@@ -184,4 +184,6 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
     default boolean containsView(View v) {
         return true;
     }
+
+    default void setWillExpand(boolean willExpand) {};
 }

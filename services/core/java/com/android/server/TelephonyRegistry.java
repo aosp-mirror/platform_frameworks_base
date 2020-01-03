@@ -1027,7 +1027,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 log(str);
             }
             mLocalLog.log(str);
-            if (validatePhoneId(phoneId)) {
+            // for service state updates, don't notify clients when subId is invalid. This prevents
+            // us from sending incorrect notifications like b/133140128
+            // In the future, we can remove this logic for every notification here and add a
+            // callback so listeners know when their PhoneStateListener's subId becomes invalid, but
+            // for now we use the simplest fix.
+            if (validatePhoneId(phoneId) && SubscriptionManager.isValidSubscriptionId(subId)) {
                 mServiceState[phoneId] = state;
 
                 for (Record r : mRecords) {
@@ -1059,7 +1064,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                 }
             } else {
-                log("notifyServiceStateForSubscriber: INVALID phoneId=" + phoneId);
+                log("notifyServiceStateForSubscriber: INVALID phoneId=" + phoneId
+                        + " or subId=" + subId);
             }
             handleRemoveListLocked();
         }
@@ -1255,23 +1261,21 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyPhysicalChannelConfiguration(List<PhysicalChannelConfig> configs) {
-        notifyPhysicalChannelConfigurationForSubscriber(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID,
-                configs);
-    }
-
-    public void notifyPhysicalChannelConfigurationForSubscriber(int subId,
+    /**
+     * Notify physical channel configuration according to subscripton ID and phone ID
+     */
+    public void notifyPhysicalChannelConfigurationForSubscriber(int phoneId, int subId,
             List<PhysicalChannelConfig> configs) {
         if (!checkNotifyPermission("notifyPhysicalChannelConfiguration()")) {
             return;
         }
 
         if (VDBG) {
-            log("notifyPhysicalChannelConfiguration: subId=" + subId + " configs=" + configs);
+            log("notifyPhysicalChannelConfiguration: subId=" + subId + " phoneId=" + phoneId
+                    + " configs=" + configs);
         }
 
         synchronized (mRecords) {
-            int phoneId = SubscriptionManager.getPhoneId(subId);
             if (validatePhoneId(phoneId)) {
                 mPhysicalChannelConfigs.set(phoneId, configs);
                 for (Record r : mRecords) {

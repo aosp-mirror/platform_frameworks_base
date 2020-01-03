@@ -151,4 +151,7 @@
       <item quantity="other">De simkaart is nu uitgeschakeld. Geef de pukcode op om door te gaan. Je hebt nog <xliff:g id="_NUMBER_1">%d</xliff:g> pogingen over voordat de simkaart definitief onbruikbaar wordt. Neem contact op met je provider voor meer informatie.</item>
       <item quantity="one">De simkaart is nu uitgeschakeld. Geef de pukcode op om door te gaan. Je hebt nog <xliff:g id="_NUMBER_0">%d</xliff:g> poging over voordat de simkaart definitief onbruikbaar wordt. Neem contact op met je provider voor meer informatie.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Standaard"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Bel"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analoog"</string>
 </resources>

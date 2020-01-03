@@ -37,9 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
-import android.app.Notification;
 import android.app.NotificationChannel;
-import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -51,6 +49,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
@@ -138,13 +137,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testIconColorShouldBeUpdatedWhenSettingDark() throws Exception {
-        ExpandableNotificationRow row = spy(mNotificationTestHelper.createRow());
-        row.setDark(true, false, 0);
-        verify(row).updateShelfIconColor();
-    }
-
-    @Test
     public void testFreeContentViewWhenSafe() throws Exception {
         ExpandableNotificationRow row = mNotificationTestHelper.createRow(FLAG_CONTENT_VIEW_ALL);
 
@@ -212,7 +204,9 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     @Test
     public void testClickSound() throws Exception {
         assertTrue("Should play sounds by default.", mGroupRow.isSoundEffectsEnabled());
-        mGroupRow.setDark(true /* dark */, false /* fade */, 0 /* delay */);
+        StatusBarStateController mock = mock(StatusBarStateController.class);
+        when(mock.isDozing()).thenReturn(true);
+        mGroupRow.setStatusBarStateController(mock);
         mGroupRow.setSecureStateProvider(()-> false);
         assertFalse("Shouldn't play sounds when dark and trusted.",
                 mGroupRow.isSoundEffectsEnabled());

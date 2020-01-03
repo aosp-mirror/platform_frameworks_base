@@ -16,6 +16,9 @@
 
 package com.android.systemui.pip.phone;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
@@ -182,7 +185,6 @@ public class PipManager implements BasePipManager {
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
 
         mInputConsumerController = InputConsumerController.getPipInputConsumer();
-        mInputConsumerController.registerInputConsumer();
         mMediaController = new PipMediaController(context, mActivityManager);
         mMenuController = new PipMenuActivityController(context, mActivityManager, mMediaController,
                 mInputConsumerController);
@@ -190,6 +192,18 @@ public class PipManager implements BasePipManager {
                 mMenuController, mInputConsumerController);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
+
+        // If SystemUI restart, and it already existed a pinned stack,
+        // register the pip input consumer to ensure touch can send to it.
+        try {
+            ActivityManager.StackInfo stackInfo = mActivityTaskManager.getStackInfo(
+                    WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
+            if (stackInfo != null) {
+                mInputConsumerController.registerInputConsumer();
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

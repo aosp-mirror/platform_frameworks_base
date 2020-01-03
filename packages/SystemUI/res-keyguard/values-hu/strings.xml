@@ -151,4 +151,7 @@
       <item quantity="other">A SIM-kártya le van tiltva. A folytatáshoz adja meg a PUK-kódot. Még <xliff:g id="_NUMBER_1">%d</xliff:g> próbálkozása van, mielőtt végleg használhatatlanná válik a SIM-kártya. További információért forduljon a szolgáltatóhoz.</item>
       <item quantity="one">A SIM-kártya le van tiltva. A folytatáshoz adja meg a PUK-kódot. Még <xliff:g id="_NUMBER_0">%d</xliff:g> próbálkozása van, mielőtt végleg használhatatlanná válik a SIM-kártya. További információért forduljon a szolgáltatóhoz.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Alapértelmezett"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Buborék"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analóg"</string>
 </resources>

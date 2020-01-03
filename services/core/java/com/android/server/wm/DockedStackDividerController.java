@@ -569,7 +569,6 @@ public class DockedStackDividerController {
             mMaximizeMeetFraction = getClipRevealMeetFraction(stack);
             animDuration = (long) (mAnimationDuration * mMaximizeMeetFraction);
         }
-        mService.mAtmInternal.notifyDockedStackMinimizedChanged(minimizedDock);
         final int size = mDockedStackListeners.beginBroadcast();
         for (int i = 0; i < size; ++i) {
             final IDockedStackListener listener = mDockedStackListeners.getBroadcastItem(i);
@@ -581,6 +580,9 @@ public class DockedStackDividerController {
             }
         }
         mDockedStackListeners.finishBroadcast();
+        // Only notify ATM after we update the remote listeners, otherwise it may trigger another
+        // minimize change, which would lead to an inversion of states send to the listeners
+        mService.mAtmInternal.notifyDockedStackMinimizedChanged(minimizedDock);
     }
 
     void notifyDockSideChanged(int newDockSide) {

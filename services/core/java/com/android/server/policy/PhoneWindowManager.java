@@ -107,6 +107,7 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.IUiModeManager;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.app.UiModeManager;
@@ -2517,14 +2518,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public Animation createHiddenByKeyguardExit(boolean onWallpaper,
-            boolean goingToNotificationShade) {
+            boolean goingToNotificationShade, boolean subtleAnimation) {
         if (goingToNotificationShade) {
             return AnimationUtils.loadAnimation(mContext, R.anim.lock_screen_behind_enter_fade_in);
         }
 
-        AnimationSet set = (AnimationSet) AnimationUtils.loadAnimation(mContext, onWallpaper ?
-                    R.anim.lock_screen_behind_enter_wallpaper :
-                    R.anim.lock_screen_behind_enter);
+        final int resource;
+        if (subtleAnimation) {
+            resource = R.anim.lock_screen_behind_enter_subtle;
+        } else if (onWallpaper) {
+            resource = R.anim.lock_screen_behind_enter_wallpaper;
+        } else  {
+            resource = R.anim.lock_screen_behind_enter;
+        }
+
+        AnimationSet set = (AnimationSet) AnimationUtils.loadAnimation(mContext, resource);
 
         // TODO: Use XML interpolators when we have log interpolators available in XML.
         final List<Animation> animations = set.getAnimations();
@@ -2563,6 +2571,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     TelecomManager getTelecommService() {
         return (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
+    }
+
+    NotificationManager getNotificationService() {
+        return mContext.getSystemService(NotificationManager.class);
     }
 
     static IAudioService getAudioService() {
@@ -3798,6 +3810,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 if (down) {
                     sendSystemKeyToStatusBarAsync(event.getKeyCode());
+
+                    NotificationManager nm = getNotificationService();
+                    if (nm != null && !mHandleVolumeKeysInWM) {
+                        nm.silenceNotificationSound();
+                    }
 
                     TelecomManager telecomManager = getTelecommService();
                     if (telecomManager != null && !mHandleVolumeKeysInWM) {

@@ -61,6 +61,7 @@ import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
@@ -75,6 +76,7 @@ import com.android.server.SystemService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -102,6 +104,80 @@ public class SoundTriggerService extends SystemService {
     private Object mCallbacksLock;
     private final TreeMap<UUID, IRecognitionStatusCallback> mCallbacks;
 
+    class SoundModelStatTracker {
+        private class SoundModelStat {
+            SoundModelStat() {
+                mStartCount = 0;
+                mTotalTimeMsec = 0;
+                mLastStartTimestampMsec = 0;
+                mLastStopTimestampMsec = 0;
+                mIsStarted = false;
+            }
+            long mStartCount; // Number of times that given model started
+            long mTotalTimeMsec; // Total time (msec) that given model was running since boot
+            long mLastStartTimestampMsec; // SystemClock.elapsedRealtime model was last started
+            long mLastStopTimestampMsec; // SystemClock.elapsedRealtime model was last stopped
+            boolean mIsStarted; // true if model is currently running
+        }
+        private final TreeMap<UUID, SoundModelStat> mModelStats;
+
+        SoundModelStatTracker() {
+            mModelStats = new TreeMap<UUID, SoundModelStat>();
+        }
+
+        public synchronized void onStart(UUID id) {
+            SoundModelStat stat = mModelStats.get(id);
+            if (stat == null) {
+                stat = new SoundModelStat();
+                mModelStats.put(id, stat);
+            }
+
+            if (stat.mIsStarted) {
+                Slog.e(TAG, "error onStart(): Model " + id + " already started");
+                return;
+            }
+
+            stat.mStartCount++;
+            stat.mLastStartTimestampMsec = SystemClock.elapsedRealtime();
+            stat.mIsStarted = true;
+        }
+
+        public synchronized void onStop(UUID id) {
+            SoundModelStat stat = mModelStats.get(id);
+            if (stat == null) {
+                Slog.e(TAG, "error onStop(): Model " + id + " has no stats available");
+                return;
+            }
+
+            if (!stat.mIsStarted) {
+                Slog.e(TAG, "error onStop(): Model " + id + " already stopped");
+                return;
+            }
+
+            stat.mLastStopTimestampMsec = SystemClock.elapsedRealtime();
+            stat.mTotalTimeMsec += stat.mLastStopTimestampMsec - stat.mLastStartTimestampMsec;
+            stat.mIsStarted = false;
+        }
+
+        public synchronized void dump(PrintWriter pw) {
+            long curTime = SystemClock.elapsedRealtime();
+            pw.println("Model Stats:");
+            for (Map.Entry<UUID, SoundModelStat> entry : mModelStats.entrySet()) {
+                UUID uuid = entry.getKey();
+                SoundModelStat stat = entry.getValue();
+                long totalTimeMsec = stat.mTotalTimeMsec;
+                if (stat.mIsStarted) {
+                    totalTimeMsec += curTime - stat.mLastStartTimestampMsec;
+                }
+                pw.println(uuid + ", total_time(msec)=" + totalTimeMsec
+                        + ", total_count=" + stat.mStartCount
+                        + ", last_start=" + stat.mLastStartTimestampMsec
+                        + ", last_stop=" + stat.mLastStopTimestampMsec);
+            }
+        }
+    }
+
+    private final SoundModelStatTracker mSoundModelStatTracker;
     /** Number of ops run by the {@link RemoteSoundTriggerDetectionService} per package name */
     @GuardedBy("mLock")
     private final ArrayMap<String, NumOps> mNumOpsPerPackage = new ArrayMap<>();
@@ -115,6 +191,7 @@ public class SoundTriggerService extends SystemService {
         mCallbacksLock = new Object();
         mCallbacks = new TreeMap<>();
         mLock = new Object();
+        mSoundModelStatTracker = new SoundModelStatTracker();
     }
 
     @Override
@@ -193,8 +270,12 @@ public class SoundTriggerService extends SystemService {
                 return STATUS_ERROR;
             }
 
-            return mSoundTriggerHelper.startGenericRecognition(parcelUuid.getUuid(), model,
+            int ret = mSoundTriggerHelper.startGenericRecognition(parcelUuid.getUuid(), model,
                     callback, config);
+            if (ret == STATUS_OK) {
+                mSoundModelStatTracker.onStart(parcelUuid.getUuid());
+            }
+            return ret;
         }
 
         @Override
@@ -208,7 +289,12 @@ public class SoundTriggerService extends SystemService {
                     + parcelUuid));
 
             if (!isInitialized()) return STATUS_ERROR;
-            return mSoundTriggerHelper.stopGenericRecognition(parcelUuid.getUuid(), callback);
+
+            int ret = mSoundTriggerHelper.stopGenericRecognition(parcelUuid.getUuid(), callback);
+            if (ret == STATUS_OK) {
+                mSoundModelStatTracker.onStop(parcelUuid.getUuid());
+            }
+            return ret;
         }
 
         @Override
@@ -252,6 +338,9 @@ public class SoundTriggerService extends SystemService {
             // Unload the model if it is loaded.
             mSoundTriggerHelper.unloadGenericSoundModel(soundModelId.getUuid());
             mDbHelper.deleteGenericSoundModel(soundModelId.getUuid());
+
+            // Stop recognition if it is started.
+            mSoundModelStatTracker.onStop(soundModelId.getUuid());
         }
 
         @Override
@@ -403,6 +492,8 @@ public class SoundTriggerService extends SystemService {
                 synchronized (mCallbacksLock) {
                     mCallbacks.put(soundModelId.getUuid(), callback);
                 }
+
+                mSoundModelStatTracker.onStart(soundModelId.getUuid());
             }
             return STATUS_OK;
         }
@@ -467,6 +558,8 @@ public class SoundTriggerService extends SystemService {
                 synchronized (mCallbacksLock) {
                     mCallbacks.remove(soundModelId.getUuid());
                 }
+
+                mSoundModelStatTracker.onStop(soundModelId.getUuid());
             }
             return STATUS_OK;
         }
@@ -1266,6 +1359,9 @@ public class SoundTriggerService extends SystemService {
             mSoundTriggerHelper.dump(fd, pw, args);
             // log
             sEventLogger.dump(pw);
+
+            // stats
+            mSoundModelStatTracker.dump(pw);
         }
 
         private synchronized boolean isInitialized() {

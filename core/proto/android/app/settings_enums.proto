@@ -2401,4 +2401,9 @@ enum PageId {
     // OS: Q
     // Note: Gear icon is shown next to gesture navigation preference and opens sensitivity dialog
     SETTINGS_GESTURE_NAV_BACK_SENSITIVITY_DLG = 1748;
+
+    // OPEN: Settings > System > Aware > Aware Display
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_AWARE_DISPLAY = 1750;
 }

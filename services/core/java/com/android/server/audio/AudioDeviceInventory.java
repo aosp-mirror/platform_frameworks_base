@@ -41,14 +41,16 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 
 /**
  * Class to manage the inventory of all connected devices.
  * This class is thread-safe.
+ * (non final for mocking/spying)
  */
-public final class AudioDeviceInventory {
+public class AudioDeviceInventory {
 
     private static final String TAG = "AS.AudioDeviceInventory";
 
@@ -56,11 +58,7 @@ public final class AudioDeviceInventory {
     // Key for map created from DeviceInfo.makeDeviceListKey()
     private final ArrayMap<String, DeviceInfo> mConnectedDevices = new ArrayMap<>();
 
-    private final @NonNull AudioDeviceBroker mDeviceBroker;
-
-    AudioDeviceInventory(@NonNull AudioDeviceBroker broker) {
-        mDeviceBroker = broker;
-    }
+    private @NonNull AudioDeviceBroker mDeviceBroker;
 
     // cache of the address of the last dock the device was connected to
     private String mDockAddress;
@@ -69,6 +67,20 @@ public final class AudioDeviceInventory {
     final AudioRoutesInfo mCurAudioRoutes = new AudioRoutesInfo();
     final RemoteCallbackList<IAudioRoutesObserver> mRoutesObservers =
             new RemoteCallbackList<IAudioRoutesObserver>();
+
+    /*package*/ AudioDeviceInventory(@NonNull AudioDeviceBroker broker) {
+        mDeviceBroker = broker;
+    }
+
+    //-----------------------------------------------------------
+    /** for mocking only */
+    /*package*/ AudioDeviceInventory() {
+        mDeviceBroker = null;
+    }
+
+    /*package*/ void setDeviceBroker(@NonNull AudioDeviceBroker broker) {
+        mDeviceBroker = broker;
+    }
 
     //------------------------------------------------------------
     /**
@@ -146,8 +158,10 @@ public final class AudioDeviceInventory {
         }
     }
 
+    // only public for mocking/spying
     @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
-    /*package*/ void onSetA2dpSinkConnectionState(@NonNull BtHelper.BluetoothA2dpDeviceInfo btInfo,
+    @VisibleForTesting
+    public void onSetA2dpSinkConnectionState(@NonNull BtHelper.BluetoothA2dpDeviceInfo btInfo,
             @AudioService.BtProfileConnectionState int state) {
         final BluetoothDevice btDevice = btInfo.getBtDevice();
         int a2dpVolume = btInfo.getVolume();
@@ -159,11 +173,13 @@ public final class AudioDeviceInventory {
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             address = "";
         }
-        AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
-                "A2DP sink connected: device addr=" + address + " state=" + state
-                        + " vol=" + a2dpVolume));
 
         final int a2dpCodec = btInfo.getCodec();
+
+        AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                "A2DP sink connected: device addr=" + address + " state=" + state
+                        + " codec=" + a2dpCodec
+                        + " vol=" + a2dpVolume));
 
         synchronized (mConnectedDevices) {
             final String key = DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
@@ -171,18 +187,26 @@ public final class AudioDeviceInventory {
             final DeviceInfo di = mConnectedDevices.get(key);
             boolean isConnected = di != null;
 
-            if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
-                if (btDevice.isBluetoothDock()) {
-                    if (state == BluetoothProfile.STATE_DISCONNECTED) {
-                        // introduction of a delay for transient disconnections of docks when
-                        // power is rapidly turned off/on, this message will be canceled if
-                        // we reconnect the dock under a preset delay
-                        makeA2dpDeviceUnavailableLater(address,
-                                AudioDeviceBroker.BTA2DP_DOCK_TIMEOUT_MS);
-                        // the next time isConnected is evaluated, it will be false for the dock
+            if (isConnected) {
+                if (state == BluetoothProfile.STATE_CONNECTED) {
+                    // device is already connected, but we are receiving a connection again,
+                    // it could be for a codec change
+                    if (a2dpCodec != di.mDeviceCodecFormat) {
+                        mDeviceBroker.postBluetoothA2dpDeviceConfigChange(btDevice);
                     }
                 } else {
-                    makeA2dpDeviceUnavailableNow(address, di.mDeviceCodecFormat);
+                    if (btDevice.isBluetoothDock()) {
+                        if (state == BluetoothProfile.STATE_DISCONNECTED) {
+                            // introduction of a delay for transient disconnections of docks when
+                            // power is rapidly turned off/on, this message will be canceled if
+                            // we reconnect the dock under a preset delay
+                            makeA2dpDeviceUnavailableLater(address,
+                                    AudioDeviceBroker.BTA2DP_DOCK_TIMEOUT_MS);
+                            // the next time isConnected is evaluated, it will be false for the dock
+                        }
+                    } else {
+                        makeA2dpDeviceUnavailableNow(address, di.mDeviceCodecFormat);
+                    }
                 }
             } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
                 if (btDevice.isBluetoothDock()) {
@@ -282,11 +306,9 @@ public final class AudioDeviceInventory {
                     + " event=" + BtHelper.a2dpDeviceEventToString(event)));
 
         synchronized (mConnectedDevices) {
-            //TODO original CL is not consistent between BluetoothDevice and BluetoothA2dpDeviceInfo
-            // for this type of message
             if (mDeviceBroker.hasScheduledA2dpSinkConnectionState(btDevice)) {
                 AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
-                        "A2dp config change ignored"));
+                        "A2dp config change ignored (scheduled connection change)"));
                 return;
             }
             final String key = DeviceInfo.makeDeviceListKey(
@@ -534,8 +556,10 @@ public final class AudioDeviceInventory {
         return mCurAudioRoutes;
     }
 
+    // only public for mocking/spying
     @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
-    /*package*/ void setBluetoothA2dpDeviceConnectionState(
+    @VisibleForTesting
+    public void setBluetoothA2dpDeviceConnectionState(
             @NonNull BluetoothDevice device, @AudioService.BtProfileConnectionState int state,
             int profile, boolean suppressNoisyIntent, int musicDevice, int a2dpVolume) {
         int delay;
@@ -544,9 +568,12 @@ public final class AudioDeviceInventory {
         }
         synchronized (mConnectedDevices) {
             if (profile == BluetoothProfile.A2DP && !suppressNoisyIntent) {
-                int intState = (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0;
+                @AudioService.ConnectionState int asState =
+                        (state == BluetoothA2dp.STATE_CONNECTED)
+                                ? AudioService.CONNECTION_STATE_CONNECTED
+                                : AudioService.CONNECTION_STATE_DISCONNECTED;
                 delay = checkSendBecomingNoisyIntentInt(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                        intState, musicDevice);
+                        asState, musicDevice);
             } else {
                 delay = 0;
             }
@@ -785,7 +812,7 @@ public final class AudioDeviceInventory {
                 return 0;
             }
             mDeviceBroker.postBroadcastBecomingNoisy();
-            delay = 1000;
+            delay = AudioService.BECOMING_NOISY_DELAY_MS;
         }
 
         return delay;
@@ -941,6 +968,23 @@ public final class AudioDeviceInventory {
                 }
             }
             intent.putExtra(AudioManager.EXTRA_MAX_CHANNEL_COUNT, maxChannels);
+        }
+    }
+
+    //----------------------------------------------------------
+    // For tests only
+
+    /**
+     * Check if device is in the list of connected devices
+     * @param device
+     * @return true if connected
+     */
+    @VisibleForTesting
+    public boolean isA2dpDeviceConnected(@NonNull BluetoothDevice device) {
+        final String key = DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                device.getAddress());
+        synchronized (mConnectedDevices) {
+            return (mConnectedDevices.get(key) != null);
         }
     }
 }

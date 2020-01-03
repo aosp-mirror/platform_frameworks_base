@@ -348,19 +348,19 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     /**
      * Animates the inner contents based on the given expansion details.
      *
-     * @param isKeyguardShowing whether or not we're showing the keyguard (a.k.a. lockscreen)
+     * @param forceExpanded whether we should show the state expanded forcibly
      * @param expansionFraction how much the QS panel is expanded/pulled out (up to 1f)
      * @param panelTranslationY how much the panel has physically moved down vertically (required
      *                          for keyguard animations only)
      */
-    public void setExpansion(boolean isKeyguardShowing, float expansionFraction,
+    public void setExpansion(boolean forceExpanded, float expansionFraction,
                              float panelTranslationY) {
-        final float keyguardExpansionFraction = isKeyguardShowing ? 1f : expansionFraction;
+        final float keyguardExpansionFraction = forceExpanded ? 1f : expansionFraction;
         if (mStatusIconsAlphaAnimator != null) {
             mStatusIconsAlphaAnimator.setPosition(keyguardExpansionFraction);
         }
 
-        if (isKeyguardShowing) {
+        if (forceExpanded) {
             // If the keyguard is showing, we want to offset the text so that it comes in at the
             // same time as the panel as it slides down.
             mHeaderTextContainerView.setTranslationY(panelTranslationY);

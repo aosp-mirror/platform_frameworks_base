@@ -51,7 +51,7 @@ public class ScreenPinningNotify {
     }
 
     /** Show a toast that describes the gesture the user should use to escape pinned mode. */
-    public void showEscapeToast(boolean isRecentsButtonVisible) {
+    public void showEscapeToast(boolean isGestureNavEnabled, boolean isRecentsButtonVisible) {
         long showToastTime = SystemClock.elapsedRealtime();
         if ((showToastTime - mLastShowToastTime) < SHOW_TOAST_MINIMUM_INTERVAL) {
             Slog.i(TAG, "Ignore toast since it is requested in very short interval.");
@@ -60,9 +60,11 @@ public class ScreenPinningNotify {
         if (mLastToast != null) {
             mLastToast.cancel();
         }
-        mLastToast = makeAllUserToastAndShow(isRecentsButtonVisible
-                ? R.string.screen_pinning_toast
-                : R.string.screen_pinning_toast_recents_invisible);
+        mLastToast = makeAllUserToastAndShow(isGestureNavEnabled
+                ? R.string.screen_pinning_toast_gesture_nav
+                : isRecentsButtonVisible
+                        ? R.string.screen_pinning_toast
+                        : R.string.screen_pinning_toast_recents_invisible);
         mLastShowToastTime = showToastTime;
     }
 

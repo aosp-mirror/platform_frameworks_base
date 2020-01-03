@@ -18,11 +18,11 @@ package com.android.settingslib.net;
 
 import android.content.Context;
 import android.net.NetworkTemplate;
-import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.android.internal.util.ArrayUtils;
 /**
  * Utils class for data usage
  */
@@ -34,19 +34,25 @@ public class DataUsageUtils {
      */
     public static NetworkTemplate getMobileTemplate(Context context, int subId) {
         final TelephonyManager telephonyManager = context.getSystemService(
-                TelephonyManager.class).createForSubscriptionId(subId);
+                TelephonyManager.class);
         final SubscriptionManager subscriptionManager = context.getSystemService(
                 SubscriptionManager.class);
-        final SubscriptionInfo info = subscriptionManager.getActiveSubscriptionInfo(subId);
         final NetworkTemplate mobileAll = NetworkTemplate.buildTemplateMobileAll(
                 telephonyManager.getSubscriberId(subId));
 
-        if (info == null) {
+        if (!subscriptionManager.isActiveSubId(subId)) {
             Log.i(TAG, "Subscription is not active: " + subId);
             return mobileAll;
         }
 
-        // Use old API to build networkTemplate
-        return NetworkTemplate.normalize(mobileAll, telephonyManager.getMergedSubscriberIds());
+        final String[] mergedSubscriberIds = telephonyManager.createForSubscriptionId(subId)
+                .getMergedSubscriberIdsFromGroup();
+
+        if (ArrayUtils.isEmpty(mergedSubscriberIds)) {
+            Log.i(TAG, "mergedSubscriberIds is null.");
+            return mobileAll;
+        }
+
+        return NetworkTemplate.normalize(mobileAll, mergedSubscriberIds);
     }
 }

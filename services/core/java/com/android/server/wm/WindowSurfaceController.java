@@ -162,7 +162,7 @@ class WindowSurfaceController {
         }
         try {
             if (mSurfaceControl != null) {
-                mSurfaceControl.remove();
+                mTmpTransaction.remove(mSurfaceControl).apply();
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error destroying surface in: " + this, e);
@@ -506,6 +506,8 @@ class WindowSurfaceController {
         mSurfaceShown = surfaceShown;
 
         mService.updateNonSystemOverlayWindowsVisibilityIfNeeded(mAnimator.mWin, surfaceShown);
+
+        mAnimator.mWin.onSurfaceShownChanged(surfaceShown);
 
         if (mWindowSession != null) {
             mWindowSession.onWindowSurfaceVisibilityChanged(this, mSurfaceShown, mWindowType);

@@ -51,7 +51,7 @@ import com.android.systemui.statusbar.notification.row.HybridNotificationView;
  */
 public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapper {
 
-    private final int mTranslationForHeader;
+    private final int mFullHeaderTranslation;
     protected ImageView mPicture;
     private ProgressBar mProgressBar;
     private TextView mTitle;
@@ -135,7 +135,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                     }
 
                 }, TRANSFORMING_VIEW_TEXT);
-        mTranslationForHeader = ctx.getResources().getDimensionPixelSize(
+        mFullHeaderTranslation = ctx.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin)
                 - ctx.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin_top);
@@ -340,20 +340,20 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
 
             // We also need to compensate for any header translation, since we're always at the end.
             mActionsContainer.setTranslationY(constrainedContentHeight - mView.getHeight()
-                    - getHeaderTranslation());
+                    - getHeaderTranslation(false /* forceNoHeader */));
         }
     }
 
     @Override
-    public int getHeaderTranslation() {
-        return (int) mHeaderTranslation;
+    public int getHeaderTranslation(boolean forceNoHeader) {
+        return forceNoHeader ? mFullHeaderTranslation : (int) mHeaderTranslation;
     }
 
     @Override
     public void setHeaderVisibleAmount(float headerVisibleAmount) {
         super.setHeaderVisibleAmount(headerVisibleAmount);
         mNotificationHeader.setAlpha(headerVisibleAmount);
-        mHeaderTranslation = (1.0f - headerVisibleAmount) * mTranslationForHeader;
+        mHeaderTranslation = (1.0f - headerVisibleAmount) * mFullHeaderTranslation;
         mView.setTranslationY(mHeaderTranslation);
     }
 

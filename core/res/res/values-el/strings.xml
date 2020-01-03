@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Μηνύματα αυτόματου τηλεφωνητή"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Κλήση Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Κατάσταση SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Κατάσταση SIM υψηλής προτεραιότητας"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Αίτημα peer για TTY ΠΛΗΡΗΣ Λειτουργία"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Αίτημα peer για TTY Λειτουργία HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Αίτημα peer για TTY Λειτουργία VCO"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Εικονίδιο δακτυλικών αποτυπωμάτων"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"διαχείριση υλικολογισμ. ελέγχου ταυτότ. προσώπου"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"διαχείριση εξοπλισμού Face Unlock"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Επιτρέπει στην εφαρμογή να επικαλείται μεθόδους προσθήκης/διαγραφής προτύπων για χρήση."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"χρήση υλικολογισμικού ελέγχου ταυτότητας προσώπου"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Επιτρέπει στην εφαρμογή να χρησιμοποιεί υλικολογισμικό για έλεγχο ταυτότητας"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Έλεγχος ταυτότητας προσώπου"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"χρήση εξοπλισμού Face Unlock"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Επιτρέπει στην εφαρμογή να χρησιμοποιεί εξοπλισμό Face Unlock για έλεγχο ταυτότητας"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Εγγράψτε ξανά το πρόσωπό σας"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Για να βελτιώσετε την αναγνώριση, εγγράψτε ξανά το πρόσωπό σας"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Αδύνατη λήψη ακριβών δεδομ. προσώπου. Επανάληψη."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Μετακινήστε το τηλέφωνο στα αριστερά."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Μετακινήστε το τηλέφωνο στα δεξιά."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Κοιτάξτε απευθείας τη συσκευή σας."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Δεν εντοπίστηκε το πρόσωπό σας. Δείτε το τηλέφωνο."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Στρέψτε το πρόσωπό σάς απευθείας στο τηλέφωνο."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Πάρα πολλή κίνηση. Κρατήστε σταθερό το τηλέφωνο."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Καταχωρίστε ξανά το πρόσωπό σας."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Αδύνατη η αναγνώριση του προσώπου. Επανάληψη."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Στρέψτε λιγότερο το κεφάλι σας."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Στρέψτε λιγότερο το κεφάλι σας."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Απομακρύνετε οτιδήποτε κρύβει το πρόσωπό σας."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Καθαρίστε τον αισθητήρα επάνω στην οθόνη."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Καθαρίστε το επάνω μέρος της οθόνης σας, συμπεριλαμβανομένης της μαύρης γραμμής"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Αδύν. επαλήθ. προσώπου. Μη διαθέσιμος εξοπλισμός."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Επαναλάβετε τον έλεγχο ταυτότητας προσώπου."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Δοκιμάστε ξανά το Face Unlock."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Η αποθήκ. νέων δεδομ. προσώπ. είναι αδύν. Διαγρ. ένα παλιό."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Η λειτουργία προσώπου ακυρώθηκε"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Ο έλεγχ. ταυτότ. προσώπου ακυρώθηκε από τον χρήστη"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Η ενέργεια προσώπου ακυρώθηκε."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Το Face Unlock ακυρώθηκε από τον χρήστη."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Πάρα πολλές προσπάθειες. Δοκιμάστε ξανά αργότερα."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Υπερβ. πολλές προσπάθειες. Ο έλεγχ. ταυτ. προσώπου απενεργ."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Υπερβολικά πολλές προσπάθειες. Το Face Unlock απενεργοποιήθηκε."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Αδύνατη επαλήθευση του προσώπου. Επανάληψη."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Δεν έχετε ρυθμίσει τον έλεγχο ταυτότητας προσώπου"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Ο έλεγχος ταυτότητας προσώπου δεν υποστηρίζεται στη συσκευή"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Δεν έχετε ρυθμίσει το Face Unlock."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Το Face Unlock δεν υποστηρίζεται σε αυτήν τη συσκευή."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Πρόσωπο <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1254,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Πατήστε για να δείτε όλα τα δίκτυα"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Σύνδεση"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Όλα τα δίκτυα"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Σύνδεση σε δίκτυα Wi-Fi;"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Προτείνεται από <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ναι"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Όχι"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Να επιτρέπονται προτεινόμενα δίκτυα Wi‑Fi;"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Προτεινόμενα δίκτυα <xliff:g id="NAME">%s</xliff:g>. Η συσκευή μπορεί να συνδεθεί αυτόματα."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Αποδοχή"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Όχι, ευχαριστώ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Το Wi‑Fi θα ενεργοποιηθεί αυτόματα"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Όταν βρίσκεστε κοντά σε αποθηκευμένο δίκτυο υψηλής ποιότητας"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Να μην ενεργοποιηθεί ξανά"</string>
@@ -1672,7 +1673,7 @@
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Επιλέξτε μια υπηρεσία που θα χρησιμοποιείται με την κίνηση προσβασιμότητας (σύρετε με δύο δάχτυλα προς τα επάνω από το κάτω μέρος της οθόνης):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Επιλέξτε μια υπηρεσία που θα χρησιμοποιείται με την κίνηση προσβασιμότητας (σύρετε με τρία δάχτυλα προς τα επάνω από το κάτω μέρος της οθόνης):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Για εναλλαγή μεταξύ υπηρεσιών, αγγίξτε παρατεταμένα το κουμπί προσβασιμότητας."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Για εναλλαγή μεταξύ υπηρεσιών, σύρετε παρατεταμένα με δύο δάχτυλα προς τα επάνω."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Για εναλλαγή μεταξύ υπηρεσιών, σύρετε παρατεταμένα με δύο δάχτυλα προς τα επάνω και μην τα απομακρύνετε από την οθόνη."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Για εναλλαγή μεταξύ υπηρεσιών, σύρετε παρατεταμένα με τρία δάχτυλα προς τα επάνω."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Μεγιστοποίηση"</string>
     <string name="user_switched" msgid="3768006783166984410">"Τρέχων χρήστης <xliff:g id="NAME">%1$s</xliff:g>."</string>
@@ -1887,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Μη κατηγοριοποιημένο"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Μπορείτε να ρυθμίσετε τη βαρύτητα αυτών των ειδοποιήσεων."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Αυτό είναι σημαντικό λόγω των ατόμων που συμμετέχουν."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Να επιτραπεί στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με το λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g>;"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Να επιτραπεί στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με το λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g> (υπάρχει ήδη χρήστης με αυτόν το λογαριασμό);"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Επιτρέπετε στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g> (υπάρχει ήδη χρήστης με αυτόν τον λογαριασμό);"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Επιτρέπετε στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g>;"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Προσθήκη γλώσσας"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Προτίμηση περιοχής"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Εισαγ. όνομα γλώσσας"</string>

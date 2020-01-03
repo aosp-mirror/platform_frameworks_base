@@ -151,4 +151,7 @@
       <item quantity="other">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="_NUMBER_1">%d</xliff:g> remaining attempts before SIM becomes permanently unusable. Contact operator for details.</item>
       <item quantity="one">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="_NUMBER_0">%d</xliff:g> remaining attempt before SIM becomes permanently unusable. Contact operator for details.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Default"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Bubble"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analogue"</string>
 </resources>

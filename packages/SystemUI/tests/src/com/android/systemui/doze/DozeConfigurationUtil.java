@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.utils.hardware.FakeSensorManager;
 
 import org.mockito.Answers;
 import org.mockito.MockSettings;
@@ -36,9 +37,9 @@ public class DozeConfigurationUtil {
         when(params.getPulseOnSigMotion()).thenReturn(false);
         when(params.getPickupVibrationThreshold()).thenReturn(0);
         when(params.getProxCheckBeforePulse()).thenReturn(true);
-        when(params.getPickupSubtypePerformsProxCheck(anyInt())).thenReturn(true);
         when(params.getPolicy()).thenReturn(mock(AlwaysOnDisplayPolicy.class));
         when(params.doubleTapReportsTouchCoordinates()).thenReturn(false);
+        when(params.getDisplayNeedsBlanking()).thenReturn(false);
 
         doneHolder[0] = true;
         return params;
@@ -52,10 +53,16 @@ public class DozeConfigurationUtil {
         when(config.pickupGestureEnabled(anyInt())).thenReturn(false);
         when(config.pulseOnNotificationEnabled(anyInt())).thenReturn(true);
         when(config.alwaysOnEnabled(anyInt())).thenReturn(false);
+        when(config.enabled(anyInt())).thenReturn(true);
+        when(config.getWakeLockScreenDebounce()).thenReturn(0L);
 
         when(config.doubleTapSensorType()).thenReturn(null);
         when(config.tapSensorType()).thenReturn(null);
         when(config.longPressSensorType()).thenReturn(null);
+
+        when(config.tapGestureEnabled(anyInt())).thenReturn(true);
+        when(config.tapSensorAvailable()).thenReturn(true);
+        when(config.tapSensorType()).thenReturn(FakeSensorManager.TAP_SENSOR_TYPE);
 
         when(config.dozePickupSensorAvailable()).thenReturn(false);
         when(config.wakeScreenGestureAvailable()).thenReturn(false);

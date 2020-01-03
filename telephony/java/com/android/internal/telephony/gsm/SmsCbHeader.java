@@ -19,7 +19,10 @@ package com.android.internal.telephony.gsm;
 import android.telephony.SmsCbCmasInfo;
 import android.telephony.SmsCbEtwsInfo;
 
+import com.android.internal.telephony.SmsConstants;
+
 import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * Parses a 3GPP TS 23.041 cell broadcast message header. This class is public for use by
@@ -32,6 +35,39 @@ import java.util.Arrays;
  * The raw PDU is no longer sent to SMS CB applications.
  */
 public class SmsCbHeader {
+    /**
+     * Languages in the 0000xxxx DCS group as defined in 3GPP TS 23.038, section 5.
+     */
+    private static final String[] LANGUAGE_CODES_GROUP_0 = {
+            Locale.GERMAN.getLanguage(),        // German
+            Locale.ENGLISH.getLanguage(),       // English
+            Locale.ITALIAN.getLanguage(),       // Italian
+            Locale.FRENCH.getLanguage(),        // French
+            new Locale("es").getLanguage(),     // Spanish
+            new Locale("nl").getLanguage(),     // Dutch
+            new Locale("sv").getLanguage(),     // Swedish
+            new Locale("da").getLanguage(),     // Danish
+            new Locale("pt").getLanguage(),     // Portuguese
+            new Locale("fi").getLanguage(),     // Finnish
+            new Locale("nb").getLanguage(),     // Norwegian
+            new Locale("el").getLanguage(),     // Greek
+            new Locale("tr").getLanguage(),     // Turkish
+            new Locale("hu").getLanguage(),     // Hungarian
+            new Locale("pl").getLanguage(),     // Polish
+            null
+    };
+
+    /**
+     * Languages in the 0010xxxx DCS group as defined in 3GPP TS 23.038, section 5.
+     */
+    private static final String[] LANGUAGE_CODES_GROUP_2 = {
+            new Locale("cs").getLanguage(),     // Czech
+            new Locale("he").getLanguage(),     // Hebrew
+            new Locale("ar").getLanguage(),     // Arabic
+            new Locale("ru").getLanguage(),     // Russian
+            new Locale("is").getLanguage(),     // Icelandic
+            null, null, null, null, null, null, null, null, null, null, null
+    };
 
     /**
      * Length of SMS-CB header
@@ -83,6 +119,8 @@ public class SmsCbHeader {
     private final int mNrOfPages;
 
     private final int mFormat;
+
+    private DataCodingScheme mDataCodingSchemeStructedData;
 
     /** ETWS warning notification info. */
     private final SmsCbEtwsInfo mEtwsInfo;
@@ -162,6 +200,10 @@ public class SmsCbHeader {
             mNrOfPages = 1;
         }
 
+        if (mDataCodingScheme != -1) {
+            mDataCodingSchemeStructedData = new DataCodingScheme(mDataCodingScheme);
+        }
+
         if (isEtwsMessage()) {
             boolean emergencyUserAlert = isEtwsEmergencyUserAlert();
             boolean activatePopup = isEtwsPopupAlert();
@@ -197,6 +239,10 @@ public class SmsCbHeader {
 
     int getDataCodingScheme() {
         return mDataCodingScheme;
+    }
+
+    DataCodingScheme getDataCodingSchemeStructedData() {
+        return mDataCodingSchemeStructedData;
     }
 
     int getPageIndex() {
@@ -447,5 +493,94 @@ public class SmsCbHeader {
                 + ", format=" + mFormat
                 + ", DCS=0x" + Integer.toHexString(mDataCodingScheme)
                 + ", page " + mPageIndex + " of " + mNrOfPages + '}';
+    }
+
+    /**
+     * CBS Data Coding Scheme.
+     * Reference: 3GPP TS 23.038 version 15.0.0 section #5, CBS Data Coding Scheme
+     */
+    public static final class DataCodingScheme {
+        public final int encoding;
+        public final String language;
+        public final boolean hasLanguageIndicator;
+
+        public DataCodingScheme(int dataCodingScheme) {
+            int encoding = 0;
+            String language = null;
+            boolean hasLanguageIndicator = false;
+
+            // Extract encoding and language from DCS, as defined in 3gpp TS 23.038,
+            // section 5.
+            switch ((dataCodingScheme & 0xf0) >> 4) {
+                case 0x00:
+                    encoding = SmsConstants.ENCODING_7BIT;
+                    language = LANGUAGE_CODES_GROUP_0[dataCodingScheme & 0x0f];
+                    break;
+
+                case 0x01:
+                    hasLanguageIndicator = true;
+                    if ((dataCodingScheme & 0x0f) == 0x01) {
+                        encoding = SmsConstants.ENCODING_16BIT;
+                    } else {
+                        encoding = SmsConstants.ENCODING_7BIT;
+                    }
+                    break;
+
+                case 0x02:
+                    encoding = SmsConstants.ENCODING_7BIT;
+                    language = LANGUAGE_CODES_GROUP_2[dataCodingScheme & 0x0f];
+                    break;
+
+                case 0x03:
+                    encoding = SmsConstants.ENCODING_7BIT;
+                    break;
+
+                case 0x04:
+                case 0x05:
+                    switch ((dataCodingScheme & 0x0c) >> 2) {
+                        case 0x01:
+                            encoding = SmsConstants.ENCODING_8BIT;
+                            break;
+
+                        case 0x02:
+                            encoding = SmsConstants.ENCODING_16BIT;
+                            break;
+
+                        case 0x00:
+                        default:
+                            encoding = SmsConstants.ENCODING_7BIT;
+                            break;
+                    }
+                    break;
+
+                case 0x06:
+                case 0x07:
+                    // Compression not supported
+                case 0x09:
+                    // UDH structure not supported
+                case 0x0e:
+                    // Defined by the WAP forum not supported
+                    throw new IllegalArgumentException("Unsupported GSM dataCodingScheme "
+                            + dataCodingScheme);
+
+                case 0x0f:
+                    if (((dataCodingScheme & 0x04) >> 2) == 0x01) {
+                        encoding = SmsConstants.ENCODING_8BIT;
+                    } else {
+                        encoding = SmsConstants.ENCODING_7BIT;
+                    }
+                    break;
+
+                default:
+                    // Reserved values are to be treated as 7-bit
+                    encoding = SmsConstants.ENCODING_7BIT;
+                    break;
+            }
+
+
+            this.encoding = encoding;
+            this.language = language;
+            this.hasLanguageIndicator = hasLanguageIndicator;
+        }
     }
 }

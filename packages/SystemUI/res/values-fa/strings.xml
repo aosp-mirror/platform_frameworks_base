@@ -28,15 +28,15 @@
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی مانده است"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> باقی مانده، براساس اشتفاده شما حدود <xliff:g id="TIME">%2$s</xliff:g> باقی مانده است"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> باقی مانده، حدود <xliff:g id="TIME">%2$s</xliff:g> باقی مانده است"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی مانده است. بهینه‌سازی باتری روشن است."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی مانده است. «بهینه‌سازی باتری» روشن است."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"‏ازطریق USB شارژ نمی‌شود. از شارژر ارائه‌شده با دستگاه استفاده کنید."</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"‏ازطریق USB شارژ نمی‌شود"</string>
     <string name="invalid_charger_text" msgid="6480624964117840005">"از شارژر ارائه‌شده با دستگاه استفاده کنید"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"تنظیمات"</string>
-    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"بهینه‌سازی باتری روشن شود؟"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2090922638411744540">"درباره بهینه‌سازی باتری"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"«بهینه‌سازی باتری» روشن شود؟"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2090922638411744540">"درباره «بهینه‌سازی باتری»"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"روشن کردن"</string>
-    <string name="battery_saver_start_action" msgid="8187820911065797519">"بهینه‌سازی باتری را روشن کنید"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"«بهینه‌سازی باتری» را روشن کنید"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"تنظیمات"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"چرخش خودکار صفحه"</string>
@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"درحال جستجوی چهره"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"چهره احراز هویت شد"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"تأیید شد"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"برای تکمیل، روی تأیید ضربه بزنید"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"حسگر اثر انگشت را لمس کنید"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"نماد اثر انگشت"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"درحال جستجوی شما…"</string>
@@ -399,7 +400,8 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"اعلان‌های کمتر فوری در زیر"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"دوباره ضربه بزنید تا باز شود"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"برای باز کردن قفل سریع به بالا بکشید"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"برای باز کردن، انگشتتان را تند به بالا بکشید"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"برای امتحان مجدد، انگشتتان را تند به بالا بکشید"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"سازمان شما این دستگاه را مدیریت می‌کند"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"این دستگاه توسط <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> مدیریت می‌شود"</string>
     <string name="phone_hint" msgid="4872890986869209950">"انگشتتان را از نماد تلفن تند بکشید"</string>
@@ -415,7 +417,7 @@
     <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • درحال شارژ بی‌سیم (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> تا شارژ کامل)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • درحال شارژ شدن (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> تا شارژ کامل)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • درحال شارژ سریع (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> تا شارژ کامل)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • درحال شارژ آهسته (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> تا شارژ کامل)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • آهسته‌آهسته شارژ می‌شود (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> تا شارژ کامل)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"تغییر کاربر"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"تعویض کاربر، کاربر کنونی <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"کاربر کنونی <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -448,9 +450,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"کاربر حذف شود؟"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"همه برنامه‌ها و داده‌های این کاربر حذف می‌شود."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"حذف"</string>
-    <string name="battery_saver_notification_title" msgid="8614079794522291840">"بهینه‌سازی باتری روشن است"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"«بهینه‌سازی باتری» روشن است"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"عملکرد و اطلاعات پس‌زمینه را کاهش می‌دهد"</string>
-    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"بهینه‌سازی باتری را خاموش کنید"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"«بهینه‌سازی باتری» را خاموش کنید"</string>
     <string name="media_projection_dialog_text" msgid="8585357687598538511">"هنگام ضبط یا ارسال محتوا، <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> می‌تواند هرگونه اطلاعات حساس را (مانند صوت، گذرواژه، اطلاعات پرداخت، عکس و پیام) که روی صفحه‌تان نشان داده می‌شود یا از دستگاهتان پخش می‌شود ضبط کند."</string>
     <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"هنگام ضبط یا ارسال محتوا، ارائه‌دهنده خدمات این عملکرد می‌تواند هرگونه اطلاعات حساس (مانند صوت، گذرواژه، اطلاعات پرداخت، عکس و پیام) را که روی صفحه‌تان نشان داده می‌شود یا از دستگاهتان پخش می‌شود ضبط کند."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"افشای اطلاعات حساس درحین ارسال/ضبط محتوا"</string>
@@ -543,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"تا برداشتن پین، در نما نگه‌داشته می‌شود. برای برداشتن پین، «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"برای برداشتن پین این صفحه، دکمه‌های «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"برای برداشتن پین این صفحه، دکمه‌های «برگشت» و «صفحه اصلی» را لمس کنید و نگه‌دارید"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"برای برداشتن پین این صفحه‌نمایش، صفحه را تند بالا بکشید و نگه‌دارید"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"متوجه شدم"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"نه متشکرم"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"صفحه پین شد"</string>

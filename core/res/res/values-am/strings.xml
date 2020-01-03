@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"የድምጽ መልዕክቶች"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"የWi-Fi ጥሪ"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"የሲም ሁኔታ"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"ከፍተኛ ቅድሚያ ተሰጪ የሲም ኹናቴ"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ቢጤ መልዕክት መጻጻፊያ ስልክ ሁነታ FULL ጠይቋል"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ቢጤ መልዕክት መጻጻፊያ ስልክ ሁነታ HCO ጠይቋል"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ቢጤ መልዕክት መጻጻፊያ ስልክ ሁነታ VCO ጠይቋል"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"የጣት አሻራ አዶ"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"የማረጋገጫ ሃርድዌር ፊትን ያስተዳድሩ"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"በመልክ መክፈቻ ሃርድዌርን ማስተዳደር"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"መተግበሪያው ጥቅም ላይ እንዲውሉ የፊት ቅንብር ደንቦችን ለማከል እና ለመሰረዝ የሚያስችሉ ስልቶችን እንዲያስጀምር ያስችለዋል።"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"የፊት ማረጋገጫ ሃርድዌር ይጠቀሙ"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"መተግበሪያው የማረጋገጫ ሃርድዌር ለማረጋገጥ ሥራ እንዲጠቀም ያስችለዋል"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"በመልክ ማረጋገጥ"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"በመልክ መክፈት ሃርድዌርን መጠቀም"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"መተግበሪያው የመልክ መክፈቻ ሃርድዌርን ለማረጋገጥ እንዲጠቀም ያስችለዋል"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"በመልክ መክፈት"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"የእርስዎን ፊት ዳግመኛ ያስመዝግቡ"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ማንነትን ለይቶ ማወቅን ለማሻሻል፣ እባክዎ የእርስዎን ፊት ዳግም ያስመዝግቡ"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"ትክክለኛ የፊት ውሂብ ማንሳት አልተቻለም። እንደገና ይሞክሩ።"</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ስልክን ወደ ግራ ያንቀሳቅሱ።"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ስልክን ወደ ቀኝ ያንቀሳቅሱ።"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"እባክዎ መሣሪያዎን ይበልጥ በቀጥታ ይመልከቱ።"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"የእርስዎን ፊት መመልከት አይችልም። ስልኩ ላይ ይመልከቱ።"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"መልክዎን በቀጥታ ከስልኩ ፊት ያድርጉት።"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ከልክ በላይ ብዙ እንቅስቃሴ። ስልኩን ቀጥ አድርገው ይያዙት።"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"እባክዎ ፊትዎን እንደገና ያስመዝግቡ"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ከእንግዲህ ፊትን ለይቶ ማወቅ አይችልም። እንደገና ይሞክሩ።"</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ጭንቅላትዎን ትንሽ ብቻ ያዙሩት።"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"ጭንቅላትዎን ትንሽ ብቻ ያዙሩት።"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"የእርስዎን ፊት የሚደብቀውን ሁሉንም ነገር በማስወገድ ላይ"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"በማያ ገጹ ላይኛው ጫፍ ላይ ዳሳሹን ያጽዱ።"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"የማያ ገጽዎን አናት ያጽዱት፣ ጥቁር አሞሌውን ጨምሮ"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"መልክን ማረጋገጥ አይቻልም። ሃርድዌር የለም።"</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"በመልክ ማረጋገጥን እንደገና ይሞክሩ።"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"በመልክ መክፈትን እንደገና ይሞክሩ።"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"አዲስ የመልክ ውውሂብ ማስቀመጥ አልተቻለም። መጀመሪያ የድሮውን ይሰርዙት።"</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"የመልክ ክወና ተሰርዟል"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"መልክን ማረጋገጥ በተጠቃሚ ተሰርዟል"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"የፊት ሥርዓተ ክወና ተሰርዟል።"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"በመልክ መክፈት በተጠቃሚ ተሰርዟል።"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"ከልክ በላይ ብዙ ሙከራዎች። በኋላ ላይ እንደገና ይሞክሩ።"</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"በጣም ብዙ ሙከራዎች። የመልክ ማረጋገጫ ተሰናክሏል።"</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"በጣም ብዙ ሙከራዎች። በመልክ መክፈት ተሰናክሏል።"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"ፊትን ማረጋገጥ አይቻልም። እንደገና ይሞክሩ።"</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"የመልክ ማረጋገጫን አላቀናበሩም"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"የመልክ ማረጋገጫ መስጫ በዚህ መሣሪያ ላይ አይደገፍም።"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"በመልክ መክፈትን አላቀናበሩም።"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"በመልክ መክፈት መስጫ በዚህ መሣሪያ ላይ አይደገፍም።"</string>
     <string name="face_name_template" msgid="7004562145809595384">"ፊት <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1254,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ሁሉንም አውታረ መረቦችን ለማየት መታ ያድርጉ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"አገናኝ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ሁሉም አውታረ መረቦች"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"ከWi-Fi አውታረ መረቦች ጋር ይገናኝ?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"በ<xliff:g id="NAME">%s</xliff:g> የተጠቆሙ"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"አዎ"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"አይ"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"የተጠቆሙ የWi‑Fi አውታረ መረቦች ይፈቀዱ?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"በ<xliff:g id="NAME">%s</xliff:g> የተጠቆሙ አውታረ መረቦች። መሣሪያ በራስ-ሰር ሊገናኝ ይችላል።"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"ፍቀድ"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"አይ፣ አመሰግናለሁ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi በራስ-ሰር ይበራል"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ከፍተኛ ጥራት ያለው የተቀመጠ አውታረ መረብ አቅራቢያ ሲሆኑ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"መልሰህ አታብራ"</string>
@@ -1887,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"ያልተመደቡ"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"የእነዚህን ማሳወቂያዎች አስፈላጊነት አዘጋጅተዋል።"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ይሄ በሚሳተፉ ሰዎች ምክንያት አስፈላጊ ነው።"</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> በ<xliff:g id="ACCOUNT">%2$s</xliff:g> አዲስ ተጠቃሚ እንዲፈጥር ይፈቀድለት?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> በ<xliff:g id="ACCOUNT">%2$s</xliff:g> አዲስ ተጠቃሚ እንዲፈጥር ይፈቀድለት (ይህ መለያ ያለው ተጠቃሚ አስቀድሞ አለ)?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="APP">%1$s</xliff:g> በ<xliff:g id="ACCOUNT">%2$s</xliff:g> አዲስ ተጠቃሚ እንዲፈጥር ይፈቀድለት (ይህ መለያ ያለው ተጠቃሚ አስቀድሞ አለ)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="APP">%1$s</xliff:g> አዲስ ተጠቃሚ ከ <xliff:g id="ACCOUNT">%2$s</xliff:g> ጋር መፍጠር እንዲችል ይፍቀዱ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"ቋንቋ ያክሉ"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"የክልል ምርጫ"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"የቋንቋ ስም ይተይቡ"</string>

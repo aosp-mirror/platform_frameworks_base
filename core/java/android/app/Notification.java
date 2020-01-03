@@ -3386,11 +3386,7 @@ public class Notification implements Parcelable
          */
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
-        /**
-         * Caches a ambient version of {@link #mCachedAmbientColorIsFor}.
-         */
-        private int mCachedAmbientColor = COLOR_INVALID;
-        private int mCachedAmbientColorIsFor = COLOR_INVALID;
+
         /**
          * A neutral color color that can be used for icons.
          */
@@ -5441,26 +5437,14 @@ public class Notification implements Parcelable
         /**
          * Construct a RemoteViews for the display in public contexts like on the lockscreen.
          *
+         * @param isLowPriority is this notification low priority
          * @hide
          */
         @UnsupportedAppUsage
-        public RemoteViews makePublicContentView() {
-            return makePublicView(false /* ambient */);
-        }
-
-        /**
-         * Construct a RemoteViews for the display in public contexts like on the lockscreen.
-         *
-         * @hide
-         */
-        public RemoteViews makePublicAmbientNotification() {
-            return makePublicView(true /* ambient */);
-        }
-
-        private RemoteViews makePublicView(boolean ambient) {
+        public RemoteViews makePublicContentView(boolean isLowPriority) {
             if (mN.publicVersion != null) {
                 final Builder builder = recoverBuilder(mContext, mN.publicVersion);
-                return ambient ? builder.makeAmbientNotification() : builder.createContentView();
+                return builder.createContentView();
             }
             Bundle savedBundle = mN.extras;
             Style style = mStyle;
@@ -5484,7 +5468,11 @@ public class Notification implements Parcelable
             }
             mN.extras = publicExtras;
             RemoteViews view;
-            view = makeNotificationHeader();
+            StandardTemplateParams params = mParams.reset().fillTextsFrom(this);
+            if (isLowPriority) {
+                params.forceDefaultColor();
+            }
+            view = makeNotificationHeader(params);
             view.setBoolean(R.id.notification_header, "setExpandOnlyOnButton", true);
             mN.extras = savedBundle;
             mN.mLargeIcon = largeIcon;
@@ -8118,8 +8106,7 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
-            RemoteViews expanded = makeMediaBigContentView();
-            return expanded != null ? expanded : makeMediaContentView();
+            return makeMediaContentView();
         }
 
         /** @hide */
@@ -8552,24 +8539,34 @@ public class Notification implements Parcelable
          * If set and the app creating the bubble is in the foreground, the bubble will be posted
          * in its expanded state, with the contents of {@link #getIntent()} in a floating window.
          *
-         * <p>If the app creating the bubble is not in the foreground this flag has no effect.</p>
+         * <p>This flag has no effect if the app posting the bubble is not in the foreground.
+         * The app is considered foreground if it is visible and on the screen, note that
+         * a foreground service does not qualify.
+         * </p>
          *
          * <p>Generally this flag should only be set if the user has performed an action to request
          * or create a bubble.</p>
+         *
+         * @hide
          */
-        private static final int FLAG_AUTO_EXPAND_BUBBLE = 0x00000001;
+        public static final int FLAG_AUTO_EXPAND_BUBBLE = 0x00000001;
 
         /**
          * If set and the app posting the bubble is in the foreground, the bubble will
          * be posted <b>without</b> the associated notification in the notification shade.
          *
-         * <p>If the app posting the bubble is not in the foreground this flag has no effect.</p>
+         * <p>This flag has no effect if the app posting the bubble is not in the foreground.
+         * The app is considered foreground if it is visible and on the screen, note that
+         * a foreground service does not qualify.
+         * </p>
          *
          * <p>Generally this flag should only be set if the user has performed an action to request
          * or create a bubble, or if the user has seen the content in the notification and the
          * notification is no longer relevant.</p>
+         *
+         * @hide
          */
-        private static final int FLAG_SUPPRESS_NOTIFICATION = 0x00000002;
+        public static final int FLAG_SUPPRESS_NOTIFICATION = 0x00000002;
 
         private BubbleMetadata(PendingIntent expandIntent, PendingIntent deleteIntent,
                 Icon icon, int height, @DimenRes int heightResId) {
@@ -8685,8 +8682,18 @@ public class Notification implements Parcelable
             out.writeInt(mDesiredHeightResId);
         }
 
-        private void setFlags(int flags) {
+        /**
+         * @hide
+         */
+        public void setFlags(int flags) {
             mFlags = flags;
+        }
+
+        /**
+         * @hide
+         */
+        public int getFlags() {
+            return mFlags;
         }
 
         /**
@@ -8805,6 +8812,8 @@ public class Notification implements Parcelable
              * {@link #getIntent()} in a floating window).
              *
              * <p>This flag has no effect if the app posting the bubble is not in the foreground.
+             * The app is considered foreground if it is visible and on the screen, note that
+             * a foreground service does not qualify.
              * </p>
              *
              * <p>Generally, this flag should only be set if the user has performed an action to
@@ -8823,6 +8832,8 @@ public class Notification implements Parcelable
              * the notification shade.
              *
              * <p>This flag has no effect if the app posting the bubble is not in the foreground.
+             * The app is considered foreground if it is visible and on the screen, note that
+             * a foreground service does not qualify.
              * </p>
              *
              * <p>Generally, this flag should only be set if the user has performed an action to
@@ -10497,12 +10508,7 @@ public class Notification implements Parcelable
         final StandardTemplateParams fillTextsFrom(Builder b) {
             Bundle extras = b.mN.extras;
             this.title = b.processLegacyText(extras.getCharSequence(EXTRA_TITLE));
-
-            CharSequence text = extras.getCharSequence(EXTRA_BIG_TEXT);
-            if (TextUtils.isEmpty(text)) {
-                text = extras.getCharSequence(EXTRA_TEXT);
-            }
-            this.text = b.processLegacyText(text);
+            this.text = b.processLegacyText(extras.getCharSequence(EXTRA_TEXT));
             this.summaryText = extras.getCharSequence(EXTRA_SUB_TEXT);
             return this;
         }

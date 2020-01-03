@@ -171,11 +171,6 @@ public class CarQSFragment extends Fragment implements QS {
     }
 
     @Override
-    public void setKeyguardShowing(boolean keyguardShowing) {
-        // No keyguard to show.
-    }
-
-    @Override
     public void animateHeaderSlidingIn(long delay) {
         // No header to animate.
     }

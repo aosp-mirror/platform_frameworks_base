@@ -151,4 +151,7 @@
       <item quantity="other">ซิมถูกปิดใช้งานในขณะนี้ โปรดป้อนรหัส PUK เพื่อทำต่อ คุณพยายามได้อีก <xliff:g id="_NUMBER_1">%d</xliff:g> ครั้งก่อนที่ซิมจะไม่สามารถใช้งานได้อย่างถาวร โปรดติดต่อสอบถามรายละเอียดจากผู้ให้บริการ</item>
       <item quantity="one">ซิมถูกปิดใช้งานในขณะนี้ โปรดป้อนรหัส PUK เพื่อทำต่อ คุณพยายามได้อีก <xliff:g id="_NUMBER_0">%d</xliff:g> ครั้งก่อนที่ซิมจะไม่สามารถใช้งานได้อย่างถาวร โปรดติดต่อสอบถามรายละเอียดจากผู้ให้บริการ</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"ค่าเริ่มต้น"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"ลูกโป่ง"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"แอนะล็อก"</string>
 </resources>

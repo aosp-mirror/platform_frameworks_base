@@ -361,9 +361,6 @@ public class ResolverActivity extends Activity {
 
         initSuspendedColorMatrix();
 
-        if (isVoiceInteraction()) {
-            onSetupVoiceInteraction();
-        }
         final Set<String> categories = intent.getCategories();
         MetricsLogger.action(this, mAdapter.hasFilteredItem()
                 ? MetricsProto.MetricsEvent.ACTION_SHOW_APP_DISAMBIG_APP_FEATURED
@@ -442,24 +439,21 @@ public class ResolverActivity extends Activity {
         mSuspendedMatrixColorFilter = new ColorMatrixColorFilter(matrix);
     }
 
-    /**
-     * Perform any initialization needed for voice interaction.
-     */
-    public void onSetupVoiceInteraction() {
-        // Do it right now. Subclasses may delay this and send it later.
-        sendVoiceChoicesIfNeeded();
-    }
-
     public void sendVoiceChoicesIfNeeded() {
         if (!isVoiceInteraction()) {
             // Clearly not needed.
             return;
         }
 
-
         final Option[] options = new Option[mAdapter.getCount()];
         for (int i = 0, N = options.length; i < N; i++) {
-            options[i] = optionForChooserTarget(mAdapter.getItem(i), i);
+            TargetInfo target = mAdapter.getItem(i);
+            if (target == null) {
+                // If this occurs, a new set of targets is being loaded. Let that complete,
+                // and have the next call to send voice choices proceed instead.
+                return;
+            }
+            options[i] = optionForChooserTarget(target, i);
         }
 
         mPickOptionRequest = new PickTargetOptionRequest(
@@ -1872,7 +1866,7 @@ public class ResolverActivity extends Activity {
                 }
             }
 
-
+            sendVoiceChoicesIfNeeded();
             postListReadyRunnable();
         }
 

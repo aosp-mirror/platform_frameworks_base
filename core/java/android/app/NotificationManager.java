@@ -1095,6 +1095,25 @@ public class NotificationManager {
     }
 
     /**
+     * Silences the current notification sound, if ones currently playing.
+     * <p>
+     * It is intended to handle use-cases such as silencing a ringing call
+     * when the user presses the volume button during ringing.
+     * <p>
+     * If this method is called prior to when the notification begins playing, the sound will not be
+     * silenced.  As such it is not intended as a means to avoid playing of a sound.
+     * @hide
+     */
+    public void silenceNotificationSound() {
+        INotificationManager service = getService();
+        try {
+            service.silenceNotificationSound();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns whether notifications from this package are temporarily hidden. This
      * could be done because the package was marked as distracting to the user via
      * {@code PackageManager#setDistractingPackageRestrictions(String[], int)} or because the

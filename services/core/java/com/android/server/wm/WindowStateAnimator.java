@@ -1493,6 +1493,12 @@ class WindowStateAnimator {
     }
 
     void detachChildren() {
+
+        // Do not detach children of starting windows, as their lifecycle is well under control and
+        // it may lead to issues in case we relaunch when we just added the starting window.
+        if (mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
+            return;
+        }
         if (mSurfaceController != null) {
             mSurfaceController.detachChildren();
         }

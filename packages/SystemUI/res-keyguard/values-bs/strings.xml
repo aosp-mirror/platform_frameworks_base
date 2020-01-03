@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="3171996292755059205">"Zaključavanje tastature"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3420548423949593123">"Upišite PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"Upišite PUK kôd za SIM karticu i novi PIN"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"Upišite PUK za SIM i novi PIN kôd"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"PUK kôd za SIM karticu"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"Novi PIN za SIM karticu"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Dodirnite da upišete lozinku"</font></string>
@@ -54,7 +54,7 @@
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"Prostor za PIN"</string>
     <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Lozinka uređaja"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"Prostor za PIN za SIM karticu"</string>
-    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Prostor za PUK kôd za SIM karticu"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Prostor za PUK za SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Naredni alarm je podešen za <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Izbriši"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"Onemogući eSIM karticu"</string>
@@ -116,7 +116,7 @@
       <item quantity="other">PUK kôd za SIM karticu je netačan. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja prije nego što SIM kartica postane trajno neupotrebljiva.</item>
     </plurals>
     <string name="kg_password_pin_failed" msgid="8769990811451236223">"Korištenje PIN-a za SIM karticu nije uspjelo!"</string>
-    <string name="kg_password_puk_failed" msgid="1331621440873439974">"Korištenje PUK koda za SIM karticu nije uspjelo!"</string>
+    <string name="kg_password_puk_failed" msgid="1331621440873439974">"Korištenje PUK-a za SIM nije uspjelo!"</string>
     <string name="kg_pin_accepted" msgid="7637293533973802143">"Kôd je prihvaćen"</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"Nema mreže."</string>
     <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Promjena načina unosa"</string>
@@ -159,4 +159,7 @@
       <item quantity="few">SIM kartica je onemogućena. Unesite PUK kôd da nastavite. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja prije nego što SIM kartica postane trajno neupotrebljiva. Za više informacija kontaktirajte mobilnog operatera.</item>
       <item quantity="other">SIM kartica je onemogućena. Unesite PUK kôd da nastavite. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja prije nego što SIM kartica postane trajno neupotrebljiva. Za više informacija kontaktirajte mobilnog operatera.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Zadano"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Mjehurići"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analogni"</string>
 </resources>

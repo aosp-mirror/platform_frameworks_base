@@ -18,6 +18,7 @@ package com.android.server.display.whitebalance;
 
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.utils.RollingBuffer;
 
 import java.io.PrintWriter;
@@ -35,7 +36,7 @@ import java.util.Arrays;
  * - {@link WeightedMovingAverageAmbientFilter}
  *   A weighted average prioritising recent changes.
  */
-abstract class AmbientFilter {
+abstract public class AmbientFilter {
 
     protected static final boolean DEBUG = false; // Enable for verbose logs.
 

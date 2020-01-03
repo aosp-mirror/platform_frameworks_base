@@ -44,6 +44,7 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 
 import java.util.ArrayList;
@@ -303,6 +304,11 @@ public class CarrierTextController {
             }
         } else {
             subs = mKeyguardUpdateMonitor.getSubscriptionInfo(false);
+            if (subs == null) {
+                subs = new ArrayList<>();
+            } else {
+                filterMobileSubscriptionInSameGroup(subs);
+            }
         }
         return subs;
     }
@@ -356,7 +362,9 @@ public class CarrierTextController {
                 }
             }
         }
-        if (allSimsMissing) {
+        // Only create "No SIM card" if no cards with CarrierName && no wifi when some sim is READY
+        // This condition will also be true always when numSubs == 0
+        if (allSimsMissing && !anySimReadyAndInService) {
             if (numSubs != 0) {
                 // Shows "No SIM card | Emergency calls only" on devices that are voice-capable.
                 // This depends on mPlmn containing the text "Emergency calls only" when the radio
@@ -395,8 +403,11 @@ public class CarrierTextController {
             }
         }
 
+        if (TextUtils.isEmpty(displayText)) displayText = joinNotEmpty(mSeparator, carrierNames);
+
         displayText = updateCarrierTextWithSimIoError(displayText, carrierNames, subOrderBySlot,
                 allSimsMissing);
+
         boolean airplaneMode = false;
         // APM (airplane mode) != no carrier state. There are carrier services
         // (e.g. WFC = Wi-Fi calling) which may operate in APM.
@@ -405,9 +416,6 @@ public class CarrierTextController {
             airplaneMode = true;
         }
 
-        if (TextUtils.isEmpty(displayText) && !airplaneMode) {
-            displayText = joinNotEmpty(mSeparator, carrierNames);
-        }
         final CarrierTextCallbackInfo info = new CarrierTextCallbackInfo(
                 displayText,
                 carrierNames,

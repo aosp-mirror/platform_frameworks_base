@@ -36,7 +36,7 @@ oneway interface IRecentsAnimationRunner {
      * @param deferredWithScreenshot If set to {@code true}, the contents of the task will be
      *                               replaced with a screenshot, such that the runner's leash is
      *                               still active. As soon as the runner doesn't need the leash
-     *                               anymore, it can call
+     *                               anymore, it must call
      *                               {@link IRecentsAnimationController#cleanupScreenshot).
      *
      * @see {@link RecentsAnimationController#cleanupScreenshot}

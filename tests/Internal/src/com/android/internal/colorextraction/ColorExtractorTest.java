@@ -39,8 +39,6 @@ import com.android.internal.colorextraction.types.Tonal;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 /**
  * Tests color extraction generation.
@@ -49,14 +47,13 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class ColorExtractorTest {
 
-    Context mContext;
-    @Mock
-    WallpaperManager mWallpaperManager;
+    private Context mContext;
+    private WallpaperManager mWallpaperManager;
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         mContext = InstrumentationRegistry.getContext();
+        mWallpaperManager = mock(WallpaperManager.class);
     }
 
     @Test

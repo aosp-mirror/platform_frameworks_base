@@ -99,6 +99,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"رسائل البريد الصوتي"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"‏الاتصال عبر Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"‏حالة شريحة SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"‏حالة شريحة SIM ذات أولوية"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‏طلب النظير وضع TTY الكامل"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏طلب النظير وضع TTY على HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏طلب النظير وضع TTY على VCO"</string>
@@ -470,7 +471,7 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"للسماح للتطبيق باستخدام مرسل الأشعة تحت الحمراء الخاص بالجهاز اللوحي."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"يتيح للتطبيق استخدام مرسل الأشعة تحت الحمراء في جهاز التلفزيون."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"للسماح للتطبيق باستخدام مرسل الأشعة تحت الحمراء الخاص بالهاتف."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"تعيين الخلفية"</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"ضبط الخلفية"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"للسماح للتطبيق بتعيين خلفية النظام."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"تعديل حجم الخلفية"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"للسماح للتطبيق بتعيين تلميحات حجم خلفية النظام."</string>
@@ -532,7 +533,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"للسماح للتطبيق بتعديل مجموعة صورك."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"قراءة المواقع من مجموعة الوسائط التابعة لك"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"للسماح للتطبيق بقراءة المواقع من مجموعة الوسائط التابعة لك."</string>
-    <string name="biometric_dialog_default_title" msgid="881952973720613213">"التحقق من هويتك"</string>
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"إثبات هويتك"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"معدّات المقاييس الحيوية غير متاحة."</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"تم إلغاء المصادقة."</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"لم يتم التعرف عليها."</string>
@@ -562,11 +563,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"رمز بصمة الإصبع"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"إدارة أجهزة مصادقة الوجه"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"إدارة أجهزة \"فتح القفل بالوجه\""</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"السماح للتطبيق باستدعاء طرق لإضافة نماذج من الوجوه وحذفها"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"استخدام أجهزة مصادقة الوجه"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"السماح للتطبيق باستخدام أجهزة مصادقة الوجه"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"المصادقة بالوجه"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"استخدام أجهزة \"فتح القفل بالوجه\""</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"السماح للتطبيق باستخدام أجهزة \"فتح القفل بالوجه\" لإجراء المصادقة"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"فتح القفل بالوجه"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"إعادة تسجيل وجهك"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"لتحسين قدرة الجهاز على معرفة وجهك، يُرجى إعادة تسجيل الوجه."</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"تعذّر تسجيل بيانات دقيقة للوجه. حاول مرة أخرى."</string>
@@ -579,7 +580,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"يُرجى نقل الهاتف إلى اليمين."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"يُرجى نقل الهاتف إلى اليسار."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"يُرجى النظر إلى جهازك مباشرة أكثر."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"يتعذّر رؤية وجهك. يُرجى النظر إلى الهاتف."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"ضع وجهك أمام الهاتف مباشرة."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"حركة أكثر من اللازم يُرجى حمل بدون حركة."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"يُرجى إعادة تسجيل وجهك."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"لم يعُد يمكن التعرّف على الوجه. حاول مرة أخرى."</string>
@@ -588,19 +589,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"حرّك رأسك قليلاً نحو الأمام مباشرة."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"حرّك رأسك قليلاً نحو الوسط."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"عليك بإزالة أي شيء يُخفي وجهك."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"نظِّف المستشعر أعلى الشاشة."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"يُرجى تنظيف الجزء العلوي من الشاشة، بما في ذلك الشريط الأسود."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"يتعذّر التحقُّق من الوجه. الجهاز غير مُتاح."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"جرِّب مصادقة الوجه مرة أخرى."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"حاول استخدام \"فتح القفل بالوجه\" مرة أخرى."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"يتعذَّر تخزين بيانات الوجه الجديد. احذف الوجه القديم أولاً."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"تم إلغاء عملية مصادقة الوجه."</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"ألغَى المستخدم مصادقة الوجه."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"تمّ إلغاء عملية مصادقة الوجه."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"ألغى المستخدم \"فتح القفل بالوجه\"."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"تمّ إجراء محاولات كثيرة. أعِد المحاولة لاحقًا."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"محاولات كثيرة جدًا. تم إيقاف مصادقة الوجه."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"تم إجراء عدد كبير جدًا من المحاولات. وتم إيقاف \"فتح القفل بالوجه\"."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"يتعذّر التحقق من الوجه. حاول مرة أخرى."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"لم يسبق لك إعداد مصادقة الوجه."</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"لا تتوفّر إمكانية مصادقة الوجه على هذا الجهاز."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"لم يسبق لك إعداد \"فتح القفل بالوجه\"."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"\"فتح القفل بالوجه\" غير متوفر على هذا الجهاز."</string>
     <string name="face_name_template" msgid="7004562145809595384">"الوجه <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1342,10 +1343,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"انقر للاطلاع على جميع الشبكات"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"اتصال"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"جميع الشبكات"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"‏هل تريد الاتصال بشبكات Wi-Fi؟"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"اقتراح من <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"نعم"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"لا"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"‏هل تريد السماح لشبكات Wi‑Fi المقترحة؟"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"شبكات <xliff:g id="NAME">%s</xliff:g> المقترحة - قد يتم توصيل الجهاز تلقائيًا."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"سماح"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"لا، شكرًا"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏سيتم تشغيل شبكة Wi-Fi تلقائيًا."</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"عندما تكون بالقرب من شبكة محفوظة عالية الجودة"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"عدم إعادة التشغيل"</string>
@@ -1676,7 +1677,7 @@
     <string name="sending" msgid="3245653681008218030">"جارٍ الإرسال..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"تشغيل المتصفح؟"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"هل تريد قبول المكالمة؟"</string>
-    <string name="activity_resolver_use_always" msgid="8017770747801494933">"دومًا"</string>
+    <string name="activity_resolver_use_always" msgid="8017770747801494933">"دائمًا"</string>
     <string name="activity_resolver_set_always" msgid="1422574191056490585">"ضبط على الفتح دائمًا"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"مرة واحدة فقط"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"الإعدادات"</string>
@@ -2023,8 +2024,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"غير مصنفة"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"لقد عيَّنت أهمية هذه الإشعارات."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"هذه الرسالة مهمة نظرًا لأهمية الأشخاص المعنيين."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"هل تسمح لـ <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g>؟"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"هل تسمح لـ <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> (يوجد مستخدم بهذا الحساب مسبقًا)؟"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"هل تسمح لتطبيق <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> (يوجد مستخدم بهذا الحساب مسبقًا)؟"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"هل تسمح لتطبيق <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> ؟"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"إضافة لغة"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"اكتب اسم اللغة"</string>

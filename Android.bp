@@ -1756,6 +1756,7 @@ droidstubs {
         last_released: {
             api_file: ":last-released-public-api",
             removed_api_file: "api/removed.txt",
+            baseline_file: ":public-api-incompatibilities-with-last-released",
         },
     },
     jdiff_enabled: true,
@@ -1781,6 +1782,7 @@ droidstubs {
         last_released: {
             api_file: ":last-released-system-api",
             removed_api_file: "api/system-removed.txt",
+            baseline_file: ":system-api-incompatibilities-with-last-released"
         },
     },
     jdiff_enabled: true,
