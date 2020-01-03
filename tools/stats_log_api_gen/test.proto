@@ -229,8 +229,8 @@ message NoModuleAtom {
 
 message ModuleAtoms {
     oneof event {
-        ModuleOneAtom module_one_atom = 1 [(android.os.statsd.log_from_module) = "module1"];
-        ModuleTwoAtom module_two_atom = 2 [(android.os.statsd.log_from_module) = "module2"];
+        ModuleOneAtom module_one_atom = 1 [(android.os.statsd.module) = "module1"];
+        ModuleTwoAtom module_two_atom = 2 [(android.os.statsd.module) = "module2"];
         NoModuleAtom no_module_atom = 3;
     }
 }

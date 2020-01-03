@@ -112,9 +112,9 @@ message Atom {
         TouchEventReported touch_event_reported = 34;
         WakeupAlarmOccurred wakeup_alarm_occurred = 35;
         KernelWakeupReported kernel_wakeup_reported = 36;
-        WifiLockStateChanged wifi_lock_state_changed = 37 [(log_from_module) = "wifi"];
-        WifiSignalStrengthChanged wifi_signal_strength_changed = 38 [(log_from_module) = "wifi"];
-        WifiScanStateChanged wifi_scan_state_changed = 39 [(log_from_module) = "wifi"];
+        WifiLockStateChanged wifi_lock_state_changed = 37 [(module) = "wifi"];
+        WifiSignalStrengthChanged wifi_signal_strength_changed = 38 [(module) = "wifi"];
+        WifiScanStateChanged wifi_scan_state_changed = 39 [(module) = "wifi"];
         PhoneSignalStrengthChanged phone_signal_strength_changed = 40;
         SettingChanged setting_changed = 41;
         ActivityForegroundStateChanged activity_foreground_state_changed = 42;
@@ -128,7 +128,7 @@ message Atom {
         AppStartFullyDrawn app_start_fully_drawn = 50;
         LmkKillOccurred lmk_kill_occurred = 51;
         PictureInPictureStateChanged picture_in_picture_state_changed = 52;
-        WifiMulticastLockStateChanged wifi_multicast_lock_state_changed = 53 [(log_from_module) = "wifi"];
+        WifiMulticastLockStateChanged wifi_multicast_lock_state_changed = 53 [(module) = "wifi"];
         LmkStateChanged lmk_state_changed = 54;
         AppStartMemoryStateCaptured app_start_memory_state_captured = 55;
         ShutdownSequenceReported shutdown_sequence_reported = 56;
@@ -182,39 +182,27 @@ message Atom {
         FlagFlipUpdateOccurred flag_flip_update_occurred = 101;
         BinaryPushStateChanged binary_push_state_changed = 102;
         DevicePolicyEvent device_policy_event = 103;
-        DocsUIFileOperationCanceledReported docs_ui_file_op_canceled =
-            104 [(log_from_module) = "docsui"];
-        DocsUIFileOperationCopyMoveModeReported
-            docs_ui_file_op_copy_move_mode_reported =
-            105 [(log_from_module) = "docsui"];
-        DocsUIFileOperationFailureReported docs_ui_file_op_failure =
-            106 [(log_from_module) = "docsui"];
-        DocsUIFileOperationReported docs_ui_provider_file_op =
-            107 [(log_from_module) = "docsui"];
-        DocsUIInvalidScopedAccessRequestReported
-            docs_ui_invalid_scoped_access_request =
-            108 [(log_from_module) = "docsui"];
-        DocsUILaunchReported docs_ui_launch_reported =
-            109 [(log_from_module) = "docsui"];
-        DocsUIRootVisitedReported docs_ui_root_visited =
-            110 [(log_from_module) = "docsui"];
-        DocsUIStartupMsReported docs_ui_startup_ms =
-            111 [(log_from_module) = "docsui"];
-        DocsUIUserActionReported docs_ui_user_action_reported =
-            112 [(log_from_module) = "docsui"];
+        DocsUIFileOperationCanceledReported docs_ui_file_op_canceled = 104 [(module) = "docsui"];
+        DocsUIFileOperationCopyMoveModeReported docs_ui_file_op_copy_move_mode_reported =
+            105 [(module) = "docsui"];
+        DocsUIFileOperationFailureReported docs_ui_file_op_failure = 106 [(module) = "docsui"];
+        DocsUIFileOperationReported docs_ui_provider_file_op = 107 [(module) = "docsui"];
+        DocsUIInvalidScopedAccessRequestReported docs_ui_invalid_scoped_access_request =
+            108 [(module) = "docsui"];
+        DocsUILaunchReported docs_ui_launch_reported = 109 [(module) = "docsui"];
+        DocsUIRootVisitedReported docs_ui_root_visited = 110 [(module) = "docsui"];
+        DocsUIStartupMsReported docs_ui_startup_ms = 111 [(module) = "docsui"];
+        DocsUIUserActionReported docs_ui_user_action_reported = 112 [(module) = "docsui"];
         WifiEnabledStateChanged wifi_enabled_state_changed = 113;
         WifiRunningStateChanged wifi_running_state_changed = 114;
         AppCompacted app_compacted = 115;
-        NetworkDnsEventReported network_dns_event_reported = 116 [(log_from_module) = "resolv"];
+        NetworkDnsEventReported network_dns_event_reported = 116 [(module) = "resolv"];
         DocsUIPickerLaunchedFromReported docs_ui_picker_launched_from_reported =
-            117 [(log_from_module) = "docsui"];
-        DocsUIPickResultReported docs_ui_pick_result_reported =
-            118 [(log_from_module) = "docsui"];
-        DocsUISearchModeReported docs_ui_search_mode_reported =
-            119 [(log_from_module) = "docsui"];
-        DocsUISearchTypeReported docs_ui_search_type_reported =
-            120 [(log_from_module) = "docsui"];
-        DataStallEvent data_stall_event = 121 [(log_from_module) = "network_stack"];
+            117 [(module) = "docsui"];
+        DocsUIPickResultReported docs_ui_pick_result_reported = 118 [(module) = "docsui"];
+        DocsUISearchModeReported docs_ui_search_mode_reported = 119 [(module) = "docsui"];
+        DocsUISearchTypeReported docs_ui_search_type_reported = 120 [(module) = "docsui"];
+        DataStallEvent data_stall_event = 121 [(module) = "network_stack"];
         RescuePartyResetReported rescue_party_reset_reported = 122;
         SignedConfigReported signed_config_reported = 123;
         GnssNiEventReported gnss_ni_event_reported = 124;
@@ -264,7 +252,7 @@ message Atom {
         ScreenTimeoutExtensionReported screen_timeout_extension_reported = 168;
         ProcessStartTime process_start_time = 169;
         PermissionGrantRequestResultReported permission_grant_request_result_reported =
-            170 [(log_from_module) = "permissioncontroller"];
+            170 [(module) = "permissioncontroller"];
         BluetoothSocketConnectionStateChanged bluetooth_socket_connection_state_changed = 171;
         DeviceIdentifierAccessDenied device_identifier_access_denied = 172;
         BubbleDeveloperErrorReported bubble_developer_error_reported = 173;
@@ -273,21 +261,21 @@ message Atom {
         AssistGestureProgressReported assist_gesture_progress_reported = 176;
         TouchGestureClassified touch_gesture_classified = 177;
         HiddenApiUsed hidden_api_used = 178 [(allow_from_any_uid) = true];
-        StyleUIChanged style_ui_changed = 179 [(log_from_module) = "style"];
+        StyleUIChanged style_ui_changed = 179 [(module) = "style"];
         PrivacyIndicatorsInteracted privacy_indicators_interacted =
-            180 [(log_from_module) = "permissioncontroller"];
+            180 [(module) = "permissioncontroller"];
         AppInstallOnExternalStorageReported app_install_on_external_storage_reported = 181;
-        NetworkStackReported network_stack_reported = 182 [(log_from_module) = "network_stack"];
+        NetworkStackReported network_stack_reported = 182 [(module) = "network_stack"];
         AppMovedStorageReported app_moved_storage_reported = 183;
         BiometricEnrolled biometric_enrolled = 184;
         SystemServerWatchdogOccurred system_server_watchdog_occurred = 185;
         TombStoneOccurred tomb_stone_occurred = 186;
         BluetoothClassOfDeviceReported bluetooth_class_of_device_reported = 187;
         IntelligenceEventReported intelligence_event_reported =
-            188 [(log_from_module) = "intelligence"];
+            188 [(module) = "intelligence"];
         ThermalThrottlingSeverityStateChanged thermal_throttling_severity_state_changed = 189;
         RoleRequestResultReported role_request_result_reported =
-            190 [(log_from_module) = "permissioncontroller"];
+            190 [(module) = "permissioncontroller"];
         MediametricsAudiopolicyReported mediametrics_audiopolicy_reported = 191;
         MediametricsAudiorecordReported mediametrics_audiorecord_reported = 192;
         MediametricsAudiothreadReported mediametrics_audiothread_reported = 193;
@@ -301,36 +289,32 @@ message Atom {
         MediametricsDrmManagerReported mediametrics_drmmanager_reported = 201;
         CarPowerStateChanged car_power_state_changed = 203;
         GarageModeInfo garage_mode_info = 204;
-        TestAtomReported test_atom_reported = 205 [(log_from_module) = "cts"];
+        TestAtomReported test_atom_reported = 205 [(module) = "cts"];
         ContentCaptureCallerMismatchReported content_capture_caller_mismatch_reported = 206;
         ContentCaptureServiceEvents content_capture_service_events = 207;
         ContentCaptureSessionEvents content_capture_session_events = 208;
         ContentCaptureFlushed content_capture_flushed = 209;
         LocationManagerApiUsageReported location_manager_api_usage_reported = 210;
         ReviewPermissionsFragmentResultReported review_permissions_fragment_result_reported =
-            211 [(log_from_module) = "permissioncontroller"];
+            211 [(module) = "permissioncontroller"];
         RuntimePermissionsUpgradeResult runtime_permissions_upgrade_result =
-            212 [(log_from_module) = "permissioncontroller"];
+            212 [(module) = "permissioncontroller"];
         GrantPermissionsActivityButtonActions grant_permissions_activity_button_actions =
-            213 [(log_from_module) = "permissioncontroller"];
+            213 [(module) = "permissioncontroller"];
         LocationAccessCheckNotificationAction location_access_check_notification_action =
-            214 [(log_from_module) = "permissioncontroller"];
+            214 [(module) = "permissioncontroller"];
         AppPermissionFragmentActionReported app_permission_fragment_action_reported =
-            215 [(log_from_module) = "permissioncontroller"];
+            215 [(module) = "permissioncontroller"];
         AppPermissionFragmentViewed app_permission_fragment_viewed =
-            216 [(log_from_module) = "permissioncontroller"];
+            216 [(module) = "permissioncontroller"];
         AppPermissionsFragmentViewed app_permissions_fragment_viewed =
-            217 [(log_from_module) = "permissioncontroller"];
+            217 [(module) = "permissioncontroller"];
         PermissionAppsFragmentViewed permission_apps_fragment_viewed =
-            218  [(log_from_module) = "permissioncontroller"];
-        TextSelectionEvent text_selection_event =
-            219  [(log_from_module) = "textclassifier"];
-        TextLinkifyEvent text_linkify_event =
-            220  [(log_from_module) = "textclassifier"];
-        ConversationActionsEvent conversation_actions_event =
-            221  [(log_from_module) = "textclassifier"];
-        LanguageDetectionEvent language_detection_event =
-            222  [(log_from_module) = "textclassifier"];
+            218  [(module) = "permissioncontroller"];
+        TextSelectionEvent text_selection_event = 219  [(module) = "textclassifier"];
+        TextLinkifyEvent text_linkify_event = 220  [(module) = "textclassifier"];
+        ConversationActionsEvent conversation_actions_event = 221  [(module) = "textclassifier"];
+        LanguageDetectionEvent language_detection_event = 222  [(module) = "textclassifier"];
         ExclusionRectStateChanged exclusion_rect_state_changed = 223;
         BackGesture back_gesture_reported_reported = 224;
         UpdateEngineUpdateAttemptReported update_engine_update_attempt_reported = 225;
@@ -338,21 +322,17 @@ message Atom {
         CameraActionEvent camera_action_event = 227;
         AppCompatibilityChangeReported app_compatibility_change_reported =
             228 [(allow_from_any_uid) = true];
-        PerfettoUploaded perfetto_uploaded =
-            229 [(log_from_module) = "perfetto"];
+        PerfettoUploaded perfetto_uploaded = 229 [(module) = "perfetto"];
         VmsClientConnectionStateChanged vms_client_connection_state_changed = 230;
         GpsLocationStatusReported gps_location_status_reported = 231;
         GpsTimeToFirstFixReported gps_time_to_first_fix_reported = 232;
-        MediaProviderScanEvent media_provider_scan_event =
-            233 [(log_from_module) = "mediaprovider"];
-        MediaProviderDeletionEvent media_provider_deletion_event =
-            234 [(log_from_module) = "mediaprovider"];
+        MediaProviderScanEvent media_provider_scan_event = 233 [(module) = "mediaprovider"];
+        MediaProviderDeletionEvent media_provider_deletion_event = 234 [(module) = "mediaprovider"];
         MediaProviderPermissionEvent media_provider_permission_event =
-            235 [(log_from_module) = "mediaprovider"];
-        MediaProviderSchemaChange media_provider_schema_change =
-            236 [(log_from_module) = "mediaprovider"];
+            235 [(module) = "mediaprovider"];
+        MediaProviderSchemaChange media_provider_schema_change = 236 [(module) = "mediaprovider"];
         MediaProviderIdleMaintenance media_provider_idle_maintenance =
-            237 [(log_from_module) = "mediaprovider"];
+            237 [(module) = "mediaprovider"];
     }
 
     // Pulled events will start at field 10000.
