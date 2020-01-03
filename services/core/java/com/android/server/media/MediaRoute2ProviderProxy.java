@@ -286,6 +286,11 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         if (mActiveConnection != connection) {
             return;
         }
+        if (sessionInfo != null) {
+            sessionInfo = new RouteSessionInfo.Builder(sessionInfo)
+                    .setProviderId(getUniqueId())
+                    .build();
+        }
         mCallback.onSessionCreated(this, sessionInfo, requestId);
     }
 

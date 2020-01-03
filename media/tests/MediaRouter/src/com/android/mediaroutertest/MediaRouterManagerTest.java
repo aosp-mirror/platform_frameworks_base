@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2;
 import android.media.MediaRouter2.RouteCallback;
+import android.media.MediaRouter2.SessionCallback;
 import android.media.MediaRouter2Manager;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -101,8 +102,8 @@ public class MediaRouterManagerTest {
     private String mPackageName;
 
     private final List<MediaRouter2Manager.Callback> mManagerCallbacks = new ArrayList<>();
-    private final List<RouteCallback> mRouteCallbacks =
-            new ArrayList<>();
+    private final List<RouteCallback> mRouteCallbacks = new ArrayList<>();
+    private final List<SessionCallback> mSessionCallbacks = new ArrayList<>();
 
     public static final List<String> CATEGORIES_ALL = new ArrayList();
     public static final List<String> CATEGORIES_SPECIAL = new ArrayList();
@@ -205,27 +206,26 @@ public class MediaRouterManagerTest {
     }
 
     /**
-     * Tests if MR2.Callback.onRouteSelected is called when a route is selected from MR2Manager.
-     *
-     * TODO: Change this test so that this test check whether the route is added in a session.
-     *       Until then, temporailiy marking @Ignore
+     * Tests if MR2.SessionCallback.onSessionCreated is called
+     * when a route is selected from MR2Manager.
      */
     @Test
-    @Ignore
-    public void testRouterOnRouteSelected() throws Exception {
+    public void testRouterOnSessionCreated() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(CATEGORIES_ALL);
 
         CountDownLatch latch = new CountDownLatch(1);
 
         addManagerCallback(new MediaRouter2Manager.Callback());
-//        addRouterCallback(new RouteDiscoveryCallback() {
-//            @Override
-//            public void onRouteSelected(MediaRoute2Info route, int reason, Bundle controlHints) {
-//                if (route != null && TextUtils.equals(route.getId(), ROUTE_ID1)) {
-//                    latch.countDown();
-//                }
-//            }
-//        });
+        //TODO: remove this when it's not necessary.
+        addRouterCallback(new MediaRouter2.RouteCallback());
+        addSessionCallback(new SessionCallback() {
+            @Override
+            public void onSessionCreated(MediaRouter2.RouteSessionController controller) {
+                if (createRouteMap(controller.getSelectedRoutes()).containsKey(ROUTE_ID1)) {
+                    latch.countDown();
+                }
+            }
+        });
 
         MediaRoute2Info routeToSelect = routes.get(ROUTE_ID1);
         assertNotNull(routeToSelect);
@@ -446,6 +446,11 @@ public class MediaRouterManagerTest {
         mRouter2.registerRouteCallback(mExecutor, routeCallback);
     }
 
+    private void addSessionCallback(SessionCallback sessionCallback) {
+        mSessionCallbacks.add(sessionCallback);
+        mRouter2.registerSessionCallback(mExecutor, sessionCallback);
+    }
+
     private void clearCallbacks() {
         for (MediaRouter2Manager.Callback callback : mManagerCallbacks) {
             mManager.unregisterCallback(callback);
@@ -456,5 +461,10 @@ public class MediaRouterManagerTest {
             mRouter2.unregisterRouteCallback(routeCallback);
         }
         mRouteCallbacks.clear();
+
+        for (SessionCallback sessionCallback : mSessionCallbacks) {
+            mRouter2.unregisterSessionCallback(sessionCallback);
+        }
+        mSessionCallbacks.clear();
     }
 }
