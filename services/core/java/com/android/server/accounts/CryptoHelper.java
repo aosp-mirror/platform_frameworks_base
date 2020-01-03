@@ -10,6 +10,7 @@ import com.android.internal.util.Preconditions;
 
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -54,7 +55,7 @@ import javax.crypto.spec.IvParameterSpec;
 
     @NonNull
     /* default */ Bundle encryptBundle(@NonNull Bundle bundle) throws GeneralSecurityException {
-        Preconditions.checkNotNull(bundle, "Cannot encrypt null bundle.");
+        Objects.requireNonNull(bundle, "Cannot encrypt null bundle.");
         Parcel parcel = Parcel.obtain();
         bundle.writeToParcel(parcel, 0);
         byte[] clearBytes = parcel.marshall();
@@ -76,7 +77,7 @@ import javax.crypto.spec.IvParameterSpec;
 
     @Nullable
     /* default */ Bundle decryptBundle(@NonNull Bundle bundle) throws GeneralSecurityException {
-        Preconditions.checkNotNull(bundle, "Cannot decrypt null bundle.");
+        Objects.requireNonNull(bundle, "Cannot decrypt null bundle.");
         byte[] iv = bundle.getByteArray(KEY_IV);
         byte[] encryptedBytes = bundle.getByteArray(KEY_CIPHER);
         byte[] mac = bundle.getByteArray(KEY_MAC);
