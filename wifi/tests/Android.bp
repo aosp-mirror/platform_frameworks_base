@@ -37,8 +37,6 @@ jacoco_include = ["android.net.wifi.*"]
 android_test {
     name: "FrameworksWifiApiTests",
 
-    defaults: ["framework-wifi-test-defaults"],
-
     srcs: ["**/*.java"],
 
     jacoco: {
@@ -61,6 +59,7 @@ android_test {
         "android.test.base",
     ],
 
+    platform_apis: true,
     test_suites: [
         "device-tests",
         "mts",
