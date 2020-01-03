@@ -65,7 +65,6 @@ import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
 import static com.android.server.NetworkManagementSocketTagger.setKernelCounterSet;
@@ -148,6 +147,7 @@ import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Collect and persist detailed network statistics, and provide this data to
@@ -357,17 +357,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             TelephonyManager teleManager, NetworkStatsSettings settings,
             NetworkStatsFactory factory, NetworkStatsObservers statsObservers, File systemDir,
             File baseDir) {
-        mContext = checkNotNull(context, "missing Context");
-        mNetworkManager = checkNotNull(networkManager, "missing INetworkManagementService");
-        mAlarmManager = checkNotNull(alarmManager, "missing AlarmManager");
-        mClock = checkNotNull(clock, "missing Clock");
-        mSettings = checkNotNull(settings, "missing NetworkStatsSettings");
-        mTeleManager = checkNotNull(teleManager, "missing TelephonyManager");
-        mWakeLock = checkNotNull(wakeLock, "missing WakeLock");
-        mStatsFactory = checkNotNull(factory, "missing factory");
-        mStatsObservers = checkNotNull(statsObservers, "missing NetworkStatsObservers");
-        mSystemDir = checkNotNull(systemDir, "missing systemDir");
-        mBaseDir = checkNotNull(baseDir, "missing baseDir");
+        mContext = Objects.requireNonNull(context, "missing Context");
+        mNetworkManager = Objects.requireNonNull(networkManager,
+            "missing INetworkManagementService");
+        mAlarmManager = Objects.requireNonNull(alarmManager, "missing AlarmManager");
+        mClock = Objects.requireNonNull(clock, "missing Clock");
+        mSettings = Objects.requireNonNull(settings, "missing NetworkStatsSettings");
+        mTeleManager = Objects.requireNonNull(teleManager, "missing TelephonyManager");
+        mWakeLock = Objects.requireNonNull(wakeLock, "missing WakeLock");
+        mStatsFactory = Objects.requireNonNull(factory, "missing factory");
+        mStatsObservers = Objects.requireNonNull(statsObservers, "missing NetworkStatsObservers");
+        mSystemDir = Objects.requireNonNull(systemDir, "missing systemDir");
+        mBaseDir = Objects.requireNonNull(baseDir, "missing baseDir");
         mUseBpfTrafficStats = new File("/sys/fs/bpf/map_netd_app_uid_stats_map").exists();
     }
 
@@ -896,11 +897,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @Override
     public DataUsageRequest registerUsageCallback(String callingPackage,
                 DataUsageRequest request, Messenger messenger, IBinder binder) {
-        checkNotNull(callingPackage, "calling package is null");
-        checkNotNull(request, "DataUsageRequest is null");
-        checkNotNull(request.template, "NetworkTemplate is null");
-        checkNotNull(messenger, "messenger is null");
-        checkNotNull(binder, "binder is null");
+        Objects.requireNonNull(callingPackage, "calling package is null");
+        Objects.requireNonNull(request, "DataUsageRequest is null");
+        Objects.requireNonNull(request.template, "NetworkTemplate is null");
+        Objects.requireNonNull(messenger, "messenger is null");
+        Objects.requireNonNull(binder, "binder is null");
 
         int callingUid = Binder.getCallingUid();
         @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(callingPackage);
@@ -921,7 +922,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public void unregisterUsageRequest(DataUsageRequest request) {
-        checkNotNull(request, "DataUsageRequest is null");
+        Objects.requireNonNull(request, "DataUsageRequest is null");
 
         int callingUid = Binder.getCallingUid();
         final long token = Binder.clearCallingIdentity();
@@ -1795,7 +1796,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         private final ContentResolver mResolver;
 
         public DefaultNetworkStatsSettings(Context context) {
-            mResolver = checkNotNull(context.getContentResolver());
+            mResolver = Objects.requireNonNull(context.getContentResolver());
             // TODO: adjust these timings for production builds
         }
 
