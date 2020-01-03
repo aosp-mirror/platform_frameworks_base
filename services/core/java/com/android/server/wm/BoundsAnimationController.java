@@ -552,6 +552,10 @@ public class BoundsAnimationController {
         return animationType;
     }
 
+    boolean isAnimationTypeFadeIn() {
+        return mAnimationType == FADE_IN;
+    }
+
     public Handler getHandler() {
         return mHandler;
     }
