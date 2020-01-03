@@ -21,8 +21,6 @@ import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.text.format.DateUtils.YEAR_IN_MILLIS;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.net.NetworkStats;
 import android.net.NetworkStats.NonMonotonicObserver;
 import android.net.NetworkStatsHistory;
@@ -54,6 +52,7 @@ import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Logic to record deltas between periodic {@link NetworkStats} snapshots into
@@ -116,9 +115,9 @@ public class NetworkStatsRecorder {
      */
     public NetworkStatsRecorder(FileRotator rotator, NonMonotonicObserver<String> observer,
             DropBoxManager dropBox, String cookie, long bucketDuration, boolean onlyTags) {
-        mRotator = checkNotNull(rotator, "missing FileRotator");
-        mObserver = checkNotNull(observer, "missing NonMonotonicObserver");
-        mDropBox = checkNotNull(dropBox, "missing DropBoxManager");
+        mRotator = Objects.requireNonNull(rotator, "missing FileRotator");
+        mObserver = Objects.requireNonNull(observer, "missing NonMonotonicObserver");
+        mDropBox = Objects.requireNonNull(dropBox, "missing DropBoxManager");
         mCookie = cookie;
 
         mBucketDuration = bucketDuration;
@@ -165,7 +164,7 @@ public class NetworkStatsRecorder {
      * as reference is valid.
      */
     public NetworkStatsCollection getOrLoadCompleteLocked() {
-        checkNotNull(mRotator, "missing FileRotator");
+        Objects.requireNonNull(mRotator, "missing FileRotator");
         NetworkStatsCollection res = mComplete != null ? mComplete.get() : null;
         if (res == null) {
             res = loadLocked(Long.MIN_VALUE, Long.MAX_VALUE);
@@ -175,7 +174,7 @@ public class NetworkStatsRecorder {
     }
 
     public NetworkStatsCollection getOrLoadPartialLocked(long start, long end) {
-        checkNotNull(mRotator, "missing FileRotator");
+        Objects.requireNonNull(mRotator, "missing FileRotator");
         NetworkStatsCollection res = mComplete != null ? mComplete.get() : null;
         if (res == null) {
             res = loadLocked(start, end);
@@ -280,7 +279,7 @@ public class NetworkStatsRecorder {
      * {@link #mPersistThresholdBytes}.
      */
     public void maybePersistLocked(long currentTimeMillis) {
-        checkNotNull(mRotator, "missing FileRotator");
+        Objects.requireNonNull(mRotator, "missing FileRotator");
         final long pendingBytes = mPending.getTotalBytes();
         if (pendingBytes >= mPersistThresholdBytes) {
             forcePersistLocked(currentTimeMillis);
@@ -293,7 +292,7 @@ public class NetworkStatsRecorder {
      * Force persisting any pending deltas.
      */
     public void forcePersistLocked(long currentTimeMillis) {
-        checkNotNull(mRotator, "missing FileRotator");
+        Objects.requireNonNull(mRotator, "missing FileRotator");
         if (mPending.isDirty()) {
             if (LOGD) Slog.d(TAG, "forcePersistLocked() writing for " + mCookie);
             try {
@@ -356,7 +355,7 @@ public class NetworkStatsRecorder {
         private final NetworkStatsCollection mCollection;
 
         public CombiningRewriter(NetworkStatsCollection collection) {
-            mCollection = checkNotNull(collection, "missing NetworkStatsCollection");
+            mCollection = Objects.requireNonNull(collection, "missing NetworkStatsCollection");
         }
 
         @Override
@@ -418,7 +417,7 @@ public class NetworkStatsRecorder {
     }
 
     public void importLegacyNetworkLocked(File file) throws IOException {
-        checkNotNull(mRotator, "missing FileRotator");
+        Objects.requireNonNull(mRotator, "missing FileRotator");
 
         // legacy file still exists; start empty to avoid double importing
         mRotator.deleteAll();
@@ -438,7 +437,7 @@ public class NetworkStatsRecorder {
     }
 
     public void importLegacyUidLocked(File file) throws IOException {
-        checkNotNull(mRotator, "missing FileRotator");
+        Objects.requireNonNull(mRotator, "missing FileRotator");
 
         // legacy file still exists; start empty to avoid double importing
         mRotator.deleteAll();
