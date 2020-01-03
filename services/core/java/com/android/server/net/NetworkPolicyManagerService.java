@@ -91,7 +91,6 @@ import static android.telephony.CarrierConfigManager.KEY_DATA_WARNING_NOTIFICATI
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import static com.android.internal.util.ArrayUtils.appendInt;
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
@@ -614,12 +613,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             INetworkManagementService networkManagement, IPackageManager pm, Clock clock,
             File systemDir, boolean suppressDefaultPolicy) {
-        mContext = checkNotNull(context, "missing context");
-        mActivityManager = checkNotNull(activityManager, "missing activityManager");
-        mNetworkManager = checkNotNull(networkManagement, "missing networkManagement");
+        mContext = Objects.requireNonNull(context, "missing context");
+        mActivityManager = Objects.requireNonNull(activityManager, "missing activityManager");
+        mNetworkManager = Objects.requireNonNull(networkManagement, "missing networkManagement");
         mDeviceIdleController = IDeviceIdleController.Stub.asInterface(ServiceManager.getService(
                 Context.DEVICE_IDLE_CONTROLLER));
-        mClock = checkNotNull(clock, "missing Clock");
+        mClock = Objects.requireNonNull(clock, "missing Clock");
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mCarrierConfigManager = mContext.getSystemService(CarrierConfigManager.class);
         mIPm = pm;
@@ -646,7 +645,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     public void bindConnectivityManager(IConnectivityManager connManager) {
-        mConnManager = checkNotNull(connManager, "missing IConnectivityManager");
+        mConnManager = Objects.requireNonNull(connManager, "missing IConnectivityManager");
     }
 
     @GuardedBy("mUidRulesFirstLock")
@@ -3295,7 +3294,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         enforceSubscriptionPlanValidity(plans);
 
         for (SubscriptionPlan plan : plans) {
-            Preconditions.checkNotNull(plan);
+            Objects.requireNonNull(plan);
         }
 
         final long token = Binder.clearCallingIdentity();
