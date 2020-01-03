@@ -51,6 +51,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -241,7 +242,7 @@ public class SliceManager {
      * @see Slice
      */
     public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull Set<SliceSpec> supportedSpecs) {
-        Preconditions.checkNotNull(uri, "uri");
+        Objects.requireNonNull(uri, "uri");
         ContentResolver resolver = mContext.getContentResolver();
         try (ContentProviderClient provider = resolver.acquireUnstableContentProviderClient(uri)) {
             if (provider == null) {
@@ -336,7 +337,7 @@ public class SliceManager {
     }
 
     private Uri resolveStatic(@NonNull Intent intent, ContentResolver resolver) {
-        Preconditions.checkNotNull(intent, "intent");
+        Objects.requireNonNull(intent, "intent");
         Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null
                 || intent.getData() != null,
                 "Slice intent must be explicit %s", intent);
@@ -371,7 +372,7 @@ public class SliceManager {
      */
     public @Nullable Slice bindSlice(@NonNull Intent intent,
             @NonNull Set<SliceSpec> supportedSpecs) {
-        Preconditions.checkNotNull(intent, "intent");
+        Objects.requireNonNull(intent, "intent");
         Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null
                 || intent.getData() != null,
                 "Slice intent must be explicit %s", intent);

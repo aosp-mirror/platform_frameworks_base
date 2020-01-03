@@ -16,8 +16,6 @@
 
 package android.app.usage;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -41,6 +39,8 @@ import android.util.DataUnit;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Objects;
 
 /**
  * Provides access to network usage history and statistics. Usage data is collected in
@@ -418,7 +418,7 @@ public class NetworkStatsManager {
     /** @hide */
     public void registerUsageCallback(NetworkTemplate template, int networkType,
             long thresholdBytes, UsageCallback callback, @Nullable Handler handler) {
-        checkNotNull(callback, "UsageCallback cannot be null");
+        Objects.requireNonNull(callback, "UsageCallback cannot be null");
 
         final Looper looper;
         if (handler == null) {

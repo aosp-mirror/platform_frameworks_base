@@ -115,6 +115,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -4263,7 +4264,7 @@ public class DevicePolicyManager {
      *            {@link #WIPE_SILENTLY} is set.
      */
     public void wipeData(int flags, @NonNull CharSequence reason) {
-        Preconditions.checkNotNull(reason, "reason string is null");
+        Objects.requireNonNull(reason, "reason string is null");
         Preconditions.checkStringNotEmpty(reason, "reason string is empty");
         Preconditions.checkArgument((flags & WIPE_SILENTLY) == 0, "WIPE_SILENTLY cannot be set");
         wipeDataInternal(flags, reason.toString());
@@ -10430,8 +10431,8 @@ public class DevicePolicyManager {
             @NonNull String packageName, @NonNull @CallbackExecutor Executor executor,
             @NonNull OnClearApplicationUserDataListener listener) {
         throwIfParentInstance("clearAppData");
-        Preconditions.checkNotNull(executor);
-        Preconditions.checkNotNull(listener);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
         try {
             mService.clearApplicationUserData(admin, packageName,
                     new IPackageDataObserver.Stub() {
@@ -10881,7 +10882,7 @@ public class DevicePolicyManager {
     @WorkerThread public @PrivateDnsModeErrorCodes int setGlobalPrivateDnsModeSpecifiedHost(
             @NonNull ComponentName admin, @NonNull String privateDnsHost) {
         throwIfParentInstance("setGlobalPrivateDnsModeSpecifiedHost");
-        Preconditions.checkNotNull(privateDnsHost, "dns resolver is null");
+        Objects.requireNonNull(privateDnsHost, "dns resolver is null");
 
         if (mService == null) {
             return PRIVATE_DNS_SET_ERROR_FAILURE_SETTING;

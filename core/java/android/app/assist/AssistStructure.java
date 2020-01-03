@@ -41,6 +41,7 @@ import com.android.internal.util.Preconditions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>This API automatically creates assist data from the platform's
@@ -1889,7 +1890,7 @@ public class AssistStructure implements Parcelable {
 
         @Override
         public void setTextIdEntry(@NonNull String entryName) {
-            mNode.mTextIdEntry = Preconditions.checkNotNull(entryName);
+            mNode.mTextIdEntry = Objects.requireNonNull(entryName);
         }
 
         @Override
@@ -1899,7 +1900,7 @@ public class AssistStructure implements Parcelable {
 
         @Override
         public void setHintIdEntry(@NonNull String entryName) {
-            mNode.mHintIdEntry = Preconditions.checkNotNull(entryName);
+            mNode.mHintIdEntry = Objects.requireNonNull(entryName);
         }
 
         @Override

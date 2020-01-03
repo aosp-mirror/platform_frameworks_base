@@ -198,6 +198,7 @@ import com.android.internal.policy.PhoneLayoutInflater;
 import com.android.internal.util.Preconditions;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Manages all of the system services that can be returned by {@link Context#getSystemService}.
@@ -1429,8 +1430,8 @@ public final class SystemServiceRegistry {
             @NonNull StaticServiceProducerWithBinder<TServiceClass> serviceProducer) {
         ensureInitializing("registerStaticService");
         Preconditions.checkStringNotEmpty(serviceName);
-        Preconditions.checkNotNull(serviceWrapperClass);
-        Preconditions.checkNotNull(serviceProducer);
+        Objects.requireNonNull(serviceWrapperClass);
+        Objects.requireNonNull(serviceProducer);
 
         registerService(serviceName, serviceWrapperClass,
                 new StaticServiceFetcher<TServiceClass>() {
@@ -1453,8 +1454,8 @@ public final class SystemServiceRegistry {
             @NonNull StaticServiceProducerWithoutBinder<TServiceClass> serviceProducer) {
         ensureInitializing("registerStaticService");
         Preconditions.checkStringNotEmpty(serviceName);
-        Preconditions.checkNotNull(serviceWrapperClass);
-        Preconditions.checkNotNull(serviceProducer);
+        Objects.requireNonNull(serviceWrapperClass);
+        Objects.requireNonNull(serviceProducer);
 
         registerService(serviceName, serviceWrapperClass,
                 new StaticServiceFetcher<TServiceClass>() {
@@ -1486,8 +1487,8 @@ public final class SystemServiceRegistry {
             @NonNull ContextAwareServiceProducerWithBinder<TServiceClass> serviceProducer) {
         ensureInitializing("registerContextAwareService");
         Preconditions.checkStringNotEmpty(serviceName);
-        Preconditions.checkNotNull(serviceWrapperClass);
-        Preconditions.checkNotNull(serviceProducer);
+        Objects.requireNonNull(serviceWrapperClass);
+        Objects.requireNonNull(serviceProducer);
 
         registerService(serviceName, serviceWrapperClass,
                 new CachedServiceFetcher<TServiceClass>() {
@@ -1514,8 +1515,8 @@ public final class SystemServiceRegistry {
             @NonNull ContextAwareServiceProducerWithoutBinder<TServiceClass> serviceProducer) {
         ensureInitializing("registerContextAwareService");
         Preconditions.checkStringNotEmpty(serviceName);
-        Preconditions.checkNotNull(serviceWrapperClass);
-        Preconditions.checkNotNull(serviceProducer);
+        Objects.requireNonNull(serviceWrapperClass);
+        Objects.requireNonNull(serviceProducer);
 
         registerService(serviceName, serviceWrapperClass,
                 new CachedServiceFetcher<TServiceClass>() {
