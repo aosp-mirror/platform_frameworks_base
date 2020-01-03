@@ -17,7 +17,6 @@
 package com.android.server.backup.encryption.chunking;
 
 import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 
 import android.annotation.Nullable;
@@ -35,6 +34,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Writes batches of {@link EncryptedChunk} to a diff script, and generates the associated {@link
@@ -174,7 +174,7 @@ public class BackupFileBuilder {
      * IllegalStateException}.
      */
     public void finish(ChunksMetadataProto.ChunksMetadata metadata) throws IOException {
-        checkNotNull(metadata, "Metadata cannot be null");
+        Objects.requireNonNull(metadata, "Metadata cannot be null");
 
         long startOfMetadata = mBackupWriter.getBytesWritten();
         mBackupWriter.writeBytes(ChunksMetadataProto.ChunksMetadata.toByteArray(metadata));
@@ -190,7 +190,7 @@ public class BackupFileBuilder {
      */
     private void writeChunkToFileAndListing(
             ChunkHash chunkHash, Map<ChunkHash, EncryptedChunk> newChunks) throws IOException {
-        checkNotNull(chunkHash, "Hash cannot be null");
+        Objects.requireNonNull(chunkHash, "Hash cannot be null");
 
         if (mOldChunkListing.hasChunk(chunkHash)) {
             ChunkListingMap.Entry oldChunk = mOldChunkListing.getChunkEntry(chunkHash);

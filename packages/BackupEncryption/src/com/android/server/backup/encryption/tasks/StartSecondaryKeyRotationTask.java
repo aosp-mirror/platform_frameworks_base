@@ -26,6 +26,7 @@ import com.android.server.backup.encryption.keys.RecoverableKeyStoreSecondaryKey
 import com.android.server.backup.encryption.keys.RecoverableKeyStoreSecondaryKeyManager;
 
 import java.security.UnrecoverableKeyException;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -41,8 +42,8 @@ public class StartSecondaryKeyRotationTask {
     public StartSecondaryKeyRotationTask(
             CryptoSettings cryptoSettings,
             RecoverableKeyStoreSecondaryKeyManager secondaryKeyManager) {
-        mCryptoSettings = Preconditions.checkNotNull(cryptoSettings);
-        mSecondaryKeyManager = Preconditions.checkNotNull(secondaryKeyManager);
+        mCryptoSettings = Objects.requireNonNull(cryptoSettings);
+        mSecondaryKeyManager = Objects.requireNonNull(secondaryKeyManager);
     }
 
     /** Begin the key rotation */
