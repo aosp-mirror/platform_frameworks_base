@@ -50,6 +50,7 @@
 #include <memunreachable/memunreachable.h>
 #include <android-base/strings.h>
 #include "android_os_Debug.h"
+#include <vintf/VintfObject.h>
 
 namespace android
 {
@@ -833,6 +834,23 @@ static jlong android_os_Debug_getIonMappedSizeKb(JNIEnv* env, jobject clazz) {
     return ionPss;
 }
 
+static jboolean android_os_Debug_isVmapStack(JNIEnv *env, jobject clazz)
+{
+    static enum {
+        CONFIG_UNKNOWN,
+        CONFIG_SET,
+        CONFIG_UNSET,
+    } cfg_state = CONFIG_UNKNOWN;
+
+    if (cfg_state == CONFIG_UNKNOWN) {
+        const std::map<std::string, std::string> configs =
+            vintf::VintfObject::GetInstance()->getRuntimeInfo()->kernelConfigs();
+        std::map<std::string, std::string>::const_iterator it = configs.find("CONFIG_VMAP_STACK");
+        cfg_state = (it != configs.end() && it->second == "y") ? CONFIG_SET : CONFIG_UNSET;
+    }
+    return cfg_state == CONFIG_SET;
+}
+
 /*
  * JNI registration.
  */
@@ -882,6 +900,8 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_os_Debug_getIonPoolsSizeKb },
     { "getIonMappedSizeKb", "()J",
             (void*)android_os_Debug_getIonMappedSizeKb },
+    { "isVmapStack", "()Z",
+            (void*)android_os_Debug_isVmapStack },
 };
 
 int register_android_os_Debug(JNIEnv *env)
