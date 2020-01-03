@@ -7710,7 +7710,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
         // Tell the user manager that the restrictions have changed.
-        pushUserRestrictions(parent ?  getProfileParentId(userHandle) : userHandle);
+        final int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
+        pushUserRestrictions(affectedUserId);
+
+        if (SecurityLog.isLoggingEnabled()) {
+            SecurityLog.writeEvent(SecurityLog.TAG_CAMERA_POLICY_SET,
+                    who.getPackageName(), userHandle, affectedUserId, disabled ? 1 : 0);
+        }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_CAMERA_DISABLED)
                 .setAdmin(who)
