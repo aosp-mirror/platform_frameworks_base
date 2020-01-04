@@ -4386,10 +4386,12 @@ package android.media.soundtrigger {
   }
 
   public static class SoundTriggerManager.Model {
-    method public static android.media.soundtrigger.SoundTriggerManager.Model create(java.util.UUID, java.util.UUID, byte[]);
-    method public byte[] getModelData();
-    method public java.util.UUID getModelUuid();
-    method public java.util.UUID getVendorUuid();
+    method @NonNull public static android.media.soundtrigger.SoundTriggerManager.Model create(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], int);
+    method @NonNull public static android.media.soundtrigger.SoundTriggerManager.Model create(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[]);
+    method @Nullable public byte[] getModelData();
+    method @NonNull public java.util.UUID getModelUuid();
+    method @NonNull public java.util.UUID getVendorUuid();
+    method public int getVersion();
   }
 
 }

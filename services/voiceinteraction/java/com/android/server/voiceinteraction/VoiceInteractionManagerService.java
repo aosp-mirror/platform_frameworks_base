@@ -1343,6 +1343,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 pw.println("  mCurUserUnlocked: " + mCurUserUnlocked);
                 pw.println("  mCurUserSupported: " + mCurUserSupported);
                 dumpSupportedUsers(pw, "  ");
+                mDbHelper.dump(pw);
                 if (mImpl == null) {
                     pw.println("  (No active implementation)");
                     return;

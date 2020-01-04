@@ -44,6 +44,7 @@ import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.util.Preconditions;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -175,19 +176,40 @@ public final class SoundTriggerManager {
          * Factory constructor to create a SoundModel instance for use with methods in this
          * class.
          */
-        public static Model create(UUID modelUuid, UUID vendorUuid, byte[] data) {
-            return new Model(new SoundTrigger.GenericSoundModel(modelUuid,
-                        vendorUuid, data));
+        @NonNull
+        public static Model create(@NonNull UUID modelUuid, @NonNull UUID vendorUuid,
+                @Nullable byte[] data, int version) {
+            Objects.requireNonNull(modelUuid);
+            Objects.requireNonNull(vendorUuid);
+            return new Model(new SoundTrigger.GenericSoundModel(modelUuid, vendorUuid, data,
+                    version));
         }
 
+        /**
+         * Factory constructor to create a SoundModel instance for use with methods in this
+         * class.
+         */
+        @NonNull
+        public static Model create(@NonNull UUID modelUuid, @NonNull UUID vendorUuid,
+                @Nullable byte[] data) {
+            return create(modelUuid, vendorUuid, data, -1);
+        }
+
+        @NonNull
         public UUID getModelUuid() {
             return mGenericSoundModel.uuid;
         }
 
+        @NonNull
         public UUID getVendorUuid() {
             return mGenericSoundModel.vendorUuid;
         }
 
+        public int getVersion() {
+            return mGenericSoundModel.version;
+        }
+
+        @Nullable
         public byte[] getModelData() {
             return mGenericSoundModel.data;
         }
