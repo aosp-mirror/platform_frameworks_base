@@ -63,6 +63,7 @@ import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Class to keep track of the information related to "force app standby", which includes:
@@ -416,12 +417,12 @@ public class AppStateTracker {
             }
             mStarted = true;
 
-            mIActivityManager = Preconditions.checkNotNull(injectIActivityManager());
-            mActivityManagerInternal = Preconditions.checkNotNull(injectActivityManagerInternal());
-            mAppOpsManager = Preconditions.checkNotNull(injectAppOpsManager());
-            mAppOpsService = Preconditions.checkNotNull(injectIAppOpsService());
-            mPowerManagerInternal = Preconditions.checkNotNull(injectPowerManagerInternal());
-            mAppStandbyInternal = Preconditions.checkNotNull(injectAppStandbyInternal());
+            mIActivityManager = Objects.requireNonNull(injectIActivityManager());
+            mActivityManagerInternal = Objects.requireNonNull(injectActivityManagerInternal());
+            mAppOpsManager = Objects.requireNonNull(injectAppOpsManager());
+            mAppOpsService = Objects.requireNonNull(injectIAppOpsService());
+            mPowerManagerInternal = Objects.requireNonNull(injectPowerManagerInternal());
+            mAppStandbyInternal = Objects.requireNonNull(injectAppStandbyInternal());
 
             mFlagsObserver = new FeatureFlagsObserver();
             mFlagsObserver.register();

@@ -223,7 +223,7 @@ public interface ServiceConnector<I extends IInterface> {
         private final @NonNull ServiceConnection mServiceConnection = this;
         private final @NonNull Runnable mTimeoutDisconnect = this;
 
-        private final @NonNull Context mContext;
+        protected final @NonNull Context mContext;
         private final @NonNull Intent mIntent;
         private final int mBindingFlags;
         private final int mUserId;

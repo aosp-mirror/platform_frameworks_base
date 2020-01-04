@@ -36,6 +36,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
+import android.content.pm.parsing.ComponentParseUtils.ParsedFeature;
 import android.content.pm.parsing.ComponentParseUtils.ParsedInstrumentation;
 import android.content.pm.parsing.ComponentParseUtils.ParsedIntentInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
@@ -173,6 +174,9 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
 
     @Nullable
     private ArrayList<ComponentParseUtils.ParsedProvider> providers;
+
+    @Nullable
+    private ArrayList<ComponentParseUtils.ParsedFeature> features;
 
     @Nullable
     private ArrayList<ComponentParseUtils.ParsedPermission> permissions;
@@ -580,6 +584,12 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         return permissions;
     }
 
+    @Nullable
+    @Override
+    public List<ParsedFeature> getFeatures() {
+        return features;
+    }
+
     @Override
     public String getCpuAbiOverride() {
         return cpuAbiOverride;
@@ -788,6 +798,12 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     @Override
     public PackageImpl addAdoptPermission(String adoptPermission) {
         this.adoptPermissions = ArrayUtils.add(this.adoptPermissions, adoptPermission);
+        return this;
+    }
+
+    @Override
+    public PackageImpl addFeature(ParsedFeature feature) {
+        this.features = ArrayUtils.add(this.features, feature);
         return this;
     }
 
@@ -3021,6 +3037,7 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         dest.writeTypedList(this.receivers);
         dest.writeTypedList(this.services);
         dest.writeTypedList(this.providers);
+        dest.writeTypedList(this.features);
         dest.writeTypedList(this.permissions);
         dest.writeTypedList(this.permissionGroups);
         dest.writeTypedList(this.instrumentations);
@@ -3173,6 +3190,7 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         this.receivers = in.createTypedArrayList(ParsedActivity.CREATOR);
         this.services = in.createTypedArrayList(ParsedService.CREATOR);
         this.providers = in.createTypedArrayList(ParsedProvider.CREATOR);
+        this.features = in.createTypedArrayList(ParsedFeature.CREATOR);
         this.permissions = in.createTypedArrayList(ParsedPermission.CREATOR);
         this.permissionGroups = in.createTypedArrayList(ParsedPermissionGroup.CREATOR);
         this.instrumentations = in.createTypedArrayList(ParsedInstrumentation.CREATOR);

@@ -11319,6 +11319,12 @@ public class PackageManagerService extends IPackageManager.Stub
                             "Static shared libs cannot declare permission groups");
                 }
 
+                // Static shared libs cannot declare features
+                if (pkg.getFeatures() != null && !pkg.getFeatures().isEmpty()) {
+                    throw new PackageManagerException(
+                            "Static shared libs cannot declare features");
+                }
+
                 // Static shared libs cannot declare permissions
                 if (pkg.getPermissions() != null && !pkg.getPermissions().isEmpty()) {
                     throw new PackageManagerException(
@@ -12872,7 +12878,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String[] getUnsuspendablePackagesForUser(String[] packageNames, int userId) {
-        Preconditions.checkNotNull("packageNames cannot be null", packageNames);
+        Preconditions.checkNotNull(packageNames, "packageNames cannot be null");
         mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
                 "getUnsuspendablePackagesForUser");
         final int callingUid = Binder.getCallingUid();

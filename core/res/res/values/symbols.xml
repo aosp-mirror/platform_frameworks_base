@@ -3209,11 +3209,6 @@
   <java-symbol type="id" name="accessibility_button_target_label" />
   <java-symbol type="string" name="accessibility_magnification_chooser_text" />
 
-  <java-symbol type="string" name="accessibility_gesture_prompt_text" />
-  <java-symbol type="string" name="accessibility_gesture_3finger_prompt_text" />
-  <java-symbol type="string" name="accessibility_gesture_instructional_text" />
-  <java-symbol type="string" name="accessibility_gesture_3finger_instructional_text" />
-
   <java-symbol type="drawable" name="ic_accessibility_magnification" />
 
   <!-- com.android.internal.widget.RecyclerView -->

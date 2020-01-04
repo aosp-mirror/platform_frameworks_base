@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -228,8 +229,8 @@ public class SyntheticPasswordManager {
          * by {@link #setEscrowData} before calling this.
          */
         public void recreateFromEscrow(byte[] escrowSplit0) {
-            Preconditions.checkNotNull(mEscrowSplit1);
-            Preconditions.checkNotNull(mEncryptedEscrowSplit0);
+            Objects.requireNonNull(mEscrowSplit1);
+            Objects.requireNonNull(mEncryptedEscrowSplit0);
             recreate(escrowSplit0, mEscrowSplit1);
         }
 

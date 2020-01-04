@@ -40,7 +40,6 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.util.AsyncChannel;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.Protocol;
 
 import java.lang.annotation.Retention;
@@ -48,6 +47,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -840,8 +840,8 @@ public class WifiScanner {
     @RequiresPermission(Manifest.permission.NETWORK_STACK)
     public void registerScanListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull ScanListener listener) {
-        Preconditions.checkNotNull(executor, "executor cannot be null");
-        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Objects.requireNonNull(executor, "executor cannot be null");
+        Objects.requireNonNull(listener, "listener cannot be null");
         int key = addListener(listener, executor);
         if (key == INVALID_KEY) return;
         validateChannel();
@@ -864,7 +864,7 @@ public class WifiScanner {
      *  #registerScanListener}
      */
     public void unregisterScanListener(@NonNull ScanListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Objects.requireNonNull(listener, "listener cannot be null");
         int key = removeListener(listener);
         if (key == INVALID_KEY) return;
         validateChannel();
@@ -894,7 +894,7 @@ public class WifiScanner {
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void startBackgroundScan(ScanSettings settings, ScanListener listener,
             WorkSource workSource) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Objects.requireNonNull(listener, "listener cannot be null");
         int key = addListener(listener);
         if (key == INVALID_KEY) return;
         validateChannel();
@@ -913,7 +913,7 @@ public class WifiScanner {
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void stopBackgroundScan(ScanListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Objects.requireNonNull(listener, "listener cannot be null");
         int key = removeListener(listener);
         if (key == INVALID_KEY) return;
         validateChannel();
@@ -962,7 +962,7 @@ public class WifiScanner {
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void startScan(ScanSettings settings, ScanListener listener, WorkSource workSource) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Objects.requireNonNull(listener, "listener cannot be null");
         int key = addListener(listener);
         if (key == INVALID_KEY) return;
         validateChannel();
@@ -981,7 +981,7 @@ public class WifiScanner {
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void stopScan(ScanListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Objects.requireNonNull(listener, "listener cannot be null");
         int key = removeListener(listener);
         if (key == INVALID_KEY) return;
         validateChannel();
@@ -1036,8 +1036,8 @@ public class WifiScanner {
      */
     public void startConnectedPnoScan(ScanSettings scanSettings, PnoSettings pnoSettings,
             PnoScanListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
-        Preconditions.checkNotNull(pnoSettings, "pnoSettings cannot be null");
+        Objects.requireNonNull(listener, "listener cannot be null");
+        Objects.requireNonNull(pnoSettings, "pnoSettings cannot be null");
         int key = addListener(listener);
         if (key == INVALID_KEY) return;
         validateChannel();
@@ -1058,8 +1058,8 @@ public class WifiScanner {
     @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     public void startDisconnectedPnoScan(ScanSettings scanSettings, PnoSettings pnoSettings,
             PnoScanListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
-        Preconditions.checkNotNull(pnoSettings, "pnoSettings cannot be null");
+        Objects.requireNonNull(listener, "listener cannot be null");
+        Objects.requireNonNull(pnoSettings, "pnoSettings cannot be null");
         int key = addListener(listener);
         if (key == INVALID_KEY) return;
         validateChannel();
@@ -1074,7 +1074,7 @@ public class WifiScanner {
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     public void stopPnoScan(ScanListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Objects.requireNonNull(listener, "listener cannot be null");
         int key = removeListener(listener);
         if (key == INVALID_KEY) return;
         validateChannel();

@@ -151,6 +151,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -1594,8 +1595,8 @@ public class LockSettingsService extends ILockSettings.Stub {
      */
     private boolean setLockCredentialInternal(LockscreenCredential credential,
             LockscreenCredential savedCredential, int userId, boolean isLockTiedToParent) {
-        Preconditions.checkNotNull(credential);
-        Preconditions.checkNotNull(savedCredential);
+        Objects.requireNonNull(credential);
+        Objects.requireNonNull(savedCredential);
         synchronized (mSpManager) {
             if (isSyntheticPasswordBasedCredentialLocked(userId)) {
                 return spBasedSetLockCredentialInternalLocked(credential, savedCredential, userId,

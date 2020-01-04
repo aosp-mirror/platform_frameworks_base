@@ -1071,12 +1071,6 @@ class MediaRouter2ServiceImpl {
                 return;
             }
 
-            //TODO: remove this when we are sure that request id is properly implemented.
-            if (matchingRequest.mClientRecord.mClientId != toClientId(requestId)) {
-                Slog.w(TAG, "Client id is changed. This shouldn't happen.");
-                return;
-            }
-
             mSessionCreationRequests.remove(matchingRequest);
 
             if (sessionInfo == null) {
@@ -1086,21 +1080,17 @@ class MediaRouter2ServiceImpl {
                 return;
             }
 
-            RouteSessionInfo sessionInfoWithProviderId = new RouteSessionInfo.Builder(sessionInfo)
-                    .setProviderId(provider.getUniqueId())
-                    .build();
-
             String originalRouteId = matchingRequest.mRoute.getId();
             String originalCategory = matchingRequest.mControlCategory;
             Client2Record client2Record = matchingRequest.mClientRecord;
 
-            if (!sessionInfoWithProviderId.getSelectedRoutes().contains(originalRouteId)
+            if (!sessionInfo.getSelectedRoutes().contains(originalRouteId)
                     || !TextUtils.equals(originalCategory,
-                        sessionInfoWithProviderId.getControlCategory())) {
+                        sessionInfo.getControlCategory())) {
                 Slog.w(TAG, "Created session doesn't match the original request."
                         + " originalRouteId=" + originalRouteId
                         + ", originalCategory=" + originalCategory + ", requestId=" + requestId
-                        + ", sessionInfo=" + sessionInfoWithProviderId);
+                        + ", sessionInfo=" + sessionInfo);
                 notifySessionCreationFailed(matchingRequest.mClientRecord,
                         toClientRequestId(requestId));
                 return;
@@ -1108,8 +1098,8 @@ class MediaRouter2ServiceImpl {
 
             // Succeeded
             notifySessionCreated(matchingRequest.mClientRecord,
-                    sessionInfoWithProviderId, toClientRequestId(requestId));
-            mSessionToClientMap.put(sessionInfoWithProviderId.getUniqueSessionId(), client2Record);
+                    sessionInfo, toClientRequestId(requestId));
+            mSessionToClientMap.put(sessionInfo.getUniqueSessionId(), client2Record);
             // TODO: Tell managers for the session creation
         }
 

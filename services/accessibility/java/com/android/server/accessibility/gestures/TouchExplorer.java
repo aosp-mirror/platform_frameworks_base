@@ -286,10 +286,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public void onDoubleTapAndHold() {
-        // Pointers should not be zero when running this command.
-        if (mState.getLastReceivedEvent().getPointerCount() == 0) {
-            return;
-        }
         // Try to use the standard accessibility API to long click
         if (!mAms.performActionOnAccessibilityFocusedItem(
                 AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK)) {

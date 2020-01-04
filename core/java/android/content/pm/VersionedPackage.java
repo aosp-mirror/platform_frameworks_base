@@ -96,6 +96,20 @@ public final class VersionedPackage implements Parcelable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        return o instanceof VersionedPackage
+                && ((VersionedPackage) o).mPackageName.equals(mPackageName)
+                && ((VersionedPackage) o).mVersionCode == mVersionCode;
+    }
+
+    @Override
+    public int hashCode() {
+        // Roll our own hash function without using Objects#hash which incurs the overhead
+        // of autoboxing.
+        return 31 * mPackageName.hashCode() + Long.hashCode(mVersionCode);
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }

@@ -35,8 +35,6 @@ import static android.service.notification.NotificationListenerService.REASON_TI
 import static android.service.notification.NotificationListenerService.REASON_UNAUTOBUNDLED;
 import static android.service.notification.NotificationListenerService.REASON_USER_STOPPED;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -49,8 +47,9 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.statusbar.NotificationListener;
-import com.android.systemui.statusbar.NotificationListener.NotifServiceListener;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CoalescedEvent;
+import com.android.systemui.statusbar.notification.collection.notifcollection.GroupCoalescer;
+import com.android.systemui.statusbar.notification.collection.notifcollection.GroupCoalescer.BatchableNotificationHandler;
 import com.android.systemui.util.Assert;
 
 import java.lang.annotation.Retention;
@@ -60,6 +59,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -109,14 +109,14 @@ public class NotifCollection {
     }
 
     /** Initializes the NotifCollection and registers it to receive notification events. */
-    public void attach(NotificationListener listenerService) {
+    public void attach(GroupCoalescer groupCoalescer) {
         Assert.isMainThread();
         if (mAttached) {
             throw new RuntimeException("attach() called twice");
         }
         mAttached = true;
 
-        listenerService.addNotificationListener(mNotifServiceListener);
+        groupCoalescer.setNotificationHandler(mNotifHandler);
     }
 
     /**
@@ -170,7 +170,7 @@ public class NotifCollection {
             @CancellationReason int reason,
             @NonNull DismissedByUserStats stats) {
         Assert.isMainThread();
-        checkNotNull(stats);
+        Objects.requireNonNull(stats);
         checkForReentrantCall();
 
         removeNotification(entry.getKey(), null, reason, stats);
@@ -179,15 +179,52 @@ public class NotifCollection {
     private void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
         Assert.isMainThread();
 
+        postNotification(sbn, requireRanking(rankingMap, sbn.getKey()), rankingMap);
+        rebuildList();
+    }
+
+    private void onNotificationGroupPosted(List<CoalescedEvent> batch) {
+        Assert.isMainThread();
+
+        Log.d(TAG, "POSTED GROUP " + batch.get(0).getSbn().getGroupKey()
+                + " (" + batch.size() + " events)");
+        for (CoalescedEvent event : batch) {
+            postNotification(event.getSbn(), event.getRanking(), null);
+        }
+        rebuildList();
+    }
+
+    private void onNotificationRemoved(
+            StatusBarNotification sbn,
+            RankingMap rankingMap,
+            int reason) {
+        Assert.isMainThread();
+
+        Log.d(TAG, "REMOVED " + sbn.getKey() + " reason=" + reason);
+        removeNotification(sbn.getKey(), rankingMap, reason, null);
+    }
+
+    private void onNotificationRankingUpdate(RankingMap rankingMap) {
+        Assert.isMainThread();
+        applyRanking(rankingMap);
+        rebuildList();
+    }
+
+    private void postNotification(
+            StatusBarNotification sbn,
+            Ranking ranking,
+            @Nullable RankingMap rankingMap) {
         NotificationEntry entry = mNotificationSet.get(sbn.getKey());
 
         if (entry == null) {
             // A new notification!
             Log.d(TAG, "POSTED  " + sbn.getKey());
 
-            entry = new NotificationEntry(sbn, requireRanking(rankingMap, sbn.getKey()));
+            entry = new NotificationEntry(sbn, ranking);
             mNotificationSet.put(sbn.getKey(), entry);
-            applyRanking(rankingMap);
+            if (rankingMap != null) {
+                applyRanking(rankingMap);
+            }
 
             dispatchOnEntryAdded(entry);
 
@@ -200,34 +237,19 @@ public class NotifCollection {
             cancelLifetimeExtension(entry);
 
             entry.setSbn(sbn);
-            applyRanking(rankingMap);
+            if (rankingMap != null) {
+                applyRanking(rankingMap);
+            }
 
             dispatchOnEntryUpdated(entry);
         }
-
-        rebuildList();
-    }
-
-    private void onNotificationRemoved(
-            StatusBarNotification sbn,
-            @Nullable RankingMap rankingMap,
-            int reason) {
-        Assert.isMainThread();
-        Log.d(TAG, "REMOVED " + sbn.getKey() + " reason=" + reason);
-        removeNotification(sbn.getKey(), rankingMap, reason, null);
-    }
-
-    private void onNotificationRankingUpdate(RankingMap rankingMap) {
-        Assert.isMainThread();
-        applyRanking(rankingMap);
-        rebuildList();
     }
 
     private void removeNotification(
             String key,
             @Nullable RankingMap rankingMap,
             @CancellationReason int reason,
-            DismissedByUserStats dismissedByUserStats) {
+            @Nullable DismissedByUserStats dismissedByUserStats) {
 
         NotificationEntry entry = mNotificationSet.get(key);
         if (entry == null) {
@@ -272,7 +294,7 @@ public class NotifCollection {
         rebuildList();
     }
 
-    private void applyRanking(RankingMap rankingMap) {
+    private void applyRanking(@NonNull RankingMap rankingMap) {
         for (NotificationEntry entry : mNotificationSet.values()) {
             if (!isLifetimeExtended(entry)) {
                 Ranking ranking = requireRanking(rankingMap, entry.getKey());
@@ -339,9 +361,6 @@ public class NotifCollection {
 
     private void dispatchOnEntryAdded(NotificationEntry entry) {
         mAmDispatchingToOtherCode = true;
-        if (mBuildListener != null) {
-            mBuildListener.onBeginDispatchToListeners();
-        }
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onEntryAdded(entry);
         }
@@ -350,9 +369,6 @@ public class NotifCollection {
 
     private void dispatchOnEntryUpdated(NotificationEntry entry) {
         mAmDispatchingToOtherCode = true;
-        if (mBuildListener != null) {
-            mBuildListener.onBeginDispatchToListeners();
-        }
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onEntryUpdated(entry);
         }
@@ -364,19 +380,21 @@ public class NotifCollection {
             @CancellationReason int reason,
             boolean removedByUser) {
         mAmDispatchingToOtherCode = true;
-        if (mBuildListener != null) {
-            mBuildListener.onBeginDispatchToListeners();
-        }
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onEntryRemoved(entry, reason, removedByUser);
         }
         mAmDispatchingToOtherCode = false;
     }
 
-    private final NotifServiceListener mNotifServiceListener = new NotifServiceListener() {
+    private final BatchableNotificationHandler mNotifHandler = new BatchableNotificationHandler() {
         @Override
         public void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
             NotifCollection.this.onNotificationPosted(sbn, rankingMap);
+        }
+
+        @Override
+        public void onNotificationBatchPosted(List<CoalescedEvent> events) {
+            NotifCollection.this.onNotificationGroupPosted(events);
         }
 
         @Override

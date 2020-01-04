@@ -17,7 +17,6 @@ package com.android.server.devicepolicy;
 
 import com.google.common.base.Objects;
 
-import com.android.internal.util.Preconditions;
 import com.android.server.pm.UserRestrictionsUtils;
 
 import android.content.ComponentName;
@@ -107,7 +106,7 @@ public class MockUtils {
     }
 
     public static Bundle checkUserRestrictions(String... keys) {
-        final Bundle expected = DpmTestUtils.newRestrictions(Preconditions.checkNotNull(keys));
+        final Bundle expected = DpmTestUtils.newRestrictions(java.util.Objects.requireNonNull(keys));
         final Matcher<Bundle> m = new BaseMatcher<Bundle>() {
             @Override
             public boolean matches(Object item) {

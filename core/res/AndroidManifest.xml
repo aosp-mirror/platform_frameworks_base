@@ -3591,6 +3591,11 @@
     <permission android:name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to start and stop one time permission sessions
+    @hide -->
+    <permission android:name="android.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS"
+                android:protectionLevel="signature|installer" />
+
     <!-- @SystemApi Allows an application to manage the holders of a role.
          @hide
          STOPSHIP b/145526313: Remove wellbeing protection flag from MANAGE_ROLE_HOLDERS. -->

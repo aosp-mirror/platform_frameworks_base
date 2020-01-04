@@ -88,7 +88,6 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.LauncherAppsService.LauncherAppsImpl;
@@ -114,6 +113,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -1241,7 +1241,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected void setCaller(String packageName, int userId) {
         mInjectedClientPackage = packageName;
         mInjectedCallingUid =
-                Preconditions.checkNotNull(getInjectedPackageInfo(packageName, userId, false),
+                Objects.requireNonNull(getInjectedPackageInfo(packageName, userId, false),
                         "Unknown package").applicationInfo.uid;
 
         // Set up LauncherApps for this caller.

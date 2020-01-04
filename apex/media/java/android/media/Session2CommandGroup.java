@@ -38,8 +38,8 @@ import java.util.Set;
 public final class Session2CommandGroup implements Parcelable {
     private static final String TAG = "Session2CommandGroup";
 
-    public static final @android.annotation.NonNull Parcelable.Creator<Session2CommandGroup> CREATOR =
-            new Parcelable.Creator<Session2CommandGroup>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<Session2CommandGroup>
+            CREATOR = new Parcelable.Creator<Session2CommandGroup>() {
                 @Override
                 public Session2CommandGroup createFromParcel(Parcel in) {
                     return new Session2CommandGroup(in);

@@ -134,7 +134,8 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 if (isStack) {
                     mViewPositionOnTouchDown.set(mStack.getStackPosition());
                     mStack.onDragStart();
-                    if (!mStack.isShowingBubbleMenu() && !mStack.isExpanded()) {
+                    if (!mStack.isShowingBubbleMenu() && !mStack.isExpanded()
+                            && BubbleExperimentConfig.allowBubbleScreenshotMenu(mContext)) {
                         mShowBubbleMenuRunnable = mStack::showBubbleMenu;
                         mStack.postDelayed(mShowBubbleMenuRunnable,
                                 ViewConfiguration.getLongPressTimeout());

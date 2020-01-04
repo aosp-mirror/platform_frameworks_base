@@ -491,8 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"允許應用程式查看平板電腦的藍牙設定，以及建立和接受與其他配對裝置的連線。"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"允許應用程式查看 Android TV 裝置的藍牙設定，以及建立和接受與其他配對裝置的連線。"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"允許應用程式查看手機的藍牙設定，以及建立和接受與其他配對裝置的連線。"</string>
-    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"首選 NFC 付款服務資訊"</string>
-    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允許應用程式取得首選 NFC 付款服務的資訊 (如已註冊的付款輔助和最終付款對象)。"</string>
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"由用戶允許授權的 NFC 付款服務資訊"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允許應用程式取得由用戶允許授權的 NFC 付款服務資訊 (如已註冊的付款輔助功能和最終付款對象)。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距離無線通訊"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"允許應用程式使用近距離無線通訊 (NFC) 標記、卡片及讀取程式進行通訊。"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"停用螢幕上鎖"</string>

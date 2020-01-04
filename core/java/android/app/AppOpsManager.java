@@ -51,6 +51,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
+import android.util.Pools;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1159,8 +1160,6 @@ public class AppOpsManager {
     })
     private @interface ShouldCollectNoteOp {}
 
-    // Warning: If an permission is added here it also has to be added to
-    // com.android.packageinstaller.permission.utils.EventLogger
     private static final int[] RUNTIME_AND_APPOP_PERMISSIONS_OPS = {
             // RUNTIME PERMISSIONS
             // Contacts
@@ -2341,15 +2340,31 @@ public class AppOpsManager {
      */
     @TestApi
     @SystemApi
-    @Immutable
-    @DataClass(genHiddenConstructor = true)
+    // @DataClass(genHiddenConstructor = true, genHiddenCopyConstructor = true)
+    // genHiddenCopyConstructor does not work for @hide @SystemApi classes
     public static final class OpEventProxyInfo implements Parcelable {
         /** UID of the proxy app that noted the op */
-        private final @IntRange(from = 0) int mUid;
+        private @IntRange(from = 0) int mUid;
         /** Package of the proxy that noted the op */
-        private final @Nullable String mPackageName;
+        private @Nullable String mPackageName;
         /** ID of the feature of the proxy that noted the op */
-        private final @Nullable String mFeatureId;
+        private @Nullable String mFeatureId;
+
+        /**
+         * Reinit existing object with new state.
+         *
+         * @param uid UID of the proxy app that noted the op
+         * @param packageName Package of the proxy that noted the op
+         * @param featureId ID of the feature of the proxy that noted the op
+         *
+         * @hide
+         */
+        public void reinit(@IntRange(from = 0) int uid, @Nullable String packageName,
+                @Nullable String featureId) {
+            mUid = Preconditions.checkArgumentNonnegative(uid);
+            mPackageName = packageName;
+            mFeatureId = featureId;
+        }
 
 
 
@@ -2390,6 +2405,18 @@ public class AppOpsManager {
             this.mFeatureId = featureId;
 
             // onConstructed(); // You can define this method to get a callback
+        }
+
+        /**
+         * Copy constructor
+         *
+         * @hide
+         */
+        @DataClass.Generated.Member
+        public OpEventProxyInfo(@NonNull OpEventProxyInfo orig) {
+            mUid = orig.mUid;
+            mPackageName = orig.mPackageName;
+            mFeatureId = orig.mFeatureId;
         }
 
         /**
@@ -2471,14 +2498,15 @@ public class AppOpsManager {
             }
         };
 
+        /*
         @DataClass.Generated(
-                time = 1576194071700L,
+                time = 1576814974615L,
                 codegenVersion = "1.0.14",
                 sourceFile = "frameworks/base/core/java/android/app/AppOpsManager.java",
-                inputSignatures = "private final @android.annotation.IntRange(from=0L) int mUid\nprivate final @android.annotation.Nullable java.lang.String mPackageName\nprivate final @android.annotation.Nullable java.lang.String mFeatureId\nclass OpEventProxyInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true)")
+                inputSignatures = "private @android.annotation.IntRange(from=0L) int mUid\nprivate @android.annotation.Nullable java.lang.String mPackageName\nprivate @android.annotation.Nullable java.lang.String mFeatureId\npublic  void reinit(int,java.lang.String,java.lang.String)\nclass OpEventProxyInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true, genHiddenCopyConstructor=true)")
         @Deprecated
         private void __metadata() {}
-
+        */
 
         //@formatter:on
         // End of generated code
@@ -2490,15 +2518,48 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @Immutable
     //@DataClass codegen verifier is broken
     public static final class NoteOpEvent implements Parcelable {
         /** Time of noteOp event */
-        public final @IntRange(from = 0) long noteTime;
+        private @IntRange(from = 0) long mNoteTime;
         /** The duration of this event (in case this is a startOp event, -1 otherwise). */
-        public final @IntRange(from = -1) long duration;
+        private @IntRange(from = -1) long mDuration;
         /** Proxy information of the noteOp event */
-        public final @Nullable OpEventProxyInfo proxy;
+        private @Nullable OpEventProxyInfo mProxy;
+
+        /**
+         * Reinit existing object with new state.
+         *
+         * @param noteTime Time of noteOp event
+         * @param duration The duration of this event (in case this is a startOp event,
+         *                 -1 otherwise).
+         * @param proxy Proxy information of the noteOp event
+         * @param proxyPool  The pool to release previous {@link OpEventProxyInfo} to
+         */
+        public void reinit(@IntRange(from = 0) long noteTime,
+                @IntRange(from = -1) long duration,
+                @Nullable OpEventProxyInfo proxy,
+                @NonNull Pools.Pool<OpEventProxyInfo> proxyPool) {
+            mNoteTime = Preconditions.checkArgumentNonnegative(noteTime);
+            mDuration = Preconditions.checkArgumentInRange(duration, -1L, Long.MAX_VALUE,
+                    "duration");
+
+            if (mProxy != null) {
+                proxyPool.release(mProxy);
+            }
+            mProxy = proxy;
+        }
+
+        /**
+         * Copy constructor
+         *
+         * @hide
+         */
+        public NoteOpEvent(@NonNull NoteOpEvent original) {
+            this(original.mNoteTime, original.mDuration,
+                    original.mProxy != null ? new OpEventProxyInfo(original.mProxy) : null);
+        }
+
 
 
         // Code below generated by codegen v1.0.14.
@@ -2529,17 +2590,41 @@ public class AppOpsManager {
                 @IntRange(from = 0) long noteTime,
                 @IntRange(from = -1) long duration,
                 @Nullable OpEventProxyInfo proxy) {
-            this.noteTime = noteTime;
+            this.mNoteTime = noteTime;
             com.android.internal.util.AnnotationValidations.validate(
-                    IntRange.class, null, noteTime,
+                    IntRange.class, null, mNoteTime,
                     "from", 0);
-            this.duration = duration;
+            this.mDuration = duration;
             com.android.internal.util.AnnotationValidations.validate(
-                    IntRange.class, null, duration,
+                    IntRange.class, null, mDuration,
                     "from", -1);
-            this.proxy = proxy;
+            this.mProxy = proxy;
 
             // onConstructed(); // You can define this method to get a callback
+        }
+
+        /**
+         * Time of noteOp event
+         */
+        @DataClass.Generated.Member
+        public @IntRange(from = 0) long getNoteTime() {
+            return mNoteTime;
+        }
+
+        /**
+         * The duration of this event (in case this is a startOp event, -1 otherwise).
+         */
+        @DataClass.Generated.Member
+        public @IntRange(from = -1) long getDuration() {
+            return mDuration;
+        }
+
+        /**
+         * Proxy information of the noteOp event
+         */
+        @DataClass.Generated.Member
+        public @Nullable OpEventProxyInfo getProxy() {
+            return mProxy;
         }
 
         @Override
@@ -2549,11 +2634,11 @@ public class AppOpsManager {
             // void parcelFieldName(Parcel dest, int flags) { ... }
 
             byte flg = 0;
-            if (proxy != null) flg |= 0x4;
+            if (mProxy != null) flg |= 0x4;
             dest.writeByte(flg);
-            dest.writeLong(noteTime);
-            dest.writeLong(duration);
-            if (proxy != null) dest.writeTypedObject(proxy, flags);
+            dest.writeLong(mNoteTime);
+            dest.writeLong(mDuration);
+            if (mProxy != null) dest.writeTypedObject(mProxy, flags);
         }
 
         @Override
@@ -2568,20 +2653,19 @@ public class AppOpsManager {
             // static FieldType unparcelFieldName(Parcel in) { ... }
 
             byte flg = in.readByte();
-            long _noteTime = in.readLong();
-            long _duration = in.readLong();
-            OpEventProxyInfo _proxy = (flg & 0x4) == 0 ? null : (OpEventProxyInfo) in.readTypedObject(
-                    OpEventProxyInfo.CREATOR);
+            long noteTime = in.readLong();
+            long duration = in.readLong();
+            OpEventProxyInfo proxy = (flg & 0x4) == 0 ? null : (OpEventProxyInfo) in.readTypedObject(OpEventProxyInfo.CREATOR);
 
-            this.noteTime = _noteTime;
+            this.mNoteTime = noteTime;
             com.android.internal.util.AnnotationValidations.validate(
-                    IntRange.class, null, noteTime,
+                    IntRange.class, null, mNoteTime,
                     "from", 0);
-            this.duration = _duration;
+            this.mDuration = duration;
             com.android.internal.util.AnnotationValidations.validate(
-                    IntRange.class, null, duration,
+                    IntRange.class, null, mDuration,
                     "from", -1);
-            this.proxy = _proxy;
+            this.mProxy = proxy;
 
             // onConstructed(); // You can define this method to get a callback
         }
@@ -2602,10 +2686,10 @@ public class AppOpsManager {
 
         /*
         @DataClass.Generated(
-                time = 1574809856220L,
+                time = 1576811792274L,
                 codegenVersion = "1.0.14",
                 sourceFile = "frameworks/base/core/java/android/app/AppOpsManager.java",
-                inputSignatures = "public final @android.annotation.IntRange(from=0L) long noteTime\npublic final @android.annotation.IntRange(from=-1) long duration\npublic final @android.annotation.Nullable android.app.NoteOpEventProxyInfo proxy\nclass NoteOpEvent extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass")
+                inputSignatures = "private @android.annotation.IntRange(from=0L) long mNoteTime\nprivate @android.annotation.IntRange(from=-1) long mDuration\nprivate @android.annotation.Nullable android.app.OpEventProxyInfo mProxy\npublic  void reinit(long,long,android.app.OpEventProxyInfo,android.util.Pools.Pool<android.app.OpEventProxyInfo>)\npublic @java.lang.Override java.lang.Object clone()\nclass NoteOpEvent extends java.lang.Object implements [android.os.Parcelable, java.lang.Cloneable]\n@com.android.internal.util.DataClass")
         @Deprecated
         private void __metadata() {}
          */
@@ -2751,7 +2835,7 @@ public class AppOpsManager {
                 return -1;
             }
 
-            return lastEvent.noteTime;
+            return lastEvent.getNoteTime();
         }
 
         /**
@@ -2847,7 +2931,7 @@ public class AppOpsManager {
                 return -1;
             }
 
-            return lastEvent.noteTime;
+            return lastEvent.getNoteTime();
         }
 
         /**
@@ -2922,7 +3006,7 @@ public class AppOpsManager {
                 return -1;
             }
 
-            return lastEvent.duration;
+            return lastEvent.getDuration();
         }
 
         /**
@@ -3000,7 +3084,7 @@ public class AppOpsManager {
                 return null;
             }
 
-            return lastEvent.proxy;
+            return lastEvent.getProxy();
         }
 
         private static class LongSparseArrayParceling implements
@@ -3304,7 +3388,7 @@ public class AppOpsManager {
                         toUidState, flags);
 
                 if (lastAccessEvent == null || (lastFeatureAccessEvent != null
-                        && lastFeatureAccessEvent.noteTime > lastAccessEvent.noteTime)) {
+                        && lastFeatureAccessEvent.getNoteTime() > lastAccessEvent.getNoteTime())) {
                     lastAccessEvent = lastFeatureAccessEvent;
                 }
             }
@@ -3335,7 +3419,7 @@ public class AppOpsManager {
                 return -1;
             }
 
-            return lastEvent.noteTime;
+            return lastEvent.getNoteTime();
         }
 
         /**
@@ -3418,7 +3502,7 @@ public class AppOpsManager {
                         toUidState, flags);
 
                 if (lastAccessEvent == null || (lastFeatureAccessEvent != null
-                        && lastFeatureAccessEvent.noteTime > lastAccessEvent.noteTime)) {
+                        && lastFeatureAccessEvent.getNoteTime() > lastAccessEvent.getNoteTime())) {
                     lastAccessEvent = lastFeatureAccessEvent;
                 }
             }
@@ -3449,7 +3533,7 @@ public class AppOpsManager {
                 return -1;
             }
 
-            return lastEvent.noteTime;
+            return lastEvent.getNoteTime();
         }
 
         /**
@@ -3544,7 +3628,7 @@ public class AppOpsManager {
                 return -1;
             }
 
-            return lastEvent.duration;
+            return lastEvent.getDuration();
         }
 
         /**
@@ -3674,7 +3758,7 @@ public class AppOpsManager {
                 return null;
             }
 
-            return lastEvent.proxy;
+            return lastEvent.getProxy();
         }
 
 
@@ -5517,8 +5601,8 @@ public class AppOpsManager {
     @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
     public void getHistoricalOps(@NonNull HistoricalOpsRequest request,
             @NonNull Executor executor, @NonNull Consumer<HistoricalOps> callback) {
-        Preconditions.checkNotNull(executor, "executor cannot be null");
-        Preconditions.checkNotNull(callback, "callback cannot be null");
+        Objects.requireNonNull(executor, "executor cannot be null");
+        Objects.requireNonNull(callback, "callback cannot be null");
         try {
             mService.getHistoricalOps(request.mUid, request.mPackageName, request.mOpNames,
                     request.mBeginTimeMillis, request.mEndTimeMillis, request.mFlags,
@@ -5556,8 +5640,8 @@ public class AppOpsManager {
     @RequiresPermission(Manifest.permission.MANAGE_APPOPS)
     public void getHistoricalOpsFromDiskRaw(@NonNull HistoricalOpsRequest request,
             @Nullable Executor executor, @NonNull Consumer<HistoricalOps> callback) {
-        Preconditions.checkNotNull(executor, "executor cannot be null");
-        Preconditions.checkNotNull(callback, "callback cannot be null");
+        Objects.requireNonNull(executor, "executor cannot be null");
+        Objects.requireNonNull(callback, "callback cannot be null");
         try {
             mService.getHistoricalOpsFromDiskRaw(request.mUid, request.mPackageName,
                     request.mOpNames, request.mBeginTimeMillis, request.mEndTimeMillis,
@@ -7062,7 +7146,7 @@ public class AppOpsManager {
         private final IAppOpsAsyncNotedCallback mAsyncCb = new IAppOpsAsyncNotedCallback.Stub() {
             @Override
             public void opNoted(AsyncNotedAppOp op) {
-                Preconditions.checkNotNull(op);
+                Objects.requireNonNull(op);
 
                 getAsyncNotedExecutor().execute(() -> onAsyncNoted(op));
             }
@@ -7331,7 +7415,8 @@ public class AppOpsManager {
                 final long key = makeKey(uidState, flag);
 
                 NoteOpEvent event = events.get(key);
-                if (lastEvent == null || event != null && event.noteTime > lastEvent.noteTime) {
+                if (lastEvent == null
+                        || event != null && event.getNoteTime() > lastEvent.getNoteTime()) {
                     lastEvent = event;
                 }
             }

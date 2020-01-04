@@ -21,8 +21,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.service.autofill.Dataset;
 import android.service.autofill.augmented.AugmentedAutofillService.AutofillProxy;
 import android.util.Log;
+
+import java.util.List;
 
 /**
  * Callback used to indicate at {@link FillRequest} has been fulfilled.
@@ -45,13 +48,19 @@ public final class FillCallback {
      * Sets the response associated with the request.
      *
      * @param response response associated with the request, or {@code null} if the service
-     * could not provide autofill for the request.
+     *                 could not provide autofill for the request.
      */
     public void onSuccess(@Nullable FillResponse response) {
         if (sDebug) Log.d(TAG, "onSuccess(): " + response);
 
         if (response == null) {
             mProxy.report(AutofillProxy.REPORT_EVENT_NO_RESPONSE);
+            return;
+        }
+
+        List<Dataset> inlineSuggestions = response.getInlineSuggestions();
+        if (inlineSuggestions != null && !inlineSuggestions.isEmpty()) {
+            mProxy.onInlineSuggestionsDataReady(inlineSuggestions);
             return;
         }
 

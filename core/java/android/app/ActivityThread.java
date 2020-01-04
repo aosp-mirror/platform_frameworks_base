@@ -3659,7 +3659,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     r.activity, Looper.myLooper());
         }
         r.activity.onGetDirectActions(cancellationSignal, (actions) -> {
-            Preconditions.checkNotNull(actions);
+            Objects.requireNonNull(actions);
             Preconditions.checkCollectionElementsNotNull(actions, "actions");
             if (!actions.isEmpty()) {
                 final int actionCount = actions.size();

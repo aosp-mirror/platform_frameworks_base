@@ -8201,9 +8201,9 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.supplyPin(pin);
+                return telephony.supplyPinForSubscriber(getSubId(), pin);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#supplyPin", e);
+            Log.e(TAG, "Error calling ITelephony#supplyPinForSubscriber", e);
         }
         return false;
     }
@@ -8215,9 +8215,9 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.supplyPuk(puk, pin);
+                return telephony.supplyPukForSubscriber(getSubId(), puk, pin);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#supplyPuk", e);
+            Log.e(TAG, "Error calling ITelephony#supplyPukForSubscriber", e);
         }
         return false;
     }
@@ -8229,9 +8229,9 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.supplyPinReportResult(pin);
+                return telephony.supplyPinReportResultForSubscriber(getSubId(), pin);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#supplyPinReportResult", e);
+            Log.e(TAG, "Error calling ITelephony#supplyPinReportResultForSubscriber", e);
         }
         return new int[0];
     }
@@ -8243,7 +8243,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.supplyPukReportResult(puk, pin);
+                return telephony.supplyPukReportResultForSubscriber(getSubId(), puk, pin);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#]", e);
         }

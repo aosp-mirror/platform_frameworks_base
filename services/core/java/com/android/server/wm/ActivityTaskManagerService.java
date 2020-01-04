@@ -296,6 +296,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -6164,7 +6165,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     final class LocalService extends ActivityTaskManagerInternal {
         @Override
         public SleepToken acquireSleepToken(String tag, int displayId) {
-            Preconditions.checkNotNull(tag);
+            Objects.requireNonNull(tag);
             return ActivityTaskManagerService.this.acquireSleepToken(tag, displayId);
         }
 
@@ -6221,7 +6222,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public int startActivitiesAsPackage(String packageName, int userId, Intent[] intents,
                 Bundle bOptions) {
-            Preconditions.checkNotNull(intents, "intents");
+            Objects.requireNonNull(intents, "intents");
             final String[] resolvedTypes = new String[intents.length];
 
             // UID of the package on user userId.

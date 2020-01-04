@@ -808,8 +808,8 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
      * @return {@code true} if the windowing mode is transient, {@code false} otherwise.
      */
     private static boolean isTransientWindowingMode(int windowingMode) {
-        // TODO(b/114842032): add PIP if/when it uses mode transitions instead of task reparenting
-        return windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+        return windowingMode == WINDOWING_MODE_PINNED
+                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                 || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
     }
 

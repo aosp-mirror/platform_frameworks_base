@@ -16,12 +16,8 @@
 
 package android.media;
 
-import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * Structure for source buffering management params.

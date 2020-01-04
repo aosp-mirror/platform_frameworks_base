@@ -46,12 +46,15 @@ import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
+import android.view.inputmethod.InlineSuggestionsRequest;
 
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ServiceConnector;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.view.IInlineSuggestionsResponseCallback;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
@@ -137,7 +140,9 @@ final class RemoteAugmentedAutofillService
      */
     public void onRequestAutofillLocked(int sessionId, @NonNull IAutoFillManagerClient client,
             int taskId, @NonNull ComponentName activityComponent, @NonNull AutofillId focusedId,
-            @Nullable AutofillValue focusedValue) {
+            @Nullable AutofillValue focusedValue,
+            @Nullable InlineSuggestionsRequest inlineSuggestionsRequest,
+            @Nullable IInlineSuggestionsResponseCallback inlineSuggestionsCallback) {
         long requestTime = SystemClock.elapsedRealtime();
         AtomicReference<ICancellationSignal> cancellationRef = new AtomicReference<>();
 
@@ -151,10 +156,13 @@ final class RemoteAugmentedAutofillService
                     final IBinder realClient = resultData
                             .getBinder(AutofillManager.EXTRA_AUGMENTED_AUTOFILL_CLIENT);
                     service.onFillRequest(sessionId, realClient, taskId, activityComponent,
-                            focusedId, focusedValue, requestTime, new IFillCallback.Stub() {
+                            focusedId, focusedValue, requestTime, inlineSuggestionsRequest,
+                            new IFillCallback.Stub() {
                                 @Override
                                 public void onSuccess(@Nullable Dataset[] inlineSuggestionsData) {
-                                    // TODO(b/146453195): handle non-null inline suggestions data.
+                                    maybeHandleInlineSuggestions(sessionId, inlineSuggestionsData,
+                                            focusedId, inlineSuggestionsRequest,
+                                            inlineSuggestionsCallback, client);
                                     requestAutofill.complete(null);
                                 }
 
@@ -214,6 +222,26 @@ final class RemoteAugmentedAutofillService
                 Slog.e(TAG, "Error requesting a cancellation", e);
             }
         });
+    }
+
+    private void maybeHandleInlineSuggestions(int sessionId,
+            @Nullable Dataset[] inlineSuggestionsData, @NonNull AutofillId focusedId,
+            @Nullable InlineSuggestionsRequest inlineSuggestionsRequest,
+            @Nullable IInlineSuggestionsResponseCallback inlineSuggestionsCallback,
+            @NonNull IAutoFillManagerClient client) {
+        if (inlineSuggestionsRequest == null
+                || ArrayUtils.isEmpty(inlineSuggestionsData)
+                || inlineSuggestionsCallback == null) {
+            return;
+        }
+        try {
+            inlineSuggestionsCallback.onInlineSuggestionsResponse(
+                    InlineSuggestionFactory.createAugmentedInlineSuggestionsResponse(
+                            sessionId, inlineSuggestionsData, focusedId, inlineSuggestionsRequest,
+                            getJobHandler(), mContext, client));
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Exception sending inline suggestions response back to IME.");
+        }
     }
 
     @Override

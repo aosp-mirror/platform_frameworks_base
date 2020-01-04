@@ -87,7 +87,7 @@ public final class SelectionActionModeHelper {
     private final SmartSelectSprite mSmartSelectSprite;
 
     SelectionActionModeHelper(@NonNull Editor editor) {
-        mEditor = Preconditions.checkNotNull(editor);
+        mEditor = Objects.requireNonNull(editor);
         mTextView = mEditor.getTextView();
         mTextClassificationHelper = new TextClassificationHelper(
                 mTextView.getContext(),
@@ -500,7 +500,7 @@ public final class SelectionActionModeHelper {
         private final LogAbandonRunnable mDelayedLogAbandon = new LogAbandonRunnable();
 
         SelectionTracker(TextView textView) {
-            mTextView = Preconditions.checkNotNull(textView);
+            mTextView = Objects.requireNonNull(textView);
             mLogger = new SelectionMetricsLogger(textView);
         }
 
@@ -703,7 +703,7 @@ public final class SelectionActionModeHelper {
         private String mText;
 
         SelectionMetricsLogger(TextView textView) {
-            Preconditions.checkNotNull(textView);
+            Objects.requireNonNull(textView);
             mEditTextLogger = textView.isTextEditable();
             mTokenIterator = SelectionSessionLogger.getTokenIterator(textView.getTextLocale());
         }
@@ -714,7 +714,7 @@ public final class SelectionActionModeHelper {
                 CharSequence text, int index,
                 @InvocationMethod int invocationMethod) {
             try {
-                Preconditions.checkNotNull(text);
+                Objects.requireNonNull(text);
                 Preconditions.checkArgumentInRange(index, 0, text.length(), "index");
                 if (mText == null || !mText.contentEquals(text)) {
                     mText = text.toString();
@@ -972,11 +972,11 @@ public final class SelectionActionModeHelper {
                 @NonNull Consumer<SelectionResult> selectionResultCallback,
                 @NonNull Supplier<SelectionResult> timeOutResultSupplier) {
             super(textView != null ? textView.getHandler() : null);
-            mTextView = Preconditions.checkNotNull(textView);
+            mTextView = Objects.requireNonNull(textView);
             mTimeOutDuration = timeOut;
-            mSelectionResultSupplier = Preconditions.checkNotNull(selectionResultSupplier);
-            mSelectionResultCallback = Preconditions.checkNotNull(selectionResultCallback);
-            mTimeOutResultSupplier = Preconditions.checkNotNull(timeOutResultSupplier);
+            mSelectionResultSupplier = Objects.requireNonNull(selectionResultSupplier);
+            mSelectionResultCallback = Objects.requireNonNull(selectionResultCallback);
+            mTimeOutResultSupplier = Objects.requireNonNull(timeOutResultSupplier);
             // Make a copy of the original text.
             mOriginalText = getText(mTextView).toString();
         }
@@ -1051,14 +1051,14 @@ public final class SelectionActionModeHelper {
         TextClassificationHelper(Context context, Supplier<TextClassifier> textClassifier,
                 CharSequence text, int selectionStart, int selectionEnd, LocaleList locales) {
             init(textClassifier, text, selectionStart, selectionEnd, locales);
-            mContext = Preconditions.checkNotNull(context);
+            mContext = Objects.requireNonNull(context);
         }
 
         @UiThread
         public void init(Supplier<TextClassifier> textClassifier, CharSequence text,
                 int selectionStart, int selectionEnd, LocaleList locales) {
-            mTextClassifier = Preconditions.checkNotNull(textClassifier);
-            mText = Preconditions.checkNotNull(text).toString();
+            mTextClassifier = Objects.requireNonNull(textClassifier);
+            mText = Objects.requireNonNull(text).toString();
             mLastClassificationText = null; // invalidate.
             Preconditions.checkArgument(selectionEnd > selectionStart);
             mSelectionStart = selectionStart;

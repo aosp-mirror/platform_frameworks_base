@@ -24,18 +24,6 @@ import java.util.Collection;
  */
 public interface CollectionReadyForBuildListener {
     /**
-     * Called after the NotifCollection has received an update from NotificationManager but before
-     * it dispatches any change events to its listeners. This is to inform the list builder that
-     * the first stage of the pipeline has been triggered. After events have been dispatched,
-     * onBuildList() will be called.
-     *
-     * While onBuildList() is always called after this method is called, the converse is not always
-     * true: sometimes the NotifCollection applies an update that does not need to dispatch events,
-     * in which case this method will be skipped and onBuildList will be called directly.
-     */
-    void onBeginDispatchToListeners();
-
-    /**
      * Called by the NotifCollection to indicate that something in the collection has changed and
      * that the list builder should regenerate the list.
      */

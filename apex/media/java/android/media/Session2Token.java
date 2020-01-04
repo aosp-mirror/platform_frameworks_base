@@ -52,17 +52,18 @@ import java.util.Objects;
 public final class Session2Token implements Parcelable {
     private static final String TAG = "Session2Token";
 
-    public static final @android.annotation.NonNull Creator<Session2Token> CREATOR = new Creator<Session2Token>() {
-        @Override
-        public Session2Token createFromParcel(Parcel p) {
-            return new Session2Token(p);
-        }
+    public static final @android.annotation.NonNull Creator<Session2Token> CREATOR =
+            new Creator<Session2Token>() {
+                @Override
+                public Session2Token createFromParcel(Parcel p) {
+                    return new Session2Token(p);
+                }
 
-        @Override
-        public Session2Token[] newArray(int size) {
-            return new Session2Token[size];
-        }
-    };
+                @Override
+                public Session2Token[] newArray(int size) {
+                    return new Session2Token[size];
+                }
+            };
 
     /**
      * @hide

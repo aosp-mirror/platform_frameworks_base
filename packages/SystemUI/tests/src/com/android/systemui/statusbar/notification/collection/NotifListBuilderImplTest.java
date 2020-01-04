@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpList;
 
 import static org.junit.Assert.assertEquals;
@@ -67,6 +66,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @SmallTest
@@ -105,7 +105,7 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
         mListBuilder.attach(mNotifCollection);
 
         Mockito.verify(mNotifCollection).setBuildListener(mBuildListenerCaptor.capture());
-        mReadyForBuildListener = checkNotNull(mBuildListenerCaptor.getValue());
+        mReadyForBuildListener = Objects.requireNonNull(mBuildListenerCaptor.getValue());
     }
 
     @Test
@@ -1021,7 +1021,6 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
             mPendingSet.clear();
         }
 
-        mReadyForBuildListener.onBeginDispatchToListeners();
         mReadyForBuildListener.onBuildList(mEntrySet);
     }
 

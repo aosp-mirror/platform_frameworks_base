@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.collection;
 
 import static com.android.systemui.statusbar.notification.collection.GroupEntry.ROOT_ENTRY;
 import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpList;
-import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_BUILD_PENDING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_BUILD_STARTED;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_FINALIZING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_GROUPING;
@@ -197,12 +196,6 @@ public class NotifListBuilderImpl implements NotifListBuilder {
 
     private final CollectionReadyForBuildListener mReadyForBuildListener =
             new CollectionReadyForBuildListener() {
-                @Override
-                public void onBeginDispatchToListeners() {
-                    Assert.isMainThread();
-                    mPipelineState.incrementTo(STATE_BUILD_PENDING);
-                }
-
                 @Override
                 public void onBuildList(Collection<NotificationEntry> entries) {
                     Assert.isMainThread();

@@ -722,15 +722,6 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
-     * Returns whether inline suggestions are enabled on this service.
-     *
-     * TODO(b/137800469): check XML for value.
-     */
-    private boolean isInlineSuggestionsEnabled() {
-        return true;
-    }
-
-    /**
      * Sends an {@link InlineSuggestionsRequest} obtained from
      * {@link #onCreateInlineSuggestionsRequest()} to the current Autofill Session through
      * {@link IInlineSuggestionsRequestCallback#onInlineSuggestionsRequest}.
@@ -763,22 +754,13 @@ public class InputMethodService extends AbstractInputMethodService {
 
     private void handleOnCreateInlineSuggestionsRequest(@NonNull ComponentName componentName,
             @NonNull AutofillId autofillId, @NonNull IInlineSuggestionsRequestCallback callback) {
-        mInlineSuggestionsRequestInfo = new InlineSuggestionsRequestInfo(componentName, autofillId,
-                callback);
-
-        if (!isInlineSuggestionsEnabled()) {
-            try {
-                callback.onInlineSuggestionsUnsupported();
-            } catch (RemoteException e) {
-                Log.w(TAG, "handleMakeInlineSuggestionsRequest() RemoteException:" + e);
-            }
-            return;
-        }
-
         if (!mInputStarted) {
             Log.w(TAG, "onStartInput() not called yet");
             return;
         }
+
+        mInlineSuggestionsRequestInfo = new InlineSuggestionsRequestInfo(componentName, autofillId,
+                callback);
 
         makeInlineSuggestionsRequest();
     }

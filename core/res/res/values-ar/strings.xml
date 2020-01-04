@@ -1283,7 +1283,7 @@
     <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"للحصول على أداء أفضل، يمكن فتح لعبة واحدة فقط من هذه الألعاب في كل مرة."</string>
     <string name="old_app_action" msgid="725331621042848590">"الرجوع إلى <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_action" msgid="547772182913269801">"فتح <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
-    <string name="new_app_description" msgid="1958903080400806644">"سيتم إغلاق <xliff:g id="OLD_APP">%1$s</xliff:g> من دون حفظ"</string>
+    <string name="new_app_description" msgid="1958903080400806644">"سيتم إغلاق <xliff:g id="OLD_APP">%1$s</xliff:g> بدون حفظ"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"لقد تجاوزت <xliff:g id="PROC">%1$s</xliff:g> حد الذاكرة."</string>
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"نَسْخ الذاكرة <xliff:g id="PROC">%1$s</xliff:g> جاهز"</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"تم جمع مقدار كبير من بيانات الذاكرة. انقر للمشاركة."</string>

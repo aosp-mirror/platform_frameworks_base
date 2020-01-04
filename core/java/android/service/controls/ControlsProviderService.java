@@ -20,7 +20,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -88,7 +87,7 @@ public abstract class ControlsProviderService extends Service {
      * {@link Control.StatelessBuilder}).
      * @param controls
      */
-    public void onLoad(@NonNull List<Control> controls) {
+    public final void onLoad(@NonNull List<Control> controls) {
         Preconditions.checkNotNull(controls);
         List<Control> list = new ArrayList<>();
         for (Control control: controls) {
@@ -114,7 +113,7 @@ public abstract class ControlsProviderService extends Service {
      * their state.
      * @param statefulControls
      */
-    public void onRefreshState(@NonNull List<Control> statefulControls) {
+    public final void onRefreshState(@NonNull List<Control> statefulControls) {
         Preconditions.checkNotNull(statefulControls);
         try {
             mCallback.onRefreshState(mToken, statefulControls);
@@ -128,7 +127,7 @@ public abstract class ControlsProviderService extends Service {
      * @param controlId
      * @param response
      */
-    public void onControlActionResponse(
+    public final void onControlActionResponse(
             @NonNull String controlId, @ControlAction.ResponseResult int response) {
         Preconditions.checkNotNull(controlId);
         if (!ControlAction.isValidResponse(response)) {

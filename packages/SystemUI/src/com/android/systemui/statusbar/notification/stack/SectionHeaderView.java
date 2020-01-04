@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.RectF;
@@ -31,6 +29,8 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
+
+import java.util.Objects;
 
 /**
  * Similar in size and appearance to the NotificationShelf, appears at the beginning of some
@@ -51,13 +51,13 @@ public class SectionHeaderView extends ActivatableNotificationView {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mContents = checkNotNull(findViewById(R.id.content));
+        mContents = Objects.requireNonNull(findViewById(R.id.content));
         bindContents();
     }
 
     private void bindContents() {
-        mLabelView = checkNotNull(findViewById(R.id.header_label));
-        mClearAllButton = checkNotNull(findViewById(R.id.btn_clear_all));
+        mLabelView = Objects.requireNonNull(findViewById(R.id.header_label));
+        mClearAllButton = Objects.requireNonNull(findViewById(R.id.btn_clear_all));
         if (mOnClearClickListener != null) {
             mClearAllButton.setOnClickListener(mOnClearClickListener);
         }
