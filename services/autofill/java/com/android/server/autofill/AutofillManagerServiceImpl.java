@@ -970,6 +970,8 @@ final class AutofillManagerServiceImpl
         } else {
             pw.println(compatPkgs);
         }
+        pw.print(prefix); pw.print("Inline Suggestions Enabled: ");
+        pw.println(isInlineSuggestionsEnabled());
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
         pw.print(prefix); pw.print("Disabled apps: ");
@@ -1117,6 +1119,14 @@ final class AutofillManagerServiceImpl
             return mInfo.getCompatibilityPackages();
         }
         return null;
+    }
+
+    @GuardedBy("mLock")
+    boolean isInlineSuggestionsEnabled() {
+        if (mInfo != null) {
+            return mInfo.isInlineSuggestionsEnabled();
+        }
+        return false;
     }
 
     @GuardedBy("mLock")

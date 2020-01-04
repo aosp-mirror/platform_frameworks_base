@@ -3469,6 +3469,8 @@
              device -->
         <attr name="isVrOnly" format="boolean"/>
         <attr name="__removed2" format="boolean" />
+        <!-- Specifies whether the IME supports showing inline suggestions. -->
+        <attr name="supportsInlineSuggestions" format="boolean" />
     </declare-styleable>
 
     <!-- This is the subtype of InputMethod. Subtype can describe locales (for example, en_US and
@@ -8177,6 +8179,9 @@
         <!-- Fully qualified class name of an activity that allows the user to modify
              the settings for this service. -->
         <attr name="settingsActivity" />
+
+        <!-- Specifies whether the AutofillService supports inline suggestions-->
+        <attr name="supportsInlineSuggestions" format="boolean" />
     </declare-styleable>
 
     <!-- Use <code>compatibility-package</code> as a child tag of <code>autofill-service</code>

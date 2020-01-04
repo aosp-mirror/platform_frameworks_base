@@ -3006,6 +3006,7 @@
       <public name="htmlDescription"/>
       <public name="preferMinimalPostProcessing"/>
       <public name="featureId" />
+      <public name="supportsInlineSuggestions" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">
