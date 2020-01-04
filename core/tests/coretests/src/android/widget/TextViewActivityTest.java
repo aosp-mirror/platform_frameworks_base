@@ -1022,23 +1022,11 @@ public class TextViewActivityTest {
 
     @Test
     public void testSelectionMetricsLogger_abandonEventIncludesEntityType() throws Throwable {
-        final List<SelectionEvent> selectionEvents = new ArrayList<>();
-        final TextClassifier classifier = new TextClassifier() {
-            @Override
-            public void onSelectionEvent(SelectionEvent event) {
-                selectionEvents.add(event);
-            }
-
-            @Override
-            public TextSelection suggestSelection(TextSelection.Request request) {
-                return new TextSelection.Builder(request.getStartIndex(), request.getEndIndex())
-                        .setEntityType(TextClassifier.TYPE_PHONE, 1)
-                        .build();
-            }
-        };
+        final TestableTextClassifier classifier = new TestableTextClassifier();
         final TextView textView = mActivity.findViewById(R.id.textview);
         mActivityRule.runOnUiThread(() -> textView.setTextClassifier(classifier));
         mInstrumentation.waitForIdleSync();
+
         final String text = "My number is 987654321";
 
         onView(withId(R.id.textview)).perform(replaceText(text));
@@ -1053,6 +1041,7 @@ public class TextViewActivityTest {
         long waitTime = 0;
         SelectionEvent lastEvent;
         do {
+            final List<SelectionEvent> selectionEvents = classifier.getSelectionEvents();
             lastEvent = selectionEvents.get(selectionEvents.size() - 1);
             if (lastEvent.getEventType() == SelectionEvent.ACTION_ABANDON) {
                 break;
@@ -1061,6 +1050,29 @@ public class TextViewActivityTest {
             waitTime += pollInterval;
         } while (waitTime < abandonDelay * 10);
         assertEquals(SelectionEvent.ACTION_ABANDON, lastEvent.getEventType());
+    }
+
+    @Test
+    public void testSelectionMetricsLogger_overtypeEventIncludesEntityType() throws Throwable {
+        final TestableTextClassifier classifier = new TestableTextClassifier();
+        final TextView textView = mActivity.findViewById(R.id.textview);
+        mActivityRule.runOnUiThread(() -> textView.setTextClassifier(classifier));
+        mInstrumentation.waitForIdleSync();
+
+        final String text = "My number is 987654321";
+
+        // Long press to trigger selection
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('9')));
+        sleepForFloatingToolbarPopup();
+
+        // Type over the selection
+        onView(withId(R.id.textview)).perform(pressKey(KeyEvent.KEYCODE_A));
+        mInstrumentation.waitForIdleSync();
+
+        final List<SelectionEvent> selectionEvents = classifier.getSelectionEvents();
+        final SelectionEvent lastEvent = selectionEvents.get(selectionEvents.size() - 1);
+        assertEquals(SelectionEvent.ACTION_OVERTYPE, lastEvent.getEventType());
         assertEquals(TextClassifier.TYPE_PHONE, lastEvent.getEntityType());
     }
 
@@ -1114,5 +1126,25 @@ public class TextViewActivityTest {
 
     private enum TextStyle {
         PLAIN, STYLED
+    }
+
+    private final class TestableTextClassifier implements TextClassifier {
+        final List<SelectionEvent> mSelectionEvents = new ArrayList<>();
+
+        @Override
+        public void onSelectionEvent(SelectionEvent event) {
+            mSelectionEvents.add(event);
+        }
+
+        @Override
+        public TextSelection suggestSelection(TextSelection.Request request) {
+            return new TextSelection.Builder(request.getStartIndex(), request.getEndIndex())
+                    .setEntityType(TextClassifier.TYPE_PHONE, 1)
+                    .build();
+        }
+
+        List<SelectionEvent> getSelectionEvents() {
+            return mSelectionEvents;
+        }
     }
 }
