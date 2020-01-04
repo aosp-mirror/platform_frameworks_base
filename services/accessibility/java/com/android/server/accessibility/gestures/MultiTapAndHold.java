@@ -38,6 +38,12 @@ class MultiTapAndHold extends MultiTap {
     }
 
     @Override
+    protected void onUp(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        super.onUp(event, rawEvent, policyFlags);
+        cancelAfterDoubleTapTimeout(event, rawEvent, policyFlags);
+    }
+
+    @Override
     public String getGestureName() {
         switch (mTargetTaps) {
             case 2:
