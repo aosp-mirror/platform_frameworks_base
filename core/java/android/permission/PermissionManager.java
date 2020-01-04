@@ -318,8 +318,7 @@ public final class PermissionManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(allOf = {Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
-            Manifest.permission.PACKAGE_USAGE_STATS})
+    @RequiresPermission(Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS)
     public void startOneTimePermissionSession(@NonNull String packageName, long timeoutMillis,
             @ActivityManager.RunningAppProcessInfo.Importance int importanceToResetTimer,
             @ActivityManager.RunningAppProcessInfo.Importance int importanceToKeepSessionAlive) {
@@ -340,8 +339,7 @@ public final class PermissionManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(allOf = {Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
-            Manifest.permission.PACKAGE_USAGE_STATS})
+    @RequiresPermission(Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS)
     public void stopOneTimePermissionSession(@NonNull String packageName) {
         try {
             mPermissionManager.stopOneTimePermissionSession(packageName,
