@@ -236,7 +236,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         // Overlay must be for a different user to prevent recognizing a matching top activity
         final ActivityRecord taskOverlay = new ActivityBuilder(mService).setTask(task)
                 .setUid(UserHandle.PER_USER_RANGE * 2).build();
-        taskOverlay.mTaskOverlay = true;
+        taskOverlay.setTaskOverlay(true);
 
         final RootWindowContainer.FindTaskResult result =
                 new RootWindowContainer.FindTaskResult();
@@ -865,7 +865,7 @@ public class ActivityStackTests extends ActivityTestsBase {
                 .setComponent(new ComponentName("package.overlay", ".OverlayActivity")).build();
         // If the task only remains overlay activity, the task should also be removed.
         // See {@link ActivityStack#removeFromHistory}.
-        overlayActivity.mTaskOverlay = true;
+        overlayActivity.setTaskOverlay(true);
 
         // The activity without an app means it will be removed immediately.
         // See {@link ActivityStack#destroyActivityLocked}.
@@ -893,7 +893,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         // Making the first activity a task overlay means it will be removed from the task's
         // activities as well once second activity is removed as handleAppDied processes the
         // activity list in reverse.
-        firstActivity.mTaskOverlay = true;
+        firstActivity.setTaskOverlay(true);
         firstActivity.app = null;
 
         // second activity will be immediately removed as it has no state.

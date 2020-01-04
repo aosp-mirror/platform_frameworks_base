@@ -571,14 +571,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
     }
 
-    void setNextTaskIdForUserLocked(int taskId, int userId) {
+    void setNextTaskIdForUser(int taskId, int userId) {
         final int currentTaskId = mCurTaskIdForUser.get(userId, -1);
         if (taskId > currentTaskId) {
             mCurTaskIdForUser.put(userId, taskId);
         }
     }
 
-    static int nextTaskIdForUser(int taskId, int userId) {
+    private static int nextTaskIdForUser(int taskId, int userId) {
         int nextTaskId = taskId + 1;
         if (nextTaskId == (userId + 1) * MAX_TASK_IDS_PER_USER) {
             // Wrap around as there will be smaller task ids that are available now.
@@ -587,7 +587,11 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         return nextTaskId;
     }
 
-    int getNextTaskIdForUserLocked(int userId) {
+    int getNextTaskIdForUser() {
+        return getNextTaskIdForUser(mRootWindowContainer.mCurrentUser);
+    }
+
+    int getNextTaskIdForUser(int userId) {
         final int currentTaskId = mCurTaskIdForUser.get(userId, userId * MAX_TASK_IDS_PER_USER);
         // for a userId u, a taskId can only be in the range
         // [u*MAX_TASK_IDS_PER_USER, (u+1)*MAX_TASK_IDS_PER_USER-1], so if MAX_TASK_IDS_PER_USER
@@ -1955,7 +1959,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         // Ensure that we're not moving a task to a dynamic stack if device doesn't support
         // multi-display.
-        if (stack.mDisplayId != DEFAULT_DISPLAY && !mService.mSupportsMultiDisplay) {
+        if (stack.getDisplayId() != DEFAULT_DISPLAY && !mService.mSupportsMultiDisplay) {
             throw new IllegalArgumentException("Device doesn't support multi-display, can not"
                     + " reparent task=" + task + " to stackId=" + stackId);
         }
@@ -2443,7 +2447,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         // Handle incorrect launch/move to secondary display if needed.
         if (isSecondaryDisplayPreferred) {
-            final int actualDisplayId = task.getStack().mDisplayId;
+            final int actualDisplayId = task.getDisplayId();
             if (!task.canBeLaunchedOnDisplay(actualDisplayId)) {
                 throw new IllegalStateException("Task resolved to incompatible display");
             }

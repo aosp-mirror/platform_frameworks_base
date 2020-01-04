@@ -310,7 +310,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     int mCurrentUser;
 
     /** The attached Display's unique identifier, or -1 if detached */
-    int mDisplayId;
+    private int mDisplayId;
     // Id of the previous display the stack was on.
     int mPrevDisplayId = INVALID_DISPLAY;
 
@@ -1013,6 +1013,10 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         return getDisplayContent();
     }
 
+    int getDisplayId() {
+        return mDisplayId;
+    }
+
     /**
      * Defers updating the bounds of the stack. If the stack was resized/repositioned while
      * deferring, the bounds will update in {@link #continueUpdateBounds()}.
@@ -1082,7 +1086,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     }
 
     private ActivityRecord topRunningNonOverlayTaskActivity() {
-        return getActivity((r) -> (r.canBeTopRunning() && !r.mTaskOverlay));
+        return getActivity((r) -> (r.canBeTopRunning() && !r.isTaskOverlay()));
     }
 
     ActivityRecord topRunningNonDelayedActivityLocked(ActivityRecord notTop) {

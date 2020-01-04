@@ -110,12 +110,12 @@ public class TaskStackTests extends WindowTestsBase {
     public void testStackRemoveImmediately() {
         final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        assertEquals(stack, task.getTaskStack());
+        assertEquals(stack, task.getStack());
 
         // Remove stack and check if its child is also removed.
         stack.removeImmediately();
         assertNull(stack.getDisplayContent());
-        assertNull(task.getTaskStack());
+        assertNull(task.getStack());
     }
 
     @Test
@@ -131,7 +131,7 @@ public class TaskStackTests extends WindowTestsBase {
         assertEquals(0, stack.getChildCount());
         assertNull(stack.getDisplayContent());
         assertNull(task.getDisplayContent());
-        assertNull(task.getTaskStack());
+        assertNull(task.getStack());
     }
 
     @Test

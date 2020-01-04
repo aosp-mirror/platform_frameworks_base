@@ -316,8 +316,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         ActivityStack stack =
                 (displayId == INVALID_DISPLAY && task != null) ? task.getStack() : null;
         if (stack != null) {
-            if (DEBUG) appendLog("display-from-task=" + stack.mDisplayId);
-            displayId = stack.mDisplayId;
+            if (DEBUG) appendLog("display-from-task=" + stack.getDisplayId());
+            displayId = stack.getDisplayId();
         }
 
         if (displayId == INVALID_DISPLAY && source != null) {

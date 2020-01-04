@@ -61,7 +61,7 @@ public class AppChangeTransitionTests extends WindowTestsBase {
     public void setUpOnDisplay(DisplayContent dc) {
         mActivity = createTestActivityRecord(dc, WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD);
         mTask = mActivity.getTask();
-        mStack = mTask.getTaskStack();
+        mStack = mTask.getStack();
 
         // Set a remote animator with snapshot disabled. Snapshots don't work in wmtests.
         RemoteAnimationDefinition definition = new RemoteAnimationDefinition();

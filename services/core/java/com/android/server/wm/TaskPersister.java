@@ -339,7 +339,7 @@ public class TaskPersister implements PersisterQueue.Listener {
                                             + userTasksDir.getAbsolutePath());
                                 } else {
                                     // Looks fine.
-                                    mStackSupervisor.setNextTaskIdForUserLocked(taskId, userId);
+                                    mStackSupervisor.setNextTaskIdForUser(taskId, userId);
                                     task.isPersistable = true;
                                     tasks.add(task);
                                     recoveredTaskIds.add(taskId);
