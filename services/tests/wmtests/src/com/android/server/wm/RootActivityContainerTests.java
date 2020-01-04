@@ -253,12 +253,12 @@ public class RootActivityContainerTests extends ActivityTestsBase {
 
         // Under split screen primary we should be focusable when not minimized
         mRootWindowContainer.setDockedStackMinimized(false);
-        assertTrue(stack.isFocusable());
+        assertTrue(stack.isTopActivityFocusable());
         assertTrue(activity.isFocusable());
 
         // Under split screen primary we should not be focusable when minimized
         mRootWindowContainer.setDockedStackMinimized(true);
-        assertFalse(stack.isFocusable());
+        assertFalse(stack.isTopActivityFocusable());
         assertFalse(activity.isFocusable());
 
         final ActivityStack pinnedStack = mRootWindowContainer.getDefaultDisplay().createStack(
@@ -267,19 +267,19 @@ public class RootActivityContainerTests extends ActivityTestsBase {
                 .setStack(pinnedStack).build();
 
         // We should not be focusable when in pinned mode
-        assertFalse(pinnedStack.isFocusable());
+        assertFalse(pinnedStack.isTopActivityFocusable());
         assertFalse(pinnedActivity.isFocusable());
 
         // Add flag forcing focusability.
         pinnedActivity.info.flags |= FLAG_ALWAYS_FOCUSABLE;
 
         // We should not be focusable when in pinned mode
-        assertTrue(pinnedStack.isFocusable());
+        assertTrue(pinnedStack.isTopActivityFocusable());
         assertTrue(pinnedActivity.isFocusable());
 
         // Without the overridding activity, stack should not be focusable.
         pinnedStack.removeChild(pinnedActivity.getTask(), "testFocusability");
-        assertFalse(pinnedStack.isFocusable());
+        assertFalse(pinnedStack.isTopActivityFocusable());
     }
 
     /**

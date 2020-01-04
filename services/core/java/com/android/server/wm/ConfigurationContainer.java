@@ -624,6 +624,21 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return mFullConfiguration.windowConfiguration.isAlwaysOnTop();
     }
 
+    /**
+     * Returns {@code true} if this container is focusable. Generally, if a parent is not focusable,
+     * this will not be focusable either.
+     */
+    boolean isFocusable() {
+        // TODO(split): Move this to WindowContainer once Split-screen is based on a WindowContainer
+        //              like DisplayArea vs. TaskTiles.
+        ConfigurationContainer parent = getParent();
+        return parent == null || parent.isFocusable();
+    }
+
+    boolean setFocusable(boolean focusable) {
+        return false;
+    }
+
     boolean hasChild() {
         return getChildCount() > 0;
     }

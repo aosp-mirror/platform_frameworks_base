@@ -27,6 +27,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -150,6 +151,19 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
         t.setBounds(info.stackToken, new Rect(10, 10, 100, 100));
         mService.applyContainerTransaction(t);
         assertEquals(newBounds, stack.getBounds());
+    }
+
+    @Test
+    public void testContainerChanges() {
+        removeGlobalMinSizeRestriction();
+        final ActivityStack stack = new StackBuilder(mRootWindowContainer)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        final Task task = stack.getTopMostTask();
+        WindowContainerTransaction t = new WindowContainerTransaction();
+        assertTrue(task.isFocusable());
+        t.setFocusable(stack.mRemoteToken, false);
+        mService.applyContainerTransaction(t);
+        assertFalse(task.isFocusable());
     }
 
     @Test
