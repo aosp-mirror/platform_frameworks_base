@@ -36,7 +36,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
-import com.android.systemui.statusbar.NotificationListener.NotifServiceListener;
+import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
@@ -179,7 +179,7 @@ public class NotificationEntryManager implements
 
     /** Once called, the NEM will start processing notification events from system server. */
     public void attach(NotificationListener notificationListener) {
-        notificationListener.addNotificationListener(mNotifListener);
+        notificationListener.addNotificationHandler(mNotifListener);
     }
 
     /** Adds a {@link NotificationEntryListener}. */
@@ -326,7 +326,7 @@ public class NotificationEntryManager implements
         }
     }
 
-    private final NotifServiceListener mNotifListener = new NotifServiceListener() {
+    private final NotificationHandler mNotifListener = new NotificationHandler() {
         @Override
         public void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
             final boolean isUpdate = mActiveNotifications.containsKey(sbn.getKey());

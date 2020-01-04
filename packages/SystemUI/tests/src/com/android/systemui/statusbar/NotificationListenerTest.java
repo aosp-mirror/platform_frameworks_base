@@ -36,7 +36,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationListener.NotifServiceListener;
+import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +51,7 @@ public class NotificationListenerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
 
-    @Mock private NotifServiceListener mServiceListener;
+    @Mock private NotificationHandler mNotificationHandler;
     @Mock private NotificationManager mNotificationManager;
 
     private NotificationListener mListener;
@@ -69,21 +69,21 @@ public class NotificationListenerTest extends SysuiTestCase {
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 new Notification(), UserHandle.CURRENT, null, 0);
 
-        mListener.addNotificationListener(mServiceListener);
+        mListener.addNotificationHandler(mNotificationHandler);
     }
 
     @Test
     public void testNotificationAddCallsAddNotification() {
         mListener.onNotificationPosted(mSbn, mRanking);
         TestableLooper.get(this).processAllMessages();
-        verify(mServiceListener).onNotificationPosted(mSbn, mRanking);
+        verify(mNotificationHandler).onNotificationPosted(mSbn, mRanking);
     }
 
     @Test
     public void testNotificationRemovalCallsRemoveNotification() {
         mListener.onNotificationRemoved(mSbn, mRanking);
         TestableLooper.get(this).processAllMessages();
-        verify(mServiceListener).onNotificationRemoved(eq(mSbn), eq(mRanking), anyInt());
+        verify(mNotificationHandler).onNotificationRemoved(eq(mSbn), eq(mRanking), anyInt());
     }
 
     @Test
@@ -91,7 +91,7 @@ public class NotificationListenerTest extends SysuiTestCase {
         mListener.onNotificationRankingUpdate(mRanking);
         TestableLooper.get(this).processAllMessages();
         // RankingMap may be modified by plugins.
-        verify(mServiceListener).onNotificationRankingUpdate(any());
+        verify(mNotificationHandler).onNotificationRankingUpdate(any());
     }
 
     @Test

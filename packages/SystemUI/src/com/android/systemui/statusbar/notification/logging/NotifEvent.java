@@ -23,6 +23,7 @@ import android.service.notification.StatusBarNotification;
 import com.android.systemui.log.RichEvent;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
+import com.android.systemui.statusbar.notification.collection.notifcollection.GroupCoalescer;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -58,7 +59,10 @@ public class NotifEvent extends RichEvent {
      */
     @Override
     public String[] getEventLabels() {
-        assert (TOTAL_EVENT_LABELS == (TOTAL_NEM_EVENT_TYPES + TOTAL_LIST_BUILDER_EVENT_TYPES));
+        assert (TOTAL_EVENT_LABELS
+                == (TOTAL_NEM_EVENT_TYPES
+                        + TOTAL_LIST_BUILDER_EVENT_TYPES
+                        + TOTAL_COALESCER_EVENT_TYPES));
         return EVENT_LABELS;
     }
 
@@ -141,7 +145,10 @@ public class NotifEvent extends RichEvent {
                     "LifetimeExtended",
                     "RemoveIntercepted",
                     "InflationAborted",
-                    "Inflated"
+                    "Inflated",
+
+                    "CoalescedEvent",
+                    "EarlyBatchEmit"
             };
 
     private static final int TOTAL_EVENT_LABELS = EVENT_LABELS.length;
@@ -167,7 +174,7 @@ public class NotifEvent extends RichEvent {
     /**
      * Events related to {@link NotificationEntryManager}
      */
-    public static final int NOTIF_ADDED = TOTAL_LIST_BUILDER_EVENT_TYPES + 0;
+    public static final int NOTIF_ADDED = TOTAL_LIST_BUILDER_EVENT_TYPES;
     public static final int NOTIF_REMOVED = TOTAL_LIST_BUILDER_EVENT_TYPES + 1;
     public static final int NOTIF_UPDATED = TOTAL_LIST_BUILDER_EVENT_TYPES + 2;
     public static final int FILTER = TOTAL_LIST_BUILDER_EVENT_TYPES + 3;
@@ -180,4 +187,12 @@ public class NotifEvent extends RichEvent {
     public static final int INFLATION_ABORTED = TOTAL_LIST_BUILDER_EVENT_TYPES + 9;
     public static final int INFLATED = TOTAL_LIST_BUILDER_EVENT_TYPES + 10;
     private static final int TOTAL_NEM_EVENT_TYPES = 11;
+
+    /**
+     * Events related to {@link GroupCoalescer}
+     */
+    public static final int COALESCED_EVENT = TOTAL_NEM_EVENT_TYPES;
+    public static final int EARLY_BATCH_EMIT = TOTAL_NEM_EVENT_TYPES + 1;
+    public static final int EMIT_EVENT_BATCH = TOTAL_NEM_EVENT_TYPES + 2;
+    private static final int TOTAL_COALESCER_EVENT_TYPES = 2;
 }

@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.collection;
+package com.android.systemui.statusbar.notification.collection.notifcollection
 
-import java.util.Collection;
+import android.service.notification.NotificationListenerService.Ranking
+import android.service.notification.StatusBarNotification
 
-/**
- * Interface for the class responsible for converting a NotifCollection into the final sorted,
- * filtered, and grouped list of currently visible notifications.
- */
-public interface CollectionReadyForBuildListener {
-    /**
-     * Called by the NotifCollection to indicate that something in the collection has changed and
-     * that the list builder should regenerate the list.
-     */
-    void onBuildList(Collection<NotificationEntry> entries);
+data class CoalescedEvent(
+    val key: String,
+    var position: Int,
+    var sbn: StatusBarNotification,
+    var ranking: Ranking,
+    var batch: EventBatch?
+) {
+    override fun toString(): String {
+        return "CoalescedEvent(key=$key)"
+    }
 }

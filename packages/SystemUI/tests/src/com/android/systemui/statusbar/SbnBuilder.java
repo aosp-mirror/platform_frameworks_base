@@ -116,6 +116,27 @@ public class SbnBuilder {
 
     public SbnBuilder setNotification(Notification notification) {
         mNotification = notification;
+        mNotificationBuilder = null;
+        return this;
+    }
+
+    public SbnBuilder setContentTitle(Context context, String contentTitle) {
+        modifyNotification(context).setContentTitle(contentTitle);
+        return this;
+    }
+
+    public SbnBuilder setContentText(Context context, String contentText) {
+        modifyNotification(context).setContentText(contentText);
+        return this;
+    }
+
+    public SbnBuilder setGroup(Context context, String groupKey) {
+        modifyNotification(context).setGroup(groupKey);
+        return this;
+    }
+
+    public SbnBuilder setGroupSummary(Context context, boolean isGroupSummary) {
+        modifyNotification(context).setGroupSummary(isGroupSummary);
         return this;
     }
 

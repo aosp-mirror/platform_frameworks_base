@@ -51,7 +51,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     private final Context mContext;
     private final NotificationManager mNotificationManager;
     private final Handler mMainHandler;
-    private final List<NotifServiceListener> mNotificationListeners = new ArrayList<>();
+    private final List<NotificationHandler> mNotificationHandlers = new ArrayList<>();
     private final ArrayList<NotificationSettingsListener> mSettingsListeners = new ArrayList<>();
 
     @Inject
@@ -65,11 +65,11 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     }
 
     /** Registers a listener that's notified when notifications are added/removed/etc. */
-    public void addNotificationListener(NotifServiceListener listener) {
-        if (mNotificationListeners.contains(listener)) {
+    public void addNotificationHandler(NotificationHandler handler) {
+        if (mNotificationHandlers.contains(handler)) {
             throw new IllegalArgumentException("Listener is already added");
         }
-        mNotificationListeners.add(listener);
+        mNotificationHandlers.add(handler);
     }
 
     /** Registers a listener that's notified when any notification-related settings change. */
@@ -100,7 +100,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             final RankingMap completeMap = new RankingMap(newRankings.toArray(new Ranking[0]));
 
             for (StatusBarNotification sbn : notifications) {
-                for (NotifServiceListener listener : mNotificationListeners) {
+                for (NotificationHandler listener : mNotificationHandlers) {
                     listener.onNotificationPosted(sbn, completeMap);
                 }
             }
@@ -117,8 +117,8 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             mMainHandler.post(() -> {
                 processForRemoteInput(sbn.getNotification(), mContext);
 
-                for (NotifServiceListener listener : mNotificationListeners) {
-                    listener.onNotificationPosted(sbn, rankingMap);
+                for (NotificationHandler handler : mNotificationHandlers) {
+                    handler.onNotificationPosted(sbn, rankingMap);
                 }
             });
         }
@@ -130,8 +130,8 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         if (DEBUG) Log.d(TAG, "onNotificationRemoved: " + sbn + " reason: " + reason);
         if (sbn != null && !onPluginNotificationRemoved(sbn, rankingMap)) {
             mMainHandler.post(() -> {
-                for (NotifServiceListener listener : mNotificationListeners) {
-                    listener.onNotificationRemoved(sbn, rankingMap, reason);
+                for (NotificationHandler handler : mNotificationHandlers) {
+                    handler.onNotificationRemoved(sbn, rankingMap, reason);
                 }
             });
         }
@@ -148,8 +148,8 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         if (rankingMap != null) {
             RankingMap r = onPluginRankingUpdate(rankingMap);
             mMainHandler.post(() -> {
-                for (NotifServiceListener listener : mNotificationListeners) {
-                    listener.onNotificationRankingUpdate(r);
+                for (NotificationHandler handler : mNotificationHandlers) {
+                    handler.onNotificationRankingUpdate(r);
                 }
             });
         }
@@ -207,7 +207,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     }
 
     /** Interface for listening to add/remove events that we receive from NotificationManager. */
-    public interface NotifServiceListener {
+    public interface NotificationHandler {
         void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap);
         void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap);
         void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap, int reason);
