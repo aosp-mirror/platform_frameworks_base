@@ -2044,7 +2044,7 @@ public class AppOpsManager {
      * transaction. Not set if this thread is currently not executing a two way binder transaction.
      *
      * @see #startNotedAppOpsCollection
-     * @see #markAppOpNoted
+     * @see #getNotedOpCollectionMode
      */
     private static final ThreadLocal<Integer> sBinderThreadCallingUid = new ThreadLocal<>();
 
@@ -2052,7 +2052,8 @@ public class AppOpsManager {
      * If a thread is currently executing a two-way binder transaction, this stores the op-codes of
      * the app-ops that were noted during this transaction.
      *
-     * @see #markAppOpNoted
+     * @see #getNotedOpCollectionMode
+     * @see #collectNotedOpSync
      */
     private static final ThreadLocal<ArrayMap<String, long[]>> sAppOpsNotedInThisBinderTransaction =
             new ThreadLocal<>();
@@ -6320,9 +6321,23 @@ public class AppOpsManager {
     public int noteOpNoThrow(int op, int uid, @Nullable String packageName,
             @Nullable String featureId, @Nullable String message) {
         try {
-            int mode = mService.noteOperation(op, uid, packageName, featureId);
+            int collectionMode = getNotedOpCollectionMode(uid, packageName, op);
+            if (collectionMode == COLLECT_ASYNC) {
+                if (message == null) {
+                    // Set stack trace as default message
+                    message = getFormattedStackTrace();
+                }
+            }
+
+            int mode = mService.noteOperation(op, uid, packageName, featureId,
+                    collectionMode == COLLECT_ASYNC, message);
+
             if (mode == MODE_ALLOWED) {
-                markAppOpNoted(uid, packageName, op, featureId, message);
+                if (collectionMode == COLLECT_SELF) {
+                    collectNotedOpForSelf(op, featureId);
+                } else if (collectionMode == COLLECT_SYNC) {
+                    collectNotedOpSync(op, featureId);
+                }
             }
 
             return mode;
@@ -6466,14 +6481,27 @@ public class AppOpsManager {
         int myUid = Process.myUid();
 
         try {
+            int collectionMode = getNotedOpCollectionMode(proxiedUid, proxiedPackageName, op);
+            if (collectionMode == COLLECT_ASYNC) {
+                if (message == null) {
+                    // Set stack trace as default message
+                    message = getFormattedStackTrace();
+                }
+            }
+
             int mode = mService.noteProxyOperation(op, proxiedUid, proxiedPackageName,
                     proxiedFeatureId, myUid, mContext.getOpPackageName(),
-                    mContext.getFeatureId());
-            if (mode == MODE_ALLOWED
-                    // Only collect app-ops when the proxy is trusted
-                    && mContext.checkPermission(Manifest.permission.UPDATE_APP_OPS_STATS, -1, myUid)
-                    == PackageManager.PERMISSION_GRANTED) {
-                markAppOpNoted(proxiedUid, proxiedPackageName, op, proxiedFeatureId, message);
+                    mContext.getFeatureId(), collectionMode == COLLECT_ASYNC, message);
+
+            if (mode == MODE_ALLOWED) {
+                if (collectionMode == COLLECT_SELF) {
+                    collectNotedOpForSelf(op, proxiedFeatureId);
+                } else if (collectionMode == COLLECT_SYNC
+                        // Only collect app-ops when the proxy is trusted
+                        && mContext.checkPermission(Manifest.permission.UPDATE_APP_OPS_STATS, -1,
+                        myUid) == PackageManager.PERMISSION_GRANTED) {
+                    collectNotedOpSync(op, proxiedFeatureId);
+                }
             }
 
             return mode;
@@ -6763,10 +6791,23 @@ public class AppOpsManager {
     public int startOpNoThrow(int op, int uid, @NonNull String packageName,
             boolean startIfModeDefault, @Nullable String featureId, @Nullable String message) {
         try {
+            int collectionMode = getNotedOpCollectionMode(uid, packageName, op);
+            if (collectionMode == COLLECT_ASYNC) {
+                if (message == null) {
+                    // Set stack trace as default message
+                    message = getFormattedStackTrace();
+                }
+            }
+
             int mode = mService.startOperation(getClientId(), op, uid, packageName,
-                    featureId, startIfModeDefault);
+                    featureId, startIfModeDefault, collectionMode == COLLECT_ASYNC, message);
+
             if (mode == MODE_ALLOWED) {
-                markAppOpNoted(uid, packageName, op, featureId, message);
+                if (collectionMode == COLLECT_SELF) {
+                    collectNotedOpForSelf(op, featureId);
+                } else if (collectionMode == COLLECT_SYNC) {
+                    collectNotedOpSync(op, featureId);
+                }
             }
 
             return mode;
@@ -6930,85 +6971,106 @@ public class AppOpsManager {
     }
 
     /**
-     * Mark an app-op as noted
+     * Collect a noted op for the current process.
+     *
+     * @param op The noted op
+     * @param featureId The feature the op is noted for
      */
-    private void markAppOpNoted(int uid, @Nullable String packageName, int code,
-            @Nullable String featureId, @Nullable String message) {
+    private void collectNotedOpForSelf(int op, @Nullable String featureId) {
+        synchronized (sLock) {
+            if (sNotedAppOpsCollector != null) {
+                sNotedAppOpsCollector.onSelfNoted(new SyncNotedAppOp(op, featureId));
+            }
+        }
+    }
+
+    /**
+     * Collect a noted op when inside of a two-way binder call.
+     *
+     * <p> Delivered to caller via {@link #prefixParcelWithAppOpsIfNeeded}
+     *
+     * @param op The noted op
+     * @param featureId The feature the op is noted for
+     */
+    private void collectNotedOpSync(int op, @Nullable String featureId) {
+        // If this is inside of a two-way binder call:
+        // We are inside of a two-way binder call. Delivered to caller via
+        // {@link #prefixParcelWithAppOpsIfNeeded}
+        ArrayMap<String, long[]> appOpsNoted = sAppOpsNotedInThisBinderTransaction.get();
+        if (appOpsNoted == null) {
+            appOpsNoted = new ArrayMap<>(1);
+            sAppOpsNotedInThisBinderTransaction.set(appOpsNoted);
+        }
+
+        long[] appOpsNotedForFeature = appOpsNoted.get(featureId);
+        if (appOpsNotedForFeature == null) {
+            appOpsNotedForFeature = new long[2];
+            appOpsNoted.put(featureId, appOpsNotedForFeature);
+        }
+
+        if (op < 64) {
+            appOpsNotedForFeature[0] |= 1L << op;
+        } else {
+            appOpsNotedForFeature[1] |= 1L << (op - 64);
+        }
+    }
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            DONT_COLLECT,
+            COLLECT_SELF,
+            COLLECT_SYNC,
+            COLLECT_ASYNC
+    })
+    private @interface NotedOpCollectionMode {}
+    private static final int DONT_COLLECT = 0;
+    private static final int COLLECT_SELF = 1;
+    private static final int COLLECT_SYNC = 2;
+    private static final int COLLECT_ASYNC = 3;
+
+    /**
+     * Mark an app-op as noted.
+     */
+    private @NotedOpCollectionMode int getNotedOpCollectionMode(int uid,
+            @Nullable String packageName, int op) {
         if (packageName == null) {
             packageName = "android";
         }
 
         // check it the appops needs to be collected and cache result
-        if (sAppOpsToNote[code] == SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED) {
+        if (sAppOpsToNote[op] == SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED) {
             boolean shouldCollectNotes;
             try {
-                shouldCollectNotes = mService.shouldCollectNotes(code);
+                shouldCollectNotes = mService.shouldCollectNotes(op);
             } catch (RemoteException e) {
-                return;
+                return DONT_COLLECT;
             }
 
             if (shouldCollectNotes) {
-                sAppOpsToNote[code] = SHOULD_COLLECT_NOTE_OP;
+                sAppOpsToNote[op] = SHOULD_COLLECT_NOTE_OP;
             } else {
-                sAppOpsToNote[code] = SHOULD_NOT_COLLECT_NOTE_OP;
+                sAppOpsToNote[op] = SHOULD_NOT_COLLECT_NOTE_OP;
             }
         }
 
-        if (sAppOpsToNote[code] != SHOULD_COLLECT_NOTE_OP) {
-            return;
+        if (sAppOpsToNote[op] != SHOULD_COLLECT_NOTE_OP) {
+            return DONT_COLLECT;
+        }
+
+        synchronized (sLock) {
+            if (uid == Process.myUid()
+                    && packageName.equals(ActivityThread.currentOpPackageName())) {
+                return COLLECT_SELF;
+            }
         }
 
         Integer binderUid = sBinderThreadCallingUid.get();
 
-        synchronized (sLock) {
-            if (sNotedAppOpsCollector != null && uid == Process.myUid() && packageName.equals(
-                    ActivityThread.currentOpPackageName())) {
-                // This app is noting an app-op for itself. Deliver immediately.
-                sNotedAppOpsCollector.onSelfNoted(new SyncNotedAppOp(code, featureId));
-
-                return;
-            }
-        }
-
         if (binderUid != null && binderUid == uid) {
-            // If this is inside of a two-way binder call: Delivered to caller via
-            // {@link #prefixParcelWithAppOpsIfNeeded}
-            // We are inside of a two-way binder call. Delivered to caller via
-            // {@link #prefixParcelWithAppOpsIfNeeded}
-            ArrayMap<String, long[]> appOpsNoted = sAppOpsNotedInThisBinderTransaction.get();
-            if (appOpsNoted == null) {
-                appOpsNoted = new ArrayMap<>(1);
-                sAppOpsNotedInThisBinderTransaction.set(appOpsNoted);
-            }
-
-            long[] appOpsNotedForFeature = appOpsNoted.get(featureId);
-            if (appOpsNotedForFeature == null) {
-                appOpsNotedForFeature = new long[2];
-                appOpsNoted.put(featureId, appOpsNotedForFeature);
-            }
-
-            if (code < 64) {
-                appOpsNotedForFeature[0] |= 1L << code;
-            } else {
-                appOpsNotedForFeature[1] |= 1L << (code - 64);
-            }
+            return COLLECT_SYNC;
         } else {
-            // Cannot deliver the note synchronous: Hence send it to the system server to
-            // notify the noted process.
-            if (message == null) {
-                // Default message is a stack trace
-                message = getFormattedStackTrace();
-            }
-
-            long token = Binder.clearCallingIdentity();
-            try {
-                mService.noteAsyncOp(mContext.getOpPackageName(), uid, packageName, code,
-                        featureId, message);
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            return COLLECT_ASYNC;
         }
     }
 

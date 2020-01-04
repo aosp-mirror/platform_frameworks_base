@@ -570,7 +570,7 @@ public final class ActiveServices {
             }
             mAm.mAppOpsService.startOperation(AppOpsManager.getToken(mAm.mAppOpsService),
                     AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName, null,
-                    true);
+                    true, false, null);
         }
 
         final ServiceMap smap = getServiceMapLocked(r.userId);
@@ -1395,7 +1395,7 @@ public final class ActiveServices {
                         mAm.mAppOpsService.startOperation(
                                 AppOpsManager.getToken(mAm.mAppOpsService),
                                 AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName,
-                                null, true);
+                                null, true, false, "");
                         StatsLog.write(StatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
                                 r.appInfo.uid, r.shortInstanceName,
                                 StatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER);

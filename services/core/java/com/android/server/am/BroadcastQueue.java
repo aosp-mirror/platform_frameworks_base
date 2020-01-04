@@ -650,7 +650,7 @@ public final class BroadcastQueue {
                 // TODO moltmann: Set featureId from caller
                 if (opCode != AppOpsManager.OP_NONE
                         && mService.mAppOpsService.noteOperation(opCode, r.callingUid,
-                                r.callerPackage, null) != AppOpsManager.MODE_ALLOWED) {
+                        r.callerPackage, null, false, "") != AppOpsManager.MODE_ALLOWED) {
                     Slog.w(TAG, "Appop Denial: broadcasting "
                             + r.intent.toString()
                             + " from " + r.callerPackage + " (pid="
@@ -680,10 +680,10 @@ public final class BroadcastQueue {
                     break;
                 }
                 int appOp = AppOpsManager.permissionToOpCode(requiredPermission);
-                // TODO moltmann: Set componentId from caller
+                // TODO moltmann: Set featureId from caller
                 if (appOp != AppOpsManager.OP_NONE && appOp != r.appOp
                         && mService.mAppOpsService.noteOperation(appOp,
-                        filter.receiverList.uid, filter.packageName, null)
+                        filter.receiverList.uid, filter.packageName, null, false, "")
                         != AppOpsManager.MODE_ALLOWED) {
                     Slog.w(TAG, "Appop Denial: receiving "
                             + r.intent.toString()
@@ -713,10 +713,10 @@ public final class BroadcastQueue {
                 skip = true;
             }
         }
-        // TODO moltmann: Set componentId from caller
+        // TODO moltmann: Set featureId from caller
         if (!skip && r.appOp != AppOpsManager.OP_NONE
                 && mService.mAppOpsService.noteOperation(r.appOp,
-                filter.receiverList.uid, filter.packageName, null)
+                filter.receiverList.uid, filter.packageName, null, false, "")
                 != AppOpsManager.MODE_ALLOWED) {
             Slog.w(TAG, "Appop Denial: receiving "
                     + r.intent.toString()
@@ -1370,10 +1370,10 @@ public final class BroadcastQueue {
             skip = true;
         } else if (!skip && info.activityInfo.permission != null) {
             final int opCode = AppOpsManager.permissionToOpCode(info.activityInfo.permission);
-            // TODO moltmann: Set componentId from caller
+            // TODO moltmann: Set featureId from caller
             if (opCode != AppOpsManager.OP_NONE
-                    && mService.mAppOpsService.noteOperation(opCode, r.callingUid,
-                            r.callerPackage, null) != AppOpsManager.MODE_ALLOWED) {
+                    && mService.mAppOpsService.noteOperation(opCode, r.callingUid, r.callerPackage,
+                    null, false, "") != AppOpsManager.MODE_ALLOWED) {
                 Slog.w(TAG, "Appop Denial: broadcasting "
                         + r.intent.toString()
                         + " from " + r.callerPackage + " (pid="
@@ -1409,10 +1409,11 @@ public final class BroadcastQueue {
                     break;
                 }
                 int appOp = AppOpsManager.permissionToOpCode(requiredPermission);
-                // TODO moltmann: Set componentId from caller
+                // TODO moltmann: Set featureId from caller
                 if (appOp != AppOpsManager.OP_NONE && appOp != r.appOp
                         && mService.mAppOpsService.noteOperation(appOp,
-                        info.activityInfo.applicationInfo.uid, info.activityInfo.packageName, null)
+                        info.activityInfo.applicationInfo.uid, info.activityInfo.packageName, null,
+                        false, "")
                         != AppOpsManager.MODE_ALLOWED) {
                     Slog.w(TAG, "Appop Denial: receiving "
                             + r.intent + " to "
@@ -1426,10 +1427,11 @@ public final class BroadcastQueue {
                 }
             }
         }
-        // TODO moltmann: Set componentId from caller
+        // TODO moltmann: Set featureId from caller
         if (!skip && r.appOp != AppOpsManager.OP_NONE
                 && mService.mAppOpsService.noteOperation(r.appOp,
-                info.activityInfo.applicationInfo.uid, info.activityInfo.packageName, null)
+                info.activityInfo.applicationInfo.uid, info.activityInfo.packageName, null, false,
+                "")
                 != AppOpsManager.MODE_ALLOWED) {
             Slog.w(TAG, "Appop Denial: receiving "
                     + r.intent + " to "

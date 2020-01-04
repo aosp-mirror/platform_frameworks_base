@@ -902,7 +902,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     boolean hasSystemAlertWindowPermission(int callingUid, int callingPid, String callingPackage) {
         final int mode = getAppOpsService().noteOperation(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-                callingUid, callingPackage, /* featureId */ null);
+                callingUid, callingPackage, /* featureId */ null, false, "");
         if (mode == AppOpsManager.MODE_DEFAULT) {
             return checkPermission(Manifest.permission.SYSTEM_ALERT_WINDOW, callingPid, callingUid)
                     == PERMISSION_GRANTED;
