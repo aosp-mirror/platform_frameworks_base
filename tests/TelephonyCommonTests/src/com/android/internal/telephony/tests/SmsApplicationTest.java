@@ -17,26 +17,34 @@
 package com.android.internal.telephony.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.app.AppOpsManager;
 import android.app.role.RoleManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.net.Uri;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Telephony;
 import android.telephony.TelephonyManager;
@@ -48,11 +56,15 @@ import com.android.internal.telephony.SmsApplication;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Unit tests for the {@link SmsApplication} utility class
@@ -80,6 +92,13 @@ public class SmsApplicationTest {
             AppOpsManager.OPSTR_READ_CELL_BROADCASTS
     };
 
+    private static final Set<String> SCHEMES_FOR_PREFERRED_APP = Arrays.stream(new String[]{
+            "mms",
+            "mmsto",
+            "sms",
+            "smsto"
+    }).collect(Collectors.toSet());
+
     @Mock private Context mContext;
     @Mock private TelephonyManager mTelephonyManager;
     @Mock private RoleManager mRoleManager;
@@ -94,13 +113,16 @@ public class SmsApplicationTest {
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mContext.getSystemService(RoleManager.class)).thenReturn(mRoleManager);
         when(mContext.getSystemService(AppOpsManager.class)).thenReturn(mAppOpsManager);
+        when(mContext.createContextAsUser(isNotNull(), anyInt())).thenReturn(mContext);
 
         doAnswer(invocation -> getResolveInfosForIntent(invocation.getArgument(0)))
                 .when(mPackageManager)
-                .queryBroadcastReceiversAsUser(nullable(Intent.class), anyInt(), anyInt());
+                .queryBroadcastReceiversAsUser(nullable(Intent.class), anyInt(),
+                        nullable(UserHandle.class));
         doAnswer(invocation -> getResolveInfosForIntent(invocation.getArgument(0)))
                 .when(mPackageManager)
-                .queryIntentActivitiesAsUser(nullable(Intent.class), anyInt(), anyInt());
+                .queryIntentActivitiesAsUser(nullable(Intent.class), anyInt(),
+                        nullable(UserHandle.class));
         doAnswer(invocation -> getResolveInfosForIntent(invocation.getArgument(0)))
                 .when(mPackageManager)
                 .queryIntentServicesAsUser(nullable(Intent.class), anyInt(),
@@ -135,6 +157,37 @@ public class SmsApplicationTest {
                 SmsApplication.getDefaultSmsApplicationAsUser(mContext, true, 0));
         verify(mAppOpsManager, atLeastOnce()).setUidMode(AppOpsManager.OPSTR_READ_SMS, SMS_APP_UID,
                 AppOpsManager.MODE_ALLOWED);
+    }
+
+    @Test
+    public void testPackageChanged() throws Exception {
+        setupPackageInfosForCoreApps();
+        SmsApplication.initSmsPackageMonitor(mContext);
+        verify(mContext).createContextAsUser(eq(UserHandle.ALL), anyInt());
+        ArgumentCaptor<BroadcastReceiver> captor = ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mContext).registerReceiver(captor.capture(), isNotNull(),
+                isNull(), nullable(Handler.class));
+        BroadcastReceiver smsPackageMonitor = captor.getValue();
+
+        Intent packageChangedIntent = new Intent(Intent.ACTION_PACKAGE_CHANGED);
+        packageChangedIntent.setData(
+                Uri.fromParts("package", TEST_COMPONENT_NAME.getPackageName(), null));
+        smsPackageMonitor.onReceive(mContext, packageChangedIntent);
+
+        ArgumentCaptor<IntentFilter> intentFilterCaptor =
+                ArgumentCaptor.forClass(IntentFilter.class);
+        verify(mPackageManager, times(SCHEMES_FOR_PREFERRED_APP.size()))
+                .replacePreferredActivity(intentFilterCaptor.capture(),
+                        eq(IntentFilter.MATCH_CATEGORY_SCHEME
+                                | IntentFilter.MATCH_ADJUSTMENT_NORMAL),
+                        isNotNull(List.class),
+                        eq(new ComponentName(TEST_COMPONENT_NAME.getPackageName(), SEND_TO_NAME)));
+
+        Set<String> capturedSchemes = intentFilterCaptor.getAllValues().stream()
+                .map(intentFilter -> intentFilter.getDataScheme(0))
+                .collect(Collectors.toSet());
+        assertEquals(SCHEMES_FOR_PREFERRED_APP.size(), capturedSchemes.size());
+        assertTrue(SCHEMES_FOR_PREFERRED_APP.containsAll(capturedSchemes));
     }
 
     private void setupPackageInfosForCoreApps() throws Exception {
