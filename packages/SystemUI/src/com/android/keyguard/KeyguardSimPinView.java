@@ -26,8 +26,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -37,7 +35,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -258,12 +255,22 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
 
         @Override
         public void run() {
-            try {
-                if (DEBUG) {
-                    Log.v(TAG, "call supplyPinReportResultForSubscriber(subid=" + mSubId + ")");
-                }
-                final int[] result = ITelephony.Stub.asInterface(ServiceManager
-                        .checkService("phone")).supplyPinReportResultForSubscriber(mSubId, mPin);
+            if (DEBUG) {
+                Log.v(TAG, "call supplyPinReportResultForSubscriber(subid=" + mSubId + ")");
+            }
+            TelephonyManager telephonyManager =
+                    ((TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE))
+                            .createForSubscriptionId(mSubId);
+            final int[] result = telephonyManager.supplyPinReportResult(mPin);
+            if (result == null || result.length == 0) {
+                Log.e(TAG, "Error result for supplyPinReportResult.");
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onSimCheckResponse(PhoneConstants.PIN_GENERAL_FAILURE, -1);
+                    }
+                });
+            } else {
                 if (DEBUG) {
                     Log.v(TAG, "supplyPinReportResult returned: " + result[0] + " " + result[1]);
                 }
@@ -271,14 +278,6 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                     @Override
                     public void run() {
                         onSimCheckResponse(result[0], result[1]);
-                    }
-                });
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException for supplyPinReportResult:", e);
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onSimCheckResponse(PhoneConstants.PIN_GENERAL_FAILURE, -1);
                     }
                 });
             }
