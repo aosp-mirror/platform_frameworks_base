@@ -157,7 +157,6 @@ public final class SurfaceControl implements Parcelable {
     private static native DisplayedContentSample nativeGetDisplayedContentSample(
             IBinder displayToken, long numFrames, long timestamp);
     private static native int nativeGetActiveConfig(IBinder displayToken);
-    private static native boolean nativeSetActiveConfig(IBinder displayToken, int id);
     private static native boolean nativeSetDesiredDisplayConfigSpecs(IBinder displayToken,
             SurfaceControl.DesiredDisplayConfigSpecs desiredDisplayConfigSpecs);
     private static native SurfaceControl.DesiredDisplayConfigSpecs
@@ -1472,16 +1471,6 @@ public final class SurfaceControl implements Parcelable {
         return nativeGetDisplayedContentSample(displayToken, maxFrames, timestamp);
     }
 
-
-    /**
-     * @hide
-     */
-    public static boolean setActiveConfig(IBinder displayToken, int id) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-        return nativeSetActiveConfig(displayToken, id);
-    }
 
     /**
      * Contains information about desired display configuration.

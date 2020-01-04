@@ -816,13 +816,6 @@ static jint nativeGetActiveConfig(JNIEnv* env, jclass clazz, jobject tokenObj) {
     return static_cast<jint>(SurfaceComposerClient::getActiveConfig(token));
 }
 
-static jboolean nativeSetActiveConfig(JNIEnv* env, jclass clazz, jobject tokenObj, jint id) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
-    if (token == NULL) return JNI_FALSE;
-    status_t err = SurfaceComposerClient::setActiveConfig(token, static_cast<int>(id));
-    return err == NO_ERROR ? JNI_TRUE : JNI_FALSE;
-}
-
 static jintArray nativeGetDisplayColorModes(JNIEnv* env, jclass, jobject tokenObj) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return NULL;
@@ -1388,8 +1381,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetDisplayConfigs },
     {"nativeGetActiveConfig", "(Landroid/os/IBinder;)I",
             (void*)nativeGetActiveConfig },
-    {"nativeSetActiveConfig", "(Landroid/os/IBinder;I)Z",
-            (void*)nativeSetActiveConfig },
     {"nativeSetDesiredDisplayConfigSpecs",
             "(Landroid/os/IBinder;Landroid/view/SurfaceControl$DesiredDisplayConfigSpecs;)Z",
             (void*)nativeSetDesiredDisplayConfigSpecs },
