@@ -585,10 +585,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                                 resolver,
                                 Global.LOW_POWER_MODE_TRIGGER_LEVEL,
                                 batterySaverTriggerLevel);
-                        Secure.putInt(
+                        Secure.putIntForUser(
                                 resolver,
                                 Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
-                                1);
+                                1, UserHandle.USER_CURRENT);
                     });
         } else {
             d.setTitle(R.string.battery_saver_confirmation_title);
