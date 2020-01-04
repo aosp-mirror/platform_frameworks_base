@@ -468,9 +468,7 @@ public class NetworkStatsFactoryTest extends NetworkStatsBaseTest {
         long appRxBytesAfter = 439237478L;
         assertEquals("App traffic should be ~100MB", 110553449, appRxBytesAfter - appRxBytesBefore);
 
-        long rootRxBytesBefore = 1394011L;
-        long rootRxBytesAfter = 1398634L;
-        assertEquals("UID 0 traffic should be ~0", 4623, rootRxBytesAfter - rootRxBytesBefore);
+        long rootRxBytes = 330187296L;
 
         mFactory.noteStackedIface("v4-wlan0", "wlan0");
         NetworkStats stats;
@@ -478,12 +476,12 @@ public class NetworkStatsFactoryTest extends NetworkStatsBaseTest {
         // Stats snapshot before the download
         stats = parseDetailedStats(R.raw.xt_qtaguid_with_clat_100mb_download_before);
         assertStatsEntry(stats, "v4-wlan0", 10106, SET_FOREGROUND, 0x0, appRxBytesBefore, 5199872L);
-        assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0x0, rootRxBytesBefore, 0L);
+        assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0x0, rootRxBytes, 0L);
 
         // Stats snapshot after the download
         stats = parseDetailedStats(R.raw.xt_qtaguid_with_clat_100mb_download_after);
         assertStatsEntry(stats, "v4-wlan0", 10106, SET_FOREGROUND, 0x0, appRxBytesAfter, 7867488L);
-        assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0x0, rootRxBytesAfter, 0L);
+        assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0x0, rootRxBytes, 0L);
     }
 
     /**
