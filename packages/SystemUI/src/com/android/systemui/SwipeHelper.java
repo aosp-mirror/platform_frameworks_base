@@ -694,7 +694,7 @@ public class SwipeHelper implements Gefingerpoken {
 
     public boolean isFalseGesture(MotionEvent ev) {
         boolean falsingDetected = mCallback.isAntiFalsingNeeded();
-        if (mFalsingManager.isClassiferEnabled()) {
+        if (mFalsingManager.isClassifierEnabled()) {
             falsingDetected = falsingDetected && mFalsingManager.isFalseTouch();
         } else {
             falsingDetected = falsingDetected && !mTouchAboveFalsingThreshold;

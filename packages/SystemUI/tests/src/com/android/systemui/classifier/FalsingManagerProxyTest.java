@@ -21,16 +21,17 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHT
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 
-import android.os.Handler;
 import android.provider.DeviceConfig;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
+import android.util.DisplayMetrics;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
+import com.android.systemui.dock.DockManager;
+import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
@@ -47,24 +48,22 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class FalsingManagerProxyTest extends SysuiTestCase {
     @Mock(stubOnly = true)
     PluginManager mPluginManager;
     @Mock(stubOnly = true)
     ProximitySensor mProximitySensor;
-    private Handler mHandler;
     private FalsingManagerProxy mProxy;
     private DeviceConfigProxy mDeviceConfig;
-    private TestableLooper mTestableLooper;
+    private DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
+    private DockManager mDockManager = new DockManagerFake();
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
-        mTestableLooper = TestableLooper.get(this);
-        mHandler = new Handler(mTestableLooper.getLooper());
         mDeviceConfig = new DeviceConfigProxyFake();
         mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_MANAGER_ENABLED, "false", false);
@@ -79,8 +78,8 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
 
     @Test
     public void test_brightLineFalsingManagerDisabled() {
-        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mHandler, mProximitySensor,
-                mDeviceConfig, mUiBgExecutor);
+        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor, mDisplayMetrics,
+                mProximitySensor, mDeviceConfig, mDockManager, mUiBgExecutor);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(FalsingManagerImpl.class));
     }
 
@@ -88,27 +87,27 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
     public void test_brightLineFalsingManagerEnabled() throws InterruptedException {
         mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_MANAGER_ENABLED, "true", false);
-        mTestableLooper.processAllMessages();
-        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mHandler, mProximitySensor,
-                mDeviceConfig, mUiBgExecutor);
+        mExecutor.runAllReady();
+        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor, mDisplayMetrics,
+                mProximitySensor, mDeviceConfig, mDockManager, mUiBgExecutor);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(BrightLineFalsingManager.class));
     }
 
     @Test
     public void test_brightLineFalsingManagerToggled() throws InterruptedException {
-        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mHandler, mProximitySensor,
-                mDeviceConfig, mUiBgExecutor);
+        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor, mDisplayMetrics,
+                mProximitySensor, mDeviceConfig, mDockManager, mUiBgExecutor);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(FalsingManagerImpl.class));
 
         mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_MANAGER_ENABLED, "true", false);
-        mTestableLooper.processAllMessages();
+        mExecutor.runAllReady();
         assertThat(mProxy.getInternalFalsingManager(),
                 instanceOf(BrightLineFalsingManager.class));
 
         mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_MANAGER_ENABLED, "false", false);
-        mTestableLooper.processAllMessages();
+        mExecutor.runAllReady();
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(FalsingManagerImpl.class));
     }
 }

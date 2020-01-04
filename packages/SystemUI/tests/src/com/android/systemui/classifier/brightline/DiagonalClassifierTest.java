@@ -24,7 +24,6 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
@@ -39,7 +38,6 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class DiagonalClassifierTest extends ClassifierTest {
 
     // Next variable is not actually five, but is very close. 5 degrees is currently the value

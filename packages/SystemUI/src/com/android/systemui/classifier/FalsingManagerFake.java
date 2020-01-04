@@ -90,7 +90,7 @@ public class FalsingManagerFake implements FalsingManager {
     }
 
     @Override
-    public boolean isClassiferEnabled() {
+    public boolean isClassifierEnabled() {
         return mIsClassiferEnabled;
     }
 

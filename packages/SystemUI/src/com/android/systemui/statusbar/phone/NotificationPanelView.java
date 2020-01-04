@@ -1299,7 +1299,7 @@ public class NotificationPanelView extends PanelView implements
         if (!needsAntiFalsing()) {
             return false;
         }
-        if (mFalsingManager.isClassiferEnabled()) {
+        if (mFalsingManager.isClassifierEnabled()) {
             return mFalsingManager.isFalseTouch();
         }
         return !mQsTouchAboveFalsingThreshold;
