@@ -9146,30 +9146,37 @@ package android.telephony {
 
   public abstract class CellIdentity implements android.os.Parcelable {
     method @NonNull public abstract android.telephony.CellLocation asCellLocation();
+    method @NonNull public abstract android.telephony.CellIdentity sanitizeLocationInfo();
   }
 
   public final class CellIdentityCdma extends android.telephony.CellIdentity {
     method @NonNull public android.telephony.cdma.CdmaCellLocation asCellLocation();
+    method @NonNull public android.telephony.CellIdentityCdma sanitizeLocationInfo();
   }
 
   public final class CellIdentityGsm extends android.telephony.CellIdentity {
     method @NonNull public android.telephony.gsm.GsmCellLocation asCellLocation();
+    method @NonNull public android.telephony.CellIdentityGsm sanitizeLocationInfo();
   }
 
   public final class CellIdentityLte extends android.telephony.CellIdentity {
     method @NonNull public android.telephony.gsm.GsmCellLocation asCellLocation();
+    method @NonNull public android.telephony.CellIdentityLte sanitizeLocationInfo();
   }
 
   public final class CellIdentityNr extends android.telephony.CellIdentity {
     method @NonNull public android.telephony.CellLocation asCellLocation();
+    method @NonNull public android.telephony.CellIdentityNr sanitizeLocationInfo();
   }
 
   public final class CellIdentityTdscdma extends android.telephony.CellIdentity {
     method @NonNull public android.telephony.gsm.GsmCellLocation asCellLocation();
+    method @NonNull public android.telephony.CellIdentityTdscdma sanitizeLocationInfo();
   }
 
   public final class CellIdentityWcdma extends android.telephony.CellIdentity {
     method @NonNull public android.telephony.gsm.GsmCellLocation asCellLocation();
+    method @NonNull public android.telephony.CellIdentityWcdma sanitizeLocationInfo();
   }
 
   public final class DataFailCause {
