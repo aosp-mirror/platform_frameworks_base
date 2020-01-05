@@ -217,6 +217,8 @@ public class DpmMockContext extends MockContext {
                 return mMockSystemServices.wifiManager;
             case Context.ACCOUNT_SERVICE:
                 return mMockSystemServices.accountManager;
+            case Context.TELEPHONY_SERVICE:
+                return mMockSystemServices.telephonyManager;
         }
         throw new UnsupportedOperationException();
     }

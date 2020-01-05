@@ -3559,7 +3559,8 @@ public final class Telephony {
          * can manage DPC-owned APNs.
          * @hide
          */
-        public static final Uri DPC_URI = Uri.parse("content://telephony/carriers/dpc");
+        @SystemApi
+        public static final @NonNull Uri DPC_URI = Uri.parse("content://telephony/carriers/dpc");
 
         /**
          * The {@code content://} style URL to be called from Telephony to query APNs.
@@ -3866,6 +3867,13 @@ public final class Telephony {
          */
         @SystemApi
         public static final String USER_EDITABLE = "user_editable";
+
+        /**
+         * Integer value denoting an invalid APN id
+         * @hide
+         */
+        @SystemApi
+        public static final int INVALID_APN_ID = -1;
 
         /**
          * {@link #EDITED_STATUS APN edit status} indicates that this APN has not been edited or
