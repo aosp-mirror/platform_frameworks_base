@@ -491,8 +491,7 @@ java_library {
         "framework-sdkextensions-stubs-systemapi",
         // TODO(b/146167933): Use framework-statsd-stubs instead.
         "framework-statsd",
-        // TODO(b/140299412): should be framework-wifi-stubs
-        "framework-wifi",
+        "framework-wifi-stubs",
         "ike-stubs",
         // TODO(b/147200698): should be the stub of framework-tethering
         "framework-tethering",
@@ -528,7 +527,8 @@ java_library {
         "compat-changeid-annotation-processor",
     ],
     static_libs: [
-        "exoplayer2-core"
+        "exoplayer2-core",
+        "android.hardware.wifi-V1.0-java-constants",
     ]
 }
 
