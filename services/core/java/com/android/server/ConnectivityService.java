@@ -50,8 +50,11 @@ import static android.system.OsConstants.IPPROTO_UDP;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import static java.util.Map.Entry;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -64,6 +67,7 @@ import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.net.CaptivePortal;
 import android.net.ConnectionInfo;
+import android.net.ConnectivityDiagnosticsManager.ConnectivityReport;
 import android.net.ConnectivityManager;
 import android.net.ICaptivePortal;
 import android.net.IConnectivityDiagnosticsCallback;
@@ -131,6 +135,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -171,6 +176,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.LocationPermissionChecker;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
@@ -493,9 +499,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
      /**
       * Event for NetworkMonitor/NetworkAgentInfo to inform ConnectivityService that the network has
       * been tested.
-      * obj = String representing URL that Internet probe was redirect to, if it was redirected.
-      * arg1 = One of the NETWORK_TESTED_RESULT_* constants.
-      * arg2 = NetID.
+      * obj = {@link NetworkTestedResults} representing information sent from NetworkMonitor.
+      * data = PersistableBundle of extras passed from NetworkMonitor. If {@link
+      * NetworkMonitorCallbacks#notifyNetworkTested} is called, this will be null.
       */
     private static final int EVENT_NETWORK_TESTED = 41;
 
@@ -597,6 +603,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private Set<String> mWolSupportedInterfaces;
 
     private TelephonyManager mTelephonyManager;
+    private final AppOpsManager mAppOpsManager;
+
+    private final LocationPermissionChecker mLocationPermissionChecker;
 
     private KeepaliveTracker mKeepaliveTracker;
     private NetworkNotificationManager mNotifier;
@@ -993,6 +1002,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mNetd = netd;
         mKeyStore = KeyStore.getInstance();
         mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+        mLocationPermissionChecker = new LocationPermissionChecker(mContext);
 
         // To ensure uid rules are synchronized with Network Policy, register for
         // NetworkPolicyManagerService events must happen prior to NetworkPolicyManagerService
@@ -2093,6 +2104,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
     }
 
+    private boolean checkNetworkStackPermission(int pid, int uid) {
+        return checkAnyPermissionOf(pid, uid,
+                android.Manifest.permission.NETWORK_STACK,
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
+    }
+
     private boolean checkNetworkSignalStrengthWakeupPermission(int pid, int uid) {
         return checkAnyPermissionOf(pid, uid,
                 android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP,
@@ -2739,88 +2756,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case EVENT_NETWORK_TESTED: {
-                    final NetworkAgentInfo nai = getNetworkAgentInfoForNetId(msg.arg2);
+                    final NetworkTestedResults results = (NetworkTestedResults) msg.obj;
+
+                    final NetworkAgentInfo nai = getNetworkAgentInfoForNetId(results.mNetId);
                     if (nai == null) break;
 
-                    final boolean wasPartial = nai.partialConnectivity;
-                    nai.partialConnectivity = ((msg.arg1 & NETWORK_VALIDATION_RESULT_PARTIAL) != 0);
-                    final boolean partialConnectivityChanged =
-                            (wasPartial != nai.partialConnectivity);
+                    handleNetworkTested(nai, results.mTestResult,
+                            (results.mRedirectUrl == null) ? "" : results.mRedirectUrl);
 
-                    final boolean valid = ((msg.arg1 & NETWORK_VALIDATION_RESULT_VALID) != 0);
-                    final boolean wasValidated = nai.lastValidated;
-                    final boolean wasDefault = isDefaultNetwork(nai);
-                    // Only show a connected notification if the network is pending validation
-                    // after the captive portal app was open, and it has now validated.
-                    if (nai.captivePortalValidationPending && valid) {
-                        // User is now logged in, network validated.
-                        nai.captivePortalValidationPending = false;
-                        showNetworkNotification(nai, NotificationType.LOGGED_IN);
-                    }
-
-                    final String redirectUrl = (msg.obj instanceof String) ? (String) msg.obj : "";
-
-                    if (DBG) {
-                        final String logMsg = !TextUtils.isEmpty(redirectUrl)
-                                 ? " with redirect to " + redirectUrl
-                                 : "";
-                        log(nai.name() + " validation " + (valid ? "passed" : "failed") + logMsg);
-                    }
-                    if (valid != nai.lastValidated) {
-                        if (wasDefault) {
-                            mDeps.getMetricsLogger()
-                                    .defaultNetworkMetrics().logDefaultNetworkValidity(
-                                            SystemClock.elapsedRealtime(), valid);
-                        }
-                        final int oldScore = nai.getCurrentScore();
-                        nai.lastValidated = valid;
-                        nai.everValidated |= valid;
-                        updateCapabilities(oldScore, nai, nai.networkCapabilities);
-                        // If score has changed, rebroadcast to NetworkProviders. b/17726566
-                        if (oldScore != nai.getCurrentScore()) sendUpdatedScoreToFactories(nai);
-                        if (valid) {
-                            handleFreshlyValidatedNetwork(nai);
-                            // Clear NO_INTERNET, PRIVATE_DNS_BROKEN, PARTIAL_CONNECTIVITY and
-                            // LOST_INTERNET notifications if network becomes valid.
-                            mNotifier.clearNotification(nai.network.netId,
-                                    NotificationType.NO_INTERNET);
-                            mNotifier.clearNotification(nai.network.netId,
-                                    NotificationType.LOST_INTERNET);
-                            mNotifier.clearNotification(nai.network.netId,
-                                    NotificationType.PARTIAL_CONNECTIVITY);
-                            mNotifier.clearNotification(nai.network.netId,
-                                    NotificationType.PRIVATE_DNS_BROKEN);
-                            // If network becomes valid, the hasShownBroken should be reset for
-                            // that network so that the notification will be fired when the private
-                            // DNS is broken again.
-                            nai.networkAgentConfig.hasShownBroken = false;
-                        }
-                    } else if (partialConnectivityChanged) {
-                        updateCapabilities(nai.getCurrentScore(), nai, nai.networkCapabilities);
-                    }
-                    updateInetCondition(nai);
-                    // Let the NetworkAgent know the state of its network
-                    Bundle redirectUrlBundle = new Bundle();
-                    redirectUrlBundle.putString(NetworkAgent.REDIRECT_URL_KEY, redirectUrl);
-                    // TODO: Evaluate to update partial connectivity to status to NetworkAgent.
-                    nai.asyncChannel.sendMessage(
-                            NetworkAgent.CMD_REPORT_NETWORK_STATUS,
-                            (valid ? NetworkAgent.VALID_NETWORK : NetworkAgent.INVALID_NETWORK),
-                            0, redirectUrlBundle);
-
-                    // If NetworkMonitor detects partial connectivity before
-                    // EVENT_PROMPT_UNVALIDATED arrives, show the partial connectivity notification
-                    // immediately. Re-notify partial connectivity silently if no internet
-                    // notification already there.
-                    if (!wasPartial && nai.partialConnectivity) {
-                        // Remove delayed message if there is a pending message.
-                        mHandler.removeMessages(EVENT_PROMPT_UNVALIDATED, nai.network);
-                        handlePromptUnvalidated(nai.network);
-                    }
-
-                    if (wasValidated && !nai.lastValidated) {
-                        handleNetworkUnvalidated(nai);
-                    }
+                    // Invoke ConnectivityReport generation for this Network test event.
+                    final Message m =
+                            mConnectivityDiagnosticsHandler.obtainMessage(
+                                    ConnectivityDiagnosticsHandler.EVENT_NETWORK_TESTED,
+                                    new ConnectivityReportEvent(results.mTimestampMillis, nai));
+                    m.setData(msg.getData());
+                    mConnectivityDiagnosticsHandler.sendMessage(m);
                     break;
                 }
                 case EVENT_PROVISIONING_NOTIFICATION: {
@@ -2871,6 +2821,87 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return true;
         }
 
+        private void handleNetworkTested(
+                @NonNull NetworkAgentInfo nai, int testResult, @NonNull String redirectUrl) {
+            final boolean wasPartial = nai.partialConnectivity;
+            nai.partialConnectivity = ((testResult & NETWORK_VALIDATION_RESULT_PARTIAL) != 0);
+            final boolean partialConnectivityChanged =
+                    (wasPartial != nai.partialConnectivity);
+
+            final boolean valid = ((testResult & NETWORK_VALIDATION_RESULT_VALID) != 0);
+            final boolean wasValidated = nai.lastValidated;
+            final boolean wasDefault = isDefaultNetwork(nai);
+            // Only show a connected notification if the network is pending validation
+            // after the captive portal app was open, and it has now validated.
+            if (nai.captivePortalValidationPending && valid) {
+                // User is now logged in, network validated.
+                nai.captivePortalValidationPending = false;
+                showNetworkNotification(nai, NotificationType.LOGGED_IN);
+            }
+
+            if (DBG) {
+                final String logMsg = !TextUtils.isEmpty(redirectUrl)
+                        ? " with redirect to " + redirectUrl
+                        : "";
+                log(nai.name() + " validation " + (valid ? "passed" : "failed") + logMsg);
+            }
+            if (valid != nai.lastValidated) {
+                if (wasDefault) {
+                    mDeps.getMetricsLogger()
+                            .defaultNetworkMetrics().logDefaultNetworkValidity(
+                            SystemClock.elapsedRealtime(), valid);
+                }
+                final int oldScore = nai.getCurrentScore();
+                nai.lastValidated = valid;
+                nai.everValidated |= valid;
+                updateCapabilities(oldScore, nai, nai.networkCapabilities);
+                // If score has changed, rebroadcast to NetworkProviders. b/17726566
+                if (oldScore != nai.getCurrentScore()) sendUpdatedScoreToFactories(nai);
+                if (valid) {
+                    handleFreshlyValidatedNetwork(nai);
+                    // Clear NO_INTERNET, PRIVATE_DNS_BROKEN, PARTIAL_CONNECTIVITY and
+                    // LOST_INTERNET notifications if network becomes valid.
+                    mNotifier.clearNotification(nai.network.netId,
+                            NotificationType.NO_INTERNET);
+                    mNotifier.clearNotification(nai.network.netId,
+                            NotificationType.LOST_INTERNET);
+                    mNotifier.clearNotification(nai.network.netId,
+                            NotificationType.PARTIAL_CONNECTIVITY);
+                    mNotifier.clearNotification(nai.network.netId,
+                            NotificationType.PRIVATE_DNS_BROKEN);
+                    // If network becomes valid, the hasShownBroken should be reset for
+                    // that network so that the notification will be fired when the private
+                    // DNS is broken again.
+                    nai.networkAgentConfig.hasShownBroken = false;
+                }
+            } else if (partialConnectivityChanged) {
+                updateCapabilities(nai.getCurrentScore(), nai, nai.networkCapabilities);
+            }
+            updateInetCondition(nai);
+            // Let the NetworkAgent know the state of its network
+            Bundle redirectUrlBundle = new Bundle();
+            redirectUrlBundle.putString(NetworkAgent.REDIRECT_URL_KEY, redirectUrl);
+            // TODO: Evaluate to update partial connectivity to status to NetworkAgent.
+            nai.asyncChannel.sendMessage(
+                    NetworkAgent.CMD_REPORT_NETWORK_STATUS,
+                    (valid ? NetworkAgent.VALID_NETWORK : NetworkAgent.INVALID_NETWORK),
+                    0, redirectUrlBundle);
+
+            // If NetworkMonitor detects partial connectivity before
+            // EVENT_PROMPT_UNVALIDATED arrives, show the partial connectivity notification
+            // immediately. Re-notify partial connectivity silently if no internet
+            // notification already there.
+            if (!wasPartial && nai.partialConnectivity) {
+                // Remove delayed message if there is a pending message.
+                mHandler.removeMessages(EVENT_PROMPT_UNVALIDATED, nai.network);
+                handlePromptUnvalidated(nai.network);
+            }
+
+            if (wasValidated && !nai.lastValidated) {
+                handleNetworkUnvalidated(nai);
+            }
+        }
+
         private int getCaptivePortalMode() {
             return Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.CAPTIVE_PORTAL_MODE,
@@ -2919,8 +2950,23 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         @Override
         public void notifyNetworkTested(int testResult, @Nullable String redirectUrl) {
-            mTrackerHandler.sendMessage(mTrackerHandler.obtainMessage(EVENT_NETWORK_TESTED,
-                    testResult, mNetId, redirectUrl));
+            notifyNetworkTestedWithExtras(testResult, redirectUrl, SystemClock.elapsedRealtime(),
+                    PersistableBundle.EMPTY);
+        }
+
+        @Override
+        public void notifyNetworkTestedWithExtras(
+                int testResult,
+                @Nullable String redirectUrl,
+                long timestampMillis,
+                @NonNull PersistableBundle extras) {
+            final Message msg =
+                    mTrackerHandler.obtainMessage(
+                            EVENT_NETWORK_TESTED,
+                            new NetworkTestedResults(
+                                    mNetId, testResult, timestampMillis, redirectUrl));
+            msg.setData(new Bundle(extras));
+            mTrackerHandler.sendMessage(msg);
         }
 
         @Override
@@ -7271,7 +7317,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @GuardedBy("mVpns")
     private Vpn getVpnIfOwner() {
-        final int uid = Binder.getCallingUid();
+        return getVpnIfOwner(Binder.getCallingUid());
+    }
+
+    @GuardedBy("mVpns")
+    private Vpn getVpnIfOwner(int uid) {
         final int user = UserHandle.getUserId(uid);
 
         final Vpn vpn = mVpns.get(user);
@@ -7383,6 +7433,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
          */
         private static final int EVENT_UNREGISTER_CONNECTIVITY_DIAGNOSTICS_CALLBACK = 2;
 
+        /**
+         * Event for {@link NetworkStateTrackerHandler} to trigger ConnectivityReport callbacks
+         * after processing {@link #EVENT_NETWORK_TESTED} events.
+         * obj = {@link ConnectivityReportEvent} representing ConnectivityReport info reported from
+         * NetworkMonitor.
+         * data = PersistableBundle of extras passed from NetworkMonitor.
+         *
+         * <p>See {@link ConnectivityService#EVENT_NETWORK_TESTED}.
+         */
+        private static final int EVENT_NETWORK_TESTED = ConnectivityService.EVENT_NETWORK_TESTED;
+
         private ConnectivityDiagnosticsHandler(Looper looper) {
             super(looper);
         }
@@ -7400,6 +7461,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             (IConnectivityDiagnosticsCallback) msg.obj, msg.arg1);
                     break;
                 }
+                case EVENT_NETWORK_TESTED: {
+                    final ConnectivityReportEvent reportEvent =
+                            (ConnectivityReportEvent) msg.obj;
+
+                    // This is safe because {@link
+                    // NetworkMonitorCallbacks#notifyNetworkTestedWithExtras} receives a
+                    // PersistableBundle and converts it to the Bundle in the incoming Message. If
+                    // {@link NetworkMonitorCallbacks#notifyNetworkTested} is called, msg.data will
+                    // not be set. This is also safe, as msg.getData() will return an empty Bundle.
+                    final PersistableBundle extras = new PersistableBundle(msg.getData());
+                    handleNetworkTestedWithExtras(reportEvent, extras);
+                    break;
+                }
             }
         }
     }
@@ -7409,18 +7483,55 @@ public class ConnectivityService extends IConnectivityManager.Stub
     class ConnectivityDiagnosticsCallbackInfo implements Binder.DeathRecipient {
         @NonNull private final IConnectivityDiagnosticsCallback mCb;
         @NonNull private final NetworkRequestInfo mRequestInfo;
+        @NonNull private final String mCallingPackageName;
 
         @VisibleForTesting
         ConnectivityDiagnosticsCallbackInfo(
-                @NonNull IConnectivityDiagnosticsCallback cb, @NonNull NetworkRequestInfo nri) {
+                @NonNull IConnectivityDiagnosticsCallback cb,
+                @NonNull NetworkRequestInfo nri,
+                @NonNull String callingPackageName) {
             mCb = cb;
             mRequestInfo = nri;
+            mCallingPackageName = callingPackageName;
         }
 
         @Override
         public void binderDied() {
             log("ConnectivityDiagnosticsCallback IBinder died.");
             unregisterConnectivityDiagnosticsCallback(mCb);
+        }
+    }
+
+    /**
+     * Class used for sending information from {@link
+     * NetworkMonitorCallbacks#notifyNetworkTestedWithExtras} to the handler for processing it.
+     */
+    private static class NetworkTestedResults {
+        private final int mNetId;
+        private final int mTestResult;
+        private final long mTimestampMillis;
+        @Nullable private final String mRedirectUrl;
+
+        private NetworkTestedResults(
+                int netId, int testResult, long timestampMillis, @Nullable String redirectUrl) {
+            mNetId = netId;
+            mTestResult = testResult;
+            mTimestampMillis = timestampMillis;
+            mRedirectUrl = redirectUrl;
+        }
+    }
+
+    /**
+     * Class used for sending information from {@link NetworkStateTrackerHandler} to {@link
+     * ConnectivityDiagnosticsHandler}.
+     */
+    private static class ConnectivityReportEvent {
+        private final long mTimestampMillis;
+        @NonNull private final NetworkAgentInfo mNai;
+
+        private ConnectivityReportEvent(long timestampMillis, @NonNull NetworkAgentInfo nai) {
+            mTimestampMillis = timestampMillis;
+            mNai = nai;
         }
     }
 
@@ -7471,13 +7582,80 @@ public class ConnectivityService extends IConnectivityManager.Stub
         cb.asBinder().unlinkToDeath(mConnectivityDiagnosticsCallbacks.remove(cb), 0);
     }
 
+    private void handleNetworkTestedWithExtras(
+            @NonNull ConnectivityReportEvent reportEvent, @NonNull PersistableBundle extras) {
+        final NetworkAgentInfo nai = reportEvent.mNai;
+        final ConnectivityReport report =
+                new ConnectivityReport(
+                        reportEvent.mNai.network,
+                        reportEvent.mTimestampMillis,
+                        nai.linkProperties,
+                        nai.networkCapabilities,
+                        extras);
+        final List<IConnectivityDiagnosticsCallback> results =
+                getMatchingPermissionedCallbacks(nai);
+        for (final IConnectivityDiagnosticsCallback cb : results) {
+            try {
+                cb.onConnectivityReport(report);
+            } catch (RemoteException ex) {
+                loge("Error invoking onConnectivityReport", ex);
+            }
+        }
+    }
+
+    private List<IConnectivityDiagnosticsCallback> getMatchingPermissionedCallbacks(
+            @NonNull NetworkAgentInfo nai) {
+        final List<IConnectivityDiagnosticsCallback> results = new ArrayList<>();
+        for (Entry<IConnectivityDiagnosticsCallback, ConnectivityDiagnosticsCallbackInfo> entry :
+                mConnectivityDiagnosticsCallbacks.entrySet()) {
+            final ConnectivityDiagnosticsCallbackInfo cbInfo = entry.getValue();
+            final NetworkRequestInfo nri = cbInfo.mRequestInfo;
+            if (nai.satisfies(nri.request)) {
+                if (checkConnectivityDiagnosticsPermissions(
+                        nri.mPid, nri.mUid, nai, cbInfo.mCallingPackageName)) {
+                    results.add(entry.getKey());
+                }
+            }
+        }
+        return results;
+    }
+
+    @VisibleForTesting
+    boolean checkConnectivityDiagnosticsPermissions(
+            int callbackPid, int callbackUid, NetworkAgentInfo nai, String callbackPackageName) {
+        if (checkNetworkStackPermission(callbackPid, callbackUid)) {
+            return true;
+        }
+
+        if (!mLocationPermissionChecker.checkLocationPermission(
+                callbackPackageName, null /* featureId */, callbackUid, null /* message */)) {
+            return false;
+        }
+
+        synchronized (mVpns) {
+            if (getVpnIfOwner(callbackUid) != null) {
+                return true;
+            }
+        }
+
+        // Administrator UIDs also contains the Owner UID
+        if (nai.networkCapabilities.getAdministratorUids().contains(callbackUid)) {
+            return true;
+        }
+
+        return false;
+    }
+
     @Override
     public void registerConnectivityDiagnosticsCallback(
-            @NonNull IConnectivityDiagnosticsCallback callback, @NonNull NetworkRequest request) {
+            @NonNull IConnectivityDiagnosticsCallback callback,
+            @NonNull NetworkRequest request,
+            @NonNull String callingPackageName) {
         if (request.legacyType != TYPE_NONE) {
             throw new IllegalArgumentException("ConnectivityManager.TYPE_* are deprecated."
                     + " Please use NetworkCapabilities instead.");
         }
+        mAppOpsManager.checkPackage(Binder.getCallingUid(), callingPackageName);
 
         // This NetworkCapabilities is only used for matching to Networks. Clear out its owner uid
         // and administrator uids to be safe.
@@ -7495,7 +7673,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // callback's binder death.
         final NetworkRequestInfo nri = new NetworkRequestInfo(requestWithId);
         final ConnectivityDiagnosticsCallbackInfo cbInfo =
-                new ConnectivityDiagnosticsCallbackInfo(callback, nri);
+                new ConnectivityDiagnosticsCallbackInfo(callback, nri, callingPackageName);
 
         mConnectivityDiagnosticsHandler.sendMessage(
                 mConnectivityDiagnosticsHandler.obtainMessage(

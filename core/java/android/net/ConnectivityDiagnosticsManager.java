@@ -676,7 +676,8 @@ public class ConnectivityDiagnosticsManager {
         }
 
         try {
-            mService.registerConnectivityDiagnosticsCallback(binder, request);
+            mService.registerConnectivityDiagnosticsCallback(
+                    binder, request, mContext.getOpPackageName());
         } catch (RemoteException exception) {
             exception.rethrowFromSystemServer();
         }
