@@ -746,7 +746,13 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
   const std::string pass_through_source = StringPrintf("/mnt/pass_through/%d", user_id);
   bool isFuse = GetBoolProperty(kPropFuse, false);
 
-  PrepareDir(user_source, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT, fail_fn);
+  // Shell is neither AID_ROOT nor AID_EVERYBODY. Since it equally needs 'execute' access to
+  // /mnt/user/0 to 'adb shell ls /sdcard' for instance, we set the uid bit of /mnt/user/0 to
+  // AID_SHELL. This gives shell access along with apps running as group everybody (user 0 apps)
+  // These bits should be consistent with what is set in vold in
+  // Utils#MountUserFuse on FUSE volume mount
+  PrepareDir(user_source, 0710, user_id ? AID_ROOT : AID_SHELL,
+             multiuser_get_uid(user_id, AID_EVERYBODY), fail_fn);
 
   if (isFuse) {
     if (mount_mode == MOUNT_EXTERNAL_PASS_THROUGH || mount_mode ==
