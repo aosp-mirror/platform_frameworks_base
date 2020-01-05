@@ -858,8 +858,8 @@ public final class NetworkCapabilities implements Parcelable {
      *
      * <p>In general, user-supplied networks (such as WiFi networks) do not have an administrator.
      *
-     * <p>An app is granted owner privileges over Networks that it supplies. Owner privileges
-     * implicitly include administrator privileges.
+     * <p>An app is granted owner privileges over Networks that it supplies. The owner UID MUST
+     * always be included in administratorUids.
      *
      * @param administratorUids the UIDs to be set as administrators of this Network.
      * @hide
