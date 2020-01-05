@@ -135,7 +135,7 @@ class ResetTargetTaskHelper {
                                 + r + " out to bottom task " + targetTask);
                     } else {
                         targetTask = mParent.createTask(
-                                mParent.mStackSupervisor.getNextTaskIdForUserLocked(r.mUserId),
+                                mParent.mStackSupervisor.getNextTaskIdForUser(r.mUserId),
                                 r.info, null /* intent */, null /* voiceSession */,
                                 null /* voiceInteractor */, false /* toTop */);
                         targetTask.affinityIntent = r.intent;

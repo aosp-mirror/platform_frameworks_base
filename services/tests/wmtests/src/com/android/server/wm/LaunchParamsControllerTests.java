@@ -424,7 +424,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         void saveTask(Task task) {
             final int userId = task.mUserId;
             final ComponentName realActivity = task.realActivity;
-            mTmpParams.mPreferredDisplayId = task.getStack().mDisplayId;
+            mTmpParams.mPreferredDisplayId = task.getDisplayId();
             mTmpParams.mWindowingMode = task.getWindowingMode();
             if (task.mLastNonFullscreenBounds != null) {
                 mTmpParams.mBounds.set(task.mLastNonFullscreenBounds);

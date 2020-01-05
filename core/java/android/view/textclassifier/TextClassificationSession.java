@@ -20,6 +20,7 @@ import android.annotation.WorkerThread;
 import android.view.textclassifier.SelectionEvent.InvocationMethod;
 
 import com.android.internal.util.Preconditions;
+
 import java.util.Objects;
 
 /**
@@ -183,6 +184,7 @@ final class TextClassificationSession implements TextClassifier {
                     mSmartEvent = event;
                     break;
                 case SelectionEvent.ACTION_ABANDON:
+                case SelectionEvent.ACTION_OVERTYPE:
                     if (mPrevEvent != null) {
                         event.setEntityType(mPrevEvent.getEntityType());
                     }

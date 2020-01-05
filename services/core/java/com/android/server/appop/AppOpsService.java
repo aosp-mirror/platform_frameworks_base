@@ -221,7 +221,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             = new AppOpsManagerInternalImpl();
 
     /**
-     * Registered callbacks, called from {@link #noteAsyncOp}.
+     * Registered callbacks, called from {@link #collectAsyncNotedOp}.
      *
      * <p>(package name, uid) -> callbacks
      *
@@ -232,7 +232,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             mAsyncOpWatchers = new ArrayMap<>();
 
     /**
-     * Async note-ops collected from {@link #noteAsyncOp} that have not been delivered to a
+     * Async note-ops collected from {@link #collectAsyncNotedOp} that have not been delivered to a
      * callback yet.
      *
      * <p>(package name, uid) -> list&lt;ops&gt;
@@ -1436,11 +1436,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 return Zygote.MOUNT_EXTERNAL_NONE;
                             }
                             if (noteOperation(AppOpsManager.OP_READ_EXTERNAL_STORAGE, uid,
-                                    packageName, null) != AppOpsManager.MODE_ALLOWED) {
+                                    packageName, null, true, "External storage policy")
+                                    != AppOpsManager.MODE_ALLOWED) {
                                 return Zygote.MOUNT_EXTERNAL_NONE;
                             }
                             if (noteOperation(AppOpsManager.OP_WRITE_EXTERNAL_STORAGE, uid,
-                                    packageName, null) != AppOpsManager.MODE_ALLOWED) {
+                                    packageName, null, true, "External storage policy")
+                                    != AppOpsManager.MODE_ALLOWED) {
                                 return Zygote.MOUNT_EXTERNAL_READ;
                             }
                             return Zygote.MOUNT_EXTERNAL_WRITE;
@@ -2521,7 +2523,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public int noteProxyOperation(int code, int proxiedUid, String proxiedPackageName,
             String proxiedFeatureId, int proxyUid, String proxyPackageName,
-            String proxyFeatureId) {
+            String proxyFeatureId, boolean shouldCollectAsyncNotedOp, String message) {
         verifyIncomingUid(proxyUid);
         verifyIncomingOp(code);
 
@@ -2537,7 +2539,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         final int proxyFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXY
                 : AppOpsManager.OP_FLAG_UNTRUSTED_PROXY;
         final int proxyMode = noteOperationUnchecked(code, proxyUid, resolveProxyPackageName,
-                proxyFeatureId, Process.INVALID_UID, null, null, proxyFlags);
+                proxyFeatureId, Process.INVALID_UID, null, null, proxyFlags,
+                !isProxyTrusted, "proxy " + message);
         if (proxyMode != AppOpsManager.MODE_ALLOWED || Binder.getCallingUid() == proxiedUid) {
             return proxyMode;
         }
@@ -2550,23 +2553,27 @@ public class AppOpsService extends IAppOpsService.Stub {
                 : AppOpsManager.OP_FLAG_UNTRUSTED_PROXIED;
         return noteOperationUnchecked(code, proxiedUid, resolveProxiedPackageName,
                 proxiedFeatureId, proxyUid, resolveProxyPackageName, proxyFeatureId,
-                proxiedFlags);
+                proxiedFlags, shouldCollectAsyncNotedOp, message);
     }
 
     @Override
-    public int noteOperation(int code, int uid, String packageName, String featureId) {
+    public int noteOperation(int code, int uid, String packageName, String featureId,
+            boolean shouldCollectAsyncNotedOp, String message) {
         final CheckOpsDelegate delegate;
         synchronized (this) {
             delegate = mCheckOpsDelegate;
         }
         if (delegate == null) {
-            return noteOperationImpl(code, uid, packageName, featureId);
+            return noteOperationImpl(code, uid, packageName, featureId, shouldCollectAsyncNotedOp,
+                    message);
         }
-        return delegate.noteOperation(code, uid, packageName, featureId,
-                AppOpsService.this::noteOperationImpl);
+        return delegate.noteOperation(code, uid, packageName, featureId, shouldCollectAsyncNotedOp,
+                message, AppOpsService.this::noteOperationImpl);
     }
 
-    private int noteOperationImpl(int code, int uid, String packageName, String featureId) {
+    private int noteOperationImpl(int code, int uid, @Nullable String packageName,
+            @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
+            @Nullable String message) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         String resolvedPackageName = resolvePackageName(uid, packageName);
@@ -2574,12 +2581,14 @@ public class AppOpsService extends IAppOpsService.Stub {
             return AppOpsManager.MODE_IGNORED;
         }
         return noteOperationUnchecked(code, uid, resolvedPackageName, featureId,
-                Process.INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF);
+                Process.INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF,
+                shouldCollectAsyncNotedOp, message);
     }
 
-    private int noteOperationUnchecked(int code, int uid, String packageName, String featureId,
-            int proxyUid, String proxyPackageName, @Nullable String proxyFeatureId,
-            @OpFlags int flags) {
+    private int noteOperationUnchecked(int code, int uid, @NonNull String packageName,
+            @Nullable String featureId, int proxyUid, String proxyPackageName,
+            @Nullable String proxyFeatureId, @OpFlags int flags, boolean shouldCollectAsyncNotedOp,
+            @Nullable String message) {
         boolean isPrivileged;
         try {
             isPrivileged = verifyAndGetIsPrivileged(uid, packageName, featureId);
@@ -2650,6 +2659,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                     uidState.state, flags);
             scheduleOpNotedIfNeededLocked(code, uid, packageName,
                     AppOpsManager.MODE_ALLOWED);
+
+            if (shouldCollectAsyncNotedOp) {
+                collectAsyncNotedOp(uid, packageName, code, featureId, message);
+            }
+
             return AppOpsManager.MODE_ALLOWED;
         }
     }
@@ -2746,21 +2760,20 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    @Override
-    public void noteAsyncOp(String callingPackageName, int uid, String packageName, int opCode,
-            String featureId, String message) {
+    /**
+     * Collect an {@link AsyncNotedAppOp}.
+     *
+     * @param uid The uid the op was noted for
+     * @param packageName The package the op was noted for
+     * @param opCode The code of the op noted
+     * @param featureId The id of the feature to op was noted for
+     * @param message The message for the op noting
+     */
+    private void collectAsyncNotedOp(int uid, @NonNull String packageName, int opCode,
+            @Nullable String featureId, @NonNull String message) {
         Objects.requireNonNull(message);
-        verifyAndGetIsPrivileged(uid, packageName, featureId);
-
-        verifyIncomingUid(uid);
-        verifyIncomingOp(opCode);
 
         int callingUid = Binder.getCallingUid();
-        long now = System.currentTimeMillis();
-
-        if (callingPackageName != null) {
-            verifyAndGetIsPrivileged(callingUid, callingPackageName, featureId);
-        }
 
         long token = Binder.clearCallingIdentity();
         try {
@@ -2769,7 +2782,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                 RemoteCallbackList<IAppOpsAsyncNotedCallback> callbacks = mAsyncOpWatchers.get(key);
                 AsyncNotedAppOp asyncNotedOp = new AsyncNotedAppOp(opCode, callingUid,
-                        callingPackageName, featureId, message, now);
+                        featureId, message, System.currentTimeMillis());
                 final boolean[] wasNoteForwarded = {false};
 
                 if (callbacks != null) {
@@ -2882,7 +2895,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int startOperation(IBinder clientId, int code, int uid, String packageName,
-            String featureId, boolean startIfModeDefault) {
+            String featureId, boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
+            String message) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         String resolvedPackageName = resolvePackageName(uid, packageName);
@@ -2951,6 +2965,10 @@ public class AppOpsService extends IAppOpsService.Stub {
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        if (shouldCollectAsyncNotedOp) {
+            collectAsyncNotedOp(uid, packageName, code, featureId, message);
         }
 
         return AppOpsManager.MODE_ALLOWED;
@@ -4379,7 +4397,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                     if (shell.packageName != null) {
                         shell.mInterface.startOperation(shell.mToken, shell.op, shell.packageUid,
-                                shell.packageName, shell.featureId, true);
+                                shell.packageName, shell.featureId, true, true,
+                                "appops start shell command");
                     } else {
                         return -1;
                     }

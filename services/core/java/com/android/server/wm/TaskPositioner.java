@@ -449,7 +449,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
         }
 
         // This is a moving or scrolling operation.
-        mTask.getTaskStack().getDimBounds(mTmpRect);
+        mTask.getStack().getDimBounds(mTmpRect);
         // If a target window is covered by system bar, there is no way to move it again by touch.
         // So we exclude them from stack bounds. and then it will be shown inside stable area.
         Rect stableBounds = new Rect();

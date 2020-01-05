@@ -421,6 +421,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     @Test
     public void testUsersTasks() {
         mRecentTasks.setOnlyTestVisibleRange();
+        mRecentTasks.unloadUserDataFromMemoryLocked(TEST_USER_0_ID);
 
         // Setup some tasks for the users
         mTaskPersister.mUserTaskIdsOverride = new SparseBooleanArray();

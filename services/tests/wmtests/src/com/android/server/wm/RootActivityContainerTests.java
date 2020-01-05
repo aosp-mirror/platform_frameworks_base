@@ -857,7 +857,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         // Assert that the stack is returned as expected.
         assertNotNull(result);
         assertEquals("The display ID of the stack should same as secondary display ",
-                secondaryDisplay.mDisplayId, result.mDisplayId);
+                secondaryDisplay.mDisplayId, result.getDisplayId());
     }
 
     /**

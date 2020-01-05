@@ -600,11 +600,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private final SparseArray<ShellRoot> mShellRoots = new SparseArray<>();
 
-    /**
-     * Counter for next free stack ID to use for dynamic activity stacks. Unique across displays.
-     */
-    private static int sNextFreeStackId = 0;
-
     private RootWindowContainer mRootWindowContainer;
 
     /**
@@ -5694,7 +5689,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     @VisibleForTesting
     int getNextStackId() {
-        return sNextFreeStackId++;
+        return mAtmService.mStackSupervisor.getNextTaskIdForUser();
     }
 
     /**

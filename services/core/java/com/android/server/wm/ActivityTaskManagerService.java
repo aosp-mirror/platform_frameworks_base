@@ -902,7 +902,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     boolean hasSystemAlertWindowPermission(int callingUid, int callingPid, String callingPackage) {
         final int mode = getAppOpsService().noteOperation(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-                callingUid, callingPackage, /* featureId */ null);
+                callingUid, callingPackage, /* featureId */ null, false, "");
         if (mode == AppOpsManager.MODE_DEFAULT) {
             return checkPermission(Manifest.permission.SYSTEM_ALERT_WINDOW, callingPid, callingUid)
                     == PERMISSION_GRANTED;
@@ -2043,8 +2043,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public int getDisplayId(IBinder activityToken) throws RemoteException {
         synchronized (mGlobalLock) {
             final ActivityStack stack = ActivityRecord.getStackLocked(activityToken);
-            if (stack != null && stack.mDisplayId != INVALID_DISPLAY) {
-                return stack.mDisplayId;
+            if (stack != null && stack.getDisplayId() != INVALID_DISPLAY) {
+                return stack.getDisplayId();
             }
             return DEFAULT_DISPLAY;
         }
@@ -3202,7 +3202,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 final ActivityStack stack = r.getActivityStack();
                 final Task task = stack.createTask(
-                        mStackSupervisor.getNextTaskIdForUserLocked(r.mUserId), ainfo, intent,
+                        mStackSupervisor.getNextTaskIdForUser(r.mUserId), ainfo, intent,
                         null /* voiceSession */, null /* voiceInteractor */, !ON_TOP);
                 if (!mRecentTasks.addToBottom(task)) {
                     // The app has too many tasks already and we can't add any more
@@ -4312,7 +4312,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         if (params.hasSetAspectRatio()
                 && !mWindowManager.isValidPictureInPictureAspectRatio(
-                        r.getActivityStack().mDisplayId, params.getAspectRatio())) {
+                        r.getDisplayId(), params.getAspectRatio())) {
             final float minAspectRatio = mContext.getResources().getFloat(
                     com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
             final float maxAspectRatio = mContext.getResources().getFloat(

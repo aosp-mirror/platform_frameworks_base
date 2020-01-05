@@ -24,7 +24,6 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
@@ -41,7 +40,6 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class ProximityClassifierTest extends ClassifierTest {
 
     private static final long NS_PER_MS = 1000000;

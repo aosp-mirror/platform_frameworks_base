@@ -345,6 +345,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         spyOn(parentWindowContainer);
         parentWindowContainer.setBounds(fullScreenBounds);
         doReturn(parentWindowContainer).when(task).getParent();
+        doReturn(stack).when(task).getStack();
         doReturn(true).when(parentWindowContainer).handlesOrientationChangeFromDescendant();
 
         // Setting app to fixed portrait fits within parent, but Task shouldn't adjust the

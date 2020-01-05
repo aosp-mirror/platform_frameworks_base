@@ -521,7 +521,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     static final int STARTING_WINDOW_SHOWN = 1;
     static final int STARTING_WINDOW_REMOVED = 2;
     int mStartingWindowState = STARTING_WINDOW_NOT_SHOWN;
-    boolean mTaskOverlay = false; // Task is always on-top of other activities in the task.
+    private boolean mTaskOverlay = false; // Task is always on-top of other activities in the task.
 
     // Marking the reason why this activity is being relaunched. Mainly used to track that this
     // activity is being relaunched to fulfill a resize request due to compatibility issues, e.g. in
@@ -1222,7 +1222,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     ActivityStack getStack() {
-        return task != null ? task.getTaskStack() : null;
+        return task != null ? task.getStack() : null;
     }
 
     @Override
@@ -1269,8 +1269,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (getDisplayContent() != null) {
                 getDisplayContent().mClosingApps.remove(this);
             }
-        } else if (mLastParent != null && mLastParent.getTaskStack() != null) {
-            task.getTaskStack().mExitingActivities.remove(this);
+        } else if (mLastParent != null && mLastParent.getStack() != null) {
+            task.getStack().mExitingActivities.remove(this);
         }
         final ActivityStack stack = getStack();
 
@@ -5523,7 +5523,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (stack == null) {
             return INVALID_DISPLAY;
         }
-        return stack.mDisplayId;
+        return stack.getDisplayId();
     }
 
     final boolean isDestroyable() {
@@ -7449,6 +7449,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         final ActivityRecord rootActivity = task.getRootActivity(true);
         return this == rootActivity;
+    }
+
+    void setTaskOverlay(boolean taskOverlay) {
+        mTaskOverlay = taskOverlay;
+        setAlwaysOnTop(mTaskOverlay);
+    }
+
+    boolean isTaskOverlay() {
+        return mTaskOverlay;
     }
 
     @Override

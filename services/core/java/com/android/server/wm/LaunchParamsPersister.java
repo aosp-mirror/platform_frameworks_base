@@ -222,9 +222,7 @@ class LaunchParamsPersister {
 
     private boolean saveTaskToLaunchParam(Task task, PersistableLaunchParams params) {
         final ActivityStack stack = task.getStack();
-        final int displayId = stack.mDisplayId;
-        final DisplayContent display =
-                mSupervisor.mRootWindowContainer.getDisplayContent(displayId);
+        final DisplayContent display = stack.getDisplayContent();
         final DisplayInfo info = new DisplayInfo();
         display.mDisplay.getDisplayInfo(info);
 

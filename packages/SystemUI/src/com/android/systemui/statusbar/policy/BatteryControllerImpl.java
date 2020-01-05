@@ -193,6 +193,11 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     @Override
+    public boolean isPluggedIn() {
+        return mPluggedIn;
+    }
+
+    @Override
     public boolean isPowerSave() {
         return mPowerSave;
     }
