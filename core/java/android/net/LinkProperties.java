@@ -1674,7 +1674,7 @@ public final class LinkProperties implements Parcelable {
         dest.writeString(mPrivateDnsServerName);
         writeAddresses(dest, mPcscfs);
         dest.writeString(mDomains);
-        dest.writeByteArray(mDhcpServerAddress.getAddress());
+        writeAddress(dest, mDhcpServerAddress);
         dest.writeInt(mMtu);
         dest.writeString(mTcpBufferSizes);
         dest.writeInt(mRoutes.size());
@@ -1703,8 +1703,9 @@ public final class LinkProperties implements Parcelable {
         }
     }
 
-    private static void writeAddress(@NonNull Parcel dest, @NonNull InetAddress addr) {
-        dest.writeByteArray(addr.getAddress());
+    private static void writeAddress(@NonNull Parcel dest, @Nullable InetAddress addr) {
+        byte[] addressBytes = (addr == null ? null : addr.getAddress());
+        dest.writeByteArray(addressBytes);
         if (addr instanceof Inet6Address) {
             final Inet6Address v6Addr = (Inet6Address) addr;
             final boolean hasScopeId = v6Addr.getScopeId() != 0;
@@ -1713,9 +1714,11 @@ public final class LinkProperties implements Parcelable {
         }
     }
 
-    @NonNull
+    @Nullable
     private static InetAddress readAddress(@NonNull Parcel p) throws UnknownHostException {
         final byte[] addr = p.createByteArray();
+        if (addr == null) return null;
+
         if (addr.length == INET6_ADDR_LENGTH) {
             final boolean hasScopeId = p.readBoolean();
             final int scopeId = hasScopeId ? p.readInt() : 0;
