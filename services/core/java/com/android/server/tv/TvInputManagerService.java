@@ -1814,8 +1814,8 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public ParcelFileDescriptor openDvbDevice(DvbDeviceInfo info, int device)
-                throws RemoteException {
+        public ParcelFileDescriptor openDvbDevice(DvbDeviceInfo info,
+                @TvInputManager.DvbDeviceType int deviceType)  throws RemoteException {
             if (mContext.checkCallingPermission(android.Manifest.permission.DVB_DEVICE)
                     != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("Requires DVB_DEVICE permission");
@@ -1852,7 +1852,7 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 String deviceFileName;
-                switch (device) {
+                switch (deviceType) {
                     case TvInputManager.DVB_DEVICE_DEMUX:
                         deviceFileName = String.format(dvbDeviceFound
                                 ? "/dev/dvb/adapter%d/demux%d" : "/dev/dvb%d.demux%d",
@@ -1869,14 +1869,14 @@ public final class TvInputManagerService extends SystemService {
                                 info.getAdapterId(), info.getDeviceId());
                         break;
                     default:
-                        throw new IllegalArgumentException("Invalid DVB device: " + device);
+                        throw new IllegalArgumentException("Invalid DVB device: " + deviceType);
                 }
                 try {
                     // The DVB frontend device only needs to be opened in read/write mode, which
                     // allows performing tuning operations. The DVB demux and DVR device are enough
                     // to be opened in read only mode.
                     return ParcelFileDescriptor.open(new File(deviceFileName),
-                            TvInputManager.DVB_DEVICE_FRONTEND == device
+                            TvInputManager.DVB_DEVICE_FRONTEND == deviceType
                                     ? ParcelFileDescriptor.MODE_READ_WRITE
                                     : ParcelFileDescriptor.MODE_READ_ONLY);
                 } catch (FileNotFoundException e) {
