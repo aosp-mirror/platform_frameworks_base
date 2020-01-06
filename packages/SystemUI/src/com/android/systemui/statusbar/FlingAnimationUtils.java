@@ -368,13 +368,14 @@ public class FlingAnimationUtils {
     public static class Builder {
         private final DisplayMetrics mDisplayMetrics;
         float mMaxLengthSeconds;
-        float mSpeedUpFactor = 0.0f;
-        float mX2 = -1.0f;
-        float mY2 = 1.0f;
+        float mSpeedUpFactor;
+        float mX2;
+        float mY2;
 
         @Inject
         public Builder(DisplayMetrics displayMetrics) {
             mDisplayMetrics = displayMetrics;
+            reset();
         }
 
         public Builder setMaxLengthSeconds(float maxLengthSeconds) {
@@ -394,6 +395,15 @@ public class FlingAnimationUtils {
 
         public Builder setY2(float y2) {
             mY2 = y2;
+            return this;
+        }
+
+        public Builder reset() {
+            mMaxLengthSeconds = 0;
+            mSpeedUpFactor = 0.0f;
+            mX2 = -1.0f;
+            mY2 = 1.0f;
+
             return this;
         }
 

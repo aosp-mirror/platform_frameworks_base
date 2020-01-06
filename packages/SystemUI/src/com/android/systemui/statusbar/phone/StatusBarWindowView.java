@@ -75,6 +75,10 @@ public class StatusBarWindowView extends FrameLayout {
         setMotionEventSplittingEnabled(false);
     }
 
+    public NotificationPanelView getNotificationPanelView() {
+        return findViewById(R.id.notification_panel);
+    }
+
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets windowInsets) {
         final Insets insets = windowInsets.getMaxInsets(WindowInsets.Type.systemBars());

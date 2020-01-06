@@ -39,12 +39,12 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
     private boolean mTouchingHeadsUpView;
     private boolean mTrackingHeadsUp;
     private boolean mCollapseSnoozes;
-    private NotificationPanelView mPanel;
+    private NotificationPanelViewController mPanel;
     private ExpandableNotificationRow mPickedChild;
 
     public HeadsUpTouchHelper(HeadsUpManagerPhone headsUpManager,
             Callback callback,
-            NotificationPanelView notificationPanelView) {
+            NotificationPanelViewController notificationPanelView) {
         mHeadsUpManager = headsUpManager;
         mCallback = callback;
         mPanel = notificationPanelView;
