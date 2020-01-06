@@ -69,7 +69,6 @@ cc_library {
     name: "service.incremental",
     defaults: [
         "service.incremental-defaults",
-        "linux_bionic_supported",
     ],
 
     export_include_dirs: ["include/",],
