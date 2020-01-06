@@ -17,7 +17,7 @@
 package android.net.wifi.p2p.nsd;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.net.nsd.DnsSdTxtRecord;
+import android.net.util.nsd.DnsSdTxtRecord;
 import android.os.Build;
 import android.text.TextUtils;
 
