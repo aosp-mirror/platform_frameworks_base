@@ -465,8 +465,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"ब्याट्री सेभर निष्क्रिय पार्नुहोस्"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ले तपाईंको स्क्रिनमा देख्न सकिने सबै जानकारी अथवा रेकर्ड वा cast गर्दा तपाईंको यन्त्रबाट प्ले गरिएका कुरामाथि पहुँच राख्न सक्ने छ। यसअन्तर्गत पासवर्ड, भुक्तानीका विवरण, तस्बिर, सन्देश र तपाईंले प्ले गर्ने अडियो जस्ता जानकारी समावेश हुन्छन्।"</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"यो कार्य प्रदान गर्ने सेवाले तपाईंको स्क्रिनमा देख्न सकिने सबै जानकारी अथवा रेकर्ड वा cast गर्दा तपाईंको यन्त्रबाट प्ले गरिएका कुरामाथि पहुँच राख्न सक्ने छ। यसअन्तर्गत पासवर्ड, भुक्तानीका विवरण, तस्बिर, सन्देश र तपाईंले प्ले गर्ने अडियो जस्ता जानकारी समावेश हुन्छन्।"</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"रेकर्ड गर्न वा cast गर्न थाल्ने हो?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> मार्फत रेकर्ड गर्न वा cast गर्न थाल्ने हो?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"फेरि नदेखाउनुहोस्"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"सबै हटाउनुहोस्"</string>

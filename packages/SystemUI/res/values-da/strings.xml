@@ -465,8 +465,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Deaktiver batterisparefunktion"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> får adgang til alle de oplysninger, der er synlige på din skærm, eller som afspilles på din enhed, når du optager eller caster. Dette omfatter oplysninger som f.eks. adgangskoder, betalingsoplysninger, billeder, beskeder og afspillet lyd."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Tjenesten, der tilbyder denne funktion, får adgang til alle de oplysninger, der er synlige på din skærm, eller som afspilles på din enhed, når du optager eller caster. Dette omfatter oplysninger som f.eks. adgangskoder, betalingsoplysninger, billeder, beskeder og afspillet lyd."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Vil du begynde at optage eller caste?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Vil du begynde at optage eller caste via <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Vis ikke igen"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Ryd alle"</string>

@@ -465,8 +465,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Désactiver la fonction Économie d\'énergie"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aura accès à toute l\'information visible sur votre écran ou qui joue sur votre appareil durant l\'enregistrement ou la diffusion. Cela comprend des renseignements comme les mots de passe, les détails du paiement, les photos, les messages et l\'audio que vous faites jouer."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Le service offrant cette fonction aura accès à toute l\'information visible sur votre écran ou qui joue sur votre appareil durant l\'enregistrement ou la diffusion. Cela comprend des renseignements comme les mots de passe, les détails du paiement, les photos, les messages et l\'audio que vous faites jouer."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Commencer à enregistrer ou à diffuser?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Commencer à enregistrer ou à diffuser avec <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Ne plus afficher"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tout effacer"</string>

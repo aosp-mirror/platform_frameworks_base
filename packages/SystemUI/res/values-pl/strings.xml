@@ -471,8 +471,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Wyłącz Oszczędzanie baterii"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Podczas nagrywania i przesyłania aplikacja <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> będzie mieć dostęp do wszystkich informacji widocznych na ekranie lub odtwarzanych na urządzeniu. Dotyczy to m.in. haseł, szczegółów płatności, zdjęć, wiadomości i odtwarzanych dźwięków."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Podczas nagrywania i przesyłania usługa udostępniająca tę funkcję będzie miała dostęp do wszystkich informacji widocznych na ekranie lub odtwarzanych na urządzeniu. Dotyczy to m.in. haseł, szczegółów płatności, zdjęć, wiadomości i odtwarzanych dźwięków."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Rozpocząć nagrywanie lub przesyłanie?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Rozpocząć nagrywanie lub przesyłanie za pomocą aplikacji <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Nie pokazuj ponownie"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Usuń wszystkie"</string>

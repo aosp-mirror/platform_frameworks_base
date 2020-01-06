@@ -465,8 +465,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Изключване на режима за запазване на батерията"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ще има достъп до цялата информация, която е видима на екрана или възпроизвеждана от устройството ви по време на записване или предаване. Това включва различна информация, като например пароли, данни за плащане, снимки, съобщения и възпроизвеждано аудио."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услугата, предоставяща тази функция, ще има достъп до цялата информация, която е видима на екрана или възпроизвеждана от устройството ви по време на записване или предаване. Това включва различна информация, като например пароли, данни за плащане, снимки, съобщения и възпроизвеждано аудио."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Да се стартира ли записване или предаване?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Да се стартира ли записване или предаване чрез <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Да не се показва отново"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Изчистване на всички"</string>

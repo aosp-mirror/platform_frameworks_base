@@ -111,7 +111,7 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"المساعد الصوتي"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"إلغاء القفل"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"في انتظار بصمة الإصبع"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"إلغاء القفل دون استخدام بصمة إصبعك"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"فتح القفل بدون استخدام بصمة إصبعك"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"مسح الوجه"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"إرسال"</string>
     <string name="accessibility_manage_notification" msgid="582215815790143983">"إدارة الإشعارات"</string>

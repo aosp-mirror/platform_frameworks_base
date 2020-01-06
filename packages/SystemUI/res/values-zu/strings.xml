@@ -465,8 +465,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Vala isilondolozi sebhethri"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> izithola ukufinyelela kulo lonke ulwazi olubonakalayo esikrinini sakho noma idlalwe kusuka kudivayisi yakho ngenkathi urekhoda noma usakaza. Lokhu kubandakanya ulwazi olufana namaphasiwedi, imininingwane yenkokhelo, izithombe, imilayezo, nomsindo owudlalayo."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Isevisi enikezela ngalo msebenzi izothola ukufinyelela kulo lonke ulwazi olubonakalayo esikrinini sakho noma oludlalwa kusuka kudivayisi yakho ngenkathi urekhoda noma usakaza. Lokhu kubandakanya ulwazi olufana namaphasiwedi, imininingwane yenkokhelo, izithombe, imilayezo, nomsindo owudlalayo."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Qala ukurekhoda noma ukusakaza?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Qala ukurekhoda noma ukusakaza nge-<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Ungabonisi futhi"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Sula konke"</string>

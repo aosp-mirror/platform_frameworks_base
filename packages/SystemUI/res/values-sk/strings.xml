@@ -471,8 +471,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Vypnúť šetrič batérie"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Povolenie <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bude mať prístup k všetkým informáciám zobrazovaným na obrazovke alebo prehrávaným v zariadení počas nahrávania či prenosu. Patria medzi ne informácie, akými sú napríklad heslá, platobné podrobnosti, fotky, správy a prehrávaný zvuk."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Služba poskytujúca túto funkciu bude mať prístup k všetkým informáciám zobrazovaným na obrazovke alebo prehrávaným v zariadení počas nahrávania či prenosu. Patria medzi ne informácie, akými sú napríklad heslá, platobné podrobnosti, fotky, správy a prehrávaný zvuk."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Chcete začať nahrávanie alebo prenos?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Chcete spustiť nahrávanie alebo prenos s aktivovaným povolením <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Nabudúce nezobrazovať"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Vymazať všetko"</string>

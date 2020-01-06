@@ -465,8 +465,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Desativar a Economia de bateria"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"O app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> terá acesso a todas as informações visíveis na tela ou tocadas no dispositivo, como gravação ou transmissão Isso inclui informações como senhas, detalhes de pagamento, fotos, mensagens e áudio que você toca."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"O serviço que oferece essa função terá acesso a todas as informações visíveis na tela ou tocadas no dispositivo durante uma gravação ou transmissão. Isso inclui informações como senhas, detalhes de pagamento, fotos, mensagens e áudio que você toca."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Iniciar gravação ou transmissão?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Iniciar gravação ou transmissão com o app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Não mostrar novamente"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Limpar tudo"</string>
