@@ -70,7 +70,6 @@ public final class DozeServiceHost implements DozeHost {
     boolean mWakeLockScreenPerformsAuth = SystemProperties.getBoolean(
             "persist.sysui.wake_performs_auth", true);
     private boolean mDozingRequested;
-    private boolean mDozing;
     private boolean mPulsing;
     private WakefulnessLifecycle mWakefulnessLifecycle;
     private final SysuiStatusBarStateController mStatusBarStateController;
@@ -196,8 +195,8 @@ public final class DozeServiceHost implements DozeHost {
     public void startDozing() {
         if (!mDozingRequested) {
             mDozingRequested = true;
-            mDozeLog.traceDozing(mDozing);
             updateDozing();
+            mDozeLog.traceDozing(mStatusBarStateController.isDozing());
             mStatusBar.updateIsKeyguard();
         }
     }
@@ -281,8 +280,8 @@ public final class DozeServiceHost implements DozeHost {
     public void stopDozing() {
         if (mDozingRequested) {
             mDozingRequested = false;
-            mDozeLog.traceDozing(mDozing);
             updateDozing();
+            mDozeLog.traceDozing(mStatusBarStateController.isDozing());
         }
     }
 
@@ -292,7 +291,7 @@ public final class DozeServiceHost implements DozeHost {
             mDozeLog.tracePulseTouchDisabledByProx(ignore);
         }
         mIgnoreTouchWhilePulsing = ignore;
-        if (mDozing && ignore) {
+        if (mStatusBarStateController.isDozing() && ignore) {
             mStatusBarWindowViewController.cancelCurrentTouch();
         }
     }
@@ -446,10 +445,6 @@ public final class DozeServiceHost implements DozeHost {
 
     boolean shouldAnimateScreenOff() {
         return mAnimateScreenOff;
-    }
-
-    public void setDozing(boolean dozing) {
-        mDozing = dozing;
     }
 
     boolean getIgnoreTouchWhilePulsing() {

@@ -3491,7 +3491,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void onDozingChanged(boolean isDozing) {
         Trace.beginSection("StatusBar#updateDozing");
         mDozing = isDozing;
-        mDozeServiceHost.setDozing(mDozing);
 
         // Collapse the notification panel if open
         boolean dozingAnimated = mDozeServiceHost.getDozingRequested()
