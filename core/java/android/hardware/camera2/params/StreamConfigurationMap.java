@@ -17,7 +17,6 @@
 package android.hardware.camera2.params;
 
 import static com.android.internal.util.Preconditions.checkArrayElementsNotNull;
-import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
@@ -491,7 +490,7 @@ public final class StreamConfigurationMap {
      * @see #isOutputSupportedFor(Surface)
      */
     public static <T> boolean isOutputSupportedFor(Class<T> klass) {
-        checkNotNull(klass, "klass must not be null");
+        Objects.requireNonNull(klass, "klass must not be null");
 
         if (klass == android.media.ImageReader.class) {
             return true;
@@ -548,7 +547,7 @@ public final class StreamConfigurationMap {
      * @see #isOutputSupportedFor(Class)
      */
     public boolean isOutputSupportedFor(Surface surface) {
-        checkNotNull(surface, "surface must not be null");
+        Objects.requireNonNull(surface, "surface must not be null");
 
         Size surfaceSize = SurfaceUtils.getSurfaceSize(surface);
         int surfaceFormat = SurfaceUtils.getSurfaceFormat(surface);
@@ -897,7 +896,7 @@ public final class StreamConfigurationMap {
      * @see PixelFormat
      */
     public long getOutputMinFrameDuration(int format, Size size) {
-        checkNotNull(size, "size must not be null");
+        Objects.requireNonNull(size, "size must not be null");
         checkArgumentFormatSupported(format, /*output*/true);
 
         return getInternalFormatDuration(imageFormatToInternal(format),

@@ -26,6 +26,8 @@ import android.os.RemoteException;
 import com.android.internal.util.Preconditions;
 import java.util.Objects;
 
+import java.util.Objects;
+
 /**
  * A class representing a USB accessory, which is an external hardware component
  * that communicates with an android application over USB.

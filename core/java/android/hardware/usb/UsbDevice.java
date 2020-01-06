@@ -27,6 +27,8 @@ import android.os.RemoteException;
 import com.android.internal.util.Preconditions;
 import java.util.Objects;
 
+import java.util.Objects;
+
 /**
  * This class represents a USB device attached to the android device with the android device
  * acting as the USB host.

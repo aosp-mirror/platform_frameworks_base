@@ -541,8 +541,8 @@ public final class BrightnessConfiguration implements Parcelable {
          * @throws IllegalArgumentException if the nit levels are not monotonically increasing.
          */
         public Builder(float[] lux, float[] nits) {
-            Preconditions.checkNotNull(lux);
-            Preconditions.checkNotNull(nits);
+            Objects.requireNonNull(lux);
+            Objects.requireNonNull(nits);
             if (lux.length == 0 || nits.length == 0) {
                 throw new IllegalArgumentException("Lux and nits arrays must not be empty");
             }

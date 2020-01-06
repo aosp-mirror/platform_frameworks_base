@@ -50,8 +50,6 @@ import android.util.Size;
 import android.util.SparseArray;
 import android.view.Surface;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,6 +58,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -2482,7 +2481,7 @@ public class CameraDeviceImpl extends CameraDevice
         private final Handler mHandler;
 
         public CameraHandlerExecutor(@NonNull Handler handler) {
-            mHandler = Preconditions.checkNotNull(handler);
+            mHandler = Objects.requireNonNull(handler);
         }
 
         @Override
