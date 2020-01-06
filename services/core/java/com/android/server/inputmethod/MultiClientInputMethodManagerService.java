@@ -59,7 +59,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.InputChannel;
@@ -198,8 +197,7 @@ public final class MultiClientInputMethodManagerService {
                                 //TODO(b/137800469): support multi client IMEs.
                                 cb.onInlineSuggestionsUnsupported();
                             } catch (RemoteException e) {
-                                Log.w("MultiClientIMManager", "RemoteException calling"
-                                        + " onInlineSuggestionsUnsupported: " + e);
+                                Slog.w(TAG, "Failed to call onInlineSuggestionsUnsupported.", e);
                             }
                         }
                     });

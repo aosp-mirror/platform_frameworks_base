@@ -19,8 +19,6 @@ package com.android.server.inputmethod;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
-import android.os.RemoteException;
-import android.util.Log;
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
@@ -99,12 +97,6 @@ public abstract class InputMethodManagerInternal {
                 @Override
                 public void onCreateInlineSuggestionsRequest(ComponentName componentName,
                         AutofillId autofillId, IInlineSuggestionsRequestCallback cb) {
-                    try {
-                        cb.onInlineSuggestionsUnsupported();
-                    } catch (RemoteException e) {
-                        Log.w("IMManagerInternal", "RemoteException calling"
-                                + " onInlineSuggestionsUnsupported: " + e);
-                    }
                 }
             };
 

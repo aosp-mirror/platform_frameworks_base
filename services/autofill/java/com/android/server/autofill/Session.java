@@ -646,8 +646,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         @Override
         public void onInlineSuggestionsUnsupported() throws RemoteException {
-            Log.i(TAG, "inline suggestions request unsupported, "
-                    + "falling back to regular autofill");
+            if (sDebug) {
+                Log.d(TAG, "inline suggestions request unsupported, "
+                        + "falling back to regular autofill");
+            }
             final Session session = mSession.get();
             if (session != null) {
                 synchronized (session.mLock) {
@@ -660,8 +662,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         @Override
         public void onInlineSuggestionsRequest(InlineSuggestionsRequest request,
                 IInlineSuggestionsResponseCallback callback) throws RemoteException {
-            Log.i(TAG, "onInlineSuggestionsRequest() received: "
-                    + request);
+            if (sDebug) {
+                Log.d(TAG, "onInlineSuggestionsRequest() received: " + request);
+            }
             final Session session = mSession.get();
             if (session != null) {
                 synchronized (session.mLock) {
