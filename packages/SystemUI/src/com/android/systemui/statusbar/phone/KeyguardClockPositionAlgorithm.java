@@ -39,6 +39,11 @@ public class KeyguardClockPositionAlgorithm {
     private static float CLOCK_HEIGHT_WEIGHT = 0.7f;
 
     /**
+     * Allow using the default clock Y calculations
+     */
+    public static int CLOCK_USE_DEFAULT_Y = -1;
+
+    /**
      * Margin between the bottom of the clock and the notification shade.
      */
     private int mClockNotificationsMargin;
@@ -180,12 +185,17 @@ public class KeyguardClockPositionAlgorithm {
         return mHeight / 2 - mKeyguardStatusHeight - mClockNotificationsMargin;
     }
 
-    private int getPreferredClockY() {
-        return mClockPreferredY;
+    private int getPreferredAlternativeClockY(int alternative) {
+        if (mClockPreferredY != CLOCK_USE_DEFAULT_Y) {
+            return mClockPreferredY;
+        } else  {
+            return alternative;
+        }
     }
 
     private int getExpandedPreferredClockY() {
-        return (mHasCustomClock && (!mHasVisibleNotifs || mBypassEnabled)) ? getPreferredClockY()
+        return (mHasCustomClock && (!mHasVisibleNotifs || mBypassEnabled))
+                ? getPreferredAlternativeClockY(getExpandedClockPosition())
                 : getExpandedClockPosition();
     }
 
@@ -215,8 +225,8 @@ public class KeyguardClockPositionAlgorithm {
 
     private int getClockY(float panelExpansion) {
         // Dark: Align the bottom edge of the clock at about half of the screen:
-        float clockYDark = (mHasCustomClock ? getPreferredClockY() : getMaxClockY())
-                + burnInPreventionOffsetY();
+        float clockYDark = (mHasCustomClock ? getPreferredAlternativeClockY(getMaxClockY())
+            : getMaxClockY()) + burnInPreventionOffsetY();
         clockYDark = MathUtils.max(0, clockYDark);
 
         float clockYRegular = getExpandedPreferredClockY();
