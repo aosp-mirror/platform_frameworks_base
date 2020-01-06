@@ -11060,7 +11060,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean setTime(ComponentName who, long millis) {
         Objects.requireNonNull(who, "ComponentName is null in setTime");
-        enforceDeviceOwner(who);
+        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(who);
         // Don't allow set time when auto time is on.
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) == 1) {
             return false;
@@ -11075,7 +11075,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean setTimeZone(ComponentName who, String timeZone) {
         Objects.requireNonNull(who, "ComponentName is null in setTimeZone");
-        enforceDeviceOwner(who);
+        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(who);
         // Don't allow set timezone when auto timezone is on.
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) == 1) {
             return false;
