@@ -47,7 +47,7 @@ public class TimeZoneDetector {
      * detector may ignore the signal based on system settings, whether better information is
      * available, and so on.
      */
-    @RequiresPermission(android.Manifest.permission.SET_TIME_ZONE)
+    @RequiresPermission(android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE)
     public void suggestPhoneTimeZone(@NonNull PhoneTimeZoneSuggestion timeZoneSuggestion) {
         if (DEBUG) {
             Log.d(TAG, "suggestPhoneTimeZone called: " + timeZoneSuggestion);
@@ -63,7 +63,7 @@ public class TimeZoneDetector {
      * Suggests the current time zone, determined for the user's manually information, to the
      * detector. The detector may ignore the signal based on system settings.
      */
-    @RequiresPermission(android.Manifest.permission.SET_TIME_ZONE)
+    @RequiresPermission(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE)
     public void suggestManualTimeZone(@NonNull ManualTimeZoneSuggestion timeZoneSuggestion) {
         if (DEBUG) {
             Log.d(TAG, "suggestManualTimeZone called: " + timeZoneSuggestion);
