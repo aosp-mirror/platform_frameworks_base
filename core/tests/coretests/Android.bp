@@ -52,9 +52,14 @@ android_test {
         "android.test.base",
         "android.test.mock",
         "framework-atb-backward-compatibility",
+        "framework-all",
+        "icing-java-proto-lite",
+        "ext",
+        "framework-res",
     ],
 
     platform_apis: true,
+    sdk_version: "core_platform",
     test_suites: ["device-tests"],
 
     certificate: "platform",

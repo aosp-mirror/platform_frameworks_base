@@ -42,8 +42,7 @@ java_library {
     hostdex: true, // for hiddenapi check
     visibility: [
         "//frameworks/base/apex/statsd:__subpackages__",
-        //TODO(b/146167933) remove this when framework is built with framework-statsd-stubs
-        "//frameworks/base",
+        //TODO(b/146167933) remove this
         "//frameworks/opt/net/wifi/service",
     ],
     apex_available: [
@@ -103,7 +102,6 @@ java_library {
     sdk_version: "core_platform",
 }
 
-// TODO(b/146167933): Use these stubs in frameworks/base/Android.bp
 java_library {
     name: "framework-statsd-stubs-systemapi",
     srcs: [ ":framework-statsd-stubs-srcs-systemapi" ],
