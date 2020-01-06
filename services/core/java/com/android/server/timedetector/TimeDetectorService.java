@@ -119,10 +119,14 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     }
 
     private void enforceSuggestPhoneTimePermission() {
-        mContext.enforceCallingPermission(android.Manifest.permission.SET_TIME, "set time");
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE,
+                "suggest phone time and time zone");
     }
 
     private void enforceSuggestManualTimePermission() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SET_TIME, "set time");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE,
+                "suggest manual time and time zone");
     }
 }
