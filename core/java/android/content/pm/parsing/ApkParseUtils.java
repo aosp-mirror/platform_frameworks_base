@@ -2364,6 +2364,21 @@ public class ApkParseUtils {
                     XmlUtils.skipCurrentTag(parser);
 
                     break;
+                case "processes":
+                    ArrayMap<String, ComponentParseUtils.ParsedProcess> processes =
+                            ComponentParseUtils.parseProcesses(separateProcesses,
+                                    parsingPackage,
+                                    res, parser, flags,
+                                    outError);
+                    if (processes == null) {
+                        return parseInput.error(
+                                PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                                outError[0]
+                        );
+                    }
+
+                    parsingPackage.setProcesses(processes);
+                    break;
                 case "uses-package":
                     // Dependencies for app installers; we don't currently try to
                     // enforce this.

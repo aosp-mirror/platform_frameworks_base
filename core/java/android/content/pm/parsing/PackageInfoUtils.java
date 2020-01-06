@@ -32,6 +32,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
+import android.content.pm.ProcessInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.SELinuxUtil;
 import android.content.pm.ServiceInfo;
@@ -41,11 +42,11 @@ import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedInstrumentation;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.internal.util.ArrayUtils;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 /** @hide */
@@ -456,6 +457,24 @@ public class PackageInfoUtils {
         }
         ii.metaData = i.metaData;
         return ii;
+    }
+
+    public static ArrayMap<String, ProcessInfo> generateProcessInfo(
+            ArrayMap<String, ComponentParseUtils.ParsedProcess> procs,
+            @PackageManager.ComponentInfoFlags int flags) {
+        if (procs == null) {
+            return null;
+        }
+
+        final int numProcs = procs.size();
+        ArrayMap<String, ProcessInfo> retProcs = new ArrayMap(numProcs);
+        for (int i = 0; i < numProcs; i++) {
+            ComponentParseUtils.ParsedProcess proc = procs.valueAt(i);
+            retProcs.put(proc.name, new ProcessInfo(proc.name,
+                    proc.deniedPermissions != null
+                            ? new ArraySet<>(proc.deniedPermissions) : null));
+        }
+        return retProcs;
     }
 
     public static PermissionInfo generatePermissionInfo(ParsedPermission p,

@@ -36,6 +36,7 @@ import android.content.pm.parsing.ComponentParseUtils.ParsedService;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
@@ -378,6 +379,9 @@ public interface AndroidPackage extends Parcelable {
 
     @Nullable
     long[] getUsesStaticLibrariesVersions();
+
+    @Nullable
+    ArrayMap<String, ComponentParseUtils.ParsedProcess> getProcesses();
 
     int getVersionCode();
 

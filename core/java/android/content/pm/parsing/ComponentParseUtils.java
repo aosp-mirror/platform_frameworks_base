@@ -50,6 +50,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -1353,6 +1354,72 @@ public class ComponentParseUtils {
                     @Override
                     public ParsedInstrumentation[] newArray(int size) {
                         return new ParsedInstrumentation[size];
+                    }
+                };
+    }
+
+    public static class ParsedProcess implements Parcelable {
+
+        public String name;
+        @Nullable
+        public ArraySet<String> deniedPermissions;
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(this.name);
+            final int numDenied = this.deniedPermissions != null
+                    ? this.deniedPermissions.size() : 0;
+            dest.writeInt(numDenied);
+            for (int i = 0; i < numDenied; i++) {
+                dest.writeString(this.deniedPermissions.valueAt(i));
+            }
+        }
+
+        public ParsedProcess() {
+        }
+
+        public ParsedProcess(@NonNull ParsedProcess other) {
+            name = other.name;
+            if (other.deniedPermissions != null) {
+                deniedPermissions = new ArraySet<>(other.deniedPermissions);
+            }
+        }
+
+        public void addStateFrom(@NonNull ParsedProcess other) {
+            if (other.deniedPermissions != null) {
+                for (int i = other.deniedPermissions.size() - 1; i >= 0; i--) {
+                    if (deniedPermissions == null) {
+                        deniedPermissions = new ArraySet<>(other.deniedPermissions.size());
+                    }
+                    deniedPermissions.add(other.deniedPermissions.valueAt(i));
+                }
+            }
+        }
+
+        protected ParsedProcess(Parcel in) {
+            this.name = TextUtils.safeIntern(in.readString());
+            final int numDenied = in.readInt();
+            if (numDenied > 0) {
+                this.deniedPermissions = new ArraySet<>(numDenied);
+                this.deniedPermissions.add(TextUtils.safeIntern(in.readString()));
+            }
+        }
+
+        public static final Creator<ParsedProcess> CREATOR =
+                new Creator<ParsedProcess>() {
+                    @Override
+                    public ParsedProcess createFromParcel(Parcel source) {
+                        return new ParsedProcess(source);
+                    }
+
+                    @Override
+                    public ParsedProcess[] newArray(int size) {
+                        return new ParsedProcess[size];
                     }
                 };
     }
@@ -3251,6 +3318,189 @@ public class ComponentParseUtils {
         }
 
         return result;
+    }
+
+    private static @Nullable ArraySet<String> parseDenyPermission(
+            ArraySet<String> perms,
+            Resources res,
+            XmlResourceParser parser,
+            String[] outError
+    ) throws IOException, XmlPullParserException {
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestDenyPermission);
+        if (sa == null) {
+            outError[0] = "<deny-permission> could not be parsed";
+            return null;
+        }
+
+        try {
+            String perm = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestDenyPermission_name,0);
+            if (perm != null && perm.equals(android.Manifest.permission.INTERNET)) {
+                if (perms == null) {
+                    perms = new ArraySet<>();
+                }
+                perms.add(perm);
+            }
+        } finally {
+            sa.recycle();
+        }
+        XmlUtils.skipCurrentTag(parser);
+        return perms;
+    }
+
+    private static ArraySet<String> parseAllowPermission(
+            ArraySet<String> perms,
+            Resources res,
+            XmlResourceParser parser,
+            String[] outError
+    ) throws IOException, XmlPullParserException {
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestAllowPermission);
+        if (sa == null) {
+            outError[0] = "<allow-permission> could not be parsed";
+            return null;
+        }
+
+        try {
+            String perm = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestAllowPermission_name,0);
+            if (perm != null && perm.equals(android.Manifest.permission.INTERNET)
+                    && perms != null) {
+                perms.remove(perm);
+                if (perms.size() <= 0) {
+                    perms = null;
+                }
+            }
+        } finally {
+            sa.recycle();
+        }
+        XmlUtils.skipCurrentTag(parser);
+        return perms;
+    }
+
+    public static ParsedProcess parseProcess(
+            ArraySet<String> perms,
+            String[] separateProcesses,
+            ParsingPackage parsingPackage,
+            Resources res,
+            XmlResourceParser parser,
+            int flags,
+            String[] outError
+    ) throws IOException, XmlPullParserException {
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestProcess);
+        if (sa == null) {
+            outError[0] = "<process> could not be parsed";
+            return null;
+        }
+
+        ParsedProcess proc = new ParsedProcess();
+        if (perms != null) {
+            proc.deniedPermissions = new ArraySet(perms);
+        }
+
+        try {
+            proc.name = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestProcess_process,0);
+            proc.name = PackageParser.buildProcessName(parsingPackage.getPackageName(),
+                    null, proc.name, flags, separateProcesses, outError);
+
+            if (proc.name == null || proc.name.length() <= 0) {
+                outError[0] = "<process> does not specify android:process";
+                return null;
+            }
+            proc.name = PackageParser.buildProcessName(parsingPackage.getPackageName(),
+                    parsingPackage.getPackageName(), proc.name,
+                    flags, separateProcesses, outError);
+            if (outError[0] != null) {
+                return null;
+            }
+        } finally {
+            sa.recycle();
+        }
+
+        int type;
+        final int innerDepth = parser.getDepth();
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            String tagName = parser.getName();
+            if (tagName.equals("deny-permission")) {
+                proc.deniedPermissions = parseDenyPermission(proc.deniedPermissions, res, parser,
+                        outError);
+                if (outError[0] != null) {
+                    return null;
+                }
+            } else if (tagName.equals("allow-permission")) {
+                proc.deniedPermissions = parseAllowPermission(proc.deniedPermissions, res, parser,
+                        outError);
+                if (outError[0] != null) {
+                    return null;
+                }
+            } else {
+                Slog.w(TAG, "Unknown element under <process>: " + tagName
+                        + " at " + parsingPackage.getBaseCodePath() + " "
+                        + parser.getPositionDescription());
+                XmlUtils.skipCurrentTag(parser);
+                continue;
+            }
+        }
+
+        return proc;
+    }
+
+    public static ArrayMap<String, ParsedProcess> parseProcesses(
+            String[] separateProcesses,
+            ParsingPackage parsingPackage,
+            Resources res,
+            XmlResourceParser parser,
+            int flags,
+            String[] outError
+    ) throws IOException, XmlPullParserException {
+        ArraySet<String> deniedPerms = null;
+        ArrayMap<String, ParsedProcess> processes = new ArrayMap<>();
+
+        int type;
+        final int innerDepth = parser.getDepth();
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            String tagName = parser.getName();
+            if (tagName.equals("deny-permission")) {
+                deniedPerms = parseDenyPermission(deniedPerms, res, parser, outError);
+                if (outError[0] != null) {
+                    return null;
+                }
+            } else if (tagName.equals("allow-permission")) {
+                deniedPerms = parseAllowPermission(deniedPerms, res, parser, outError);
+                if (outError[0] != null) {
+                    return null;
+                }
+            } else if (tagName.equals("process")) {
+                ParsedProcess proc = parseProcess(deniedPerms, separateProcesses, parsingPackage,
+                        res, parser, flags, outError);
+                if (outError[0] != null) {
+                    return null;
+                }
+                if (processes.get(proc.name) != null) {
+                    outError[0] = "<process> specified existing name '" + proc.name + "'";
+                    return null;
+                }
+                processes.put(proc.name, proc);
+            } else {
+                Slog.w(TAG, "Unknown element under <processes>: " + tagName
+                        + " at " + parsingPackage.getBaseCodePath() + " "
+                        + parser.getPositionDescription());
+                XmlUtils.skipCurrentTag(parser);
+                continue;
+            }
+        }
+
+        return processes;
     }
 
     public static ActivityInfo.WindowLayout parseLayout(Resources res, AttributeSet attrs) {
