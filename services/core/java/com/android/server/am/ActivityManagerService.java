@@ -2176,10 +2176,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             @Override
             public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args,
                     boolean asProto) {
-                if (asProto) return;
                 if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                         "cpuinfo", pw)) return;
                 synchronized (mActivityManagerService.mProcessCpuTracker) {
+                    if (asProto) {
+                        mActivityManagerService.mProcessCpuTracker.dumpProto(fd);
+                        return;
+                    }
                     pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentLoad());
                     pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentState(
                             SystemClock.uptimeMillis()));

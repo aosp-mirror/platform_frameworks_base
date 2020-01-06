@@ -21,6 +21,7 @@ import "frameworks/base/core/proto/android/os/backtrace.proto";
 import "frameworks/base/core/proto/android/os/batterytype.proto";
 import "frameworks/base/core/proto/android/os/cpufreq.proto";
 import "frameworks/base/core/proto/android/os/cpuinfo.proto";
+import "frameworks/base/core/proto/android/os/cpu_usage.proto";
 import "frameworks/base/core/proto/android/os/data.proto";
 import "frameworks/base/core/proto/android/os/header.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
@@ -467,6 +468,11 @@ message IncidentProto {
     optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_subsystem_restart = 3046 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "dropbox --proto SubsystemRestart"
+    ];
+
+    optional CpuUsageProto process_cpu_usage = 3047 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "cpuinfo --proto"
     ];
 
     // Reserved for OEMs.
