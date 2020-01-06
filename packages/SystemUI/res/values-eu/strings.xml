@@ -465,8 +465,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Desaktibatu bateria-aurrezlea"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Zerbait grabatzen edo igortzen duzunean, pantailan ikus daitekeen edo gailuak erreproduzitzen duen informazio guztia atzitu ahalko du <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioak. Horrek barne hartzen ditu pasahitzak, ordainketen xehetasunak, argazkiak, mezuak eta erreproduzitzen dituzun audioak."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Zerbait grabatzen edo igortzen duzunean, pantailan ikus daitekeen edo gailuak erreproduzitzen duen informazio guztia atzitu ahalko du funtzio hori eskaintzen duen zerbitzuak. Horrek barne hartzen ditu pasahitzak, ordainketen xehetasunak, argazkiak, mezuak eta erreproduzitzen dituzun audioak."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Grabatzen edo igortzen hasi nahi duzu?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioarekin grabatzen edo igortzen hasi nahi duzu?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Ez erakutsi berriro"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Garbitu guztiak"</string>

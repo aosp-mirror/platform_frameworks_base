@@ -465,8 +465,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"關閉省電模式"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"在錄影或投放時，「<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>」可以存取螢幕顯示或裝置播放的任何資料，當中包括密碼、付款詳情、相片、訊息和播放的語音等。"</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"在錄影或投放時，此功能的服務供應商可以存取螢幕顯示或裝置播放的任何資料，當中包括密碼、付款詳情、相片、訊息和播放的語音等。"</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"要開始錄影或投放嗎？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"要使用「<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>」開始錄影或投放嗎？"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"不用再顯示"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"全部清除"</string>

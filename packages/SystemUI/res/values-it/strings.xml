@@ -465,8 +465,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Disattiva Risparmio energetico"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> avrà accesso a tutte le informazioni visibili sul tuo schermo o riprodotte dal tuo dispositivo durante la registrazione o la trasmissione. Sono incluse informazioni quali password, dettagli sui pagamenti, foto, messaggi e audio riprodotto."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Il servizio che offre questa funzione avrà accesso a tutte le informazioni visibili sul tuo schermo o riprodotte dal tuo dispositivo durante la registrazione o la trasmissione. Sono incluse informazioni quali password, dettagli sui pagamenti, foto, messaggi e audio riprodotto."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Vuoi avviare la registrazione o la trasmissione?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Vuoi avviare la registrazione o la trasmissione con <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Non mostrare più"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Cancella tutto"</string>

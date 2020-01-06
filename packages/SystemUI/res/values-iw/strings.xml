@@ -471,8 +471,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"כיבוי תכונת החיסכון בסוללה"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"‏לאפליקציה <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> תהיה גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך בזמן הקלטה או העברה (cast). זה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"‏לשירות שמספק את הפונקציה הזו תהיה גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך בזמן הקלטה או העברה (cast). זה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"‏להתחיל להקליט או להעביר (cast)?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"‏להתחיל להקליט או להעביר (cast) באמצעות <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"אל תציג שוב"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ניקוי הכל"</string>

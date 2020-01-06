@@ -465,8 +465,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Çaktivizo \"Kursyesin e baterisë\""</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione si p.sh. fjalëkalimet, detajet e pagesave, fotografitë, mesazhet dhe audion që luan ti."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Shërbimi që e ofron këtë funksion do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione si p.sh. fjalëkalimet, detajet e pagesave, fotografitë, mesazhet dhe audion që luan ti."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Do të fillosh regjistrimin ose transmetimin?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Fillo regjistrimin ose transmetimin me <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Mos e shfaq sërish"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Pastroji të gjitha"</string>

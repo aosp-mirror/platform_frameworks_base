@@ -465,8 +465,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Akusäästja väljalülitamine"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Rakendus <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> saab juurdepääsu kogu teabele, mis on teie ekraanikuval nähtav või mida seadmes salvestamise või ülekande ajal esitatakse. See hõlmab teavet, nagu paroolid, maksete üksikasjad, fotod, sõnumid ja esitatav heli."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Seda funktsiooni pakkuv teenus saab juurdepääsu kogu teabele, mis on teie ekraanikuval nähtav või mida seadmes salvestamise või ülekande ajal esitatakse. See hõlmab teavet, nagu paroolid, maksete üksikasjad, fotod, sõnumid ja esitatav heli."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Kas alustada salvestamist või ülekannet?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Kas alustada rakendusega <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> salvestamist või ülekannet?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Ära kuva uuesti"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tühjenda kõik"</string>
