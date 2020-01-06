@@ -80,11 +80,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean checkShowToOwnerOnly(WindowManager.LayoutParams attrs) {
-        return false;
-    }
-
-    @Override
     public void adjustConfigurationLw(Configuration config, int keyboardPresence,
             int navigationPresence) {
     }

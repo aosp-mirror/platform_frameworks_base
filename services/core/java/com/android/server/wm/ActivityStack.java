@@ -1258,7 +1258,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
 
         super.switchUser(userId);
         forAllTasks((t) -> {
-            if (t.mWmService.isCurrentProfileLocked(t.mUserId) || t.showForAllUsers()) {
+            if (t.mWmService.isCurrentProfile(t.mUserId) || t.showForAllUsers()) {
                 mChildren.remove(t);
                 mChildren.add(t);
             }
@@ -3986,11 +3986,19 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
      * @param showForAllUsers Whether to show the task regardless of the current user.
      */
     private void addChild(Task task, int position, boolean showForAllUsers, boolean moveParents) {
-        // Add child task.
-        addChild(task, null);
+        try {
+            // Force show for all user so task can be position correctly based on which user is
+            // active. We clear the force show below.
+            task.setForceShowForAllUsers(showForAllUsers);
+            // Add child task.
+            addChild(task, null);
 
-        // Move child to a proper position, as some restriction for position might apply.
-        positionChildAt(position, task, moveParents /* includingParents */, showForAllUsers);
+            // Move child to a proper position, as some restriction for position might apply.
+            positionChildAt(position, task, moveParents /* includingParents */);
+
+        } finally {
+            task.setForceShowForAllUsers(false);
+        }
     }
 
     @Override
@@ -4036,18 +4044,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     @Override
     void positionChildAt(int position, WindowContainer child, boolean includingParents) {
         final Task task = (Task) child;
-        positionChildAt(position, task, includingParents, task.showForAllUsers());
-    }
-
-    /**
-     * Overridden version of {@link ActivityStack#positionChildAt(int, WindowContainer, boolean)}.
-     * Used in {@link ActivityStack#addChild(Task, int, boolean showForAllUsers, boolean)}, as it
-     * can receive showForAllUsers param from {@link ActivityRecord} instead of
-     * {@link Task#showForAllUsers()}.
-     */
-    private int positionChildAt(int position, Task child, boolean includingParents,
-            boolean showForAllUsers) {
-        final int targetPosition = findPositionForTask(child, position, showForAllUsers);
+        final int targetPosition = findPositionForTask(task, position);
         super.positionChildAt(targetPosition, child, includingParents);
 
         // Log positioning.
@@ -4056,8 +4053,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         }
 
         final int toTop = targetPosition == mChildren.size() - 1 ? 1 : 0;
-        EventLogTags.writeWmTaskMoved(child.mTaskId, toTop, targetPosition);
-        return targetPosition;
+        EventLogTags.writeWmTaskMoved(task.mTaskId, toTop, targetPosition);
     }
 
     @Override
@@ -4127,9 +4123,8 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
 
     // TODO: We should really have users as a window container in the hierarchy so that we don't
     // have to do complicated things like we are doing in this method.
-    int findPositionForTask(Task task, int targetPosition, boolean showForAllUsers) {
-        final boolean canShowTask =
-                showForAllUsers || mWmService.isCurrentProfileLocked(task.mUserId);
+    int findPositionForTask(Task task, int targetPosition) {
+        final boolean canShowTask = task.showToCurrentUser();
 
         final int stackSize = mChildren.size();
         int minPosition = 0;
@@ -4161,9 +4156,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     private int computeMinPosition(int minPosition, int size) {
         while (minPosition < size) {
             final Task tmpTask = (Task) mChildren.get(minPosition);
-            final boolean canShowTmpTask =
-                    tmpTask.showForAllUsers()
-                            || mWmService.isCurrentProfileLocked(tmpTask.mUserId);
+            final boolean canShowTmpTask = tmpTask.showToCurrentUser();
             if (canShowTmpTask) {
                 break;
             }
@@ -4181,9 +4174,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     private int computeMaxPosition(int maxPosition) {
         while (maxPosition > 0) {
             final Task tmpTask = (Task) mChildren.get(maxPosition);
-            final boolean canShowTmpTask =
-                    tmpTask.showForAllUsers()
-                            || mWmService.isCurrentProfileLocked(tmpTask.mUserId);
+            final boolean canShowTmpTask = tmpTask.showToCurrentUser();
             if (!canShowTmpTask) {
                 break;
             }

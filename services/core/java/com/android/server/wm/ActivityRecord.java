@@ -7452,6 +7452,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
+    boolean showToCurrentUser() {
+        return mShowForAllUsers || mWmService.isCurrentProfile(mUserId);
+    }
+
+    @Override
     public String toString() {
         if (stringName != null) {
             return stringName + " t" + (task == null ? INVALID_TASK_ID : task.mTaskId) +
