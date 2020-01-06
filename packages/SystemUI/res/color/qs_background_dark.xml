@@ -15,6 +15,5 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:alpha="1"
-          android:color="?android:attr/colorBackgroundFloating"/>
+    <item android:color="@color/qs_background_dark_color"/>
 </selector>
