@@ -275,7 +275,12 @@ public final class NotificationEntry extends ListEntry {
         return mHasInflationError;
     }
 
-    void setHasInflationError(boolean hasError) {
+    /**
+     * Set whether the notification has an error while inflating.
+     *
+     * TODO: Move this into an inflation error manager class.
+     */
+    public void setHasInflationError(boolean hasError) {
         mHasInflationError = hasError;
     }
 

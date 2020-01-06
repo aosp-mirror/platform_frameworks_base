@@ -101,7 +101,7 @@ public interface NotificationRowContentBinder {
      */
     int FLAG_CONTENT_VIEW_PUBLIC = 1 << 3;
 
-    int FLAG_CONTENT_VIEW_ALL = ~0;
+    int FLAG_CONTENT_VIEW_ALL = (1 << 4) - 1;
 
     /**
      * Parameters for content view binding
