@@ -185,18 +185,17 @@ StatsService::StatsService(const sp<Looper>& handlerLooper, shared_ptr<LogEventQ
                 }
             },
             [this](const int& uid, const vector<int64_t>& activeConfigs) {
-                auto receiver = mConfigManager->GetActiveConfigsChangedReceiver(uid);
-                sp<IStatsCompanionService> sc = getStatsCompanionService();
-                if (sc == nullptr) {
-                    VLOG("Could not access statsCompanion");
-                    return false;
-                } else if (receiver == nullptr) {
+                sp<IPendingIntentRef> receiver =
+                    mConfigManager->GetActiveConfigsChangedReceiver(uid);
+                if (receiver == nullptr) {
                     VLOG("Could not find receiver for uid %d", uid);
                     return false;
-                } else {
-                    sc->sendActiveConfigsChangedBroadcast(receiver, activeConfigs);
+                } else if (receiver->sendActiveConfigsChangedBroadcast(activeConfigs).isOk()) {
                     VLOG("StatsService::active configs broadcast succeeded for uid %d" , uid);
                     return true;
+                } else {
+                    VLOG("StatsService::active configs broadcast failed for uid %d" , uid);
+                    return false;
                 }
             });
 
@@ -630,15 +629,15 @@ status_t StatsService::cmd_trigger_active_config_broadcast(int out, Vector<Strin
             }
         }
     }
-    auto receiver = mConfigManager->GetActiveConfigsChangedReceiver(uid);
-    sp<IStatsCompanionService> sc = getStatsCompanionService();
-    if (sc == nullptr) {
-        VLOG("Could not access statsCompanion");
-    } else if (receiver == nullptr) {
+    sp<IPendingIntentRef> receiver = mConfigManager->GetActiveConfigsChangedReceiver(uid);
+    if (receiver == nullptr) {
         VLOG("Could not find receiver for uid %d", uid);
-    } else {
-        sc->sendActiveConfigsChangedBroadcast(receiver, configIds);
+        return UNKNOWN_ERROR;
+    } else if (receiver->sendActiveConfigsChangedBroadcast(configIds).isOk()) {
         VLOG("StatsService::trigger active configs changed broadcast succeeded for uid %d" , uid);
+    } else {
+        VLOG("StatsService::trigger active configs changed broadcast failed for uid %d", uid);
+        return UNKNOWN_ERROR;
     }
     return NO_ERROR;
 }
@@ -1209,27 +1208,24 @@ Status StatsService::setDataFetchOperation(int64_t key,
     return Status::ok();
 }
 
-Status StatsService::setActiveConfigsChangedOperation(const sp<android::IBinder>& intentSender,
-                                                      const String16& packageName,
+Status StatsService::setActiveConfigsChangedOperation(const sp<IPendingIntentRef>& pir,
+                                                      const int32_t callingUid,
                                                       vector<int64_t>* output) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    int uid = ipc->getCallingUid();
-    mConfigManager->SetActiveConfigsChangedReceiver(uid, intentSender);
+    mConfigManager->SetActiveConfigsChangedReceiver(callingUid, pir);
     if (output != nullptr) {
-        mProcessor->GetActiveConfigs(uid, *output);
+        mProcessor->GetActiveConfigs(callingUid, *output);
     } else {
         ALOGW("StatsService::setActiveConfigsChanged output was nullptr");
     }
     return Status::ok();
 }
 
-Status StatsService::removeActiveConfigsChangedOperation(const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+Status StatsService::removeActiveConfigsChangedOperation(const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    mConfigManager->RemoveActiveConfigsChangedReceiver(ipc->getCallingUid());
+    mConfigManager->RemoveActiveConfigsChangedReceiver(callingUid);
     return Status::ok();
 }
 

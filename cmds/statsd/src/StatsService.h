@@ -134,14 +134,14 @@ public:
     /**
      * Binder call to let clients register the active configs changed operation.
      */
-    virtual Status setActiveConfigsChangedOperation(const sp<android::IBinder>& intentSender,
-                                                    const String16& packageName,
+    virtual Status setActiveConfigsChangedOperation(const sp<IPendingIntentRef>& pir,
+                                                    const int32_t callingUid,
                                                     vector<int64_t>* output) override;
 
     /**
      * Binder call to remove the active configs changed operation for the specified package..
      */
-    virtual Status removeActiveConfigsChangedOperation(const String16& packageName) override;
+    virtual Status removeActiveConfigsChangedOperation(const int32_t callingUid) override;
     /**
      * Binder call to allow clients to remove the specified configuration.
      */

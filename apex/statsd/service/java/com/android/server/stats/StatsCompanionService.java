@@ -203,7 +203,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private static final int INSTALLER_FIELD_ID = 5;
 
     public static final int CODE_SUBSCRIBER_BROADCAST = 1;
-    public static final int CODE_ACTIVE_CONFIGS_BROADCAST = 1;
     public static final int DEATH_THRESHOLD = 10;
     /**
      * Which native processes to snapshot memory for.
@@ -441,22 +440,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
         mKernelCpuThreadReader =
                 KernelCpuThreadReaderSettingsObserver.getSettingsModifiedReader(mContext);
-    }
-
-    @Override
-    public void sendActiveConfigsChangedBroadcast(IBinder intentSenderBinder, long[] configIds) {
-        StatsCompanion.enforceStatsCompanionPermission(mContext);
-        IntentSender intentSender = new IntentSender(intentSenderBinder);
-        Intent intent = new Intent();
-        intent.putExtra(StatsManager.EXTRA_STATS_ACTIVE_CONFIG_KEYS, configIds);
-        try {
-            intentSender.sendIntent(mContext, CODE_ACTIVE_CONFIGS_BROADCAST, intent, null, null);
-            if (DEBUG) {
-                Slog.d(TAG, "Sent broadcast with config ids " + Arrays.toString(configIds));
-            }
-        } catch (IntentSender.SendIntentException e) {
-            Slog.w(TAG, "Unable to send active configs changed broadcast using IntentSender");
-        }
     }
 
     @Override

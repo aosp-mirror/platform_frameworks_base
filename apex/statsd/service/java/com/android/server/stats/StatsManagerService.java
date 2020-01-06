@@ -37,6 +37,7 @@ import java.util.Objects;
 
 /**
  * Service for {@link android.app.StatsManager}.
+ *
  * @hide
  */
 public class StatsManagerService extends IStatsManagerService.Stub {
@@ -57,6 +58,9 @@ public class StatsManagerService extends IStatsManagerService.Stub {
 
     @GuardedBy("mLock")
     private ArrayMap<ConfigKey, PendingIntentRef> mDataFetchPirMap = new ArrayMap<>();
+    @GuardedBy("mLock")
+    private ArrayMap<Integer, PendingIntentRef> mActiveConfigsPirMap =
+            new ArrayMap<>();
 
     public StatsManagerService(Context context) {
         super();
@@ -143,11 +147,45 @@ public class StatsManagerService extends IStatsManagerService.Stub {
     @Override
     public long[] setActiveConfigsChangedOperation(PendingIntent pendingIntent,
             String packageName) {
-        // no-op
-        if (DEBUG) {
-            Slog.d(TAG, "setActiveConfigsChangedOperation");
+        enforceDumpAndUsageStatsPermission(packageName);
+        int callingUid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+        PendingIntentRef pir = new PendingIntentRef(pendingIntent, mContext);
+        // We add the PIR to a map so we can reregister if statsd is unavailable.
+        synchronized (mLock) {
+            mActiveConfigsPirMap.put(callingUid, pir);
         }
-        return new long[]{};
+        try {
+            IStatsd statsd = getStatsdNonblocking();
+            if (statsd != null) {
+                return statsd.setActiveConfigsChangedOperation(pir, callingUid);
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to setActiveConfigsChangedOperation with statsd");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return new long[] {};
+    }
+
+    @Override
+    public void removeActiveConfigsChangedOperation(String packageName) {
+        enforceDumpAndUsageStatsPermission(packageName);
+        int callingUid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+        synchronized (mLock) {
+            mActiveConfigsPirMap.remove(callingUid);
+        }
+        try {
+            IStatsd statsd = getStatsdNonblocking();
+            if (statsd != null) {
+                statsd.removeActiveConfigsChangedOperation(callingUid);
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to removeActiveConfigsChangedOperation with statsd");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -248,8 +286,10 @@ public class StatsManagerService extends IStatsManagerService.Stub {
             return;
         }
         ArrayMap<ConfigKey, PendingIntentRef> dataFetchCopy;
+        ArrayMap<Integer, PendingIntentRef> activeConfigsChangedCopy;
         synchronized (mLock) {
             dataFetchCopy = new ArrayMap<>(mDataFetchPirMap);
+            activeConfigsChangedCopy = new ArrayMap<>(mActiveConfigsPirMap);
         }
         for (Map.Entry<ConfigKey, PendingIntentRef> entry : dataFetchCopy.entrySet()) {
             ConfigKey key = entry.getKey();
@@ -257,6 +297,14 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 statsd.setDataFetchOperation(key.getConfigId(), entry.getValue(), key.getUid());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to setDataFetchOperation from pirMap");
+            }
+        }
+        for (Map.Entry<Integer, PendingIntentRef> entry
+                : activeConfigsChangedCopy.entrySet()) {
+            try {
+                statsd.setActiveConfigsChangedOperation(entry.getValue(), entry.getKey());
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to setActiveConfigsChangedOperation from pirMap");
             }
         }
     }

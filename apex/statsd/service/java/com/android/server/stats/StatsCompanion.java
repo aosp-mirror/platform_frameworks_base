@@ -17,6 +17,7 @@
 package com.android.server.stats;
 
 import android.app.PendingIntent;
+import android.app.StatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -26,6 +27,8 @@ import android.os.StatsDimensionsValue;
 import android.util.Slog;
 
 import com.android.server.SystemService;
+
+import java.util.Arrays;
 
 /**
  * @hide
@@ -97,6 +100,8 @@ public class StatsCompanion {
          */
         private static final String EXTRA_LAST_REPORT_TIME = "android.app.extra.LAST_REPORT_TIME";
         private static final int CODE_DATA_BROADCAST = 1;
+        private static final int CODE_ACTIVE_CONFIGS_BROADCAST = 1;
+
 
         private final PendingIntent mPendingIntent;
         private final Context mContext;
@@ -120,7 +125,17 @@ public class StatsCompanion {
 
         @Override
         public void sendActiveConfigsChangedBroadcast(long[] configIds) {
-            // no-op
+            enforceStatsCompanionPermission(mContext);
+            Intent intent = new Intent();
+            intent.putExtra(StatsManager.EXTRA_STATS_ACTIVE_CONFIG_KEYS, configIds);
+            try {
+                mPendingIntent.send(mContext, CODE_ACTIVE_CONFIGS_BROADCAST, intent, null, null);
+                if (DEBUG) {
+                    Slog.d(TAG, "Sent broadcast with config ids " + Arrays.toString(configIds));
+                }
+            } catch (PendingIntent.CanceledException e) {
+                Slog.w(TAG, "Unable to send active configs changed broadcast using PendingIntent");
+            }
         }
 
         @Override

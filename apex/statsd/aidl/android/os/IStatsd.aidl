@@ -133,14 +133,14 @@ interface IStatsd {
      *
      * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
      */
-    long[] setActiveConfigsChangedOperation(in IBinder intentSender, in String packageName);
+    long[] setActiveConfigsChangedOperation(in IPendingIntentRef pendingIntentRef, int callingUid);
 
     /**
      * Removes the active configs changed operation for the specified package name.
      *
      * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
      */
-    void removeActiveConfigsChangedOperation(in String packageName);
+    void removeActiveConfigsChangedOperation(int callingUid);
 
     /**
      * Removes the configuration with the matching config key. No-op if this config key does not

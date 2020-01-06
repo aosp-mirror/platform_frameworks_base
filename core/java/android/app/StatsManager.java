@@ -345,20 +345,18 @@ public final class StatsManager {
             throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsd service = getIStatsdLocked();
+                IStatsManagerService service = getIStatsManagerServiceLocked();
                 if (pendingIntent == null) {
                     service.removeActiveConfigsChangedOperation(mContext.getOpPackageName());
                     return new long[0];
                 } else {
-                    // Extracts IIntentSender from the PendingIntent and turns it into an IBinder.
-                    IBinder intentSender = pendingIntent.getTarget().asBinder();
-                    return service.setActiveConfigsChangedOperation(intentSender,
+                    return service.setActiveConfigsChangedOperation(pendingIntent,
                             mContext.getOpPackageName());
                 }
 
             } catch (RemoteException e) {
-                Slog.e(TAG,
-                        "Failed to connect to statsd when registering active configs listener.");
+                Slog.e(TAG, "Failed to connect to statsmanager "
+                        + "when registering active configs listener.");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);

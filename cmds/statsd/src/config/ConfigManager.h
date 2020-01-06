@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "binder/IBinder.h"
 #include "config/ConfigKey.h"
 #include "config/ConfigListener.h"
 
@@ -86,13 +85,13 @@ public:
      * Sets the broadcast receiver that is notified whenever the list of active configs
      * changes for this uid.
      */
-    void SetActiveConfigsChangedReceiver(const int uid, const sp<IBinder>& intentSender);
+    void SetActiveConfigsChangedReceiver(const int uid, const sp<IPendingIntentRef>& pir);
 
     /**
      * Returns the broadcast receiver for active configs changed for this uid.
      */
 
-    const sp<IBinder> GetActiveConfigsChangedReceiver(const int uid) const;
+    const sp<IPendingIntentRef> GetActiveConfigsChangedReceiver(const int uid) const;
 
     /**
      * Erase any active configs changed broadcast receiver associated with this uid.
@@ -148,9 +147,9 @@ private:
 
     /**
      * Each uid can be subscribed by up to one receiver to notify that the list of active configs
-     * for this uid has changed. The receiver is specified as IBinder from PendingIntent.
+     * for this uid has changed. The receiver is specified as IPendingIntentRef.
      */
-     std::map<int, sp<android::IBinder>> mActiveConfigsChangedReceivers;
+     std::map<int, sp<IPendingIntentRef>> mActiveConfigsChangedReceivers;
 
     /**
      * The ConfigListeners that will be told about changes.

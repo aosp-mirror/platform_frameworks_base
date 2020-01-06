@@ -53,6 +53,13 @@ interface IStatsManagerService {
     long[] setActiveConfigsChangedOperation(in PendingIntent pendingIntent, in String packageName);
 
     /**
+     * Removes the active configs changed operation for the specified package name.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    void removeActiveConfigsChangedOperation(in String packageName);
+
+    /**
      * Set the PendingIntent to be used when broadcasting subscriber
      * information to the given subscriberId within the given config.
      *
