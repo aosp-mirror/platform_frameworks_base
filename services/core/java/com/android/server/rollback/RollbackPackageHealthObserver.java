@@ -333,9 +333,24 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         return rollbackId;
     }
 
+    private static String rollbackTypeToString(int type) {
+        switch (type) {
+            case StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE:
+                return "ROLLBACK_INITIATE";
+            case StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS:
+                return "ROLLBACK_SUCCESS";
+            case StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE:
+                return "ROLLBACK_FAILURE";
+            case StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED:
+                return "ROLLBACK_BOOT_TRIGGERED";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
     private static void logEvent(@Nullable VersionedPackage moduleMetadataPackage, int type,
             int rollbackReason, @NonNull String failingPackageName) {
-        Slog.i(TAG, "Watchdog event occurred of type: " + type);
+        Slog.i(TAG, "Watchdog event occurred of type: " + rollbackTypeToString(type));
         if (moduleMetadataPackage != null) {
             StatsLog.logWatchdogRollbackOccurred(type, moduleMetadataPackage.getPackageName(),
                     moduleMetadataPackage.getVersionCode(), rollbackReason, failingPackageName);
