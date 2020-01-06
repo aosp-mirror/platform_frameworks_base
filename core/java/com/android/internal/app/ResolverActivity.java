@@ -24,7 +24,6 @@ import static com.android.internal.app.AbstractMultiProfilePagerAdapter.PROFILE_
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UiThread;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -32,6 +31,7 @@ import android.app.ActivityThread;
 import android.app.VoiceInteractor.PickOptionRequest;
 import android.app.VoiceInteractor.PickOptionRequest.Option;
 import android.app.VoiceInteractor.Prompt;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;

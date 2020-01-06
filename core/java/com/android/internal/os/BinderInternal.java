@@ -17,7 +17,7 @@
 package com.android.internal.os;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
