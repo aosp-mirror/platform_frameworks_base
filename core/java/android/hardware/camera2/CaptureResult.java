@@ -3484,6 +3484,99 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<android.graphics.Rect>("android.scaler.cropRegion", android.graphics.Rect.class);
 
     /**
+     * <p>Whether a rotation-and-crop operation is applied to processed
+     * outputs from the camera.</p>
+     * <p>This control is primarily intended to help camera applications with no support for
+     * multi-window modes to work correctly on devices where multi-window scenarios are
+     * unavoidable, such as foldables or other devices with variable display geometry or more
+     * free-form window placement (such as laptops, which often place portrait-orientation apps
+     * in landscape with pillarboxing).</p>
+     * <p>If supported, the default value is <code>ROTATE_AND_CROP_AUTO</code>, which allows the camera API
+     * to enable backwards-compatibility support for applications that do not support resizing
+     * / multi-window modes, when the device is in fact in a multi-window mode (such as inset
+     * portrait on laptops, or on a foldable device in some fold states).  In addition,
+     * <code>ROTATE_AND_CROP_NONE</code> and <code>ROTATE_AND_CROP_90</code> will always be available if this control
+     * is supported by the device.  If not supported, devices API level 30 or higher will always
+     * list only <code>ROTATE_AND_CROP_NONE</code>.</p>
+     * <p>When <code>CROP_AUTO</code> is in use, and the camera API activates backward-compatibility mode,
+     * several metadata fields will also be parsed differently to ensure that coordinates are
+     * correctly handled for features like drawing face detection boxes or passing in
+     * tap-to-focus coordinates.  The camera API will convert positions in the active array
+     * coordinate system to/from the cropped-and-rotated coordinate system to make the
+     * operation transparent for applications.  The following controls are affected:</p>
+     * <ul>
+     * <li>{@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions}</li>
+     * <li>{@link CaptureResult#STATISTICS_FACES android.statistics.faces}</li>
+     * </ul>
+     * <p>Capture results will contain the actual value selected by the API;
+     * <code>ROTATE_AND_CROP_AUTO</code> will never be seen in a capture result.</p>
+     * <p>Applications can also select their preferred cropping mode, either to opt out of the
+     * backwards-compatibility treatment, or to use the cropping feature themselves as needed.
+     * In this case, no coordinate translation will be done automatically, and all controls
+     * will continue to use the normal active array coordinates.</p>
+     * <p>Cropping and rotating is done after the application of digital zoom (via either
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} or {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}), but before each individual
+     * output is further cropped and scaled. It only affects processed outputs such as
+     * YUV, PRIVATE, and JPEG.  It has no effect on RAW outputs.</p>
+     * <p>When <code>CROP_90</code> or <code>CROP_270</code> are selected, there is a significant loss to the field of
+     * view. For example, with a 4:3 aspect ratio output of 1600x1200, <code>CROP_90</code> will still
+     * produce 1600x1200 output, but these buffers are cropped from a vertical 3:4 slice at the
+     * center of the 4:3 area, then rotated to be 4:3, and then upscaled to 1600x1200.  Only
+     * 56.25% of the original FOV is still visible.  In general, for an aspect ratio of <code>w:h</code>,
+     * the crop and rotate operation leaves <code>(h/w)^2</code> of the field of view visible. For 16:9,
+     * this is ~31.6%.</p>
+     * <p>As a visual example, the figure below shows the effect of <code>ROTATE_AND_CROP_90</code> on the
+     * outputs for the following parameters:</p>
+     * <ul>
+     * <li>Sensor active array: <code>2000x1500</code></li>
+     * <li>Crop region: top-left: <code>(500, 375)</code>, size: <code>(1000, 750)</code> (4:3 aspect ratio)</li>
+     * <li>Output streams: YUV <code>640x480</code> and YUV <code>1280x720</code></li>
+     * <li><code>ROTATE_AND_CROP_90</code></li>
+     * </ul>
+     * <p><img alt="Effect of ROTATE_AND_CROP_90" src="/reference/images/camera2/metadata/android.scaler.rotateAndCrop/crop-region-rotate-90-43-ratio.png" /></p>
+     * <p>With these settings, the regions of the active array covered by the output streams are:</p>
+     * <ul>
+     * <li>640x480 stream crop: top-left: <code>(219, 375)</code>, size: <code>(562, 750)</code></li>
+     * <li>1280x720 stream crop: top-left: <code>(289, 375)</code>, size: <code>(422, 750)</code></li>
+     * </ul>
+     * <p>Since the buffers are rotated, the buffers as seen by the application are:</p>
+     * <ul>
+     * <li>640x480 stream: top-left: <code>(781, 375)</code> on active array, size: <code>(640, 480)</code>, downscaled 1.17x from sensor pixels</li>
+     * <li>1280x720 stream: top-left: <code>(711, 375)</code> on active array, size: <code>(1280, 720)</code>, upscaled 1.71x from sensor pixels</li>
+     * </ul>
+     * <p><b>Possible values:</b>
+     * <ul>
+     *   <li>{@link #SCALER_ROTATE_AND_CROP_NONE NONE}</li>
+     *   <li>{@link #SCALER_ROTATE_AND_CROP_90 90}</li>
+     *   <li>{@link #SCALER_ROTATE_AND_CROP_180 180}</li>
+     *   <li>{@link #SCALER_ROTATE_AND_CROP_270 270}</li>
+     *   <li>{@link #SCALER_ROTATE_AND_CROP_AUTO AUTO}</li>
+     * </ul></p>
+     * <p><b>Available values for this device:</b><br>
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_ROTATE_AND_CROP_MODES android.scaler.availableRotateAndCropModes}</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_REGIONS
+     * @see CaptureRequest#CONTROL_AF_REGIONS
+     * @see CaptureRequest#CONTROL_AWB_REGIONS
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @see CameraCharacteristics#SCALER_AVAILABLE_ROTATE_AND_CROP_MODES
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CaptureResult#STATISTICS_FACES
+     * @see #SCALER_ROTATE_AND_CROP_NONE
+     * @see #SCALER_ROTATE_AND_CROP_90
+     * @see #SCALER_ROTATE_AND_CROP_180
+     * @see #SCALER_ROTATE_AND_CROP_270
+     * @see #SCALER_ROTATE_AND_CROP_AUTO
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> SCALER_ROTATE_AND_CROP =
+            new Key<Integer>("android.scaler.rotateAndCrop", int.class);
+
+    /**
      * <p>Duration each pixel is exposed to
      * light.</p>
      * <p>If the sensor can't expose this exact duration, it will shorten the
