@@ -451,7 +451,7 @@
     <string name="permlab_callPhone" msgid="1798582257194643320">"اتصال مباشر بأرقام الهواتف"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"للسماح للتطبيق بطلب أرقام هاتفية بدون تدخل منك. وقد يؤدي ذلك إلى تحمل رسوم غير متوقعة أو إجراء مكالمات غير متوقعة. ومن الجدير بالذكر أن ذلك لا يتيح للتطبيق الاتصال بأرقام الطوارئ. وقد تؤدي التطبيقات الضارة إلى تحملك تكاليف مالية من خلال إجراء مكالمات بدون موافقة منك."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"الوصول إلى خدمة الاتصال عبر الرسائل الفورية"</string>
-    <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"للسماح للتطبيق باستخدام خدمة الرسائل الفورية لإجراء المكالمات دون تدخل منك."</string>
+    <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"للسماح للتطبيق باستخدام خدمة الرسائل الفورية لإجراء المكالمات بدون تدخل منك."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"قراءة حالة الهاتف والهوية"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"للسماح للتطبيق بالدخول إلى ميزات الهاتف في الجهاز. ويتيح هذا الإذن للتطبيق تحديد رقم الهاتف ومعرّفات الجهاز، وما إذا كانت هناك مكالمة نشطة والرقم البعيد الذي تم الاتصال به في المكالمة."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"توجيه المكالمات من خلال النظام"</string>
@@ -1290,7 +1290,7 @@
     <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"للحصول على أداء أفضل، يمكن فتح لعبة واحدة فقط من هذه الألعاب في كل مرة."</string>
     <string name="old_app_action" msgid="725331621042848590">"الرجوع إلى <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_action" msgid="547772182913269801">"فتح <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
-    <string name="new_app_description" msgid="1958903080400806644">"سيتم إغلاق <xliff:g id="OLD_APP">%1$s</xliff:g> من دون حفظ"</string>
+    <string name="new_app_description" msgid="1958903080400806644">"سيتم إغلاق <xliff:g id="OLD_APP">%1$s</xliff:g> بدون حفظ"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"لقد تجاوزت <xliff:g id="PROC">%1$s</xliff:g> حد الذاكرة."</string>
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"نَسْخ الذاكرة <xliff:g id="PROC">%1$s</xliff:g> جاهز"</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"تم جمع مقدار كبير من بيانات الذاكرة. انقر للمشاركة."</string>

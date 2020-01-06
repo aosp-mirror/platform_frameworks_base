@@ -674,7 +674,7 @@
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Sletter denne brukerens data på dette nettbrettet uten advarsel."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="7310266499158746034">"Sletter denne brukerens data på denne TV-en uten advarsel."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Sletter denne brukerens data på denne telefonen uten advarsel."</string>
-    <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Angi enhetens globale mellomtjener"</string>
+    <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Angi enhetens globale proxy-tjener"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Angir den globale proxy-tjeneren på enheten som skal brukes når regelen er aktivert. Bare eieren av enheten kan angi den globale proxy-tjeneren."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"Angi utløpstid for skjermlås"</string>
     <string name="policydesc_expirePassword" msgid="9136524319325960675">"Endrer hvor ofte PIN-koden, passordet eller mønsteret til skjermlåsen skal byttes."</string>
