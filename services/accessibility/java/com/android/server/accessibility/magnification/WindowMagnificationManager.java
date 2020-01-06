@@ -107,6 +107,13 @@ public final class WindowMagnificationManager implements
         mUserId = userId;
     }
 
+    /**
+     *
+     * @return {@code true} if {@link IWindowMagnificationConnection} is available
+     */
+    public boolean isConnected() {
+        return mConnectionWrapper != null;
+    }
 
     private void resetWindowMagnifiers() {
         synchronized (mLock) {
