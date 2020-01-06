@@ -270,7 +270,23 @@ public class WifiConfigurationTest {
         config.allowedKeyManagement.clear();
         assertEquals(mSsid + "WEP", config.getSsidAndSecurityTypeString());
 
+        // set WEP key and give a valid index.
         config.wepKeys[0] = null;
+        config.wepKeys[2] = "TestWep";
+        config.wepTxKeyIndex = 2;
+        config.allowedKeyManagement.clear();
+        assertEquals(mSsid + "WEP", config.getSsidAndSecurityTypeString());
+
+        // set WEP key but does not give a valid index.
+        config.wepKeys[0] = null;
+        config.wepKeys[2] = "TestWep";
+        config.wepTxKeyIndex = 0;
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.OWE);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.OWE], config.getSsidAndSecurityTypeString());
+
+        config.wepKeys[0] = null;
+        config.wepTxKeyIndex = 0;
         config.allowedKeyManagement.clear();
         config.allowedKeyManagement.set(KeyMgmt.OWE);
         assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.OWE], config.getSsidAndSecurityTypeString());
