@@ -63,7 +63,8 @@ public class WindowInsetsTest {
         b.setInsets(navigationBars(), Insets.of(0, 0, 0, 100));
         b.setInsets(ime(), Insets.of(0, 0, 0, 300));
         WindowInsets insets = b.build();
-        assertEquals(300, insets.getSystemWindowInsets().bottom);
+        assertEquals(100, insets.getSystemWindowInsets().bottom);
+        assertEquals(300, insets.getInsets(ime()).bottom);
     }
 
     // TODO: Move this to CTS once API made public
