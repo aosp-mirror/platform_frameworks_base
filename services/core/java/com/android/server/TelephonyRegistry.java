@@ -2142,7 +2142,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             Binder.restoreCallingIdentity(ident);
         }
 
-        Intent intent = new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
+        Intent intent = new Intent(Intent.ACTION_SERVICE_STATE);
         intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         Bundle data = new Bundle();
         state.fillInNotifierBundle(data);

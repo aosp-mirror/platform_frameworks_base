@@ -304,7 +304,7 @@ public class TelephonyIntents {
      * </ul>
      */
     public static final String ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED
-            = "android.intent.action.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED";
+            = TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED;
 
     /**
      * Broadcast Action: The default voice subscription has changed.  This has the following
@@ -314,7 +314,7 @@ public class TelephonyIntents {
      * </ul>
      */
     public static final String ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED
-            = "android.intent.action.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED";
+            = TelephonyManager.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED;
 
     /**
      * Broadcast Action: The default sms subscription has changed.  This has the following
@@ -433,7 +433,7 @@ public class TelephonyIntents {
      * Broadcast action to trigger CI OMA-DM Session.
      */
     public static final String ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE =
-            "com.android.omadm.service.CONFIGURATION_UPDATE";
+            TelephonyManager.ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE;
 
     /**
      * Broadcast action to trigger the Carrier Certificate download.
