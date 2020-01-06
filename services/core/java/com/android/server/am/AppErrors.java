@@ -88,6 +88,11 @@ class AppErrors {
     private final ProcessMap<Long> mProcessCrashTimesPersistent = new ProcessMap<>();
 
     /**
+     * The last time that various processes have crashed and shown an error dialog.
+     */
+    private final ProcessMap<Long> mProcessCrashShowDialogTimes = new ProcessMap<>();
+
+    /**
      * Set of applications that we consider to be bad, and will reject
      * incoming broadcasts from (which the user has no control over).
      * Processes are added to this set when they have crashed twice within
@@ -820,6 +825,11 @@ class AppErrors {
                 }
                 return;
             }
+            Long crashShowErrorTime = null;
+            if (!proc.isolated) {
+                crashShowErrorTime = mProcessCrashShowDialogTimes.get(proc.info.processName,
+                        proc.uid);
+            }
             final boolean showFirstCrash = Settings.Global.getInt(
                     mContext.getContentResolver(),
                     Settings.Global.SHOW_FIRST_CRASH_DIALOG, 0) != 0;
@@ -830,10 +840,16 @@ class AppErrors {
                     mService.mUserController.getCurrentUserId()) != 0;
             final boolean crashSilenced = mAppsNotReportingCrashes != null &&
                     mAppsNotReportingCrashes.contains(proc.info.packageName);
+            final long now = SystemClock.uptimeMillis();
+            final boolean shouldThottle = crashShowErrorTime != null
+                    && now < crashShowErrorTime + ProcessList.MIN_CRASH_INTERVAL;
             if ((mService.mAtmInternal.canShowErrorDialogs() || showBackground)
-                    && !crashSilenced
+                    && !crashSilenced && !shouldThottle
                     && (showFirstCrash || showFirstCrashDevOption || data.repeating)) {
                 proc.getDialogController().showCrashDialogs(data);
+                if (!proc.isolated) {
+                    mProcessCrashShowDialogTimes.put(proc.info.processName, proc.uid, now);
+                }
             } else {
                 // The device is asleep, so just pretend that the user
                 // saw a crash dialog and hit "force quit".
