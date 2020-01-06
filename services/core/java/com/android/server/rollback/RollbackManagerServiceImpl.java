@@ -1139,9 +1139,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             } else {
                 removeRollbackForPackageSessionId(sessionId);
             }
-
-            // Clear the queue so it will never be leaked to next tests.
-            mSleepDuration.clear();
         }
     }
 
