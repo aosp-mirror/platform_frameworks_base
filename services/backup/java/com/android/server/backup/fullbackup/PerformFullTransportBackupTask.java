@@ -42,7 +42,6 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.backup.IBackupTransport;
-import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
@@ -62,6 +61,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -171,7 +171,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         mUserInitiated = userInitiated;
         mCurrentOpToken = backupManagerService.generateRandomIntegerToken();
         mBackupRunnerOpToken = backupManagerService.generateRandomIntegerToken();
-        mAgentTimeoutParameters = Preconditions.checkNotNull(
+        mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
         mUserId = backupManagerService.getUserId();

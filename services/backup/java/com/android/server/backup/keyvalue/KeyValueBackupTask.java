@@ -310,7 +310,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         mUserInitiated = userInitiated;
         mNonIncremental = nonIncremental;
         mAgentTimeoutParameters =
-                Preconditions.checkNotNull(
+                Objects.requireNonNull(
                         backupManagerService.getAgentTimeoutParameters(),
                         "Timeout parameters cannot be null");
         mStateDirectory = new File(backupManagerService.getBaseStateDir(), transportDirName);

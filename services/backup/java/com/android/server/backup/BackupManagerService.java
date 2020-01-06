@@ -16,8 +16,6 @@
 
 package com.android.server.backup;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import static java.util.Collections.emptySet;
 
 import android.Manifest;
@@ -68,6 +66,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -124,7 +123,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     static BackupManagerService sInstance;
 
     static BackupManagerService getInstance() {
-        return checkNotNull(sInstance);
+        return Objects.requireNonNull(sInstance);
     }
 
     private final Context mContext;

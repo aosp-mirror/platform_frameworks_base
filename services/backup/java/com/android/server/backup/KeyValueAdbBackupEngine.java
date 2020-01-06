@@ -21,7 +21,6 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.util.Slog;
 
-import com.android.internal.util.Preconditions;
 import com.android.server.backup.fullbackup.AppMetadataBackupWriter;
 import com.android.server.backup.remote.ServiceBackupCallback;
 import com.android.server.backup.utils.FullBackupUtils;
@@ -33,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Objects;
 
 /**
  * Used by BackupManagerService to perform adb backup for key-value packages. At the moment this
@@ -87,7 +87,7 @@ public class KeyValueAdbBackupEngine {
                 pkg + BACKUP_KEY_VALUE_NEW_STATE_FILENAME_SUFFIX);
 
         mManifestFile = new File(mDataDir, BACKUP_MANIFEST_FILENAME);
-        mAgentTimeoutParameters = Preconditions.checkNotNull(
+        mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
     }
