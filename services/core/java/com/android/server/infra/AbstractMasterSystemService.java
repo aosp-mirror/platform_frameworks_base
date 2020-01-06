@@ -50,6 +50,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Base class for {@link SystemService SystemServices} that support multi user.
@@ -373,7 +374,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                 + durationMs + "ms");
         enforceCallingPermissionForManagement();
 
-        Preconditions.checkNotNull(componentName);
+        Objects.requireNonNull(componentName);
         final int maxDurationMs = getMaximumTemporaryServiceDurationMs();
         if (durationMs > maxDurationMs) {
             throw new IllegalArgumentException(
@@ -735,7 +736,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      * @throws SecurityException when it's not...
      */
     protected final void assertCalledByPackageOwner(@NonNull String packageName) {
-        Preconditions.checkNotNull(packageName);
+        Objects.requireNonNull(packageName);
         final int uid = Binder.getCallingUid();
         final String[] packages = getContext().getPackageManager().getPackagesForUid(uid);
         if (packages != null) {
