@@ -48,6 +48,44 @@
             "include-filter": "android.permission.cts.PermissionUpdateListenerTest"
         }
       ]
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "install-arg": "-t"
+        },
+        {
+          "include-filter": "com.android.server.pm.UserDataPreparerTest"
+        },
+        {
+          "include-filter": "com.android.server.pm.UserLifecycleStressTest"
+        },
+        {
+          "include-filter": "com.android.server.pm.UserManagerServiceCreateProfileTest"
+        },
+        {
+          "include-filter": "com.android.server.pm.UserManagerServiceIdRecyclingTest"
+        },
+        {
+          "include-filter": "com.android.server.pm.UserManagerServiceTest"
+        },
+        {
+          "include-filter": "com.android.server.pm.UserManagerServiceUserInfoTest"
+        },
+        {
+          "include-filter": "com.android.server.pm.UserManagerServiceUserTypeTest"
+        },
+        {
+          "include-filter": "com.android.server.pm.UserManagerTest"
+        },
+        {
+          "include-filter": "com.android.server.pm.UserRestrictionsUtilsTest"
+        },
+        {
+          "include-filter": "com.android.server.pm.UserSystemPackageInstallerTest"
+        }
+      ]
     }
   ],
   "imports": [
