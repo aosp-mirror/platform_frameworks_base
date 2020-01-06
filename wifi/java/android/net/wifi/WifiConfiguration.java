@@ -2590,9 +2590,8 @@ public class WifiConfiguration implements Parcelable {
         return mPasspointManagementObjectTree;
     }
 
-    /** copy constructor {@hide} */
-    @UnsupportedAppUsage
-    public WifiConfiguration(WifiConfiguration source) {
+    /** Copy constructor */
+    public WifiConfiguration(@NonNull WifiConfiguration source) {
         if (source != null) {
             networkId = source.networkId;
             status = source.status;
