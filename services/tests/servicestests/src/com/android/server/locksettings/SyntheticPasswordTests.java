@@ -381,7 +381,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         LockscreenCredential pattern = newPattern("123654");
         byte[] token = "some-high-entropy-secure-token".getBytes();
 
-        mHasSecureLockScreen = false;
+        mService.mHasSecureLockScreen = false;
         enableSyntheticPassword();
         long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID, null);
         assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));

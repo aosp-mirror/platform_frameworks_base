@@ -33,7 +33,6 @@ import android.app.trust.TrustManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -87,7 +86,6 @@ public class LockPatternUtils {
      * The interval of the countdown for showing progress of the lockout.
      */
     public static final long FAILED_ATTEMPT_COUNTDOWN_INTERVAL_MS = 1000L;
-
 
     /**
      * This dictates when we start telling the user that continued failed attempts will wipe
@@ -1735,8 +1733,11 @@ public class LockPatternUtils {
      */
     public boolean hasSecureLockScreen() {
         if (mHasSecureLockScreen == null) {
-            mHasSecureLockScreen = Boolean.valueOf(mContext.getPackageManager()
-                    .hasSystemFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN));
+            try {
+                mHasSecureLockScreen = Boolean.valueOf(getLockSettings().hasSecureLockScreen());
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
         }
         return mHasSecureLockScreen.booleanValue();
     }

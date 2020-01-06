@@ -423,7 +423,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
 
     private void testCreateCredentialFailsWithoutLockScreen(
             int userId, LockscreenCredential credential) throws RemoteException {
-        mHasSecureLockScreen = false;
+        mService.mHasSecureLockScreen = false;
 
         try {
             mService.setLockCredential(credential, null, userId);
