@@ -1301,22 +1301,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         return booting;
     }
 
-    // Checked.
-    @GuardedBy("mService")
-    final ActivityRecord activityIdleInternalLocked(final IBinder token, boolean fromTimeout,
+    void activityIdleInternal(ActivityRecord r, boolean fromTimeout,
             boolean processPausingActivities, Configuration config) {
-        if (DEBUG_ALL) Slog.v(TAG, "Activity idle: " + token);
+        if (DEBUG_ALL) Slog.v(TAG, "Activity idle: " + r);
 
-        ArrayList<ActivityRecord> finishes = null;
-        ArrayList<UserState> startingUsers = null;
-        int NS = 0;
-        int NF = 0;
         boolean booting = false;
-        boolean activityRemoved = false;
 
-        ActivityRecord r = ActivityRecord.forTokenLocked(token);
         if (r != null) {
-            if (DEBUG_IDLE) Slog.d(TAG_IDLE, "activityIdleInternalLocked: Callers="
+            if (DEBUG_IDLE) Slog.d(TAG_IDLE, "activityIdleInternal: Callers="
                     + Debug.getCallers(4));
             mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
             r.finishLaunchTickingLocked();
@@ -1369,47 +1361,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         // Atomically retrieve all of the other things to do.
-        final ArrayList<ActivityRecord> stops = processStoppingActivitiesLocked(r,
-                true /* remove */, processPausingActivities);
-        NS = stops != null ? stops.size() : 0;
-        if ((NF = mFinishingActivities.size()) > 0) {
-            finishes = new ArrayList<>(mFinishingActivities);
-            mFinishingActivities.clear();
-        }
+        processStoppingAndFinishingActivities(r, processPausingActivities, "idle");
 
-        if (mStartingUsers.size() > 0) {
-            startingUsers = new ArrayList<>(mStartingUsers);
+        if (!mStartingUsers.isEmpty()) {
+            final ArrayList<UserState> startingUsers = new ArrayList<>(mStartingUsers);
             mStartingUsers.clear();
-        }
 
-        // Stop any activities that are scheduled to do so but have been
-        // waiting for the next one to start.
-        for (int i = 0; i < NS; i++) {
-            r = stops.get(i);
-            final ActivityStack stack = r.getActivityStack();
-            if (stack != null) {
-                if (r.finishing) {
-                    // TODO(b/137329632): Wait for idle of the right activity, not just any.
-                    r.destroyIfPossible("activityIdleInternalLocked");
-                } else {
-                    r.stopIfPossible();
-                }
-            }
-        }
-
-        // Finish any activities that are scheduled to do so but have been
-        // waiting for the next one to start.
-        for (int i = 0; i < NF; i++) {
-            r = finishes.get(i);
-            final ActivityStack stack = r.getActivityStack();
-            if (stack != null) {
-                activityRemoved |= r.destroyImmediately(true /* removeFromApp */, "finish-idle");
-            }
-        }
-
-        if (!booting) {
-            // Complete user switch
-            if (startingUsers != null) {
+            if (!booting) {
+                // Complete user switch.
                 for (int i = 0; i < startingUsers.size(); i++) {
                     mService.mAmInternal.finishUserSwitch(startingUsers.get(i));
                 }
@@ -1417,14 +1376,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         mService.mH.post(() -> mService.mAmInternal.trimApplications());
-        //dump();
-        //mWindowManager.dump();
-
-        if (activityRemoved) {
-            mRootWindowContainer.resumeFocusedStacksTopActivities();
-        }
-
-        return r;
     }
 
     /** This doesn't just find a task, it also moves the task to front. */
@@ -1765,7 +1716,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             stack.mForceHidden = true;
             stack.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
             stack.mForceHidden = false;
-            activityIdleInternalLocked(null, false /* fromTimeout */,
+            activityIdleInternal(null /* idleActivity */, false /* fromTimeout */,
                     true /* processPausingActivities */, null /* configuration */);
 
             // Move all the tasks to the bottom of the fullscreen stack
@@ -2133,19 +2084,46 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         return false;
     }
 
-    // TODO: Change method name to reflect what it actually does.
-    final ArrayList<ActivityRecord> processStoppingActivitiesLocked(ActivityRecord idleActivity,
-            boolean remove, boolean processPausingActivities) {
-        ArrayList<ActivityRecord> stops = null;
+    /**
+     * Processes the activities to be stopped or destroyed. This should be called when the resumed
+     * activities are idle or drawn.
+     */
+    private void processStoppingAndFinishingActivities(ActivityRecord launchedActivity,
+            boolean processPausingActivities, String reason) {
+        // Stop any activities that are scheduled to do so but have been waiting for the transition
+        // animation to finish.
+        processStoppingActivities(launchedActivity, false /* onlyUpdateVisibility */,
+                processPausingActivities, reason);
+
+        final int numFinishingActivities = mFinishingActivities.size();
+        if (numFinishingActivities == 0) {
+            return;
+        }
+
+        // Finish any activities that are scheduled to do so but have been waiting for the next one
+        // to start.
+        final ArrayList<ActivityRecord> finishingActivities = new ArrayList<>(mFinishingActivities);
+        mFinishingActivities.clear();
+        for (int i = 0; i < numFinishingActivities; i++) {
+            final ActivityRecord r = finishingActivities.get(i);
+            if (r.isInHistory()) {
+                r.destroyImmediately(true /* removeFromApp */, "finish-" + reason);
+            }
+        }
+    }
+
+    /** Stop or destroy the stopping activities if they are not interactive. */
+    void processStoppingActivities(ActivityRecord launchedActivity, boolean onlyUpdateVisibility,
+            boolean processPausingActivities, String reason) {
+        final int numStoppingActivities = mStoppingActivities.size();
+        if (numStoppingActivities == 0) {
+            return;
+        }
+        ArrayList<ActivityRecord> readyToStopActivities = null;
 
         final boolean nowVisible = mRootWindowContainer.allResumedActivitiesVisible();
-        for (int activityNdx = mStoppingActivities.size() - 1; activityNdx >= 0; --activityNdx) {
-            ActivityRecord s = mStoppingActivities.get(activityNdx);
-
-            final boolean animating = s.isAnimating(TRANSITION);
-
-            if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + nowVisible
-                    + " animating=" + animating + " finishing=" + s.finishing);
+        for (int activityNdx = numStoppingActivities - 1; activityNdx >= 0; --activityNdx) {
+            final ActivityRecord s = mStoppingActivities.get(activityNdx);
             if (nowVisible && s.finishing) {
 
                 // If this activity is finishing, it is sitting on top of
@@ -2156,32 +2134,49 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 if (DEBUG_STATES) Slog.v(TAG, "Before stopping, can hide: " + s);
                 s.setVisibility(false);
             }
-            if (remove) {
-                final ActivityStack stack = s.getActivityStack();
-                final boolean shouldSleepOrShutDown = stack != null
-                        ? stack.shouldSleepOrShutDownActivities()
-                        : mService.isSleepingOrShuttingDownLocked();
-                if (!animating || shouldSleepOrShutDown) {
-                    if (!processPausingActivities && s.isState(PAUSING)) {
-                        // Defer processing pausing activities in this iteration and reschedule
-                        // a delayed idle to reprocess it again
-                        removeIdleTimeoutForActivity(idleActivity);
-                        scheduleIdleTimeoutLocked(idleActivity);
-                        continue;
-                    }
+            if (onlyUpdateVisibility) {
+                continue;
+            }
 
-                    if (DEBUG_STATES) Slog.v(TAG, "Ready to stop: " + s);
-                    if (stops == null) {
-                        stops = new ArrayList<>();
-                    }
-                    stops.add(s);
+            final boolean animating = s.isAnimating(TRANSITION);
+            if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + nowVisible
+                    + " animating=" + animating + " finishing=" + s.finishing);
 
-                    mStoppingActivities.remove(activityNdx);
+            final ActivityStack stack = s.getActivityStack();
+            final boolean shouldSleepOrShutDown = stack != null
+                    ? stack.shouldSleepOrShutDownActivities()
+                    : mService.isSleepingOrShuttingDownLocked();
+            if (!animating || shouldSleepOrShutDown) {
+                if (!processPausingActivities && s.isState(PAUSING)) {
+                    // Defer processing pausing activities in this iteration and reschedule
+                    // a delayed idle to reprocess it again
+                    removeIdleTimeoutForActivity(launchedActivity);
+                    scheduleIdleTimeout(launchedActivity);
+                    continue;
                 }
+
+                if (DEBUG_STATES) Slog.v(TAG, "Ready to stop: " + s);
+                if (readyToStopActivities == null) {
+                    readyToStopActivities = new ArrayList<>();
+                }
+                readyToStopActivities.add(s);
+
+                mStoppingActivities.remove(activityNdx);
             }
         }
 
-        return stops;
+        final int numReadyStops = readyToStopActivities == null ? 0 : readyToStopActivities.size();
+        for (int i = 0; i < numReadyStops; i++) {
+            final ActivityRecord r = readyToStopActivities.get(i);
+            if (r.isInHistory()) {
+                if (r.finishing) {
+                    // TODO(b/137329632): Wait for idle of the right activity, not just any.
+                    r.destroyIfPossible(reason);
+                } else {
+                    r.stopIfPossible();
+                }
+            }
+        }
     }
 
     void removeHistoryRecords(WindowProcessController app) {
@@ -2319,14 +2314,13 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         return printed;
     }
 
-    void scheduleIdleTimeoutLocked(ActivityRecord next) {
-        if (DEBUG_IDLE) Slog.d(TAG_IDLE,
-                "scheduleIdleTimeoutLocked: Callers=" + Debug.getCallers(4));
+    void scheduleIdleTimeout(ActivityRecord next) {
+        if (DEBUG_IDLE) Slog.d(TAG_IDLE, "scheduleIdleTimeout: Callers=" + Debug.getCallers(4));
         Message msg = mHandler.obtainMessage(IDLE_TIMEOUT_MSG, next);
         mHandler.sendMessageDelayed(msg, IDLE_TIMEOUT);
     }
 
-    final void scheduleIdleLocked() {
+    final void scheduleIdle() {
         mHandler.sendEmptyMessage(IDLE_NOW_MSG);
     }
 
@@ -2620,83 +2614,19 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     private final class ActivityStackSupervisorHandler extends Handler {
 
-        public ActivityStackSupervisorHandler(Looper looper) {
+        ActivityStackSupervisorHandler(Looper looper) {
             super(looper);
-        }
-
-        void activityIdleInternal(ActivityRecord r, boolean processPausingActivities) {
-            synchronized (mService.mGlobalLock) {
-                activityIdleInternalLocked(r != null ? r.appToken : null, true /* fromTimeout */,
-                        processPausingActivities, null);
-            }
         }
 
         @Override
         public void handleMessage(Message msg) {
+            synchronized (mService.mGlobalLock) {
+                if (handleMessageInner(msg)) {
+                    return;
+                }
+            }
+            // The cases that some invocations cannot be locked by WM.
             switch (msg.what) {
-                case REPORT_MULTI_WINDOW_MODE_CHANGED_MSG: {
-                    synchronized (mService.mGlobalLock) {
-                        for (int i = mMultiWindowModeChangedActivities.size() - 1; i >= 0; i--) {
-                            final ActivityRecord r = mMultiWindowModeChangedActivities.remove(i);
-                            r.updateMultiWindowMode();
-                        }
-                    }
-                } break;
-                case REPORT_PIP_MODE_CHANGED_MSG: {
-                    synchronized (mService.mGlobalLock) {
-                        for (int i = mPipModeChangedActivities.size() - 1; i >= 0; i--) {
-                            final ActivityRecord r = mPipModeChangedActivities.remove(i);
-                            r.updatePictureInPictureMode(mPipModeChangedTargetStackBounds,
-                                    false /* forceUpdate */);
-                        }
-                    }
-                } break;
-                case IDLE_TIMEOUT_MSG: {
-                    if (DEBUG_IDLE) Slog.d(TAG_IDLE,
-                            "handleMessage: IDLE_TIMEOUT_MSG: r=" + msg.obj);
-                    // We don't at this point know if the activity is fullscreen,
-                    // so we need to be conservative and assume it isn't.
-                    activityIdleInternal((ActivityRecord) msg.obj,
-                            true /* processPausingActivities */);
-                } break;
-                case IDLE_NOW_MSG: {
-                    if (DEBUG_IDLE) Slog.d(TAG_IDLE, "handleMessage: IDLE_NOW_MSG: r=" + msg.obj);
-                    activityIdleInternal((ActivityRecord) msg.obj,
-                            false /* processPausingActivities */);
-                } break;
-                case RESUME_TOP_ACTIVITY_MSG: {
-                    synchronized (mService.mGlobalLock) {
-                        mRootWindowContainer.resumeFocusedStacksTopActivities();
-                    }
-                } break;
-                case SLEEP_TIMEOUT_MSG: {
-                    synchronized (mService.mGlobalLock) {
-                        if (mService.isSleepingOrShuttingDownLocked()) {
-                            Slog.w(TAG, "Sleep timeout!  Sleeping now.");
-                            checkReadyForSleepLocked(false /* allowDelay */);
-                        }
-                    }
-                } break;
-                case LAUNCH_TIMEOUT_MSG: {
-                    synchronized (mService.mGlobalLock) {
-                        if (mLaunchingActivityWakeLock.isHeld()) {
-                            Slog.w(TAG, "Launch timeout has expired, giving up wake lock!");
-                            if (VALIDATE_WAKE_LOCK_CALLER
-                                    && Binder.getCallingUid() != Process.myUid()) {
-                                throw new IllegalStateException("Calling must be system uid");
-                            }
-                            mLaunchingActivityWakeLock.release();
-                        }
-                    }
-                } break;
-                case LAUNCH_TASK_BEHIND_COMPLETE: {
-                    synchronized (mService.mGlobalLock) {
-                        ActivityRecord r = ActivityRecord.forTokenLocked((IBinder) msg.obj);
-                        if (r != null) {
-                            handleLaunchTaskBehindCompleteLocked(r);
-                        }
-                    }
-                } break;
                 case RESTART_ACTIVITY_PROCESS_TIMEOUT_MSG: {
                     final ActivityRecord r = (ActivityRecord) msg.obj;
                     String processName = null;
@@ -2713,26 +2643,89 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                                 "restartActivityProcessTimeout");
                     }
                 } break;
-                case REPORT_HOME_CHANGED_MSG: {
-                    synchronized (mService.mGlobalLock) {
-                        mHandler.removeMessages(REPORT_HOME_CHANGED_MSG);
+            }
+        }
 
-                        // Start home activities on displays with no activities.
-                        mRootWindowContainer.startHomeOnEmptyDisplays("homeChanged");
+        private void activityIdleFromMessage(ActivityRecord idleActivity, boolean fromTimeout) {
+            activityIdleInternal(idleActivity, fromTimeout,
+                    fromTimeout /* processPausingActivities */, null /* config */);
+        }
+
+        /**
+         * Handles the message with lock held.
+         *
+         * @return {@code true} if the message is handled.
+         */
+        private boolean handleMessageInner(Message msg) {
+            switch (msg.what) {
+                case REPORT_MULTI_WINDOW_MODE_CHANGED_MSG: {
+                    for (int i = mMultiWindowModeChangedActivities.size() - 1; i >= 0; i--) {
+                        final ActivityRecord r = mMultiWindowModeChangedActivities.remove(i);
+                        r.updateMultiWindowMode();
                     }
                 } break;
-                case TOP_RESUMED_STATE_LOSS_TIMEOUT_MSG: {
-                    ActivityRecord r = (ActivityRecord) msg.obj;
-                    Slog.w(TAG, "Activity top resumed state loss timeout for " + r);
-                    synchronized (mService.mGlobalLock) {
-                        if (r.hasProcess()) {
-                            mService.logAppTooSlow(r.app, r.topResumedStateLossTime,
-                                    "top state loss for " + r);
+                case REPORT_PIP_MODE_CHANGED_MSG: {
+                    for (int i = mPipModeChangedActivities.size() - 1; i >= 0; i--) {
+                        final ActivityRecord r = mPipModeChangedActivities.remove(i);
+                        r.updatePictureInPictureMode(mPipModeChangedTargetStackBounds,
+                                false /* forceUpdate */);
+                    }
+                } break;
+                case IDLE_TIMEOUT_MSG: {
+                    if (DEBUG_IDLE) Slog.d(TAG_IDLE,
+                            "handleMessage: IDLE_TIMEOUT_MSG: r=" + msg.obj);
+                    // We don't at this point know if the activity is fullscreen, so we need to be
+                    // conservative and assume it isn't.
+                    activityIdleFromMessage((ActivityRecord) msg.obj, true /* fromTimeout */);
+                } break;
+                case IDLE_NOW_MSG: {
+                    if (DEBUG_IDLE) Slog.d(TAG_IDLE, "handleMessage: IDLE_NOW_MSG: r=" + msg.obj);
+                    activityIdleFromMessage((ActivityRecord) msg.obj, false /* fromTimeout */);
+                } break;
+                case RESUME_TOP_ACTIVITY_MSG: {
+                    mRootWindowContainer.resumeFocusedStacksTopActivities();
+                } break;
+                case SLEEP_TIMEOUT_MSG: {
+                    if (mService.isSleepingOrShuttingDownLocked()) {
+                        Slog.w(TAG, "Sleep timeout!  Sleeping now.");
+                        checkReadyForSleepLocked(false /* allowDelay */);
+                    }
+                } break;
+                case LAUNCH_TIMEOUT_MSG: {
+                    if (mLaunchingActivityWakeLock.isHeld()) {
+                        Slog.w(TAG, "Launch timeout has expired, giving up wake lock!");
+                        if (VALIDATE_WAKE_LOCK_CALLER
+                                && Binder.getCallingUid() != Process.myUid()) {
+                            throw new IllegalStateException("Calling must be system uid");
                         }
+                        mLaunchingActivityWakeLock.release();
+                    }
+                } break;
+                case LAUNCH_TASK_BEHIND_COMPLETE: {
+                    final ActivityRecord r = ActivityRecord.forTokenLocked((IBinder) msg.obj);
+                    if (r != null) {
+                        handleLaunchTaskBehindCompleteLocked(r);
+                    }
+                } break;
+                case REPORT_HOME_CHANGED_MSG: {
+                    mHandler.removeMessages(REPORT_HOME_CHANGED_MSG);
+
+                    // Start home activities on displays with no activities.
+                    mRootWindowContainer.startHomeOnEmptyDisplays("homeChanged");
+                } break;
+                case TOP_RESUMED_STATE_LOSS_TIMEOUT_MSG: {
+                    final ActivityRecord r = (ActivityRecord) msg.obj;
+                    Slog.w(TAG, "Activity top resumed state loss timeout for " + r);
+                    if (r.hasProcess()) {
+                        mService.logAppTooSlow(r.app, r.topResumedStateLossTime,
+                                "top state loss for " + r);
                     }
                     handleTopResumedStateReleased(true /* timeout */);
                 } break;
+                default:
+                    return false;
             }
+            return true;
         }
     }
 

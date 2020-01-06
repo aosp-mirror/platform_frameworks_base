@@ -4763,7 +4763,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Schedule an idle timeout in case the app doesn't do it for us.
-        mStackSupervisor.scheduleIdleTimeoutLocked(this);
+        mStackSupervisor.scheduleIdleTimeout(this);
 
         mStackSupervisor.reportResumedActivityLocked(this);
 
@@ -4984,9 +4984,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         + "immediate=" + !idleDelayed);
             }
             if (!idleDelayed) {
-                mStackSupervisor.scheduleIdleLocked();
+                mStackSupervisor.scheduleIdle();
             } else {
-                mStackSupervisor.scheduleIdleTimeoutLocked(this);
+                mStackSupervisor.scheduleIdleTimeout(this);
             }
         } else {
             stack.checkReadyForSleep();
@@ -6102,13 +6102,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // the full stop of this activity. This is because we won't do that while they are still
             // waiting for the animation to finish.
             if (mAtmService.mStackSupervisor.mStoppingActivities.contains(this)) {
-                mAtmService.mStackSupervisor.scheduleIdleLocked();
+                mStackSupervisor.scheduleIdle();
             }
         } else {
             // Instead of doing the full stop routine here, let's just hide any activities
             // we now can, and let them stop when the normal idle happens.
-            mAtmService.mStackSupervisor.processStoppingActivitiesLocked(null /* idleActivity */,
-                    false /* remove */, true /* processPausingActivities */);
+            mStackSupervisor.processStoppingActivities(null /* launchedActivity */,
+                    true /* onlyUpdateVisibility */, true /* unused */, null /* unused */);
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
