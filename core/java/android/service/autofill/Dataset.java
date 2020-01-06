@@ -20,6 +20,7 @@ import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.IntentSender;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -55,6 +56,10 @@ import java.util.regex.Pattern;
  * the Android System displays a UI containing the {@link RemoteViews presentation} of
  * all datasets pairs that have that view's {@link AutofillId}. Then, when the user selects a
  * dataset from the UI, all views in that dataset are autofilled.
+ *
+ * <p>If both the current Input Method and autofill service supports inline suggestions, the Dataset
+ * can be shown by the keyboard as a suggestion. To use this feature, the Dataset should contain
+ * an {@link InlinePresentation} representing how the inline suggestion UI will be rendered.
  *
  * <a name="Authentication"></a>
  * <h3>Dataset authentication</h3>
@@ -99,8 +104,10 @@ public final class Dataset implements Parcelable {
     private final ArrayList<AutofillId> mFieldIds;
     private final ArrayList<AutofillValue> mFieldValues;
     private final ArrayList<RemoteViews> mFieldPresentations;
+    private final ArrayList<InlinePresentation> mFieldInlinePresentations;
     private final ArrayList<DatasetFieldFilter> mFieldFilters;
     private final RemoteViews mPresentation;
+    @Nullable private final InlinePresentation mInlinePresentation;
     private final IntentSender mAuthentication;
     @Nullable String mId;
 
@@ -108,8 +115,10 @@ public final class Dataset implements Parcelable {
         mFieldIds = builder.mFieldIds;
         mFieldValues = builder.mFieldValues;
         mFieldPresentations = builder.mFieldPresentations;
+        mFieldInlinePresentations = builder.mFieldInlinePresentations;
         mFieldFilters = builder.mFieldFilters;
         mPresentation = builder.mPresentation;
+        mInlinePresentation = builder.mInlinePresentation;
         mAuthentication = builder.mAuthentication;
         mId = builder.mId;
     }
@@ -128,6 +137,13 @@ public final class Dataset implements Parcelable {
     public RemoteViews getFieldPresentation(int index) {
         final RemoteViews customPresentation = mFieldPresentations.get(index);
         return customPresentation != null ? customPresentation : mPresentation;
+    }
+
+    /** @hide */
+    @Nullable
+    public InlinePresentation getFieldInlinePresentation(int index) {
+        final InlinePresentation inlinePresentation = mFieldInlinePresentations.get(index);
+        return inlinePresentation != null ? inlinePresentation : mInlinePresentation;
     }
 
     /** @hide */
@@ -165,13 +181,18 @@ public final class Dataset implements Parcelable {
         }
         if (mFieldPresentations != null) {
             builder.append(", fieldPresentations=").append(mFieldPresentations.size());
-
+        }
+        if (mFieldInlinePresentations != null) {
+            builder.append(", fieldInlinePresentations=").append(mFieldInlinePresentations.size());
         }
         if (mFieldFilters != null) {
             builder.append(", fieldFilters=").append(mFieldFilters.size());
         }
         if (mPresentation != null) {
             builder.append(", hasPresentation");
+        }
+        if (mInlinePresentation != null) {
+            builder.append(", hasInlinePresentation");
         }
         if (mAuthentication != null) {
             builder.append(", hasAuthentication");
@@ -198,8 +219,10 @@ public final class Dataset implements Parcelable {
         private ArrayList<AutofillId> mFieldIds;
         private ArrayList<AutofillValue> mFieldValues;
         private ArrayList<RemoteViews> mFieldPresentations;
+        private ArrayList<InlinePresentation> mFieldInlinePresentations;
         private ArrayList<DatasetFieldFilter> mFieldFilters;
         private RemoteViews mPresentation;
+        @Nullable private InlinePresentation mInlinePresentation;
         private IntentSender mAuthentication;
         private boolean mDestroyed;
         @Nullable private String mId;
@@ -208,10 +231,39 @@ public final class Dataset implements Parcelable {
          * Creates a new builder.
          *
          * @param presentation The presentation used to visualize this dataset.
+         * @param inlinePresentation The {@link InlinePresentation} used to visualize this dataset
+         *              as inline suggestions. If the dataset supports inline suggestions,
+         *              this should not be null.
          */
-        public Builder(@NonNull RemoteViews presentation) {
+        public Builder(@NonNull RemoteViews presentation,
+                @NonNull InlinePresentation inlinePresentation) {
             Preconditions.checkNotNull(presentation, "presentation must be non-null");
             mPresentation = presentation;
+            mInlinePresentation = inlinePresentation;
+        }
+
+        /**
+         * Creates a new builder.
+         *
+         * @param presentation The presentation used to visualize this dataset.
+         */
+        public Builder(@NonNull RemoteViews presentation) {
+            this(presentation, null);
+        }
+
+        /**
+         * Creates a new builder.
+         *
+         * <p>Only called by augmented autofill.
+         *
+         * @param inlinePresentation The {@link InlinePresentation} used to visualize this dataset
+         *              as inline suggestions. If the dataset supports inline suggestions,
+         *              this should not be null.
+         * @hide
+         */
+        @SystemApi
+        public Builder(@NonNull InlinePresentation inlinePresentation) {
+            mInlinePresentation = inlinePresentation;
         }
 
         /**
@@ -325,7 +377,7 @@ public final class Dataset implements Parcelable {
          */
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value) {
             throwIfDestroyed();
-            setLifeTheUniverseAndEverything(id, value, null, null);
+            setLifeTheUniverseAndEverything(id, value, null, null, null);
             return this;
         }
 
@@ -353,7 +405,7 @@ public final class Dataset implements Parcelable {
                 @NonNull RemoteViews presentation) {
             throwIfDestroyed();
             Preconditions.checkNotNull(presentation, "presentation cannot be null");
-            setLifeTheUniverseAndEverything(id, value, presentation, null);
+            setLifeTheUniverseAndEverything(id, value, presentation, null, null);
             return this;
         }
 
@@ -389,7 +441,7 @@ public final class Dataset implements Parcelable {
             throwIfDestroyed();
             Preconditions.checkState(mPresentation != null,
                     "Dataset presentation not set on constructor");
-            setLifeTheUniverseAndEverything(id, value, null, new DatasetFieldFilter(filter));
+            setLifeTheUniverseAndEverything(id, value, null, null, new DatasetFieldFilter(filter));
             return this;
         }
 
@@ -424,13 +476,119 @@ public final class Dataset implements Parcelable {
                 @Nullable Pattern filter, @NonNull RemoteViews presentation) {
             throwIfDestroyed();
             Preconditions.checkNotNull(presentation, "presentation cannot be null");
-            setLifeTheUniverseAndEverything(id, value, presentation,
+            setLifeTheUniverseAndEverything(id, value, presentation, null,
+                    new DatasetFieldFilter(filter));
+            return this;
+        }
+
+        /**
+         * Sets the value of a field, using a custom {@link RemoteViews presentation} to
+         * visualize it and an {@link InlinePresentation} to visualize it as an inline suggestion.
+         *
+         * <p><b>Note:</b> If the dataset requires authentication but the service knows its text
+         * value it's easier to filter by calling
+         * {@link #setValue(AutofillId, AutofillValue, RemoteViews)} and using the value to filter.
+         *
+         * @param id id returned by {@link
+         *        android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
+         * @param value the value to be autofilled. Pass {@code null} if you do not have the value
+         *        but the target view is a logical part of the dataset. For example, if
+         *        the dataset needs authentication and you have no access to the value.
+         * @param presentation the presentation used to visualize this field.
+         * @param inlinePresentation The {@link InlinePresentation} used to visualize this dataset
+         *        as inline suggestions. If the dataset supports inline suggestions,
+         *        this should not be null.
+         *
+         * @return this builder.
+         */
+        public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
+                @NonNull RemoteViews presentation, @NonNull InlinePresentation inlinePresentation) {
+            throwIfDestroyed();
+            Preconditions.checkNotNull(presentation, "presentation cannot be null");
+            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation cannot be null");
+            setLifeTheUniverseAndEverything(id, value, presentation, inlinePresentation, null);
+            return this;
+        }
+
+        /**
+         * Sets the value of a field, using a custom {@link RemoteViews presentation} to
+         * visualize it and a <a href="#Filtering">explicit filter</a>, and an
+         * {@link InlinePresentation} to visualize it as an inline suggestion.
+         *
+         * <p>This method is typically used when the dataset requires authentication and the service
+         * does not know its value but wants to hide the dataset after the user enters a minimum
+         * number of characters. For example, if the dataset represents a credit card number and the
+         * service does not want to show the "Tap to authenticate" message until the user tapped
+         * 4 digits, in which case the filter would be {@code Pattern.compile("\\d.{4,}")}.
+         *
+         * <p><b>Note:</b> If the dataset requires authentication but the service knows its text
+         * value it's easier to filter by calling
+         * {@link #setValue(AutofillId, AutofillValue, RemoteViews)} and using the value to filter.
+         *
+         * @param id id returned by {@link
+         *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
+         * @param value the value to be autofilled. Pass {@code null} if you do not have the value
+         *        but the target view is a logical part of the dataset. For example, if
+         *        the dataset needs authentication and you have no access to the value.
+         * @param filter regex used to determine if the dataset should be shown in the autofill UI;
+         *        when {@code null}, it disables filtering on that dataset (this is the recommended
+         *        approach when {@code value} is not {@code null} and field contains sensitive data
+         *        such as passwords).
+         * @param presentation the presentation used to visualize this field.
+         * @param inlinePresentation The {@link InlinePresentation} used to visualize this dataset
+         *        as inline suggestions. If the dataset supports inline suggestions, this
+         *        should not be null.
+         *
+         * @return this builder.
+         */
+        public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
+                @Nullable Pattern filter, @NonNull RemoteViews presentation,
+                @NonNull InlinePresentation inlinePresentation) {
+            throwIfDestroyed();
+            Preconditions.checkNotNull(presentation, "presentation cannot be null");
+            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation cannot be null");
+            setLifeTheUniverseAndEverything(id, value, presentation, inlinePresentation,
+                    new DatasetFieldFilter(filter));
+            return this;
+        }
+
+        /**
+         * Sets the value of a field with an <a href="#Filtering">explicit filter</a>, and using an
+         * {@link InlinePresentation} to visualize it as an inline suggestion.
+         *
+         * <p>Only called by augmented autofill.
+         *
+         * @param id id returned by {@link
+         *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
+         * @param value the value to be autofilled. Pass {@code null} if you do not have the value
+         *        but the target view is a logical part of the dataset. For example, if
+         *        the dataset needs authentication and you have no access to the value.
+         * @param filter regex used to determine if the dataset should be shown in the autofill UI;
+         *        when {@code null}, it disables filtering on that dataset (this is the recommended
+         *        approach when {@code value} is not {@code null} and field contains sensitive data
+         *        such as passwords).
+         * @param inlinePresentation The {@link InlinePresentation} used to visualize this dataset
+         *        as inline suggestions. If the dataset supports inline suggestions, this
+         *        should not be null.
+         *
+         * @return this builder.
+         *
+         * @hide
+         */
+        @SystemApi
+        public @NonNull Builder setInlinePresentation(@NonNull AutofillId id,
+                @Nullable AutofillValue value, @Nullable Pattern filter,
+                @NonNull InlinePresentation inlinePresentation) {
+            throwIfDestroyed();
+            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation cannot be null");
+            setLifeTheUniverseAndEverything(id, value, null, inlinePresentation,
                     new DatasetFieldFilter(filter));
             return this;
         }
 
         private void setLifeTheUniverseAndEverything(@NonNull AutofillId id,
                 @Nullable AutofillValue value, @Nullable RemoteViews presentation,
+                @Nullable InlinePresentation inlinePresentation,
                 @Nullable DatasetFieldFilter filter) {
             Preconditions.checkNotNull(id, "id cannot be null");
             if (mFieldIds != null) {
@@ -438,6 +596,7 @@ public final class Dataset implements Parcelable {
                 if (existingIdx >= 0) {
                     mFieldValues.set(existingIdx, value);
                     mFieldPresentations.set(existingIdx, presentation);
+                    mFieldInlinePresentations.set(existingIdx, inlinePresentation);
                     mFieldFilters.set(existingIdx, filter);
                     return;
                 }
@@ -445,11 +604,13 @@ public final class Dataset implements Parcelable {
                 mFieldIds = new ArrayList<>();
                 mFieldValues = new ArrayList<>();
                 mFieldPresentations = new ArrayList<>();
+                mFieldInlinePresentations = new ArrayList<>();
                 mFieldFilters = new ArrayList<>();
             }
             mFieldIds.add(id);
             mFieldValues.add(value);
             mFieldPresentations.add(presentation);
+            mFieldInlinePresentations.add(inlinePresentation);
             mFieldFilters.add(filter);
         }
 
@@ -460,7 +621,8 @@ public final class Dataset implements Parcelable {
          *
          * @throws IllegalStateException if no field was set (through
          * {@link #setValue(AutofillId, AutofillValue)} or
-         * {@link #setValue(AutofillId, AutofillValue, RemoteViews)}).
+         * {@link #setValue(AutofillId, AutofillValue, RemoteViews)} or
+         * {@link #setValue(AutofillId, AutofillValue, RemoteViews, InlinePresentation)}).
          *
          * @return The built dataset.
          */
@@ -492,38 +654,49 @@ public final class Dataset implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeParcelable(mPresentation, flags);
+        parcel.writeParcelable(mInlinePresentation, flags);
         parcel.writeTypedList(mFieldIds, flags);
         parcel.writeTypedList(mFieldValues, flags);
         parcel.writeTypedList(mFieldPresentations, flags);
+        parcel.writeTypedList(mFieldInlinePresentations, flags);
         parcel.writeTypedList(mFieldFilters, flags);
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeString(mId);
     }
 
-    public static final @android.annotation.NonNull Creator<Dataset> CREATOR = new Creator<Dataset>() {
+    public static final @NonNull Creator<Dataset> CREATOR = new Creator<Dataset>() {
         @Override
         public Dataset createFromParcel(Parcel parcel) {
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
             final RemoteViews presentation = parcel.readParcelable(null);
-            final Builder builder = (presentation == null)
-                    ? new Builder()
-                    : new Builder(presentation);
+            final InlinePresentation inlinePresentation = parcel.readParcelable(null);
+            final Builder builder = presentation == null
+                    ? new Builder(inlinePresentation)
+                    : inlinePresentation == null
+                            ? new Builder(presentation)
+                            : new Builder(presentation, inlinePresentation);
             final ArrayList<AutofillId> ids =
                     parcel.createTypedArrayList(AutofillId.CREATOR);
             final ArrayList<AutofillValue> values =
                     parcel.createTypedArrayList(AutofillValue.CREATOR);
             final ArrayList<RemoteViews> presentations =
                     parcel.createTypedArrayList(RemoteViews.CREATOR);
+            final ArrayList<InlinePresentation> inlinePresentations =
+                    parcel.createTypedArrayList(InlinePresentation.CREATOR);
             final ArrayList<DatasetFieldFilter> filters =
                     parcel.createTypedArrayList(DatasetFieldFilter.CREATOR);
+            final int inlinePresentationsSize = inlinePresentations.size();
             for (int i = 0; i < ids.size(); i++) {
                 final AutofillId id = ids.get(i);
                 final AutofillValue value = values.get(i);
                 final RemoteViews fieldPresentation = presentations.get(i);
+                final InlinePresentation fieldInlinePresentation =
+                        i < inlinePresentationsSize ? inlinePresentations.get(i) : null;
                 final DatasetFieldFilter filter = filters.get(i);
-                builder.setLifeTheUniverseAndEverything(id, value, fieldPresentation, filter);
+                builder.setLifeTheUniverseAndEverything(id, value, fieldPresentation,
+                        fieldInlinePresentation, filter);
             }
             builder.setAuthentication(parcel.readParcelable(null));
             builder.setId(parcel.readString());
