@@ -83,6 +83,7 @@ import static com.android.server.wm.Task.LOCK_TASK_AUTH_WHITELISTED;
 import static com.android.server.wm.Task.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.wm.Task.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.wm.Task.REPARENT_MOVE_STACK_TO_FRONT;
+import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -2079,7 +2080,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         ArrayList<ActivityRecord> readyToStopActivities = null;
         for (int i = mStoppingActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord s = mStoppingActivities.get(i);
-            final boolean animating = s.isAnimating(TRANSITION);
+            final boolean animating = s.isAnimating(TRANSITION | PARENTS);
             if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + s.nowVisible
                     + " animating=" + animating + " finishing=" + s.finishing);
 

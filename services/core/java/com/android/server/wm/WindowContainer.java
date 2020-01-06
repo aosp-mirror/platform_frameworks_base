@@ -777,7 +777,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *         otherwise.
      */
     boolean isWaitingForTransitionStart() {
-        return getActivity(app -> app.isWaitingForTransitionStart()) != null;
+        return false;
     }
 
     /**
