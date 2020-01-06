@@ -150,8 +150,7 @@ static int parseUidStats(const uint32_t uid, Stats* stats) {
 }
 
 static jlong getTotalStat(JNIEnv* env, jclass clazz, jint type, jboolean useBpfStats) {
-    Stats stats;
-    memset(&stats, 0, sizeof(Stats));
+    Stats stats = {};
 
     if (useBpfStats) {
         if (bpfGetIfaceStats(NULL, &stats) == 0) {
@@ -175,8 +174,7 @@ static jlong getIfaceStat(JNIEnv* env, jclass clazz, jstring iface, jint type,
         return UNKNOWN;
     }
 
-    Stats stats;
-    memset(&stats, 0, sizeof(Stats));
+    Stats stats = {};
 
     if (useBpfStats) {
         if (bpfGetIfaceStats(iface8.c_str(), &stats) == 0) {
@@ -194,8 +192,7 @@ static jlong getIfaceStat(JNIEnv* env, jclass clazz, jstring iface, jint type,
 }
 
 static jlong getUidStat(JNIEnv* env, jclass clazz, jint uid, jint type, jboolean useBpfStats) {
-    Stats stats;
-    memset(&stats, 0, sizeof(Stats));
+    Stats stats = {};
 
     if (useBpfStats) {
         if (bpfGetUidStats(uid, &stats) == 0) {
