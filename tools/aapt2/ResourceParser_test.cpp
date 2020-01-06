@@ -611,6 +611,32 @@ TEST_F(ResourceParserTest, ParseAttributesDeclareStyleable) {
   EXPECT_THAT(styleable->entries[2].name, Eq(make_value(test::ParseNameOrDie("attr/baz"))));
 }
 
+TEST_F(ResourceParserTest, ParseDeclareStyleablePreservingVisibility) {
+  StringInputStream input(R"(
+      <resources>
+        <declare-styleable name="foo">
+          <attr name="myattr" />
+        </declare-styleable>
+        <declare-styleable name="bar">
+          <attr name="myattr" />
+        </declare-styleable>
+        <public type="styleable" name="bar" />
+      </resources>)");
+  ResourceParser parser(context_->GetDiagnostics(), &table_, Source{"test"},
+                        ConfigDescription::DefaultConfig(),
+                        ResourceParserOptions{.preserve_visibility_of_styleables = true});
+
+  xml::XmlPullParser xml_parser(&input);
+  ASSERT_TRUE(parser.Parse(&xml_parser));
+
+  EXPECT_EQ(
+      table_.FindResource(test::ParseNameOrDie("styleable/foo")).value().entry->visibility.level,
+      Visibility::Level::kUndefined);
+  EXPECT_EQ(
+      table_.FindResource(test::ParseNameOrDie("styleable/bar")).value().entry->visibility.level,
+      Visibility::Level::kPublic);
+}
+
 TEST_F(ResourceParserTest, ParsePrivateAttributesDeclareStyleable) {
   std::string input = R"(
       <declare-styleable xmlns:privAndroid="http://schemas.android.com/apk/prv/res/android"
