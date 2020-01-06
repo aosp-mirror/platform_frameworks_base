@@ -48,7 +48,7 @@ public class TimeDetector {
      * signal if better signals are available such as those that come from more reliable sources or
      * were determined more recently.
      */
-    @RequiresPermission(android.Manifest.permission.SET_TIME)
+    @RequiresPermission(android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE)
     public void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSuggestion) {
         if (DEBUG) {
             Log.d(TAG, "suggestPhoneTime called: " + timeSuggestion);
@@ -63,7 +63,7 @@ public class TimeDetector {
     /**
      * Suggests the user's manually entered current time to the detector.
      */
-    @RequiresPermission(android.Manifest.permission.SET_TIME)
+    @RequiresPermission(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE)
     public void suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion) {
         if (DEBUG) {
             Log.d(TAG, "suggestManualTime called: " + timeSuggestion);
