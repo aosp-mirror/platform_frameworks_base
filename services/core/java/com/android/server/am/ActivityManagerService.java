@@ -12594,7 +12594,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ArrayList<ProcessRecord> procs, PrintWriter categoryPw) {
         long uptime = SystemClock.uptimeMillis();
         long realtime = SystemClock.elapsedRealtime();
-        final long[] tmpLong = new long[1];
+        final long[] tmpLong = new long[3];
 
         if (procs == null) {
             // No Java processes.  Maybe they want to print a native process.
@@ -12627,17 +12627,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                         for (int i = nativeProcs.size() - 1 ; i >= 0 ; i--) {
                             final ProcessCpuTracker.Stats r = nativeProcs.get(i);
                             final int pid = r.pid;
-                            if (!opts.isCheckinRequest && opts.dumpDetails) {
-                                pw.println("\n** MEMINFO in pid " + pid + " [" + r.baseName + "] **");
-                            }
                             if (mi == null) {
                                 mi = new Debug.MemoryInfo();
                             }
                             if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
-                                Debug.getMemoryInfo(pid, mi);
+                                if (!Debug.getMemoryInfo(pid, mi)) {
+                                    continue;
+                                }
                             } else {
-                                mi.dalvikPss = (int)Debug.getPss(pid, tmpLong, null);
-                                mi.dalvikPrivateDirty = (int)tmpLong[0];
+                                long pss = Debug.getPss(pid, tmpLong, null);
+                                if (pss == 0) {
+                                    continue;
+                                }
+                                mi.nativePss = (int) pss;
+                                mi.nativePrivateDirty = (int) tmpLong[0];
+                                mi.nativeRss = (int) tmpLong[2];
+                            }
+                            if (!opts.isCheckinRequest && opts.dumpDetails) {
+                                pw.println("\n** MEMINFO in pid " + pid + " ["
+                                        + r.baseName + "] **");
                             }
                             ActivityThread.dumpMemInfoTable(pw, mi, opts.isCheckinRequest,
                                     opts.dumpFullDetails, opts.dumpDalvik, opts.dumpSummaryOnly,
@@ -12715,9 +12723,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 hasActivities = r.hasActivities();
             }
             if (thread != null) {
-                if (!opts.isCheckinRequest && opts.dumpDetails) {
-                    pw.println("\n** MEMINFO in pid " + pid + " [" + r.processName + "] **");
-                }
                 if (mi == null) {
                     mi = new Debug.MemoryInfo();
                 }
@@ -12727,16 +12732,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
                     reportType = ProcessStats.ADD_PSS_EXTERNAL_SLOW;
                     startTime = SystemClock.currentThreadTimeMillis();
-                    Debug.getMemoryInfo(pid, mi);
+                    if (!Debug.getMemoryInfo(pid, mi)) {
+                        continue;
+                    }
                     endTime = SystemClock.currentThreadTimeMillis();
                     hasSwapPss = mi.hasSwappedOutPss;
                 } else {
                     reportType = ProcessStats.ADD_PSS_EXTERNAL;
                     startTime = SystemClock.currentThreadTimeMillis();
-                    mi.dalvikPss = (int)Debug.getPss(pid, tmpLong, null);
+                    long pss = Debug.getPss(pid, tmpLong, null);
+                    if (pss == 0) {
+                        continue;
+                    }
+                    mi.dalvikPss = (int) pss;
                     endTime = SystemClock.currentThreadTimeMillis();
-                    mi.dalvikPrivateDirty = (int)tmpLong[0];
+                    mi.dalvikPrivateDirty = (int) tmpLong[0];
                     mi.dalvikRss = (int) tmpLong[2];
+                }
+                if (!opts.isCheckinRequest && opts.dumpDetails) {
+                    pw.println("\n** MEMINFO in pid " + pid + " [" + r.processName + "] **");
                 }
                 if (opts.dumpDetails) {
                     if (opts.localOnly) {
@@ -12867,10 +12881,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                             mi = new Debug.MemoryInfo();
                         }
                         if (!brief && !opts.oomOnly) {
-                            Debug.getMemoryInfo(st.pid, mi);
+                            if (!Debug.getMemoryInfo(st.pid, mi)) {
+                                continue;
+                            }
                         } else {
-                            mi.nativePss = (int)Debug.getPss(st.pid, tmpLong, null);
-                            mi.nativePrivateDirty = (int)tmpLong[0];
+                            long pss = Debug.getPss(st.pid, tmpLong, null);
+                            if (pss == 0) {
+                                continue;
+                            }
+                            mi.nativePss = (int) pss;
+                            mi.nativePrivateDirty = (int) tmpLong[0];
+                            mi.nativeRss = (int) tmpLong[2];
                         }
 
                         final long myTotalPss = mi.getTotalPss();
@@ -13174,7 +13195,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ArrayList<ProcessRecord> procs) {
         final long uptimeMs = SystemClock.uptimeMillis();
         final long realtimeMs = SystemClock.elapsedRealtime();
-        final long[] tmpLong = new long[1];
+        final long[] tmpLong = new long[3];
 
         if (procs == null) {
             // No Java processes.  Maybe they want to print a native process.
@@ -13209,20 +13230,29 @@ public class ActivityManagerService extends IActivityManager.Stub
                         for (int i = nativeProcs.size() - 1 ; i >= 0 ; i--) {
                             final ProcessCpuTracker.Stats r = nativeProcs.get(i);
                             final int pid = r.pid;
-                            final long nToken = proto.start(MemInfoDumpProto.NATIVE_PROCESSES);
-
-                            proto.write(MemInfoDumpProto.ProcessMemory.PID, pid);
-                            proto.write(MemInfoDumpProto.ProcessMemory.PROCESS_NAME, r.baseName);
 
                             if (mi == null) {
                                 mi = new Debug.MemoryInfo();
                             }
                             if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
-                                Debug.getMemoryInfo(pid, mi);
+                                if (!Debug.getMemoryInfo(pid, mi)) {
+                                    continue;
+                                }
                             } else {
-                                mi.dalvikPss = (int)Debug.getPss(pid, tmpLong, null);
-                                mi.dalvikPrivateDirty = (int)tmpLong[0];
+                                long pss = Debug.getPss(pid, tmpLong, null);
+                                if (pss == 0) {
+                                    continue;
+                                }
+                                mi.nativePss = (int) pss;
+                                mi.nativePrivateDirty = (int) tmpLong[0];
+                                mi.nativeRss = (int) tmpLong[2];
                             }
+
+                            final long nToken = proto.start(MemInfoDumpProto.NATIVE_PROCESSES);
+
+                            proto.write(MemInfoDumpProto.ProcessMemory.PID, pid);
+                            proto.write(MemInfoDumpProto.ProcessMemory.PROCESS_NAME, r.baseName);
+
                             ActivityThread.dumpMemInfoTable(proto, mi, opts.dumpDalvik,
                                     opts.dumpSummaryOnly, 0, 0, 0, 0, 0, 0);
 
@@ -13313,13 +13343,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
                 reportType = ProcessStats.ADD_PSS_EXTERNAL_SLOW;
                 startTime = SystemClock.currentThreadTimeMillis();
-                Debug.getMemoryInfo(pid, mi);
+                if (!Debug.getMemoryInfo(pid, mi)) {
+                    continue;
+                }
                 endTime = SystemClock.currentThreadTimeMillis();
                 hasSwapPss = mi.hasSwappedOutPss;
             } else {
                 reportType = ProcessStats.ADD_PSS_EXTERNAL;
                 startTime = SystemClock.currentThreadTimeMillis();
-                mi.dalvikPss = (int) Debug.getPss(pid, tmpLong, null);
+                long pss = Debug.getPss(pid, tmpLong, null);
+                if (pss == 0) {
+                    continue;
+                }
+                mi.dalvikPss = (int) pss;
                 endTime = SystemClock.currentThreadTimeMillis();
                 mi.dalvikPrivateDirty = (int) tmpLong[0];
                 mi.dalvikRss = (int) tmpLong[2];
@@ -13447,10 +13483,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                             mi = new Debug.MemoryInfo();
                         }
                         if (!brief && !opts.oomOnly) {
-                            Debug.getMemoryInfo(st.pid, mi);
+                            if (!Debug.getMemoryInfo(st.pid, mi)) {
+                                continue;
+                            }
                         } else {
-                            mi.nativePss = (int)Debug.getPss(st.pid, tmpLong, null);
-                            mi.nativePrivateDirty = (int)tmpLong[0];
+                            long pss = Debug.getPss(st.pid, tmpLong, null);
+                            if (pss == 0) {
+                                continue;
+                            }
+                            mi.nativePss = (int) pss;
+                            mi.nativePrivateDirty = (int) tmpLong[0];
+                            mi.nativeRss = (int) tmpLong[2];
                         }
 
                         final long myTotalPss = mi.getTotalPss();

@@ -237,7 +237,7 @@ static int read_memtrack_memory(int pid, struct graphics_memory_pss* graphics_me
     return err;
 }
 
-static void load_maps(int pid, stats_t* stats, bool* foundSwapPss)
+static bool load_maps(int pid, stats_t* stats, bool* foundSwapPss)
 {
     *foundSwapPss = false;
     uint64_t prev_end = 0;
@@ -407,17 +407,19 @@ static void load_maps(int pid, stats_t* stats, bool* foundSwapPss)
         }
     };
 
-    meminfo::ForEachVmaFromFile(smaps_path, vma_scan);
+    return meminfo::ForEachVmaFromFile(smaps_path, vma_scan);
 }
 
-static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
+static jboolean android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
         jint pid, jobject object)
 {
     bool foundSwapPss;
     stats_t stats[_NUM_HEAP];
     memset(&stats, 0, sizeof(stats));
 
-    load_maps(pid, stats, &foundSwapPss);
+    if (!load_maps(pid, stats, &foundSwapPss)) {
+        return JNI_FALSE;
+    }
 
     struct graphics_memory_pss graphics_mem;
     if (read_memtrack_memory(pid, &graphics_mem) == 0) {
@@ -462,7 +464,7 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
 
     jint* otherArray = (jint*)env->GetPrimitiveArrayCritical(otherIntArray, 0);
     if (otherArray == NULL) {
-        return;
+        return JNI_FALSE;
     }
 
     int j=0;
@@ -479,6 +481,7 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
     }
 
     env->ReleasePrimitiveArrayCritical(otherIntArray, otherArray, 0);
+    return JNI_TRUE;
 }
 
 static void android_os_Debug_getDirtyPages(JNIEnv *env, jobject clazz, jobject object)
@@ -508,6 +511,8 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
         rss += stats.rss;
         swapPss = stats.swap_pss;
         pss += swapPss; // Also in swap, those pages would be accounted as Pss without SWAP
+    } else {
+        return 0;
     }
 
     if (outUssSwapPssRss != NULL) {
@@ -866,7 +871,7 @@ static const JNINativeMethod gMethods[] = {
             (void*) android_os_Debug_getNativeHeapFreeSize },
     { "getMemoryInfo",          "(Landroid/os/Debug$MemoryInfo;)V",
             (void*) android_os_Debug_getDirtyPages },
-    { "getMemoryInfo",          "(ILandroid/os/Debug$MemoryInfo;)V",
+    { "getMemoryInfo",          "(ILandroid/os/Debug$MemoryInfo;)Z",
             (void*) android_os_Debug_getDirtyPagesPid },
     { "getPss",                 "()J",
             (void*) android_os_Debug_getPss },
