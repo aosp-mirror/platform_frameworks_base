@@ -47,7 +47,6 @@ import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 
-import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
 
@@ -157,7 +156,7 @@ final class InputMonitor {
         mDisplayContent = mService.mRoot.getDisplayContent(displayId);
         mDisplayId = displayId;
         mInputTransaction = mService.mTransactionFactory.get();
-        mHandler = AnimationThread.getHandler();
+        mHandler = mService.mAnimationHandler;
         mUpdateInputForAllWindowsConsumer = new UpdateInputForAllWindowsConsumer();
     }
 
