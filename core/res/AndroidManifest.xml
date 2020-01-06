@@ -1623,6 +1623,12 @@
     <permission android:name="android.permission.REQUEST_NETWORK_SCORES"
         android:protectionLevel="signature|setup" />
 
+    <!-- @SystemApi @hide Allows applications to toggle airplane mode.
+         <p>Not for use by third-party or privileged applications.
+    -->
+    <permission android:name="android.permission.NETWORK_AIRPLANE_MODE"
+        android:protectionLevel="signature" />
+
     <!-- Allows network stack services (Connectivity and Wifi) to coordinate
          <p>Not for use by third-party or privileged applications.
          @SystemApi
