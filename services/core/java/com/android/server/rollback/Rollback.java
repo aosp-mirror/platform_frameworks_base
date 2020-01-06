@@ -62,7 +62,7 @@ class Rollback {
 
     private static final String TAG = "RollbackManager";
 
-    @IntDef(flag = true, prefix = { "ROLLBACK_STATE_" }, value = {
+    @IntDef(prefix = { "ROLLBACK_STATE_" }, value = {
             ROLLBACK_STATE_ENABLING,
             ROLLBACK_STATE_AVAILABLE,
             ROLLBACK_STATE_COMMITTED,
@@ -91,6 +91,19 @@ class Rollback {
      * The rollback has been deleted.
      */
     static final int ROLLBACK_STATE_DELETED = 4;
+
+    @IntDef(flag = true, prefix = { "MATCH_" }, value = {
+            MATCH_APK_IN_APEX,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface RollbackInfoFlags {}
+
+    /**
+     * {@link RollbackInfo} flag: include {@code RollbackInfo} packages that are apk-in-apex.
+     * These packages do not have their own sessions. They are embedded in an apex which has a
+     * session id.
+     */
+    static final int MATCH_APK_IN_APEX = 1;
 
     /**
      * The session ID for the staged session if this rollback data represents a staged session,
@@ -726,9 +739,30 @@ class Rollback {
         }
     }
 
-    int getPackageCount() {
+    /**
+     * Returns the number of {@link PackageRollbackInfo} we are storing in this {@link Rollback}
+     * instance. By default, this method does not include apk-in-apex package in the count.
+     *
+     * @param flags Apk-in-apex packages can be included in the count by passing
+     * {@link Rollback#MATCH_APK_IN_APEX}
+     *
+     * @return Counts number of {@link PackageRollbackInfo} stored in the {@link Rollback}
+     * according to {@code flags} passed
+     */
+    int getPackageCount(@RollbackInfoFlags int flags) {
         synchronized (mLock) {
-            return info.getPackages().size();
+            List<PackageRollbackInfo> packages = info.getPackages();
+            if ((flags & MATCH_APK_IN_APEX) != 0) {
+                return packages.size();
+            }
+
+            int packagesWithoutApkInApex = 0;
+            for (PackageRollbackInfo rollbackInfo : packages) {
+                if (!rollbackInfo.isApkInApex()) {
+                    packagesWithoutApkInApex++;
+                }
+            }
+            return packagesWithoutApkInApex;
         }
     }
 
