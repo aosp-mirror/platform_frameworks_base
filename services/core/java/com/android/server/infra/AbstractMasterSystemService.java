@@ -954,6 +954,35 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                 onServicePackageRestartedLocked(userId);
             }
 
+            @Override
+            public void onPackageModified(String packageName) {
+                if (verbose) Slog.v(mTag, "onPackageModified(): " + packageName);
+
+                final int userId = getChangingUserId();
+                final String serviceName = mServiceNameResolver.getDefaultServiceName(userId);
+                if (serviceName == null) {
+                    return;
+                }
+
+                final ComponentName serviceComponentName =
+                        ComponentName.unflattenFromString(serviceName);
+                if (serviceComponentName == null
+                        || !serviceComponentName.getPackageName().equals(packageName)) {
+                    return;
+                }
+
+                // The default service package has changed, update the cached if the service
+                // exists but no active component.
+                final S service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    final ComponentName componentName = service.getServiceComponentName();
+                    if (componentName == null) {
+                        if (verbose) Slog.v(mTag, "update cached");
+                        updateCachedServiceLocked(userId);
+                    }
+                }
+            }
+
             private String getActiveServicePackageNameLocked() {
                 final int userId = getChangingUserId();
                 final S service = peekServiceForUserLocked(userId);
