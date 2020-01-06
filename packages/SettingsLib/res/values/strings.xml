@@ -699,7 +699,7 @@
     <!-- Summary of checkbox for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume_summary">Disables the Bluetooth absolute volume feature in case of volume issues with remote devices such as unacceptably loud volume or lack of control.</string>
     <!-- Summary of checkbox for enabling Bluetooth Gabeldorche features [CHAR LIMIT=none] -->
-    <string name="bluetooth_enable_gabeldorsche_summary">Enables the Bluetooth Gabeldorche feature stack.</string>
+    <string name="bluetooth_enable_gabeldorsche_summary">Enables the Bluetooth Gabeldorsche feature stack.</string>
 
     <!-- Title of checkbox setting that enables the terminal app. [CHAR LIMIT=32] -->
     <string name="enable_terminal_title">Local terminal</string>
