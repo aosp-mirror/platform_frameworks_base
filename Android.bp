@@ -489,7 +489,8 @@ java_library {
         // TODO(b/140299412): should be framework-wifi-stubs
         "framework-wifi",
         "ike-stubs",
-        // TODO(jiyong): add more stubs for APEXes here
+        // TODO(b/147200698): should be the stub of framework-tethering
+        "framework-tethering",
     ],
     sdk_version: "core_platform",
     apex_available: ["//apex_available:platform"],

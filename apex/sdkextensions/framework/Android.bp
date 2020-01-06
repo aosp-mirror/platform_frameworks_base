@@ -36,6 +36,11 @@ java_library {
         "//frameworks/base/apex/sdkextensions",
         "//frameworks/base/apex/sdkextensions/testing",
     ],
+    hostdex: true, // for hiddenapi check
+    apex_available: [
+        "com.android.sdkext",
+        "test_com.android.sdkext",
+    ],
 }
 
 droidstubs {
