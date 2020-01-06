@@ -21,6 +21,7 @@ import static android.view.autofill.Helper.sDebug;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.IntentSender;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -238,6 +239,7 @@ public final class Dataset implements Parcelable {
         public Builder(@NonNull RemoteViews presentation,
                 @NonNull InlinePresentation inlinePresentation) {
             Preconditions.checkNotNull(presentation, "presentation must be non-null");
+            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation must be non-null");
             mPresentation = presentation;
             mInlinePresentation = inlinePresentation;
         }
@@ -248,7 +250,8 @@ public final class Dataset implements Parcelable {
          * @param presentation The presentation used to visualize this dataset.
          */
         public Builder(@NonNull RemoteViews presentation) {
-            this(presentation, null);
+            Preconditions.checkNotNull(presentation, "presentation must be non-null");
+            mPresentation = presentation;
         }
 
         /**
@@ -262,7 +265,9 @@ public final class Dataset implements Parcelable {
          * @hide
          */
         @SystemApi
+        @TestApi
         public Builder(@NonNull InlinePresentation inlinePresentation) {
+            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation must be non-null");
             mInlinePresentation = inlinePresentation;
         }
 
@@ -576,6 +581,7 @@ public final class Dataset implements Parcelable {
          * @hide
          */
         @SystemApi
+        @TestApi
         public @NonNull Builder setInlinePresentation(@NonNull AutofillId id,
                 @Nullable AutofillValue value, @Nullable Pattern filter,
                 @NonNull InlinePresentation inlinePresentation) {
@@ -672,11 +678,13 @@ public final class Dataset implements Parcelable {
             // using specially crafted parcels.
             final RemoteViews presentation = parcel.readParcelable(null);
             final InlinePresentation inlinePresentation = parcel.readParcelable(null);
-            final Builder builder = presentation == null
-                    ? new Builder(inlinePresentation)
-                    : inlinePresentation == null
+            final Builder builder = presentation != null
+                    ? inlinePresentation == null
                             ? new Builder(presentation)
-                            : new Builder(presentation, inlinePresentation);
+                            : new Builder(presentation, inlinePresentation)
+                    : inlinePresentation == null
+                            ? new Builder()
+                            : new Builder(inlinePresentation);
             final ArrayList<AutofillId> ids =
                     parcel.createTypedArrayList(AutofillId.CREATOR);
             final ArrayList<AutofillValue> values =

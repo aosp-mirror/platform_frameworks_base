@@ -2706,6 +2706,11 @@ package android.service.autofill {
     method @Nullable public android.util.SparseArray<android.service.autofill.InternalOnClickAction> getActions();
   }
 
+  public static final class Dataset.Builder {
+    ctor public Dataset.Builder(@NonNull android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.service.autofill.InlinePresentation);
+  }
+
   public final class DateTransformation extends android.service.autofill.InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
     method public void apply(@NonNull android.service.autofill.ValueFinder, @NonNull android.widget.RemoteViews, int) throws java.lang.Exception;
   }
