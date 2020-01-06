@@ -47,6 +47,16 @@ java_library {
     libs: [
         "android_system_stubs_current",
     ],
+
+    hostdex: true, // for hiddenapi check
+    visibility: [
+        "//frameworks/base/packages/Tethering:__subpackages__",
+        //TODO(b/147200698) remove below lines when the platform is built with stubs
+        "//frameworks/base",
+        "//frameworks/base/services",
+        "//frameworks/base/services/core",
+    ],
+    apex_available: ["com.android.tethering"],
 }
 
 filegroup {
