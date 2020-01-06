@@ -3972,6 +3972,15 @@ package android.media.soundtrigger {
 
 package android.media.tv {
 
+  public final class DvbDeviceInfo implements android.os.Parcelable {
+    ctor public DvbDeviceInfo(int, int);
+    method public int describeContents();
+    method public int getAdapterId();
+    method public int getDeviceId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.DvbDeviceInfo> CREATOR;
+  }
+
   public final class TvContentRatingSystemInfo implements android.os.Parcelable {
     method public static android.media.tv.TvContentRatingSystemInfo createTvContentRatingSystemInfo(int, android.content.pm.ApplicationInfo);
     method public int describeContents();
@@ -4086,12 +4095,14 @@ package android.media.tv {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void addBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public boolean captureFrame(String, android.view.Surface, android.media.tv.TvStreamConfig);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public java.util.List<android.media.tv.TvStreamConfig> getAvailableTvStreamConfigList(String);
+    method @NonNull @RequiresPermission("android.permission.DVB_DEVICE") public java.util.List<android.media.tv.DvbDeviceInfo> getDvbDeviceList();
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public java.util.List<android.media.tv.TvInputHardwareInfo> getHardwareList();
     method @RequiresPermission(android.Manifest.permission.READ_CONTENT_RATING_SYSTEMS) public java.util.List<android.media.tv.TvContentRatingSystemInfo> getTvContentRatingSystemList();
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public boolean isSingleSessionActive();
     method @RequiresPermission(android.Manifest.permission.NOTIFY_TV_INPUTS) public void notifyPreviewProgramAddedToWatchNext(String, long, long);
     method @RequiresPermission(android.Manifest.permission.NOTIFY_TV_INPUTS) public void notifyPreviewProgramBrowsableDisabled(String, long);
     method @RequiresPermission(android.Manifest.permission.NOTIFY_TV_INPUTS) public void notifyWatchNextProgramBrowsableDisabled(String, long);
+    method @Nullable @RequiresPermission("android.permission.DVB_DEVICE") public android.os.ParcelFileDescriptor openDvbDevice(@NonNull android.media.tv.DvbDeviceInfo, int);
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public void releaseTvInputHardware(int, android.media.tv.TvInputManager.Hardware);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void removeBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void setParentalControlsEnabled(boolean);
