@@ -2651,8 +2651,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 return "TD_SCDMA";
             case TelephonyManager.NETWORK_TYPE_IWLAN:
                 return "IWLAN";
-            case TelephonyManager.NETWORK_TYPE_LTE_CA:
-                return "LTE_CA";
+
+            //TODO: This network type is marked as hidden because it is not a
+            // true network type and we are looking to remove it completely from the available list
+            // of network types.  Since this method is only used for logging, in the event that this
+            // network type is selected, the log will read as "Unknown."
+            //case TelephonyManager.NETWORK_TYPE_LTE_CA:
+            //    return "LTE_CA";
+
             case TelephonyManager.NETWORK_TYPE_NR:
                 return "NR";
             default:
