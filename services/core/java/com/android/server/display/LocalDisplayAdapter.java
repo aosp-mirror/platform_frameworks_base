@@ -37,6 +37,7 @@ import android.view.DisplayEventReceiver;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
@@ -641,9 +642,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         @Override
         public void setRequestedColorModeLocked(int colorMode) {
-            if (requestColorModeLocked(colorMode)) {
-                updateDeviceInfoLocked();
-            }
+            requestColorModeLocked(colorMode);
         }
 
         @Override
@@ -671,12 +670,22 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             if (mDisplayModeSpecsInvalid || !displayModeSpecs.equals(mDisplayModeSpecs)) {
                 mDisplayModeSpecsInvalid = false;
                 mDisplayModeSpecs.copyFrom(displayModeSpecs);
-                final IBinder token = getDisplayTokenLocked();
-                SurfaceControl.setDesiredDisplayConfigSpecs(token,
+                getHandler().sendMessage(PooledLambda.obtainMessage(
+                        LocalDisplayDevice::setDesiredDisplayModeSpecsAsync, this,
+                        getDisplayTokenLocked(),
                         new SurfaceControl.DesiredDisplayConfigSpecs(defaultPhysIndex,
                                 mDisplayModeSpecs.refreshRateRange.min,
-                                mDisplayModeSpecs.refreshRateRange.max));
-                int activePhysIndex = SurfaceControl.getActiveConfig(token);
+                                mDisplayModeSpecs.refreshRateRange.max)));
+            }
+        }
+
+        private void setDesiredDisplayModeSpecsAsync(IBinder displayToken,
+                SurfaceControl.DesiredDisplayConfigSpecs configSpecs) {
+            // Do not lock when calling these SurfaceControl methods because they are sync
+            // operations that may block for a while when setting display power mode.
+            SurfaceControl.setDesiredDisplayConfigSpecs(displayToken, configSpecs);
+            final int activePhysIndex = SurfaceControl.getActiveConfig(displayToken);
+            synchronized (getSyncRoot()) {
                 if (updateActiveModeLocked(activePhysIndex)) {
                     updateDeviceInfoLocked();
                 }
@@ -708,19 +717,30 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return true;
         }
 
-        public boolean requestColorModeLocked(int colorMode) {
+        public void requestColorModeLocked(int colorMode) {
             if (mActiveColorMode == colorMode) {
-                return false;
+                return;
             }
             if (!mSupportedColorModes.contains(colorMode)) {
                 Slog.w(TAG, "Unable to find color mode " + colorMode
                         + ", ignoring request.");
-                return false;
+                return;
             }
-            SurfaceControl.setActiveColorMode(getDisplayTokenLocked(), colorMode);
+
             mActiveColorMode = colorMode;
             mActiveColorModeInvalid = false;
-            return true;
+            getHandler().sendMessage(PooledLambda.obtainMessage(
+                    LocalDisplayDevice::requestColorModeAsync, this,
+                    getDisplayTokenLocked(), colorMode));
+        }
+
+        private void requestColorModeAsync(IBinder displayToken, int colorMode) {
+            // Do not lock when calling this SurfaceControl method because it is a sync operation
+            // that may block for a while when setting display power mode.
+            SurfaceControl.setActiveColorMode(displayToken, colorMode);
+            synchronized (getSyncRoot()) {
+                updateDeviceInfoLocked();
+            }
         }
 
         @Override
