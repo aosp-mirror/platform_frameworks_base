@@ -1219,7 +1219,8 @@ public class AppOpsManager {
             OP_START_FOREGROUND,
             OP_SMS_FINANCIAL_TRANSACTIONS,
             OP_MANAGE_IPSEC_TUNNELS,
-            OP_INSTANT_APP_START_FOREGROUND
+            OP_INSTANT_APP_START_FOREGROUND,
+            OP_MANAGE_EXTERNAL_STORAGE,
     };
 
     /**
@@ -1623,7 +1624,7 @@ public class AppOpsManager {
             null, // no direct permission for OP_READ_DEVICE_IDENTIFIERS
             Manifest.permission.ACCESS_MEDIA_LOCATION,
             null, // no permission for OP_QUERY_ALL_PACKAGES
-            null, // no permission for OP_MANAGE_EXTERNAL_STORAGE
+            Manifest.permission.MANAGE_EXTERNAL_STORAGE,
     };
 
     /**

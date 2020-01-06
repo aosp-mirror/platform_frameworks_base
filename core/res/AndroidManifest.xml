@@ -932,6 +932,14 @@
     <permission android:name="android.permission.WRITE_OBB"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an application a broad access to external storage in scoped storage.
+         Intended to be used by few apps that need to manage files on behalf of the users.
+         <p>Protection level: signature|appop
+         <p>This protection level is temporary and will most likely be changed to |preinstalled -->
+    <permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:protectionLevel="signature|appop" />
+
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device location                          -->
     <!-- ====================================================================== -->
