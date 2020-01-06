@@ -167,6 +167,12 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         ipw.increaseIndent(); // level 1
 
         ipw.println("mLastAutoSystemClockTimeSet=" + mLastAutoSystemClockTimeSet);
+        ipw.println("mCallback.isAutoTimeDetectionEnabled()="
+                + mCallback.isAutoTimeDetectionEnabled());
+        ipw.println("mCallback.elapsedRealtimeMillis()=" + mCallback.elapsedRealtimeMillis());
+        ipw.println("mCallback.systemClockMillis()=" + mCallback.systemClockMillis());
+        ipw.println("mCallback.systemClockUpdateThresholdMillis()="
+                + mCallback.systemClockUpdateThresholdMillis());
 
         ipw.println("Time change log:");
         ipw.increaseIndent(); // level 2
