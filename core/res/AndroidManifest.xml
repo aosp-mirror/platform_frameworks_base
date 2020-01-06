@@ -2524,23 +2524,37 @@
     <permission android:name="android.permission.READ_WALLPAPER_INTERNAL"
         android:protectionLevel="signature|privileged" />
 
-    <!-- ============================================ -->
-    <!-- Permissions for changing the system clock -->
-    <!-- ============================================ -->
+    <!-- ===================================================== -->
+    <!-- Permissions for changing the system clock / time zone -->
+    <!-- ===================================================== -->
     <eat-comment />
 
-    <!-- Allows applications to set the system time.
-    <p>Not for use by third-party applications. -->
+    <!-- Allows applications to set the system time directly.
+         <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.SET_TIME"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows applications to set the system time zone.
+    <!-- Allows applications to set the system time zone directly.
          <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.SET_TIME_ZONE"
         android:label="@string/permlab_setTimeZone"
         android:description="@string/permdesc_setTimeZone"
         android:protectionLevel="signature|privileged" />
+
+    <!-- Allows telephony to suggest the time / time zone.
+         <p>Not for use by third-party applications.
+         @hide
+     -->
+    <permission android:name="android.permission.SUGGEST_PHONE_TIME_AND_ZONE"
+        android:protectionLevel="signature|telephony" />
+
+    <!-- Allows applications like settings to suggest the user's manually chosen time / time zone.
+         <p>Not for use by third-party applications.
+         @hide
+    -->
+    <permission android:name="android.permission.SUGGEST_MANUAL_TIME_AND_ZONE"
+        android:protectionLevel="signature" />
 
     <!-- ==================================================== -->
     <!-- Permissions related to changing status bar   -->
