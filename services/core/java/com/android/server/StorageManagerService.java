@@ -74,8 +74,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.DropBoxManager;
 import android.os.Environment;
-import android.os.Environment.UserEnvironment;
-import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -183,6 +181,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -378,6 +378,14 @@ class StorageManagerService extends IStorageManager.Stub
 
     @GuardedBy("mAppFuseLock")
     private AppFuseBridge mAppFuseBridge = null;
+
+    /** Matches known application dir paths. The first group contains the generic part of the path,
+     * the second group contains the user id (or null if it's a public volume without users), the
+     * third group contains the package name, and the fourth group the remainder of the path.
+     */
+    public static final Pattern KNOWN_APP_DIR_PATHS = Pattern.compile(
+            "(?i)(^/storage/[^/]+/(?:([0-9]+)/)?Android/(?:data|media|obb|sandbox)/)([^/]+)(/.*)?");
+
 
     private VolumeInfo findVolumeByIdOrThrow(String id) {
         synchronized (mLock) {
@@ -3135,7 +3143,6 @@ class StorageManagerService extends IStorageManager.Stub
     public void mkdirs(String callingPkg, String appPath) {
         final int callingUid = Binder.getCallingUid();
         final int userId = UserHandle.getUserId(callingUid);
-        final UserEnvironment userEnv = new UserEnvironment(userId);
         final String propertyName = "sys.user." + userId + ".ce_available";
 
         // Ignore requests to create directories while storage is locked
@@ -3161,25 +3168,36 @@ class StorageManagerService extends IStorageManager.Stub
             throw new IllegalStateException("Failed to resolve " + appPath + ": " + e);
         }
 
-        // Try translating the app path into a vold path, but require that it
-        // belong to the calling package.
-        if (FileUtils.contains(userEnv.buildExternalStorageAppDataDirs(callingPkg), appFile) ||
-                FileUtils.contains(userEnv.buildExternalStorageAppObbDirs(callingPkg), appFile) ||
-                FileUtils.contains(userEnv.buildExternalStorageAppMediaDirs(callingPkg), appFile)) {
-            appPath = appFile.getAbsolutePath();
-            if (!appPath.endsWith("/")) {
-                appPath = appPath + "/";
+        appPath = appFile.getAbsolutePath();
+        if (!appPath.endsWith("/")) {
+            appPath = appPath + "/";
+        }
+        // Ensure that the path we're asked to create is a known application directory
+        // path.
+        final Matcher matcher = KNOWN_APP_DIR_PATHS.matcher(appPath);
+        if (matcher.matches()) {
+            // And that the package dir matches the calling package
+            if (!matcher.group(3).equals(callingPkg)) {
+                throw new SecurityException("Invalid mkdirs path: " + appFile
+                        + " does not contain calling package " + callingPkg);
             }
-
+            // And that the user id part of the path (if any) matches the calling user id,
+            // or if for a public volume (no user id), the user matches the current user
+            if ((matcher.group(2) != null && !matcher.group(2).equals(Integer.toString(userId)))
+                    || (matcher.group(2) == null && userId != mCurrentUserId)) {
+                throw new SecurityException("Invalid mkdirs path: " + appFile
+                        + " does not match calling user id " + userId);
+            }
             try {
-                mVold.mkdirs(appPath);
-                return;
-            } catch (Exception e) {
+                mVold.setupAppDir(appPath, matcher.group(1), callingUid);
+            } catch (RemoteException e) {
                 throw new IllegalStateException("Failed to prepare " + appPath + ": " + e);
             }
-        }
 
-        throw new SecurityException("Invalid mkdirs path: " + appFile);
+            return;
+        }
+        throw new SecurityException("Invalid mkdirs path: " + appFile
+                + " is not a known app path.");
     }
 
     @Override
