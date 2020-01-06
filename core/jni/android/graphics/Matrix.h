@@ -23,7 +23,7 @@
 namespace android {
 
 /* Gets the underlying SkMatrix from a Matrix object. */
-extern SkMatrix* android_graphics_Matrix_getSkMatrix(JNIEnv* env, jobject matrixObj);
+SkMatrix* android_graphics_Matrix_getSkMatrix(JNIEnv* env, jobject matrixObj);
 
 } // namespace android
 
