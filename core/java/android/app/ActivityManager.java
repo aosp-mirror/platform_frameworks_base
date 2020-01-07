@@ -65,6 +65,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.WorkSource;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -4436,6 +4437,29 @@ public class ActivityManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Return if a given profile is in the foreground.
+     * @param userHandle UserHandle to check
+     * @return Returns the boolean result.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS
+    })
+    public boolean isProfileForeground(@NonNull UserHandle userHandle) {
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        if (userManager != null) {
+            for (UserInfo userInfo : userManager.getProfiles(getCurrentUser())) {
+                if (userInfo.id == userHandle.getIdentifier()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
