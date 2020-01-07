@@ -2183,6 +2183,14 @@ package android.os {
     field public static final String ACTION_USER_RESTRICTIONS_CHANGED = "android.os.action.USER_RESTRICTIONS_CHANGED";
   }
 
+  public final class VibrationAttributes implements android.os.Parcelable {
+    method @Deprecated @NonNull public android.media.AudioAttributes getAudioAttributes();
+  }
+
+  public static final class VibrationAttributes.Builder {
+    ctor public VibrationAttributes.Builder(@NonNull android.media.AudioAttributes, @Nullable android.os.VibrationEffect);
+  }
+
   public abstract class VibrationEffect implements android.os.Parcelable {
     method public static android.os.VibrationEffect get(int);
     method public static android.os.VibrationEffect get(int, boolean);

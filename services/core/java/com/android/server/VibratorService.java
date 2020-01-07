@@ -32,7 +32,6 @@ import android.hardware.input.InputManager;
 import android.hardware.vibrator.IVibrator;
 import android.hardware.vibrator.V1_0.EffectStrength;
 import android.icu.text.DateFormat;
-import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -54,6 +53,7 @@ import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.WorkSource;
@@ -107,8 +107,9 @@ public class VibratorService extends IVibratorService.Stub
     private static final int SCALE_VERY_LOW_MAX_AMPLITUDE = 168; // 2/3 * 255
     private static final int SCALE_LOW_MAX_AMPLITUDE = 192; // 3/4 * 255
 
-    // If a vibration is playing for longer than 5s, it's probably not haptic feedback.
-    private static final long MAX_HAPTIC_FEEDBACK_DURATION = 5000;
+    // Default vibration attributes. Used when vibration is requested without attributes
+    private static final VibrationAttributes DEFAULT_ATTRIBUTES =
+            new VibrationAttributes.Builder().build();
 
     // If HAL supports callbacks set the timeout to ASYNC_TIMEOUT_MULTIPLIER * duration.
     private static final long ASYNC_TIMEOUT_MULTIPLIER = 2;
@@ -163,7 +164,7 @@ public class VibratorService extends IVibratorService.Stub
     private int mHapticFeedbackIntensity;
     private int mNotificationIntensity;
     private int mRingIntensity;
-    private SparseArray<Pair<VibrationEffect, AudioAttributes>> mAlwaysOnEffects =
+    private SparseArray<Pair<VibrationEffect, VibrationAttributes>> mAlwaysOnEffects =
             new SparseArray<>();
 
     static native boolean vibratorExists();
@@ -207,7 +208,7 @@ public class VibratorService extends IVibratorService.Stub
         // with other system events, any duration calculations should be done use startTime so as
         // not to be affected by discontinuities created by RTC adjustments.
         public final long startTimeDebug;
-        public final AudioAttributes attrs;
+        public final VibrationAttributes attrs;
         public final int uid;
         public final String opPkg;
         public final String reason;
@@ -220,7 +221,7 @@ public class VibratorService extends IVibratorService.Stub
         public VibrationEffect originalEffect;
 
         private Vibration(IBinder token, VibrationEffect effect,
-                AudioAttributes attrs, int uid, String opPkg, String reason) {
+                VibrationAttributes attrs, int uid, String opPkg, String reason) {
             this.token = token;
             this.effect = effect;
             this.startTime = SystemClock.elapsedRealtime();
@@ -253,28 +254,7 @@ public class VibratorService extends IVibratorService.Stub
         }
 
         public boolean isHapticFeedback() {
-            if (VibratorService.this.isHapticFeedback(attrs.getUsage())) {
-                return true;
-            }
-            if (effect instanceof VibrationEffect.Prebaked) {
-                VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) effect;
-                switch (prebaked.getId()) {
-                    case VibrationEffect.EFFECT_CLICK:
-                    case VibrationEffect.EFFECT_DOUBLE_CLICK:
-                    case VibrationEffect.EFFECT_HEAVY_CLICK:
-                    case VibrationEffect.EFFECT_TEXTURE_TICK:
-                    case VibrationEffect.EFFECT_TICK:
-                    case VibrationEffect.EFFECT_POP:
-                    case VibrationEffect.EFFECT_THUD:
-                        return true;
-                    default:
-                        Slog.w(TAG, "Unknown prebaked vibration effect, "
-                                + "assuming it isn't haptic feedback.");
-                        return false;
-                }
-            }
-            final long duration = effect.getDuration();
-            return duration >= 0 && duration < MAX_HAPTIC_FEEDBACK_DURATION;
+            return VibratorService.this.isHapticFeedback(attrs.getUsage());
         }
 
         public boolean isNotification() {
@@ -303,13 +283,13 @@ public class VibratorService extends IVibratorService.Stub
         private final long mStartTimeDebug;
         private final VibrationEffect mEffect;
         private final VibrationEffect mOriginalEffect;
-        private final AudioAttributes mAttrs;
+        private final VibrationAttributes mAttrs;
         private final int mUid;
         private final String mOpPkg;
         private final String mReason;
 
-        public VibrationInfo(long startTimeDebug, VibrationEffect effect,
-                VibrationEffect originalEffect, AudioAttributes attrs, int uid,
+        VibrationInfo(long startTimeDebug, VibrationEffect effect,
+                VibrationEffect originalEffect, VibrationAttributes attrs, int uid,
                 String opPkg, String reason) {
             mStartTimeDebug = startTimeDebug;
             mEffect = effect;
@@ -528,7 +508,7 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     @Override // Binder call
-    public boolean setAlwaysOnEffect(int id, VibrationEffect effect, AudioAttributes attrs) {
+    public boolean setAlwaysOnEffect(int id, VibrationEffect effect, VibrationAttributes attrs) {
         if (!hasPermission(android.Manifest.permission.VIBRATE_ALWAYS_ON)) {
             throw new SecurityException("Requires VIBRATE_ALWAYS_ON permission");
         }
@@ -550,8 +530,7 @@ public class VibratorService extends IVibratorService.Stub
                 return false;
             }
             if (attrs == null) {
-                attrs = new AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_UNKNOWN)
+                attrs = new VibrationAttributes.Builder()
                         .build();
             }
             synchronized (mLock) {
@@ -610,7 +589,7 @@ public class VibratorService extends IVibratorService.Stub
 
     @Override // Binder call
     public void vibrate(int uid, String opPkg, VibrationEffect effect,
-            @Nullable AudioAttributes attrs, String reason, IBinder token) {
+            @Nullable VibrationAttributes attrs, String reason, IBinder token) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "vibrate, reason = " + reason);
         try {
             if (!hasPermission(android.Manifest.permission.VIBRATE)) {
@@ -626,18 +605,16 @@ public class VibratorService extends IVibratorService.Stub
             }
 
             if (attrs == null) {
-                attrs = new AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_UNKNOWN)
-                        .build();
+                attrs = DEFAULT_ATTRIBUTES;
             }
 
             if (shouldBypassDnd(attrs)) {
                 if (!(hasPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
                         || hasPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
                         || hasPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING))) {
-                    final int flags = attrs.getAllFlags()
-                            & ~AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
-                    attrs = new AudioAttributes.Builder(attrs).replaceFlags(flags).build();
+                    final int flags = attrs.getFlags()
+                            & ~VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
+                    attrs = new VibrationAttributes.Builder(attrs).replaceFlags(flags).build();
                 }
             }
 
@@ -868,18 +845,10 @@ public class VibratorService extends IVibratorService.Stub
             return true;
         }
 
-        if (vib.attrs.getUsage() == AudioAttributes.USAGE_NOTIFICATION_RINGTONE) {
-            return true;
-        }
-
-        if (vib.attrs.getUsage() == AudioAttributes.USAGE_ALARM
-                || vib.attrs.getUsage() == AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY
-                || vib.attrs.getUsage()
-                    == AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST) {
-            return true;
-        }
-
-        return false;
+        int usage = vib.attrs.getUsage();
+        return usage == VibrationAttributes.USAGE_RINGTONE
+                || usage == VibrationAttributes.USAGE_ALARM
+                || usage == VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
     }
 
     private int getCurrentIntensityLocked(Vibration vib) {
@@ -968,13 +937,13 @@ public class VibratorService extends IVibratorService.Stub
         }
     }
 
-    private static boolean shouldBypassDnd(AudioAttributes attrs) {
-        return (attrs.getAllFlags() & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0;
+    private static boolean shouldBypassDnd(VibrationAttributes attrs) {
+        return attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY);
     }
 
     private int getAppOpMode(Vibration vib) {
         int mode = mAppOps.checkAudioOpNoThrow(AppOpsManager.OP_VIBRATE,
-                vib.attrs.getUsage(), vib.uid, vib.opPkg);
+                vib.attrs.getAudioAttributes().getUsage(), vib.uid, vib.opPkg);
         if (mode == AppOpsManager.MODE_ALLOWED) {
             mode = mAppOps.startOpNoThrow(AppOpsManager.OP_VIBRATE, vib.uid, vib.opPkg);
         }
@@ -1100,7 +1069,7 @@ public class VibratorService extends IVibratorService.Stub
                 mVibrator.getDefaultRingVibrationIntensity(), UserHandle.USER_CURRENT);
     }
 
-    private void updateAlwaysOnLocked(int id, VibrationEffect effect, AudioAttributes attrs) {
+    private void updateAlwaysOnLocked(int id, VibrationEffect effect, VibrationAttributes attrs) {
         // TODO: Check DND and LowPower settings
         final Vibration vib = new Vibration(null, effect, attrs, 0, null, null);
         final int intensity = getCurrentIntensityLocked(vib);
@@ -1116,7 +1085,7 @@ public class VibratorService extends IVibratorService.Stub
     private void updateAlwaysOnLocked() {
         for (int i = 0; i < mAlwaysOnEffects.size(); i++) {
             int id = mAlwaysOnEffects.keyAt(i);
-            Pair<VibrationEffect, AudioAttributes> pair = mAlwaysOnEffects.valueAt(i);
+            Pair<VibrationEffect, VibrationAttributes> pair = mAlwaysOnEffects.valueAt(i);
             updateAlwaysOnLocked(id, pair.first, pair.second);
         }
     }
@@ -1148,7 +1117,7 @@ public class VibratorService extends IVibratorService.Stub
         return vibratorExists();
     }
 
-    private void doVibratorOn(long millis, int amplitude, int uid, AudioAttributes attrs) {
+    private void doVibratorOn(long millis, int amplitude, int uid, VibrationAttributes attrs) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doVibratorOn");
         try {
             synchronized (mInputDeviceVibrators) {
@@ -1163,7 +1132,7 @@ public class VibratorService extends IVibratorService.Stub
                 final int vibratorCount = mInputDeviceVibrators.size();
                 if (vibratorCount != 0) {
                     for (int i = 0; i < vibratorCount; i++) {
-                        mInputDeviceVibrators.get(i).vibrate(millis, attrs);
+                        mInputDeviceVibrators.get(i).vibrate(millis, attrs.getAudioAttributes());
                     }
                 } else {
                     // Note: ordering is important here! Many haptic drivers will reset their
@@ -1272,28 +1241,19 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     private static boolean isNotification(int usageHint) {
-        switch (usageHint) {
-            case AudioAttributes.USAGE_NOTIFICATION:
-            case AudioAttributes.USAGE_NOTIFICATION_EVENT:
-            case AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
-            case AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_INSTANT:
-            case AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_DELAYED:
-                return true;
-            default:
-                return false;
-        }
+        return usageHint == VibrationAttributes.USAGE_NOTIFICATION;
     }
 
     private static boolean isRingtone(int usageHint) {
-        return usageHint == AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
+        return usageHint == VibrationAttributes.USAGE_RINGTONE;
     }
 
     private static boolean isHapticFeedback(int usageHint) {
-        return usageHint == AudioAttributes.USAGE_ASSISTANCE_SONIFICATION;
+        return usageHint == VibrationAttributes.USAGE_TOUCH;
     }
 
     private static boolean isAlarm(int usageHint) {
-        return usageHint == AudioAttributes.USAGE_ALARM;
+        return usageHint == VibrationAttributes.USAGE_ALARM;
     }
 
     private void noteVibratorOnLocked(int uid, long millis) {
@@ -1332,11 +1292,11 @@ public class VibratorService extends IVibratorService.Stub
     private class VibrateThread extends Thread {
         private final VibrationEffect.Waveform mWaveform;
         private final int mUid;
-        private final AudioAttributes mAttrs;
+        private final VibrationAttributes mAttrs;
 
         private boolean mForceStop;
 
-        VibrateThread(VibrationEffect.Waveform waveform, int uid, AudioAttributes attrs) {
+        VibrateThread(VibrationEffect.Waveform waveform, int uid, VibrationAttributes attrs) {
             mWaveform = waveform;
             mUid = uid;
             mAttrs = attrs;
@@ -1600,7 +1560,7 @@ public class VibratorService extends IVibratorService.Stub
                         Slog.e(TAG, "Playing external vibration: " + vib);
                     }
                 }
-                final int usage = vib.getAudioAttributes().getUsage();
+                final int usage = vib.getVibrationAttributes().getUsage();
                 final int defaultIntensity;
                 final int currentIntensity;
                 if (isRingtone(usage)) {
@@ -1731,7 +1691,7 @@ public class VibratorService extends IVibratorService.Stub
 
                 VibrationEffect effect =
                         VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE);
-                AudioAttributes attrs = createAudioAttributes(commonOptions);
+                VibrationAttributes attrs = createVibrationAttributes(commonOptions);
                 vibrate(Binder.getCallingUid(), description, effect, attrs, "Shell Command",
                         mToken);
                 return 0;
@@ -1792,7 +1752,7 @@ public class VibratorService extends IVibratorService.Stub
                             amplitudesList.stream().mapToInt(Integer::intValue).toArray();
                     effect = VibrationEffect.createWaveform(timings, amplitudes, repeat);
                 }
-                AudioAttributes attrs = createAudioAttributes(commonOptions);
+                VibrationAttributes attrs = createVibrationAttributes(commonOptions);
                 vibrate(Binder.getCallingUid(), description, effect, attrs, "Shell Command",
                         mToken);
                 return 0;
@@ -1824,7 +1784,7 @@ public class VibratorService extends IVibratorService.Stub
 
                 VibrationEffect effect =
                         VibrationEffect.get(id, false);
-                AudioAttributes attrs = createAudioAttributes(commonOptions);
+                VibrationAttributes attrs = createVibrationAttributes(commonOptions);
                 vibrate(Binder.getCallingUid(), description, effect, attrs, "Shell Command",
                         mToken);
                 return 0;
@@ -1833,13 +1793,13 @@ public class VibratorService extends IVibratorService.Stub
             }
         }
 
-        private AudioAttributes createAudioAttributes(CommonOptions commonOptions) {
+        private VibrationAttributes createVibrationAttributes(CommonOptions commonOptions) {
             final int flags = commonOptions.force
-                    ? AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY
+                    ? VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY
                     : 0;
-            return new AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_UNKNOWN)
-                    .setFlags(flags)
+            return new VibrationAttributes.Builder()
+                    .setUsage(VibrationAttributes.USAGE_UNKNOWN)
+                    .replaceFlags(flags)
                     .build();
         }
 
