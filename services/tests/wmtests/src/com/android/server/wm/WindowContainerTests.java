@@ -21,6 +21,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyFloat;
@@ -49,7 +50,12 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.view.IRemoteAnimationFinishedCallback;
+import android.view.IRemoteAnimationRunner;
+import android.view.RemoteAnimationAdapter;
+import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
@@ -780,6 +786,63 @@ public class WindowContainerTests extends WindowTestsBase {
         assertEquals(newDc, stack.mDisplayContent);
         assertEquals(newDc, task.mDisplayContent);
         assertEquals(newDc, activity.mDisplayContent);
+    }
+
+    @Test
+    public void testTaskCanApplyAnimation() {
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
+        final ActivityRecord activity =
+                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
+        verifyWindowContainerApplyAnimation(task, activity);
+    }
+
+    @Test
+    public void testStackCanApplyAnimation() {
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityRecord activity = WindowTestUtils.createActivityRecordInTask(mDisplayContent,
+                createTaskInStack(stack, 0 /* userId */));
+        verifyWindowContainerApplyAnimation(stack, activity);
+    }
+
+    private void verifyWindowContainerApplyAnimation(WindowContainer wc, ActivityRecord act) {
+        // Initial remote animation for app transition.
+        final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
+                new IRemoteAnimationRunner.Stub() {
+                    @Override
+                    public void onAnimationStart(RemoteAnimationTarget[] apps,
+                            RemoteAnimationTarget[] wallpapers,
+                            IRemoteAnimationFinishedCallback finishedCallback) {
+                        try {
+                            finishedCallback.onAnimationFinished();
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onAnimationCancelled() {
+                    }
+                }, 0, 0, false);
+        adapter.setCallingPidUid(123, 456);
+        wc.getDisplayContent().prepareAppTransition(TRANSIT_TASK_OPEN, false);
+        wc.getDisplayContent().mAppTransition.overridePendingAppTransitionRemote(adapter);
+        spyOn(wc);
+        doReturn(true).when(wc).okToAnimate();
+
+        // Make sure animating state is as expected after applied animation.
+        assertTrue(wc.applyAnimation(null, TRANSIT_TASK_OPEN, true, false));
+        assertEquals(wc.getTopMostActivity(), act);
+        assertTrue(wc.isAnimating());
+        assertTrue(act.isAnimating(PARENTS));
+
+        // Make sure animation finish callback will be received and reset animating state after
+        // animation finish.
+        wc.getDisplayContent().mAppTransition.goodToGo(TRANSIT_TASK_OPEN, act,
+                mDisplayContent.mOpeningApps);
+        verify(wc).onAnimationFinished();
+        assertFalse(wc.isAnimating());
+        assertFalse(act.isAnimating(PARENTS));
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */

@@ -1586,7 +1586,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // TODO: Can we consolidate this with #isVisible() or have a more appropriate name for this?
     boolean isWinVisibleLw() {
         return (mActivityRecord == null || mActivityRecord.mVisibleRequested
-                || mActivityRecord.isAnimating(TRANSITION)) && isVisible();
+                || mActivityRecord.isAnimating(TRANSITION | PARENTS)) && isVisible();
     }
 
     /**
@@ -1812,7 +1812,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Starting window that's exiting will be removed when the animation finishes.
             // Mark all relevant flags for that onExitAnimationDone will proceed all the way
             // to actually remove it.
-            if (!visible && isVisibleNow && mActivityRecord.isAnimating(TRANSITION)) {
+            if (!visible && isVisibleNow && mActivityRecord.isAnimating(PARENTS | TRANSITION)) {
                 mAnimatingExit = true;
                 mRemoveOnExit = true;
                 mWindowRemovalAllowed = true;
@@ -2081,7 +2081,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     this, mWinAnimator.mSurfaceController, mAnimatingExit, mRemoveOnExit,
                     mHasSurface, mWinAnimator.getShown(),
                     isAnimating(TRANSITION | PARENTS),
-                    mActivityRecord != null && mActivityRecord.isAnimating(TRANSITION),
+                    mActivityRecord != null && mActivityRecord.isAnimating(PARENTS | TRANSITION),
                     mWillReplaceWindow,
                     mWmService.mDisplayFrozen, Debug.getCallers(6));
 
@@ -4300,7 +4300,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " tok.visible=" + (mActivityRecord != null && mActivityRecord.isVisible())
                     + " animating=" + isAnimating(TRANSITION | PARENTS)
                     + " tok animating="
-                    + (mActivityRecord != null && mActivityRecord.isAnimating(TRANSITION))
+                    + (mActivityRecord != null && mActivityRecord.isAnimating(TRANSITION | PARENTS))
                     + " Callers=" + Debug.getCallers(4));
         }
     }

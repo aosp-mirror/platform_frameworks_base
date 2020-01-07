@@ -777,7 +777,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *         otherwise.
      */
     boolean isWaitingForTransitionStart() {
-        return false;
+        return getActivity(app -> app.isWaitingForTransitionStart()) != null;
     }
 
     /**
@@ -785,7 +785,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *         {@code ActivityRecord#isAnimating(TRANSITION)}, {@code false} otherwise.
      */
     boolean isAppTransitioning() {
-        return getActivity(app -> app.isAnimating(TRANSITION)) != null;
+        return getActivity(app -> app.isAnimating(PARENTS | TRANSITION)) != null;
     }
 
     /**
@@ -1895,7 +1895,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 if (adapter != null) {
                     startAnimation(getPendingTransaction(), adapter, !isVisible());
                     if (adapter.getShowWallpaper()) {
-                        mDisplayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+                        getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                     }
                     if (thumbnailAdapter != null) {
                         mThumbnail.startAnimation(
@@ -2040,7 +2040,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     boolean okToDisplay() {
-        return mDisplayContent != null && mDisplayContent.okToDisplay();
+        final DisplayContent dc = getDisplayContent();
+        return dc != null && dc.okToDisplay();
     }
 
     boolean okToAnimate() {
@@ -2048,7 +2049,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     boolean okToAnimate(boolean ignoreFrozen) {
-        return mDisplayContent != null && mDisplayContent.okToAnimate(ignoreFrozen);
+        final DisplayContent dc = getDisplayContent();
+        return dc != null && dc.okToAnimate(ignoreFrozen);
     }
 
     @Override
@@ -2087,6 +2089,21 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     AnimationAdapter getAnimation() {
         return mSurfaceAnimator.getAnimation();
+    }
+
+    /**
+     * @return The {@link WindowContainer} which is running an animation.
+     *
+     * It traverses from the current container to its parents recursively. If nothing is animating,
+     * it will return {@code null}.
+     */
+    @Nullable
+    WindowContainer getAnimatingContainer() {
+        if (isAnimating()) {
+            return this;
+        }
+        final WindowContainer parent = getParent();
+        return (parent != null) ? parent.getAnimatingContainer() : null;
     }
 
     /**
