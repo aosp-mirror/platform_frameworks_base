@@ -1323,6 +1323,11 @@ public class SubscriptionManager {
      * The records will be sorted by {@link SubscriptionInfo#getSimSlotIndex}
      * then by {@link SubscriptionInfo#getSubscriptionId}.
      *
+     * Hidden subscriptions refer to those are not meant visible to the users.
+     * For example, an opportunistic subscription that is grouped with other
+     * subscriptions should remain invisible to users as they are only functionally
+     * supplementary to primary ones.
+     *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see
      * {@link TelephonyManager#hasCarrierPrivileges}). In the latter case, only records accessible
@@ -2176,20 +2181,35 @@ public class SubscriptionManager {
     }
 
     /**
-     * TODO(b/137102918) Make this static, tests use this as an instance method currently.
+     * Get visible subscription Id(s) of the currently active SIM(s).
      *
      * @return the list of subId's that are active,
-     *         is never null but the length maybe 0.
+     *         is never null but the length may be 0.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public @NonNull int[] getActiveSubscriptionIdList() {
         return getActiveSubscriptionIdList(/* visibleOnly */ true);
     }
 
     /**
-     * TODO(b/137102918) Make this static, tests use this as an instance method currently.
+     * Get both hidden and visible subscription Id(s) of the currently active SIM(s).
      *
+     * Hidden subscriptions refer to those are not meant visible to the users.
+     * For example, an opportunistic subscription that is grouped with other
+     * subscriptions should remain invisible to users as they are only functionally
+     * supplementary to primary ones.
+     *
+     * @return the list of subId's that are active,
+     *         is never null but the length may be 0.
+     * @hide
+     */
+    @SystemApi
+    public @NonNull int[] getActiveAndHiddenSubscriptionIdList() {
+        return getActiveSubscriptionIdList(/* visibleOnly */false);
+    }
+
+    /**
      * @return a non-null list of subId's that are active.
      *
      * @hide
