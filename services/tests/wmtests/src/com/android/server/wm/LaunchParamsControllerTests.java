@@ -421,7 +421,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         }
 
         @Override
-        void saveTask(Task task) {
+        void saveTask(Task task, DisplayContent display) {
             final int userId = task.mUserId;
             final ComponentName realActivity = task.realActivity;
             mTmpParams.mPreferredDisplayId = task.getDisplayId();

@@ -574,13 +574,19 @@ class Task extends WindowContainer<WindowContainer> {
         mAtmService.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
     }
 
-    private void cleanUpResourcesForDestroy() {
+    private void cleanUpResourcesForDestroy(ConfigurationContainer oldParent) {
         if (hasChild()) {
             return;
         }
 
-        // This task is going away, so save the last state if necessary.
-        saveLaunchingStateIfNeeded();
+        // TODO(xutan): Removed type check after stack and task is merged.
+        // Before the real merge of stack and task, we need to avoid saving state of stacks. Once
+        // the merge is finished we can just pass DisplayContent because both windowing mode and
+        // bounds are set in the merged task.
+        if (oldParent instanceof ActivityStack) {
+            // This task is going away, so save the last state if necessary.
+            saveLaunchingStateIfNeeded(((WindowContainer) oldParent).getDisplayContent());
+        }
 
         // TODO: VI what about activity?
         final boolean isVoiceSession = voiceSession != null;
@@ -1053,9 +1059,8 @@ class Task extends WindowContainer<WindowContainer> {
 
         mPrevDisplayId = (oldDisplay != null) ? oldDisplay.mDisplayId : INVALID_DISPLAY;
 
-        // Task is going to be removed, clean it up before detaching from hierarchy.
         if (oldParent != null && newParent == null) {
-            cleanUpResourcesForDestroy();
+            cleanUpResourcesForDestroy(oldParent);
         }
 
         if (display != null) {
@@ -1884,7 +1889,11 @@ class Task extends WindowContainer<WindowContainer> {
      * It only saves state if this task has been shown to user and it's in fullscreen or freeform
      * mode on freeform displays.
      */
-    void saveLaunchingStateIfNeeded() {
+    private void saveLaunchingStateIfNeeded() {
+        saveLaunchingStateIfNeeded(getDisplayContent());
+    }
+
+    private void saveLaunchingStateIfNeeded(DisplayContent display) {
         if (!hasBeenVisible) {
             // Not ever visible to user.
             return;
@@ -1904,7 +1913,7 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         // Saves the new state so that we can launch the activity at the same location.
-        mStackSupervisor.mLaunchParamsPersister.saveTask(this);
+        mStackSupervisor.mLaunchParamsPersister.saveTask(this, display);
     }
 
     /**
