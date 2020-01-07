@@ -204,11 +204,8 @@ public final class NotificationEntry extends ListEntry {
                     + " doesn't match existing key " + mKey);
         }
 
-        if (!Objects.equals(mSbn, sbn)) {
-            mSbn = sbn;
-            mBubbleMetadata = mSbn.getNotification().getBubbleMetadata();
-            onSbnUpdated();
-        }
+        mSbn = sbn;
+        mBubbleMetadata = mSbn.getNotification().getBubbleMetadata();
     }
 
     /**
@@ -233,10 +230,7 @@ public final class NotificationEntry extends ListEntry {
                     + " doesn't match existing key " + mKey);
         }
 
-        if (!Objects.equals(mRanking, ranking)) {
-            mRanking = ranking;
-            onRankingUpdated();
-        }
+        mRanking = ranking;
     }
 
     /*

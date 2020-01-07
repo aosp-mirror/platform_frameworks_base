@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -81,6 +82,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private final Context mContext;
     private final VisualStabilityManager mVisualStabilityManager;
     private final AccessibilityManager mAccessibilityManager;
+    private final HighPriorityProvider mHighPriorityProvider;
 
     // Dependencies:
     private final NotificationLockscreenUserManager mLockscreenUserManager =
@@ -109,12 +111,14 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     @Inject
     public NotificationGutsManager(Context context, VisualStabilityManager visualStabilityManager,
             Lazy<StatusBar> statusBarLazy, @Main Handler mainHandler,
-            AccessibilityManager accessibilityManager) {
+            AccessibilityManager accessibilityManager,
+            HighPriorityProvider highPriorityProvider) {
         mContext = context;
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarLazy = statusBarLazy;
         mMainHandler = mainHandler;
         mAccessibilityManager = accessibilityManager;
+        mHighPriorityProvider = highPriorityProvider;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -331,8 +335,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 row.getIsNonblockable(),
                 isForBlockingHelper,
                 row.getEntry().getImportance(),
-                row.getEntry().isHighPriority());
-
+                mHighPriorityProvider.isHighPriority(row.getEntry()));
     }
 
     /**

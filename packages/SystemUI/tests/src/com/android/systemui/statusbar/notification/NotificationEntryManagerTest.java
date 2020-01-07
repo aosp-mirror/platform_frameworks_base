@@ -83,6 +83,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
@@ -233,7 +234,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                         mock(NotificationFilter.class),
                         mNotifLog,
                         mock(NotificationSectionsFeatureManager.class),
-                        mock(PeopleNotificationIdentifier.class)),
+                        mock(PeopleNotificationIdentifier.class),
+                        mock(HighPriorityProvider.class)),
                 mEnvironment,
                 mFeatureFlags
         );

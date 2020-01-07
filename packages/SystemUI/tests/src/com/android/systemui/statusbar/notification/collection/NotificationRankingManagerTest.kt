@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.notification.NotificationFilter
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
+import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
 import com.android.systemui.statusbar.notification.logging.NotifLog
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING
@@ -62,7 +63,8 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 mock(NotificationFilter::class.java),
                 mock(NotifLog::class.java),
                 mock(NotificationSectionsFeatureManager::class.java),
-                personNotificationIdentifier
+                personNotificationIdentifier,
+                HighPriorityProvider(personNotificationIdentifier)
         )
     }
 
@@ -182,7 +184,8 @@ class NotificationRankingManagerTest : SysuiTestCase() {
         filter: NotificationFilter,
         notifLog: NotifLog,
         sectionsFeatureManager: NotificationSectionsFeatureManager,
-        peopleNotificationIdentifier: PeopleNotificationIdentifier
+        peopleNotificationIdentifier: PeopleNotificationIdentifier,
+        highPriorityProvider: HighPriorityProvider
     ) : NotificationRankingManager(
         mediaManager,
         groupManager,
@@ -190,7 +193,8 @@ class NotificationRankingManagerTest : SysuiTestCase() {
         filter,
         notifLog,
         sectionsFeatureManager,
-        peopleNotificationIdentifier
+        peopleNotificationIdentifier,
+        highPriorityProvider
     ) {
         fun applyTestRankingMap(r: RankingMap) {
             rankingMap = r
