@@ -30,6 +30,7 @@
 #include <android/frameworks/stats/1.0/IStats.h>
 #include <android/frameworks/stats/1.0/types.h>
 #include <android/os/BnStatsd.h>
+#include <android/os/IPendingIntentRef.h>
 #include <android/os/IStatsCompanionService.h>
 #include <android/os/IStatsd.h>
 #include <binder/IResultReceiver.h>
@@ -121,26 +122,26 @@ public:
      * Binder call to let clients register the data fetch operation for a configuration.
      */
     virtual Status setDataFetchOperation(int64_t key,
-                                         const sp<android::IBinder>& intentSender,
-                                         const String16& packageName) override;
+                                         const sp<IPendingIntentRef>& pir,
+                                         const int32_t callingUid) override;
 
     /**
      * Binder call to remove the data fetch operation for the specified config key.
      */
     virtual Status removeDataFetchOperation(int64_t key,
-                                            const String16& packageName) override;
+                                            const int32_t callingUid) override;
 
     /**
      * Binder call to let clients register the active configs changed operation.
      */
-    virtual Status setActiveConfigsChangedOperation(const sp<android::IBinder>& intentSender,
-                                                    const String16& packageName,
+    virtual Status setActiveConfigsChangedOperation(const sp<IPendingIntentRef>& pir,
+                                                    const int32_t callingUid,
                                                     vector<int64_t>* output) override;
 
     /**
      * Binder call to remove the active configs changed operation for the specified package..
      */
-    virtual Status removeActiveConfigsChangedOperation(const String16& packageName) override;
+    virtual Status removeActiveConfigsChangedOperation(const int32_t callingUid) override;
     /**
      * Binder call to allow clients to remove the specified configuration.
      */
@@ -148,20 +149,19 @@ public:
                                        const String16& packageName) override;
 
     /**
-     * Binder call to associate the given config's subscriberId with the given intentSender.
-     * intentSender must be convertible into an IntentSender (in Java) using IntentSender(IBinder).
+     * Binder call to associate the given config's subscriberId with the given pendingIntentRef.
      */
     virtual Status setBroadcastSubscriber(int64_t configId,
                                           int64_t subscriberId,
-                                          const sp<android::IBinder>& intentSender,
-                                          const String16& packageName) override;
+                                          const sp<IPendingIntentRef>& pir,
+                                          const int32_t callingUid) override;
 
     /**
-     * Binder call to unassociate the given config's subscriberId with any intentSender.
+     * Binder call to unassociate the given config's subscriberId with any pendingIntentRef.
      */
     virtual Status unsetBroadcastSubscriber(int64_t configId,
                                             int64_t subscriberId,
-                                            const String16& packageName) override;
+                                            const int32_t callingUid) override;
 
     /** Inform statsCompanion that statsd is ready. */
     virtual void sayHiToStatsCompanion();

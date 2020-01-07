@@ -170,33 +170,32 @@ StatsService::StatsService(const sp<Looper>& handlerLooper, shared_ptr<LogEventQ
             mUidMap, mPullerManager, mAnomalyAlarmMonitor, mPeriodicAlarmMonitor,
             getElapsedRealtimeNs(),
             [this](const ConfigKey& key) {
-                sp<IStatsCompanionService> sc = getStatsCompanionService();
-                auto receiver = mConfigManager->GetConfigReceiver(key);
-                if (sc == nullptr) {
-                    VLOG("Could not find StatsCompanionService");
+                sp<IPendingIntentRef> receiver = mConfigManager->GetConfigReceiver(key);
+                if (receiver == nullptr) {
+                    VLOG("Could not find a broadcast receiver for %s",
+                        key.ToString().c_str());
                     return false;
-                } else if (receiver == nullptr) {
-                    VLOG("Statscompanion could not find a broadcast receiver for %s",
-                         key.ToString().c_str());
-                    return false;
-                } else {
-                    sc->sendDataBroadcast(receiver, mProcessor->getLastReportTimeNs(key));
+                } else if (receiver->sendDataBroadcast(
+                           mProcessor->getLastReportTimeNs(key)).isOk()) {
                     return true;
+                } else {
+                    VLOG("Failed to send a broadcast for receiver %s",
+                        key.ToString().c_str());
+                    return false;
                 }
             },
             [this](const int& uid, const vector<int64_t>& activeConfigs) {
-                auto receiver = mConfigManager->GetActiveConfigsChangedReceiver(uid);
-                sp<IStatsCompanionService> sc = getStatsCompanionService();
-                if (sc == nullptr) {
-                    VLOG("Could not access statsCompanion");
-                    return false;
-                } else if (receiver == nullptr) {
+                sp<IPendingIntentRef> receiver =
+                    mConfigManager->GetActiveConfigsChangedReceiver(uid);
+                if (receiver == nullptr) {
                     VLOG("Could not find receiver for uid %d", uid);
                     return false;
-                } else {
-                    sc->sendActiveConfigsChangedBroadcast(receiver, activeConfigs);
+                } else if (receiver->sendActiveConfigsChangedBroadcast(activeConfigs).isOk()) {
                     VLOG("StatsService::active configs broadcast succeeded for uid %d" , uid);
                     return true;
+                } else {
+                    VLOG("StatsService::active configs broadcast failed for uid %d" , uid);
+                    return false;
                 }
             });
 
@@ -574,18 +573,19 @@ status_t StatsService::cmd_trigger_broadcast(int out, Vector<String8>& args) {
         return UNKNOWN_ERROR;
     }
     ConfigKey key(uid, StrToInt64(name));
-    auto receiver = mConfigManager->GetConfigReceiver(key);
-    sp<IStatsCompanionService> sc = getStatsCompanionService();
-    if (sc == nullptr) {
-        VLOG("Could not access statsCompanion");
-    } else if (receiver == nullptr) {
-        VLOG("Could not find receiver for %s, %s", args[1].c_str(), args[2].c_str())
-    } else {
-        sc->sendDataBroadcast(receiver, mProcessor->getLastReportTimeNs(key));
+    sp<IPendingIntentRef> receiver = mConfigManager->GetConfigReceiver(key);
+    if (receiver == nullptr) {
+        VLOG("Could not find receiver for %s, %s", args[1].c_str(), args[2].c_str());
+        return UNKNOWN_ERROR;
+    } else if (receiver->sendDataBroadcast(
+               mProcessor->getLastReportTimeNs(key)).isOk()) {
         VLOG("StatsService::trigger broadcast succeeded to %s, %s", args[1].c_str(),
              args[2].c_str());
+    } else {
+        VLOG("StatsService::trigger broadcast failed to %s, %s", args[1].c_str(),
+             args[2].c_str());
+        return UNKNOWN_ERROR;
     }
-
     return NO_ERROR;
 }
 
@@ -629,15 +629,15 @@ status_t StatsService::cmd_trigger_active_config_broadcast(int out, Vector<Strin
             }
         }
     }
-    auto receiver = mConfigManager->GetActiveConfigsChangedReceiver(uid);
-    sp<IStatsCompanionService> sc = getStatsCompanionService();
-    if (sc == nullptr) {
-        VLOG("Could not access statsCompanion");
-    } else if (receiver == nullptr) {
+    sp<IPendingIntentRef> receiver = mConfigManager->GetActiveConfigsChangedReceiver(uid);
+    if (receiver == nullptr) {
         VLOG("Could not find receiver for uid %d", uid);
-    } else {
-        sc->sendActiveConfigsChangedBroadcast(receiver, configIds);
+        return UNKNOWN_ERROR;
+    } else if (receiver->sendActiveConfigsChangedBroadcast(configIds).isOk()) {
         VLOG("StatsService::trigger active configs changed broadcast succeeded for uid %d" , uid);
+    } else {
+        VLOG("StatsService::trigger active configs changed broadcast failed for uid %d", uid);
+        return UNKNOWN_ERROR;
     }
     return NO_ERROR;
 }
@@ -1111,7 +1111,6 @@ Status StatsService::statsCompanionReady() {
     mPullerManager->SetStatsCompanionService(statsCompanion);
     mAnomalyAlarmMonitor->setStatsCompanionService(statsCompanion);
     mPeriodicAlarmMonitor->setStatsCompanionService(statsCompanion);
-    SubscriberReporter::getInstance().setStatsCompanionService(statsCompanion);
     return Status::ok();
 }
 
@@ -1185,23 +1184,21 @@ bool StatsService::addConfigurationChecked(int uid, int64_t key, const vector<ui
     return true;
 }
 
-Status StatsService::removeDataFetchOperation(int64_t key, const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
-
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), key);
+Status StatsService::removeDataFetchOperation(int64_t key,
+                                              const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
+    ConfigKey configKey(callingUid, key);
     mConfigManager->RemoveConfigReceiver(configKey);
     return Status::ok();
 }
 
 Status StatsService::setDataFetchOperation(int64_t key,
-                                           const sp<android::IBinder>& intentSender,
-                                           const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+                                           const sp<IPendingIntentRef>& pir,
+                                           const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), key);
-    mConfigManager->SetConfigReceiver(configKey, intentSender);
+    ConfigKey configKey(callingUid, key);
+    mConfigManager->SetConfigReceiver(configKey, pir);
     if (StorageManager::hasConfigMetricsReport(configKey)) {
         VLOG("StatsService::setDataFetchOperation marking configKey %s to dump reports on disk",
              configKey.ToString().c_str());
@@ -1210,27 +1207,24 @@ Status StatsService::setDataFetchOperation(int64_t key,
     return Status::ok();
 }
 
-Status StatsService::setActiveConfigsChangedOperation(const sp<android::IBinder>& intentSender,
-                                                      const String16& packageName,
+Status StatsService::setActiveConfigsChangedOperation(const sp<IPendingIntentRef>& pir,
+                                                      const int32_t callingUid,
                                                       vector<int64_t>* output) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    int uid = ipc->getCallingUid();
-    mConfigManager->SetActiveConfigsChangedReceiver(uid, intentSender);
+    mConfigManager->SetActiveConfigsChangedReceiver(callingUid, pir);
     if (output != nullptr) {
-        mProcessor->GetActiveConfigs(uid, *output);
+        mProcessor->GetActiveConfigs(callingUid, *output);
     } else {
         ALOGW("StatsService::setActiveConfigsChanged output was nullptr");
     }
     return Status::ok();
 }
 
-Status StatsService::removeActiveConfigsChangedOperation(const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+Status StatsService::removeActiveConfigsChangedOperation(const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    mConfigManager->RemoveActiveConfigsChangedReceiver(ipc->getCallingUid());
+    mConfigManager->RemoveActiveConfigsChangedReceiver(callingUid);
     return Status::ok();
 }
 
@@ -1246,26 +1240,24 @@ Status StatsService::removeConfiguration(int64_t key, const String16& packageNam
 
 Status StatsService::setBroadcastSubscriber(int64_t configId,
                                             int64_t subscriberId,
-                                            const sp<android::IBinder>& intentSender,
-                                            const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+                                            const sp<IPendingIntentRef>& pir,
+                                            const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
     VLOG("StatsService::setBroadcastSubscriber called.");
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), configId);
+    ConfigKey configKey(callingUid, configId);
     SubscriberReporter::getInstance()
-            .setBroadcastSubscriber(configKey, subscriberId, intentSender);
+            .setBroadcastSubscriber(configKey, subscriberId, pir);
     return Status::ok();
 }
 
 Status StatsService::unsetBroadcastSubscriber(int64_t configId,
                                               int64_t subscriberId,
-                                              const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+                                              const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
     VLOG("StatsService::unsetBroadcastSubscriber called.");
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), configId);
+    ConfigKey configKey(callingUid, configId);
     SubscriberReporter::getInstance()
             .unsetBroadcastSubscriber(configKey, subscriberId);
     return Status::ok();
@@ -1631,7 +1623,6 @@ void StatsService::binderDied(const wp <IBinder>& who) {
     }
     mAnomalyAlarmMonitor->setStatsCompanionService(nullptr);
     mPeriodicAlarmMonitor->setStatsCompanionService(nullptr);
-    SubscriberReporter::getInstance().setStatsCompanionService(nullptr);
     mPullerManager->SetStatsCompanionService(nullptr);
 }
 

@@ -17,6 +17,7 @@
 package android.os;
 
 import android.os.IStatsPullerCallback;
+import android.os.IPendingIntentRef;
 import android.os.IPullAtomCallback;
 import android.os.ParcelFileDescriptor;
 
@@ -114,14 +115,15 @@ interface IStatsd {
      *
      * Requires Manifest.permission.DUMP.
      */
-    void setDataFetchOperation(long configKey, in IBinder intentSender, in String packageName);
+    void setDataFetchOperation(long configId, in IPendingIntentRef pendingIntentRef,
+                               int callingUid);
 
     /**
      * Removes the data fetch operation for the specified configuration.
      *
      * Requires Manifest.permission.DUMP.
      */
-    void removeDataFetchOperation(long configKey, in String packageName);
+    void removeDataFetchOperation(long configId, int callingUid);
 
     /**
      * Registers the given pending intent for this packagename. This intent is invoked when the
@@ -131,14 +133,14 @@ interface IStatsd {
      *
      * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
      */
-    long[] setActiveConfigsChangedOperation(in IBinder intentSender, in String packageName);
+    long[] setActiveConfigsChangedOperation(in IPendingIntentRef pendingIntentRef, int callingUid);
 
     /**
      * Removes the active configs changed operation for the specified package name.
      *
      * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
      */
-    void removeActiveConfigsChangedOperation(in String packageName);
+    void removeActiveConfigsChangedOperation(int callingUid);
 
     /**
      * Removes the configuration with the matching config key. No-op if this config key does not
@@ -149,34 +151,31 @@ interface IStatsd {
     void removeConfiguration(in long configKey, in String packageName);
 
     /**
-     * Set the IIntentSender (i.e. PendingIntent) to be used when broadcasting subscriber
+     * Set the PendingIntentRef to be used when broadcasting subscriber
      * information to the given subscriberId within the given config.
      *
-     * Suppose that the calling uid has added a config with key configKey, and that in this config
+     * Suppose that the calling uid has added a config with key configId, and that in this config
      * it is specified that when a particular anomaly is detected, a broadcast should be sent to
-     * a BroadcastSubscriber with id subscriberId. This function links the given intentSender with
-     * that subscriberId (for that config), so that this intentSender is used to send the broadcast
+     * a BroadcastSubscriber with id subscriberId. This function links the given pendingIntent with
+     * that subscriberId (for that config), so that this pendingIntent is used to send the broadcast
      * when the anomaly is detected.
      *
      * This function can only be called by the owner (uid) of the config. It must be called each
-     * time statsd starts. Later calls overwrite previous calls; only one intentSender is stored.
-     *
-     * intentSender must be convertible into an IntentSender using IntentSender(IBinder)
-     * and cannot be null.
+     * time statsd starts. Later calls overwrite previous calls; only one pendingIntent is stored.
      *
      * Requires Manifest.permission.DUMP.
      */
-    void setBroadcastSubscriber(long configKey, long subscriberId, in IBinder intentSender,
-                                in String packageName);
+    void setBroadcastSubscriber(long configId, long subscriberId, in IPendingIntentRef pir,
+                                int callingUid);
 
     /**
-     * Undoes setBroadcastSubscriber() for the (configKey, subscriberId) pair.
+     * Undoes setBroadcastSubscriber() for the (configId, subscriberId) pair.
      * Any broadcasts associated with subscriberId will henceforth not be sent.
-     * No-op if this (configKey, subsriberId) pair was not associated with an IntentSender.
+     * No-op if this (configKey, subscriberId) pair was not associated with an PendingIntentRef.
      *
      * Requires Manifest.permission.DUMP.
      */
-    void unsetBroadcastSubscriber(long configKey, long subscriberId, in String packageName);
+    void unsetBroadcastSubscriber(long configId, long subscriberId, int callingUid);
 
     /**
      * Apps can send an atom via this application breadcrumb with the specified label and state for
