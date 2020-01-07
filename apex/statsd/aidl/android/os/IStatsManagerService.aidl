@@ -99,4 +99,12 @@ interface IStatsManagerService {
      * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
      */
     byte[] getMetadata(in String packageName);
+
+    /**
+     * Fetches data for the specified configuration key. Returns a byte array representing proto
+     * wire-encoded of ConfigMetricsReportList.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    byte[] getData(in long key, in String packageName);
 }

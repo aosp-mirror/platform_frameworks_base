@@ -390,10 +390,10 @@ public final class StatsManager {
     public byte[] getReports(long configKey) throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsd service = getIStatsdLocked();
+                IStatsManagerService service = getIStatsManagerServiceLocked();
                 return service.getData(configKey, mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsd when getting data");
+                Slog.e(TAG, "Failed to connect to statsmanager when getting data");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);

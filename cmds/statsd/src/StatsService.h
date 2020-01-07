@@ -99,7 +99,7 @@ public:
      * Binder call for clients to request data for this configuration key.
      */
     virtual Status getData(int64_t key,
-                           const String16& packageName,
+                           const int32_t callingUid,
                            vector<uint8_t>* output) override;
 
 

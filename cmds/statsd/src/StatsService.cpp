@@ -1135,12 +1135,11 @@ void StatsService::OnLogEvent(LogEvent* event) {
     }
 }
 
-Status StatsService::getData(int64_t key, const String16& packageName, vector<uint8_t>* output) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+Status StatsService::getData(int64_t key, const int32_t callingUid, vector<uint8_t>* output) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    VLOG("StatsService::getData with Pid %i, Uid %i", ipc->getCallingPid(), ipc->getCallingUid());
-    ConfigKey configKey(ipc->getCallingUid(), key);
+    VLOG("StatsService::getData with Uid %i", callingUid);
+    ConfigKey configKey(callingUid, key);
     // The dump latency does not matter here since we do not include the current bucket, we do not
     // need to pull any new data anyhow.
     mProcessor->onDumpReport(configKey, getElapsedRealtimeNs(), false /* include_current_bucket*/,
