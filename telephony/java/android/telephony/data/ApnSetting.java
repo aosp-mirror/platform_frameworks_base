@@ -1056,6 +1056,11 @@ public class ApnSetting implements Parcelable {
     }
 
     /** @hide */
+    public boolean isEmergencyApn() {
+        return hasApnType(TYPE_EMERGENCY);
+    }
+
+    /** @hide */
     public boolean canHandleType(@ApnType int type) {
         if (!mCarrierEnabled) {
             return false;
