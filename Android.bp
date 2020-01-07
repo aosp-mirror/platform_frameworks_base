@@ -632,6 +632,7 @@ filegroup {
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
+        "core/java/com/android/internal/util/TokenBucket.java",
         "core/java/android/net/shared/*.java",
     ],
 }
