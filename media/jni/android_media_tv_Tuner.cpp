@@ -118,6 +118,10 @@ sp<IDvr> Dvr::getIDvr() {
     return mDvrSp;
 }
 
+DvrMQ& Dvr::getDvrMQ() {
+    return *mDvrMQ;
+}
+
 /////////////// FilterCallback ///////////////////////
 //TODO: implement filter callback
 Return<void> FilterCallback::onFilterEvent(const DemuxFilterEvent& /*filterEvent*/) {
@@ -1024,13 +1028,66 @@ static int android_media_tv_Tuner_read_dvr(JNIEnv *env, jobject dvr, jint size) 
     return ret;
 }
 
-static int android_media_tv_Tuner_read_dvr_to_array(
+static int android_media_tv_Tuner_read_dvr_from_array(
         JNIEnv /* *env */, jobject /* dvr */, jbyteArray /* bytes */, jint /* offset */,
         jint /* size */) {
     //TODO: impl
     return 0;
 }
 
+static int android_media_tv_Tuner_write_dvr(JNIEnv *env, jobject dvr, jint size) {
+    sp<Dvr> dvrSp = getDvr(env, dvr);
+    if (dvrSp == NULL) {
+        ALOGW("Failed to write dvr: dvr not found");
+        return 0;
+    }
+
+    if (dvrSp->mDvrMQ == NULL) {
+        ALOGW("Failed to write dvr: dvr not configured");
+        return 0;
+    }
+
+    DvrMQ& dvrMq = dvrSp->getDvrMQ();
+
+    int available = dvrMq.availableToRead();
+    int toRead = std::min(size, available);
+
+    int ret = 0;
+    DvrMQ::MemTransaction tx;
+    if (dvrMq.beginRead(toRead, &tx)) {
+        auto first = tx.getFirstRegion();
+        auto data = first.getAddress();
+        int length = first.getLength();
+        int firstToRead = std::min(length, toRead);
+        ret = write(dvrSp->mFd, data, firstToRead);
+        if (ret < firstToRead) {
+            ALOGW("[DVR] MQ to file: %d bytes read, but %d bytes written", firstToRead, ret);
+        } else if (firstToRead < toRead) {
+            ALOGD("[DVR] read second region: %d bytes read, %d bytes in total", ret, toRead);
+            auto second = tx.getSecondRegion();
+            data = second.getAddress();
+            length = second.getLength();
+            int secondToRead = toRead - firstToRead;
+            ret += write(dvrSp->mFd, data, secondToRead);
+        }
+        ALOGD("[DVR] MQ to file: %d bytes to be read, %d bytes written", toRead, ret);
+        if (!dvrMq.commitRead(ret)) {
+            ALOGE("[DVR] Error: failed to commit read!");
+        }
+
+    } else {
+        ALOGE("dvrMq.beginRead failed");
+    }
+
+    return ret;
+}
+
+static int android_media_tv_Tuner_write_dvr_to_array(
+        JNIEnv /* *env */, jobject /* dvr */, jbyteArray /* bytes */, jint /* offset */,
+        jint /* size */) {
+    //TODO: impl
+    return 0;
+}
 
 static const JNINativeMethod gTunerMethods[] = {
     { "nativeInit", "()V", (void *)android_media_tv_Tuner_native_init },
@@ -1104,7 +1161,9 @@ static const JNINativeMethod gDvrMethods[] = {
     { "nativeSetFileDescriptor", "(Ljava/io/FileDescriptor;)V",
             (void *)android_media_tv_Tuner_dvr_set_fd },
     { "nativeRead", "(I)I", (void *)android_media_tv_Tuner_read_dvr },
-    { "nativeRead", "([BII)I", (void *)android_media_tv_Tuner_read_dvr_to_array },
+    { "nativeRead", "([BII)I", (void *)android_media_tv_Tuner_read_dvr_from_array },
+    { "nativeWrite", "(I)I", (void *)android_media_tv_Tuner_write_dvr },
+    { "nativeWrite", "([BII)I", (void *)android_media_tv_Tuner_write_dvr_to_array },
 };
 
 static const JNINativeMethod gLnbMethods[] = {
