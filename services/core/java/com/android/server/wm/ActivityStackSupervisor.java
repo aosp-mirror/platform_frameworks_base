@@ -183,6 +183,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     private static final int RESUME_TOP_ACTIVITY_MSG = FIRST_SUPERVISOR_STACK_MSG + 2;
     private static final int SLEEP_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG + 3;
     private static final int LAUNCH_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG + 4;
+    private static final int PROCESS_STOPPING_AND_FINISHING_MSG = FIRST_SUPERVISOR_STACK_MSG + 5;
     private static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 12;
     private static final int RESTART_ACTIVITY_PROCESS_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG + 13;
     private static final int REPORT_MULTI_WINDOW_MODE_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 14;
@@ -2068,23 +2069,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     /**
-     * Returns whether a stopping activity is present that should be stopped after visible, rather
-     * than idle.
-     * @return {@code true} if such activity is present. {@code false} otherwise.
-     */
-    boolean isStoppingNoHistoryActivity() {
-        // Activities that are marked as nohistory should be stopped immediately after the resumed
-        // activity has become visible.
-        for (ActivityRecord record : mStoppingActivities) {
-            if (record.isNoHistory()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Processes the activities to be stopped or destroyed. This should be called when the resumed
      * activities are idle or drawn.
      */
@@ -2403,6 +2387,12 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
     }
 
+    void scheduleProcessStoppingAndFinishingActivities() {
+        if (!mHandler.hasMessages(PROCESS_STOPPING_AND_FINISHING_MSG)) {
+            mHandler.sendEmptyMessage(PROCESS_STOPPING_AND_FINISHING_MSG);
+        }
+    }
+
     void removeSleepTimeouts() {
         mHandler.removeMessages(SLEEP_TIMEOUT_MSG);
     }
@@ -2700,6 +2690,10 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         }
                         mLaunchingActivityWakeLock.release();
                     }
+                } break;
+                case PROCESS_STOPPING_AND_FINISHING_MSG: {
+                    processStoppingAndFinishingActivities(null /* launchedActivity */,
+                            false /* processPausingActivities */, "transit");
                 } break;
                 case LAUNCH_TASK_BEHIND_COMPLETE: {
                     final ActivityRecord r = ActivityRecord.forTokenLocked((IBinder) msg.obj);

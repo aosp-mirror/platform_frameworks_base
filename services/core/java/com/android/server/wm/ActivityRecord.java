@@ -4861,8 +4861,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void stopIfPossible() {
         if (DEBUG_SWITCH) Slog.d(TAG_SWITCH, "Stopping: " + this);
         final ActivityStack stack = getActivityStack();
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
-                || (info.flags & ActivityInfo.FLAG_NO_HISTORY) != 0) {
+        if (isNoHistory()) {
             if (!finishing) {
                 if (!stack.shouldSleepActivities()) {
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "no-history finish of " + this);
@@ -6094,20 +6093,26 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         getDisplayContent().mAppTransition.notifyAppTransitionFinishedLocked(token);
         scheduleAnimation();
 
-        if (mAtmService.mRootWindowContainer.allResumedActivitiesIdle()
-                || mAtmService.mStackSupervisor.isStoppingNoHistoryActivity()) {
-            // If all activities are already idle or there is an activity that must be
-            // stopped immediately after visible, then we now need to make sure we perform
-            // the full stop of this activity. This is because we won't do that while they are still
-            // waiting for the animation to finish.
-            if (mAtmService.mStackSupervisor.mStoppingActivities.contains(this)) {
+        if (!mStackSupervisor.mStoppingActivities.isEmpty()
+                || !mStackSupervisor.mFinishingActivities.isEmpty()) {
+            if (mRootWindowContainer.allResumedActivitiesIdle()) {
+                // If all activities are already idle then we now need to make sure we perform
+                // the full stop of this activity. This is because we won't do that while they
+                // are still waiting for the animation to finish.
                 mStackSupervisor.scheduleIdle();
+            } else if (mRootWindowContainer.allResumedActivitiesVisible()) {
+                // If all resumed activities are already visible (and should be drawn, see
+                // updateReportedVisibility ~ nowVisible) but not idle, we still schedule to
+                // process the stopping and finishing activities because the transition is done.
+                // This also avoids if the next activity never reports idle (e.g. animating view),
+                // the previous will need to wait until idle timeout to be stopped or destroyed.
+                mStackSupervisor.scheduleProcessStoppingAndFinishingActivities();
+            } else {
+                // Instead of doing the full stop routine here, let's just hide any activities
+                // we now can, and let them stop when the normal idle happens.
+                mStackSupervisor.processStoppingActivities(null /* launchedActivity */,
+                        true /* onlyUpdateVisibility */, true /* unused */, null /* unused */);
             }
-        } else {
-            // Instead of doing the full stop routine here, let's just hide any activities
-            // we now can, and let them stop when the normal idle happens.
-            mStackSupervisor.processStoppingActivities(null /* launchedActivity */,
-                    true /* onlyUpdateVisibility */, true /* unused */, null /* unused */);
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
