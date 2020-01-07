@@ -30,14 +30,26 @@ import android.media.tv.tuner.TunerConstants.FilterType;
 public final class TunerUtils {
     private static final String PERMISSION = android.Manifest.permission.ACCESS_TV_TUNER;
 
-    static void checkTunerPermission(Context context) {
+    /**
+     * Checks whether the caller has permission to access tuner.
+     *
+     * @param context context of the caller.
+     * @throws SecurityException if the caller doesn't have the permission.
+     */
+    public static void checkTunerPermission(Context context) {
         if (context.checkCallingOrSelfPermission(PERMISSION)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Caller must have " + PERMISSION + " permission.");
         }
     }
 
-    static int getFilterSubtype(@FilterType int mainType, @FilterSubtype int subtype) {
+    /**
+     * Gets the corresponding filter subtype constant defined in tuner HAL.
+     *
+     * @param mainType filter main type.
+     * @param subtype filter subtype.
+     */
+    public static int getFilterSubtype(@FilterType int mainType, @FilterSubtype int subtype) {
         if (mainType == TunerConstants.FILTER_TYPE_TS) {
             switch (subtype) {
                 case TunerConstants.FILTER_SUBTYPE_UNDEFINED:
