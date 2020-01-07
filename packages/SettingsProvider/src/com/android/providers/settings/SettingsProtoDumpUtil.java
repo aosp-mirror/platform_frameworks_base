@@ -266,9 +266,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS,
                 GlobalSettingsProto.Backup.BACKUP_AGENT_TIMEOUT_PARAMETERS);
-        dumpSetting(s, p,
-                Settings.Global.BACKUP_MULTI_USER_ENABLED,
-                GlobalSettingsProto.Backup.BACKUP_MULTI_USER_ENABLED);
         p.end(backupToken);
 
         final long batteryToken = p.start(GlobalSettingsProto.BATTERY);

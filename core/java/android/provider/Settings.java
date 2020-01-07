@@ -13713,14 +13713,6 @@ public final class Settings {
                 "backup_agent_timeout_parameters";
 
         /**
-         * Whether the backup system service supports multiple users (0 = disabled, 1 = enabled). If
-         * disabled, the service will only be active for the system user.
-         *
-         * @hide
-         */
-        public static final String BACKUP_MULTI_USER_ENABLED = "backup_multi_user_enabled";
-
-        /**
          * Blacklist of GNSS satellites.
          *
          * This is a list of integers separated by commas to represent pairs of (constellation,
