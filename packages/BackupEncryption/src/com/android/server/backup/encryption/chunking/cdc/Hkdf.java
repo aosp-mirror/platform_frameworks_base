@@ -16,10 +16,9 @@
 
 package com.android.server.backup.encryption.chunking.cdc;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -49,9 +48,9 @@ public final class Hkdf {
      * @throws InvalidKeyException If the salt can not be used as a valid key.
      */
     static byte[] hkdf(byte[] masterKey, byte[] salt, byte[] data) throws InvalidKeyException {
-        checkNotNull(masterKey, "HKDF requires master key to be set.");
-        checkNotNull(salt, "HKDF requires a salt.");
-        checkNotNull(data, "No data provided to HKDF.");
+        Objects.requireNonNull(masterKey, "HKDF requires master key to be set.");
+        Objects.requireNonNull(salt, "HKDF requires a salt.");
+        Objects.requireNonNull(data, "No data provided to HKDF.");
         return hkdfSha256Expand(hkdfSha256Extract(masterKey, salt), data);
     }
 

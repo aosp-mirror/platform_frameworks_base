@@ -16,7 +16,6 @@
 
 package com.android.server.backup.encryption;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 
 import android.content.Context;
@@ -29,6 +28,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.security.KeyStoreException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -88,8 +88,8 @@ public class CryptoSettings {
     }
 
     private CryptoSettings(SharedPreferences sharedPreferences, Context context) {
-        mSharedPreferences = checkNotNull(sharedPreferences);
-        mContext = checkNotNull(context);
+        mSharedPreferences = Objects.requireNonNull(sharedPreferences);
+        mContext = Objects.requireNonNull(context);
     }
 
     /**

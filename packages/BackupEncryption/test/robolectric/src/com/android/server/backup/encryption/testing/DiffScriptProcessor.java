@@ -17,7 +17,6 @@
 package com.android.server.backup.encryption.testing;
 
 import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.internal.util.Preconditions.checkNotNull;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -29,6 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -69,7 +69,7 @@ public class DiffScriptProcessor {
         checkArgument(input.exists(), "input file did not exist.");
         mInput = input;
         mInputLength = input.length();
-        mOutput = checkNotNull(output);
+        mOutput = Objects.requireNonNull(output);
     }
 
     public void process(InputStream diffScript) throws IOException, MalformedDiffScriptException {

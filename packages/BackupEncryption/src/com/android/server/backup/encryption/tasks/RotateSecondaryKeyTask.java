@@ -18,8 +18,6 @@ package com.android.server.backup.encryption.tasks;
 
 import static android.os.Build.VERSION_CODES.P;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.content.Context;
 import android.security.keystore.recovery.InternalRecoveryServiceException;
 import android.security.keystore.recovery.RecoveryController;
@@ -42,6 +40,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.crypto.IllegalBlockSizeException;
@@ -77,10 +76,10 @@ public class RotateSecondaryKeyTask {
             CryptoSettings cryptoSettings,
             RecoveryController recoveryController) {
         mContext = context;
-        mSecondaryKeyManager = checkNotNull(secondaryKeyManager);
-        mCryptoSettings = checkNotNull(cryptoSettings);
-        mBackupServer = checkNotNull(backupServer);
-        mRecoveryController = checkNotNull(recoveryController);
+        mSecondaryKeyManager = Objects.requireNonNull(secondaryKeyManager);
+        mCryptoSettings = Objects.requireNonNull(cryptoSettings);
+        mBackupServer = Objects.requireNonNull(backupServer);
+        mRecoveryController = Objects.requireNonNull(recoveryController);
     }
 
     /** Runs the task. */

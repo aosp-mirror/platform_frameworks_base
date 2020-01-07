@@ -16,7 +16,6 @@
 
 package com.android.server.backup.encryption.tasks;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 
 import android.annotation.Nullable;
@@ -34,6 +33,7 @@ import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.security.SecureRandom;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -67,12 +67,12 @@ public class EncryptedFullBackupDataProcessor implements FullBackupDataProcessor
             SecureRandom secureRandom,
             RecoverableKeyStoreSecondaryKey secondaryKey,
             String packageName) {
-        mContext = checkNotNull(context);
-        mExecutorService = checkNotNull(executorService);
-        mCryptoBackupServer = checkNotNull(cryptoBackupServer);
-        mSecureRandom = checkNotNull(secureRandom);
-        mSecondaryKey = checkNotNull(secondaryKey);
-        mPackageName = checkNotNull(packageName);
+        mContext = Objects.requireNonNull(context);
+        mExecutorService = Objects.requireNonNull(executorService);
+        mCryptoBackupServer = Objects.requireNonNull(cryptoBackupServer);
+        mSecureRandom = Objects.requireNonNull(secureRandom);
+        mSecondaryKey = Objects.requireNonNull(secondaryKey);
+        mPackageName = Objects.requireNonNull(packageName);
     }
 
     @Override

@@ -16,10 +16,9 @@
 
 package com.android.server.testing.shadows;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Represents a key value pair in {@link ShadowBackupDataInput} and {@link ShadowBackupDataOutput}.
@@ -34,7 +33,7 @@ public class DataEntity {
      * StandardCharsets#UTF_8}.
      */
     public DataEntity(String key, String value) {
-        this.mKey = checkNotNull(key);
+        this.mKey = Objects.requireNonNull(key);
         this.mValue = value.getBytes(StandardCharsets.UTF_8);
         mSize = this.mValue.length;
     }
@@ -44,7 +43,7 @@ public class DataEntity {
      * pair.
      */
     public DataEntity(String key) {
-        this.mKey = checkNotNull(key);
+        this.mKey = Objects.requireNonNull(key);
         mSize = -1;
         mValue = null;
     }
@@ -62,7 +61,7 @@ public class DataEntity {
      * @param size the length of the value in bytes
      */
     public DataEntity(String key, byte[] data, int size) {
-        this.mKey = checkNotNull(key);
+        this.mKey = Objects.requireNonNull(key);
         this.mSize = size;
         mValue = new byte[size];
         for (int i = 0; i < size; i++) {
