@@ -33,16 +33,22 @@ import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 
 interface ITelephonyRegistry {
-    void addOnSubscriptionsChangedListener(String pkg,
+    void addOnSubscriptionsChangedListener(String pkg, String featureId,
             IOnSubscriptionsChangedListener callback);
-    void addOnOpportunisticSubscriptionsChangedListener(String pkg,
+    void addOnOpportunisticSubscriptionsChangedListener(String pkg, String featureId,
             IOnSubscriptionsChangedListener callback);
     void removeOnSubscriptionsChangedListener(String pkg,
             IOnSubscriptionsChangedListener callback);
+    /**
+      * @deprecated Use {@link #listenWithFeature(String, String, IPhoneStateListener, int,
+      * boolean) instead
+      */
     @UnsupportedAppUsage
     void listen(String pkg, IPhoneStateListener callback, int events, boolean notifyNow);
-    void listenForSubscriber(in int subId, String pkg, IPhoneStateListener callback, int events,
+    void listenWithFeature(String pkg, String featureId, IPhoneStateListener callback, int events,
             boolean notifyNow);
+    void listenForSubscriber(in int subId, String pkg, String featureId,
+            IPhoneStateListener callback, int events, boolean notifyNow);
     @UnsupportedAppUsage
     void notifyCallStateForAllSubs(int state, String incomingNumber);
     void notifyCallState(in int phoneId, in int subId, int state, String incomingNumber);

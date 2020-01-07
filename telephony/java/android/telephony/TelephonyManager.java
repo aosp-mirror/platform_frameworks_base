@@ -379,6 +379,10 @@ public class TelephonyManager {
         return ActivityThread.currentOpPackageName();
     }
 
+    private String getFeatureId() {
+        return null;
+    }
+
     private boolean isSystemProcess() {
         return Process.myUid() == Process.SYSTEM_UID;
     }
@@ -1511,7 +1515,8 @@ public class TelephonyManager {
         if (telephony == null) return null;
 
         try {
-            return telephony.getDeviceSoftwareVersionForSlot(slotIndex, getOpPackageName());
+            return telephony.getDeviceSoftwareVersionForSlot(slotIndex, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1552,7 +1557,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getDeviceId(mContext.getOpPackageName());
+            return telephony.getDeviceIdWithFeature(mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1596,7 +1602,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getDeviceIdForPhone(slotIndex, mContext.getOpPackageName());
+            return info.getDeviceIdForPhone(slotIndex, mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1654,7 +1661,7 @@ public class TelephonyManager {
         if (telephony == null) return null;
 
         try {
-            return telephony.getImeiForSlot(slotIndex, getOpPackageName());
+            return telephony.getImeiForSlot(slotIndex, getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1748,7 +1755,7 @@ public class TelephonyManager {
         if (telephony == null) return null;
 
         try {
-            String meid = telephony.getMeidForSlot(slotIndex, getOpPackageName());
+            String meid = telephony.getMeidForSlot(slotIndex, getOpPackageName(), getFeatureId());
             if (TextUtils.isEmpty(meid)) {
                 Log.d(TAG, "getMeid: return null because MEID is not available");
                 return null;
@@ -1849,7 +1856,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            String nai = info.getNaiForSubscriber(subId, mContext.getOpPackageName());
+            String nai = info.getNaiForSubscriber(subId, mContext.getOpPackageName(),
+                    null);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Rlog.v(TAG, "Nai = " + nai);
             }
@@ -1882,7 +1890,7 @@ public class TelephonyManager {
                 return null;
             }
 
-            Bundle bundle = telephony.getCellLocation(mContext.getOpPackageName());
+            Bundle bundle = telephony.getCellLocation(mContext.getOpPackageName(), null);
             if (bundle == null || bundle.isEmpty()) {
                 Rlog.d(TAG, "getCellLocation returning null because CellLocation is unavailable");
                 return null;
@@ -1970,7 +1978,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getNeighboringCellInfo(mContext.getOpPackageName());
+            return telephony.getNeighboringCellInfo(mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -2398,7 +2407,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null) return "";
             return telephony.getNetworkCountryIsoForPhone(getPhoneId(),
-                    null /* no permission check */);
+                    null /* no permission check */, null);
         } catch (RemoteException ex) {
             return "";
         }
@@ -2438,7 +2447,8 @@ public class TelephonyManager {
 
             ITelephony telephony = getITelephony();
             if (telephony == null) return "";
-            return telephony.getNetworkCountryIsoForPhone(slotIndex, getOpPackageName());
+            return telephony.getNetworkCountryIsoForPhone(slotIndex, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             return "";
         }
@@ -2570,7 +2580,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getNetworkTypeForSubscriber(subId, getOpPackageName());
+                return telephony.getNetworkTypeForSubscriber(subId, getOpPackageName(),
+                        getFeatureId());
             } else {
                 // This can happen when the ITelephony interface is not up yet.
                 return NETWORK_TYPE_UNKNOWN;
@@ -2634,7 +2645,8 @@ public class TelephonyManager {
         try{
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getDataNetworkTypeForSubscriber(subId, getOpPackageName());
+                return telephony.getDataNetworkTypeForSubscriber(subId, getOpPackageName(),
+                        getFeatureId());
             } else {
                 // This can happen when the ITelephony interface is not up yet.
                 return NETWORK_TYPE_UNKNOWN;
@@ -2670,7 +2682,8 @@ public class TelephonyManager {
         try{
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getVoiceNetworkTypeForSubscriber(subId, getOpPackageName());
+                return telephony.getVoiceNetworkTypeForSubscriber(subId, getOpPackageName(),
+                        getFeatureId());
             } else {
                 // This can happen when the ITelephony interface is not up yet.
                 return NETWORK_TYPE_UNKNOWN;
@@ -3464,7 +3477,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getIccSerialNumberForSubscriber(subId, mContext.getOpPackageName());
+            return info.getIccSerialNumberForSubscriber(subId, mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -3508,7 +3522,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return PhoneConstants.LTE_ON_CDMA_UNKNOWN;
-            return telephony.getLteOnCdmaModeForSubscriber(subId, getOpPackageName());
+            return telephony.getLteOnCdmaModeForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             // Assume no ICC card if remote exception which shouldn't happen
             return PhoneConstants.LTE_ON_CDMA_UNKNOWN;
@@ -3736,7 +3751,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getSubscriberIdForSubscriber(subId, mContext.getOpPackageName());
+            return info.getSubscriberIdForSubscriber(subId, mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -3903,7 +3919,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getGroupIdLevel1ForSubscriber(getSubId(), mContext.getOpPackageName());
+            return info.getGroupIdLevel1ForSubscriber(getSubId(), mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -3926,7 +3943,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getGroupIdLevel1ForSubscriber(subId, mContext.getOpPackageName());
+            return info.getGroupIdLevel1ForSubscriber(subId, mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -3976,7 +3994,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                number = telephony.getLine1NumberForDisplay(subId, mContext.getOpPackageName());
+                number = telephony.getLine1NumberForDisplay(subId, mContext.getOpPackageName(),
+                         null);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -3987,7 +4006,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getLine1NumberForSubscriber(subId, mContext.getOpPackageName());
+            return info.getLine1NumberForSubscriber(subId, mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -4066,7 +4086,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null)
                 alphaTag = telephony.getLine1AlphaTagForDisplay(subId,
-                        getOpPackageName());
+                        getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -4077,7 +4097,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getLine1AlphaTagForSubscriber(subId, getOpPackageName());
+            return info.getLine1AlphaTagForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -4106,7 +4127,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.getMergedSubscriberIds(getSubId(), getOpPackageName());
+                return telephony.getMergedSubscriberIds(getSubId(), getOpPackageName(),
+                        getFeatureId());
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -4161,7 +4183,7 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getMsisdnForSubscriber(subId, getOpPackageName());
+            return info.getMsisdnForSubscriber(subId, getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -4195,7 +4217,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getVoiceMailNumberForSubscriber(subId, getOpPackageName());
+            return info.getVoiceMailNumberForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -4319,8 +4342,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony
-                        .getVisualVoicemailPackageName(mContext.getOpPackageName(), getSubId());
+                return telephony.getVisualVoicemailPackageName(mContext.getOpPackageName(),
+                        getFeatureId(), getSubId());
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -4756,7 +4779,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return 0;
-            return telephony.getVoiceMessageCountForSubscriber(subId, getOpPackageName());
+            return telephony.getVoiceMessageCountForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             return 0;
         } catch (NullPointerException ex) {
@@ -4792,7 +4816,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getVoiceMailAlphaTagForSubscriber(subId, getOpPackageName());
+            return info.getVoiceMailAlphaTagForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -5188,7 +5213,7 @@ public class TelephonyManager {
                 } else if (listener.mSubId != null) {
                     subId = listener.mSubId;
                 }
-                registry.listenForSubscriber(subId, getOpPackageName(),
+                registry.listenForSubscriber(subId, getOpPackageName(), getFeatureId(),
                         listener.callback, events, notifyNow);
             } else {
                 Rlog.w(TAG, "telephony registry not ready.");
@@ -5218,7 +5243,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return -1;
-            return telephony.getCdmaEriIconIndexForSubscriber(subId, getOpPackageName());
+            return telephony.getCdmaEriIconIndexForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return -1;
@@ -5253,7 +5279,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return -1;
-            return telephony.getCdmaEriIconModeForSubscriber(subId, getOpPackageName());
+            return telephony.getCdmaEriIconModeForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return -1;
@@ -5284,7 +5311,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getCdmaEriTextForSubscriber(subId, getOpPackageName());
+            return telephony.getCdmaEriTextForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return null;
@@ -5376,8 +5404,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getAllCellInfo(
-                    getOpPackageName());
+            return telephony.getAllCellInfo(getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -5477,7 +5504,7 @@ public class TelephonyManager {
                                 Binder.restoreCallingIdentity(identity);
                             }
                         }
-                    }, getOpPackageName());
+                    }, getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
         }
     }
@@ -5528,7 +5555,7 @@ public class TelephonyManager {
                                 Binder.restoreCallingIdentity(identity);
                             }
                         }
-                    }, getOpPackageName(), workSource);
+                    }, getOpPackageName(), getFeatureId(), workSource);
         } catch (RemoteException ex) {
         }
     }
@@ -6744,7 +6771,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getForbiddenPlmns(subId, appType, mContext.getOpPackageName());
+            return telephony.getForbiddenPlmns(subId, appType, mContext.getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -6778,7 +6806,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null) return -1;
             return telephony.setForbiddenPlmns(
-                    getSubId(), APPTYPE_USIM, fplmns, getOpPackageName());
+                    getSubId(), APPTYPE_USIM, fplmns, getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setForbiddenPlmns RemoteException: " + ex.getMessage());
         } catch (NullPointerException ex) {
@@ -6799,7 +6827,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return new String[0];
-            return telephony.getPcscfAddress(apnType, getOpPackageName());
+            return telephony.getPcscfAddress(apnType, getOpPackageName(), getFeatureId());
         } catch (RemoteException e) {
             return new String[0];
         }
@@ -7310,7 +7338,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getCellNetworkScanResults(getSubId(), getOpPackageName());
+                return telephony.getCellNetworkScanResults(getSubId(), getOpPackageName(),
+                        getFeatureId());
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getAvailableNetworks RemoteException", ex);
@@ -7365,7 +7394,7 @@ public class TelephonyManager {
             }
         }
         return mTelephonyScanManager.requestNetworkScan(getSubId(), request, executor, callback,
-                getOpPackageName());
+                getOpPackageName(), getFeatureId());
     }
 
     /**
@@ -8037,7 +8066,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.isRadioOn(getOpPackageName());
+                return telephony.isRadioOnWithFeature(getOpPackageName(), getFeatureId());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isRadioOn", e);
         }
@@ -8350,7 +8379,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getRadioPowerState(getSlotIndex(), mContext.getOpPackageName());
+                return telephony.getRadioPowerState(getSlotIndex(), mContext.getOpPackageName(),
+                        null);
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
@@ -8708,7 +8738,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.isVideoCallingEnabled(getOpPackageName());
+                return telephony.isVideoCallingEnabled(getOpPackageName(), getFeatureId());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isVideoCallingEnabled", e);
         }
@@ -8724,7 +8754,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.canChangeDtmfToneLength(mSubId, getOpPackageName());
+                return telephony.canChangeDtmfToneLength(mSubId, getOpPackageName(),
+                        getFeatureId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#canChangeDtmfToneLength", e);
@@ -8743,7 +8774,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.isWorldPhone(mSubId, getOpPackageName());
+                return telephony.isWorldPhone(mSubId, getOpPackageName(), getFeatureId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isWorldPhone", e);
@@ -9469,7 +9500,7 @@ public class TelephonyManager {
             ITelephony service = getITelephony();
             if (service != null) {
                 retval = service.getSubIdForPhoneAccountHandle(
-                        phoneAccountHandle, mContext.getOpPackageName());
+                        phoneAccountHandle, mContext.getOpPackageName(), null);
             }
         } catch (RemoteException ex) {
             Log.e(TAG, "getSubscriptionId RemoteException", ex);
@@ -9607,7 +9638,8 @@ public class TelephonyManager {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getServiceStateForSubscriber(subId, getOpPackageName());
+                return service.getServiceStateForSubscriber(subId, getOpPackageName(),
+                        getFeatureId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
@@ -10347,7 +10379,7 @@ public class TelephonyManager {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getClientRequestStats(getOpPackageName(), subId);
+                return service.getClientRequestStats(getOpPackageName(), getFeatureId(), subId);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getClientRequestStats", e);
@@ -10636,7 +10668,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.getNumberOfModemsWithSimultaneousDataConnections(
-                        getSubId(), getOpPackageName());
+                        getSubId(), getOpPackageName(), getFeatureId());
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
@@ -10992,7 +11024,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getEmergencyNumberList(mContext.getOpPackageName());
+                return telephony.getEmergencyNumberList(mContext.getOpPackageName(),
+                        null);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
@@ -11047,7 +11080,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 emergencyNumberList = telephony.getEmergencyNumberList(
-                        mContext.getOpPackageName());
+                        mContext.getOpPackageName(), null);
                 if (emergencyNumberList != null) {
                     for (Integer subscriptionId : emergencyNumberList.keySet()) {
                         List<EmergencyNumber> numberList = emergencyNumberList.get(subscriptionId);
@@ -11353,12 +11386,14 @@ public class TelephonyManager {
             android.Manifest.permission.READ_PHONE_STATE
     })
     public int getPreferredOpportunisticDataSubscription() {
-        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        String packageName = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        String featureId = null;
         int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         try {
             IOns iOpportunisticNetworkService = getIOns();
             if (iOpportunisticNetworkService != null) {
-                subId = iOpportunisticNetworkService.getPreferredDataSubscriptionId(pkgForDebug);
+                subId = iOpportunisticNetworkService.getPreferredDataSubscriptionId(
+                        packageName, featureId);
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getPreferredDataSubscriptionId RemoteException", ex);
@@ -11485,7 +11520,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.isModemEnabledForSlot(slotIndex, mContext.getOpPackageName());
+                return telephony.isModemEnabledForSlot(slotIndex, mContext.getOpPackageName(),
+                        null);
             }
         } catch (RemoteException ex) {
             Log.e(TAG, "enableModem RemoteException", ex);
@@ -11590,7 +11626,7 @@ public class TelephonyManager {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.isMultiSimSupported(getOpPackageName());
+                return service.isMultiSimSupported(getOpPackageName(), getFeatureId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "isMultiSimSupported RemoteException", e);
@@ -11642,7 +11678,7 @@ public class TelephonyManager {
             ITelephony service = getITelephony();
             if (service != null) {
                 return service.doesSwitchMultiSimConfigTriggerReboot(getSubId(),
-                        getOpPackageName());
+                        getOpPackageName(), getFeatureId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "doesSwitchMultiSimConfigTriggerReboot RemoteException", e);

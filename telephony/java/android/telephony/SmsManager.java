@@ -2684,7 +2684,7 @@ public final class SmsManager {
             ISms iccISms = getISmsServiceOrThrow();
             if (iccISms != null) {
                 return iccISms.checkSmsShortCodeDestination(getSubscriptionId(),
-                        ActivityThread.currentPackageName(), destAddress, countryIso);
+                        ActivityThread.currentPackageName(), null, destAddress, countryIso);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "checkSmsShortCodeDestination() RemoteException", e);

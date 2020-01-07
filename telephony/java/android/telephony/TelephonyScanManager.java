@@ -200,13 +200,14 @@ public final class TelephonyScanManager {
      */
     public NetworkScan requestNetworkScan(int subId,
             NetworkScanRequest request, Executor executor, NetworkScanCallback callback,
-            String callingPackage) {
+            String callingPackage, String callingFeatureId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 synchronized (mScanInfo) {
                     int scanId = telephony.requestNetworkScan(
-                            subId, request, mMessenger, new Binder(), callingPackage);
+                            subId, request, mMessenger, new Binder(), callingPackage,
+                            callingFeatureId);
                     if (scanId == INVALID_SCAN_ID) {
                         Rlog.e(TAG, "Failed to initiate network scan");
                         return null;
