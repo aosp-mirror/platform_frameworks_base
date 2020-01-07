@@ -17,6 +17,11 @@
 package com.android.server.appop;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
+import static android.app.AppOpsManager.FILTER_BY_FEATURE_ID;
+import static android.app.AppOpsManager.FILTER_BY_OP_NAMES;
+import static android.app.AppOpsManager.FILTER_BY_PACKAGE_NAME;
+import static android.app.AppOpsManager.FILTER_BY_UID;
+import static android.app.AppOpsManager.HistoricalOpsRequestFilter;
 import static android.app.AppOpsManager.NoteOpEvent;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_COARSE_LOCATION;
@@ -53,7 +58,6 @@ import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.HistoricalOps;
-import android.app.AppOpsManager.HistoricalOpsRequest;
 import android.app.AppOpsManager.Mode;
 import android.app.AppOpsManager.OpEntry;
 import android.app.AppOpsManager.OpFeatureEntry;
@@ -632,6 +636,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private final class FeatureOp {
+        public final @Nullable String featureId;
         public final @NonNull Op parent;
 
         /**
@@ -658,7 +663,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         @GuardedBy("AppOpsService.this")
         private @Nullable ArrayMap<IBinder, InProgressStartOpEvent> mInProgressEvents;
 
-        FeatureOp(@NonNull Op parent) {
+        FeatureOp(@Nullable String featureId, @NonNull Op parent) {
+            this.featureId = featureId;
             this.parent = parent;
         }
 
@@ -676,6 +682,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 @OpFlags int flags) {
             accessed(System.currentTimeMillis(), -1, proxyUid, proxyPackageName,
                     proxyFeatureId, uidState, flags);
+
+            mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid, parent.packageName,
+                    featureId, uidState, flags);
         }
 
         /**
@@ -720,6 +729,9 @@ public class AppOpsService extends IAppOpsService.Stub {
          */
         public void rejected(@AppOpsManager.UidState int uidState, @OpFlags int flags) {
             rejected(System.currentTimeMillis(), uidState, flags);
+
+            mHistoricalRegistry.incrementOpRejected(parent.op, parent.uid, parent.packageName,
+                    featureId, uidState, flags);
         }
 
         /**
@@ -780,7 +792,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             // startOp events don't support proxy, hence use flags==SELF
             mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid, parent.packageName,
-                    uidState, OP_FLAG_SELF);
+                    featureId, uidState, OP_FLAG_SELF);
         }
 
         /**
@@ -820,8 +832,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 mAccessEvents.put(makeKey(event.getUidState(), OP_FLAG_SELF), finishedEvent);
 
                 mHistoricalRegistry.increaseOpAccessDuration(parent.op, parent.uid,
-                        parent.packageName, event.getUidState(), AppOpsManager.OP_FLAG_SELF,
-                        finishedEvent.getDuration());
+                        parent.packageName, featureId, event.getUidState(),
+                        AppOpsManager.OP_FLAG_SELF, finishedEvent.getDuration());
 
                 mInProgressStartOpEventPool.release(event);
 
@@ -1031,7 +1043,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             featureOp = mFeatures.get(featureId);
             if (featureOp == null) {
-                featureOp = new FeatureOp(parent);
+                featureOp = new FeatureOp(featureId, parent);
                 mFeatures.put(featureId, featureOp);
             }
 
@@ -1697,18 +1709,47 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    /**
+     * Verify that historical appop request arguments are valid.
+     */
+    private void ensureHistoricalOpRequestIsValid(int uid, String packageName, String featureId,
+            List<String> opNames, int filter, long beginTimeMillis, long endTimeMillis,
+            int flags) {
+        if ((filter & FILTER_BY_UID) != 0) {
+            Preconditions.checkArgument(uid != Process.INVALID_UID);
+        } else {
+            Preconditions.checkArgument(uid == Process.INVALID_UID);
+        }
+
+        if ((filter & FILTER_BY_PACKAGE_NAME) != 0) {
+            Objects.requireNonNull(packageName);
+        } else {
+            Preconditions.checkArgument(packageName == null);
+        }
+
+        if ((filter & FILTER_BY_FEATURE_ID) == 0) {
+            Preconditions.checkArgument(featureId == null);
+        }
+
+        if ((filter & FILTER_BY_OP_NAMES) != 0) {
+            Objects.requireNonNull(opNames);
+        } else {
+            Preconditions.checkArgument(opNames == null);
+        }
+
+        Preconditions.checkFlagsArgument(filter,
+                FILTER_BY_UID | FILTER_BY_PACKAGE_NAME | FILTER_BY_FEATURE_ID | FILTER_BY_OP_NAMES);
+        Preconditions.checkArgumentNonnegative(beginTimeMillis);
+        Preconditions.checkArgument(endTimeMillis > beginTimeMillis);
+        Preconditions.checkFlagsArgument(flags, OP_FLAGS_ALL);
+    }
+
     @Override
-    public void getHistoricalOps(int uid, @NonNull String packageName,
-            @Nullable List<String> opNames, long beginTimeMillis, long endTimeMillis,
-            @OpFlags int flags, @NonNull RemoteCallback callback) {
-        // Use the builder to validate arguments.
-        new HistoricalOpsRequest.Builder(
-                beginTimeMillis, endTimeMillis)
-                .setUid(uid)
-                .setPackageName(packageName)
-                .setOpNames(opNames)
-                .setFlags(flags)
-                .build();
+    public void getHistoricalOps(int uid, String packageName, String featureId,
+            List<String> opNames, int filter, long beginTimeMillis, long endTimeMillis,
+            int flags, RemoteCallback callback) {
+        ensureHistoricalOpRequestIsValid(uid, packageName, featureId, opNames, filter,
+                beginTimeMillis, endTimeMillis, flags);
         Objects.requireNonNull(callback, "callback cannot be null");
 
         mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
@@ -1718,22 +1759,16 @@ public class AppOpsService extends IAppOpsService.Stub {
                 ? opNames.toArray(new String[opNames.size()]) : null;
 
         // Must not hold the appops lock
-        mHistoricalRegistry.getHistoricalOps(uid, packageName, opNamesArray,
+        mHistoricalRegistry.getHistoricalOps(uid, packageName, featureId, opNamesArray, filter,
                 beginTimeMillis, endTimeMillis, flags, callback);
     }
 
     @Override
-    public void getHistoricalOpsFromDiskRaw(int uid, @NonNull String packageName,
-            @Nullable List<String> opNames, long beginTimeMillis, long endTimeMillis,
-            @OpFlags int flags, @NonNull RemoteCallback callback) {
-        // Use the builder to validate arguments.
-        new HistoricalOpsRequest.Builder(
-                beginTimeMillis, endTimeMillis)
-                .setUid(uid)
-                .setPackageName(packageName)
-                .setOpNames(opNames)
-                .setFlags(flags)
-                .build();
+    public void getHistoricalOpsFromDiskRaw(int uid, String packageName, String featureId,
+            List<String> opNames, int filter, long beginTimeMillis, long endTimeMillis,
+            int flags, RemoteCallback callback) {
+        ensureHistoricalOpRequestIsValid(uid, packageName, featureId, opNames, filter,
+                beginTimeMillis, endTimeMillis, flags);
         Objects.requireNonNull(callback, "callback cannot be null");
 
         mContext.enforcePermission(Manifest.permission.MANAGE_APPOPS,
@@ -1743,8 +1778,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 ? opNames.toArray(new String[opNames.size()]) : null;
 
         // Must not hold the appops lock
-        mHistoricalRegistry.getHistoricalOpsFromDiskRaw(uid, packageName, opNamesArray,
-                beginTimeMillis, endTimeMillis, flags, callback);
+        mHistoricalRegistry.getHistoricalOpsFromDiskRaw(uid, packageName, featureId, opNamesArray,
+                filter, beginTimeMillis, endTimeMillis, flags, callback);
     }
 
     @Override
@@ -2631,8 +2666,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + packageName);
                     featureOp.rejected(uidState.state, flags);
-                    mHistoricalRegistry.incrementOpRejected(code, uid, packageName,
-                            uidState.state, flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, uidMode);
                     return uidMode;
                 }
@@ -2645,8 +2678,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + packageName);
                     featureOp.rejected(uidState.state, flags);
-                    mHistoricalRegistry.incrementOpRejected(code, uid, packageName,
-                            uidState.state, flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, mode);
                     return mode;
                 }
@@ -2654,9 +2685,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (DEBUG) Slog.d(TAG, "noteOperation: allowing code " + code + " uid " + uid
                     + " package " + packageName + (featureId == null ? "" : "." + featureId));
             featureOp.accessed(proxyUid, proxyPackageName, proxyFeatureId, uidState.state, flags);
-            // TODO moltmann: Add features to historical app-ops
-            mHistoricalRegistry.incrementOpAccessedCount(op.op, uid, packageName,
-                    uidState.state, flags);
             scheduleOpNotedIfNeededLocked(code, uid, packageName,
                     AppOpsManager.MODE_ALLOWED);
 
@@ -2938,8 +2966,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + resolvedPackageName);
                     featureOp.rejected(uidState.state, AppOpsManager.OP_FLAG_SELF);
-                    mHistoricalRegistry.incrementOpRejected(opCode, uid, packageName,
-                            uidState.state, AppOpsManager.OP_FLAG_SELF);
                     return uidMode;
                 }
             } else {
@@ -2952,8 +2978,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + resolvedPackageName);
                     featureOp.rejected(uidState.state, AppOpsManager.OP_FLAG_SELF);
-                    mHistoricalRegistry.incrementOpRejected(opCode, uid, packageName,
-                            uidState.state, AppOpsManager.OP_FLAG_SELF);
                     return mode;
                 }
             }
@@ -4437,16 +4461,24 @@ public class AppOpsService extends IAppOpsService.Stub {
         pw.println("    Limit output to data associated with the given app op mode.");
         pw.println("  --package [PACKAGE]");
         pw.println("    Limit output to data associated with the given package name.");
+        pw.println("  --featureId [featureId]");
+        pw.println("    Limit output to data associated with the given feature id.");
         pw.println("  --watchers");
         pw.println("    Only output the watcher sections.");
         pw.println("  --history");
         pw.println("    Output the historical data.");
     }
 
-    private void dumpStatesLocked(@NonNull PrintWriter pw, long nowElapsed, @NonNull Op op,
-            long now, @NonNull SimpleDateFormat sdf, @NonNull Date date, @NonNull String prefix) {
+    private void dumpStatesLocked(@NonNull PrintWriter pw, @Nullable String filterFeatureId,
+            @HistoricalOpsRequestFilter int filter, long nowElapsed, @NonNull Op op, long now,
+            @NonNull SimpleDateFormat sdf, @NonNull Date date, @NonNull String prefix) {
         final int numFeatures = op.mFeatures.size();
         for (int i = 0; i < numFeatures; i++) {
+            if ((filter & FILTER_BY_FEATURE_ID) != 0 && !Objects.equals(op.mFeatures.keyAt(i),
+                    filterFeatureId)) {
+                continue;
+            }
+
             pw.print(prefix + op.mFeatures.keyAt(i) + "=[\n");
             dumpStatesLocked(pw, nowElapsed, op, op.mFeatures.keyAt(i), now, sdf, date,
                     prefix + "  ");
@@ -4563,10 +4595,12 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         int dumpOp = OP_NONE;
         String dumpPackage = null;
+        String dumpFeatureId = null;
         int dumpUid = Process.INVALID_UID;
         int dumpMode = -1;
         boolean dumpWatchers = false;
         boolean dumpHistory = false;
+        @HistoricalOpsRequestFilter int dumpFilter = 0;
 
         if (args != null) {
             for (int i=0; i<args.length; i++) {
@@ -4583,6 +4617,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         return;
                     }
                     dumpOp = Shell.strOpToOp(args[i], pw);
+                    dumpFilter |= FILTER_BY_OP_NAMES;
                     if (dumpOp < 0) {
                         return;
                     }
@@ -4593,6 +4628,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         return;
                     }
                     dumpPackage = args[i];
+                    dumpFilter |= FILTER_BY_PACKAGE_NAME;
                     try {
                         dumpUid = AppGlobals.getPackageManager().getPackageUid(dumpPackage,
                                 PackageManager.MATCH_KNOWN_PACKAGES | PackageManager.MATCH_INSTANT,
@@ -4604,6 +4640,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                         return;
                     }
                     dumpUid = UserHandle.getAppId(dumpUid);
+                    dumpFilter |= FILTER_BY_UID;
+                } else if ("--featureId".equals(arg)) {
+                    i++;
+                    if (i >= args.length) {
+                        pw.println("No argument for --featureId option");
+                        return;
+                    }
+                    dumpFeatureId = args[i];
+                    dumpFilter |= FILTER_BY_FEATURE_ID;
                 } else if ("--mode".equals(arg)) {
                     i++;
                     if (i >= args.length) {
@@ -4640,8 +4685,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             final Date date = new Date();
             boolean needSep = false;
-            if (dumpOp < 0 && dumpMode < 0 && dumpPackage == null && mProfileOwners != null
-                    && !dumpWatchers && !dumpHistory) {
+            if (dumpFilter == 0 && dumpMode < 0 && mProfileOwners != null && !dumpWatchers
+                    && !dumpHistory) {
                 pw.println("  Profile owners:");
                 for (int poi = 0; poi < mProfileOwners.size(); poi++) {
                     pw.print("    User #");
@@ -4944,7 +4989,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                             pw.print("="); pw.print(AppOpsManager.modeToName(mode));
                         }
                         pw.println("): ");
-                        dumpStatesLocked(pw, nowElapsed, op, now, sdf, date, "        ");
+                        dumpStatesLocked(pw, dumpFeatureId, dumpFilter, nowElapsed, op, now, sdf,
+                                date, "        ");
                     }
                 }
             }
@@ -5043,7 +5089,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         // Must not hold the appops lock
         if (dumpHistory && !dumpWatchers) {
-            mHistoricalRegistry.dump("  ", pw, dumpUid, dumpPackage, dumpOp);
+            mHistoricalRegistry.dump("  ", pw, dumpUid, dumpPackage, dumpFeatureId, dumpOp,
+                    dumpFilter);
         }
     }
 

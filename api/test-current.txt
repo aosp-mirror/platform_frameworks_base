@@ -244,6 +244,16 @@ package android.app {
     field public static final int UID_STATE_TOP = 200; // 0xc8
   }
 
+  public static final class AppOpsManager.HistoricalFeatureOps implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public String getFeatureId();
+    method @Nullable public android.app.AppOpsManager.HistoricalOp getOp(@NonNull String);
+    method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(@IntRange(from=0) int);
+    method @IntRange(from=0) public int getOpCount();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalFeatureOps> CREATOR;
+  }
+
   public static final class AppOpsManager.HistoricalOp implements android.os.Parcelable {
     method public int describeContents();
     method public long getAccessCount(int, int, int);
@@ -268,9 +278,9 @@ package android.app {
     method @IntRange(from=0) public int getUidCount();
     method @Nullable public android.app.AppOpsManager.HistoricalUidOps getUidOps(int);
     method @NonNull public android.app.AppOpsManager.HistoricalUidOps getUidOpsAt(@IntRange(from=0) int);
-    method public void increaseAccessCount(int, int, @NonNull String, int, int, long);
-    method public void increaseAccessDuration(int, int, @NonNull String, int, int, long);
-    method public void increaseRejectCount(int, int, @NonNull String, int, int, long);
+    method public void increaseAccessCount(int, int, @NonNull String, @Nullable String, int, int, long);
+    method public void increaseAccessDuration(int, int, @NonNull String, @Nullable String, int, int, long);
+    method public void increaseRejectCount(int, int, @NonNull String, @Nullable String, int, int, long);
     method public void offsetBeginAndEndTime(long);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalOps> CREATOR;
@@ -282,6 +292,7 @@ package android.app {
   public static final class AppOpsManager.HistoricalOpsRequest.Builder {
     ctor public AppOpsManager.HistoricalOpsRequest.Builder(long, long);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest build();
+    method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setFeatureId(@Nullable String);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setFlags(int);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setOpNames(@Nullable java.util.List<java.lang.String>);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setPackageName(@Nullable String);
@@ -290,6 +301,9 @@ package android.app {
 
   public static final class AppOpsManager.HistoricalPackageOps implements android.os.Parcelable {
     method public int describeContents();
+    method @IntRange(from=0) public int getFeatureCount();
+    method @Nullable public android.app.AppOpsManager.HistoricalFeatureOps getFeatureOps(@NonNull String);
+    method @NonNull public android.app.AppOpsManager.HistoricalFeatureOps getFeatureOpsAt(@IntRange(from=0) int);
     method @Nullable public android.app.AppOpsManager.HistoricalOp getOp(@NonNull String);
     method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(@IntRange(from=0) int);
     method @IntRange(from=0) public int getOpCount();
