@@ -4574,6 +4574,36 @@ package android.media.tv.tuner {
   public class Tuner.Descrambler {
   }
 
+  public class Tuner.Filter {
+  }
+
+  public static interface Tuner.FilterCallback {
+    method public void onFilterEvent(@NonNull android.media.tv.tuner.Tuner.Filter, @NonNull android.media.tv.tuner.filter.FilterEvent[]);
+    method public void onFilterStatusChanged(@NonNull android.media.tv.tuner.Tuner.Filter, int);
+  }
+
+  public final class TunerConstants {
+    field public static final int FILTER_STATUS_DATA_READY = 1; // 0x1
+    field public static final int FILTER_STATUS_HIGH_WATER = 4; // 0x4
+    field public static final int FILTER_STATUS_LOW_WATER = 2; // 0x2
+    field public static final int FILTER_STATUS_OVERFLOW = 8; // 0x8
+  }
+
+}
+
+package android.media.tv.tuner.filter {
+
+  public abstract class FilterEvent {
+    ctor public FilterEvent();
+  }
+
+  public class SectionEvent extends android.media.tv.tuner.filter.FilterEvent {
+    method public int getDataLength();
+    method public int getSectionNumber();
+    method public int getTableId();
+    method public int getVersion();
+  }
+
 }
 
 package android.metrics {
