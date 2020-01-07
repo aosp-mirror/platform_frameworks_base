@@ -4341,6 +4341,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean allUids = mAtmInternal.isGetTasksAllowed(
                 "getProcessMemoryInfo", callingPid, callingUid);
 
+        // Check if the caller is actually instrumented and from shell, if it's true, we may lift
+        // the throttle of PSS info sampling.
+        boolean isCallerInstrumentedFromShell = false;
+        synchronized (mPidsSelfLocked) {
+            ProcessRecord caller = mPidsSelfLocked.get(callingPid);
+            if (caller != null) {
+                final ActiveInstrumentation instr = caller.getActiveInstrumentation();
+                isCallerInstrumentedFromShell = instr != null
+                        && (instr.mSourceUid == SHELL_UID || instr.mSourceUid == ROOT_UID);
+            }
+        }
+
         Debug.MemoryInfo[] infos = new Debug.MemoryInfo[pids.length];
         for (int i=pids.length-1; i>=0; i--) {
             infos[i] = new Debug.MemoryInfo();
@@ -4364,7 +4376,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     continue; // Not allowed to see other users.
                 }
             }
-            if (proc != null && proc.lastMemInfoTime >= lastNow && proc.lastMemInfo != null) {
+            if (proc != null && proc.lastMemInfoTime >= lastNow && proc.lastMemInfo != null
+                    && !isCallerInstrumentedFromShell) {
                 // It hasn't been long enough that we want to take another sample; return
                 // the last one.
                 infos[i].set(proc.lastMemInfo);
@@ -16212,6 +16225,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     disableTestApiChecks, mountExtStorageFull, abiOverride);
             app.setActiveInstrumentation(activeInstr);
             activeInstr.mFinished = false;
+            activeInstr.mSourceUid = callingUid;
             activeInstr.mRunningProcesses.add(app);
             if (!mActiveInstrumentation.contains(activeInstr)) {
                 mActiveInstrumentation.add(activeInstr);

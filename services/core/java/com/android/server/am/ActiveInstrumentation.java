@@ -67,6 +67,9 @@ class ActiveInstrumentation {
     // Set to true when we have told the watcher the instrumentation is finished.
     boolean mFinished;
 
+    // The uid of the process who started this instrumentation.
+    int mSourceUid;
+
     ActiveInstrumentation(ActivityManagerService service) {
         mService = service;
     }
