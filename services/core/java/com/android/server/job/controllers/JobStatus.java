@@ -29,7 +29,7 @@ import android.net.Network;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.text.format.Time;
+import android.text.format.TimeMigrationUtils;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
@@ -1643,17 +1643,13 @@ public final class JobStatus {
         if (numFailures != 0) {
             pw.print(prefix); pw.print("Num failures: "); pw.println(numFailures);
         }
-        final Time t = new Time();
-        final String format = "%Y-%m-%d %H:%M:%S";
         if (mLastSuccessfulRunTime != 0) {
             pw.print(prefix); pw.print("Last successful run: ");
-            t.set(mLastSuccessfulRunTime);
-            pw.println(t.format(format));
+            pw.println(TimeMigrationUtils.formatMillisWithFixedFormat(mLastSuccessfulRunTime));
         }
         if (mLastFailedRunTime != 0) {
             pw.print(prefix); pw.print("Last failed run: ");
-            t.set(mLastFailedRunTime);
-            pw.println(t.format(format));
+            pw.println(TimeMigrationUtils.formatMillisWithFixedFormat(mLastFailedRunTime));
         }
     }
 
