@@ -28,18 +28,19 @@ import static com.android.server.integrity.model.ComponentBitSize.OPERATOR_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.SEPARATOR_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.SIGNAL_BIT;
 import static com.android.server.integrity.model.ComponentBitSize.VALUE_SIZE_BITS;
+import static com.android.server.integrity.parser.BinaryFileOperations.getBooleanValue;
+import static com.android.server.integrity.parser.BinaryFileOperations.getIntValue;
+import static com.android.server.integrity.parser.BinaryFileOperations.getStringValue;
 
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
 import android.content.integrity.Formula;
 import android.content.integrity.Rule;
 
-import com.android.server.integrity.IntegrityUtils;
 import com.android.server.integrity.model.BitInputStream;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -144,34 +145,5 @@ public class RuleBinaryParser implements RuleParser {
             default:
                 throw new IllegalArgumentException(String.format("Unknown key: %d", key));
         }
-    }
-
-    // Get value string from stream.
-    // If the value is not hashed, get its raw form directly.
-    // If the value is hashed, get the hex-encoding of the value. Serialized values are in raw form.
-    // All hashed values are hex-encoded.
-    private static String getStringValue(
-            BitInputStream bitInputStream, int valueSize, boolean isHashedValue)
-            throws IOException {
-        if (!isHashedValue) {
-            StringBuilder value = new StringBuilder();
-            while (valueSize-- > 0) {
-                value.append((char) bitInputStream.getNext(/* numOfBits= */ 8));
-            }
-            return value.toString();
-        }
-        ByteBuffer byteBuffer = ByteBuffer.allocate(valueSize);
-        while (valueSize-- > 0) {
-            byteBuffer.put((byte) (bitInputStream.getNext(/* numOfBits= */ 8) & 0xFF));
-        }
-        return IntegrityUtils.getHexDigest(byteBuffer.array());
-    }
-
-    private static int getIntValue(BitInputStream bitInputStream) throws IOException {
-        return bitInputStream.getNext(/* numOfBits= */ 32);
-    }
-
-    private static boolean getBooleanValue(BitInputStream bitInputStream) throws IOException {
-        return bitInputStream.getNext(/* numOfBits= */ 1) == 1;
     }
 }
