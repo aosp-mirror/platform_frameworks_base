@@ -149,20 +149,19 @@ public:
                                        const String16& packageName) override;
 
     /**
-     * Binder call to associate the given config's subscriberId with the given intentSender.
-     * intentSender must be convertible into an IntentSender (in Java) using IntentSender(IBinder).
+     * Binder call to associate the given config's subscriberId with the given pendingIntentRef.
      */
     virtual Status setBroadcastSubscriber(int64_t configId,
                                           int64_t subscriberId,
-                                          const sp<android::IBinder>& intentSender,
-                                          const String16& packageName) override;
+                                          const sp<IPendingIntentRef>& pir,
+                                          const int32_t callingUid) override;
 
     /**
-     * Binder call to unassociate the given config's subscriberId with any intentSender.
+     * Binder call to unassociate the given config's subscriberId with any pendingIntentRef.
      */
     virtual Status unsetBroadcastSubscriber(int64_t configId,
                                             int64_t subscriberId,
-                                            const String16& packageName) override;
+                                            const int32_t callingUid) override;
 
     /** Inform statsCompanion that statsd is ready. */
     virtual void sayHiToStatsCompanion();

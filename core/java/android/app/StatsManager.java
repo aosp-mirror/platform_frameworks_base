@@ -255,18 +255,17 @@ public final class StatsManager {
             throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsd service = getIStatsdLocked();
+                IStatsManagerService service = getIStatsManagerServiceLocked();
                 if (pendingIntent != null) {
-                    // Extracts IIntentSender from the PendingIntent and turns it into an IBinder.
-                    IBinder intentSender = pendingIntent.getTarget().asBinder();
-                    service.setBroadcastSubscriber(configKey, subscriberId, intentSender,
+                    service.setBroadcastSubscriber(configKey, subscriberId, pendingIntent,
                             mContext.getOpPackageName());
                 } else {
                     service.unsetBroadcastSubscriber(configKey, subscriberId,
                             mContext.getOpPackageName());
                 }
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsd when adding broadcast subscriber", e);
+                Slog.e(TAG, "Failed to connect to statsmanager when adding broadcast subscriber",
+                        e);
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);

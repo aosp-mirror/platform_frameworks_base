@@ -61,6 +61,9 @@ public class StatsManagerService extends IStatsManagerService.Stub {
     @GuardedBy("mLock")
     private ArrayMap<Integer, PendingIntentRef> mActiveConfigsPirMap =
             new ArrayMap<>();
+    @GuardedBy("mLock")
+    private ArrayMap<ConfigKey, ArrayMap<Long, PendingIntentRef>> mBroadcastSubscriberPirMap =
+            new ArrayMap<>();
 
     public StatsManagerService(Context context) {
         super();
@@ -189,11 +192,56 @@ public class StatsManagerService extends IStatsManagerService.Stub {
     }
 
     @Override
-    public void setBroadcastSubscriber(long configKey, long subscriberId,
+    public void setBroadcastSubscriber(long configId, long subscriberId,
             PendingIntent pendingIntent, String packageName) {
-        //no-op
-        if (DEBUG) {
-            Slog.d(TAG, "setBroadcastSubscriber");
+        enforceDumpAndUsageStatsPermission(packageName);
+        int callingUid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+        PendingIntentRef pir = new PendingIntentRef(pendingIntent, mContext);
+        ConfigKey key = new ConfigKey(callingUid, configId);
+        // We add the PIR to a map so we can reregister if statsd is unavailable.
+        synchronized (mLock) {
+            ArrayMap<Long, PendingIntentRef> innerMap = mBroadcastSubscriberPirMap
+                    .getOrDefault(key, new ArrayMap<>());
+            innerMap.put(subscriberId, pir);
+            mBroadcastSubscriberPirMap.put(key, innerMap);
+        }
+        try {
+            IStatsd statsd = getStatsdNonblocking();
+            if (statsd != null) {
+                statsd.setBroadcastSubscriber(
+                        configId, subscriberId, pir, callingUid);
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to setBroadcastSubscriber with statsd");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public void unsetBroadcastSubscriber(long configId, long subscriberId, String packageName) {
+        enforceDumpAndUsageStatsPermission(packageName);
+        int callingUid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+        ConfigKey key = new ConfigKey(callingUid, configId);
+        synchronized (mLock) {
+            ArrayMap<Long, PendingIntentRef> innerMap = mBroadcastSubscriberPirMap
+                    .getOrDefault(key, new ArrayMap<>());
+            innerMap.remove(subscriberId);
+            if (innerMap.isEmpty()) {
+                mBroadcastSubscriberPirMap.remove(key);
+            }
+        }
+        try {
+            IStatsd statsd = getStatsdNonblocking();
+            if (statsd != null) {
+                statsd.unsetBroadcastSubscriber(configId, subscriberId, callingUid);
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to unsetBroadcastSubscriber with statsd");
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -285,11 +333,19 @@ public class StatsManagerService extends IStatsManagerService.Stub {
         if (statsd == null) {
             return;
         }
+        // Since we do not want to make an IPC with the a lock held, we first create local deep
+        // copies of the data with the lock held before iterating through the maps.
         ArrayMap<ConfigKey, PendingIntentRef> dataFetchCopy;
         ArrayMap<Integer, PendingIntentRef> activeConfigsChangedCopy;
+        ArrayMap<ConfigKey, ArrayMap<Long, PendingIntentRef>> broadcastSubscriberCopy;
         synchronized (mLock) {
             dataFetchCopy = new ArrayMap<>(mDataFetchPirMap);
             activeConfigsChangedCopy = new ArrayMap<>(mActiveConfigsPirMap);
+            broadcastSubscriberCopy = new ArrayMap<>();
+            for (Map.Entry<ConfigKey, ArrayMap<Long, PendingIntentRef>> entry
+                    : mBroadcastSubscriberPirMap.entrySet()) {
+                broadcastSubscriberCopy.put(entry.getKey(), new ArrayMap<>(entry.getValue()));
+            }
         }
         for (Map.Entry<ConfigKey, PendingIntentRef> entry : dataFetchCopy.entrySet()) {
             ConfigKey key = entry.getKey();
@@ -305,6 +361,18 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 statsd.setActiveConfigsChangedOperation(entry.getValue(), entry.getKey());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to setActiveConfigsChangedOperation from pirMap");
+            }
+        }
+        for (Map.Entry<ConfigKey, ArrayMap<Long, PendingIntentRef>> entry
+                : broadcastSubscriberCopy.entrySet()) {
+            for (Map.Entry<Long, PendingIntentRef> subscriberEntry : entry.getValue().entrySet()) {
+                ConfigKey configKey = entry.getKey();
+                try {
+                    statsd.setBroadcastSubscriber(configKey.getConfigId(), subscriberEntry.getKey(),
+                            subscriberEntry.getValue(), configKey.getUid());
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to setBroadcastSubscriber from pirMap");
+                }
             }
         }
     }

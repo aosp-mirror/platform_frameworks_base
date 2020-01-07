@@ -17,7 +17,6 @@
 package android.os;
 
 import android.os.IPullAtomCallback;
-import android.os.StatsDimensionsValue;
 import android.os.StatsLogEventWrapper;
 
 /**
@@ -65,15 +64,6 @@ interface IStatsCompanionService {
 
     /** Pull the specified data. Results will be sent to statsd when complete. */
     StatsLogEventWrapper[] pullData(int pullCode);
-
-    /**
-     * Requests StatsCompanionService to send a broadcast using the given intentSender
-     * (which should cast to an IIntentSender), along with the other information specified.
-     */
-    oneway void sendSubscriberBroadcast(in IBinder intentSender, long configUid, long configId,
-                                        long subscriptionId, long subscriptionRuleId,
-                                        in String[] cookies,
-                                        in StatsDimensionsValue dimensionsValue);
 
     /** Tells StatsCompaionService to grab the uid map snapshot and send it to statsd. */
     oneway void triggerUidSnapshot();

@@ -50,7 +50,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -88,7 +87,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
-import android.os.StatsDimensionsValue;
 import android.os.StatsLogEventWrapper;
 import android.os.SynchronousResultReceiver;
 import android.os.SystemClock;
@@ -202,7 +200,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private static final int PACKAGE_NAME_FIELD_ID = 4;
     private static final int INSTALLER_FIELD_ID = 5;
 
-    public static final int CODE_SUBSCRIBER_BROADCAST = 1;
     public static final int DEATH_THRESHOLD = 10;
     /**
      * Which native processes to snapshot memory for.
@@ -440,43 +437,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
         mKernelCpuThreadReader =
                 KernelCpuThreadReaderSettingsObserver.getSettingsModifiedReader(mContext);
-    }
-
-    @Override
-    public void sendSubscriberBroadcast(IBinder intentSenderBinder, long configUid, long configKey,
-            long subscriptionId, long subscriptionRuleId, String[] cookies,
-            StatsDimensionsValue dimensionsValue) {
-        StatsCompanion.enforceStatsCompanionPermission(mContext);
-        IntentSender intentSender = new IntentSender(intentSenderBinder);
-        Intent intent =
-                new Intent()
-                        .putExtra(StatsManager.EXTRA_STATS_CONFIG_UID, configUid)
-                        .putExtra(StatsManager.EXTRA_STATS_CONFIG_KEY, configKey)
-                        .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_ID, subscriptionId)
-                        .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_RULE_ID, subscriptionRuleId)
-                        .putExtra(StatsManager.EXTRA_STATS_DIMENSIONS_VALUE, dimensionsValue);
-
-        ArrayList<String> cookieList = new ArrayList<>(cookies.length);
-        for (String cookie : cookies) {
-            cookieList.add(cookie);
-        }
-        intent.putStringArrayListExtra(
-                StatsManager.EXTRA_STATS_BROADCAST_SUBSCRIBER_COOKIES, cookieList);
-
-        if (DEBUG) {
-            Slog.d(TAG,
-                    String.format("Statsd sendSubscriberBroadcast with params {%d %d %d %d %s %s}",
-                            configUid, configKey, subscriptionId, subscriptionRuleId,
-                            Arrays.toString(cookies),
-                            dimensionsValue));
-        }
-        try {
-            intentSender.sendIntent(mContext, CODE_SUBSCRIBER_BROADCAST, intent, null, null);
-        } catch (IntentSender.SendIntentException e) {
-            Slog.w(TAG,
-                    "Unable to send using IntentSender from uid " + configUid
-                            + "; presumably it had been cancelled.");
-        }
     }
 
     private final static int[] toIntArray(List<Integer> list) {

@@ -1111,7 +1111,6 @@ Status StatsService::statsCompanionReady() {
     mPullerManager->SetStatsCompanionService(statsCompanion);
     mAnomalyAlarmMonitor->setStatsCompanionService(statsCompanion);
     mPeriodicAlarmMonitor->setStatsCompanionService(statsCompanion);
-    SubscriberReporter::getInstance().setStatsCompanionService(statsCompanion);
     return Status::ok();
 }
 
@@ -1241,26 +1240,24 @@ Status StatsService::removeConfiguration(int64_t key, const String16& packageNam
 
 Status StatsService::setBroadcastSubscriber(int64_t configId,
                                             int64_t subscriberId,
-                                            const sp<android::IBinder>& intentSender,
-                                            const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+                                            const sp<IPendingIntentRef>& pir,
+                                            const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
     VLOG("StatsService::setBroadcastSubscriber called.");
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), configId);
+    ConfigKey configKey(callingUid, configId);
     SubscriberReporter::getInstance()
-            .setBroadcastSubscriber(configKey, subscriberId, intentSender);
+            .setBroadcastSubscriber(configKey, subscriberId, pir);
     return Status::ok();
 }
 
 Status StatsService::unsetBroadcastSubscriber(int64_t configId,
                                               int64_t subscriberId,
-                                              const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+                                              const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
     VLOG("StatsService::unsetBroadcastSubscriber called.");
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), configId);
+    ConfigKey configKey(callingUid, configId);
     SubscriberReporter::getInstance()
             .unsetBroadcastSubscriber(configKey, subscriberId);
     return Status::ok();
@@ -1626,7 +1623,6 @@ void StatsService::binderDied(const wp <IBinder>& who) {
     }
     mAnomalyAlarmMonitor->setStatsCompanionService(nullptr);
     mPeriodicAlarmMonitor->setStatsCompanionService(nullptr);
-    SubscriberReporter::getInstance().setStatsCompanionService(nullptr);
     mPullerManager->SetStatsCompanionService(nullptr);
 }
 

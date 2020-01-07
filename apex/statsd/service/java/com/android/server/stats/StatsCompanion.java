@@ -28,6 +28,7 @@ import android.util.Slog;
 
 import com.android.server.SystemService;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -101,7 +102,7 @@ public class StatsCompanion {
         private static final String EXTRA_LAST_REPORT_TIME = "android.app.extra.LAST_REPORT_TIME";
         private static final int CODE_DATA_BROADCAST = 1;
         private static final int CODE_ACTIVE_CONFIGS_BROADCAST = 1;
-
+        private static final int CODE_SUBSCRIBER_BROADCAST = 1;
 
         private final PendingIntent mPendingIntent;
         private final Context mContext;
@@ -141,7 +142,36 @@ public class StatsCompanion {
         @Override
         public void sendSubscriberBroadcast(long configUid, long configId, long subscriptionId,
                 long subscriptionRuleId, String[] cookies, StatsDimensionsValue dimensionsValue) {
-            // no-op
+            enforceStatsCompanionPermission(mContext);
+            Intent intent =
+                    new Intent()
+                            .putExtra(StatsManager.EXTRA_STATS_CONFIG_UID, configUid)
+                            .putExtra(StatsManager.EXTRA_STATS_CONFIG_KEY, configId)
+                            .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_ID, subscriptionId)
+                            .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_RULE_ID,
+                                    subscriptionRuleId)
+                            .putExtra(StatsManager.EXTRA_STATS_DIMENSIONS_VALUE, dimensionsValue);
+
+            ArrayList<String> cookieList = new ArrayList<>(cookies.length);
+            cookieList.addAll(Arrays.asList(cookies));
+            intent.putStringArrayListExtra(
+                    StatsManager.EXTRA_STATS_BROADCAST_SUBSCRIBER_COOKIES, cookieList);
+
+            if (DEBUG) {
+                Slog.d(TAG,
+                        String.format(
+                                "Statsd sendSubscriberBroadcast with params {%d %d %d %d %s %s}",
+                                configUid, configId, subscriptionId, subscriptionRuleId,
+                                Arrays.toString(cookies),
+                                dimensionsValue));
+            }
+            try {
+                mPendingIntent.send(mContext, CODE_SUBSCRIBER_BROADCAST, intent, null, null);
+            } catch (PendingIntent.CanceledException e) {
+                Slog.w(TAG,
+                        "Unable to send using PendingIntent from uid " + configUid
+                                + "; presumably it had been cancelled.");
+            }
         }
     }
 }

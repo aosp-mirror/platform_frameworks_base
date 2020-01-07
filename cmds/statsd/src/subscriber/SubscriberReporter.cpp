@@ -19,7 +19,6 @@
 
 #include "SubscriberReporter.h"
 
-using android::IBinder;
 using std::lock_guard;
 using std::unordered_map;
 
@@ -29,12 +28,32 @@ namespace statsd {
 
 using std::vector;
 
+class BroadcastSubscriberDeathRecipient : public android::IBinder::DeathRecipient {
+    public:
+        BroadcastSubscriberDeathRecipient(const ConfigKey& configKey, int64_t subscriberId):
+            mConfigKey(configKey),
+            mSubscriberId(subscriberId) {}
+        ~BroadcastSubscriberDeathRecipient() override = default;
+    private:
+        ConfigKey mConfigKey;
+        int64_t mSubscriberId;
+
+    void binderDied(const android::wp<android::IBinder>& who) override {
+        if (IInterface::asBinder(SubscriberReporter::getInstance().getBroadcastSubscriber(
+              mConfigKey, mSubscriberId)) == who.promote()) {
+            SubscriberReporter::getInstance().unsetBroadcastSubscriber(mConfigKey, mSubscriberId);
+        }
+    }
+};
+
 void SubscriberReporter::setBroadcastSubscriber(const ConfigKey& configKey,
                                                 int64_t subscriberId,
-                                                const sp<IBinder>& intentSender) {
+                                                const sp<IPendingIntentRef>& pir) {
     VLOG("SubscriberReporter::setBroadcastSubscriber called.");
     lock_guard<std::mutex> lock(mLock);
-    mIntentMap[configKey][subscriberId] = intentSender;
+    mIntentMap[configKey][subscriberId] = pir;
+    IInterface::asBinder(pir)->linkToDeath(
+        new BroadcastSubscriberDeathRecipient(configKey, subscriberId));
 }
 
 void SubscriberReporter::unsetBroadcastSubscriber(const ConfigKey& configKey,
@@ -97,24 +116,33 @@ void SubscriberReporter::alertBroadcastSubscriber(const ConfigKey& configKey,
     sendBroadcastLocked(it2->second, configKey, subscription, cookies, dimKey);
 }
 
-void SubscriberReporter::sendBroadcastLocked(const sp<IBinder>& intentSender,
+void SubscriberReporter::sendBroadcastLocked(const sp<IPendingIntentRef>& pir,
                                              const ConfigKey& configKey,
                                              const Subscription& subscription,
                                              const vector<String16>& cookies,
                                              const MetricDimensionKey& dimKey) const {
     VLOG("SubscriberReporter::sendBroadcastLocked called.");
-    if (mStatsCompanionService == nullptr) {
-        ALOGW("Failed to send subscriber broadcast: could not access StatsCompanionService.");
-        return;
-    }
-    mStatsCompanionService->sendSubscriberBroadcast(
-            intentSender,
+    pir->sendSubscriberBroadcast(
             configKey.GetUid(),
             configKey.GetId(),
             subscription.id(),
             subscription.rule_id(),
             cookies,
             getStatsDimensionsValue(dimKey.getDimensionKeyInWhat()));
+}
+
+sp<IPendingIntentRef> SubscriberReporter::getBroadcastSubscriber(const ConfigKey& configKey,
+                                                                 int64_t subscriberId) {
+    lock_guard<std::mutex> lock(mLock);
+    auto subscriberMapIt = mIntentMap.find(configKey);
+    if (subscriberMapIt == mIntentMap.end()) {
+        return nullptr;
+    }
+    auto pirMapIt = subscriberMapIt->second.find(subscriberId);
+    if (pirMapIt == subscriberMapIt->second.end()) {
+        return nullptr;
+    }
+    return pirMapIt->second;
 }
 
 void getStatsDimensionsValueHelper(const vector<FieldValue>& dims, size_t* index, int depth,

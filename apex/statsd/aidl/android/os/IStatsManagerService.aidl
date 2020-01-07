@@ -72,8 +72,17 @@ interface IStatsManagerService {
      * This function can only be called by the owner (uid) of the config. It must be called each
      * time statsd starts. Later calls overwrite previous calls; only one PendingIntent is stored.
      *
-     * Requires Manifest.permission.DUMP.
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
      */
     void setBroadcastSubscriber(long configKey, long subscriberId, in PendingIntent pendingIntent,
                                 in String packageName);
+
+    /**
+     * Undoes setBroadcastSubscriber() for the (configKey, subscriberId) pair.
+     * Any broadcasts associated with subscriberId will henceforth not be sent.
+     * No-op if this (configKey, subscriberId) pair was not associated with an PendingIntent.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    void unsetBroadcastSubscriber(long configKey, long subscriberId, in String packageName);
 }
