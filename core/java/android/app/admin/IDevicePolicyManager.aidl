@@ -444,6 +444,8 @@ interface IDevicePolicyManager {
     void setCrossProfilePackages(in ComponentName admin, in List<String> packageNames);
     List<String> getCrossProfilePackages(in ComponentName admin);
 
+    List<String> getAllCrossProfilePackages();
+
     boolean isManagedKiosk();
     boolean isUnattendedManagedKiosk();
 

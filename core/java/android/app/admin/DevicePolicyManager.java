@@ -88,6 +88,7 @@ import android.telephony.data.ApnSetting;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
@@ -11199,6 +11200,40 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return new ArraySet<>(mService.getCrossProfilePackages(admin));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return Collections.emptySet();
+    }
+
+    /**
+     * Returns the combined set of the following:
+     * <ul>
+     * <li>The package names that the admin has previously set as allowed to request user consent
+     * for cross-profile communication, via {@link
+     * #setCrossProfilePackages(ComponentName, Set)}.</li>
+     * <li>The default package names set by the OEM that are allowed to request user consent for
+     * cross-profile communication without being explicitly enabled by the admin, via
+     * {@link R.array#cross_profile_apps}</li>
+     * </ul>
+     *
+     * @return the combined set of whitelisted package names set via
+     * {@link #setCrossProfilePackages(ComponentName, Set)} and
+     * {@link R.array#cross_profile_apps}
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            permission.INTERACT_ACROSS_USERS_FULL,
+            permission.INTERACT_ACROSS_USERS,
+            permission.INTERACT_ACROSS_PROFILES
+    })
+    public @NonNull Set<String> getAllCrossProfilePackages() {
+        throwIfParentInstance("getDefaultCrossProfilePackages");
+        if (mService != null) {
+            try {
+                return new ArraySet<>(mService.getAllCrossProfilePackages());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
