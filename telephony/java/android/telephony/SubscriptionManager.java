@@ -1040,6 +1040,23 @@ public class SubscriptionManager {
      */
     public void addOnSubscriptionsChangedListener(OnSubscriptionsChangedListener listener) {
         if (listener == null) return;
+        addOnSubscriptionsChangedListener(listener.mExecutor, listener);
+    }
+
+    /**
+     * Register for changes to the list of active {@link SubscriptionInfo} records or to the
+     * individual records themselves. When a change occurs the onSubscriptionsChanged method of
+     * the listener will be invoked immediately if there has been a notification. The
+     * onSubscriptionChanged method will also be triggered once initially when calling this
+     * function.
+     *
+     * @param listener an instance of {@link OnSubscriptionsChangedListener} with
+     *                 onSubscriptionsChanged overridden.
+     * @param executor the executor that will execute callbacks.
+     */
+    public void addOnSubscriptionsChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnSubscriptionsChangedListener listener) {
         String pkgName = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         if (DBG) {
             logd("register OnSubscriptionsChangedListener pkgName=" + pkgName
@@ -1051,7 +1068,7 @@ public class SubscriptionManager {
                 mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
         if (telephonyRegistryManager != null) {
             telephonyRegistryManager.addOnSubscriptionsChangedListener(listener,
-                    listener.mExecutor);
+                    executor);
         }
     }
 
