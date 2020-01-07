@@ -44,6 +44,7 @@ import android.telephony.Rlog;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
@@ -67,10 +68,10 @@ import java.util.function.Consumer;
  */
 public final class SmsApplication {
     static final String LOG_TAG = "SmsApplication";
-    private static final String PHONE_PACKAGE_NAME = "com.android.phone";
-    private static final String BLUETOOTH_PACKAGE_NAME = "com.android.bluetooth";
-    private static final String MMS_SERVICE_PACKAGE_NAME = "com.android.mms.service";
-    private static final String TELEPHONY_PROVIDER_PACKAGE_NAME = "com.android.providers.telephony";
+    public static final String PHONE_PACKAGE_NAME = "com.android.phone";
+    public static final String BLUETOOTH_PACKAGE_NAME = "com.android.bluetooth";
+    public static final String MMS_SERVICE_PACKAGE_NAME = "com.android.mms.service";
+    public static final String TELEPHONY_PROVIDER_PACKAGE_NAME = "com.android.providers.telephony";
 
     private static final String SCHEME_SMS = "sms";
     private static final String SCHEME_SMSTO = "smsto";
@@ -79,13 +80,13 @@ public final class SmsApplication {
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_MULTIUSER = false;
 
-    private static final int[] DEFAULT_APP_EXCLUSIVE_APPOPS = {
-            AppOpsManager.OP_READ_SMS,
-            AppOpsManager.OP_WRITE_SMS,
-            AppOpsManager.OP_RECEIVE_SMS,
-            AppOpsManager.OP_RECEIVE_WAP_PUSH,
-            AppOpsManager.OP_SEND_SMS,
-            AppOpsManager.OP_READ_CELL_BROADCASTS
+    private static final String[] DEFAULT_APP_EXCLUSIVE_APPOPS = {
+            AppOpsManager.OPSTR_READ_SMS,
+            AppOpsManager.OPSTR_WRITE_SMS,
+            AppOpsManager.OPSTR_RECEIVE_SMS,
+            AppOpsManager.OPSTR_RECEIVE_WAP_PUSH,
+            AppOpsManager.OPSTR_SEND_SMS,
+            AppOpsManager.OPSTR_READ_CELL_BROADCASTS
     };
 
     private static SmsPackageMonitor sSmsPackageMonitor = null;
@@ -501,7 +502,7 @@ public final class SmsApplication {
 
         // If we found a package, make sure AppOps permissions are set up correctly
         if (applicationData != null) {
-            // We can only call checkOp if we are privileged (updateIfNeeded) or if the app we
+            // We can only call unsafeCheckOp if we are privileged (updateIfNeeded) or if the app we
             // are checking is for our current uid. Doing this check from the unprivileged current
             // SMS app allows us to tell the current SMS app that it is not in a good state and
             // needs to ask to be the current SMS app again to work properly.
@@ -555,23 +556,23 @@ public final class SmsApplication {
         // apps, all of them should be able to write to telephony provider.
         // This is to allow the proxy package permission check in telephony provider
         // to pass.
-        for (int appop : DEFAULT_APP_EXCLUSIVE_APPOPS) {
-            appOps.setUidMode(appop, Process.PHONE_UID, AppOpsManager.MODE_ALLOWED);
+        for (String opStr : DEFAULT_APP_EXCLUSIVE_APPOPS) {
+            appOps.setUidMode(opStr, Process.PHONE_UID, AppOpsManager.MODE_ALLOWED);
         }
     }
 
     private static boolean tryFixExclusiveSmsAppops(Context context,
             SmsApplicationData applicationData, boolean updateIfNeeded) {
         AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
-        for (int appOp : DEFAULT_APP_EXCLUSIVE_APPOPS) {
-            int mode = appOps.checkOp(appOp, applicationData.mUid,
+        for (String opStr : DEFAULT_APP_EXCLUSIVE_APPOPS) {
+            int mode = appOps.unsafeCheckOp(opStr, applicationData.mUid,
                     applicationData.mPackageName);
             if (mode != AppOpsManager.MODE_ALLOWED) {
                 Rlog.e(LOG_TAG, applicationData.mPackageName + " lost "
-                        + AppOpsManager.modeToName(appOp) + ": "
+                        + opStr + ": "
                         + (updateIfNeeded ? " (fixing)" : " (no permission to fix)"));
                 if (updateIfNeeded) {
-                    appOps.setUidMode(appOp, applicationData.mUid, AppOpsManager.MODE_ALLOWED);
+                    appOps.setUidMode(opStr, applicationData.mUid, AppOpsManager.MODE_ALLOWED);
                 } else {
                     return false;
                 }
@@ -757,7 +758,7 @@ public final class SmsApplication {
         }
         try {
             PackageInfo info = packageManager.getPackageInfo(packageName, 0);
-            int mode = appOps.checkOp(AppOpsManager.OP_WRITE_SMS, info.applicationInfo.uid,
+            int mode = appOps.unsafeCheckOp(AppOpsManager.OPSTR_WRITE_SMS, info.applicationInfo.uid,
                     packageName);
             if (mode != AppOpsManager.MODE_ALLOWED) {
                 Rlog.w(LOG_TAG, packageName + " does not have OP_WRITE_SMS:  (fixing)");
@@ -773,8 +774,8 @@ public final class SmsApplication {
 
     private static void setExclusiveAppops(String pkg, AppOpsManager appOpsManager, int uid,
             int mode) {
-        for (int appop : DEFAULT_APP_EXCLUSIVE_APPOPS) {
-            appOpsManager.setUidMode(appop, uid, mode);
+        for (String opStr : DEFAULT_APP_EXCLUSIVE_APPOPS) {
+            appOpsManager.setUidMode(opStr, uid, mode);
         }
     }
 
@@ -899,6 +900,7 @@ public final class SmsApplication {
      * @param userId target user ID.
      * @return component name of the app and class to deliver SMS messages to
      */
+    @VisibleForTesting
     public static ComponentName getDefaultSmsApplicationAsUser(Context context,
             boolean updateIfNeeded, int userId) {
         final long token = Binder.clearCallingIdentity();
