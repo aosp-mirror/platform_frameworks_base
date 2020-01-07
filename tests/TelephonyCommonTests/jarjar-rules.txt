@@ -1,0 +1,1 @@
+rule com.android.internal.telephony.SmsApplication* com.android.internal.telephony.tests.SmsApplication@1

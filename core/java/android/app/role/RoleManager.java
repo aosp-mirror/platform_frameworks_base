@@ -629,9 +629,12 @@ public final class RoleManager {
      * {@link Manifest.permission#OBSERVE_ROLE_HOLDERS}, as required by
      * {@link android.provider.Telephony.Sms#getDefaultSmsPackage(Context)}
      *
+     * @param userId The user ID to get the default SMS package for.
+     * @return the package name of the default SMS app, or {@code null} if not configured.
      * @hide
      */
     @Nullable
+    @SystemApi
     public String getDefaultSmsPackage(@UserIdInt int userId) {
         try {
             return mService.getDefaultSmsPackage(userId);
