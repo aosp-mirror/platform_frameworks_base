@@ -2192,10 +2192,13 @@ public class DisplayPolicy {
         final boolean attachedInParent = attached != null && !layoutInScreen;
         final boolean requestedFullscreen = (fl & FLAG_FULLSCREEN) != 0
                 || (requestedSysUiFl & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0
-                || !win.getClientInsetsState().getSource(ITYPE_STATUS_BAR).isVisible();
+                || (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL
+                        && !win.getRequestedInsetsState().getSource(ITYPE_STATUS_BAR).isVisible());
         final boolean requestedHideNavigation =
                 (requestedSysUiFl & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
-                        || !win.getClientInsetsState().getSource(ITYPE_NAVIGATION_BAR).isVisible();
+                || (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL
+                        && !win.getRequestedInsetsState().getSource(ITYPE_NAVIGATION_BAR)
+                                .isVisible());
 
         // TYPE_BASE_APPLICATION windows are never considered floating here because they don't get
         // cropped / shifted to the displayFrame in WindowState.

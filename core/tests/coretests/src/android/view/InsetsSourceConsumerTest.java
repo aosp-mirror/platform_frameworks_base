@@ -102,8 +102,12 @@ public class InsetsSourceConsumerTest {
 
     @Test
     public void testShow() {
+
+        // Insets source starts out visible
+        mConsumer.hide();
         mConsumer.show();
         assertTrue("Consumer should be visible", mConsumer.isVisible());
+        verify(mSpyInsetsSource).setVisible(eq(false));
         verify(mSpyInsetsSource).setVisible(eq(true));
     }
 

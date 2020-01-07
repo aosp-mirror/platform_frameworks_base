@@ -210,6 +210,7 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
+import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
@@ -650,17 +651,29 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mIsDimming = false;
 
     private @Nullable InsetsSourceProvider mControllableInsetProvider;
-    private InsetsState mClientInsetsState;
+    private InsetsState mRequestedInsetsState;
 
     private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
     private KeyInterceptionInfo mKeyInterceptionInfo;
 
-    InsetsState getClientInsetsState() {
-        return mClientInsetsState;
+    /**
+     * @return The insets state as requested by the client, i.e. the dispatched insets state
+     *         for which the visibilities are overridden with what the client requested.
+     */
+    InsetsState getRequestedInsetsState() {
+        return mRequestedInsetsState;
     }
 
-    void setClientInsetsState(InsetsState state) {
-        mClientInsetsState = state;
+    /**
+     * @see #getRequestedInsetsState()
+     */
+    void updateRequestedInsetsState(InsetsState state) {
+
+        // Only update the sources the client is actually controlling.
+        for (int i = state.getSourcesCount(); i >= 0; i--) {
+            final InsetsSource source = state.sourceAt(i);
+            mRequestedInsetsState.addSource(source);
+        }
     }
 
     void seamlesslyRotateIfAllowed(Transaction transaction, @Rotation int oldRotation,
@@ -779,7 +792,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mSeq = seq;
         mPowerManagerWrapper = powerManagerWrapper;
         mForceSeamlesslyRotate = token.mRoundedCornerOverlay;
-        mClientInsetsState =
+        mRequestedInsetsState =
                 getDisplayContent().getInsetsPolicy().getInsetsForDispatch(this);
         if (DEBUG) {
             Slog.v(TAG, "Window " + this + " client=" + c.asBinder()
