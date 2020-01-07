@@ -172,24 +172,6 @@ public class TelephonyIntents {
             = "android.intent.action.ANY_DATA_STATE";
 
     /**
-     * Broadcast Action: An attempt to establish a data connection has failed.
-     * The intent will have the following extra values:</p>
-     * <dl>
-     *   <dt>phoneName</dt><dd>A string version of the phone name.</dd>
-     *   <dt>state</dt><dd>One of {@code CONNECTED}, {@code CONNECTING}, or {code DISCONNECTED}.</dd>
-     *   <dt>reason</dt><dd>A string indicating the reason for the failure, if available.</dd>
-     * </dl>
-     *
-     * <p class="note">
-     * Requires the READ_PHONE_STATE permission.
-     *
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     */
-    public static final String ACTION_DATA_CONNECTION_FAILED
-            = "android.intent.action.DATA_CONNECTION_FAILED";
-
-    /**
      * Broadcast Action: The sim card state has changed.
      * The intent will have the following extra values:</p>
      * <dl>
