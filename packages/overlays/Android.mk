@@ -26,6 +26,7 @@ LOCAL_REQUIRED_MODULES := \
 	AccentColorPurpleOverlay \
 	DisplayCutoutEmulationCornerOverlay \
 	DisplayCutoutEmulationDoubleOverlay \
+        DisplayCutoutEmulationHoleOverlay \
 	DisplayCutoutEmulationTallOverlay \
 	FontNotoSerifSourceOverlay \
 	IconPackCircularAndroidOverlay \
