@@ -17,7 +17,6 @@
 package com.android.ims;
 
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.telephony.Rlog;
@@ -25,6 +24,8 @@ import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsConfigCallback;
+
+import com.android.internal.telephony.util.HandlerExecutor;
 
 import java.util.concurrent.Executor;
 
