@@ -217,21 +217,6 @@ java_library_static {
     defaults: ["framework-stubs-default"],
 }
 
-java_system_modules {
-    name: "android_stubs_current_system_modules",
-    libs: ["android_stubs_current"],
-}
-
-java_system_modules {
-    name: "android_system_stubs_current_system_modules",
-    libs: ["android_system_stubs_current"],
-}
-
-java_system_modules {
-    name: "android_test_stubs_current_system_modules",
-    libs: ["android_test_stubs_current"],
-}
-
 /////////////////////////////////////////////////////////////////////
 // hwbinder.stubs provides APIs required for building HIDL Java
 // libraries.
