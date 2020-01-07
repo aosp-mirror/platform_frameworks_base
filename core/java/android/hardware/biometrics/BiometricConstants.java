@@ -18,8 +18,7 @@ package android.hardware.biometrics;
 
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
-import android.annotation.UnsupportedAppUsage;
-
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Interface containing all of the biometric modality agnostic constants.

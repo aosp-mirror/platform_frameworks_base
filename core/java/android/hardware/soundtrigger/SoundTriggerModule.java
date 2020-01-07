@@ -18,11 +18,10 @@ package android.hardware.soundtrigger;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
-import android.media.soundtrigger_middleware.ModelParameterRange;
 import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
 import android.media.soundtrigger_middleware.PhraseSoundModel;
 import android.media.soundtrigger_middleware.RecognitionEvent;
