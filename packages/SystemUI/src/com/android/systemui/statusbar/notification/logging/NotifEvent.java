@@ -112,7 +112,12 @@ public class NotifEvent extends RichEvent {
             LIFETIME_EXTENDED,
             REMOVE_INTERCEPTED,
             INFLATION_ABORTED,
-            INFLATED
+            INFLATED,
+
+            // GroupCoalescer
+            COALESCED_EVENT,
+            EARLY_BATCH_EMIT,
+            EMIT_EVENT_BATCH
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {}
@@ -147,8 +152,10 @@ public class NotifEvent extends RichEvent {
                     "InflationAborted",
                     "Inflated",
 
+                    // GroupCoalescer labels:
                     "CoalescedEvent",
-                    "EarlyBatchEmit"
+                    "EarlyBatchEmit",
+                    "EmitEventBatch"
             };
 
     private static final int TOTAL_EVENT_LABELS = EVENT_LABELS.length;
@@ -174,25 +181,28 @@ public class NotifEvent extends RichEvent {
     /**
      * Events related to {@link NotificationEntryManager}
      */
-    public static final int NOTIF_ADDED = TOTAL_LIST_BUILDER_EVENT_TYPES;
-    public static final int NOTIF_REMOVED = TOTAL_LIST_BUILDER_EVENT_TYPES + 1;
-    public static final int NOTIF_UPDATED = TOTAL_LIST_BUILDER_EVENT_TYPES + 2;
-    public static final int FILTER = TOTAL_LIST_BUILDER_EVENT_TYPES + 3;
-    public static final int SORT = TOTAL_LIST_BUILDER_EVENT_TYPES + 4;
-    public static final int FILTER_AND_SORT = TOTAL_LIST_BUILDER_EVENT_TYPES + 5;
-    public static final int NOTIF_VISIBILITY_CHANGED = TOTAL_LIST_BUILDER_EVENT_TYPES + 6;
-    public static final int LIFETIME_EXTENDED = TOTAL_LIST_BUILDER_EVENT_TYPES + 7;
+    private static final int NEM_EVENT_START_INDEX = TOTAL_LIST_BUILDER_EVENT_TYPES;
+    public static final int NOTIF_ADDED = NEM_EVENT_START_INDEX;
+    public static final int NOTIF_REMOVED = NEM_EVENT_START_INDEX + 1;
+    public static final int NOTIF_UPDATED = NEM_EVENT_START_INDEX + 2;
+    public static final int FILTER = NEM_EVENT_START_INDEX + 3;
+    public static final int SORT = NEM_EVENT_START_INDEX + 4;
+    public static final int FILTER_AND_SORT = NEM_EVENT_START_INDEX + 5;
+    public static final int NOTIF_VISIBILITY_CHANGED = NEM_EVENT_START_INDEX + 6;
+    public static final int LIFETIME_EXTENDED = NEM_EVENT_START_INDEX + 7;
     // unable to remove notif - removal intercepted by {@link NotificationRemoveInterceptor}
-    public static final int REMOVE_INTERCEPTED = TOTAL_LIST_BUILDER_EVENT_TYPES + 8;
-    public static final int INFLATION_ABORTED = TOTAL_LIST_BUILDER_EVENT_TYPES + 9;
-    public static final int INFLATED = TOTAL_LIST_BUILDER_EVENT_TYPES + 10;
+    public static final int REMOVE_INTERCEPTED = NEM_EVENT_START_INDEX + 8;
+    public static final int INFLATION_ABORTED = NEM_EVENT_START_INDEX + 9;
+    public static final int INFLATED = NEM_EVENT_START_INDEX + 10;
     private static final int TOTAL_NEM_EVENT_TYPES = 11;
 
     /**
      * Events related to {@link GroupCoalescer}
      */
-    public static final int COALESCED_EVENT = TOTAL_NEM_EVENT_TYPES;
-    public static final int EARLY_BATCH_EMIT = TOTAL_NEM_EVENT_TYPES + 1;
-    public static final int EMIT_EVENT_BATCH = TOTAL_NEM_EVENT_TYPES + 2;
-    private static final int TOTAL_COALESCER_EVENT_TYPES = 2;
+    private static final int COALESCER_EVENT_START_INDEX = NEM_EVENT_START_INDEX
+            + TOTAL_NEM_EVENT_TYPES;
+    public static final int COALESCED_EVENT = COALESCER_EVENT_START_INDEX;
+    public static final int EARLY_BATCH_EMIT = COALESCER_EVENT_START_INDEX + 1;
+    public static final int EMIT_EVENT_BATCH = COALESCER_EVENT_START_INDEX + 2;
+    private static final int TOTAL_COALESCER_EVENT_TYPES = 3;
 }
