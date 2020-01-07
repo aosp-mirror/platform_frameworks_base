@@ -15158,10 +15158,10 @@ public class PackageManagerService extends IPackageManager.Stub
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "updateSettings");
 
         final String pkgName = pkg.getPackageName();
-        final InstallSource installSource = installArgs.installSource;
-        final String installerPackageName = installSource.installerPackageName;
         final int[] installedForUsers = res.origUsers;
         final int installReason = installArgs.installReason;
+        InstallSource installSource = installArgs.installSource;
+        final String installerPackageName = installSource.installerPackageName;
 
         if (DEBUG_INSTALL) Slog.d(TAG, "New package installed in " + pkg.getCodePath());
         synchronized (mLock) {
@@ -15207,6 +15207,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId, installerPackageName);
                 }
 
+                if (installSource.initiatingPackageName != null) {
+                    final PackageSetting ips = mSettings.mPackages.get(
+                            installSource.initiatingPackageName);
+                    if (ips != null) {
+                        installSource = installSource.setInitiatingPackageSignatures(
+                                ips.signatures);
+                    }
+                }
                 ps.setInstallSource(installSource);
                 mSettings.addInstallerPackageNames(installSource);
 
@@ -19976,19 +19984,25 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            // All installSource strings are interned, so == is ok here
-            if (installSource.initiatingPackageName == installSource.installerPackageName) {
-                // The installer and initiator will often be the same, and when they are
-                // we can skip doing the same check again.
-                initiatingPackageName = installerPackageName;
+            if (installSource.isInitiatingPackageUninstalled) {
+                // TODO(b/146555198) Allow the app itself to see the info
+                // (at least for non-instant apps)
+                initiatingPackageName = null;
             } else {
-                initiatingPackageName = installSource.initiatingPackageName;
-                final PackageSetting ps = mSettings.mPackages.get(initiatingPackageName);
-                if (ps == null || shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                    initiatingPackageName = null;
+                // All installSource strings are interned, so == is ok here
+                if (installSource.initiatingPackageName == installSource.installerPackageName) {
+                    // The installer and initiator will often be the same, and when they are
+                    // we can skip doing the same check again.
+                    initiatingPackageName = installerPackageName;
+                } else {
+                    initiatingPackageName = installSource.initiatingPackageName;
+                    final PackageSetting ps = mSettings.mPackages.get(initiatingPackageName);
+                    if (ps == null || shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                        initiatingPackageName = null;
+                    }
                 }
-
             }
+
             originatingPackageName = installSource.originatingPackageName;
             if (originatingPackageName != null) {
                 final PackageSetting ps = mSettings.mPackages.get(originatingPackageName);

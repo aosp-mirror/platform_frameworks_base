@@ -1452,7 +1452,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
 
                 mInstallerUid = uid;
-                mInstallSource = InstallSource.create(packageName, null, packageName, false);
+                mInstallSource = InstallSource.create(packageName, null, packageName);
             }
         } catch (PackageManager.NameNotFoundException e) {
             onSessionTransferStatus(statusReceiver, packageName,
@@ -3115,7 +3115,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         InstallSource installSource = InstallSource.create(installInitiatingPackageName,
-                installOriginatingPackageName, installerPackageName, false);
+                installOriginatingPackageName, installerPackageName);
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
                 installerThread, stagingManager, sessionId, userId, installerUid,
                 installSource, params, createdMillis, stageDir, stageCid, fileInfosArray,
