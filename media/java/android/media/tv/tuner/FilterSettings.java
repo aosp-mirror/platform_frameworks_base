@@ -40,6 +40,10 @@ public abstract class FilterSettings {
     @FilterType
     public abstract int getType();
 
+    public Settings getSettings() {
+        return mSettings;
+    }
+
     // TODO: more builders and getters
 
     /**

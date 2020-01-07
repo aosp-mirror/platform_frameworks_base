@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.media.tv.tuner.FilterSettings.Settings;
 import android.media.tv.tuner.TunerConstants.DemuxPidType;
 import android.media.tv.tuner.TunerConstants.FilterSubtype;
 import android.media.tv.tuner.TunerConstants.FilterType;
@@ -29,6 +30,7 @@ import android.media.tv.tuner.TunerConstants.LnbPosition;
 import android.media.tv.tuner.TunerConstants.LnbTone;
 import android.media.tv.tuner.TunerConstants.LnbVoltage;
 import android.media.tv.tuner.TunerConstants.Result;
+import android.media.tv.tuner.filter.FilterEvent;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -464,8 +466,9 @@ public final class Tuner implements AutoCloseable  {
          */
         public int configure(FilterSettings settings) {
             int subType = -1;
-            if (settings.mSettings != null) {
-                subType = settings.mSettings.getType();
+            Settings s = settings.getSettings();
+            if (s != null) {
+                subType = s.getType();
             }
             return nativeConfigureFilter(settings.getType(), subType, settings);
         }

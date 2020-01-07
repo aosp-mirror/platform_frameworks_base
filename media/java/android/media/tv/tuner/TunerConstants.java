@@ -26,7 +26,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * @hide
  */
-final class TunerConstants {
+public final class TunerConstants {
     public static final int INVALID_TS_PID = Constants.Constant.INVALID_TS_PID;
     public static final int INVALID_STREAM_ID = Constants.Constant.INVALID_STREAM_ID;
 
