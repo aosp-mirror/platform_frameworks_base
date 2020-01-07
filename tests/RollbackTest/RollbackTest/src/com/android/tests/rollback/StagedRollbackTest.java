@@ -324,6 +324,7 @@ public class StagedRollbackTest {
 
     @Test
     public void testNetworkPassedDoesNotRollback_Phase1() throws Exception {
+        // Remove available rollbacks and uninstall NetworkStack on /data/
         RollbackManager rm = RollbackUtils.getRollbackManager();
         String networkStack = getNetworkStackPackageName();
 
@@ -332,6 +333,15 @@ public class StagedRollbackTest {
 
         assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
                         networkStack)).isNull();
+
+        // Reduce health check deadline, here unlike the network failed case, we use
+        // a longer deadline because joining a network can take a much longer time for
+        // reasons external to the device than 'not joining'
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PROPERTY_WATCHDOG_REQUEST_TIMEOUT_MILLIS,
+                Integer.toString(300000), false);
+        // Simulate re-installation of new NetworkStack with rollbacks enabled
+        installNetworkStackPackage();
     }
 
     @Test
@@ -343,6 +353,9 @@ public class StagedRollbackTest {
 
     @Test
     public void testNetworkPassedDoesNotRollback_Phase3() throws Exception {
+        // Sleep for > health check deadline. We expect no rollback should happen during sleeping.
+        // If the device reboots for rollback, this device test will fail as well as the host test.
+        Thread.sleep(TimeUnit.SECONDS.toMillis(310));
         RollbackManager rm = RollbackUtils.getRollbackManager();
         assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
                         getNetworkStackPackageName())).isNull();
