@@ -784,6 +784,10 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                         null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
                         null /* tempOtherTaskBounds */, null /* tempOtherTaskInsetBounds */,
                         PRESERVE_WINDOWS, true /* deferResume */);
+            } else if (overrideWindowingMode != WINDOWING_MODE_PINNED) {
+                // For pinned stack, resize is now part of the {@link WindowContainerTransaction}
+                resize(new Rect(newBounds), null /* tempTaskBounds */,
+                        null /* tempTaskInsetBounds */, PRESERVE_WINDOWS, true /* deferResume */);
             }
         }
         if (prevIsAlwaysOnTop != isAlwaysOnTop()) {
