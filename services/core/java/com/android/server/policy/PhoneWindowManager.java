@@ -712,16 +712,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     accessibilityShortcutActivated();
                     break;
                 case MSG_BUGREPORT_TV:
-                    boolean customBugreport = mContext.getResources().getBoolean(
-                            com.android.internal.R.bool.config_customBugreport);
-                    if (customBugreport) {
-                        Log.i(TAG, "Triggering a custom bugreport!");
-                        Intent intent = new Intent(ACTION_CUSTOM_BUGREPORT_REQUESTED);
-                        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-                    } else {
-                        requestFullBugreport();
-                    }
+                    requestFullBugreport();
                     break;
                 case MSG_ACCESSIBILITY_TV:
                     if (mAccessibilityShortcutController.isAccessibilityShortcutAvailable(false)) {

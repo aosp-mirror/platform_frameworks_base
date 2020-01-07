@@ -96,7 +96,6 @@
     <protected-broadcast android:name="android.intent.action.USER_ACTIVITY_NOTIFICATION" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_SUSPENDED" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_UNSUSPENDED" />
-    <protected-broadcast android:name="android.intent.action.CUSTOM_BUGREPORT_REQUESTED" />
 
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGING" />
