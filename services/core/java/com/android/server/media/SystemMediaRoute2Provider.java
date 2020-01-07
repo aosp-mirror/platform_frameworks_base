@@ -102,33 +102,33 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void selectRoute(int sessionId, MediaRoute2Info route) {
+    public void selectRoute(int sessionId, String routeId) {
         //TODO: implement method
     }
 
     @Override
-    public void deselectRoute(int sessionId, MediaRoute2Info route) {
+    public void deselectRoute(int sessionId, String routeId) {
         //TODO: implement method
     }
 
     @Override
-    public void transferToRoute(int sessionId, MediaRoute2Info route) {
+    public void transferToRoute(int sessionId, String routeId) {
         //TODO: implement method
     }
 
     //TODO: implement method
     @Override
-    public void sendControlRequest(@NonNull MediaRoute2Info route, @NonNull Intent request) {
+    public void sendControlRequest(@NonNull String routeId, @NonNull Intent request) {
     }
 
     //TODO: implement method
     @Override
-    public void requestSetVolume(MediaRoute2Info route, int volume) {
+    public void requestSetVolume(String routeId, int volume) {
     }
 
     //TODO: implement method
     @Override
-    public void requestUpdateVolume(MediaRoute2Info route, int delta) {
+    public void requestUpdateVolume(String routeId, int delta) {
     }
 
     void initializeRoutes() {

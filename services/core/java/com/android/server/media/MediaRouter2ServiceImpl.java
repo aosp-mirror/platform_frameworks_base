@@ -990,7 +990,7 @@ class MediaRouter2ServiceImpl {
                     clientRecord, route, controlCategory, requestId);
             mSessionCreationRequests.add(request);
 
-            provider.requestCreateSession(clientRecord.mPackageName, route.getId(),
+            provider.requestCreateSession(clientRecord.mPackageName, route.getOriginalId(),
                     controlCategory, requestId);
         }
 
@@ -1007,7 +1007,8 @@ class MediaRouter2ServiceImpl {
             if (provider == null) {
                 return;
             }
-            provider.selectRoute(RouteSessionInfo.getSessionId(uniqueSessionId), route);
+            provider.selectRoute(RouteSessionInfo.getSessionId(uniqueSessionId),
+                    route.getOriginalId());
         }
 
         private void deselectRouteOnHandler(@NonNull Client2Record clientRecord,
@@ -1023,7 +1024,8 @@ class MediaRouter2ServiceImpl {
             if (provider == null) {
                 return;
             }
-            provider.deselectRoute(RouteSessionInfo.getSessionId(uniqueSessionId), route);
+            provider.deselectRoute(RouteSessionInfo.getSessionId(uniqueSessionId),
+                    route.getOriginalId());
         }
 
         private void transferToRouteOnHandler(@NonNull Client2Record clientRecord,
@@ -1039,7 +1041,8 @@ class MediaRouter2ServiceImpl {
             if (provider == null) {
                 return;
             }
-            provider.transferToRoute(RouteSessionInfo.getSessionId(uniqueSessionId), route);
+            provider.transferToRoute(RouteSessionInfo.getSessionId(uniqueSessionId),
+                    route.getOriginalId());
         }
 
         private boolean checkArgumentsForSessionControl(@NonNull Client2Record clientRecord,
@@ -1246,21 +1249,21 @@ class MediaRouter2ServiceImpl {
         private void sendControlRequest(MediaRoute2Info route, Intent request) {
             final MediaRoute2Provider provider = findProvider(route.getProviderId());
             if (provider != null) {
-                provider.sendControlRequest(route, request);
+                provider.sendControlRequest(route.getOriginalId(), request);
             }
         }
 
         private void requestSetVolume(MediaRoute2Info route, int volume) {
             final MediaRoute2Provider provider = findProvider(route.getProviderId());
             if (provider != null) {
-                provider.requestSetVolume(route, volume);
+                provider.requestSetVolume(route.getOriginalId(), volume);
             }
         }
 
         private void requestUpdateVolume(MediaRoute2Info route, int delta) {
             final MediaRoute2Provider provider = findProvider(route.getProviderId());
             if (provider != null) {
-                provider.requestUpdateVolume(route, delta);
+                provider.requestUpdateVolume(route.getOriginalId(), delta);
             }
         }
 

@@ -156,8 +156,6 @@ public final class MediaRoute2Info implements Parcelable {
     @Nullable
     final Bundle mExtras;
 
-    private final String mUniqueId;
-
     MediaRoute2Info(@NonNull Builder builder) {
         mId = builder.mId;
         mProviderId = builder.mProviderId;
@@ -172,7 +170,6 @@ public final class MediaRoute2Info implements Parcelable {
         mVolumeHandling = builder.mVolumeHandling;
         mDeviceType = builder.mDeviceType;
         mExtras = builder.mExtras;
-        mUniqueId = createUniqueId();
     }
 
     MediaRoute2Info(@NonNull Parcel in) {
@@ -189,18 +186,12 @@ public final class MediaRoute2Info implements Parcelable {
         mVolumeHandling = in.readInt();
         mDeviceType = in.readInt();
         mExtras = in.readBundle();
-        mUniqueId = createUniqueId();
     }
 
-    private String createUniqueId() {
-        String uniqueId = null;
-        if (mProviderId != null) {
-            uniqueId = toUniqueId(mProviderId, mId);
-        }
-        return uniqueId;
-    }
-
-    static String toUniqueId(String providerId, String routeId) {
+    /**
+     * @hide
+     */
+    public static String toUniqueId(String providerId, String routeId) {
         return providerId + ":" + routeId;
     }
 
@@ -251,25 +242,30 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
-     * Gets the id of the route.
-     * Use {@link #getUniqueId()} if you need a unique identifier.
+     * Gets the id of the route. The routes which are given by {@link MediaRouter2} will have
+     * unique IDs.
+     * <p>
+     * In order to ensure uniqueness in {@link MediaRouter2} side, the value of this method
+     * can be different from what was set in {@link MediaRoute2ProviderService}.
      *
-     * @see #getUniqueId()
+     * @see Builder#setId(String)
      */
     @NonNull
     public String getId() {
-        return mId;
+        if (mProviderId != null) {
+            return toUniqueId(mProviderId, mId);
+        } else {
+            return mId;
+        }
     }
 
     /**
-     * Gets the unique id of the route. A route obtained from
-     * {@link com.android.server.media.MediaRouterService} always has a unique id.
-     *
-     * @return unique id of the route or null if it has no unique id.
+     * Gets the original id set by {@link Builder#setId(String)}.
+     * @hide
      */
-    @Nullable
-    public String getUniqueId() {
-        return mUniqueId;
+    @NonNull
+    public String getOriginalId() {
+        return mId;
     }
 
     /**
@@ -499,7 +495,15 @@ public final class MediaRoute2Info implements Parcelable {
         }
 
         /**
-         * Sets the unique id of the route.
+         * Sets the unique id of the route. The value given here must be unique for each of your
+         * route.
+         * <p>
+         * In order to ensure uniqueness in {@link MediaRouter2} side, the value of
+         * {@link MediaRoute2Info#getId()} can be different from what was set in
+         * {@link MediaRoute2ProviderService}.
+         * </p>
+         *
+         * @see MediaRoute2Info#getId()
          */
         @NonNull
         public Builder setId(@NonNull String id) {

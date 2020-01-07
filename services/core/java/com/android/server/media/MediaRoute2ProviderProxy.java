@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.IMediaRoute2Provider;
 import android.media.IMediaRoute2ProviderClient;
-import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
 import android.media.RouteSessionInfo;
@@ -95,46 +94,46 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     @Override
-    public void selectRoute(int sessionId, MediaRoute2Info route) {
+    public void selectRoute(int sessionId, String routeId) {
         if (mConnectionReady) {
-            mActiveConnection.selectRoute(sessionId, route.getId());
+            mActiveConnection.selectRoute(sessionId, routeId);
         }
     }
 
     @Override
-    public void deselectRoute(int sessionId, MediaRoute2Info route) {
+    public void deselectRoute(int sessionId, String routeId) {
         if (mConnectionReady) {
-            mActiveConnection.deselectRoute(sessionId, route.getId());
+            mActiveConnection.deselectRoute(sessionId, routeId);
         }
     }
 
     @Override
-    public void transferToRoute(int sessionId, MediaRoute2Info route) {
+    public void transferToRoute(int sessionId, String routeId) {
         if (mConnectionReady) {
-            mActiveConnection.transferToRoute(sessionId, route.getId());
+            mActiveConnection.transferToRoute(sessionId, routeId);
         }
     }
 
     @Override
-    public void sendControlRequest(MediaRoute2Info route, Intent request) {
+    public void sendControlRequest(String routeId, Intent request) {
         if (mConnectionReady) {
-            mActiveConnection.sendControlRequest(route.getId(), request);
+            mActiveConnection.sendControlRequest(routeId, request);
             updateBinding();
         }
     }
 
     @Override
-    public void requestSetVolume(MediaRoute2Info route, int volume) {
+    public void requestSetVolume(String routeId, int volume) {
         if (mConnectionReady) {
-            mActiveConnection.requestSetVolume(route.getId(), volume);
+            mActiveConnection.requestSetVolume(routeId, volume);
             updateBinding();
         }
     }
 
     @Override
-    public void requestUpdateVolume(MediaRoute2Info route, int delta) {
+    public void requestUpdateVolume(String routeId, int delta) {
         if (mConnectionReady) {
-            mActiveConnection.requestUpdateVolume(route.getId(), delta);
+            mActiveConnection.requestUpdateVolume(routeId, delta);
             updateBinding();
         }
     }
