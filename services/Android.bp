@@ -61,6 +61,7 @@ java_library {
         "services.devicepolicy",
         "services.midi",
         "services.net",
+        "services.people",
         "services.print",
         "services.restrictions",
         "services.startop",
