@@ -58,6 +58,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Class for managing the primary application that we will deliver SMS/MMS messages to
@@ -248,6 +249,7 @@ public final class SmsApplication {
     private static Collection<SmsApplicationData> getApplicationCollectionInternal(
             Context context, int userId) {
         PackageManager packageManager = context.getPackageManager();
+        UserHandle userHandle = UserHandle.of(userId);
 
         // Get the list of apps registered for SMS
         Intent intent = new Intent(Intents.SMS_DELIVER_ACTION);
@@ -256,7 +258,7 @@ public final class SmsApplication {
         }
         List<ResolveInfo> smsReceivers = packageManager.queryBroadcastReceiversAsUser(intent,
                 PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                userId);
+                userHandle);
 
         HashMap<String, SmsApplicationData> receivers = new HashMap<String, SmsApplicationData>();
 
@@ -283,7 +285,7 @@ public final class SmsApplication {
         intent.setDataAndType(null, "application/vnd.wap.mms-message");
         List<ResolveInfo> mmsReceivers = packageManager.queryBroadcastReceiversAsUser(intent,
                 PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                userId);
+                userHandle);
         for (ResolveInfo resolveInfo : mmsReceivers) {
             final ActivityInfo activityInfo = resolveInfo.activityInfo;
             if (activityInfo == null) {
@@ -325,7 +327,7 @@ public final class SmsApplication {
                 Uri.fromParts(SCHEME_SMSTO, "", null));
         List<ResolveInfo> sendToActivities = packageManager.queryIntentActivitiesAsUser(intent,
                 PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                userId);
+                userHandle);
         for (ResolveInfo resolveInfo : sendToActivities) {
             final ActivityInfo activityInfo = resolveInfo.activityInfo;
             if (activityInfo == null) {
@@ -343,7 +345,7 @@ public final class SmsApplication {
         List<ResolveInfo> smsAppChangedReceivers =
                 packageManager.queryBroadcastReceiversAsUser(intent,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
         if (DEBUG_MULTIUSER) {
             Log.i(LOG_TAG, "getApplicationCollectionInternal smsAppChangedActivities=" +
                     smsAppChangedReceivers);
@@ -370,7 +372,7 @@ public final class SmsApplication {
         List<ResolveInfo> providerChangedReceivers =
                 packageManager.queryBroadcastReceiversAsUser(intent,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
         if (DEBUG_MULTIUSER) {
             Log.i(LOG_TAG, "getApplicationCollectionInternal providerChangedActivities=" +
                     providerChangedReceivers);
@@ -397,7 +399,7 @@ public final class SmsApplication {
         List<ResolveInfo> simFullReceivers =
                 packageManager.queryBroadcastReceiversAsUser(intent,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
         if (DEBUG_MULTIUSER) {
             Log.i(LOG_TAG, "getApplicationCollectionInternal simFullReceivers="
                     + simFullReceivers);
@@ -626,7 +628,8 @@ public final class SmsApplication {
         }
 
         // We only make the change if the new package is valid
-        PackageManager packageManager = context.getPackageManager();
+        PackageManager packageManager =
+                context.createContextAsUser(userHandle, 0).getPackageManager();
         Collection<SmsApplicationData> applications = getApplicationCollectionInternal(
                 context, userId);
         SmsApplicationData oldAppData = oldPackageName != null ?
@@ -637,8 +640,7 @@ public final class SmsApplication {
             AppOpsManager appOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
             if (oldPackageName != null) {
                 try {
-                    int uid = packageManager.getPackageInfoAsUser(
-                            oldPackageName, 0, userId).applicationInfo.uid;
+                    int uid = packageManager.getPackageInfo(oldPackageName, 0).applicationInfo.uid;
                     setExclusiveAppops(oldPackageName, appOps, uid, AppOpsManager.MODE_DEFAULT);
                 } catch (NameNotFoundException e) {
                     Rlog.w(LOG_TAG, "Old SMS package not found: " + oldPackageName);
@@ -802,9 +804,16 @@ public final class SmsApplication {
         }
 
         private void onPackageChanged() {
-            PackageManager packageManager = mContext.getPackageManager();
+            int userId;
+            try {
+                userId = getSendingUser().getIdentifier();
+            } catch (NullPointerException e) {
+                // This should never happen in prod -- unit tests will put the receiver into a
+                // unusual state where the pending result is null, which produces a NPE when calling
+                // getSendingUserId. Just pretend like it's the system user for testing.
+                userId = UserHandle.USER_SYSTEM;
+            }
             Context userContext = mContext;
-            final int userId = getSendingUserId();
             if (userId != UserHandle.USER_SYSTEM) {
                 try {
                     userContext = mContext.createPackageContextAsUser(mContext.getPackageName(), 0,
@@ -815,10 +824,11 @@ public final class SmsApplication {
                     }
                 }
             }
+            PackageManager packageManager = userContext.getPackageManager();
             // Ensure this component is still configured as the preferred activity
             ComponentName componentName = getDefaultSendToApplication(userContext, true);
             if (componentName != null) {
-                configurePreferredActivity(packageManager, componentName, userId);
+                configurePreferredActivity(packageManager, componentName);
             }
         }
     }
@@ -830,41 +840,36 @@ public final class SmsApplication {
 
     @UnsupportedAppUsage
     private static void configurePreferredActivity(PackageManager packageManager,
-            ComponentName componentName, int userId) {
+            ComponentName componentName) {
         // Add the four activity preferences we want to direct to this app.
-        replacePreferredActivity(packageManager, componentName, userId, SCHEME_SMS);
-        replacePreferredActivity(packageManager, componentName, userId, SCHEME_SMSTO);
-        replacePreferredActivity(packageManager, componentName, userId, SCHEME_MMS);
-        replacePreferredActivity(packageManager, componentName, userId, SCHEME_MMSTO);
+        replacePreferredActivity(packageManager, componentName, SCHEME_SMS);
+        replacePreferredActivity(packageManager, componentName, SCHEME_SMSTO);
+        replacePreferredActivity(packageManager, componentName, SCHEME_MMS);
+        replacePreferredActivity(packageManager, componentName, SCHEME_MMSTO);
     }
 
     /**
      * Updates the ACTION_SENDTO activity to the specified component for the specified scheme.
      */
     private static void replacePreferredActivity(PackageManager packageManager,
-            ComponentName componentName, int userId, String scheme) {
+            ComponentName componentName, String scheme) {
         // Build the set of existing activities that handle this scheme
         Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(scheme, "", null));
-        List<ResolveInfo> resolveInfoList = packageManager.queryIntentActivitiesAsUser(
-                intent, PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_RESOLVED_FILTER,
-                userId);
+        List<ResolveInfo> resolveInfoList = packageManager.queryIntentActivities(
+                intent, PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_RESOLVED_FILTER);
 
-        // Build the set of ComponentNames for these activities
-        final int n = resolveInfoList.size();
-        ComponentName[] set = new ComponentName[n];
-        for (int i = 0; i < n; i++) {
-            ResolveInfo info = resolveInfoList.get(i);
-            set[i] = new ComponentName(info.activityInfo.packageName, info.activityInfo.name);
-        }
+        List<ComponentName> components = resolveInfoList.stream().map(info ->
+                new ComponentName(info.activityInfo.packageName, info.activityInfo.name))
+                .collect(Collectors.toList());
 
         // Update the preferred SENDTO activity for the specified scheme
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_SENDTO);
         intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
         intentFilter.addDataScheme(scheme);
-        packageManager.replacePreferredActivityAsUser(intentFilter,
+        packageManager.replacePreferredActivity(intentFilter,
                 IntentFilter.MATCH_CATEGORY_SCHEME + IntentFilter.MATCH_ADJUSTMENT_NORMAL,
-                set, componentName, userId);
+                components, componentName);
     }
 
     /**
