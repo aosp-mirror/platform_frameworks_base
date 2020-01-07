@@ -2347,13 +2347,9 @@
     <permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"
         android:protectionLevel="signature|installer|telephony" />
 
-    <!-- @SystemApi Allows an application to start its own activities, but on a different profile
-         associated with the user. For example, an application running on the main profile of a user
-         can start an activity on a managed profile of that user.
-         This permission is not available to third party applications.
-         @hide -->
+    <!-- Allows interaction across profiles in the same profile group. -->
     <permission android:name="android.permission.INTERACT_ACROSS_PROFILES"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|appop|documenter|wellbeing" />
 
     <!-- @SystemApi @hide Allows an application to call APIs that allow it to query and manage
          users on the device. This permission is not available to
