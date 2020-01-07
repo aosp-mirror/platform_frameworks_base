@@ -34,6 +34,7 @@ import android.provider.Telephony.MmsSms;
 import android.provider.Telephony.MmsSms.PendingMessages;
 import android.provider.Telephony.Threads;
 import android.telephony.PhoneNumberUtils;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -1448,9 +1449,9 @@ public class PduPersister {
         final Set<String> myPhoneNumbers = new HashSet<String>();
         if (excludeMyNumber) {
             // Build a list of my phone numbers from the various sims.
-            for (int subid : subscriptionManager.getActiveSubscriptionIdList()) {
+            for (SubscriptionInfo subInfo : subscriptionManager.getActiveSubscriptionInfoList()) {
                 final String myNumber = mContext.getSystemService(TelephonyManager.class).
-                        createForSubscriptionId(subid).getLine1Number();
+                        createForSubscriptionId(subInfo.getSubscriptionId()).getLine1Number();
                 if (myNumber != null) {
                     myPhoneNumbers.add(myNumber);
                 }
