@@ -614,9 +614,9 @@ public class TelephonyRegistryManager {
      * Notify call disconnect causes which contains {@link DisconnectCause} and {@link
      * android.telephony.PreciseDisconnectCause}.
      *
-     * @param subId for which call disconnected.
      * @param slotIndex for which call disconnected. Can be derived from subId except when subId is
      * invalid.
+     * @param subId for which call disconnected.
      * @param cause {@link DisconnectCause} for the disconnected call.
      * @param preciseCause {@link android.telephony.PreciseDisconnectCause} for the disconnected
      * call.
@@ -673,6 +673,38 @@ public class TelephonyRegistryManager {
             sRegistry.notifyActiveDataSubIdChanged(activeDataSubId);
         } catch (RemoteException ex) {
 
+        }
+    }
+
+    /**
+     * Report that Registration or a Location/Routing/Tracking Area update has failed.
+     *
+     * @param slotIndex for which call disconnected. Can be derived from subId except when subId is
+     * invalid.
+     * @param subId for which cellinfo changed.
+     * @param cellIdentity the CellIdentity, which must include the globally unique identifier
+     *        for the cell (for example, all components of the CGI or ECGI).
+     * @param chosenPlmn a 5 or 6 digit alphanumeric PLMN (MCC|MNC) among those broadcast by the
+     *         cell that was chosen for the failed registration attempt.
+     * @param domain DOMAIN_CS, DOMAIN_PS or both in case of a combined procedure.
+     * @param causeCode the primary failure cause code of the procedure.
+     *        For GSM/UMTS (MM), values are in TS 24.008 Sec 10.5.95
+     *        For GSM/UMTS (GMM), values are in TS 24.008 Sec 10.5.147
+     *        For LTE (EMM), cause codes are TS 24.301 Sec 9.9.3.9
+     *        For NR (5GMM), cause codes are TS 24.501 Sec 9.11.3.2
+     *        Integer.MAX_VALUE if this value is unused.
+     * @param additionalCauseCode the cause code of any secondary/combined procedure if appropriate.
+     *        For UMTS, if a combined attach succeeds for PS only, then the GMM cause code shall be
+     *        included as an additionalCauseCode. For LTE (ESM), cause codes are in
+     *        TS 24.301 9.9.4.4. Integer.MAX_VALUE if this value is unused.
+     */
+    public void notifyRegistrationFailed(int slotIndex, int subId,
+            @NonNull CellIdentity cellIdentity, @NonNull String chosenPlmn,
+            @NetworkRegistrationInfo.Domain int domain, int causeCode, int additionalCauseCode) {
+        try {
+            sRegistry.notifyRegistrationFailed(slotIndex, subId, cellIdentity,
+                    chosenPlmn, domain, causeCode, additionalCauseCode);
+        } catch (RemoteException ex) {
         }
     }
 }

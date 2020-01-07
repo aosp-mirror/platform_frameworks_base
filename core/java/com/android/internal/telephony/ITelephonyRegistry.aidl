@@ -97,4 +97,6 @@ interface ITelephonyRegistry {
     void notifyCallQualityChanged(in CallQuality callQuality, int phoneId, int subId,
             int callNetworkType);
     void notifyImsDisconnectCause(int subId, in ImsReasonInfo imsReasonInfo);
+    void notifyRegistrationFailed(int slotIndex, int subId, in CellIdentity cellIdentity,
+            String chosenPlmn, int domain, int causeCode, int additionalCauseCode);
 }

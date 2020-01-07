@@ -98,7 +98,8 @@ public final class CellIdentityWcdma extends CellIdentity {
     }
 
     /** @hide */
-    public CellIdentityWcdma sanitizeLocationInfo() {
+    @Override
+    public @NonNull CellIdentityWcdma sanitizeLocationInfo() {
         return new CellIdentityWcdma(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, mMccStr, mMncStr,
                 mAlphaLong, mAlphaShort);

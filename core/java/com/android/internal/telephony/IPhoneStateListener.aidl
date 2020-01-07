@@ -62,4 +62,6 @@ oneway interface IPhoneStateListener {
     void onOutgoingEmergencySms(in EmergencyNumber sentEmergencyNumber);
     void onCallDisconnectCauseChanged(in int disconnectCause, in int preciseDisconnectCause);
     void onImsCallDisconnectCauseChanged(in ImsReasonInfo imsReasonInfo);
+    void onRegistrationFailed(in CellIdentity cellIdentity,
+             String chosenPlmn, int domain, int causeCode, int additionalCauseCode);
 }

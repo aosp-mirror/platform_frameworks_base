@@ -23,6 +23,7 @@ import static android.telephony.TelephonyRegistryManager.SIM_ACTIVATION_TYPE_VOI
 
 import static java.util.Arrays.copyOf;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -281,11 +282,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     static final int ENFORCE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR
                         | PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR
-                        | PhoneStateListener.LISTEN_EMERGENCY_NUMBER_LIST;
+                        | PhoneStateListener.LISTEN_EMERGENCY_NUMBER_LIST
+                        | PhoneStateListener.LISTEN_REGISTRATION_FAILURE;
 
     static final int PRECISE_PHONE_STATE_PERMISSION_MASK =
-                PhoneStateListener.LISTEN_PRECISE_CALL_STATE |
-                PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE;
+                PhoneStateListener.LISTEN_PRECISE_CALL_STATE
+                | PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE;
 
     static final int READ_ACTIVE_EMERGENCY_SESSION_PERMISSION_MASK =
             PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_CALL
@@ -2061,6 +2063,40 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 }
             }
 
+            handleRemoveListLocked();
+        }
+    }
+
+    @Override
+    public void notifyRegistrationFailed(int phoneId, int subId, @NonNull CellIdentity cellIdentity,
+            @NonNull String chosenPlmn, int domain, int causeCode, int additionalCauseCode) {
+        if (!checkNotifyPermission("notifyRegistrationFailed()")) {
+            return;
+        }
+
+        // In case callers don't have fine location access, pre-construct a location-free version
+        // of the CellIdentity. This will still have the PLMN ID, which should be sufficient for
+        // most purposes.
+        final CellIdentity noLocationCi = cellIdentity.sanitizeLocationInfo();
+
+        synchronized (mRecords) {
+            if (validatePhoneId(phoneId)) {
+                for (Record r : mRecords) {
+                    if (r.matchPhoneStateListenerEvent(
+                            PhoneStateListener.LISTEN_REGISTRATION_FAILURE)
+                            && idMatch(r.subId, subId, phoneId)) {
+                        try {
+                            r.callback.onRegistrationFailed(
+                                    checkFineLocationAccess(r, Build.VERSION_CODES.R)
+                                            ? cellIdentity : noLocationCi,
+                                    chosenPlmn, domain, causeCode,
+                                    additionalCauseCode);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
+                    }
+                }
+            }
             handleRemoveListLocked();
         }
     }
