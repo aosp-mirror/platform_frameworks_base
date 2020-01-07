@@ -7773,12 +7773,12 @@ public class TelephonyManager {
     /**
      * Check whether DUN APN is required for tethering.
      * <p>
-     * Requires Permission: READ_PRIVILEGED_PHONE_STATE.
+     * Requires Permission: MODIFY_PHONE_STATE.
      *
      * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     public boolean isTetheringApnRequired() {
         return isTetheringApnRequired(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
