@@ -91,6 +91,9 @@ class ResetTargetTaskHelper {
     }
 
     private boolean processActivity(ActivityRecord r, boolean isTargetTask) {
+        // End processing if we have reached the root.
+        if (r == mRoot) return true;
+
         mAllActivities.add(r);
         final int flags = r.info.flags;
         final boolean finishOnTaskLaunch =
