@@ -61,13 +61,6 @@ public class NetworkUtils {
     public static native void detachBPFFilter(FileDescriptor fd) throws SocketException;
 
     /**
-     * Configures a socket for receiving ICMPv6 router solicitations and sending advertisements.
-     * @param fd the socket's {@link FileDescriptor}.
-     * @param ifIndex the interface index.
-     */
-    public native static void setupRaSocket(FileDescriptor fd, int ifIndex) throws SocketException;
-
-    /**
      * Binds the current process to the network designated by {@code netId}.  All sockets created
      * in the future (and not explicitly bound via a bound {@link SocketFactory} (see
      * {@link Network#getSocketFactory}) will be bound to this network.  Note that if this

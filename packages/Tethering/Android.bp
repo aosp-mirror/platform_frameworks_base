@@ -45,9 +45,9 @@ android_library {
 
 // Due to b/143733063, APK can't access a jni lib that is in APEX (but not in the APK).
 cc_library {
-    name: "libtetheroffloadjni",
+    name: "libtetherutilsjni",
     srcs: [
-        "jni/com_android_server_connectivity_tethering_OffloadHardwareInterface.cpp",
+        "jni/android_net_util_TetheringUtils.cpp",
     ],
     shared_libs: [
         "libcgrouprc",
@@ -87,7 +87,7 @@ java_defaults {
         "libcgrouprc",
         "libnativehelper_compat_libc++",
         "libvndksupport",
-        "libtetheroffloadjni",
+        "libtetherutilsjni",
     ],
     resource_dirs: [
         "res",
