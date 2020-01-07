@@ -22,6 +22,7 @@ import static org.testng.Assert.assertThrows;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +51,11 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     @Before
     public void setUp() throws Exception {
         getDevice().reboot();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        runPhase("testCleanUp");
     }
 
     /**
@@ -164,16 +170,9 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testRollbackWhitelistedApp() throws Exception {
-        try {
-            runPhase("testRollbackWhitelistedApp_Phase1");
-            getDevice().reboot();
-            runPhase("testRollbackWhitelistedApp_Phase2");
-        } finally {
-            // testNativeWatchdogTriggersRollback will fail if multiple staged sessions are
-            // committed on a device which doesn't support checkpoint. Let's clean up the rollback
-            // so there is only one rollback to commit when testing native crashes.
-            runPhase("testRollbackWhitelistedApp_cleanUp");
-        }
+        runPhase("testRollbackWhitelistedApp_Phase1");
+        getDevice().reboot();
+        runPhase("testRollbackWhitelistedApp_Phase2");
     }
 
     @Test

@@ -393,11 +393,6 @@ public class StagedRollbackTest {
     }
 
     @Test
-    public void testRollbackWhitelistedApp_cleanUp() throws Exception {
-        RollbackUtils.getRollbackManager().expireRollbackForPackage(getModuleMetadataPackageName());
-    }
-
-    @Test
     public void testRollbackDataPolicy_Phase1() throws Exception {
         Uninstall.packages(TestApp.A, TestApp.B);
         Install.multi(TestApp.A1, TestApp.B1).commit();
@@ -433,6 +428,16 @@ public class StagedRollbackTest {
         // B's user data version is 1 as rollback committed.
         assertThat(InstallUtils.getUserDataVersion(TestApp.A)).isEqualTo(-1);
         assertThat(InstallUtils.getUserDataVersion(TestApp.B)).isEqualTo(1);
+    }
+
+    @Test
+    public void testCleanUp() throws Exception {
+        // testNativeWatchdogTriggersRollback will fail if multiple staged sessions are
+        // committed on a device which doesn't support checkpoint. Let's clean up all rollbacks
+        // so there is only one rollback to commit when testing native crashes.
+        RollbackManager rm  = RollbackUtils.getRollbackManager();
+        rm.getAvailableRollbacks().stream().flatMap(info -> info.getPackages().stream())
+                .map(info -> info.getPackageName()).forEach(rm::expireRollbackForPackage);
     }
 
     private static void runShellCommand(String cmd) {
