@@ -34,6 +34,7 @@ import android.util.SparseIntArray;
 import android.util.SparseSetArray;
 import android.view.InsetsController.LayoutInsetsDuringAnimation;
 import android.view.InsetsState.InternalInsetsSide;
+import android.view.InsetsState.InternalInsetsType;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimationCallback.AnimationBounds;
@@ -92,6 +93,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mController = controller;
         mInitialInsetsState = new InsetsState(state, true /* copySources */);
         mCurrentInsets = getInsetsFromState(mInitialInsetsState, frame, null /* typeSideMap */);
+        mPendingInsets = mCurrentInsets;
         mHiddenInsets = calculateInsets(mInitialInsetsState, frame, controls, false /* shown */,
                 null /* typeSideMap */);
         mShownInsets = calculateInsets(mInitialInsetsState, frame, controls, true /* shown */,
@@ -129,6 +131,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     @Override
     @InsetsType public int getTypes() {
         return mTypes;
+    }
+
+    boolean controlsInternalType(@InternalInsetsType int type) {
+        return InsetsState.toInternalType(mTypes).contains(type);
     }
 
     @Override

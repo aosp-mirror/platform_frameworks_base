@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.InsetsController.ANIMATION_TYPE_NONE;
+
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.view.InsetsState.InternalInsetsType;
@@ -172,7 +174,7 @@ public class InsetsSourceConsumer {
 
     private void applyHiddenToControl() {
         if (mSourceControl == null || mSourceControl.getLeash() == null
-                || mController.isAnimating()) {
+                || mController.getAnimationType(mType) != ANIMATION_TYPE_NONE) {
             return;
         }
 
