@@ -15,9 +15,10 @@
  */
 package android.util;
 
-import static com.android.internal.util.Preconditions.*;
+import static com.android.internal.util.Preconditions.checkNotNull;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
+
 import java.io.IOException;
 import java.io.InvalidObjectException;
 

@@ -19,7 +19,7 @@ package android.text.util;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;

@@ -16,9 +16,9 @@
 
 package android.text;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.app.Application;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
