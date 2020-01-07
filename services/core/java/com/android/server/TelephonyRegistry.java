@@ -49,6 +49,13 @@ import android.telephony.CallQuality;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
 import android.telephony.CellLocation;
+import android.telephony.CellSignalStrength;
+import android.telephony.CellSignalStrengthCdma;
+import android.telephony.CellSignalStrengthGsm;
+import android.telephony.CellSignalStrengthLte;
+import android.telephony.CellSignalStrengthNr;
+import android.telephony.CellSignalStrengthTdscdma;
+import android.telephony.CellSignalStrengthWcdma;
 import android.telephony.DataFailCause;
 import android.telephony.DisconnectCause;
 import android.telephony.LocationAccessPolicy;
@@ -402,7 +409,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mVoiceActivationState = copyOf(mVoiceActivationState, mNumPhones);
         mDataActivationState = copyOf(mDataActivationState, mNumPhones);
         mUserMobileDataState = copyOf(mUserMobileDataState, mNumPhones);
-        mSignalStrength = copyOf(mSignalStrength, mNumPhones);
+        if (mSignalStrength != null) {
+            mSignalStrength = copyOf(mSignalStrength, mNumPhones);
+        } else {
+            mSignalStrength = new SignalStrength[mNumPhones];
+        }
         mMessageWaiting = copyOf(mMessageWaiting, mNumPhones);
         mCallForwarding = copyOf(mCallForwarding, mNumPhones);
         mCellIdentity = copyOf(mCellIdentity, mNumPhones);
@@ -436,7 +447,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mDataActivationState[i] = TelephonyManager.SIM_ACTIVATION_STATE_UNKNOWN;
             mCallIncomingNumber[i] =  "";
             mServiceState[i] =  new ServiceState();
-            mSignalStrength[i] =  new SignalStrength();
+            mSignalStrength[i] =  null;
             mUserMobileDataState[i] = false;
             mMessageWaiting[i] =  false;
             mCallForwarding[i] =  false;
@@ -520,7 +531,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mDataActivationState[i] = TelephonyManager.SIM_ACTIVATION_STATE_UNKNOWN;
             mCallIncomingNumber[i] =  "";
             mServiceState[i] =  new ServiceState();
-            mSignalStrength[i] =  new SignalStrength();
+            mSignalStrength[i] =  null;
             mUserMobileDataState[i] = false;
             mMessageWaiting[i] =  false;
             mCallForwarding[i] =  false;
@@ -797,10 +808,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                     if ((events & PhoneStateListener.LISTEN_SIGNAL_STRENGTH) != 0) {
                         try {
-                            int gsmSignalStrength = mSignalStrength[phoneId]
-                                    .getGsmSignalStrength();
-                            r.callback.onSignalStrengthChanged((gsmSignalStrength == 99 ? -1
-                                    : gsmSignalStrength));
+                            if (mSignalStrength[phoneId] != null) {
+                                int gsmSignalStrength = mSignalStrength[phoneId]
+                                        .getGsmSignalStrength();
+                                r.callback.onSignalStrengthChanged((gsmSignalStrength == 99 ? -1
+                                        : gsmSignalStrength));
+                            }
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -857,7 +870,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                     if ((events & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0) {
                         try {
-                            r.callback.onSignalStrengthsChanged(mSignalStrength[phoneId]);
+                            if (mSignalStrength[phoneId] != null) {
+                                r.callback.onSignalStrengthsChanged(mSignalStrength[phoneId]);
+                            }
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -2168,11 +2183,30 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         Intent intent = new Intent(TelephonyIntents.ACTION_SIGNAL_STRENGTH_CHANGED);
         Bundle data = new Bundle();
-        signalStrength.fillInNotifierBundle(data);
+        fillInSignalStrengthNotifierBundle(signalStrength, data);
         intent.putExtras(data);
         intent.putExtra(PHONE_CONSTANTS_SUBSCRIPTION_KEY, subId);
         intent.putExtra(PHONE_CONSTANTS_SLOT_KEY, phoneId);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+    }
+
+    private void fillInSignalStrengthNotifierBundle(SignalStrength signalStrength, Bundle bundle) {
+        List<CellSignalStrength> cellSignalStrengths = signalStrength.getCellSignalStrengths();
+        for (CellSignalStrength cellSignalStrength : cellSignalStrengths) {
+            if (cellSignalStrength instanceof CellSignalStrengthLte) {
+                bundle.putParcelable("Lte", (CellSignalStrengthLte) cellSignalStrength);
+            } else if (cellSignalStrength instanceof CellSignalStrengthCdma) {
+                bundle.putParcelable("Cdma", (CellSignalStrengthCdma) cellSignalStrength);
+            } else if (cellSignalStrength instanceof CellSignalStrengthGsm) {
+                bundle.putParcelable("Gsm", (CellSignalStrengthGsm) cellSignalStrength);
+            } else if (cellSignalStrength instanceof CellSignalStrengthWcdma) {
+                bundle.putParcelable("Wcdma", (CellSignalStrengthWcdma) cellSignalStrength);
+            } else if (cellSignalStrength instanceof CellSignalStrengthTdscdma) {
+                bundle.putParcelable("Tdscdma", (CellSignalStrengthTdscdma) cellSignalStrength);
+            } else if (cellSignalStrength instanceof CellSignalStrengthNr) {
+                bundle.putParcelable("Nr", (CellSignalStrengthNr) cellSignalStrength);
+            }
+        }
     }
 
     /**
@@ -2483,11 +2517,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         if ((events & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0) {
             try {
-                SignalStrength signalStrength = mSignalStrength[phoneId];
-                if (DBG) {
-                    log("checkPossibleMissNotify: onSignalStrengthsChanged SS=" + signalStrength);
+                if (mSignalStrength[phoneId] != null) {
+                    SignalStrength signalStrength = mSignalStrength[phoneId];
+                    if (DBG) {
+                        log("checkPossibleMissNotify: onSignalStrengthsChanged SS="
+                                + signalStrength);
+                    }
+                    r.callback.onSignalStrengthsChanged(new SignalStrength(signalStrength));
                 }
-                r.callback.onSignalStrengthsChanged(new SignalStrength(signalStrength));
             } catch (RemoteException ex) {
                 mRemoveList.add(r.binder);
             }
@@ -2495,14 +2532,16 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         if ((events & PhoneStateListener.LISTEN_SIGNAL_STRENGTH) != 0) {
             try {
-                int gsmSignalStrength = mSignalStrength[phoneId]
-                        .getGsmSignalStrength();
-                if (DBG) {
-                    log("checkPossibleMissNotify: onSignalStrengthChanged SS=" +
-                            gsmSignalStrength);
+                if (mSignalStrength[phoneId] != null) {
+                    int gsmSignalStrength = mSignalStrength[phoneId]
+                            .getGsmSignalStrength();
+                    if (DBG) {
+                        log("checkPossibleMissNotify: onSignalStrengthChanged SS="
+                                + gsmSignalStrength);
+                    }
+                    r.callback.onSignalStrengthChanged((gsmSignalStrength == 99 ? -1
+                            : gsmSignalStrength));
                 }
-                r.callback.onSignalStrengthChanged((gsmSignalStrength == 99 ? -1
-                        : gsmSignalStrength));
             } catch (RemoteException ex) {
                 mRemoveList.add(r.binder);
             }
