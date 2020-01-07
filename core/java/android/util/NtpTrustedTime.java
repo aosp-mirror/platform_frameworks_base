@@ -183,12 +183,11 @@ public class NtpTrustedTime implements TrustedTime {
      *
      * @throws IllegalStateException if there is no cached value
      */
-    @UnsupportedAppUsage
     public TimestampedValue<Long> getCachedNtpTimeSignal() {
         if (!mHasCache) {
             throw new IllegalStateException("Missing authoritative time source");
         }
-        if (LOGD) Log.d(TAG, "currentTimeMillis() cache hit");
+        if (LOGD) Log.d(TAG, "getCachedNtpTimeSignal() cache hit");
 
         return new TimestampedValue<>(mCachedNtpElapsedRealtime, mCachedNtpTime);
     }
