@@ -1766,7 +1766,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (config.allowedKeyManagement.get(KeyMgmt.OWE)) {
             return SECURITY_OWE;
         }
-        return (config.wepKeys[0] != null) ? SECURITY_WEP : SECURITY_NONE;
+        return (config.wepTxKeyIndex >= 0
+                && config.wepTxKeyIndex < config.wepKeys.length
+                && config.wepKeys[config.wepTxKeyIndex] != null)
+                ? SECURITY_WEP : SECURITY_NONE;
     }
 
     public static String securityToString(int security, int pskType) {
