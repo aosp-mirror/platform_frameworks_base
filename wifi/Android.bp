@@ -48,6 +48,7 @@ test_access_hidden_api_whitelist = [
     "//frameworks/opt/net/wifi/tests/wifitests:__subpackages__",
 
     "//frameworks/opt/net/wifi/libs/WifiTrackerLib/tests",
+    "//external/robolectric-shadows:__subpackages__",
 ]
 
 java_library {
