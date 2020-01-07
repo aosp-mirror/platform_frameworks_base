@@ -33,7 +33,6 @@ import android.content.Context;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
-import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArrayMap;
@@ -179,7 +178,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 true /* isNewView */, (v, p, r) -> true,
                 new InflationCallback() {
                     @Override
-                    public void handleInflationException(StatusBarNotification notification,
+                    public void handleInflationException(NotificationEntry entry,
                             Exception e) {
                         countDownLatch.countDown();
                         throw new RuntimeException("No Exception expected");
@@ -261,7 +260,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         inflater.setInflateSynchronously(true);
         InflationCallback callback = new InflationCallback() {
             @Override
-            public void handleInflationException(StatusBarNotification notification,
+            public void handleInflationException(NotificationEntry entry,
                     Exception e) {
                 if (!expectingException) {
                     exceptionHolder.setException(e);

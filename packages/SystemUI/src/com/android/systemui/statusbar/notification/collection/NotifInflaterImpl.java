@@ -34,7 +34,7 @@ import javax.inject.Singleton;
 /**
  * Handles notification inflating, rebinding, and inflation aborting.
  *
- * Currently a wrapper for NotificationRowBinderImpl which requires some TLC.
+ * Currently a wrapper for NotificationRowBinderImpl.
  */
 @Singleton
 public class NotifInflaterImpl implements NotifInflater {
@@ -58,7 +58,7 @@ public class NotifInflaterImpl implements NotifInflater {
      */
     public void setRowBinder(NotificationRowBinderImpl rowBinder) {
         mNotificationRowBinder = rowBinder;
-        requireBinder().setInflationCallback(mInflationCallback);
+        mNotificationRowBinder.setInflationCallback(mInflationCallback);
     }
 
     @Override
@@ -78,9 +78,10 @@ public class NotifInflaterImpl implements NotifInflater {
     @Override
     public void inflateViews(NotificationEntry entry) {
         try {
+            entry.setHasInflationError(false);
             requireBinder().inflateViews(entry, getDismissCallback(entry));
         } catch (InflationException e) {
-            // logged in the inflation callback
+            // logged in mInflationCallback.handleInflationException
         }
     }
 
@@ -126,9 +127,11 @@ public class NotifInflaterImpl implements NotifInflater {
             new NotificationContentInflater.InflationCallback() {
                 @Override
                 public void handleInflationException(
-                        StatusBarNotification sbn,
+                        NotificationEntry entry,
                         Exception e) {
+                    entry.setHasInflationError(true);
                     try {
+                        final StatusBarNotification sbn = entry.getSbn();
                         // report notification inflation errors back up
                         // to notification delegates
                         mStatusBarService.onNotificationError(

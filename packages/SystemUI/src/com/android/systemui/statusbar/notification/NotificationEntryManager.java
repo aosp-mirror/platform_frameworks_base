@@ -294,6 +294,10 @@ public class NotificationEntryManager implements
      * WARNING: this will call back into us.  Don't hold any locks.
      */
     @Override
+    public void handleInflationException(NotificationEntry n, Exception e) {
+        handleInflationException(n.getSbn(), e);
+    }
+
     public void handleInflationException(StatusBarNotification n, Exception e) {
         removeNotificationInternal(
                 n.getKey(), null, null, true /* forceRemove */, false /* removedByUser */,
