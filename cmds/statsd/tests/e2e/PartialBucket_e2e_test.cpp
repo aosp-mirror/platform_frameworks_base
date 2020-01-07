@@ -28,16 +28,16 @@ namespace statsd {
 
 #ifdef __ANDROID__
 
-const string kAndroid = "android";
 const string kApp1 = "app1.sharing.1";
 const int kConfigKey = 789130123;  // Randomly chosen to avoid collisions with existing configs.
+const int kCallingUid = 0; // Randomly chosen
 
 void SendConfig(StatsService& service, const StatsdConfig& config) {
     string str;
     config.SerializeToString(&str);
     std::vector<uint8_t> configAsVec(str.begin(), str.end());
     bool success;
-    service.addConfiguration(kConfigKey, configAsVec, String16(kAndroid.c_str()));
+    service.addConfiguration(kConfigKey, configAsVec, kCallingUid);
 }
 
 ConfigMetricsReport GetReports(sp<StatsLogProcessor> processor, int64_t timestamp,
@@ -50,7 +50,7 @@ ConfigMetricsReport GetReports(sp<StatsLogProcessor> processor, int64_t timestam
     ConfigMetricsReportList reports;
     reports.ParseFromArray(output.data(), output.size());
     EXPECT_EQ(1, reports.reports_size());
-    return reports.reports(0);
+    return reports.reports(kCallingUid);
 }
 
 StatsdConfig MakeConfig() {
