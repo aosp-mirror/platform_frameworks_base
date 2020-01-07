@@ -465,7 +465,8 @@ public class ComponentParseUtils {
         }
 
         public void setPermission(String permission) {
-            this.permission = TextUtils.safeIntern(permission);
+            // Empty string must be converted to null
+            this.permission = TextUtils.isEmpty(permission) ? null : permission.intern();
         }
 
         public String getPermission() {
@@ -842,7 +843,9 @@ public class ComponentParseUtils {
         }
 
         public void setReadPermission(String readPermission) {
-            this.readPermission = TextUtils.safeIntern(readPermission);
+            // Empty string must be converted to null
+            this.readPermission = TextUtils.isEmpty(readPermission)
+                    ? null : readPermission.intern();
         }
 
         public String getReadPermission() {
@@ -850,7 +853,9 @@ public class ComponentParseUtils {
         }
 
         public void setWritePermission(String writePermission) {
-            this.writePermission = TextUtils.safeIntern(writePermission);
+            // Empty string must be converted to null
+            this.writePermission = TextUtils.isEmpty(writePermission)
+                    ? null : writePermission.intern();
         }
 
         public String getWritePermission() {
