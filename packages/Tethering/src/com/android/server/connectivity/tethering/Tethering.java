@@ -633,8 +633,7 @@ public class Tethering {
         reportTetherStateChanged(mTetherStatesParcel);
 
         final Intent bcast = new Intent(ACTION_TETHER_STATE_CHANGED);
-        bcast.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
-                | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        bcast.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
         bcast.putStringArrayListExtra(EXTRA_AVAILABLE_TETHER, availableList);
         bcast.putStringArrayListExtra(EXTRA_ACTIVE_LOCAL_ONLY, localOnlyList);
         bcast.putStringArrayListExtra(EXTRA_ACTIVE_TETHER, tetherList);
