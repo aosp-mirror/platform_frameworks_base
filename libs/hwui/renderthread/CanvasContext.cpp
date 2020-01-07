@@ -16,7 +16,6 @@
 
 #include "CanvasContext.h"
 
-#include <GpuMemoryTracker.h>
 #include <apex/window.h>
 #include <fcntl.h>
 #include <strings.h>
@@ -558,7 +557,7 @@ void CanvasContext::draw() {
         mJankTracker.finishGpuDraw(*forthBehind);
     }
 
-    GpuMemoryTracker::onFrameCompleted();
+    mRenderThread.cacheManager().onFrameCompleted();
 }
 
 // Called by choreographer to do an RT-driven animation
