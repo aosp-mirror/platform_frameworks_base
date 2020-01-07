@@ -18,13 +18,12 @@
 -->
 
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
-    <LinearLayout
+    <FrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/car_nav_button_icon"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:gravity="center"
         android:animateLayoutChanges="true"
         android:orientation="vertical">
 
@@ -32,20 +31,35 @@
             android:id="@+id/car_nav_button_icon_image"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
+            android:layout_gravity="center"
             android:animateLayoutChanges="true"
             android:background="@android:color/transparent"
-            android:scaleType="fitCenter">
-        </com.android.keyguard.AlphaOptimizedImageButton>
+            android:scaleType="fitCenter"
+            android:clickable="false"
+        />
 
         <com.android.keyguard.AlphaOptimizedImageButton
             android:id="@+id/car_nav_button_more_icon"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
+            android:layout_gravity="center"
             android:animateLayoutChanges="true"
             android:src="@drawable/car_ic_arrow"
             android:background="@android:color/transparent"
-            android:scaleType="fitCenter">
-        </com.android.keyguard.AlphaOptimizedImageButton>
+            android:scaleType="fitCenter"
+            android:clickable="false"
+        />
 
-    </LinearLayout>
+        <ImageView
+            android:id="@+id/car_nav_button_unseen_icon"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_gravity="center"
+            android:src="@drawable/car_ic_unseen_indicator"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:clickable="false"
+        />
+
+    </FrameLayout>
 </merge>

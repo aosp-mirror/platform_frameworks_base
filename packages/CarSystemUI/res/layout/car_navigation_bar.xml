@@ -114,7 +114,6 @@
             style="@style/NavigationBarButton"
             systemui:icon="@drawable/car_ic_notification"
             systemui:longIntent="intent:#Intent;component=com.android.car.bugreport/.BugReportActivity;end"
-            systemui:selectedIcon="@drawable/car_ic_notification_selected"
         />
 
         <Space
@@ -138,8 +137,7 @@
         android:paddingStart="@dimen/car_keyline_1"
         android:paddingEnd="@dimen/car_keyline_1"
         android:gravity="center"
-        android:visibility="gone">
-
-    </LinearLayout>
+        android:visibility="gone"
+    />
 
 </com.android.systemui.navigationbar.car.CarNavigationBarView>
