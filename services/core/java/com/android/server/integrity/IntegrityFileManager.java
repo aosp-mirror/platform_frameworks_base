@@ -44,12 +44,9 @@ import java.util.Optional;
 public class IntegrityFileManager {
     private static final String TAG = "IntegrityFileManager";
 
-    // TODO: this is a prototype implementation of this class. Thus no tests are included.
-    //  Implementing rule indexing will likely overhaul this class and more tests should be included
-    //  then.
-
     private static final String METADATA_FILE = "metadata";
     private static final String RULES_FILE = "rules";
+    private static final String INDEXING_FILE = "indexing";
     private static final Object RULES_LOCK = new Object();
 
     private static IntegrityFileManager sInstance = null;
@@ -125,9 +122,12 @@ public class IntegrityFileManager {
             // We don't consider this fatal so we continue execution.
         }
 
-        try (FileOutputStream fileOutputStream =
-                new FileOutputStream(new File(mStagingDir, RULES_FILE))) {
-            mRuleSerializer.serialize(rules, Optional.empty(), fileOutputStream);
+        try (FileOutputStream ruleFileOutputStream =
+                     new FileOutputStream(new File(mStagingDir, RULES_FILE));
+             FileOutputStream indexingFileOutputStream =
+                     new FileOutputStream(new File(mStagingDir, INDEXING_FILE))) {
+            mRuleSerializer.serialize(
+                    rules, Optional.empty(), ruleFileOutputStream, indexingFileOutputStream);
         }
 
         switchStagingRulesDir();
@@ -143,7 +143,7 @@ public class IntegrityFileManager {
         // TODO: select rules by index
         synchronized (RULES_LOCK) {
             try (FileInputStream inputStream =
-                    new FileInputStream(new File(mRulesDir, RULES_FILE))) {
+                         new FileInputStream(new File(mRulesDir, RULES_FILE))) {
                 List<Rule> rules = mRuleParser.parse(inputStream);
                 return rules;
             }

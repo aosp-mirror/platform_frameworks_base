@@ -27,7 +27,7 @@ import java.io.OutputStream;
  */
 public class ByteTrackedOutputStream {
 
-    private static long sWrittenBytesCount;
+    private static int sWrittenBytesCount;
     private static OutputStream sOutputStream;
 
     public ByteTrackedOutputStream(OutputStream outputStream) {
@@ -47,7 +47,7 @@ public class ByteTrackedOutputStream {
     /**
      * Returns the total number of bytes written into the output stream at the requested time.
      */
-    public long getWrittenBytesCount() {
+    public int getWrittenBytesCount() {
         return sWrittenBytesCount;
     }
 }

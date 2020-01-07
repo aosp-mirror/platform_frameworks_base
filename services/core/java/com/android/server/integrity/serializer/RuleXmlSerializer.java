@@ -56,12 +56,17 @@ public class RuleXmlSerializer implements RuleSerializer {
 
     @Override
     public void serialize(
-            List<Rule> rules, Optional<Integer> formatVersion, OutputStream outputStream)
+            List<Rule> rules,
+            Optional<Integer> formatVersion,
+            OutputStream outputStream,
+            OutputStream indexingOutputStream)
             throws RuleSerializeException {
         try {
             XmlSerializer xmlSerializer = Xml.newSerializer();
             xmlSerializer.setOutput(outputStream, StandardCharsets.UTF_8.name());
             serializeRules(rules, xmlSerializer);
+
+            // TODO(b/145493956): Implement the indexing logic.
         } catch (Exception e) {
             throw new RuleSerializeException(e.getMessage(), e);
         }

@@ -26,10 +26,14 @@ import java.util.Optional;
 public interface RuleSerializer {
 
     /** Serialize rules to an output stream */
-    void serialize(List<Rule> rules, Optional<Integer> formatVersion, OutputStream outputStream)
+    void serialize(
+            List<Rule> rules,
+            Optional<Integer> formatVersion,
+            OutputStream ruleFileOutputStream,
+            OutputStream indexingFileOutputStream)
             throws RuleSerializeException;
 
     /** Serialize rules to a ByteArray. */
-    byte[] serialize(List<Rule> rule, Optional<Integer> formatVersion)
+    byte[] serialize(List<Rule> rules, Optional<Integer> formatVersion)
             throws RuleSerializeException;
 }
