@@ -137,11 +137,6 @@ public class MmsServiceBroker extends SystemService {
         }
 
         @Override
-        public Bundle getCarrierConfigValues(int subId) throws RemoteException {
-            return null;
-        }
-
-        @Override
         public Uri importTextMessage(String callingPkg, String address, int type, String text,
                 long timestampMillis, boolean seen, boolean read) throws RemoteException {
             return null;
@@ -367,12 +362,6 @@ public class MmsServiceBroker extends SystemService {
 
             getServiceGuarded().downloadMessage(subId, callingPkg, locationUrl, contentUri,
                     configOverrides, downloadedIntent);
-        }
-
-        @Override
-        public Bundle getCarrierConfigValues(int subId) throws RemoteException {
-            Slog.d(TAG, "getCarrierConfigValues() by " + getCallingPackageName());
-            return getServiceGuarded().getCarrierConfigValues(subId);
         }
 
         @Override

@@ -97,22 +97,4 @@ public class MmsManager {
             // Ignore it
         }
     }
-
-    /**
-     * Get carrier-dependent configuration values.
-     *
-     * @param subId the subscription id
-     * @return bundle key/values pairs of configuration values
-     */
-    public Bundle getCarrierConfigValues(int subId) {
-        try {
-            IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-            if (iMms != null) {
-                return iMms.getCarrierConfigValues(subId);
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-        return null;
-    }
 }
