@@ -557,7 +557,7 @@ public final class SmsCbMessage implements Parcelable {
     public ContentValues getContentValues() {
         ContentValues cv = new ContentValues(16);
         cv.put(CellBroadcasts.SLOT_INDEX, mSlotIndex);
-        cv.put(CellBroadcasts.SUB_ID, mSubId);
+        cv.put(CellBroadcasts.SUBSCRIPTION_ID, mSubId);
         cv.put(CellBroadcasts.GEOGRAPHICAL_SCOPE, mGeographicalScope);
         if (mLocation.getPlmn() != null) {
             cv.put(CellBroadcasts.PLMN, mLocation.getPlmn());
@@ -621,7 +621,7 @@ public final class SmsCbMessage implements Parcelable {
         int format = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.MESSAGE_FORMAT));
         int priority = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.MESSAGE_PRIORITY));
         int slotIndex = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.SLOT_INDEX));
-        int subId = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.SUB_ID));
+        int subId = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.SUBSCRIPTION_ID));
 
         String plmn;
         int plmnColumn = cursor.getColumnIndex(CellBroadcasts.PLMN);
