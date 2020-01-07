@@ -8329,6 +8329,26 @@
         <attr name="successColor" format="color|reference"/>
     </declare-styleable>
 
+    <!-- =============================== -->
+    <!-- QuickAccessWallet attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <!-- Use <code>quickaccesswallet-service</code> as the root tag of the XML resource
+         that describes a {@link android.service.quickaccesswallet.QuickAccessWalletService},
+         which is referenced from its
+         {@link android.service.quickaccesswallet.QuickAccessWalletService#SERVICE_META_DATA}
+         meta-data entry.
+    -->
+    <declare-styleable name="QuickAccessWalletService">
+        <!-- Fully qualified class name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity"/>
+        <!-- Fully qualified class name of an activity that allows the user to view
+             their entire wallet -->
+        <attr name="targetActivity"/>
+    </declare-styleable>
+
     <!-- Use <code>recognition-service</code> as the root tag of the XML resource that
          describes a {@link android.speech.RecognitionService}, which is referenced from
          its {@link android.speech.RecognitionService#SERVICE_META_DATA} meta-data entry.
