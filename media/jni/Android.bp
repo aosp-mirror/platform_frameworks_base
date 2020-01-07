@@ -139,6 +139,7 @@ cc_library_shared {
         "libfmq",
         "libhidlbase",
         "liblog",
+        "libnativehelper",
         "libutils",
     ],
 
