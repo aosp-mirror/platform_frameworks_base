@@ -84,7 +84,7 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
 
         mTarget.finishTaskPositioning();
         // Wait until the looper processes finishTaskPositioning.
-        assertTrue(waitHandlerIdle(mWm.mH, TIMEOUT_MS));
+        assertTrue(waitHandlerIdle(mWm.mAnimationHandler, TIMEOUT_MS));
 
         assertFalse(mTarget.isPositioningLocked());
         assertNull(mTarget.getDragWindowHandleLocked());
@@ -103,7 +103,7 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
 
         mTarget.finishTaskPositioning(mWindow.mClient);
         // Wait until the looper processes finishTaskPositioning.
-        assertTrue(waitHandlerIdle(mWm.mH, TIMEOUT_MS));
+        assertTrue(waitHandlerIdle(mWm.mAnimationHandler, TIMEOUT_MS));
 
         assertFalse(mTarget.isPositioningLocked());
         assertNull(mTarget.getDragWindowHandleLocked());
@@ -119,7 +119,7 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
         assertNotNull(mWindow.getTask().getTopVisibleAppMainWindow());
 
         mTarget.handleTapOutsideTask(content, 0, 0);
-        // Wait until the looper processes finishTaskPositioning.
+        // Wait until the looper processes handleTapOutsideTask.
         assertTrue(waitHandlerIdle(mWm.mH, TIMEOUT_MS));
 
         assertTrue(mTarget.isPositioningLocked());
@@ -127,7 +127,7 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
 
         mTarget.finishTaskPositioning();
         // Wait until the looper processes finishTaskPositioning.
-        assertTrue(waitHandlerIdle(mWm.mH, TIMEOUT_MS));
+        assertTrue(waitHandlerIdle(mWm.mAnimationHandler, TIMEOUT_MS));
 
         assertFalse(mTarget.isPositioningLocked());
         assertNull(mTarget.getDragWindowHandleLocked());
@@ -145,7 +145,7 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
         mWindow.getTask().setResizeMode(RESIZE_MODE_UNRESIZEABLE);
 
         mTarget.handleTapOutsideTask(content, 0, 0);
-        // Wait until the looper processes finishTaskPositioning.
+        // Wait until the looper processes handleTapOutsideTask.
         assertTrue(waitHandlerIdle(mWm.mH, TIMEOUT_MS));
 
         assertFalse(mTarget.isPositioningLocked());
