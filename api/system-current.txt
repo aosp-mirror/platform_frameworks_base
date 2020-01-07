@@ -9569,6 +9569,7 @@ package android.telephony {
     field public static final int IMS_ACCESS_BLOCKED = 60; // 0x3c
     field public static final int IMS_MERGED_SUCCESSFULLY = 45; // 0x2d
     field public static final int IMS_SIP_ALTERNATE_EMERGENCY_CALL = 71; // 0x47
+    field public static final int INCOMING_AUTO_REJECTED = 81; // 0x51
     field public static final int INCOMING_MISSED = 1; // 0x1
     field public static final int INCOMING_REJECTED = 16; // 0x10
     field public static final int INVALID_CREDENTIALS = 10; // 0xa
@@ -10726,6 +10727,7 @@ package android.telephony.ims {
     field public static final int DIALSTRING_USSD = 2; // 0x2
     field public static final String EXTRA_ADDITIONAL_CALL_INFO = "AdditionalCallInfo";
     field public static final String EXTRA_ADDITIONAL_SIP_INVITE_FIELDS = "android.telephony.ims.extra.ADDITIONAL_SIP_INVITE_FIELDS";
+    field public static final String EXTRA_CALL_DISCONNECT_CAUSE = "android.telephony.ims.extra.CALL_DISCONNECT_CAUSE";
     field public static final String EXTRA_CALL_RAT_TYPE = "CallRadioTech";
     field public static final String EXTRA_CHILD_NUMBER = "ChildNum";
     field public static final String EXTRA_CNA = "cna";
