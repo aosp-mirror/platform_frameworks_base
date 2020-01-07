@@ -16,6 +16,10 @@
 
 package android.net.wifi;
 
+import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_EAP_SUITE_B;
+import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_OWE;
+import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_SAE;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -311,5 +315,58 @@ public class WifiConfigurationTest {
         for (int i = 0; i < NetworkSelectionStatus.NETWORK_SELECTION_DISABLED_MAX; i++) {
             assertNotNull(NetworkSelectionStatus.DISABLE_REASON_INFOS.get(i));
         }
+    }
+
+    /**
+     * Ensure that {@link WifiConfiguration#setSecurityParams(int)} sets up the
+     * {@link WifiConfiguration} object correctly for SAE security type.
+     * @throws Exception
+     */
+    @Test
+    public void testSetSecurityParamsForSae() throws Exception {
+        WifiConfiguration config = new WifiConfiguration();
+
+        config.setSecurityParams(SECURITY_TYPE_SAE);
+
+        assertTrue(config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.SAE));
+        assertTrue(config.allowedPairwiseCiphers.get(WifiConfiguration.PairwiseCipher.CCMP));
+        assertTrue(config.allowedGroupCiphers.get(WifiConfiguration.GroupCipher.CCMP));
+        assertTrue(config.requirePMF);
+    }
+
+    /**
+     * Ensure that {@link WifiConfiguration#setSecurityParams(int)} sets up the
+     * {@link WifiConfiguration} object correctly for OWE security type.
+     * @throws Exception
+     */
+    @Test
+    public void testSetSecurityParamsForOwe() throws Exception {
+        WifiConfiguration config = new WifiConfiguration();
+
+        config.setSecurityParams(SECURITY_TYPE_OWE);
+
+        assertTrue(config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.OWE));
+        assertTrue(config.allowedPairwiseCiphers.get(WifiConfiguration.PairwiseCipher.CCMP));
+        assertTrue(config.allowedGroupCiphers.get(WifiConfiguration.GroupCipher.CCMP));
+        assertTrue(config.requirePMF);
+    }
+
+    /**
+     * Ensure that {@link WifiConfiguration#setSecurityParams(int)} sets up the
+     * {@link WifiConfiguration} object correctly for Suite-B security type.
+     * @throws Exception
+     */
+    @Test
+    public void testSetSecurityParamsForSuiteB() throws Exception {
+        WifiConfiguration config = new WifiConfiguration();
+
+        config.setSecurityParams(SECURITY_TYPE_EAP_SUITE_B);
+
+        assertTrue(config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.SUITE_B_192));
+        assertTrue(config.allowedPairwiseCiphers.get(WifiConfiguration.PairwiseCipher.GCMP_256));
+        assertTrue(config.allowedGroupCiphers.get(WifiConfiguration.GroupCipher.GCMP_256));
+        assertTrue(config.allowedGroupManagementCiphers
+                .get(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256));
+        assertTrue(config.requirePMF);
     }
 }
