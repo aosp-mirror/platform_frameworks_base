@@ -1477,17 +1477,7 @@ Status StatsService::sendWatchdogRollbackOccurredAtom(const int32_t rollbackType
 
 
 Status StatsService::getRegisteredExperimentIds(std::vector<int64_t>* experimentIdsOut) {
-    uid_t uid = IPCThreadState::self()->getCallingUid();
-
-    // Caller must be granted these permissions
-    if (!checkCallingPermission(String16(kPermissionDump))) {
-        return exception(binder::Status::EX_SECURITY,
-                         StringPrintf("UID %d lacks permission %s", uid, kPermissionDump));
-    }
-    if (!checkCallingPermission(String16(kPermissionUsage))) {
-        return exception(binder::Status::EX_SECURITY,
-                         StringPrintf("UID %d lacks permission %s", uid, kPermissionUsage));
-    }
+    ENFORCE_UID(AID_SYSTEM);
     // TODO: add verifier permission
 
     // Read the latest train info

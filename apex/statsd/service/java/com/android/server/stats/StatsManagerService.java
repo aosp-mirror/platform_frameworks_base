@@ -19,6 +19,7 @@ package com.android.server.stats;
 import static com.android.server.stats.StatsCompanion.PendingIntentRef;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -245,20 +246,48 @@ public class StatsManagerService extends IStatsManagerService.Stub {
         }
     }
 
+    @Override
+    public long[] getRegisteredExperimentIds() throws IllegalStateException {
+        enforceDumpAndUsageStatsPermission(null);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            IStatsd statsd = waitForStatsd();
+            if (statsd != null) {
+                return statsd.getRegisteredExperimentIds();
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to getRegisteredExperimentIds with statsd");
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        throw new IllegalStateException("Failed to connect to statsd to registerExperimentIds");
+    }
+
     void setStatsCompanionService(StatsCompanionService statsCompanionService) {
         mStatsCompanionService = statsCompanionService;
     }
 
-    private void enforceDumpAndUsageStatsPermission(String packageName) {
+    /**
+     * Checks that the caller has both DUMP and PACKAGE_USAGE_STATS permissions. Also checks that
+     * the caller has USAGE_STATS_PERMISSION_OPS for the specified packageName if it is not null.
+     *
+     * @param packageName The packageName to check USAGE_STATS_PERMISSION_OPS.
+     */
+    private void enforceDumpAndUsageStatsPermission(@Nullable String packageName) {
         int callingUid = Binder.getCallingUid();
         int callingPid = Binder.getCallingPid();
 
         if (callingPid == Process.myPid()) {
             return;
         }
+
         mContext.enforceCallingPermission(Manifest.permission.DUMP, null);
         mContext.enforceCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS, null);
 
+        if (packageName == null) {
+            return;
+        }
         AppOpsManager appOpsManager = (AppOpsManager) mContext
                 .getSystemService(Context.APP_OPS_SERVICE);
         switch (appOpsManager.noteOp(USAGE_STATS_PERMISSION_OPS,

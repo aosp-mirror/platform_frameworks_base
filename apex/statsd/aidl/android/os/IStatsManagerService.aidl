@@ -85,4 +85,11 @@ interface IStatsManagerService {
      * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
      */
     void unsetBroadcastSubscriber(long configKey, long subscriberId, in String packageName);
+
+    /**
+     * Returns the most recently registered experiment IDs.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    long[] getRegisteredExperimentIds();
 }
