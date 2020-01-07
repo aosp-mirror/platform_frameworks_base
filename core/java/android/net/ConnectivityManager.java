@@ -3107,6 +3107,63 @@ public class ConnectivityManager {
         }
     }
 
+    /**
+     * Registers the specified {@link NetworkProvider}.
+     * Each listener must only be registered once. The listener can be unregistered with
+     * {@link #unregisterNetworkProvider}.
+     *
+     * @param provider the provider to register
+     * @return the ID of the provider. This ID must be used by the provider when registering
+     *         {@link android.net.NetworkAgent}s.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
+    public int registerNetworkProvider(@NonNull NetworkProvider provider) {
+        if (provider.getProviderId() != NetworkProvider.ID_NONE) {
+            // TODO: Provide a better method for checking this by moving NetworkFactory.SerialNumber
+            // out of NetworkFactory.
+            throw new IllegalStateException("NetworkProviders can only be registered once");
+        }
+
+        try {
+            int providerId = mService.registerNetworkProvider(provider.getMessenger(),
+                    provider.getName());
+            provider.setProviderId(providerId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return provider.getProviderId();
+    }
+
+    /**
+     * Unregisters the specified NetworkProvider.
+     *
+     * @param provider the provider to unregister
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
+    public void unregisterNetworkProvider(@NonNull NetworkProvider provider) {
+        try {
+            mService.unregisterNetworkProvider(provider.getMessenger());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        provider.setProviderId(NetworkProvider.ID_NONE);
+    }
+
+
+    /** @hide exposed via the NetworkProvider class. */
+    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
+    public void declareNetworkRequestUnfulfillable(@NonNull NetworkRequest request) {
+        try {
+            mService.declareNetworkRequestUnfulfillable(request);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     // TODO : remove this method. It is a stopgap measure to help sheperding a number
     // of dependent changes that would conflict throughout the automerger graph. Having this
     // temporarily helps with the process of going through with all these dependent changes across
