@@ -100,7 +100,7 @@ void DvrCallback::setDvr(const jobject dvr) {
 
 /////////////// Dvr ///////////////////////
 
-Dvr::Dvr(sp<IDvr> sp, jweak obj) : mDvrSp(sp), mDvrObj(obj) {}
+Dvr::Dvr(sp<IDvr> sp, jweak obj) : mDvrSp(sp), mDvrObj(obj), mDvrMQEventFlag(nullptr) {}
 
 Dvr::~Dvr() {
     EventFlag::deleteEventFlag(&mDvrMQEventFlag);
