@@ -258,6 +258,7 @@ public class MediaRouter2Test {
 
         final CountDownLatch successLatch = new CountDownLatch(1);
         final CountDownLatch failureLatch = new CountDownLatch(1);
+        final List<RouteSessionController> controllers = new ArrayList<>();
 
         // Create session with this route
         SessionCallback sessionCallback = new SessionCallback() {
@@ -266,6 +267,7 @@ public class MediaRouter2Test {
                 assertNotNull(controller);
                 assertTrue(createRouteMap(controller.getSelectedRoutes()).containsKey(ROUTE_ID1));
                 assertTrue(TextUtils.equals(CATEGORY_SAMPLE, controller.getControlCategory()));
+                controllers.add(controller);
                 successLatch.countDown();
             }
 
@@ -288,7 +290,7 @@ public class MediaRouter2Test {
             // onSessionCreationFailed should not be called.
             assertFalse(failureLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
         } finally {
-            // TODO: Release controllers
+            releaseControllers(controllers);
             mRouter2.unregisterRouteCallback(routeCallback);
             mRouter2.unregisterSessionCallback(sessionCallback);
         }
@@ -305,11 +307,13 @@ public class MediaRouter2Test {
 
         final CountDownLatch successLatch = new CountDownLatch(1);
         final CountDownLatch failureLatch = new CountDownLatch(1);
+        final List<RouteSessionController> controllers = new ArrayList<>();
 
         // Create session with this route
         SessionCallback sessionCallback = new SessionCallback() {
             @Override
             public void onSessionCreated(RouteSessionController controller) {
+                controllers.add(controller);
                 successLatch.countDown();
             }
 
@@ -334,7 +338,7 @@ public class MediaRouter2Test {
             // onSessionCreated should not be called.
             assertFalse(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
         } finally {
-            // TODO: Release controllers
+            releaseControllers(controllers);
             mRouter2.unregisterRouteCallback(routeCallback);
             mRouter2.unregisterSessionCallback(sessionCallback);
         }
@@ -347,7 +351,6 @@ public class MediaRouter2Test {
 
         final CountDownLatch successLatch = new CountDownLatch(2);
         final CountDownLatch failureLatch = new CountDownLatch(1);
-
         final List<RouteSessionController> createdControllers = new ArrayList<>();
 
         // Create session with this route
@@ -395,7 +398,7 @@ public class MediaRouter2Test {
             assertTrue(TextUtils.equals(CATEGORY_SAMPLE, controller1.getControlCategory()));
             assertTrue(TextUtils.equals(CATEGORY_SAMPLE, controller2.getControlCategory()));
         } finally {
-            // TODO: Release controllers
+            releaseControllers(createdControllers);
             mRouter2.unregisterRouteCallback(routeCallback);
             mRouter2.unregisterSessionCallback(sessionCallback);
         }
@@ -412,11 +415,13 @@ public class MediaRouter2Test {
 
         final CountDownLatch successLatch = new CountDownLatch(1);
         final CountDownLatch failureLatch = new CountDownLatch(1);
+        final List<RouteSessionController> controllers = new ArrayList<>();
 
         // Create session with this route
         SessionCallback sessionCallback = new SessionCallback() {
             @Override
             public void onSessionCreated(RouteSessionController controller) {
+                controllers.add(controller);
                 successLatch.countDown();
             }
 
@@ -442,7 +447,7 @@ public class MediaRouter2Test {
             assertFalse(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
             assertFalse(failureLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
         } finally {
-            // TODO: Release controllers
+            releaseControllers(controllers);
             mRouter2.unregisterRouteCallback(routeCallback);
             mRouter2.unregisterSessionCallback(sessionCallback);
         }
@@ -541,8 +546,7 @@ public class MediaRouter2Test {
             assertTrue(onSessionInfoChangedLatchForDeselect.await(
                     TIMEOUT_MS, TimeUnit.MILLISECONDS));
         } finally {
-            // TODO: Release controllers
-            controllers.clear();
+            releaseControllers(controllers);
             mRouter2.unregisterRouteCallback(routeCallback);
             mRouter2.unregisterSessionCallback(sessionCallback);
         }
@@ -618,12 +622,79 @@ public class MediaRouter2Test {
             controller.transferToRoute(routeToTransferTo);
             assertTrue(onSessionInfoChangedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
         } finally {
-            // TODO: Release controllers
-            controllers.clear();
+            releaseControllers(controllers);
             mRouter2.unregisterRouteCallback(routeCallback);
             mRouter2.unregisterSessionCallback(sessionCallback);
         }
+    }
 
+    // TODO: Add tests for onSessionReleased() call.
+
+    @Test
+    public void testRouteSessionControllerReleaseShouldIgnoreTransferTo() throws Exception {
+        final List<String> sampleControlCategory = new ArrayList<>();
+        sampleControlCategory.add(CATEGORY_SAMPLE);
+
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutes(sampleControlCategory);
+        MediaRoute2Info routeToCreateSessionWith = routes.get(ROUTE_ID1);
+        assertNotNull(routeToCreateSessionWith);
+
+        final CountDownLatch onSessionCreatedLatch = new CountDownLatch(1);
+        final CountDownLatch onSessionInfoChangedLatch = new CountDownLatch(1);
+        final List<RouteSessionController> controllers = new ArrayList<>();
+
+        // Create session with ROUTE_ID1
+        SessionCallback sessionCallback = new SessionCallback() {
+            @Override
+            public void onSessionCreated(RouteSessionController controller) {
+                assertNotNull(controller);
+                assertTrue(getRouteIds(controller.getSelectedRoutes()).contains(ROUTE_ID1));
+                assertTrue(TextUtils.equals(CATEGORY_SAMPLE, controller.getControlCategory()));
+                controllers.add(controller);
+                onSessionCreatedLatch.countDown();
+            }
+
+            @Override
+            public void onSessionInfoChanged(RouteSessionController controller,
+                    RouteSessionInfo oldInfo, RouteSessionInfo newInfo) {
+                if (onSessionCreatedLatch.getCount() != 0
+                        || controllers.get(0).getSessionId() != controller.getSessionId()) {
+                    return;
+                }
+                onSessionInfoChangedLatch.countDown();
+            }
+        };
+
+        // TODO: Remove this once the MediaRouter2 becomes always connected to the service.
+        RouteCallback routeCallback = new RouteCallback();
+        mRouter2.registerRouteCallback(mExecutor, routeCallback);
+
+        try {
+            mRouter2.registerSessionCallback(mExecutor, sessionCallback);
+            mRouter2.requestCreateSession(routeToCreateSessionWith, CATEGORY_SAMPLE);
+            assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
+            assertEquals(1, controllers.size());
+            RouteSessionController controller = controllers.get(0);
+            assertTrue(getRouteIds(controller.getTransferrableRoutes())
+                    .contains(ROUTE_ID5_TO_TRANSFER_TO));
+
+            // Release controller. Future calls should be ignored.
+            controller.release();
+
+            // Transfer to ROUTE_ID5_TO_TRANSFER_TO
+            MediaRoute2Info routeToTransferTo = routes.get(ROUTE_ID5_TO_TRANSFER_TO);
+            assertNotNull(routeToTransferTo);
+
+            // This call should be ignored.
+            // The onSessionInfoChanged() shouldn't be called.
+            controller.transferToRoute(routeToTransferTo);
+            assertFalse(onSessionInfoChangedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        } finally {
+            releaseControllers(controllers);
+            mRouter2.unregisterRouteCallback(routeCallback);
+            mRouter2.unregisterSessionCallback(sessionCallback);
+        }
     }
 
     // Helper for getting routes easily
@@ -660,6 +731,12 @@ public class MediaRouter2Test {
             return createRouteMap(mRouter2.getRoutes());
         } finally {
             mRouter2.unregisterRouteCallback(routeCallback);
+        }
+    }
+
+    static void releaseControllers(@NonNull List<RouteSessionController> controllers) {
+        for (RouteSessionController controller : controllers) {
+            controller.release();
         }
     }
 
