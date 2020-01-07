@@ -5807,8 +5807,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // Make sure that the caller is the profile owner or delegate.
             enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
                     DELEGATION_CERT_INSTALL);
-            // Verify that the profile owner was granted access to Device IDs.
-            if (canProfileOwnerAccessDeviceIds(userId)) {
+            // Verify that the managed profile is on an organization-owned device and as such
+            // the profile owner can access Device IDs.
+            if (isProfileOwnerOfOrganizationOwnedDevice(userId)) {
                 return;
             }
             throw new SecurityException(
@@ -8005,7 +8006,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private boolean canProfileOwnerAccessDeviceIds(int userId) {
+    private boolean isProfileOwnerOfOrganizationOwnedDevice(int userId) {
         synchronized (getLockObject()) {
             return mOwners.isProfileOwnerOfOrganizationOwnedDevice(userId);
         }
@@ -8028,7 +8029,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean isProfileOwnerOfOrganizationOwnedDevice(ComponentName who, int userId) {
-        return isProfileOwner(who, userId) && canProfileOwnerAccessDeviceIds(userId);
+        return isProfileOwner(who, userId) && isProfileOwnerOfOrganizationOwnedDevice(userId);
     }
 
     @Override
@@ -8555,7 +8556,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
                 if (userInfo.isManagedProfile()) {
                     if (getProfileOwner(userInfo.id) != null
-                            && canProfileOwnerAccessDeviceIds(userInfo.id)) {
+                            && isProfileOwnerOfOrganizationOwnedDevice(userInfo.id)) {
                         ComponentName who = getProfileOwner(userInfo.id);
                         return getActiveAdminUncheckedLocked(who, userInfo.id);
                     }
@@ -8606,7 +8607,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final boolean isCallerProfileOwnerOrDelegate = profileOwner != null
                 && (profileOwner.getPackageName().equals(packageName)
                         || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL));
-        if (isCallerProfileOwnerOrDelegate && canProfileOwnerAccessDeviceIds(userId)) {
+        if (isCallerProfileOwnerOrDelegate && isProfileOwnerOfOrganizationOwnedDevice(userId)) {
             return true;
         }
         //TODO(b/130844684): Temporarily allow profile owner on non-organization-owned devices
