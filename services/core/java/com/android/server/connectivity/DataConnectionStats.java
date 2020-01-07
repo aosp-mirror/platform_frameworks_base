@@ -16,6 +16,9 @@
 
 package com.android.server.connectivity;
 
+import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN;
+import static android.telephony.NetworkRegistrationInfo.DOMAIN_PS;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +27,7 @@ import android.net.ConnectivityManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -91,7 +95,10 @@ public class DataConnectionStats extends BroadcastReceiver {
         boolean visible = (simReadyOrUnknown || isCdma()) // we only check the sim state for GSM
                 && hasService()
                 && mDataState == TelephonyManager.DATA_CONNECTED;
-        int networkType = mServiceState.getDataNetworkType();
+        NetworkRegistrationInfo regInfo =
+                mServiceState.getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN);
+        int networkType = regInfo == null ? TelephonyManager.NETWORK_TYPE_UNKNOWN
+                : regInfo.getAccessNetworkTechnology();
         if (DEBUG) Log.d(TAG, String.format("Noting data connection for network type %s: %svisible",
                 networkType, visible ? "" : "not "));
         try {
