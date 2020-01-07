@@ -664,6 +664,7 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         setTextOrHide(mSubtitleView,
                 mBiometricPromptBundle.getString(BiometricPrompt.KEY_SUBTITLE));
+
         setTextOrHide(mDescriptionView,
                 mBiometricPromptBundle.getString(BiometricPrompt.KEY_DESCRIPTION));
 

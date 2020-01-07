@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -56,6 +58,7 @@ public abstract class AuthCredentialView extends LinearLayout {
     private TextView mTitleView;
     private TextView mSubtitleView;
     private TextView mDescriptionView;
+    private ImageView mIconView;
     protected TextView mErrorView;
 
     protected @Utils.CredentialType int mCredentialType;
@@ -176,6 +179,16 @@ public abstract class AuthCredentialView extends LinearLayout {
         setTextOrHide(mDescriptionView,
                 mBiometricPromptBundle.getString(BiometricPrompt.KEY_DESCRIPTION));
 
+        final boolean isManagedProfile = Utils.isManagedProfile(mContext, mEffectiveUserId);
+        final Drawable image;
+        if (isManagedProfile) {
+            image = getResources().getDrawable(R.drawable.auth_dialog_enterprise,
+                    mContext.getTheme());
+        } else {
+            image = getResources().getDrawable(R.drawable.auth_dialog_lock, mContext.getTheme());
+        }
+        mIconView.setImageDrawable(image);
+
         // Only animate this if we're transitioning from a biometric view.
         if (mShouldAnimateContents) {
             setTranslationY(getResources()
@@ -207,6 +220,7 @@ public abstract class AuthCredentialView extends LinearLayout {
         mTitleView = findViewById(R.id.title);
         mSubtitleView = findViewById(R.id.subtitle);
         mDescriptionView = findViewById(R.id.description);
+        mIconView = findViewById(R.id.icon);
         mErrorView = findViewById(R.id.error);
     }
 
