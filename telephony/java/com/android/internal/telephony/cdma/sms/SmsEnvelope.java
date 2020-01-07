@@ -16,8 +16,7 @@
 
 package com.android.internal.telephony.cdma.sms;
 
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.telephony.cdma.CdmaSmsCbProgramData;
 
 public final class SmsEnvelope {

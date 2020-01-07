@@ -16,12 +16,12 @@
 
 package com.android.ims.internal.uce.options;
 
-import com.android.ims.internal.uce.common.StatusCode;
-import com.android.ims.internal.uce.common.CapInfo;
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.ims.internal.uce.common.CapInfo;
+import com.android.ims.internal.uce.common.StatusCode;
 
 /** @hide  */
 public class OptionsCmdStatus implements Parcelable {

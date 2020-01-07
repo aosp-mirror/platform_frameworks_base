@@ -25,6 +25,7 @@ import static com.android.internal.telephony.SmsConstants.MAX_USER_DATA_BYTES;
 import static com.android.internal.telephony.SmsConstants.MAX_USER_DATA_SEPTETS;
 import static com.android.internal.telephony.SmsConstants.MessageClass;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.Rlog;
@@ -37,8 +38,6 @@ import com.android.internal.telephony.Sms7BitEncodingTranslator;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.uicc.IccUtils;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;

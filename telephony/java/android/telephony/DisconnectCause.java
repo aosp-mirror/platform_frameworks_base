@@ -18,7 +18,7 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Describes the cause of a disconnected call. Those disconnect causes can be converted into a more

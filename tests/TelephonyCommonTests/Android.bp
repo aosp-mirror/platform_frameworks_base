@@ -44,5 +44,6 @@ android_test {
         "android.test.runner",
         "android.test.mock",
         "android.test.base",
+        "unsupportedappusage",
     ],
 }
