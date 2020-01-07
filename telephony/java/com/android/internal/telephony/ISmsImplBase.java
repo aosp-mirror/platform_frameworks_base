@@ -186,6 +186,11 @@ public class ISmsImplBase extends ISms.Stub {
     }
 
     @Override
+    public Bundle getCarrierConfigValuesForSubscriber(int subId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String createAppSpecificSmsToken(int subId, String callingPkg, PendingIntent intent) {
         throw new UnsupportedOperationException();
     }
