@@ -20,7 +20,7 @@ java_defaults {
     srcs: [
         "src/**/*.java",
         ":framework-tethering-shared-srcs",
-        ":net-module-utils-srcs",
+        ":tethering-module-utils-srcs",
         ":services-tethering-shared-srcs",
     ],
     static_libs: [
