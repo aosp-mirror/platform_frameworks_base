@@ -1700,6 +1700,14 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /** @see AudioManager#getDevicesForAttributes(AudioAttributes) */
+    public @NonNull ArrayList<AudioDeviceAddress> getDevicesForAttributes(
+            @NonNull AudioAttributes attributes) {
+        Objects.requireNonNull(attributes);
+        enforceModifyAudioRoutingPermission();
+        return AudioSystem.getDevicesForAttributes(attributes);
+    }
+
 
     /** @see AudioManager#adjustVolume(int, int) */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,

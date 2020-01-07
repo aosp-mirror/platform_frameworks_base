@@ -4329,6 +4329,26 @@ public class AudioManager {
         }
     }
 
+    /**
+     * @hide
+     * Get the audio devices that would be used for the routing of the given audio attributes.
+     * @param attributes the {@link AudioAttributes} for which the routing is being queried
+     * @return an empty list if there was an issue with the request, a list of audio devices
+     *   otherwise (typically one device, except for duplicated paths).
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public @NonNull List<AudioDeviceAddress> getDevicesForAttributes(
+            @NonNull AudioAttributes attributes) {
+        Objects.requireNonNull(attributes);
+        final IAudioService service = getService();
+        try {
+            return service.getDevicesForAttributes(attributes);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
      /**
      * Indicate wired accessory connection state change.
      * @param device type of device connected/disconnected (AudioManager.DEVICE_OUT_xxx)
