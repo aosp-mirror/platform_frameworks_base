@@ -234,7 +234,9 @@
 
     <color name="GM2_orange_900">#B06000</color>
 
+    <!-- Window magnification colors -->
     <color name="magnification_border_color">#FF9900</color>
+    <color name="magnification_switch_button_color">#7F000000</color>
 
     <!-- controls -->
     <color name="control_primary_text">@color/GM2_grey_100</color>
