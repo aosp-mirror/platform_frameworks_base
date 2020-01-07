@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,17 +29,30 @@ public final class ArrayUtils {
 
     /**
      * Adds value to given array if not already present, providing set-like behavior.
+     *
+     * @param kind    The class of the array elements.
+     * @param array   The array to append to.
+     * @param element The array element to append.
+     * @return The array containing the appended element.
      */
     @SuppressWarnings("unchecked")
-    public static @NonNull <T> T[] appendElement(Class<T> kind, @Nullable T[] array, T element) {
+    @NonNull
+    public static <T> T[] appendElement(Class<T> kind, @Nullable T[] array, T element) {
         return appendElement(kind, array, element, false);
     }
 
     /**
      * Adds value to given array.
+     *
+     * @param kind            The class of the array elements.
+     * @param array           The array to append to.
+     * @param element         The array element to append.
+     * @param allowDuplicates Whether to allow duplicated elements in array.
+     * @return The array containing the appended element.
      */
     @SuppressWarnings("unchecked")
-    public static @NonNull <T> T[] appendElement(Class<T> kind, @Nullable T[] array, T element,
+    @NonNull
+    public static <T> T[] appendElement(Class<T> kind, @Nullable T[] array, T element,
             boolean allowDuplicates) {
         final T[] result;
         final int end;
@@ -59,13 +72,14 @@ public final class ArrayUtils {
     /**
      * Combine multiple arrays into a single array.
      *
-     * @param kind The class of the array elements
+     * @param kind   The class of the array elements
      * @param arrays The arrays to combine
-     * @param <T> The class of the array elements (inferred from kind).
+     * @param <T>    The class of the array elements (inferred from kind).
      * @return A single array containing all the elements of the parameter arrays.
      */
     @SuppressWarnings("unchecked")
-    public static @NonNull <T> T[] concatElements(Class<T> kind, @Nullable T[]... arrays) {
+    @NonNull
+    public static <T> T[] concatElements(Class<T> kind, @Nullable T[]... arrays) {
         if (arrays == null || arrays.length == 0) {
             return createEmptyArray(kind);
         }

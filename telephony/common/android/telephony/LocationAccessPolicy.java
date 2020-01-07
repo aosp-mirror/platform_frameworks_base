@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package android.telephony;
@@ -60,6 +60,7 @@ public final class LocationAccessPolicy {
         DENIED_HARD,
     }
 
+    /** Data structure for location permission query */
     public static class LocationPermissionQuery {
         public final String callingPackage;
         public final String callingFeatureId;
@@ -83,6 +84,7 @@ public final class LocationAccessPolicy {
             this.method = method;
         }
 
+        /** Builder for LocationPermissionQuery */
         public static class Builder {
             private String mCallingPackage;
             private String mCallingFeatureId;
@@ -161,6 +163,7 @@ public final class LocationAccessPolicy {
                 return this;
             }
 
+            /** build LocationPermissionQuery */
             public LocationPermissionQuery build() {
                 return new LocationPermissionQuery(mCallingPackage, mCallingFeatureId,
                         mCallingUid, mCallingPid, mMinSdkVersionForCoarse, mMinSdkVersionForFine,
@@ -258,6 +261,7 @@ public final class LocationAccessPolicy {
         }
     }
 
+    /** Check if location permissions have been granted */
     public static LocationPermissionResult checkLocationPermission(
             Context context, LocationPermissionQuery query) {
         // Always allow the phone process and system server to access location. This avoid

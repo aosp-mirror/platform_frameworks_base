@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.internal.telephony;
@@ -74,7 +74,7 @@ public final class CarrierAppUtils {
      * system startup prior to any application running, as well as any time the set of carrier
      * privileged apps may have changed.
      */
-    public synchronized static void disableCarrierAppsUntilPrivileged(String callingPackage,
+    public static synchronized void disableCarrierAppsUntilPrivileged(String callingPackage,
             IPackageManager packageManager, IPermissionManager permissionManager,
             TelephonyManager telephonyManager, ContentResolver contentResolver, int userId) {
         if (DEBUG) {
@@ -101,7 +101,7 @@ public final class CarrierAppUtils {
      * broadcasts. The app will continue to run (briefly) after being disabled, before the Package
      * Manager can kill it, and this can lead to crashes as the app is in an unexpected state.
      */
-    public synchronized static void disableCarrierAppsUntilPrivileged(String callingPackage,
+    public static synchronized void disableCarrierAppsUntilPrivileged(String callingPackage,
             IPackageManager packageManager, IPermissionManager permissionManager,
             ContentResolver contentResolver, int userId) {
         if (DEBUG) {
@@ -119,7 +119,10 @@ public final class CarrierAppUtils {
                 systemCarrierAppsDisabledUntilUsed, systemCarrierAssociatedAppsDisabledUntilUsed);
     }
 
-    // Must be public b/c framework unit tests can't access package-private methods.
+    /**
+     * Disable carrier apps until they are privileged
+     * Must be public b/c framework unit tests can't access package-private methods.
+     */
     @VisibleForTesting
     public static void disableCarrierAppsUntilPrivileged(String callingPackage,
             IPackageManager packageManager, IPermissionManager permissionManager,
@@ -169,10 +172,10 @@ public final class CarrierAppUtils {
                     // Only update enabled state for the app on /system. Once it has been
                     // updated we shouldn't touch it.
                     if (!ai.isUpdatedSystemApp()
-                            && (ai.enabledSetting ==
-                            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
-                            || ai.enabledSetting ==
-                            PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
+                            && (ai.enabledSetting
+                            == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                            || ai.enabledSetting
+                            == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
                             || (ai.flags & ApplicationInfo.FLAG_INSTALLED) == 0)) {
                         Rlog.i(TAG, "Update state(" + packageName + "): ENABLED for user "
                                 + userId);
@@ -191,10 +194,10 @@ public final class CarrierAppUtils {
                     // Also enable any associated apps for this carrier app.
                     if (associatedAppList != null) {
                         for (ApplicationInfo associatedApp : associatedAppList) {
-                            if (associatedApp.enabledSetting ==
-                                    PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
-                                    || associatedApp.enabledSetting ==
-                                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
+                            if (associatedApp.enabledSetting
+                                    == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                                    || associatedApp.enabledSetting
+                                    == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
                                     || (associatedApp.flags
                                     & ApplicationInfo.FLAG_INSTALLED) == 0) {
                                 Rlog.i(TAG, "Update associated state(" + associatedApp.packageName
@@ -219,8 +222,8 @@ public final class CarrierAppUtils {
                     // Only update enabled state for the app on /system. Once it has been
                     // updated we shouldn't touch it.
                     if (!ai.isUpdatedSystemApp()
-                            && ai.enabledSetting ==
-                            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                            && ai.enabledSetting
+                            == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                             && (ai.flags & ApplicationInfo.FLAG_INSTALLED) != 0) {
                         Rlog.i(TAG, "Update state(" + packageName
                                 + "): DISABLED_UNTIL_USED for user " + userId);
@@ -294,8 +297,8 @@ public final class CarrierAppUtils {
             ApplicationInfo ai = candidates.get(i);
             String packageName = ai.packageName;
             boolean hasPrivileges =
-                    telephonyManager.checkCarrierPrivilegesForPackageAnyPhone(packageName) ==
-                            TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+                    telephonyManager.checkCarrierPrivilegesForPackageAnyPhone(packageName)
+                            == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
             if (!hasPrivileges) {
                 candidates.remove(i);
             }
