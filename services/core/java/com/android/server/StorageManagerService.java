@@ -1119,7 +1119,7 @@ class StorageManagerService extends IStorageManager.Stub
         // Push down current secure keyguard status so that we ignore malicious
         // USB devices while locked.
         mSecureKeyguardShowing = isShowing
-                && mContext.getSystemService(KeyguardManager.class).isDeviceSecure();
+                && mContext.getSystemService(KeyguardManager.class).isDeviceSecure(mCurrentUserId);
         try {
             mVold.onSecureKeyguardStateChanged(mSecureKeyguardShowing);
         } catch (Exception e) {
