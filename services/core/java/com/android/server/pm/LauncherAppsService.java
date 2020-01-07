@@ -78,6 +78,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Service that manages requests and callbacks for launchers that support
@@ -136,15 +137,15 @@ public class LauncherAppsService extends SystemService {
         public LauncherAppsImpl(Context context) {
             mContext = context;
             mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            mUserManagerInternal = Preconditions.checkNotNull(
+            mUserManagerInternal = Objects.requireNonNull(
                     LocalServices.getService(UserManagerInternal.class));
-            mUsageStatsManagerInternal = Preconditions.checkNotNull(
+            mUsageStatsManagerInternal = Objects.requireNonNull(
                     LocalServices.getService(UsageStatsManagerInternal.class));
-            mActivityManagerInternal = Preconditions.checkNotNull(
+            mActivityManagerInternal = Objects.requireNonNull(
                     LocalServices.getService(ActivityManagerInternal.class));
-            mActivityTaskManagerInternal = Preconditions.checkNotNull(
+            mActivityTaskManagerInternal = Objects.requireNonNull(
                     LocalServices.getService(ActivityTaskManagerInternal.class));
-            mShortcutServiceInternal = Preconditions.checkNotNull(
+            mShortcutServiceInternal = Objects.requireNonNull(
                     LocalServices.getService(ShortcutServiceInternal.class));
             mShortcutServiceInternal.addListener(mPackageMonitor);
             mCallbackHandler = BackgroundThread.getHandler();
@@ -558,7 +559,7 @@ public class LauncherAppsService extends SystemService {
             if (!canAccessProfile(user.getIdentifier(), "Cannot check package")) {
                 return null;
             }
-            Preconditions.checkNotNull(component);
+            Objects.requireNonNull(component);
 
             // All right, create the sender.
             Intent intent = new Intent(Intent.ACTION_CREATE_SHORTCUT).setComponent(component);

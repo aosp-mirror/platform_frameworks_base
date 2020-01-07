@@ -75,7 +75,7 @@ class ShortcutUser {
 
         private PackageWithUser(int userId, String packageName) {
             this.userId = userId;
-            this.packageName = Preconditions.checkNotNull(packageName);
+            this.packageName = Objects.requireNonNull(packageName);
         }
 
         public static PackageWithUser of(int userId, String packageName) {

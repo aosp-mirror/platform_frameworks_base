@@ -62,6 +62,7 @@ import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Objects;
 
 /**
  * A system service that provides access to runtime and compiler artifacts.
@@ -180,7 +181,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         }
 
         // Sanity checks on the arguments.
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(callback);
 
         boolean bootImageProfile = profileType == ArtManager.PROFILE_BOOT_IMAGE;
         if (!bootImageProfile) {
