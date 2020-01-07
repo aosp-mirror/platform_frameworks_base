@@ -1199,12 +1199,17 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get the active SubscriptionInfo associated with the iccId
+     * Gets an active SubscriptionInfo {@link SubscriptionInfo} associated with the Sim IccId.
+     *
      * @param iccId the IccId of SIM card
      * @return SubscriptionInfo, maybe null if its not active
+     *
      * @hide
      */
-    public SubscriptionInfo getActiveSubscriptionInfoForIccIndex(String iccId) {
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Nullable
+    @SystemApi
+    public SubscriptionInfo getActiveSubscriptionInfoForIcc(@NonNull String iccId) {
         if (VDBG) logd("[getActiveSubscriptionInfoForIccIndex]+ iccId=" + iccId);
         if (iccId == null) {
             logd("[getActiveSubscriptionInfoForIccIndex]- null iccid");
