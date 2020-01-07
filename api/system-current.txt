@@ -3787,12 +3787,15 @@ package android.location {
   public final class GnssMeasurementCorrections implements android.os.Parcelable {
     method public int describeContents();
     method @FloatRange(from=-1000.0F, to=10000.0f) public double getAltitudeMeters();
+    method @FloatRange(from=0.0f, to=360.0f) public float getEnvironmentBearingDegrees();
+    method @FloatRange(from=0.0f, to=180.0f) public float getEnvironmentBearingUncertaintyDegrees();
     method @FloatRange(from=0.0f) public double getHorizontalPositionUncertaintyMeters();
     method @FloatRange(from=-90.0F, to=90.0f) public double getLatitudeDegrees();
     method @FloatRange(from=-180.0F, to=180.0f) public double getLongitudeDegrees();
     method @NonNull public java.util.List<android.location.GnssSingleSatCorrection> getSingleSatelliteCorrectionList();
     method @IntRange(from=0) public long getToaGpsNanosecondsOfWeek();
     method @FloatRange(from=0.0f) public double getVerticalPositionUncertaintyMeters();
+    method public boolean hasEnvironmentBearing();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GnssMeasurementCorrections> CREATOR;
   }
@@ -3801,6 +3804,8 @@ package android.location {
     ctor public GnssMeasurementCorrections.Builder();
     method @NonNull public android.location.GnssMeasurementCorrections build();
     method @NonNull public android.location.GnssMeasurementCorrections.Builder setAltitudeMeters(@FloatRange(from=-1000.0F, to=10000.0f) double);
+    method @NonNull public android.location.GnssMeasurementCorrections.Builder setEnvironmentBearingDegrees(@FloatRange(from=0.0f, to=360.0f) float);
+    method @NonNull public android.location.GnssMeasurementCorrections.Builder setEnvironmentBearingUncertaintyDegrees(@FloatRange(from=0.0f, to=180.0f) float);
     method @NonNull public android.location.GnssMeasurementCorrections.Builder setHorizontalPositionUncertaintyMeters(@FloatRange(from=0.0f) double);
     method @NonNull public android.location.GnssMeasurementCorrections.Builder setLatitudeDegrees(@FloatRange(from=-90.0F, to=90.0f) double);
     method @NonNull public android.location.GnssMeasurementCorrections.Builder setLongitudeDegrees(@FloatRange(from=-180.0F, to=180.0f) double);
