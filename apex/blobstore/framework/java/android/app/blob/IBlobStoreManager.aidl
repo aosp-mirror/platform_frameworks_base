@@ -21,8 +21,9 @@ import android.app.blob.IBlobStoreSession;
 /** {@hide} */
 interface IBlobStoreManager {
     long createSession(in BlobHandle handle, in String packageName);
-    IBlobStoreSession openSession(long sessionId);
+    IBlobStoreSession openSession(long sessionId, in String packageName);
     ParcelFileDescriptor openBlob(in BlobHandle handle, in String packageName);
+    void deleteSession(long sessionId, in String packageName);
 
     void acquireLease(in BlobHandle handle, int descriptionResId, long leaseTimeout,
             in String packageName);
