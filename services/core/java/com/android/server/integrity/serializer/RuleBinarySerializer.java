@@ -27,6 +27,9 @@ import static com.android.server.integrity.model.ComponentBitSize.KEY_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.OPERATOR_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.SEPARATOR_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.VALUE_SIZE_BITS;
+import static com.android.server.integrity.model.IndexingFileConstants.END_INDEXING_KEY;
+import static com.android.server.integrity.model.IndexingFileConstants.INDEXING_BLOCK_SIZE;
+import static com.android.server.integrity.model.IndexingFileConstants.START_INDEXING_KEY;
 import static com.android.server.integrity.serializer.RuleIndexingDetails.APP_CERTIFICATE_INDEXED;
 import static com.android.server.integrity.serializer.RuleIndexingDetails.NOT_INDEXED;
 import static com.android.server.integrity.serializer.RuleIndexingDetails.PACKAGE_NAME_INDEXED;
@@ -51,13 +54,6 @@ import java.util.TreeMap;
 
 /** A helper class to serialize rules from the {@link Rule} model to Binary representation. */
 public class RuleBinarySerializer implements RuleSerializer {
-
-    // The parsing time seems acceptable for this block size based on the tests in
-    // go/ic-rule-file-format.
-    public static final int INDEXING_BLOCK_SIZE = 100;
-
-    public static final String START_INDEXING_KEY = "START_KEY";
-    public static final String END_INDEXING_KEY = "END_KEY";
 
     // Get the byte representation for a list of rules.
     @Override
