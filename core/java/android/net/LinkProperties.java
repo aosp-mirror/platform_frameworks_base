@@ -63,6 +63,7 @@ public final class LinkProperties implements Parcelable {
     private String mPrivateDnsServerName;
     private String mDomains;
     private ArrayList<RouteInfo> mRoutes = new ArrayList<>();
+    private Inet4Address mDhcpServerAddress;
     private ProxyInfo mHttpProxy;
     private int mMtu;
     // in the format "rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max"
@@ -196,6 +197,7 @@ public final class LinkProperties implements Parcelable {
                 addStackedLink(l);
             }
             setMtu(source.mMtu);
+            setDhcpServerAddress(source.getDhcpServerAddress());
             mTcpBufferSizes = source.mTcpBufferSizes;
             mNat64Prefix = source.mNat64Prefix;
             mWakeOnLanSupported = source.mWakeOnLanSupported;
@@ -457,6 +459,24 @@ public final class LinkProperties implements Parcelable {
     @SystemApi
     public void setPrivateDnsServerName(@Nullable String privateDnsServerName) {
         mPrivateDnsServerName = privateDnsServerName;
+    }
+
+    /**
+     * Set DHCP server address.
+     *
+     * @param serverAddress the server address to set.
+     */
+    public void setDhcpServerAddress(@Nullable Inet4Address serverAddress) {
+        mDhcpServerAddress = serverAddress;
+    }
+
+     /**
+     * Get DHCP server address
+     *
+     * @return The current DHCP server address.
+     */
+    public @Nullable Inet4Address getDhcpServerAddress() {
+        return mDhcpServerAddress;
     }
 
     /**
@@ -851,6 +871,7 @@ public final class LinkProperties implements Parcelable {
         mHttpProxy = null;
         mStackedLinks.clear();
         mMtu = 0;
+        mDhcpServerAddress = null;
         mTcpBufferSizes = null;
         mNat64Prefix = null;
         mWakeOnLanSupported = false;
@@ -917,6 +938,11 @@ public final class LinkProperties implements Parcelable {
 
         if (mWakeOnLanSupported) {
             resultJoiner.add("WakeOnLanSupported: true");
+        }
+
+        if (mDhcpServerAddress != null) {
+            resultJoiner.add("ServerAddress:");
+            resultJoiner.add(mDhcpServerAddress.toString());
         }
 
         if (mTcpBufferSizes != null) {
@@ -1273,6 +1299,17 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
+     * Compares this {@code LinkProperties} DHCP server address against the target
+     *
+     * @param target LinkProperties to compare.
+     * @return {@code true} if both are identical, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isIdenticalDhcpServerAddress(@NonNull LinkProperties target) {
+        return Objects.equals(mDhcpServerAddress, target.mDhcpServerAddress);
+    }
+
+    /**
      * Compares this {@code LinkProperties} interface addresses against the target
      *
      * @param target LinkProperties to compare.
@@ -1489,6 +1526,7 @@ public final class LinkProperties implements Parcelable {
          */
         return isIdenticalInterfaceName(target)
                 && isIdenticalAddresses(target)
+                && isIdenticalDhcpServerAddress(target)
                 && isIdenticalDnses(target)
                 && isIdenticalPrivateDns(target)
                 && isIdenticalValidatedPrivateDnses(target)
@@ -1613,6 +1651,7 @@ public final class LinkProperties implements Parcelable {
                 + mMtu * 51
                 + ((null == mTcpBufferSizes) ? 0 : mTcpBufferSizes.hashCode())
                 + (mUsePrivateDns ? 57 : 0)
+                + ((null == mDhcpServerAddress) ? 0 : mDhcpServerAddress.hashCode())
                 + mPcscfs.size() * 67
                 + ((null == mPrivateDnsServerName) ? 0 : mPrivateDnsServerName.hashCode())
                 + Objects.hash(mNat64Prefix)
@@ -1635,6 +1674,7 @@ public final class LinkProperties implements Parcelable {
         dest.writeString(mPrivateDnsServerName);
         writeAddresses(dest, mPcscfs);
         dest.writeString(mDomains);
+        writeAddress(dest, mDhcpServerAddress);
         dest.writeInt(mMtu);
         dest.writeString(mTcpBufferSizes);
         dest.writeInt(mRoutes.size());
@@ -1663,8 +1703,9 @@ public final class LinkProperties implements Parcelable {
         }
     }
 
-    private static void writeAddress(@NonNull Parcel dest, @NonNull InetAddress addr) {
-        dest.writeByteArray(addr.getAddress());
+    private static void writeAddress(@NonNull Parcel dest, @Nullable InetAddress addr) {
+        byte[] addressBytes = (addr == null ? null : addr.getAddress());
+        dest.writeByteArray(addressBytes);
         if (addr instanceof Inet6Address) {
             final Inet6Address v6Addr = (Inet6Address) addr;
             final boolean hasScopeId = v6Addr.getScopeId() != 0;
@@ -1673,9 +1714,11 @@ public final class LinkProperties implements Parcelable {
         }
     }
 
-    @NonNull
+    @Nullable
     private static InetAddress readAddress(@NonNull Parcel p) throws UnknownHostException {
         final byte[] addr = p.createByteArray();
+        if (addr == null) return null;
+
         if (addr.length == INET6_ADDR_LENGTH) {
             final boolean hasScopeId = p.readBoolean();
             final int scopeId = hasScopeId ? p.readInt() : 0;
@@ -1722,6 +1765,10 @@ public final class LinkProperties implements Parcelable {
                     } catch (UnknownHostException e) { }
                 }
                 netProp.setDomains(in.readString());
+                try {
+                    netProp.setDhcpServerAddress((Inet4Address) InetAddress
+                            .getByAddress(in.createByteArray()));
+                } catch (UnknownHostException e) { }
                 netProp.setMtu(in.readInt());
                 netProp.setTcpBufferSizes(in.readString());
                 addressCount = in.readInt();
