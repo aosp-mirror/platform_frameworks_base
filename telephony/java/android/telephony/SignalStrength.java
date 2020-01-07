@@ -332,17 +332,16 @@ public class SignalStrength implements Parcelable {
     /**
      * {@link Parcelable.Creator}
      *
-     * @hide
      */
-    @UnsupportedAppUsage
-    public static final @android.annotation.NonNull Parcelable.Creator<SignalStrength> CREATOR = new Parcelable.Creator() {
-        public SignalStrength createFromParcel(Parcel in) {
-            return new SignalStrength(in);
-        }
+    public static final @android.annotation.NonNull Parcelable.Creator<SignalStrength> CREATOR =
+            new Parcelable.Creator<SignalStrength>() {
+                public SignalStrength createFromParcel(Parcel in) {
+                    return new SignalStrength(in);
+                }
 
-        public SignalStrength[] newArray(int size) {
-            return new SignalStrength[size];
-        }
+                public SignalStrength[] newArray(int size) {
+                    return new SignalStrength[size];
+                }
     };
 
     /**
