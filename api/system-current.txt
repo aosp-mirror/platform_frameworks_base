@@ -5640,8 +5640,32 @@ package android.net.wifi {
   }
 
   public class ScanResult implements android.os.Parcelable {
+    field public static final int CIPHER_CCMP = 3; // 0x3
+    field public static final int CIPHER_GCMP_256 = 4; // 0x4
+    field public static final int CIPHER_NONE = 0; // 0x0
+    field public static final int CIPHER_NO_GROUP_ADDRESSED = 1; // 0x1
+    field public static final int CIPHER_SMS4 = 5; // 0x5
+    field public static final int CIPHER_TKIP = 2; // 0x2
+    field public static final int KEY_MGMT_EAP = 2; // 0x2
+    field public static final int KEY_MGMT_EAP_SHA256 = 6; // 0x6
+    field public static final int KEY_MGMT_EAP_SUITE_B_192 = 10; // 0xa
+    field public static final int KEY_MGMT_FT_EAP = 4; // 0x4
+    field public static final int KEY_MGMT_FT_PSK = 3; // 0x3
+    field public static final int KEY_MGMT_FT_SAE = 11; // 0xb
+    field public static final int KEY_MGMT_NONE = 0; // 0x0
+    field public static final int KEY_MGMT_OSEN = 7; // 0x7
+    field public static final int KEY_MGMT_OWE = 9; // 0x9
+    field public static final int KEY_MGMT_OWE_TRANSITION = 12; // 0xc
+    field public static final int KEY_MGMT_PSK = 1; // 0x1
+    field public static final int KEY_MGMT_PSK_SHA256 = 5; // 0x5
+    field public static final int KEY_MGMT_SAE = 8; // 0x8
     field public static final int KEY_MGMT_WAPI_CERT = 14; // 0xe
     field public static final int KEY_MGMT_WAPI_PSK = 13; // 0xd
+    field public static final int PROTOCOL_NONE = 0; // 0x0
+    field public static final int PROTOCOL_OSEN = 3; // 0x3
+    field public static final int PROTOCOL_RSN = 2; // 0x2
+    field public static final int PROTOCOL_WAPI = 4; // 0x4
+    field public static final int PROTOCOL_WPA = 1; // 0x1
   }
 
   public final class SoftApCapability implements android.os.Parcelable {
@@ -6381,6 +6405,7 @@ package android.net.wifi.wificond {
     method @NonNull public java.util.List<android.net.wifi.wificond.NativeScanResult> getScanResults(@NonNull String, int);
     method @Nullable public android.net.wifi.wificond.WifiCondManager.TxPacketCounters getTxPacketCounters(@NonNull String);
     method public boolean initialize(@NonNull Runnable);
+    method @Nullable public static android.net.wifi.wificond.WifiCondManager.OemSecurityType parseOemSecurityTypeElement(int, int, @NonNull byte[]);
     method public boolean registerApCallback(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.wificond.WifiCondManager.SoftApCallback);
     method public void sendMgmtFrame(@NonNull String, @NonNull byte[], int, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.wificond.WifiCondManager.SendMgmtFrameCallback);
     method public boolean setupInterfaceForClientMode(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.wificond.WifiCondManager.ScanEventCallback, @NonNull android.net.wifi.wificond.WifiCondManager.ScanEventCallback);
@@ -6399,6 +6424,14 @@ package android.net.wifi.wificond {
     field public static final int SEND_MGMT_FRAME_ERROR_NO_ACK = 3; // 0x3
     field public static final int SEND_MGMT_FRAME_ERROR_TIMEOUT = 4; // 0x4
     field public static final int SEND_MGMT_FRAME_ERROR_UNKNOWN = 1; // 0x1
+  }
+
+  public static class WifiCondManager.OemSecurityType {
+    ctor public WifiCondManager.OemSecurityType(int, @NonNull java.util.List<java.lang.Integer>, @NonNull java.util.List<java.lang.Integer>, int);
+    field public final int groupCipher;
+    field @NonNull public final java.util.List<java.lang.Integer> keyManagement;
+    field @NonNull public final java.util.List<java.lang.Integer> pairwiseCipher;
+    field public final int protocol;
   }
 
   public static interface WifiCondManager.PnoScanRequestCallback {
