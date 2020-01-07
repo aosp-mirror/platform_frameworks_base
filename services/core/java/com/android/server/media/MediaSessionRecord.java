@@ -56,6 +56,7 @@ import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -72,6 +73,24 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
      * command before reverting to the last reported volume.
      */
     private static final int OPTIMISTIC_VOLUME_TIMEOUT = 1000;
+
+    /**
+     * These are states that usually indicate the user took an action and should
+     * bump priority regardless of the old state.
+     */
+    private static final List<Integer> ALWAYS_PRIORITY_STATES = Arrays.asList(
+            PlaybackState.STATE_FAST_FORWARDING,
+            PlaybackState.STATE_REWINDING,
+            PlaybackState.STATE_SKIPPING_TO_PREVIOUS,
+            PlaybackState.STATE_SKIPPING_TO_NEXT);
+    /**
+     * These are states that usually indicate the user took an action if they
+     * were entered from a non-priority state.
+     */
+    private static final List<Integer> TRANSITION_PRIORITY_STATES = Arrays.asList(
+            PlaybackState.STATE_BUFFERING,
+            PlaybackState.STATE_CONNECTING,
+            PlaybackState.STATE_PLAYING);
 
     private final MessageHandler mHandler;
 
@@ -225,7 +244,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
      * @param opPackageName The op package that made the original volume request.
      * @param pid The pid that made the original volume request.
      * @param uid The uid that made the original volume request.
-     * @param caller caller binder. can be {@code null} if it's from the volume key.
      * @param asSystemService {@code true} if the event sent to the session as if it was come from
      *          the system service instead of the app process. This helps sessions to distinguish
      *          between the key injection by the app and key events from the hardware devices.
@@ -362,7 +380,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
     @Override
     public void binderDied() {
-        mService.sessionDied(this);
+        mService.onSessionDied(this);
     }
 
     /**
@@ -724,7 +742,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public void destroySession() throws RemoteException {
             final long token = Binder.clearCallingIdentity();
             try {
-                mService.sessionDied(MediaSessionRecord.this);
+                mService.onSessionDied(MediaSessionRecord.this);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -746,7 +764,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             mIsActive = active;
             final long token = Binder.clearCallingIdentity();
             try {
-                mService.updateSession(MediaSessionRecord.this);
+                mService.onSessionActiveStateChanged(MediaSessionRecord.this);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -813,12 +831,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                     ? PlaybackState.STATE_NONE : mPlaybackState.getState();
             int newState = state == null
                     ? PlaybackState.STATE_NONE : state.getState();
+            boolean shouldUpdatePriority = ALWAYS_PRIORITY_STATES.contains(newState)
+                    || (!TRANSITION_PRIORITY_STATES.contains(oldState)
+                    && TRANSITION_PRIORITY_STATES.contains(newState));
             synchronized (mLock) {
                 mPlaybackState = state;
             }
             final long token = Binder.clearCallingIdentity();
             try {
-                mService.onSessionPlaystateChanged(MediaSessionRecord.this, oldState, newState);
+                mService.onSessionPlaybackStateChanged(
+                        MediaSessionRecord.this, shouldUpdatePriority);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

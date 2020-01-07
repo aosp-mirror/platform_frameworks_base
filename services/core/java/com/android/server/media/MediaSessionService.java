@@ -119,12 +119,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     @GuardedBy("mLock")
     private final ArrayList<SessionsListenerRecord> mSessionsListeners =
             new ArrayList<SessionsListenerRecord>();
-    // Map user id as index to list of Session2Tokens
-    // TODO: Keep session2 info in MediaSessionStack for prioritizing both session1 and session2 in
-    //       one place.
-    @GuardedBy("mLock")
-    private final SparseArray<List<MediaSession2Record>> mSession2RecordsPerUser =
-            new SparseArray<>();
     @GuardedBy("mLock")
     private final List<Session2TokensListenerRecord> mSession2TokensListenerRecords =
             new ArrayList<>();
@@ -190,7 +184,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         return mGlobalPrioritySession != null && mGlobalPrioritySession.isActive();
     }
 
-    void updateSession(MediaSessionRecord record) {
+    void onSessionActiveStateChanged(MediaSessionRecordImpl record) {
         synchronized (mLock) {
             FullUserRecord user = getFullUserRecordLocked(record.getUserId());
             if (user == null) {
@@ -207,12 +201,14 @@ public class MediaSessionService extends SystemService implements Monitor {
                     Log.w(TAG, "Unknown session updated. Ignoring.");
                     return;
                 }
-                user.mPriorityStack.onSessionStateChange(record);
+                user.mPriorityStack.onSessionActiveStateChanged(record);
             }
-            mHandler.postSessionsChanged(record.getUserId());
+
+            mHandler.postSessionsChanged(record);
         }
     }
 
+    // Currently only media1 can become global priority session.
     void setGlobalPrioritySession(MediaSessionRecord record) {
         synchronized (mLock) {
             FullUserRecord user = getFullUserRecordLocked(record.getUserId());
@@ -258,21 +254,13 @@ public class MediaSessionService extends SystemService implements Monitor {
     List<Session2Token> getSession2TokensLocked(int userId) {
         List<Session2Token> list = new ArrayList<>();
         if (userId == USER_ALL) {
-            for (int i = 0; i < mSession2RecordsPerUser.size(); i++) {
-                List<MediaSession2Record> records = mSession2RecordsPerUser.valueAt(i);
-                for (MediaSession2Record record: records) {
-                    if (record.isActive()) {
-                        list.add(record.getSession2Token());
-                    }
-                }
+            int size = mUserRecords.size();
+            for (int i = 0; i < size; i++) {
+                list.addAll(mUserRecords.valueAt(i).mPriorityStack.getSession2Tokens(userId));
             }
         } else {
-            List<MediaSession2Record> records = mSession2RecordsPerUser.get(userId);
-            for (MediaSession2Record record: records) {
-                if (record.isActive()) {
-                    list.add(record.getSession2Token());
-                }
-            }
+            FullUserRecord user = getFullUserRecordLocked(userId);
+            list.addAll(user.mPriorityStack.getSession2Tokens(userId));
         }
         return list;
     }
@@ -299,14 +287,15 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
-    void onSessionPlaystateChanged(MediaSessionRecord record, int oldState, int newState) {
+    void onSessionPlaybackStateChanged(MediaSessionRecordImpl record,
+            boolean shouldUpdatePriority) {
         synchronized (mLock) {
             FullUserRecord user = getFullUserRecordLocked(record.getUserId());
             if (user == null || !user.mPriorityStack.contains(record)) {
                 Log.d(TAG, "Unknown session changed playback state. Ignoring.");
                 return;
             }
-            user.mPriorityStack.onPlaystateChanged(record, oldState, newState);
+            user.mPriorityStack.onPlaybackStateChanged(record, shouldUpdatePriority);
         }
     }
 
@@ -349,13 +338,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                     user.destroySessionsForUserLocked(userId);
                 }
             }
-            List<MediaSession2Record> list = mSession2RecordsPerUser.get(userId);
-            if (list != null) {
-                for (MediaSession2Record session : list) {
-                    session.close();
-                }
-                mSession2RecordsPerUser.remove(userId);
-            }
             updateUser();
         }
     }
@@ -374,23 +356,9 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
-    void sessionDied(MediaSessionRecord session) {
+    void onSessionDied(MediaSessionRecordImpl session) {
         synchronized (mLock) {
             destroySessionLocked(session);
-        }
-    }
-
-    void pushSession2TokensChanged(MediaSession2Record sessionRecord) {
-        synchronized (mLock) {
-            pushSession2TokensChangedLocked(sessionRecord.getUserId());
-        }
-    }
-
-    void sessionDied(MediaSession2Record sessionRecord) {
-        synchronized (mLock) {
-            int userId = sessionRecord.getUserId();
-            mSession2RecordsPerUser.get(userId).remove(sessionRecord);
-            pushSession2TokensChangedLocked(userId);
         }
     }
 
@@ -409,9 +377,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                             mUserRecords.put(userInfo.id, new FullUserRecord(userInfo.id));
                         }
                     }
-                    if (mSession2RecordsPerUser.get(userInfo.id) == null) {
-                        mSession2RecordsPerUser.put(userInfo.id, new ArrayList<>());
-                    }
                 }
             }
             // Ensure that the current full user exists.
@@ -421,9 +386,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                 Log.w(TAG, "Cannot find FullUserInfo for the current user " + currentFullUserId);
                 mCurrentFullUserRecord = new FullUserRecord(currentFullUserId);
                 mUserRecords.put(currentFullUserId, mCurrentFullUserRecord);
-                if (mSession2RecordsPerUser.get(currentFullUserId) == null) {
-                    mSession2RecordsPerUser.put(currentFullUserId, new ArrayList<>());
-                }
             }
             mFullUserIds.put(currentFullUserId, currentFullUserId);
         }
@@ -460,7 +422,7 @@ public class MediaSessionService extends SystemService implements Monitor {
      * 5. We need to unlink to death from the cb binder
      * 6. We need to tell the session to do any final cleanup (onDestroy)
      */
-    private void destroySessionLocked(MediaSessionRecord session) {
+    private void destroySessionLocked(MediaSessionRecordImpl session) {
         if (DEBUG) {
             Log.d(TAG, "Destroying " + session);
         }
@@ -477,7 +439,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         session.close();
-        mHandler.postSessionsChanged(session.getUserId());
+        mHandler.postSessionsChanged(session);
     }
 
     private void enforcePackageName(String packageName, int uid) {
@@ -582,7 +544,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
 
             user.mPriorityStack.addSession(session);
-            mHandler.postSessionsChanged(userId);
+            mHandler.postSessionsChanged(session);
 
             if (DEBUG) {
                 Log.d(TAG, "Created session for " + callerPackageName + " with tag " + tag);
@@ -609,16 +571,16 @@ public class MediaSessionService extends SystemService implements Monitor {
         return -1;
     }
 
-    private void pushSessionsChanged(int userId) {
+    private void pushSession1Changed(int userId) {
         synchronized (mLock) {
             FullUserRecord user = getFullUserRecordLocked(userId);
             if (user == null) {
-                Log.w(TAG, "pushSessionsChanged failed. No user with id=" + userId);
+                Log.w(TAG, "pushSession1ChangedOnHandler failed. No user with id=" + userId);
                 return;
             }
             List<MediaSessionRecord> records = getActiveSessionsLocked(userId);
             int size = records.size();
-            ArrayList<MediaSession.Token> tokens = new ArrayList<MediaSession.Token>();
+            ArrayList<MediaSession.Token> tokens = new ArrayList<>();
             for (int i = 0; i < size; i++) {
                 tokens.add(records.get(i).getSessionToken());
             }
@@ -638,6 +600,27 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
+    void pushSession2Changed(int userId) {
+        synchronized (mLock) {
+            List<Session2Token> allSession2Tokens = getSession2TokensLocked(USER_ALL);
+            List<Session2Token> session2Tokens = getSession2TokensLocked(userId);
+
+            for (int i = mSession2TokensListenerRecords.size() - 1; i >= 0; i--) {
+                Session2TokensListenerRecord listenerRecord = mSession2TokensListenerRecords.get(i);
+                try {
+                    if (listenerRecord.userId == USER_ALL) {
+                        listenerRecord.listener.onSession2TokensChanged(allSession2Tokens);
+                    } else if (listenerRecord.userId == userId) {
+                        listenerRecord.listener.onSession2TokensChanged(session2Tokens);
+                    }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failed to notify Session2Token change. Removing listener.", e);
+                    mSession2TokensListenerRecords.remove(i);
+                }
+            }
+        }
+    }
+
     private void pushRemoteVolumeUpdateLocked(int userId) {
         FullUserRecord user = getFullUserRecordLocked(userId);
         if (user == null) {
@@ -647,8 +630,13 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         synchronized (mLock) {
             int size = mRemoteVolumeControllers.beginBroadcast();
-            MediaSessionRecord record = user.mPriorityStack.getDefaultRemoteSession(userId);
-            MediaSession.Token token = record == null ? null : record.getSessionToken();
+            MediaSessionRecordImpl record = user.mPriorityStack.getDefaultRemoteSession(userId);
+            if (record instanceof MediaSession2Record) {
+                // TODO(jaewan): Implement
+                return;
+            }
+            MediaSession.Token token = record == null
+                    ? null : ((MediaSessionRecord) record).getSessionToken();
 
             for (int i = size - 1; i >= 0; i--) {
                 try {
@@ -662,34 +650,15 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
-    void pushSession2TokensChangedLocked(int userId) {
-        List<Session2Token> allSession2Tokens = getSession2TokensLocked(USER_ALL);
-        List<Session2Token> session2Tokens = getSession2TokensLocked(userId);
-
-        for (int i = mSession2TokensListenerRecords.size() - 1; i >= 0; i--) {
-            Session2TokensListenerRecord listenerRecord = mSession2TokensListenerRecords.get(i);
-            try {
-                if (listenerRecord.userId == USER_ALL) {
-                    listenerRecord.listener.onSession2TokensChanged(allSession2Tokens);
-                } else if (listenerRecord.userId == userId) {
-                    listenerRecord.listener.onSession2TokensChanged(session2Tokens);
-                }
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to notify Session2Token change. Removing listener.", e);
-                mSession2TokensListenerRecords.remove(i);
-            }
-        }
-    }
-
     /**
      * Called when the media button receiver for the {@code record} is changed.
      *
      * @param record the media session whose media button receiver is updated.
      */
-    public void onMediaButtonReceiverChanged(MediaSessionRecord record) {
+    public void onMediaButtonReceiverChanged(MediaSessionRecordImpl record) {
         synchronized (mLock) {
             FullUserRecord user = getFullUserRecordLocked(record.getUserId());
-            MediaSessionRecord mediaButtonSession =
+            MediaSessionRecordImpl mediaButtonSession =
                     user.mPriorityStack.getMediaButtonSession();
             if (record == mediaButtonSession) {
                 user.rememberMediaButtonReceiverLocked(mediaButtonSession);
@@ -877,39 +846,34 @@ public class MediaSessionService extends SystemService implements Monitor {
             pw.println(indent + "Restored MediaButtonReceiverComponentType: "
                     + mRestoredMediaButtonReceiverComponentType);
             mPriorityStack.dump(pw, indent);
-            pw.println(indent + "Session2Tokens:");
-            for (int i = 0; i < mSession2RecordsPerUser.size(); i++) {
-                List<MediaSession2Record> list = mSession2RecordsPerUser.valueAt(i);
-                if (list == null || list.size() == 0) {
-                    continue;
-                }
-                for (MediaSession2Record record : list) {
-                    record.dump(pw, indent);
-                }
-            }
         }
 
         @Override
-        public void onMediaButtonSessionChanged(MediaSessionRecord oldMediaButtonSession,
-                MediaSessionRecord newMediaButtonSession) {
+        public void onMediaButtonSessionChanged(MediaSessionRecordImpl oldMediaButtonSession,
+                MediaSessionRecordImpl newMediaButtonSession) {
             if (DEBUG_KEY_EVENT) {
                 Log.d(TAG, "Media button session is changed to " + newMediaButtonSession);
             }
             synchronized (mLock) {
                 if (oldMediaButtonSession != null) {
-                    mHandler.postSessionsChanged(oldMediaButtonSession.getUserId());
+                    mHandler.postSessionsChanged(oldMediaButtonSession);
                 }
                 if (newMediaButtonSession != null) {
                     rememberMediaButtonReceiverLocked(newMediaButtonSession);
-                    mHandler.postSessionsChanged(newMediaButtonSession.getUserId());
+                    mHandler.postSessionsChanged(newMediaButtonSession);
                 }
                 pushAddressedPlayerChangedLocked();
             }
         }
 
         // Remember media button receiver and keep it in the persistent storage.
-        public void rememberMediaButtonReceiverLocked(MediaSessionRecord record) {
-            PendingIntent receiver = record.getMediaButtonReceiver();
+        public void rememberMediaButtonReceiverLocked(MediaSessionRecordImpl record) {
+            if (record instanceof MediaSession2Record) {
+                // TODO(jaewan): Implement
+                return;
+            }
+            MediaSessionRecord sessionRecord = (MediaSessionRecord) record;
+            PendingIntent receiver = sessionRecord.getMediaButtonReceiver();
             mLastMediaButtonReceiver = receiver;
             mRestoredMediaButtonReceiver = null;
             mRestoredMediaButtonReceiverComponentType = COMPONENT_TYPE_INVALID;
@@ -934,10 +898,15 @@ public class MediaSessionService extends SystemService implements Monitor {
         private void pushAddressedPlayerChangedLocked(
                 IOnMediaKeyEventSessionChangedListener callback) {
             try {
-                MediaSessionRecord mediaButtonSession = getMediaButtonSessionLocked();
+                MediaSessionRecordImpl mediaButtonSession = getMediaButtonSessionLocked();
                 if (mediaButtonSession != null) {
-                    callback.onMediaKeyEventSessionChanged(mediaButtonSession.getPackageName(),
-                            mediaButtonSession.getSessionToken());
+                    if (mediaButtonSession instanceof MediaSessionRecord) {
+                        MediaSessionRecord session1 = (MediaSessionRecord) mediaButtonSession;
+                        callback.onMediaKeyEventSessionChanged(session1.getPackageName(),
+                                session1.getSessionToken());
+                    } else {
+                        // TODO(jaewan): Implement
+                    }
                 } else if (mCurrentFullUserRecord.mLastMediaButtonReceiver != null) {
                     callback.onMediaKeyEventSessionChanged(
                             mCurrentFullUserRecord.mLastMediaButtonReceiver
@@ -960,7 +929,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
 
-        private MediaSessionRecord getMediaButtonSessionLocked() {
+        private MediaSessionRecordImpl getMediaButtonSessionLocked() {
             return isGlobalPriorityActiveLocked()
                     ? mGlobalPrioritySession : mPriorityStack.getMediaButtonSession();
         }
@@ -1143,7 +1112,10 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
                 MediaSession2Record record = new MediaSession2Record(
                         sessionToken, MediaSessionService.this, mHandler.getLooper());
-                mSession2RecordsPerUser.get(record.getUserId()).add(record);
+                synchronized (mLock) {
+                    FullUserRecord user = getFullUserRecordLocked(record.getUserId());
+                    user.mPriorityStack.addSession(record);
+                }
                 // Do not immediately notify changes -- do so when framework can dispatch command
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -1185,7 +1157,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                         null /* optional packageName */);
                 List<Session2Token> result;
                 synchronized (mLock) {
-                    result = getSession2TokensLocked(resolvedUserId);
+                    FullUserRecord user = getFullUserRecordLocked(userId);
+                    result = user.mPriorityStack.getSession2Tokens(resolvedUserId);
                 }
                 return new ParceledListSlice(result);
             } finally {
@@ -2023,7 +1996,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         private void dispatchAdjustVolumeLocked(String packageName, String opPackageName, int pid,
                 int uid, boolean asSystemService, int suggestedStream, int direction, int flags) {
-            MediaSessionRecord session = isGlobalPriorityActiveLocked() ? mGlobalPrioritySession
+            MediaSessionRecordImpl session = isGlobalPriorityActiveLocked() ? mGlobalPrioritySession
                     : mCurrentFullUserRecord.mPriorityStack.getDefaultVolumeSession();
 
             boolean preferSuggestedStream = false;
@@ -2114,7 +2087,13 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         private void dispatchMediaKeyEventLocked(String packageName, int pid, int uid,
                 boolean asSystemService, KeyEvent keyEvent, boolean needWakeLock) {
-            MediaSessionRecord session = mCurrentFullUserRecord.getMediaButtonSessionLocked();
+            if (mCurrentFullUserRecord.getMediaButtonSessionLocked()
+                    instanceof MediaSession2Record) {
+                // TODO(jaewan): Implement
+                return;
+            }
+            MediaSessionRecord session =
+                    (MediaSessionRecord) mCurrentFullUserRecord.getMediaButtonSessionLocked();
             if (session != null) {
                 if (DEBUG_KEY_EVENT) {
                     Log.d(TAG, "Sending " + keyEvent + " to " + session);
@@ -2394,15 +2373,19 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     final class MessageHandler extends Handler {
-        private static final int MSG_SESSIONS_CHANGED = 1;
-        private static final int MSG_VOLUME_INITIAL_DOWN = 2;
+        private static final int MSG_SESSIONS_1_CHANGED = 1;
+        private static final int MSG_SESSIONS_2_CHANGED = 2;
+        private static final int MSG_VOLUME_INITIAL_DOWN = 3;
         private final SparseArray<Integer> mIntegerCache = new SparseArray<>();
 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_SESSIONS_CHANGED:
-                    pushSessionsChanged((int) msg.obj);
+                case MSG_SESSIONS_1_CHANGED:
+                    pushSession1Changed((int) msg.obj);
+                    break;
+                case MSG_SESSIONS_2_CHANGED:
+                    pushSession2Changed((int) msg.obj);
                     break;
                 case MSG_VOLUME_INITIAL_DOWN:
                     synchronized (mLock) {
@@ -2417,15 +2400,18 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
 
-        public void postSessionsChanged(int userId) {
+        public void postSessionsChanged(MediaSessionRecordImpl record) {
             // Use object instead of the arguments when posting message to remove pending requests.
-            Integer userIdInteger = mIntegerCache.get(userId);
+            Integer userIdInteger = mIntegerCache.get(record.getUserId());
             if (userIdInteger == null) {
-                userIdInteger = Integer.valueOf(userId);
-                mIntegerCache.put(userId, userIdInteger);
+                userIdInteger = Integer.valueOf(record.getUserId());
+                mIntegerCache.put(record.getUserId(), userIdInteger);
             }
-            removeMessages(MSG_SESSIONS_CHANGED, userIdInteger);
-            obtainMessage(MSG_SESSIONS_CHANGED, userIdInteger).sendToTarget();
+
+            int msg = (record instanceof MediaSessionRecord)
+                    ? MSG_SESSIONS_1_CHANGED : MSG_SESSIONS_2_CHANGED;
+            removeMessages(msg, userIdInteger);
+            obtainMessage(msg, userIdInteger).sendToTarget();
         }
     }
 

@@ -138,6 +138,12 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
         pw.println(indent + "playbackActive=" + mController.isPlaybackActive());
     }
 
+    @Override
+    public String toString() {
+        // TODO(jaewan): Also add getId().
+        return getPackageName() + " (userId=" + getUserId() + ")";
+    }
+
     private class Controller2Callback extends MediaController2.ControllerCallback {
         @Override
         public void onConnected(MediaController2 controller, Session2CommandGroup allowedCommands) {
@@ -147,7 +153,7 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
             synchronized (mLock) {
                 mIsConnected = true;
             }
-            mService.pushSession2TokensChanged(MediaSession2Record.this);
+            mService.onSessionActiveStateChanged(MediaSession2Record.this);
         }
 
         @Override
@@ -158,7 +164,16 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
             synchronized (mLock) {
                 mIsConnected = false;
             }
-            mService.sessionDied(MediaSession2Record.this);
+            mService.onSessionDied(MediaSession2Record.this);
+        }
+
+        @Override
+        public void onPlaybackActiveChanged(MediaController2 controller, boolean playbackActive) {
+            if (DEBUG) {
+                Log.d(TAG, "playback active changed, " + mSessionToken + ", active="
+                        + playbackActive);
+            }
+            mService.onSessionPlaybackStateChanged(MediaSession2Record.this, playbackActive);
         }
     }
 }
