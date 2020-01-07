@@ -2481,7 +2481,6 @@ public class CarrierConfigManager {
      */
     public static final String IMSI_KEY_AVAILABILITY_INT = "imsi_key_availability_int";
 
-
     /**
      * Key identifying if the CDMA Caller ID presentation and suppression MMI codes
      * should be converted to 3GPP CLIR codes when a multimode (CDMA+UMTS+LTE) device is roaming
@@ -3118,6 +3117,16 @@ public class CarrierConfigManager {
      */
     public static final String KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG =
             "data_switch_validation_timeout_long";
+
+    /**
+     * Specifies whether the system should prefix the EAP method to the anonymous identity.
+     * The following prefix will be added if this key is set to TRUE:
+     *   EAP-AKA: "0"
+     *   EAP-SIM: "1"
+     *   EAP-AKA_PRIME: "6"
+     * @hide
+     */
+    public static final String ENABLE_EAP_METHOD_PREFIX_BOOL = "enable_eap_method_prefix_bool";
 
     /**
      * GPS configs. See the GNSS HAL documentation for more details.
@@ -3934,6 +3943,7 @@ public class CarrierConfigManager {
                 CellSignalStrengthLte.USE_RSRP | CellSignalStrengthLte.USE_RSSNR);
         // Default wifi configurations.
         sDefaults.putAll(Wifi.getDefaults());
+        sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);
     }
 
     /**

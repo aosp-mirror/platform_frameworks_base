@@ -318,9 +318,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-        filter.addAction(TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
-        filter.addAction(TelephonyIntents.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED);
-        filter.addAction(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
+        filter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
+        filter.addAction(TelephonyManager.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED);
+        filter.addAction(Intent.ACTION_SERVICE_STATE);
         filter.addAction(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
@@ -512,11 +512,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 refreshLocale();
                 updateAirplaneMode(false);
                 break;
-            case TelephonyIntents.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED:
+            case TelephonyManager.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED:
                 // We are using different subs now, we might be able to make calls.
                 recalculateEmergency();
                 break;
-            case TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED:
+            case TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED:
                 // Notify every MobileSignalController so they can know whether they are the
                 // data sim or not.
                 for (int i = 0; i < mMobileSignalControllers.size(); i++) {
@@ -534,7 +534,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 // Might have different subscriptions now.
                 updateMobileControllers();
                 break;
-            case TelephonyIntents.ACTION_SERVICE_STATE_CHANGED:
+            case Intent.ACTION_SERVICE_STATE:
                 mLastServiceState = ServiceState.newFromBundle(intent.getExtras());
                 if (mMobileSignalControllers.size() == 0) {
                     // If none of the subscriptions are active, we might need to recalculate

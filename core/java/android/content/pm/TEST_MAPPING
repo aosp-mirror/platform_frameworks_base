@@ -9,5 +9,11 @@
     {
       "path": "system/apex/tests"
     }
+  ],
+  "presubmit": [
+    {
+      "name": "FrameworksInstantAppResolverTests",
+      "file_patterns": ["(/|^)InstantApp[^/]*"]
+    }
   ]
 }

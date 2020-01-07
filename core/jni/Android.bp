@@ -345,8 +345,9 @@ cc_library_static {
 
     srcs: [
         "android/graphics/apex/android_bitmap.cpp",
-        "android/graphics/apex/android_region.cpp",
+        "android/graphics/apex/android_matrix.cpp",
         "android/graphics/apex/android_paint.cpp",
+        "android/graphics/apex/android_region.cpp",
 
         "android_graphics_Canvas.cpp",
         "android_graphics_ColorSpace.cpp",

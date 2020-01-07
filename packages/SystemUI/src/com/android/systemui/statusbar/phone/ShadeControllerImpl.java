@@ -79,7 +79,7 @@ public class ShadeControllerImpl implements ShadeController {
     public void instantExpandNotificationsPanel() {
         // Make our window larger and the panel expanded.
         getStatusBar().makeExpandedVisible(true /* force */);
-        getNotificationPanelView().expand(false /* animate */);
+        getNotificationPanelViewController().expand(false /* animate */);
         mCommandQueue.recomputeDisableFlags(mDisplayId, false /* animate */);
     }
 
@@ -123,8 +123,9 @@ public class ShadeControllerImpl implements ShadeController {
 
         // TODO(b/62444020): remove when this bug is fixed
         Log.v(TAG, "mStatusBarWindow: " + getStatusBarWindowView() + " canPanelBeCollapsed(): "
-                + getNotificationPanelView().canPanelBeCollapsed());
-        if (getStatusBarWindowView() != null && getNotificationPanelView().canPanelBeCollapsed()) {
+                + getNotificationPanelViewController().canPanelBeCollapsed());
+        if (getStatusBarWindowView() != null
+                && getNotificationPanelViewController().canPanelBeCollapsed()) {
             // release focus immediately to kick off focus change transition
             mStatusBarWindowController.setStatusBarFocusable(false);
 
@@ -138,7 +139,7 @@ public class ShadeControllerImpl implements ShadeController {
 
     @Override
     public boolean closeShadeIfOpen() {
-        if (!getNotificationPanelView().isFullyCollapsed()) {
+        if (!getNotificationPanelViewController().isFullyCollapsed()) {
             mCommandQueue.animateCollapsePanels(
                     CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
             getStatusBar().visibilityChanged(false);
@@ -149,15 +150,14 @@ public class ShadeControllerImpl implements ShadeController {
 
     @Override
     public void postOnShadeExpanded(Runnable executable) {
-        getNotificationPanelView().getViewTreeObserver().addOnGlobalLayoutListener(
+        getNotificationPanelViewController().addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
                         if (getStatusBar().getStatusBarWindow().getHeight()
                                 != getStatusBar().getStatusBarHeight()) {
-                            getNotificationPanelView().getViewTreeObserver()
-                                    .removeOnGlobalLayoutListener(this);
-                            getNotificationPanelView().post(executable);
+                            getNotificationPanelViewController().removeOnGlobalLayoutListener(this);
+                            getNotificationPanelViewController().getView().post(executable);
                         }
                     }
                 });
@@ -187,7 +187,7 @@ public class ShadeControllerImpl implements ShadeController {
 
     @Override
     public boolean collapsePanel() {
-        if (!getNotificationPanelView().isFullyCollapsed()) {
+        if (!getNotificationPanelViewController().isFullyCollapsed()) {
             // close the shade if it was open
             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
                     true /* force */, true /* delayed */);
@@ -230,7 +230,7 @@ public class ShadeControllerImpl implements ShadeController {
         return (PhoneStatusBarView) getStatusBar().getStatusBarView();
     }
 
-    private NotificationPanelView getNotificationPanelView() {
-        return getStatusBar().getPanel();
+    private NotificationPanelViewController getNotificationPanelViewController() {
+        return getStatusBar().getPanelController();
     }
 }

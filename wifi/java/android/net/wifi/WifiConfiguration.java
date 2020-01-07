@@ -2428,7 +2428,8 @@ public class WifiConfiguration implements Parcelable {
         } else if (allowedKeyManagement.get(KeyMgmt.WPA_EAP)
                 || allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
             key = SSID + KeyMgmt.strings[KeyMgmt.WPA_EAP];
-        } else if (wepKeys[0] != null) {
+        } else if (wepTxKeyIndex >= 0 && wepTxKeyIndex < wepKeys.length
+                && wepKeys[wepTxKeyIndex] != null) {
             key = SSID + "WEP";
         } else if (allowedKeyManagement.get(KeyMgmt.OWE)) {
             key = SSID + KeyMgmt.strings[KeyMgmt.OWE];
@@ -2590,9 +2591,8 @@ public class WifiConfiguration implements Parcelable {
         return mPasspointManagementObjectTree;
     }
 
-    /** copy constructor {@hide} */
-    @UnsupportedAppUsage
-    public WifiConfiguration(WifiConfiguration source) {
+    /** Copy constructor */
+    public WifiConfiguration(@NonNull WifiConfiguration source) {
         if (source != null) {
             networkId = source.networkId;
             status = source.status;

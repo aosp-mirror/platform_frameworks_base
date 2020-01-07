@@ -35,6 +35,7 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 
 import java.util.Arrays;
@@ -297,7 +298,10 @@ public abstract class InstantAppResolverService extends Service {
     public static final class InstantAppResolutionCallback {
         private final IRemoteCallback mCallback;
         private final int mSequence;
-        InstantAppResolutionCallback(int sequence, IRemoteCallback callback) {
+
+        /** @hide **/
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public InstantAppResolutionCallback(int sequence, IRemoteCallback callback) {
             mCallback = callback;
             mSequence = sequence;
         }

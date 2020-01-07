@@ -54,7 +54,6 @@ import android.view.WindowManagerGlobal;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -76,7 +75,6 @@ import org.mockito.quality.Strictness;
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 @Presubmit
-@FlakyTest(bugId = 143153552)
 public class ActivityThreadClientTest {
 
     @Test

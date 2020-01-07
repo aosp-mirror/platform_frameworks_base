@@ -32,7 +32,6 @@ import android.os.storage.IStorageManager;
 import android.security.KeyStore;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 
-import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.server.ServiceThread;
 import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
@@ -46,7 +45,6 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         private LockSettingsStorage mLockSettingsStorage;
         private KeyStore mKeyStore;
         private IActivityManager mActivityManager;
-        private LockPatternUtils mLockPatternUtils;
         private IStorageManager mStorageManager;
         private SyntheticPasswordManager mSpManager;
         private FakeGsiService mGsiService;
@@ -56,7 +54,7 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         private FakeSettings mSettings;
 
         public MockInjector(Context context, LockSettingsStorage storage, KeyStore keyStore,
-                IActivityManager activityManager, LockPatternUtils lockPatternUtils,
+                IActivityManager activityManager,
                 IStorageManager storageManager, SyntheticPasswordManager spManager,
                 FakeGsiService gsiService, RecoverableKeyStoreManager recoverableKeyStoreManager,
                 UserManagerInternal userManagerInternal, DeviceStateCache deviceStateCache,
@@ -65,7 +63,6 @@ public class LockSettingsServiceTestable extends LockSettingsService {
             mLockSettingsStorage = storage;
             mKeyStore = keyStore;
             mActivityManager = activityManager;
-            mLockPatternUtils = lockPatternUtils;
             mStorageManager = storageManager;
             mSpManager = spManager;
             mGsiService = gsiService;
@@ -100,10 +97,6 @@ public class LockSettingsServiceTestable extends LockSettingsService {
             return mActivityManager;
         }
 
-        @Override
-        public LockPatternUtils getLockPatternUtils() {
-            return mLockPatternUtils;
-        }
         @Override
         public DeviceStateCache getDeviceStateCache() {
             return mDeviceStateCache;
@@ -158,14 +151,14 @@ public class LockSettingsServiceTestable extends LockSettingsService {
 
     public MockInjector mInjector;
 
-    protected LockSettingsServiceTestable(Context context, LockPatternUtils lockPatternUtils,
+    protected LockSettingsServiceTestable(Context context,
             LockSettingsStorage storage, FakeGateKeeperService gatekeeper, KeyStore keystore,
             IStorageManager storageManager, IActivityManager mActivityManager,
             SyntheticPasswordManager spManager, IAuthSecret authSecretService,
             FakeGsiService gsiService, RecoverableKeyStoreManager recoverableKeyStoreManager,
             UserManagerInternal userManagerInternal, DeviceStateCache deviceStateCache,
             FakeSettings settings) {
-        super(new MockInjector(context, storage, keystore, mActivityManager, lockPatternUtils,
+        super(new MockInjector(context, storage, keystore, mActivityManager,
                 storageManager, spManager, gsiService,
                 recoverableKeyStoreManager, userManagerInternal, deviceStateCache, settings));
         mGateKeeperService = gatekeeper;

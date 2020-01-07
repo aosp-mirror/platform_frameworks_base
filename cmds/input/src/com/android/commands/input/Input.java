@@ -430,6 +430,6 @@ public class Input extends BaseCommand {
                 + " (Default: touchscreen)");
         out.println("      press (Default: trackball)");
         out.println("      roll <dx> <dy> (Default: trackball)");
-        out.println("      event <DOWN|UP|MOVE> <x> <y> (Default: touchscreen)");
+        out.println("      motionevent <DOWN|UP|MOVE> <x> <y> (Default: touchscreen)");
     }
 }

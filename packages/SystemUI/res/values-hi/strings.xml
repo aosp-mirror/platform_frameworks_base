@@ -946,10 +946,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेविगेशन अपडेट हो गया. बदलाव करने के लिए \'सेटिंग\' पर जाएं."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेविगेशन अपडेट करने के लिए \'सेटिंग\' में जाएं"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टैंडबाई"</string>
-    <!-- no translation found for magnification_overlay_title (6584179429612427958) -->
-    <skip />
-    <!-- no translation found for magnification_window_title (4863914360847258333) -->
-    <skip />
-    <!-- no translation found for magnification_controls_title (8421106606708891519) -->
-    <skip />
+    <string name="magnification_overlay_title" msgid="6584179429612427958">"Magnification Overlay Window"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"स्क्रीन को बड़ा करके दिखाने वाली विंडो"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"स्क्रीन को बड़ा करके दिखाने वाली विंडो के नियंत्रण"</string>
 </resources>

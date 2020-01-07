@@ -222,7 +222,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final TaskSnapshotSurface snapshotSurface = new TaskSnapshotSurface(service, window,
                 surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, sysUiVis,
                 windowFlags, windowPrivateFlags, taskBounds,
-                currentOrientation, topFullscreenOpaqueWindow.getClientInsetsState());
+                currentOrientation, topFullscreenOpaqueWindow.getRequestedInsetsState());
         window.setOuter(snapshotSurface);
         try {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,

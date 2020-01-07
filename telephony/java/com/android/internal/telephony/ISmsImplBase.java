@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.app.PendingIntent;
 import android.net.Uri;
+import android.os.Bundle;
 
 import java.util.List;
 
@@ -181,6 +182,11 @@ public class ISmsImplBase extends ISms.Stub {
     public void sendStoredMultipartText(int subId, String callingPkg, Uri messageUri,
             String scAddress, List<PendingIntent> sentIntents,
             List<PendingIntent> deliveryIntents) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Bundle getCarrierConfigValuesForSubscriber(int subId) {
         throw new UnsupportedOperationException();
     }
 

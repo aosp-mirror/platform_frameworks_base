@@ -48,34 +48,19 @@ import static android.view.WindowManager.LayoutParams.LAST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
-import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
-import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
-import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
-import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
-import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
@@ -712,7 +697,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     accessibilityShortcutActivated();
                     break;
                 case MSG_BUGREPORT_TV:
-                    requestFullBugreport();
+                    boolean customBugreport = mContext.getResources().getBoolean(
+                            com.android.internal.R.bool.config_customBugreport);
+                    if (customBugreport) {
+                        Log.i(TAG, "Triggering a custom bugreport!");
+                        Intent intent = new Intent(ACTION_CUSTOM_BUGREPORT_REQUESTED);
+                        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+                    } else {
+                        requestFullBugreport();
+                    }
                     break;
                 case MSG_ACCESSIBILITY_TV:
                     if (mAccessibilityShortcutController.isAccessibilityShortcutAvailable(false)) {
@@ -2180,52 +2174,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return (mContext.checkCallingOrSelfPermission(SYSTEM_ALERT_WINDOW)
                         == PERMISSION_GRANTED) ? ADD_OKAY : ADD_PERMISSION_DENIED;
         }
-    }
-
-    @Override
-    public boolean checkShowToOwnerOnly(WindowManager.LayoutParams attrs) {
-
-        // If this switch statement is modified, modify the comment in the declarations of
-        // the type in {@link WindowManager.LayoutParams} as well.
-        switch (attrs.type) {
-            default:
-                // These are the windows that by default are shown only to the user that created
-                // them. If this needs to be overridden, set
-                // {@link WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS} in
-                // {@link WindowManager.LayoutParams}. Note that permission
-                // {@link android.Manifest.permission.INTERNAL_SYSTEM_WINDOW} is required as well.
-                if ((attrs.privateFlags & SYSTEM_FLAG_SHOW_FOR_ALL_USERS) == 0) {
-                    return true;
-                }
-                break;
-
-            // These are the windows that by default are shown to all users. However, to
-            // protect against spoofing, check permissions below.
-            case TYPE_APPLICATION_STARTING:
-            case TYPE_BOOT_PROGRESS:
-            case TYPE_DISPLAY_OVERLAY:
-            case TYPE_INPUT_CONSUMER:
-            case TYPE_KEYGUARD_DIALOG:
-            case TYPE_MAGNIFICATION_OVERLAY:
-            case TYPE_NAVIGATION_BAR:
-            case TYPE_NAVIGATION_BAR_PANEL:
-            case TYPE_PHONE:
-            case TYPE_POINTER:
-            case TYPE_PRIORITY_PHONE:
-            case TYPE_SEARCH_BAR:
-            case TYPE_STATUS_BAR:
-            case TYPE_STATUS_BAR_PANEL:
-            case TYPE_STATUS_BAR_SUB_PANEL:
-            case TYPE_SYSTEM_DIALOG:
-            case TYPE_VOLUME_OVERLAY:
-            case TYPE_PRESENTATION:
-            case TYPE_PRIVATE_PRESENTATION:
-            case TYPE_DOCK_DIVIDER:
-                break;
-        }
-
-        // Check if third party app has set window to system window type.
-        return mContext.checkCallingOrSelfPermission(INTERNAL_SYSTEM_WINDOW) != PERMISSION_GRANTED;
     }
 
     void readLidState() {

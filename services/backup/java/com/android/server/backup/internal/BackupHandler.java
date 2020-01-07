@@ -31,8 +31,8 @@ import android.util.EventLog;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
-import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
@@ -58,6 +58,7 @@ import com.android.server.backup.transport.TransportClient;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Asynchronous backup/restore handler thread.
@@ -91,14 +92,16 @@ public class BackupHandler extends Handler {
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     private final HandlerThread mBackupThread;
-    private volatile boolean mIsStopping = false;
+
+    @VisibleForTesting
+    volatile boolean mIsStopping = false;
 
     public BackupHandler(
             UserBackupManagerService backupManagerService, HandlerThread backupThread) {
         super(backupThread.getLooper());
         mBackupThread = backupThread;
         this.backupManagerService = backupManagerService;
-        mAgentTimeoutParameters = Preconditions.checkNotNull(
+        mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
     }
@@ -111,6 +114,24 @@ public class BackupHandler extends Handler {
     public void stop() {
         mIsStopping = true;
         sendMessage(obtainMessage(BackupHandler.MSG_STOP));
+    }
+
+    @Override
+    public void dispatchMessage(Message message) {
+        try {
+            dispatchMessageInternal(message);
+        } catch (Exception e) {
+            // If the backup service is stopping, we'll suppress all exceptions to avoid crashes
+            // caused by code still running after the current user has become unavailable.
+            if (!mIsStopping) {
+                throw e;
+            }
+        }
+    }
+
+    @VisibleForTesting
+    void dispatchMessageInternal(Message message) {
+        super.dispatchMessage(message);
     }
 
     public void handleMessage(Message msg) {
@@ -414,7 +435,7 @@ public class BackupHandler extends Handler {
                             try {
                                 params.observer.onTimeout();
                             } catch (RemoteException e) {
-                            /* don't care if the app has gone away */
+                                /* don't care if the app has gone away */
                             }
                         }
                     } else {

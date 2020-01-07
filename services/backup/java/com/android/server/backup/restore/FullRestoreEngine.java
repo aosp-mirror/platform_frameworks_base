@@ -42,7 +42,6 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
@@ -62,6 +61,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Full restore engine, used by both adb restore and transport-based full restore.
@@ -142,7 +142,7 @@ public class FullRestoreEngine extends RestoreEngine {
         mOnlyPackage = onlyPackage;
         mAllowApks = allowApks;
         mBuffer = new byte[32 * 1024];
-        mAgentTimeoutParameters = Preconditions.checkNotNull(
+        mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
         mIsAdbRestore = isAdbRestore;

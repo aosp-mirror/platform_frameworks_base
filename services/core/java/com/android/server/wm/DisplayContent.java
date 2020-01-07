@@ -230,7 +230,6 @@ import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
-import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.utils.DisplayRotationUtil;
@@ -977,7 +976,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         AnimationHandler animationHandler = new AnimationHandler();
         mBoundsAnimationController = new BoundsAnimationController(mWmService.mContext,
-                mAppTransition, AnimationThread.getHandler(), animationHandler);
+                mAppTransition, mWmService.mAnimationHandler, animationHandler);
 
         final InputChannel inputChannel = mWmService.mInputManager.monitorInput(
                 "PointerEventDispatcher" + mDisplayId, mDisplayId);

@@ -53,7 +53,6 @@ import android.security.KeyStore;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.LockscreenCredential;
@@ -91,7 +90,6 @@ public abstract class BaseLockSettingsServiceTests {
     MockLockSettingsContext mContext;
     LockSettingsStorageTestable mStorage;
 
-    LockPatternUtils mLockPatternUtils;
     FakeGateKeeperService mGateKeeperService;
     NotificationManager mNotificationManager;
     UserManager mUserManager;
@@ -111,7 +109,6 @@ public abstract class BaseLockSettingsServiceTests {
     FingerprintManager mFingerprintManager;
     FaceManager mFaceManager;
     PackageManager mPackageManager;
-    protected boolean mHasSecureLockScreen;
     FakeSettings mSettings;
 
     @Before
@@ -153,25 +150,14 @@ public abstract class BaseLockSettingsServiceTests {
             storageDir.mkdirs();
         }
 
-        mHasSecureLockScreen = true;
-        mLockPatternUtils = new LockPatternUtils(mContext) {
-            @Override
-            public ILockSettings getLockSettings() {
-                return mService;
-            }
-
-            @Override
-            public boolean hasSecureLockScreen() {
-                return mHasSecureLockScreen;
-            }
-        };
         mSpManager = new MockSyntheticPasswordManager(mContext, mStorage, mGateKeeperService,
                 mUserManager, mPasswordSlotManager);
         mAuthSecretService = mock(IAuthSecret.class);
-        mService = new LockSettingsServiceTestable(mContext, mLockPatternUtils, mStorage,
+        mService = new LockSettingsServiceTestable(mContext, mStorage,
                 mGateKeeperService, mKeyStore, setUpStorageManagerMock(), mActivityManager,
                 mSpManager, mAuthSecretService, mGsiService, mRecoverableKeyStoreManager,
                 mUserManagerInternal, mDeviceStateCache, mSettings);
+        mService.mHasSecureLockScreen = true;
         when(mUserManager.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(PRIMARY_USER_INFO);
         mPrimaryUserProfiles.add(PRIMARY_USER_INFO);
         installChildProfile(MANAGED_PROFILE_USER_ID);

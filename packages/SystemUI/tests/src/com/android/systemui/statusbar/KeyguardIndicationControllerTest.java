@@ -154,12 +154,14 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     @Test
     public void onAlignmentStateChanged_showsSlowChargingIndication() {
-        createController();
-        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
-        mController.setVisible(true);
+        mInstrumentation.runOnMainSync(() -> {
+            createController();
+            verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+            mController.setVisible(true);
 
-        mAlignmentListener.getValue().onAlignmentStateChanged(
-                DockManager.ALIGN_STATE_POOR);
+            mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_POOR);
+        });
+        mInstrumentation.waitForIdleSync();
 
         assertThat(mTextView.getText()).isEqualTo(
                 mContext.getResources().getString(R.string.dock_alignment_slow_charging));
@@ -169,11 +171,14 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     @Test
     public void onAlignmentStateChanged_showsNotChargingIndication() {
-        createController();
-        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
-        mController.setVisible(true);
+        mInstrumentation.runOnMainSync(() -> {
+            createController();
+            verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+            mController.setVisible(true);
 
-        mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
+            mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
+        });
+        mInstrumentation.waitForIdleSync();
 
         assertThat(mTextView.getText()).isEqualTo(
                 mContext.getResources().getString(R.string.dock_alignment_not_charging));
@@ -183,13 +188,15 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     @Test
     public void onAlignmentStateChanged_whileDozing_showsSlowChargingIndication() {
-        createController();
-        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
-        mController.setVisible(true);
-        mController.setDozing(true);
+        mInstrumentation.runOnMainSync(() -> {
+            createController();
+            verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+            mController.setVisible(true);
+            mController.setDozing(true);
 
-        mAlignmentListener.getValue().onAlignmentStateChanged(
-                DockManager.ALIGN_STATE_POOR);
+            mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_POOR);
+        });
+        mInstrumentation.waitForIdleSync();
 
         assertThat(mTextView.getText()).isEqualTo(
                 mContext.getResources().getString(R.string.dock_alignment_slow_charging));
@@ -199,12 +206,15 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     @Test
     public void onAlignmentStateChanged_whileDozing_showsNotChargingIndication() {
-        createController();
-        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
-        mController.setVisible(true);
-        mController.setDozing(true);
+        mInstrumentation.runOnMainSync(() -> {
+            createController();
+            verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+            mController.setVisible(true);
+            mController.setDozing(true);
 
-        mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
+            mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
+        });
+        mInstrumentation.waitForIdleSync();
 
         assertThat(mTextView.getText()).isEqualTo(
                 mContext.getResources().getString(R.string.dock_alignment_not_charging));

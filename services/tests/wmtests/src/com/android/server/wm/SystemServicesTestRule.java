@@ -484,8 +484,8 @@ public class SystemServicesTestRule implements TestRule {
             spyOn(this);
 
             // Do not schedule idle that may touch methods outside the scope of the test.
-            doNothing().when(this).scheduleIdleLocked();
-            doNothing().when(this).scheduleIdleTimeoutLocked(any());
+            doNothing().when(this).scheduleIdle();
+            doNothing().when(this).scheduleIdleTimeout(any());
             // unit test version does not handle launch wake lock
             doNothing().when(this).acquireLaunchWakelock();
             doReturn(mock(KeyguardController.class)).when(this).getKeyguardController();

@@ -16,13 +16,11 @@
 
 package com.android.internal.app;
 
-import com.android.internal.R;
-
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.ListFragment;
 import android.app.backup.BackupManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -38,11 +36,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.internal.R;
+
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.ArrayList;
 
 public class LocalePicker extends ListFragment {
     private static final String TAG = "LocalePicker";

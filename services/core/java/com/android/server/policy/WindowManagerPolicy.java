@@ -702,16 +702,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     public int checkAddPermission(WindowManager.LayoutParams attrs, int[] outAppOp);
 
     /**
-     * Check permissions when adding a window.
-     *
-     * @param attrs The window's LayoutParams.
-     *
-     * @return True if the window may only be shown to the current user, false if the window can
-     * be shown on all users' windows.
-     */
-    public boolean checkShowToOwnerOnly(WindowManager.LayoutParams attrs);
-
-    /**
      * After the window manager has computed the current configuration based
      * on its knowledge of the display and input devices, it gives the policy
      * a chance to adjust the information contained in it.  If you want to

@@ -275,6 +275,7 @@ import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.server.ServerProtoEnums;
 import android.sysprop.VoldProperties;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.SuggestionSpan;
@@ -318,7 +319,6 @@ import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -2176,10 +2176,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             @Override
             public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args,
                     boolean asProto) {
-                if (asProto) return;
                 if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                         "cpuinfo", pw)) return;
                 synchronized (mActivityManagerService.mProcessCpuTracker) {
+                    if (asProto) {
+                        mActivityManagerService.mProcessCpuTracker.dumpProto(fd);
+                        return;
+                    }
                     pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentLoad());
                     pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentState(
                             SystemClock.uptimeMillis()));
@@ -4338,6 +4341,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean allUids = mAtmInternal.isGetTasksAllowed(
                 "getProcessMemoryInfo", callingPid, callingUid);
 
+        // Check if the caller is actually instrumented and from shell, if it's true, we may lift
+        // the throttle of PSS info sampling.
+        boolean isCallerInstrumentedFromShell = false;
+        synchronized (mPidsSelfLocked) {
+            ProcessRecord caller = mPidsSelfLocked.get(callingPid);
+            if (caller != null) {
+                final ActiveInstrumentation instr = caller.getActiveInstrumentation();
+                isCallerInstrumentedFromShell = instr != null
+                        && (instr.mSourceUid == SHELL_UID || instr.mSourceUid == ROOT_UID);
+            }
+        }
+
         Debug.MemoryInfo[] infos = new Debug.MemoryInfo[pids.length];
         for (int i=pids.length-1; i>=0; i--) {
             infos[i] = new Debug.MemoryInfo();
@@ -4361,7 +4376,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     continue; // Not allowed to see other users.
                 }
             }
-            if (proc != null && proc.lastMemInfoTime >= lastNow && proc.lastMemInfo != null) {
+            if (proc != null && proc.lastMemInfoTime >= lastNow && proc.lastMemInfo != null
+                    && !isCallerInstrumentedFromShell) {
                 // It hasn't been long enough that we want to take another sample; return
                 // the last one.
                 infos[i].set(proc.lastMemInfo);
@@ -12594,7 +12610,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ArrayList<ProcessRecord> procs, PrintWriter categoryPw) {
         long uptime = SystemClock.uptimeMillis();
         long realtime = SystemClock.elapsedRealtime();
-        final long[] tmpLong = new long[1];
+        final long[] tmpLong = new long[3];
 
         if (procs == null) {
             // No Java processes.  Maybe they want to print a native process.
@@ -12627,17 +12643,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                         for (int i = nativeProcs.size() - 1 ; i >= 0 ; i--) {
                             final ProcessCpuTracker.Stats r = nativeProcs.get(i);
                             final int pid = r.pid;
-                            if (!opts.isCheckinRequest && opts.dumpDetails) {
-                                pw.println("\n** MEMINFO in pid " + pid + " [" + r.baseName + "] **");
-                            }
                             if (mi == null) {
                                 mi = new Debug.MemoryInfo();
                             }
                             if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
-                                Debug.getMemoryInfo(pid, mi);
+                                if (!Debug.getMemoryInfo(pid, mi)) {
+                                    continue;
+                                }
                             } else {
-                                mi.dalvikPss = (int)Debug.getPss(pid, tmpLong, null);
-                                mi.dalvikPrivateDirty = (int)tmpLong[0];
+                                long pss = Debug.getPss(pid, tmpLong, null);
+                                if (pss == 0) {
+                                    continue;
+                                }
+                                mi.nativePss = (int) pss;
+                                mi.nativePrivateDirty = (int) tmpLong[0];
+                                mi.nativeRss = (int) tmpLong[2];
+                            }
+                            if (!opts.isCheckinRequest && opts.dumpDetails) {
+                                pw.println("\n** MEMINFO in pid " + pid + " ["
+                                        + r.baseName + "] **");
                             }
                             ActivityThread.dumpMemInfoTable(pw, mi, opts.isCheckinRequest,
                                     opts.dumpFullDetails, opts.dumpDalvik, opts.dumpSummaryOnly,
@@ -12715,9 +12739,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 hasActivities = r.hasActivities();
             }
             if (thread != null) {
-                if (!opts.isCheckinRequest && opts.dumpDetails) {
-                    pw.println("\n** MEMINFO in pid " + pid + " [" + r.processName + "] **");
-                }
                 if (mi == null) {
                     mi = new Debug.MemoryInfo();
                 }
@@ -12727,16 +12748,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
                     reportType = ProcessStats.ADD_PSS_EXTERNAL_SLOW;
                     startTime = SystemClock.currentThreadTimeMillis();
-                    Debug.getMemoryInfo(pid, mi);
+                    if (!Debug.getMemoryInfo(pid, mi)) {
+                        continue;
+                    }
                     endTime = SystemClock.currentThreadTimeMillis();
                     hasSwapPss = mi.hasSwappedOutPss;
                 } else {
                     reportType = ProcessStats.ADD_PSS_EXTERNAL;
                     startTime = SystemClock.currentThreadTimeMillis();
-                    mi.dalvikPss = (int)Debug.getPss(pid, tmpLong, null);
+                    long pss = Debug.getPss(pid, tmpLong, null);
+                    if (pss == 0) {
+                        continue;
+                    }
+                    mi.dalvikPss = (int) pss;
                     endTime = SystemClock.currentThreadTimeMillis();
-                    mi.dalvikPrivateDirty = (int)tmpLong[0];
+                    mi.dalvikPrivateDirty = (int) tmpLong[0];
                     mi.dalvikRss = (int) tmpLong[2];
+                }
+                if (!opts.isCheckinRequest && opts.dumpDetails) {
+                    pw.println("\n** MEMINFO in pid " + pid + " [" + r.processName + "] **");
                 }
                 if (opts.dumpDetails) {
                     if (opts.localOnly) {
@@ -12867,10 +12897,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                             mi = new Debug.MemoryInfo();
                         }
                         if (!brief && !opts.oomOnly) {
-                            Debug.getMemoryInfo(st.pid, mi);
+                            if (!Debug.getMemoryInfo(st.pid, mi)) {
+                                continue;
+                            }
                         } else {
-                            mi.nativePss = (int)Debug.getPss(st.pid, tmpLong, null);
-                            mi.nativePrivateDirty = (int)tmpLong[0];
+                            long pss = Debug.getPss(st.pid, tmpLong, null);
+                            if (pss == 0) {
+                                continue;
+                            }
+                            mi.nativePss = (int) pss;
+                            mi.nativePrivateDirty = (int) tmpLong[0];
+                            mi.nativeRss = (int) tmpLong[2];
                         }
 
                         final long myTotalPss = mi.getTotalPss();
@@ -13174,7 +13211,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ArrayList<ProcessRecord> procs) {
         final long uptimeMs = SystemClock.uptimeMillis();
         final long realtimeMs = SystemClock.elapsedRealtime();
-        final long[] tmpLong = new long[1];
+        final long[] tmpLong = new long[3];
 
         if (procs == null) {
             // No Java processes.  Maybe they want to print a native process.
@@ -13209,20 +13246,29 @@ public class ActivityManagerService extends IActivityManager.Stub
                         for (int i = nativeProcs.size() - 1 ; i >= 0 ; i--) {
                             final ProcessCpuTracker.Stats r = nativeProcs.get(i);
                             final int pid = r.pid;
-                            final long nToken = proto.start(MemInfoDumpProto.NATIVE_PROCESSES);
-
-                            proto.write(MemInfoDumpProto.ProcessMemory.PID, pid);
-                            proto.write(MemInfoDumpProto.ProcessMemory.PROCESS_NAME, r.baseName);
 
                             if (mi == null) {
                                 mi = new Debug.MemoryInfo();
                             }
                             if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
-                                Debug.getMemoryInfo(pid, mi);
+                                if (!Debug.getMemoryInfo(pid, mi)) {
+                                    continue;
+                                }
                             } else {
-                                mi.dalvikPss = (int)Debug.getPss(pid, tmpLong, null);
-                                mi.dalvikPrivateDirty = (int)tmpLong[0];
+                                long pss = Debug.getPss(pid, tmpLong, null);
+                                if (pss == 0) {
+                                    continue;
+                                }
+                                mi.nativePss = (int) pss;
+                                mi.nativePrivateDirty = (int) tmpLong[0];
+                                mi.nativeRss = (int) tmpLong[2];
                             }
+
+                            final long nToken = proto.start(MemInfoDumpProto.NATIVE_PROCESSES);
+
+                            proto.write(MemInfoDumpProto.ProcessMemory.PID, pid);
+                            proto.write(MemInfoDumpProto.ProcessMemory.PROCESS_NAME, r.baseName);
+
                             ActivityThread.dumpMemInfoTable(proto, mi, opts.dumpDalvik,
                                     opts.dumpSummaryOnly, 0, 0, 0, 0, 0, 0);
 
@@ -13313,13 +13359,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
                 reportType = ProcessStats.ADD_PSS_EXTERNAL_SLOW;
                 startTime = SystemClock.currentThreadTimeMillis();
-                Debug.getMemoryInfo(pid, mi);
+                if (!Debug.getMemoryInfo(pid, mi)) {
+                    continue;
+                }
                 endTime = SystemClock.currentThreadTimeMillis();
                 hasSwapPss = mi.hasSwappedOutPss;
             } else {
                 reportType = ProcessStats.ADD_PSS_EXTERNAL;
                 startTime = SystemClock.currentThreadTimeMillis();
-                mi.dalvikPss = (int) Debug.getPss(pid, tmpLong, null);
+                long pss = Debug.getPss(pid, tmpLong, null);
+                if (pss == 0) {
+                    continue;
+                }
+                mi.dalvikPss = (int) pss;
                 endTime = SystemClock.currentThreadTimeMillis();
                 mi.dalvikPrivateDirty = (int) tmpLong[0];
                 mi.dalvikRss = (int) tmpLong[2];
@@ -13447,10 +13499,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                             mi = new Debug.MemoryInfo();
                         }
                         if (!brief && !opts.oomOnly) {
-                            Debug.getMemoryInfo(st.pid, mi);
+                            if (!Debug.getMemoryInfo(st.pid, mi)) {
+                                continue;
+                            }
                         } else {
-                            mi.nativePss = (int)Debug.getPss(st.pid, tmpLong, null);
-                            mi.nativePrivateDirty = (int)tmpLong[0];
+                            long pss = Debug.getPss(st.pid, tmpLong, null);
+                            if (pss == 0) {
+                                continue;
+                            }
+                            mi.nativePss = (int) pss;
+                            mi.nativePrivateDirty = (int) tmpLong[0];
+                            mi.nativeRss = (int) tmpLong[2];
                         }
 
                         final long myTotalPss = mi.getTotalPss();
@@ -15098,7 +15157,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(action)
                 || AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)
                 || LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)
-                || TelephonyIntents.ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE.equals(action)
+                || TelephonyManager.ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE.equals(action)
                 || SuggestionSpan.ACTION_SUGGESTION_PICKED.equals(action)
                 || AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION.equals(action)
                 || AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION.equals(action)) {
@@ -16166,6 +16225,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     disableTestApiChecks, mountExtStorageFull, abiOverride);
             app.setActiveInstrumentation(activeInstr);
             activeInstr.mFinished = false;
+            activeInstr.mSourceUid = callingUid;
             activeInstr.mRunningProcesses.add(app);
             if (!mActiveInstrumentation.contains(activeInstr)) {
                 mActiveInstrumentation.add(activeInstr);

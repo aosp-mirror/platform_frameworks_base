@@ -34,6 +34,7 @@ public class RuntimeShader extends Shader {
     }
 
     private byte[] mUniforms;
+    private boolean mIsOpaque;
 
     /**
      * Current native shader factory instance.
@@ -56,7 +57,8 @@ public class RuntimeShader extends Shader {
             ColorSpace colorSpace) {
         super(colorSpace);
         mUniforms = uniforms;
-        mNativeInstanceRuntimeShaderFactory = nativeCreateShaderFactory(sksl, isOpaque);
+        mIsOpaque = isOpaque;
+        mNativeInstanceRuntimeShaderFactory = nativeCreateShaderFactory(sksl);
         NoImagePreloadHolder.sRegistry.registerNativeAllocation(this,
                 mNativeInstanceRuntimeShaderFactory);
     }
@@ -75,13 +77,13 @@ public class RuntimeShader extends Shader {
     @Override
     long createNativeInstance(long nativeMatrix) {
         return nativeCreate(mNativeInstanceRuntimeShaderFactory, nativeMatrix, mUniforms,
-                colorSpace().getNativeInstance());
+                colorSpace().getNativeInstance(), mIsOpaque);
     }
 
     private static native long nativeCreate(long shaderFactory, long matrix, byte[] inputs,
-            long colorSpaceHandle);
+            long colorSpaceHandle, boolean isOpaque);
 
-    private static native long nativeCreateShaderFactory(String sksl, boolean isOpaque);
+    private static native long nativeCreateShaderFactory(String sksl);
 
     private static native long nativeGetFinalizer();
 }

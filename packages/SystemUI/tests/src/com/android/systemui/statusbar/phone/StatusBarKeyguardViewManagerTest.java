@@ -74,7 +74,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock
     private ViewGroup mContainer;
     @Mock
-    private NotificationPanelView mNotificationPanelView;
+    private NotificationPanelViewController mNotificationPanelView;
     @Mock
     private BiometricUnlockController mBiometrucUnlockController;
     @Mock
@@ -281,12 +281,12 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
         @Override
         public void registerStatusBar(StatusBar statusBar, ViewGroup container,
-                NotificationPanelView notificationPanelView,
+                NotificationPanelViewController notificationPanelViewController,
                 BiometricUnlockController fingerprintUnlockController,
                 DismissCallbackRegistry dismissCallbackRegistry,
                 ViewGroup lockIconContainer, View notificationContainer,
                 KeyguardBypassController bypassController, FalsingManager falsingManager) {
-            super.registerStatusBar(statusBar, container, notificationPanelView,
+            super.registerStatusBar(statusBar, container, notificationPanelViewController,
                     fingerprintUnlockController, dismissCallbackRegistry, lockIconContainer,
                     notificationContainer, bypassController, falsingManager);
             mBouncer = StatusBarKeyguardViewManagerTest.this.mBouncer;

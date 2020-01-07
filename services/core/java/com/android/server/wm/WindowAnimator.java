@@ -32,7 +32,6 @@ import android.util.TimeUtils;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
 
-import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
 
@@ -92,7 +91,7 @@ public class WindowAnimator {
         mContext = service.mContext;
         mPolicy = service.mPolicy;
         mTransaction = service.mTransactionFactory.get();
-        AnimationThread.getHandler().runWithScissors(
+        service.mAnimationHandler.runWithScissors(
                 () -> mChoreographer = Choreographer.getSfInstance(), 0 /* timeout */);
 
         mAnimationFrameCallback = frameTimeNs -> {

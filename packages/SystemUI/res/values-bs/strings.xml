@@ -468,8 +468,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Isključi Uštedu baterije"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> će imati pristup svim informacijama koje se prikazuju na ekranu ili koje se reproduciraju s vašeg uređaja za vrijeme snimanja ili emitiranja. To obuhvata informacije kao što su lozinke, detalji o plaćanju, fotografije, poruke i zvuk koji reproducirate."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Usluga koja pruža ovu funkciju će imati pristup svim informacijama koje se prikazuju na ekranu ili koje se reproduciraju s vašeg uređaja za vrijeme snimanja ili emitiranja. To obuhvata informacije kao što su lozinke, detalji o plaćanju, fotografije, poruke i zvuk koji reproducirate."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Započeti snimanje ili emitiranje?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Započeti snimanje ili emitiranje s aplikacijom <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Ne prikazuj opet"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Očisti sve"</string>

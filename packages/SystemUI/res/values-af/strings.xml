@@ -465,8 +465,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Skakel Batterybespaarder af"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sal toegang hê tot al die inligting wat op jou skerm sigbaar is of wat op jou toestel gespeel word terwyl dit opneem of uitsaai. Dit sluit in inligting soos wagwoorde, betalingbesonderhede, foto\'s, boodskappe en oudio wat jy speel."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Die diens wat hierdie funksie verskaf, sal toegang hê tot al die inligting wat op jou skerm sigbaar is of wat op jou toestel gespeel word terwyl dit opneem of uitsaai. Dit sluit in inligting soos wagwoorde, betalingbesonderhede, foto\'s, boodskappe en oudio wat jy speel."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Begin opneem of uitsaai?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Begin opneem of uitsaai met <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Moenie weer wys nie"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Vee alles uit"</string>

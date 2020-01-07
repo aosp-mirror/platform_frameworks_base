@@ -1541,6 +1541,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     @FastNative
     private static native float nativeGetAxisValue(long nativePtr,
             int axis, int pointerIndex, int historyPos);
+    @FastNative
+    private static native void nativeTransform(long nativePtr, Matrix matrix);
 
     // -------------- @CriticalNative ----------------------
 
@@ -1614,8 +1616,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     @CriticalNative
     private static native void nativeScale(long nativePtr, float scale);
-    @CriticalNative
-    private static native void nativeTransform(long nativePtr, long matrix);
 
     private MotionEvent() {
     }
@@ -3210,7 +3210,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             throw new IllegalArgumentException("matrix must not be null");
         }
 
-        nativeTransform(mNativePtr, matrix.native_instance);
+        nativeTransform(mNativePtr, matrix);
     }
 
     /**

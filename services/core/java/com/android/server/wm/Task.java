@@ -385,6 +385,8 @@ class Task extends WindowContainer<WindowContainer> {
 
     private static Exception sTmpException;
 
+    private boolean mForceShowForAllUsers;
+
     private final FindRootHelper mFindRootHelper = new FindRootHelper();
     private class FindRootHelper {
         private ActivityRecord mRoot;
@@ -2185,7 +2187,7 @@ class Task extends WindowContainer<WindowContainer> {
                 + " from stack=" + getStack());
         EventLogTags.writeWmTaskRemoved(mTaskId, "reParentTask:" + reason);
 
-        position = stack.findPositionForTask(this, position, showForAllUsers());
+        position = stack.findPositionForTask(this, position);
 
         reparent(stack, position);
 
@@ -2520,6 +2522,15 @@ class Task extends WindowContainer<WindowContainer> {
         if (mChildren.isEmpty()) return false;
         final ActivityRecord r = getTopNonFinishingActivity();
         return r != null && r.mShowForAllUsers;
+    }
+
+    @Override
+    boolean showToCurrentUser() {
+        return mForceShowForAllUsers || showForAllUsers() || mWmService.isCurrentProfile(mUserId);
+    }
+
+    void setForceShowForAllUsers(boolean forceShowForAllUsers) {
+        mForceShowForAllUsers = forceShowForAllUsers;
     }
 
     /**

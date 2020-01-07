@@ -3046,12 +3046,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // Verify they're not lying about package name
         mAppOps.checkPackage(callingUid, callingPackage);
 
+        final SubscriptionManager sm;
         final SubscriptionInfo si;
         final PersistableBundle config;
         final long token = Binder.clearCallingIdentity();
         try {
-            si = mContext.getSystemService(SubscriptionManager.class)
-                    .getActiveSubscriptionInfo(subId);
+            sm = mContext.getSystemService(SubscriptionManager.class);
+            si = sm.getActiveSubscriptionInfo(subId);
             config = mCarrierConfigManager.getConfigForSubId(subId);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -3059,7 +3060,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // First check: is caller the CarrierService?
         if (si != null) {
-            if (si.isEmbedded() && si.canManageSubscription(mContext, callingPackage)) {
+            if (si.isEmbedded() && sm.canManageSubscription(si, callingPackage)) {
                 return;
             }
         }

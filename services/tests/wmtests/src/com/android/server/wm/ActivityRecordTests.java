@@ -902,7 +902,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         topActivity.mVisibleRequested = false;
         topActivity.nowVisible = false;
         topActivity.finishing = true;
-        topActivity.setState(PAUSED, "true");
+        topActivity.setState(STOPPED, "true");
         // Mark the bottom activity as not visible, so that we would wait for it before removing
         // the top one.
         mActivity.mVisibleRequested = false;

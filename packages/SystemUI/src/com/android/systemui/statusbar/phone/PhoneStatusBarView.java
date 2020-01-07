@@ -236,7 +236,7 @@ public class PhoneStatusBarView extends PanelBar {
     public void onPanelFullyOpened() {
         super.onPanelFullyOpened();
         if (!mIsFullyOpenedPanel) {
-            mPanel.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+            mPanel.getView().sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         }
         mIsFullyOpenedPanel = true;
         maybeShowDivider(!mBar.mPanelExpanded);
@@ -420,7 +420,8 @@ public class PhoneStatusBarView extends PanelBar {
 
     void maybeShowDivider(boolean showDivider) {
         int state =
-                showDivider && NotificationPanelView.isQsSplitEnabled() ? View.VISIBLE : View.GONE;
+                showDivider && NotificationPanelViewController.isQsSplitEnabled()
+                        ? View.VISIBLE : View.GONE;
         mDividerContainer.setVisibility(state);
     }
 

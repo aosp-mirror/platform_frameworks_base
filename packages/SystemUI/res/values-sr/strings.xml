@@ -468,8 +468,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Искључи Уштеду батерије"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ће имати приступ свим информацијама које се приказују на екрану или репродукују са уређаја током снимања или пребацивања. То обухвата информације попут лозинки, информација о плаћању, слика, порука и звука који пуштате."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услуга која пружа ову функцију ће имати приступ свим информацијама које се приказују на екрану или репродукују са уређаја током снимања или пребацивања. То обухвата информације попут лозинки, информација о плаћању, слика, порука и звука који пуштате."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Желите да почнете снимање или пребацивање?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Желите да почнете снимање или пребацивање помоћу апликације <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Не приказуј поново"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Обриши све"</string>

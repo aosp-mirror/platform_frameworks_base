@@ -96,6 +96,7 @@
     <protected-broadcast android:name="android.intent.action.USER_ACTIVITY_NOTIFICATION" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_SUSPENDED" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_UNSUSPENDED" />
+    <protected-broadcast android:name="android.intent.action.CUSTOM_BUGREPORT_REQUESTED" />
 
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGING" />
@@ -932,6 +933,14 @@
     <permission android:name="android.permission.WRITE_OBB"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an application a broad access to external storage in scoped storage.
+         Intended to be used by few apps that need to manage files on behalf of the users.
+         <p>Protection level: signature|appop
+         <p>This protection level is temporary and will most likely be changed to |preinstalled -->
+    <permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:protectionLevel="signature|appop" />
+
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device location                          -->
     <!-- ====================================================================== -->
@@ -1614,6 +1623,12 @@
          <p>Not for use by third-party applications. @hide -->
     <permission android:name="android.permission.REQUEST_NETWORK_SCORES"
         android:protectionLevel="signature|setup" />
+
+    <!-- @SystemApi @hide Allows applications to toggle airplane mode.
+         <p>Not for use by third-party or privileged applications.
+    -->
+    <permission android:name="android.permission.NETWORK_AIRPLANE_MODE"
+        android:protectionLevel="signature" />
 
     <!-- Allows network stack services (Connectivity and Wifi) to coordinate
          <p>Not for use by third-party or privileged applications.
@@ -2534,23 +2549,37 @@
     <permission android:name="android.permission.READ_WALLPAPER_INTERNAL"
         android:protectionLevel="signature|privileged" />
 
-    <!-- ============================================ -->
-    <!-- Permissions for changing the system clock -->
-    <!-- ============================================ -->
+    <!-- ===================================================== -->
+    <!-- Permissions for changing the system clock / time zone -->
+    <!-- ===================================================== -->
     <eat-comment />
 
-    <!-- Allows applications to set the system time.
-    <p>Not for use by third-party applications. -->
+    <!-- Allows applications to set the system time directly.
+         <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.SET_TIME"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows applications to set the system time zone.
+    <!-- Allows applications to set the system time zone directly.
          <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.SET_TIME_ZONE"
         android:label="@string/permlab_setTimeZone"
         android:description="@string/permdesc_setTimeZone"
         android:protectionLevel="signature|privileged" />
+
+    <!-- Allows telephony to suggest the time / time zone.
+         <p>Not for use by third-party applications.
+         @hide
+     -->
+    <permission android:name="android.permission.SUGGEST_PHONE_TIME_AND_ZONE"
+        android:protectionLevel="signature|telephony" />
+
+    <!-- Allows applications like settings to suggest the user's manually chosen time / time zone.
+         <p>Not for use by third-party applications.
+         @hide
+    -->
+    <permission android:name="android.permission.SUGGEST_MANUAL_TIME_AND_ZONE"
+        android:protectionLevel="signature" />
 
     <!-- ==================================================== -->
     <!-- Permissions related to changing status bar   -->

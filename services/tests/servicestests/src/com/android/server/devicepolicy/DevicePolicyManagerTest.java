@@ -3659,6 +3659,25 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertExpectException(SecurityException.class, null, () -> dpm.setTime(admin1, 0));
     }
 
+    public void testSetTimeWithPOOfOrganizationOwnedDevice() throws Exception {
+        setupProfileOwner();
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
+        dpm.setTime(admin1, 0);
+
+        BaseMatcher<ManualTimeSuggestion> hasZeroTime = new BaseMatcher<ManualTimeSuggestion>() {
+            @Override
+            public boolean matches(Object item) {
+                final ManualTimeSuggestion suggestion = (ManualTimeSuggestion) item;
+                return suggestion.getUtcTime().getValue() == 0;
+            }
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("ManualTimeSuggestion{utcTime.value=0}");
+            }
+        };
+        verify(getServices().timeDetector).suggestManualTime(argThat(hasZeroTime));
+    }
+
     public void testSetTimeWithAutoTimeOn() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -3680,6 +3699,15 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setupProfileOwner();
         assertExpectException(SecurityException.class, null,
                 () -> dpm.setTimeZone(admin1, "Asia/Shanghai"));
+    }
+
+    public void testSetTimeZoneWithPOOfOrganizationOwnedDevice() throws Exception {
+        setupProfileOwner();
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
+        dpm.setTimeZone(admin1, "Asia/Shanghai");
+        ManualTimeZoneSuggestion suggestion =
+                TimeZoneDetector.createManualTimeZoneSuggestion("Asia/Shanghai", "Test debug info");
+        verify(getServices().timeZoneDetector).suggestManualTimeZone(suggestion);
     }
 
     public void testSetTimeZoneWithAutoTimeZoneOn() throws Exception {

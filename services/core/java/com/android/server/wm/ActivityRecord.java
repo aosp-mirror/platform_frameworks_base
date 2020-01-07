@@ -1974,15 +1974,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     + " is already the parent of r=" + this);
         }
 
-        // TODO: Ensure that we do not directly reparent activities across stacks, as that may leave
-        //       the stacks in strange states. For now, we should use Task.reparent() to ensure that
-        //       the stack is left in an OK state.
-        if (prevTask != null && newTask != null && prevTask.getStack() != newTask.getStack()) {
-            throw new IllegalArgumentException(reason + ": task=" + newTask
-                    + " is in a different stack (" + newTask.getStackId() + ") than the parent of"
-                    + " r=" + this + " (" + prevTask.getStackId() + ")");
-        }
-
         ProtoLog.i(WM_DEBUG_ADD_REMOVE, "reparent: moving activity=%s"
                 + " to task=%d at %d", this, task.mTaskId, position);
         reparent(newTask, position);
@@ -2633,14 +2624,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // TODO(b/137329632): find the next activity directly underneath this one, not just anywhere
         final ActivityRecord next = getDisplay().topRunningActivity(
                 true /* considerKeyguardState */);
-        final boolean isVisible = mVisibleRequested || nowVisible;
         // isNextNotYetVisible is to check if the next activity is invisible, or it has been
         // requested to be invisible but its windows haven't reported as invisible.  If so, it
         // implied that the current finishing activity should be added into stopping list rather
         // than destroy immediately.
         final boolean isNextNotYetVisible = next != null
                 && (!next.nowVisible || !next.mVisibleRequested);
-        if (isVisible && isNextNotYetVisible) {
+        if ((mVisibleRequested || isState(PAUSED)) && isNextNotYetVisible) {
             // Add this activity to the list of stopping activities. It will be processed and
             // destroyed when the next activity reports idle.
             addToStopping(false /* scheduleIdle */, false /* idleDelayed */,
@@ -4772,7 +4762,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Schedule an idle timeout in case the app doesn't do it for us.
-        mStackSupervisor.scheduleIdleTimeoutLocked(this);
+        mStackSupervisor.scheduleIdleTimeout(this);
 
         mStackSupervisor.reportResumedActivityLocked(this);
 
@@ -4993,9 +4983,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         + "immediate=" + !idleDelayed);
             }
             if (!idleDelayed) {
-                mStackSupervisor.scheduleIdleLocked();
+                mStackSupervisor.scheduleIdle();
             } else {
-                mStackSupervisor.scheduleIdleTimeoutLocked(this);
+                mStackSupervisor.scheduleIdleTimeout(this);
             }
         } else {
             stack.checkReadyForSleep();
@@ -6111,13 +6101,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // the full stop of this activity. This is because we won't do that while they are still
             // waiting for the animation to finish.
             if (mAtmService.mStackSupervisor.mStoppingActivities.contains(this)) {
-                mAtmService.mStackSupervisor.scheduleIdleLocked();
+                mStackSupervisor.scheduleIdle();
             }
         } else {
             // Instead of doing the full stop routine here, let's just hide any activities
             // we now can, and let them stop when the normal idle happens.
-            mAtmService.mStackSupervisor.processStoppingActivitiesLocked(null /* idleActivity */,
-                    false /* remove */, true /* processPausingActivities */);
+            mStackSupervisor.processStoppingActivities(null /* launchedActivity */,
+                    true /* onlyUpdateVisibility */, true /* unused */, null /* unused */);
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
@@ -7458,6 +7448,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     boolean isTaskOverlay() {
         return mTaskOverlay;
+    }
+
+    @Override
+    boolean showToCurrentUser() {
+        return mShowForAllUsers || mWmService.isCurrentProfile(mUserId);
     }
 
     @Override

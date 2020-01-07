@@ -1071,6 +1071,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
+    boolean showToCurrentUser() {
+        return true;
+    }
+
     /**
      * For all windows at or below this container call the callback.
      * @param   callback Calls the {@link ToBooleanFunction#apply} method for each window found and

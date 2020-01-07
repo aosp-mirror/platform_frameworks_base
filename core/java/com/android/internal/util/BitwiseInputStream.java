@@ -16,7 +16,7 @@
 
 package com.android.internal.util;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * An object that provides bitwise incremental read access to a byte array.

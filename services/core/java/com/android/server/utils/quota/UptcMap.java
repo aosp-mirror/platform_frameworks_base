@@ -22,6 +22,7 @@ import android.util.ArrayMap;
 import android.util.SparseArrayMap;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * A SparseArrayMap of ArrayMaps, which is suitable for holding userId-packageName-tag combination
@@ -95,6 +96,23 @@ class UptcMap<T> {
     }
 
     /**
+     * Returns the saved object for the given UPTC. If there was no saved object, it will create a
+     * new object using creator, insert it, and return it.
+     */
+    @Nullable
+    public T getOrCreate(int userId, @NonNull String packageName, @Nullable String tag,
+            Function<Void, T> creator) {
+        final ArrayMap<String, T> data = mData.get(userId, packageName);
+        if (data == null || !data.containsKey(tag)) {
+            // We've never inserted data for this combination before. Create a new object.
+            final T val = creator.apply(null);
+            add(userId, packageName, tag, val);
+            return val;
+        }
+        return data.get(tag);
+    }
+
+    /**
      * Returns the index for which {@link #getUserIdAtIndex(int)} would return the specified userId,
      * or a negative number if the specified userId is not mapped.
      */
@@ -159,5 +177,27 @@ class UptcMap<T> {
                 consumer.accept(tagMap.valueAt(i));
             }
         });
+    }
+
+    public void forEach(UptcDataConsumer<T> consumer) {
+        final int uCount = userCount();
+        for (int u = 0; u < uCount; ++u) {
+            final int userId = getUserIdAtIndex(u);
+
+            final int pkgCount = packageCountForUser(userId);
+            for (int p = 0; p < pkgCount; ++p) {
+                final String pkgName = getPackageNameAtIndex(u, p);
+
+                final int tagCount = tagCountForUserAndPackage(userId, pkgName);
+                for (int t = 0; t < tagCount; ++t) {
+                    final String tag = getTagAtIndex(u, p, t);
+                    consumer.accept(userId, pkgName, tag, get(userId, pkgName, tag));
+                }
+            }
+        }
+    }
+
+    interface UptcDataConsumer<D> {
+        void accept(int userId, @NonNull String packageName, @Nullable String tag, @Nullable D obj);
     }
 }

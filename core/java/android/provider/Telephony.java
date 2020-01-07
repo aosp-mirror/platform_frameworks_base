@@ -36,6 +36,7 @@ import android.database.Cursor;
 import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.telephony.Rlog;
 import android.telephony.ServiceState;
@@ -4103,6 +4104,113 @@ public final class Telephony {
         @RequiresPermission(Manifest.permission.READ_CELL_BROADCASTS)
         @NonNull
         public static final Uri MESSAGE_HISTORY_URI = Uri.parse("content://cellbroadcasts/history");
+
+        /**
+         * The authority for the legacy cellbroadcast provider.
+         * This is used for OEM data migration. OEMs want to migrate message history or
+         * sharepreference data to mainlined cellbroadcastreceiver app, should have a
+         * contentprovider with authority: cellbroadcast-legacy. Mainlined cellbroadcastreceiver
+         * will interact with this URI to retrieve data and persists to mainlined cellbroadcast app.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final @NonNull String AUTHORITY_LEGACY = "cellbroadcast-legacy";
+
+        /**
+         * A content:// style uri to the authority for the legacy cellbroadcast provider.
+         * @hide
+         */
+        @SystemApi
+        public static final @NonNull Uri AUTHORITY_LEGACY_URI =
+                Uri.parse("content://cellbroadcast-legacy");
+
+        /**
+         * Method name to {@link android.content.ContentProvider#call(String, String, Bundle)
+         * for {@link #AUTHORITY_LEGACY}. Used to query cellbroadcast {@link Preference},
+         * containing following supported entries
+         * <ul>
+         *     <li>{@link #ENABLE_AREA_UPDATE_INFO_PREF}</li>
+         *     <li>{@link #ENABLE_TEST_ALERT_PREF}</li>
+         *     <li>{@link #ENABLE_STATE_LOCAL_TEST_PREF}</li>
+         *     <li>{@link #ENABLE_PUBLIC_SAFETY_PREF}</li>
+         *     <li>{@link #ENABLE_CMAS_AMBER_PREF}</li>
+         *     <li>{@link #ENABLE_CMAS_SEVERE_THREAT_PREF}</li>
+         *     <li>{@link #ENABLE_CMAS_EXTREME_THREAT_PREF}</li>
+         *     <li>{@link #ENABLE_CMAS_PRESIDENTIAL_PREF}</li>
+         *     <li>{@link #ENABLE_ALERT_VIBRATION_PREF}</li>
+         *     <li>{@link #ENABLE_EMERGENCY_PERF}</li>
+         *     <li>{@link #ENABLE_FULL_VOLUME_PREF}</li>
+         *     <li>{@link #ENABLE_CMAS_IN_SECOND_LANGUAGE_PREF}</li>
+         * </ul>
+         * @hide
+         */
+        @SystemApi
+        public static final @NonNull String CALL_METHOD_GET_PREFERENCE = "get_preference";
+
+        /**
+         * Arg name to {@link android.content.ContentProvider#call(String, String, Bundle)}
+         * for {@link #AUTHORITY_LEGACY}.
+         * Contains all supported shared preferences for cellbroadcast.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final class Preference {
+            /**
+             * Not Instantiatable.
+             * @hide
+             */
+            private Preference() {}
+
+            /** Preference to enable area update info alert */
+            public static final @NonNull String ENABLE_AREA_UPDATE_INFO_PREF =
+                    "enable_area_update_info_alerts";
+
+            /** Preference to enable test alert */
+            public static final @NonNull String ENABLE_TEST_ALERT_PREF =
+                    "enable_test_alerts";
+
+            /** Preference to enable state local test alert */
+            public static final @NonNull String ENABLE_STATE_LOCAL_TEST_PREF
+                    = "enable_state_local_test_alerts";
+
+            /** Preference to enable public safety alert */
+            public static final @NonNull String ENABLE_PUBLIC_SAFETY_PREF
+                    = "enable_public_safety_messages";
+
+            /** Preference to enable amber alert */
+            public static final @NonNull String ENABLE_CMAS_AMBER_PREF
+                    = "enable_cmas_amber_alerts";
+
+            /** Preference to enable severe threat alert */
+            public static final @NonNull String ENABLE_CMAS_SEVERE_THREAT_PREF
+                    = "enable_cmas_severe_threat_alerts";
+
+            /** Preference to enable extreme threat alert */
+            public static final @NonNull String ENABLE_CMAS_EXTREME_THREAT_PREF =
+                    "enable_cmas_extreme_threat_alerts";
+
+            /** Preference to enable presidential alert */
+            public static final @NonNull String ENABLE_CMAS_PRESIDENTIAL_PREF =
+                    "enable_cmas_presidential_alerts";
+
+            /** Preference to enable alert vibration */
+            public static final @NonNull String ENABLE_ALERT_VIBRATION_PREF =
+                    "enable_alert_vibrate";
+
+            /** Preference to enable emergency alert */
+            public static final @NonNull String ENABLE_EMERGENCY_PERF =
+                    "enable_emergency_alerts";
+
+            /** Preference to enable volume for alerts */
+            public static final @NonNull String ENABLE_FULL_VOLUME_PREF =
+                    "use_full_volume";
+
+            /** Preference to enable receive alerts in second language */
+            public static final @NonNull String ENABLE_CMAS_IN_SECOND_LANGUAGE_PREF =
+                    "receive_cmas_in_second_language";
+        }
 
         /**
          * The subscription which received this cell broadcast message.

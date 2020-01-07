@@ -19,6 +19,8 @@
 
 #include <android/hardware/tv/tuner/1.0/ITuner.h>
 #include <fmq/MessageQueue.h>
+#include <fstream>
+#include <string>
 #include <unordered_map>
 #include <utils/RefBase.h>
 
@@ -58,6 +60,7 @@ using ::android::hardware::tv::tuner::V1_0::PlaybackStatus;
 using ::android::hardware::tv::tuner::V1_0::RecordStatus;
 
 using FilterMQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
+using DvrMQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
 
 namespace android {
 
@@ -80,9 +83,15 @@ private:
 
 struct Dvr : public RefBase {
     Dvr(sp<IDvr> sp, jweak obj);
+    ~Dvr();
+    int close();
     sp<IDvr> getIDvr();
     sp<IDvr> mDvrSp;
     jweak mDvrObj;
+    std::unique_ptr<DvrMQ> mDvrMQ;
+    EventFlag* mDvrMQEventFlag;
+    std::string mFilePath;
+    int mFd;
 };
 
 struct FilterCallback : public IFilterCallback {

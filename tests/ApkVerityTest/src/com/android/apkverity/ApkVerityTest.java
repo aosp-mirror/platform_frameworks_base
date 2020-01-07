@@ -27,6 +27,7 @@ import android.platform.test.annotations.RootPermissionTest;
 
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
+import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 import com.android.tradefed.util.CommandResult;
@@ -412,6 +413,7 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
                         break;
                     }
                     try {
+                        CLog.d("lsof: " + expectRemoteCommandToSucceed("lsof " + apkPath));
                         Thread.sleep(1000);
                         String pid = expectRemoteCommandToSucceed("pidof system_server");
                         mDevice.executeShellV2Command("kill -10 " + pid);  // force GC

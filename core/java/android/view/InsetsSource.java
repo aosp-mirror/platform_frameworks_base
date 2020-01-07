@@ -41,6 +41,7 @@ public class InsetsSource implements Parcelable {
     public InsetsSource(@InternalInsetsType int type) {
         mType = type;
         mFrame = new Rect();
+        mVisible = InsetsState.getDefaultVisibility(type);
     }
 
     public InsetsSource(InsetsSource other) {

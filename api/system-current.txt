@@ -128,6 +128,7 @@ package android {
     field public static final String MODIFY_PARENTAL_CONTROLS = "android.permission.MODIFY_PARENTAL_CONTROLS";
     field public static final String MODIFY_QUIET_MODE = "android.permission.MODIFY_QUIET_MODE";
     field public static final String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
+    field public static final String NETWORK_AIRPLANE_MODE = "android.permission.NETWORK_AIRPLANE_MODE";
     field public static final String NETWORK_CARRIER_PROVISIONING = "android.permission.NETWORK_CARRIER_PROVISIONING";
     field public static final String NETWORK_FACTORY = "android.permission.NETWORK_FACTORY";
     field public static final String NETWORK_MANAGED_PROVISIONING = "android.permission.NETWORK_MANAGED_PROVISIONING";
@@ -1267,6 +1268,7 @@ package android.app.role {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void addRoleHolderAsUser(@NonNull String, @NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public boolean addRoleHolderFromController(@NonNull String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void clearRoleHoldersAsUser(@NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @Nullable public String getDefaultSmsPackage(int);
     method @NonNull @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public java.util.List<java.lang.String> getHeldRolesFromController(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public java.util.List<java.lang.String> getRoleHolders(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public java.util.List<java.lang.String> getRoleHoldersAsUser(@NonNull String, @NonNull android.os.UserHandle);
@@ -1696,6 +1698,7 @@ package android.content {
     field public static final String ACTION_INSTALL_INSTANT_APP_PACKAGE = "android.intent.action.INSTALL_INSTANT_APP_PACKAGE";
     field public static final String ACTION_INSTANT_APP_RESOLVER_SETTINGS = "android.intent.action.INSTANT_APP_RESOLVER_SETTINGS";
     field public static final String ACTION_INTENT_FILTER_NEEDS_VERIFICATION = "android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION";
+    field public static final String ACTION_LOAD_DATA = "android.intent.action.LOAD_DATA";
     field @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS) public static final String ACTION_MANAGE_APP_PERMISSION = "android.intent.action.MANAGE_APP_PERMISSION";
     field public static final String ACTION_MANAGE_APP_PERMISSIONS = "android.intent.action.MANAGE_APP_PERMISSIONS";
     field @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public static final String ACTION_MANAGE_DEFAULT_APP = "android.intent.action.MANAGE_DEFAULT_APP";
@@ -4330,6 +4333,15 @@ package android.media.soundtrigger {
 
 package android.media.tv {
 
+  public final class DvbDeviceInfo implements android.os.Parcelable {
+    ctor public DvbDeviceInfo(int, int);
+    method public int describeContents();
+    method public int getAdapterId();
+    method public int getDeviceId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.DvbDeviceInfo> CREATOR;
+  }
+
   public final class TvContentRatingSystemInfo implements android.os.Parcelable {
     method public static android.media.tv.TvContentRatingSystemInfo createTvContentRatingSystemInfo(int, android.content.pm.ApplicationInfo);
     method public int describeContents();
@@ -4444,12 +4456,14 @@ package android.media.tv {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void addBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public boolean captureFrame(String, android.view.Surface, android.media.tv.TvStreamConfig);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public java.util.List<android.media.tv.TvStreamConfig> getAvailableTvStreamConfigList(String);
+    method @NonNull @RequiresPermission("android.permission.DVB_DEVICE") public java.util.List<android.media.tv.DvbDeviceInfo> getDvbDeviceList();
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public java.util.List<android.media.tv.TvInputHardwareInfo> getHardwareList();
     method @RequiresPermission(android.Manifest.permission.READ_CONTENT_RATING_SYSTEMS) public java.util.List<android.media.tv.TvContentRatingSystemInfo> getTvContentRatingSystemList();
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public boolean isSingleSessionActive();
     method @RequiresPermission(android.Manifest.permission.NOTIFY_TV_INPUTS) public void notifyPreviewProgramAddedToWatchNext(String, long, long);
     method @RequiresPermission(android.Manifest.permission.NOTIFY_TV_INPUTS) public void notifyPreviewProgramBrowsableDisabled(String, long);
     method @RequiresPermission(android.Manifest.permission.NOTIFY_TV_INPUTS) public void notifyWatchNextProgramBrowsableDisabled(String, long);
+    method @Nullable @RequiresPermission("android.permission.DVB_DEVICE") public android.os.ParcelFileDescriptor openDvbDevice(@NonNull android.media.tv.DvbDeviceInfo, int);
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public void releaseTvInputHardware(int, android.media.tv.TvInputManager.Hardware);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void removeBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void setParentalControlsEnabled(boolean);
@@ -4601,7 +4615,7 @@ package android.net {
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void getLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEntitlementResultListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
-    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void setAirplaneMode(boolean);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_AIRPLANE_MODE, android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void setAirplaneMode(boolean);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public boolean shouldAvoidBadWifi();
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(@NonNull android.net.Network, @NonNull android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback);
@@ -7730,6 +7744,9 @@ package android.provider {
   }
 
   public static final class Telephony.CellBroadcasts implements android.provider.BaseColumns {
+    field @NonNull public static final String AUTHORITY_LEGACY = "cellbroadcast-legacy";
+    field @NonNull public static final android.net.Uri AUTHORITY_LEGACY_URI;
+    field @NonNull public static final String CALL_METHOD_GET_PREFERENCE = "get_preference";
     field public static final String CID = "cid";
     field public static final String CMAS_CATEGORY = "cmas_category";
     field public static final String CMAS_CERTAINTY = "cmas_certainty";
@@ -7758,6 +7775,21 @@ package android.provider {
     field public static final String SERVICE_CATEGORY = "service_category";
     field public static final String SLOT_INDEX = "slot_index";
     field public static final String SUB_ID = "sub_id";
+  }
+
+  public static final class Telephony.CellBroadcasts.Preference {
+    field @NonNull public static final String ENABLE_ALERT_VIBRATION_PREF = "enable_alert_vibrate";
+    field @NonNull public static final String ENABLE_AREA_UPDATE_INFO_PREF = "enable_area_update_info_alerts";
+    field @NonNull public static final String ENABLE_CMAS_AMBER_PREF = "enable_cmas_amber_alerts";
+    field @NonNull public static final String ENABLE_CMAS_EXTREME_THREAT_PREF = "enable_cmas_extreme_threat_alerts";
+    field @NonNull public static final String ENABLE_CMAS_IN_SECOND_LANGUAGE_PREF = "receive_cmas_in_second_language";
+    field @NonNull public static final String ENABLE_CMAS_PRESIDENTIAL_PREF = "enable_cmas_presidential_alerts";
+    field @NonNull public static final String ENABLE_CMAS_SEVERE_THREAT_PREF = "enable_cmas_severe_threat_alerts";
+    field @NonNull public static final String ENABLE_EMERGENCY_PERF = "enable_emergency_alerts";
+    field @NonNull public static final String ENABLE_FULL_VOLUME_PREF = "use_full_volume";
+    field @NonNull public static final String ENABLE_PUBLIC_SAFETY_PREF = "enable_public_safety_messages";
+    field @NonNull public static final String ENABLE_STATE_LOCAL_TEST_PREF = "enable_state_local_test_alerts";
+    field @NonNull public static final String ENABLE_TEST_ALERT_PREF = "enable_test_alerts";
   }
 
   public static final class Telephony.SimInfo {
@@ -7986,6 +8018,11 @@ package android.service.autofill {
     field public static final String SERVICE_INTERFACE = "android.service.autofill.AutofillFieldClassificationService";
     field public static final String SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS = "android.autofill.field_classification.available_algorithms";
     field public static final String SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM = "android.autofill.field_classification.default_algorithm";
+  }
+
+  public static final class Dataset.Builder {
+    ctor public Dataset.Builder(@NonNull android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.service.autofill.InlinePresentation);
   }
 
 }
@@ -10104,10 +10141,13 @@ package android.telephony {
     method public void updateServiceLocation();
     method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void updateTestOtaEmergencyNumberDbFilePath(@NonNull String);
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final String ACTION_ANOMALY_REPORTED = "android.telephony.action.ANOMALY_REPORTED";
+    field public static final String ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED = "android.intent.action.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED";
+    field public static final String ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED = "android.intent.action.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED";
     field public static final String ACTION_EMERGENCY_ASSISTANCE = "android.telephony.action.EMERGENCY_ASSISTANCE";
     field public static final String ACTION_EMERGENCY_CALLBACK_MODE_CHANGED = "android.intent.action.EMERGENCY_CALLBACK_MODE_CHANGED";
     field public static final String ACTION_EMERGENCY_CALL_STATE_CHANGED = "android.intent.action.EMERGENCY_CALL_STATE_CHANGED";
     field public static final String ACTION_NETWORK_SET_TIME = "android.telephony.action.NETWORK_SET_TIME";
+    field public static final String ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE = "com.android.omadm.service.CONFIGURATION_UPDATE";
     field public static final String ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS = "android.telephony.action.SHOW_NOTICE_ECM_BLOCK_OTHERS";
     field public static final String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
     field public static final String ACTION_SIM_CARD_STATE_CHANGED = "android.telephony.action.SIM_CARD_STATE_CHANGED";

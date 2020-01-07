@@ -3072,6 +3072,7 @@ public class ConnectivityManager {
      * @hide
      */
     @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_AIRPLANE_MODE,
             android.Manifest.permission.NETWORK_SETTINGS,
             android.Manifest.permission.NETWORK_SETUP_WIZARD,
             android.Manifest.permission.NETWORK_STACK})

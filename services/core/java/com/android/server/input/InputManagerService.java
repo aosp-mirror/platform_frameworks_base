@@ -1719,7 +1719,7 @@ public class InputManagerService extends IInputManager.Stub
     // Binder call
     @Override
     public void setCustomPointerIcon(PointerIcon icon) {
-        Preconditions.checkNotNull(icon);
+        Objects.requireNonNull(icon);
         nativeSetCustomPointerIcon(mPtr, icon);
     }
 

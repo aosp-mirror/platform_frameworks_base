@@ -25,10 +25,9 @@ import android.os.IInterface;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A helper class that handles operations in remote listeners.
@@ -61,7 +60,7 @@ public abstract class RemoteListenerHelper<TListener extends IInterface> {
     private int mLastReportedResult = RESULT_UNKNOWN;
 
     protected RemoteListenerHelper(Context context, Handler handler, String name) {
-        Preconditions.checkNotNull(name);
+        Objects.requireNonNull(name);
         mHandler = handler;
         mTag = name;
         mContext = context;
@@ -77,7 +76,7 @@ public abstract class RemoteListenerHelper<TListener extends IInterface> {
      * Adds GNSS data listener {@code listener} with caller identify {@code callerIdentify}.
      */
     public void addListener(@NonNull TListener listener, CallerIdentity callerIdentity) {
-        Preconditions.checkNotNull(listener, "Attempted to register a 'null' listener.");
+        Objects.requireNonNull(listener, "Attempted to register a 'null' listener.");
         IBinder binder = listener.asBinder();
         synchronized (mListenerMap) {
             if (mListenerMap.containsKey(binder)) {
@@ -116,7 +115,7 @@ public abstract class RemoteListenerHelper<TListener extends IInterface> {
      * Remove GNSS data listener {@code listener}.
      */
     public void removeListener(@NonNull TListener listener) {
-        Preconditions.checkNotNull(listener, "Attempted to remove a 'null' listener.");
+        Objects.requireNonNull(listener, "Attempted to remove a 'null' listener.");
         synchronized (mListenerMap) {
             mListenerMap.remove(listener.asBinder());
             if (mListenerMap.isEmpty()) {

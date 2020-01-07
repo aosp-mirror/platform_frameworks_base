@@ -1541,12 +1541,12 @@ public final class OomAdjuster {
                                         trackedProcState = true;
                                     }
                                 } else if ((cr.flags & Context.BIND_NOT_PERCEPTIBLE) != 0
-                                        && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
-                                        && adj > ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
+                                        && clientAdj <= ProcessList.PERCEPTIBLE_APP_ADJ
+                                        && adj >= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
                                     newAdj = ProcessList.PERCEPTIBLE_LOW_APP_ADJ;
                                 } else if ((cr.flags&Context.BIND_NOT_VISIBLE) != 0
                                         && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
-                                        && adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                                        && adj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
                                     newAdj = ProcessList.PERCEPTIBLE_APP_ADJ;
                                 } else if (clientAdj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
                                     newAdj = clientAdj;

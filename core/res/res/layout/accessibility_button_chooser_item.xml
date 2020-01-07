@@ -21,10 +21,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center"
-    android:paddingBottom="12dp"
-    android:paddingEnd="16dp"
     android:paddingStart="16dp"
-    android:paddingTop="12dp">
+    android:paddingEnd="16dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
 
     <ImageView
         android:id="@+id/accessibility_button_target_icon"
@@ -39,5 +39,26 @@
         android:layout_marginStart="8dp"
         android:layout_weight="1"
         android:textColor="?attr/textColorPrimary"/>
+
+    <FrameLayout
+        android:id="@+id/accessibility_button_target_item_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="56dp">
+
+        <ImageView
+            android:id="@+id/accessibility_button_target_view_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
+
+        <Switch android:id="@+id/accessibility_button_target_switch_item"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@null"
+                android:clickable="false"
+                android:focusable="false"/>
+    </FrameLayout>
 </LinearLayout>
 

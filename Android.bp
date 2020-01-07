@@ -284,7 +284,7 @@ java_defaults {
     name: "framework-aidl-export-defaults",
     aidl: {
         export_include_dirs: [
-            "apex/media/java",
+            "apex/media/framework/java",
             "core/java",
             "drm/java",
             "graphics/java",
@@ -451,6 +451,16 @@ java_library {
     // For backwards compatibility.
     stem: "framework",
     apex_available: ["//apex_available:platform"],
+    visibility: [
+        "//frameworks/base",
+        // TODO(b/144149403) remove the below lines
+        "//frameworks/base/apex/appsearch/framework",
+        "//frameworks/base/apex/blobstore/framework",
+        "//frameworks/base/apex/jobscheduler/framework",
+        "//frameworks/base/apex/statsd/service",
+        "//frameworks/base/wifi",
+        "//frameworks/opt/net/wifi/service",
+    ],
 }
 
 // This "framework" module is NOT installed to the device. It's

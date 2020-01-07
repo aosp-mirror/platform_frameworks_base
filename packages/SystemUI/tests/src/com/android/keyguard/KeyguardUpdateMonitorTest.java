@@ -204,7 +204,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testTelephonyCapable_SimInvalid_ServiceState_InService() {
         // SERVICE_STATE - IN_SERVICE, but SIM_STATE is invalid TelephonyCapable should be False
-        Intent intent = new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
+        Intent intent = new Intent(Intent.ACTION_SERVICE_STATE);
         Bundle data = new Bundle();
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_IN_SERVICE);
@@ -219,7 +219,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void testTelephonyCapable_SimValid_ServiceState_PowerOff() {
         // Simulate AirplaneMode case, SERVICE_STATE - POWER_OFF, check TelephonyCapable False
         // Only receive ServiceState callback IN_SERVICE -> OUT_OF_SERVICE -> POWER_OFF
-        Intent intent = new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
+        Intent intent = new Intent(Intent.ACTION_SERVICE_STATE);
         intent.putExtra(Intent.EXTRA_SIM_STATE
                 , Intent.SIM_STATE_LOADED);
         Bundle data = new Bundle();
@@ -241,7 +241,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
      */
     @Test
     public void testTelephonyCapable_BootInitState_ServiceState_OutOfService() {
-        Intent intent = new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
+        Intent intent = new Intent(Intent.ACTION_SERVICE_STATE);
         Bundle data = new Bundle();
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_OUT_OF_SERVICE);
@@ -285,7 +285,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testTelephonyCapable_BootInitState_ServiceState_PowerOff() {
-        Intent intent = new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
+        Intent intent = new Intent(Intent.ACTION_SERVICE_STATE);
         Bundle data = new Bundle();
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_POWER_OFF);
@@ -298,7 +298,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testTelephonyCapable_SimValid_ServiceState_InService() {
-        Intent intent = new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
+        Intent intent = new Intent(Intent.ACTION_SERVICE_STATE);
         Bundle data = new Bundle();
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_IN_SERVICE);
@@ -321,10 +321,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
                 , putPhoneInfo(intentSimState, data, true));
         mTestableLooper.processAllMessages();
-        // Even SimState Loaded, still need ACTION_SERVICE_STATE_CHANGED turn on mTelephonyCapable
+        // Even SimState Loaded, still need ACTION_SERVICE_STATE turn on mTelephonyCapable
         assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isFalse();
 
-        Intent intentServiceState =  new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
+        Intent intentServiceState =  new Intent(Intent.ACTION_SERVICE_STATE);
         intentSimState.putExtra(Intent.EXTRA_SIM_STATE
                 , Intent.SIM_STATE_LOADED);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()

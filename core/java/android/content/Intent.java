@@ -4224,9 +4224,10 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_SERVICE_STATE = "android.intent.action.SERVICE_STATE";
 
     /**
-     * Used for looking up a Data Loader Service providers.
+     * Used for looking up a Data Loader Service provider.
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String ACTION_LOAD_DATA = "android.intent.action.LOAD_DATA";
 

@@ -37,8 +37,8 @@ import java.util.ArrayList;
 /** Helper class for processing the reset of a task. */
 class ResetTargetTaskHelper {
     private Task mTask;
-    private ActivityStack mParent;
     private Task mTargetTask;
+    private ActivityStack mTargetStack;
     private ActivityRecord mRoot;
     private boolean mForceReset;
     private boolean mCanMoveOptions;
@@ -47,7 +47,7 @@ class ResetTargetTaskHelper {
     private ActivityOptions mTopOptions;
     private ArrayList<ActivityRecord> mResultActivities = new ArrayList<>();
     private ArrayList<ActivityRecord> mAllActivities = new ArrayList<>();
-    private ArrayList<Task> mCreatedTasks = new ArrayList<>();
+    private ArrayList<ActivityRecord> mPendingReparentActivities = new ArrayList<>();
 
     private void reset(Task task) {
         mTask = task;
@@ -56,23 +56,22 @@ class ResetTargetTaskHelper {
         mTopOptions = null;
         mResultActivities.clear();
         mAllActivities.clear();
-        mCreatedTasks.clear();
     }
 
-    ActivityOptions process(ActivityStack parent, Task targetTask, boolean forceReset) {
-        mParent = parent;
+    ActivityOptions process(Task targetTask, boolean forceReset) {
         mForceReset = forceReset;
         mTargetTask = targetTask;
         mTargetTaskFound = false;
+        mTargetStack = targetTask.getStack();
         mActivityReparentPosition = -1;
 
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 ResetTargetTaskHelper::processTask, this, PooledLambda.__(Task.class));
-        parent.forAllTasks(c);
+        targetTask.mWmService.mRoot.forAllTasks(c);
         c.recycle();
 
+        processPendingReparentActivities();
         reset(null);
-        mParent = null;
         return mTopOptions;
     }
 
@@ -89,14 +88,9 @@ class ResetTargetTaskHelper {
                 PooledLambda.__(ActivityRecord.class), isTargetTask);
         task.forAllActivities(f);
         f.recycle();
-
-        processCreatedTasks();
     }
 
     private boolean processActivity(ActivityRecord r, boolean isTargetTask) {
-        // End processing if we have reached the root.
-        if (r == mRoot) return true;
-
         mAllActivities.add(r);
         final int flags = r.info.flags;
         final boolean finishOnTaskLaunch =
@@ -122,32 +116,9 @@ class ResetTargetTaskHelper {
                     // it out of here. We will move it as far out of the way as possible, to the
                     // bottom of the activity stack. This also keeps it correctly ordered with
                     // any activities we previously moved.
-                    // TODO: We should probably look for other stacks also, since corresponding
-                    //  task with the same affinity is unlikely to be in the same stack.
-                    final Task targetTask;
-                    final ActivityRecord bottom = mParent.getBottomMostActivity();
 
-                    if (bottom != null && r.taskAffinity.equals(bottom.getTask().affinity)) {
-                        // If the activity currently at the bottom has the same task affinity as
-                        // the one we are moving, then merge it into the same task.
-                        targetTask = bottom.getTask();
-                        if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity "
-                                + r + " out to bottom task " + targetTask);
-                    } else {
-                        targetTask = mParent.createTask(
-                                mParent.mStackSupervisor.getNextTaskIdForUser(r.mUserId),
-                                r.info, null /* intent */, null /* voiceSession */,
-                                null /* voiceInteractor */, false /* toTop */);
-                        targetTask.affinityIntent = r.intent;
-                        mCreatedTasks.add(targetTask);
-                        if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity "
-                                + r + " out to new task " + targetTask);
-                    }
-
-                    mResultActivities.add(r);
-                    processResultActivities(r, targetTask, 0 /*bottom*/, true, true);
-                    mParent.positionChildAtBottom(targetTask);
-                    mParent.mStackSupervisor.mRecentTasks.add(targetTask);
+                    // Handle this activity after we have done traversing the hierarchy.
+                    mPendingReparentActivities.add(r);
                     return false;
                 }
             }
@@ -203,8 +174,6 @@ class ResetTargetTaskHelper {
                 processResultActivities(
                         r, mTargetTask, mActivityReparentPosition, false, false);
 
-                mParent.positionChildAtTop(mTargetTask);
-
                 // Now we've moved it in to place...but what if this is a singleTop activity and
                 // we have put it on top of another instance of the same activity? Then we drop
                 // the instance below so it remains singleTop.
@@ -255,23 +224,51 @@ class ResetTargetTaskHelper {
         }
     }
 
-    private void processCreatedTasks() {
-        if (mCreatedTasks.isEmpty()) return;
-
-        DisplayContent display = mParent.getDisplay();
-        final boolean singleTaskInstanceDisplay = display.isSingleTaskInstance();
-        if (singleTaskInstanceDisplay) {
-            display = mParent.mRootWindowContainer.getDefaultDisplay();
+    private void processPendingReparentActivities() {
+        if (mPendingReparentActivities.isEmpty()) {
+            return;
         }
 
-        final int windowingMode = mParent.getWindowingMode();
-        final int activityType = mParent.getActivityType();
+        final ActivityTaskManagerService atmService = mTargetStack.mAtmService;
+        final ArrayList<Task> createdTasks = new ArrayList<>();
+        while (!mPendingReparentActivities.isEmpty()) {
+            final ActivityRecord r = mPendingReparentActivities.remove(0);
+            final ActivityRecord bottom = mTargetStack.getBottomMostActivity();
+            final Task targetTask;
+            if (bottom != null && r.taskAffinity.equals(bottom.getTask().affinity)) {
+                // If the activity currently at the bottom has the same task affinity as
+                // the one we are moving, then merge it into the same task.
+                targetTask = bottom.getTask();
+                if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity "
+                        + r + " out to bottom task " + targetTask);
+            } else {
+                targetTask = mTargetStack.createTask(
+                        atmService.mStackSupervisor.getNextTaskIdForUser(r.mUserId), r.info,
+                        null /* intent */, null /* voiceSession */, null /* voiceInteractor */,
+                        false /* toTop */);
+                targetTask.affinityIntent = r.intent;
+                createdTasks.add(targetTask);
+                if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity "
+                        + r + " out to new task " + targetTask);
+            }
+            r.reparent(targetTask, 0 /* position */, "resetTargetTaskIfNeeded");
+            atmService.mStackSupervisor.mRecentTasks.add(targetTask);
+        }
+
+        DisplayContent display = mTargetStack.getDisplay();
+        final boolean singleTaskInstanceDisplay = display.isSingleTaskInstance();
+        if (singleTaskInstanceDisplay) {
+            display = atmService.mRootWindowContainer.getDefaultDisplay();
+        }
+
+        final int windowingMode = mTargetStack.getWindowingMode();
+        final int activityType = mTargetStack.getActivityType();
         if (!singleTaskInstanceDisplay && !display.alwaysCreateStack(windowingMode, activityType)) {
             return;
         }
 
-        while (!mCreatedTasks.isEmpty()) {
-            final Task targetTask = mCreatedTasks.remove(mCreatedTasks.size() - 1);
+        while (!createdTasks.isEmpty()) {
+            final Task targetTask = createdTasks.remove(createdTasks.size() - 1);
             final ActivityStack targetStack = display.getOrCreateStack(
                     windowingMode, activityType, false /* onTop */);
             targetTask.reparent(targetStack, false /* toTop */, REPARENT_LEAVE_STACK_IN_PLACE,
