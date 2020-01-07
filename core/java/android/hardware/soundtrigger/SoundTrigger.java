@@ -47,8 +47,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 /**
- * The SoundTrigger class provides access via JNI to the native service managing
- * the sound trigger HAL.
+ * The SoundTrigger class provides access to the service managing the sound trigger HAL.
  *
  * @hide
  */
