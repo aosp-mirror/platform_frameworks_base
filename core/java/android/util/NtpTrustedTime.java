@@ -175,4 +175,22 @@ public class NtpTrustedTime implements TrustedTime {
     public long getCachedNtpTimeReference() {
         return mCachedNtpElapsedRealtime;
     }
+
+    /**
+     * Returns the combination of {@link #getCachedNtpTime()} and {@link
+     * #getCachedNtpTimeReference()} as a {@link TimestampedValue}. This method is useful when
+     * passing the time to another component that will adjust for elapsed time.
+     *
+     * @throws IllegalStateException if there is no cached value
+     */
+    @UnsupportedAppUsage
+    public TimestampedValue<Long> getCachedNtpTimeSignal() {
+        if (!mHasCache) {
+            throw new IllegalStateException("Missing authoritative time source");
+        }
+        if (LOGD) Log.d(TAG, "currentTimeMillis() cache hit");
+
+        return new TimestampedValue<>(mCachedNtpElapsedRealtime, mCachedNtpTime);
+    }
+
 }
