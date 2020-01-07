@@ -10520,14 +10520,15 @@ public class TelephonyManager {
     /**
      * Policy control of data connection. Usually used when data limit is passed.
      * @param enabled True if enabling the data, otherwise disabling.
-     * @param subId sub id
      * @hide
      */
-    public void setPolicyDataEnabled(boolean enabled, int subId) {
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public void setPolicyDataEnabled(boolean enabled) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.setPolicyDataEnabled(enabled, subId);
+                service.setPolicyDataEnabled(enabled, getSubId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#setPolicyDataEnabled", e);
