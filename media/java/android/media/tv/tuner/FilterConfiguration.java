@@ -22,20 +22,20 @@ import android.media.tv.tuner.TunerConstants.FilterType;
 import java.util.List;
 
 /**
- * Demux Filter settings.
+ * Demux Filter configuration.
  *
  * @hide
  */
-public abstract class FilterSettings {
+public abstract class FilterConfiguration {
     @Nullable
     protected final Settings mSettings;
 
-    protected FilterSettings(Settings settings) {
+    protected FilterConfiguration(Settings settings) {
         mSettings = settings;
     }
 
     /**
-     * Gets filter settings type
+     * Gets filter configuration type
      */
     @FilterType
     public abstract int getType();
@@ -47,12 +47,12 @@ public abstract class FilterSettings {
     // TODO: more builders and getters
 
     /**
-     *  Filter Settings for a TS filter.
+     *  Filter configuration for a TS filter.
      */
-    public static class TsFilterSettings extends FilterSettings {
+    public static class TsFilterConfiguration extends FilterConfiguration {
         private int mTpid;
 
-        private TsFilterSettings(Settings settings, int tpid) {
+        private TsFilterConfiguration(Settings settings, int tpid) {
             super(settings);
             mTpid = tpid;
         }
@@ -70,7 +70,7 @@ public abstract class FilterSettings {
         }
 
         /**
-         * Builder for TsFilterSettings.
+         * Builder for TsFilterConfiguration.
          */
         public static class Builder {
             private Settings mSettings;
@@ -93,21 +93,21 @@ public abstract class FilterSettings {
             }
 
             /**
-             * Builds a TsFilterSettings instance.
+             * Builds a TsFilterConfiguration instance.
              */
-            public TsFilterSettings build() {
-                return new TsFilterSettings(mSettings, mTpid);
+            public TsFilterConfiguration build() {
+                return new TsFilterConfiguration(mSettings, mTpid);
             }
         }
     }
 
     /**
-     *  Filter Settings for a MMTP filter.
+     *  Filter configuration for a MMTP filter.
      */
-    public static class MmtpFilterSettings extends FilterSettings {
+    public static class MmtpFilterConfiguration extends FilterConfiguration {
         private int mMmtpPid;
 
-        public MmtpFilterSettings(Settings settings) {
+        public MmtpFilterConfiguration(Settings settings) {
             super(settings);
         }
 
@@ -119,16 +119,16 @@ public abstract class FilterSettings {
 
 
     /**
-     *  Filter Settings for a IP filter.
+     *  Filter configuration for a IP filter.
      */
-    public static class IpFilterSettings extends FilterSettings {
+    public static class IpFilterConfiguration extends FilterConfiguration {
         private byte[] mSrcIpAddress;
         private byte[] mDstIpAddress;
         private int mSrcPort;
         private int mDstPort;
         private boolean mPassthrough;
 
-        public IpFilterSettings(Settings settings) {
+        public IpFilterConfiguration(Settings settings) {
             super(settings);
         }
 
@@ -140,14 +140,14 @@ public abstract class FilterSettings {
 
 
     /**
-     *  Filter Settings for a TLV filter.
+     *  Filter configuration for a TLV filter.
      */
-    public static class TlvFilterSettings extends FilterSettings {
+    public static class TlvFilterConfiguration extends FilterConfiguration {
         private int mPacketType;
         private boolean mIsCompressedIpPacket;
         private boolean mPassthrough;
 
-        public TlvFilterSettings(Settings settings) {
+        public TlvFilterConfiguration(Settings settings) {
             super(settings);
         }
 
@@ -159,13 +159,13 @@ public abstract class FilterSettings {
 
 
     /**
-     *  Filter Settings for a ALP filter.
+     *  Filter configuration for a ALP filter.
      */
-    public static class AlpFilterSettings extends FilterSettings {
+    public static class AlpFilterConfiguration extends FilterConfiguration {
         private int mPacketType;
         private int mLengthType;
 
-        public AlpFilterSettings(Settings settings) {
+        public AlpFilterConfiguration(Settings settings) {
             super(settings);
         }
 
