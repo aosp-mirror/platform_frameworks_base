@@ -89,12 +89,12 @@ public class BadgedImageView extends ImageView {
     /**
      * Updates the view with provided info.
      */
-    public void update(Bubble bubble, Bitmap bubbleImage, int dotColor, Path dotPath) {
+    public void update(Bubble bubble) {
         mBubble = bubble;
-        setImageBitmap(bubbleImage);
+        setImageBitmap(bubble.getBadgedImage());
         setDotState(DOT_STATE_SUPPRESSED_FOR_FLYOUT);
-        mDotColor = dotColor;
-        drawDot(dotPath);
+        mDotColor = bubble.getDotColor();
+        drawDot(bubble.getDotPath());
         animateDot();
     }
 
