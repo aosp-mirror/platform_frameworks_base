@@ -408,6 +408,16 @@ public class SystemServicesTestRule implements TestRule {
         }
     }
 
+    /**
+     * Throws if caller doesn't hold the given lock.
+     * @param lock the lock
+     */
+    static void checkHoldsLock(Object lock) {
+        if (!Thread.holdsLock(lock)) {
+            throw new IllegalStateException("Caller doesn't hold global lock.");
+        }
+    }
+
     protected class TestActivityTaskManagerService extends ActivityTaskManagerService {
         // ActivityStackSupervisor may be created more than once while setting up AMS and ATMS.
         // We keep the reference in order to prevent creating it twice.
