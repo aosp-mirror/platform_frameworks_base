@@ -124,7 +124,7 @@ public class QSMediaPlayer {
                     }
                 }
             });
-            btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_replay));
+            btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_play));
             btn.setImageTintList(ColorStateList.valueOf(mForegroundColor));
             btn.setVisibility(View.VISIBLE);
 
@@ -199,8 +199,7 @@ public class QSMediaPlayer {
         List<ResolveInfo> info = pm.queryBroadcastReceiversAsUser(it, 0, mContext.getUser());
         if (info != null) {
             for (ResolveInfo inf : info) {
-                if (inf.activityInfo.packageName.equals(notif.contentIntent.getCreatorPackage())) {
-                    Log.d(TAG, "Found receiver for package: " + inf);
+                if (inf.activityInfo.packageName.equals(mController.getPackageName())) {
                     mRecvComponent = inf.getComponentInfo().getComponentName();
                 }
             }
