@@ -96,7 +96,7 @@ interface IStatsd {
      *
      * Requires Manifest.permission.DUMP.
      */
-    byte[] getMetadata(in String packageName);
+    byte[] getMetadata();
 
     /**
      * Sets a configuration with the specified config key and subscribes to updates for this

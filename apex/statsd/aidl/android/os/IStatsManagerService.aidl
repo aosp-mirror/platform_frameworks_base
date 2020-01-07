@@ -92,4 +92,11 @@ interface IStatsManagerService {
      * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
      */
     long[] getRegisteredExperimentIds();
+
+    /**
+     * Fetches metadata across statsd. Returns byte array representing wire-encoded proto.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    byte[] getMetadata(in String packageName);
 }

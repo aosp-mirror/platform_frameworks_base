@@ -427,10 +427,10 @@ public final class StatsManager {
     public byte[] getStatsMetadata() throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsd service = getIStatsdLocked();
+                IStatsManagerService service = getIStatsManagerServiceLocked();
                 return service.getMetadata(mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsd when getting metadata");
+                Slog.e(TAG, "Failed to connect to statsmanager when getting metadata");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);

@@ -1148,12 +1148,9 @@ Status StatsService::getData(int64_t key, const String16& packageName, vector<ui
     return Status::ok();
 }
 
-Status StatsService::getMetadata(const String16& packageName, vector<uint8_t>* output) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+Status StatsService::getMetadata(vector<uint8_t>* output) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    VLOG("StatsService::getMetadata with Pid %i, Uid %i", ipc->getCallingPid(),
-         ipc->getCallingUid());
     StatsdStats::getInstance().dumpStats(output, false); // Don't reset the counters.
     return Status::ok();
 }

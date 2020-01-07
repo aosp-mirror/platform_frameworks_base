@@ -106,8 +106,7 @@ public:
     /**
      * Binder call for clients to get metadata across all configs in statsd.
      */
-    virtual Status getMetadata(const String16& packageName,
-                               vector<uint8_t>* output) override;
+    virtual Status getMetadata(vector<uint8_t>* output) override;
 
 
     /**

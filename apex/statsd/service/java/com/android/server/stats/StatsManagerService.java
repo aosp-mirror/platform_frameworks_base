@@ -264,6 +264,24 @@ public class StatsManagerService extends IStatsManagerService.Stub {
         throw new IllegalStateException("Failed to connect to statsd to registerExperimentIds");
     }
 
+    @Override
+    public byte[] getMetadata(String packageName) throws IllegalStateException {
+        enforceDumpAndUsageStatsPermission(packageName);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            IStatsd statsd = waitForStatsd();
+            if (statsd != null) {
+                return statsd.getMetadata();
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to getMetadata with statsd");
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        throw new IllegalStateException("Failed to connect to statsd to getMetadata");
+    }
+
     void setStatsCompanionService(StatsCompanionService statsCompanionService) {
         mStatsCompanionService = statsCompanionService;
     }
