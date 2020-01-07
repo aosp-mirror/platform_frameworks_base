@@ -2504,22 +2504,31 @@ public final class SmsManager {
     public static final String MESSAGE_STATUS_READ = "read";
 
     /**
-     * Get carrier-dependent configuration values.
+     * Get carrier-dependent MMS configuration values.
      *
      * <p class="note"><strong>Note:</strong> This method is intended for internal use by carrier
-     * applications or the Telephony framework and will never trigger an SMS disambiguation
-     * dialog. If this method is called on a device that has multiple active subscriptions, this
-     * {@link SmsManager} instance has been created with {@link #getDefault()}, and no user-defined
-     * default subscription is defined, the subscription ID associated with this message will be
-     * INVALID, which will result in the operation being completed on the subscription associated
-     * with logical slot 0. Use {@link #getSmsManagerForSubscriptionId(int)} to ensure the
-     * operation is performed on the correct subscription.
+     * applications or the Telephony framework and will never trigger an SMS disambiguation dialog.
+     * If this method is called on a device that has multiple active subscriptions, this {@link
+     * SmsManager} instance has been created with {@link #getDefault()}, and no user-defined default
+     * subscription is defined, the subscription ID associated with this message will be INVALID,
+     * which will result in the operation being completed on the subscription associated with
+     * logical slot 0. Use {@link #getSmsManagerForSubscriptionId(int)} to ensure the operation is
+     * performed on the correct subscription.
      * </p>
      *
-     * @return bundle key/values pairs of configuration values
+     * @return the bundle key/values pairs that contains MMS configuration values
      */
+    @Nullable
     public Bundle getCarrierConfigValues() {
-        return MmsManager.getInstance().getCarrierConfigValues(getSubscriptionId());
+        try {
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                return iSms.getCarrierConfigValuesForSubscriber(getSubscriptionId());
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+        return null;
     }
 
     /**
