@@ -33,6 +33,8 @@ import android.media.tv.tuner.TunerConstants.LnbVoltage;
 import android.media.tv.tuner.TunerConstants.Result;
 import android.media.tv.tuner.filter.FilterEvent;
 import android.media.tv.tuner.frontend.FrontendCallback;
+import android.media.tv.tuner.frontend.FrontendInfo;
+import android.media.tv.tuner.frontend.FrontendStatus;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;

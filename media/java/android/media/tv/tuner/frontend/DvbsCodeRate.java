@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner.filter;
-
-import android.os.NativeHandle;
+package android.media.tv.tuner.frontend;
 
 /**
- * Media event.
+ * Code rate for DVBS.
  * @hide
  */
-public class MediaEvent extends FilterEvent {
-    private int mStreamId;
-    private boolean mIsPtsPresent;
-    private long mPts;
-    private int mDataLength;
-    private NativeHandle mHandle;
-    private boolean mIsSecureMemory;
-    private int mMpuSequenceNumber;
-    private boolean mIsPrivateData;
-    private AudioExtraMetaData mExtraMetaData;
+public class DvbsCodeRate {
+    public long fec;
+    public boolean isLinear;
+    public boolean isShortFrames;
+    public int bitsPer1000Symbol;
 }
