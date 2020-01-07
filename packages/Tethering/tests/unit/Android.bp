@@ -20,7 +20,11 @@ android_test {
     srcs: [
         "src/**/*.java",
     ],
-    test_suites: ["device-tests"],
+    test_suites: [
+        "device-tests",
+        "mts",
+    ],
+    compile_multilib: "both",
     static_libs: [
         "androidx.test.rules",
         "frameworks-base-testutils",
