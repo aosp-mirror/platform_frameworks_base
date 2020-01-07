@@ -24,6 +24,7 @@ import android.hardware.tetheroffload.control.V1_0.NatTimeoutUpdate;
 import android.hardware.tetheroffload.control.V1_0.NetworkProtocol;
 import android.hardware.tetheroffload.control.V1_0.OffloadCallbackEvent;
 import android.net.util.SharedLog;
+import android.net.util.TetheringUtils;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.system.OsConstants;
@@ -46,8 +47,6 @@ public class OffloadHardwareInterface {
     private static final String NO_INTERFACE_NAME = "";
     private static final String NO_IPV4_ADDRESS = "";
     private static final String NO_IPV4_GATEWAY = "";
-
-    private static native boolean configOffload();
 
     private final Handler mHandler;
     private final SharedLog mLog;
@@ -107,8 +106,6 @@ public class OffloadHardwareInterface {
     public OffloadHardwareInterface(Handler h, SharedLog log) {
         mHandler = h;
         mLog = log.forSubComponent(TAG);
-
-        System.loadLibrary("tetheroffloadjni");
     }
 
     /** Get default value indicating whether offload is supported. */
@@ -118,7 +115,7 @@ public class OffloadHardwareInterface {
 
     /** Configure offload management process. */
     public boolean initOffloadConfig() {
-        return configOffload();
+        return TetheringUtils.configOffload();
     }
 
     /** Initialize the tethering offload HAL. */
