@@ -4808,10 +4808,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             } else {
                 final int count = mChildren.size();
                 for (int i = 0; i < count; i++) {
-                    Slog.d(TAG, "child " + mChildren.get(i));
                     final WindowContainer child = mChildren.get(i);
                     if (skipTraverseChild(child)) {
-                        Slog.d(TAG, "child skipped");
                         continue;
                     }
 
