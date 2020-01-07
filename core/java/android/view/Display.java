@@ -1514,6 +1514,7 @@ public final class Display {
         public HdrCapabilities(int[] supportedHdrTypes, float maxLuminance,
                 float maxAverageLuminance, float minLuminance) {
             mSupportedHdrTypes = supportedHdrTypes;
+            Arrays.sort(mSupportedHdrTypes);
             mMaxLuminance = maxLuminance;
             mMaxAverageLuminance = maxAverageLuminance;
             mMinLuminance = minLuminance;
