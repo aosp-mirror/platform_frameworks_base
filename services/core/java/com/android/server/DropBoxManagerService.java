@@ -41,7 +41,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.text.format.Time;
+import android.text.format.TimeMigrationUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -582,11 +582,9 @@ public final class DropBoxManagerService extends SystemService {
         }
 
         int numFound = 0, numArgs = searchArgs.size();
-        Time time = new Time();
         out.append("\n");
         for (EntryFile entry : mAllFiles.contents) {
-            time.set(entry.timestampMillis);
-            String date = time.format("%Y-%m-%d %H:%M:%S");
+            String date = TimeMigrationUtils.formatMillisWithFixedFormat(entry.timestampMillis);
             boolean match = true;
             for (int i = 0; i < numArgs && match; i++) {
                 String arg = searchArgs.get(i);
