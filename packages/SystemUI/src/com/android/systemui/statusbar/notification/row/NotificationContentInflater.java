@@ -397,7 +397,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     existingWrapper.onReinflated();
                 }
             } catch (Exception e) {
-                handleInflationError(runningInflations, e, row.getEntry().getSbn(), callback);
+                handleInflationError(runningInflations, e, row.getEntry(), callback);
                 // Add a running inflation to make sure we don't trigger callbacks.
                 // Safe to do because only happens in tests.
                 runningInflations.put(inflationId, new CancellationSignal());
@@ -448,7 +448,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     onViewApplied(newView);
                 } catch (Exception anotherException) {
                     runningInflations.remove(inflationId);
-                    handleInflationError(runningInflations, e, row.getEntry().getSbn(),
+                    handleInflationError(runningInflations, e, row.getEntry(),
                             callback);
                 }
             }
@@ -474,7 +474,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
     private static void handleInflationError(
             HashMap<Integer, CancellationSignal> runningInflations, Exception e,
-            StatusBarNotification notification, @Nullable InflationCallback callback) {
+            NotificationEntry notification, @Nullable InflationCallback callback) {
         Assert.isMainThread();
         runningInflations.values().forEach(CancellationSignal::cancel);
         if (callback != null) {
@@ -707,7 +707,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     + Integer.toHexString(sbn.getId());
             Log.e(StatusBar.TAG, "couldn't inflate view for notification " + ident, e);
             if (mCallback != null) {
-                mCallback.handleInflationException(sbn,
+                mCallback.handleInflationException(mRow.getEntry(),
                         new InflationException("Couldn't inflate contentViews" + e));
             }
         }
@@ -729,7 +729,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         }
 
         @Override
-        public void handleInflationException(StatusBarNotification notification, Exception e) {
+        public void handleInflationException(NotificationEntry entry, Exception e) {
             handleError(e);
         }
 

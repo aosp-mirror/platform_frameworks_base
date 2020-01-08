@@ -102,6 +102,9 @@ public final class NotificationEntry extends ListEntry {
     /** If this was a group child that was promoted to the top level, then who did the promoting. */
     @Nullable NotifPromoter mNotifPromoter;
 
+    /** If this notification had an issue with inflating. Only used with the NewNotifPipeline **/
+    private boolean mHasInflationError;
+
 
     /*
     * Old members
@@ -574,6 +577,18 @@ public final class NotificationEntry extends ListEntry {
     public void onRemoteInputInserted() {
         lastRemoteInputSent = NOT_LAUNCHED_YET;
         remoteInputTextWhenReset = null;
+    }
+
+    void setHasInflationError(boolean hasError) {
+        mHasInflationError = hasError;
+    }
+
+    /**
+     * Whether this notification had an error when attempting to inflate. This is only used in
+     * the NewNotifPipeline
+     */
+    public boolean hasInflationError() {
+        return mHasInflationError;
     }
 
     public void setHasSentReply() {

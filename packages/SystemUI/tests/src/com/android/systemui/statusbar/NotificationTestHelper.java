@@ -345,7 +345,7 @@ public class NotificationTestHelper {
         NotificationContentInflater.InflationCallback callback =
                 new NotificationContentInflater.InflationCallback() {
                     @Override
-                    public void handleInflationException(StatusBarNotification notification,
+                    public void handleInflationException(NotificationEntry entry,
                             Exception e) {
                         countDownLatch.countDown();
                     }

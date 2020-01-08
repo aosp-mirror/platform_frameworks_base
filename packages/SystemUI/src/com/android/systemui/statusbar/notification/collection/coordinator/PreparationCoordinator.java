@@ -57,7 +57,8 @@ public class PreparationCoordinator implements Coordinator {
     @Override
     public void attach(NotifCollection notifCollection, NotifListBuilder notifListBuilder) {
         notifCollection.addCollectionListener(mNotifCollectionListener);
-        notifListBuilder.addPreRenderFilter(mNotifFilter);
+        notifListBuilder.addPreRenderFilter(mNotifInflationErrorFilter);
+        notifListBuilder.addPreRenderFilter(mNotifInflatingFilter);
     }
 
     private final NotifCollectionListener mNotifCollectionListener = new NotifCollectionListener() {
@@ -77,7 +78,25 @@ public class PreparationCoordinator implements Coordinator {
         }
     };
 
-    private final NotifFilter mNotifFilter = new NotifFilter(TAG) {
+    private final NotifFilter mNotifInflationErrorFilter = new NotifFilter(
+            TAG + "InflationError") {
+        /**
+         * Filters out notifications that threw an error when attempting to inflate.
+         */
+        @Override
+        public boolean shouldFilterOut(NotificationEntry entry, long now) {
+            if (entry.hasInflationError()) {
+                mPendingNotifications.remove(entry);
+                return true;
+            }
+            return false;
+        }
+    };
+
+    private final NotifFilter mNotifInflatingFilter = new NotifFilter(TAG + "Inflating") {
+        /**
+         * Filters out notifications that haven't been inflated yet
+         */
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
             return mPendingNotifications.contains(entry);
@@ -90,7 +109,7 @@ public class PreparationCoordinator implements Coordinator {
         public void onInflationFinished(NotificationEntry entry) {
             mNotifLog.log(NotifEvent.INFLATED, entry);
             mPendingNotifications.remove(entry);
-            mNotifFilter.invalidateList();
+            mNotifInflatingFilter.invalidateList();
         }
     };
 
