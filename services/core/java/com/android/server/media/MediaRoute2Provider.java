@@ -46,7 +46,7 @@ abstract class MediaRoute2Provider {
     }
 
     public abstract void requestCreateSession(String packageName, String routeId,
-            String controlCategory, long requestId);
+            String routeType, long requestId);
     public abstract void releaseSession(int sessionId);
 
     public abstract void selectRoute(int sessionId, String routeId);

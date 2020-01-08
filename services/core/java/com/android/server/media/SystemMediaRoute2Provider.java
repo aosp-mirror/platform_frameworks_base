@@ -91,7 +91,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void requestCreateSession(String packageName, String routeId, String controlCategory,
+    public void requestCreateSession(String packageName, String routeId, String routeType,
             long requestId) {
         // Do nothing
     }
@@ -141,8 +141,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                         : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                 .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
                 .setVolume(mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
-                .addSupportedCategory(CATEGORY_LIVE_AUDIO)
-                .addSupportedCategory(CATEGORY_LIVE_VIDEO)
+                .addRouteType(CATEGORY_LIVE_AUDIO)
+                .addRouteType(CATEGORY_LIVE_VIDEO)
                 .build();
 
         AudioRoutesInfo newAudioRoutes = null;
@@ -181,8 +181,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                         : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                 .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
                 .setVolume(mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
-                .addSupportedCategory(CATEGORY_LIVE_AUDIO)
-                .addSupportedCategory(CATEGORY_LIVE_VIDEO)
+                .addRouteType(CATEGORY_LIVE_AUDIO)
+                .addRouteType(CATEGORY_LIVE_VIDEO)
                 .build();
 
         if (!TextUtils.equals(newRoutes.bluetoothName, mCurAudioRoutesInfo.bluetoothName)) {
@@ -193,7 +193,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                         mCurAudioRoutesInfo.bluetoothName)
                         .setDescription(mContext.getResources().getText(
                                 R.string.bluetooth_a2dp_audio_route_name).toString())
-                        .addSupportedCategory(CATEGORY_LIVE_AUDIO)
+                        .addRouteType(CATEGORY_LIVE_AUDIO)
                         .build();
             } else {
                 mBluetoothA2dpRoute = null;
