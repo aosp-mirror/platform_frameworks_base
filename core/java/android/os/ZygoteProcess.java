@@ -594,6 +594,8 @@ public class ZygoteProcess {
             argsForZygote.add("--mount-external-legacy");
         } else if (mountExternal == Zygote.MOUNT_EXTERNAL_PASS_THROUGH) {
             argsForZygote.add("--mount-external-pass-through");
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+            argsForZygote.add("--mount-external-android-writable");
         }
 
         argsForZygote.add("--target-sdk-version=" + targetSdkVersion);
