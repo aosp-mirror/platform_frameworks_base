@@ -119,7 +119,6 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
@@ -1684,7 +1683,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 computeProgressLocked(true);
 
                 // Unpack native libraries for non-incremental installation
-                if (isIncrementalInstallation()) {
+                if (!isIncrementalInstallation()) {
                     extractNativeLibraries(stageDir, params.abiOverride, mayInheritNativeLibs());
                 }
             }
