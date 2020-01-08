@@ -772,7 +772,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // If this is the first layout, we need to initialize the last frames and inset values,
             // as otherwise we'd immediately cause an unnecessary resize.
             if (firstLayout) {
-                w.updateLastFrames();
+                // The client may compute its actual requested size according to the first layout,
+                // so we still request the window to resize if the current frame is empty.
+                if (!w.getFrameLw().isEmpty()) {
+                    w.updateLastFrames();
+                }
                 w.updateLastInsetValues();
                 w.updateLocationInParentDisplayIfNeeded();
             }
