@@ -777,4 +777,9 @@
     <!-- Assistant handles -->
     <dimen name="assist_handle_shadow_radius">2dp</dimen>
 
+    <!-- For Waterfall Display -->
+    <dimen name="waterfall_display_left_edge_size">0px</dimen>
+    <dimen name="waterfall_display_top_edge_size">0px</dimen>
+    <dimen name="waterfall_display_right_edge_size">0px</dimen>
+    <dimen name="waterfall_display_bottom_edge_size">0px</dimen>
 </resources>

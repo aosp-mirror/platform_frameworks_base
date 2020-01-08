@@ -3801,5 +3801,9 @@
   <!-- Assistant handles -->
   <java-symbol type="dimen" name="assist_handle_shadow_radius" />
 
-
+  <!-- For Waterfall Display -->
+  <java-symbol type="dimen" name="waterfall_display_left_edge_size" />
+  <java-symbol type="dimen" name="waterfall_display_top_edge_size" />
+  <java-symbol type="dimen" name="waterfall_display_right_edge_size" />
+  <java-symbol type="dimen" name="waterfall_display_bottom_edge_size" />
 </resources>
