@@ -24,10 +24,10 @@ import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
 import android.content.Intent;
+import android.os.TimestampedValue;
 import android.telephony.TelephonyManager;
 import android.util.LocalLog;
 import android.util.Slog;
-import android.util.TimestampedValue;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
