@@ -17,6 +17,11 @@
 
 package android.filterfw.core;
 
+import android.compat.annotation.UnsupportedAppUsage;
+import android.filterpacks.base.FrameBranch;
+import android.filterpacks.base.NullFilter;
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,14 +29,6 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
-
-import android.filterfw.core.FilterContext;
-import android.filterfw.core.KeyValueMap;
-import android.filterpacks.base.FrameBranch;
-import android.filterpacks.base.NullFilter;
-
-import android.annotation.UnsupportedAppUsage;
-import android.util.Log;
 
 /**
  * @hide
