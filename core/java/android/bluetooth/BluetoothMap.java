@@ -17,7 +17,10 @@
 package android.bluetooth;
 
 import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -35,21 +38,35 @@ import java.util.List;
  *
  * @hide
  */
+@SystemApi
 public final class BluetoothMap implements BluetoothProfile {
 
     private static final String TAG = "BluetoothMap";
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
+    /** @hide */
+    @SuppressLint("ActionValue")
+    @SystemApi
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED";
 
-    /** There was an error trying to obtain the state */
+    /**
+     * There was an error trying to obtain the state
+     *
+     * @hide
+     */
     public static final int STATE_ERROR = -1;
 
+    /** @hide */
     public static final int RESULT_FAILURE = 0;
+    /** @hide */
     public static final int RESULT_SUCCESS = 1;
-    /** Connection canceled before completion. */
+    /**
+     * Connection canceled before completion.
+     *
+     * @hide
+     */
     public static final int RESULT_CANCELED = 2;
 
     private BluetoothAdapter mAdapter;
@@ -71,6 +88,7 @@ public final class BluetoothMap implements BluetoothProfile {
         mProfileConnector.connect(context, listener);
     }
 
+    @SuppressLint("GenericException")
     protected void finalize() throws Throwable {
         try {
             close();
@@ -84,6 +102,8 @@ public final class BluetoothMap implements BluetoothProfile {
      * Other public functions of BluetoothMap will return default error
      * results once close() has been called. Multiple invocations of close()
      * are ok.
+     *
+     * @hide
      */
     public synchronized void close() {
         mProfileConnector.disconnect();
@@ -98,6 +118,8 @@ public final class BluetoothMap implements BluetoothProfile {
      *
      * @return One of the STATE_ return codes, or STATE_ERROR if this proxy object is currently not
      * connected to the Map service.
+     *
+     * @hide
      */
     public int getState() {
         if (VDBG) log("getState()");
@@ -120,6 +142,8 @@ public final class BluetoothMap implements BluetoothProfile {
      *
      * @return The remote Bluetooth device, or null if not in connected or connecting state, or if
      * this proxy object is not connected to the Map service.
+     *
+     * @hide
      */
     public BluetoothDevice getClient() {
         if (VDBG) log("getClient()");
@@ -141,6 +165,8 @@ public final class BluetoothMap implements BluetoothProfile {
      * Returns true if the specified Bluetooth device is connected.
      * Returns false if not connected, or if this proxy object is not
      * currently connected to the Map service.
+     *
+     * @hide
      */
     public boolean isConnected(BluetoothDevice device) {
         if (VDBG) log("isConnected(" + device + ")");
@@ -161,6 +187,8 @@ public final class BluetoothMap implements BluetoothProfile {
     /**
      * Initiate connection. Initiation of outgoing connections is not
      * supported for MAP server.
+     *
+     * @hide
      */
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")" + "not supported for MAPS");
@@ -172,6 +200,8 @@ public final class BluetoothMap implements BluetoothProfile {
      *
      * @param device Remote Bluetooth Device
      * @return false on error, true otherwise
+     *
+     * @hide
      */
     @UnsupportedAppUsage
     public boolean disconnect(BluetoothDevice device) {
@@ -196,6 +226,8 @@ public final class BluetoothMap implements BluetoothProfile {
      * devices. It tries to err on the side of false positives.
      *
      * @return True if this device might support Map.
+     *
+     * @hide
      */
     public static boolean doesClassMatchSink(BluetoothClass btClass) {
         // TODO optimize the rule
@@ -214,8 +246,11 @@ public final class BluetoothMap implements BluetoothProfile {
      * Get the list of connected devices. Currently at most one.
      *
      * @return list of connected devices
+     *
+     * @hide
      */
-    public List<BluetoothDevice> getConnectedDevices() {
+    @SystemApi
+    public @NonNull List<BluetoothDevice> getConnectedDevices() {
         if (DBG) log("getConnectedDevices()");
         final IBluetoothMap service = getService();
         if (service != null && isEnabled()) {
@@ -234,6 +269,8 @@ public final class BluetoothMap implements BluetoothProfile {
      * Get the list of devices matching specified states. Currently at most one.
      *
      * @return list of matching devices
+     *
+     * @hide
      */
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (DBG) log("getDevicesMatchingStates()");
@@ -254,6 +291,8 @@ public final class BluetoothMap implements BluetoothProfile {
      * Get connection state of device
      *
      * @return device connection state
+     *
+     * @hide
      */
     public int getConnectionState(BluetoothDevice device) {
         if (DBG) log("getConnectionState(" + device + ")");
@@ -301,7 +340,7 @@ public final class BluetoothMap implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    public boolean setConnectionPolicy(BluetoothDevice device, int connectionPolicy) {
+    public boolean setConnectionPolicy(@Nullable BluetoothDevice device, int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
         final IBluetoothMap service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
@@ -349,7 +388,7 @@ public final class BluetoothMap implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public int getConnectionPolicy(BluetoothDevice device) {
+    public int getConnectionPolicy(@Nullable BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
         final IBluetoothMap service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
