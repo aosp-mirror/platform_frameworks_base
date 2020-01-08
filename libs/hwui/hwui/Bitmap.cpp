@@ -219,7 +219,7 @@ Bitmap::Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info
 
 Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info, BitmapPalette palette)
         : SkPixelRef(info.width(), info.height(), nullptr,
-                     bytesPerPixel(buffer->getPixelFormat()) * buffer->getStride())
+                     bytesPerPixel(buffer->getPixelFormat()) * (buffer->getStride() > 0 ? buffer->getStride() : buffer->getWidth()))
         , mInfo(validateAlpha(info))
         , mPixelStorageType(PixelStorageType::Hardware)
         , mPalette(palette)
