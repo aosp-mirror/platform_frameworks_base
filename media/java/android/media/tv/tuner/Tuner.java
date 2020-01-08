@@ -32,6 +32,7 @@ import android.media.tv.tuner.TunerConstants.LnbTone;
 import android.media.tv.tuner.TunerConstants.LnbVoltage;
 import android.media.tv.tuner.TunerConstants.Result;
 import android.media.tv.tuner.filter.FilterEvent;
+import android.media.tv.tuner.frontend.FrontendCallback;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -129,25 +130,6 @@ public final class Tuner implements AutoCloseable  {
     private native Dvr nativeOpenDvr(int type, int bufferSize);
 
     private static native DemuxCapabilities nativeGetDemuxCapabilities();
-
-    /**
-     * Frontend Callback.
-     *
-     * @hide
-     */
-    public interface FrontendCallback {
-
-        /**
-         * Invoked when there is a frontend event.
-         */
-        void onEvent(int frontendEventType);
-
-        /**
-         * Invoked when there is a scan message.
-         * @param msg
-         */
-        void onScanMessage(ScanMessage msg);
-    }
 
     /**
      * LNB Callback.
