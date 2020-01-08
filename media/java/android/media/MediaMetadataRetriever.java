@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -354,8 +355,8 @@ public class MediaMetadataRetriever implements AutoCloseable {
      *         is less than or equal to 0.
      * @see {@link #getScaledFrameAtTime(long, int, int, int, BitmapParams)}
      */
-    public @Nullable Bitmap getScaledFrameAtTime(
-            long timeUs, @Option int option, int dstWidth, int dstHeight) {
+    public @Nullable Bitmap getScaledFrameAtTime(long timeUs, @Option int option,
+            @IntRange(from=1) int dstWidth, @IntRange(from=1) int dstHeight) {
         validate(option, dstWidth, dstHeight);
         return _getFrameAtTime(timeUs, option, dstWidth, dstHeight, null);
     }
@@ -400,7 +401,8 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @see {@link #getScaledFrameAtTime(long, int, int, int)}
      */
     public @Nullable Bitmap getScaledFrameAtTime(long timeUs, @Option int option,
-            int dstWidth, int dstHeight, @NonNull BitmapParams params) {
+            @IntRange(from=1) int dstWidth, @IntRange(from=1) int dstHeight,
+            @NonNull BitmapParams params) {
         validate(option, dstWidth, dstHeight);
         return _getFrameAtTime(timeUs, option, dstWidth, dstHeight, params);
     }
