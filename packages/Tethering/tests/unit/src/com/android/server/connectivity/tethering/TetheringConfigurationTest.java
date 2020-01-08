@@ -34,7 +34,6 @@ import static com.android.internal.R.array.config_tether_wifi_regexs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
@@ -145,7 +144,7 @@ public class TetheringConfigurationTest {
 
     @Test
     public void testDunFromTelephonyManagerMeansDun() {
-        when(mTelephonyManager.isTetheringApnRequired(anyInt())).thenReturn(true);
+        when(mTelephonyManager.isTetheringApnRequired()).thenReturn(true);
 
         final TetheringConfiguration cfgWifi = getTetheringConfiguration(TYPE_WIFI);
         final TetheringConfiguration cfgMobileWifiHipri = getTetheringConfiguration(
@@ -169,7 +168,7 @@ public class TetheringConfigurationTest {
 
     @Test
     public void testDunNotRequiredFromTelephonyManagerMeansNoDun() {
-        when(mTelephonyManager.isTetheringApnRequired(anyInt())).thenReturn(false);
+        when(mTelephonyManager.isTetheringApnRequired()).thenReturn(false);
 
         final TetheringConfiguration cfgWifi = getTetheringConfiguration(TYPE_WIFI);
         final TetheringConfiguration cfgMobileWifiHipri = getTetheringConfiguration(
@@ -212,7 +211,7 @@ public class TetheringConfigurationTest {
     @Test
     public void testNoDefinedUpstreamTypesAddsEthernet() {
         when(mResources.getIntArray(config_tether_upstream_types)).thenReturn(new int[]{});
-        when(mTelephonyManager.isTetheringApnRequired(anyInt())).thenReturn(false);
+        when(mTelephonyManager.isTetheringApnRequired()).thenReturn(false);
 
         final TetheringConfiguration cfg = new TetheringConfiguration(
                 mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
@@ -235,7 +234,7 @@ public class TetheringConfigurationTest {
     public void testDefinedUpstreamTypesSansEthernetAddsEthernet() {
         when(mResources.getIntArray(config_tether_upstream_types)).thenReturn(
                 new int[]{TYPE_WIFI, TYPE_MOBILE_HIPRI});
-        when(mTelephonyManager.isTetheringApnRequired(anyInt())).thenReturn(false);
+        when(mTelephonyManager.isTetheringApnRequired()).thenReturn(false);
 
         final TetheringConfiguration cfg = new TetheringConfiguration(
                 mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
@@ -253,7 +252,7 @@ public class TetheringConfigurationTest {
     public void testDefinedUpstreamTypesWithEthernetDoesNotAddEthernet() {
         when(mResources.getIntArray(config_tether_upstream_types))
                 .thenReturn(new int[]{TYPE_WIFI, TYPE_ETHERNET, TYPE_MOBILE_HIPRI});
-        when(mTelephonyManager.isTetheringApnRequired(anyInt())).thenReturn(false);
+        when(mTelephonyManager.isTetheringApnRequired()).thenReturn(false);
 
         final TetheringConfiguration cfg = new TetheringConfiguration(
                 mMockContext, mLog, INVALID_SUBSCRIPTION_ID);

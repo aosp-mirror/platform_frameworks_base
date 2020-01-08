@@ -21,6 +21,7 @@ import static android.net.NetworkStats.STATS_PER_IFACE;
 import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
+import static android.net.RouteInfo.RTN_UNICAST;
 import static android.net.TrafficStats.UID_TETHERING;
 import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 
@@ -269,7 +270,7 @@ public class OffloadControllerTest {
         final String ipv4Addr = "192.0.2.5";
         final String linkAddr = ipv4Addr + "/24";
         lp.addLinkAddress(new LinkAddress(linkAddr));
-        lp.addRoute(new RouteInfo(new IpPrefix("192.0.2.0/24")));
+        lp.addRoute(new RouteInfo(new IpPrefix("192.0.2.0/24"), null, null, RTN_UNICAST));
         offload.setUpstreamLinkProperties(lp);
         // IPv4 prefixes and addresses on the upstream are simply left as whole
         // prefixes (already passed in from UpstreamNetworkMonitor code). If a
@@ -285,7 +286,7 @@ public class OffloadControllerTest {
         inOrder.verifyNoMoreInteractions();
 
         final String ipv4Gateway = "192.0.2.1";
-        lp.addRoute(new RouteInfo(InetAddress.getByName(ipv4Gateway)));
+        lp.addRoute(new RouteInfo(null, InetAddress.getByName(ipv4Gateway), null, RTN_UNICAST));
         offload.setUpstreamLinkProperties(lp);
         // No change in local addresses means no call to setLocalPrefixes().
         inOrder.verify(mHardware, never()).setLocalPrefixes(mStringArrayCaptor.capture());
@@ -296,7 +297,7 @@ public class OffloadControllerTest {
         inOrder.verifyNoMoreInteractions();
 
         final String ipv6Gw1 = "fe80::cafe";
-        lp.addRoute(new RouteInfo(InetAddress.getByName(ipv6Gw1)));
+        lp.addRoute(new RouteInfo(null, InetAddress.getByName(ipv6Gw1), null, RTN_UNICAST));
         offload.setUpstreamLinkProperties(lp);
         // No change in local addresses means no call to setLocalPrefixes().
         inOrder.verify(mHardware, never()).setLocalPrefixes(mStringArrayCaptor.capture());
@@ -310,7 +311,7 @@ public class OffloadControllerTest {
         inOrder.verifyNoMoreInteractions();
 
         final String ipv6Gw2 = "fe80::d00d";
-        lp.addRoute(new RouteInfo(InetAddress.getByName(ipv6Gw2)));
+        lp.addRoute(new RouteInfo(null, InetAddress.getByName(ipv6Gw2), null, RTN_UNICAST));
         offload.setUpstreamLinkProperties(lp);
         // No change in local addresses means no call to setLocalPrefixes().
         inOrder.verify(mHardware, never()).setLocalPrefixes(mStringArrayCaptor.capture());
@@ -327,8 +328,10 @@ public class OffloadControllerTest {
         final LinkProperties stacked = new LinkProperties();
         stacked.setInterfaceName("stacked");
         stacked.addLinkAddress(new LinkAddress("192.0.2.129/25"));
-        stacked.addRoute(new RouteInfo(InetAddress.getByName("192.0.2.254")));
-        stacked.addRoute(new RouteInfo(InetAddress.getByName("fe80::bad:f00")));
+        stacked.addRoute(new RouteInfo(null, InetAddress.getByName("192.0.2.254"), null,
+                  RTN_UNICAST));
+        stacked.addRoute(new RouteInfo(null, InetAddress.getByName("fe80::bad:f00"), null,
+                  RTN_UNICAST));
         assertTrue(lp.addStackedLink(stacked));
         offload.setUpstreamLinkProperties(lp);
         // No change in local addresses means no call to setLocalPrefixes().
@@ -348,7 +351,7 @@ public class OffloadControllerTest {
         // removed from "local prefixes" and /128s added for the upstream IPv6
         // addresses.  This is not yet implemented, and for now we simply
         // expect to see these /128s.
-        lp.addRoute(new RouteInfo(new IpPrefix("2001:db8::/64")));
+        lp.addRoute(new RouteInfo(new IpPrefix("2001:db8::/64"), null, null, RTN_UNICAST));
         // "2001:db8::/64" plus "assigned" ASCII in hex
         lp.addLinkAddress(new LinkAddress("2001:db8::6173:7369:676e:6564/64"));
         // "2001:db8::/64" plus "random" ASCII in hex
@@ -574,13 +577,15 @@ public class OffloadControllerTest {
         final LinkProperties usbLinkProperties = new LinkProperties();
         usbLinkProperties.setInterfaceName(RNDIS0);
         usbLinkProperties.addLinkAddress(new LinkAddress("192.168.42.1/24"));
-        usbLinkProperties.addRoute(new RouteInfo(new IpPrefix(USB_PREFIX)));
+        usbLinkProperties.addRoute(
+                new RouteInfo(new IpPrefix(USB_PREFIX), null, null, RTN_UNICAST));
         offload.notifyDownstreamLinkProperties(usbLinkProperties);
         inOrder.verify(mHardware, times(1)).addDownstreamPrefix(RNDIS0, USB_PREFIX);
         inOrder.verifyNoMoreInteractions();
 
         // [2] Routes for IPv6 link-local prefixes should never be added.
-        usbLinkProperties.addRoute(new RouteInfo(new IpPrefix(IPV6_LINKLOCAL)));
+        usbLinkProperties.addRoute(
+                new RouteInfo(new IpPrefix(IPV6_LINKLOCAL), null, null, RTN_UNICAST));
         offload.notifyDownstreamLinkProperties(usbLinkProperties);
         inOrder.verify(mHardware, never()).addDownstreamPrefix(eq(RNDIS0), anyString());
         inOrder.verifyNoMoreInteractions();
@@ -588,7 +593,8 @@ public class OffloadControllerTest {
         // [3] Add an IPv6 prefix for good measure. Only new offload-able
         // prefixes should be passed to the HAL.
         usbLinkProperties.addLinkAddress(new LinkAddress("2001:db8::1/64"));
-        usbLinkProperties.addRoute(new RouteInfo(new IpPrefix(IPV6_DOC_PREFIX)));
+        usbLinkProperties.addRoute(
+                new RouteInfo(new IpPrefix(IPV6_DOC_PREFIX), null, null, RTN_UNICAST));
         offload.notifyDownstreamLinkProperties(usbLinkProperties);
         inOrder.verify(mHardware, times(1)).addDownstreamPrefix(RNDIS0, IPV6_DOC_PREFIX);
         inOrder.verifyNoMoreInteractions();
@@ -601,8 +607,10 @@ public class OffloadControllerTest {
 
         // [5] Differences in local routes are converted into addDownstream()
         // and removeDownstream() invocations accordingly.
-        usbLinkProperties.removeRoute(new RouteInfo(new IpPrefix(IPV6_DOC_PREFIX), null, RNDIS0));
-        usbLinkProperties.addRoute(new RouteInfo(new IpPrefix(IPV6_DISCARD_PREFIX)));
+        usbLinkProperties.removeRoute(
+                new RouteInfo(new IpPrefix(IPV6_DOC_PREFIX), null, RNDIS0, RTN_UNICAST));
+        usbLinkProperties.addRoute(
+                new RouteInfo(new IpPrefix(IPV6_DISCARD_PREFIX), null, null, RTN_UNICAST));
         offload.notifyDownstreamLinkProperties(usbLinkProperties);
         inOrder.verify(mHardware, times(1)).removeDownstreamPrefix(RNDIS0, IPV6_DOC_PREFIX);
         inOrder.verify(mHardware, times(1)).addDownstreamPrefix(RNDIS0, IPV6_DISCARD_PREFIX);
@@ -680,19 +688,23 @@ public class OffloadControllerTest {
         final LinkProperties usbLinkProperties = new LinkProperties();
         usbLinkProperties.setInterfaceName(RNDIS0);
         usbLinkProperties.addLinkAddress(new LinkAddress("192.168.42.1/24"));
-        usbLinkProperties.addRoute(new RouteInfo(new IpPrefix(USB_PREFIX)));
+        usbLinkProperties.addRoute(
+                new RouteInfo(new IpPrefix(USB_PREFIX), null, null, RTN_UNICAST));
         offload.notifyDownstreamLinkProperties(usbLinkProperties);
 
         final LinkProperties wifiLinkProperties = new LinkProperties();
         wifiLinkProperties.setInterfaceName(WLAN0);
         wifiLinkProperties.addLinkAddress(new LinkAddress("192.168.43.1/24"));
-        wifiLinkProperties.addRoute(new RouteInfo(new IpPrefix(WIFI_PREFIX)));
-        wifiLinkProperties.addRoute(new RouteInfo(new IpPrefix(IPV6_LINKLOCAL)));
+        wifiLinkProperties.addRoute(
+                new RouteInfo(new IpPrefix(WIFI_PREFIX), null, null, RTN_UNICAST));
+        wifiLinkProperties.addRoute(
+                new RouteInfo(new IpPrefix(IPV6_LINKLOCAL), null, null, RTN_UNICAST));
         // Use a benchmark prefix (RFC 5180 + erratum), since the documentation
         // prefix is included in the excluded prefix list.
         wifiLinkProperties.addLinkAddress(new LinkAddress("2001:2::1/64"));
         wifiLinkProperties.addLinkAddress(new LinkAddress("2001:2::2/64"));
-        wifiLinkProperties.addRoute(new RouteInfo(new IpPrefix("2001:2::/64")));
+        wifiLinkProperties.addRoute(
+                new RouteInfo(new IpPrefix("2001:2::/64"), null, null, RTN_UNICAST));
         offload.notifyDownstreamLinkProperties(wifiLinkProperties);
 
         offload.removeDownstreamInterface(RNDIS0);

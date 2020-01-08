@@ -29,6 +29,7 @@ import android.util.Log;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -257,7 +258,7 @@ public class IPv6TetheringCoordinator {
         final LinkProperties lp = new LinkProperties();
 
         final IpPrefix local48 = makeUniqueLocalPrefix(ulp, (short) 0, 48);
-        lp.addRoute(new RouteInfo(local48, null, null));
+        lp.addRoute(new RouteInfo(local48, null, null, RouteInfo.RTN_UNICAST));
 
         final IpPrefix local64 = makeUniqueLocalPrefix(ulp, subnetId, 64);
         // Because this is a locally-generated ULA, we don't have an upstream
@@ -273,7 +274,13 @@ public class IPv6TetheringCoordinator {
         final byte[] bytes = Arrays.copyOf(in6addr, in6addr.length);
         bytes[7] = (byte) (subnetId >> 8);
         bytes[8] = (byte) subnetId;
-        return new IpPrefix(bytes, prefixlen);
+        final InetAddress addr;
+        try {
+            addr = InetAddress.getByAddress(bytes);
+        } catch (UnknownHostException e) {
+            throw new IllegalStateException("Invalid address length: " + bytes.length, e);
+        }
+        return new IpPrefix(addr, prefixlen);
     }
 
     // Generates a Unique Locally-assigned Prefix:

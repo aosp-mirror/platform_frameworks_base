@@ -17,10 +17,12 @@
 package android.net.ip;
 
 import static android.net.InetAddresses.parseNumericAddress;
+import static android.net.RouteInfo.RTN_UNICAST;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.util.NetworkConstants.FF;
 import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
 import static android.net.util.NetworkConstants.asByte;
+import static android.net.util.TetheringMessageBase.BASE_IPSERVER;
 
 import android.net.ConnectivityManager;
 import android.net.INetd;
@@ -46,11 +48,9 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
-import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.util.MessageUtils;
-import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
@@ -153,27 +153,26 @@ public class IpServer extends StateMachine {
                 DhcpServerCallbacks cb);
     }
 
-    private static final int BASE_IFACE              = Protocol.BASE_TETHERING + 100;
     // request from the user that it wants to tether
-    public static final int CMD_TETHER_REQUESTED            = BASE_IFACE + 2;
+    public static final int CMD_TETHER_REQUESTED            = BASE_IPSERVER + 1;
     // request from the user that it wants to untether
-    public static final int CMD_TETHER_UNREQUESTED          = BASE_IFACE + 3;
+    public static final int CMD_TETHER_UNREQUESTED          = BASE_IPSERVER + 2;
     // notification that this interface is down
-    public static final int CMD_INTERFACE_DOWN              = BASE_IFACE + 4;
+    public static final int CMD_INTERFACE_DOWN              = BASE_IPSERVER + 3;
     // notification from the master SM that it had trouble enabling IP Forwarding
-    public static final int CMD_IP_FORWARDING_ENABLE_ERROR  = BASE_IFACE + 7;
+    public static final int CMD_IP_FORWARDING_ENABLE_ERROR  = BASE_IPSERVER + 4;
     // notification from the master SM that it had trouble disabling IP Forwarding
-    public static final int CMD_IP_FORWARDING_DISABLE_ERROR = BASE_IFACE + 8;
+    public static final int CMD_IP_FORWARDING_DISABLE_ERROR = BASE_IPSERVER + 5;
     // notification from the master SM that it had trouble starting tethering
-    public static final int CMD_START_TETHERING_ERROR       = BASE_IFACE + 9;
+    public static final int CMD_START_TETHERING_ERROR       = BASE_IPSERVER + 6;
     // notification from the master SM that it had trouble stopping tethering
-    public static final int CMD_STOP_TETHERING_ERROR        = BASE_IFACE + 10;
+    public static final int CMD_STOP_TETHERING_ERROR        = BASE_IPSERVER + 7;
     // notification from the master SM that it had trouble setting the DNS forwarders
-    public static final int CMD_SET_DNS_FORWARDERS_ERROR    = BASE_IFACE + 11;
+    public static final int CMD_SET_DNS_FORWARDERS_ERROR    = BASE_IPSERVER + 8;
     // the upstream connection has changed
-    public static final int CMD_TETHER_CONNECTION_CHANGED   = BASE_IFACE + 12;
+    public static final int CMD_TETHER_CONNECTION_CHANGED   = BASE_IPSERVER + 9;
     // new IPv6 tethering parameters need to be processed
-    public static final int CMD_IPV6_TETHER_UPDATE          = BASE_IFACE + 13;
+    public static final int CMD_IPV6_TETHER_UPDATE          = BASE_IPSERVER + 10;
 
     private final State mInitialState;
     private final State mLocalHotspotState;
@@ -486,7 +485,9 @@ public class IpServer extends StateMachine {
         }
 
         // Directly-connected route.
-        final RouteInfo route = new RouteInfo(linkAddr);
+        final IpPrefix ipv4Prefix = new IpPrefix(linkAddr.getAddress(),
+                linkAddr.getPrefixLength());
+        final RouteInfo route = new RouteInfo(ipv4Prefix, null, null, RTN_UNICAST);
         if (enabled) {
             mLinkProperties.addLinkAddress(linkAddr);
             mLinkProperties.addRoute(route);
@@ -1007,7 +1008,7 @@ public class IpServer extends StateMachine {
             String ifname, HashSet<IpPrefix> prefixes) {
         final ArrayList<RouteInfo> localRoutes = new ArrayList<RouteInfo>();
         for (IpPrefix ipp : prefixes) {
-            localRoutes.add(new RouteInfo(ipp, null, ifname));
+            localRoutes.add(new RouteInfo(ipp, null, ifname, RTN_UNICAST));
         }
         return localRoutes;
     }
@@ -1019,7 +1020,7 @@ public class IpServer extends StateMachine {
         try {
             return Inet6Address.getByAddress(null, dnsBytes, 0);
         } catch (UnknownHostException e) {
-            Slog.wtf(TAG, "Failed to construct Inet6Address from: " + localPrefix);
+            Log.wtf(TAG, "Failed to construct Inet6Address from: " + localPrefix);
             return null;
         }
     }
