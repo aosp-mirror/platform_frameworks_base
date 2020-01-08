@@ -4823,6 +4823,7 @@ package android.net {
   public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
     ctor public MatchAllNetworkSpecifier();
     method public int describeContents();
+    method public boolean satisfiedBy(android.net.NetworkSpecifier);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.MatchAllNetworkSpecifier> CREATOR;
   }
@@ -4884,6 +4885,12 @@ package android.net {
   public static interface NetworkScoreManager.NetworkScoreCallback {
     method public void clearScores();
     method public void updateScores(@NonNull java.util.List<android.net.ScoredNetwork>);
+  }
+
+  public abstract class NetworkSpecifier {
+    method public void assertValidFromUid(int);
+    method @Nullable public android.net.NetworkSpecifier redact();
+    method public abstract boolean satisfiedBy(@Nullable android.net.NetworkSpecifier);
   }
 
   public class NetworkStack {
@@ -4956,6 +4963,7 @@ package android.net {
   public final class StringNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
     ctor public StringNetworkSpecifier(@NonNull String);
     method public int describeContents();
+    method public boolean satisfiedBy(android.net.NetworkSpecifier);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.StringNetworkSpecifier> CREATOR;
     field @NonNull public final String specifier;
@@ -6073,6 +6081,10 @@ package android.net.wifi {
     field public int numUsage;
   }
 
+  public final class WifiNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
+    method public boolean satisfiedBy(android.net.NetworkSpecifier);
+  }
+
   public static final class WifiNetworkSuggestion.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_CARRIER_PROVISIONING) public android.net.wifi.WifiNetworkSuggestion.Builder setCarrierId(int);
   }
@@ -6257,6 +6269,10 @@ package android.net.wifi.aware {
 
   public class DiscoverySession implements java.lang.AutoCloseable {
     method @Deprecated public android.net.NetworkSpecifier createNetworkSpecifierPmk(@NonNull android.net.wifi.aware.PeerHandle, @NonNull byte[]);
+  }
+
+  public final class WifiAwareNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
+    method public boolean satisfiedBy(android.net.NetworkSpecifier);
   }
 
   public class WifiAwareSession implements java.lang.AutoCloseable {
