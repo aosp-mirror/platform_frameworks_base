@@ -64,6 +64,13 @@ public class ServiceState implements Parcelable {
     static final boolean DBG = false;
     static final boolean VDBG = false;  // STOPSHIP if true
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "STATE_",
+            value = {STATE_IN_SERVICE, STATE_OUT_OF_SERVICE, STATE_EMERGENCY_ONLY,
+                    STATE_POWER_OFF})
+    public @interface RegState {}
+
     /**
      * Normal operation condition, the phone is registered
      * with an operator either in home network or in roaming.
@@ -82,6 +89,7 @@ public class ServiceState implements Parcelable {
     /**
      * The phone is registered and locked.  Only emergency numbers are allowed. {@more}
      */
+    //TODO: This state is not used anymore. It should be deprecated in a future release.
     public static final int STATE_EMERGENCY_ONLY =
             TelephonyProtoEnums.SERVICE_STATE_EMERGENCY_ONLY;  // 2
 
@@ -530,18 +538,37 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get current data service state
+     * Get current data registration state.
      *
      * @see #STATE_IN_SERVICE
      * @see #STATE_OUT_OF_SERVICE
      * @see #STATE_EMERGENCY_ONLY
      * @see #STATE_POWER_OFF
      *
+     * @return current data registration state
+     *
      * @hide
      */
     @UnsupportedAppUsage
     public int getDataRegState() {
         return mDataRegState;
+    }
+
+    /**
+     * Get current data registration state.
+     *
+     * @see #STATE_IN_SERVICE
+     * @see #STATE_OUT_OF_SERVICE
+     * @see #STATE_EMERGENCY_ONLY
+     * @see #STATE_POWER_OFF
+     *
+     * @return current data registration state
+     *
+     * @hide
+     */
+    @SystemApi
+    public @RegState int getDataRegistrationState() {
+        return getDataRegState();
     }
 
     /**
@@ -1437,7 +1464,15 @@ public class ServiceState implements Parcelable {
         return getRilDataRadioTechnology();
     }
 
-    /** @hide */
+    /**
+     * Transform RIL radio technology {@link RilRadioTechnology} value to Network
+     * type {@link NetworkType}.
+     *
+     * @param rat The RIL radio technology {@link RilRadioTechnology}.
+     * @return The network type {@link NetworkType}.
+     *
+     * @hide
+     */
     public static int rilRadioTechnologyToNetworkType(@RilRadioTechnology int rat) {
         switch(rat) {
             case RIL_RADIO_TECHNOLOGY_GPRS:
@@ -1519,7 +1554,15 @@ public class ServiceState implements Parcelable {
         }
     }
 
-    /** @hide */
+    /**
+     * Transform network type {@link NetworkType} value to RIL radio technology
+     * {@link RilRadioTechnology}.
+     *
+     * @param networkType The network type {@link NetworkType}.
+     * @return The RIL radio technology {@link RilRadioTechnology}.
+     *
+     * @hide
+     */
     public static int networkTypeToRilRadioTechnology(int networkType) {
         switch(networkType) {
             case TelephonyManager.NETWORK_TYPE_GPRS:
@@ -1720,7 +1763,14 @@ public class ServiceState implements Parcelable {
         return bearerBitmask;
     }
 
-    /** @hide */
+    /**
+     * Convert network type bitmask to bearer bitmask.
+     *
+     * @param networkTypeBitmask The network type bitmask value
+     * @return The bearer bitmask value.
+     *
+     * @hide
+     */
     public static int convertNetworkTypeBitmaskToBearerBitmask(int networkTypeBitmask) {
         if (networkTypeBitmask == 0) {
             return 0;
@@ -1734,7 +1784,14 @@ public class ServiceState implements Parcelable {
         return bearerBitmask;
     }
 
-    /** @hide */
+    /**
+     * Convert bearer bitmask to network type bitmask.
+     *
+     * @param bearerBitmask The bearer bitmask value.
+     * @return The network type bitmask value.
+     *
+     * @hide
+     */
     public static int convertBearerBitmaskToNetworkTypeBitmask(int bearerBitmask) {
         if (bearerBitmask == 0) {
             return 0;
