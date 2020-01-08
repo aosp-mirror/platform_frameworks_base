@@ -609,10 +609,12 @@ public final class FillResponse implements Parcelable {
                         "must add at least 1 dataset when using header or footer");
             }
 
-            for (final Dataset dataset : mDatasets) {
-                if (dataset.getFieldInlinePresentation(0) != null) {
-                    mSupportsInlineSuggestions = true;
-                    break;
+            if (mDatasets != null) {
+                for (final Dataset dataset : mDatasets) {
+                    if (dataset.getFieldInlinePresentation(0) != null) {
+                        mSupportsInlineSuggestions = true;
+                        break;
+                    }
                 }
             }
 
