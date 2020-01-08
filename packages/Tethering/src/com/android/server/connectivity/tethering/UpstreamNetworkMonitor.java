@@ -328,13 +328,6 @@ public class UpstreamNetworkMonitor {
                     network, newNc));
         }
 
-        // Log changes in upstream network signal strength, if available.
-        if (network.equals(mTetheringUpstreamNetwork) && newNc.hasSignalStrength()) {
-            final int newSignal = newNc.getSignalStrength();
-            final String prevSignal = getSignalStrength(prev.networkCapabilities);
-            mLog.logf("upstream network signal strength: %s -> %s", prevSignal, newSignal);
-        }
-
         mNetworkMap.put(network, new UpstreamNetworkState(
                 prev.linkProperties, newNc, network));
         // TODO: If sufficient information is available to select a more
@@ -555,11 +548,6 @@ public class UpstreamNetworkMonitor {
         }
 
         return prefixSet;
-    }
-
-    private static String getSignalStrength(NetworkCapabilities nc) {
-        if (nc == null || !nc.hasSignalStrength()) return "unknown";
-        return Integer.toString(nc.getSignalStrength());
     }
 
     private static boolean isCellular(UpstreamNetworkState ns) {

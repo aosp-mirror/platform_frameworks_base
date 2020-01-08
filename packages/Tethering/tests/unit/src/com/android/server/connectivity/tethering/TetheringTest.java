@@ -28,6 +28,7 @@ import static android.net.ConnectivityManager.TETHERING_WIFI;
 import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
 import static android.net.ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE;
 import static android.net.ConnectivityManager.TYPE_WIFI_P2P;
+import static android.net.RouteInfo.RTN_UNICAST;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
@@ -72,6 +73,7 @@ import android.net.INetd;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.ITetheringEventCallback;
+import android.net.InetAddresses;
 import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
@@ -81,7 +83,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
-import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.TetherStatesParcel;
 import android.net.TetheringConfigurationParcel;
@@ -365,23 +366,26 @@ public class TetheringTest {
 
         if (withIPv4) {
             prop.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0),
-                    NetworkUtils.numericToInetAddress("10.0.0.1"), TEST_MOBILE_IFNAME));
+                    InetAddresses.parseNumericAddress("10.0.0.1"),
+                    TEST_MOBILE_IFNAME, RTN_UNICAST));
         }
 
         if (withIPv6) {
-            prop.addDnsServer(NetworkUtils.numericToInetAddress("2001:db8::2"));
+            prop.addDnsServer(InetAddresses.parseNumericAddress("2001:db8::2"));
             prop.addLinkAddress(
-                    new LinkAddress(NetworkUtils.numericToInetAddress("2001:db8::"),
+                    new LinkAddress(InetAddresses.parseNumericAddress("2001:db8::"),
                             NetworkConstants.RFC7421_PREFIX_LENGTH));
             prop.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0),
-                    NetworkUtils.numericToInetAddress("2001:db8::1"), TEST_MOBILE_IFNAME));
+                    InetAddresses.parseNumericAddress("2001:db8::1"),
+                    TEST_MOBILE_IFNAME, RTN_UNICAST));
         }
 
         if (with464xlat) {
             final LinkProperties stackedLink = new LinkProperties();
             stackedLink.setInterfaceName(TEST_XLAT_MOBILE_IFNAME);
             stackedLink.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0),
-                    NetworkUtils.numericToInetAddress("192.0.0.1"), TEST_XLAT_MOBILE_IFNAME));
+                    InetAddresses.parseNumericAddress("192.0.0.1"),
+                    TEST_XLAT_MOBILE_IFNAME, RTN_UNICAST));
 
             prop.addStackedLink(stackedLink);
         }
@@ -1210,12 +1214,12 @@ public class TetheringTest {
     @Test
     public void testMultiSimAware() throws Exception {
         final TetheringConfiguration initailConfig = mTethering.getTetheringConfiguration();
-        assertEquals(INVALID_SUBSCRIPTION_ID, initailConfig.subId);
+        assertEquals(INVALID_SUBSCRIPTION_ID, initailConfig.activeDataSubId);
 
         final int fakeSubId = 1234;
         mPhoneStateListener.onActiveDataSubscriptionIdChanged(fakeSubId);
         final TetheringConfiguration newConfig = mTethering.getTetheringConfiguration();
-        assertEquals(fakeSubId, newConfig.subId);
+        assertEquals(fakeSubId, newConfig.activeDataSubId);
     }
 
     private void workingWifiP2pGroupOwner(
