@@ -199,8 +199,7 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
             return;
         }
         if ((mWifiEntry.getSecurity() != WifiEntry.SECURITY_NONE)
-                && (mWifiEntry.getSecurity() != WifiEntry.SECURITY_OWE)
-                && (mWifiEntry.getSecurity() != WifiEntry.SECURITY_OWE_TRANSITION)) {
+                && (mWifiEntry.getSecurity() != WifiEntry.SECURITY_OWE)) {
             mFrictionSld.setState(STATE_SECURED);
         } else if (mWifiEntry.isMetered()) {
             mFrictionSld.setState(STATE_METERED);
