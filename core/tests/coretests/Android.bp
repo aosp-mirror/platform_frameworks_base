@@ -41,6 +41,7 @@ android_test {
         "truth-prebuilt",
         "print-test-util-lib",
         "testng",
+        "servicestests-utils"
     ],
 
     libs: [
