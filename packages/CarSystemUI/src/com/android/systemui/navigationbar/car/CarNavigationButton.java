@@ -48,13 +48,11 @@ public class CarNavigationButton extends LinearLayout {
     private static final String BUTTON_FILTER_DELIMITER = ";";
     private static final String EXTRA_BUTTON_CATEGORIES = "categories";
     private static final String EXTRA_BUTTON_PACKAGES = "packages";
-    private static final int UNSEEN_ICON_RESOURCE_ID = R.drawable.car_ic_notification_unseen;
-    private static final int UNSEEN_SELECTED_ICON_RESOURCE_ID =
-            R.drawable.car_ic_notification_selected_unseen;
 
     private Context mContext;
     private AlphaOptimizedImageButton mIcon;
     private AlphaOptimizedImageButton mMoreIcon;
+    private ImageView mUnseenIcon;
     private String mIntent;
     private String mLongIntent;
     private boolean mBroadcastIntent;
@@ -265,23 +263,22 @@ public class CarNavigationButton extends LinearLayout {
 
         mIcon = findViewById(R.id.car_nav_button_icon_image);
         mIcon.setScaleType(ImageView.ScaleType.CENTER);
-        mIcon.setClickable(false);
         // Always apply selected alpha if the button does not toggle alpha based on selection state.
         mIcon.setAlpha(mHighlightWhenSelected ? mUnselectedAlpha : mSelectedAlpha);
         mIcon.setImageResource(mIconResourceId);
 
         mMoreIcon = findViewById(R.id.car_nav_button_more_icon);
-        mMoreIcon.setClickable(false);
         mMoreIcon.setAlpha(mSelectedAlpha);
         mMoreIcon.setVisibility(GONE);
+
+        mUnseenIcon = findViewById(R.id.car_nav_button_unseen_icon);
+
+        mUnseenIcon.setVisibility(mHasUnseen ? VISIBLE : GONE);
     }
 
     private void updateImage() {
-        if (mHasUnseen) {
-            mIcon.setImageResource(mSelected ? UNSEEN_SELECTED_ICON_RESOURCE_ID
-                    : UNSEEN_ICON_RESOURCE_ID);
-        } else {
-            mIcon.setImageResource(mSelected ? mSelectedIconResourceId : mIconResourceId);
-        }
+        mIcon.setImageResource(mSelected ? mSelectedIconResourceId : mIconResourceId);
+        mUnseenIcon.setVisibility(mHasUnseen ? VISIBLE : GONE);
     }
+
 }

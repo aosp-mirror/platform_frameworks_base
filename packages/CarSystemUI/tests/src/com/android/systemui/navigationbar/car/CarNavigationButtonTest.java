@@ -31,6 +31,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.test.filters.SmallTest;
@@ -214,6 +215,22 @@ public class CarNavigationButtonTest extends SysuiTestCase {
                 return argument.getAction().equals(BROADCAST_ACTION_NAME);
             }
         }), any());
+    }
+
+    @Test
+    public void onSetUnseen_hasUnseen_showsUnseenIndicator() {
+        mDefaultButton.setUnseen(true);
+        ImageView hasUnseenIndicator = mDefaultButton.findViewById(R.id.car_nav_button_unseen_icon);
+
+        assertThat(hasUnseenIndicator.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void onSetUnseen_doesNotHaveUnseen_hidesUnseenIndicator() {
+        mDefaultButton.setUnseen(false);
+        ImageView hasUnseenIndicator = mDefaultButton.findViewById(R.id.car_nav_button_unseen_icon);
+
+        assertThat(hasUnseenIndicator.getVisibility()).isEqualTo(View.GONE);
     }
 
     private String getCurrentActivityName() {
