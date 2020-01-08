@@ -159,20 +159,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private void bindRow(NotificationEntry entry, PackageManager pmUser,
             StatusBarNotification sbn, ExpandableNotificationRow row,
             Runnable onDismissRunnable) {
-        row.setExpansionLogger(mExpansionLogger, entry.getSbn().getKey());
-        row.setBypassController(mKeyguardBypassController);
-        row.setStatusBarStateController(mStatusBarStateController);
-        row.setGroupManager(mGroupManager);
-        row.setHeadsUpManager(mHeadsUpManager);
-        row.setOnExpandClickListener(mPresenter);
-        row.setContentBinder(mRowContentBinder);
-        row.setInflationCallback(mInflationCallback);
-        if (mAllowLongPress) {
-            row.setLongPressListener(mGutsManager::openGuts);
-        }
-        mListContainer.bindRow(row);
-        getRemoteInputManager().bindRow(row);
-
         // Get the app name.
         // Note that Notification.Builder#bindHeaderAppName has similar logic
         // but since this field is used in the guts, it must be accurate.
@@ -190,14 +176,32 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         } catch (PackageManager.NameNotFoundException e) {
             // Do nothing
         }
-        row.setAppName(appname);
+
+        row.initialize(
+                appname,
+                sbn.getKey(),
+                mExpansionLogger,
+                mKeyguardBypassController,
+                mGroupManager,
+                mHeadsUpManager,
+                mRowContentBinder,
+                mPresenter);
+
+        // TODO: Either move these into ExpandableNotificationRow#initialize or out of row entirely
+        row.setStatusBarStateController(mStatusBarStateController);
+        row.setInflationCallback(mInflationCallback);
+        row.setAppOpsOnClickListener(mOnAppOpsClickListener);
+        if (mAllowLongPress) {
+            row.setLongPressListener(mGutsManager::openGuts);
+        }
+        mListContainer.bindRow(row);
+        getRemoteInputManager().bindRow(row);
+
         row.setOnDismissRunnable(onDismissRunnable);
         row.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (ENABLE_REMOTE_INPUT) {
             row.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
         }
-
-        row.setAppOpsOnClickListener(mOnAppOpsClickListener);
 
         mBindRowCallback.onBindRow(entry, pmUser, sbn, row);
     }
