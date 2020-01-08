@@ -16,7 +16,7 @@
 
 package android.graphics;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * <p>This class contains the list of alpha compositing and blending modes

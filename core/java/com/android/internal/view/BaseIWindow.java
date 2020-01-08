@@ -16,6 +16,7 @@
 
 package com.android.internal.view;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
@@ -33,8 +34,6 @@ import android.view.PointerIcon;
 import android.view.WindowInsets.Type.InsetsType;
 
 import com.android.internal.os.IResultReceiver;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.io.IOException;
 

@@ -16,7 +16,7 @@
 
 package com.android.internal.widget;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ImageView;

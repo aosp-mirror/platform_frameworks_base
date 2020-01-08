@@ -16,14 +16,14 @@
 
 package com.android.internal.view;
 
-import com.android.internal.R;
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Build;
+
+import com.android.internal.R;
 
 /**
  * Allows components to query for various configuration policy decisions

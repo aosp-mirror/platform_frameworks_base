@@ -17,7 +17,7 @@
 package com.android.internal.util;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 public class HexDump
 {
