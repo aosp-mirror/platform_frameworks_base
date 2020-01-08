@@ -390,10 +390,10 @@ public final class StatsManager {
     public byte[] getReports(long configKey) throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsd service = getIStatsdLocked();
+                IStatsManagerService service = getIStatsManagerServiceLocked();
                 return service.getData(configKey, mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsd when getting data");
+                Slog.e(TAG, "Failed to connect to statsmanager when getting data");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);
@@ -427,10 +427,10 @@ public final class StatsManager {
     public byte[] getStatsMetadata() throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsd service = getIStatsdLocked();
+                IStatsManagerService service = getIStatsManagerServiceLocked();
                 return service.getMetadata(mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsd when getting metadata");
+                Slog.e(TAG, "Failed to connect to statsmanager when getting metadata");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);
@@ -462,21 +462,19 @@ public final class StatsManager {
             throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsd service = getIStatsdLocked();
+                IStatsManagerService service = getIStatsManagerServiceLocked();
                 if (service == null) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Failed to find statsd when getting experiment IDs");
-                    }
-                    return new long[0];
+                    throw new StatsUnavailableException("Failed to find statsmanager when "
+                                                              + "getting experiment IDs");
                 }
                 return service.getRegisteredExperimentIds();
             } catch (RemoteException e) {
                 if (DEBUG) {
                     Slog.d(TAG,
-                            "Failed to connect to StatsCompanionService when getting "
+                            "Failed to connect to StatsManagerService when getting "
                                     + "registered experiment IDs");
                 }
-                return new long[0];
+                throw new StatsUnavailableException("could not connect", e);
             }
         }
     }

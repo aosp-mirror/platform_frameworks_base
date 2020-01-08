@@ -1135,12 +1135,11 @@ void StatsService::OnLogEvent(LogEvent* event) {
     }
 }
 
-Status StatsService::getData(int64_t key, const String16& packageName, vector<uint8_t>* output) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+Status StatsService::getData(int64_t key, const int32_t callingUid, vector<uint8_t>* output) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    VLOG("StatsService::getData with Pid %i, Uid %i", ipc->getCallingPid(), ipc->getCallingUid());
-    ConfigKey configKey(ipc->getCallingUid(), key);
+    VLOG("StatsService::getData with Uid %i", callingUid);
+    ConfigKey configKey(callingUid, key);
     // The dump latency does not matter here since we do not include the current bucket, we do not
     // need to pull any new data anyhow.
     mProcessor->onDumpReport(configKey, getElapsedRealtimeNs(), false /* include_current_bucket*/,
@@ -1148,12 +1147,9 @@ Status StatsService::getData(int64_t key, const String16& packageName, vector<ui
     return Status::ok();
 }
 
-Status StatsService::getMetadata(const String16& packageName, vector<uint8_t>* output) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+Status StatsService::getMetadata(vector<uint8_t>* output) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    VLOG("StatsService::getMetadata with Pid %i, Uid %i", ipc->getCallingPid(),
-         ipc->getCallingUid());
     StatsdStats::getInstance().dumpStats(output, false); // Don't reset the counters.
     return Status::ok();
 }
@@ -1477,17 +1473,7 @@ Status StatsService::sendWatchdogRollbackOccurredAtom(const int32_t rollbackType
 
 
 Status StatsService::getRegisteredExperimentIds(std::vector<int64_t>* experimentIdsOut) {
-    uid_t uid = IPCThreadState::self()->getCallingUid();
-
-    // Caller must be granted these permissions
-    if (!checkCallingPermission(String16(kPermissionDump))) {
-        return exception(binder::Status::EX_SECURITY,
-                         StringPrintf("UID %d lacks permission %s", uid, kPermissionDump));
-    }
-    if (!checkCallingPermission(String16(kPermissionUsage))) {
-        return exception(binder::Status::EX_SECURITY,
-                         StringPrintf("UID %d lacks permission %s", uid, kPermissionUsage));
-    }
+    ENFORCE_UID(AID_SYSTEM);
     // TODO: add verifier permission
 
     // Read the latest train info

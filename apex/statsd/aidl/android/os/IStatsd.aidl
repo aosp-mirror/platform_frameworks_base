@@ -89,14 +89,14 @@ interface IStatsd {
      *
      * Requires Manifest.permission.DUMP.
      */
-    byte[] getData(in long key, in String packageName);
+    byte[] getData(in long key, int callingUid);
 
     /**
      * Fetches metadata across statsd. Returns byte array representing wire-encoded proto.
      *
      * Requires Manifest.permission.DUMP.
      */
-    byte[] getMetadata(in String packageName);
+    byte[] getMetadata();
 
     /**
      * Sets a configuration with the specified config key and subscribes to updates for this

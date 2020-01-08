@@ -99,15 +99,14 @@ public:
      * Binder call for clients to request data for this configuration key.
      */
     virtual Status getData(int64_t key,
-                           const String16& packageName,
+                           const int32_t callingUid,
                            vector<uint8_t>* output) override;
 
 
     /**
      * Binder call for clients to get metadata across all configs in statsd.
      */
-    virtual Status getMetadata(const String16& packageName,
-                               vector<uint8_t>* output) override;
+    virtual Status getMetadata(vector<uint8_t>* output) override;
 
 
     /**

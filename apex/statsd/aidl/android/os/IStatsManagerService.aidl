@@ -85,4 +85,26 @@ interface IStatsManagerService {
      * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
      */
     void unsetBroadcastSubscriber(long configKey, long subscriberId, in String packageName);
+
+    /**
+     * Returns the most recently registered experiment IDs.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    long[] getRegisteredExperimentIds();
+
+    /**
+     * Fetches metadata across statsd. Returns byte array representing wire-encoded proto.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    byte[] getMetadata(in String packageName);
+
+    /**
+     * Fetches data for the specified configuration key. Returns a byte array representing proto
+     * wire-encoded of ConfigMetricsReportList.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    byte[] getData(in long key, in String packageName);
 }
