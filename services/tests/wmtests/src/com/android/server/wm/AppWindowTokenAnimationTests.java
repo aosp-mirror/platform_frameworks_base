@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -70,7 +71,8 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     public void clipAfterAnim_boundsLayerIsCreated() {
         mActivity.mNeedsAnimationBoundsLayer = true;
 
-        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
+        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
         verify(mTransaction).reparent(eq(mActivity.getSurfaceControl()),
                 eq(mActivity.mSurfaceAnimator.mLeash));
         verify(mTransaction).reparent(eq(mActivity.mSurfaceAnimator.mLeash),
@@ -82,7 +84,8 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
         mActivity.mNeedsAnimationBoundsLayer = true;
         mActivity.mNeedsZBoost = true;
 
-        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
+        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
         verify(mTransaction).setLayer(eq(mActivity.mAnimationBoundsLayer),
                 intThat(layer -> layer >= ActivityRecord.Z_BOOST_BASE));
     }
@@ -91,15 +94,18 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     @FlakyTest(bugId = 131005232)
     public void clipAfterAnim_boundsLayerIsDestroyed() {
         mActivity.mNeedsAnimationBoundsLayer = true;
-        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
+        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
         final SurfaceControl leash = mActivity.mSurfaceAnimator.mLeash;
         final SurfaceControl animationBoundsLayer = mActivity.mAnimationBoundsLayer;
         final ArgumentCaptor<SurfaceAnimator.OnAnimationFinishedCallback> callbackCaptor =
                 ArgumentCaptor.forClass(
                         SurfaceAnimator.OnAnimationFinishedCallback.class);
-        verify(mSpec).startAnimation(any(), any(), callbackCaptor.capture());
+        verify(mSpec).startAnimation(any(), any(), eq(ANIMATION_TYPE_APP_TRANSITION),
+                callbackCaptor.capture());
 
-        callbackCaptor.getValue().onAnimationFinished(mSpec);
+        callbackCaptor.getValue().onAnimationFinished(
+                ANIMATION_TYPE_APP_TRANSITION, mSpec);
         verify(mTransaction).remove(eq(leash));
         verify(mTransaction).remove(eq(animationBoundsLayer));
         assertThat(mActivity.mNeedsAnimationBoundsLayer).isFalse();
@@ -108,7 +114,8 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     @Test
     public void clipAfterAnimCancelled_boundsLayerIsDestroyed() {
         mActivity.mNeedsAnimationBoundsLayer = true;
-        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
+        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
         final SurfaceControl leash = mActivity.mSurfaceAnimator.mLeash;
         final SurfaceControl animationBoundsLayer = mActivity.mAnimationBoundsLayer;
 
@@ -123,7 +130,8 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     public void clipNoneAnim_boundsLayerIsNotCreated() {
         mActivity.mNeedsAnimationBoundsLayer = false;
 
-        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
+        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
         verify(mTransaction).reparent(eq(mActivity.getSurfaceControl()),
                 eq(mActivity.mSurfaceAnimator.mLeash));
         assertThat(mActivity.mAnimationBoundsLayer).isNull();

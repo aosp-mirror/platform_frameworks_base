@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyZeroInteractions;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 
 import static org.junit.Assert.assertFalse;
@@ -69,8 +70,10 @@ public class AnimatingActivityRegistryTest extends WindowTestsBase {
         final AnimatingActivityRegistry registry =
                 activity1.getStack().getAnimatingActivityRegistry();
 
-        activity1.startAnimation(activity1.getPendingTransaction(), mAdapter, false /* hidden */);
-        activity2.startAnimation(activity1.getPendingTransaction(), mAdapter, false /* hidden */);
+        activity1.startAnimation(activity1.getPendingTransaction(), mAdapter, false /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
+        activity2.startAnimation(activity1.getPendingTransaction(), mAdapter, false /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
         assertTrue(activity1.isAnimating(TRANSITION));
         assertTrue(activity2.isAnimating(TRANSITION));
 
@@ -91,8 +94,10 @@ public class AnimatingActivityRegistryTest extends WindowTestsBase {
         final AnimatingActivityRegistry registry =
                 window1.getStack().getAnimatingActivityRegistry();
 
-        window1.startAnimation(window1.getPendingTransaction(), mAdapter, false /* hidden */);
-        window2.startAnimation(window1.getPendingTransaction(), mAdapter, false /* hidden */);
+        window1.startAnimation(window1.getPendingTransaction(), mAdapter, false /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
+        window2.startAnimation(window1.getPendingTransaction(), mAdapter, false /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
         assertTrue(window1.isAnimating(TRANSITION));
         assertTrue(window2.isAnimating(TRANSITION));
 

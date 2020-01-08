@@ -24,6 +24,7 @@ import static com.android.server.wm.RotationAnimationSpecProto.END_LUMA;
 import static com.android.server.wm.RotationAnimationSpecProto.START_LUMA;
 import static com.android.server.wm.ScreenRotationAnimationProto.ANIMATION_RUNNING;
 import static com.android.server.wm.ScreenRotationAnimationProto.STARTED;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
@@ -48,6 +49,8 @@ import android.view.animation.Transformation;
 
 import com.android.internal.R;
 import com.android.server.protolog.common.ProtoLog;
+import com.android.server.wm.SurfaceAnimator.AnimationType;
+import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.RotationAnimationUtils;
 
 import java.io.PrintWriter;
@@ -670,33 +673,35 @@ class ScreenRotationAnimation {
          * Start an animation defined by animationSpec on a new {@link SurfaceAnimator}.
          *
          * @param animatable The animatable used for the animation.
-         * @param animationSpec                The spec of the animation.
-         * @param animationFinishedCallback    Callback passed to the {@link SurfaceAnimator} and
-         *                                    called when the animation finishes.
+         * @param animationSpec The spec of the animation.
+         * @param animationFinishedCallback Callback passed to the {@link SurfaceAnimator}
+         *                                    and called when the animation finishes.
          * @return The newly created {@link SurfaceAnimator} that as been started.
          */
         private SurfaceAnimator startAnimation(
                 SurfaceAnimator.Animatable animatable,
                 LocalAnimationAdapter.AnimationSpec animationSpec,
-                Runnable animationFinishedCallback) {
+                OnAnimationFinishedCallback animationFinishedCallback) {
             SurfaceAnimator animator = new SurfaceAnimator(
                     animatable, animationFinishedCallback, mService);
 
             LocalAnimationAdapter localAnimationAdapter = new LocalAnimationAdapter(
                     animationSpec, mService.mSurfaceAnimationRunner);
             animator.startAnimation(mDisplayContent.getPendingTransaction(),
-                    localAnimationAdapter, false);
+                    localAnimationAdapter, false, ANIMATION_TYPE_SCREEN_ROTATION);
             return animator;
         }
 
-        private void onAnimationEnd() {
+        private void onAnimationEnd(@AnimationType int type, AnimationAdapter anim) {
             synchronized (mService.mGlobalLock) {
                 if (isAnimating()) {
                     ProtoLog.v(WM_DEBUG_ORIENTATION,
-                            "ScreenRotation sill animating: mDisplayAnimator: %s\n"
-                                    + "mEnterBlackFrameAnimator: "
-                                    + "%s\nmRotateScreenAnimator: %s\n"
+                            "ScreenRotation still animating: type: %d\n"
+                                    + "mDisplayAnimator: %s\n"
+                                    + "mEnterBlackFrameAnimator: %s\n"
+                                    + "mRotateScreenAnimator: %s\n"
                                     + "mScreenshotRotationAnimator: %s",
+                            type,
                             mDisplayAnimator != null
                                     ? mDisplayAnimator.isAnimating() : null,
                             mEnterBlackFrameAnimator != null

@@ -34,6 +34,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -60,6 +61,8 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -829,7 +832,8 @@ public class WindowContainerTests extends WindowTestsBase {
         wc.getDisplayContent().mAppTransition.overridePendingAppTransitionRemote(adapter);
         spyOn(wc);
         doReturn(true).when(wc).okToAnimate();
-        final Runnable onAnimationFinishedCallback = mock(Runnable.class);
+        final OnAnimationFinishedCallback onAnimationFinishedCallback =
+                mock(OnAnimationFinishedCallback.class);
 
         // Make sure animating state is as expected after applied animation.
         assertTrue(wc.applyAnimation(null, TRANSIT_TASK_OPEN, true, false,
@@ -837,16 +841,18 @@ public class WindowContainerTests extends WindowTestsBase {
         assertEquals(wc.getTopMostActivity(), act);
         assertTrue(wc.isAnimating());
         assertTrue(act.isAnimating(PARENTS));
-        verify(onAnimationFinishedCallback, times(0)).run();
+        verify(onAnimationFinishedCallback, times(0)).onAnimationFinished(
+                eq(ANIMATION_TYPE_APP_TRANSITION), any());
 
         // Make sure animation finish callback will be received and reset animating state after
         // animation finish.
         wc.getDisplayContent().mAppTransition.goodToGo(TRANSIT_TASK_OPEN, act,
                 mDisplayContent.mOpeningApps);
-        verify(wc).onAnimationFinished();
+        verify(wc).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION), any());
         assertFalse(wc.isAnimating());
         assertFalse(act.isAnimating(PARENTS));
-        verify(onAnimationFinishedCallback, times(1)).run();
+        verify(onAnimationFinishedCallback, times(1)).onAnimationFinished(
+                eq(ANIMATION_TYPE_APP_TRANSITION), any());
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */

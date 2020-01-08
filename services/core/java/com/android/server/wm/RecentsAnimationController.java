@@ -30,6 +30,7 @@ import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 import static com.android.server.wm.BoundsAnimationController.FADE_IN;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import android.annotation.IntDef;
@@ -61,6 +62,7 @@ import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.protolog.common.ProtoLog;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.InsetUtils;
 
@@ -432,7 +434,8 @@ public class RecentsAnimationController implements DeathRecipient {
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "addAnimation(%s)", task.getName());
         final TaskAnimationAdapter taskAdapter = new TaskAnimationAdapter(task,
                 isRecentTaskInvisible);
-        task.startAnimation(task.getPendingTransaction(), taskAdapter, false /* hidden */);
+        task.startAnimation(task.getPendingTransaction(), taskAdapter, false /* hidden */,
+                ANIMATION_TYPE_RECENTS);
         task.commitPendingTransaction();
         mPendingAnimations.add(taskAdapter);
         return taskAdapter;
@@ -443,14 +446,16 @@ public class RecentsAnimationController implements DeathRecipient {
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                 "removeAnimation(%d)", taskAdapter.mTask.mTaskId);
         taskAdapter.mTask.setCanAffectSystemUiFlags(true);
-        taskAdapter.mCapturedFinishCallback.onAnimationFinished(taskAdapter);
+        taskAdapter.mCapturedFinishCallback.onAnimationFinished(taskAdapter.mLastAnimationType,
+                taskAdapter);
         mPendingAnimations.remove(taskAdapter);
     }
 
     @VisibleForTesting
     void removeWallpaperAnimation(WallpaperAnimationAdapter wallpaperAdapter) {
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "removeWallpaperAnimation()");
-        wallpaperAdapter.getLeashFinishedCallback().onAnimationFinished(wallpaperAdapter);
+        wallpaperAdapter.getLeashFinishedCallback().onAnimationFinished(
+                wallpaperAdapter.getLastAnimationType(), wallpaperAdapter);
         mPendingWallpaperAnimations.remove(wallpaperAdapter);
     }
 
@@ -638,7 +643,7 @@ public class RecentsAnimationController implements DeathRecipient {
                         taskSnapshot.getColorSpace(), false /* containsSecureLayers */));
         mRecentScreenshotAnimator = new SurfaceAnimator(
                 animatable,
-                () -> {
+                (type, anim) -> {
                     ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "mRecentScreenshotAnimator finish");
                     mCallbacks.onAnimationFinished(reorderMode, false /* sendUserLeaveHint */);
                 }, mService);
@@ -827,6 +832,7 @@ public class RecentsAnimationController implements DeathRecipient {
         private final Task mTask;
         private SurfaceControl mCapturedLeash;
         private OnAnimationFinishedCallback mCapturedFinishCallback;
+        private @AnimationType int mLastAnimationType;
         private final boolean mIsRecentTaskInvisible;
         private RemoteAnimationTarget mTarget;
         private final Point mPosition = new Point();
@@ -868,7 +874,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
         @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
-                OnAnimationFinishedCallback finishCallback) {
+                @AnimationType int type, OnAnimationFinishedCallback finishCallback) {
             // Restore z-layering, position and stack crop until client has a chance to modify it.
             t.setLayer(animationLeash, mTask.getPrefixOrderIndex());
             t.setPosition(animationLeash, mPosition.x, mPosition.y);
@@ -877,6 +883,7 @@ public class RecentsAnimationController implements DeathRecipient {
             t.setWindowCrop(animationLeash, mTmpRect);
             mCapturedLeash = animationLeash;
             mCapturedFinishCallback = finishCallback;
+            mLastAnimationType = type;
         }
 
         @Override

@@ -22,11 +22,13 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_DIMMER;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
@@ -36,6 +38,9 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+
+import com.android.server.wm.SurfaceAnimator.AnimationType;
+import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -114,11 +119,11 @@ public class DimmerTests extends WindowTestsBase {
     private static class SurfaceAnimatorStarterImpl implements Dimmer.SurfaceAnimatorStarter {
         @Override
         public void startAnimation(SurfaceAnimator surfaceAnimator, SurfaceControl.Transaction t,
-                AnimationAdapter anim, boolean hidden,
-                @Nullable Runnable animationFinishedCallback) {
-            surfaceAnimator.mStaticAnimationFinishedCallback.run();
+                AnimationAdapter anim, boolean hidden, @AnimationType int type,
+                @Nullable OnAnimationFinishedCallback animationFinishedCallback) {
+            surfaceAnimator.mStaticAnimationFinishedCallback.onAnimationFinished(type, anim);
             if (animationFinishedCallback != null) {
-                animationFinishedCallback.run();
+                animationFinishedCallback.onAnimationFinished(type, anim);
             }
         }
     }
@@ -224,7 +229,7 @@ public class DimmerTests extends WindowTestsBase {
         mDimmer.updateDims(mTransaction, new Rect());
         verify(mSurfaceAnimatorStarter).startAnimation(any(SurfaceAnimator.class), any(
                 SurfaceControl.Transaction.class), any(AnimationAdapter.class), anyBoolean(),
-                isNull());
+                eq(ANIMATION_TYPE_DIMMER), isNull());
         verify(mHost.getPendingTransaction()).remove(dimLayer);
     }
 
@@ -282,7 +287,7 @@ public class DimmerTests extends WindowTestsBase {
         mDimmer.updateDims(mTransaction, new Rect());
         verify(mSurfaceAnimatorStarter, never()).startAnimation(any(SurfaceAnimator.class), any(
                 SurfaceControl.Transaction.class), any(AnimationAdapter.class), anyBoolean(),
-                isNull());
+                eq(ANIMATION_TYPE_DIMMER), isNull());
         verify(mTransaction).remove(dimLayer);
     }
 

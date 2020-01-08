@@ -1183,12 +1183,6 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
-    "292555239": {
-      "message": "ScreenRotation sill animating: mDisplayAnimator: %s\nmEnterBlackFrameAnimator: %s\nmRotateScreenAnimator: %s\nmScreenshotRotationAnimator: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
-    },
     "292904800": {
       "message": "Deferring rotation, animation in progress.",
       "level": "VERBOSE",
@@ -1698,6 +1692,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1346895820": {
+      "message": "ScreenRotation still animating: type: %d\nmDisplayAnimator: %s\nmEnterBlackFrameAnimator: %s\nmRotateScreenAnimator: %s\nmScreenshotRotationAnimator: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
     },
     "1358462645": {
       "message": "Looking for focus: %s, flags=%d, canReceive=%b",

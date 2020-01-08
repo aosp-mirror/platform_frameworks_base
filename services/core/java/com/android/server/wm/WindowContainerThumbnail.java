@@ -20,6 +20,7 @@ import static android.view.SurfaceControl.METADATA_OWNER_UID;
 import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
 
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowContainerThumbnailProto.HEIGHT;
 import static com.android.server.wm.WindowContainerThumbnailProto.SURFACE_ANIMATOR;
 import static com.android.server.wm.WindowContainerThumbnailProto.WIDTH;
@@ -40,6 +41,7 @@ import android.view.animation.Animation;
 
 import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.Animatable;
+import com.android.server.wm.SurfaceAnimator.AnimationType;
 
 import java.util.function.Supplier;
 
@@ -85,7 +87,7 @@ class WindowContainerThumbnail implements Animatable {
             // We can't use a delegating constructor since we need to
             // reference this::onAnimationFinished
             mSurfaceAnimator =
-                new SurfaceAnimator(this, null /* animationFinishedCallback */,
+                new SurfaceAnimator(this, this::onAnimationFinished /* animationFinishedCallback */,
                         container.mWmService);
         }
         mWidth = thumbnailHeader.getWidth();
@@ -130,14 +132,19 @@ class WindowContainerThumbnail implements Animatable {
                 new WindowAnimationSpec(anim, position,
                         mWindowContainer.getDisplayContent().mAppTransition.canSkipFirstFrame(),
                         mWindowContainer.getDisplayContent().getWindowCornerRadius()),
-                mWindowContainer.mWmService.mSurfaceAnimationRunner), false /* hidden */);
+                mWindowContainer.mWmService.mSurfaceAnimationRunner), false /* hidden */,
+                ANIMATION_TYPE_RECENTS, null /* animationFinishedCallback */);
     }
 
     /**
      * Start animation with existing adapter.
      */
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden) {
-        mSurfaceAnimator.startAnimation(t, anim, hidden);
+        mSurfaceAnimator.startAnimation(t, anim, hidden, ANIMATION_TYPE_RECENTS,
+                null /* animationFinishedCallback */);
+    }
+
+    private void onAnimationFinished(@AnimationType int type, AnimationAdapter anim) {
     }
 
     void setShowing(Transaction pendingTransaction, boolean show) {
