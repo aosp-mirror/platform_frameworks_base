@@ -44,5 +44,6 @@ public abstract class UpdateEngineCallback {
      * unsuccessfully. The value of {@code errorCode} will be one of the
      * values from {@link UpdateEngine.ErrorCodeConstants}.
      */
-    public abstract void onPayloadApplicationComplete(int errorCode);
+    public abstract void onPayloadApplicationComplete(
+            @UpdateEngine.ErrorCode int errorCode);
 }
