@@ -299,6 +299,14 @@ public class NotifCollection {
             if (!isLifetimeExtended(entry)) {
                 Ranking ranking = requireRanking(rankingMap, entry.getKey());
                 entry.setRanking(ranking);
+
+                // TODO: (b/145659174) update the sbn's overrideGroupKey in
+                //  NotificationEntry.setRanking instead of here once we fully migrate to the
+                //  NewNotifPipeline
+                final String newOverrideGroupKey = ranking.getOverrideGroupKey();
+                if (!Objects.equals(entry.getSbn().getOverrideGroupKey(), newOverrideGroupKey)) {
+                    entry.getSbn().setOverrideGroupKey(newOverrideGroupKey);
+                }
             }
         }
     }
