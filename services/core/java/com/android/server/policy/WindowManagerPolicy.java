@@ -866,6 +866,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         }
     }
 
+    default int getMaxWindowLayer() {
+        return 35;
+    }
+
     /**
      * Return how to Z-order sub-windows in relation to the window they are attached to.
      * Return positive to have them ordered in front, negative for behind.

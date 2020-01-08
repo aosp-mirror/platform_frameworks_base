@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-
 import android.content.res.Resources;
 import android.text.TextUtils;
 
@@ -43,7 +41,7 @@ public abstract class DisplayAreaPolicy {
     /**
      * The Tasks container. Tasks etc. are automatically added to this container.
      */
-    protected final TaskContainers mTaskContainers;
+    protected final DisplayArea<? extends ActivityStack> mTaskContainers;
 
     /**
      * Construct a new {@link DisplayAreaPolicy}
@@ -58,7 +56,8 @@ public abstract class DisplayAreaPolicy {
      */
     protected DisplayAreaPolicy(WindowManagerService wmService,
             DisplayContent content, DisplayArea.Root root,
-            DisplayArea<? extends WindowContainer> imeContainer, TaskContainers taskContainers) {
+            DisplayArea<? extends WindowContainer> imeContainer,
+            DisplayArea<? extends ActivityStack> taskContainers) {
         mWmService = wmService;
         mContent = content;
         mRoot = root;
@@ -83,67 +82,15 @@ public abstract class DisplayAreaPolicy {
      */
     public abstract void addWindow(WindowToken token);
 
-    /**
-     * Default policy that has no special features.
-     */
-    public static class Default extends DisplayAreaPolicy {
-
-        public Default(WindowManagerService wmService, DisplayContent content,
-                DisplayArea.Root root,
+    /** Provider for platform-default display area policy. */
+    static final class DefaultProvider implements DisplayAreaPolicy.Provider {
+        @Override
+        public DisplayAreaPolicy instantiate(WindowManagerService wmService,
+                DisplayContent content, DisplayArea.Root root,
                 DisplayArea<? extends WindowContainer> imeContainer,
                 TaskContainers taskContainers) {
-            super(wmService, content, root, imeContainer, taskContainers);
-        }
-
-        private final DisplayArea.Tokens mBelow = new DisplayArea.Tokens(mWmService,
-                DisplayArea.Type.BELOW_TASKS, "BelowTasks");
-        private final DisplayArea<DisplayArea> mAbove = new DisplayArea<>(mWmService,
-                DisplayArea.Type.ABOVE_TASKS, "AboveTasks");
-        private final DisplayArea.Tokens mAboveBelowIme = new DisplayArea.Tokens(mWmService,
-                DisplayArea.Type.ABOVE_TASKS, "AboveTasksBelowIme");
-        private final DisplayArea.Tokens mAboveAboveIme = new DisplayArea.Tokens(mWmService,
-                DisplayArea.Type.ABOVE_TASKS, "AboveTasksAboveIme");
-
-        @Override
-        public void attachDisplayAreas() {
-            mRoot.addChild(mBelow, 0);
-            mRoot.addChild(mTaskContainers, 1);
-            mRoot.addChild(mAbove, 2);
-
-            mAbove.addChild(mAboveBelowIme, 0);
-            mAbove.addChild(mImeContainer, 1);
-            mAbove.addChild(mAboveAboveIme, 2);
-        }
-
-        @Override
-        public void addWindow(WindowToken token) {
-            switch (DisplayArea.Type.typeOf(token)) {
-                case ABOVE_TASKS:
-                    if (token.getWindowLayerFromType()
-                            < mWmService.mPolicy.getWindowLayerFromTypeLw(TYPE_INPUT_METHOD)) {
-                        mAboveBelowIme.addChild(token);
-                    } else {
-                        mAboveAboveIme.addChild(token);
-                    }
-                    break;
-                case BELOW_TASKS:
-                    mBelow.addChild(token);
-                    break;
-                default:
-                    throw new IllegalArgumentException("don't know how to sort " + token);
-            }
-        }
-
-        /** Provider for {@link DisplayAreaPolicy.Default platform-default display area policy}. */
-        static class Provider implements DisplayAreaPolicy.Provider {
-            @Override
-            public DisplayAreaPolicy instantiate(WindowManagerService wmService,
-                    DisplayContent content, DisplayArea.Root root,
-                    DisplayArea<? extends WindowContainer> imeContainer,
-                    TaskContainers taskContainers) {
-                return new DisplayAreaPolicy.Default(wmService, content, root, imeContainer,
-                        taskContainers);
-            }
+            return new DisplayAreaPolicyBuilder()
+                    .build(wmService, content, root, imeContainer, taskContainers);
         }
     }
 
@@ -172,7 +119,7 @@ public abstract class DisplayAreaPolicy {
             String name = res.getString(
                     com.android.internal.R.string.config_deviceSpecificDisplayAreaPolicyProvider);
             if (TextUtils.isEmpty(name)) {
-                return new DisplayAreaPolicy.Default.Provider();
+                return new DisplayAreaPolicy.DefaultProvider();
             }
             try {
                 return (Provider) Class.forName(name).newInstance();

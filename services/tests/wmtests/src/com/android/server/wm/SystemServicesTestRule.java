@@ -56,6 +56,7 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.StrictMode;
 import android.os.UserHandle;
+import android.util.Log;
 import android.view.InputChannel;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -120,11 +121,22 @@ public class SystemServicesTestRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
+                Throwable throwable = null;
                 try {
                     runWithDexmakerShareClassLoader(SystemServicesTestRule.this::setUp);
                     base.evaluate();
+                } catch (Throwable t) {
+                    throwable = t;
                 } finally {
-                    tearDown();
+                    try {
+                        tearDown();
+                    } catch (Throwable t) {
+                        if (throwable != null) {
+                            Log.e("SystemServicesTestRule", "Suppressed: ", throwable);
+                            t.addSuppressed(throwable);
+                        }
+                        throw t;
+                    }
                 }
             }
         };

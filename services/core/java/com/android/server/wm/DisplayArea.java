@@ -102,6 +102,11 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     @Override
+    public String toString() {
+        return mName + "@" + System.identityHashCode(this);
+    }
+
+    @Override
     public final void dumpDebug(ProtoOutputStream proto, long fieldId, int logLevel) {
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
