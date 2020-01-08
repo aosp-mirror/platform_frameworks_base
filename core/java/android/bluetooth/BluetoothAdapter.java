@@ -2670,6 +2670,9 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.PAN) {
             BluetoothPan pan = new BluetoothPan(context, listener);
             return true;
+        } else if (profile == BluetoothProfile.PBAP) {
+            BluetoothPbap pbap = new BluetoothPbap(context, listener);
+            return true;
         } else if (profile == BluetoothProfile.HEALTH) {
             Log.e(TAG, "getProfileProxy(): BluetoothHealth is deprecated");
             return false;
@@ -2741,6 +2744,10 @@ public final class BluetoothAdapter {
             case BluetoothProfile.PAN:
                 BluetoothPan pan = (BluetoothPan) proxy;
                 pan.close();
+                break;
+            case BluetoothProfile.PBAP:
+                BluetoothPbap pbap = (BluetoothPbap) proxy;
+                pbap.close();
                 break;
             case BluetoothProfile.GATT:
                 BluetoothGatt gatt = (BluetoothGatt) proxy;
