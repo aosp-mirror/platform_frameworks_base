@@ -292,6 +292,12 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
     }
 
     @Override
+    public boolean supportsOfflineProcessing(Surface surface) {
+        throw new UnsupportedOperationException("Constrained high speed session doesn't support" +
+                " offline mode");
+    }
+
+    @Override
     public void closeWithoutDraining() {
         throw new UnsupportedOperationException("Constrained high speed session doesn't support"
                 + " this method");

@@ -886,12 +886,14 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @param offlineSurfaces Client-specified collection of input/output camera registered surfaces
      *                        that need to be switched to offline mode along with their pending
      *                        capture requests. Do note that not all camera registered
-     *                        surfaces can be switched to offline mode.
-     *                        Shared surfaces {@link OutputConfiguration#enableSurfaceSharing}
-     *                        and surfaces as part of a surface group do not support offline
-     *                        switches.
+     *                        surfaces can be switched to offline mode. Offline processing
+     *                        support for individual surfaces can be queried using
+     *                        {@link #supportsOfflineProcessing}. Additionally offline mode
+     *                        switches are not available for shared surfaces
+     *                        {@link OutputConfiguration#enableSurfaceSharing} and surfaces
+     *                        as part of a surface group.
      *
-     * @param executor the executor which will be used for invoking the offline callback listener.
+     * @param executor The executor which will be used for invoking the offline callback listener.
      *
      * @param listener The callback object to notify for offline session events.
      *
@@ -912,11 +914,37 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * @see CameraOfflineSession
      * @see CameraOfflineSessionCallback
+     * @see #supportsOfflineProcessing
      */
     @Nullable
     public CameraOfflineSession switchToOffline(@NonNull Collection<Surface> offlineSurfaces,
             @NonNull Executor executor, @NonNull CameraOfflineSessionCallback listener)
             throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
+
+    /**
+     * <p>Query whether a given Surface is able to support offline mode. </p>
+     *
+     * <p>Surfaces that support offline mode can be passed as arguments to {@link #switchToOffline}.
+     * </p>
+     *
+     * @param surface An input/output surface that was used to create this session or the result of
+     *                {@link #getInputSurface}.
+     *
+     * @return {@code true} if the surface can support offline mode and can be passed as argument to
+     *         {@link #switchToOffline}. {@code false} otherwise.
+     *
+     * @throws IllegalArgumentException if an attempt was made to pass a {@link Surface} that was
+     *                                  not registered with this capture session.
+     * @throws UnsupportedOperationException if an attempt was made to call this method using
+     *                                       unsupported camera capture session like
+     *                                       {@link CameraConstrainedHighSpeedCaptureSession} or
+     *                                       {@link CameraOfflineSession}.
+     *
+     * @see #switchToOffline
+     */
+    public boolean supportsOfflineProcessing(@NonNull Surface surface) {
         throw new UnsupportedOperationException("Subclasses must override this method");
     }
 

@@ -103,6 +103,9 @@ public class CameraDeviceImpl extends CameraDevice
     private final SparseArray<OutputConfiguration> mConfiguredOutputs =
             new SparseArray<>();
 
+    // Cache all stream IDs capable of supporting offline mode.
+    private final HashSet<Integer> mOfflineSupport = new HashSet<>();
+
     private final String mCameraId;
     private final CameraCharacteristics mCharacteristics;
     private final int mTotalPartialCount;
@@ -473,10 +476,19 @@ public class CameraDeviceImpl extends CameraDevice
                     }
                 }
 
+                int offlineStreamIds[];
                 if (sessionParams != null) {
-                    mRemoteDevice.endConfigure(operatingMode, sessionParams.getNativeCopy());
+                    offlineStreamIds = mRemoteDevice.endConfigure(operatingMode,
+                            sessionParams.getNativeCopy());
                 } else {
-                    mRemoteDevice.endConfigure(operatingMode, null);
+                    offlineStreamIds = mRemoteDevice.endConfigure(operatingMode, null);
+                }
+
+                mOfflineSupport.clear();
+                if ((offlineStreamIds != null) && (offlineStreamIds.length > 0)) {
+                    for (int offlineStreamId : offlineStreamIds) {
+                        mOfflineSupport.add(offlineStreamId);
+                    }
                 }
 
                 success = true;
@@ -942,6 +954,25 @@ public class CameraDeviceImpl extends CameraDevice
         });
 
         return mOfflineSessionImpl;
+    }
+
+    public boolean supportsOfflineProcessing(Surface surface) {
+        if (surface == null) throw new IllegalArgumentException("Surface is null");
+
+        synchronized(mInterfaceLock) {
+            int streamId = -1;
+            for (int i = 0; i < mConfiguredOutputs.size(); i++) {
+                if (surface == mConfiguredOutputs.valueAt(i).getSurface()) {
+                    streamId = mConfiguredOutputs.keyAt(i);
+                    break;
+                }
+            }
+            if (streamId == -1) {
+                throw new IllegalArgumentException("Surface is not part of this session");
+            }
+
+            return mOfflineSupport.contains(streamId);
+        }
     }
 
     public void tearDown(Surface surface) throws CameraAccessException {

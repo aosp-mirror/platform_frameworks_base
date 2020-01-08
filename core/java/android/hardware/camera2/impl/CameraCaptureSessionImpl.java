@@ -469,6 +469,15 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
         return mDeviceImpl.switchToOffline(offlineOutputs, executor, listener);
     }
 
+
+    @Override
+    public boolean supportsOfflineProcessing(Surface surface) {
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
+        }
+        return mDeviceImpl.supportsOfflineProcessing(surface);
+    }
+
     @Override
     public boolean isReprocessable() {
         return mInput != null;

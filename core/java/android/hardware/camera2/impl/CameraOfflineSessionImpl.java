@@ -829,6 +829,11 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
     }
 
     @Override
+    public boolean supportsOfflineProcessing(Surface surface) {
+        throw new UnsupportedOperationException("Operation not supported in offline mode");
+    }
+
+    @Override
     public void close() {
         disconnect();
     }

@@ -110,10 +110,10 @@ public class ICameraDeviceUserWrapper {
         }
     }
 
-    public void endConfigure(int operatingMode, CameraMetadataNative sessionParams)
+    public int[] endConfigure(int operatingMode, CameraMetadataNative sessionParams)
            throws CameraAccessException {
         try {
-            mRemoteDevice.endConfigure(operatingMode, (sessionParams == null) ?
+            return mRemoteDevice.endConfigure(operatingMode, (sessionParams == null) ?
                     new CameraMetadataNative() : sessionParams);
         } catch (Throwable t) {
             CameraManager.throwAsPublicException(t);
