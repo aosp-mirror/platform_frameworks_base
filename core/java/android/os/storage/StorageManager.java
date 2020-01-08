@@ -829,7 +829,14 @@ public class StorageManager {
      */
     public @NonNull UUID getUuidForPath(@NonNull File path) throws IOException {
         Preconditions.checkNotNull(path);
-        final String pathString = path.getCanonicalPath();
+        String pathString = path.getCanonicalPath();
+        if (path.getPath().startsWith("/sdcard")) {
+            // On FUSE enabled devices, realpath(2) /sdcard is /mnt/user/<userid>/emulated/<userid>
+            // as opposed to /storage/emulated/<userid>.
+            // And vol.path below expects to match with a path starting with /storage
+            pathString = pathString.replaceFirst("^/mnt/user/[0-9]+/", "/storage/");
+        }
+
         if (FileUtils.contains(Environment.getDataDirectory().getAbsolutePath(), pathString)) {
             return UUID_DEFAULT;
         }
