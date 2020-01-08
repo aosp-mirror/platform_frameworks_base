@@ -25,6 +25,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.integrity.model.RuleMetadata;
 import com.android.server.integrity.parser.RuleBinaryParser;
+import com.android.server.integrity.parser.RuleIndexRange;
 import com.android.server.integrity.parser.RuleIndexingController;
 import com.android.server.integrity.parser.RuleMetadataParser;
 import com.android.server.integrity.parser.RuleParseException;
@@ -152,7 +153,7 @@ public class IntegrityFileManager {
             throws IOException, RuleParseException {
         synchronized (RULES_LOCK) {
             // Try to identify indexes from the index file.
-            List<List<Integer>> ruleReadingIndexes =
+            List<RuleIndexRange> ruleReadingIndexes =
                     mRuleIndexingController.identifyRulesToEvaluate(appInstallMetadata);
 
             // Read the rules based on the index information.
