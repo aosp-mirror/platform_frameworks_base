@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.car;
 
-import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
 import android.animation.Animator;
@@ -107,6 +106,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.init.NewNotifPipeline;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -268,7 +268,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             HeadsUpManagerPhone headsUpManagerPhone,
             DynamicPrivacyController dynamicPrivacyController,
             BypassHeadsUpNotifier bypassHeadsUpNotifier,
-            @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowNotificationLongPress,
             Lazy<NewNotifPipeline> newNotifPipeline,
             FalsingManager falsingManager,
             BroadcastDispatcher broadcastDispatcher,
@@ -334,6 +333,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             KeyguardDismissUtil keyguardDismissUtil,
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
+            NotificationRowBinderImpl notificationRowBinder,
             DismissCallbackRegistry dismissCallbackRegistry,
             /* Car Settings injected components. */
             CarServiceProvider carServiceProvider,
@@ -355,7 +355,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 headsUpManagerPhone,
                 dynamicPrivacyController,
                 bypassHeadsUpNotifier,
-                allowNotificationLongPress,
                 newNotifPipeline,
                 falsingManager,
                 broadcastDispatcher,
@@ -421,6 +420,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 keyguardDismissUtil,
                 extensionController,
                 userInfoControllerImpl,
+                notificationRowBinder,
                 dismissCallbackRegistry);
         mScrimController = scrimController;
         mLockscreenLockIconController = lockscreenLockIconController;
