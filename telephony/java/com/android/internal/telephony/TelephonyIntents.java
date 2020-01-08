@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.content.Intent;
 import android.telephony.SubscriptionManager;
+import android.telephony.ims.ImsManager;
 
 /**
  * The intents that the telephony services broadcast.
@@ -223,9 +224,11 @@ public class TelephonyIntents {
      * <p class="note">
      * This is for the OEM applications to understand about possible provisioning issues.
      * Used in OMA-DM applications.
+     * @deprecated Use {@link ImsManager#ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION} instead.
      */
-    public static final String ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION
-            = "com.android.internal.intent.action.ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION";
+    @Deprecated
+    public static final String ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION =
+            ImsManager.ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION;
 
     /**
      * Broadcast Action: A "secret code" has been entered in the dialer. Secret codes are

@@ -23,6 +23,7 @@ import android.content.Context;
 import android.os.PersistableBundle;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsConfigCallback;
 import android.util.Log;
@@ -228,7 +229,8 @@ public class ImsConfigImplBase {
      * The configuration requested resulted in an unknown result. This may happen if the
      * IMS configurations are unavailable.
      */
-    public static final int CONFIG_RESULT_UNKNOWN = -1;
+    public static final int CONFIG_RESULT_UNKNOWN = ProvisioningManager.PROVISIONING_RESULT_UNKNOWN;
+
     /**
      * Setting the configuration value completed.
      */
