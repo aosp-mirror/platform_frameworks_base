@@ -105,6 +105,9 @@ public final class AccessibilityManager {
     public static final int STATE_FLAG_DISPATCH_DOUBLE_TAP = 0x00000008;
 
     /** @hide */
+    public static final int STATE_FLAG_REQUEST_MULTI_FINGER_GESTURES = 0x00000010;
+
+    /** @hide */
     public static final int DALTONIZER_DISABLED = -1;
 
     /** @hide */

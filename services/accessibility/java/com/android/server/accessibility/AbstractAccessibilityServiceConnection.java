@@ -136,6 +136,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     private boolean mServiceHandlesDoubleTap;
 
+    private boolean mRequestMultiFingerGestures;
+
     boolean mRequestFilterKeyEvents;
 
     boolean mRetrieveInteractiveWindows;
@@ -302,6 +304,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
         mServiceHandlesDoubleTap = (info.flags
                 & AccessibilityServiceInfo.FLAG_SERVICE_HANDLES_DOUBLE_TAP) != 0;
+        mRequestMultiFingerGestures = (info.flags
+                & AccessibilityServiceInfo.FLAG_REQUEST_MULTI_FINGER_GESTURES) != 0;
         mRequestFilterKeyEvents = (info.flags
                 & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS) != 0;
         mRetrieveInteractiveWindows = (info.flags
@@ -1696,5 +1700,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     public boolean isServiceHandlesDoubleTapEnabled() {
         return mServiceHandlesDoubleTap;
+    }
+
+    public boolean isMultiFingerGesturesEnabled() {
+        return mRequestMultiFingerGestures;
     }
 }

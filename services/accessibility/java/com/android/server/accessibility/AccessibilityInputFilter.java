@@ -106,13 +106,21 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      */
     static final int FLAG_SERVICE_HANDLES_DOUBLE_TAP = 0x00000080;
 
+/**
+     * Flag for enabling multi-finger gestures.
+     *
+     * @see #setUserAndEnabledFeatures(int, int)
+     */
+    static final int FLAG_REQUEST_MULTI_FINGER_GESTURES = 0x00000100;
+
     static final int FEATURES_AFFECTING_MOTION_EVENTS =
             FLAG_FEATURE_INJECT_MOTION_EVENTS
                     | FLAG_FEATURE_AUTOCLICK
                     | FLAG_FEATURE_TOUCH_EXPLORATION
                     | FLAG_FEATURE_SCREEN_MAGNIFIER
                     | FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER
-                    | FLAG_SERVICE_HANDLES_DOUBLE_TAP;
+                    | FLAG_SERVICE_HANDLES_DOUBLE_TAP
+                    | FLAG_REQUEST_MULTI_FINGER_GESTURES;
 
     private final Context mContext;
 
@@ -404,6 +412,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                 TouchExplorer explorer = new TouchExplorer(displayContext, mAms);
                 if ((mEnabledFeatures & FLAG_SERVICE_HANDLES_DOUBLE_TAP) != 0) {
                     explorer.setServiceHandlesDoubleTap(true);
+                }
+                if ((mEnabledFeatures & FLAG_REQUEST_MULTI_FINGER_GESTURES) != 0) {
+                    explorer.setMultiFingerGesturesEnabled(true);
                 }
                 addFirstEventHandler(displayId, explorer);
                 mTouchExplorer.put(displayId, explorer);

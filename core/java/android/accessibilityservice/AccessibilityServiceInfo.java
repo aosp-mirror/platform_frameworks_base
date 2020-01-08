@@ -351,6 +351,16 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int FLAG_SERVICE_HANDLES_DOUBLE_TAP = 0x0000800;
 
+    /**
+     * This flag requests that when when {@link #FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is enabled,
+     * multi-finger gestures are also enabled. As a consequence, two-finger bypass gestures will be
+     * disabled. If {@link #FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is disabled this flag has no
+     * effect.
+     *
+     * @see #FLAG_REQUEST_TOUCH_EXPLORATION_MODE
+     */
+    public static final int FLAG_REQUEST_MULTI_FINGER_GESTURES = 0x0001000;
+
     /** {@hide} */
     public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
 
@@ -1233,6 +1243,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_REQUEST_TOUCH_EXPLORATION_MODE";
             case FLAG_SERVICE_HANDLES_DOUBLE_TAP:
                 return "FLAG_SERVICE_HANDLES_DOUBLE_TAP";
+            case FLAG_REQUEST_MULTI_FINGER_GESTURES:
+                return "FLAG_REQUEST_MULTI_FINGER_GESTURES";
             case FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY:
                 return "FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY";
             case FLAG_REPORT_VIEW_IDS:

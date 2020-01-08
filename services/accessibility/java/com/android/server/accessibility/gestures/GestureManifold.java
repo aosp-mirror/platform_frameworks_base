@@ -65,8 +65,13 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
     private final Handler mHandler;
     // Listener to be notified of gesture start and end.
     private Listener mListener;
-    // Whether enhanced touch exploration mode is enabled.
+    // Whether double tap and double tap and hold will be dispatched to the service or handled in
+    // the framework.
     private boolean mServiceHandlesDoubleTap = false;
+    // Whether multi-finger gestures are enabled.
+    boolean mMultiFingerGesturesEnabled;
+    // A list of all the multi-finger gestures, for easy adding and removal.
+    private final List<GestureMatcher> mMultiFingerGestures = new ArrayList<>();
     // Shared state information.
     private TouchState mState;
 
@@ -257,11 +262,26 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
         }
     }
 
-    public boolean isServiceHandlesDoubleTapEnabled() {
-        return mServiceHandlesDoubleTap;
+    public boolean isMultiFingerGesturesEnabled() {
+        return mMultiFingerGesturesEnabled;
+    }
+
+    public void setMultiFingerGesturesEnabled(boolean mode) {
+        if (mMultiFingerGesturesEnabled != mode) {
+            mMultiFingerGesturesEnabled = mode;
+            if (mode) {
+                mGestures.addAll(mMultiFingerGestures);
+            } else {
+                mGestures.removeAll(mMultiFingerGestures);
+            }
+        }
     }
 
     public void setServiceHandlesDoubleTap(boolean mode) {
         mServiceHandlesDoubleTap = mode;
+    }
+
+    public boolean isServiceHandlesDoubleTapEnabled() {
+        return mServiceHandlesDoubleTap;
     }
 }

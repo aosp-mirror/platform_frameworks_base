@@ -1613,6 +1613,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (userState.isServiceHandlesDoubleTapEnabledLocked()) {
                     flags |= AccessibilityInputFilter.FLAG_SERVICE_HANDLES_DOUBLE_TAP;
                 }
+                if (userState.isMultiFingerGesturesEnabledLocked()) {
+                    flags |= AccessibilityInputFilter.FLAG_REQUEST_MULTI_FINGER_GESTURES;
+                }
             }
             if (userState.isFilterKeyEventsEnabledLocked()) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_FILTER_KEY_EVENTS;
@@ -1887,18 +1890,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void updateTouchExplorationLocked(AccessibilityUserState userState) {
         boolean touchExplorationEnabled = mUiAutomationManager.isTouchExplorationEnabledLocked();
         boolean serviceHandlesDoubleTapEnabled = false;
+        boolean requestMultiFingerGestures = false;
         final int serviceCount = userState.mBoundServices.size();
         for (int i = 0; i < serviceCount; i++) {
             AccessibilityServiceConnection service = userState.mBoundServices.get(i);
             if (canRequestAndRequestsTouchExplorationLocked(service, userState)) {
                 touchExplorationEnabled = true;
                 serviceHandlesDoubleTapEnabled = service.isServiceHandlesDoubleTapEnabled();
+                requestMultiFingerGestures = service.isMultiFingerGesturesEnabled();
                 break;
             }
         }
         if (touchExplorationEnabled != userState.isTouchExplorationEnabledLocked()) {
             userState.setTouchExplorationEnabledLocked(touchExplorationEnabled);
-            userState.setServiceHandlesDoubleTapLocked(serviceHandlesDoubleTapEnabled);
             final long identity = Binder.clearCallingIdentity();
             try {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
@@ -1908,6 +1912,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 Binder.restoreCallingIdentity(identity);
             }
         }
+        userState.setServiceHandlesDoubleTapLocked(serviceHandlesDoubleTapEnabled);
+        userState.setMultiFingerGesturesLocked(requestMultiFingerGestures);
     }
 
     private boolean readAccessibilityShortcutKeySettingLocked(AccessibilityUserState userState) {
