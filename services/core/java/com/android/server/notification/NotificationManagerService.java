@@ -2481,7 +2481,7 @@ public class NotificationManagerService extends SystemService {
                     .setUid(r.sbn.getUid())
                     .setChannelId(r.getChannel().getId())
                     .setChannelName(r.getChannel().getName().toString())
-                    .setPostedTimeMs(r.sbn.getPostTime())
+                    .setPostedTimeMs(System.currentTimeMillis())
                     .setTitle(getHistoryTitle(r.getNotification()))
                     .setText(getHistoryText(
                             r.sbn.getPackageContext(getContext()), r.getNotification()))
