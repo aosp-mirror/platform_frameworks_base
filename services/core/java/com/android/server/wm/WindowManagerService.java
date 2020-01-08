@@ -2769,6 +2769,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         true /* includingParents */);
             }
         }
+        syncInputTransactions();
     }
 
     /**
