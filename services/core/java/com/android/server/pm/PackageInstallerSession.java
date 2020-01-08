@@ -2390,16 +2390,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void addFile(String name, long lengthBytes, byte[] metadata) {
-        if (mIncrementalFileStorages != null) {
-            try {
-                mIncrementalFileStorages.addFile(new InstallationFile(name, lengthBytes, metadata));
-                //TODO(b/136132412): merge incremental and callback installation schemes
-                return;
-            } catch (IOException ex) {
-                throw new IllegalStateException(
-                        "Failed to add and configure Incremental File: " + name, ex);
-            }
-        }
         if (!isDataLoaderInstallation()) {
             throw new IllegalStateException(
                     "Cannot add files to non-data loader installation session.");
@@ -2412,7 +2402,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotSealedLocked("addFile");
-
             mFiles.add(FileInfo.added(name, lengthBytes, metadata));
         }
     }
@@ -2463,7 +2452,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     private void prepareDataLoader()
             throws PackageManagerException, StreamingException {
-        if (!isStreamingInstallation()) {
+        if (!isDataLoaderInstallation()) {
             return;
         }
 
@@ -2479,6 +2468,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     file -> file.name.substring(
                             0, file.name.length() - REMOVE_MARKER_EXTENSION.length())).collect(
                 Collectors.toList());
+        if (mIncrementalFileStorages != null) {
+            for (InstallationFile file : addedFiles) {
+                try {
+                    mIncrementalFileStorages.addFile(file);
+                } catch (IOException ex) {
+                    // TODO(b/146080380): add incremental-specific error code
+                    throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                            "Failed to add and configure Incremental File: " + file.getName(), ex);
+                }
+            }
+            return;
+        }
 
         DataLoaderManager dataLoaderManager = mContext.getSystemService(DataLoaderManager.class);
         if (dataLoaderManager == null) {
