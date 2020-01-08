@@ -495,7 +495,8 @@ class PhysicsAnimator<T> private constructor (val target: T) {
 
     /** Returns whether the given property is animating.  */
     fun isPropertyAnimating(property: FloatPropertyCompat<in T>): Boolean {
-        return springAnimations[property]?.isRunning ?: false
+        return springAnimations[property]?.isRunning ?: false ||
+                flingAnimations[property]?.isRunning ?: false
     }
 
     /** Returns whether any of the given properties are animating.  */

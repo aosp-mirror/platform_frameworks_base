@@ -19,6 +19,7 @@ import com.android.systemui.util.animation.PhysicsAnimatorTestUtils.verifyAnimat
 import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -383,6 +384,37 @@ class PhysicsAnimatorTest : SysuiTestCase() {
                 .onAnimationEnd(
                         eq(testView), eq(DynamicAnimation.TRANSLATION_X), eq(false), eq(-5f),
                         anyFloat(), eq(true))
+    }
+
+    @Test
+    fun testIsPropertyAnimating() {
+        PhysicsAnimatorTestUtils.setAllAnimationsBlock(false)
+
+        testView.physicsAnimator
+                .spring(DynamicAnimation.TRANSLATION_X, 500f, springConfig)
+                .fling(DynamicAnimation.TRANSLATION_Y, 10f, flingConfig)
+                .spring(DynamicAnimation.TRANSLATION_Z, 1000f, springConfig)
+                .start()
+
+        // All of the properties we just started should be animating.
+        assertTrue(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_X))
+        assertTrue(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_Y))
+        assertTrue(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_Z))
+
+        // Block until x and y end.
+        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(testView.physicsAnimator,
+                DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y)
+
+        // Verify that x and y are no longer animating, but that Z is (it's springing to 1000f).
+        assertFalse(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_X))
+        assertFalse(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_Y))
+        assertTrue(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_Z))
+
+        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(DynamicAnimation.TRANSLATION_Z)
+
+        assertFalse(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_X))
+        assertFalse(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_Y))
+        assertFalse(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_Z))
     }
 
     @Test
