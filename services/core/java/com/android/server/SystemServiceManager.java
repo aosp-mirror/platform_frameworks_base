@@ -25,9 +25,12 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
+import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.server.utils.TimingsTraceAndSlog;
+
+import dalvik.system.PathClassLoader;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -62,6 +65,9 @@ public class SystemServiceManager {
     // Services that should receive lifecycle events.
     private final ArrayList<SystemService> mServices = new ArrayList<SystemService>();
 
+    // Map of paths to PathClassLoader, so we don't load the same path multiple times.
+    private final ArrayMap<String, PathClassLoader> mLoadedPaths = new ArrayMap<>();
+
     private int mCurrentPhase = -1;
 
     private UserManagerInternal mUserManagerInternal;
@@ -75,20 +81,46 @@ public class SystemServiceManager {
      *
      * @return The service instance.
      */
-    @SuppressWarnings("unchecked")
     public SystemService startService(String className) {
-        final Class<SystemService> serviceClass;
+        final Class<SystemService> serviceClass = loadClassFromLoader(className,
+                this.getClass().getClassLoader());
+        return startService(serviceClass);
+    }
+
+    /**
+     * Starts a service by class name and a path that specifies the jar where the service lives.
+     *
+     * @return The service instance.
+     */
+    public SystemService startServiceFromJar(String className, String path) {
+        PathClassLoader pathClassLoader = mLoadedPaths.get(path);
+        if (pathClassLoader == null) {
+            // NB: the parent class loader should always be the system server class loader.
+            // Changing it has implications that require discussion with the mainline team.
+            pathClassLoader = new PathClassLoader(path, this.getClass().getClassLoader());
+            mLoadedPaths.put(path, pathClassLoader);
+        }
+        final Class<SystemService> serviceClass = loadClassFromLoader(className, pathClassLoader);
+        return startService(serviceClass);
+    }
+
+    /*
+     * Loads and initializes a class from the given classLoader. Returns the class.
+     */
+    @SuppressWarnings("unchecked")
+    private static Class<SystemService> loadClassFromLoader(String className,
+            ClassLoader classLoader) {
         try {
-            serviceClass = (Class<SystemService>)Class.forName(className);
+            return (Class<SystemService>) Class.forName(className, true, classLoader);
         } catch (ClassNotFoundException ex) {
-            Slog.i(TAG, "Starting " + className);
             throw new RuntimeException("Failed to create service " + className
-                    + ": service class not found, usually indicates that the caller should "
+                    + " from class loader " + classLoader.toString() + ": service class not "
+                    + "found, usually indicates that the caller should "
                     + "have called PackageManager.hasSystemFeature() to check whether the "
                     + "feature is available on this device before trying to start the "
-                    + "services that implement it", ex);
+                    + "services that implement it. Also ensure that the correct path for the "
+                    + "classloader is supplied, if applicable.", ex);
         }
-        return startService(serviceClass);
     }
 
     /**
