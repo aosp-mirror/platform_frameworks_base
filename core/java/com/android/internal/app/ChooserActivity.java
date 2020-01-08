@@ -956,7 +956,9 @@ public class ChooserActivity extends ResolverActivity {
                 name = pkgRes.getString(nameResId);
                 final int resId = metaData.getInt(CHIP_ICON_METADATA_KEY);
                 icon = pkgRes.getDrawable(resId);
-            } catch (NameNotFoundException ex) { }
+            } catch (Resources.NotFoundException ex) {
+            } catch (NameNotFoundException ex) {
+            }
         }
         if (TextUtils.isEmpty(name)) {
             name = ri.loadLabel(getPackageManager());
