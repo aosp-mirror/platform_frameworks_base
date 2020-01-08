@@ -59,9 +59,6 @@ public:
      */
     void unsetBroadcastSubscriber(const ConfigKey& configKey, int64_t subscriberId);
 
-    /** Remove all information stored by SubscriberReporter about the given config. */
-    void removeConfig(const ConfigKey& configKey);
-
     /**
      * Sends a broadcast via the intentSender previously stored for the
      * given (configKey, subscriberId) pair by setBroadcastSubscriber.
