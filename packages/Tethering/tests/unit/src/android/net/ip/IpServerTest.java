@@ -510,8 +510,10 @@ public class IpServerTest {
         }
         assertNotNull("missing IPv4 address", addr4);
 
+        final IpPrefix destination = new IpPrefix(addr4.getAddress(), addr4.getPrefixLength());
         // Assert the presence of the associated directly connected route.
-        final RouteInfo directlyConnected = new RouteInfo(addr4, null, lp.getInterfaceName());
+        final RouteInfo directlyConnected = new RouteInfo(destination, null, lp.getInterfaceName(),
+                RouteInfo.RTN_UNICAST);
         assertTrue("missing directly connected route: '" + directlyConnected.toString() + "'",
                    lp.getRoutes().contains(directlyConnected));
     }
