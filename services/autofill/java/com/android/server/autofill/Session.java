@@ -336,7 +336,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + "mForAugmentedAutofillOnly: %s", mForAugmentedAutofillOnly);
                 return;
             }
-            if (mCurrentViewId == null) {
+            // Keeps to prevent it is cleared on multiple threads.
+            final AutofillId currentViewId = mCurrentViewId;
+            if (currentViewId == null) {
                 Slog.w(TAG, "No current view id - session might have finished");
                 return;
             }
@@ -410,7 +412,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (mContexts == null) {
                     mContexts = new ArrayList<>(1);
                 }
-                mContexts.add(new FillContext(requestId, structure, mCurrentViewId));
+                mContexts.add(new FillContext(requestId, structure, currentViewId));
 
                 cancelCurrentRequestLocked();
 
