@@ -38,7 +38,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.net.util.SharedLog;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -48,7 +47,6 @@ import android.os.PersistableBundle;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
 import android.util.ArraySet;
@@ -196,9 +194,9 @@ public class EntitlementManager {
             // till upstream change to cellular.
             if (mUsingCellularAsUpstream) {
                 if (showProvisioningUi) {
-                    runUiTetherProvisioning(type, config.subId);
+                    runUiTetherProvisioning(type, config.activeDataSubId);
                 } else {
-                    runSilentTetherProvisioning(type, config.subId);
+                    runSilentTetherProvisioning(type, config.activeDataSubId);
                 }
                 mNeedReRunProvisioningUi = false;
             } else {
@@ -270,9 +268,9 @@ public class EntitlementManager {
             if (mCellularPermitted.indexOfKey(downstream) < 0) {
                 if (mNeedReRunProvisioningUi) {
                     mNeedReRunProvisioningUi = false;
-                    runUiTetherProvisioning(downstream, config.subId);
+                    runUiTetherProvisioning(downstream, config.activeDataSubId);
                 } else {
-                    runSilentTetherProvisioning(downstream, config.subId);
+                    runSilentTetherProvisioning(downstream, config.activeDataSubId);
                 }
             }
         }
@@ -336,7 +334,8 @@ public class EntitlementManager {
                 .getSystemService(Context.CARRIER_CONFIG_SERVICE);
         if (configManager == null) return null;
 
-        final PersistableBundle carrierConfig = configManager.getConfigForSubId(config.subId);
+        final PersistableBundle carrierConfig = configManager.getConfigForSubId(
+                config.activeDataSubId);
 
         if (CarrierConfigManager.isConfigForIdentifiedCarrier(carrierConfig)) {
             return carrierConfig;
@@ -379,12 +378,9 @@ public class EntitlementManager {
         intent.putExtra(EXTRA_PROVISION_CALLBACK, receiver);
         intent.putExtra(EXTRA_SUBID, subId);
         intent.setComponent(TETHER_SERVICE);
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            mContext.startServiceAsUser(intent, UserHandle.CURRENT);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
+        // Only admin user can change tethering and SilentTetherProvisioning don't need to
+        // show UI, it is fine to always start setting's background service as system user.
+        mContext.startService(intent);
     }
 
     private void runUiTetherProvisioning(int type, int subId) {
@@ -407,12 +403,9 @@ public class EntitlementManager {
         intent.putExtra(EXTRA_PROVISION_CALLBACK, receiver);
         intent.putExtra(EXTRA_SUBID, subId);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
+        // Only launch entitlement UI for system user. Entitlement UI should not appear for other
+        // user because only admin user is allowed to change tethering.
+        mContext.startActivity(intent);
     }
 
     // Not needed to check if this don't run on the handler thread because it's private.
@@ -671,7 +664,7 @@ public class EntitlementManager {
             receiver.send(cacheValue, null);
         } else {
             ResultReceiver proxy = buildProxyReceiver(downstream, false/* notifyFail */, receiver);
-            runUiTetherProvisioning(downstream, config.subId, proxy);
+            runUiTetherProvisioning(downstream, config.activeDataSubId, proxy);
         }
     }
 }

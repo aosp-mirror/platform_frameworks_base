@@ -16,7 +16,7 @@
 
 package com.android.server.connectivity.tethering;
 
-import static com.android.internal.util.BitUtils.uint16;
+import static android.net.util.TetheringUtils.uint16;
 
 import android.hardware.tetheroffload.control.V1_0.IOffloadControl;
 import android.hardware.tetheroffload.control.V1_0.ITetheringOffloadCallback;
