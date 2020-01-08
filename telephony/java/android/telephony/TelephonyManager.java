@@ -4233,14 +4233,18 @@ public class TelephonyManager {
 
     /**
      * Returns the phone number string for line 1, for example, the MSISDN
-     * for a GSM phone. Return null if it is unavailable.
+     * for a GSM phone for a particular subscription. Return null if it is unavailable.
+     * <p>
+     * The default SMS app can also use this.
      *
      * <p>Requires Permission:
-     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE},
      *     {@link android.Manifest.permission#READ_SMS READ_SMS},
      *     {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS},
      *     that the caller is the default SMS app,
-     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges})
+     *     for any API level.
+     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *     for apps targeting SDK API level 29 and below.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges or default SMS app
     @RequiresPermission(anyOf = {
@@ -4257,6 +4261,15 @@ public class TelephonyManager {
      * for a GSM phone for a particular subscription. Return null if it is unavailable.
      * <p>
      * The default SMS app can also use this.
+     *
+     * <p>Requires Permission:
+     *     {@link android.Manifest.permission#READ_SMS READ_SMS},
+     *     {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS},
+     *     that the caller is the default SMS app,
+     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges})
+     *     for any API level.
+     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *     for apps targeting SDK API level 29 and below.
      *
      * @param subId whose phone number for line 1 is returned
      * @hide
@@ -4436,25 +4449,50 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the MSISDN string.
-     * for a GSM phone. Return null if it is unavailable.
+     * Returns the MSISDN string for a GSM phone. Return null if it is unavailable.
+     *
+     * <p>Requires Permission:
+     *     {@link android.Manifest.permission#READ_SMS READ_SMS},
+     *     {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS},
+     *     that the caller is the default SMS app,
+     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges})
+     *     for any API level.
+     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *     for apps targeting SDK API level 29 and below.
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_SMS,
+            android.Manifest.permission.READ_PHONE_NUMBERS
+    })
     @UnsupportedAppUsage
     public String getMsisdn() {
         return getMsisdn(getSubId());
     }
 
     /**
-     * Returns the MSISDN string.
-     * for a GSM phone. Return null if it is unavailable.
+     * Returns the MSISDN string for a GSM phone. Return null if it is unavailable.
      *
      * @param subId for which msisdn is returned
+     *
+     * <p>Requires Permission:
+     *     {@link android.Manifest.permission#READ_SMS READ_SMS},
+     *     {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS},
+     *     that the caller is the default SMS app,
+     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges})
+     *     for any API level.
+     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *     for apps targeting SDK API level 29 and below.
+     *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_SMS,
+            android.Manifest.permission.READ_PHONE_NUMBERS
+    })
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getMsisdn(int subId) {
         try {
