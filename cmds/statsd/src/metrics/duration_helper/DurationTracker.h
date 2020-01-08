@@ -82,8 +82,6 @@ public:
 
     virtual ~DurationTracker(){};
 
-    virtual unique_ptr<DurationTracker> clone(const int64_t eventTime) = 0;
-
     virtual void noteStart(const HashableDimensionKey& key, bool condition,
                            const int64_t eventTime, const ConditionKey& conditionKey) = 0;
     virtual void noteStop(const HashableDimensionKey& key, const int64_t eventTime,

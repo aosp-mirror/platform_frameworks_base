@@ -37,8 +37,6 @@ public:
 
     OringDurationTracker(const OringDurationTracker& tracker) = default;
 
-    unique_ptr<DurationTracker> clone(const int64_t eventTime) override;
-
     void noteStart(const HashableDimensionKey& key, bool condition, const int64_t eventTime,
                    const ConditionKey& conditionKey) override;
     void noteStop(const HashableDimensionKey& key, const int64_t eventTime,
