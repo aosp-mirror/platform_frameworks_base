@@ -1409,8 +1409,11 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * @param uri The URI to query. This will be the full URI sent by the client.
      * @param projection The list of columns to put into the cursor.
      *            If {@code null} provide a default set of columns.
-     * @param queryArgs A Bundle containing all additional information necessary for the query.
-     *            Values in the Bundle may include SQL style arguments.
+     * @param queryArgs A Bundle containing additional information necessary for
+     *            the operation. Arguments may include SQL style arguments, such
+     *            as {@link ContentResolver#QUERY_ARG_SQL_LIMIT}, but note that
+     *            the documentation for each individual provider will indicate
+     *            which arguments they support.
      * @param cancellationSignal A signal to cancel the operation in progress,
      *            or {@code null}.
      * @return a Cursor or {@code null}.
@@ -1609,9 +1612,14 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      *
      * @param uri The content:// URI of the insertion request.
      * @param values A set of column_name/value pairs to add to the database.
-     * @param extras A Bundle containing all additional information necessary
-     *            for the insert.
+     * @param extras A Bundle containing additional information necessary for
+     *            the operation. Arguments may include SQL style arguments, such
+     *            as {@link ContentResolver#QUERY_ARG_SQL_LIMIT}, but note that
+     *            the documentation for each individual provider will indicate
+     *            which arguments they support.
      * @return The URI for the newly inserted item.
+     * @throws IllegalArgumentException if the provider doesn't support one of
+     *             the requested Bundle arguments.
      */
     @Override
     public @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues values,
@@ -1688,10 +1696,13 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      *
      * @param uri The full URI to query, including a row ID (if a specific
      *            record is requested).
-     * @param extras A Bundle containing all additional information necessary
-     *            for the delete. Values in the Bundle may include SQL style
-     *            arguments.
-     * @return The number of rows affected.
+     * @param extras A Bundle containing additional information necessary for
+     *            the operation. Arguments may include SQL style arguments, such
+     *            as {@link ContentResolver#QUERY_ARG_SQL_LIMIT}, but note that
+     *            the documentation for each individual provider will indicate
+     *            which arguments they support.
+     * @throws IllegalArgumentException if the provider doesn't support one of
+     *             the requested Bundle arguments.
      * @throws SQLException
      */
     @Override
@@ -1734,10 +1745,14 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * @param uri The URI to query. This can potentially have a record ID if
      *            this is an update request for a specific record.
      * @param values A set of column_name/value pairs to update in the database.
-     * @param extras A Bundle containing all additional information necessary
-     *            for the update. Values in the Bundle may include SQL style
-     *            arguments.
+     * @param extras A Bundle containing additional information necessary for
+     *            the operation. Arguments may include SQL style arguments, such
+     *            as {@link ContentResolver#QUERY_ARG_SQL_LIMIT}, but note that
+     *            the documentation for each individual provider will indicate
+     *            which arguments they support.
      * @return the number of rows affected.
+     * @throws IllegalArgumentException if the provider doesn't support one of
+     *             the requested Bundle arguments.
      */
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values,
