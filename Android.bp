@@ -262,7 +262,7 @@ filegroup {
     name: "framework-updatable-sources",
     srcs: [
         ":framework-appsearch-sources",
-        ":framework-sdkext-sources",
+        ":framework-sdkextensions-sources",
         ":framework-statsd-sources",
         ":framework-tethering-srcs",
         ":updatable-media-srcs",
@@ -481,7 +481,7 @@ java_library {
         "updatable_media_stubs",
         "framework_mediaprovider_stubs",
         "framework-appsearch", // TODO(b/146218515): should be framework-appsearch-stubs
-        "framework-sdkext-stubs-systemapi",
+        "framework-sdkextensions-stubs-systemapi",
         // TODO(b/146167933): Use framework-statsd-stubs instead.
         "framework-statsd",
         // TODO(b/140299412): should be framework-wifi-stubs
