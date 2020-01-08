@@ -12,7 +12,6 @@ LOCAL_SHARED_LIBRARIES := \
     libRS \
     libcutils \
     liblog \
-    libhwui \
     libutils \
     libui \
     libgui \
