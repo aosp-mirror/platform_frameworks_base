@@ -64,7 +64,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
             "com.android.mediarouteprovider.TYPE_SPECIAL";
 
     Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
-    Map<String, Integer> mRouteSessionMap = new HashMap<>();
+    Map<String, String> mRouteSessionMap = new HashMap<>();
     private int mNextSessionId = 1000;
 
     private void initializeRoutes() {
@@ -177,7 +177,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         }
         maybeDeselectRoute(routeId);
 
-        final int sessionId = mNextSessionId;
+        final String sessionId = String.valueOf(mNextSessionId);
         mNextSessionId++;
 
         mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
@@ -196,7 +196,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onDestroySession(int sessionId, RouteSessionInfo lastSessionInfo) {
+    public void onDestroySession(String sessionId, RouteSessionInfo lastSessionInfo) {
         for (String routeId : lastSessionInfo.getSelectedRoutes()) {
             mRouteSessionMap.remove(routeId);
             MediaRoute2Info route = mRoutes.get(routeId);
@@ -209,7 +209,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onSelectRoute(int sessionId, String routeId) {
+    public void onSelectRoute(String sessionId, String routeId) {
         RouteSessionInfo sessionInfo = getSessionInfo(sessionId);
         MediaRoute2Info route = mRoutes.get(routeId);
         if (route == null || sessionInfo == null) {
@@ -218,7 +218,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         maybeDeselectRoute(routeId);
 
         mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
-                .setClientPackageName(sessionInfo.getPackageName())
+                .setClientPackageName(sessionInfo.getClientPackageName())
                 .build());
         mRouteSessionMap.put(routeId, sessionId);
 
@@ -232,7 +232,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onDeselectRoute(int sessionId, String routeId) {
+    public void onDeselectRoute(String sessionId, String routeId) {
         RouteSessionInfo sessionInfo = getSessionInfo(sessionId);
         MediaRoute2Info route = mRoutes.get(routeId);
 
@@ -254,7 +254,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onTransferToRoute(int sessionId, String routeId) {
+    public void onTransferToRoute(String sessionId, String routeId) {
         RouteSessionInfo sessionInfo = getSessionInfo(sessionId);
         RouteSessionInfo newSessionInfo = new RouteSessionInfo.Builder(sessionInfo)
                 .clearSelectedRoutes()
@@ -271,7 +271,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
             return;
         }
 
-        int sessionId = mRouteSessionMap.get(routeId);
+        String sessionId = mRouteSessionMap.get(routeId);
         onDeselectRoute(sessionId, routeId);
     }
 

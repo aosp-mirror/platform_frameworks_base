@@ -99,7 +99,7 @@ public class MediaRouterManagerTest {
     public static final String TYPE_SPECIAL =
             "com.android.mediarouteprovider.TYPE_SPECIAL";
 
-    private static final String TYPE_LIVE_AUDIO = "android.media.intent.category.LIVE_AUDIO";
+    private static final String TYPE_LIVE_AUDIO = "android.media.intent.route.TYPE_LIVE_AUDIO";
 
     private static final int TIMEOUT_MS = 5000;
 

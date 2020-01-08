@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class RouteSessionTest {
+    private static final String TEST_SESSION_ID = "test_session_id";
     private static final String TEST_PACKAGE_NAME = "com.android.mediaroutertest";
     private static final String TEST_CONTROL_CATEGORY = "com.android.mediaroutertest.category";
 
@@ -36,17 +37,17 @@ public class RouteSessionTest {
 
     @Test
     public void testValidity() {
-        RouteSessionInfo emptyPackageSession = new RouteSessionInfo.Builder(1,
+        RouteSessionInfo emptyPackageSession = new RouteSessionInfo.Builder(TEST_SESSION_ID,
                 "",
                 TEST_CONTROL_CATEGORY)
                 .addSelectedRoute(TEST_ROUTE_ID1)
                 .build();
-        RouteSessionInfo emptyCategorySession = new RouteSessionInfo.Builder(1,
+        RouteSessionInfo emptyCategorySession = new RouteSessionInfo.Builder(TEST_SESSION_ID,
                 TEST_PACKAGE_NAME, "")
                 .addSelectedRoute(TEST_ROUTE_ID1)
                 .build();
 
-        RouteSessionInfo emptySelectedRouteSession = new RouteSessionInfo.Builder(1,
+        RouteSessionInfo emptySelectedRouteSession = new RouteSessionInfo.Builder(TEST_SESSION_ID,
                 TEST_PACKAGE_NAME, TEST_CONTROL_CATEGORY)
                 .build();
 
@@ -54,9 +55,9 @@ public class RouteSessionTest {
                 .addSelectedRoute(TEST_ROUTE_ID1)
                 .build();
 
-        assertFalse(emptySelectedRouteSession.isValid());
         assertFalse(emptyPackageSession.isValid());
         assertFalse(emptyCategorySession.isValid());
+        assertFalse(emptySelectedRouteSession.isValid());
         assertTrue(validSession.isValid());
     }
 }
