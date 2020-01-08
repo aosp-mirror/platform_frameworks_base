@@ -278,6 +278,9 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isBackgroundActivityStartsEnabled();
     public abstract void reportCurKeyguardUsageEvent(boolean keyguardShowing);
 
+    /** @see com.android.server.am.ActivityManagerService#monitor */
+    public abstract void monitor();
+
     /** Input dispatch timeout to a window, start the ANR process. */
     public abstract long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason);
     public abstract boolean inputDispatchingTimedOut(Object proc, String activityShortComponentName,

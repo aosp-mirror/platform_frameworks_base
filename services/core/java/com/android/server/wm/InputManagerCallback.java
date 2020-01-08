@@ -10,23 +10,40 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.ON_POINTER_DOWN_OUTSIDE_FOCUS;
 
+import android.os.Build;
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemClock;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.IWindow;
 import android.view.InputApplicationHandle;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
+import com.android.server.am.ActivityManagerService;
 import com.android.server.input.InputManagerService;
 import com.android.server.wm.EmbeddedWindowController.EmbeddedWindow;
 
+import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 final class InputManagerCallback implements InputManagerService.WindowManagerCallbacks {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "InputManagerCallback" : TAG_WM;
+
+    /** Prevent spamming the traces because pre-dump cannot aware duplicated ANR. */
+    private static final long PRE_DUMP_MIN_INTERVAL_MS = TimeUnit.SECONDS.toMillis(20);
+    /** The timeout to detect if a monitor is held for a while. */
+    private static final long PRE_DUMP_MONITOR_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(1);
+    /** The last time pre-dump was executed. */
+    private volatile long mLastPreDumpTimeMs;
+
     private final WindowManagerService mService;
 
     // Set to true when the first input device configuration change notification
@@ -77,6 +94,77 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     }
 
     /**
+     * Pre-dump stack trace if the locks of activity manager or window manager (they may be locked
+     * in the path of reporting ANR) cannot be acquired in time. That provides the stack traces
+     * before the real blocking symptom has gone.
+     * <p>
+     * Do not hold the {@link WindowManagerGlobalLock} while calling this method.
+     */
+    private void preDumpIfLockTooSlow() {
+        if (!Build.IS_DEBUGGABLE)  {
+            return;
+        }
+        final long now = SystemClock.uptimeMillis();
+        if (mLastPreDumpTimeMs > 0 && now - mLastPreDumpTimeMs < PRE_DUMP_MIN_INTERVAL_MS) {
+            return;
+        }
+
+        final boolean[] shouldDumpSf = { true };
+        final ArrayMap<String, Runnable> monitors = new ArrayMap<>(2);
+        monitors.put(TAG_WM, mService::monitor);
+        monitors.put("ActivityManager", mService.mAmInternal::monitor);
+        final CountDownLatch latch = new CountDownLatch(monitors.size());
+        // The pre-dump will execute if one of the monitors doesn't complete within the timeout.
+        for (int i = 0; i < monitors.size(); i++) {
+            final String name = monitors.keyAt(i);
+            final Runnable monitor = monitors.valueAt(i);
+            // Always create new thread to avoid noise of existing threads. Suppose here won't
+            // create too many threads because it means that watchdog will be triggered first.
+            new Thread() {
+                @Override
+                public void run() {
+                    monitor.run();
+                    latch.countDown();
+                    final long elapsed = SystemClock.uptimeMillis() - now;
+                    if (elapsed > PRE_DUMP_MONITOR_TIMEOUT_MS) {
+                        Slog.i(TAG_WM, "Pre-dump acquired " + name + " in " + elapsed + "ms");
+                    } else if (TAG_WM.equals(name)) {
+                        // Window manager is the main client of SurfaceFlinger. If window manager
+                        // is responsive, the stack traces of SurfaceFlinger may not be important.
+                        shouldDumpSf[0] = false;
+                    }
+                };
+            }.start();
+        }
+        try {
+            if (latch.await(PRE_DUMP_MONITOR_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                return;
+            }
+        } catch (InterruptedException ignored) { }
+        mLastPreDumpTimeMs = now;
+        Slog.i(TAG_WM, "Pre-dump for unresponsive");
+
+        final ArrayList<Integer> firstPids = new ArrayList<>(1);
+        firstPids.add(ActivityManagerService.MY_PID);
+        ArrayList<Integer> nativePids = null;
+        final int[] pids = shouldDumpSf[0]
+                ? Process.getPidsForCommands(new String[] { "/system/bin/surfaceflinger" })
+                : null;
+        if (pids != null) {
+            nativePids = new ArrayList<>(1);
+            for (int pid : pids) {
+                nativePids.add(pid);
+            }
+        }
+
+        final File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
+                null /* processCpuTracker */, null /* lastPids */, nativePids);
+        if (tracesFile != null) {
+            tracesFile.renameTo(new File(tracesFile.getParent(), tracesFile.getName() + "_pre"));
+        }
+    }
+
+    /**
      * Notifies the window manager about an application that is not responding.
      * Returns a new timeout to continue waiting in nanoseconds, or 0 to abort dispatch.
      *
@@ -89,6 +177,9 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         WindowState windowState = null;
         boolean aboveSystem = false;
         int windowPid = INVALID_PID;
+
+        preDumpIfLockTooSlow();
+
         //TODO(b/141764879) Limit scope of wm lock when input calls notifyANR
         synchronized (mService.mGlobalLock) {
 
