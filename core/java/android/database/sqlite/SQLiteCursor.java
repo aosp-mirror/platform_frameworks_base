@@ -16,7 +16,7 @@
 
 package android.database.sqlite;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.database.AbstractWindowedCursor;
 import android.database.CursorWindow;
 import android.database.DatabaseUtils;
