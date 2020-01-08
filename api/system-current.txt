@@ -1412,6 +1412,14 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
   }
 
+  public final class BluetoothHidHost implements android.bluetooth.BluetoothProfile {
+    method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
+    method public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice, int);
+    field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED";
+  }
+
   public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
     method protected void finalize();
     method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
