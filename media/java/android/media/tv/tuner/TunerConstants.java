@@ -1278,68 +1278,45 @@ public final class TunerConstants {
 
 
     /** @hide */
-    @IntDef({LNB_VOLTAGE_NONE, LNB_VOLTAGE_5V, LNB_VOLTAGE_11V, LNB_VOLTAGE_12V, LNB_VOLTAGE_13V,
-            LNB_VOLTAGE_14V, LNB_VOLTAGE_15V, LNB_VOLTAGE_18V, LNB_VOLTAGE_19V})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface LnbVoltage {}
-    /** @hide */
-    public static final int LNB_VOLTAGE_NONE = Constants.LnbVoltage.NONE;
-    /** @hide */
-    public static final int LNB_VOLTAGE_5V = Constants.LnbVoltage.VOLTAGE_5V;
-    /** @hide */
-    public static final int LNB_VOLTAGE_11V = Constants.LnbVoltage.VOLTAGE_11V;
-    /** @hide */
-    public static final int LNB_VOLTAGE_12V = Constants.LnbVoltage.VOLTAGE_12V;
-    /** @hide */
-    public static final int LNB_VOLTAGE_13V = Constants.LnbVoltage.VOLTAGE_13V;
-    /** @hide */
-    public static final int LNB_VOLTAGE_14V = Constants.LnbVoltage.VOLTAGE_14V;
-    /** @hide */
-    public static final int LNB_VOLTAGE_15V = Constants.LnbVoltage.VOLTAGE_15V;
-    /** @hide */
-    public static final int LNB_VOLTAGE_18V = Constants.LnbVoltage.VOLTAGE_18V;
-    /** @hide */
-    public static final int LNB_VOLTAGE_19V = Constants.LnbVoltage.VOLTAGE_19V;
-
-    /** @hide */
-    @IntDef({LNB_TONE_NONE, LNB_TONE_CONTINUOUS})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface LnbTone {}
-    /** @hide */
-    public static final int LNB_TONE_NONE = Constants.LnbTone.NONE;
-    /** @hide */
-    public static final int LNB_TONE_CONTINUOUS = Constants.LnbTone.CONTINUOUS;
-
-    /** @hide */
-    @IntDef({LNB_POSITION_UNDEFINED, LNB_POSITION_A, LNB_POSITION_B})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface LnbPosition {}
-    /** @hide */
-    public static final int LNB_POSITION_UNDEFINED = Constants.LnbPosition.UNDEFINED;
-    /** @hide */
-    public static final int LNB_POSITION_A = Constants.LnbPosition.POSITION_A;
-    /** @hide */
-    public static final int LNB_POSITION_B = Constants.LnbPosition.POSITION_B;
-
-
-    /** @hide */
     @IntDef({RESULT_SUCCESS, RESULT_UNAVAILABLE, RESULT_NOT_INITIALIZED, RESULT_INVALID_STATE,
             RESULT_INVALID_ARGUMENT, RESULT_OUT_OF_MEMORY, RESULT_UNKNOWN_ERROR})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Result {}
-    /** @hide */
+
+    /**
+     * Operation succeeded.
+     * @hide
+     */
     public static final int RESULT_SUCCESS = Constants.Result.SUCCESS;
-    /** @hide */
+    /**
+     * Operation failed because the corresponding resources are not available.
+     * @hide
+     */
     public static final int RESULT_UNAVAILABLE = Constants.Result.UNAVAILABLE;
-    /** @hide */
+    /**
+     * Operation failed because the corresponding resources are not initialized.
+     * @hide
+     */
     public static final int RESULT_NOT_INITIALIZED = Constants.Result.NOT_INITIALIZED;
-    /** @hide */
+    /**
+     * Operation failed because it's not in a valid state.
+     * @hide
+     */
     public static final int RESULT_INVALID_STATE = Constants.Result.INVALID_STATE;
-    /** @hide */
+    /**
+     * Operation failed because there are invalid arguments.
+     * @hide
+     */
     public static final int RESULT_INVALID_ARGUMENT = Constants.Result.INVALID_ARGUMENT;
-    /** @hide */
+    /**
+     * Memory allocation failed.
+     * @hide
+     */
     public static final int RESULT_OUT_OF_MEMORY = Constants.Result.OUT_OF_MEMORY;
-    /** @hide */
+    /**
+     * Operation failed due to unknown errors.
+     * @hide
+     */
     public static final int RESULT_UNKNOWN_ERROR = Constants.Result.UNKNOWN_ERROR;
 
     private TunerConstants() {
