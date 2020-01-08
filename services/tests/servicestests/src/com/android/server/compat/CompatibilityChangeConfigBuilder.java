@@ -17,55 +17,36 @@
 package com.android.server.compat;
 
 import android.compat.Compatibility;
-import android.os.RemoteException;
 
 import com.android.internal.compat.CompatibilityChangeConfig;
 
 import java.util.HashSet;
 import java.util.Set;
 
-class OverridesBuilder {
+class CompatibilityChangeConfigBuilder {
     private Set<Long> mEnabled;
     private Set<Long> mDisabled;
-    private String mPackageName;
 
-    private OverridesBuilder() {
+    private CompatibilityChangeConfigBuilder() {
         mEnabled = new HashSet<>();
         mDisabled = new HashSet<>();
     }
 
-    static OverridesBuilder create() {
-        return new OverridesBuilder();
+    static CompatibilityChangeConfigBuilder create() {
+        return new CompatibilityChangeConfigBuilder();
     }
 
-    OverridesBuilder enable(Long id) {
+    CompatibilityChangeConfigBuilder enable(Long id) {
         mEnabled.add(id);
         return this;
     }
 
-    OverridesBuilder disable(Long id) {
+    CompatibilityChangeConfigBuilder disable(Long id) {
         mDisabled.add(id);
         return this;
     }
 
-    OverridesBuilder toPackage(String packageName) {
-        mPackageName = packageName;
-        return this;
-    }
-
-    void override(CompatConfig config) throws RemoteException {
-        config.addOverrides(
-                new CompatibilityChangeConfig(
-                        new Compatibility.ChangeConfig(mEnabled, mDisabled)), mPackageName);
-    }
-
-    void override(PlatformCompat platformCompat) throws RemoteException {
-        platformCompat.setOverrides(
-                new CompatibilityChangeConfig(
-                        new Compatibility.ChangeConfig(mEnabled, mDisabled)), mPackageName);
-    }
-
-    void clear(PlatformCompat platformCompat) throws RemoteException {
-        platformCompat.clearOverrides(mPackageName);
+    CompatibilityChangeConfig build() {
+        return new CompatibilityChangeConfig(new Compatibility.ChangeConfig(mEnabled, mDisabled));
     }
 }
