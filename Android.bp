@@ -265,7 +265,7 @@ filegroup {
 filegroup {
     name: "framework-updatable-sources",
     srcs: [
-        ":framework-sdkext-sources",
+        ":framework-sdkextensions-sources",
         ":framework-tethering-srcs",
         ":updatable-media-srcs",
     ]
@@ -463,7 +463,7 @@ java_library {
     static_libs: [
         "framework-minus-apex",
         "updatable_media_stubs",
-        "framework-sdkext-stubs-systemapi",
+        "framework-sdkextensions-stubs-systemapi",
         // TODO(jiyong): add more stubs for APEXes here
     ],
     sdk_version: "core_platform",
