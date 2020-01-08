@@ -16,8 +16,6 @@
 
 package android.telephony;
 
-import com.android.telephony.Rlog;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,6 +33,8 @@ import android.telephony.Annotation.NetworkType;
 import android.telephony.NetworkRegistrationInfo.Domain;
 import android.telephony.NetworkRegistrationInfo.NRState;
 import android.text.TextUtils;
+
+import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -584,8 +584,8 @@ public class ServiceState implements Parcelable {
      */
     @DuplexMode
     public int getDuplexMode() {
-        // only support LTE duplex mode
-        if (!isLte(getRilDataRadioTechnology())) {
+        // support LTE/NR duplex mode
+        if (!isPsOnlyTech(getRilDataRadioTechnology())) {
             return DUPLEX_MODE_UNKNOWN;
         }
 
@@ -1717,9 +1717,10 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    public static boolean isLte(int radioTechnology) {
-        return radioTechnology == RIL_RADIO_TECHNOLOGY_LTE ||
-                radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA;
+    public static boolean isPsOnlyTech(int radioTechnology) {
+        return radioTechnology == RIL_RADIO_TECHNOLOGY_LTE
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_NR;
     }
 
     /** @hide */
