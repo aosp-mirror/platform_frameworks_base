@@ -301,6 +301,48 @@ public class StatsManagerService extends IStatsManagerService.Stub {
         throw new IllegalStateException("Failed to connect to statsd to getData");
     }
 
+    @Override
+    public void addConfiguration(long configId, byte[] config, String packageName)
+            throws IllegalStateException {
+        enforceDumpAndUsageStatsPermission(packageName);
+        int callingUid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            IStatsd statsd = waitForStatsd();
+            if (statsd != null) {
+                statsd.addConfiguration(configId, config, callingUid);
+                return;
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to addConfiguration with statsd");
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        throw new IllegalStateException("Failed to connect to statsd to addConfig");
+    }
+
+    @Override
+    public void removeConfiguration(long configId, String packageName)
+            throws IllegalStateException {
+        enforceDumpAndUsageStatsPermission(packageName);
+        int callingUid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            IStatsd statsd = waitForStatsd();
+            if (statsd != null) {
+                statsd.removeConfiguration(configId, callingUid);
+                return;
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to removeConfiguration with statsd");
+            throw new IllegalStateException(e.getMessage(), e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        throw new IllegalStateException("Failed to connect to statsd to removeConfig");
+    }
+
     void setStatsCompanionService(StatsCompanionService statsCompanionService) {
         mStatsCompanionService = statsCompanionService;
     }

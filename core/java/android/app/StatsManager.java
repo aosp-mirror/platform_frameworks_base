@@ -157,11 +157,11 @@ public final class StatsManager {
     public void addConfig(long configKey, byte[] config) throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsd service = getIStatsdLocked();
+                IStatsManagerService service = getIStatsManagerServiceLocked();
                 // can throw IllegalArgumentException
                 service.addConfiguration(configKey, config, mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsd when adding configuration");
+                Slog.e(TAG, "Failed to connect to statsmanager when adding configuration");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);
@@ -194,10 +194,10 @@ public final class StatsManager {
     public void removeConfig(long configKey) throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsd service = getIStatsdLocked();
+                IStatsManagerService service = getIStatsManagerServiceLocked();
                 service.removeConfiguration(configKey, mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsd when removing configuration");
+                Slog.e(TAG, "Failed to connect to statsmanager when removing configuration");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);

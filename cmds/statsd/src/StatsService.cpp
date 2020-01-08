@@ -1155,11 +1155,10 @@ Status StatsService::getMetadata(vector<uint8_t>* output) {
 }
 
 Status StatsService::addConfiguration(int64_t key, const vector <uint8_t>& config,
-                                      const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+                                      const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    if (addConfigurationChecked(ipc->getCallingUid(), key, config)) {
+    if (addConfigurationChecked(callingUid, key, config)) {
         return Status::ok();
     } else {
         ALOGE("Could not parse malformatted StatsdConfig");
@@ -1224,11 +1223,10 @@ Status StatsService::removeActiveConfigsChangedOperation(const int32_t callingUi
     return Status::ok();
 }
 
-Status StatsService::removeConfiguration(int64_t key, const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+Status StatsService::removeConfiguration(int64_t key, const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), key);
+    ConfigKey configKey(callingUid, key);
     mConfigManager->RemoveConfig(configKey);
     SubscriberReporter::getInstance().removeConfig(configKey);
     return Status::ok();
