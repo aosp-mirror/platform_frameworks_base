@@ -67,11 +67,4 @@ interface IStatsCompanionService {
 
     /** Tells StatsCompaionService to grab the uid map snapshot and send it to statsd. */
     oneway void triggerUidSnapshot();
-
-    /** Tells StatsCompanionService to tell statsd to register a puller for the given atom id */
-    oneway void registerPullAtomCallback(int atomTag, long coolDownNs, long timeoutNs,
-            in int[] additiveFields, IPullAtomCallback pullerCallback);
-
-    /** Tells StatsCompanionService to tell statsd to unregister a puller for the given atom id */
-    oneway void unregisterPullAtomCallback(int atomTag);
 }
