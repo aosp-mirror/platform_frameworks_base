@@ -37,7 +37,6 @@ import static com.android.internal.R.string.config_mobile_hotspot_provision_app_
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
-import android.net.ConnectivityManager;
 import android.net.TetheringConfigurationParcel;
 import android.net.util.SharedLog;
 import android.provider.Settings;
@@ -179,8 +178,8 @@ public class TetheringConfiguration {
 
         pw.print("chooseUpstreamAutomatically: ");
         pw.println(chooseUpstreamAutomatically);
-        dumpStringArray(pw, "preferredUpstreamIfaceTypes",
-                preferredUpstreamNames(preferredUpstreamIfaceTypes));
+        pw.print("legacyPreredUpstreamIfaceTypes: ");
+        pw.println(Arrays.toString(toIntArray(preferredUpstreamIfaceTypes)));
 
         dumpStringArray(pw, "legacyDhcpRanges", legacyDhcpRanges);
         dumpStringArray(pw, "defaultIPv4DNS", defaultIPv4DNS);
@@ -205,7 +204,7 @@ public class TetheringConfiguration {
         sj.add(String.format("isDunRequired:%s", isDunRequired));
         sj.add(String.format("chooseUpstreamAutomatically:%s", chooseUpstreamAutomatically));
         sj.add(String.format("preferredUpstreamIfaceTypes:%s",
-                makeString(preferredUpstreamNames(preferredUpstreamIfaceTypes))));
+                toIntArray(preferredUpstreamIfaceTypes)));
         sj.add(String.format("provisioningApp:%s", makeString(provisioningApp)));
         sj.add(String.format("provisioningAppNoUi:%s", provisioningAppNoUi));
         sj.add(String.format("enableLegacyDhcpServer:%s", enableLegacyDhcpServer));
@@ -232,21 +231,6 @@ public class TetheringConfiguration {
         final StringJoiner sj = new StringJoiner(",", "[", "]");
         for (String s : strings) sj.add(s);
         return sj.toString();
-    }
-
-    private static String[] preferredUpstreamNames(Collection<Integer> upstreamTypes) {
-        String[] upstreamNames = null;
-
-        if (upstreamTypes != null) {
-            upstreamNames = new String[upstreamTypes.size()];
-            int i = 0;
-            for (Integer netType : upstreamTypes) {
-                upstreamNames[i] = ConnectivityManager.getNetworkTypeName(netType);
-                i++;
-            }
-        }
-
-        return upstreamNames;
     }
 
     /** Check whether dun is required. */
@@ -388,6 +372,15 @@ public class TetheringConfiguration {
         return false;
     }
 
+    private static int[] toIntArray(Collection<Integer> values) {
+        final int[] result = new int[values.size()];
+        int index = 0;
+        for (Integer value : values) {
+            result[index++] = value;
+        }
+        return result;
+    }
+
     /**
      * Convert this TetheringConfiguration to a TetheringConfigurationParcel.
      */
@@ -400,12 +393,7 @@ public class TetheringConfiguration {
         parcel.isDunRequired = isDunRequired;
         parcel.chooseUpstreamAutomatically = chooseUpstreamAutomatically;
 
-        int[] preferredTypes = new int[preferredUpstreamIfaceTypes.size()];
-        int index = 0;
-        for (Integer type : preferredUpstreamIfaceTypes) {
-            preferredTypes[index++] = type;
-        }
-        parcel.preferredUpstreamIfaceTypes = preferredTypes;
+        parcel.preferredUpstreamIfaceTypes = toIntArray(preferredUpstreamIfaceTypes);
 
         parcel.legacyDhcpRanges = legacyDhcpRanges;
         parcel.defaultIPv4DNS = defaultIPv4DNS;
