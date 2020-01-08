@@ -27,9 +27,12 @@ import android.os.UserHandle;
 import android.util.Slog;
 import android.util.StatsLog;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.compat.AndroidBuildClassifier;
 import com.android.internal.compat.ChangeReporter;
 import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.compat.CompatibilityChangeInfo;
+import com.android.internal.compat.IOverrideValidator;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
@@ -46,11 +49,21 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     private final Context mContext;
     private final ChangeReporter mChangeReporter;
+    private final CompatConfig mCompatConfig;
 
     public PlatformCompat(Context context) {
         mContext = context;
         mChangeReporter = new ChangeReporter(
                 StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER);
+        mCompatConfig = CompatConfig.create(new AndroidBuildClassifier(), mContext);
+    }
+
+    @VisibleForTesting
+    PlatformCompat(Context context, CompatConfig compatConfig) {
+        mContext = context;
+        mChangeReporter = new ChangeReporter(
+                StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER);
+        mCompatConfig = compatConfig;
     }
 
     @Override
@@ -75,7 +88,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     @Override
     public boolean isChangeEnabled(long changeId, ApplicationInfo appInfo) {
-        if (CompatConfig.get().isChangeEnabled(changeId, appInfo)) {
+        if (mCompatConfig.isChangeEnabled(changeId, appInfo)) {
             reportChange(changeId, appInfo.uid,
                     StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__ENABLED);
             return true;
@@ -122,57 +135,59 @@ public class PlatformCompat extends IPlatformCompat.Stub {
      * otherwise.
      */
     public boolean registerListener(long changeId, CompatChange.ChangeListener listener) {
-        return CompatConfig.get().registerListener(changeId, listener);
+        return mCompatConfig.registerListener(changeId, listener);
     }
 
     @Override
-    public void setOverrides(CompatibilityChangeConfig overrides, String packageName) {
-        CompatConfig.get().addOverrides(overrides, packageName);
+    public void setOverrides(CompatibilityChangeConfig overrides, String packageName)
+            throws RemoteException, SecurityException {
+        mCompatConfig.addOverrides(overrides, packageName);
         killPackage(packageName);
     }
 
     @Override
-    public void setOverridesForTest(CompatibilityChangeConfig overrides, String packageName) {
-        CompatConfig.get().addOverrides(overrides, packageName);
+    public void setOverridesForTest(CompatibilityChangeConfig overrides, String packageName)
+            throws RemoteException, SecurityException {
+        mCompatConfig.addOverrides(overrides, packageName);
     }
 
     @Override
-    public void clearOverrides(String packageName) {
-        CompatConfig config = CompatConfig.get();
-        config.removePackageOverrides(packageName);
+    public void clearOverrides(String packageName) throws RemoteException, SecurityException {
+        mCompatConfig.removePackageOverrides(packageName);
         killPackage(packageName);
     }
 
     @Override
-    public void clearOverridesForTest(String packageName) {
-        CompatConfig config = CompatConfig.get();
-        config.removePackageOverrides(packageName);
+    public void clearOverridesForTest(String packageName)
+            throws RemoteException, SecurityException {
+        mCompatConfig.removePackageOverrides(packageName);
     }
 
     @Override
-    public boolean clearOverride(long changeId, String packageName) {
-        boolean existed = CompatConfig.get().removeOverride(changeId, packageName);
+    public boolean clearOverride(long changeId, String packageName)
+            throws RemoteException, SecurityException {
+        boolean existed = mCompatConfig.removeOverride(changeId, packageName);
         killPackage(packageName);
         return existed;
     }
 
     @Override
     public CompatibilityChangeConfig getAppConfig(ApplicationInfo appInfo) {
-        return CompatConfig.get().getAppConfig(appInfo);
+        return mCompatConfig.getAppConfig(appInfo);
     }
 
     @Override
     public CompatibilityChangeInfo[] listAllChanges() {
-        return CompatConfig.get().dumpChanges();
+        return mCompatConfig.dumpChanges();
     }
 
     /**
      * Check whether the change is known to the compat config.
-     * @param changeId
+     *
      * @return {@code true} if the change is known.
      */
     public boolean isKnownChangeId(long changeId) {
-        return CompatConfig.get().isKnownChangeId(changeId);
+        return mCompatConfig.isKnownChangeId(changeId);
 
     }
 
@@ -182,11 +197,11 @@ public class PlatformCompat extends IPlatformCompat.Stub {
      *
      * @param appInfo The app in question
      * @return A sorted long array of change IDs. We use a primitive array to minimize memory
-     *      footprint: Every app process will store this array statically so we aim to reduce
-     *      overhead as much as possible.
+     * footprint: Every app process will store this array statically so we aim to reduce
+     * overhead as much as possible.
      */
     public long[] getDisabledChanges(ApplicationInfo appInfo) {
-        return CompatConfig.get().getDisabledChanges(appInfo);
+        return mCompatConfig.getDisabledChanges(appInfo);
     }
 
     /**
@@ -196,18 +211,24 @@ public class PlatformCompat extends IPlatformCompat.Stub {
      * @return The change ID, or {@code -1} if no change with that name exists.
      */
     public long lookupChangeId(String name) {
-        return CompatConfig.get().lookupChangeId(name);
+        return mCompatConfig.lookupChangeId(name);
     }
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, "platform_compat", pw)) return;
-        CompatConfig.get().dumpConfig(pw);
+        mCompatConfig.dumpConfig(pw);
+    }
+
+    @Override
+    public IOverrideValidator getOverrideValidator() {
+        return mCompatConfig.getOverrideValidator();
     }
 
     /**
      * Clears information stored about events reported on behalf of an app.
      * To be called once upon app start or end. A second call would be a no-op.
+     *
      * @param appInfo the app to reset
      */
     public void resetReporting(ApplicationInfo appInfo) {

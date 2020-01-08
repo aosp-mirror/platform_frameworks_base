@@ -17,8 +17,10 @@
 package com.android.server.compat;
 
 import android.compat.Compatibility.ChangeConfig;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Environment;
+import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.LongArray;
 import android.util.LongSparseArray;
@@ -26,8 +28,11 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.compat.AndroidBuildClassifier;
 import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.compat.CompatibilityChangeInfo;
+import com.android.internal.compat.IOverrideValidator;
+import com.android.internal.compat.OverrideAllowedState;
 import com.android.server.compat.config.Change;
 import com.android.server.compat.config.XmlParser;
 
@@ -54,22 +59,14 @@ final class CompatConfig {
 
     private static final String TAG = "CompatConfig";
 
-    private static final CompatConfig sInstance = new CompatConfig().initConfigFromLib(
-            Environment.buildPath(
-                    Environment.getRootDirectory(), "etc", "compatconfig"));
-
     @GuardedBy("mChanges")
     private final LongSparseArray<CompatChange> mChanges = new LongSparseArray<>();
 
-    @VisibleForTesting
-    CompatConfig() {
-    }
+    private IOverrideValidator mOverrideValidator;
 
-    /**
-     * @return The static instance of this class to be used within the system server.
-     */
-    static CompatConfig get() {
-        return sInstance;
+    @VisibleForTesting
+    CompatConfig(AndroidBuildClassifier androidBuildClassifier, Context context) {
+        mOverrideValidator = new OverrideValidatorImpl(androidBuildClassifier, context, this);
     }
 
     /**
@@ -159,8 +156,12 @@ final class CompatConfig {
      * @param enabled     If the change should be enabled or disabled.
      * @return {@code true} if the change existed before adding the override.
      */
-    boolean addOverride(long changeId, String packageName, boolean enabled) {
+    boolean addOverride(long changeId, String packageName, boolean enabled)
+            throws RemoteException, SecurityException {
         boolean alreadyKnown = true;
+        OverrideAllowedState allowedState =
+                mOverrideValidator.getOverrideAllowedState(changeId, packageName);
+        allowedState.enforce(changeId, packageName);
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
             if (c == null) {
@@ -186,6 +187,20 @@ final class CompatConfig {
     }
 
     /**
+     * Returns the minimum sdk version for which this change should be enabled (or 0 if it is not
+     * target sdk gated).
+     */
+    int minTargetSdkForChangeId(long changeId) {
+        synchronized (mChanges) {
+            CompatChange c = mChanges.get(changeId);
+            if (c == null) {
+                return 0;
+            }
+            return c.getEnableAfterTargetSdk();
+        }
+    }
+
+    /**
      * Removes an override previously added via {@link #addOverride(long, String, boolean)}. This
      * restores the default behaviour for the given change and app, once any app processes have been
      * restarted.
@@ -194,34 +209,44 @@ final class CompatConfig {
      * @param packageName The app package name that was overridden.
      * @return {@code true} if an override existed;
      */
-    boolean removeOverride(long changeId, String packageName) {
+    boolean removeOverride(long changeId, String packageName)
+            throws RemoteException, SecurityException {
         boolean overrideExists = false;
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
-            if (c != null) {
-                overrideExists = true;
-                c.removePackageOverride(packageName);
+            try {
+                if (c != null) {
+                    OverrideAllowedState allowedState =
+                            mOverrideValidator.getOverrideAllowedState(changeId, packageName);
+                    allowedState.enforce(changeId, packageName);
+                    overrideExists = true;
+                    c.removePackageOverride(packageName);
+                }
+            } catch (RemoteException e) {
+                // Should never occur, since validator is in the same process.
+                throw new RuntimeException("Unable to call override validator!", e);
             }
         }
         return overrideExists;
     }
 
     /**
-     * Overrides the enabled state for a given change and app. This method is intended to be used
-     * *only* for debugging purposes.
+     * Overrides the enabled state for a given change and app.
      *
      * <p>Note, package overrides are not persistent and will be lost on system or runtime restart.
      *
      * @param overrides   list of overrides to default changes config.
      * @param packageName app for which the overrides will be applied.
      */
-    void addOverrides(CompatibilityChangeConfig overrides, String packageName) {
+    void addOverrides(CompatibilityChangeConfig overrides, String packageName)
+            throws RemoteException, SecurityException {
         synchronized (mChanges) {
             for (Long changeId : overrides.enabledChanges()) {
                 addOverride(changeId, packageName, true);
             }
             for (Long changeId : overrides.disabledChanges()) {
                 addOverride(changeId, packageName, false);
+
             }
         }
     }
@@ -235,10 +260,22 @@ final class CompatConfig {
      *
      * @param packageName The package for which the overrides should be purged.
      */
-    void removePackageOverrides(String packageName) {
+    void removePackageOverrides(String packageName) throws RemoteException, SecurityException {
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
-                mChanges.valueAt(i).removePackageOverride(packageName);
+                try {
+                    CompatChange change = mChanges.valueAt(i);
+                    OverrideAllowedState allowedState =
+                            mOverrideValidator.getOverrideAllowedState(change.getId(),
+                                                                       packageName);
+                    allowedState.enforce(change.getId(), packageName);
+                    if (change != null) {
+                        mChanges.valueAt(i).removePackageOverride(packageName);
+                    }
+                } catch (RemoteException e) {
+                    // Should never occur, since validator is in the same process.
+                    throw new RuntimeException("Unable to call override validator!", e);
+                }
             }
         }
     }
@@ -326,17 +363,23 @@ final class CompatConfig {
         }
     }
 
-    CompatConfig initConfigFromLib(File libraryDir) {
+    static CompatConfig create(AndroidBuildClassifier androidBuildClassifier, Context context) {
+        CompatConfig config = new CompatConfig(androidBuildClassifier, context);
+        config.initConfigFromLib(Environment.buildPath(
+                Environment.getRootDirectory(), "etc", "compatconfig"));
+        return config;
+    }
+
+    void initConfigFromLib(File libraryDir) {
         if (!libraryDir.exists() || !libraryDir.isDirectory()) {
             Slog.e(TAG, "No directory " + libraryDir + ", skipping");
-            return this;
+            return;
         }
         for (File f : libraryDir.listFiles()) {
             Slog.d(TAG, "Found a config file: " + f.getPath());
             //TODO(b/138222363): Handle duplicate ids across config files.
             readConfig(f);
         }
-        return this;
     }
 
     private void readConfig(File configFile) {
@@ -350,4 +393,7 @@ final class CompatConfig {
         }
     }
 
+    IOverrideValidator getOverrideValidator() {
+        return mOverrideValidator;
+    }
 }
