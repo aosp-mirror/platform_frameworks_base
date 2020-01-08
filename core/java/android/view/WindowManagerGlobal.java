@@ -57,6 +57,12 @@ public final class WindowManagerGlobal {
     private static final String TAG = "WindowManager";
 
     /**
+     * This flag controls whether ViewRootImpl will utilize the Blast Adapter
+     * to send buffer updates to SurfaceFlinger
+     */
+    public static final boolean USE_BLAST_ADAPTER = false;
+
+    /**
      * The user is navigating with keys (not the touch screen), so
      * navigational focus should be shown.
      */
