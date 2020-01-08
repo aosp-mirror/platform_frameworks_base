@@ -7203,7 +7203,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             ActivityManagerServiceDumpProcessesProto.VR_CONTROLLER);
                     if (mController != null) {
                         final long token = proto.start(CONTROLLER);
-                        proto.write(CONTROLLER, mController.toString());
+                        proto.write(ActivityManagerServiceDumpProcessesProto.Controller.CONTROLLER,
+                                mController.toString());
                         proto.write(IS_A_MONKEY, mControllerIsAMonkey);
                         proto.end(token);
                     }
