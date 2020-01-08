@@ -106,8 +106,10 @@ java_defaults {
     name: "framework-wifi-test-defaults",
     sdk_version: "core_platform", // tests can use @CorePlatformApi's
     libs: [
+        // order matters: classes in framework-wifi are resolved before framework, meaning
+        // @hide APIs in framework-wifi are resolved before @SystemApi stubs in framework
         "framework-wifi",
-        "framework-minus-apex",
+        "framework",
 
         // if sdk_version="" this gets automatically included, but here we need to add manually.
         "framework-res",
