@@ -27,6 +27,7 @@ import static android.os.Trace.TRACE_TAG_DATABASE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.AppOpsManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.PackageManager;
@@ -942,7 +943,18 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         return null;
     }
 
-    /** {@hide} */
+    /**
+     * Return the package name of the caller that initiated the request being
+     * processed on the current thread. The returned package will have
+     * <em>not</em> been verified to belong to the calling UID. Returns
+     * {@code null} if not currently processing a request.
+     * <p>
+     * This will always return {@code null} when processing
+     * {@link #getType(Uri)} or {@link #getStreamTypes(Uri, String)} requests.
+     *
+     * @see Binder#getCallingUid()
+     * @see Context#grantUriPermission(String, Uri, int)
+     */
     public final @Nullable String getCallingPackageUnchecked() {
         final Pair<String, String> pkg = mCallingPackage.get();
         if (pkg != null) {
@@ -952,7 +964,14 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         return null;
     }
 
-    /** {@hide} */
+    /**
+     * Called whenever the value of {@link #getCallingPackage()} changes, giving
+     * the provider an opportunity to invalidate any security related caching it
+     * may be performing.
+     * <p>
+     * This typically happens when a {@link ContentProvider} makes a nested call
+     * back into itself when already processing a call from a remote process.
+     */
     public void onCallingPackageChanged() {
     }
 
@@ -1525,8 +1544,24 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         return false;
     }
 
-    /** {@hide} */
+    /**
+     * Perform a detailed internal check on a {@link Uri} to determine if a UID
+     * is able to access it with specific mode flags.
+     * <p>
+     * This method is typically used when the provider implements more dynamic
+     * access controls that cannot be expressed with {@code <path-permission>}
+     * style static rules.
+     *
+     * @param uri the {@link Uri} to perform an access check on.
+     * @param uid the UID to check the permission for.
+     * @param modeFlags the access flags to use for the access check, such as
+     *            {@link Intent#FLAG_GRANT_READ_URI_PERMISSION}.
+     * @return {@link PackageManager#PERMISSION_GRANTED} if access is allowed,
+     *         otherwise {@link PackageManager#PERMISSION_DENIED}.
+     * @hide
+     */
     @Override
+    @SystemApi
     public int checkUriPermission(@NonNull Uri uri, int uid, @Intent.AccessUriMode int modeFlags) {
         return PackageManager.PERMISSION_DENIED;
     }

@@ -35,8 +35,8 @@ import com.android.internal.util.ArrayUtils;
 import libcore.util.EmptyArray;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -56,7 +56,7 @@ public class SQLiteQueryBuilder {
             "(?i)(AVG|COUNT|MAX|MIN|SUM|TOTAL|GROUP_CONCAT)\\((.+)\\)");
 
     private Map<String, String> mProjectionMap = null;
-    private List<Pattern> mProjectionGreylist = null;
+    private Collection<Pattern> mProjectionGreylist = null;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String mTables = "";
@@ -196,20 +196,16 @@ public class SQLiteQueryBuilder {
      * Sets a projection greylist of columns that will be allowed through, even
      * when {@link #setStrict(boolean)} is enabled. This provides a way for
      * abusive custom columns like {@code COUNT(*)} to continue working.
-     *
-     * @hide
      */
-    public void setProjectionGreylist(@Nullable List<Pattern> projectionGreylist) {
+    public void setProjectionGreylist(@Nullable Collection<Pattern> projectionGreylist) {
         mProjectionGreylist = projectionGreylist;
     }
 
     /**
      * Gets the projection greylist for the query, as last configured by
-     * {@link #setProjectionGreylist(List)}.
-     *
-     * @hide
+     * {@link #setProjectionGreylist}.
      */
-    public @Nullable List<Pattern> getProjectionGreylist() {
+    public @Nullable Collection<Pattern> getProjectionGreylist() {
         return mProjectionGreylist;
     }
 

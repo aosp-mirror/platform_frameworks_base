@@ -553,6 +553,7 @@ package android.app {
   }
 
   public class DownloadManager {
+    method @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE) public void onMediaStoreDownloadsDeleted(@NonNull android.util.LongSparseArray<java.lang.String>);
     field public static final String ACTION_DOWNLOAD_COMPLETED = "android.intent.action.DOWNLOAD_COMPLETED";
   }
 
@@ -1629,11 +1630,17 @@ package android.content {
     method @NonNull public final android.os.UserHandle getSendingUser();
   }
 
+  public abstract class ContentProvider implements android.content.ComponentCallbacks2 {
+    method public int checkUriPermission(@NonNull android.net.Uri, int, int);
+  }
+
   public class ContentProviderClient implements java.lang.AutoCloseable {
     method @RequiresPermission(android.Manifest.permission.REMOVE_TASKS) public void setDetectNotResponding(long);
   }
 
   public abstract class ContentResolver {
+    method @NonNull public static android.net.Uri decodeFromFile(@NonNull java.io.File);
+    method @NonNull public static java.io.File encodeToFile(@NonNull android.net.Uri);
     method @Nullable @RequiresPermission("android.permission.CACHE_CONTENT") public android.os.Bundle getCache(@NonNull android.net.Uri);
     method @RequiresPermission("android.permission.CACHE_CONTENT") public void putCache(@NonNull android.net.Uri, @Nullable android.os.Bundle);
   }
@@ -6873,6 +6880,10 @@ package android.os {
     method public boolean hasSingleFileDescriptor();
   }
 
+  public class ParcelFileDescriptor implements java.io.Closeable android.os.Parcelable {
+    method @NonNull public static android.os.ParcelFileDescriptor wrap(@NonNull android.os.ParcelFileDescriptor, @NonNull android.os.Handler, @NonNull android.os.ParcelFileDescriptor.OnCloseListener) throws java.io.IOException;
+  }
+
   public final class PowerManager {
     method @RequiresPermission(allOf={android.Manifest.permission.READ_DREAM_STATE, android.Manifest.permission.WRITE_DREAM_STATE}) public void dream(long);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public boolean forceSuspend();
@@ -7247,6 +7258,10 @@ package android.os.storage {
     method @WorkerThread public long getAllocatableBytes(@NonNull java.util.UUID, @RequiresPermission int) throws java.io.IOException;
     method public static boolean hasIsolatedStorage();
     field @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE) public static final int FLAG_ALLOCATE_AGGRESSIVE = 1; // 0x1
+  }
+
+  public final class StorageVolume implements android.os.Parcelable {
+    method @NonNull public String getId();
   }
 
 }

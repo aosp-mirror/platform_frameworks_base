@@ -18,6 +18,7 @@ package android.os.storage;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -162,9 +163,13 @@ public final class StorageVolume implements Parcelable {
         mState = in.readString();
     }
 
-    /** {@hide} */
-    @UnsupportedAppUsage
-    public String getId() {
+    /**
+     * Return an opaque ID that can be used to identify this volume.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @NonNull String getId() {
         return mId;
     }
 
