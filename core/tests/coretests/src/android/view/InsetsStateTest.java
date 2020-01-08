@@ -23,6 +23,7 @@ import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 
 import static org.junit.Assert.assertEquals;
@@ -116,14 +117,18 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateInsets_imeIgnoredWithoutAdjustResize() {
-        mState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 100, 100));
-        mState.getSource(ITYPE_STATUS_BAR).setVisible(true);
-        mState.getSource(ITYPE_IME).setFrame(new Rect(0, 200, 100, 300));
-        mState.getSource(ITYPE_IME).setVisible(true);
-        WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), false, false,
-                DisplayCutout.NO_CUTOUT, null, null, 0, null);
-        assertEquals(0, insets.getSystemWindowInsetBottom());
-        assertTrue(insets.isVisible(ime()));
+        try (final InsetsModeSession session =
+                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_FULL)) {
+            mState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 100, 100));
+            mState.getSource(ITYPE_STATUS_BAR).setVisible(true);
+            mState.getSource(ITYPE_IME).setFrame(new Rect(0, 200, 100, 300));
+            mState.getSource(ITYPE_IME).setVisible(true);
+            WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), false, false,
+                    DisplayCutout.NO_CUTOUT, null, null, SOFT_INPUT_ADJUST_NOTHING, null);
+            assertEquals(0, insets.getSystemWindowInsetBottom());
+            assertEquals(100, insets.getInsets(ime()).bottom);
+            assertTrue(insets.isVisible(ime()));
+        }
     }
 
     @Test
