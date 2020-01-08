@@ -482,7 +482,7 @@ class UserUsageStatsService {
     }
 
     UsageEvents queryEvents(final long beginTime, final long endTime,
-                            boolean obfuscateInstantApps) {
+                            boolean obfuscateInstantApps, boolean hideShortcutInvocationEvents) {
         if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
             return null;
         }
@@ -500,6 +500,10 @@ class UserUsageStatsService {
                             }
 
                             Event event = stats.events.get(i);
+                            if (hideShortcutInvocationEvents
+                                    && event.mEventType == Event.SHORTCUT_INVOCATION) {
+                                continue;
+                            }
                             if (obfuscateInstantApps) {
                                 event = event.getObfuscatedIfInstantApp();
                             }
