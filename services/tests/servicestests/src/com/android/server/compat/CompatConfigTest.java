@@ -18,12 +18,20 @@ package com.android.server.compat;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.when;
+
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.compat.AndroidBuildClassifier;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,6 +41,11 @@ import java.util.UUID;
 
 @RunWith(AndroidJUnit4.class)
 public class CompatConfigTest {
+
+    @Mock
+    private Context mContext;
+    @Mock
+    private AndroidBuildClassifier mBuildClassifier;
 
     private ApplicationInfo makeAppInfo(String pName, int targetSdkVersion) {
         ApplicationInfo ai = new ApplicationInfo();
@@ -54,43 +67,51 @@ public class CompatConfigTest {
         os.close();
     }
 
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        // Assume userdebug/eng non-final build
+        when(mBuildClassifier.isDebuggableBuild()).thenReturn(true);
+        when(mBuildClassifier.isFinalBuild()).thenReturn(false);
+    }
+
     @Test
-    public void testUnknownChangeEnabled() {
-        CompatConfig pc = new CompatConfig();
+    public void testUnknownChangeEnabled() throws Exception {
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 1))).isTrue();
     }
 
     @Test
-    public void testDisabledChangeDisabled() {
-        CompatConfig pc = new CompatConfig();
+    public void testDisabledChangeDisabled() throws Exception {
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, true, ""));
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 1))).isFalse();
     }
 
     @Test
-    public void testTargetSdkChangeDisabled() {
-        CompatConfig pc = new CompatConfig();
+    public void testTargetSdkChangeDisabled() throws Exception {
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         pc.addChange(new CompatChange(1234L, "MY_CHANGE", 2, false, null));
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 2))).isFalse();
     }
 
     @Test
-    public void testTargetSdkChangeEnabled() {
-        CompatConfig pc = new CompatConfig();
+    public void testTargetSdkChangeEnabled() throws Exception {
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         pc.addChange(new CompatChange(1234L, "MY_CHANGE", 2, false, ""));
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 3))).isTrue();
     }
 
     @Test
-    public void testDisabledOverrideTargetSdkChange() {
-        CompatConfig pc = new CompatConfig();
+    public void testDisabledOverrideTargetSdkChange() throws Exception {
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         pc.addChange(new CompatChange(1234L, "MY_CHANGE", 2, true, null));
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 3))).isFalse();
     }
 
     @Test
-    public void testGetDisabledChanges() {
-        CompatConfig pc = new CompatConfig();
+    public void testGetDisabledChanges() throws Exception {
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, true, null));
         pc.addChange(new CompatChange(2345L, "OTHER_CHANGE", -1, false, null));
         assertThat(pc.getDisabledChanges(
@@ -98,8 +119,8 @@ public class CompatConfigTest {
     }
 
     @Test
-    public void testGetDisabledChangesSorted() {
-        CompatConfig pc = new CompatConfig();
+    public void testGetDisabledChangesSorted() throws Exception {
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         pc.addChange(new CompatChange(1234L, "MY_CHANGE", 2, true, null));
         pc.addChange(new CompatChange(123L, "OTHER_CHANGE", 2, true, null));
         pc.addChange(new CompatChange(12L, "THIRD_CHANGE", 2, true, null));
@@ -108,8 +129,8 @@ public class CompatConfigTest {
     }
 
     @Test
-    public void testPackageOverrideEnabled() {
-        CompatConfig pc = new CompatConfig();
+    public void testPackageOverrideEnabled() throws Exception {
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, true, null)); // disabled
         pc.addOverride(1234L, "com.some.package", true);
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 2))).isTrue();
@@ -117,8 +138,8 @@ public class CompatConfigTest {
     }
 
     @Test
-    public void testPackageOverrideDisabled() {
-        CompatConfig pc = new CompatConfig();
+    public void testPackageOverrideDisabled() throws Exception {
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, false, null));
         pc.addOverride(1234L, "com.some.package", false);
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 2))).isFalse();
@@ -126,22 +147,22 @@ public class CompatConfigTest {
     }
 
     @Test
-    public void testPackageOverrideUnknownPackage() {
-        CompatConfig pc = new CompatConfig();
+    public void testPackageOverrideUnknownPackage() throws Exception {
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         pc.addOverride(1234L, "com.some.package", false);
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 2))).isFalse();
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.other.package", 2))).isTrue();
     }
 
     @Test
-    public void testPackageOverrideUnknownChange() {
-        CompatConfig pc = new CompatConfig();
+    public void testPackageOverrideUnknownChange() throws Exception {
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 1))).isTrue();
     }
 
     @Test
-    public void testRemovePackageOverride() {
-        CompatConfig pc = new CompatConfig();
+    public void testRemovePackageOverride() throws Exception {
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, false, null));
         pc.addOverride(1234L, "com.some.package", false);
         pc.removeOverride(1234L, "com.some.package");
@@ -149,16 +170,16 @@ public class CompatConfigTest {
     }
 
     @Test
-    public void testLookupChangeId() {
-        CompatConfig pc = new CompatConfig();
+    public void testLookupChangeId() throws Exception {
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, false, null));
         pc.addChange(new CompatChange(2345L, "ANOTHER_CHANGE", -1, false, null));
         assertThat(pc.lookupChangeId("MY_CHANGE")).isEqualTo(1234L);
     }
 
     @Test
-    public void testLookupChangeIdNotPresent() {
-        CompatConfig pc = new CompatConfig();
+    public void testLookupChangeIdNotPresent() throws Exception {
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         assertThat(pc.lookupChangeId("MY_CHANGE")).isEqualTo(-1L);
     }
 
@@ -173,7 +194,7 @@ public class CompatConfigTest {
         File dir = createTempDir();
         writeToFile(dir, "platform_compat_config.xml", configXml);
 
-        CompatConfig pc = new CompatConfig();
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         pc.initConfigFromLib(dir);
 
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 1))).isFalse();
@@ -196,7 +217,7 @@ public class CompatConfigTest {
         writeToFile(dir, "libcore_platform_compat_config.xml", configXml1);
         writeToFile(dir, "frameworks_platform_compat_config.xml", configXml2);
 
-        CompatConfig pc = new CompatConfig();
+        CompatConfig pc = new CompatConfig(mBuildClassifier, mContext);
         pc.initConfigFromLib(dir);
 
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 1))).isFalse();
