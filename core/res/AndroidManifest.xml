@@ -456,7 +456,6 @@
     <protected-broadcast android:name="android.intent.action.internal_sim_state_changed" />
     <protected-broadcast android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
     <protected-broadcast android:name="android.intent.action.PRECISE_CALL_STATE" />
-    <protected-broadcast android:name="android.intent.action.PRECISE_DATA_CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.intent.action.SUBSCRIPTION_PHONE_STATE" />
     <protected-broadcast android:name="android.intent.action.USER_INFO_CHANGED" />
     <protected-broadcast android:name="android.intent.action.USER_UNLOCKED" />
