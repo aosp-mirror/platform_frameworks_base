@@ -85,8 +85,7 @@ public class SignalStrength implements Parcelable {
     /**
      * Create a new SignalStrength from a intent notifier Bundle
      *
-     * This method is used by PhoneStateIntentReceiver and maybe by
-     * external applications.
+     * This method may be used by external applications.
      *
      * @param m Bundle from intent notifier
      * @return newly created SignalStrength

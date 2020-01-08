@@ -50,8 +50,7 @@ public abstract class CellLocation {
     /**
      * Create a new CellLocation from a intent notifier Bundle
      *
-     * This method is used by PhoneStateIntentReceiver and maybe by
-     * external applications.
+     * This method maybe used by external applications.
      *
      * @param bundle Bundle from intent notifier
      * @return newly created CellLocation

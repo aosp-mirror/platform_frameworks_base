@@ -4841,7 +4841,6 @@ com.android.internal.telephony.PhoneConstants$State
 com.android.internal.telephony.PhoneFactory
 com.android.internal.telephony.PhoneInternalInterface
 com.android.internal.telephony.PhoneNotifier
-com.android.internal.telephony.PhoneStateIntentReceiver
 com.android.internal.telephony.PhoneSubInfoController$CallPhoneMethodHelper
 com.android.internal.telephony.PhoneSubInfoController$PermissionCheckHelper
 com.android.internal.telephony.PhoneSubInfoController
