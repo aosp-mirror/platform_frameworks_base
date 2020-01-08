@@ -41,7 +41,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
@@ -713,8 +712,8 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     /**
-     * Gets a list of all supported users (i.e., those that pass the {@link #isSupported(UserInfo)}
-     * check).
+     * Gets a list of all supported users (i.e., those that pass the
+     * {@link #isSupportedUser(TargetUser)}check).
      */
     @NonNull
     protected List<UserInfo> getSupportedUsers() {
@@ -723,7 +722,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         final List<UserInfo> supportedUsers = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             final UserInfo userInfo = allUsers[i];
-            if (isSupported(userInfo)) {
+            if (isSupportedUser(new TargetUser(userInfo))) {
                 supportedUsers.add(userInfo);
             }
         }

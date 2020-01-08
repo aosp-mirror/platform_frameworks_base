@@ -18,18 +18,23 @@ package com.android.server;
 
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_DEFAULT;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.IBinder;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.os.UserManager;
 
 import com.android.server.pm.UserManagerService;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,15 +62,17 @@ import java.util.List;
  *
  * {@hide}
  */
+//@SystemApi(client = Client.MODULE_LIBRARIES, process = Process.SYSTEM_SERVER)
 public abstract class SystemService {
 
+    /** @hide */
     // TODO(b/133242016) STOPSHIP: change to false before R ships
     protected static final boolean DEBUG_USER = true;
 
     /*
-     * Boot Phases
+     * The earliest boot phase the system send to system services on boot.
      */
-    public static final int PHASE_WAIT_FOR_DEFAULT_DISPLAY = 100; // maybe should be a dependency?
+    public static final int PHASE_WAIT_FOR_DEFAULT_DISPLAY = 100;
 
     /**
      * After receiving this boot phase, services can obtain lock settings data.
@@ -98,11 +105,68 @@ public abstract class SystemService {
      * After receiving this boot phase, services can allow user interaction with the device.
      * This phase occurs when boot has completed and the home application has started.
      * System services may prefer to listen to this phase rather than registering a
-     * broadcast receiver for ACTION_BOOT_COMPLETED to reduce overall latency.
+     * broadcast receiver for {@link android.content.Intent#ACTION_LOCKED_BOOT_COMPLETED}
+     * to reduce overall latency.
      */
     public static final int PHASE_BOOT_COMPLETED = 1000;
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "PHASE_" }, value = {
+            PHASE_WAIT_FOR_DEFAULT_DISPLAY,
+            PHASE_LOCK_SETTINGS_READY,
+            PHASE_SYSTEM_SERVICES_READY,
+            PHASE_DEVICE_SPECIFIC_SERVICES_READY,
+            PHASE_ACTIVITY_MANAGER_READY,
+            PHASE_THIRD_PARTY_APPS_CAN_START,
+            PHASE_BOOT_COMPLETED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BootPhase {}
+
     private final Context mContext;
+
+    /**
+     * Class representing user in question in the lifecycle callbacks.
+     * @hide
+     */
+    //@SystemApi(client = Client.MODULE_LIBRARIES, process = Process.SYSTEM_SERVER)
+    public static final class TargetUser {
+        @NonNull
+        private final UserInfo mUserInfo;
+
+        /** @hide */
+        public TargetUser(@NonNull UserInfo userInfo) {
+            mUserInfo = userInfo;
+        }
+
+        /**
+         * @return The information about the user. <b>NOTE: </b> this is a "live" object
+         * referenced by {@link UserManagerService} and hence should not be modified.
+         *
+         * @hide
+         */
+        @NonNull
+        public UserInfo getUserInfo() {
+            return mUserInfo;
+        }
+
+        /**
+         * @return the target {@link UserHandle}.
+         */
+        @NonNull
+        public UserHandle getUserHandle() {
+            return mUserInfo.getUserHandle();
+        }
+
+        /**
+         * @return the integer user id
+         *
+         * @hide
+         */
+        public int getUserIdentifier() {
+            return mUserInfo.id;
+        }
+    }
 
     /**
      * Initializes the system service.
@@ -113,13 +177,14 @@ public abstract class SystemService {
      *
      * @param context The system server context.
      */
-    public SystemService(Context context) {
+    public SystemService(@NonNull Context context) {
         mContext = context;
     }
 
     /**
      * Gets the system context.
      */
+    @NonNull
     public final Context getContext() {
         return mContext;
     }
@@ -128,6 +193,8 @@ public abstract class SystemService {
      * Get the system UI context. This context is to be used for displaying UI. It is themable,
      * which means resources can be overridden at runtime. Do not use to retrieve properties that
      * configure the behavior of the device that is not UX related.
+     *
+     * @hide
      */
     public final Context getUiContext() {
         // This has already been set up by the time any SystemServices are created.
@@ -137,15 +204,16 @@ public abstract class SystemService {
     /**
      * Returns true if the system is running in safe mode.
      * TODO: we should define in which phase this becomes valid
+     *
+     * @hide
      */
     public final boolean isSafeMode() {
         return getManager().isSafeMode();
     }
 
     /**
-     * Called when the dependencies listed in the @Service class-annotation are available
-     * and after the chosen start phase.
-     * When this method returns, the service should be published.
+     * Called when the system service should publish a binder service using
+     * {@link #publishBinderService(String, IBinder).}
      */
     public abstract void onStart();
 
@@ -155,7 +223,7 @@ public abstract class SystemService {
      *
      * @param phase The current boot phase.
      */
-    public void onBootPhase(int phase) {}
+    public void onBootPhase(@BootPhase int phase) {}
 
     /**
      * Checks if the service should be available for the given user.
@@ -163,12 +231,14 @@ public abstract class SystemService {
      * <p>By default returns {@code true}, but subclasses should extend for optimization, if they
      * don't support some types (like headless system user).
      */
-    public boolean isSupported(@NonNull UserInfo userInfo) {
+    public boolean isSupportedUser(@NonNull TargetUser user) {
         return true;
     }
 
     /**
-     * Helper method used to dump which users are {@link #onStartUser(UserInfo) supported}.
+     * Helper method used to dump which users are {@link #onStartUser(TargetUser) supported}.
+     *
+     * @hide
      */
     protected void dumpSupportedUsers(@NonNull PrintWriter pw, @NonNull String prefix) {
         final List<UserInfo> allUsers = UserManager.get(mContext).getUsers();
@@ -187,32 +257,57 @@ public abstract class SystemService {
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onStartUser(UserInfo)} instead (which by default
-     * calls this method).
+     * @deprecated subclasses should extend {@link #onStartUser(TargetUser)} instead
+     * (which by default calls this method).
+     *
+     * @hide
      */
     @Deprecated
     public void onStartUser(@UserIdInt int userId) {}
 
     /**
-     * Called when a new user is starting, for system services to initialize any per-user
-     * state they maintain for running users.
+     * @deprecated subclasses should extend {@link #onStartUser(TargetUser)} instead
+     * (which by default calls this method).
      *
-     * <p>This method is only called when the service {@link #isSupported(UserInfo) supports} this
-     * user.
-     *
-     * @param userInfo The information about the user. <b>NOTE: </b> this is a "live" object
-     * referenced by {@link UserManagerService} and hence should not be modified.
+     * @hide
      */
+    @Deprecated
     public void onStartUser(@NonNull UserInfo userInfo) {
         onStartUser(userInfo.id);
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onUnlockUser(UserInfo)} instead (which by
+     * Called when a new user is starting, for system services to initialize any per-user
+     * state they maintain for running users.
+     *
+     * <p>This method is only called when the service {@link #isSupportedUser(TargetUser) supports}
+     * this user.
+     *
+     * @param user target user
+     */
+    public void onStartUser(@NonNull TargetUser user) {
+        onStartUser(user.getUserInfo());
+    }
+
+    /**
+     * @deprecated subclasses should extend {@link #onUnlockUser(TargetUser)} instead (which by
      * default calls this method).
+     *
+     * @hide
      */
     @Deprecated
     public void onUnlockUser(@UserIdInt int userId) {}
+
+    /**
+     * @deprecated subclasses should extend {@link #onUnlockUser(TargetUser)} instead (which by
+     * default calls this method).
+     *
+     * @hide
+     */
+    @Deprecated
+    public void onUnlockUser(@NonNull UserInfo userInfo) {
+        onUnlockUser(userInfo.id);
+    }
 
     /**
      * Called when an existing user is in the process of being unlocked. This
@@ -226,47 +321,73 @@ public abstract class SystemService {
      * {@link UserManager#isUserUnlockingOrUnlocked(int)} to handle both of
      * these states.
      * <p>
-     * This method is only called when the service {@link #isSupported(UserInfo) supports} this
-     * user.
+     * This method is only called when the service {@link #isSupportedUser(TargetUser) supports}
+     * this user.
      *
-     * @param userInfo The information about the user. <b>NOTE: </b> this is a "live" object
-     * referenced by {@link UserManagerService} and hence should not be modified.
+     * @param user target user
      */
-    public void onUnlockUser(@NonNull UserInfo userInfo) {
-        onUnlockUser(userInfo.id);
+    public void onUnlockUser(@NonNull TargetUser user) {
+        onUnlockUser(user.getUserInfo());
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onSwitchUser(UserInfo, UserInfo)} instead
+     * @deprecated subclasses should extend {@link #onSwitchUser(TargetUser, TargetUser)} instead
      * (which by default calls this method).
+     *
+     * @hide
      */
     @Deprecated
-    public void onSwitchUser(@UserIdInt int userId) {}
+    public void onSwitchUser(@UserIdInt int toUserId) {}
+
+    /**
+     * @deprecated subclasses should extend {@link #onSwitchUser(TargetUser, TargetUser)} instead
+     * (which by default calls this method).
+     *
+     * @hide
+     */
+    @Deprecated
+    public void onSwitchUser(@Nullable UserInfo from, @NonNull UserInfo to) {
+        onSwitchUser(to.id);
+    }
 
     /**
      * Called when switching to a different foreground user, for system services that have
      * special behavior for whichever user is currently in the foreground.  This is called
      * before any application processes are aware of the new user.
      *
-     * <p>This method is only called when the service {@link #isSupported(UserInfo) supports} either
-     * of the users ({@code from} or {@code to}).
+     * <p>This method is only called when the service {@link #isSupportedUser(TargetUser) supports}
+     * either of the users ({@code from} or {@code to}).
      *
      * <b>NOTE: </b> both {@code from} and {@code to} are "live" objects
      * referenced by {@link UserManagerService} and hence should not be modified.
      *
-     * @param from The information about the user being switched from.
-     * @param to The information about the user being switched from to.
+     * @param from the user switching from
+     * @param to the user switching to
      */
-    public void onSwitchUser(@NonNull UserInfo from, @NonNull UserInfo to) {
-        onSwitchUser(to.id);
+    public void onSwitchUser(@Nullable TargetUser from, @NonNull TargetUser to) {
+        onSwitchUser((from == null ? null : from.getUserInfo()), to.getUserInfo());
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onStopUser(UserInfo)} instead (which by default
-     * calls this method).
+     * @deprecated subclasses should extend {@link #onStopUser(TargetUser)} instead
+     * (which by default calls this method).
+     *
+     * @hide
      */
     @Deprecated
     public void onStopUser(@UserIdInt int userId) {}
+
+    /**
+     * @deprecated subclasses should extend {@link #onStopUser(TargetUser)} instead
+     * (which by default calls this method).
+     *
+     * @hide
+     */
+    @Deprecated
+    public void onStopUser(@NonNull UserInfo user) {
+        onStopUser(user.id);
+
+    }
 
     /**
      * Called when an existing user is stopping, for system services to finalize any per-user
@@ -274,42 +395,53 @@ public abstract class SystemService {
      * broadcast to the user; it is a good place to stop making use of any resources of that
      * user (such as binding to a service running in the user).
      *
-     * <p>This method is only called when the service {@link #isSupported(UserInfo) supports} this
-     * user.
+     * <p>This method is only called when the service {@link #isSupportedUser(TargetUser) supports}
+     * this user.
      *
      * <p>NOTE: This is the last callback where the callee may access the target user's CE storage.
      *
-     * @param userInfo The information about the user. <b>NOTE: </b> this is a "live" object
-     * referenced by {@link UserManagerService} and hence should not be modified.
+     * @param user target user
      */
-    public void onStopUser(@NonNull UserInfo userInfo) {
-        onStopUser(userInfo.id);
+    public void onStopUser(@NonNull TargetUser user) {
+        onStopUser(user.getUserInfo());
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onCleanupUser(UserInfo)} instead (which by
+     * @deprecated subclasses should extend {@link #onCleanupUser(TargetUser)} instead (which by
      * default calls this method).
+     *
+     * @hide
      */
     @Deprecated
     public void onCleanupUser(@UserIdInt int userId) {}
+
+    /**
+     * @deprecated subclasses should extend {@link #onCleanupUser(TargetUser)} instead (which by
+     * default calls this method).
+     *
+     * @hide
+     */
+    @Deprecated
+    public void onCleanupUser(@NonNull UserInfo user) {
+        onCleanupUser(user.id);
+    }
 
     /**
      * Called when an existing user is stopping, for system services to finalize any per-user
      * state they maintain for running users.  This is called after all application process
      * teardown of the user is complete.
      *
-     * <p>This method is only called when the service {@link #isSupported(UserInfo) supports} this
-     * user.
+     * <p>This method is only called when the service {@link #isSupportedUser(TargetUser) supports}
+     * this user.
      *
      * <p>NOTE: When this callback is called, the CE storage for the target user may not be
-     * accessible already.  Use {@link #onStopUser(UserInfo)} instead if you need to access the CE
+     * accessible already.  Use {@link #onStopUser(TargetUser)} instead if you need to access the CE
      * storage.
      *
-     * @param userInfo The information about the user. <b>NOTE: </b> this is a "live" object
-     * referenced by {@link UserManagerService} and hence should not be modified.
+     * @param user target user
      */
-    public void onCleanupUser(@NonNull UserInfo userInfo) {
-        onCleanupUser(userInfo.id);
+    public void onCleanupUser(@NonNull TargetUser user) {
+        onCleanupUser(user.getUserInfo());
     }
 
     /**
@@ -318,7 +450,7 @@ public abstract class SystemService {
      * @param name the name of the new service
      * @param service the service object
      */
-    protected final void publishBinderService(String name, IBinder service) {
+    protected final void publishBinderService(@NonNull String name, @NonNull IBinder service) {
         publishBinderService(name, service, false);
     }
 
@@ -330,7 +462,7 @@ public abstract class SystemService {
      * @param allowIsolated set to true to allow isolated sandboxed processes
      * to access this service
      */
-    protected final void publishBinderService(String name, IBinder service,
+    protected final void publishBinderService(@NonNull String name, @NonNull IBinder service,
             boolean allowIsolated) {
         publishBinderService(name, service, allowIsolated, DUMP_FLAG_PRIORITY_DEFAULT);
     }
@@ -343,6 +475,8 @@ public abstract class SystemService {
      * @param allowIsolated set to true to allow isolated sandboxed processes
      * to access this service
      * @param dumpPriority supported dump priority levels as a bitmask
+     *
+     * @hide
      */
     protected final void publishBinderService(String name, IBinder service,
             boolean allowIsolated, int dumpPriority) {
@@ -351,6 +485,8 @@ public abstract class SystemService {
 
     /**
      * Get a binder service by its name.
+     *
+     * @hide
      */
     protected final IBinder getBinderService(String name) {
         return ServiceManager.getService(name);
@@ -358,6 +494,8 @@ public abstract class SystemService {
 
     /**
      * Publish the service so it is only accessible to the system process.
+     *
+     * @hide
      */
     protected final <T> void publishLocalService(Class<T> type, T service) {
         LocalServices.addService(type, service);
@@ -365,6 +503,8 @@ public abstract class SystemService {
 
     /**
      * Get a local service by interface.
+     *
+     * @hide
      */
     protected final <T> T getLocalService(Class<T> type) {
         return LocalServices.getService(type);

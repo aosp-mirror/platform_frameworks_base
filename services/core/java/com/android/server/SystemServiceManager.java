@@ -27,6 +27,7 @@ import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.util.Slog;
 
+import com.android.server.SystemService.TargetUser;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import java.io.File;
@@ -264,26 +265,26 @@ public class SystemServiceManager {
             @UserIdInt int curUserId, @UserIdInt int prevUserId) {
         t.traceBegin("ssm." + onWhat + "User-" + curUserId);
         Slog.i(TAG, "Calling on" + onWhat + "User " + curUserId);
-        final UserInfo curUserInfo = getUserInfo(curUserId);
-        final UserInfo prevUserInfo = prevUserId == UserHandle.USER_NULL ? null
-                : getUserInfo(prevUserId);
+        final TargetUser curUser = new TargetUser(getUserInfo(curUserId));
+        final TargetUser prevUser = prevUserId == UserHandle.USER_NULL ? null
+                : new TargetUser(getUserInfo(prevUserId));
         final int serviceLen = mServices.size();
         for (int i = 0; i < serviceLen; i++) {
             final SystemService service = mServices.get(i);
             final String serviceName = service.getClass().getName();
-            boolean supported = service.isSupported(curUserInfo);
+            boolean supported = service.isSupportedUser(curUser);
 
             // Must check if either curUser or prevUser is supported (for example, if switching from
             // unsupported to supported, we still need to notify the services)
-            if (!supported && prevUserInfo != null) {
-                supported = service.isSupported(prevUserInfo);
+            if (!supported && prevUser != null) {
+                supported = service.isSupportedUser(prevUser);
             }
 
             if (!supported) {
                 if (DEBUG) {
                     Slog.d(TAG, "Skipping " + onWhat + "User-" + curUserId + " on service "
                             + serviceName + " because it's not supported (curUser: "
-                            + curUserInfo + ", prevUser:" + prevUserInfo + ")");
+                            + curUser + ", prevUser:" + prevUser + ")");
                 } else {
                     Slog.i(TAG,  "Skipping " + onWhat + "User-" + curUserId + " on "
                             + serviceName);
@@ -295,25 +296,25 @@ public class SystemServiceManager {
             try {
                 switch (onWhat) {
                     case SWITCH:
-                        service.onSwitchUser(prevUserInfo, curUserInfo);
+                        service.onSwitchUser(prevUser, curUser);
                         break;
                     case START:
-                        service.onStartUser(curUserInfo);
+                        service.onStartUser(curUser);
                         break;
                     case UNLOCK:
-                        service.onUnlockUser(curUserInfo);
+                        service.onUnlockUser(curUser);
                         break;
                     case STOP:
-                        service.onStopUser(curUserInfo);
+                        service.onStopUser(curUser);
                         break;
                     case CLEANUP:
-                        service.onCleanupUser(curUserInfo);
+                        service.onCleanupUser(curUser);
                         break;
                     default:
                         throw new IllegalArgumentException(onWhat + " what?");
                 }
             } catch (Exception ex) {
-                Slog.wtf(TAG, "Failure reporting " + onWhat + " of user " + curUserInfo
+                Slog.wtf(TAG, "Failure reporting " + onWhat + " of user " + curUser
                         + " to service " + serviceName, ex);
             }
             warnIfTooLong(SystemClock.elapsedRealtime() - time, service,
