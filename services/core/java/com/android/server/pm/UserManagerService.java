@@ -1132,14 +1132,13 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Returns the user type, e.g. {@link UserManager#USER_TYPE_FULL_GUEST}, of the given userId,
-     * or null if the user doesn't exist.
+     * Returns whether the given user (specified by userId) is of the given user type, such as
+     * {@link UserManager#USER_TYPE_FULL_GUEST}.
      */
     @Override
-    public @Nullable String getUserTypeForUser(@UserIdInt int userId) {
-        // TODO(b/142482943): Decide on the appropriate permission requirements.
-        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "getUserTypeForUser");
-        return getUserTypeNoChecks(userId);
+    public boolean isUserOfType(@UserIdInt int userId, String userType) {
+        checkManageUsersPermission("check user type");
+        return userType != null && userType.equals(getUserTypeNoChecks(userId));
     }
 
     /**

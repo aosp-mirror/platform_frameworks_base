@@ -62,7 +62,7 @@ interface IUserManager {
     boolean canAddMoreManagedProfiles(int userId, boolean allowedToRemoveOne);
     UserInfo getProfileParent(int userId);
     boolean isSameProfileGroup(int userId, int otherUserHandle);
-    String getUserTypeForUser(int userId);
+    boolean isUserOfType(int userId, in String userType);
     @UnsupportedAppUsage
     UserInfo getUserInfo(int userId);
     String getUserAccount(int userId);
