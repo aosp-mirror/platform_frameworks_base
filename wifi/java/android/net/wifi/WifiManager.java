@@ -545,15 +545,22 @@ public class WifiManager {
     public static final String EXTRA_WIFI_AP_STATE = "wifi_state";
 
     /**
-     * The look up key for an int that indicates why softAP started failed
-     * currently support general and no_channel
-     * @see #SAP_START_FAILURE_GENERAL
-     * @see #SAP_START_FAILURE_NO_CHANNEL
-     * @see #SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION
+     * An extra containing the int error code for Soft AP start failure.
+     * Can be obtained from the {@link #WIFI_AP_STATE_CHANGED_ACTION} using
+     * {@link android.content.Intent#getIntExtra}.
+     * This extra will only be attached if {@link #EXTRA_WIFI_AP_STATE} is
+     * attached and is equal to {@link #WIFI_AP_STATE_FAILED}.
+     *
+     * The error code will be one of:
+     * {@link #SAP_START_FAILURE_GENERAL},
+     * {@link #SAP_START_FAILURE_NO_CHANNEL},
+     * {@link #SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION}
      *
      * @hide
      */
-    public static final String EXTRA_WIFI_AP_FAILURE_REASON = "wifi_ap_error_code";
+    @SystemApi
+    public static final String EXTRA_WIFI_AP_FAILURE_REASON =
+            "android.net.wifi.extra.WIFI_AP_FAILURE_REASON";
     /**
      * The previous Wi-Fi state.
      *
