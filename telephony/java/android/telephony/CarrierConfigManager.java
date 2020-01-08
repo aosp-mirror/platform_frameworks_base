@@ -1625,8 +1625,8 @@ public class CarrierConfigManager {
      * Defines carrier-specific actions which act upon
      * com.android.internal.telephony.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED
      * and configured signal args:
-     * {@link com.android.internal.telephony.TelephonyIntents#EXTRA_APN_TYPE_KEY apnType},
-     * {@link com.android.internal.telephony.TelephonyIntents#EXTRA_ERROR_CODE_KEY errorCode}
+     * {@link TelephonyManager#EXTRA_APN_TYPE apnType},
+     * {@link TelephonyManager#EXTRA_ERROR_CODE errorCode}
      * used for customization of the default carrier app
      * Format:
      * {
