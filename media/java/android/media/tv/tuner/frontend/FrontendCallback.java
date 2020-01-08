@@ -16,8 +16,6 @@
 
 package android.media.tv.tuner.frontend;
 
-import android.media.tv.tuner.ScanMessage;
-
 /**
  * Frontend Callback.
  *

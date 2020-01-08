@@ -227,41 +227,6 @@ public final class TunerConstants {
     /** @hide */
     public static final int FRONTEND_SCAN_BLIND = Constants.FrontendScanType.SCAN_BLIND;
 
-    /** @hide */
-    @IntDef({SCAN_MESSAGE_TYPE_LOCKED, SCAN_MESSAGE_TYPE_END, SCAN_MESSAGE_TYPE_PROGRESS_PERCENT,
-            SCAN_MESSAGE_TYPE_FREQUENCY, SCAN_MESSAGE_TYPE_SYMBOL_RATE, SCAN_MESSAGE_TYPE_PLP_IDS,
-            SCAN_MESSAGE_TYPE_GROUP_IDS, SCAN_MESSAGE_TYPE_INPUT_STREAM_IDS,
-            SCAN_MESSAGE_TYPE_STANDARD, SCAN_MESSAGE_TYPE_ATSC3_PLP_INFO})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface ScanMessageType {}
-    /** @hide */
-    public static final int SCAN_MESSAGE_TYPE_LOCKED = Constants.FrontendScanMessageType.LOCKED;
-    /** @hide */
-    public static final int SCAN_MESSAGE_TYPE_END = Constants.FrontendScanMessageType.END;
-    /** @hide */
-    public static final int SCAN_MESSAGE_TYPE_PROGRESS_PERCENT =
-            Constants.FrontendScanMessageType.PROGRESS_PERCENT;
-    /** @hide */
-    public static final int SCAN_MESSAGE_TYPE_FREQUENCY =
-            Constants.FrontendScanMessageType.FREQUENCY;
-    /** @hide */
-    public static final int SCAN_MESSAGE_TYPE_SYMBOL_RATE =
-            Constants.FrontendScanMessageType.SYMBOL_RATE;
-    /** @hide */
-    public static final int SCAN_MESSAGE_TYPE_PLP_IDS = Constants.FrontendScanMessageType.PLP_IDS;
-    /** @hide */
-    public static final int SCAN_MESSAGE_TYPE_GROUP_IDS =
-            Constants.FrontendScanMessageType.GROUP_IDS;
-    /** @hide */
-    public static final int SCAN_MESSAGE_TYPE_INPUT_STREAM_IDS =
-            Constants.FrontendScanMessageType.INPUT_STREAM_IDS;
-    /** @hide */
-    public static final int SCAN_MESSAGE_TYPE_STANDARD =
-            Constants.FrontendScanMessageType.STANDARD;
-    /** @hide */
-    public static final int SCAN_MESSAGE_TYPE_ATSC3_PLP_INFO =
-            Constants.FrontendScanMessageType.ATSC3_PLP_INFO;
-
 
     /** @hide */
     @IntDef({FRONTEND_STATUS_TYPE_DEMOD_LOCK, FRONTEND_STATUS_TYPE_SNR, FRONTEND_STATUS_TYPE_BER,
