@@ -1,10 +1,10 @@
 # Copyright (C) 2019 The Android Open Source Project
 #
-# Bionic loader config file for the sdkext apex.
+# Bionic loader config file for the sdkextensions apex.
 
-dir.sdkext = /apex/com.android.sdkext/bin/
+dir.sdkextensions = /apex/com.android.sdkext/bin/
 
-[sdkext]
+[sdkextensions]
 additional.namespaces = platform
 
 namespace.default.isolated = true
