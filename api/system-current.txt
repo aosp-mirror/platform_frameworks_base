@@ -10379,6 +10379,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
     method public int getEmergencyNumberDbVersion();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String[] getIsimImpu();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimIst();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Map<java.lang.Integer,java.lang.Integer> getLogicalToPhysicalSlotMapping();
     method public int getMaxNumberOfSimultaneouslyActiveSims();
@@ -11083,6 +11084,7 @@ package android.telephony.ims {
   public class ImsManager {
     method @NonNull public android.telephony.ims.ImsMmTelManager getImsMmTelManager(int);
     method @NonNull public android.telephony.ims.ImsRcsManager getImsRcsManager(int);
+    field public static final String ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION = "com.android.internal.intent.action.ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION";
   }
 
   public class ImsMmTelManager implements android.telephony.ims.RegistrationManager {
@@ -11382,8 +11384,22 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setProvisioningStatusForCapability(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningStringValue(int, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterProvisioningChangedCallback(@NonNull android.telephony.ims.ProvisioningManager.Callback);
+    field public static final int KEY_EAB_PROVISIONING_STATUS = 25; // 0x19
+    field public static final int KEY_RCS_AVAILABILITY_CACHE_EXPIRATION_SEC = 19; // 0x13
+    field public static final int KEY_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC = 18; // 0x12
+    field public static final int KEY_RCS_CAPABILITIES_POLL_INTERVAL_SEC = 20; // 0x14
+    field public static final int KEY_RCS_CAPABILITY_DISCOVERY_ENABLED = 17; // 0x11
+    field public static final int KEY_RCS_CAPABILITY_POLL_LIST_SUB_EXP_SEC = 23; // 0x17
+    field public static final int KEY_RCS_MAX_NUM_ENTRIES_IN_RCL = 22; // 0x16
+    field public static final int KEY_RCS_PUBLISH_SOURCE_THROTTLE_MS = 21; // 0x15
+    field public static final int KEY_RCS_PUBLISH_TIMER_EXTENDED_SEC = 16; // 0x10
+    field public static final int KEY_RCS_PUBLISH_TIMER_SEC = 15; // 0xf
+    field public static final int KEY_T1_TIMER_VALUE_MS = 7; // 0x7
     field public static final int KEY_VOICE_OVER_WIFI_MODE_OVERRIDE = 27; // 0x1b
     field public static final int KEY_VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE = 26; // 0x1a
+    field public static final int KEY_VOLTE_PROVISIONING_STATUS = 10; // 0xa
+    field public static final int KEY_VT_PROVISIONING_STATUS = 11; // 0xb
+    field public static final int PROVISIONING_RESULT_UNKNOWN = -1; // 0xffffffff
     field public static final int PROVISIONING_VALUE_DISABLED = 0; // 0x0
     field public static final int PROVISIONING_VALUE_ENABLED = 1; // 0x1
     field public static final String STRING_QUERY_RESULT_ERROR_GENERIC = "STRING_QUERY_RESULT_ERROR_GENERIC";
@@ -11394,6 +11410,47 @@ package android.telephony.ims {
     ctor public ProvisioningManager.Callback();
     method public void onProvisioningIntChanged(int, int);
     method public void onProvisioningStringChanged(int, @NonNull String);
+  }
+
+  public final class RcsContactUceCapability implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<java.lang.String> getCapableExtensionTags();
+    method @NonNull public android.net.Uri getContactUri();
+    method @Nullable public android.net.Uri getServiceUri(int);
+    method public boolean isCapable(int);
+    method public boolean isCapable(@NonNull String);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CAPABILITY_CHAT_SESSION = 2; // 0x2
+    field public static final int CAPABILITY_CHAT_SESSION_STORE_FORWARD = 4; // 0x4
+    field public static final int CAPABILITY_CHAT_STANDALONE = 1; // 0x1
+    field public static final int CAPABILITY_DISCOVERY_VIA_PRESENCE = 4096; // 0x1000
+    field public static final int CAPABILITY_FILE_TRANSFER = 8; // 0x8
+    field public static final int CAPABILITY_FILE_TRANSFER_HTTP = 64; // 0x40
+    field public static final int CAPABILITY_FILE_TRANSFER_SMS = 128; // 0x80
+    field public static final int CAPABILITY_FILE_TRANSFER_STORE_FORWARD = 32; // 0x20
+    field public static final int CAPABILITY_FILE_TRANSFER_THUMBNAIL = 16; // 0x10
+    field public static final int CAPABILITY_GEOLOCATION_PULL = 131072; // 0x20000
+    field public static final int CAPABILITY_GEOLOCATION_PULL_FILE_TRANSFER = 262144; // 0x40000
+    field public static final int CAPABILITY_GEOLOCATION_PUSH = 32768; // 0x8000
+    field public static final int CAPABILITY_GEOLOCATION_PUSH_SMS = 65536; // 0x10000
+    field public static final int CAPABILITY_IMAGE_SHARE = 256; // 0x100
+    field public static final int CAPABILITY_IP_VIDEO_CALL = 16384; // 0x4000
+    field public static final int CAPABILITY_IP_VOICE_CALL = 8192; // 0x2000
+    field public static final int CAPABILITY_RCS_VIDEO_CALL = 1048576; // 0x100000
+    field public static final int CAPABILITY_RCS_VIDEO_ONLY_CALL = 2097152; // 0x200000
+    field public static final int CAPABILITY_RCS_VOICE_CALL = 524288; // 0x80000
+    field public static final int CAPABILITY_SOCIAL_PRESENCE = 2048; // 0x800
+    field public static final int CAPABILITY_VIDEO_SHARE = 1024; // 0x400
+    field public static final int CAPABILITY_VIDEO_SHARE_DURING_CS_CALL = 512; // 0x200
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.RcsContactUceCapability> CREATOR;
+  }
+
+  public static class RcsContactUceCapability.Builder {
+    ctor public RcsContactUceCapability.Builder(@NonNull android.net.Uri);
+    method @NonNull public android.telephony.ims.RcsContactUceCapability.Builder add(int, @NonNull android.net.Uri);
+    method @NonNull public android.telephony.ims.RcsContactUceCapability.Builder add(int);
+    method @NonNull public android.telephony.ims.RcsContactUceCapability.Builder add(@NonNull String);
+    method @NonNull public android.telephony.ims.RcsContactUceCapability build();
   }
 
   public interface RegistrationManager {

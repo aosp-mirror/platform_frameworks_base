@@ -17,6 +17,8 @@
 package android.telephony.ims;
 
 import android.annotation.NonNull;
+import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -35,7 +37,26 @@ public class ImsManager {
 
     private Context mContext;
 
-    /** @hide */
+    /**
+     * <p>Broadcast Action: Indicates that an IMS operation was rejected by the network due to it
+     * not being authorized on the network.
+     * May include the {@link SubscriptionManager#EXTRA_SUBSCRIPTION_INDEX} extra to also specify
+     * which subscription the operation was rejected for.
+     * <p class="note">
+     * Carrier applications may listen to this broadcast to be notified of possible IMS provisioning
+     * issues.
+     */
+    // Moved from TelephonyIntents, need to keep backwards compatibility with OEM apps that have
+    // this value hard-coded in BroadcastReceiver.
+    @SuppressLint("ActionValue")
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION =
+            "com.android.internal.intent.action.ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION";
+
+    /**
+     * Use {@link Context#getSystemService(String)} to get an instance of this class.
+     * @hide
+     */
     public ImsManager(@NonNull Context context) {
         mContext = context;
     }
