@@ -199,13 +199,31 @@ public class UserRestrictionsUtils {
     );
 
     /**
-     * Special user restrictions that are applied globally when set by the profile owner of a
-     * managed profile that was created during the device provisioning flow.
+     * Special user restrictions that profile owner of an organization-owned managed profile can
+     * set on the parent profile instance to apply them globally.
      */
     private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS =
             Sets.newArraySet(
                     UserManager.DISALLOW_CONFIG_DATE_TIME,
-                    UserManager.DISALLOW_CAMERA
+                    UserManager.DISALLOW_CAMERA,
+                    UserManager.DISALLOW_ADD_USER,
+                    UserManager.DISALLOW_BLUETOOTH,
+                    UserManager.DISALLOW_BLUETOOTH_SHARING,
+                    UserManager.DISALLOW_CONFIG_BLUETOOTH,
+                    UserManager.DISALLOW_CONFIG_CELL_BROADCASTS,
+                    UserManager.DISALLOW_CONFIG_LOCATION,
+                    UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
+                    UserManager.DISALLOW_CONFIG_PRIVATE_DNS,
+                    UserManager.DISALLOW_CONFIG_TETHERING,
+                    UserManager.DISALLOW_CONFIG_WIFI,
+                    UserManager.DISALLOW_CONTENT_CAPTURE,
+                    UserManager.DISALLOW_CONTENT_SUGGESTIONS,
+                    UserManager.DISALLOW_DATA_ROAMING,
+                    UserManager.DISALLOW_DEBUGGING_FEATURES,
+                    UserManager.DISALLOW_SAFE_BOOT,
+                    UserManager.DISALLOW_SHARE_LOCATION,
+                    UserManager.DISALLOW_SMS,
+                    UserManager.DISALLOW_USB_FILE_TRANSFER
     );
 
     /**

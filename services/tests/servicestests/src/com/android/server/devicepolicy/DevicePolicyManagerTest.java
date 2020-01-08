@@ -1945,6 +1945,29 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // TODO Make sure restrictions are written to the file.
     }
 
+    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS =
+            Sets.newSet(
+                    UserManager.DISALLOW_CONFIG_DATE_TIME,
+                    UserManager.DISALLOW_ADD_USER,
+                    UserManager.DISALLOW_BLUETOOTH,
+                    UserManager.DISALLOW_BLUETOOTH_SHARING,
+                    UserManager.DISALLOW_CONFIG_BLUETOOTH,
+                    UserManager.DISALLOW_CONFIG_CELL_BROADCASTS,
+                    UserManager.DISALLOW_CONFIG_LOCATION,
+                    UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
+                    UserManager.DISALLOW_CONFIG_PRIVATE_DNS,
+                    UserManager.DISALLOW_CONFIG_TETHERING,
+                    UserManager.DISALLOW_CONFIG_WIFI,
+                    UserManager.DISALLOW_CONTENT_CAPTURE,
+                    UserManager.DISALLOW_CONTENT_SUGGESTIONS,
+                    UserManager.DISALLOW_DATA_ROAMING,
+                    UserManager.DISALLOW_DEBUGGING_FEATURES,
+                    UserManager.DISALLOW_SAFE_BOOT,
+                    UserManager.DISALLOW_SHARE_LOCATION,
+                    UserManager.DISALLOW_SMS,
+                    UserManager.DISALLOW_USB_FILE_TRANSFER
+            );
+
     public void testSetUserRestriction_asPoOfOrgOwnedDevice() throws Exception {
         final int MANAGED_PROFILE_USER_ID = DpmMockContext.CALLER_USER_HANDLE;
         final int MANAGED_PROFILE_ADMIN_UID =
@@ -1957,15 +1980,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().userManager.getProfileParent(MANAGED_PROFILE_USER_ID))
                 .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
 
-        parentDpm.addUserRestriction(admin1, UserManager.DISALLOW_CONFIG_DATE_TIME);
-        verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
-                eq(MANAGED_PROFILE_USER_ID),
-                MockUtils.checkUserRestrictions(UserManager.DISALLOW_CONFIG_DATE_TIME),
-                eq(UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE));
-        reset(getServices().userManagerInternal);
-
-        parentDpm.clearUserRestriction(admin1, UserManager.DISALLOW_CONFIG_DATE_TIME);
-        reset(getServices().userManagerInternal);
+        for (String restriction : PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS) {
+            addAndRemoveUserRestrictionOnParentDpm(restriction);
+        }
 
         parentDpm.setCameraDisabled(admin1, true);
         verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
@@ -1979,6 +1996,20 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 eq(MANAGED_PROFILE_USER_ID),
                 MockUtils.checkUserRestrictions(),
                 eq(UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE));
+        reset(getServices().userManagerInternal);
+    }
+
+    private void addAndRemoveUserRestrictionOnParentDpm(String restriction) {
+        parentDpm.addUserRestriction(admin1, restriction);
+        verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(DpmMockContext.CALLER_USER_HANDLE),
+                MockUtils.checkUserRestrictions(restriction),
+                eq(UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE));
+        parentDpm.clearUserRestriction(admin1, restriction);
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(),
+                parentDpm.getUserRestrictions(admin1)
+        );
         reset(getServices().userManagerInternal);
     }
 
