@@ -19,15 +19,12 @@ package android.service.controls.templates;
 import android.annotation.NonNull;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.service.controls.Control;
 
 import com.android.internal.util.Preconditions;
 
 /**
  * A template for a {@link Control} that displays an image.
- *
- * @hide
  */
 public final class ThumbnailTemplate extends ControlTemplate {
 
@@ -52,6 +49,10 @@ public final class ThumbnailTemplate extends ControlTemplate {
         mContentDescription = contentDescription;
     }
 
+    /**
+     * @param b
+     * @hide
+     */
     ThumbnailTemplate(Bundle b) {
         super(b);
         mThumbnail = b.getParcelable(KEY_ICON);
@@ -82,25 +83,16 @@ public final class ThumbnailTemplate extends ControlTemplate {
         return TYPE;
     }
 
+    /**
+     * @return
+     * @hide
+     */
     @Override
-    protected Bundle getDataBundle() {
+    @NonNull
+    Bundle getDataBundle() {
         Bundle b = super.getDataBundle();
         b.putObject(KEY_ICON, mThumbnail);
         b.putObject(KEY_CONTENT_DESCRIPTION, mContentDescription);
         return b;
     }
-
-    public static final Creator<ThumbnailTemplate> CREATOR = new Creator<ThumbnailTemplate>() {
-        @Override
-        public ThumbnailTemplate createFromParcel(Parcel source) {
-            int type = source.readInt();
-            verifyType(type, TYPE);
-            return new ThumbnailTemplate(source.readBundle());
-        }
-
-        @Override
-        public ThumbnailTemplate[] newArray(int size) {
-            return new ThumbnailTemplate[size];
-        }
-    };
 }

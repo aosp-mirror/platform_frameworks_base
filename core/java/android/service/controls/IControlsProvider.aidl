@@ -16,15 +16,20 @@
 
 package android.service.controls;
 
-import android.service.controls.actions.ControlAction;
+import android.service.controls.IControlsActionCallback;
+import android.service.controls.IControlsLoadCallback;
+import android.service.controls.IControlsSubscriber;
+import android.service.controls.actions.ControlActionWrapper;
 
-/** @hide */
+/**
+ * @hide
+ */
 oneway interface IControlsProvider {
-    void load();
+    void load(IControlsLoadCallback cb);
 
-    void subscribe(in List<String> controlIds);
+    void subscribe(in List<String> controlIds,
+             IControlsSubscriber subscriber);
 
-    void unsubscribe();
-
-    void onAction(in String controlId, in ControlAction action);
+    void action(in String controlId, in ControlActionWrapper action,
+             IControlsActionCallback cb);
 }

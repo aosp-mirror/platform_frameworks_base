@@ -30,7 +30,7 @@ interface ControlsController {
     fun changeFavoriteStatus(controlInfo: ControlInfo, state: Boolean)
     fun unsubscribe()
     fun action(controlInfo: ControlInfo, action: ControlAction)
-    fun refreshStatus(componentName: ComponentName, controls: List<Control>)
+    fun refreshStatus(componentName: ComponentName, control: Control)
     fun onActionResponse(
         componentName: ComponentName,
         controlId: String,

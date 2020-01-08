@@ -224,8 +224,9 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testRefreshStatus() {
-        val list = listOf(Control.StatefulBuilder(TEST_CONTROL_ID, pendingIntent).build())
-        controller.refreshStatus(TEST_COMPONENT, list)
+        val control = Control.StatefulBuilder(TEST_CONTROL_ID, pendingIntent).build()
+        val list = listOf(control)
+        controller.refreshStatus(TEST_COMPONENT, control)
 
         verify(uiController).onRefreshState(TEST_COMPONENT, list)
     }
@@ -340,7 +341,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
         val newControlInfo = TEST_CONTROL_INFO.copy(controlTitle = TEST_CONTROL_TITLE_2)
         val control = builderFromInfo(newControlInfo).build()
 
-        controller.refreshStatus(TEST_COMPONENT, listOf(control))
+        controller.refreshStatus(TEST_COMPONENT, control)
 
         delayableExecutor.runAllReady()
 

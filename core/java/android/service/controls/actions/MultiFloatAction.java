@@ -19,14 +19,10 @@ package android.service.controls.actions;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
-/**
- * @hide
- */
 public final class MultiFloatAction extends ControlAction {
 
     private static final String TAG = "MultiFloatAction";
@@ -58,6 +54,10 @@ public final class MultiFloatAction extends ControlAction {
         this(templateId, newValues, null);
     }
 
+    /**
+     * @param b
+     * @hide
+     */
     MultiFloatAction(Bundle b) {
         super(b);
         mNewValues = b.getFloatArray(KEY_VALUES);
@@ -68,24 +68,15 @@ public final class MultiFloatAction extends ControlAction {
         return mNewValues.clone();
     }
 
+    /**
+     * @return
+     * @hide
+     */
     @Override
-    protected Bundle getDataBundle() {
+    @NonNull
+    Bundle getDataBundle() {
         Bundle b = super.getDataBundle();
         b.putFloatArray(KEY_VALUES, mNewValues);
         return b;
     }
-
-    public static final Creator<MultiFloatAction> CREATOR = new Creator<MultiFloatAction>() {
-        @Override
-        public MultiFloatAction createFromParcel(Parcel source) {
-            int type = source.readInt();
-            verifyType(type, TYPE);
-            return new MultiFloatAction(source.readBundle());
-        }
-
-        @Override
-        public MultiFloatAction[] newArray(int size) {
-            return new MultiFloatAction[size];
-        }
-    };
 }

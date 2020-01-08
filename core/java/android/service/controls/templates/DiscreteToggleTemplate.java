@@ -18,7 +18,6 @@ package android.service.controls.templates;
 
 import android.annotation.NonNull;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.service.controls.Control;
 import android.service.controls.actions.BooleanAction;
 
@@ -33,9 +32,8 @@ import com.android.internal.util.Preconditions;
  * {@link BooleanAction#getNewState} will be {@code false} if the button was
  * {@link DiscreteToggleTemplate#getNegativeButton} and {@code true} if the button was
  * {@link DiscreteToggleTemplate#getPositiveButton}.
- * @hide
  */
-public class DiscreteToggleTemplate extends ControlTemplate {
+public final class DiscreteToggleTemplate extends ControlTemplate {
 
     private static final @TemplateType int TYPE = TYPE_DISCRETE_TOGGLE;
     private static final String KEY_NEGATIVE_BUTTON = "key_negative_button";
@@ -46,8 +44,8 @@ public class DiscreteToggleTemplate extends ControlTemplate {
 
     /**
      * @param templateId the identifier for this template object
-     * @param negativeButton a {@ControlButton} for the <i>Negative</i> input
-     * @param positiveButton a {@ControlButton} for the <i>Positive</i> input
+     * @param negativeButton a {@link ControlButton} for the <i>Negative</i> input
+     * @param positiveButton a {@link ControlButton} for the <i>Positive</i> input
      */
     public DiscreteToggleTemplate(@NonNull String templateId,
             @NonNull ControlButton negativeButton,
@@ -59,6 +57,10 @@ public class DiscreteToggleTemplate extends ControlTemplate {
         mPositiveButton = positiveButton;
     }
 
+    /**
+     * @param b
+     * @hide
+     */
     DiscreteToggleTemplate(Bundle b) {
         super(b);
         mNegativeButton = b.getParcelable(KEY_NEGATIVE_BUTTON);
@@ -89,32 +91,17 @@ public class DiscreteToggleTemplate extends ControlTemplate {
         return TYPE;
     }
 
-
+    /**
+     * @return
+     * @hide
+     */
     @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    protected Bundle getDataBundle() {
+    @NonNull
+    Bundle getDataBundle() {
         Bundle b = super.getDataBundle();
         b.putParcelable(KEY_NEGATIVE_BUTTON, mNegativeButton);
         b.putParcelable(KEY_POSITIVE_BUTTON, mPositiveButton);
         return b;
     }
 
-    public static final Creator<DiscreteToggleTemplate> CREATOR =
-            new Creator<DiscreteToggleTemplate>() {
-                @Override
-                public DiscreteToggleTemplate createFromParcel(Parcel source) {
-                    int type = source.readInt();
-                    verifyType(type, TYPE);
-                    return new DiscreteToggleTemplate(source.readBundle());
-                }
-
-                @Override
-                public DiscreteToggleTemplate[] newArray(int size) {
-                    return new DiscreteToggleTemplate[size];
-                }
-            };
 }

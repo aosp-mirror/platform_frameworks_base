@@ -18,11 +18,7 @@ package android.service.controls.templates;
 
 import android.annotation.NonNull;
 import android.os.Bundle;
-import android.os.Parcel;
 
-/**
- * @hide
- */
 public final class StatelessTemplate extends ControlTemplate {
 
     @Override
@@ -30,23 +26,15 @@ public final class StatelessTemplate extends ControlTemplate {
         return TYPE_STATELESS;
     }
 
-    public StatelessTemplate(@NonNull Bundle b) {
+    /**
+     * @param b
+     * @hide
+     */
+    StatelessTemplate(@NonNull Bundle b) {
         super(b);
     }
 
     public StatelessTemplate(@NonNull String templateId) {
         super(templateId);
     }
-
-    public static final Creator<StatelessTemplate> CREATOR = new Creator<StatelessTemplate>() {
-        @Override
-        public StatelessTemplate createFromParcel(Parcel source) {
-            return new StatelessTemplate(source.readBundle());
-        }
-
-        @Override
-        public StatelessTemplate[] newArray(int size) {
-            return new StatelessTemplate[size];
-        }
-    };
 }

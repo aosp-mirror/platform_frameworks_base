@@ -19,11 +19,7 @@ package android.service.controls.actions;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
-import android.os.Parcel;
 
-/**
- * @hide
- */
 public final class ModeAction extends ControlAction {
 
     private static final @ActionType int TYPE = TYPE_MODE;
@@ -45,13 +41,22 @@ public final class ModeAction extends ControlAction {
         this(templateId, newMode, null);
     }
 
+    /**
+     * @param b
+     * @hide
+     */
     ModeAction(Bundle b) {
         super(b);
         mNewMode = b.getInt(KEY_MODE);
     }
 
+    /**
+     * @return
+     * @hide
+     */
     @Override
-    protected Bundle getDataBundle() {
+    @NonNull
+    Bundle getDataBundle() {
         Bundle b = super.getDataBundle();
         b.putInt(KEY_MODE, mNewMode);
         return b;
@@ -60,18 +65,4 @@ public final class ModeAction extends ControlAction {
     public int getNewMode() {
         return mNewMode;
     }
-
-    public static final Creator<ModeAction> CREATOR = new Creator<ModeAction>() {
-        @Override
-        public ModeAction createFromParcel(Parcel source) {
-            int type = source.readInt();
-            verifyType(type, TYPE);
-            return new ModeAction(source.readBundle());
-        }
-
-        @Override
-        public ModeAction[] newArray(int size) {
-            return new ModeAction[size];
-        }
-    };
 }

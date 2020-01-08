@@ -19,7 +19,6 @@ package android.service.controls.templates;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -27,9 +26,6 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-/**
- * @hide
- */
 public final class TemperatureControlTemplate extends ControlTemplate {
 
     private static final String TAG = "ThermostatTemplate";
@@ -67,6 +63,9 @@ public final class TemperatureControlTemplate extends ControlTemplate {
 
     public static final @Mode int MODE_ECO = 5;
 
+    /**
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {
             FLAG_MODE_OFF,
@@ -136,18 +135,27 @@ public final class TemperatureControlTemplate extends ControlTemplate {
         }
     }
 
+    /**
+     * @param b
+     * @hide
+     */
     TemperatureControlTemplate(@NonNull Bundle b) {
         super(b);
-        mTemplate = b.getParcelable(KEY_TEMPLATE);
+        mTemplate = ControlTemplate.createTemplateFromBundle(b.getBundle(KEY_TEMPLATE));
         mCurrentMode = b.getInt(KEY_CURRENT_MODE);
         mCurrentActiveMode = b.getInt(KEY_CURRENT_ACTIVE_MODE);
         mModes = b.getInt(KEY_MODES);
     }
 
+    /**
+     * @return
+     * @hide
+     */
     @Override
-    protected Bundle getDataBundle() {
+    @NonNull
+    Bundle getDataBundle() {
         Bundle b = super.getDataBundle();
-        b.putParcelable(KEY_TEMPLATE, mTemplate);
+        b.putBundle(KEY_TEMPLATE, mTemplate.getDataBundle());
         b.putInt(KEY_CURRENT_MODE, mCurrentMode);
         b.putInt(KEY_CURRENT_ACTIVE_MODE, mCurrentActiveMode);
         b.putInt(KEY_MODES, mModes);
@@ -175,18 +183,4 @@ public final class TemperatureControlTemplate extends ControlTemplate {
     public int getTemplateType() {
         return TYPE;
     }
-
-    public static final Creator<TemperatureControlTemplate> CREATOR = new Creator<TemperatureControlTemplate>() {
-        @Override
-        public TemperatureControlTemplate createFromParcel(Parcel source) {
-            int type = source.readInt();
-            verifyType(type, TYPE);
-            return new TemperatureControlTemplate(source.readBundle());
-        }
-
-        @Override
-        public TemperatureControlTemplate[] newArray(int size) {
-            return new TemperatureControlTemplate[size];
-        }
-    };
 }

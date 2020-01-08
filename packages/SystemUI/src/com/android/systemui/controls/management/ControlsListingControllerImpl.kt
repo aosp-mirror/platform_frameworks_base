@@ -51,7 +51,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
             context,
             executor,
             ServiceListing.Builder(context)
-                    .setIntentAction(ControlsProviderService.CONTROLS_ACTION)
+                    .setIntentAction(ControlsProviderService.SERVICE_CONTROLS)
                     .setPermission("android.permission.BIND_CONTROLS")
                     .setNoun("Controls Provider")
                     .setSetting("controls_providers")

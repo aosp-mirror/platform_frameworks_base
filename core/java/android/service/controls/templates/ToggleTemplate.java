@@ -18,7 +18,6 @@ package android.service.controls.templates;
 
 import android.annotation.NonNull;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.service.controls.Control;
 import android.service.controls.actions.BooleanAction;
 
@@ -31,7 +30,6 @@ import com.android.internal.util.Preconditions;
  * An action on this template will originate a {@link BooleanAction} to change that state.
  *
  * @see BooleanAction
- * @hide
  */
 public final class ToggleTemplate extends ControlTemplate {
 
@@ -41,7 +39,7 @@ public final class ToggleTemplate extends ControlTemplate {
 
     /**
      * @param templateId the identifier for this template object
-     * @param button a {@ControlButton} that can show the current state and toggle it
+     * @param button a {@link ControlButton} that can show the current state and toggle it
      */
     public ToggleTemplate(@NonNull String templateId, @NonNull ControlButton button) {
         super(templateId);
@@ -49,6 +47,10 @@ public final class ToggleTemplate extends ControlTemplate {
         mButton = button;
     }
 
+    /**
+     * @param b
+     * @hide
+     */
     ToggleTemplate(Bundle b) {
         super(b);
         mButton = b.getParcelable(KEY_BUTTON);
@@ -58,6 +60,7 @@ public final class ToggleTemplate extends ControlTemplate {
         return mButton.isChecked();
     }
 
+    @NonNull
     public CharSequence getContentDescription() {
         return mButton.getActionDescription();
     }
@@ -70,25 +73,15 @@ public final class ToggleTemplate extends ControlTemplate {
         return TYPE;
     }
 
+    /**
+     * @return
+     * @hide
+     */
     @Override
-    protected Bundle getDataBundle() {
+    @NonNull
+    Bundle getDataBundle() {
         Bundle b =  super.getDataBundle();
         b.putParcelable(KEY_BUTTON, mButton);
         return b;
     }
-
-    public static final Creator<ToggleTemplate> CREATOR = new Creator<ToggleTemplate>() {
-        @Override
-        public ToggleTemplate createFromParcel(Parcel source) {
-            int type = source.readInt();
-            verifyType(type, TYPE);
-            return new ToggleTemplate(source.readBundle());
-        }
-
-        @Override
-        public ToggleTemplate[] newArray(int size) {
-            return new ToggleTemplate[size];
-        }
-    };
-
 }
