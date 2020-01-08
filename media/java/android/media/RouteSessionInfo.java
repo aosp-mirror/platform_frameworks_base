@@ -327,12 +327,28 @@ public class RouteSessionInfo implements Parcelable {
         }
 
         /**
-         * Sets the provider id of the session.
+         * Sets the provider ID of the session.
+         * Also, calling this method will make all type of route IDs be unique by adding
+         * {@code providerId:} as a prefix. So do NOT call this method twice on same instance.
+         *
+         * @hide
          */
         @NonNull
         public Builder setProviderId(String providerId) {
             mProviderId = providerId;
+            convertToUniqueRouteIds(providerId, mSelectedRoutes);
+            convertToUniqueRouteIds(providerId, mSelectableRoutes);
+            convertToUniqueRouteIds(providerId, mDeselectableRoutes);
+            convertToUniqueRouteIds(providerId, mTransferrableRoutes);
             return this;
+        }
+
+        private void convertToUniqueRouteIds(@NonNull String providerId,
+                @NonNull List<String> routeIds) {
+            for (int i = 0; i < routeIds.size(); i++) {
+                String routeId = routeIds.get(i);
+                routeIds.set(i, MediaRoute2Info.toUniqueId(providerId, routeId));
+            }
         }
 
         /**

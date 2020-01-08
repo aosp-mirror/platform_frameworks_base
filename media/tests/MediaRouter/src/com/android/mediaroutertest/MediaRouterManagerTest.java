@@ -57,30 +57,37 @@ import java.util.function.Predicate;
 public class MediaRouterManagerTest {
     private static final String TAG = "MediaRouterManagerTest";
 
-    // Must be the same as SampleMediaRoute2ProviderService
-    public static final String ROUTE_ID1 = "route_id1";
+    public static final String SAMPLE_PROVIDER_ROUTES_ID_PREFIX =
+            "com.android.mediarouteprovider.example/.SampleMediaRoute2ProviderService:";
+
+    // Must be the same as SampleMediaRoute2ProviderService except the prefix of IDs.
+    public static final String ROUTE_ID1 = SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_id1";
     public static final String ROUTE_NAME1 = "Sample Route 1";
-    public static final String ROUTE_ID2 = "route_id2";
+    public static final String ROUTE_ID2 = SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_id2";
     public static final String ROUTE_NAME2 = "Sample Route 2";
     public static final String ROUTE_ID3_SESSION_CREATION_FAILED =
-            "route_id3_session_creation_failed";
+            SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_id3_session_creation_failed";
     public static final String ROUTE_NAME3 = "Sample Route 3 - Session creation failed";
     public static final String ROUTE_ID4_TO_SELECT_AND_DESELECT =
-            "route_id4_to_select_and_deselect";
+            SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_id4_to_select_and_deselect";
     public static final String ROUTE_NAME4 = "Sample Route 4 - Route to select and deselect";
-    public static final String ROUTE_ID5_TO_TRANSFER_TO = "route_id5_to_transfer_to";
+    public static final String ROUTE_ID5_TO_TRANSFER_TO =
+            SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_id5_to_transfer_to";
     public static final String ROUTE_NAME5 = "Sample Route 5 - Route to transfer to";
 
-    public static final String ROUTE_ID_SPECIAL_CATEGORY = "route_special_category";
+    public static final String ROUTE_ID_SPECIAL_CATEGORY =
+            SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_special_category";
     public static final String ROUTE_NAME_SPECIAL_CATEGORY = "Special Category Route";
 
     public static final String SYSTEM_PROVIDER_ID =
             "com.android.server.media/.SystemMediaRoute2Provider";
 
     public static final int VOLUME_MAX = 100;
-    public static final String ROUTE_ID_FIXED_VOLUME = "route_fixed_volume";
+    public static final String ROUTE_ID_FIXED_VOLUME =
+            SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_fixed_volume";
     public static final String ROUTE_NAME_FIXED_VOLUME = "Fixed Volume Route";
-    public static final String ROUTE_ID_VARIABLE_VOLUME = "route_variable_volume";
+    public static final String ROUTE_ID_VARIABLE_VOLUME =
+            SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_variable_volume";
     public static final String ROUTE_NAME_VARIABLE_VOLUME = "Variable Volume Route";
 
     public static final String ACTION_REMOVE_ROUTE =
@@ -430,7 +437,6 @@ public class MediaRouterManagerTest {
     static Map<String, MediaRoute2Info> createRouteMap(List<MediaRoute2Info> routes) {
         Map<String, MediaRoute2Info> routeMap = new HashMap<>();
         for (MediaRoute2Info route : routes) {
-            // intentionally not using route.getUniqueId() for convenience.
             routeMap.put(route.getId(), route);
         }
         return routeMap;

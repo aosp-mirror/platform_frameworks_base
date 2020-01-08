@@ -295,7 +295,7 @@ public class MediaRouter2Manager {
     void addRoutesOnHandler(List<MediaRoute2Info> routes) {
         synchronized (mRoutesLock) {
             for (MediaRoute2Info route : routes) {
-                mRoutes.put(route.getUniqueId(), route);
+                mRoutes.put(route.getId(), route);
             }
         }
         if (routes.size() > 0) {
@@ -306,7 +306,7 @@ public class MediaRouter2Manager {
     void removeRoutesOnHandler(List<MediaRoute2Info> routes) {
         synchronized (mRoutesLock) {
             for (MediaRoute2Info route : routes) {
-                mRoutes.remove(route.getUniqueId());
+                mRoutes.remove(route.getId());
             }
         }
         if (routes.size() > 0) {
@@ -317,7 +317,7 @@ public class MediaRouter2Manager {
     void changeRoutesOnHandler(List<MediaRoute2Info> routes) {
         synchronized (mRoutesLock) {
             for (MediaRoute2Info route : routes) {
-                mRoutes.put(route.getUniqueId(), route);
+                mRoutes.put(route.getId(), route);
             }
         }
         if (routes.size() > 0) {

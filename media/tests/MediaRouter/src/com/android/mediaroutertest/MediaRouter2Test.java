@@ -701,7 +701,6 @@ public class MediaRouter2Test {
     static Map<String, MediaRoute2Info> createRouteMap(List<MediaRoute2Info> routes) {
         Map<String, MediaRoute2Info> routeMap = new HashMap<>();
         for (MediaRoute2Info route : routes) {
-            // intentionally not using route.getUniqueId() for convenience.
             routeMap.put(route.getId(), route);
         }
         return routeMap;
@@ -741,7 +740,7 @@ public class MediaRouter2Test {
     }
 
     /**
-     * Returns a list of IDs (not uniqueId) of the given route list.
+     * Returns a list of IDs of the given route list.
      */
     List<String> getRouteIds(@NonNull List<MediaRoute2Info> routes) {
         List<String> result = new ArrayList<>();
