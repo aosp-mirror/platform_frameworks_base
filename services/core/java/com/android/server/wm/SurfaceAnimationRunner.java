@@ -78,6 +78,10 @@ class SurfaceAnimationRunner {
     @GuardedBy("mLock")
     private boolean mAnimationStartDeferred;
 
+    /**
+     * There should only ever be one instance of this class. Usual spot for it is with
+     * {@link WindowManagerService}
+     */
     SurfaceAnimationRunner(Supplier<Transaction> transactionFactory,
             PowerManagerInternal powerManagerInternal) {
         this(null /* callbackProvider */, null /* animatorFactory */,
