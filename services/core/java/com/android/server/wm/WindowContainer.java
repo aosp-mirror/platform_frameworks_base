@@ -2296,6 +2296,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mRemoteToken;
     }
 
+    static WindowContainer fromBinder(IBinder binder) {
+        return RemoteToken.fromBinder(binder).getContainer();
+    }
+
     static class RemoteToken extends IWindowContainer.Stub {
         final WeakReference<WindowContainer> mWeakRef;
 
