@@ -29,7 +29,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.service.carrier.CarrierService;
 import android.telecom.TelecomManager;
 import android.telephony.ims.ImsReasonInfo;
@@ -4205,8 +4204,11 @@ public class CarrierConfigManager {
     /** @hide */
     @Nullable
     private ICarrierConfigLoader getICarrierConfigLoader() {
-        return ICarrierConfigLoader.Stub
-                .asInterface(ServiceManager.getService(Context.CARRIER_CONFIG_SERVICE));
+        return ICarrierConfigLoader.Stub.asInterface(
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getCarrierConfigServiceRegisterer()
+                        .get());
     }
 
     /**
