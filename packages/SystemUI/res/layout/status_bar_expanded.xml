@@ -17,9 +17,14 @@
 */
 -->
 
-<merge
+
+<com.android.systemui.statusbar.phone.NotificationPanelView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res-auto">
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/notification_panel"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
     <FrameLayout
         android:id="@+id/big_clock_container"
         android:layout_width="match_parent"
@@ -97,4 +102,4 @@
         android:background="@drawable/qs_navbar_scrim" />
 
     <include layout="@layout/status_bar_expanded_plugin_frame"/>
-</merge>
+</com.android.systemui.statusbar.phone.NotificationPanelView>
