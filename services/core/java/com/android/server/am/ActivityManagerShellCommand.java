@@ -2899,33 +2899,37 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
         ArraySet<Long> enabled = new ArraySet<>();
         ArraySet<Long> disabled = new ArraySet<>();
-        switch (toggleValue) {
-            case "enable":
-                enabled.add(changeId);
-                pw.println("Enabled change " + changeId + " for " + packageName + ".");
-                CompatibilityChangeConfig overrides =
-                        new CompatibilityChangeConfig(
-                                new Compatibility.ChangeConfig(enabled, disabled));
-                platformCompat.setOverrides(overrides, packageName);
-                return 0;
-            case "disable":
-                disabled.add(changeId);
-                pw.println("Disabled change " + changeId + " for " + packageName + ".");
-                overrides =
-                        new CompatibilityChangeConfig(
-                                new Compatibility.ChangeConfig(enabled, disabled));
-                platformCompat.setOverrides(overrides, packageName);
-                return 0;
-            case "reset":
-                if (platformCompat.clearOverride(changeId, packageName)) {
-                    pw.println("Reset change " + changeId + " for " + packageName
-                            + " to default value.");
-                } else {
-                    pw.println("No override exists for changeId " + changeId + ".");
-                }
-                return 0;
-            default:
-                pw.println("Invalid toggle value: '" + toggleValue + "'.");
+        try {
+            switch (toggleValue) {
+                case "enable":
+                    enabled.add(changeId);
+                    CompatibilityChangeConfig overrides =
+                            new CompatibilityChangeConfig(
+                                    new Compatibility.ChangeConfig(enabled, disabled));
+                    platformCompat.setOverrides(overrides, packageName);
+                    pw.println("Enabled change " + changeId + " for " + packageName + ".");
+                    return 0;
+                case "disable":
+                    disabled.add(changeId);
+                    overrides =
+                            new CompatibilityChangeConfig(
+                                    new Compatibility.ChangeConfig(enabled, disabled));
+                    platformCompat.setOverrides(overrides, packageName);
+                    pw.println("Disabled change " + changeId + " for " + packageName + ".");
+                    return 0;
+                case "reset":
+                    if (platformCompat.clearOverride(changeId, packageName)) {
+                        pw.println("Reset change " + changeId + " for " + packageName
+                                + " to default value.");
+                    } else {
+                        pw.println("No override exists for changeId " + changeId + ".");
+                    }
+                    return 0;
+                default:
+                    pw.println("Invalid toggle value: '" + toggleValue + "'.");
+            }
+        } catch (SecurityException e) {
+            pw.println(e.getMessage());
         }
         return -1;
     }
