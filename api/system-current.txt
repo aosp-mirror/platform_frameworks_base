@@ -5980,6 +5980,7 @@ package android.net.wifi {
     field public static final String EXTRA_OSU_NETWORK = "android.net.wifi.extra.OSU_NETWORK";
     field public static final String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
     field public static final String EXTRA_URL = "android.net.wifi.extra.URL";
+    field public static final String EXTRA_WIFI_AP_FAILURE_REASON = "android.net.wifi.extra.WIFI_AP_FAILURE_REASON";
     field public static final String EXTRA_WIFI_AP_INTERFACE_NAME = "android.net.wifi.extra.WIFI_AP_INTERFACE_NAME";
     field public static final String EXTRA_WIFI_AP_MODE = "android.net.wifi.extra.WIFI_AP_MODE";
     field public static final String EXTRA_WIFI_AP_STATE = "wifi_state";
