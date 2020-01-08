@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
+import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
@@ -56,7 +57,7 @@ import dagger.Provides;
 @Module(includes = {AssistModule.class,
                     ConcurrencyModule.class,
                     PeopleHubModule.class},
-        subcomponents = {StatusBarComponent.class})
+        subcomponents = {StatusBarComponent.class, NotificationRowComponent.class})
 public abstract class SystemUIModule {
 
     @Binds

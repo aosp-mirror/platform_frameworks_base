@@ -41,9 +41,6 @@ import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.notification.people.NotificationPersonExtractorPluginBoundary;
-import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
-import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifierImpl;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
@@ -52,13 +49,13 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.policy.ExtensionControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 /** Handles inflating and updating views for notifications. */
@@ -88,6 +85,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private ExpandableNotificationRow.OnAppOpsClickListener mOnAppOpsClickListener;
     private BindRowCallback mBindRowCallback;
     private NotificationClicker mNotificationClicker;
+    private final Provider<RowInflaterTask> mRowInflaterTaskProvider;
     private final NotificationLogger mNotificationLogger;
 
     @Inject
@@ -102,6 +100,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             NotificationGroupManager notificationGroupManager,
             NotificationGutsManager notificationGutsManager,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
+            Provider<RowInflaterTask> rowInflaterTaskProvider,
             NotificationLogger logger) {
         mContext = context;
         mRowContentBinder = rowContentBinder;
@@ -114,6 +113,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mGroupManager = notificationGroupManager;
         mGutsManager = notificationGutsManager;
         mNotificationInterruptionStateProvider = notificationInterruptionStateProvider;
+        mRowInflaterTaskProvider = rowInflaterTaskProvider;
         mNotificationLogger = logger;
     }
 
@@ -159,7 +159,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             entry.getRow().setOnDismissRunnable(onDismissRunnable);
         } else {
             entry.createIcons(mContext, sbn);
-            new RowInflaterTask().inflate(mContext, parent, entry,
+            mRowInflaterTaskProvider.get().inflate(mContext, parent, entry,
                     row -> {
                         bindRow(entry, pmUser, sbn, row, onDismissRunnable);
                         updateNotification(entry, pmUser, sbn, row);

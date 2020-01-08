@@ -83,12 +83,14 @@ import com.android.systemui.statusbar.notification.collection.provider.HighPrior
 import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
+import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotifRemoteViewCache;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
+import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -139,6 +141,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private NotifLog mNotifLog;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private LeakDetector mLeakDetector;
+    @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
+    @Mock private NotificationRowComponent.Builder mNotificationRowComponentBuilder;
 
     private int mId;
     private NotificationEntry mEntry;
@@ -207,6 +211,10 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 mock(NotifRemoteViewCache.class),
                 mRemoteInputManager);
 
+        when(mNotificationRowComponentBuilder.activatableNotificationView(any()))
+                .thenReturn(mNotificationRowComponentBuilder);
+        when(mNotificationRowComponentBuilder.build()).thenReturn(
+                () -> mActivatableNotificationViewController);
         NotificationRowBinderImpl notificationRowBinder =
                 new NotificationRowBinderImpl(mContext,
                         mRemoteInputManager,
@@ -218,6 +226,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                         mGroupManager,
                         mGutsManager,
                         mNotificationInterruptionStateProvider,
+                        () -> new RowInflaterTask(mNotificationRowComponentBuilder),
                         mock(NotificationLogger.class));
 
         when(mFeatureFlags.isNewNotifPipelineEnabled()).thenReturn(false);
