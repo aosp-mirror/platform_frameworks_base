@@ -47,6 +47,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotifRemoteViewCache;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
@@ -329,6 +330,11 @@ public class NotificationTestHelper {
         entry.setRow(row);
         entry.createIcons(mContext, entry.getSbn());
         row.setEntry(entry);
+        NotificationContentInflater contentBinder = new NotificationContentInflater(
+                mock(NotifRemoteViewCache.class),
+                mock(NotificationRemoteInputManager.class));
+        contentBinder.setInflateSynchronously(true);
+        row.setContentBinder(contentBinder);
         row.setInflationFlags(extraInflationFlags);
         inflateAndWait(row);
 
@@ -341,7 +347,6 @@ public class NotificationTestHelper {
 
     private static void inflateAndWait(ExpandableNotificationRow row) throws Exception {
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        row.getNotificationInflater().setInflateSynchronously(true);
         NotificationContentInflater.InflationCallback callback =
                 new NotificationContentInflater.InflationCallback() {
                     @Override
