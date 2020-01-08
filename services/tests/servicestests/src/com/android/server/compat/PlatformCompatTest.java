@@ -30,6 +30,7 @@ import android.compat.Compatibility;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
+import com.android.internal.compat.AndroidBuildClassifier;
 import com.android.internal.compat.CompatibilityChangeConfig;
 
 import com.google.common.collect.ImmutableSet;
@@ -50,6 +51,10 @@ public class PlatformCompatTest {
     private PackageManager mPackageManager;
     @Mock
     CompatChange.ChangeListener mListener1, mListener2;
+    CompatConfig mCompatConfig;
+    @Mock
+    AndroidBuildClassifier mBuildClassifier;
+
 
 
     @Before
@@ -57,12 +62,15 @@ public class PlatformCompatTest {
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getPackageUid(eq(PACKAGE_NAME), eq(0))).thenThrow(
                 new PackageManager.NameNotFoundException());
-        CompatConfig.get().clearChanges();
+        mCompatConfig = new CompatConfig(mBuildClassifier, mContext);
+        // Assume userdebug/eng non-final build
+        when(mBuildClassifier.isDebuggableBuild()).thenReturn(true);
+        when(mBuildClassifier.isFinalBuild()).thenReturn(false);
     }
 
     @Test
-    public void testRegisterListenerToSameIdThrows() {
-        PlatformCompat pc = new PlatformCompat(mContext);
+    public void testRegisterListenerToSameIdThrows() throws Exception {
+        PlatformCompat pc = new PlatformCompat(mContext, mCompatConfig);
 
         // Registering a listener to change 1 is successful.
         pc.registerListener(1, mListener1);
@@ -73,8 +81,8 @@ public class PlatformCompatTest {
     }
 
     @Test
-    public void testRegisterListenerReturn() {
-        PlatformCompat pc = new PlatformCompat(mContext);
+    public void testRegisterListenerReturn() throws Exception {
+        PlatformCompat pc = new PlatformCompat(mContext, mCompatConfig);
 
         pc.setOverrides(
                 new CompatibilityChangeConfig(
@@ -88,8 +96,8 @@ public class PlatformCompatTest {
     }
 
     @Test
-    public void testListenerCalledOnSetOverrides() {
-        PlatformCompat pc = new PlatformCompat(mContext);
+    public void testListenerCalledOnSetOverrides() throws Exception {
+        PlatformCompat pc = new PlatformCompat(mContext, mCompatConfig);
 
         pc.registerListener(1, mListener1);
         pc.registerListener(2, mListener1);
@@ -103,8 +111,8 @@ public class PlatformCompatTest {
     }
 
     @Test
-    public void testListenerNotCalledOnWrongPackage() {
-        PlatformCompat pc = new PlatformCompat(mContext);
+    public void testListenerNotCalledOnWrongPackage() throws Exception {
+        PlatformCompat pc = new PlatformCompat(mContext, mCompatConfig);
 
         pc.registerListener(1, mListener1);
         pc.registerListener(2, mListener1);
@@ -118,8 +126,8 @@ public class PlatformCompatTest {
     }
 
     @Test
-    public void testListenerCalledOnSetOverridesTwoListeners() {
-        PlatformCompat pc = new PlatformCompat(mContext);
+    public void testListenerCalledOnSetOverridesTwoListeners() throws Exception {
+        PlatformCompat pc = new PlatformCompat(mContext, mCompatConfig);
         pc.registerListener(1, mListener1);
 
         final ImmutableSet<Long> enabled = ImmutableSet.of(1L);
@@ -148,8 +156,8 @@ public class PlatformCompatTest {
     }
 
     @Test
-    public void testListenerCalledOnSetOverridesForTest() {
-        PlatformCompat pc = new PlatformCompat(mContext);
+    public void testListenerCalledOnSetOverridesForTest() throws Exception {
+        PlatformCompat pc = new PlatformCompat(mContext, mCompatConfig);
 
         pc.registerListener(1, mListener1);
         pc.registerListener(2, mListener1);
@@ -163,8 +171,8 @@ public class PlatformCompatTest {
     }
 
     @Test
-    public void testListenerCalledOnSetOverridesTwoListenersForTest() {
-        PlatformCompat pc = new PlatformCompat(mContext);
+    public void testListenerCalledOnSetOverridesTwoListenersForTest() throws Exception {
+        PlatformCompat pc = new PlatformCompat(mContext, mCompatConfig);
         pc.registerListener(1, mListener1);
 
         final ImmutableSet<Long> enabled = ImmutableSet.of(1L);
@@ -192,8 +200,8 @@ public class PlatformCompatTest {
     }
 
     @Test
-    public void testListenerCalledOnClearOverrides() {
-        PlatformCompat pc = new PlatformCompat(mContext);
+    public void testListenerCalledOnClearOverrides() throws Exception {
+        PlatformCompat pc = new PlatformCompat(mContext, mCompatConfig);
 
         pc.registerListener(1, mListener1);
         pc.registerListener(2, mListener2);
@@ -214,8 +222,8 @@ public class PlatformCompatTest {
     }
 
     @Test
-    public void testListenerCalledOnClearOverridesMultipleOverrides() {
-        PlatformCompat pc = new PlatformCompat(mContext);
+    public void testListenerCalledOnClearOverridesMultipleOverrides() throws Exception {
+        PlatformCompat pc = new PlatformCompat(mContext, mCompatConfig);
 
         pc.registerListener(1, mListener1);
         pc.registerListener(2, mListener2);
@@ -236,8 +244,8 @@ public class PlatformCompatTest {
     }
 
     @Test
-    public void testListenerCalledOnClearOverrideExists() {
-        PlatformCompat pc = new PlatformCompat(mContext);
+    public void testListenerCalledOnClearOverrideExists() throws Exception {
+        PlatformCompat pc = new PlatformCompat(mContext, mCompatConfig);
 
         pc.registerListener(1, mListener1);
         pc.registerListener(2, mListener2);
@@ -258,8 +266,8 @@ public class PlatformCompatTest {
     }
 
     @Test
-    public void testListenerCalledOnClearOverrideDoesntExist() {
-        PlatformCompat pc = new PlatformCompat(mContext);
+    public void testListenerCalledOnClearOverrideDoesntExist() throws Exception {
+        PlatformCompat pc = new PlatformCompat(mContext, mCompatConfig);
 
         pc.registerListener(1, mListener1);
 

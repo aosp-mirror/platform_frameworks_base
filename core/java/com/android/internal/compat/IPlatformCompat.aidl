@@ -17,6 +17,7 @@
 package com.android.internal.compat;
 
 import android.content.pm.ApplicationInfo;
+import com.android.internal.compat.IOverrideValidator;
 import java.util.Map;
 
 parcelable CompatibilityChangeConfig;
@@ -195,4 +196,9 @@ interface IPlatformCompat
      * @return An array of {@link CompatChangeInfo} known to the service.
      */
     CompatibilityChangeInfo[] listAllChanges();
+
+    /**
+     * Get an instance that can determine whether a changeid can be overridden for a package name.
+     */
+    IOverrideValidator getOverrideValidator();
 }
