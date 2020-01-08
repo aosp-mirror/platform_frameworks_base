@@ -8607,6 +8607,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public boolean isOrganizationOwnedDeviceWithManagedProfile() {
+        if (!mHasFeature) {
+            return false;
+        }
+        enforceManageUsers();
+
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            for (UserInfo ui : mUserManager.getUsers()) {
+                if (ui.isManagedProfile() && isProfileOwnerOfOrganizationOwnedDevice(ui.id)) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+    }
+
+    @Override
     public boolean checkDeviceIdentifierAccess(String packageName, int pid, int uid) {
         ensureCallerIdentityMatchesIfNotSystem(packageName, pid, uid);
 
