@@ -4594,6 +4594,28 @@ package android.media.tv.tuner {
     method public abstract int getType();
   }
 
+  public class Lnb implements java.lang.AutoCloseable {
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void close();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int sendDiseqcMessage(@NonNull byte[]);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setSatellitePosition(int);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setTone(int);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setVoltage(int);
+    field public static final int POSITION_A = 1; // 0x1
+    field public static final int POSITION_B = 2; // 0x2
+    field public static final int POSITION_UNDEFINED = 0; // 0x0
+    field public static final int TONE_CONTINUOUS = 1; // 0x1
+    field public static final int TONE_NONE = 0; // 0x0
+    field public static final int VOLTAGE_11V = 2; // 0x2
+    field public static final int VOLTAGE_12V = 3; // 0x3
+    field public static final int VOLTAGE_13V = 4; // 0x4
+    field public static final int VOLTAGE_14V = 5; // 0x5
+    field public static final int VOLTAGE_15V = 6; // 0x6
+    field public static final int VOLTAGE_18V = 7; // 0x7
+    field public static final int VOLTAGE_19V = 8; // 0x8
+    field public static final int VOLTAGE_5V = 1; // 0x1
+    field public static final int VOLTAGE_NONE = 0; // 0x0
+  }
+
   public final class Tuner implements java.lang.AutoCloseable {
     ctor public Tuner(@NonNull android.content.Context);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.Tuner.Descrambler openDescrambler();
@@ -4616,6 +4638,13 @@ package android.media.tv.tuner {
     field public static final int FILTER_STATUS_HIGH_WATER = 4; // 0x4
     field public static final int FILTER_STATUS_LOW_WATER = 2; // 0x2
     field public static final int FILTER_STATUS_OVERFLOW = 8; // 0x8
+    field public static final int RESULT_INVALID_ARGUMENT = 4; // 0x4
+    field public static final int RESULT_INVALID_STATE = 3; // 0x3
+    field public static final int RESULT_NOT_INITIALIZED = 2; // 0x2
+    field public static final int RESULT_OUT_OF_MEMORY = 5; // 0x5
+    field public static final int RESULT_SUCCESS = 0; // 0x0
+    field public static final int RESULT_UNAVAILABLE = 1; // 0x1
+    field public static final int RESULT_UNKNOWN_ERROR = 6; // 0x6
   }
 
 }

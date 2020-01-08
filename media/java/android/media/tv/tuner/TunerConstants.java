@@ -1285,37 +1285,30 @@ public final class TunerConstants {
 
     /**
      * Operation succeeded.
-     * @hide
      */
     public static final int RESULT_SUCCESS = Constants.Result.SUCCESS;
     /**
      * Operation failed because the corresponding resources are not available.
-     * @hide
      */
     public static final int RESULT_UNAVAILABLE = Constants.Result.UNAVAILABLE;
     /**
      * Operation failed because the corresponding resources are not initialized.
-     * @hide
      */
     public static final int RESULT_NOT_INITIALIZED = Constants.Result.NOT_INITIALIZED;
     /**
      * Operation failed because it's not in a valid state.
-     * @hide
      */
     public static final int RESULT_INVALID_STATE = Constants.Result.INVALID_STATE;
     /**
      * Operation failed because there are invalid arguments.
-     * @hide
      */
     public static final int RESULT_INVALID_ARGUMENT = Constants.Result.INVALID_ARGUMENT;
     /**
      * Memory allocation failed.
-     * @hide
      */
     public static final int RESULT_OUT_OF_MEMORY = Constants.Result.OUT_OF_MEMORY;
     /**
      * Operation failed due to unknown errors.
-     * @hide
      */
     public static final int RESULT_UNKNOWN_ERROR = Constants.Result.UNKNOWN_ERROR;
 

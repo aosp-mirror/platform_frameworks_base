@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.Tuner.LnbCallback;
@@ -37,6 +38,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@SystemApi
 public class Lnb implements AutoCloseable {
     /** @hide */
     @IntDef({VOLTAGE_NONE, VOLTAGE_5V, VOLTAGE_11V, VOLTAGE_12V, VOLTAGE_13V, VOLTAGE_14V,
