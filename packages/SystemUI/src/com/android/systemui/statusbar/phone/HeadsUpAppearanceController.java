@@ -58,7 +58,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     private final View mClockView;
     private final View mOperatorNameView;
     private final DarkIconDispatcher mDarkIconDispatcher;
-    private final NotificationPanelViewController mNotificationPanelViewController;
+    private final NotificationPanelView mPanelView;
     private final Consumer<ExpandableNotificationRow>
             mSetTrackingHeadsUp = this::setTrackingHeadsUp;
     private final Runnable mUpdatePanelTranslation = this::updatePanelTranslation;
@@ -96,14 +96,13 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
             SysuiStatusBarStateController statusBarStateController,
             KeyguardBypassController keyguardBypassController,
             KeyguardStateController keyguardStateController,
-            NotificationWakeUpCoordinator wakeUpCoordinator, CommandQueue commandQueue,
-            NotificationPanelViewController notificationPanelViewController) {
+            NotificationWakeUpCoordinator wakeUpCoordinator, CommandQueue commandQueue) {
         this(notificationIconAreaController, headsUpManager, statusBarStateController,
                 keyguardBypassController, wakeUpCoordinator, keyguardStateController,
                 commandQueue,
                 statusbarView.findViewById(R.id.heads_up_status_bar_view),
                 statusbarView.findViewById(R.id.notification_stack_scroller),
-                notificationPanelViewController,
+                statusbarView.findViewById(R.id.notification_panel),
                 statusbarView.findViewById(R.id.clock),
                 statusbarView.findViewById(R.id.operator_name_frame),
                 statusbarView.findViewById(R.id.centered_icon_area));
@@ -120,7 +119,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
             CommandQueue commandQueue,
             HeadsUpStatusBarView headsUpStatusBarView,
             NotificationStackScrollLayout stackScroller,
-            NotificationPanelViewController notificationPanelViewController,
+            NotificationPanelView panelView,
             View clockView,
             View operatorNameView,
             View centeredIconView) {
@@ -132,10 +131,10 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         headsUpStatusBarView.setOnDrawingRectChangedListener(
                 () -> updateIsolatedIconLocation(true /* requireUpdate */));
         mStackScroller = stackScroller;
-        mNotificationPanelViewController = notificationPanelViewController;
-        notificationPanelViewController.addTrackingHeadsUpListener(mSetTrackingHeadsUp);
-        notificationPanelViewController.addVerticalTranslationListener(mUpdatePanelTranslation);
-        notificationPanelViewController.setHeadsUpAppearanceController(this);
+        mPanelView = panelView;
+        panelView.addTrackingHeadsUpListener(mSetTrackingHeadsUp);
+        panelView.addVerticalTranslationListener(mUpdatePanelTranslation);
+        panelView.setHeadsUpAppearanceController(this);
         mStackScroller.addOnExpandedHeightChangedListener(mSetExpandedHeight);
         mStackScroller.addOnLayoutChangeListener(mStackScrollLayoutChangeListener);
         mStackScroller.setHeadsUpAppearanceController(this);
@@ -170,9 +169,9 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         mHeadsUpManager.removeListener(this);
         mHeadsUpStatusBarView.setOnDrawingRectChangedListener(null);
         mWakeUpCoordinator.removeListener(this);
-        mNotificationPanelViewController.removeTrackingHeadsUpListener(mSetTrackingHeadsUp);
-        mNotificationPanelViewController.removeVerticalTranslationListener(mUpdatePanelTranslation);
-        mNotificationPanelViewController.setHeadsUpAppearanceController(null);
+        mPanelView.removeTrackingHeadsUpListener(mSetTrackingHeadsUp);
+        mPanelView.removeVerticalTranslationListener(mUpdatePanelTranslation);
+        mPanelView.setHeadsUpAppearanceController(null);
         mStackScroller.removeOnExpandedHeightChangedListener(mSetExpandedHeight);
         mStackScroller.removeOnLayoutChangeListener(mStackScrollLayoutChangeListener);
         mDarkIconDispatcher.removeDarkReceiver(this);

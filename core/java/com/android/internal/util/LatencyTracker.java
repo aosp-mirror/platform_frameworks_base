@@ -121,11 +121,7 @@ public class LatencyTracker {
     }
 
     public static boolean isEnabled(Context ctx) {
-        return getInstance(ctx).isEnabled();
-    }
-
-    public boolean isEnabled() {
-        return Build.IS_DEBUGGABLE && mEnabled;
+        return Build.IS_DEBUGGABLE && getInstance(ctx).mEnabled;
     }
 
     /**

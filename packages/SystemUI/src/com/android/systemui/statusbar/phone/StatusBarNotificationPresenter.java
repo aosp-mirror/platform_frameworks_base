@@ -107,7 +107,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final NotificationGutsManager mGutsManager =
             Dependency.get(NotificationGutsManager.class);
 
-    private final NotificationPanelViewController mNotificationPanel;
+    private final NotificationPanelView mNotificationPanel;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final AboveShelfObserver mAboveShelfObserver;
     private final DozeScrimController mDozeScrimController;
@@ -132,7 +132,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private int mMaxKeyguardNotifications;
 
     public StatusBarNotificationPresenter(Context context,
-            NotificationPanelViewController panel,
+            NotificationPanelView panel,
             HeadsUpManagerPhone headsUp,
             StatusBarWindowView statusBarWindow,
             ViewGroup stackScroller,
@@ -172,7 +172,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
         if (MULTIUSER_DEBUG) {
-            mNotificationPanelDebugText = mNotificationPanel.getHeaderDebugInfo();
+            mNotificationPanelDebugText = mNotificationPanel.findViewById(R.id.header_debug_info);
             mNotificationPanelDebugText.setVisibility(View.VISIBLE);
         }
 

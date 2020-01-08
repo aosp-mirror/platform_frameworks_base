@@ -37,7 +37,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
-import com.android.systemui.statusbar.phone.NotificationPanelViewController;
+import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.StatusBarWindowViewController;
 
 /**
@@ -53,7 +53,7 @@ public class ActivityLaunchAnimator {
             CollapsedStatusBarFragment.FADE_IN_DURATION - CollapsedStatusBarFragment.FADE_IN_DELAY
             - 16;
     private static final long LAUNCH_TIMEOUT = 500;
-    private final NotificationPanelViewController mNotificationPanel;
+    private final NotificationPanelView mNotificationPanel;
     private final NotificationListContainer mNotificationContainer;
     private final float mWindowCornerRadius;
     private final StatusBarWindowViewController mStatusBarWindowViewController;
@@ -69,7 +69,7 @@ public class ActivityLaunchAnimator {
     public ActivityLaunchAnimator(
             StatusBarWindowViewController statusBarWindowViewController,
             Callback callback,
-            NotificationPanelViewController notificationPanel,
+            NotificationPanelView notificationPanel,
             NotificationListContainer container) {
         mNotificationPanel = notificationPanel;
         mNotificationContainer = container;

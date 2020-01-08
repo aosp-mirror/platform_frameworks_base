@@ -86,7 +86,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private StatusBarWindowViewController mStatusBarWindowViewController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    @Mock private NotificationPanelViewController mNotificationPanel;
+    @Mock private NotificationPanelView mNotificationPanel;
     @Mock private View mAmbientIndicationContainer;
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private LockscreenLockIconController mLockscreenLockIconController;

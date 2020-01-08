@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -101,7 +102,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
     private final MetricsLogger mMetricsLogger;
     private final Context mContext;
-    private final NotificationPanelViewController mNotificationPanel;
+    private final NotificationPanelView mNotificationPanel;
     private final NotificationPresenter mPresenter;
     private final LockPatternUtils mLockPatternUtils;
     private final HeadsUpManagerPhone mHeadsUpManager;
@@ -120,7 +121,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private boolean mIsCollapsingToShowActivityOverLockscreen;
 
     private StatusBarNotificationActivityStarter(Context context, CommandQueue commandQueue,
-            Lazy<AssistManager> assistManagerLazy, NotificationPanelViewController panel,
+            Lazy<AssistManager> assistManagerLazy, NotificationPanelView panel,
             NotificationPresenter presenter, NotificationEntryManager entryManager,
             HeadsUpManagerPhone headsUpManager, ActivityStarter activityStarter,
             ActivityLaunchAnimator activityLaunchAnimator, IStatusBarService statusBarService,
@@ -518,6 +519,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         private final NotificationGroupManager mGroupManager;
         private final NotificationLockscreenUserManager mLockscreenUserManager;
         private final KeyguardStateController mKeyguardStateController;
+        private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
         private final MetricsLogger mMetricsLogger;
         private final LockPatternUtils mLockPatternUtils;
         private final Handler mMainThreadHandler;
@@ -525,8 +527,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         private final Executor mUiBgExecutor;
         private final ActivityIntentHelper mActivityIntentHelper;
         private final BubbleController mBubbleController;
-        private NotificationPanelViewController mNotificationPanelViewController;
-        private NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
+        private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
         private final ShadeController mShadeController;
         private NotificationPresenter mNotificationPresenter;
         private ActivityLaunchAnimator mActivityLaunchAnimator;
@@ -557,7 +558,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 @UiBackground Executor uiBgExecutor,
                 ActivityIntentHelper activityIntentHelper,
                 BubbleController bubbleController,
-                ShadeController shadeController) {
+                ShadeController shadeController,
+                SuperStatusBarViewFactory superStatusBarViewFactory) {
             mContext = context;
             mCommandQueue = commandQueue;
             mAssistManagerLazy = assistManagerLazy;
@@ -583,6 +585,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mActivityIntentHelper = activityIntentHelper;
             mBubbleController = bubbleController;
             mShadeController = shadeController;
+            mSuperStatusBarViewFactory = superStatusBarViewFactory;
         }
 
         /** Sets the status bar to use as {@link StatusBar}. */
@@ -601,19 +604,10 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             return this;
         }
 
-        /** Set the NotificationPanelViewController */
-        public Builder setNotificationPanelViewController(
-                NotificationPanelViewController notificationPanelViewController) {
-            mNotificationPanelViewController = notificationPanelViewController;
-            return this;
-        }
-
-
-
         public StatusBarNotificationActivityStarter build() {
             return new StatusBarNotificationActivityStarter(mContext,
                     mCommandQueue, mAssistManagerLazy,
-                    mNotificationPanelViewController,
+                    mSuperStatusBarViewFactory.getNotificationPanelView(),
                     mNotificationPresenter,
                     mEntryManager,
                     mHeadsUpManager,

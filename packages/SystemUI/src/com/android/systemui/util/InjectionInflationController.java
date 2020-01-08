@@ -35,6 +35,7 @@ import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.LockIcon;
+import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -126,6 +127,11 @@ public class InjectionInflationController {
          * Creates the NotificationStackScrollLayout.
          */
         NotificationStackScrollLayout createNotificationStackScrollLayout();
+
+        /**
+         * Creates the NotificationPanelView.
+         */
+        NotificationPanelView createPanelView();
 
         /**
          * Creates the Shelf.
