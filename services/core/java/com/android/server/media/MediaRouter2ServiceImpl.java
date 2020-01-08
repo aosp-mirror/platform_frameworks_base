@@ -79,7 +79,6 @@ class MediaRouter2ServiceImpl {
     @GuardedBy("mLock")
     private int mCurrentUserId = -1;
 
-
     MediaRouter2ServiceImpl(Context context) {
         mContext = context;
     }
@@ -89,17 +88,23 @@ class MediaRouter2ServiceImpl {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserId(uid);
 
-        Collection<MediaRoute2Info> systemRoutes;
-        synchronized (mLock) {
-            UserRecord userRecord = mUserRecords.get(userId);
-            if (userRecord == null) {
-                userRecord = new UserRecord(userId);
-                mUserRecords.put(userId, userRecord);
-                initializeUserLocked(userRecord);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            Collection<MediaRoute2Info> systemRoutes;
+            synchronized (mLock) {
+                UserRecord userRecord = getOrCreateUserRecordLocked(userId);
+                MediaRoute2ProviderInfo providerInfo =
+                        userRecord.mHandler.mSystemProvider.getProviderInfo();
+                if (providerInfo != null) {
+                    systemRoutes = providerInfo.getRoutes();
+                } else {
+                    systemRoutes = Collections.emptyList();
+                }
             }
-            systemRoutes = userRecord.mHandler.mSystemProvider.getProviderInfo().getRoutes();
+            return new ArrayList<>(systemRoutes);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
-        return new ArrayList<>(systemRoutes);
     }
 
     public void registerClient(@NonNull IMediaRouter2Client client,
@@ -400,12 +405,7 @@ class MediaRouter2ServiceImpl {
             int uid, int pid, String packageName, int userId, boolean trusted) {
         final IBinder binder = client.asBinder();
         if (mAllClientRecords.get(binder) == null) {
-            UserRecord userRecord = mUserRecords.get(userId);
-            if (userRecord == null) {
-                userRecord = new UserRecord(userId);
-                mUserRecords.put(userId, userRecord);
-                initializeUserLocked(userRecord);
-            }
+            UserRecord userRecord = getOrCreateUserRecordLocked(userId);
             Client2Record clientRecord = new Client2Record(userRecord, client, uid, pid,
                     packageName, trusted);
             try {
@@ -556,22 +556,12 @@ class MediaRouter2ServiceImpl {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
         if (managerRecord == null) {
-            boolean newUser = false;
-            UserRecord userRecord = mUserRecords.get(userId);
-            if (userRecord == null) {
-                userRecord = new UserRecord(userId);
-                newUser = true;
-            }
+            UserRecord userRecord = getOrCreateUserRecordLocked(userId);
             managerRecord = new ManagerRecord(userRecord, manager, uid, pid, packageName, trusted);
             try {
                 binder.linkToDeath(managerRecord, 0);
             } catch (RemoteException ex) {
                 throw new RuntimeException("Media router manager died prematurely.", ex);
-            }
-
-            if (newUser) {
-                mUserRecords.put(userId, userRecord);
-                initializeUserLocked(userRecord);
             }
 
             userRecord.mManagerRecords.add(managerRecord);
@@ -661,14 +651,17 @@ class MediaRouter2ServiceImpl {
         return sessionInfos;
     }
 
-    private void initializeUserLocked(UserRecord userRecord) {
-        if (DEBUG) {
-            Slog.d(TAG, userRecord + ": Initialized");
+    private UserRecord getOrCreateUserRecordLocked(int userId) {
+        UserRecord userRecord = mUserRecords.get(userId);
+        if (userRecord == null) {
+            userRecord = new UserRecord(userId);
+            mUserRecords.put(userId, userRecord);
+            if (userId == mCurrentUserId) {
+                userRecord.mHandler.sendMessage(
+                        obtainMessage(UserHandler::start, userRecord.mHandler));
+            }
         }
-        if (userRecord.mUserId == mCurrentUserId) {
-            userRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::start, userRecord.mHandler));
-        }
+        return userRecord;
     }
 
     private void disposeUserIfNeededLocked(UserRecord userRecord) {
