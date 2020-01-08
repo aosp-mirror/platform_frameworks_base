@@ -1599,6 +1599,11 @@ public class LockPatternUtils {
         public static final int STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN = 0x20;
 
         /**
+         * Strong authentication is required to prepare for unattended upgrade.
+         */
+        public static final int STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE = 0x40;
+
+        /**
          * Strong auth flags that do not prevent biometric methods from being accepted as auth.
          * If any other flags are set, biometric authentication is disabled.
          */
