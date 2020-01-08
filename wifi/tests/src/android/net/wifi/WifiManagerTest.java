@@ -1672,8 +1672,20 @@ public class WifiManagerTest {
     @Test
     public void testAllowAutojoin() throws Exception {
         mWifiManager.allowAutojoin(1, true);
-        verify(mWifiService).allowAutojoin(eq(1), eq(true));
+        verify(mWifiService).allowAutojoin(1, true);
     }
+
+    /**
+     * Test behavior of {@link WifiManager#allowAutojoinPasspoint(String, boolean)}
+     * @throws Exception
+     */
+    @Test
+    public void testAllowAutojoinPasspoint() throws Exception {
+        final String fqdn = "FullyQualifiedDomainName";
+        mWifiManager.allowAutojoinPasspoint(fqdn, true);
+        verify(mWifiService).allowAutojoinPasspoint(fqdn, true);
+    }
+
 
     /**
      * Test behavior of {@link WifiManager#disconnect()}
