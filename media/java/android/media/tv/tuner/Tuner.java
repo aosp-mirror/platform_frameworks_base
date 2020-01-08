@@ -16,6 +16,7 @@
 
 package android.media.tv.tuner;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -30,11 +31,13 @@ import android.media.tv.tuner.filter.FilterEvent;
 import android.media.tv.tuner.frontend.FrontendCallback;
 import android.media.tv.tuner.frontend.FrontendInfo;
 import android.media.tv.tuner.frontend.FrontendStatus;
+import android.media.tv.tuner.frontend.ScanCallback;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * This class is used to interact with hardware tuners devices.
@@ -68,6 +71,10 @@ public final class Tuner implements AutoCloseable  {
 
     private List<Integer> mLnbIds;
     private Lnb mLnb;
+    @Nullable
+    private ScanCallback mScanCallback;
+    @Nullable
+    private Executor mScanCallbackExecutor;
 
     /**
      * Constructs a Tuner instance.
@@ -229,29 +236,6 @@ public final class Tuner implements AutoCloseable  {
         private Frontend(int id) {
             mId = id;
         }
-
-        public void setCallback(@Nullable FrontendCallback callback, @Nullable Handler handler) {
-            mCallback = callback;
-
-            if (mCallback == null) {
-                return;
-            }
-
-            if (handler == null) {
-                // use default looper if handler is null
-                if (mHandler == null) {
-                    mHandler = createEventHandler();
-                }
-                return;
-            }
-
-            Looper looper = handler.getLooper();
-            if (mHandler != null && mHandler.getLooper() == looper) {
-                // the same looper. reuse mHandler
-                return;
-            }
-            mHandler = new EventHandler(looper);
-        }
     }
 
     /**
@@ -284,18 +268,32 @@ public final class Tuner implements AutoCloseable  {
      * Scan channels.
      * @hide
      */
-    public int scan(@NonNull FrontendSettings settings, @FrontendScanType int scanType) {
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    public int scan(@NonNull FrontendSettings settings, @FrontendScanType int scanType,
+            @NonNull @CallbackExecutor Executor executor, @NonNull ScanCallback scanCallback) {
+        mScanCallback = scanCallback;
+        mScanCallbackExecutor = executor;
         return nativeScan(settings.getType(), settings, scanType);
     }
 
     /**
      * Stops a previous scanning.
      *
-     * If the method completes successfully, the frontend stop previous scanning.
+     * <p>
+     * The {@link ScanCallback} and it's {@link Executor} will be removed.
+     *
+     * <p>
+     * If the method completes successfully, the frontend stopped previous scanning.
+     *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     public int stopScan() {
-        return nativeStopScan();
+        TunerUtils.checkTunerPermission(mContext);
+        int retVal = nativeStopScan();
+        mScanCallback = null;
+        mScanCallbackExecutor = null;
+        return retVal;
     }
 
     /**
