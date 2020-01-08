@@ -93,9 +93,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -429,7 +432,10 @@ public final class InputMethodManager {
      * in a background thread. Later, if there is an actual startInput it will wait on
      * main thread till the background thread completes.
      */
-    private CompletableFuture<Void> mWindowFocusGainFuture;
+    private Future<?> mWindowFocusGainFuture;
+
+    private ExecutorService mStartInputWorker = Executors.newSingleThreadExecutor(
+            new ImeThreadFactory("StartInputWorker"));
 
     /**
      * The instance that has previously been sent to the input method.
@@ -787,6 +793,19 @@ public final class InputMethodManager {
                     + " finished=" + isFinished()
                     + " mParentInputMethodManager.mActive=" + mParentInputMethodManager.mActive
                     + "}";
+        }
+    }
+
+    private static class ImeThreadFactory implements ThreadFactory {
+        private final String mThreadName;
+
+        ImeThreadFactory(String name) {
+            mThreadName = name;
+        }
+
+        @Override
+        public Thread newThread(Runnable r) {
+            return new Thread(r, mThreadName);
         }
     }
 
@@ -1978,7 +1997,7 @@ public final class InputMethodManager {
         if (mWindowFocusGainFuture != null) {
             mWindowFocusGainFuture.cancel(false/* mayInterruptIfRunning */);
         }
-        mWindowFocusGainFuture = CompletableFuture.runAsync(() -> {
+        mWindowFocusGainFuture = mStartInputWorker.submit(() -> {
             if (checkFocusNoStartInput(forceNewFocus1)) {
                 // We need to restart input on the current focus view.  This
                 // should be done in conjunction with telling the system service
