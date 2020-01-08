@@ -8914,6 +8914,7 @@ package android.telephony {
 
   public class SubscriptionManager {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean canDisablePhysicalSubscription();
+    method public boolean canManageSubscription(@Nullable android.telephony.SubscriptionInfo, @Nullable String);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.SubscriptionInfo getActiveSubscriptionInfoForIcc(@NonNull String);
     method public java.util.List<android.telephony.SubscriptionInfo> getAvailableSubscriptionInfoList();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEnabledSubscriptionId(int);
