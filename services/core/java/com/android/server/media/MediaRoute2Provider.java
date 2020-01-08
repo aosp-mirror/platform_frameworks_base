@@ -108,5 +108,8 @@ abstract class MediaRoute2Provider {
         // TODO: Remove this when MediaRouter2ServiceImpl notifies clients of session changes.
         void onSessionInfoChanged(@NonNull MediaRoute2Provider provider,
                 @NonNull RouteSessionInfo sessionInfo);
+        // TODO: Call this when service actually notifies of session release.
+        void onSessionReleased(@NonNull MediaRoute2Provider provider,
+                @NonNull RouteSessionInfo sessionInfo);
     }
 }

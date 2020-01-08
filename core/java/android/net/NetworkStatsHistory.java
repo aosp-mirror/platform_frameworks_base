@@ -30,7 +30,7 @@ import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
 import static com.android.internal.util.ArrayUtils.total;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.NetworkStatsHistoryBucketProto;

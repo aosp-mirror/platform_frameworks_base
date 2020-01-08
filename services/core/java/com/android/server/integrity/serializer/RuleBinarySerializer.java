@@ -27,6 +27,9 @@ import static com.android.server.integrity.model.ComponentBitSize.KEY_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.OPERATOR_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.SEPARATOR_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.VALUE_SIZE_BITS;
+import static com.android.server.integrity.model.IndexingFileConstants.END_INDEXING_KEY;
+import static com.android.server.integrity.model.IndexingFileConstants.INDEXING_BLOCK_SIZE;
+import static com.android.server.integrity.model.IndexingFileConstants.START_INDEXING_KEY;
 import static com.android.server.integrity.serializer.RuleIndexingDetails.APP_CERTIFICATE_INDEXED;
 import static com.android.server.integrity.serializer.RuleIndexingDetails.NOT_INDEXED;
 import static com.android.server.integrity.serializer.RuleIndexingDetails.PACKAGE_NAME_INDEXED;
@@ -52,20 +55,14 @@ import java.util.TreeMap;
 /** A helper class to serialize rules from the {@link Rule} model to Binary representation. */
 public class RuleBinarySerializer implements RuleSerializer {
 
-    // The parsing time seems acceptable for 100 rules based on the tests in go/ic-rule-file-format.
-    private static final int INDEXING_BLOCK_SIZE = 100;
-
-    private static final String START_INDEXING_KEY = "START_KEY";
-    private static final String END_INDEXING_KEY = "END_KEY";
-
     // Get the byte representation for a list of rules.
     @Override
     public byte[] serialize(List<Rule> rules, Optional<Integer> formatVersion)
             throws RuleSerializeException {
         try {
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            serialize(rules, formatVersion, byteArrayOutputStream);
-            return byteArrayOutputStream.toByteArray();
+            ByteArrayOutputStream rulesOutputStream = new ByteArrayOutputStream();
+            serialize(rules, formatVersion, rulesOutputStream, new ByteArrayOutputStream());
+            return rulesOutputStream.toByteArray();
         } catch (Exception e) {
             throw new RuleSerializeException(e.getMessage(), e);
         }
@@ -74,27 +71,38 @@ public class RuleBinarySerializer implements RuleSerializer {
     // Get the byte representation for a list of rules, and write them to an output stream.
     @Override
     public void serialize(
-            List<Rule> rules, Optional<Integer> formatVersion, OutputStream originalOutputStream)
+            List<Rule> rules,
+            Optional<Integer> formatVersion,
+            OutputStream rulesFileOutputStream,
+            OutputStream indexingFileOutputStream)
             throws RuleSerializeException {
         try {
             // Determine the indexing groups and the order of the rules within each indexed group.
             Map<Integer, TreeMap<String, List<Rule>>> indexedRules =
                     RuleIndexingDetailsIdentifier.splitRulesIntoIndexBuckets(rules);
 
-            ByteTrackedOutputStream outputStream =
-                    new ByteTrackedOutputStream(originalOutputStream);
+            ByteTrackedOutputStream ruleFileByteTrackedOutputStream =
+                    new ByteTrackedOutputStream(rulesFileOutputStream);
 
-            serializeRuleFileMetadata(formatVersion, outputStream);
+            serializeRuleFileMetadata(formatVersion, ruleFileByteTrackedOutputStream);
 
-            Map<String, Long> packageNameIndexes =
-                    serializeRuleList(indexedRules.get(PACKAGE_NAME_INDEXED), outputStream);
-            Map<String, Long> appCertificateIndexes =
-                    serializeRuleList(indexedRules.get(APP_CERTIFICATE_INDEXED), outputStream);
-            Map<String, Long> unindexedRulesIndex =
-                    serializeRuleList(indexedRules.get(NOT_INDEXED), outputStream);
+            Map<String, Integer> packageNameIndexes =
+                    serializeRuleList(indexedRules.get(PACKAGE_NAME_INDEXED),
+                            ruleFileByteTrackedOutputStream);
+            indexingFileOutputStream.write(
+                    serializeIndexes(packageNameIndexes, /* isIndexed= */true));
 
-            // TODO(b/145493956): Write these indexes into a index file provided by integrity file
-            //  manager.
+            Map<String, Integer> appCertificateIndexes =
+                    serializeRuleList(indexedRules.get(APP_CERTIFICATE_INDEXED),
+                            ruleFileByteTrackedOutputStream);
+            indexingFileOutputStream.write(
+                    serializeIndexes(appCertificateIndexes, /* isIndexed= */true));
+
+            Map<String, Integer> unindexedRulesIndexes =
+                    serializeRuleList(indexedRules.get(NOT_INDEXED),
+                            ruleFileByteTrackedOutputStream);
+            indexingFileOutputStream.write(
+                    serializeIndexes(unindexedRulesIndexes, /* isIndexed= */false));
         } catch (Exception e) {
             throw new RuleSerializeException(e.getMessage(), e);
         }
@@ -109,15 +117,15 @@ public class RuleBinarySerializer implements RuleSerializer {
         outputStream.write(bitOutputStream.toByteArray());
     }
 
-    private Map<String, Long> serializeRuleList(TreeMap<String, List<Rule>> rulesMap,
+    private Map<String, Integer> serializeRuleList(TreeMap<String, List<Rule>> rulesMap,
             ByteTrackedOutputStream outputStream)
             throws IOException {
         Preconditions.checkArgument(rulesMap != null,
                 "serializeRuleList should never be called with null rule list.");
 
         BitOutputStream bitOutputStream = new BitOutputStream();
-        Map<String, Long> indexMapping = new TreeMap();
-        long indexTracker = 0;
+        Map<String, Integer> indexMapping = new TreeMap();
+        int indexTracker = 0;
 
         indexMapping.put(START_INDEXING_KEY, outputStream.getWrittenBytesCount());
         for (Map.Entry<String, List<Rule>> entry : rulesMap.entrySet()) {
@@ -208,6 +216,33 @@ public class RuleBinarySerializer implements RuleSerializer {
             throw new IllegalArgumentException(
                     String.format("Invalid atomic formula type: %s", atomicFormula.getClass()));
         }
+    }
+
+    private byte[] serializeIndexes(Map<String, Integer> indexes, boolean isIndexed) {
+        BitOutputStream bitOutputStream = new BitOutputStream();
+
+        // Output the starting location of this indexing group.
+        serializeStringValue(START_INDEXING_KEY, /* isHashedValue= */false,
+                bitOutputStream);
+        serializeIntValue(indexes.get(START_INDEXING_KEY), bitOutputStream);
+
+        // If the group is indexed, output the locations of the indexes.
+        if (isIndexed) {
+            for (Map.Entry<String, Integer> entry : indexes.entrySet()) {
+                if (!entry.getKey().equals(START_INDEXING_KEY)
+                        && !entry.getKey().equals(END_INDEXING_KEY)) {
+                    serializeStringValue(entry.getKey(), /* isHashedValue= */false,
+                            bitOutputStream);
+                    serializeIntValue(entry.getValue(), bitOutputStream);
+                }
+            }
+        }
+
+        // Output the end location of this indexing group.
+        serializeStringValue(END_INDEXING_KEY, /*isHashedValue= */ false, bitOutputStream);
+        serializeIntValue(indexes.get(END_INDEXING_KEY), bitOutputStream);
+
+        return bitOutputStream.toByteArray();
     }
 
     private void serializeStringValue(

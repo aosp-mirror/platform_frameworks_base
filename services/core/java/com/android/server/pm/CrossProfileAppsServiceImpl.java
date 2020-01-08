@@ -48,6 +48,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     private static final String TAG = "CrossProfileAppsService";
@@ -67,7 +68,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
     @Override
     public List<UserHandle> getTargetUserProfiles(String callingPackage) {
-        Preconditions.checkNotNull(callingPackage);
+        Objects.requireNonNull(callingPackage);
 
         verifyCallingPackage(callingPackage);
 
@@ -87,8 +88,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             ComponentName component,
             @UserIdInt int userId,
             boolean launchMainActivity) throws RemoteException {
-        Preconditions.checkNotNull(callingPackage);
-        Preconditions.checkNotNull(component);
+        Objects.requireNonNull(callingPackage);
+        Objects.requireNonNull(component);
 
         verifyCallingPackage(callingPackage);
 

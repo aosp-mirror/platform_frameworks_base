@@ -16,15 +16,23 @@
 
 package android.widget;
 
+import static android.widget.espresso.TextViewActions.clickOnTextAtIndex;
 import static android.widget.espresso.TextViewActions.dragOnText;
 import static android.widget.espresso.TextViewAssertions.hasInsertionPointerAtIndex;
+import static android.widget.espresso.TextViewAssertions.hasSelection;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.app.Activity;
 import android.app.Instrumentation;
+import android.view.MotionEvent;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -70,30 +78,67 @@ public class EditorCursorDragTest {
         onView(withId(R.id.textview)).perform(replaceText(text));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
 
-        // Drag left to right. The cursor should end up at the position where the finger is lifted.
+        // Swipe left to right to drag the cursor. The cursor should end up at the position where
+        // the finger is lifted.
         onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("llo"), text.indexOf("!")));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(11));
 
-        // Drag right to left. The cursor should end up at the position where the finger is lifted.
+        // Swipe right to left to drag the cursor. The cursor should end up at the position where
+        // the finger is lifted.
         onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("!"), text.indexOf("llo")));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(2));
     }
 
     @Test
     public void testCursorDrag_horizontal_whenTextViewContentsLargerThanScreen() throws Throwable {
-        String text = "Hello world!"
-                + Strings.repeat("\n", 500) + "012345middle"
-                + Strings.repeat("\n", 10) + "012345last";
+        String text = "Hello world!\n\n"
+                + Strings.repeat("Bla\n\n", 200) + "Bye";
         onView(withId(R.id.textview)).perform(replaceText(text));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
 
-        // Drag left to right. The cursor should end up at the position where the finger is lifted.
+        // Swipe left to right to drag the cursor. The cursor should end up at the position where
+        // the finger is lifted.
         onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("llo"), text.indexOf("!")));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(11));
 
-        // Drag right to left. The cursor should end up at the position where the finger is lifted.
+        // Swipe right to left to drag the cursor. The cursor should end up at the position where
+        // the finger is lifted.
         onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("!"), text.indexOf("llo")));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(2));
+    }
+
+    @Test
+    public void testCursorDrag_diagonal_whenTextViewContentsFitOnScreen() throws Throwable {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i <= 9; i++) {
+            sb.append("line").append(i).append("\n");
+        }
+        String text = sb.toString();
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
+
+        // Swipe along a diagonal path. This should drag the cursor.
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("2")));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("2")));
+
+        // Swipe along a steeper diagonal path. This should still drag the cursor.
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("3")));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("3")));
+
+        // Swipe right-down along a very steep diagonal path. This should not drag the cursor.
+        // Normally this would trigger a scroll, but since the full view fits on the screen there
+        // is nothing to scroll and the gesture will trigger a selection drag.
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("7")));
+        onView(withId(R.id.textview)).check(hasSelection(not(emptyString())));
+
+        // Swipe right-up along a very steep diagonal path. This should not drag the cursor.
+        // Normally this would trigger a scroll, but since the full view fits on the screen there
+        // is nothing to scroll and the gesture will trigger a selection drag.
+        int index = text.indexOf("line9");
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(index));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(index));
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line7"), text.indexOf("1")));
+        onView(withId(R.id.textview)).check(hasSelection(not(emptyString())));
     }
 
     @Test
@@ -102,75 +147,178 @@ public class EditorCursorDragTest {
         for (int i = 1; i <= 9; i++) {
             sb.append("line").append(i).append("\n");
         }
-        sb.append(Strings.repeat("0123456789\n\n", 500)).append("Last line");
+        sb.append(Strings.repeat("0123456789\n", 400)).append("Last");
         String text = sb.toString();
         onView(withId(R.id.textview)).perform(replaceText(text));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
 
-        // Drag along a diagonal path.
+        // Swipe along a diagonal path. This should drag the cursor.
         onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("2")));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("2")));
 
-        // Drag along a steeper diagonal path.
-        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("9")));
-        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("9")));
+        // Swipe along a steeper diagonal path. This should still drag the cursor.
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("3")));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("3")));
 
-        // Drag along an almost vertical path.
-        // TODO(b/145833335): Consider whether this should scroll instead of dragging the cursor.
-        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("ne1"), text.indexOf("9")));
-        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("9")));
+        // Swipe right-down along a very steep diagonal path. This should not drag the cursor.
+        // Normally this would trigger a scroll up, but since the view is already at the top there
+        // is nothing to scroll and the gesture will trigger a selection drag.
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("7")));
+        onView(withId(R.id.textview)).check(hasSelection(not(emptyString())));
 
-        // Drag along a vertical path from line 1 to line 9.
-        // TODO(b/145833335): Consider whether this should scroll instead of dragging the cursor.
-        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("e1"), text.indexOf("e9")));
-        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("e9")));
-
-        // Drag along a vertical path from line 9 to line 1.
-        // TODO(b/145833335): Consider whether this should scroll instead of dragging the cursor.
-        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("e9"), text.indexOf("e1")));
-        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("e1")));
+        // Swipe right-up along a very steep diagonal path. This should not drag the cursor. This
+        // will trigger a downward scroll and the cursor position will not change.
+        int index = text.indexOf("line9");
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(index));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(index));
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line7"), text.indexOf("1")));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(index));
     }
 
     @Test
     public void testCursorDrag_vertical_whenTextViewContentsFitOnScreen() throws Throwable {
-        String text = "012first\n\n" + Strings.repeat("012345\n\n", 10) + "012last";
+        String text = "012345_aaa\n"
+                + "0123456789\n"
+                + "012345_bbb\n"
+                + "0123456789\n"
+                + "012345_ccc\n"
+                + "0123456789\n"
+                + "012345_ddd";
         onView(withId(R.id.textview)).perform(replaceText(text));
+
+        // Swipe up vertically. This should not drag the cursor. Since there's also nothing to
+        // scroll, the gesture will trigger a selection drag.
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(0));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("bbb"), text.indexOf("aaa")));
+        onView(withId(R.id.textview)).check(hasSelection(not(emptyString())));
 
-        // Drag down. Since neither the TextView nor its container require scrolling, the cursor
-        // drag should execute and the cursor should end up at the position where the finger is
-        // lifted.
-        onView(withId(R.id.textview)).perform(
-                dragOnText(text.indexOf("first"), text.indexOf("last")));
-        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.length() - 4));
-
-        // Drag up. Since neither the TextView nor its container require scrolling, the cursor
-        // drag should execute and the cursor should end up at the position where the finger is
-        // lifted.
-        onView(withId(R.id.textview)).perform(
-                dragOnText(text.indexOf("last"), text.indexOf("first")));
-        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(3));
+        // Swipe down vertically. This should not drag the cursor. Since there's also nothing to
+        // scroll, the gesture will trigger a selection drag.
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(0));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("ccc"), text.indexOf("ddd")));
+        onView(withId(R.id.textview)).check(hasSelection(not(emptyString())));
     }
 
     @Test
     public void testCursorDrag_vertical_whenTextViewContentsLargerThanScreen() throws Throwable {
-        String text = "012345first\n\n"
-                + Strings.repeat("0123456789\n\n", 10) + "012345middle"
-                + Strings.repeat("0123456789\n\n", 500) + "012345last";
+        String text = "012345_aaa\n"
+                + "0123456789\n"
+                + "012345_bbb\n"
+                + "0123456789\n"
+                + "012345_ccc\n"
+                + "0123456789\n"
+                + "012345_ddd\n"
+                + Strings.repeat("0123456789\n", 400) + "012345_zzz";
         onView(withId(R.id.textview)).perform(replaceText(text));
-        int initialCursorPosition = 0;
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.indexOf("ddd")));
+        int initialCursorPosition = text.indexOf("ddd");
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(initialCursorPosition));
 
-        // Drag up.
-        // TODO(b/145833335): Consider whether this should scroll instead of dragging the cursor.
-        onView(withId(R.id.textview)).perform(
-                dragOnText(text.indexOf("middle"), text.indexOf("first")));
-        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("first")));
+        // Swipe up vertically. This should trigger a downward scroll.
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("bbb"), text.indexOf("aaa")));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(initialCursorPosition));
 
-        // Drag down.
-        // TODO(b/145833335): Consider whether this should scroll instead of dragging the cursor.
-        onView(withId(R.id.textview)).perform(
-                dragOnText(text.indexOf("first"), text.indexOf("middle")));
-        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("middle")));
+        // Swipe down vertically. This should trigger an upward scroll.
+        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("ccc"), text.indexOf("ddd")));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(initialCursorPosition));
+    }
+
+    @Test
+    public void testEditor_onTouchEvent_cursorDrag() throws Throwable {
+        String text = "testEditor_onTouchEvent_cursorDrag";
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
+
+        TextView tv = mActivity.findViewById(R.id.textview);
+        Editor editor = tv.getEditorForTesting();
+
+        // Simulate a tap-and-drag gesture. This should trigger a cursor drag.
+        long event1Time = 1001;
+        MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
+        mActivity.runOnUiThread(() -> editor.onTouchEvent(event1));
+        mInstrumentation.waitForIdleSync();
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+
+        long event2Time = 1002;
+        MotionEvent event2 = moveEvent(event1Time, event2Time, 21f, 30f);
+        mActivity.runOnUiThread(() -> editor.onTouchEvent(event2));
+        mInstrumentation.waitForIdleSync();
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+
+        long event3Time = 1003;
+        MotionEvent event3 = moveEvent(event3Time, event3Time, 120f, 30f);
+        mActivity.runOnUiThread(() -> editor.onTouchEvent(event3));
+        mInstrumentation.waitForIdleSync();
+        assertTrue(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+
+        long event4Time = 1004;
+        MotionEvent event4 = upEvent(event3Time, event4Time, 120f, 30f);
+        mActivity.runOnUiThread(() -> editor.onTouchEvent(event4));
+        mInstrumentation.waitForIdleSync();
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+    }
+
+    @Test
+    public void testEditor_onTouchEvent_selectionDrag() throws Throwable {
+        String text = "testEditor_onTouchEvent_selectionDrag";
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
+
+        TextView tv = mActivity.findViewById(R.id.textview);
+        Editor editor = tv.getEditorForTesting();
+
+        // Simulate a double-tap followed by a drag. This should trigger a selection drag.
+        long event1Time = 1001;
+        MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
+        mActivity.runOnUiThread(() -> editor.onTouchEvent(event1));
+        mInstrumentation.waitForIdleSync();
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+
+        long event2Time = 1002;
+        MotionEvent event2 = upEvent(event1Time, event2Time, 20f, 30f);
+        mActivity.runOnUiThread(() -> editor.onTouchEvent(event2));
+        mInstrumentation.waitForIdleSync();
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+
+        long event3Time = 1003;
+        MotionEvent event3 = downEvent(event3Time, event3Time, 20f, 30f);
+        mActivity.runOnUiThread(() -> editor.onTouchEvent(event3));
+        mInstrumentation.waitForIdleSync();
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertTrue(editor.getSelectionController().isCursorBeingModified());
+
+        long event4Time = 1004;
+        MotionEvent event4 = moveEvent(event3Time, event4Time, 120f, 30f);
+        mActivity.runOnUiThread(() -> editor.onTouchEvent(event4));
+        mInstrumentation.waitForIdleSync();
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertTrue(editor.getSelectionController().isCursorBeingModified());
+
+        long event5Time = 1005;
+        MotionEvent event5 = upEvent(event3Time, event5Time, 120f, 30f);
+        mActivity.runOnUiThread(() -> editor.onTouchEvent(event5));
+        mInstrumentation.waitForIdleSync();
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+    }
+
+    private static MotionEvent downEvent(long downTime, long eventTime, float x, float y) {
+        return MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_DOWN, x, y, 0);
+    }
+
+    private static MotionEvent upEvent(long downTime, long eventTime, float x, float y) {
+        return MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_UP, x, y, 0);
+    }
+
+    private static MotionEvent moveEvent(long downTime, long eventTime, float x, float y) {
+        return MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_MOVE, x, y, 0);
     }
 }

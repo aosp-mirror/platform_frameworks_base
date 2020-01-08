@@ -168,8 +168,9 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
      *
      * @param reason a flag indicating which string should be shown, see
      *               {@link KeyguardSecurityView#PROMPT_REASON_NONE},
-     *               {@link KeyguardSecurityView#PROMPT_REASON_RESTART} and
-     *               {@link KeyguardSecurityView#PROMPT_REASON_TIMEOUT}.
+     *               {@link KeyguardSecurityView#PROMPT_REASON_RESTART},
+     *               {@link KeyguardSecurityView#PROMPT_REASON_TIMEOUT}, and
+     *               {@link KeyguardSecurityView#PROMPT_REASON_PREPARE_FOR_UPDATE}.
      */
     public void showPromptReason(int reason) {
         mSecurityContainer.showPromptReason(reason);

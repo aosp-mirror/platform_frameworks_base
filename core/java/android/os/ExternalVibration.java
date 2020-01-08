@@ -84,6 +84,10 @@ public class ExternalVibration implements Parcelable {
         return mAttrs;
     }
 
+    public VibrationAttributes getVibrationAttributes() {
+        return new VibrationAttributes.Builder(mAttrs, null).build();
+    }
+
     /**
      * Mutes the external vibration if it's playing and unmuted.
      *
@@ -157,7 +161,6 @@ public class ExternalVibration implements Parcelable {
         out.writeInt(mUid);
         out.writeString(mPkg);
         writeAudioAttributes(mAttrs, out, flags);
-        out.writeParcelable(mAttrs, flags);
         out.writeStrongBinder(mController.asBinder());
         out.writeStrongBinder(mToken);
     }

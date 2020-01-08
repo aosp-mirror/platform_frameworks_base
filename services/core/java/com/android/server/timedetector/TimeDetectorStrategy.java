@@ -19,6 +19,7 @@ package com.android.server.timedetector;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.timedetector.ManualTimeSuggestion;
+import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
 import android.content.Intent;
 import android.util.TimestampedValue;
@@ -85,6 +86,9 @@ public interface TimeDetectorStrategy {
 
     /** Process the suggested manually entered time. */
     void suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
+
+    /** Process the suggested time from network sources. */
+    void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSuggestion);
 
     /** Handle the auto-time setting being toggled on or off. */
     void handleAutoTimeDetectionChanged();

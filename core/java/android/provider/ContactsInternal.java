@@ -15,15 +15,14 @@
  */
 package android.provider;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.admin.DevicePolicyManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ActivityNotFoundException;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.UriMatcher;
 import android.net.Uri;
-import android.os.Process;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.widget.Toast;

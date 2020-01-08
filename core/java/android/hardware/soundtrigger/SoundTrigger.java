@@ -27,8 +27,8 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.AudioFormat;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
@@ -44,12 +44,10 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 /**
- * The SoundTrigger class provides access via JNI to the native service managing
- * the sound trigger HAL.
+ * The SoundTrigger class provides access to the service managing the sound trigger HAL.
  *
  * @hide
  */

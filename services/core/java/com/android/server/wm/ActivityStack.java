@@ -784,6 +784,10 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                         null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
                         null /* tempOtherTaskBounds */, null /* tempOtherTaskInsetBounds */,
                         PRESERVE_WINDOWS, true /* deferResume */);
+            } else if (overrideWindowingMode != WINDOWING_MODE_PINNED) {
+                // For pinned stack, resize is now part of the {@link WindowContainerTransaction}
+                resize(new Rect(newBounds), null /* tempTaskBounds */,
+                        null /* tempTaskInsetBounds */, PRESERVE_WINDOWS, true /* deferResume */);
             }
         }
         if (prevIsAlwaysOnTop != isAlwaysOnTop()) {
@@ -1414,8 +1418,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         else if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Start pausing: " + prev);
         mPausingActivity = prev;
         mLastPausedActivity = prev;
-        mLastNoHistoryActivity = (prev.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
-                || (prev.info.flags & ActivityInfo.FLAG_NO_HISTORY) != 0 ? prev : null;
+        mLastNoHistoryActivity = prev.isNoHistory() ? prev : null;
         prev.setState(PAUSING, "startPausingLocked");
         prev.getTask().touchActiveTime();
         clearLaunchTime(prev);
@@ -4886,6 +4889,18 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 // No PiP animation, just run the normal animation-end logic
                 onPipAnimationEndResize();
             }
+        }
+    }
+
+    @Override
+    protected void onAnimationFinished() {
+        super.onAnimationFinished();
+        // TODO(b/142617871): we may need to add animation type parameter on onAnimationFinished to
+        //  identify if the callback is for launch animation finish and then calling
+        //  activity#onAnimationFinished.
+        final ActivityRecord activity = getTopMostActivity();
+        if (activity != null) {
+            activity.onAnimationFinished();
         }
     }
 

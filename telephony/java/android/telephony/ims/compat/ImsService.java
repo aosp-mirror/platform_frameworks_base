@@ -17,8 +17,8 @@
 package android.telephony.ims.compat;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Service;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;

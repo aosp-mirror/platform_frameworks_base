@@ -16,8 +16,9 @@
 
 package android.net.http;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
+
 import java.security.cert.X509Certificate;
 
 /**

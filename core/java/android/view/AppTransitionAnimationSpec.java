@@ -1,6 +1,6 @@
 package android.view;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.os.Parcel;

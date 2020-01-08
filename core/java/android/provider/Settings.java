@@ -26,7 +26,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
@@ -36,6 +35,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.SearchManager;
 import android.app.WallpaperManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -251,6 +251,9 @@ public final class Settings {
 
     /** @hide */
     public static final String EXTRA_NETWORK_TEMPLATE = "network_template";
+
+    /** @hide */
+    public static final String KEY_CONFIG_SET_RETURN = "config_set_return";
 
     /**
      * An int extra specifying a subscription ID.
@@ -2504,13 +2507,14 @@ public final class Settings {
                 args.putString(CALL_METHOD_PREFIX_KEY, prefix);
                 args.putSerializable(CALL_METHOD_FLAGS_KEY, keyValues);
                 IContentProvider cp = mProviderHolder.getProvider(cr);
-                cp.call(cr.getPackageName(), cr.getFeatureId(), mProviderHolder.mUri.getAuthority(),
+                Bundle bundle = cp.call(cr.getPackageName(), cr.getFeatureId(),
+                        mProviderHolder.mUri.getAuthority(),
                         mCallSetAllCommand, null, args);
+                return bundle.getBoolean(KEY_CONFIG_SET_RETURN);
             } catch (RemoteException e) {
                 // Not supported by the remote side
                 return false;
             }
-            return true;
         }
 
         @UnsupportedAppUsage
@@ -13709,14 +13713,6 @@ public final class Settings {
                 "backup_agent_timeout_parameters";
 
         /**
-         * Whether the backup system service supports multiple users (0 = disabled, 1 = enabled). If
-         * disabled, the service will only be active for the system user.
-         *
-         * @hide
-         */
-        public static final String BACKUP_MULTI_USER_ENABLED = "backup_multi_user_enabled";
-
-        /**
          * Blacklist of GNSS satellites.
          *
          * This is a list of integers separated by commas to represent pairs of (constellation,
@@ -13985,14 +13981,18 @@ public final class Settings {
          */
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
         static boolean setStrings(@NonNull ContentResolver resolver, @NonNull String namespace,
-                @NonNull Map<String, String> keyValues) {
+                @NonNull Map<String, String> keyValues) throws DeviceConfig.BadConfigException {
             HashMap<String, String> compositeKeyValueMap = new HashMap<>(keyValues.keySet().size());
             for (Map.Entry<String, String> entry : keyValues.entrySet()) {
                 compositeKeyValueMap.put(
                         createCompositeName(namespace, entry.getKey()), entry.getValue());
             }
-            return sNameValueCache.setStringsForPrefix(resolver, createPrefix(namespace),
-                    compositeKeyValueMap);
+            // If can't set given configuration that means it's bad
+            if (!sNameValueCache.setStringsForPrefix(resolver, createPrefix(namespace),
+                    compositeKeyValueMap)) {
+                throw new DeviceConfig.BadConfigException();
+            }
+            return true;
         }
 
         /**

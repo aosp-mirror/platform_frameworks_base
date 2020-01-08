@@ -65,9 +65,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * This class contains the state for one type of settings. It is responsible
@@ -108,6 +111,11 @@ final class SettingsState {
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_ID = "id";
     private static final String ATTR_NAME = "name";
+
+    private static final String TAG_NAMESPACE_HASHES = "namespaceHashes";
+    private static final String TAG_NAMESPACE_HASH = "namespaceHash";
+    private static final String ATTR_NAMESPACE = "namespace";
+    private static final String ATTR_BANNED_HASH = "bannedHash";
 
     /**
      * Non-binary value will be written in this attributes.
@@ -157,6 +165,9 @@ final class SettingsState {
 
     @GuardedBy("mLock")
     private final ArrayMap<String, Setting> mSettings = new ArrayMap<>();
+
+    @GuardedBy("mLock")
+    private final ArrayMap<String, String> mNamespaceBannedHashes = new ArrayMap<>();
 
     @GuardedBy("mLock")
     private final ArrayMap<String, Integer> mPackageToMemoryUsage;
@@ -416,6 +427,41 @@ final class SettingsState {
         scheduleWriteIfNeededLocked();
 
         return true;
+    }
+
+    @GuardedBy("mLock")
+    public boolean isNewConfigBannedLocked(String prefix, Map<String, String> keyValues) {
+        // Replaces old style "null" String values with actual null's. This is done to simulate
+        // what will happen to String "null" values when they are written to Settings. This needs to
+        // be done here make sure that config hash computed during is banned check matches the
+        // one computed during banning when values are already stored.
+        keyValues = removeNullValueOldStyle(keyValues);
+        String bannedHash = mNamespaceBannedHashes.get(prefix);
+        if (bannedHash == null) {
+            return false;
+        }
+        return bannedHash.equals(hashCode(keyValues));
+    }
+
+    @GuardedBy("mLock")
+    public void banConfigurationLocked(String prefix, Map<String, String> keyValues) {
+        if (prefix == null || keyValues.isEmpty()) {
+            return;
+        }
+        // The write is intentionally not scheduled here, banned hashes should and will be written
+        // when the related setting changes are written
+        mNamespaceBannedHashes.put(prefix, hashCode(keyValues));
+    }
+
+    @GuardedBy("mLock")
+    public Set<String> getAllConfigPrefixesLocked() {
+        Set<String> prefixSet = new HashSet<>();
+        final int settingsCount = mSettings.size();
+        for (int i = 0; i < settingsCount; i++) {
+            String name = mSettings.keyAt(i);
+            prefixSet.add(name.split("/")[0] + "/");
+        }
+        return prefixSet;
     }
 
     // The settings provider must hold its lock when calling here.
@@ -710,10 +756,12 @@ final class SettingsState {
         boolean wroteState = false;
         final int version;
         final ArrayMap<String, Setting> settings;
+        final ArrayMap<String, String> namespaceBannedHashes;
 
         synchronized (mLock) {
             version = mVersion;
             settings = new ArrayMap<>(mSettings);
+            namespaceBannedHashes = new ArrayMap<>(mNamespaceBannedHashes);
             mDirty = false;
             mWriteScheduled = false;
         }
@@ -756,8 +804,19 @@ final class SettingsState {
                                 + setting.getValue());
                     }
                 }
-
                 serializer.endTag(null, TAG_SETTINGS);
+
+                serializer.startTag(null, TAG_NAMESPACE_HASHES);
+                for (int i = 0; i < namespaceBannedHashes.size(); i++) {
+                    String namespace = namespaceBannedHashes.keyAt(i);
+                    String bannedHash = namespaceBannedHashes.get(namespace);
+                    writeSingleNamespaceHash(serializer, namespace, bannedHash);
+                    if (DEBUG_PERSISTENCE) {
+                        Slog.i(LOG_TAG, "[PERSISTED] namespace=" + namespace
+                                + ", bannedHash=" + bannedHash);
+                    }
+                }
+                serializer.endTag(null, TAG_NAMESPACE_HASHES);
                 serializer.endDocument();
                 destination.finishWrite(out);
 
@@ -869,6 +928,21 @@ final class SettingsState {
         }
     }
 
+    private static void writeSingleNamespaceHash(XmlSerializer serializer, String namespace,
+            String bannedHashCode) throws IOException {
+        if (namespace == null || bannedHashCode == null) {
+            return;
+        }
+        serializer.startTag(null, TAG_NAMESPACE_HASH);
+        serializer.attribute(null, ATTR_NAMESPACE, namespace);
+        serializer.attribute(null, ATTR_BANNED_HASH, bannedHashCode);
+        serializer.endTag(null, TAG_NAMESPACE_HASH);
+    }
+
+    private static String hashCode(Map<String, String> keyValues) {
+        return Integer.toString(keyValues.hashCode());
+    }
+
     private String getValueAttribute(XmlPullParser parser, String attr, String base64Attr) {
         if (mVersion >= SETTINGS_VERSION_NEW_ENCODING) {
             final String value = parser.getAttributeValue(null, attr);
@@ -939,6 +1013,8 @@ final class SettingsState {
             String tagName = parser.getName();
             if (tagName.equals(TAG_SETTINGS)) {
                 parseSettingsLocked(parser);
+            } else if (tagName.equals(TAG_NAMESPACE_HASHES)) {
+                parseNamespaceHash(parser);
             }
         }
     }
@@ -980,6 +1056,37 @@ final class SettingsState {
                 }
             }
         }
+    }
+
+    @GuardedBy("mLock")
+    private void parseNamespaceHash(XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+
+        final int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            if (parser.getName().equals(TAG_NAMESPACE_HASH)) {
+                String namespace = parser.getAttributeValue(null, ATTR_NAMESPACE);
+                String bannedHashCode = parser.getAttributeValue(null, ATTR_BANNED_HASH);
+                mNamespaceBannedHashes.put(namespace, bannedHashCode);
+            }
+        }
+    }
+
+    private static Map<String, String> removeNullValueOldStyle(Map<String, String> keyValues) {
+        Iterator<Map.Entry<String, String>> it = keyValues.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, String> keyValueEntry = it.next();
+            if (NULL_VALUE_OLD_STYLE.equals(keyValueEntry.getValue())) {
+                keyValueEntry.setValue(null);
+            }
+        }
+        return keyValues;
     }
 
     private final class MyHandler extends Handler {

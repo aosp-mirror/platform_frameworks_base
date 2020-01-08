@@ -17,7 +17,7 @@
 package android.transition;
 
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.util.ArrayMap;
 import android.util.Log;

@@ -25,6 +25,7 @@ import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 
 import android.content.ContentResolver;
 import android.net.ITetheringStatsProvider;
+import android.net.InetAddresses;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -33,7 +34,6 @@ import android.net.RouteInfo;
 import android.net.netlink.ConntrackMessage;
 import android.net.netlink.NetlinkConstants;
 import android.net.netlink.NetlinkSocket;
-import android.net.util.IpUtils;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.INetworkManagementService;
@@ -477,9 +477,10 @@ public class OffloadController {
             if (!ri.hasGateway()) continue;
 
             final String gateway = ri.getGateway().getHostAddress();
-            if (ri.isIPv4Default()) {
+            final InetAddress address = ri.getDestination().getAddress();
+            if (ri.isDefaultRoute() && address instanceof Inet4Address) {
                 v4gateway = gateway;
-            } else if (ri.isIPv6Default()) {
+            } else if (ri.isDefaultRoute() && address instanceof Inet6Address) {
                 v6gateways.add(gateway);
             }
         }
@@ -547,7 +548,10 @@ public class OffloadController {
 
     private static boolean shouldIgnoreDownstreamRoute(RouteInfo route) {
         // Ignore any link-local routes.
-        if (!route.getDestinationLinkAddress().isGlobalPreferred()) return true;
+        final IpPrefix destination = route.getDestination();
+        final LinkAddress linkAddr = new LinkAddress(destination.getAddress(),
+                destination.getPrefixLength());
+        if (!linkAddr.isGlobalPreferred()) return true;
 
         return false;
     }
@@ -588,7 +592,7 @@ public class OffloadController {
             return;
         }
 
-        if (!IpUtils.isValidUdpOrTcpPort(srcPort)) {
+        if (!isValidUdpOrTcpPort(srcPort)) {
             mLog.e("Invalid src port: " + srcPort);
             return;
         }
@@ -599,7 +603,7 @@ public class OffloadController {
             return;
         }
 
-        if (!IpUtils.isValidUdpOrTcpPort(dstPort)) {
+        if (!isValidUdpOrTcpPort(dstPort)) {
             mLog.e("Invalid dst port: " + dstPort);
             return;
         }
@@ -628,7 +632,7 @@ public class OffloadController {
 
     private static Inet4Address parseIPv4Address(String addrString) {
         try {
-            final InetAddress ip = InetAddress.parseNumericAddress(addrString);
+            final InetAddress ip = InetAddresses.parseNumericAddress(addrString);
             // TODO: Consider other sanitization steps here, including perhaps:
             //           not eql to 0.0.0.0
             //           not within 169.254.0.0/16
@@ -667,5 +671,9 @@ public class OffloadController {
             // Cf. /proc/sys/net/netfilter/nf_conntrack_udp_timeout_stream
             return 180;
         }
+    }
+
+    private static boolean isValidUdpOrTcpPort(int port) {
+        return port > 0 && port < 65536;
     }
 }

@@ -20,7 +20,7 @@ import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.shared.Inet4AddressUtils;
 import android.os.Build;
 import android.system.ErrnoException;
@@ -59,13 +59,6 @@ public class NetworkUtils {
      * @param fd the socket's {@link FileDescriptor}.
      */
     public static native void detachBPFFilter(FileDescriptor fd) throws SocketException;
-
-    /**
-     * Configures a socket for receiving ICMPv6 router solicitations and sending advertisements.
-     * @param fd the socket's {@link FileDescriptor}.
-     * @param ifIndex the interface index.
-     */
-    public native static void setupRaSocket(FileDescriptor fd, int ifIndex) throws SocketException;
 
     /**
      * Binds the current process to the network designated by {@code netId}.  All sockets created

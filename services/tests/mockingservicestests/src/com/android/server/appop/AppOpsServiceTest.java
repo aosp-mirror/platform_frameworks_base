@@ -16,6 +16,8 @@
 package com.android.server.appop;
 
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+import static android.app.AppOpsManager.FILTER_BY_PACKAGE_NAME;
+import static android.app.AppOpsManager.FILTER_BY_UID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
@@ -287,7 +289,7 @@ public class AppOpsServiceTest {
         mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null);
 
         AppOpsManager.HistoricalOps historicalOps = new AppOpsManager.HistoricalOps(0, 15000);
-        historicalOps.increaseAccessCount(OP_READ_SMS, mMyUid, sMyPackageName,
+        historicalOps.increaseAccessCount(OP_READ_SMS, mMyUid, sMyPackageName, null,
                 AppOpsManager.UID_STATE_PERSISTENT, 0, 1);
 
         mAppOpsService.addHistoricalOps(historicalOps);
@@ -300,8 +302,8 @@ public class AppOpsServiceTest {
         });
 
         // First, do a fetch to ensure it's written
-        mAppOpsService.getHistoricalOps(mMyUid, sMyPackageName, null, 0, Long.MAX_VALUE, 0,
-                callback);
+        mAppOpsService.getHistoricalOps(mMyUid, sMyPackageName, null, null,
+                FILTER_BY_UID | FILTER_BY_PACKAGE_NAME, 0, Long.MAX_VALUE, 0, callback);
 
         latchRef.get().await(5, TimeUnit.SECONDS);
         assertThat(latchRef.get().getCount()).isEqualTo(0);
@@ -312,8 +314,8 @@ public class AppOpsServiceTest {
 
         latchRef.set(new CountDownLatch(1));
 
-        mAppOpsService.getHistoricalOps(mMyUid, sMyPackageName, null, 0, Long.MAX_VALUE, 0,
-                callback);
+        mAppOpsService.getHistoricalOps(mMyUid, sMyPackageName, null, null,
+                FILTER_BY_UID | FILTER_BY_PACKAGE_NAME, 0, Long.MAX_VALUE, 0, callback);
 
         latchRef.get().await(5, TimeUnit.SECONDS);
         assertThat(latchRef.get().getCount()).isEqualTo(0);

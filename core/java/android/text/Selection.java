@@ -17,7 +17,7 @@
 package android.text;
 
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.text.BreakIterator;
 

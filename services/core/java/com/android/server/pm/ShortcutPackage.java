@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -454,7 +455,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     public void updateInvisibleShortcutForPinRequestWith(@NonNull ShortcutInfo shortcut) {
         final ShortcutInfo source = mShortcuts.get(shortcut.getId());
-        Preconditions.checkNotNull(source);
+        Objects.requireNonNull(source);
 
         mShortcutUser.mService.validateShortcutForPinRequest(shortcut);
 

@@ -1154,6 +1154,10 @@ public final class OverlayManagerService extends SystemService {
                 throws RemoteException, IOException {
             PackageInfo packageInfo = mPackageManager.getPackageInfo(targetPackageName, 0,
                     userId);
+            if (packageInfo == null) {
+                throw new IOException("Unable to get target package");
+            }
+
             String baseCodePath = packageInfo.applicationInfo.getBaseCodePath();
 
             ApkAssets apkAssets = null;

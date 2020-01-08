@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.PublicKey;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /*
@@ -219,10 +220,10 @@ public class KeySetManagerService {
     }
 
     public void addScannedPackageLPw(AndroidPackage pkg) {
-        Preconditions.checkNotNull(pkg, "Attempted to add null pkg to ksms.");
-        Preconditions.checkNotNull(pkg.getPackageName(), "Attempted to add null pkg to ksms.");
+        Objects.requireNonNull(pkg, "Attempted to add null pkg to ksms.");
+        Objects.requireNonNull(pkg.getPackageName(), "Attempted to add null pkg to ksms.");
         PackageSetting ps = mPackages.get(pkg.getPackageName());
-        Preconditions.checkNotNull(ps, "pkg: " + pkg.getPackageName()
+        Objects.requireNonNull(ps, "pkg: " + pkg.getPackageName()
                     + "does not have a corresponding entry in mPackages.");
         addSigningKeySetToPackageLPw(ps, pkg.getSigningDetails().publicKeys);
         if (pkg.getKeySetMapping() != null) {
@@ -504,7 +505,7 @@ public class KeySetManagerService {
      * Adds the given PublicKey to the system, deduping as it goes.
      */
     private long addPublicKeyLPw(PublicKey key) {
-        Preconditions.checkNotNull(key, "Cannot add null public key!");
+        Objects.requireNonNull(key, "Cannot add null public key!");
         long id = getIdForPublicKeyLPr(key);
         if (id != PUBLIC_KEY_NOT_FOUND) {
 
@@ -574,7 +575,7 @@ public class KeySetManagerService {
 
         /* remove refs from common keysets and public keys */
         PackageSetting pkg = mPackages.get(packageName);
-        Preconditions.checkNotNull(pkg, "pkg name: " + packageName
+        Objects.requireNonNull(pkg, "pkg name: " + packageName
                 + "does not have a corresponding entry in mPackages.");
         long signingKeySetId = pkg.keySetData.getProperSigningKeySet();
         decrementKeySetLPw(signingKeySetId);

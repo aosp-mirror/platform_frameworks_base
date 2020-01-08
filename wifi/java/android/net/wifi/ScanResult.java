@@ -19,7 +19,7 @@ package android.net.wifi;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -82,16 +82,19 @@ public class ScanResult implements Parcelable {
      * @hide
      * No security protocol.
      */
+    @SystemApi
     public static final int PROTOCOL_NONE = 0;
     /**
      * @hide
      * Security protocol type: WPA version 1.
      */
+    @SystemApi
     public static final int PROTOCOL_WPA = 1;
     /**
      * @hide
      * Security protocol type: RSN, for WPA version 2, and version 3.
      */
+    @SystemApi
     public static final int PROTOCOL_RSN = 2;
     /**
      * @hide
@@ -99,79 +102,94 @@ public class ScanResult implements Parcelable {
      * OSU Server-only authenticated layer 2 Encryption Network.
      * Used for Hotspot 2.0.
      */
+    @SystemApi
     public static final int PROTOCOL_OSEN = 3;
 
     /**
      * @hide
      * Security protocol type: WAPI.
      */
+    @SystemApi
     public static final int PROTOCOL_WAPI = 4;
 
     /**
      * @hide
      * No security key management scheme.
      */
+    @SystemApi
     public static final int KEY_MGMT_NONE = 0;
     /**
      * @hide
      * Security key management scheme: PSK.
      */
+    @SystemApi
     public static final int KEY_MGMT_PSK = 1;
     /**
      * @hide
      * Security key management scheme: EAP.
      */
+    @SystemApi
     public static final int KEY_MGMT_EAP = 2;
     /**
      * @hide
      * Security key management scheme: FT_PSK.
      */
+    @SystemApi
     public static final int KEY_MGMT_FT_PSK = 3;
     /**
      * @hide
      * Security key management scheme: FT_EAP.
      */
+    @SystemApi
     public static final int KEY_MGMT_FT_EAP = 4;
     /**
      * @hide
      * Security key management scheme: PSK_SHA256
      */
+    @SystemApi
     public static final int KEY_MGMT_PSK_SHA256 = 5;
     /**
      * @hide
      * Security key management scheme: EAP_SHA256.
      */
+    @SystemApi
     public static final int KEY_MGMT_EAP_SHA256 = 6;
     /**
      * @hide
      * Security key management scheme: OSEN.
      * Used for Hotspot 2.0.
      */
+    @SystemApi
     public static final int KEY_MGMT_OSEN = 7;
      /**
      * @hide
      * Security key management scheme: SAE.
      */
+    @SystemApi
     public static final int KEY_MGMT_SAE = 8;
     /**
      * @hide
      * Security key management scheme: OWE.
      */
+    @SystemApi
     public static final int KEY_MGMT_OWE = 9;
     /**
      * @hide
      * Security key management scheme: SUITE_B_192.
      */
+    @SystemApi
     public static final int KEY_MGMT_EAP_SUITE_B_192 = 10;
     /**
      * @hide
      * Security key management scheme: FT_SAE.
      */
+    @SystemApi
     public static final int KEY_MGMT_FT_SAE = 11;
     /**
      * @hide
      * Security key management scheme: OWE in transition mode.
      */
+    @SystemApi
     public static final int KEY_MGMT_OWE_TRANSITION = 12;
     /**
      * @hide
@@ -185,35 +203,42 @@ public class ScanResult implements Parcelable {
      */
     @SystemApi
     public static final int KEY_MGMT_WAPI_CERT = 14;
+
     /**
      * @hide
      * No cipher suite.
      */
+    @SystemApi
     public static final int CIPHER_NONE = 0;
     /**
      * @hide
      * No group addressed, only used for group data cipher.
      */
+    @SystemApi
     public static final int CIPHER_NO_GROUP_ADDRESSED = 1;
     /**
      * @hide
      * Cipher suite: TKIP
      */
+    @SystemApi
     public static final int CIPHER_TKIP = 2;
     /**
      * @hide
      * Cipher suite: CCMP
      */
+    @SystemApi
     public static final int CIPHER_CCMP = 3;
     /**
      * @hide
      * Cipher suite: GCMP
      */
+    @SystemApi
     public static final int CIPHER_GCMP_256 = 4;
     /**
      * @hide
      * Cipher suite: SMS4
      */
+    @SystemApi
     public static final int CIPHER_SMS4 = 5;
 
     /**

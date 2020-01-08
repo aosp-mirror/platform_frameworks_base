@@ -50,7 +50,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -85,11 +84,9 @@ import android.os.IThermalService;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
-import android.os.StatsDimensionsValue;
 import android.os.StatsLogEventWrapper;
 import android.os.SynchronousResultReceiver;
 import android.os.SystemClock;
@@ -203,18 +200,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private static final int PACKAGE_NAME_FIELD_ID = 4;
     private static final int INSTALLER_FIELD_ID = 5;
 
-    public static final int CODE_DATA_BROADCAST = 1;
-    public static final int CODE_SUBSCRIBER_BROADCAST = 1;
-    public static final int CODE_ACTIVE_CONFIGS_BROADCAST = 1;
-    /**
-     * The last report time is provided with each intent registered to
-     * StatsManager#setFetchReportsOperation. This allows easy de-duping in the receiver if
-     * statsd is requesting the client to retrieve the same statsd data. The last report time
-     * corresponds to the last_report_elapsed_nanos that will provided in the current
-     * ConfigMetricsReport, and this timestamp also corresponds to the
-     * current_report_elapsed_nanos of the most recently obtained ConfigMetricsReport.
-     */
-    public static final String EXTRA_LAST_REPORT_TIME = "android.app.extra.LAST_REPORT_TIME";
     public static final int DEATH_THRESHOLD = 10;
     /**
      * Which native processes to snapshot memory for.
@@ -452,72 +437,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
         mKernelCpuThreadReader =
                 KernelCpuThreadReaderSettingsObserver.getSettingsModifiedReader(mContext);
-    }
-
-    @Override
-    public void sendDataBroadcast(IBinder intentSenderBinder, long lastReportTimeNs) {
-        enforceCallingPermission();
-        IntentSender intentSender = new IntentSender(intentSenderBinder);
-        Intent intent = new Intent();
-        intent.putExtra(EXTRA_LAST_REPORT_TIME, lastReportTimeNs);
-        try {
-            intentSender.sendIntent(mContext, CODE_DATA_BROADCAST, intent, null, null);
-        } catch (IntentSender.SendIntentException e) {
-            Slog.w(TAG, "Unable to send using IntentSender");
-        }
-    }
-
-    @Override
-    public void sendActiveConfigsChangedBroadcast(IBinder intentSenderBinder, long[] configIds) {
-        enforceCallingPermission();
-        IntentSender intentSender = new IntentSender(intentSenderBinder);
-        Intent intent = new Intent();
-        intent.putExtra(StatsManager.EXTRA_STATS_ACTIVE_CONFIG_KEYS, configIds);
-        try {
-            intentSender.sendIntent(mContext, CODE_ACTIVE_CONFIGS_BROADCAST, intent, null, null);
-            if (DEBUG) {
-                Slog.d(TAG, "Sent broadcast with config ids " + Arrays.toString(configIds));
-            }
-        } catch (IntentSender.SendIntentException e) {
-            Slog.w(TAG, "Unable to send active configs changed broadcast using IntentSender");
-        }
-    }
-
-    @Override
-    public void sendSubscriberBroadcast(IBinder intentSenderBinder, long configUid, long configKey,
-            long subscriptionId, long subscriptionRuleId, String[] cookies,
-            StatsDimensionsValue dimensionsValue) {
-        enforceCallingPermission();
-        IntentSender intentSender = new IntentSender(intentSenderBinder);
-        Intent intent =
-                new Intent()
-                        .putExtra(StatsManager.EXTRA_STATS_CONFIG_UID, configUid)
-                        .putExtra(StatsManager.EXTRA_STATS_CONFIG_KEY, configKey)
-                        .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_ID, subscriptionId)
-                        .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_RULE_ID, subscriptionRuleId)
-                        .putExtra(StatsManager.EXTRA_STATS_DIMENSIONS_VALUE, dimensionsValue);
-
-        ArrayList<String> cookieList = new ArrayList<>(cookies.length);
-        for (String cookie : cookies) {
-            cookieList.add(cookie);
-        }
-        intent.putStringArrayListExtra(
-                StatsManager.EXTRA_STATS_BROADCAST_SUBSCRIBER_COOKIES, cookieList);
-
-        if (DEBUG) {
-            Slog.d(TAG,
-                    String.format("Statsd sendSubscriberBroadcast with params {%d %d %d %d %s %s}",
-                            configUid, configKey, subscriptionId, subscriptionRuleId,
-                            Arrays.toString(cookies),
-                            dimensionsValue));
-        }
-        try {
-            intentSender.sendIntent(mContext, CODE_SUBSCRIBER_BROADCAST, intent, null, null);
-        } catch (IntentSender.SendIntentException e) {
-            Slog.w(TAG,
-                    "Unable to send using IntentSender from uid " + configUid
-                            + "; presumably it had been cancelled.");
-        }
     }
 
     private final static int[] toIntArray(List<Integer> list) {
@@ -770,7 +689,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void setAnomalyAlarm(long timestampMs) {
-        enforceCallingPermission();
+        StatsCompanion.enforceStatsCompanionPermission(mContext);
         if (DEBUG) Slog.d(TAG, "Setting anomaly alarm for " + timestampMs);
         final long callingToken = Binder.clearCallingIdentity();
         try {
@@ -786,7 +705,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void cancelAnomalyAlarm() {
-        enforceCallingPermission();
+        StatsCompanion.enforceStatsCompanionPermission(mContext);
         if (DEBUG) Slog.d(TAG, "Cancelling anomaly alarm");
         final long callingToken = Binder.clearCallingIdentity();
         try {
@@ -798,7 +717,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void setAlarmForSubscriberTriggering(long timestampMs) {
-        enforceCallingPermission();
+        StatsCompanion.enforceStatsCompanionPermission(mContext);
         if (DEBUG) {
             Slog.d(TAG,
                     "Setting periodic alarm in about " + (timestampMs
@@ -817,7 +736,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void cancelAlarmForSubscriberTriggering() {
-        enforceCallingPermission();
+        StatsCompanion.enforceStatsCompanionPermission(mContext);
         if (DEBUG) {
             Slog.d(TAG, "Cancelling periodic alarm");
         }
@@ -831,7 +750,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void setPullingAlarm(long nextPullTimeMs) {
-        enforceCallingPermission();
+        StatsCompanion.enforceStatsCompanionPermission(mContext);
         if (DEBUG) {
             Slog.d(TAG, "Setting pulling alarm in about "
                     + (nextPullTimeMs - SystemClock.elapsedRealtime()));
@@ -849,7 +768,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void cancelPullingAlarm() {
-        enforceCallingPermission();
+        StatsCompanion.enforceStatsCompanionPermission(mContext);
         if (DEBUG) {
             Slog.d(TAG, "Cancelling pulling alarm");
         }
@@ -2455,7 +2374,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
      */
     @Override // Binder call
     public StatsLogEventWrapper[] pullData(int tagId) {
-        enforceCallingPermission();
+        StatsCompanion.enforceStatsCompanionPermission(mContext);
         if (DEBUG) {
             Slog.d(TAG, "Pulling " + tagId);
         }
@@ -2690,12 +2609,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void statsdReady() {
-        enforceCallingPermission();
+        StatsCompanion.enforceStatsCompanionPermission(mContext);
         if (DEBUG) {
             Slog.d(TAG, "learned that statsdReady");
         }
         sayHiToStatsd(); // tell statsd that we're ready too and link to it
-        mStatsManagerService.systemReady();
         mContext.sendBroadcastAsUser(new Intent(StatsManager.ACTION_STATSD_STARTED)
                         .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND),
                 UserHandle.SYSTEM, android.Manifest.permission.DUMP);
@@ -2703,7 +2621,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override
     public void triggerUidSnapshot() {
-        enforceCallingPermission();
+        StatsCompanion.enforceStatsCompanionPermission(mContext);
         synchronized (sStatsdLock) {
             final long token = Binder.clearCallingIdentity();
             try {
@@ -2714,13 +2632,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 restoreCallingIdentity(token);
             }
         }
-    }
-
-    private void enforceCallingPermission() {
-        if (Binder.getCallingPid() == Process.myPid()) {
-            return;
-        }
-        mContext.enforceCallingPermission(android.Manifest.permission.STATSCOMPANION, null);
     }
 
     @Override
@@ -2817,6 +2728,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                                 + "alive.");
                 return;
             }
+            mStatsManagerService.statsdReady(sStatsd);
             if (DEBUG) Slog.d(TAG, "Saying hi to statsd");
             try {
                 sStatsd.statsCompanionReady();
@@ -2928,6 +2840,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         if (looperStats != null) {
             looperStats.reset();
         }
+        mStatsManagerService.statsdNotReady();
     }
 
     @Override

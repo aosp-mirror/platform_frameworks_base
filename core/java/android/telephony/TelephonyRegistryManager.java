@@ -24,6 +24,7 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.DataActivityType;
 import android.telephony.Annotation.DataFailureCause;
@@ -352,7 +353,7 @@ public class TelephonyRegistryManager {
      * @param subId for which data connection state changed.
      * @param slotIndex for which data connections state changed. Can be derived from subId except
      * when subId is invalid.
-     * @param apnType the APN type that triggered this update
+     * @param apnType the apn type bitmask, defined with {@code ApnSetting#TYPE_*} flags.
      * @param preciseState the PreciseDataConnectionState
      *
      * @see android.telephony.PreciseDataConnection
@@ -360,7 +361,7 @@ public class TelephonyRegistryManager {
      * @hide
      */
     public void notifyDataConnectionForSubscriber(int slotIndex, int subId,
-            String apnType, PreciseDataConnectionState preciseState) {
+            @ApnType int apnType, PreciseDataConnectionState preciseState) {
         try {
             sRegistry.notifyDataConnectionForSubscriber(
                     slotIndex, subId, apnType, preciseState);
@@ -553,13 +554,13 @@ public class TelephonyRegistryManager {
      * @param subId for which data connection failed.
      * @param slotIndex for which data conenction failed. Can be derived from subId except when
      * subId is invalid.
-     * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN.
+     * @param apnType the apn type bitmask, defined with {@code ApnSetting#TYPE_*} flags.
      * @param apn the APN {@link ApnSetting#getApnName()} of this data connection.
      * @param failCause data fail cause.
      *
      * @hide
      */
-    public void notifyPreciseDataConnectionFailed(int subId, int slotIndex, String apnType,
+    public void notifyPreciseDataConnectionFailed(int subId, int slotIndex, @ApnType int apnType,
         String apn, @DataFailureCause int failCause) {
         try {
             sRegistry.notifyPreciseDataConnectionFailed(slotIndex, subId, apnType, apn, failCause);
@@ -614,9 +615,9 @@ public class TelephonyRegistryManager {
      * Notify call disconnect causes which contains {@link DisconnectCause} and {@link
      * android.telephony.PreciseDisconnectCause}.
      *
-     * @param subId for which call disconnected.
      * @param slotIndex for which call disconnected. Can be derived from subId except when subId is
      * invalid.
+     * @param subId for which call disconnected.
      * @param cause {@link DisconnectCause} for the disconnected call.
      * @param preciseCause {@link android.telephony.PreciseDisconnectCause} for the disconnected
      * call.
@@ -673,6 +674,38 @@ public class TelephonyRegistryManager {
             sRegistry.notifyActiveDataSubIdChanged(activeDataSubId);
         } catch (RemoteException ex) {
 
+        }
+    }
+
+    /**
+     * Report that Registration or a Location/Routing/Tracking Area update has failed.
+     *
+     * @param slotIndex for which call disconnected. Can be derived from subId except when subId is
+     * invalid.
+     * @param subId for which cellinfo changed.
+     * @param cellIdentity the CellIdentity, which must include the globally unique identifier
+     *        for the cell (for example, all components of the CGI or ECGI).
+     * @param chosenPlmn a 5 or 6 digit alphanumeric PLMN (MCC|MNC) among those broadcast by the
+     *         cell that was chosen for the failed registration attempt.
+     * @param domain DOMAIN_CS, DOMAIN_PS or both in case of a combined procedure.
+     * @param causeCode the primary failure cause code of the procedure.
+     *        For GSM/UMTS (MM), values are in TS 24.008 Sec 10.5.95
+     *        For GSM/UMTS (GMM), values are in TS 24.008 Sec 10.5.147
+     *        For LTE (EMM), cause codes are TS 24.301 Sec 9.9.3.9
+     *        For NR (5GMM), cause codes are TS 24.501 Sec 9.11.3.2
+     *        Integer.MAX_VALUE if this value is unused.
+     * @param additionalCauseCode the cause code of any secondary/combined procedure if appropriate.
+     *        For UMTS, if a combined attach succeeds for PS only, then the GMM cause code shall be
+     *        included as an additionalCauseCode. For LTE (ESM), cause codes are in
+     *        TS 24.301 9.9.4.4. Integer.MAX_VALUE if this value is unused.
+     */
+    public void notifyRegistrationFailed(int slotIndex, int subId,
+            @NonNull CellIdentity cellIdentity, @NonNull String chosenPlmn,
+            @NetworkRegistrationInfo.Domain int domain, int causeCode, int additionalCauseCode) {
+        try {
+            sRegistry.notifyRegistrationFailed(slotIndex, subId, cellIdentity,
+                    chosenPlmn, domain, causeCode, additionalCauseCode);
+        } catch (RemoteException ex) {
         }
     }
 }

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <android/os/IPendingIntentRef.h>
 #include <android/os/IStatsCompanionService.h>
 #include <utils/RefBase.h>
 
@@ -47,23 +48,11 @@ public:
     void operator=(SubscriberReporter const&) = delete;
 
     /**
-     * Tells SubscriberReporter what IStatsCompanionService to use.
-     * May be nullptr, but SubscriberReporter will not send broadcasts for any calls
-     * to alertBroadcastSubscriber that occur while nullptr.
-     */
-    void setStatsCompanionService(sp<IStatsCompanionService> statsCompanionService) {
-        std::lock_guard<std::mutex> lock(mLock);
-        sp<IStatsCompanionService> tmpForLock = mStatsCompanionService;
-        mStatsCompanionService = statsCompanionService;
-    }
-
-    /**
      * Stores the given intentSender, associating it with the given (configKey, subscriberId) pair.
-     * intentSender must be convertible into an IntentSender (in Java) using IntentSender(IBinder).
      */
     void setBroadcastSubscriber(const ConfigKey& configKey,
                                 int64_t subscriberId,
-                                const sp<android::IBinder>& intentSender);
+                                const sp<IPendingIntentRef>& pir);
 
     /**
      * Erases any intentSender information from the given (configKey, subscriberId) pair.
@@ -82,6 +71,8 @@ public:
                                   const Subscription& subscription,
                                   const MetricDimensionKey& dimKey) const;
 
+    sp<IPendingIntentRef> getBroadcastSubscriber(const ConfigKey& configKey, int64_t subscriberId);
+
     static StatsDimensionsValue getStatsDimensionsValue(const HashableDimensionKey& dim);
 
 private:
@@ -92,15 +83,15 @@ private:
     /** Binder interface for communicating with StatsCompanionService. */
     sp<IStatsCompanionService> mStatsCompanionService = nullptr;
 
-    /** Maps <ConfigKey, SubscriberId> -> IBinder (which represents an IIntentSender). */
+    /** Maps <ConfigKey, SubscriberId> -> IPendingIntentRef (which represents a PendingIntent). */
     std::unordered_map<ConfigKey,
-            std::unordered_map<int64_t, sp<android::IBinder>>> mIntentMap;
+            std::unordered_map<int64_t, sp<IPendingIntentRef>>> mIntentMap;
 
     /**
      * Sends a broadcast via the given intentSender (using mStatsCompanionService), along
      * with the information in the other parameters.
      */
-    void sendBroadcastLocked(const sp<android::IBinder>& intentSender,
+    void sendBroadcastLocked(const sp<IPendingIntentRef>& pir,
                              const ConfigKey& configKey,
                              const Subscription& subscription,
                              const std::vector<String16>& cookies,

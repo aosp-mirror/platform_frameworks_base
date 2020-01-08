@@ -18,6 +18,8 @@ package com.android.server;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.timedetector.NetworkTimeSuggestion;
+import android.app.timedetector.TimeDetector;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -35,10 +37,10 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.TimeUtils;
+import android.util.TimestampedValue;
 
 import com.android.internal.util.DumpUtils;
 
@@ -46,21 +48,19 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
- * Monitors the network time and updates the system time if it is out of sync
- * and there hasn't been any NITZ update from the carrier recently.
- * If looking up the network time fails for some reason, it tries a few times with a short
- * interval and then resets to checking on longer intervals.
- * <p>
- * If the user enables AUTO_TIME, it will check immediately for the network time, if NITZ wasn't
- * available.
- * </p>
+ * Monitors the network time. If looking up the network time fails for some reason, it tries a few
+ * times with a short interval and then resets to checking on longer intervals.
+ *
+ * <p>When available, the time is always suggested to the {@link
+ * com.android.server.timedetector.TimeDetectorService} where it may be used to set the device
+ * system clock, depending on user settings and what other signals are available.
  */
 public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeUpdateService {
 
     private static final String TAG = "NetworkTimeUpdateService";
     private static final boolean DBG = false;
 
-    private static final int EVENT_AUTO_TIME_CHANGED = 1;
+    private static final int EVENT_AUTO_TIME_ENABLED = 1;
     private static final int EVENT_POLL_NETWORK_TIME = 2;
     private static final int EVENT_NETWORK_CHANGED = 3;
 
@@ -69,20 +69,19 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
 
     private static final int POLL_REQUEST = 0;
 
-    private static final long NOT_SET = -1;
-    private long mNitzTimeSetTime = NOT_SET;
     private Network mDefaultNetwork = null;
 
     private final Context mContext;
     private final NtpTrustedTime mTime;
     private final AlarmManager mAlarmManager;
+    private final TimeDetector mTimeDetector;
     private final ConnectivityManager mCM;
     private final PendingIntent mPendingPollIntent;
     private final PowerManager.WakeLock mWakeLock;
 
     // NTP lookup is done on this thread and handler
     private Handler mHandler;
-    private SettingsObserver mSettingsObserver;
+    private AutoTimeSettingObserver mAutoTimeSettingObserver;
     private NetworkTimeUpdateCallback mNetworkTimeUpdateCallback;
 
     // Normal polling frequency
@@ -91,8 +90,6 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
     private final long mPollingIntervalShorterMs;
     // Number of times to try again
     private final int mTryAgainTimesMax;
-    // If the time difference is greater than this threshold, then update the time.
-    private final int mTimeErrorThresholdMs;
     // Keeps track of how many quick attempts were made to fetch NTP time.
     // During bootup, the network may not have been up yet, or it's taking time for the
     // connection to happen.
@@ -102,6 +99,7 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
         mContext = context;
         mTime = NtpTrustedTime.getInstance(context);
         mAlarmManager = mContext.getSystemService(AlarmManager.class);
+        mTimeDetector = mContext.getSystemService(TimeDetector.class);
         mCM = mContext.getSystemService(ConnectivityManager.class);
 
         Intent pollIntent = new Intent(ACTION_POLL, null);
@@ -113,8 +111,6 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
                 com.android.internal.R.integer.config_ntpPollingIntervalShorter);
         mTryAgainTimesMax = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_ntpRetry);
-        mTimeErrorThresholdMs = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_ntpThreshold);
 
         mWakeLock = context.getSystemService(PowerManager.class).newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, TAG);
@@ -122,7 +118,6 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
 
     @Override
     public void systemRunning() {
-        registerForTelephonyIntents();
         registerForAlarms();
 
         HandlerThread thread = new HandlerThread(TAG);
@@ -131,14 +126,9 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
         mNetworkTimeUpdateCallback = new NetworkTimeUpdateCallback();
         mCM.registerDefaultNetworkCallback(mNetworkTimeUpdateCallback, mHandler);
 
-        mSettingsObserver = new SettingsObserver(mHandler, EVENT_AUTO_TIME_CHANGED);
-        mSettingsObserver.observe(mContext);
-    }
-
-    private void registerForTelephonyIntents() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(TelephonyManager.ACTION_NETWORK_SET_TIME);
-        mContext.registerReceiver(mNitzReceiver, intentFilter);
+        mAutoTimeSettingObserver = new AutoTimeSettingObserver(mContext, mHandler,
+                EVENT_AUTO_TIME_ENABLED);
+        mAutoTimeSettingObserver.observe();
     }
 
     private void registerForAlarms() {
@@ -152,8 +142,7 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
     }
 
     private void onPollNetworkTime(int event) {
-        // If Automatic time is not set, don't bother. Similarly, if we don't
-        // have any default network, don't bother.
+        // If we don't have any default network, don't bother.
         if (mDefaultNetwork == null) return;
         mWakeLock.acquire();
         try {
@@ -173,10 +162,12 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
         if (mTime.getCacheAge() < mPollingIntervalMs) {
             // Obtained fresh fix; schedule next normal update
             resetAlarm(mPollingIntervalMs);
-            if (isAutomaticTimeRequested()) {
-                updateSystemClock(event);
-            }
 
+            // Suggest the time to the time detector. It may choose use it to set the system clock.
+            TimestampedValue<Long> timeSignal = mTime.getCachedNtpTimeSignal();
+            NetworkTimeSuggestion timeSuggestion = new NetworkTimeSuggestion(timeSignal);
+            timeSuggestion.addDebugInfo("Origin: NetworkTimeUpdateServiceImpl. event=" + event);
+            mTimeDetector.suggestNetworkTime(timeSuggestion);
         } else {
             // No fresh fix; schedule retry
             mTryAgainCounter++;
@@ -188,36 +179,6 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
                 resetAlarm(mPollingIntervalMs);
             }
         }
-    }
-
-    private long getNitzAge() {
-        if (mNitzTimeSetTime == NOT_SET) {
-            return Long.MAX_VALUE;
-        } else {
-            return SystemClock.elapsedRealtime() - mNitzTimeSetTime;
-        }
-    }
-
-    /**
-     * Consider updating system clock based on current NTP fix, if requested by
-     * user, significant enough delta, and we don't have a recent NITZ.
-     */
-    private void updateSystemClock(int event) {
-        final boolean forceUpdate = (event == EVENT_AUTO_TIME_CHANGED);
-        if (!forceUpdate) {
-            if (getNitzAge() < mPollingIntervalMs) {
-                if (DBG) Log.d(TAG, "Ignoring NTP update due to recent NITZ");
-                return;
-            }
-
-            final long skew = Math.abs(mTime.currentTimeMillis() - System.currentTimeMillis());
-            if (skew < mTimeErrorThresholdMs) {
-                if (DBG) Log.d(TAG, "Ignoring NTP update due to low skew");
-                return;
-            }
-        }
-
-        SystemClock.setCurrentTimeMillis(mTime.currentTimeMillis());
     }
 
     /**
@@ -232,27 +193,6 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, next, mPendingPollIntent);
     }
 
-    /**
-     * Checks if the user prefers to automatically set the time.
-     */
-    private boolean isAutomaticTimeRequested() {
-        return Settings.Global.getInt(
-                mContext.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 0;
-    }
-
-    /** Receiver for Nitz time events */
-    private BroadcastReceiver mNitzReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (DBG) Log.d(TAG, "Received " + action);
-            if (TelephonyManager.ACTION_NETWORK_SET_TIME.equals(action)) {
-                mNitzTimeSetTime = SystemClock.elapsedRealtime();
-            }
-        }
-    };
-
     /** Handler to do the network accesses on */
     private class MyHandler extends Handler {
 
@@ -263,7 +203,7 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case EVENT_AUTO_TIME_CHANGED:
+                case EVENT_AUTO_TIME_ENABLED:
                 case EVENT_POLL_NETWORK_TIME:
                 case EVENT_NETWORK_CHANGED:
                     onPollNetworkTime(msg.what);
@@ -287,27 +227,42 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
         }
     }
 
-    /** Observer to watch for changes to the AUTO_TIME setting */
-    private static class SettingsObserver extends ContentObserver {
+    /**
+     * Observer to watch for changes to the AUTO_TIME setting. It only triggers when the setting
+     * is enabled.
+     */
+    private static class AutoTimeSettingObserver extends ContentObserver {
 
-        private int mMsg;
-        private Handler mHandler;
+        private final Context mContext;
+        private final int mMsg;
+        private final Handler mHandler;
 
-        SettingsObserver(Handler handler, int msg) {
+        AutoTimeSettingObserver(Context context, Handler handler, int msg) {
             super(handler);
+            mContext = context;
             mHandler = handler;
             mMsg = msg;
         }
 
-        void observe(Context context) {
-            ContentResolver resolver = context.getContentResolver();
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.Global.getUriFor(Settings.Global.AUTO_TIME),
                     false, this);
         }
 
         @Override
         public void onChange(boolean selfChange) {
-            mHandler.obtainMessage(mMsg).sendToTarget();
+            if (isAutomaticTimeEnabled()) {
+                mHandler.obtainMessage(mMsg).sendToTarget();
+            }
+        }
+
+        /**
+         * Checks if the user prefers to automatically set the time.
+         */
+        private boolean isAutomaticTimeEnabled() {
+            ContentResolver resolver = mContext.getContentResolver();
+            return Settings.Global.getInt(resolver, Settings.Global.AUTO_TIME, 0) != 0;
         }
     }
 
@@ -319,8 +274,6 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
         pw.print("\nPollingIntervalShorterMs: ");
         TimeUtils.formatDuration(mPollingIntervalShorterMs, pw);
         pw.println("\nTryAgainTimesMax: " + mTryAgainTimesMax);
-        pw.print("TimeErrorThresholdMs: ");
-        TimeUtils.formatDuration(mTimeErrorThresholdMs, pw);
         pw.println("\nTryAgainCounter: " + mTryAgainCounter);
         pw.println("NTP cache age: " + mTime.getCacheAge());
         pw.println("NTP cache certainty: " + mTime.getCacheCertainty());

@@ -16,9 +16,8 @@
 
 package com.android.internal.telephony;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.sysprop.TelephonyProperties;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.util.Optional;
 
@@ -555,4 +554,5 @@ public interface RILConstants {
     int RIL_UNSOL_PHYSICAL_CHANNEL_CONFIG = 1101;
     int RIL_UNSOL_EMERGENCY_NUMBER_LIST = 1102;
     int RIL_UNSOL_UICC_APPLICATIONS_ENABLEMENT_CHANGED = 1103;
+    int RIL_UNSOL_REGISTRATION_FAILED = 1104;
 }

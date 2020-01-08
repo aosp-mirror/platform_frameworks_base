@@ -16,15 +16,16 @@
 
 package android.security.net.config;
 
+import android.compat.annotation.UnsupportedAppUsage;
+
 import java.net.Socket;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
-import android.annotation.UnsupportedAppUsage;
-import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.X509ExtendedTrustManager;
 
 /**

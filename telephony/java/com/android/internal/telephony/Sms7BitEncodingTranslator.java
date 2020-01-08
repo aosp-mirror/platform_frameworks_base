@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.telephony.Rlog;
@@ -24,8 +25,6 @@ import android.util.SparseIntArray;
 import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.internal.telephony.util.XmlUtils;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 public class Sms7BitEncodingTranslator {
     private static final String TAG = "Sms7BitEncodingTranslator";

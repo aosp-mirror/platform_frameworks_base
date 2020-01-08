@@ -21,7 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -1886,7 +1886,7 @@ public class ServiceState implements Parcelable {
 
         synchronized (mNetworkRegistrationInfos) {
             for (NetworkRegistrationInfo networkRegistrationInfo : mNetworkRegistrationInfos) {
-                if (networkRegistrationInfo.getDomain() == domain) {
+                if ((networkRegistrationInfo.getDomain() & domain) != 0) {
                     list.add(new NetworkRegistrationInfo(networkRegistrationInfo));
                 }
             }
@@ -1902,7 +1902,6 @@ public class ServiceState implements Parcelable {
      * @param transportType The transport type
      * @return The matching {@link NetworkRegistrationInfo}
      * @hide
-     *
      */
     @Nullable
     @SystemApi
@@ -1911,7 +1910,7 @@ public class ServiceState implements Parcelable {
         synchronized (mNetworkRegistrationInfos) {
             for (NetworkRegistrationInfo networkRegistrationInfo : mNetworkRegistrationInfos) {
                 if (networkRegistrationInfo.getTransportType() == transportType
-                        && networkRegistrationInfo.getDomain() == domain) {
+                        && (networkRegistrationInfo.getDomain() & domain) != 0) {
                     return new NetworkRegistrationInfo(networkRegistrationInfo);
                 }
             }

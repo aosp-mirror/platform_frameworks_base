@@ -58,10 +58,12 @@ interface IAppOpsService {
     List<AppOpsManager.PackageOps> getPackagesForOps(in int[] ops);
     @UnsupportedAppUsage
     List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, in int[] ops);
-    void getHistoricalOps(int uid, String packageName, in List<String> ops, long beginTimeMillis,
-            long endTimeMillis, int flags, in RemoteCallback callback);
-    void getHistoricalOpsFromDiskRaw(int uid, String packageName, in List<String> ops,
-            long beginTimeMillis, long endTimeMillis, int flags, in RemoteCallback callback);
+    void getHistoricalOps(int uid, String packageName, String featureId, in List<String> ops,
+            int filter, long beginTimeMillis, long endTimeMillis, int flags,
+            in RemoteCallback callback);
+    void getHistoricalOpsFromDiskRaw(int uid, String packageName, String featureId,
+            in List<String> ops, int filter, long beginTimeMillis, long endTimeMillis, int flags,
+            in RemoteCallback callback);
     void offsetHistory(long duration);
     void setHistoryParameters(int mode, long baseSnapshotInterval, int compressionStep);
     void addHistoricalOps(in AppOpsManager.HistoricalOps ops);

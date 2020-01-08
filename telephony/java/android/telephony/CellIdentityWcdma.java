@@ -18,7 +18,7 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
@@ -98,7 +98,8 @@ public final class CellIdentityWcdma extends CellIdentity {
     }
 
     /** @hide */
-    public CellIdentityWcdma sanitizeLocationInfo() {
+    @Override
+    public @NonNull CellIdentityWcdma sanitizeLocationInfo() {
         return new CellIdentityWcdma(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, mMccStr, mMncStr,
                 mAlphaLong, mAlphaShort);

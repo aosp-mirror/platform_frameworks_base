@@ -1398,7 +1398,7 @@ class WindowStateAnimator {
             mWin.getDisplayContent().adjustForImeIfNeeded();
         }
 
-        return mWin.isAnimating(TRANSITION | PARENTS);
+        return mWin.isAnimating(PARENTS);
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {

@@ -77,7 +77,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.IntArray;
 import android.util.Pair;
@@ -1346,6 +1345,35 @@ public final class DisplayManagerService extends SystemService {
         return SurfaceControl.getDisplayedContentSample(token, maxFrames, timestamp);
     }
 
+    void resetBrightnessConfiguration() {
+        setBrightnessConfigurationForUserInternal(null, mContext.getUserId(),
+                mContext.getPackageName());
+    }
+
+    void setAutoBrightnessLoggingEnabled(boolean enabled) {
+        if (mDisplayPowerController != null) {
+            synchronized (mSyncRoot) {
+                mDisplayPowerController.setAutoBrightnessLoggingEnabled(enabled);
+            }
+        }
+    }
+
+    void setDisplayWhiteBalanceLoggingEnabled(boolean enabled) {
+        if (mDisplayPowerController != null) {
+            synchronized (mSyncRoot) {
+                mDisplayPowerController.setDisplayWhiteBalanceLoggingEnabled(enabled);
+            }
+        }
+    }
+
+    void setAmbientColorTemperatureOverride(float cct) {
+        if (mDisplayPowerController != null) {
+            synchronized (mSyncRoot) {
+                mDisplayPowerController.setAmbientColorTemperatureOverride(cct);
+            }
+        }
+    }
+
     private void onDesiredDisplayModeSpecsChangedInternal() {
         boolean changed = false;
         synchronized (mSyncRoot) {
@@ -2249,13 +2277,8 @@ public final class DisplayManagerService extends SystemService {
         public void onShellCommand(FileDescriptor in, FileDescriptor out,
                 FileDescriptor err, String[] args, ShellCallback callback,
                 ResultReceiver resultReceiver) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                DisplayManagerShellCommand command = new DisplayManagerShellCommand(this);
-                command.exec(this, in, out, err, args, callback, resultReceiver);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            new DisplayManagerShellCommand(DisplayManagerService.this).exec(this, in, out, err,
+                    args, callback, resultReceiver);
         }
 
         @Override // Binder call
@@ -2275,40 +2298,6 @@ public final class DisplayManagerService extends SystemService {
                 return getPreferredWideGamutColorSpaceIdInternal();
             } finally {
                 Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        void setBrightness(int brightness) {
-            Settings.System.putIntForUser(mContext.getContentResolver(),
-                    Settings.System.SCREEN_BRIGHTNESS, brightness, UserHandle.USER_CURRENT);
-        }
-
-        void resetBrightnessConfiguration() {
-            setBrightnessConfigurationForUserInternal(null, mContext.getUserId(),
-                    mContext.getPackageName());
-        }
-
-        void setAutoBrightnessLoggingEnabled(boolean enabled) {
-            if (mDisplayPowerController != null) {
-                synchronized (mSyncRoot) {
-                    mDisplayPowerController.setAutoBrightnessLoggingEnabled(enabled);
-                }
-            }
-        }
-
-        void setDisplayWhiteBalanceLoggingEnabled(boolean enabled) {
-            if (mDisplayPowerController != null) {
-                synchronized (mSyncRoot) {
-                    mDisplayPowerController.setDisplayWhiteBalanceLoggingEnabled(enabled);
-                }
-            }
-        }
-
-        void setAmbientColorTemperatureOverride(float cct) {
-            if (mDisplayPowerController != null) {
-                synchronized (mSyncRoot) {
-                    mDisplayPowerController.setAmbientColorTemperatureOverride(cct);
-                }
             }
         }
 

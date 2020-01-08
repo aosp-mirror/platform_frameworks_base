@@ -138,6 +138,7 @@ cc_defaults {
         "android.hardware.thermal@1.0",
         "android.hardware.tv.cec@1.0",
         "android.hardware.tv.input@1.0",
+        "android.hardware.vibrator-cpp",
         "android.hardware.vibrator@1.0",
         "android.hardware.vibrator@1.1",
         "android.hardware.vibrator@1.2",
@@ -148,7 +149,6 @@ cc_defaults {
         "android.system.suspend@1.0",
         "service.incremental",
         "suspend_control_aidl_interface-cpp",
-        "vintf-vibrator-cpp",
     ],
 
     static_libs: [

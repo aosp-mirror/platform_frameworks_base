@@ -85,6 +85,7 @@ struct Dvr : public RefBase {
     Dvr(sp<IDvr> sp, jweak obj);
     ~Dvr();
     int close();
+    DvrMQ& getDvrMQ();
     sp<IDvr> getIDvr();
     sp<IDvr> mDvrSp;
     jweak mDvrObj;

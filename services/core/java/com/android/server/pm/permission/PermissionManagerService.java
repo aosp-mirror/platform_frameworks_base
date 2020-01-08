@@ -796,7 +796,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     public int checkPermission(String permName, String pkgName, int userId) {
-        // Not using Preconditions.checkNotNull() here for compatibility reasons.
+        // Not using Objects.requireNonNull() here for compatibility reasons.
         if (permName == null || pkgName == null) {
             return PackageManager.PERMISSION_DENIED;
         }
@@ -872,7 +872,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     public int checkUidPermission(String permName, int uid) {
-        // Not using Preconditions.checkNotNull() here for compatibility reasons.
+        // Not using Objects.requireNonNull() here for compatibility reasons.
         if (permName == null) {
             return PackageManager.PERMISSION_DENIED;
         }
@@ -955,7 +955,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     @Override
     @Nullable public List<String> getWhitelistedRestrictedPermissions(@NonNull String packageName,
             @PermissionWhitelistFlags int flags, @UserIdInt int userId) {
-        Preconditions.checkNotNull(packageName);
+        Objects.requireNonNull(packageName);
         Preconditions.checkFlagsArgument(flags,
                 PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
                         | PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
@@ -1043,7 +1043,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             @NonNull String permName, @PermissionWhitelistFlags int flags,
             @UserIdInt int userId) {
         // Other argument checks are done in get/setWhitelistedRestrictedPermissions
-        Preconditions.checkNotNull(permName);
+        Objects.requireNonNull(permName);
 
         if (!checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(permName)) {
             return false;
@@ -1086,7 +1086,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             @NonNull String permName, @PermissionWhitelistFlags int flags,
             @UserIdInt int userId) {
         // Other argument checks are done in get/setWhitelistedRestrictedPermissions
-        Preconditions.checkNotNull(permName);
+        Objects.requireNonNull(permName);
 
         if (!checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(permName)) {
             return false;
@@ -1104,7 +1104,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private boolean setWhitelistedRestrictedPermissionsInternal(@NonNull String packageName,
             @Nullable List<String> permissions, @PermissionWhitelistFlags int flags,
             @UserIdInt int userId) {
-        Preconditions.checkNotNull(packageName);
+        Objects.requireNonNull(packageName);
         Preconditions.checkFlagsArgument(flags,
                 PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
                         | PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
@@ -3028,7 +3028,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         mContext.enforceCallingPermission(Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS,
                 "Must hold " + Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS
                         + " to register permissions as one time.");
-        packageName = Preconditions.checkNotNull(packageName);
+        Objects.requireNonNull(packageName);
 
         long token = Binder.clearCallingIdentity();
         try {
@@ -3044,7 +3044,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         mContext.enforceCallingPermission(Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS,
                 "Must hold " + Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS
                         + " to remove permissions as one time.");
-        Preconditions.checkNotNull(packageName);
+        Objects.requireNonNull(packageName);
 
         long token = Binder.clearCallingIdentity();
         try {

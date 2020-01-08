@@ -38,6 +38,7 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,6 +66,7 @@ public class LinkPropertiesTest {
     private static final InetAddress GATEWAY62 = address("fe80::6:22%lo");
     private static final InetAddress TESTIPV4ADDR = address("192.168.47.42");
     private static final InetAddress TESTIPV6ADDR = address("fe80::7:33%43");
+    private static final Inet4Address DHCPSERVER = (Inet4Address) address("192.0.2.1");
     private static final String NAME = "qmi0";
     private static final String DOMAINS = "google.com";
     private static final String PRIV_DNS_SERVER_NAME = "private.dns.com";
@@ -93,6 +95,7 @@ public class LinkPropertiesTest {
         assertNull(lp.getHttpProxy());
         assertNull(lp.getTcpBufferSizes());
         assertNull(lp.getNat64Prefix());
+        assertNull(lp.getDhcpServerAddress());
         assertFalse(lp.isProvisioned());
         assertFalse(lp.isIpv4Provisioned());
         assertFalse(lp.isIpv6Provisioned());
@@ -119,6 +122,7 @@ public class LinkPropertiesTest {
         lp.setMtu(MTU);
         lp.setTcpBufferSizes(TCP_BUFFER_SIZES);
         lp.setNat64Prefix(new IpPrefix("2001:db8:0:64::/96"));
+        lp.setDhcpServerAddress(DHCPSERVER);
         lp.setWakeOnLanSupported(true);
         return lp;
     }
@@ -960,11 +964,13 @@ public class LinkPropertiesTest {
 
         source.setWakeOnLanSupported(true);
 
+        source.setDhcpServerAddress((Inet4Address) GATEWAY1);
+
         final LinkProperties stacked = new LinkProperties();
         stacked.setInterfaceName("test-stacked");
         source.addStackedLink(stacked);
 
-        assertParcelSane(source, 15 /* fieldCount */);
+        assertParcelSane(source, 16 /* fieldCount */);
     }
 
     @Test
@@ -1088,6 +1094,15 @@ public class LinkPropertiesTest {
 
         lp.clear();
         assertFalse(lp.isPrivateDnsActive());
+    }
+
+    @Test
+    public void testDhcpServerAddress() {
+        final LinkProperties lp = makeTestObject();
+        assertEquals(DHCPSERVER, lp.getDhcpServerAddress());
+
+        lp.clear();
+        assertNull(lp.getDhcpServerAddress());
     }
 
     @Test

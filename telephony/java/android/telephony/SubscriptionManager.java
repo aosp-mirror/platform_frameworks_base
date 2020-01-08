@@ -33,9 +33,9 @@ import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -1199,12 +1199,17 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get the active SubscriptionInfo associated with the iccId
+     * Gets an active SubscriptionInfo {@link SubscriptionInfo} associated with the Sim IccId.
+     *
      * @param iccId the IccId of SIM card
      * @return SubscriptionInfo, maybe null if its not active
+     *
      * @hide
      */
-    public SubscriptionInfo getActiveSubscriptionInfoForIccIndex(String iccId) {
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Nullable
+    @SystemApi
+    public SubscriptionInfo getActiveSubscriptionInfoForIcc(@NonNull String iccId) {
         if (VDBG) logd("[getActiveSubscriptionInfoForIccIndex]+ iccId=" + iccId);
         if (iccId == null) {
             logd("[getActiveSubscriptionInfoForIccIndex]- null iccid");
@@ -1322,6 +1327,11 @@ public class SubscriptionManager {
      * Get both hidden and visible SubscriptionInfo(s) of the currently active SIM(s).
      * The records will be sorted by {@link SubscriptionInfo#getSimSlotIndex}
      * then by {@link SubscriptionInfo#getSubscriptionId}.
+     *
+     * Hidden subscriptions refer to those are not meant visible to the users.
+     * For example, an opportunistic subscription that is grouped with other
+     * subscriptions should remain invisible to users as they are only functionally
+     * supplementary to primary ones.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see
@@ -2176,20 +2186,35 @@ public class SubscriptionManager {
     }
 
     /**
-     * TODO(b/137102918) Make this static, tests use this as an instance method currently.
+     * Get visible subscription Id(s) of the currently active SIM(s).
      *
      * @return the list of subId's that are active,
-     *         is never null but the length maybe 0.
+     *         is never null but the length may be 0.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public @NonNull int[] getActiveSubscriptionIdList() {
         return getActiveSubscriptionIdList(/* visibleOnly */ true);
     }
 
     /**
-     * TODO(b/137102918) Make this static, tests use this as an instance method currently.
+     * Get both hidden and visible subscription Id(s) of the currently active SIM(s).
      *
+     * Hidden subscriptions refer to those are not meant visible to the users.
+     * For example, an opportunistic subscription that is grouped with other
+     * subscriptions should remain invisible to users as they are only functionally
+     * supplementary to primary ones.
+     *
+     * @return the list of subId's that are active,
+     *         is never null but the length may be 0.
+     * @hide
+     */
+    @SystemApi
+    public @NonNull int[] getActiveAndHiddenSubscriptionIdList() {
+        return getActiveSubscriptionIdList(/* visibleOnly */false);
+    }
+
+    /**
      * @return a non-null list of subId's that are active.
      *
      * @hide
@@ -3280,31 +3305,6 @@ public class SubscriptionManager {
 
         if (VDBG) logd("getEnabledSubscriptionId, subId = " + subId);
         return subId;
-    }
-
-    /**
-     * Set whether a subscription always allows MMS connection. If true, MMS network
-     * request will be accepted by telephony even if user turns "mobile data" off
-     * on this subscription.
-     *
-     * @param subId which subscription it's setting to.
-     * @param alwaysAllow whether Mms data is always allowed.
-     * @return whether operation is successful.
-     *
-     * @hide
-     */
-    public boolean setAlwaysAllowMmsData(int subId, boolean alwaysAllow) {
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                return iSub.setAlwaysAllowMmsData(subId, alwaysAllow);
-            }
-        } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
-        }
-        return false;
     }
 
     private interface CallISubMethodHelper {

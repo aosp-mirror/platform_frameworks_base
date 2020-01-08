@@ -206,7 +206,7 @@ public class EglHelper {
             Log.d(TAG, "createEglSurface start");
         }
 
-        if (hasEglDisplay()) {
+        if (hasEglDisplay() && surfaceHolder.getSurface().isValid()) {
             int[] attrs = null;
             int wcgCapability = getWcgCapability();
             if (wcg && checkExtensionCapability(KHR_GL_COLOR_SPACE) && wcgCapability > 0) {
@@ -214,7 +214,8 @@ public class EglHelper {
             }
             mEglSurface = eglCreateWindowSurface(mEglDisplay, mEglConfig, surfaceHolder, attrs, 0);
         } else {
-            Log.w(TAG, "mEglDisplay is null");
+            Log.w(TAG, "Create EglSurface failed: hasEglDisplay=" + hasEglDisplay()
+                    + ", has valid surface=" + surfaceHolder.getSurface().isValid());
             return false;
         }
 

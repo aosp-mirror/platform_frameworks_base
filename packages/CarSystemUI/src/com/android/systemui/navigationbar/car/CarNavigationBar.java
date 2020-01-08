@@ -57,12 +57,12 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private final WindowManager mWindowManager;
     private final CarDeviceProvisionedController mCarDeviceProvisionedController;
     private final CommandQueue mCommandQueue;
-    private final Lazy<FacetButtonTaskStackListener> mFacetButtonTaskStackListenerLazy;
+    private final ButtonSelectionStateListener mButtonSelectionStateListener;
     private final Handler mMainHandler;
     private final Lazy<KeyguardStateController> mKeyguardStateControllerLazy;
     private final Lazy<NavigationBarController> mNavigationBarControllerLazy;
     private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
-    private final Lazy<CarFacetButtonController> mCarFacetButtonControllerLazy;
+    private final ButtonSelectionStateController mButtonSelectionStateController;
 
     private IStatusBarService mBarService;
     private ActivityManagerWrapper mActivityManagerWrapper;
@@ -92,24 +92,24 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             WindowManager windowManager,
             DeviceProvisionedController deviceProvisionedController,
             CommandQueue commandQueue,
-            Lazy<FacetButtonTaskStackListener> facetButtonTaskStackListenerLazy,
+            ButtonSelectionStateListener buttonSelectionStateListener,
             @Main Handler mainHandler,
             Lazy<KeyguardStateController> keyguardStateControllerLazy,
             Lazy<NavigationBarController> navigationBarControllerLazy,
             SuperStatusBarViewFactory superStatusBarViewFactory,
-            Lazy<CarFacetButtonController> carFacetButtonControllerLazy) {
+            ButtonSelectionStateController buttonSelectionStateController) {
         super(context);
         mCarNavigationBarController = carNavigationBarController;
         mWindowManager = windowManager;
         mCarDeviceProvisionedController = (CarDeviceProvisionedController)
                 deviceProvisionedController;
         mCommandQueue = commandQueue;
-        mFacetButtonTaskStackListenerLazy = facetButtonTaskStackListenerLazy;
+        mButtonSelectionStateListener = buttonSelectionStateListener;
         mMainHandler = mainHandler;
         mKeyguardStateControllerLazy = keyguardStateControllerLazy;
         mNavigationBarControllerLazy = navigationBarControllerLazy;
         mSuperStatusBarViewFactory = superStatusBarViewFactory;
-        mCarFacetButtonControllerLazy = carFacetButtonControllerLazy;
+        mButtonSelectionStateController = buttonSelectionStateController;
     }
 
     @Override
@@ -156,7 +156,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         createNavigationBar(result);
 
         mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
-        mActivityManagerWrapper.registerTaskStackListener(mFacetButtonTaskStackListenerLazy.get());
+        mActivityManagerWrapper.registerTaskStackListener(mButtonSelectionStateListener);
 
         mCarNavigationBarController.connectToHvac();
     }
@@ -181,7 +181,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         // remove and reattach all hvac components such that we don't keep a reference to unused
         // ui elements
         mCarNavigationBarController.removeAllFromHvac();
-        mCarFacetButtonControllerLazy.get().removeAll();
+        mButtonSelectionStateController.removeAll();
 
         if (mTopNavigationBarWindow != null) {
             mTopNavigationBarWindow.removeAllViews();
@@ -343,7 +343,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("  mTaskStackListener=");
-        pw.println(mFacetButtonTaskStackListenerLazy.get());
+        pw.println(mButtonSelectionStateListener);
         pw.print("  mBottomNavigationBarView=");
         pw.println(mBottomNavigationBarView);
     }

@@ -17,7 +17,7 @@
 package android.util;
 
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

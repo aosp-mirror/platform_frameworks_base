@@ -46,13 +46,17 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "DOMAIN_", value = {DOMAIN_CS, DOMAIN_PS})
+    @IntDef(prefix = "DOMAIN_", value = {DOMAIN_UNKNOWN, DOMAIN_CS, DOMAIN_PS, DOMAIN_CS_PS})
     public @interface Domain {}
 
+    /** Unknown / Unspecified domain */
+    public static final int DOMAIN_UNKNOWN = 0;
     /** Circuit switching domain */
-    public static final int DOMAIN_CS = 1;
+    public static final int DOMAIN_CS = android.hardware.radio.V1_5.Domain.CS;
     /** Packet switching domain */
-    public static final int DOMAIN_PS = 2;
+    public static final int DOMAIN_PS = android.hardware.radio.V1_5.Domain.PS;
+    /** Applicable to both CS and PS Domain */
+    public static final int DOMAIN_CS_PS = DOMAIN_CS | DOMAIN_PS;
 
     /**
      * Network registration state
@@ -504,11 +508,21 @@ public final class NetworkRegistrationInfo implements Parcelable {
         }
     }
 
+    /** @hide */
+    static @NonNull String domainToString(@Domain int domain) {
+        switch (domain) {
+            case DOMAIN_CS: return "CS";
+            case DOMAIN_PS: return "PS";
+            case DOMAIN_CS_PS: return "CS_PS";
+            default: return "UNKNOWN";
+        }
+    }
+
     @NonNull
     @Override
     public String toString() {
         return new StringBuilder("NetworkRegistrationInfo{")
-                .append(" domain=").append((mDomain == DOMAIN_CS) ? "CS" : "PS")
+                .append(" domain=").append(domainToString(mDomain))
                 .append(" transportType=").append(
                         AccessNetworkConstants.transportTypeToString(mTransportType))
                 .append(" registrationState=").append(registrationStateToString(mRegistrationState))
@@ -646,7 +660,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
      *     .build();
      * </code></pre>
      */
-    public static final class Builder{
+    public static final class Builder {
         @Domain
         private int mDomain;
 

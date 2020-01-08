@@ -60,4 +60,45 @@ public final class WifiAnnotations {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Bandwidth {}
+
+    @IntDef(prefix = { "PROTOCOL_" }, value = {
+            ScanResult.PROTOCOL_NONE,
+            ScanResult.PROTOCOL_WPA,
+            ScanResult.PROTOCOL_RSN,
+            ScanResult.PROTOCOL_OSEN,
+            ScanResult.PROTOCOL_WAPI
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Protocol {}
+
+    @IntDef(prefix = { "KEY_MGMT_" }, value = {
+        ScanResult.KEY_MGMT_NONE,
+        ScanResult.KEY_MGMT_PSK,
+        ScanResult.KEY_MGMT_EAP,
+        ScanResult.KEY_MGMT_FT_PSK,
+        ScanResult.KEY_MGMT_FT_EAP,
+        ScanResult.KEY_MGMT_PSK_SHA256,
+        ScanResult.KEY_MGMT_EAP_SHA256,
+        ScanResult.KEY_MGMT_OSEN,
+        ScanResult.KEY_MGMT_SAE,
+        ScanResult.KEY_MGMT_OWE,
+        ScanResult.KEY_MGMT_EAP_SUITE_B_192,
+        ScanResult.KEY_MGMT_FT_SAE,
+        ScanResult.KEY_MGMT_OWE_TRANSITION,
+        ScanResult.KEY_MGMT_WAPI_PSK,
+        ScanResult.KEY_MGMT_WAPI_CERT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface KeyMgmt {}
+
+    @IntDef(prefix = { "CIPHER_" }, value = {
+        ScanResult.CIPHER_NONE,
+        ScanResult.CIPHER_NO_GROUP_ADDRESSED,
+        ScanResult.CIPHER_TKIP,
+        ScanResult.CIPHER_CCMP,
+        ScanResult.CIPHER_GCMP_256,
+        ScanResult.CIPHER_SMS4
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Cipher {}
 }

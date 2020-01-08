@@ -28,6 +28,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * All methods should be guarded by {@code #mShortcutUser.mService.mLock}.
@@ -49,7 +50,7 @@ abstract class ShortcutPackageItem {
         mShortcutUser = shortcutUser;
         mPackageUserId = packageUserId;
         mPackageName = Preconditions.checkStringNotEmpty(packageName);
-        mPackageInfo = Preconditions.checkNotNull(packageInfo);
+        mPackageInfo = Objects.requireNonNull(packageInfo);
     }
 
     /**

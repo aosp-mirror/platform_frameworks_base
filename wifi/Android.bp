@@ -48,6 +48,7 @@ test_access_hidden_api_whitelist = [
     "//frameworks/opt/net/wifi/tests/wifitests:__subpackages__",
 
     "//frameworks/opt/net/wifi/libs/WifiTrackerLib/tests",
+    "//external/robolectric-shadows:__subpackages__",
 ]
 
 java_library {
@@ -57,6 +58,7 @@ java_library {
     libs: [
         // TODO(b/140299412) should be framework-system-stubs once we fix all @hide dependencies
         "framework-minus-apex",
+        "unsupportedappusage",
     ],
     srcs: [
         ":framework-wifi-updatable-sources",

@@ -77,4 +77,34 @@ public abstract class LockSettingsInternal {
      * @return the user password metrics.
      */
     public abstract @Nullable PasswordMetrics getUserPasswordMetrics(int userHandle);
+
+    /**
+     * Prepare for reboot escrow. This triggers the strong auth to be required. After the escrow
+     * is complete as indicated by calling to the listener registered with {@link
+     * #setRebootEscrowListener}, then {@link #armRebootEscrow()} should be called before
+     * rebooting to apply the update.
+     */
+    public abstract void prepareRebootEscrow();
+
+    /**
+     * Registers a listener for when the RebootEscrow HAL has stored its data needed for rebooting
+     * for an OTA.
+     *
+     * @see RebootEscrowListener
+     * @param listener
+     */
+    public abstract void setRebootEscrowListener(RebootEscrowListener listener);
+
+    /**
+     * Requests that any data needed for rebooting is cleared from the RebootEscrow HAL.
+     */
+    public abstract void clearRebootEscrow();
+
+    /**
+     * Should be called immediately before rebooting for an update. This depends on {@link
+     * #prepareRebootEscrow()} having been called and the escrow completing.
+     *
+     * @return true if the arming worked
+     */
+    public abstract boolean armRebootEscrow();
 }

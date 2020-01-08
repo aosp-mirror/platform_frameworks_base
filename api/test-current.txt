@@ -244,6 +244,16 @@ package android.app {
     field public static final int UID_STATE_TOP = 200; // 0xc8
   }
 
+  public static final class AppOpsManager.HistoricalFeatureOps implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public String getFeatureId();
+    method @Nullable public android.app.AppOpsManager.HistoricalOp getOp(@NonNull String);
+    method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(@IntRange(from=0) int);
+    method @IntRange(from=0) public int getOpCount();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalFeatureOps> CREATOR;
+  }
+
   public static final class AppOpsManager.HistoricalOp implements android.os.Parcelable {
     method public int describeContents();
     method public long getAccessCount(int, int, int);
@@ -268,9 +278,9 @@ package android.app {
     method @IntRange(from=0) public int getUidCount();
     method @Nullable public android.app.AppOpsManager.HistoricalUidOps getUidOps(int);
     method @NonNull public android.app.AppOpsManager.HistoricalUidOps getUidOpsAt(@IntRange(from=0) int);
-    method public void increaseAccessCount(int, int, @NonNull String, int, int, long);
-    method public void increaseAccessDuration(int, int, @NonNull String, int, int, long);
-    method public void increaseRejectCount(int, int, @NonNull String, int, int, long);
+    method public void increaseAccessCount(int, int, @NonNull String, @Nullable String, int, int, long);
+    method public void increaseAccessDuration(int, int, @NonNull String, @Nullable String, int, int, long);
+    method public void increaseRejectCount(int, int, @NonNull String, @Nullable String, int, int, long);
     method public void offsetBeginAndEndTime(long);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalOps> CREATOR;
@@ -282,6 +292,7 @@ package android.app {
   public static final class AppOpsManager.HistoricalOpsRequest.Builder {
     ctor public AppOpsManager.HistoricalOpsRequest.Builder(long, long);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest build();
+    method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setFeatureId(@Nullable String);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setFlags(int);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setOpNames(@Nullable java.util.List<java.lang.String>);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setPackageName(@Nullable String);
@@ -290,6 +301,9 @@ package android.app {
 
   public static final class AppOpsManager.HistoricalPackageOps implements android.os.Parcelable {
     method public int describeContents();
+    method @IntRange(from=0) public int getFeatureCount();
+    method @Nullable public android.app.AppOpsManager.HistoricalFeatureOps getFeatureOps(@NonNull String);
+    method @NonNull public android.app.AppOpsManager.HistoricalFeatureOps getFeatureOpsAt(@IntRange(from=0) int);
     method @Nullable public android.app.AppOpsManager.HistoricalOp getOp(@NonNull String);
     method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(@IntRange(from=0) int);
     method @IntRange(from=0) public int getOpCount();
@@ -2183,6 +2197,14 @@ package android.os {
     field public static final String ACTION_USER_RESTRICTIONS_CHANGED = "android.os.action.USER_RESTRICTIONS_CHANGED";
   }
 
+  public final class VibrationAttributes implements android.os.Parcelable {
+    method @Deprecated @NonNull public android.media.AudioAttributes getAudioAttributes();
+  }
+
+  public static final class VibrationAttributes.Builder {
+    ctor public VibrationAttributes.Builder(@NonNull android.media.AudioAttributes, @Nullable android.os.VibrationEffect);
+  }
+
   public abstract class VibrationEffect implements android.os.Parcelable {
     method public static android.os.VibrationEffect get(int);
     method public static android.os.VibrationEffect get(int, boolean);
@@ -2602,7 +2624,7 @@ package android.provider {
     field public static final String SERIAL_NUMBER = "serial_number";
     field public static final String SERVICE_CATEGORY = "service_category";
     field public static final String SLOT_INDEX = "slot_index";
-    field public static final String SUB_ID = "sub_id";
+    field public static final String SUBSCRIPTION_ID = "sub_id";
   }
 
   public static final class Telephony.Sms.Intents {
@@ -3170,7 +3192,9 @@ package android.telephony {
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationInfo> CREATOR;
     field public static final int DOMAIN_CS = 1; // 0x1
+    field public static final int DOMAIN_CS_PS = 3; // 0x3
     field public static final int DOMAIN_PS = 2; // 0x2
+    field public static final int DOMAIN_UNKNOWN = 0; // 0x0
     field public static final int REGISTRATION_STATE_DENIED = 3; // 0x3
     field public static final int REGISTRATION_STATE_HOME = 1; // 0x1
     field public static final int REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING = 0; // 0x0
@@ -3370,6 +3394,7 @@ package android.telephony.ims {
     field public static final int DIALSTRING_USSD = 2; // 0x2
     field public static final String EXTRA_ADDITIONAL_CALL_INFO = "AdditionalCallInfo";
     field public static final String EXTRA_ADDITIONAL_SIP_INVITE_FIELDS = "android.telephony.ims.extra.ADDITIONAL_SIP_INVITE_FIELDS";
+    field public static final String EXTRA_CALL_DISCONNECT_CAUSE = "android.telephony.ims.extra.CALL_DISCONNECT_CAUSE";
     field public static final String EXTRA_CALL_RAT_TYPE = "CallRadioTech";
     field public static final String EXTRA_CHILD_NUMBER = "ChildNum";
     field public static final String EXTRA_CNA = "cna";

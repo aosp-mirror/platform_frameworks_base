@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -277,6 +277,14 @@ public final class ImsCallProfile implements Parcelable {
      */
     public static final String EXTRA_ADDITIONAL_SIP_INVITE_FIELDS =
                                   "android.telephony.ims.extra.ADDITIONAL_SIP_INVITE_FIELDS";
+
+    /**
+     * CallDisconnectCause: Specify call disconnect cause. This extra should be a code
+     * corresponding to ImsReasonInfo and should only be populated in the case that the
+     * call has already been missed
+     */
+    public static final String EXTRA_CALL_DISCONNECT_CAUSE =
+                                 "android.telephony.ims.extra.CALL_DISCONNECT_CAUSE";
 
     /**
      * Extra key which the RIL can use to indicate the radio technology used for a call.

@@ -81,6 +81,8 @@ class LockSettingsStorage {
     private static final String LOCK_PASSWORD_FILE = "gatekeeper.password.key";
     private static final String CHILD_PROFILE_LOCK_FILE = "gatekeeper.profile.key";
 
+    private static final String REBOOT_ESCROW_FILE = "reboot.escrow.key";
+
     private static final String SYNTHETIC_PASSWORD_DIRECTORY = "spblob/";
 
     private static final Object DEFAULT = new Object();
@@ -261,6 +263,22 @@ class LockSettingsStorage {
         return hasFile(getChildProfileLockFile(userId));
     }
 
+    public void writeRebootEscrow(int userId, byte[] rebootEscrow) {
+        writeFile(getRebootEscrowFile(userId), rebootEscrow);
+    }
+
+    public byte[] readRebootEscrow(int userId) {
+        return readFile(getRebootEscrowFile(userId));
+    }
+
+    public boolean hasRebootEscrow(int userId) {
+        return hasFile(getRebootEscrowFile(userId));
+    }
+
+    public void removeRebootEscrow(int userId) {
+        deleteFile(getRebootEscrowFile(userId));
+    }
+
     public boolean hasPassword(int userId) {
         return hasFile(getLockPasswordFilename(userId));
     }
@@ -384,6 +402,11 @@ class LockSettingsStorage {
         return getLockCredentialFilePathForUser(userId, CHILD_PROFILE_LOCK_FILE);
     }
 
+    @VisibleForTesting
+    String getRebootEscrowFile(int userId) {
+        return getLockCredentialFilePathForUser(userId, REBOOT_ESCROW_FILE);
+    }
+
     private String getLockCredentialFilePathForUser(int userId, String basename) {
         String dataSystemDirectory = Environment.getDataDirectory().getAbsolutePath() +
                         SYSTEM_DIRECTORY;
@@ -479,18 +502,10 @@ class LockSettingsStorage {
         if (parentInfo == null) {
             // This user owns its lock settings files - safe to delete them
             synchronized (mFileWriteLock) {
-                String name = getLockPasswordFilename(userId);
-                File file = new File(name);
-                if (file.exists()) {
-                    file.delete();
-                    mCache.putFile(name, null);
-                }
-                name = getLockPatternFilename(userId);
-                file = new File(name);
-                if (file.exists()) {
-                    file.delete();
-                    mCache.putFile(name, null);
-                }
+                deleteFilesAndRemoveCache(
+                        getLockPasswordFilename(userId),
+                        getLockPatternFilename(userId),
+                        getRebootEscrowFile(userId));
             }
         } else {
             // Managed profile
@@ -509,6 +524,16 @@ class LockSettingsStorage {
             mCache.purgePath(spStateDir.getAbsolutePath());
         } finally {
             db.endTransaction();
+        }
+    }
+
+    private void deleteFilesAndRemoveCache(String... names) {
+        for (String name : names) {
+            File file = new File(name);
+            if (file.exists()) {
+                file.delete();
+                mCache.putFile(name, null);
+            }
         }
     }
 

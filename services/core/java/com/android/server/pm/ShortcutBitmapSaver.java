@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Deque;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -157,7 +158,7 @@ public class ShortcutBitmapSaver {
     public void saveBitmapLocked(ShortcutInfo shortcut,
             int maxDimension, CompressFormat format, int quality) {
         final Icon icon = shortcut.getIcon();
-        Preconditions.checkNotNull(icon);
+        Objects.requireNonNull(icon);
 
         final Bitmap original = icon.getBitmap();
         if (original == null) {

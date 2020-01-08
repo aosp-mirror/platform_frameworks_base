@@ -16,14 +16,54 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.SystemApi;
+import android.media.tv.tuner.Tuner.Filter;
+
 /**
- * Section event.
+ * Filter event sent from {@link Filter} objects with section type.
+ *
  * @hide
  */
-public class SectionEvent {
-    // TODO: add constructor and getters
-    private int mTableId;
-    private int mVersion;
-    private int mSectionNum;
-    private int mDataLength;
+@SystemApi
+public class SectionEvent extends FilterEvent {
+    private final int mTableId;
+    private final int mVersion;
+    private final int mSectionNum;
+    private final int mDataLength;
+
+    // This constructor is used by JNI code only
+    private SectionEvent(int tableId, int version, int sectionNum, int dataLength) {
+        mTableId = tableId;
+        mVersion = version;
+        mSectionNum = sectionNum;
+        mDataLength = dataLength;
+    }
+
+    /**
+     * Gets table ID of filtered data.
+     */
+    public int getTableId() {
+        return mTableId;
+    }
+
+    /**
+     * Gets version number of filtered data.
+     */
+    public int getVersion() {
+        return mVersion;
+    }
+
+    /**
+     * Gets section number of filtered data.
+     */
+    public int getSectionNumber() {
+        return mSectionNum;
+    }
+
+    /**
+     * Gets data size in bytes of filtered data.
+     */
+    public int getDataLength() {
+        return mDataLength;
+    }
 }

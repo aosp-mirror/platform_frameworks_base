@@ -670,7 +670,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void updateRequestedInsetsState(InsetsState state) {
 
         // Only update the sources the client is actually controlling.
-        for (int i = state.getSourcesCount(); i >= 0; i--) {
+        for (int i = state.getSourcesCount() - 1; i >= 0; i--) {
             final InsetsSource source = state.sourceAt(i);
             mRequestedInsetsState.addSource(source);
         }
@@ -984,8 +984,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int layoutXDiff;
         final int layoutYDiff;
         final WindowState imeWin = mWmService.mRoot.getCurrentInputMethodWindow();
+        final boolean isInputMethodAdjustTarget = windowsAreFloating
+                ? dc.mInputMethodTarget != null && task == dc.mInputMethodTarget.getTask()
+                : isInputMethodTarget();
         final boolean isImeTarget =
-                imeWin != null && imeWin.isVisibleNow() && isInputMethodTarget();
+                imeWin != null && imeWin.isVisibleNow() && isInputMethodAdjustTarget;
         if (isFullscreenAndFillsDisplay || layoutInParentFrame()) {
             // We use the parent frame as the containing frame for fullscreen and child windows
             mWindowFrames.mContainingFrame.set(mWindowFrames.mParentFrame);
@@ -1016,7 +1019,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         final int distanceToTop = Math.max(mWindowFrames.mContainingFrame.top
                                 - mWindowFrames.mContentFrame.top, 0);
                         int offs = Math.min(bottomOverlap, distanceToTop);
-                        mWindowFrames.mContainingFrame.top -= offs;
+                        mWindowFrames.mContainingFrame.offset(0, -offs);
+                        mInsetFrame.offset(0, -offs);
                     }
                 } else if (!inPinnedWindowingMode() && mWindowFrames.mContainingFrame.bottom
                         > mWindowFrames.mParentFrame.bottom) {
@@ -1586,7 +1590,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // TODO: Can we consolidate this with #isVisible() or have a more appropriate name for this?
     boolean isWinVisibleLw() {
         return (mActivityRecord == null || mActivityRecord.mVisibleRequested
-                || mActivityRecord.isAnimating(TRANSITION)) && isVisible();
+                || mActivityRecord.isAnimating(TRANSITION | PARENTS)) && isVisible();
     }
 
     /**
@@ -1812,7 +1816,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Starting window that's exiting will be removed when the animation finishes.
             // Mark all relevant flags for that onExitAnimationDone will proceed all the way
             // to actually remove it.
-            if (!visible && isVisibleNow && mActivityRecord.isAnimating(TRANSITION)) {
+            if (!visible && isVisibleNow && mActivityRecord.isAnimating(PARENTS | TRANSITION)) {
                 mAnimatingExit = true;
                 mRemoveOnExit = true;
                 mWindowRemovalAllowed = true;
@@ -2081,7 +2085,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     this, mWinAnimator.mSurfaceController, mAnimatingExit, mRemoveOnExit,
                     mHasSurface, mWinAnimator.getShown(),
                     isAnimating(TRANSITION | PARENTS),
-                    mActivityRecord != null && mActivityRecord.isAnimating(TRANSITION),
+                    mActivityRecord != null && mActivityRecord.isAnimating(PARENTS | TRANSITION),
                     mWillReplaceWindow,
                     mWmService.mDisplayFrozen, Debug.getCallers(6));
 
@@ -4300,7 +4304,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " tok.visible=" + (mActivityRecord != null && mActivityRecord.isVisible())
                     + " animating=" + isAnimating(TRANSITION | PARENTS)
                     + " tok animating="
-                    + (mActivityRecord != null && mActivityRecord.isAnimating(TRANSITION))
+                    + (mActivityRecord != null && mActivityRecord.isAnimating(TRANSITION | PARENTS))
                     + " Callers=" + Debug.getCallers(4));
         }
     }

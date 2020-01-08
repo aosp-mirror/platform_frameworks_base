@@ -63,7 +63,7 @@ interface ITelephonyRegistry {
     void notifyDataActivity(int state);
     void notifyDataActivityForSubscriber(in int subId, int state);
     void notifyDataConnectionForSubscriber(
-            int phoneId, int subId, String apnType, in PreciseDataConnectionState preciseState);
+            int phoneId, int subId, int apnType, in PreciseDataConnectionState preciseState);
     @UnsupportedAppUsage
     void notifyDataConnectionFailed(String apnType);
     // Uses CellIdentity which is Parcelable here; will convert to CellLocation in client.
@@ -75,7 +75,7 @@ interface ITelephonyRegistry {
             int foregroundCallState, int backgroundCallState);
     void notifyDisconnectCause(int phoneId, int subId, int disconnectCause,
             int preciseDisconnectCause);
-    void notifyPreciseDataConnectionFailed(int phoneId, int subId, String apnType, String apn,
+    void notifyPreciseDataConnectionFailed(int phoneId, int subId, int apnType, String apn,
             int failCause);
     void notifyCellInfoForSubscriber(in int subId, in List<CellInfo> cellInfo);
     void notifySrvccStateChanged(in int subId, in int lteState);
@@ -97,4 +97,6 @@ interface ITelephonyRegistry {
     void notifyCallQualityChanged(in CallQuality callQuality, int phoneId, int subId,
             int callNetworkType);
     void notifyImsDisconnectCause(int subId, in ImsReasonInfo imsReasonInfo);
+    void notifyRegistrationFailed(int slotIndex, int subId, in CellIdentity cellIdentity,
+            String chosenPlmn, int domain, int causeCode, int additionalCauseCode);
 }

@@ -16,13 +16,13 @@
 
 package com.android.server.backup.encryption.keys;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.annotation.IntDef;
 import android.content.Context;
 import android.security.keystore.recovery.InternalRecoveryServiceException;
 import android.security.keystore.recovery.RecoveryController;
 import android.util.Slog;
+
+import java.util.Objects;
 
 import javax.crypto.SecretKey;
 
@@ -46,8 +46,8 @@ public class RecoverableKeyStoreSecondaryKey {
      * @param secretKey The key.
      */
     public RecoverableKeyStoreSecondaryKey(String alias, SecretKey secretKey) {
-        mAlias = checkNotNull(alias);
-        mSecretKey = checkNotNull(secretKey);
+        mAlias = Objects.requireNonNull(alias);
+        mSecretKey = Objects.requireNonNull(secretKey);
     }
 
     /**

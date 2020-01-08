@@ -96,7 +96,7 @@ public class MediaRouter2 {
 
     private static final String TAG = "MR2";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final Object sLock = new Object();
+    private static final Object sRouterLock = new Object();
 
     @GuardedBy("sLock")
     private static MediaRouter2 sInstance;
@@ -122,8 +122,9 @@ public class MediaRouter2 {
 
     // TODO: Make MediaRouter2 is always connected to the MediaRouterService.
     @GuardedBy("sLock")
-    private Client2 mClient;
+    Client2 mClient;
 
+    @GuardedBy("sLock")
     private Map<String, RouteSessionController> mSessionControllers = new ArrayMap<>();
 
     private AtomicInteger mSessionCreationRequestCnt = new AtomicInteger(1);
@@ -138,7 +139,7 @@ public class MediaRouter2 {
      */
     public static MediaRouter2 getInstance(@NonNull Context context) {
         Objects.requireNonNull(context, "context must not be null");
-        synchronized (sLock) {
+        synchronized (sRouterLock) {
             if (sInstance == null) {
                 sInstance = new MediaRouter2(context.getApplicationContext());
             }
@@ -210,7 +211,7 @@ public class MediaRouter2 {
             return;
         }
 
-        synchronized (sLock) {
+        synchronized (sRouterLock) {
             if (mClient == null) {
                 Client2 client = new Client2();
                 try {
@@ -242,7 +243,7 @@ public class MediaRouter2 {
             return;
         }
 
-        synchronized (sLock) {
+        synchronized (sRouterLock) {
             if (mRouteCallbackRecords.size() == 0 && mClient != null) {
                 try {
                     mMediaRouterService.unregisterClient2(mClient);
@@ -266,7 +267,7 @@ public class MediaRouter2 {
 
         List<String> newControlCategories = new ArrayList<>(controlCategories);
 
-        synchronized (sLock) {
+        synchronized (sRouterLock) {
             mShouldUpdateRoutes = true;
 
             // invoke callbacks due to control categories change
@@ -291,7 +292,7 @@ public class MediaRouter2 {
      */
     @NonNull
     public List<MediaRoute2Info> getRoutes() {
-        synchronized (sLock) {
+        synchronized (sRouterLock) {
             if (mShouldUpdateRoutes) {
                 mShouldUpdateRoutes = false;
 
@@ -372,7 +373,7 @@ public class MediaRouter2 {
         mSessionCreationRequests.add(request);
 
         Client2 client;
-        synchronized (sLock) {
+        synchronized (sRouterLock) {
             client = mClient;
         }
         if (client != null) {
@@ -400,7 +401,7 @@ public class MediaRouter2 {
         Objects.requireNonNull(request, "request must not be null");
 
         Client2 client;
-        synchronized (sLock) {
+        synchronized (sRouterLock) {
             client = mClient;
         }
         if (client != null) {
@@ -424,7 +425,7 @@ public class MediaRouter2 {
         Objects.requireNonNull(route, "route must not be null");
 
         Client2 client;
-        synchronized (sLock) {
+        synchronized (sRouterLock) {
             client = mClient;
         }
         if (client != null) {
@@ -448,7 +449,7 @@ public class MediaRouter2 {
         Objects.requireNonNull(route, "route must not be null");
 
         Client2 client;
-        synchronized (sLock) {
+        synchronized (sRouterLock) {
             client = mClient;
         }
         if (client != null) {
@@ -496,7 +497,7 @@ public class MediaRouter2 {
         //  2) Call onRouteSelected(system_route, reason_fallback) if previously selected route
         //     does not exist anymore. => We may need 'boolean MediaRoute2Info#isSystemRoute()'.
         List<MediaRoute2Info> addedRoutes = new ArrayList<>();
-        synchronized (sLock) {
+        synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.put(route.getUniqueId(), route);
                 if (route.supportsControlCategories(mControlCategories)) {
@@ -512,7 +513,7 @@ public class MediaRouter2 {
 
     void removeRoutesOnHandler(List<MediaRoute2Info> routes) {
         List<MediaRoute2Info> removedRoutes = new ArrayList<>();
-        synchronized (sLock) {
+        synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.remove(route.getUniqueId());
                 if (route.supportsControlCategories(mControlCategories)) {
@@ -528,7 +529,7 @@ public class MediaRouter2 {
 
     void changeRoutesOnHandler(List<MediaRoute2Info> routes) {
         List<MediaRoute2Info> changedRoutes = new ArrayList<>();
-        synchronized (sLock) {
+        synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.put(route.getUniqueId(), route);
                 if (route.supportsControlCategories(mControlCategories)) {
@@ -596,7 +597,9 @@ public class MediaRouter2 {
 
         if (sessionInfo != null) {
             RouteSessionController controller = new RouteSessionController(sessionInfo);
-            mSessionControllers.put(controller.getUniqueSessionId(), controller);
+            synchronized (sRouterLock) {
+                mSessionControllers.put(controller.getUniqueSessionId(), controller);
+            }
             notifySessionCreated(controller);
         }
     }
@@ -607,8 +610,10 @@ public class MediaRouter2 {
             return;
         }
 
-        RouteSessionController matchingController = mSessionControllers.get(
-                sessionInfo.getUniqueSessionId());
+        RouteSessionController matchingController;
+        synchronized (sRouterLock) {
+            matchingController = mSessionControllers.get(sessionInfo.getUniqueSessionId());
+        }
 
         if (matchingController == null) {
             Log.w(TAG, "changeSessionInfoOnHandler: Matching controller not found. uniqueSessionId="
@@ -625,6 +630,40 @@ public class MediaRouter2 {
 
         matchingController.setRouteSessionInfo(sessionInfo);
         notifySessionInfoChanged(matchingController, oldInfo, sessionInfo);
+    }
+
+    void releaseControllerOnHandler(RouteSessionInfo sessionInfo) {
+        if (sessionInfo == null) {
+            Log.w(TAG, "releaseControllerOnHandler: Ignoring null sessionInfo.");
+            return;
+        }
+
+        final String uniqueSessionId = sessionInfo.getUniqueSessionId();
+        RouteSessionController matchingController;
+        synchronized (sRouterLock) {
+            matchingController = mSessionControllers.get(uniqueSessionId);
+        }
+
+        if (matchingController == null) {
+            if (DEBUG) {
+                Log.d(TAG, "releaseControllerOnHandler: Matching controller not found. "
+                        + "uniqueSessionId=" + sessionInfo.getUniqueSessionId());
+            }
+            return;
+        }
+
+        RouteSessionInfo oldInfo = matchingController.getRouteSessionInfo();
+        if (!TextUtils.equals(oldInfo.getProviderId(), sessionInfo.getProviderId())) {
+            Log.w(TAG, "releaseControllerOnHandler: Provider IDs are not matched. old="
+                    + oldInfo.getProviderId() + ", new=" + sessionInfo.getProviderId());
+            return;
+        }
+
+        synchronized (sRouterLock) {
+            mSessionControllers.remove(uniqueSessionId, matchingController);
+        }
+        matchingController.release();
+        notifyControllerReleased(matchingController);
     }
 
     private void notifyRoutesAdded(List<MediaRoute2Info> routes) {
@@ -668,6 +707,13 @@ public class MediaRouter2 {
             record.mExecutor.execute(
                     () -> record.mSessionCallback.onSessionInfoChanged(
                             controller, oldInfo, newInfo));
+        }
+    }
+
+    private void notifyControllerReleased(RouteSessionController controller) {
+        for (SessionCallbackRecord record: mSessionCallbackRecords) {
+            record.mExecutor.execute(
+                    () -> record.mSessionCallback.onSessionReleased(controller));
         }
     }
 
@@ -737,14 +783,20 @@ public class MediaRouter2 {
                 @NonNull RouteSessionInfo newInfo) {}
 
         /**
-         * Called when the session is released. Session can be released by the controller using
-         * {@link RouteSessionController#release(boolean)}, or by the
-         * {@link MediaRoute2ProviderService} itself. One can do clean-ups here.
+         * Called when the session is released by {@link MediaRoute2ProviderService}.
+         * Before this method is called, the controller would be released by the system,
+         * which means the {@link RouteSessionController#isReleased()} will always return true
+         * for the {@code controller} here.
+         * <p>
+         * Note: Calling {@link RouteSessionController#release()} will <em>NOT</em> trigger
+         * this method to be called.
          *
-         * TODO: When Provider#notifySessionDestroyed is introduced, add @see for the method.
+         * TODO: Add tests for checking whether this method is called.
+         * TODO: When service process dies, this should be called.
+         *
+         * @see RouteSessionController#isReleased()
          */
-        public void onSessionReleased(@NonNull RouteSessionController controller, int reason,
-                boolean shouldStop) {}
+        public void onSessionReleased(@NonNull RouteSessionController controller) {}
     }
 
     /**
@@ -755,7 +807,7 @@ public class MediaRouter2 {
      * TODO: Need to add toString()
      */
     public final class RouteSessionController {
-        private final Object mLock = new Object();
+        private final Object mControllerLock = new Object();
 
         @GuardedBy("mLock")
         private RouteSessionInfo mSessionInfo;
@@ -771,7 +823,7 @@ public class MediaRouter2 {
          * @return the ID of the session
          */
         public int getSessionId() {
-            synchronized (mLock) {
+            synchronized (mControllerLock) {
                 return mSessionInfo.getSessionId();
             }
         }
@@ -782,7 +834,7 @@ public class MediaRouter2 {
          */
         @NonNull
         public String getUniqueSessionId() {
-            synchronized (mLock) {
+            synchronized (mControllerLock) {
                 return mSessionInfo.getUniqueSessionId();
             }
         }
@@ -792,7 +844,7 @@ public class MediaRouter2 {
          */
         @NonNull
         public String getControlCategory() {
-            synchronized (mLock) {
+            synchronized (mControllerLock) {
                 return mSessionInfo.getControlCategory();
             }
         }
@@ -802,7 +854,7 @@ public class MediaRouter2 {
          */
         @Nullable
         public Bundle getControlHints() {
-            synchronized (mLock) {
+            synchronized (mControllerLock) {
                 return mSessionInfo.getControlHints();
             }
         }
@@ -812,7 +864,7 @@ public class MediaRouter2 {
          */
         @NonNull
         public List<MediaRoute2Info> getSelectedRoutes() {
-            synchronized (mLock) {
+            synchronized (mControllerLock) {
                 return getRoutesWithIdsLocked(mSessionInfo.getSelectedRoutes());
             }
         }
@@ -822,7 +874,7 @@ public class MediaRouter2 {
          */
         @NonNull
         public List<MediaRoute2Info> getSelectableRoutes() {
-            synchronized (mLock) {
+            synchronized (mControllerLock) {
                 return getRoutesWithIdsLocked(mSessionInfo.getSelectableRoutes());
             }
         }
@@ -832,7 +884,7 @@ public class MediaRouter2 {
          */
         @NonNull
         public List<MediaRoute2Info> getDeselectableRoutes() {
-            synchronized (mLock) {
+            synchronized (mControllerLock) {
                 return getRoutesWithIdsLocked(mSessionInfo.getDeselectableRoutes());
             }
         }
@@ -842,7 +894,7 @@ public class MediaRouter2 {
          */
         @NonNull
         public List<MediaRoute2Info> getTransferrableRoutes() {
-            synchronized (mLock) {
+            synchronized (mControllerLock) {
                 return getRoutesWithIdsLocked(mSessionInfo.getTransferrableRoutes());
             }
         }
@@ -853,10 +905,9 @@ public class MediaRouter2 {
          * Also, any operations to this instance will be ignored once released.
          *
          * @see #release
-         * @see SessionCallback#onSessionReleased
          */
         public boolean isReleased() {
-            synchronized (mLock) {
+            synchronized (mControllerLock) {
                 return mIsReleased;
             }
         }
@@ -876,6 +927,12 @@ public class MediaRouter2 {
          */
         public void selectRoute(@NonNull MediaRoute2Info route) {
             Objects.requireNonNull(route, "route must not be null");
+            synchronized (mControllerLock) {
+                if (mIsReleased) {
+                    Log.w(TAG, "selectRoute() called on released controller. Ignoring.");
+                    return;
+                }
+            }
 
             List<MediaRoute2Info> selectedRoutes = getSelectedRoutes();
             if (checkRouteListContainsRouteId(selectedRoutes, route.getUniqueId())) {
@@ -890,12 +947,12 @@ public class MediaRouter2 {
             }
 
             Client2 client;
-            synchronized (sLock) {
+            synchronized (sRouterLock) {
                 client = mClient;
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.selectRoute(mClient, getUniqueSessionId(), route);
+                    mMediaRouterService.selectRoute(client, getUniqueSessionId(), route);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to select route for session.", ex);
                 }
@@ -917,6 +974,12 @@ public class MediaRouter2 {
          */
         public void deselectRoute(@NonNull MediaRoute2Info route) {
             Objects.requireNonNull(route, "route must not be null");
+            synchronized (mControllerLock) {
+                if (mIsReleased) {
+                    Log.w(TAG, "deselectRoute() called on released controller. Ignoring.");
+                    return;
+                }
+            }
 
             List<MediaRoute2Info> selectedRoutes = getSelectedRoutes();
             if (!checkRouteListContainsRouteId(selectedRoutes, route.getUniqueId())) {
@@ -931,12 +994,12 @@ public class MediaRouter2 {
             }
 
             Client2 client;
-            synchronized (sLock) {
+            synchronized (sRouterLock) {
                 client = mClient;
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.deselectRoute(mClient, getUniqueSessionId(), route);
+                    mMediaRouterService.deselectRoute(client, getUniqueSessionId(), route);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to remove route from session.", ex);
                 }
@@ -958,6 +1021,12 @@ public class MediaRouter2 {
          */
         public void transferToRoute(@NonNull MediaRoute2Info route) {
             Objects.requireNonNull(route, "route must not be null");
+            synchronized (mControllerLock) {
+                if (mIsReleased) {
+                    Log.w(TAG, "transferToRoute() called on released controller. Ignoring.");
+                    return;
+                }
+            }
 
             List<MediaRoute2Info> selectedRoutes = getSelectedRoutes();
             if (checkRouteListContainsRouteId(selectedRoutes, route.getUniqueId())) {
@@ -973,12 +1042,12 @@ public class MediaRouter2 {
             }
 
             Client2 client;
-            synchronized (sLock) {
+            synchronized (sRouterLock) {
                 client = mClient;
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.transferToRoute(mClient, getUniqueSessionId(), route);
+                    mMediaRouterService.transferToRoute(client, getUniqueSessionId(), route);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to transfer to route for session.", ex);
                 }
@@ -986,45 +1055,53 @@ public class MediaRouter2 {
         }
 
         /**
-         * Release this session.
-         * Any operation on this session after calling this method will be ignored.
+         * Release this controller and corresponding session.
+         * Any operations on this controller after calling this method will be ignored.
+         * The devices that are playing media will stop playing it.
          *
-         * @param stopMedia Should the media that is playing on the device be stopped after this
-         *                  session is released.
-         * @see SessionCallback#onSessionReleased
+         * TODO: Add tests using {@link MediaRouter2Manager#getActiveSessions()}.
          */
-        public void release(boolean stopMedia) {
-            synchronized (mLock) {
+        public void release() {
+            synchronized (mControllerLock) {
                 if (mIsReleased) {
+                    Log.w(TAG, "release() called on released controller. Ignoring.");
                     return;
                 }
                 mIsReleased = true;
             }
-            // TODO: Use stopMedia variable when the actual connection logic is implemented.
+
+            Client2 client;
+            synchronized (sRouterLock) {
+                mSessionControllers.remove(getUniqueSessionId(), this);
+                client = mClient;
+            }
+            if (client != null) {
+                try {
+                    mMediaRouterService.releaseSession(client, getUniqueSessionId());
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "Unable to notify of controller release", ex);
+                }
+            }
         }
 
-        /**
-         * @hide
-         */
         @NonNull
-        public RouteSessionInfo getRouteSessionInfo() {
-            synchronized (mLock) {
+        RouteSessionInfo getRouteSessionInfo() {
+            synchronized (mControllerLock) {
                 return mSessionInfo;
             }
         }
 
-        /**
-         * @hide
-         */
-        public void setRouteSessionInfo(@NonNull RouteSessionInfo info) {
-            synchronized (mLock) {
+        void setRouteSessionInfo(@NonNull RouteSessionInfo info) {
+            synchronized (mControllerLock) {
                 mSessionInfo = info;
             }
         }
 
+        // TODO: This method uses two locks (mLock outside, sLock inside).
+        //       Check if there is any possiblity of deadlock.
         private List<MediaRoute2Info> getRoutesWithIdsLocked(List<String> routeIds) {
             List<MediaRoute2Info> routes = new ArrayList<>();
-            synchronized (mLock) {
+            synchronized (sRouterLock) {
                 for (String routeId : routeIds) {
                     MediaRoute2Info route = mRoutes.get(
                             MediaRoute2Info.toUniqueId(mSessionInfo.mProviderId, routeId));
@@ -1137,6 +1214,12 @@ public class MediaRouter2 {
         @Override
         public void notifySessionInfoChanged(@Nullable RouteSessionInfo sessionInfo) {
             mHandler.sendMessage(obtainMessage(MediaRouter2::changeSessionInfoOnHandler,
+                    MediaRouter2.this, sessionInfo));
+        }
+
+        @Override
+        public void notifySessionReleased(RouteSessionInfo sessionInfo) {
+            mHandler.sendMessage(obtainMessage(MediaRouter2::releaseControllerOnHandler,
                     MediaRouter2.this, sessionInfo));
         }
     }

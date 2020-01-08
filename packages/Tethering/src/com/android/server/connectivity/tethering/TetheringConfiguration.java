@@ -100,13 +100,13 @@ public class TetheringConfiguration {
     public final String provisioningAppNoUi;
     public final int provisioningCheckPeriod;
 
-    public final int subId;
+    public final int activeDataSubId;
 
     public TetheringConfiguration(Context ctx, SharedLog log, int id) {
         final SharedLog configLog = log.forSubComponent("config");
 
-        subId = id;
-        Resources res = getResources(ctx, subId);
+        activeDataSubId = id;
+        Resources res = getResources(ctx, activeDataSubId);
 
         tetherableUsbRegexs = getResourceStringArray(res, config_tether_usb_regexs);
         // TODO: Evaluate deleting this altogether now that Wi-Fi always passes
@@ -116,7 +116,7 @@ public class TetheringConfiguration {
         tetherableWifiP2pRegexs = getResourceStringArray(res, config_tether_wifi_p2p_regexs);
         tetherableBluetoothRegexs = getResourceStringArray(res, config_tether_bluetooth_regexs);
 
-        isDunRequired = checkDunRequired(ctx, subId);
+        isDunRequired = checkDunRequired(ctx);
 
         chooseUpstreamAutomatically = getResourceBoolean(res, config_tether_upstream_automatic);
         preferredUpstreamIfaceTypes = getUpstreamIfaceTypes(res, isDunRequired);
@@ -166,8 +166,8 @@ public class TetheringConfiguration {
 
     /** Does the dumping.*/
     public void dump(PrintWriter pw) {
-        pw.print("subId: ");
-        pw.println(subId);
+        pw.print("activeDataSubId: ");
+        pw.println(activeDataSubId);
 
         dumpStringArray(pw, "tetherableUsbRegexs", tetherableUsbRegexs);
         dumpStringArray(pw, "tetherableWifiRegexs", tetherableWifiRegexs);
@@ -196,7 +196,7 @@ public class TetheringConfiguration {
     /** Returns the string representation of this object.*/
     public String toString() {
         final StringJoiner sj = new StringJoiner(" ");
-        sj.add(String.format("subId:%d", subId));
+        sj.add(String.format("activeDataSubId:%d", activeDataSubId));
         sj.add(String.format("tetherableUsbRegexs:%s", makeString(tetherableUsbRegexs)));
         sj.add(String.format("tetherableWifiRegexs:%s", makeString(tetherableWifiRegexs)));
         sj.add(String.format("tetherableWifiP2pRegexs:%s", makeString(tetherableWifiP2pRegexs)));
@@ -250,9 +250,11 @@ public class TetheringConfiguration {
     }
 
     /** Check whether dun is required. */
-    public static boolean checkDunRequired(Context ctx, int id) {
+    public static boolean checkDunRequired(Context ctx) {
         final TelephonyManager tm = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
-        return (tm != null) ? tm.isTetheringApnRequired(id) : false;
+        // TelephonyManager would uses the active data subscription, which should be the one used
+        // by tethering.
+        return (tm != null) ? tm.isTetheringApnRequired() : false;
     }
 
     private static Collection<Integer> getUpstreamIfaceTypes(Resources res, boolean dunRequired) {
@@ -391,7 +393,7 @@ public class TetheringConfiguration {
      */
     public TetheringConfigurationParcel toStableParcelable() {
         final TetheringConfigurationParcel parcel = new TetheringConfigurationParcel();
-        parcel.subId = subId;
+        parcel.subId = activeDataSubId;
         parcel.tetherableUsbRegexs = tetherableUsbRegexs;
         parcel.tetherableWifiRegexs = tetherableWifiRegexs;
         parcel.tetherableBluetoothRegexs = tetherableBluetoothRegexs;

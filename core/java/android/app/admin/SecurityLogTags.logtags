@@ -38,3 +38,4 @@ option java_package android.app.admin
 210031 security_crypto_self_test_completed      (success|1)
 210032 security_key_integrity_violation         (key_id|3),(uid|1)
 210033 security_cert_validation_failure         (reason|3)
+210034 security_camera_policy_set               (package|3),(admin_user|1),(target_user|1),(disabled|1)

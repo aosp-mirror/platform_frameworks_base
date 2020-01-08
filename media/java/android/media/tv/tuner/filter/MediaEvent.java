@@ -22,7 +22,7 @@ import android.os.NativeHandle;
  * Media event.
  * @hide
  */
-public class MediaEvent {
+public class MediaEvent extends FilterEvent {
     private int mStreamId;
     private boolean mIsPtsPresent;
     private long mPts;

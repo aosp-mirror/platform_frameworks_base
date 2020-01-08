@@ -20,6 +20,7 @@ import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.Manifest.permission.READ_CONTACTS;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.UserHandle.USER_ALL;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
@@ -29,6 +30,7 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
 import static com.android.internal.widget.LockPatternUtils.frpCredentialEnabled;
 import static com.android.internal.widget.LockPatternUtils.userOwnsFrpCredential;
@@ -118,6 +120,7 @@ import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.RebootEscrowListener;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -222,7 +225,10 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private final RecoverableKeyStoreManager mRecoverableKeyStoreManager;
 
+    private final RebootEscrowManager mRebootEscrowManager;
+
     private boolean mFirstCallToVold;
+
     // Current password metric for all users on the device. Updated when user unlocks
     // the device or changes password. Removed when user is stopped.
     @GuardedBy("this")
@@ -483,6 +489,11 @@ public class LockSettingsService extends ILockSettings.Stub {
                     new PasswordSlotManager());
         }
 
+        public RebootEscrowManager getRebootEscrowManager(RebootEscrowManager.Callbacks callbacks,
+                LockSettingsStorage storage) {
+            return new RebootEscrowManager(mContext, callbacks, storage);
+        }
+
         public boolean hasEnrolledBiometrics(int userId) {
             BiometricManager bm = mContext.getSystemService(BiometricManager.class);
             return bm.hasEnrolledBiometrics(userId);
@@ -549,6 +560,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStrongAuthTracker.register(mStrongAuth);
 
         mSpManager = injector.getSyntheticPasswordManager(mStorage);
+
+        mRebootEscrowManager = injector.getRebootEscrowManager(new RebootEscrowCallbacks(),
+                mStorage);
 
         LocalServices.addService(LockSettingsInternal.class, new LocalService());
     }
@@ -782,7 +796,14 @@ public class LockSettingsService extends ILockSettings.Stub {
         migrateOldData();
         getGateKeeperService();
         mSpManager.initWeaverService();
-        // Find the AuthSecret HAL
+        getAuthSecretHal();
+        mDeviceProvisionedObserver.onSystemReady();
+        mRebootEscrowManager.loadRebootEscrowDataIfAvailable();
+        // TODO: maybe skip this for split system user mode.
+        mStorage.prefetchUser(UserHandle.USER_SYSTEM);
+    }
+
+    private void getAuthSecretHal() {
         try {
             mAuthSecretService = IAuthSecret.getService();
         } catch (NoSuchElementException e) {
@@ -790,9 +811,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to get AuthSecret HAL", e);
         }
-        mDeviceProvisionedObserver.onSystemReady();
-        // TODO: maybe skip this for split system user mode.
-        mStorage.prefetchUser(UserHandle.USER_SYSTEM);
     }
 
     private void migrateOldData() {
@@ -2466,10 +2484,18 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void onAuthTokenKnownForUser(@UserIdInt int userId, AuthenticationToken auth) {
         if (mInjector.isGsiRunning()) {
-            Slog.w(TAG, "AuthSecret disabled in GSI");
+            Slog.w(TAG, "Running in GSI; skipping calls to AuthSecret and RebootEscrow");
             return;
         }
 
+        mRebootEscrowManager.callToRebootEscrowIfNeeded(userId, auth.getVersion(),
+                auth.getSyntheticPassword());
+
+        callToAuthSecretIfNeeded(userId, auth);
+    }
+
+    private void callToAuthSecretIfNeeded(@UserIdInt int userId,
+            AuthenticationToken auth) {
         // Pass the primary user's auth secret to the HAL
         if (mAuthSecretService != null && mUserManager.getUserInfo(userId).isPrimary()) {
             try {
@@ -3288,5 +3314,46 @@ public class LockSettingsService extends ILockSettings.Stub {
             return LockSettingsService.this.getUserPasswordMetrics(userHandle);
         }
 
+        @Override
+        public void prepareRebootEscrow() {
+            if (!mRebootEscrowManager.prepareRebootEscrow()) {
+                return;
+            }
+            mStrongAuth.requireStrongAuth(STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE, USER_ALL);
+        }
+
+        @Override
+        public void setRebootEscrowListener(RebootEscrowListener listener) {
+            mRebootEscrowManager.setRebootEscrowListener(listener);
+        }
+
+        @Override
+        public void clearRebootEscrow() {
+            if (!mRebootEscrowManager.clearRebootEscrow()) {
+                return;
+            }
+            mStrongAuth.noLongerRequireStrongAuth(STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE,
+                    USER_ALL);
+        }
+
+        @Override
+        public boolean armRebootEscrow() {
+            return mRebootEscrowManager.armRebootEscrowIfNeeded();
+        }
+    }
+
+    private class RebootEscrowCallbacks implements RebootEscrowManager.Callbacks {
+        @Override
+        public boolean isUserSecure(int userId) {
+            return LockSettingsService.this.isUserSecure(userId);
+        }
+
+        @Override
+        public void onRebootEscrowRestored(byte spVersion, byte[] syntheticPassword, int userId) {
+            SyntheticPasswordManager.AuthenticationToken
+                    authToken = new SyntheticPasswordManager.AuthenticationToken(spVersion);
+            authToken.recreateDirectly(syntheticPassword);
+            onCredentialVerified(authToken, CHALLENGE_NONE, 0, null, userId);
+        }
     }
 }

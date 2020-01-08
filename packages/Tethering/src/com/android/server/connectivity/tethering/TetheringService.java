@@ -21,6 +21,7 @@ import static android.net.TetheringManager.TETHER_ERROR_NO_ACCESS_TETHERING_PERM
 import static android.net.TetheringManager.TETHER_ERROR_NO_CHANGE_TETHERING_PERMISSION;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
 import static android.net.TetheringManager.TETHER_ERROR_UNSUPPORTED;
+import static android.net.dhcp.IDhcpServer.STATUS_UNKNOWN_ERROR;
 
 import android.app.Service;
 import android.content.Context;
@@ -84,6 +85,7 @@ public class TetheringService extends Service {
      */
     @VisibleForTesting
     public Tethering makeTethering(TetheringDependencies deps) {
+        System.loadLibrary("tetherutilsjni");
         return new Tethering(deps);
     }
 
@@ -339,7 +341,10 @@ public class TetheringService extends Service {
 
                                 service.makeDhcpServer(ifName, params, cb);
                             } catch (RemoteException e) {
-                                e.rethrowFromSystemServer();
+                                Log.e(TAG, "Fail to make dhcp server");
+                                try {
+                                    cb.onDhcpServerCreated(STATUS_UNKNOWN_ERROR, null);
+                                } catch (RemoteException re) { }
                             }
                         }
                     };

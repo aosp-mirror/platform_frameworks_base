@@ -19,9 +19,8 @@ package android.view;
 
 import android.annotation.StringRes;
 import android.annotation.TestApi;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 /**
  * Represents a contextual mode of the user interface. Action modes can be used to provide

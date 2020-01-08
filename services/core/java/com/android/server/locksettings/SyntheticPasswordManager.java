@@ -38,7 +38,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.Preconditions;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
@@ -284,6 +283,14 @@ public class SyntheticPasswordManager {
          */
         public byte[] getSyntheticPassword() {
             return mSyntheticPassword;
+        }
+
+        /**
+         * Returns the version of this AuthenticationToken for use with reconstructing
+         * this with a synthetic password version.
+         */
+        public byte getVersion() {
+            return mVersion;
         }
     }
 

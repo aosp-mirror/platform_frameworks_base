@@ -17,7 +17,6 @@
 package com.android.server.backup.encryption.kv;
 
 import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.internal.util.Preconditions.checkNotNull;
 
 import com.android.server.backup.encryption.chunk.ChunkHash;
 import com.android.server.backup.encryption.protos.nano.KeyValueListingProto;
@@ -26,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 /**
  * Builds a {@link KeyValueListingProto.KeyValueListing}, which is a nano proto and so has no
@@ -37,7 +37,7 @@ public class KeyValueListingBuilder {
     /** Adds a new pair entry to the listing. */
     public KeyValueListingBuilder addPair(String key, ChunkHash hash) {
         checkArgument(key.length() != 0, "Key must have non-zero length");
-        checkNotNull(hash, "Hash must not be null");
+        Objects.requireNonNull(hash, "Hash must not be null");
 
         KeyValueListingProto.KeyValueEntry entry = new KeyValueListingProto.KeyValueEntry();
         entry.key = key;

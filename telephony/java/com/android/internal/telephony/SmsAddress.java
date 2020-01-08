@@ -16,7 +16,7 @@
 
 package com.android.internal.telephony;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 public abstract class SmsAddress {
     // From TS 23.040 9.1.2.5 and TS 24.008 table 10.5.118

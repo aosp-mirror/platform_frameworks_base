@@ -295,8 +295,6 @@ interface ISub {
 
     boolean isActiveSubId(int subId, String callingPackage, String callingFeatureId);
 
-    boolean setAlwaysAllowMmsData(int subId, boolean alwaysAllow);
-
     int getActiveDataSubscriptionId();
 
     boolean canDisablePhysicalSubscription();

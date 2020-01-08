@@ -119,7 +119,6 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
@@ -140,6 +139,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -511,7 +511,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         this.userId = userId;
         mOriginalInstallerUid = installerUid;
         mInstallerUid = installerUid;
-        mInstallSource = Preconditions.checkNotNull(installSource);
+        mInstallSource = Objects.requireNonNull(installSource);
         this.params = params;
         this.createdMillis = createdMillis;
         this.updatedMillis = createdMillis;
@@ -1143,7 +1143,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * permissions.
      */
     private boolean markAsCommitted(@NonNull IntentSender statusReceiver) {
-        Preconditions.checkNotNull(statusReceiver);
+        Objects.requireNonNull(statusReceiver);
 
         List<PackageInstallerSession> childSessions = getChildSessions();
 
@@ -1408,8 +1408,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void transfer(String packageName, IntentSender statusReceiver) {
-        Preconditions.checkNotNull(statusReceiver);
-        Preconditions.checkNotNull(packageName);
+        Objects.requireNonNull(statusReceiver);
+        Objects.requireNonNull(packageName);
 
         try {
             assertCanBeTransferredAndReturnNewOwner(packageName);
@@ -1607,9 +1607,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             localObserver = null;
         } else {
             if (!params.isMultiPackage) {
-                Preconditions.checkNotNull(mPackageName);
-                Preconditions.checkNotNull(mSigningDetails);
-                Preconditions.checkNotNull(mResolvedBaseFile);
+                Objects.requireNonNull(mPackageName);
+                Objects.requireNonNull(mSigningDetails);
+                Objects.requireNonNull(mResolvedBaseFile);
 
                 if (needToAskForPermissionsLocked()) {
                     // User needs to confirm installation;
@@ -1683,7 +1683,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 computeProgressLocked(true);
 
                 // Unpack native libraries for non-incremental installation
-                if (isIncrementalInstallation()) {
+                if (!isIncrementalInstallation()) {
                     extractNativeLibraries(stageDir, params.abiOverride, mayInheritNativeLibs());
                 }
             }

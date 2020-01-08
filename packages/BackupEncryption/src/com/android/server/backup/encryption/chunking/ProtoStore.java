@@ -16,8 +16,6 @@
 
 package com.android.server.backup.encryption.chunking;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.AtomicFile;
@@ -34,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -75,7 +74,7 @@ public class ProtoStore<T extends MessageNano> {
      */
     @VisibleForTesting
     ProtoStore(Class<T> clazz, File storeFolder) throws IOException {
-        mClazz = checkNotNull(clazz);
+        mClazz = Objects.requireNonNull(clazz);
         mStoreFolder = ensureDirectoryExistsOrThrow(storeFolder);
     }
 
@@ -118,7 +117,7 @@ public class ProtoStore<T extends MessageNano> {
 
     /** Saves a proto to disk, associating it with the given package. */
     public void saveProto(String packageName, T proto) throws IOException {
-        checkNotNull(proto);
+        Objects.requireNonNull(proto);
         File file = getFileForPackage(packageName);
 
         try (FileOutputStream os = new FileOutputStream(file)) {

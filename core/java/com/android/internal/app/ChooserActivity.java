@@ -2434,11 +2434,6 @@ public class ChooserActivity extends ResolverActivity implements
         FooterViewHolder(View itemView) {
             super(itemView);
         }
-
-        public void setHeight(int height) {
-            itemView.setLayoutParams(
-                    new RecyclerView.LayoutParams(LayoutParams.MATCH_PARENT, height));
-        }
     }
 
     /**
@@ -2471,7 +2466,7 @@ public class ChooserActivity extends ResolverActivity implements
 
         private boolean mLayoutRequested = false;
 
-        private FooterViewHolder mFooterViewHolder;
+        private int mFooterHeight = 0;
 
         private static final int VIEW_TYPE_DIRECT_SHARE = 0;
         private static final int VIEW_TYPE_NORMAL = 1;
@@ -2489,9 +2484,6 @@ public class ChooserActivity extends ResolverActivity implements
             super();
             mChooserListAdapter = wrappedAdapter;
             mLayoutInflater = LayoutInflater.from(ChooserActivity.this);
-
-            mFooterViewHolder = new FooterViewHolder(
-                    new Space(ChooserActivity.this.getApplicationContext()));
 
             mShowAzLabelIfPoss = getNumSheetExpansions() < NUM_EXPANSIONS_TO_HIDE_AZ_LABEL;
 
@@ -2511,7 +2503,7 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         public void setFooterHeight(int height) {
-            mFooterViewHolder.setHeight(height);
+            mFooterHeight = height;
         }
 
         /**
@@ -2614,7 +2606,10 @@ public class ChooserActivity extends ResolverActivity implements
                 case VIEW_TYPE_CALLER_AND_RANK:
                     return createItemGroupViewHolder(viewType, parent);
                 case VIEW_TYPE_FOOTER:
-                    return mFooterViewHolder;
+                    Space sp = new Space(parent.getContext());
+                    sp.setLayoutParams(new RecyclerView.LayoutParams(
+                            LayoutParams.MATCH_PARENT, mFooterHeight));
+                    return new FooterViewHolder(sp);
                 default:
                     // Since we catch all possible viewTypes above, no chance this is being called.
                     return null;

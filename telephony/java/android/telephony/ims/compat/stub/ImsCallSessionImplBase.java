@@ -16,7 +16,7 @@
 
 package android.telephony.ims.compat.stub;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.CallQuality;

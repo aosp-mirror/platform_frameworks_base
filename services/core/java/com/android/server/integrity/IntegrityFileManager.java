@@ -25,6 +25,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.integrity.model.RuleMetadata;
 import com.android.server.integrity.parser.RuleBinaryParser;
+import com.android.server.integrity.parser.RuleIndexingController;
 import com.android.server.integrity.parser.RuleMetadataParser;
 import com.android.server.integrity.parser.RuleParseException;
 import com.android.server.integrity.parser.RuleParser;
@@ -44,12 +45,9 @@ import java.util.Optional;
 public class IntegrityFileManager {
     private static final String TAG = "IntegrityFileManager";
 
-    // TODO: this is a prototype implementation of this class. Thus no tests are included.
-    //  Implementing rule indexing will likely overhaul this class and more tests should be included
-    //  then.
-
     private static final String METADATA_FILE = "metadata";
     private static final String RULES_FILE = "rules";
+    private static final String INDEXING_FILE = "indexing";
     private static final Object RULES_LOCK = new Object();
 
     private static IntegrityFileManager sInstance = null;
@@ -64,7 +62,10 @@ public class IntegrityFileManager {
     // update rules atomically.
     private final File mStagingDir;
 
-    @Nullable private RuleMetadata mRuleMetadataCache;
+    @Nullable
+    private RuleMetadata mRuleMetadataCache;
+    @Nullable
+    private RuleIndexingController mRuleIndexingController;
 
     /** Get the singleton instance of this class. */
     public static synchronized IntegrityFileManager getInstance() {
@@ -103,6 +104,8 @@ public class IntegrityFileManager {
                 Slog.e(TAG, "Error reading metadata file.", e);
             }
         }
+
+        updateRuleIndexingController();
     }
 
     /**
@@ -112,7 +115,8 @@ public class IntegrityFileManager {
      */
     public boolean initialized() {
         return new File(mRulesDir, RULES_FILE).exists()
-                && new File(mRulesDir, METADATA_FILE).exists();
+                && new File(mRulesDir, METADATA_FILE).exists()
+                && new File(mRulesDir, INDEXING_FILE).exists();
     }
 
     /** Write rules to persistent storage. */
@@ -125,12 +129,18 @@ public class IntegrityFileManager {
             // We don't consider this fatal so we continue execution.
         }
 
-        try (FileOutputStream fileOutputStream =
-                new FileOutputStream(new File(mStagingDir, RULES_FILE))) {
-            mRuleSerializer.serialize(rules, Optional.empty(), fileOutputStream);
+        try (FileOutputStream ruleFileOutputStream =
+                     new FileOutputStream(new File(mStagingDir, RULES_FILE));
+             FileOutputStream indexingFileOutputStream =
+                     new FileOutputStream(new File(mStagingDir, INDEXING_FILE))) {
+            mRuleSerializer.serialize(
+                    rules, Optional.empty(), ruleFileOutputStream, indexingFileOutputStream);
         }
 
         switchStagingRulesDir();
+
+        // Update object holding the indexing information.
+        updateRuleIndexingController();
     }
 
     /**
@@ -140,10 +150,15 @@ public class IntegrityFileManager {
      */
     public List<Rule> readRules(AppInstallMetadata appInstallMetadata)
             throws IOException, RuleParseException {
-        // TODO: select rules by index
         synchronized (RULES_LOCK) {
+            // Try to identify indexes from the index file.
+            List<List<Integer>> ruleReadingIndexes =
+                    mRuleIndexingController.identifyRulesToEvaluate(appInstallMetadata);
+
+            // Read the rules based on the index information.
+            // TODO(b/145493956): Provide the identified indexes to the rule reader.
             try (FileInputStream inputStream =
-                    new FileInputStream(new File(mRulesDir, RULES_FILE))) {
+                         new FileInputStream(new File(mRulesDir, RULES_FILE))) {
                 List<Rule> rules = mRuleParser.parse(inputStream);
                 return rules;
             }
@@ -164,6 +179,17 @@ public class IntegrityFileManager {
                     && mStagingDir.renameTo(mRulesDir)
                     && tmpDir.renameTo(mStagingDir))) {
                 throw new IOException("Error switching staging/rules directory");
+            }
+        }
+    }
+
+    private void updateRuleIndexingController() {
+        File ruleIndexingFile = new File(mRulesDir, INDEXING_FILE);
+        if (ruleIndexingFile.exists()) {
+            try (FileInputStream inputStream = new FileInputStream(ruleIndexingFile)) {
+                mRuleIndexingController = new RuleIndexingController(inputStream);
+            } catch (Exception e) {
+                Slog.e(TAG, "Error parsing the rule indexing file.", e);
             }
         }
     }

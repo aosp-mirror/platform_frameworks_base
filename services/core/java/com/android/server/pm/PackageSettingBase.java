@@ -41,6 +41,7 @@ import com.android.internal.util.Preconditions;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -172,7 +173,7 @@ public abstract class PackageSettingBase extends SettingBase {
     }
 
     public void setInstallSource(InstallSource installSource) {
-        this.installSource = Preconditions.checkNotNull(installSource);
+        this.installSource = Objects.requireNonNull(installSource);
     }
 
     void removeInstallerPackage(String packageName) {

@@ -555,7 +555,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private RemoteAnimationDefinition mRemoteAnimationDefinition;
 
-    private AnimatingActivityRegistry mAnimatingActivityRegistry;
+    AnimatingActivityRegistry mAnimatingActivityRegistry;
 
     private Task mLastParent;
 
@@ -3088,7 +3088,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "Removing app %s delayed=%b animation=%s animating=%b", this, delayed,
-                getAnimation(), isAnimating(TRANSITION));
+                getAnimation(), isAnimating(TRANSITION | PARENTS));
 
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "removeAppToken: %s"
                 + " delayed=%b Callers=%s", this, delayed, Debug.getCallers(4));
@@ -3100,7 +3100,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If this window was animating, then we need to ensure that the app transition notifies
         // that animations have completed in DisplayContent.handleAnimatingStoppedAndTransition(),
         // so add to that list now
-        if (isAnimating(TRANSITION)) {
+        if (isAnimating(TRANSITION | PARENTS)) {
             getDisplayContent().mNoAnimationNotifyOnTransitionFinished.add(token);
         }
 
@@ -3436,7 +3436,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         color mode set to avoid jank in the middle of the transition.
      */
     boolean canShowWindows() {
-        return allDrawn && !(isAnimating() && hasNonDefaultColorWindow());
+        return allDrawn && !(isAnimating(PARENTS) && hasNonDefaultColorWindow());
     }
 
     /**
@@ -4861,8 +4861,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void stopIfPossible() {
         if (DEBUG_SWITCH) Slog.d(TAG_SWITCH, "Stopping: " + this);
         final ActivityStack stack = getActivityStack();
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
-                || (info.flags & ActivityInfo.FLAG_NO_HISTORY) != 0) {
+        if (isNoHistory()) {
             if (!finishing) {
                 if (!stack.shouldSleepActivities()) {
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "no-history finish of " + this);
@@ -5344,13 +5343,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!allDrawn && w.mightAffectAllDrawn()) {
             if (DEBUG_VISIBILITY || WM_DEBUG_ORIENTATION.isLogToLogcat()) {
                 Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()
-                        + ", isAnimationSet=" + isAnimating(TRANSITION));
+                        + ", isAnimationSet=" + isAnimating(TRANSITION | PARENTS));
                 if (!w.isDrawnLw()) {
                     Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceController
                             + " pv=" + w.isVisibleByPolicy()
                             + " mDrawState=" + winAnimator.drawStateToString()
                             + " ph=" + w.isParentWindowHidden() + " th=" + mVisibleRequested
-                            + " a=" + isAnimating(TRANSITION));
+                            + " a=" + isAnimating(TRANSITION | PARENTS));
                 }
             }
 
@@ -5951,7 +5950,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void prepareSurfaces() {
-        final boolean show = isVisible() || isAnimating();
+        final boolean show = isVisible() || isAnimating(PARENTS);
 
         if (mSurfaceControl != null) {
             if (show && !mLastSurfaceShowing) {
@@ -5979,7 +5978,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void attachThumbnailAnimation() {
-        if (!isAnimating()) {
+        if (!isAnimating(PARENTS)) {
             return;
         }
         final GraphicBuffer thumbnailHeader =
@@ -5999,7 +5998,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * {@link android.app.ActivityOptions#ANIM_OPEN_CROSS_PROFILE_APPS} animation.
      */
     void attachCrossProfileAppsThumbnailAnimation() {
-        if (!isAnimating()) {
+        if (!isAnimating(PARENTS)) {
             return;
         }
         clearThumbnail();
@@ -6094,20 +6093,26 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         getDisplayContent().mAppTransition.notifyAppTransitionFinishedLocked(token);
         scheduleAnimation();
 
-        if (mAtmService.mRootWindowContainer.allResumedActivitiesIdle()
-                || mAtmService.mStackSupervisor.isStoppingNoHistoryActivity()) {
-            // If all activities are already idle or there is an activity that must be
-            // stopped immediately after visible, then we now need to make sure we perform
-            // the full stop of this activity. This is because we won't do that while they are still
-            // waiting for the animation to finish.
-            if (mAtmService.mStackSupervisor.mStoppingActivities.contains(this)) {
+        if (!mStackSupervisor.mStoppingActivities.isEmpty()
+                || !mStackSupervisor.mFinishingActivities.isEmpty()) {
+            if (mRootWindowContainer.allResumedActivitiesIdle()) {
+                // If all activities are already idle then we now need to make sure we perform
+                // the full stop of this activity. This is because we won't do that while they
+                // are still waiting for the animation to finish.
                 mStackSupervisor.scheduleIdle();
+            } else if (mRootWindowContainer.allResumedActivitiesVisible()) {
+                // If all resumed activities are already visible (and should be drawn, see
+                // updateReportedVisibility ~ nowVisible) but not idle, we still schedule to
+                // process the stopping and finishing activities because the transition is done.
+                // This also avoids if the next activity never reports idle (e.g. animating view),
+                // the previous will need to wait until idle timeout to be stopped or destroyed.
+                mStackSupervisor.scheduleProcessStoppingAndFinishingActivities();
+            } else {
+                // Instead of doing the full stop routine here, let's just hide any activities
+                // we now can, and let them stop when the normal idle happens.
+                mStackSupervisor.processStoppingActivities(null /* launchedActivity */,
+                        true /* onlyUpdateVisibility */, true /* unused */, null /* unused */);
             }
-        } else {
-            // Instead of doing the full stop routine here, let's just hide any activities
-            // we now can, and let them stop when the normal idle happens.
-            mStackSupervisor.processStoppingActivities(null /* launchedActivity */,
-                    true /* onlyUpdateVisibility */, true /* unused */, null /* unused */);
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
@@ -7511,7 +7516,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         super.dumpDebug(proto, WINDOW_TOKEN, logLevel);
         proto.write(LAST_SURFACE_SHOWING, mLastSurfaceShowing);
         proto.write(IS_WAITING_FOR_TRANSITION_START, isWaitingForTransitionStart());
-        proto.write(IS_ANIMATING, isAnimating());
+        proto.write(IS_ANIMATING, isAnimating(PARENTS));
         if (mThumbnail != null){
             mThumbnail.dumpDebug(proto, THUMBNAIL);
         }

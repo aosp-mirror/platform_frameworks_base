@@ -18,7 +18,7 @@ package android.hardware.camera2;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
@@ -1212,7 +1212,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>Minimum and maximum zoom ratios supported by this camera device.</p>
      * <p>If the camera device supports zoom-out from 1x zoom, minZoom will be less than 1.0, and
-     * setting android.control.zoomRation to values less than 1.0 increases the camera's field
+     * setting {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} to values less than 1.0 increases the camera's field
      * of view.</p>
      * <p><b>Units</b>: A pair of zoom ratio in floating points: (minZoom, maxZoom)</p>
      * <p><b>Range of valid values:</b><br></p>
@@ -1222,6 +1222,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     @PublicKey

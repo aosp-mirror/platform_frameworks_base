@@ -1032,31 +1032,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // Sets the display content for the children.
         onDisplayChanged(this);
 
-        // Add itself as a child to the root container.
-        mWmService.mRoot.addChild(this, POSITION_BOTTOM);
-
-        // TODO(b/62541591): evaluate whether this is the best spot to declare the
-        // {@link DisplayContent} ready for use.
-        mDisplayReady = true;
-
-        mWmService.mAnimator.addDisplayLocked(mDisplayId);
-        mInputMonitor = new InputMonitor(mWmService, mDisplayId);
+        mInputMonitor = new InputMonitor(mWmService, this);
         mInsetsStateController = new InsetsStateController(this);
         mInsetsPolicy = new InsetsPolicy(mInsetsStateController, this);
 
-        if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
+        if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Creating display=" + display);
 
         mWmService.mDisplayWindowSettings.applySettingsToDisplayLocked(this);
-
-        if (mWmService.mDisplayManagerInternal != null) {
-            mWmService.mDisplayManagerInternal
-                    .setDisplayInfoOverrideFromWindowManager(mDisplayId, getDisplayInfo());
-            configureDisplayPolicy();
-        }
-
-        reconfigureDisplayLocked();
-        onRequestedOverrideConfigurationChanged(getRequestedOverrideConfiguration());
-        mWmService.mDisplayNotificationController.dispatchDisplayAdded(this);
     }
 
     boolean isReady() {
@@ -3360,7 +3342,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // to look at all windows below the current target that are in this app, finding the
                 // highest visible one in layering.
                 WindowState highestTarget = null;
-                if (activity.isAnimating(TRANSITION)) {
+                if (activity.isAnimating(PARENTS | TRANSITION)) {
                     highestTarget = activity.getHighestAnimLayerWindow(curTarget);
                 }
 
@@ -4802,10 +4784,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             } else {
                 final int count = mChildren.size();
                 for (int i = 0; i < count; i++) {
-                    Slog.d(TAG, "child " + mChildren.get(i));
                     final WindowContainer child = mChildren.get(i);
                     if (skipTraverseChild(child)) {
-                        Slog.d(TAG, "child skipped");
                         continue;
                     }
 
@@ -4994,6 +4974,24 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // we create the root surfaces explicitly rather than chaining
         // up as the default implementation in onParentChanged does. So we
         // explicitly do NOT call super here.
+
+        if (!isReady()) {
+            // TODO(b/62541591): evaluate whether this is the best spot to declare the
+            // {@link DisplayContent} ready for use.
+            mDisplayReady = true;
+
+            mWmService.mAnimator.addDisplayLocked(mDisplayId);
+
+            if (mWmService.mDisplayManagerInternal != null) {
+                mWmService.mDisplayManagerInternal
+                        .setDisplayInfoOverrideFromWindowManager(mDisplayId, getDisplayInfo());
+                configureDisplayPolicy();
+            }
+
+            reconfigureDisplayLocked();
+            onRequestedOverrideConfigurationChanged(getRequestedOverrideConfiguration());
+            mWmService.mDisplayNotificationController.dispatchDisplayAdded(this);
+        }
     }
 
     @Override

@@ -30,9 +30,9 @@ import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 /**
  * AssitantButton is a ui component that will trigger the Voice Interaction Service.
  */
-public class AssitantButton extends CarFacetButton {
+public class AssitantButton extends CarNavigationButton {
 
-    private static final String TAG = "CarFacetButton";
+    private static final String TAG = "AssistantButton";
     private final AssistUtils mAssistUtils;
     private IVoiceInteractionSessionShowCallback mShowCallback =
             new IVoiceInteractionSessionShowCallback.Stub() {
@@ -62,7 +62,7 @@ public class AssitantButton extends CarFacetButton {
     }
 
     @Override
-    protected void setupIntents(TypedArray typedArray) {
+    protected void setUpIntents(TypedArray typedArray) {
         // left blank because for the assistant button Intent will not be passed from the layout.
     }
 }

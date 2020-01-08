@@ -387,8 +387,10 @@ public class SettingsProvider extends ContentProvider {
             case Settings.CALL_METHOD_SET_ALL_CONFIG: {
                 String prefix = getSettingPrefix(args);
                 Map<String, String> flags = getSettingFlags(args);
-                setAllConfigSettings(prefix, flags);
-                break;
+                Bundle result = new Bundle();
+                result.putBoolean(Settings.KEY_CONFIG_SET_RETURN,
+                        setAllConfigSettings(prefix, flags));
+                return result;
             }
 
             case Settings.CALL_METHOD_RESET_CONFIG: {
@@ -2666,20 +2668,28 @@ public class SettingsProvider extends ContentProvider {
             return success;
         }
 
+        /**
+         * Set Settings using consumed keyValues, returns true if the keyValues can be set, false
+         * otherwise.
+         */
         public boolean setSettingsLocked(int type, int userId, String prefix,
                 Map<String, String> keyValues, String packageName) {
             final int key = makeKey(type, userId);
 
             SettingsState settingsState = peekSettingsStateLocked(key);
             if (settingsState != null) {
+                if (SETTINGS_TYPE_CONFIG == type && settingsState.isNewConfigBannedLocked(prefix,
+                        keyValues)) {
+                    return false;
+                }
                 List<String> changedSettings =
                         settingsState.setSettingsLocked(prefix, keyValues, packageName);
                 if (!changedSettings.isEmpty()) {
                     notifyForConfigSettingsChangeLocked(key, prefix, changedSettings);
                 }
             }
-
-            return settingsState != null;
+            // keyValues aren't banned and can be set
+            return true;
         }
 
         public boolean deleteSettingLocked(int type, int userId, String name, boolean forceNotify,
@@ -2739,7 +2749,8 @@ public class SettingsProvider extends ContentProvider {
 
         public void resetSettingsLocked(int type, int userId, String packageName, int mode,
                 String tag) {
-            resetSettingsLocked(type, userId, packageName, mode, tag, null);
+            resetSettingsLocked(type, userId, packageName, mode, tag, /*prefix=*/
+                    null);
         }
 
         public void resetSettingsLocked(int type, int userId, String packageName, int mode,
@@ -2750,6 +2761,7 @@ public class SettingsProvider extends ContentProvider {
                 return;
             }
 
+            banConfigurationIfNecessary(type, prefix, settingsState);
             switch (mode) {
                 case Settings.RESET_MODE_PACKAGE_DEFAULTS: {
                     for (String name : settingsState.getSettingNamesLocked()) {
@@ -3171,6 +3183,34 @@ public class SettingsProvider extends ContentProvider {
 
         private boolean isSsaidSettingsKey(int key) {
             return getTypeFromKey(key) == SETTINGS_TYPE_SSAID;
+        }
+
+        private boolean shouldBan(int type) {
+            if (SETTINGS_TYPE_CONFIG != type) {
+                return false;
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int appId = UserHandle.getAppId(callingUid);
+
+            // Only non-shell resets should result in namespace banning
+            return appId != SHELL_UID;
+        }
+
+        private void banConfigurationIfNecessary(int type, @Nullable String prefix,
+                SettingsState settingsState) {
+            // Banning should be performed only for Settings.Config and for non-shell reset calls
+            if (!shouldBan(type)) {
+                return;
+            }
+            if (prefix != null) {
+                settingsState.banConfigurationLocked(prefix, getAllConfigFlags(prefix));
+            } else {
+                Set<String> configPrefixes = settingsState.getAllConfigPrefixesLocked();
+                for (String configPrefix : configPrefixes) {
+                    settingsState.banConfigurationLocked(configPrefix,
+                            getAllConfigFlags(configPrefix));
+                }
+            }
         }
 
         private File getSettingsFile(int key) {

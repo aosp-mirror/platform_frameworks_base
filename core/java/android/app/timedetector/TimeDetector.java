@@ -85,4 +85,19 @@ public class TimeDetector {
         manualTimeSuggestion.addDebugInfo(why);
         return manualTimeSuggestion;
     }
+
+    /**
+     * Suggests the time according to a network time source like NTP.
+     */
+    @RequiresPermission(android.Manifest.permission.SET_TIME)
+    public void suggestNetworkTime(NetworkTimeSuggestion timeSuggestion) {
+        if (DEBUG) {
+            Log.d(TAG, "suggestNetworkTime called: " + timeSuggestion);
+        }
+        try {
+            mITimeDetectorService.suggestNetworkTime(timeSuggestion);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

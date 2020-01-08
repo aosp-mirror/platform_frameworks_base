@@ -24,8 +24,12 @@ import android.os.Build;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
+import com.android.keyguard.AlphaOptimizedImageButton;
 import com.android.systemui.R;
 
 import java.net.URISyntaxException;
@@ -35,101 +39,50 @@ import java.net.URISyntaxException;
  * xml file level. This allows for more control via overlays instead of having to update
  * code.
  */
-public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImageButton {
-    private static final String TAG = "CarNavigationButton";
+public class CarNavigationButton extends LinearLayout {
 
-    private static final int UNSEEN_ICON_RESOURCE_ID = R.drawable.car_ic_notification_unseen;
-    private static final int UNSEEN_SELECTED_ICON_RESOURCE_ID =
-            R.drawable.car_ic_notification_selected_unseen;
+    protected static final float DEFAULT_SELECTED_ALPHA = 1f;
+    protected static final float DEFAULT_UNSELECTED_ALPHA = 0.75f;
+
+    private static final String TAG = "CarNavigationButton";
+    private static final String BUTTON_FILTER_DELIMITER = ";";
+    private static final String EXTRA_BUTTON_CATEGORIES = "categories";
+    private static final String EXTRA_BUTTON_PACKAGES = "packages";
 
     private Context mContext;
+    private AlphaOptimizedImageButton mIcon;
+    private AlphaOptimizedImageButton mMoreIcon;
+    private ImageView mUnseenIcon;
     private String mIntent;
     private String mLongIntent;
     private boolean mBroadcastIntent;
     private boolean mHasUnseen = false;
     private boolean mSelected = false;
-    private float mSelectedAlpha = 1f;
-    private float mUnselectedAlpha = 1f;
+    private float mSelectedAlpha;
+    private float mUnselectedAlpha;
     private int mSelectedIconResourceId;
     private int mIconResourceId;
-
+    private String[] mComponentNames;
+    /** App categories that are to be used with this widget */
+    private String[] mButtonCategories;
+    /** App packages that are allowed to be used with this widget */
+    private String[] mButtonPackages;
+    /** Whether to display more icon beneath the primary icon when the button is selected */
+    private boolean mShowMoreWhenSelected = false;
+    /** Whether to highlight the button if the active application is associated with it */
+    private boolean mHighlightWhenSelected = false;
 
     public CarNavigationButton(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
-
+        View.inflate(mContext, R.layout.car_navigation_button, /* root= */ this);
         // CarNavigationButton attrs
-        TypedArray typedArray = context.obtainStyledAttributes(
-                attrs, R.styleable.CarNavigationButton);
-        mIntent = typedArray.getString(R.styleable.CarNavigationButton_intent);
-        mLongIntent = typedArray.getString(R.styleable.CarNavigationButton_longIntent);
-        mBroadcastIntent = typedArray.getBoolean(R.styleable.CarNavigationButton_broadcast, false);
-        mSelectedAlpha = typedArray.getFloat(
-                R.styleable.CarNavigationButton_selectedAlpha, mSelectedAlpha);
-        mUnselectedAlpha = typedArray.getFloat(
-                R.styleable.CarNavigationButton_unselectedAlpha, mUnselectedAlpha);
-        mSelectedIconResourceId = typedArray.getResourceId(
-                R.styleable.CarNavigationButton_selectedIcon, mIconResourceId);
-        mIconResourceId = typedArray.getResourceId(
-                R.styleable.CarNavigationButton_icon, 0);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs,
+                R.styleable.CarNavigationButton);
+
+        setUpIntents(typedArray);
+        setUpIcons(typedArray);
         typedArray.recycle();
-    }
-
-
-    /**
-     * After the standard inflate this then adds the xml defined intents to click and long click
-     * actions if defined.
-     */
-    @Override
-    public void onFinishInflate() {
-        super.onFinishInflate();
-        setScaleType(ImageView.ScaleType.CENTER);
-        setAlpha(mUnselectedAlpha);
-        setImageResource(mIconResourceId);
-        try {
-            if (mIntent != null) {
-                final Intent intent = Intent.parseUri(mIntent, Intent.URI_INTENT_SCHEME);
-                setOnClickListener(v -> {
-                    try {
-                        if (mBroadcastIntent) {
-                            mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
-                            mContext.sendBroadcastAsUser(
-                                    new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
-                                    UserHandle.CURRENT);
-                            return;
-                        }
-                        ActivityOptions options = ActivityOptions.makeBasic();
-                        options.setLaunchDisplayId(mContext.getDisplayId());
-                        mContext.startActivityAsUser(intent, options.toBundle(),
-                                UserHandle.CURRENT);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Failed to launch intent", e);
-                    }
-                });
-            }
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("Failed to attach intent", e);
-        }
-
-        try {
-            if (mLongIntent != null && (Build.IS_ENG || Build.IS_USERDEBUG)) {
-                final Intent intent = Intent.parseUri(mLongIntent, Intent.URI_INTENT_SCHEME);
-                setOnLongClickListener(v -> {
-                    try {
-                        ActivityOptions options = ActivityOptions.makeBasic();
-                        options.setLaunchDisplayId(mContext.getDisplayId());
-                        mContext.startActivityAsUser(intent, options.toBundle(),
-                                UserHandle.CURRENT);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Failed to launch intent", e);
-                    }
-                    // consume event either way
-                    return true;
-                });
-            }
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("Failed to attach long press intent", e);
-        }
     }
 
     /**
@@ -138,7 +91,12 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
     public void setSelected(boolean selected) {
         super.setSelected(selected);
         mSelected = selected;
-        setAlpha(mSelected ? mSelectedAlpha : mUnselectedAlpha);
+        if (mHighlightWhenSelected) {
+            setAlpha(mSelected ? mSelectedAlpha : mUnselectedAlpha);
+        }
+        if (mShowMoreWhenSelected && mMoreIcon != null) {
+            mMoreIcon.setVisibility(selected ? VISIBLE : GONE);
+        }
         updateImage();
     }
 
@@ -155,12 +113,172 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
         return mHasUnseen;
     }
 
-    private void updateImage() {
-        if (mHasUnseen) {
-            setImageResource(mSelected ? UNSEEN_SELECTED_ICON_RESOURCE_ID
-                    : UNSEEN_ICON_RESOURCE_ID);
-        } else {
-            setImageResource(mSelected ? mSelectedIconResourceId : mIconResourceId);
+    /**
+     * @return The app categories the component represents
+     */
+    public String[] getCategories() {
+        if (mButtonCategories == null) {
+            return new String[0];
+        }
+        return mButtonCategories;
+    }
+
+    /**
+     * @return The valid packages that should be considered.
+     */
+    public String[] getPackages() {
+        if (mButtonPackages == null) {
+            return new String[0];
+        }
+        return mButtonPackages;
+    }
+
+    /**
+     * @return The list of component names.
+     */
+    public String[] getComponentName() {
+        if (mComponentNames == null) {
+            return new String[0];
+        }
+        return mComponentNames;
+    }
+
+    /**
+     * @return The id of the display the button is on or Display.INVALID_DISPLAY if it's not yet on
+     * a display.
+     */
+    protected int getDisplayId() {
+        Display display = getDisplay();
+        if (display == null) {
+            return Display.INVALID_DISPLAY;
+        }
+        return display.getDisplayId();
+    }
+
+    protected boolean hasSelectionState() {
+        return mHighlightWhenSelected || mShowMoreWhenSelected;
+    }
+
+    /**
+     * Sets up intents for click, long touch, and broadcast.
+     */
+    protected void setUpIntents(TypedArray typedArray) {
+        mIntent = typedArray.getString(R.styleable.CarNavigationButton_intent);
+        mLongIntent = typedArray.getString(R.styleable.CarNavigationButton_longIntent);
+        mBroadcastIntent = typedArray.getBoolean(R.styleable.CarNavigationButton_broadcast, false);
+
+        String categoryString = typedArray.getString(R.styleable.CarNavigationButton_categories);
+        String packageString = typedArray.getString(R.styleable.CarNavigationButton_packages);
+        String componentNameString =
+                typedArray.getString(R.styleable.CarNavigationButton_componentNames);
+
+        try {
+            if (mIntent != null) {
+                final Intent intent = Intent.parseUri(mIntent, Intent.URI_INTENT_SCHEME);
+                setOnClickListener(getButtonClickListener(intent));
+                if (packageString != null) {
+                    mButtonPackages = packageString.split(BUTTON_FILTER_DELIMITER);
+                    intent.putExtra(EXTRA_BUTTON_PACKAGES, mButtonPackages);
+                }
+                if (categoryString != null) {
+                    mButtonCategories = categoryString.split(BUTTON_FILTER_DELIMITER);
+                    intent.putExtra(EXTRA_BUTTON_CATEGORIES, mButtonCategories);
+                }
+                if (componentNameString != null) {
+                    mComponentNames = componentNameString.split(BUTTON_FILTER_DELIMITER);
+                }
+            }
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Failed to attach intent", e);
+        }
+
+        try {
+            if (mLongIntent != null && (Build.IS_ENG || Build.IS_USERDEBUG)) {
+                final Intent intent = Intent.parseUri(mLongIntent, Intent.URI_INTENT_SCHEME);
+                setOnLongClickListener(getButtonLongClickListener(intent));
+            }
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Failed to attach long press intent", e);
         }
     }
+
+    /** Defines the behavior of a button click. */
+    protected OnClickListener getButtonClickListener(Intent toSend) {
+        return v -> {
+            mContext.sendBroadcastAsUser(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
+                    UserHandle.CURRENT);
+            try {
+                if (mBroadcastIntent) {
+                    mContext.sendBroadcastAsUser(toSend, UserHandle.CURRENT);
+                    return;
+                }
+                ActivityOptions options = ActivityOptions.makeBasic();
+                options.setLaunchDisplayId(mContext.getDisplayId());
+                mContext.startActivityAsUser(toSend, options.toBundle(),
+                        UserHandle.CURRENT);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to launch intent", e);
+            }
+        };
+    }
+
+    /** Defines the behavior of a long click. */
+    protected OnLongClickListener getButtonLongClickListener(Intent toSend) {
+        return v -> {
+            mContext.sendBroadcastAsUser(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
+                    UserHandle.CURRENT);
+            try {
+                ActivityOptions options = ActivityOptions.makeBasic();
+                options.setLaunchDisplayId(mContext.getDisplayId());
+                mContext.startActivityAsUser(toSend, options.toBundle(),
+                        UserHandle.CURRENT);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to launch intent", e);
+            }
+            // consume event either way
+            return true;
+        };
+    }
+
+
+    /**
+     * Initializes view-related aspects of the button.
+     */
+    private void setUpIcons(TypedArray typedArray) {
+        mSelectedAlpha = typedArray.getFloat(
+                R.styleable.CarNavigationButton_selectedAlpha, DEFAULT_SELECTED_ALPHA);
+        mUnselectedAlpha = typedArray.getFloat(
+                R.styleable.CarNavigationButton_unselectedAlpha, DEFAULT_UNSELECTED_ALPHA);
+        mHighlightWhenSelected = typedArray.getBoolean(
+                R.styleable.CarNavigationButton_highlightWhenSelected,
+                mHighlightWhenSelected);
+        mShowMoreWhenSelected = typedArray.getBoolean(
+                R.styleable.CarNavigationButton_showMoreWhenSelected,
+                mShowMoreWhenSelected);
+
+        mSelectedIconResourceId = typedArray.getResourceId(
+                R.styleable.CarNavigationButton_selectedIcon, mIconResourceId);
+        mIconResourceId = typedArray.getResourceId(
+                R.styleable.CarNavigationButton_icon, 0);
+
+        mIcon = findViewById(R.id.car_nav_button_icon_image);
+        mIcon.setScaleType(ImageView.ScaleType.CENTER);
+        // Always apply selected alpha if the button does not toggle alpha based on selection state.
+        mIcon.setAlpha(mHighlightWhenSelected ? mUnselectedAlpha : mSelectedAlpha);
+        mIcon.setImageResource(mIconResourceId);
+
+        mMoreIcon = findViewById(R.id.car_nav_button_more_icon);
+        mMoreIcon.setAlpha(mSelectedAlpha);
+        mMoreIcon.setVisibility(GONE);
+
+        mUnseenIcon = findViewById(R.id.car_nav_button_unseen_icon);
+
+        mUnseenIcon.setVisibility(mHasUnseen ? VISIBLE : GONE);
+    }
+
+    private void updateImage() {
+        mIcon.setImageResource(mSelected ? mSelectedIconResourceId : mIconResourceId);
+        mUnseenIcon.setVisibility(mHasUnseen ? VISIBLE : GONE);
+    }
+
 }

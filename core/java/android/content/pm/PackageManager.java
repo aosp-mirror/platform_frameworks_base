@@ -2918,6 +2918,18 @@ public abstract class PackageManager {
     public static final String FEATURE_IPSEC_TUNNELS = "android.software.ipsec_tunnels";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * the requisite hardware support to support reboot escrow of synthetic password for updates.
+     *
+     * <p>This feature implies that the device has the RebootEscrow HAL implementation.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
+
+    /**
      * Extra field name for the URI to a verification file. Passed to a package
      * verifier.
      *
