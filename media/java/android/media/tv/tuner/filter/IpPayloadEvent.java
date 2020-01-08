@@ -16,10 +16,25 @@
 
 package android.media.tv.tuner.filter;
 
+import android.media.tv.tuner.Tuner.Filter;
+
 /**
- * IP payload event.
+ * Filter event sent from {@link Filter} objects with IP payload type.
+ *
  * @hide
  */
 public class IpPayloadEvent extends FilterEvent {
-    private int mDataLength;
+    private final int mDataLength;
+
+    // This constructor is used by JNI code only
+    private IpPayloadEvent(int dataLength) {
+        mDataLength = dataLength;
+    }
+
+    /**
+     * Gets data size in bytes of filtered data.
+     */
+    public int getDataLength() {
+        return mDataLength;
+    }
 }

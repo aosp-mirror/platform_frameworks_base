@@ -201,6 +201,187 @@ public final class TunerConstants {
      */
     public static final int FILTER_STATUS_OVERFLOW = Constants.DemuxFilterStatus.OVERFLOW;
 
+    /**
+     * Indexes can be tagged through TS (Transport Stream) header.
+     *
+     * @hide
+     */
+    @IntDef(flag = true, value = {TS_INDEX_FIRST_PACKET, TS_INDEX_PAYLOAD_UNIT_START_INDICATOR,
+            TS_INDEX_CHANGE_TO_NOT_SCRAMBLED, TS_INDEX_CHANGE_TO_EVEN_SCRAMBLED,
+            TS_INDEX_CHANGE_TO_ODD_SCRAMBLED, TS_INDEX_DISCONTINUITY_INDICATOR,
+            TS_INDEX_RANDOM_ACCESS_INDICATOR, TS_INDEX_PRIORITY_INDICATOR, TS_INDEX_PCR_FLAG,
+            TS_INDEX_OPCR_FLAG, TS_INDEX_SPLICING_POINT_FLAG, TS_INDEX_PRIVATE_DATA,
+            TS_INDEX_ADAPTATION_EXTENSION_FLAG})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TsIndex {}
+
+    /**
+     * TS index FIRST_PACKET.
+     * @hide
+     */
+    public static final int TS_INDEX_FIRST_PACKET = Constants.DemuxTsIndex.FIRST_PACKET;
+    /**
+     * TS index PAYLOAD_UNIT_START_INDICATOR.
+     * @hide
+     */
+    public static final int TS_INDEX_PAYLOAD_UNIT_START_INDICATOR =
+            Constants.DemuxTsIndex.PAYLOAD_UNIT_START_INDICATOR;
+    /**
+     * TS index CHANGE_TO_NOT_SCRAMBLED.
+     * @hide
+     */
+    public static final int TS_INDEX_CHANGE_TO_NOT_SCRAMBLED =
+            Constants.DemuxTsIndex.CHANGE_TO_NOT_SCRAMBLED;
+    /**
+     * TS index CHANGE_TO_EVEN_SCRAMBLED.
+     * @hide
+     */
+    public static final int TS_INDEX_CHANGE_TO_EVEN_SCRAMBLED =
+            Constants.DemuxTsIndex.CHANGE_TO_EVEN_SCRAMBLED;
+    /**
+     * TS index CHANGE_TO_ODD_SCRAMBLED.
+     * @hide
+     */
+    public static final int TS_INDEX_CHANGE_TO_ODD_SCRAMBLED =
+            Constants.DemuxTsIndex.CHANGE_TO_ODD_SCRAMBLED;
+    /**
+     * TS index DISCONTINUITY_INDICATOR.
+     * @hide
+     */
+    public static final int TS_INDEX_DISCONTINUITY_INDICATOR =
+            Constants.DemuxTsIndex.DISCONTINUITY_INDICATOR;
+    /**
+     * TS index RANDOM_ACCESS_INDICATOR.
+     * @hide
+     */
+    public static final int TS_INDEX_RANDOM_ACCESS_INDICATOR =
+            Constants.DemuxTsIndex.RANDOM_ACCESS_INDICATOR;
+    /**
+     * TS index PRIORITY_INDICATOR.
+     * @hide
+     */
+    public static final int TS_INDEX_PRIORITY_INDICATOR = Constants.DemuxTsIndex.PRIORITY_INDICATOR;
+    /**
+     * TS index PCR_FLAG.
+     * @hide
+     */
+    public static final int TS_INDEX_PCR_FLAG = Constants.DemuxTsIndex.PCR_FLAG;
+    /**
+     * TS index OPCR_FLAG.
+     * @hide
+     */
+    public static final int TS_INDEX_OPCR_FLAG = Constants.DemuxTsIndex.OPCR_FLAG;
+    /**
+     * TS index SPLICING_POINT_FLAG.
+     * @hide
+     */
+    public static final int TS_INDEX_SPLICING_POINT_FLAG =
+            Constants.DemuxTsIndex.SPLICING_POINT_FLAG;
+    /**
+     * TS index PRIVATE_DATA.
+     * @hide
+     */
+    public static final int TS_INDEX_PRIVATE_DATA = Constants.DemuxTsIndex.PRIVATE_DATA;
+    /**
+     * TS index ADAPTATION_EXTENSION_FLAG.
+     * @hide
+     */
+    public static final int TS_INDEX_ADAPTATION_EXTENSION_FLAG =
+            Constants.DemuxTsIndex.ADAPTATION_EXTENSION_FLAG;
+
+    /**
+     * Indexes can be tagged by Start Code in PES (Packetized Elementary Stream)
+     * according to ISO/IEC 13818-1.
+     * @hide
+     */
+    @IntDef(flag = true, value = {SC_INDEX_I_FRAME, SC_INDEX_P_FRAME, SC_INDEX_B_FRAME,
+            SC_INDEX_SEQUENCE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScIndex {}
+
+    /**
+     * SC index for a new I-frame.
+     * @hide
+     */
+    public static final int SC_INDEX_I_FRAME = Constants.DemuxScIndex.I_FRAME;
+    /**
+     * SC index for a new P-frame.
+     * @hide
+     */
+    public static final int SC_INDEX_P_FRAME = Constants.DemuxScIndex.P_FRAME;
+    /**
+     * SC index for a new B-frame.
+     * @hide
+     */
+    public static final int SC_INDEX_B_FRAME = Constants.DemuxScIndex.B_FRAME;
+    /**
+     * SC index for a new sequence.
+     * @hide
+     */
+    public static final int SC_INDEX_SEQUENCE = Constants.DemuxScIndex.SEQUENCE;
+
+
+    /**
+     * Indexes can be tagged by NAL unit group in HEVC according to ISO/IEC 23008-2.
+     *
+     * @hide
+     */
+    @IntDef(flag = true,
+            value = {SC_HEVC_INDEX_SPS, SC_HEVC_INDEX_AUD, SC_HEVC_INDEX_SLICE_CE_BLA_W_LP,
+            SC_HEVC_INDEX_SLICE_BLA_W_RADL, SC_HEVC_INDEX_SLICE_BLA_N_LP,
+            SC_HEVC_INDEX_SLICE_IDR_W_RADL, SC_HEVC_INDEX_SLICE_IDR_N_LP,
+            SC_HEVC_INDEX_SLICE_TRAIL_CRA})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScHevcIndex {}
+
+    /**
+     * SC HEVC index SPS.
+     * @hide
+     */
+    public static final int SC_HEVC_INDEX_SPS = Constants.DemuxScHevcIndex.SPS;
+    /**
+     * SC HEVC index AUD.
+     * @hide
+     */
+    public static final int SC_HEVC_INDEX_AUD = Constants.DemuxScHevcIndex.AUD;
+    /**
+     * SC HEVC index SLICE_CE_BLA_W_LP.
+     * @hide
+     */
+    public static final int SC_HEVC_INDEX_SLICE_CE_BLA_W_LP =
+            Constants.DemuxScHevcIndex.SLICE_CE_BLA_W_LP;
+    /**
+     * SC HEVC index SLICE_BLA_W_RADL.
+     * @hide
+     */
+    public static final int SC_HEVC_INDEX_SLICE_BLA_W_RADL =
+            Constants.DemuxScHevcIndex.SLICE_BLA_W_RADL;
+    /**
+     * SC HEVC index SLICE_BLA_N_LP.
+     * @hide
+     */
+    public static final int SC_HEVC_INDEX_SLICE_BLA_N_LP =
+            Constants.DemuxScHevcIndex.SLICE_BLA_N_LP;
+    /**
+     * SC HEVC index SLICE_IDR_W_RADL.
+     * @hide
+     */
+    public static final int SC_HEVC_INDEX_SLICE_IDR_W_RADL =
+            Constants.DemuxScHevcIndex.SLICE_IDR_W_RADL;
+    /**
+     * SC HEVC index SLICE_IDR_N_LP.
+     * @hide
+     */
+    public static final int SC_HEVC_INDEX_SLICE_IDR_N_LP =
+            Constants.DemuxScHevcIndex.SLICE_IDR_N_LP;
+    /**
+     * SC HEVC index SLICE_TRAIL_CRA.
+     * @hide
+     */
+    public static final int SC_HEVC_INDEX_SLICE_TRAIL_CRA =
+            Constants.DemuxScHevcIndex.SLICE_TRAIL_CRA;
+
+
     /** @hide */
     @IntDef({FRONTEND_SCAN_UNDEFINED, FRONTEND_SCAN_AUTO, FRONTEND_SCAN_BLIND})
     @Retention(RetentionPolicy.SOURCE)
