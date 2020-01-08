@@ -950,6 +950,9 @@
     <dimen name="cell_overlay_padding">18dp</dimen>
 
     <!-- Global actions power menu -->
+    <dimen name="global_actions_top_margin">12dp</dimen>
+    <dimen name="global_actions_plugin_offset">-145dp</dimen>
+
     <dimen name="global_actions_panel_width">120dp</dimen>
     <dimen name="global_actions_padding">12dp</dimen>
     <dimen name="global_actions_translate">9dp</dimen>
