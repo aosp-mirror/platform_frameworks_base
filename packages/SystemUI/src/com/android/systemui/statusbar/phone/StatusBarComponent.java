@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone.dagger;
+package com.android.systemui.statusbar.phone;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import com.android.systemui.statusbar.phone.NotificationPanelViewController;
-import com.android.systemui.statusbar.phone.StatusBarWindowView;
-import com.android.systemui.statusbar.phone.StatusBarWindowViewController;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -33,8 +29,7 @@ import dagger.Subcomponent;
 /**
  * Dagger subcomponent tied to the lifecycle of StatusBar views.
  */
-@Subcomponent(modules = {StatusBarViewModule.class})
-@StatusBarComponent.StatusBarScope
+@Subcomponent
 public interface StatusBarComponent {
     /**
      * Builder for {@link StatusBarComponent}.
@@ -58,11 +53,5 @@ public interface StatusBarComponent {
      */
     @StatusBarScope
     StatusBarWindowViewController getStatusBarWindowViewController();
-
-    /**
-     * Creates a NotificationPanelViewController.
-     */
-    @StatusBarScope
-    NotificationPanelViewController getNotificationPanelViewController();
 
 }

@@ -155,6 +155,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     };
 
     private boolean mLeftIsVoiceAssist;
+    private AssistManager mAssistManager;
     private Drawable mLeftAssistIcon;
 
     private IntentButton mRightButton = new DefaultRightButton();
@@ -253,6 +254,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mActivityStarter = Dependency.get(ActivityStarter.class);
         mFlashlightController = Dependency.get(FlashlightController.class);
         mAccessibilityController = Dependency.get(AccessibilityController.class);
+        mAssistManager = Dependency.get(AssistManager.class);
         mActivityIntentHelper = new ActivityIntentHelper(getContext());
         updateLeftAffordance();
     }
@@ -549,7 +551,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                Dependency.get(AssistManager.class).launchVoiceAssistFromKeyguard();
+                mAssistManager.launchVoiceAssistFromKeyguard();
             }
         };
         if (!mKeyguardStateController.canDismissLockScreen()) {
@@ -563,7 +565,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     private boolean canLaunchVoiceAssist() {
-        return Dependency.get(AssistManager.class).canVoiceAssistBeLaunchedFromKeyguard();
+        return mAssistManager.canVoiceAssistBeLaunchedFromKeyguard();
     }
 
     private void launchPhone() {
@@ -645,7 +647,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
         if (mLeftIsVoiceAssist) {
             mLeftPreview = mPreviewInflater.inflatePreviewFromService(
-                    Dependency.get(AssistManager.class).getVoiceInteractorComponentName());
+                    mAssistManager.getVoiceInteractorComponentName());
         } else {
             mLeftPreview = mPreviewInflater.inflatePreview(mLeftButton.getIntent());
         }

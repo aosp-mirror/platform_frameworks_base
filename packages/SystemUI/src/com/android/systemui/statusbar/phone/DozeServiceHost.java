@@ -92,7 +92,7 @@ public final class DozeServiceHost implements DozeHost {
     private final LockscreenLockIconController mLockscreenLockIconController;
     private NotificationIconAreaController mNotificationIconAreaController;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private NotificationPanelViewController mNotificationPanel;
+    private NotificationPanelView mNotificationPanel;
     private View mAmbientIndicationContainer;
     private StatusBar mStatusBar;
 
@@ -142,7 +142,7 @@ public final class DozeServiceHost implements DozeHost {
             NotificationIconAreaController notificationIconAreaController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             StatusBarWindowViewController statusBarWindowViewController,
-            NotificationPanelViewController notificationPanel, View ambientIndicationContainer) {
+            NotificationPanelView notificationPanel, View ambientIndicationContainer) {
         mStatusBar = statusBar;
         mNotificationIconAreaController = notificationIconAreaController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;

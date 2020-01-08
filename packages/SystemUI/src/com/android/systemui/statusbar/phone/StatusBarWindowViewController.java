@@ -26,9 +26,11 @@ import android.provider.Settings;
 import android.view.GestureDetector;
 import android.view.InputDevice;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.ExpandHelper;
@@ -91,7 +93,6 @@ public class StatusBarWindowViewController {
     private boolean mSingleTapEnabled;
     private boolean mExpandingBelowNotch;
     private final DockManager mDockManager;
-    private final NotificationPanelViewController mNotificationPanelViewController;
 
     @Inject
     public StatusBarWindowViewController(
@@ -112,8 +113,7 @@ public class StatusBarWindowViewController {
             CommandQueue commandQueue,
             ShadeController shadeController,
             DockManager dockManager,
-            StatusBarWindowView statusBarWindowView,
-            NotificationPanelViewController notificationPanelViewController) {
+            StatusBarWindowView statusBarWindowView) {
         mInjectionInflationController = injectionInflationController;
         mCoordinator = coordinator;
         mPulseExpansionHandler = pulseExpansionHandler;
@@ -132,7 +132,6 @@ public class StatusBarWindowViewController {
         mView = statusBarWindowView;
         mShadeController = shadeController;
         mDockManager = dockManager;
-        mNotificationPanelViewController = notificationPanelViewController;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror);
@@ -140,6 +139,39 @@ public class StatusBarWindowViewController {
 
     /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */
     public void setupExpandedStatusBar() {
+        // TODO: create controller for NotificationPanelView
+        NotificationPanelView notificationPanelView = new NotificationPanelView(
+                mView.getContext(),
+                null,
+                mInjectionInflationController,
+                mCoordinator,
+                mPulseExpansionHandler,
+                mDynamicPrivacyController,
+                mBypassController,
+                mFalsingManager,
+                mPluginManager,
+                mShadeController,
+                mNotificationLockscreenUserManager,
+                mNotificationEntryManager,
+                mKeyguardStateController,
+                mStatusBarStateController,
+                mDozeLog,
+                mDozeParameters,
+                mCommandQueue);
+        ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        notificationPanelView.setVisibility(View.INVISIBLE);
+        notificationPanelView.setId(R.id.notification_panel);
+        LayoutInflater li = mInjectionInflationController.injectable(
+                LayoutInflater.from(mView.getContext()));
+
+        li.inflate(R.layout.status_bar_expanded, notificationPanelView);
+        notificationPanelView.onChildrenAttached();
+
+        ViewStub statusBarExpanded = mView.findViewById(R.id.status_bar_expanded);
+        mView.addView(notificationPanelView, mView.indexOfChild(statusBarExpanded), lp);
+        mView.removeView(statusBarExpanded);
+
         mStackScrollLayout = mView.findViewById(R.id.notification_stack_scroller);
 
         TunerService.Tunable tunable = (key, newValue) -> {
@@ -201,8 +233,8 @@ public class StatusBarWindowViewController {
                 if (!isCancel && mService.shouldIgnoreTouch()) {
                     return false;
                 }
-                if (isDown && mNotificationPanelViewController.isFullyCollapsed()) {
-                    mNotificationPanelViewController.startExpandLatencyTracking();
+                if (isDown && notificationPanelView.isFullyCollapsed()) {
+                    notificationPanelView.startExpandLatencyTracking();
                 }
                 if (isDown) {
                     setTouchActive(true);
@@ -255,7 +287,7 @@ public class StatusBarWindowViewController {
                     return true;
                 }
                 boolean intercept = false;
-                if (mNotificationPanelViewController.isFullyExpanded()
+                if (notificationPanelView.isFullyExpanded()
                         && mDragDownHelper.isDragDownEnabled()
                         && !mService.isBouncerShowing()
                         && !mStatusBarStateController.isDozing()) {
@@ -271,7 +303,7 @@ public class StatusBarWindowViewController {
                 MotionEvent cancellation = MotionEvent.obtain(ev);
                 cancellation.setAction(MotionEvent.ACTION_CANCEL);
                 mStackScrollLayout.onInterceptTouchEvent(cancellation);
-                mNotificationPanelViewController.getView().onInterceptTouchEvent(cancellation);
+                notificationPanelView.onInterceptTouchEvent(cancellation);
                 cancellation.recycle();
             }
 

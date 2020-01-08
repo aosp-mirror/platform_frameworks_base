@@ -64,8 +64,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         mMockNotificiationAreaController = mock(NotificationIconAreaController.class);
         mNotificationAreaInner = mock(View.class);
         mCenteredNotificationAreaView = mock(View.class);
-        when(statusBar.getPanelController()).thenReturn(
-                mock(NotificationPanelViewController.class));
+        when(statusBar.getPanel()).thenReturn(mock(NotificationPanelView.class));
         when(mNotificationAreaInner.animate()).thenReturn(mock(ViewPropertyAnimator.class));
         when(mMockNotificiationAreaController.getNotificationInnerAreaView()).thenReturn(
                 mNotificationAreaInner);

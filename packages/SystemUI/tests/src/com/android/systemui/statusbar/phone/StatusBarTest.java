@@ -124,7 +124,6 @@ import com.android.systemui.statusbar.notification.collection.init.NewNotifPipel
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -173,7 +172,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private KeyguardIndicationController mKeyguardIndicationController;
     @Mock private NotificationStackScrollLayout mStackScroller;
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
-    @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private NotificationPanelView mNotificationPanelView;
     @Mock private IStatusBarService mBarService;
     @Mock private IDreamManager mDreamManager;
@@ -287,7 +285,6 @@ public class StatusBarTest extends SysuiTestCase {
         mContext.setTheme(R.style.Theme_SystemUI_Light);
 
         when(mStackScroller.generateLayoutParams(any())).thenReturn(new LayoutParams(0, 0));
-        when(mNotificationPanelViewController.getView()).thenReturn(mNotificationPanelView);
         when(mNotificationPanelView.getLayoutParams()).thenReturn(new LayoutParams(0, 0));
         when(powerManagerService.isInteractive()).thenReturn(true);
         when(mStackScroller.getActivatedChild()).thenReturn(null);
@@ -419,7 +416,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mLockIconContainer);
 
         when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),
-                any(NotificationPanelViewController.class), any(BiometricUnlockController.class),
+                any(NotificationPanelView.class), any(BiometricUnlockController.class),
                 any(ViewGroup.class), any(ViewGroup.class), any(KeyguardBypassController.class)))
                 .thenReturn(mStatusBarKeyguardViewManager);
 
@@ -429,7 +426,7 @@ public class StatusBarTest extends SysuiTestCase {
         // TODO: we should be able to call mStatusBar.start() and have all the below values
         // initialized automatically.
         mStatusBar.mStatusBarWindow = mStatusBarWindowView;
-        mStatusBar.mNotificationPanelViewController = mNotificationPanelViewController;
+        mStatusBar.mNotificationPanel = mNotificationPanelView;
         mStatusBar.mDozeScrimController = mDozeScrimController;
         mStatusBar.mNotificationIconAreaController = mNotificationIconAreaController;
         mStatusBar.mPresenter = mNotificationPresenter;
@@ -734,20 +731,20 @@ public class StatusBarTest extends SysuiTestCase {
         when(mCommandQueue.panelsEnabled()).thenReturn(false);
         mStatusBar.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false);
-        verify(mNotificationPanelViewController).setQsExpansionEnabled(false);
+        verify(mNotificationPanelView).setQsExpansionEnabled(false);
         mStatusBar.animateExpandNotificationsPanel();
-        verify(mNotificationPanelViewController, never()).expand(anyBoolean());
+        verify(mNotificationPanelView, never()).expand(anyBoolean());
         mStatusBar.animateExpandSettingsPanel(null);
-        verify(mNotificationPanelViewController, never()).expand(anyBoolean());
+        verify(mNotificationPanelView, never()).expand(anyBoolean());
 
         when(mCommandQueue.panelsEnabled()).thenReturn(true);
         mStatusBar.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NONE, false);
-        verify(mNotificationPanelViewController).setQsExpansionEnabled(true);
+        verify(mNotificationPanelView).setQsExpansionEnabled(true);
         mStatusBar.animateExpandNotificationsPanel();
-        verify(mNotificationPanelViewController).expandWithoutQs();
+        verify(mNotificationPanelView).expandWithoutQs();
         mStatusBar.animateExpandSettingsPanel(null);
-        verify(mNotificationPanelViewController).expandWithQs();
+        verify(mNotificationPanelView).expandWithQs();
     }
 
     @Test
@@ -837,12 +834,12 @@ public class StatusBarTest extends SysuiTestCase {
         when(mDozeServiceHost.getDozingRequested()).thenReturn(true);
         mStatusBar.updateIsKeyguard();
         // TODO: mNotificationPanelView.expand(false) gets called twice. Should be once.
-        verify(mNotificationPanelViewController, times(2)).expand(eq(false));
-        clearInvocations(mNotificationPanelViewController);
+        verify(mNotificationPanelView, times(2)).expand(eq(false));
+        clearInvocations(mNotificationPanelView);
 
         mStatusBar.mWakefulnessObserver.onStartedWakingUp();
         verify(mDozeServiceHost).stopDozing();
-        verify(mNotificationPanelViewController).expand(eq(false));
+        verify(mNotificationPanelView).expand(eq(false));
     }
 
     @Test
@@ -851,11 +848,11 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBarStateController.isKeyguardRequested()).thenReturn(true);
         when(mDozeServiceHost.getDozingRequested()).thenReturn(true);
         mStatusBar.updateIsKeyguard();
-        clearInvocations(mNotificationPanelViewController);
+        clearInvocations(mNotificationPanelView);
 
         mStatusBar.setBouncerShowing(true);
         mStatusBar.mWakefulnessObserver.onStartedWakingUp();
-        verify(mNotificationPanelViewController, never()).expand(anyBoolean());
+        verify(mNotificationPanelView, never()).expand(anyBoolean());
     }
 
     @Test

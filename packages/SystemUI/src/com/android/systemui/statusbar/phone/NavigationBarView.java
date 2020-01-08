@@ -67,6 +67,7 @@ import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistHandleViewController;
+import com.android.systemui.assist.AssistManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
@@ -147,7 +148,7 @@ public class NavigationBarView extends FrameLayout implements
 
     private NavigationBarInflaterView mNavigationInflaterView;
     private RecentsOnboarding mRecentsOnboarding;
-    private NotificationPanelViewController mPanelView;
+    private NotificationPanelView mPanelView;
     private FloatingRotationButton mFloatingRotationButton;
     private RotationButtonController mRotationButtonController;
 
@@ -348,7 +349,7 @@ public class NavigationBarView extends FrameLayout implements
         return mBarTransitions.getLightTransitionsController();
     }
 
-    public void setComponents(NotificationPanelViewController panel) {
+    public void setComponents(NotificationPanelView panel, AssistManager assistManager) {
         mPanelView = panel;
         updatePanelSystemUiStateFlags();
     }

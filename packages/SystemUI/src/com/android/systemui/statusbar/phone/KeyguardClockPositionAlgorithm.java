@@ -90,7 +90,7 @@ public class KeyguardClockPositionAlgorithm {
     private int mContainerTopPadding;
 
     /**
-     * @see NotificationPanelViewController#getExpandedFraction()
+     * @see NotificationPanelView#getExpandedFraction()
      */
     private float mPanelExpansion;
 

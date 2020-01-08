@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +26,6 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -42,7 +40,6 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.InjectionInflationController;
@@ -77,16 +74,12 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
     @Mock private DozeLog mDozeLog;
     @Mock private DozeParameters mDozeParameters;
     @Mock private DockManager mDockManager;
-    @Mock private NotificationPanelViewController mNotificationPanelViewController;
-    @Mock private NotificationStackScrollLayout mNotificationStackScrollLayout;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mView = spy(new StatusBarWindowView(getContext(), null));
-        when(mView.findViewById(R.id.notification_stack_scroller))
-                .thenReturn(mNotificationStackScrollLayout);
+        mView = new StatusBarWindowView(getContext(), null);
         when(mStatusBarStateController.isDozing()).thenReturn(false);
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
 
@@ -111,8 +104,7 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
                 new CommandQueue(mContext),
                 mShadeController,
                 mDockManager,
-                mView,
-                mNotificationPanelViewController);
+                mView);
         mController.setupExpandedStatusBar();
         mController.setService(mStatusBar);
         mController.setDragDownHelper(mDragDownHelper);

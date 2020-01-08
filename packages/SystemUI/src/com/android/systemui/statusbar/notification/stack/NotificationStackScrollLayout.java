@@ -134,7 +134,7 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager.OnGroupChangeListener;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
-import com.android.systemui.statusbar.phone.NotificationPanelViewController;
+import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -496,7 +496,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     protected boolean mClearAllEnabled;
 
     private Interpolator mHideXInterpolator = Interpolators.FAST_OUT_SLOW_IN;
-    private NotificationPanelViewController mNotificationPanelController;
+    private NotificationPanelView mNotificationPanel;
+    private final ShadeController mShadeController = Dependency.get(ShadeController.class);
 
     private final NotificationGutsManager mNotificationGutsManager;
     private final NotificationSectionsManager mSectionsManager;
@@ -5518,8 +5519,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         if (viewsToRemove.isEmpty()) {
             if (closeShade) {
-                Dependency.get(ShadeController.class).animateCollapsePanels(
-                        CommandQueue.FLAG_EXCLUDE_NONE);
+                mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
             }
             return;
         }
@@ -5577,12 +5577,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         final Runnable onSlideAwayAnimationComplete = () -> {
             if (closeShade) {
-                Dependency.get(ShadeController.class).addPostCollapseAction(() -> {
+                mShadeController.addPostCollapseAction(() -> {
                     setDismissAllInProgress(false);
                     onAnimationComplete.run();
                 });
-                Dependency.get(ShadeController.class).animateCollapsePanels(
-                        CommandQueue.FLAG_EXCLUDE_NONE);
+                mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
             } else {
                 setDismissAllInProgress(false);
                 onAnimationComplete.run();
@@ -5658,9 +5657,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setNotificationPanelController(
-            NotificationPanelViewController notificationPanelViewController) {
-        mNotificationPanelController = notificationPanelViewController;
+    public void setNotificationPanel(NotificationPanelView notificationPanelView) {
+        mNotificationPanel = notificationPanelView;
     }
 
     public void updateIconAreaViews() {
@@ -6404,7 +6402,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 if (!mAmbientState.isDozing() || startingChild != null) {
                     // We have notifications, go to locked shade.
-                    Dependency.get(ShadeController.class).goToLockedShade(startingChild);
+                    mShadeController.goToLockedShade(startingChild);
                     if (startingChild instanceof ExpandableNotificationRow) {
                         ExpandableNotificationRow row = (ExpandableNotificationRow) startingChild;
                         row.onExpandedByGesture(true /* drag down is always an open */);
@@ -6443,7 +6441,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         @Override
         public void setEmptyDragAmount(float amount) {
-            mNotificationPanelController.setEmptyDragAmount(amount);
+            mNotificationPanel.setEmptyDragAmount(amount);
         }
 
         @Override
