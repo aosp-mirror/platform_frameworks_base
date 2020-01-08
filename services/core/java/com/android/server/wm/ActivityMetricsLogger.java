@@ -751,10 +751,10 @@ class ActivityMetricsLogger {
         if (abort) {
             launchObserverNotifyActivityLaunchCancelled(info);
         } else {
-            logAppTransitionFinished(info);
             if (info.isInterestingToLoggerAndObserver()) {
                 launchObserverNotifyActivityLaunchFinished(info, timestampNs);
             }
+            logAppTransitionFinished(info);
         }
         info.mPendingDrawActivities.clear();
         mTransitionInfoList.remove(info);
