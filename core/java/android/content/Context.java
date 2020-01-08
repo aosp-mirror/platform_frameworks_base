@@ -4016,6 +4016,7 @@ public abstract class Context {
      * @see android.net.wifi.WifiCondManager
      * @hide
      */
+    @SystemApi
     public static final String WIFI_COND_SERVICE = "wificond";
 
     /**
