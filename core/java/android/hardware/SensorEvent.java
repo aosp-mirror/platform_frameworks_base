@@ -16,7 +16,7 @@
 
 package android.hardware;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * This class represents a {@link android.hardware.Sensor Sensor} event and
