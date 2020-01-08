@@ -59,7 +59,8 @@ interface IConnectivityManager
     NetworkInfo[] getAllNetworkInfo();
     Network getNetworkForType(int networkType);
     Network[] getAllNetworks();
-    NetworkCapabilities[] getDefaultNetworkCapabilitiesForUser(int userId);
+    NetworkCapabilities[] getDefaultNetworkCapabilitiesForUser(
+            int userId, String callingPackageName);
 
     boolean isNetworkSupported(int networkType);
 
@@ -68,7 +69,7 @@ interface IConnectivityManager
     LinkProperties getLinkPropertiesForType(int networkType);
     LinkProperties getLinkProperties(in Network network);
 
-    NetworkCapabilities getNetworkCapabilities(in Network network);
+    NetworkCapabilities getNetworkCapabilities(in Network network, String callingPackageName);
 
     @UnsupportedAppUsage
     NetworkState[] getAllNetworkState();
