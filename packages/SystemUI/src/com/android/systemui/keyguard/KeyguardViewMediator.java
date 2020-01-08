@@ -87,7 +87,7 @@ import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationPanelView;
+import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
@@ -2105,7 +2105,7 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     public StatusBarKeyguardViewManager registerStatusBar(StatusBar statusBar,
-            ViewGroup container, NotificationPanelView panelView,
+            ViewGroup container, NotificationPanelViewController panelView,
             BiometricUnlockController biometricUnlockController, ViewGroup lockIconContainer,
             View notificationContainer, KeyguardBypassController bypassController) {
         mStatusBarKeyguardViewManagerLazy.get().registerStatusBar(statusBar, container, panelView,

@@ -108,7 +108,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         StatusBarWindowView statusBarWindowView = mock(StatusBarWindowView.class);
         when(statusBarWindowView.getResources()).thenReturn(mContext.getResources());
         mStatusBarNotificationPresenter = new StatusBarNotificationPresenter(mContext,
-                mock(NotificationPanelView.class), mock(HeadsUpManagerPhone.class),
+                mock(NotificationPanelViewController.class), mock(HeadsUpManagerPhone.class),
                 statusBarWindowView, mock(NotificationListContainerViewGroup.class),
                 mock(DozeScrimController.class), mock(ScrimController.class),
                 mock(ActivityLaunchAnimator.class), mock(DynamicPrivacyController.class),

@@ -33,7 +33,7 @@ import android.view.View;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.phone.NotificationPanelView;
+import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.phone.StatusBarWindowViewController;
 
@@ -64,7 +64,7 @@ public class ActivityLaunchAnimatorTest extends SysuiTestCase {
         mLaunchAnimator = new ActivityLaunchAnimator(
                 mStatusBarWindowViewController,
                 mCallback,
-                mock(NotificationPanelView.class),
+                mock(NotificationPanelViewController.class),
                 mNotificationContainer);
 
     }

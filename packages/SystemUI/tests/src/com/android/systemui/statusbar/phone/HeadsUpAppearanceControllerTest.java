@@ -53,7 +53,8 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
 
     private final NotificationStackScrollLayout mStackScroller =
             mock(NotificationStackScrollLayout.class);
-    private final NotificationPanelView mPanelView = mock(NotificationPanelView.class);
+    private final NotificationPanelViewController mPanelView =
+            mock(NotificationPanelViewController.class);
     private final DarkIconDispatcher mDarkIconDispatcher = mock(DarkIconDispatcher.class);
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private ExpandableNotificationRow mFirst;

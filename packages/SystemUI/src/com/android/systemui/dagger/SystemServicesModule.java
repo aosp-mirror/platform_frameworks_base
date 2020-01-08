@@ -46,6 +46,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.PackageManagerWrapper;
 
@@ -69,6 +70,19 @@ public class SystemServicesModule {
     @Provides
     static AlarmManager provideAlarmManager(Context context) {
         return context.getSystemService(AlarmManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static ActivityManager provideActivityManager(Context context) {
+        return context.getSystemService(ActivityManager.class);
+    }
+
+
+    @Provides
+    @DisplayId
+    static int provideDisplayId(Context context) {
+        return context.getDisplayId();
     }
 
     @Provides

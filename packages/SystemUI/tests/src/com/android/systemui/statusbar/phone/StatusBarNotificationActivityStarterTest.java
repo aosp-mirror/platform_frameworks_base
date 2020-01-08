@@ -64,7 +64,6 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -124,10 +123,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private Intent mContentIntentInner;
     @Mock
     private NotificationActivityStarter mNotificationActivityStarter;
-    @Mock
-    private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
-    @Mock
-    private NotificationPanelView mNotificationPanelView;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
     private NotificationTestHelper mNotificationTestHelper;
@@ -167,8 +162,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         mActiveNotifications.add(mBubbleNotificationRow.getEntry());
         when(mEntryManager.getVisibleNotifications()).thenReturn(mActiveNotifications);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
-        when(mSuperStatusBarViewFactory.getNotificationPanelView())
-                .thenReturn(mNotificationPanelView);
 
         mNotificationActivityStarter = (new StatusBarNotificationActivityStarter.Builder(
                 getContext(), mock(CommandQueue.class), () -> mAssistManager,
@@ -182,9 +175,9 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mock(NotificationInterruptionStateProvider.class), mock(MetricsLogger.class),
                 mock(LockPatternUtils.class), mHandler, mHandler, mUiBgExecutor,
-                mActivityIntentHelper, mBubbleController, mShadeController,
-                mSuperStatusBarViewFactory))
+                mActivityIntentHelper, mBubbleController, mShadeController))
                 .setStatusBar(mStatusBar)
+                .setNotificationPanelViewController(mock(NotificationPanelViewController.class))
                 .setNotificationPresenter(mock(NotificationPresenter.class))
                 .setActivityLaunchAnimator(mock(ActivityLaunchAnimator.class))
         .build();

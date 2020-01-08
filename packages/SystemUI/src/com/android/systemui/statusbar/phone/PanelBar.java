@@ -43,7 +43,7 @@ public abstract class PanelBar extends FrameLayout {
     public static final int STATE_OPENING = 1;
     public static final int STATE_OPEN = 2;
 
-    PanelView mPanel;
+    PanelViewController mPanel;
     private int mState = STATE_CLOSED;
     private boolean mTracking;
 
@@ -83,7 +83,8 @@ public abstract class PanelBar extends FrameLayout {
         super.onFinishInflate();
     }
 
-    public void setPanel(PanelView pv) {
+    /** Set the PanelViewController */
+    public void setPanel(PanelViewController pv) {
         mPanel = pv;
         pv.setBar(this);
     }
@@ -96,7 +97,7 @@ public abstract class PanelBar extends FrameLayout {
         setImportantForAccessibility(important);
         updateVisibility();
 
-        if (mPanel != null) mPanel.setImportantForAccessibility(important);
+        if (mPanel != null) mPanel.getView().setImportantForAccessibility(important);
     }
 
     public float getExpansionFraction() {
@@ -108,7 +109,7 @@ public abstract class PanelBar extends FrameLayout {
     }
 
     protected void updateVisibility() {
-        mPanel.setVisibility(shouldPanelBeVisible() ? VISIBLE : INVISIBLE);
+        mPanel.getView().setVisibility(shouldPanelBeVisible() ? VISIBLE : INVISIBLE);
     }
 
     protected boolean shouldPanelBeVisible() {
@@ -131,7 +132,7 @@ public abstract class PanelBar extends FrameLayout {
         }
 
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            final PanelView panel = mPanel;
+            final PanelViewController panel = mPanel;
             if (panel == null) {
                 // panel is not there, so we'll eat the gesture
                 Log.v(TAG, String.format("onTouch: no panel for touch at (%d,%d)",
@@ -149,7 +150,7 @@ public abstract class PanelBar extends FrameLayout {
                 return true;
             }
         }
-        return mPanel == null || mPanel.onTouchEvent(event);
+        return mPanel == null || mPanel.getView().dispatchTouchEvent(event);
     }
 
     public abstract void panelScrimMinFractionChanged(float minFraction);
@@ -163,7 +164,7 @@ public abstract class PanelBar extends FrameLayout {
         boolean fullyClosed = true;
         boolean fullyOpened = false;
         if (SPEW) LOG("panelExpansionChanged: start state=%d", mState);
-        PanelView pv = mPanel;
+        PanelViewController pv = mPanel;
         mExpanded = expanded;
         mPanelFraction = frac;
         updateVisibility();
@@ -192,7 +193,7 @@ public abstract class PanelBar extends FrameLayout {
 
     public void collapsePanel(boolean animate, boolean delayed, float speedUpFactor) {
         boolean waiting = false;
-        PanelView pv = mPanel;
+        PanelViewController pv = mPanel;
         if (animate && !pv.isFullyCollapsed()) {
             pv.collapse(delayed, speedUpFactor);
             waiting = true;
