@@ -20,7 +20,6 @@ import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
 import android.app.INotificationManager;
 import android.content.Context;
-import android.content.pm.IPackageManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
@@ -110,13 +109,6 @@ public class DependencyProvider {
     public INotificationManager provideINotificationManager() {
         return INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-    }
-
-    /** */
-    @Singleton
-    @Provides
-    public IPackageManager provideIPackageManager() {
-        return IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
     }
 
     /** */

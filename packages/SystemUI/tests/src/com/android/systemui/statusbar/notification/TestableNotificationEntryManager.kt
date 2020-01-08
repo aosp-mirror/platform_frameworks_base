@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification
 
+import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager
@@ -33,8 +34,9 @@ class TestableNotificationEntryManager(
     log: NotifLog,
     gm: NotificationGroupManager,
     rm: NotificationRankingManager,
-    ke: KeyguardEnvironment
-) : NotificationEntryManager(log, gm, rm, ke) {
+    ke: KeyguardEnvironment,
+    ff: FeatureFlags
+) : NotificationEntryManager(log, gm, rm, ke, ff) {
 
     public var countDownLatch: CountDownLatch = CountDownLatch(1)
 

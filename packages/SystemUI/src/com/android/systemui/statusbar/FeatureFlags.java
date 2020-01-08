@@ -40,7 +40,7 @@ import javax.inject.Singleton;
  * You will probably need to restart systemui for the changes to be picked up:
  *
  * {@code
- *  $ adb shell am crash com.android.systemui
+ *  $ adb shell am restart com.android.systemui
  * }
  */
 @Singleton
@@ -57,6 +57,11 @@ public class FeatureFlags {
 
     public boolean isNewNotifPipelineEnabled() {
         return getDeviceConfigFlag("notification.newpipeline.enabled", false);
+    }
+
+    public boolean isNewNotifPipelineRenderingEnabled() {
+        return isNewNotifPipelineEnabled()
+                && getDeviceConfigFlag("notification.newpipeline.rendering", false);
     }
 
     private void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {

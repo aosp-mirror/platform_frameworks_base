@@ -20,9 +20,12 @@ import android.util.Log;
 
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
+import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.coordinator.NotifCoordinators;
 import com.android.systemui.statusbar.notification.collection.notifcollection.GroupCoalescer;
 
@@ -41,7 +44,9 @@ public class NewNotifPipeline implements Dumpable {
     private final NotifCollection mNotifCollection;
     private final NotifListBuilderImpl mNotifPipeline;
     private final NotifCoordinators mNotifPluggableCoordinators;
+    private final NotifInflaterImpl mNotifInflater;
     private final DumpController mDumpController;
+    private final FeatureFlags mFeatureFlags;
 
     private final FakePipelineConsumer mFakePipelineConsumer = new FakePipelineConsumer();
 
@@ -51,19 +56,29 @@ public class NewNotifPipeline implements Dumpable {
             NotifCollection notifCollection,
             NotifListBuilderImpl notifPipeline,
             NotifCoordinators notifCoordinators,
-            DumpController dumpController) {
+            NotifInflaterImpl notifInflater,
+            DumpController dumpController,
+            FeatureFlags featureFlags) {
         mGroupCoalescer = groupCoalescer;
         mNotifCollection = notifCollection;
         mNotifPipeline = notifPipeline;
         mNotifPluggableCoordinators = notifCoordinators;
         mDumpController = dumpController;
+        mNotifInflater = notifInflater;
+        mFeatureFlags = featureFlags;
     }
 
     /** Hooks the new pipeline up to NotificationManager */
     public void initialize(
-            NotificationListener notificationService) {
+            NotificationListener notificationService,
+            NotificationRowBinderImpl rowBinder) {
 
         mDumpController.registerDumpable("NotifPipeline", this);
+
+        // Setup inflation
+        if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            mNotifInflater.setRowBinder(rowBinder);
+        }
 
         // Wire up coordinators
         mFakePipelineConsumer.attach(mNotifPipeline);
