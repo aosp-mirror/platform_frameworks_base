@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner.filter;
+package android.media.tv.tuner.frontend;
 
-import android.os.NativeHandle;
+
+import android.media.tv.tuner.FrontendSettings;
+import android.media.tv.tuner.TunerConstants;
+
+import java.util.List;
 
 /**
- * Media event.
+ * Frontend settings for ATSC-3.
  * @hide
  */
-public class MediaEvent extends FilterEvent {
-    private int mStreamId;
-    private boolean mIsPtsPresent;
-    private long mPts;
-    private int mDataLength;
-    private NativeHandle mHandle;
-    private boolean mIsSecureMemory;
-    private int mMpuSequenceNumber;
-    private boolean mIsPrivateData;
-    private AudioExtraMetaData mExtraMetaData;
+public class Atsc3FrontendSettings extends FrontendSettings {
+    public int bandwidth;
+    public byte demodOutputFormat;
+    public List<Atsc3PlpSettings> plpSettings;
+
+    Atsc3FrontendSettings(int frequency) {
+        super(frequency);
+    }
+
+    @Override
+    public int getType() {
+        return TunerConstants.FRONTEND_TYPE_ATSC3;
+    }
 }

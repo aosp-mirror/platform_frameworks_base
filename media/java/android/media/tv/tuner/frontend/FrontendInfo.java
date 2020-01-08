@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner;
+package android.media.tv.tuner.frontend;
 
+import android.media.tv.tuner.FrontendCapabilities;
 import android.media.tv.tuner.TunerConstants.FrontendType;
 
 /**

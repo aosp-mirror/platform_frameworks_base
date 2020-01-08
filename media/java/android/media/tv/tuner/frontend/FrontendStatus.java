@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner;
+package android.media.tv.tuner.frontend;
 
+import android.media.tv.tuner.TunerConstants;
 import android.media.tv.tuner.TunerConstants.FrontendDvbcSpectralInversion;
 import android.media.tv.tuner.TunerConstants.FrontendDvbtHierarchy;
 import android.media.tv.tuner.TunerConstants.FrontendInnerFec;

@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner.filter;
-
-import android.os.NativeHandle;
+package android.media.tv.tuner.frontend;
 
 /**
- * Media event.
+ * PLP settings for ATSC-3.
  * @hide
  */
-public class MediaEvent extends FilterEvent {
-    private int mStreamId;
-    private boolean mIsPtsPresent;
-    private long mPts;
-    private int mDataLength;
-    private NativeHandle mHandle;
-    private boolean mIsSecureMemory;
-    private int mMpuSequenceNumber;
-    private boolean mIsPrivateData;
-    private AudioExtraMetaData mExtraMetaData;
+public class Atsc3PlpSettings {
+    public byte plpId;
+    public int modulation;
+    public int interleaveMode;
+    public int codeRate;
+    public int fec;
 }

@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner.filter;
+package android.media.tv.tuner.frontend;
 
-import android.os.NativeHandle;
+import android.media.tv.tuner.FrontendSettings;
+import android.media.tv.tuner.TunerConstants;
 
 /**
- * Media event.
+ * Frontend settings for DVBC.
  * @hide
  */
-public class MediaEvent extends FilterEvent {
-    private int mStreamId;
-    private boolean mIsPtsPresent;
-    private long mPts;
-    private int mDataLength;
-    private NativeHandle mHandle;
-    private boolean mIsSecureMemory;
-    private int mMpuSequenceNumber;
-    private boolean mIsPrivateData;
-    private AudioExtraMetaData mExtraMetaData;
+public class DvbcFrontendSettings extends FrontendSettings {
+    public int modulation;
+    public long fec;
+    public int symbolRate;
+    public int outerFec;
+    public byte annex;
+    public int spectralInversion;
+
+    DvbcFrontendSettings(int frequency) {
+        super(frequency);
+    }
+
+    @Override
+    public int getType() {
+        return TunerConstants.FRONTEND_TYPE_DVBC;
+    }
 }
