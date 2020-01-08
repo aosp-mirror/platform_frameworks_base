@@ -32,9 +32,9 @@ import android.media.tv.tuner.filter.Filter.Subtype;
 import android.media.tv.tuner.filter.Filter.Type;
 import android.media.tv.tuner.filter.FilterEvent;
 import android.media.tv.tuner.filter.TimeFilter;
-import android.media.tv.tuner.frontend.FrontendCallback;
 import android.media.tv.tuner.frontend.FrontendInfo;
 import android.media.tv.tuner.frontend.FrontendStatus;
+import android.media.tv.tuner.frontend.OnTuneEventListener;
 import android.media.tv.tuner.frontend.ScanCallback;
 import android.os.Handler;
 import android.os.Looper;
@@ -57,7 +57,6 @@ public final class Tuner implements AutoCloseable  {
     private static final String TAG = "MediaTvTuner";
     private static final boolean DEBUG = false;
 
-    private static final int MSG_ON_FRONTEND_EVENT = 1;
     private static final int MSG_ON_FILTER_EVENT = 2;
     private static final int MSG_ON_FILTER_STATUS = 3;
     private static final int MSG_ON_LNB_EVENT = 4;
@@ -75,6 +74,10 @@ public final class Tuner implements AutoCloseable  {
 
     private List<Integer> mLnbIds;
     private Lnb mLnb;
+    @Nullable
+    private OnTuneEventListener mOnTuneEventListener;
+    @Nullable
+    private Executor mOnTunerEventExecutor;
     @Nullable
     private ScanCallback mScanCallback;
     @Nullable
@@ -222,11 +225,6 @@ public final class Tuner implements AutoCloseable  {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_ON_FRONTEND_EVENT:
-                    if (mFrontend != null && mFrontend.mCallback != null) {
-                        mFrontend.mCallback.onEvent(msg.arg1);
-                    }
-                    break;
                 case MSG_ON_FILTER_STATUS: {
                     Filter filter = (Filter) msg.obj;
                     if (filter.mCallback != null) {
@@ -242,7 +240,6 @@ public final class Tuner implements AutoCloseable  {
 
     private class Frontend {
         private int mId;
-        private FrontendCallback mCallback;
 
         private Frontend(int id) {
             mId = id;
@@ -250,13 +247,59 @@ public final class Tuner implements AutoCloseable  {
     }
 
     /**
-     * Tunes the frontend to the settings given.
+     * Listens for tune events.
      *
-     * @return result status of tune operation.
+     * <p>
+     * Tuner events are started when {@link #tune(FrontendSettings)} is called and end when {@link
+     * #stopTune()} is called.
+     *
+     * @param eventListener receives tune events.
      * @throws SecurityException if the caller does not have appropriate permissions.
-     * TODO: add result constants or throw exceptions.
+     * @see #tune(FrontendSettings)
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    public void setOnTuneEventListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull OnTuneEventListener eventListener) {
+        TunerUtils.checkTunerPermission(mContext);
+        mOnTuneEventListener = eventListener;
+        mOnTunerEventExecutor = executor;
+    }
+
+    /**
+     * Clears the {@link OnTuneEventListener} and its associated {@link Executor}.
+     *
+     * @throws SecurityException if the caller does not have appropriate permissions.
+     * @see #setOnTuneEventListener(Executor, OnTuneEventListener)
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    public void clearOnTuneEventListener() {
+        TunerUtils.checkTunerPermission(mContext);
+        mOnTuneEventListener = null;
+        mOnTunerEventExecutor = null;
+
+    }
+
+    /**
+     * Tunes the frontend to using the settings given.
+     *
+     * <p>
+     * This locks the frontend to a frequency by providing signal
+     * delivery information. If previous tuning isn't completed, this stop the previous tuning, and
+     * start a new tuning.
+     *
+     * <p>
+     * Tune is an async call, with {@link OnTuneEventListener#LOCKED LOCKED} and {@link
+     * OnTuneEventListener#NO_SIGNAL NO_SIGNAL} events sent to the {@link OnTuneEventListener}
+     * specified in {@link #setOnTuneEventListener(Executor, OnTuneEventListener)}.
+     *
+     * @param settings Signal delivery information the frontend uses to
+     *                 search and lock the signal.
+     * @return result status of tune operation.
+     * @throws SecurityException if the caller does not have appropriate permissions.
+     * @see #setOnTuneEventListener(Executor, OnTuneEventListener)
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @Result
     public int tune(@NonNull FrontendSettings settings) {
         TunerUtils.checkTunerPermission(mContext);
         return nativeTune(settings.getType(), settings);
@@ -269,8 +312,6 @@ public final class Tuner implements AutoCloseable  {
      * will be sent to attached filters.
      *
      * @return result status of the operation.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
@@ -501,8 +542,8 @@ public final class Tuner implements AutoCloseable  {
     }
 
     private void onFrontendEvent(int eventType) {
-        if (mHandler != null) {
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_ON_FRONTEND_EVENT, eventType, 0));
+        if (mOnTunerEventExecutor != null && mOnTuneEventListener != null) {
+            mOnTunerEventExecutor.execute(() -> mOnTuneEventListener.onTuneEvent(eventType));
         }
     }
 

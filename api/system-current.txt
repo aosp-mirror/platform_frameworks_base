@@ -4660,7 +4660,10 @@ package android.media.tv.tuner {
 
   public final class Tuner implements java.lang.AutoCloseable {
     ctor public Tuner(@NonNull android.content.Context);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void clearOnTuneEventListener();
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.Tuner.Descrambler openDescrambler();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void setOnTuneEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.OnTuneEventListener);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int stopTune();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int tune(@NonNull android.media.tv.tuner.FrontendSettings);
   }
 
@@ -4738,6 +4741,17 @@ package android.media.tv.tuner.filter {
     method @NonNull public android.media.tv.tuner.filter.TsFilterConfiguration build();
     method @NonNull public android.media.tv.tuner.filter.TsFilterConfiguration.Builder setSettings(@NonNull android.media.tv.tuner.filter.Settings);
     method @NonNull public android.media.tv.tuner.filter.TsFilterConfiguration.Builder setTpid(int);
+  }
+
+}
+
+package android.media.tv.tuner.frontend {
+
+  public interface OnTuneEventListener {
+    method public void onTuneEvent(int);
+    field public static final int SIGNAL_LOCKED = 0; // 0x0
+    field public static final int SIGNAL_LOST_LOCK = 2; // 0x2
+    field public static final int SIGNAL_NO_SIGNAL = 1; // 0x1
   }
 
 }
