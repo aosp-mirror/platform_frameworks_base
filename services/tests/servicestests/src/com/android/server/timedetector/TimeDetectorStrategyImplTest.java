@@ -30,7 +30,7 @@ import android.content.Intent;
 import android.icu.util.Calendar;
 import android.icu.util.GregorianCalendar;
 import android.icu.util.TimeZone;
-import android.util.TimestampedValue;
+import android.os.TimestampedValue;
 
 import androidx.test.runner.AndroidJUnit4;
 

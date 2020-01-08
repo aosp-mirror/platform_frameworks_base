@@ -25,6 +25,7 @@ import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.SntpClient;
 import android.os.SystemClock;
+import android.os.TimestampedValue;
 import android.provider.Settings;
 import android.text.TextUtils;
 
