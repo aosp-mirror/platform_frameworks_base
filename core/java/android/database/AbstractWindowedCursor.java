@@ -16,7 +16,7 @@
 
 package android.database;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * A base class for Cursors that store their data in {@link CursorWindow}s.

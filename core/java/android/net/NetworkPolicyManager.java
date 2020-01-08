@@ -19,8 +19,8 @@ package android.net;
 import static android.content.pm.PackageManager.GET_SIGNATURES;
 
 import android.annotation.SystemService;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;

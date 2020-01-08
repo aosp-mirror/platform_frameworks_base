@@ -16,7 +16,8 @@
 
 package android.net;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
+
 import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.IOException;
