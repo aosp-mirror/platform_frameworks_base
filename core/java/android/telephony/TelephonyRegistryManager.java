@@ -24,6 +24,7 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.DataActivityType;
 import android.telephony.Annotation.DataFailureCause;
@@ -352,7 +353,7 @@ public class TelephonyRegistryManager {
      * @param subId for which data connection state changed.
      * @param slotIndex for which data connections state changed. Can be derived from subId except
      * when subId is invalid.
-     * @param apnType the APN type that triggered this update
+     * @param apnType the apn type bitmask, defined with {@code ApnSetting#TYPE_*} flags.
      * @param preciseState the PreciseDataConnectionState
      *
      * @see android.telephony.PreciseDataConnection
@@ -360,7 +361,7 @@ public class TelephonyRegistryManager {
      * @hide
      */
     public void notifyDataConnectionForSubscriber(int slotIndex, int subId,
-            String apnType, PreciseDataConnectionState preciseState) {
+            @ApnType int apnType, PreciseDataConnectionState preciseState) {
         try {
             sRegistry.notifyDataConnectionForSubscriber(
                     slotIndex, subId, apnType, preciseState);
@@ -553,13 +554,13 @@ public class TelephonyRegistryManager {
      * @param subId for which data connection failed.
      * @param slotIndex for which data conenction failed. Can be derived from subId except when
      * subId is invalid.
-     * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN.
+     * @param apnType the apn type bitmask, defined with {@code ApnSetting#TYPE_*} flags.
      * @param apn the APN {@link ApnSetting#getApnName()} of this data connection.
      * @param failCause data fail cause.
      *
      * @hide
      */
-    public void notifyPreciseDataConnectionFailed(int subId, int slotIndex, String apnType,
+    public void notifyPreciseDataConnectionFailed(int subId, int slotIndex, @ApnType int apnType,
         String apn, @DataFailureCause int failCause) {
         try {
             sRegistry.notifyPreciseDataConnectionFailed(slotIndex, subId, apnType, apn, failCause);
