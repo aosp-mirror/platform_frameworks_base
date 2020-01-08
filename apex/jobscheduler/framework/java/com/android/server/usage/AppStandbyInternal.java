@@ -1,5 +1,6 @@
 package com.android.server.usage;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageEvents;
@@ -99,8 +100,18 @@ public interface AppStandbyInternal {
 
     List<AppStandbyInfo> getAppStandbyBuckets(int userId);
 
-    void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
-            int reason, long elapsedRealtime, boolean resetTimeout);
+    /**
+     * Changes an app's standby bucket to the provided value. The caller can only set the standby
+     * bucket for a different app than itself.
+     */
+    void setAppStandbyBucket(@NonNull String packageName, int bucket, int userId, int callingUid,
+            int callingPid);
+
+    /**
+     * Changes the app standby bucket for multiple apps at once.
+     */
+    void setAppStandbyBuckets(@NonNull List<AppStandbyInfo> appBuckets, int userId, int callingUid,
+            int callingPid);
 
     void addActiveDeviceAdmin(String adminPkg, int userId);
 
