@@ -47,7 +47,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocationManagerServiceUtils.LinkedListener;
 import com.android.server.LocationManagerServiceUtils.LinkedListenerBase;
-import com.android.server.location.AbstractLocationProvider;
 import com.android.server.location.CallerIdentity;
 import com.android.server.location.GnssBatchingProvider;
 import com.android.server.location.GnssCapabilitiesProvider;
@@ -116,11 +115,9 @@ public class GnssManagerService {
     private final Handler mHandler;
 
     public GnssManagerService(LocationManagerService locationManagerService,
-            Context context,
-            AbstractLocationProvider.LocationProviderManager gnssProviderManager,
-            LocationUsageLogger locationUsageLogger) {
-        this(locationManagerService, context, new GnssLocationProvider(context, gnssProviderManager,
-                FgThread.getHandler().getLooper()), locationUsageLogger);
+            Context context, LocationUsageLogger locationUsageLogger) {
+        this(locationManagerService, context,
+                new GnssLocationProvider(context, FgThread.getHandler()), locationUsageLogger);
     }
 
     // Can use this constructor to inject GnssLocationProvider for testing
