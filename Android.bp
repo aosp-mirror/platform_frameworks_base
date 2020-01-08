@@ -268,6 +268,7 @@ filegroup {
         ":updatable-media-srcs",
         ":framework-mediaprovider-sources",
         ":framework-wifi-updatable-sources",
+        ":ike-srcs",
     ]
 }
 
@@ -432,6 +433,7 @@ java_library {
         // TODO(b/146167933): Use framework-statsd-stubs
         "framework-statsd",
         "framework-wifi-stubs",
+        "ike-stubs",
     ],
     installable: true,
     javac_shard_size: 150,
@@ -486,6 +488,7 @@ java_library {
         "framework-statsd",
         // TODO(b/140299412): should be framework-wifi-stubs
         "framework-wifi",
+        "ike-stubs",
         // TODO(jiyong): add more stubs for APEXes here
     ],
     sdk_version: "core_platform",
