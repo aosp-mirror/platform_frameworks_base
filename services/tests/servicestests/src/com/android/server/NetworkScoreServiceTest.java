@@ -29,6 +29,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -57,7 +58,6 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.net.wifi.WifiSsid;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -180,8 +180,8 @@ public class NetworkScoreServiceTest {
     }
 
     private ScanResult createScanResult(String ssid, String bssid) {
-        ScanResult result = new ScanResult();
-        result.wifiSsid = WifiSsid.createFromAsciiEncoded(ssid);
+        ScanResult result = mock(ScanResult.class);
+        result.SSID = ssid;
         result.BSSID = bssid;
         return result;
     }
@@ -792,7 +792,7 @@ public class NetworkScoreServiceTest {
     @Test
     public void testScanResultsScoreCacheFilter_invalidScanResults() throws Exception {
         List<ScanResult> invalidScanResults = Lists.newArrayList(
-                new ScanResult(),
+                mock(ScanResult.class),
                 createScanResult("", SCORED_NETWORK.networkKey.wifiKey.bssid),
                 createScanResult(WifiManager.UNKNOWN_SSID, SCORED_NETWORK.networkKey.wifiKey.bssid),
                 createScanResult(SSID, null),
