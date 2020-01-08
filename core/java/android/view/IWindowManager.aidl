@@ -35,6 +35,7 @@ import android.os.ParcelFileDescriptor;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
+import android.view.IDisplayWindowInsetsController;
 import android.view.IDisplayWindowListener;
 import android.view.IDisplayFoldListener;
 import android.view.IDisplayWindowRotationController;
@@ -49,6 +50,7 @@ import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
 import android.view.KeyEvent;
 import android.view.InputEvent;
+import android.view.InsetsState;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.InputChannel;
@@ -711,4 +713,16 @@ interface IWindowManager
      * @return true if the display was successfully mirrored.
      */
     boolean mirrorDisplay(int displayId, out SurfaceControl outSurfaceControl);
+
+    /**
+     * When in multi-window mode, the provided displayWindowInsetsController will control insets
+     * animations.
+     */
+    void setDisplayWindowInsetsController(
+            int displayId, in IDisplayWindowInsetsController displayWindowInsetsController);
+
+    /**
+     * Called when a remote process modifies insets on a display window container.
+     */
+    void modifyDisplayWindowInsets(int displayId, in InsetsState state);
 }

@@ -205,6 +205,7 @@ import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
+import android.view.IDisplayWindowInsetsController;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindow;
 import android.view.InputChannel;
@@ -218,6 +219,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
@@ -570,6 +572,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     WindowState mInputMethodTarget;
 
+    InsetsControlTarget mInputMethodControlTarget;
+
     /** If true hold off on modifying the animation layer of mInputMethodTarget */
     boolean mInputMethodTargetWaitingAnim;
 
@@ -598,6 +602,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final float mWindowCornerRadius;
 
     private final SparseArray<ShellRoot> mShellRoots = new SparseArray<>();
+    RemoteInsetsControlTarget mRemoteInsetsControlTarget = null;
+    private final IBinder.DeathRecipient mRemoteInsetsDeath =
+            () -> {
+                synchronized (mWmService.mGlobalLock) {
+                    mRemoteInsetsControlTarget = null;
+                }
+            };
 
     private RootWindowContainer mRootWindowContainer;
 
@@ -1154,6 +1165,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         root.clear();
         mShellRoots.remove(windowType);
+    }
+
+    void setRemoteInsetsController(IDisplayWindowInsetsController controller) {
+        if (mRemoteInsetsControlTarget != null) {
+            mRemoteInsetsControlTarget.mRemoteInsetsController.asBinder().unlinkToDeath(
+                    mRemoteInsetsDeath, 0);
+            mRemoteInsetsControlTarget = null;
+        }
+        if (controller != null) {
+            try {
+                controller.asBinder().linkToDeath(mRemoteInsetsDeath, 0);
+                mRemoteInsetsControlTarget = new RemoteInsetsControlTarget(controller);
+            } catch (RemoteException e) {
+                return;
+            }
+        }
     }
 
     /** Changes the display the input window token is housed on to this one. */
@@ -3383,6 +3410,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
+    boolean isImeAttachedToApp() {
+        return (mInputMethodTarget != null && mInputMethodTarget.mActivityRecord != null
+                && mInputMethodTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                // An activity with override bounds should be letterboxed inside its parent bounds,
+                // so it doesn't fill the screen.
+                && mInputMethodTarget.mActivityRecord.matchParentBounds());
+    }
+
     private void setInputMethodTarget(WindowState target, boolean targetWaitingAnim) {
         if (target == mInputMethodTarget && mInputMethodTargetWaitingAnim == targetWaitingAnim) {
             return;
@@ -3391,7 +3426,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mInputMethodTarget = target;
         mInputMethodTargetWaitingAnim = targetWaitingAnim;
         assignWindowLayers(false /* setLayoutNeeded */);
-        mInsetsStateController.onImeTargetChanged(target);
+        mInputMethodControlTarget = computeImeControlTarget();
+        mInsetsStateController.onImeTargetChanged(mInputMethodControlTarget);
         updateImeParent();
     }
 
@@ -3416,16 +3452,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // Attach it to app if the target is part of an app and such app is covering the entire
         // screen. If it's not covering the entire screen the IME might extend beyond the apps
         // bounds.
-        if (mInputMethodTarget != null && mInputMethodTarget.mActivityRecord != null
-                && mInputMethodTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                // An activity with override bounds should be letterboxed inside its parent bounds,
-                // so it doesn't fill the screen.
-                && mInputMethodTarget.mActivityRecord.matchParentBounds()) {
+        if (isImeAttachedToApp()) {
             return mInputMethodTarget.mActivityRecord.getSurfaceControl();
         }
 
         // Otherwise, we just attach it to the display.
         return mWindowContainers.getSurfaceControl();
+    }
+
+    /**
+     * Computes which control-target the IME should be attached to.
+     */
+    @VisibleForTesting
+    InsetsControlTarget computeImeControlTarget() {
+        if (!isImeAttachedToApp() && mRemoteInsetsControlTarget != null) {
+            return mRemoteInsetsControlTarget;
+        }
+
+        // Otherwise, we just use the ime target
+        return mInputMethodTarget;
     }
 
     void setLayoutNeeded() {
@@ -6687,5 +6732,51 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     Context getDisplayUiContext() {
         return mDisplayPolicy.getSystemUiContext();
+    }
+
+    class RemoteInsetsControlTarget implements InsetsControlTarget {
+        private final IDisplayWindowInsetsController mRemoteInsetsController;
+
+        RemoteInsetsControlTarget(IDisplayWindowInsetsController controller) {
+            mRemoteInsetsController = controller;
+        }
+
+        void notifyInsetsChanged() {
+            try {
+                mRemoteInsetsController.insetsChanged(
+                        getInsetsStateController().getRawInsetsState());
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to deliver inset state change", e);
+            }
+        }
+
+        @Override
+        public void notifyInsetsControlChanged() {
+            final InsetsStateController stateController = getInsetsStateController();
+            try {
+                mRemoteInsetsController.insetsControlChanged(stateController.getRawInsetsState(),
+                        stateController.getControlsForDispatch(this));
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to deliver inset state change", e);
+            }
+        }
+
+        @Override
+        public void showInsets(@WindowInsets.Type.InsetsType int types, boolean fromIme) {
+            try {
+                mRemoteInsetsController.showInsets(types, fromIme);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to deliver showInsets", e);
+            }
+        }
+
+        @Override
+        public void hideInsets(@WindowInsets.Type.InsetsType int types, boolean fromIme) {
+            try {
+                mRemoteInsetsController.hideInsets(types, fromIme);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to deliver showInsets", e);
+            }
+        }
     }
 }
