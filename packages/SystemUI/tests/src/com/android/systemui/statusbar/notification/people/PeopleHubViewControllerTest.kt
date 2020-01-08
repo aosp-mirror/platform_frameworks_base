@@ -178,9 +178,10 @@ private fun <T> castNull(): T = null as T
 private fun fakePersonModel(
     id: String,
     name: CharSequence,
-    clickIntent: PendingIntent
+    clickIntent: PendingIntent,
+    userId: Int = 0
 ): PersonModel =
-        PersonModel(id, name, mock(Drawable::class.java), clickIntent)
+        PersonModel(id, name, mock(Drawable::class.java), clickIntent, userId)
 
 private fun fakePersonViewModel(name: CharSequence): PersonViewModel =
         PersonViewModel(name, mock(Drawable::class.java), mock({}.javaClass))
