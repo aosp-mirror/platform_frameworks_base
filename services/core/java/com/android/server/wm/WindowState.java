@@ -792,8 +792,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mSeq = seq;
         mPowerManagerWrapper = powerManagerWrapper;
         mForceSeamlesslyRotate = token.mRoundedCornerOverlay;
-        mRequestedInsetsState =
-                getDisplayContent().getInsetsPolicy().getInsetsForDispatch(this);
+        mRequestedInsetsState = new InsetsState(
+                getDisplayContent().getInsetsPolicy().getInsetsForDispatch(this),
+                true /* copySources */);
         if (DEBUG) {
             Slog.v(TAG, "Window " + this + " client=" + c.asBinder()
                             + " token=" + token + " (" + mAttrs.token + ")" + " params=" + a);
