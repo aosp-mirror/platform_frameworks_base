@@ -4615,6 +4615,18 @@ package android.view.contentcapture {
 
 package android.view.inputmethod {
 
+  public final class InlineSuggestion implements android.os.Parcelable {
+    method @NonNull public static android.view.inputmethod.InlineSuggestion newInlineSuggestion(@NonNull android.view.inputmethod.InlineSuggestionInfo);
+  }
+
+  public final class InlineSuggestionInfo implements android.os.Parcelable {
+    method @NonNull public static android.view.inputmethod.InlineSuggestionInfo newInlineSuggestionInfo(@NonNull android.view.inline.InlinePresentationSpec, @NonNull String, @Nullable String[]);
+  }
+
+  public final class InlineSuggestionsResponse implements android.os.Parcelable {
+    method @NonNull public static android.view.inputmethod.InlineSuggestionsResponse newInlineSuggestionsResponse(@NonNull java.util.List<android.view.inputmethod.InlineSuggestion>);
+  }
+
   public final class InputMethodManager {
     method public int getDisplayId();
     method public boolean isInputMethodPickerShown();

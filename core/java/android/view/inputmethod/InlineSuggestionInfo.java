@@ -18,6 +18,7 @@ package android.view.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.Parcelable;
 import android.view.inline.InlinePresentationSpec;
 
@@ -53,6 +54,19 @@ public final class InlineSuggestionInfo implements Parcelable {
     /** Hints for the type of data being suggested. */
     private final @Nullable String[] mAutofillHints;
 
+    /**
+     * Creates a new {@link InlineSuggestionInfo}, for testing purpose.
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public static InlineSuggestionInfo newInlineSuggestionInfo(
+            @NonNull InlinePresentationSpec presentationSpec,
+            @NonNull @Source String source,
+            @Nullable String[] autofillHints) {
+        return new InlineSuggestionInfo(presentationSpec, source, autofillHints);
+    }
 
 
 
@@ -247,10 +261,10 @@ public final class InlineSuggestionInfo implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1574406074120L,
+            time = 1578972121865L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/view/inputmethod/InlineSuggestionInfo.java",
-            inputSignatures = "public static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_AUTOFILL\npublic static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_PLATFORM\nprivate final @android.annotation.NonNull android.view.inline.InlinePresentationSpec mPresentationSpec\nprivate final @android.annotation.NonNull @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String mSource\nprivate final @android.annotation.Nullable java.lang.String[] mAutofillHints\nclass InlineSuggestionInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstDefs=true, genHiddenConstructor=true)")
+            inputSignatures = "public static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_AUTOFILL\npublic static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_PLATFORM\nprivate final @android.annotation.NonNull android.view.inline.InlinePresentationSpec mPresentationSpec\nprivate final @android.annotation.NonNull @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String mSource\nprivate final @android.annotation.Nullable java.lang.String[] mAutofillHints\npublic static @android.annotation.TestApi @android.annotation.NonNull android.view.inputmethod.InlineSuggestionInfo newInlineSuggestionInfo(android.view.inline.InlinePresentationSpec,java.lang.String,java.lang.String[])\nclass InlineSuggestionInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstDefs=true, genHiddenConstructor=true)")
     @Deprecated
     private void __metadata() {}
 

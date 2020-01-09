@@ -18,6 +18,7 @@ package android.view.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.Parcelable;
 
 import com.android.internal.util.DataClass;
@@ -32,6 +33,18 @@ import java.util.List;
 @DataClass(genEqualsHashCode = true, genToString = true, genHiddenConstructor = true)
 public final class InlineSuggestionsResponse implements Parcelable {
     private final @NonNull List<InlineSuggestion> mInlineSuggestions;
+
+    /**
+     * Creates a new {@link InlineSuggestionsResponse}, for testing purpose.
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public static InlineSuggestionsResponse newInlineSuggestionsResponse(
+            @NonNull List<InlineSuggestion> inlineSuggestions) {
+        return new InlineSuggestionsResponse(inlineSuggestions);
+    }
 
 
 
@@ -151,10 +164,10 @@ public final class InlineSuggestionsResponse implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1574406147911L,
+            time = 1578972149519L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/view/inputmethod/InlineSuggestionsResponse.java",
-            inputSignatures = "private final @android.annotation.NonNull java.util.List<android.view.inputmethod.InlineSuggestion> mInlineSuggestions\nclass InlineSuggestionsResponse extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstructor=true)")
+            inputSignatures = "private final @android.annotation.NonNull java.util.List<android.view.inputmethod.InlineSuggestion> mInlineSuggestions\npublic static @android.annotation.TestApi @android.annotation.NonNull android.view.inputmethod.InlineSuggestionsResponse newInlineSuggestionsResponse(java.util.List<android.view.inputmethod.InlineSuggestion>)\nclass InlineSuggestionsResponse extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstructor=true)")
     @Deprecated
     private void __metadata() {}
 
