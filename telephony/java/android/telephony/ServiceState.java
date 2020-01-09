@@ -1950,9 +1950,18 @@ public class ServiceState implements Parcelable {
      * Returns a copy of self with location-identifying information removed.
      * Always clears the NetworkRegistrationInfo's CellIdentity fields, but if removeCoarseLocation
      * is true, clears other info as well.
+     *
+     * @param removeCoarseLocation Whether to also remove coarse location information.
+     *                             if false, it only clears fine location information such as
+     *                             NetworkRegistrationInfo's CellIdentity fields; If true, it will
+     *                             also remove other location information such as operator's MCC
+     *                             and MNC.
+     * @return the copied ServiceState with location info sanitized.
      * @hide
      */
-    public ServiceState sanitizeLocationInfo(boolean removeCoarseLocation) {
+    @SystemApi
+    @NonNull
+    public ServiceState createLocationInfoSanitizedCopy(boolean removeCoarseLocation) {
         ServiceState state = new ServiceState(this);
         synchronized (state.mNetworkRegistrationInfos) {
             List<NetworkRegistrationInfo> networkRegistrationInfos =
