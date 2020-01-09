@@ -24,7 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telecom.Call;
 import android.telecom.Connection;
-import android.telephony.Rlog;
+import com.android.telephony.Rlog;
 import android.util.Log;
 
 import java.util.HashMap;

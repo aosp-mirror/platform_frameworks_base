@@ -19,7 +19,7 @@ package com.android.internal.telephony;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
-import android.telephony.Rlog;
+import com.android.telephony.Rlog;
 import android.util.SparseIntArray;
 
 import com.android.internal.telephony.cdma.sms.UserData;

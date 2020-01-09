@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import com.android.telephony.Rlog;
+
 import android.annotation.IntRange;
 import android.annotation.StringDef;
 import android.compat.annotation.UnsupportedAppUsage;

@@ -19,7 +19,7 @@ package com.android.internal.telephony;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.telephony.Rlog;
+import com.android.telephony.Rlog;
 
 import com.android.internal.telephony.HbpcdLookup.ArbitraryMccSidMatch;
 import com.android.internal.telephony.HbpcdLookup.MccIdd;
