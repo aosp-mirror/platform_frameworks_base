@@ -16,11 +16,32 @@
 
 package android.media.tv.tuner;
 
+import android.annotation.IntDef;
+import android.annotation.Nullable;
+import android.annotation.Size;
+import android.media.tv.tuner.filter.FilterConfiguration;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Capabilities info for Demux.
+ *
  * @hide
  */
 public class DemuxCapabilities {
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            FilterConfiguration.FILTER_TYPE_TS,
+            FilterConfiguration.FILTER_TYPE_MMTP,
+            FilterConfiguration.FILTER_TYPE_IP,
+            FilterConfiguration.FILTER_TYPE_TLV,
+            FilterConfiguration.FILTER_TYPE_ALP
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FilterCapabilities {}
+
     private final int mNumDemux;
     private final int mNumRecord;
     private final int mNumPlayback;
@@ -34,7 +55,8 @@ public class DemuxCapabilities {
     private final int mFilterCaps;
     private final int[] mLinkCaps;
 
-    DemuxCapabilities(int numDemux, int numRecord, int numPlayback, int numTsFilter,
+    // Used by JNI
+    private DemuxCapabilities(int numDemux, int numRecord, int numPlayback, int numTsFilter,
             int numSectionFilter, int numAudioFilter, int numVideoFilter, int numPesFilter,
             int numPcrFilter, int numBytesInSectionFilter, int filterCaps, int[] linkCaps) {
         mNumDemux = numDemux;
@@ -51,52 +73,73 @@ public class DemuxCapabilities {
         mLinkCaps = linkCaps;
     }
 
-    /** Gets total number of demuxes. */
+    /**
+     * Gets total number of demuxes.
+     */
     public int getNumDemux() {
         return mNumDemux;
     }
-    /** Gets max number of recordings at a time. */
+    /**
+     * Gets max number of recordings at a time.
+     */
     public int getNumRecord() {
         return mNumRecord;
     }
-    /** Gets max number of playbacks at a time. */
+    /**
+     * Gets max number of playbacks at a time.
+     */
     public int getNumPlayback() {
         return mNumPlayback;
     }
-    /** Gets number of TS filters. */
+    /**
+     * Gets number of TS filters.
+     */
     public int getNumTsFilter() {
         return mNumTsFilter;
     }
-    /** Gets number of section filters. */
+    /**
+     * Gets number of section filters.
+     */
     public int getNumSectionFilter() {
         return mNumSectionFilter;
     }
-    /** Gets number of audio filters. */
+    /**
+     * Gets number of audio filters.
+     */
     public int getNumAudioFilter() {
         return mNumAudioFilter;
     }
-    /** Gets number of video filters. */
+    /**
+     * Gets number of video filters.
+     */
     public int getNumVideoFilter() {
         return mNumVideoFilter;
     }
-    /** Gets number of PES filters. */
+    /**
+     * Gets number of PES filters.
+     */
     public int getNumPesFilter() {
         return mNumPesFilter;
     }
-    /** Gets number of PCR filters. */
+    /**
+     * Gets number of PCR filters.
+     */
     public int getNumPcrFilter() {
         return mNumPcrFilter;
     }
-    /** Gets number of bytes in the mask of a section filter. */
+    /**
+     * Gets number of bytes in the mask of a section filter.
+     */
     public int getNumBytesInSectionFilter() {
         return mNumBytesInSectionFilter;
     }
     /**
      * Gets filter capabilities in bit field.
      *
-     * The bits of the returned value is corresponding to the types in
-     * {@link TunerConstants.FilterType}.
+     * <p>The bits of the returned value is corresponding to the types in
+     * {@link FilterConfiguration}.
      */
+    @FilterCapabilities
     public int getFilterCapabilities() {
         return mFilterCaps;
     }
@@ -104,10 +147,12 @@ public class DemuxCapabilities {
     /**
      * Gets link capabilities.
      *
-     * The returned array contains the same elements as the number of types in
-     * {@link TunerConstants.FilterType}.
-     * The ith element represents the filter's capability as the source for the ith type
+     * <p>The returned array contains the same elements as the number of types in
+     * {@link FilterConfiguration}.
+     * <p>The ith element represents the filter's capability as the source for the ith type.
      */
+    @Nullable
+    @Size(5)
     public int[] getLinkCapabilities() {
         return mLinkCaps;
     }
