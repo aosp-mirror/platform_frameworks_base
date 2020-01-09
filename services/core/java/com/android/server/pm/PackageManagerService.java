@@ -19374,7 +19374,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // PermissionController manages default home directly.
             return false;
         }
-        mPermissionManager.setDefaultHome(currentPackageName, userId, (successful) -> {
+        mPermissionManager.setDefaultHome(packageName, userId, (successful) -> {
             if (successful) {
                 postPreferredActivityChangedBroadcast(userId);
             }
