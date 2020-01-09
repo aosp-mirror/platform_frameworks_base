@@ -99,10 +99,10 @@ public class SettingsStateTest extends AndroidTestCase {
         checkWriteSingleSetting(serializer, CRAZY_STRING, null);
         SettingsState.writeSingleSetting(
                 SettingsState.SETTINGS_VERSION_NEW_ENCODING,
-                serializer, null, "k", "v", null, "package", null, false);
+                serializer, null, "k", "v", null, "package", null, false, false);
         SettingsState.writeSingleSetting(
                 SettingsState.SETTINGS_VERSION_NEW_ENCODING,
-                serializer, "1", "k", "v", null, null, null, false);
+                serializer, "1", "k", "v", null, null, null, false, false);
     }
 
     private void checkWriteSingleSetting(XmlSerializer serializer, String key, String value)
@@ -115,7 +115,7 @@ public class SettingsStateTest extends AndroidTestCase {
         // Make sure the XML serializer won't crash.
         SettingsState.writeSingleSetting(
                 SettingsState.SETTINGS_VERSION_NEW_ENCODING,
-                serializer, "1", key, value, null, "package", null, false);
+                serializer, "1", key, value, null, "package", null, false, false);
     }
 
     /**

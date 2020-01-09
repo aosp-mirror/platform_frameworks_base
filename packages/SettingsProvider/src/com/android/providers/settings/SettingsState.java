@@ -117,6 +117,8 @@ final class SettingsState {
     private static final String ATTR_NAMESPACE = "namespace";
     private static final String ATTR_BANNED_HASH = "bannedHash";
 
+    private static final String ATTR_PRESERVE_IN_RESTORE = "preserve_in_restore";
+
     /**
      * Non-binary value will be written in this attributes.
      */
@@ -797,7 +799,8 @@ final class SettingsState {
 
                     writeSingleSetting(mVersion, serializer, setting.getId(), setting.getName(),
                             setting.getValue(), setting.getDefaultValue(), setting.getPackageName(),
-                            setting.getTag(), setting.isDefaultFromSystem());
+                            setting.getTag(), setting.isDefaultFromSystem(),
+                            setting.isValuePreservedInRestore());
 
                     if (DEBUG_PERSISTENCE) {
                         Slog.i(LOG_TAG, "[PERSISTED]" + setting.getName() + "="
@@ -886,7 +889,8 @@ final class SettingsState {
 
     static void writeSingleSetting(int version, XmlSerializer serializer, String id,
             String name, String value, String defaultValue, String packageName,
-            String tag, boolean defaultSysSet) throws IOException {
+            String tag, boolean defaultSysSet, boolean isValuePreservedInRestore)
+            throws IOException {
         if (id == null || isBinary(id) || name == null || isBinary(name)
                 || packageName == null || isBinary(packageName)) {
             // This shouldn't happen.
@@ -904,6 +908,9 @@ final class SettingsState {
             serializer.attribute(null, ATTR_DEFAULT_SYS_SET, Boolean.toString(defaultSysSet));
             setValueAttribute(ATTR_TAG, ATTR_TAG_BASE64,
                     version, serializer, tag);
+        }
+        if (isValuePreservedInRestore) {
+            serializer.attribute(null, ATTR_PRESERVE_IN_RESTORE, Boolean.toString(true));
         }
         serializer.endTag(null, TAG_SETTING);
     }
@@ -1041,6 +1048,10 @@ final class SettingsState {
                 String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
                 String defaultValue = getValueAttribute(parser, ATTR_DEFAULT_VALUE,
                         ATTR_DEFAULT_VALUE_BASE64);
+                String isPreservedInRestoreString = parser.getAttributeValue(null,
+                        ATTR_PRESERVE_IN_RESTORE);
+                boolean isPreservedInRestore = isPreservedInRestoreString != null
+                        && Boolean.parseBoolean(isPreservedInRestoreString);
                 String tag = null;
                 boolean fromSystem = false;
                 if (defaultValue != null) {
@@ -1049,7 +1060,7 @@ final class SettingsState {
                     tag = getValueAttribute(parser, ATTR_TAG, ATTR_TAG_BASE64);
                 }
                 mSettings.put(name, new Setting(name, value, defaultValue, packageName, tag,
-                        fromSystem, id));
+                        fromSystem, id, isPreservedInRestore));
 
                 if (DEBUG_PERSISTENCE) {
                     Slog.i(LOG_TAG, "[RESTORED] " + name + "=" + value);
@@ -1133,6 +1144,8 @@ final class SettingsState {
         private String tag;
         // Whether the default is set by the system
         private boolean defaultFromSystem;
+        // Whether the value of this setting will be preserved when restore happens..
+        private boolean isValuePreservedInRestore;
 
         public Setting(Setting other) {
             name = other.name;
@@ -1152,15 +1165,23 @@ final class SettingsState {
 
         public Setting(String name, String value, String defaultValue,
                 String packageName, String tag, boolean fromSystem, String id) {
+            this(name, value, defaultValue, packageName, tag, fromSystem, id, false);
+        }
+
+        Setting(String name, String value, String defaultValue,
+                String packageName, String tag, boolean fromSystem, String id,
+                boolean isValuePreservedInRestore) {
             mNextId = Math.max(mNextId, Long.parseLong(id) + 1);
             if (NULL_VALUE.equals(value)) {
                 value = null;
             }
-            init(name, value, tag, defaultValue, packageName, fromSystem, id);
+            init(name, value, tag, defaultValue, packageName, fromSystem, id,
+                    isValuePreservedInRestore);
         }
 
         private void init(String name, String value, String tag, String defaultValue,
-                String packageName, boolean fromSystem, String id) {
+                String packageName, boolean fromSystem, String id,
+                boolean isValuePreservedInRestore) {
             this.name = name;
             this.value = value;
             this.tag = tag;
@@ -1168,6 +1189,7 @@ final class SettingsState {
             this.packageName = packageName;
             this.id = id;
             this.defaultFromSystem = fromSystem;
+            this.isValuePreservedInRestore = isValuePreservedInRestore;
         }
 
         public String getName() {
@@ -1196,6 +1218,10 @@ final class SettingsState {
 
         public boolean isDefaultFromSystem() {
             return defaultFromSystem;
+        }
+
+        public boolean isValuePreservedInRestore() {
+            return isValuePreservedInRestore;
         }
 
         public String getId() {
@@ -1263,7 +1289,7 @@ final class SettingsState {
             }
 
             init(name, value, tag, defaultValue, packageName, defaultFromSystem,
-                    String.valueOf(mNextId++));
+                    String.valueOf(mNextId++), /* isValuePreservedInRestore */ true);
             return true;
         }
 
