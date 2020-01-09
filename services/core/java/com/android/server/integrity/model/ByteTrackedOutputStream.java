@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.integrity.serializer;
+package com.android.server.integrity.model;
 
 import java.io.IOException;
 import java.io.OutputStream;
