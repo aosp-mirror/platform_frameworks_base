@@ -1542,6 +1542,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String[] mTelephonyPackages;
     final @NonNull String mServicesExtensionPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
+    final @Nullable String mRetailDemoPackage;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
     private final CompilerStats mCompilerStats = new CompilerStats();
@@ -3161,6 +3162,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
             mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
             mTelephonyPackages = getTelephonyPackageNames();
+            mRetailDemoPackage = getRetailDemoPackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -19703,6 +19705,41 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Nullable
+    private String getRetailDemoPackageName() {
+        final String predefinedPkgName = mContext.getString(R.string.config_retailDemoPackage);
+        final String predefinedSignature = mContext.getString(
+                R.string.config_retailDemoPackageSignature);
+
+        if (TextUtils.isEmpty(predefinedPkgName) || TextUtils.isEmpty(predefinedSignature)) {
+            return null;
+        }
+
+        final AndroidPackage androidPkg = mPackages.get(predefinedPkgName);
+        if (androidPkg != null) {
+            final SigningDetails signingDetail = androidPkg.getSigningDetails();
+            if (signingDetail != null && signingDetail.signatures != null) {
+                try {
+                    final MessageDigest msgDigest = MessageDigest.getInstance("SHA-256");
+                    for (Signature signature : signingDetail.signatures) {
+                        if (TextUtils.equals(predefinedSignature,
+                                HexEncoding.encodeToString(msgDigest.digest(
+                                        signature.toByteArray()), false))) {
+                            return predefinedPkgName;
+                        }
+                    }
+                } catch (NoSuchAlgorithmException e) {
+                    Slog.e(
+                            TAG,
+                            "Unable to verify signatures as getting the retail demo package name",
+                            e);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
     private String ensureSystemPackageName(@Nullable String packageName) {
         if (packageName == null) {
             return null;
@@ -22990,6 +23027,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     return filterOnlySystemPackages(mTelephonyPackages);
                 case PackageManagerInternal.PACKAGE_COMPANION:
                     return filterOnlySystemPackages("com.android.companiondevicemanager");
+                case PackageManagerInternal.PACKAGE_RETAIL_DEMO:
+                    return TextUtils.isEmpty(mRetailDemoPackage)
+                            ? ArrayUtils.emptyArray(String.class)
+                            : new String[] {mRetailDemoPackage};
                 default:
                     return ArrayUtils.emptyArray(String.class);
             }
