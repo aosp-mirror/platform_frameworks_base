@@ -2584,7 +2584,7 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gMidAudioRecordRoutingProxy_release =
             android::GetMethodIDOrDie(env, gClsAudioRecordRoutingProxy, "native_release", "()V");
 
-    AudioSystem::setErrorCallback(android_media_AudioSystem_error_callback);
+    AudioSystem::addErrorCallback(android_media_AudioSystem_error_callback);
 
     RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
     return RegisterMethodsOrDie(env, kEventHandlerClassPathName, gEventHandlerMethods,
