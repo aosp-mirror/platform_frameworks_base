@@ -19922,7 +19922,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * Tries to delete system package.
      */
     private boolean deleteSystemPackageLIF(PackageParser.Package deletedPkg,
-            PackageSetting deletedPs, int[] allUserHandles, int flags, PackageRemovedInfo outInfo,
+            PackageSetting deletedPs, int[] allUserHandles, int flags,
+            @Nullable PackageRemovedInfo outInfo,
             boolean writeSettings) {
         if (deletedPs.parentPackageName != null) {
             Slog.w(TAG, "Attempt to delete child system package " + deletedPkg.packageName);
@@ -19930,7 +19931,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         final boolean applyUserRestrictions
-                = (allUserHandles != null) && (outInfo.origUsers != null);
+                = (allUserHandles != null) && outInfo != null && (outInfo.origUsers != null);
         final PackageSetting disabledPs;
         // Confirm if the system package has been updated
         // An updated system app can be deleted. This will also have to restore
@@ -19960,19 +19961,21 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        // Delete the updated package
-        outInfo.isRemovedPackageSystemUpdate = true;
-        if (outInfo.removedChildPackages != null) {
-            final int childCount = (deletedPs.childPackageNames != null)
-                    ? deletedPs.childPackageNames.size() : 0;
-            for (int i = 0; i < childCount; i++) {
-                String childPackageName = deletedPs.childPackageNames.get(i);
-                if (disabledPs.childPackageNames != null && disabledPs.childPackageNames
-                        .contains(childPackageName)) {
-                    PackageRemovedInfo childInfo = outInfo.removedChildPackages.get(
-                            childPackageName);
-                    if (childInfo != null) {
-                        childInfo.isRemovedPackageSystemUpdate = true;
+        if (outInfo != null) {
+            // Delete the updated package
+            outInfo.isRemovedPackageSystemUpdate = true;
+            if (outInfo.removedChildPackages != null) {
+                final int childCount = (deletedPs.childPackageNames != null)
+                        ? deletedPs.childPackageNames.size() : 0;
+                for (int i = 0; i < childCount; i++) {
+                    String childPackageName = deletedPs.childPackageNames.get(i);
+                    if (disabledPs.childPackageNames != null && disabledPs.childPackageNames
+                            .contains(childPackageName)) {
+                        PackageRemovedInfo childInfo = outInfo.removedChildPackages.get(
+                                childPackageName);
+                        if (childInfo != null) {
+                            childInfo.isRemovedPackageSystemUpdate = true;
+                        }
                     }
                 }
             }
