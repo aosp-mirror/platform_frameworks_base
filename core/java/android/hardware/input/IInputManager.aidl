@@ -90,4 +90,11 @@ interface IInputManager {
 
     /** Create an input monitor for gestures. */
     InputMonitor monitorGestureInput(String name, int displayId);
+
+    // Add a runtime association between the input port and the display port. This overrides any
+    // static associations.
+    void addPortAssociation(in String inputPort, int displayPort);
+    // Remove the runtime association between the input port and the display port. Any existing
+    // static association for the cleared input port will be restored.
+    void removePortAssociation(in String inputPort);
 }

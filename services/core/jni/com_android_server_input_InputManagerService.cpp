@@ -1757,6 +1757,12 @@ static jboolean nativeCanDispatchToDisplay(JNIEnv* env, jclass /* clazz */, jlon
     return im->getInputManager()->getReader()->canDispatchToDisplay(deviceId, displayId);
 }
 
+static void nativeNotifyPortAssociationsChanged(JNIEnv* env, jclass /* clazz */, jlong ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    im->getInputManager()->getReader()->requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -1842,6 +1848,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeSetCustomPointerIcon },
     { "nativeCanDispatchToDisplay", "(JII)Z",
             (void*) nativeCanDispatchToDisplay },
+    { "nativeNotifyPortAssociationsChanged", "(J)V",
+            (void*) nativeNotifyPortAssociationsChanged },
 };
 
 #define FIND_CLASS(var, className) \
