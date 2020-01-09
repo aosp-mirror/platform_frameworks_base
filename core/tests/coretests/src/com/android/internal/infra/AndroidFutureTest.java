@@ -121,7 +121,12 @@ public class AndroidFutureTest {
         AndroidFuture future2 = AndroidFuture.CREATOR.createFromParcel(parcel);
         ExecutionException executionException =
                 expectThrows(ExecutionException.class, future2::get);
-        assertThat(executionException.getCause()).isInstanceOf(UnsupportedOperationException.class);
+
+        Throwable cause = executionException.getCause();
+        String msg = cause.getMessage();
+        assertThat(cause).isInstanceOf(UnsupportedOperationException.class);
+        assertThat(msg).contains(getClass().getName());
+        assertThat(msg).contains("testWriteToParcel_Exception");
     }
 
     @Test
