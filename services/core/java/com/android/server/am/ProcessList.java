@@ -103,6 +103,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
+import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.DexManager;
@@ -356,6 +357,8 @@ public final class ProcessList {
     private boolean mOomLevelsSet = false;
 
     private boolean mAppDataIsolationEnabled = false;
+
+    private ArrayList<String> mAppDataIsolationWhitelistedApps;
 
     /**
      * Temporary to avoid allocations.  Protected by main lock.
@@ -645,6 +648,9 @@ public final class ProcessList {
         // want some apps enabled while some apps disabled
         mAppDataIsolationEnabled =
                 SystemProperties.getBoolean(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
+        mAppDataIsolationWhitelistedApps = new ArrayList<>(
+                SystemConfig.getInstance().getAppDataIsolationWhitelistedApps());
+
 
         if (sKillHandler == null) {
             sKillThread = new ServiceThread(TAG + ":kill",
@@ -1912,6 +1918,16 @@ public final class ProcessList {
                 result.put(packageName, Pair.create(volumeUuid, inode));
             }
         }
+        if (mAppDataIsolationWhitelistedApps != null) {
+            for (String packageName : mAppDataIsolationWhitelistedApps) {
+                String volumeUuid = pmInt.getPackage(packageName).getVolumeUuid();
+                long inode = pmInt.getCeDataInode(packageName, userId);
+                if (inode != 0) {
+                    result.put(packageName, Pair.create(volumeUuid, inode));
+                }
+            }
+        }
+
         return result;
     }
 
