@@ -326,19 +326,6 @@ public final class SoftApConfiguration implements Parcelable {
         return mBssid;
     }
 
-    // TODO: Remove it after update the caller
-    /**
-     * Returns String set to be passphrase for the WPA2-PSK AP.
-     * {@link #setWpa2Passphrase(String)}.
-     */
-    @Nullable
-    public String getWpa2Passphrase() {
-        if (mSecurityType == SECURITY_TYPE_WPA2_PSK) {
-            return mPassphrase;
-        }
-        return null;
-    }
-
     /**
      * Returns String set to be passphrase for current AP.
      * {@link #setPassphrase(String, @SecurityType int)}.
@@ -503,22 +490,6 @@ public final class SoftApConfiguration implements Parcelable {
             }
             mBssid = bssid;
             return this;
-        }
-
-        // TODO: Remove it after update the caller
-        /**
-         * Specifies that this AP should use WPA2-PSK with the given ASCII WPA2 passphrase.
-         * When set to null, an open network is created.
-         * <p>
-         *
-         * @param passphrase The passphrase to use, or null to unset a previously-set WPA2-PSK
-         *                   configuration.
-         * @return Builder for chaining.
-         * @throws IllegalArgumentException when the passphrase is the empty string
-         */
-        @NonNull
-        public Builder setWpa2Passphrase(@Nullable String passphrase) {
-            return setPassphrase(passphrase, SECURITY_TYPE_WPA2_PSK);
         }
 
         /**

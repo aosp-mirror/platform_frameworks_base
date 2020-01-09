@@ -5838,7 +5838,6 @@ package android.net.wifi {
     method public int getSecurityType();
     method public int getShutdownTimeoutMillis();
     method @Nullable public String getSsid();
-    method @Nullable public String getWpa2Passphrase();
     method public boolean isHiddenSsid();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int BAND_2GHZ = 1; // 0x1
@@ -5864,7 +5863,6 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setPassphrase(@Nullable String, int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setShutdownTimeoutMillis(int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setSsid(@Nullable String);
-    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setWpa2Passphrase(@Nullable String);
   }
 
   public final class SoftApInfo implements android.os.Parcelable {
