@@ -741,8 +741,21 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mIsHeadsUp || mHeadsupDisappearRunning;
     }
 
+
+    public void setGroupManager(NotificationGroupManager groupManager) {
+        mGroupManager = groupManager;
+        mPrivateLayout.setGroupManager(groupManager);
+    }
+
     public void setRemoteInputController(RemoteInputController r) {
         mPrivateLayout.setRemoteInputController(r);
+    }
+
+    public void setAppName(String appName) {
+        mAppName = appName;
+        if (mMenuRow != null && mMenuRow.getMenuView() != null) {
+            mMenuRow.setAppName(mAppName);
+        }
     }
 
     public void addChildNotification(ExpandableNotificationRow row) {
@@ -1091,6 +1104,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mPrivateLayout.getContractedNotificationHeader();
     }
 
+    public void setOnExpandClickListener(OnExpandClickListener onExpandClickListener) {
+        mOnExpandClickListener = onExpandClickListener;
+    }
+
     public void setLongPressListener(LongPressListener longPressListener) {
         mLongPressListener = longPressListener;
     }
@@ -1111,6 +1128,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (isClickable() != clickable) {
             setClickable(clickable);
         }
+    }
+
+    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
+        mHeadsUpManager = headsUpManager;
     }
 
     public HeadsUpManager getHeadsUpManager() {
@@ -1635,6 +1656,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
+    /**
+     * Set the binder implementation for notification content views.
+     *
+     * @param contentBinder content binder
+     */
+    public void setContentBinder(NotificationRowContentBinder contentBinder) {
+        mNotificationContentBinder = contentBinder;
+    }
+
     public interface ExpansionLogger {
         void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
@@ -1648,30 +1678,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         initDimens();
     }
 
-    /**
-     * Initialize row.
-     */
-    public void initialize(
-            String appName,
-            String notificationKey,
-            ExpansionLogger logger,
-            KeyguardBypassController bypassController,
-            NotificationGroupManager groupManager,
-            HeadsUpManager headsUpManager,
-            NotificationRowContentBinder rowContentBinder,
-            OnExpandClickListener onExpandClickListener) {
-        mAppName = appName;
-        if (mMenuRow != null && mMenuRow.getMenuView() != null) {
-            mMenuRow.setAppName(mAppName);
-        }
-        mLogger = logger;
-        mLoggingKey = notificationKey;
+    public void setBypassController(KeyguardBypassController bypassController) {
         mBypassController = bypassController;
-        mGroupManager = groupManager;
-        mPrivateLayout.setGroupManager(groupManager);
-        mHeadsUpManager = headsUpManager;
-        mNotificationContentBinder = rowContentBinder;
-        mOnExpandClickListener = onExpandClickListener;
     }
 
     public void setStatusBarStateController(StatusBarStateController statusBarStateController) {
@@ -2908,6 +2916,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return mChildrenContainer.getPositionInLinearLayout(childRow);
         }
         return 0;
+    }
+
+    public void setExpansionLogger(ExpansionLogger logger, String key) {
+        mLogger = logger;
+        mLoggingKey = key;
     }
 
     public void onExpandedByGesture(boolean userExpanded) {
