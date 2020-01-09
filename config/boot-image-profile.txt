@@ -14142,7 +14142,6 @@ HSPLandroid/telephony/ServiceState;->convertNetworkTypeBitmaskToBearerBitmask(I)
 HSPLandroid/telephony/ServiceState;->copyFrom(Landroid/telephony/ServiceState;)V
 HSPLandroid/telephony/ServiceState;->describeContents()I
 HSPLandroid/telephony/ServiceState;->equals(Ljava/lang/Object;)Z
-HSPLandroid/telephony/ServiceState;->fillInNotifierBundle(Landroid/os/Bundle;)V
 HSPLandroid/telephony/ServiceState;->getCdmaDefaultRoamingIndicator()I
 HSPLandroid/telephony/ServiceState;->getCdmaEriIconIndex()I
 HSPLandroid/telephony/ServiceState;->getCdmaEriIconMode()I
