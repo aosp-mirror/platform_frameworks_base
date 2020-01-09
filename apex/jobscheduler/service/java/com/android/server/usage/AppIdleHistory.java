@@ -25,7 +25,10 @@ import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_USER_INTERACT
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RESTRICTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
+
+import static com.android.server.usage.AppStandbyController.isUserUsage;
 
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageStatsManager;
@@ -81,6 +84,8 @@ public class AppIdleHistory {
     private static final String ATTR_SCREEN_IDLE = "screenIdleTime";
     // Elapsed timebase time when app was last used
     private static final String ATTR_ELAPSED_IDLE = "elapsedIdleTime";
+    // Elapsed timebase time when app was last used by the user
+    private static final String ATTR_LAST_USED_BY_USER_ELAPSED = "lastUsedByUserElapsedTime";
     // Elapsed timebase time when the app bucket was last predicted externally
     private static final String ATTR_LAST_PREDICTED_TIME = "lastPredictedTime";
     // The standby bucket for the app
@@ -93,6 +98,12 @@ public class AppIdleHistory {
     private static final String ATTR_BUCKET_ACTIVE_TIMEOUT_TIME = "activeTimeoutTime";
     // The time when the forced working_set state can be overridden.
     private static final String ATTR_BUCKET_WORKING_SET_TIMEOUT_TIME = "workingSetTimeoutTime";
+    // Elapsed timebase time when the app was last marked for restriction.
+    private static final String ATTR_LAST_RESTRICTION_ATTEMPT_ELAPSED =
+            "lastRestrictionAttemptElapsedTime";
+    // Reason why the app was last marked for restriction.
+    private static final String ATTR_LAST_RESTRICTION_ATTEMPT_REASON =
+            "lastRestrictionAttemptReason";
 
     // device on time = mElapsedDuration + (timeNow - mElapsedSnapshot)
     private long mElapsedSnapshot; // Elapsed time snapshot when last write of mDeviceOnDuration
@@ -107,8 +118,10 @@ public class AppIdleHistory {
     private boolean mScreenOn;
 
     static class AppUsageHistory {
-        // Last used time using elapsed timebase
+        // Last used time (including system usage), using elapsed timebase
         long lastUsedElapsedTime;
+        // Last time the user used the app, using elapsed timebase
+        long lastUsedByUserElapsedTime;
         // Last used time using screen_on timebase
         long lastUsedScreenTime;
         // Last predicted time using elapsed timebase
@@ -136,6 +149,10 @@ public class AppIdleHistory {
         // under any active state timeout, so that it becomes applicable after the active state
         // timeout expires.
         long bucketWorkingSetTimeoutTime;
+        // The last time an agent attempted to put the app into the RESTRICTED bucket.
+        long lastRestrictAttemptElapsedTime;
+        // The last reason the app was marked to be put into the RESTRICTED bucket.
+        int lastRestrictReason;
     }
 
     AppIdleHistory(File storageDir, long elapsedRealtime) {
@@ -229,25 +246,37 @@ public class AppIdleHistory {
      */
     public AppUsageHistory reportUsage(AppUsageHistory appUsageHistory, String packageName,
             int newBucket, int usageReason, long elapsedRealtime, long timeout) {
-        // Set the timeout if applicable
-        if (timeout > elapsedRealtime) {
-            // Convert to elapsed timebase
-            final long timeoutTime = mElapsedDuration + (timeout - mElapsedSnapshot);
-            if (newBucket == STANDBY_BUCKET_ACTIVE) {
-                appUsageHistory.bucketActiveTimeoutTime = Math.max(timeoutTime,
-                        appUsageHistory.bucketActiveTimeoutTime);
-            } else if (newBucket == STANDBY_BUCKET_WORKING_SET) {
-                appUsageHistory.bucketWorkingSetTimeoutTime = Math.max(timeoutTime,
-                        appUsageHistory.bucketWorkingSetTimeoutTime);
-            } else {
-                throw new IllegalArgumentException("Cannot set a timeout on bucket=" +
-                        newBucket);
+        int bucketingReason = REASON_MAIN_USAGE | usageReason;
+        final boolean isUserUsage = isUserUsage(bucketingReason);
+
+        if (appUsageHistory.currentBucket == STANDBY_BUCKET_RESTRICTED && !isUserUsage) {
+            // Only user usage should bring an app out of the RESTRICTED bucket.
+            newBucket = STANDBY_BUCKET_RESTRICTED;
+            bucketingReason = appUsageHistory.bucketingReason;
+        } else {
+            // Set the timeout if applicable
+            if (timeout > elapsedRealtime) {
+                // Convert to elapsed timebase
+                final long timeoutTime = mElapsedDuration + (timeout - mElapsedSnapshot);
+                if (newBucket == STANDBY_BUCKET_ACTIVE) {
+                    appUsageHistory.bucketActiveTimeoutTime = Math.max(timeoutTime,
+                            appUsageHistory.bucketActiveTimeoutTime);
+                } else if (newBucket == STANDBY_BUCKET_WORKING_SET) {
+                    appUsageHistory.bucketWorkingSetTimeoutTime = Math.max(timeoutTime,
+                            appUsageHistory.bucketWorkingSetTimeoutTime);
+                } else {
+                    throw new IllegalArgumentException("Cannot set a timeout on bucket="
+                            + newBucket);
+                }
             }
         }
 
         if (elapsedRealtime != 0) {
             appUsageHistory.lastUsedElapsedTime = mElapsedDuration
                     + (elapsedRealtime - mElapsedSnapshot);
+            if (isUserUsage) {
+                appUsageHistory.lastUsedByUserElapsedTime = appUsageHistory.lastUsedElapsedTime;
+            }
             appUsageHistory.lastUsedScreenTime = getScreenOnTime(elapsedRealtime);
         }
 
@@ -259,7 +288,7 @@ public class AppIdleHistory {
                         + ", reason=0x0" + Integer.toHexString(appUsageHistory.bucketingReason));
             }
         }
-        appUsageHistory.bucketingReason = REASON_MAIN_USAGE | usageReason;
+        appUsageHistory.bucketingReason = bucketingReason;
 
         return appUsageHistory;
     }
@@ -383,6 +412,24 @@ public class AppIdleHistory {
         AppUsageHistory appUsageHistory =
                 getPackageHistory(userHistory, packageName, elapsedRealtime, true);
         appUsageHistory.lastJobRunTime = getElapsedTime(elapsedRealtime);
+    }
+
+    /**
+     * Notes an attempt to put the app in the {@link UsageStatsManager#STANDBY_BUCKET_RESTRICTED}
+     * bucket.
+     *
+     * @param packageName     The package name of the app that is being restricted
+     * @param userId          The ID of the user in which the app is being restricted
+     * @param elapsedRealtime The time the attempt was made, in the (unadjusted) elapsed realtime
+     *                        timebase
+     * @param reason          The reason for the restriction attempt
+     */
+    void noteRestrictionAttempt(String packageName, int userId, long elapsedRealtime, int reason) {
+        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
+        AppUsageHistory appUsageHistory =
+                getPackageHistory(userHistory, packageName, elapsedRealtime, true);
+        appUsageHistory.lastRestrictAttemptElapsedTime = getElapsedTime(elapsedRealtime);
+        appUsageHistory.lastRestrictReason = reason;
     }
 
     /**
@@ -547,6 +594,9 @@ public class AppIdleHistory {
                         AppUsageHistory appUsageHistory = new AppUsageHistory();
                         appUsageHistory.lastUsedElapsedTime =
                                 Long.parseLong(parser.getAttributeValue(null, ATTR_ELAPSED_IDLE));
+                        appUsageHistory.lastUsedByUserElapsedTime = getLongValue(parser,
+                                ATTR_LAST_USED_BY_USER_ELAPSED,
+                                appUsageHistory.lastUsedElapsedTime);
                         appUsageHistory.lastUsedScreenTime =
                                 Long.parseLong(parser.getAttributeValue(null, ATTR_SCREEN_IDLE));
                         appUsageHistory.lastPredictedTime = getLongValue(parser,
@@ -570,6 +620,19 @@ public class AppIdleHistory {
                                 appUsageHistory.bucketingReason =
                                         Integer.parseInt(bucketingReason, 16);
                             } catch (NumberFormatException nfe) {
+                                Slog.wtf(TAG, "Unable to read bucketing reason", nfe);
+                            }
+                        }
+                        appUsageHistory.lastRestrictAttemptElapsedTime =
+                                getLongValue(parser, ATTR_LAST_RESTRICTION_ATTEMPT_ELAPSED, 0);
+                        String lastRestrictReason = parser.getAttributeValue(
+                                null, ATTR_LAST_RESTRICTION_ATTEMPT_REASON);
+                        if (lastRestrictReason != null) {
+                            try {
+                                appUsageHistory.lastRestrictReason =
+                                        Integer.parseInt(lastRestrictReason, 16);
+                            } catch (NumberFormatException nfe) {
+                                Slog.wtf(TAG, "Unable to read last restrict reason", nfe);
                             }
                         }
                         appUsageHistory.lastInformedBucket = -1;
@@ -618,6 +681,8 @@ public class AppIdleHistory {
                 xml.attribute(null, ATTR_NAME, packageName);
                 xml.attribute(null, ATTR_ELAPSED_IDLE,
                         Long.toString(history.lastUsedElapsedTime));
+                xml.attribute(null, ATTR_LAST_USED_BY_USER_ELAPSED,
+                        Long.toString(history.lastUsedByUserElapsedTime));
                 xml.attribute(null, ATTR_SCREEN_IDLE,
                         Long.toString(history.lastUsedScreenTime));
                 xml.attribute(null, ATTR_LAST_PREDICTED_TIME,
@@ -638,6 +703,12 @@ public class AppIdleHistory {
                     xml.attribute(null, ATTR_LAST_RUN_JOB_TIME, Long.toString(history
                             .lastJobRunTime));
                 }
+                if (history.lastRestrictAttemptElapsedTime > 0) {
+                    xml.attribute(null, ATTR_LAST_RESTRICTION_ATTEMPT_ELAPSED,
+                            Long.toString(history.lastRestrictAttemptElapsedTime));
+                }
+                xml.attribute(null, ATTR_LAST_RESTRICTION_ATTEMPT_REASON,
+                        Integer.toHexString(history.lastRestrictReason));
                 xml.endTag(null, TAG_PACKAGE);
             }
 
@@ -672,6 +743,9 @@ public class AppIdleHistory {
                     + UsageStatsManager.reasonToString(appUsageHistory.bucketingReason));
             idpw.print(" used=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastUsedElapsedTime, idpw);
+            idpw.print(" usedByUser=");
+            TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastUsedByUserElapsedTime,
+                    idpw);
             idpw.print(" usedScr=");
             TimeUtils.formatDuration(screenOnTime - appUsageHistory.lastUsedScreenTime, idpw);
             idpw.print(" lastPred=");
@@ -684,6 +758,13 @@ public class AppIdleHistory {
                     idpw);
             idpw.print(" lastJob=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastJobRunTime, idpw);
+            if (appUsageHistory.lastRestrictAttemptElapsedTime > 0) {
+                idpw.print(" lastRestrictAttempt=");
+                TimeUtils.formatDuration(
+                        totalElapsedTime - appUsageHistory.lastRestrictAttemptElapsedTime, idpw);
+                idpw.print(" lastRestrictReason="
+                        + UsageStatsManager.reasonToString(appUsageHistory.lastRestrictReason));
+            }
             idpw.print(" idle=" + (isIdle(packageName, userId, elapsedRealtime) ? "y" : "n"));
             idpw.println();
         }
