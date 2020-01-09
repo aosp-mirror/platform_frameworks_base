@@ -398,7 +398,7 @@ public class EntitlementManager {
     protected void runUiTetherProvisioning(int type, int subId, ResultReceiver receiver) {
         if (DBG) mLog.i("runUiTetherProvisioning: " + type);
 
-        Intent intent = new Intent(Settings.ACTION_TETHER_PROVISIONING);
+        Intent intent = new Intent(Settings.ACTION_TETHER_PROVISIONING_UI);
         intent.putExtra(EXTRA_ADD_TETHER_TYPE, type);
         intent.putExtra(EXTRA_PROVISION_CALLBACK, receiver);
         intent.putExtra(EXTRA_SUBID, subId);
