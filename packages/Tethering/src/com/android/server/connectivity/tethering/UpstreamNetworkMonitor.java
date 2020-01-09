@@ -19,7 +19,6 @@ package com.android.server.connectivity.tethering;
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
 import static android.net.ConnectivityManager.TYPE_NONE;
-import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
@@ -35,7 +34,6 @@ import android.net.NetworkRequest;
 import android.net.util.PrefixUtils;
 import android.net.util.SharedLog;
 import android.os.Handler;
-import android.os.Process;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -130,15 +128,15 @@ public class UpstreamNetworkMonitor {
      */
     public void startTrackDefaultNetwork(NetworkRequest defaultNetworkRequest,
             EntitlementManager entitle) {
-        // This is not really a "request", just a way of tracking the system default network.
-        // It's guaranteed not to actually bring up any networks because it's the same request
-        // as the ConnectivityService default request, and thus shares fate with it. We can't
-        // use registerDefaultNetworkCallback because it will not track the system default
-        // network if there is a VPN that applies to our UID.
+
+        // defaultNetworkRequest is not really a "request", just a way of tracking the system
+        // default network. It's guaranteed not to actually bring up any networks because it's
+        // the should be the same request as the ConnectivityService default request, and thus
+        // shares fate with it. We can't use registerDefaultNetworkCallback because it will not
+        // track the system default network if there is a VPN that applies to our UID.
         if (mDefaultNetworkCallback == null) {
-            final NetworkRequest trackDefaultRequest = new NetworkRequest(defaultNetworkRequest);
             mDefaultNetworkCallback = new UpstreamNetworkCallback(CALLBACK_DEFAULT_INTERNET);
-            cm().requestNetwork(trackDefaultRequest, mDefaultNetworkCallback, mHandler);
+            cm().requestNetwork(defaultNetworkRequest, mDefaultNetworkCallback, mHandler);
         }
         if (mEntitlementMgr == null) {
             mEntitlementMgr = entitle;
@@ -239,7 +237,7 @@ public class UpstreamNetworkMonitor {
         final TypeStatePair typeStatePair = findFirstAvailableUpstreamByType(
                 mNetworkMap.values(), preferredTypes, isCellularUpstreamPermitted());
 
-        mLog.log("preferred upstream type: " + getNetworkTypeName(typeStatePair.type));
+        mLog.log("preferred upstream type: " + typeStatePair.type);
 
         switch (typeStatePair.type) {
             case TYPE_MOBILE_DUN:
@@ -514,15 +512,12 @@ public class UpstreamNetworkMonitor {
             try {
                 nc = ConnectivityManager.networkCapabilitiesForType(type);
             } catch (IllegalArgumentException iae) {
-                Log.e(TAG, "No NetworkCapabilities mapping for legacy type: "
-                        + ConnectivityManager.getNetworkTypeName(type));
+                Log.e(TAG, "No NetworkCapabilities mapping for legacy type: " + type);
                 continue;
             }
             if (!isCellularUpstreamPermitted && isCellular(nc)) {
                 continue;
             }
-
-            nc.setSingleUid(Process.myUid());
 
             for (UpstreamNetworkState value : netStates) {
                 if (!nc.satisfiedByNetworkCapabilities(value.networkCapabilities)) {
