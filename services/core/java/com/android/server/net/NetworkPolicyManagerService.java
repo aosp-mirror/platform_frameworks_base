@@ -222,6 +222,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.RoSystemProperties;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
@@ -3309,7 +3310,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @Override
     public void setSubscriptionOverride(int subId, int overrideMask, int overrideValue,
-            long timeoutMillis, String callingPackage) {
+            long networkTypeMask, long timeoutMillis, String callingPackage) {
         enforceSubscriptionPlanAccess(subId, Binder.getCallingUid(), callingPackage);
 
         // We can only override when carrier told us about plans
@@ -3327,11 +3328,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final boolean overrideEnabled = Settings.Global.getInt(mContext.getContentResolver(),
                 NETPOLICY_OVERRIDE_ENABLED, 1) != 0;
         if (overrideEnabled || overrideValue == 0) {
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_SUBSCRIPTION_OVERRIDE,
-                    overrideMask, overrideValue, subId));
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = subId;
+            args.arg2 = overrideMask;
+            args.arg3 = overrideValue;
+            args.arg4 = networkTypeMask;
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_SUBSCRIPTION_OVERRIDE, args));
             if (timeoutMillis > 0) {
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SUBSCRIPTION_OVERRIDE,
-                        overrideMask, 0, subId), timeoutMillis);
+                args.arg3 = 0;
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SUBSCRIPTION_OVERRIDE, args),
+                        timeoutMillis);
             }
         }
     }
@@ -4467,10 +4473,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     private void dispatchSubscriptionOverride(INetworkPolicyListener listener, int subId,
-            int overrideMask, int overrideValue) {
+            int overrideMask, int overrideValue, long networkTypeMask) {
         if (listener != null) {
             try {
-                listener.onSubscriptionOverride(subId, overrideMask, overrideValue);
+                listener.onSubscriptionOverride(subId, overrideMask, overrideValue,
+                        networkTypeMask);
             } catch (RemoteException ignored) {
             }
         }
@@ -4571,13 +4578,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     return true;
                 }
                 case MSG_SUBSCRIPTION_OVERRIDE: {
-                    final int overrideMask = msg.arg1;
-                    final int overrideValue = msg.arg2;
-                    final int subId = (int) msg.obj;
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final int subId = (int) args.arg1;
+                    final int overrideMask = (int) args.arg2;
+                    final int overrideValue = (int) args.arg3;
+                    final long networkTypeMask = (long) args.arg4;
                     final int length = mListeners.beginBroadcast();
                     for (int i = 0; i < length; i++) {
                         final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
-                        dispatchSubscriptionOverride(listener, subId, overrideMask, overrideValue);
+                        dispatchSubscriptionOverride(listener, subId, overrideMask, overrideValue,
+                                networkTypeMask);
                     }
                     mListeners.finishBroadcast();
                     return true;
