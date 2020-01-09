@@ -22,7 +22,7 @@ filegroup {
         "java/**/*.java",
     ],
     path: "java",
-    visibility: [ "//frameworks/base:__pkg__" ] // For the "global" stubs.
+    visibility: [ "//frameworks/base" ] // For the "global" stubs.
 }
 
 java_library {
@@ -32,7 +32,10 @@ java_library {
     libs: [ "framework-annotations-lib" ],
     permitted_packages: [ "android.os.ext" ],
     installable: true,
-    visibility: [ "//frameworks/base/apex/sdkextensions:__pkg__" ],
+    visibility: [
+        "//frameworks/base/apex/sdkextensions",
+        "//frameworks/base/apex/sdkextensions/testing",
+    ],
 }
 
 droidstubs {
@@ -65,7 +68,7 @@ java_library {
     srcs: [":framework-sdkextensions-droidstubs-systemapi"],
     sdk_version: "system_current",
     visibility: [
-      "//frameworks/base:__pkg__", // Framework
-      "//frameworks/base/apex/sdkextensions:__pkg__", // sdkextensions SDK
+        "//frameworks/base", // Framework
+        "//frameworks/base/apex/sdkextensions", // sdkextensions SDK
     ]
 }
