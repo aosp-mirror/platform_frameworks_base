@@ -56,6 +56,7 @@ public class NotifCoordinators implements Dumpable {
             PreparationCoordinator preparationCoordinator) {
         dumpController.registerDumpable(TAG, this);
 
+        mCoordinators.add(new HideLocallyDismissedNotifsCoordinator());
         mCoordinators.add(keyguardCoordinator);
         mCoordinators.add(rankingCoordinator);
         mCoordinators.add(foregroundCoordinator);

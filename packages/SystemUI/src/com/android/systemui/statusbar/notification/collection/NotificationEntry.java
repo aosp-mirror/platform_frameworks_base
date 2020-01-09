@@ -29,9 +29,11 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICAT
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 
+import static com.android.systemui.statusbar.notification.collection.NotifCollection.REASON_NOT_CANCELED;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING;
 
-import android.annotation.NonNull;
+import static java.util.Objects.requireNonNull;
+
 import android.app.Notification;
 import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
@@ -50,6 +52,7 @@ import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -59,6 +62,7 @@ import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.InflationException;
+import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
@@ -105,9 +109,18 @@ public final class NotificationEntry extends ListEntry {
     /** If this was a group child that was promoted to the top level, then who did the promoting. */
     @Nullable NotifPromoter mNotifPromoter;
 
-    /** If this notification had an issue with inflating. Only used with the NewNotifPipeline **/
+    /**
+     * If this notification was cancelled by system server, then the reason that was supplied.
+     * Uncancelled notifications always have REASON_NOT_CANCELED. Note that lifetime-extended
+     * notifications will have this set even though they are still in the active notification set.
+     */
+    @CancellationReason int mCancellationReason = REASON_NOT_CANCELED;
+
+    /** @see #hasInflationError() */
     private boolean mHasInflationError;
 
+    /** @see #getDismissState() */
+    @NonNull private DismissState mDismissState = DismissState.NOT_DISMISSED;
 
     /*
     * Old members
@@ -169,9 +182,9 @@ public final class NotificationEntry extends ListEntry {
     public NotificationEntry(
             @NonNull StatusBarNotification sbn,
             @NonNull Ranking ranking) {
-        super(Objects.requireNonNull(Objects.requireNonNull(sbn).getKey()));
+        super(requireNonNull(requireNonNull(sbn).getKey()));
 
-        Objects.requireNonNull(ranking);
+        requireNonNull(ranking);
 
         mKey = sbn.getKey();
         setSbn(sbn);
@@ -201,8 +214,8 @@ public final class NotificationEntry extends ListEntry {
      * TODO: Make this package-private
      */
     public void setSbn(@NonNull StatusBarNotification sbn) {
-        Objects.requireNonNull(sbn);
-        Objects.requireNonNull(sbn.getKey());
+        requireNonNull(sbn);
+        requireNonNull(sbn.getKey());
 
         if (!sbn.getKey().equals(mKey)) {
             throw new IllegalArgumentException("New key " + sbn.getKey()
@@ -227,8 +240,8 @@ public final class NotificationEntry extends ListEntry {
      * TODO: Make this package-private
      */
     public void setRanking(@NonNull Ranking ranking) {
-        Objects.requireNonNull(ranking);
-        Objects.requireNonNull(ranking.getKey());
+        requireNonNull(ranking);
+        requireNonNull(ranking.getKey());
 
         if (!ranking.getKey().equals(mKey)) {
             throw new IllegalArgumentException("New key " + ranking.getKey()
@@ -236,6 +249,34 @@ public final class NotificationEntry extends ListEntry {
         }
 
         mRanking = ranking;
+    }
+
+    /*
+     * Bookkeeping getters and setters
+     */
+
+    /**
+     * Whether this notification had an error when attempting to inflate. This is only used in
+     * the NewNotifPipeline
+     */
+    public boolean hasInflationError() {
+        return mHasInflationError;
+    }
+
+    void setHasInflationError(boolean hasError) {
+        mHasInflationError = hasError;
+    }
+
+    /**
+     * Set if the user has dismissed this notif but we haven't yet heard back from system server to
+     * confirm the dismissal.
+     */
+    @NonNull public DismissState getDismissState() {
+        return mDismissState;
+    }
+
+    void setDismissState(@NonNull DismissState dismissState) {
+        mDismissState = requireNonNull(dismissState);
     }
 
     /*
@@ -274,7 +315,6 @@ public final class NotificationEntry extends ListEntry {
     public boolean canBubble() {
         return mRanking.canBubble();
     }
-
 
     public @NonNull List<Notification.Action> getSmartActions() {
         return mRanking.getSmartActions();
@@ -576,18 +616,6 @@ public final class NotificationEntry extends ListEntry {
     public void onRemoteInputInserted() {
         lastRemoteInputSent = NOT_LAUNCHED_YET;
         remoteInputTextWhenReset = null;
-    }
-
-    void setHasInflationError(boolean hasError) {
-        mHasInflationError = hasError;
-    }
-
-    /**
-     * Whether this notification had an error when attempting to inflate. This is only used in
-     * the NewNotifPipeline
-     */
-    public boolean hasInflationError() {
-        return mHasInflationError;
     }
 
     public void setHasSentReply() {
@@ -972,6 +1000,16 @@ public final class NotificationEntry extends ListEntry {
             this.originalText = originalText;
             this.index = index;
         }
+    }
+
+    /** @see #getDismissState() */
+    public enum DismissState {
+        /** User has not dismissed this notif or its parent */
+        NOT_DISMISSED,
+        /** User has dismissed this notif specifically */
+        DISMISSED,
+        /** User has dismissed this notif's parent (which implicitly dismisses this one as well) */
+        PARENT_DISMISSED,
     }
 
     private static final long LAUNCH_COOLDOWN = 2000;

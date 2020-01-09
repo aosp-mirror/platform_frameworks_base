@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
+import static com.android.systemui.statusbar.notification.collection.NotifCollection.REASON_NOT_CANCELED;
+import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.NOT_DISMISSED;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -132,8 +135,20 @@ public class ListDumper {
                         .append(" ");
             }
 
+            if (notifEntry.mCancellationReason != REASON_NOT_CANCELED) {
+                rksb.append("cancellationReason=")
+                        .append(notifEntry.mCancellationReason)
+                        .append(" ");
+            }
+
             if (notifEntry.hasInflationError()) {
-                rksb.append("hasInflationError ");
+                rksb.append("(!)hasInflationError ");
+            }
+
+            if (notifEntry.getDismissState() != NOT_DISMISSED) {
+                rksb.append("dismissState=")
+                        .append(notifEntry.getDismissState())
+                        .append(" ");
             }
 
             String rkString = rksb.toString();
