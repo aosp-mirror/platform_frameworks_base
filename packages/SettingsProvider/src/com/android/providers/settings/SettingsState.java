@@ -390,15 +390,25 @@ final class SettingsState {
 
     // The settings provider must hold its lock when calling here.
     @GuardedBy("mLock")
-    public boolean insertSettingLocked(String name, String value, String tag,
+    public boolean insertSettingOverrideableByRestoreLocked(String name, String value, String tag,
             boolean makeDefault, String packageName) {
-        return insertSettingLocked(name, value, tag, makeDefault, false, packageName);
+        return insertSettingLocked(name, value, tag, makeDefault, false, packageName,
+                /* overrideableByRestore */ true);
     }
 
     // The settings provider must hold its lock when calling here.
     @GuardedBy("mLock")
     public boolean insertSettingLocked(String name, String value, String tag,
-            boolean makeDefault, boolean forceNonSystemPackage, String packageName) {
+            boolean makeDefault, String packageName) {
+        return insertSettingLocked(name, value, tag, makeDefault, false, packageName,
+                /* overrideableByRestore */ false);
+    }
+
+    // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
+    public boolean insertSettingLocked(String name, String value, String tag,
+            boolean makeDefault, boolean forceNonSystemPackage, String packageName,
+            boolean overrideableByRestore) {
         if (TextUtils.isEmpty(name)) {
             return false;
         }
@@ -409,7 +419,8 @@ final class SettingsState {
         Setting newState;
 
         if (oldState != null) {
-            if (!oldState.update(value, makeDefault, packageName, tag, forceNonSystemPackage)) {
+            if (!oldState.update(value, makeDefault, packageName, tag, forceNonSystemPackage,
+                    overrideableByRestore)) {
                 return false;
             }
             newState = oldState;
@@ -497,7 +508,8 @@ final class SettingsState {
                 changedKeys.add(key); // key was added
             } else if (state.value != value) {
                 oldValue = state.value;
-                state.update(value, false, packageName, null, true);
+                state.update(value, false, packageName, null, true,
+                        /* overrideableByRestore */ false);
                 changedKeys.add(key); // key was updated
             } else {
                 // this key/value already exists, no change and no logging necessary
@@ -1144,7 +1156,7 @@ final class SettingsState {
         private String tag;
         // Whether the default is set by the system
         private boolean defaultFromSystem;
-        // Whether the value of this setting will be preserved when restore happens..
+        // Whether the value of this setting will be preserved when restore happens.
         private boolean isValuePreservedInRestore;
 
         public Setting(Setting other) {
@@ -1155,17 +1167,22 @@ final class SettingsState {
             id = other.id;
             defaultFromSystem = other.defaultFromSystem;
             tag = other.tag;
+            isValuePreservedInRestore = other.isValuePreservedInRestore;
         }
 
         public Setting(String name, String value, boolean makeDefault, String packageName,
                 String tag) {
             this.name = name;
-            update(value, makeDefault, packageName, tag, false);
+            // overrideableByRestore = true as the first initialization isn't considered a
+            // modification.
+            update(value, makeDefault, packageName, tag, false,
+                    /* overrideableByRestore */ true);
         }
 
         public Setting(String name, String value, String defaultValue,
                 String packageName, String tag, boolean fromSystem, String id) {
-            this(name, value, defaultValue, packageName, tag, fromSystem, id, false);
+            this(name, value, defaultValue, packageName, tag, fromSystem, id,
+                    /* isOverrideableByRestore */ false);
         }
 
         Setting(String name, String value, String defaultValue,
@@ -1234,7 +1251,9 @@ final class SettingsState {
 
         /** @return whether the value changed */
         public boolean reset() {
-            return update(this.defaultValue, false, packageName, null, true);
+            // overrideableByRestore = true as resetting to default value isn't considered a
+            // modification.
+            return update(this.defaultValue, false, packageName, null, true, true);
         }
 
         public boolean isTransient() {
@@ -1246,7 +1265,7 @@ final class SettingsState {
         }
 
         public boolean update(String value, boolean setDefault, String packageName, String tag,
-                boolean forceNonSystemPackage) {
+                boolean forceNonSystemPackage, boolean overrideableByRestore) {
             if (NULL_VALUE.equals(value)) {
                 value = null;
             }
@@ -1279,17 +1298,22 @@ final class SettingsState {
                 }
             }
 
+            // isValuePreservedInRestore shouldn't change back to false if it has been set to true.
+            boolean isPreserved = this.isValuePreservedInRestore || !overrideableByRestore;
+
             // Is something gonna change?
             if (Objects.equals(value, this.value)
                     && Objects.equals(defaultValue, this.defaultValue)
                     && Objects.equals(packageName, this.packageName)
                     && Objects.equals(tag, this.tag)
-                    && defaultFromSystem == this.defaultFromSystem) {
+                    && defaultFromSystem == this.defaultFromSystem
+                    && isPreserved == this.isValuePreservedInRestore) {
                 return false;
             }
 
             init(name, value, tag, defaultValue, packageName, defaultFromSystem,
-                    String.valueOf(mNextId++), /* isValuePreservedInRestore */ true);
+                    String.valueOf(mNextId++), isPreserved);
+
             return true;
         }
 
