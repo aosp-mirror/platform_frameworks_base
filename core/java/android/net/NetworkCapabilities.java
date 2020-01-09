@@ -587,15 +587,14 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
-     * Removes the NET_CAPABILITY_NOT_RESTRICTED capability if all the capabilities it provides are
-     * typically provided by restricted networks.
+     * Deduces that all the capabilities it provides are typically provided by restricted networks
+     * or not.
      *
-     * TODO: consider:
-     * - Renaming it to guessRestrictedCapability and make it set the
-     *   restricted capability bit in addition to clearing it.
+     * @return {@code true} if the network should be restricted.
      * @hide
      */
-    public void maybeMarkCapabilitiesRestricted() {
+    @SystemApi
+    public boolean deduceRestrictedCapability() {
         // Check if we have any capability that forces the network to be restricted.
         final boolean forceRestrictedCapability =
                 (mNetworkCapabilities & FORCE_RESTRICTED_CAPABILITIES) != 0;
@@ -609,8 +608,17 @@ public final class NetworkCapabilities implements Parcelable {
         final boolean hasRestrictedCapabilities =
                 (mNetworkCapabilities & RESTRICTED_CAPABILITIES) != 0;
 
-        if (forceRestrictedCapability
-                || (hasRestrictedCapabilities && !hasUnrestrictedCapabilities)) {
+        return forceRestrictedCapability
+                || (hasRestrictedCapabilities && !hasUnrestrictedCapabilities);
+    }
+
+    /**
+     * Removes the NET_CAPABILITY_NOT_RESTRICTED capability if deducing the network is restricted.
+     *
+     * @hide
+     */
+    public void maybeMarkCapabilitiesRestricted() {
+        if (deduceRestrictedCapability()) {
             removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
         }
     }

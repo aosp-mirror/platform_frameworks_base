@@ -4385,6 +4385,7 @@ package android.net {
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
+    method public boolean deduceRestrictedCapability();
     method @NonNull public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
     method @NonNull public android.net.NetworkCapabilities setSSID(@Nullable String);
