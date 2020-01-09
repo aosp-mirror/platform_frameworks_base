@@ -16,6 +16,7 @@
 
 package android.media.tv.tuner;
 
+import android.media.tv.tuner.CasSessionRequest;
 import android.media.tv.tuner.ITunerResourceManagerListener;
 import android.media.tv.tuner.ResourceClientProfile;
 import android.media.tv.tuner.TunerFrontendInfo;
@@ -88,6 +89,17 @@ interface ITunerResourceManager {
     void setFrontendInfoList(in TunerFrontendInfo[] infos);
 
     /*
+     * Updates the available Cas resource information on the current device.
+     *
+     * <p><strong>Note:</strong> This update must happen before the first
+     * {@link #requestCasSession(CasSessionRequest, int[])} and {@link #releaseCasSession(int)} call.
+     *
+     * @param casSystemId id of the updating CAS system.
+     * @param maxSessionNum the max session number of the CAS system that is updated.
+     */
+    void updateCasInfo(in int casSystemId, in int maxSessionNum);
+
+    /*
      * This API is used by the Tuner framework to request an available frontend from the TunerHAL.
      *
      * <p>There are three possible scenarios:
@@ -125,6 +137,32 @@ interface ITunerResourceManager {
     void shareFrontend(in int selfClientId, in int targetClientId);
 
     /*
+     * This API is used by the Tuner framework to request an available Cas session. This session
+     * needs to be under the CAS system with the id indicated in the {@code request}.
+     *
+     * <p>There are three possible scenarios:
+     * <ul>
+     * <li>If there is Cas session available, the API would send the id back.
+     *
+     * <li>If no Cas session is available but the current request info can show higher priority than
+     * other uses of the sessions under the requested CAS system, the API will send
+     * {@link ITunerResourceManagerCallback#onResourcesReclaim()} to the {@link Tuner}. Tuner would
+     * handle the resource reclaim on the holder of lower priority and notify the holder of its
+     * resource loss.
+     *
+     * <li>If no Cas session can be granted, the API would return false.
+     * <ul>
+     *
+     * <p><strong>Note:</strong> {@link #updateCasInfo(int, int)} must be called before this request.
+     *
+     * @param request {@link CasSessionRequest} information of the current request.
+     * @param sessionResourceId a one-element array to return the granted cas session id.
+     *
+     * @return true if there is CAS session granted.
+     */
+    boolean requestCasSession(in CasSessionRequest request, out int[] sessionResourceId);
+
+    /*
      * Notifies the TRM that the given frontend has been released.
      *
      * <p>Client must call this whenever it releases a Tuner frontend.
@@ -135,4 +173,15 @@ interface ITunerResourceManager {
      * @param frontendId the id of the released frontend.
      */
     void releaseFrontend(in int frontendId);
+
+    /*
+     * Notifies the TRM that the given Cas session has been released.
+     *
+     * <p>Client must call this whenever it releases a Cas session.
+     *
+     * <p><strong>Note:</strong> {@link #updateCasInfo(int, int)} must be called before this release.
+     *
+     * @param sessionResourceId the id of the released CAS session.
+     */
+    void releaseCasSession(in int sessionResourceId);
 }
