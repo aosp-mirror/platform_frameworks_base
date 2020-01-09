@@ -1197,11 +1197,11 @@ public class NetworkPolicyManagerServiceTest {
             history.recordData(start, end,
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
             stats.clear();
-            stats.addValues(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
+            stats.addEntry(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
-            stats.addValues(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
+            stats.addEntry(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
-            stats.addValues(IFACE_ALL, UID_C, SET_ALL, TAG_ALL,
+            stats.addEntry(IFACE_ALL, UID_C, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
 
             reset(mNotifManager);
@@ -1225,9 +1225,9 @@ public class NetworkPolicyManagerServiceTest {
             history.recordData(start, end,
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
             stats.clear();
-            stats.addValues(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
+            stats.addEntry(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(960), 0, 0, 0, 0);
-            stats.addValues(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
+            stats.addEntry(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
 
             reset(mNotifManager);

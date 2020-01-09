@@ -4458,6 +4458,33 @@ package android.net {
     field public static final String PERMISSION_MAINLINE_NETWORK_STACK = "android.permission.MAINLINE_NETWORK_STACK";
   }
 
+  public final class NetworkStats implements android.os.Parcelable {
+    ctor public NetworkStats(long, int);
+    method @NonNull public android.net.NetworkStats add(@NonNull android.net.NetworkStats);
+    method @NonNull public android.net.NetworkStats addValues(@NonNull android.net.NetworkStats.Entry);
+    method public int describeContents();
+    method @NonNull public android.net.NetworkStats subtract(@NonNull android.net.NetworkStats);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStats> CREATOR;
+    field public static final int DEFAULT_NETWORK_NO = 0; // 0x0
+    field public static final int DEFAULT_NETWORK_YES = 1; // 0x1
+    field @Nullable public static final String IFACE_ALL;
+    field public static final String IFACE_VT = "vt_data0";
+    field public static final int METERED_NO = 0; // 0x0
+    field public static final int METERED_YES = 1; // 0x1
+    field public static final int ROAMING_NO = 0; // 0x0
+    field public static final int ROAMING_YES = 1; // 0x1
+    field public static final int SET_DEFAULT = 0; // 0x0
+    field public static final int SET_FOREGROUND = 1; // 0x1
+    field public static final int TAG_NONE = 0; // 0x0
+    field public static final int UID_ALL = -1; // 0xffffffff
+    field public static final int UID_TETHERING = -5; // 0xfffffffb
+  }
+
+  public static class NetworkStats.Entry {
+    ctor public NetworkStats.Entry(@Nullable String, int, int, int, int, int, int, long, long, long, long, long);
+  }
+
   public final class RouteInfo implements android.os.Parcelable {
     ctor public RouteInfo(@Nullable android.net.IpPrefix, @Nullable java.net.InetAddress, @Nullable String, int);
     method public int getType();
