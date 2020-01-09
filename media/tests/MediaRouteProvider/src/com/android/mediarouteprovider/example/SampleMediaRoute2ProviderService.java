@@ -16,12 +16,11 @@
 
 package com.android.mediarouteprovider.example;
 
-import static android.media.MediaRoute2Info.DEVICE_TYPE_SPEAKER;
-import static android.media.MediaRoute2Info.DEVICE_TYPE_TV;
+import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_SPEAKER;
+import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_TV;
 
 import android.content.Intent;
 import android.media.MediaRoute2Info;
-import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
 import android.media.RouteSessionInfo;
 import android.os.IBinder;
@@ -46,8 +45,8 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     public static final String ROUTE_ID5_TO_TRANSFER_TO = "route_id5_to_transfer_to";
     public static final String ROUTE_NAME5 = "Sample Route 5 - Route to transfer to";
 
-    public static final String ROUTE_ID_SPECIAL_TYPE = "route_special_type";
-    public static final String ROUTE_NAME_SPECIAL_TYPE = "Special Type Route";
+    public static final String ROUTE_ID_SPECIAL_FEATURE = "route_special_feature";
+    public static final String ROUTE_NAME_SPECIAL_FEATURE = "Special Feature Route";
 
     public static final int VOLUME_MAX = 100;
     public static final String ROUTE_ID_FIXED_VOLUME = "route_fixed_volume";
@@ -58,10 +57,10 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     public static final String ACTION_REMOVE_ROUTE =
             "com.android.mediarouteprovider.action_remove_route";
 
-    public static final String TYPE_SAMPLE =
-            "com.android.mediarouteprovider.TYPE_SAMPLE";
-    public static final String TYPE_SPECIAL =
-            "com.android.mediarouteprovider.TYPE_SPECIAL";
+    public static final String FEATURE_SAMPLE =
+            "com.android.mediarouteprovider.FEATURE_SAMPLE";
+    public static final String FEATURE_SPECIAL =
+            "com.android.mediarouteprovider.FEATURE_SPECIAL";
 
     Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
     Map<String, String> mRouteSessionMap = new HashMap<>();
@@ -69,38 +68,38 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
 
     private void initializeRoutes() {
         MediaRoute2Info route1 = new MediaRoute2Info.Builder(ROUTE_ID1, ROUTE_NAME1)
-                .addRouteType(TYPE_SAMPLE)
-                .setDeviceType(DEVICE_TYPE_TV)
+                .addFeature(FEATURE_SAMPLE)
+                .setDeviceType(DEVICE_TYPE_REMOTE_TV)
                 .build();
         MediaRoute2Info route2 = new MediaRoute2Info.Builder(ROUTE_ID2, ROUTE_NAME2)
-                .addRouteType(TYPE_SAMPLE)
-                .setDeviceType(DEVICE_TYPE_SPEAKER)
+                .addFeature(FEATURE_SAMPLE)
+                .setDeviceType(DEVICE_TYPE_REMOTE_SPEAKER)
                 .build();
         MediaRoute2Info route3 = new MediaRoute2Info.Builder(
                 ROUTE_ID3_SESSION_CREATION_FAILED, ROUTE_NAME3)
-                .addRouteType(TYPE_SAMPLE)
+                .addFeature(FEATURE_SAMPLE)
                 .build();
         MediaRoute2Info route4 = new MediaRoute2Info.Builder(
                 ROUTE_ID4_TO_SELECT_AND_DESELECT, ROUTE_NAME4)
-                .addRouteType(TYPE_SAMPLE)
+                .addFeature(FEATURE_SAMPLE)
                 .build();
         MediaRoute2Info route5 = new MediaRoute2Info.Builder(
                 ROUTE_ID5_TO_TRANSFER_TO, ROUTE_NAME5)
-                .addRouteType(TYPE_SAMPLE)
+                .addFeature(FEATURE_SAMPLE)
                 .build();
         MediaRoute2Info routeSpecial =
-                new MediaRoute2Info.Builder(ROUTE_ID_SPECIAL_TYPE, ROUTE_NAME_SPECIAL_TYPE)
-                        .addRouteType(TYPE_SAMPLE)
-                        .addRouteType(TYPE_SPECIAL)
+                new MediaRoute2Info.Builder(ROUTE_ID_SPECIAL_FEATURE, ROUTE_NAME_SPECIAL_FEATURE)
+                        .addFeature(FEATURE_SAMPLE)
+                        .addFeature(FEATURE_SPECIAL)
                         .build();
         MediaRoute2Info fixedVolumeRoute =
                 new MediaRoute2Info.Builder(ROUTE_ID_FIXED_VOLUME, ROUTE_NAME_FIXED_VOLUME)
-                        .addRouteType(TYPE_SAMPLE)
+                        .addFeature(FEATURE_SAMPLE)
                         .setVolumeHandling(MediaRoute2Info.PLAYBACK_VOLUME_FIXED)
                         .build();
         MediaRoute2Info variableVolumeRoute =
                 new MediaRoute2Info.Builder(ROUTE_ID_VARIABLE_VOLUME, ROUTE_NAME_VARIABLE_VOLUME)
-                        .addRouteType(TYPE_SAMPLE)
+                        .addFeature(FEATURE_SAMPLE)
                         .setVolumeHandling(MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                         .setVolumeMax(VOLUME_MAX)
                         .build();
@@ -154,6 +153,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
 
     @Override
     public void onUpdateVolume(String routeId, int delta) {
+        android.util.Log.d(TAG, "onUpdateVolume routeId= " + routeId + "delta=" + delta);
         MediaRoute2Info route = mRoutes.get(routeId);
         if (route == null) {
             return;
@@ -167,7 +167,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onCreateSession(String packageName, String routeId, String routeType,
+    public void onCreateSession(String packageName, String routeId, String routeFeature,
             long requestId) {
         MediaRoute2Info route = mRoutes.get(routeId);
         if (route == null || TextUtils.equals(ROUTE_ID3_SESSION_CREATION_FAILED, routeId)) {
@@ -186,7 +186,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         mRouteSessionMap.put(routeId, sessionId);
 
         RouteSessionInfo sessionInfo = new RouteSessionInfo.Builder(
-                sessionId, packageName, routeType)
+                sessionId, packageName, routeFeature)
                 .addSelectedRoute(routeId)
                 .addSelectableRoute(ROUTE_ID4_TO_SELECT_AND_DESELECT)
                 .addTransferrableRoute(ROUTE_ID5_TO_TRANSFER_TO)
@@ -276,9 +276,6 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     void publishRoutes() {
-        MediaRoute2ProviderInfo info = new MediaRoute2ProviderInfo.Builder()
-                .addRoutes(mRoutes.values())
-                .build();
-        updateProviderInfo(info);
+        notifyRoutes(mRoutes.values());
     }
 }
