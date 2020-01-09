@@ -23,6 +23,10 @@ import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SI
 import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowInsetsAnimationCallback.DISPATCH_MODE_CONTINUE_ON_SUBTREE;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.systemBars;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 
 import static java.lang.Math.max;
@@ -97,6 +101,7 @@ import android.util.FloatProperty;
 import android.util.LayoutDirection;
 import android.util.Log;
 import android.util.LongSparseLongArray;
+import android.util.Pair;
 import android.util.Pools.SynchronizedPool;
 import android.util.Property;
 import android.util.SparseArray;
@@ -110,6 +115,7 @@ import android.view.AccessibilityIterators.ParagraphTextSegmentIterator;
 import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.AccessibilityIterators.WordTextSegmentIterator;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Window.OnContentApplyWindowInsetsListener;
 import android.view.WindowInsetsAnimationCallback.AnimationBounds;
 import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
 import android.view.WindowInsetsAnimationCallback.DispatchMode;
@@ -140,6 +146,7 @@ import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 
 import com.android.internal.R;
+import com.android.internal.policy.DecorView;
 import com.android.internal.view.TooltipPopup;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.ScrollBarUtils;
@@ -1510,6 +1517,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Set for framework elements that use FITS_SYSTEM_WINDOWS, to indicate
      * that they are optional and should be skipped if the window has
      * requested system UI flags that ignore those insets for layout.
+     * <p>
+     * This is only used for support library as of Android R. The framework now uses
+     * {@link #PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS} such that it can skip the legacy
+     * insets path that loses insets information.
      */
     static final int OPTIONAL_FITS_SYSTEM_WINDOWS = 0x00000800;
 
@@ -2258,7 +2269,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * be extended in the future to hold our own class with more than just
      * a Rect. :)
      */
-    static final ThreadLocal<Rect> sThreadLocal = new ThreadLocal<Rect>();
+    static final ThreadLocal<Rect> sThreadLocal = ThreadLocal.withInitial(Rect::new);
 
     /**
      * Map used to store views' tags.
@@ -3420,6 +3431,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                          1       PFLAG4_CONTENT_CAPTURE_IMPORTANCE_IS_CACHED
      *                         1        PFLAG4_CONTENT_CAPTURE_IMPORTANCE_CACHED_VALUE
      *                         11       PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK
+     *                        1         PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS
      * |-------|-------|-------|-------|
      */
 
@@ -3456,6 +3468,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final int PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK =
             PFLAG4_CONTENT_CAPTURE_IMPORTANCE_IS_CACHED
             | PFLAG4_CONTENT_CAPTURE_IMPORTANCE_CACHED_VALUE;
+
+    /**
+     * @see #OPTIONAL_FITS_SYSTEM_WINDOWS
+     */
+    static final int PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS = 0x000000100;
 
     /* End of masks for mPrivateFlags4 */
 
@@ -10983,21 +11000,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private boolean fitSystemWindowsInt(Rect insets) {
         if ((mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS) {
-            mUserPaddingStart = UNDEFINED_PADDING;
-            mUserPaddingEnd = UNDEFINED_PADDING;
             Rect localInsets = sThreadLocal.get();
-            if (localInsets == null) {
-                localInsets = new Rect();
-                sThreadLocal.set(localInsets);
-            }
             boolean res = computeFitSystemWindows(insets, localInsets);
-            mUserPaddingLeftInitial = localInsets.left;
-            mUserPaddingRightInitial = localInsets.right;
-            internalSetPadding(localInsets.left, localInsets.top,
-                    localInsets.right, localInsets.bottom);
+            applyInsets(localInsets);
             return res;
         }
         return false;
+    }
+
+    private void applyInsets(Rect insets) {
+        mUserPaddingStart = UNDEFINED_PADDING;
+        mUserPaddingEnd = UNDEFINED_PADDING;
+        mUserPaddingLeftInitial = insets.left;
+        mUserPaddingRightInitial = insets.right;
+        internalSetPadding(insets.left, insets.top, insets.right, insets.bottom);
     }
 
     /**
@@ -11026,6 +11042,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The supplied insets with any applied insets consumed
      */
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        if ((mPrivateFlags4 & PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS) != 0
+                && (mViewFlags & FITS_SYSTEM_WINDOWS) != 0) {
+            return onApplyFrameworkOptionalFitSystemWindows(insets);
+        }
         if ((mPrivateFlags3 & PFLAG3_FITTING_SYSTEM_WINDOWS) == 0) {
             // We weren't called from within a direct call to fitSystemWindows,
             // call into it as a fallback in case we're in a class that overrides it
@@ -11040,6 +11060,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
         return insets;
+    }
+
+    private WindowInsets onApplyFrameworkOptionalFitSystemWindows(WindowInsets insets) {
+        Rect localInsets = sThreadLocal.get();
+        WindowInsets result = computeSystemWindowInsets(insets, localInsets);
+        applyInsets(localInsets);
+        return result;
     }
 
     /**
@@ -11332,16 +11359,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return Insets that should be passed along to views under this one
      */
     public WindowInsets computeSystemWindowInsets(WindowInsets in, Rect outLocalInsets) {
-        if ((mViewFlags & OPTIONAL_FITS_SYSTEM_WINDOWS) == 0
-                || mAttachInfo == null
-                || ((mAttachInfo.mSystemUiVisibility & SYSTEM_UI_LAYOUT_FLAGS) == 0)) {
+        boolean isOptionalFitSystemWindows = (mViewFlags & OPTIONAL_FITS_SYSTEM_WINDOWS) != 0
+                || (mPrivateFlags4 & PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS) != 0;
+        if (isOptionalFitSystemWindows && mAttachInfo != null) {
+            OnContentApplyWindowInsetsListener listener =
+                    mAttachInfo.mContentOnApplyWindowInsetsListener;
+            if (listener == null) {
+                // The application wants to take care of fitting system window for
+                // the content.
+                outLocalInsets.setEmpty();
+                return in;
+            }
+            Pair<Insets, WindowInsets> result = listener.onContentApplyWindowInsets(in);
+            outLocalInsets.set(result.first.toRect());
+            return result.second;
+        } else {
             outLocalInsets.set(in.getSystemWindowInsetsAsRect());
             return in.consumeSystemWindowInsets().inset(outLocalInsets);
-        } else {
-            // The application wants to take care of fitting system window for
-            // the content.
-            outLocalInsets.setEmpty();
-            return in;
         }
     }
 
@@ -11412,12 +11446,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * For use by PhoneWindow to make its own system window fitting optional.
+     * @see #OPTIONAL_FITS_SYSTEM_WINDOWS
      * @hide
      */
     @UnsupportedAppUsage
     public void makeOptionalFitsSystemWindows() {
         setFlags(OPTIONAL_FITS_SYSTEM_WINDOWS, OPTIONAL_FITS_SYSTEM_WINDOWS);
+    }
+
+    /**
+     * @see #PFLAG4_OPTIONAL_FITS_SYSTEM_WINDOWS
+     * @hide
+     */
+    public void makeFrameworkOptionalFitsSystemWindows() {
+        mPrivateFlags4 |= PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS;
     }
 
     /**
@@ -28378,6 +28420,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * window.
      */
     final static class AttachInfo {
+
         interface Callbacks {
             void playSoundEffect(int effectId);
             boolean performHapticFeedback(int effectId, boolean always);
@@ -28815,6 +28858,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Cached reference to the {@link ContentCaptureManager}.
          */
         ContentCaptureManager mContentCaptureManager;
+
+        /**
+         * Listener used to fit content on window level.
+         */
+        OnContentApplyWindowInsetsListener mContentOnApplyWindowInsetsListener;
 
         /**
          * Creates a new set of attachment information with the specified

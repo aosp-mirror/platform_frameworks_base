@@ -33,6 +33,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -46,6 +47,9 @@ import android.os.RemoteException;
 import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionManager;
+import android.util.Pair;
+import android.view.View.OnApplyWindowInsetsListener;
+import android.view.ViewGroup.LayoutParams;
 import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.accessibility.AccessibilityEvent;
@@ -692,6 +696,32 @@ public abstract class Window {
                 int dropCountSinceLastInvocation);
     }
 
+    /**
+     * Listener for applying window insets on the content of a window in a custom way.
+     *
+     * <p>Apps may choose to implement this interface if they want to apply custom policy
+     * to the way that window insets are treated for fitting root-level content views.
+     *
+     * @see Window#setOnContentApplyWindowInsetsListener(OnContentApplyWindowInsetsListener)
+     */
+    public interface OnContentApplyWindowInsetsListener {
+
+        /**
+         * Called when the window needs to apply insets on the container of its content view which
+         * are set by calling {@link #setContentView}. The method should determine what insets to
+         * apply on the container of the root level content view and what should be dispatched to
+         * the content view's
+         * {@link View#setOnApplyWindowInsetsListener(OnApplyWindowInsetsListener)} through the view
+         * hierarchy.
+         *
+         * @param insets The root level insets that are about to be dispatched
+         * @return A pair, with the first element containing the insets to apply as margin to the
+         *         root-level content views, and the second element determining what should be
+         *         dispatched to the content view.
+         */
+        @NonNull Pair<Insets, WindowInsets> onContentApplyWindowInsets(
+                @NonNull WindowInsets insets);
+    }
 
     public Window(Context context) {
         mContext = context;
@@ -1281,57 +1311,33 @@ public abstract class Window {
     }
 
     /**
-     * A shortcut for {@link WindowManager.LayoutParams#setFitWindowInsetsTypes(int)}
-     * @hide pending unhide
+     * Sets the listener to be invoked when fitting root-level content views.
+     * <p>
+     * By default, a listener that inspects the now deprecated {@link View#SYSTEM_UI_LAYOUT_FLAGS}
+     * as well the {@link WindowManager.LayoutParams#SOFT_INPUT_ADJUST_RESIZE} flag is installed and
+     * fits content according to these flags.
+     * </p>
+     * @param contentOnApplyWindowInsetsListener The listener to use for fitting root-level content
+     *                                           views, or {@code null} to disable any kind of
+     *                                           content fitting on the window level and letting the
+     *                                           {@link WindowInsets} pass through to the content
+     *                                           view.
+     * @see OnContentApplyWindowInsetsListener
      */
-    public void setFitWindowInsetsTypes(@InsetsType int types) {
-        final WindowManager.LayoutParams attrs = getAttributes();
-        attrs.setFitWindowInsetsTypes(types);
-        dispatchWindowAttributesChanged(attrs);
+    public void setOnContentApplyWindowInsetsListener(
+            @Nullable OnContentApplyWindowInsetsListener contentOnApplyWindowInsetsListener) {
     }
 
     /**
-     * A shortcut for {@link WindowManager.LayoutParams#setFitWindowInsetsSides(int)}
-     * @hide pending unhide
+     * Resets the listener set via {@link #setOnContentApplyWindowInsetsListener} to the default
+     * state.
+     * <p>
+     * By default, a listener that inspects the now deprecated {@link View#SYSTEM_UI_LAYOUT_FLAGS}
+     * as well the {@link WindowManager.LayoutParams#SOFT_INPUT_ADJUST_RESIZE} flag is installed and
+     * fits content according to these flags.
+     * </p>
      */
-    public void setFitWindowInsetsSides(@InsetsSide int sides) {
-        final WindowManager.LayoutParams attrs = getAttributes();
-        attrs.setFitWindowInsetsSides(sides);
-        dispatchWindowAttributesChanged(attrs);
-    }
-
-    /**
-     * A shortcut for {@link WindowManager.LayoutParams#setFitIgnoreVisibility(boolean)}
-     * @hide pending unhide
-     */
-    public void setFitIgnoreVisibility(boolean ignore) {
-        final WindowManager.LayoutParams attrs = getAttributes();
-        attrs.setFitIgnoreVisibility(ignore);
-        dispatchWindowAttributesChanged(attrs);
-    }
-
-    /**
-     * A shortcut for {@link WindowManager.LayoutParams#getFitWindowInsetsTypes}
-     * @hide pending unhide
-     */
-    public @InsetsType int getFitWindowInsetsTypes() {
-        return getAttributes().getFitWindowInsetsTypes();
-    }
-
-    /**
-     * A shortcut for {@link WindowManager.LayoutParams#getFitWindowInsetsSides()}
-     * @hide pending unhide
-     */
-    public @InsetsSide int getFitWindowInsetsSides() {
-        return getAttributes().getFitWindowInsetsSides();
-    }
-
-    /**
-     * A shortcut for {@link WindowManager.LayoutParams#getFitIgnoreVisibility()}
-     * @hide pending unhide
-     */
-    public boolean getFitIgnoreVisibility() {
-        return getAttributes().getFitIgnoreVisibility();
+    public void resetOnContentApplyWindowInsetsListener() {
     }
 
     /**

@@ -1194,7 +1194,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 Context.LAYOUT_INFLATER_SERVICE);
         mWindow = new SoftInputWindow(this, "InputMethod", mTheme, null, null, mDispatcherState,
                 WindowManager.LayoutParams.TYPE_INPUT_METHOD, Gravity.BOTTOM, false);
-        mWindow.getWindow().setFitWindowInsetsTypes(WindowInsets.Type.systemBars());
+        mWindow.getWindow().getAttributes().setFitWindowInsetsTypes(WindowInsets.Type.systemBars());
         mWindow.getWindow().addPrivateFlags(PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND);
         mWindow.getWindow().getDecorView().setOnApplyWindowInsetsListener(
                 (v, insets) -> v.onApplyWindowInsets(
