@@ -40,7 +40,7 @@ import org.junit.runner.RunWith;
 
 /**
  * Build/Install/Run:
- *  atest FrameworksServicesTests:DimmerTests
+ *  atest WmTests:DimmerTests
  */
 @Presubmit
 @RunWith(WindowTestRunner.class)

@@ -60,7 +60,7 @@ import org.junit.runner.RunWith;
  * appropriately.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:BoundsAnimationControllerTests
+ *  atest WmTests:BoundsAnimationControllerTests
  */
 @SmallTest
 @Presubmit

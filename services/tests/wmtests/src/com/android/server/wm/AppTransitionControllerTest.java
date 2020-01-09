@@ -42,7 +42,7 @@ import org.junit.runner.RunWith;
 
 /**
  * Build/Install/Run:
- *  atest FrameworksServicesTests:AppTransitionControllerTest
+ *  atest WmTests:AppTransitionControllerTest
  */
 @SmallTest
 @Presubmit
