@@ -89,6 +89,12 @@ public class Process {
     public static final int DRM_UID = 1019;
 
     /**
+     * Defines the GID for the group that allows write access to the internal media storage.
+     * @hide
+     */
+    public static final int SDCARD_RW_GID = 1015;
+
+    /**
      * Defines the UID/GID for the group that controls VPN services.
      * @hide
      */

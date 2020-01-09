@@ -145,6 +145,11 @@ public final class Zygote {
     /** The lower file system should be bind mounted directly on external storage */
     public static final int MOUNT_EXTERNAL_PASS_THROUGH = IVold.REMOUNT_MODE_PASS_THROUGH;
 
+    /** Use the regular scoped storage filesystem, but Android/ should be writable.
+     * Used to support the applications hosting DownloadManager and the MTP server.
+     */
+    public static final int MOUNT_EXTERNAL_ANDROID_WRITABLE = IVold.REMOUNT_MODE_ANDROID_WRITABLE;
+
     /** Number of bytes sent to the Zygote over USAP pipes or the pool event FD */
     static final int USAP_MANAGEMENT_MESSAGE_BYTES = 8;
 

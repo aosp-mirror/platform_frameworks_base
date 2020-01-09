@@ -1555,20 +1555,27 @@ public final class ProcessList {
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }
-
+                int numGids = 3;
+                if (mountExternal == Zygote.MOUNT_EXTERNAL_INSTALLER
+                        || mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+                    numGids++;
+                }
                 /*
                  * Add shared application and profile GIDs so applications can share some
                  * resources like shared libraries and access user-wide resources
                  */
                 if (ArrayUtils.isEmpty(permGids)) {
-                    gids = new int[3];
+                    gids = new int[numGids];
                 } else {
-                    gids = new int[permGids.length + 3];
-                    System.arraycopy(permGids, 0, gids, 3, permGids.length);
+                    gids = new int[permGids.length + numGids];
+                    System.arraycopy(permGids, 0, gids, numGids, permGids.length);
                 }
                 gids[0] = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
                 gids[1] = UserHandle.getCacheAppGid(UserHandle.getAppId(uid));
                 gids[2] = UserHandle.getUserGid(UserHandle.getUserId(uid));
+                if (numGids > 3) {
+                    gids[3] = Process.SDCARD_RW_GID;
+                }
 
                 // Replace any invalid GIDs
                 if (gids[0] == UserHandle.ERR_GID) gids[0] = gids[2];
