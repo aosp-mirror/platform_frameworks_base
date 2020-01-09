@@ -157,7 +157,8 @@ public class ResolverActivity extends Activity implements
     private static final String TAB_TAG_PERSONAL = "personal";
     private static final String TAB_TAG_WORK = "work";
 
-    private final PackageMonitor mPackageMonitor = createPackageMonitor();
+    private final PackageMonitor mPersonalPackageMonitor = createPackageMonitor();
+    private PackageMonitor mWorkPackageMonitor;
 
     @VisibleForTesting
     protected AbstractMultiProfilePagerAdapter mMultiProfilePagerAdapter;
@@ -327,7 +328,13 @@ public class ResolverActivity extends Activity implements
 
         mPm = getPackageManager();
 
-        mPackageMonitor.register(this, getMainLooper(), false);
+        mPersonalPackageMonitor.register(
+                this, getMainLooper(), getPersonalProfileUserHandle(), false);
+        if (hasWorkProfile()) {
+            mWorkPackageMonitor = createPackageMonitor();
+            mWorkPackageMonitor.register(this, getMainLooper(), getWorkProfileUserHandle(), false);
+        }
+
         mRegistered = true;
         mReferrerPackage = getReferrerPackageName();
 
@@ -543,9 +550,6 @@ public class ResolverActivity extends Activity implements
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
-        if (mMultiProfilePagerAdapter.getInactiveListAdapter() != null) {
-            mMultiProfilePagerAdapter.getInactiveListAdapter().handlePackagesChanged();
-        }
 
         if (mSystemWindowInsets != null) {
             mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,
@@ -707,7 +711,15 @@ public class ResolverActivity extends Activity implements
     protected void onRestart() {
         super.onRestart();
         if (!mRegistered) {
-            mPackageMonitor.register(this, getMainLooper(), false);
+            mPersonalPackageMonitor.register(this, getMainLooper(),
+                    getPersonalProfileUserHandle(), false);
+            if (hasWorkProfile()) {
+                if (mWorkPackageMonitor == null) {
+                    mWorkPackageMonitor = createPackageMonitor();
+                }
+                mWorkPackageMonitor.register(this, getMainLooper(),
+                        getWorkProfileUserHandle(), false);
+            }
             mRegistered = true;
         }
         mMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
@@ -718,7 +730,10 @@ public class ResolverActivity extends Activity implements
     protected void onStop() {
         super.onStop();
         if (mRegistered) {
-            mPackageMonitor.unregister();
+            mPersonalPackageMonitor.unregister();
+            if (mWorkPackageMonitor != null) {
+                mWorkPackageMonitor.unregister();
+            }
             mRegistered = false;
         }
         final Intent intent = getIntent();
@@ -1287,7 +1302,10 @@ public class ResolverActivity extends Activity implements
                         .targetInfoForPosition(0, false);
                 if (shouldAutoLaunchSingleChoice(target)) {
                     safelyStartActivity(target);
-                    mPackageMonitor.unregister();
+                    mPersonalPackageMonitor.unregister();
+                    if (mWorkPackageMonitor != null) {
+                        mWorkPackageMonitor.unregister();
+                    }
                     mRegistered = false;
                     finish();
                     return true;
