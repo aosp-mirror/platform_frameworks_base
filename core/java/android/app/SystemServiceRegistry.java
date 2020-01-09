@@ -83,6 +83,7 @@ import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.input.InputManager;
 import android.hardware.iris.IIrisService;
 import android.hardware.iris.IrisManager;
+import android.hardware.lights.LightsManager;
 import android.hardware.location.ContextHubManager;
 import android.hardware.radio.RadioManager;
 import android.hardware.usb.IUsbManager;
@@ -1348,6 +1349,13 @@ final class SystemServiceRegistry {
                         return new DynamicSystemManager(
                                 IDynamicSystemService.Stub.asInterface(b));
                     }});
+        registerService(Context.LIGHTS_SERVICE, LightsManager.class,
+            new CachedServiceFetcher<LightsManager>() {
+                @Override
+                public LightsManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                    return new LightsManager(ctx);
+                }});
         //CHECKSTYLE:ON IndentationCheck
     }
 
