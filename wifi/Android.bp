@@ -52,10 +52,15 @@ test_access_hidden_api_whitelist = [
     "//external/robolectric-shadows:__subpackages__",
 ]
 
+// wifi-service needs pre-jarjared version of framework-wifi so it can reference copied utility
+// classes before they are renamed.
 java_library {
-    name: "framework-wifi",
+    name: "framework-wifi-pre-jarjar",
     // TODO(b/140299412) should be core_current once we build against framework-system-stubs
     sdk_version: "core_platform",
+    static_libs: [
+        "framework-wifi-util-lib",
+    ],
     libs: [
         // TODO(b/140299412) should be framework-system-stubs once we fix all @hide dependencies
         "framework-minus-apex",
@@ -64,6 +69,23 @@ java_library {
     srcs: [
         ":framework-wifi-updatable-sources",
     ],
+    installable: false,
+    visibility: [
+        "//frameworks/opt/net/wifi/service",
+        "//frameworks/opt/net/wifi/tests/wifitests",
+    ],
+}
+
+// post-jarjar version of framework-wifi
+java_library {
+    name: "framework-wifi",
+    // TODO(b/140299412) should be core_current once we build against framework-system-stubs
+    sdk_version: "core_platform",
+    static_libs: [
+        "framework-wifi-pre-jarjar",
+    ],
+    jarjar_rules: ":wifi-jarjar-rules",
+
     installable: true,
     optimize: {
         enabled: false
@@ -121,4 +143,9 @@ java_defaults {
         "framework-res",
     ],
     visibility: test_access_hidden_api_whitelist,
+}
+
+filegroup {
+    name: "wifi-jarjar-rules",
+    srcs: ["jarjar-rules.txt"],
 }
