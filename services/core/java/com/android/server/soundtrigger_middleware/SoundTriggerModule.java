@@ -85,7 +85,7 @@ class SoundTriggerModule {
     @NonNull private final SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider;
     private final Set<Session> mActiveSessions = new HashSet<>();
     private int mNumLoadedModels = 0;
-    private SoundTriggerModuleProperties mProperties = null;
+    private SoundTriggerModuleProperties mProperties;
     private boolean mRecognitionAvailable;
 
     /**
@@ -117,7 +117,7 @@ class SoundTriggerModule {
      * @return The interface through which this module can be controlled.
      */
     synchronized @NonNull
-    Session attach(@NonNull ISoundTriggerCallback callback) {
+    ISoundTriggerModule attach(@NonNull ISoundTriggerCallback callback) {
         Log.d(TAG, "attach()");
         Session session = new Session(callback);
         mActiveSessions.add(session);
@@ -274,8 +274,7 @@ class SoundTriggerModule {
         }
 
         @Override
-        public void setModelParameter(int modelHandle, int modelParam, int value)
-                throws RemoteException {
+        public void setModelParameter(int modelHandle, int modelParam, int value) {
             Log.d(TAG,
                     String.format("setModelParameter(handle=%d, param=%d, value=%d)", modelHandle,
                             modelParam, value));
@@ -285,7 +284,7 @@ class SoundTriggerModule {
         }
 
         @Override
-        public int getModelParameter(int modelHandle, int modelParam) throws RemoteException {
+        public int getModelParameter(int modelHandle, int modelParam) {
             Log.d(TAG, String.format("getModelParameter(handle=%d, param=%d)", modelHandle,
                     modelParam));
             synchronized (SoundTriggerModule.this) {
@@ -348,10 +347,6 @@ class SoundTriggerModule {
             private void setState(@NonNull ModelState state) {
                 mState = state;
                 SoundTriggerModule.this.notifyAll();
-            }
-
-            private void waitStateChange() throws InterruptedException {
-                SoundTriggerModule.this.wait();
             }
 
             private int load(@NonNull SoundModel model) {

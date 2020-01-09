@@ -89,7 +89,7 @@ public class SoundTriggerMiddlewareImpl implements ISoundTriggerMiddlewareServic
             try {
                 modules.add(new SoundTriggerModule(service, audioSessionProvider));
             } catch (Exception e) {
-                Log.e(TAG, "Failed to a SoundTriggerModule instance", e);
+                Log.e(TAG, "Failed to add a SoundTriggerModule instance", e);
             }
         }
 
