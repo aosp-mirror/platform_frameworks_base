@@ -1228,7 +1228,6 @@ Status StatsService::removeConfiguration(int64_t key, const int32_t callingUid) 
 
     ConfigKey configKey(callingUid, key);
     mConfigManager->RemoveConfig(configKey);
-    SubscriberReporter::getInstance().removeConfig(configKey);
     return Status::ok();
 }
 
