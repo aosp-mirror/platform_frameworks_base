@@ -17,7 +17,8 @@
 package com.android.server.usage;
 
 import static android.app.usage.UsageStatsManager.REASON_MAIN_DEFAULT;
-import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_SYSTEM;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_USER;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_MASK;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_PREDICTED;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_TIMEOUT;
@@ -565,7 +566,7 @@ public class AppStandbyController implements AppStandbyInternal {
 
                 // If the bucket was forced by the user/developer, leave it alone.
                 // A usage event will be the only way to bring it out of this forced state
-                if (oldMainReason == REASON_MAIN_FORCED) {
+                if (oldMainReason == REASON_MAIN_FORCED_BY_USER) {
                     return;
                 }
                 final int oldBucket = app.currentBucket;
@@ -783,7 +784,7 @@ public class AppStandbyController implements AppStandbyInternal {
         // Inform listeners if necessary
         if (previouslyIdle != stillIdle) {
             maybeInformListeners(packageName, userId, elapsedRealtime, standbyBucket,
-                    REASON_MAIN_FORCED, false);
+                    REASON_MAIN_FORCED_BY_USER, false);
             if (!stillIdle) {
                 notifyBatteryStats(packageName, userId, idle);
             }
@@ -1030,8 +1031,17 @@ public class AppStandbyController implements AppStandbyInternal {
                 callingPid, callingUid, userId, false, true, "setAppStandbyBucket", null);
         final boolean shellCaller = callingUid == Process.ROOT_UID
                 || callingUid == Process.SHELL_UID;
-        final boolean systemCaller = UserHandle.isCore(callingUid);
-        final int reason = systemCaller ? REASON_MAIN_FORCED : REASON_MAIN_PREDICTED;
+        final int reason;
+        // The Settings app runs in the system UID but in a separate process. Assume
+        // things coming from other processes are due to the user.
+        if ((UserHandle.isSameApp(callingUid, Process.SYSTEM_UID) && callingPid != Process.myPid())
+                || shellCaller) {
+            reason = REASON_MAIN_FORCED_BY_USER;
+        } else if (UserHandle.isCore(callingUid)) {
+            reason = REASON_MAIN_FORCED_BY_SYSTEM;
+        } else {
+            reason = REASON_MAIN_PREDICTED;
+        }
         final int packageFlags = PackageManager.MATCH_ANY_USER
                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                 | PackageManager.MATCH_DIRECT_BOOT_AWARE;
@@ -1087,7 +1097,11 @@ public class AppStandbyController implements AppStandbyInternal {
             }
 
             // If the bucket was forced, don't allow prediction to override
-            if ((app.bucketingReason & REASON_MAIN_MASK) == REASON_MAIN_FORCED && predicted) return;
+            if (predicted
+                    && ((app.bucketingReason & REASON_MAIN_MASK) == REASON_MAIN_FORCED_BY_USER
+                    || (app.bucketingReason & REASON_MAIN_MASK) == REASON_MAIN_FORCED_BY_SYSTEM)) {
+                return;
+            }
 
             // If the bucket is required to stay in a higher state for a specified duration, don't
             // override unless the duration has passed
