@@ -17,12 +17,18 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
+import android.content.Context;
+import android.media.tv.tuner.TunerUtils;
 
 /**
  * Filter configuration for a TS filter.
  *
  * @hide
  */
+@SystemApi
 public class TsFilterConfiguration extends FilterConfiguration {
     private final int mTpid;
 
@@ -37,10 +43,28 @@ public class TsFilterConfiguration extends FilterConfiguration {
     }
 
     /**
-     * Creates a builder for {@link TsFilterConfiguration}.
+     * Gets the {@link Settings} object of this filter configuration.
      */
+    @Nullable
+    public Settings getSettings() {
+        return mSettings;
+    }
+    /**
+     * Gets Tag Protocol ID.
+     */
+    public int getTpid() {
+        return mTpid;
+    }
+
+    /**
+     * Creates a builder for {@link TsFilterConfiguration}.
+     *
+     * @param context the context of the caller.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder newBuilder() {
+    public static Builder builder(@NonNull Context context) {
+        TunerUtils.checkTunerPermission(context);
         return new Builder();
     }
 
@@ -50,6 +74,9 @@ public class TsFilterConfiguration extends FilterConfiguration {
     public static class Builder {
         private Settings mSettings;
         private int mTpid;
+
+        private Builder() {
+        }
 
         /**
          * Sets filter settings.

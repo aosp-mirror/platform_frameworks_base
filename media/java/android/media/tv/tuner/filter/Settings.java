@@ -16,11 +16,14 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.SystemApi;
+
 /**
  * Settings for filters of different subtypes.
  *
  * @hide
  */
+@SystemApi
 public abstract class Settings {
     private final int mType;
 
