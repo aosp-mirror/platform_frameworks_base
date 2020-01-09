@@ -257,10 +257,6 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         for (int i = items.size() - 1; i >= 0; i--) {
             final InsetsSourceControl control = items.valueAt(i);
             final InsetsSource source = mInitialInsetsState.getSource(control.getType());
-            if (control == null) {
-                // TODO: remove this check when we ensure the elements will not be null.
-                continue;
-            }
             final SurfaceControl leash = control.getLeash();
 
             mTmpMatrix.setTranslate(control.getSurfacePosition().x, control.getSurfacePosition().y);

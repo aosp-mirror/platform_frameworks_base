@@ -203,7 +203,7 @@ class InsetsStateController {
         if (target == previous) {
             return;
         }
-        final InsetsSourceProvider provider = getSourceProvider(type);
+        final InsetsSourceProvider provider = mProviders.get(type);
         if (provider == null) {
             return;
         }
@@ -211,6 +211,7 @@ class InsetsStateController {
             return;
         }
         provider.updateControlForTarget(target, false /* force */);
+        target = provider.getControlTarget();
         if (previous != null) {
             removeFromControlMaps(previous, type, false /* fake */);
             mPendingControlChanged.add(previous);

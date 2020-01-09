@@ -375,8 +375,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
         cancelExistingControllers(types);
 
-        final ArraySet<Integer> internalTypes = mState.toInternalType(types);
-        final SparseArray<InsetsSourceConsumer> consumers = new SparseArray<>();
+        final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
         final SparseArray<InsetsSourceControl> controls = new SparseArray<>();
 
         Pair<Integer, Boolean> typesReadyPair = collectSourceControls(
@@ -441,7 +440,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 }
                 typesReady |= InsetsState.toPublicType(consumer.getType());
             }
-            controls.put(consumer.getType(), consumer.getControl());
+            final InsetsSourceControl control = consumer.getControl();
+            if (control != null) {
+                controls.put(consumer.getType(), control);
+            }
         }
         return new Pair<>(typesReady, isReady);
     }

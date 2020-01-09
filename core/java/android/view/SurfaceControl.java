@@ -677,6 +677,22 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Set the initial visibility for the SurfaceControl.
+         *
+         * @param hidden Whether the Surface is initially HIDDEN.
+         * @hide
+         */
+        @NonNull
+        public Builder setHidden(boolean hidden) {
+            if (hidden) {
+                mFlags |= HIDDEN;
+            } else {
+                mFlags &= ~HIDDEN;
+            }
+            return this;
+        }
+
+        /**
          * Set a parent surface for our new SurfaceControl.
          *
          * Child surfaces are constrained to the onscreen region of their parent.
@@ -789,8 +805,7 @@ public final class SurfaceControl implements Parcelable {
      * @param name     The surface name, must not be null.
      * @param w        The surface initial width.
      * @param h        The surface initial height.
-     * @param flags    The surface creation flags.  Should always include {@link #HIDDEN}
-     *                 in the creation flags.
+     * @param flags    The surface creation flags.
      * @param metadata Initial metadata.
      * @throws throws OutOfResourcesException If the SurfaceControl cannot be created.
      */
@@ -799,15 +814,6 @@ public final class SurfaceControl implements Parcelable {
                     throws OutOfResourcesException, IllegalArgumentException {
         if (name == null) {
             throw new IllegalArgumentException("name must not be null");
-        }
-
-        if ((flags & SurfaceControl.HIDDEN) == 0) {
-            Log.w(TAG, "Surfaces should always be created with the HIDDEN flag set "
-                    + "to ensure that they are not made visible prematurely before "
-                    + "all of the surface's properties have been configured.  "
-                    + "Set the other properties and make the surface visible within "
-                    + "a transaction.  New surface name: " + name,
-                    new Throwable());
         }
 
         mName = name;
