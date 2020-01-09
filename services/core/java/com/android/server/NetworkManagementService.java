@@ -58,10 +58,12 @@ import android.net.NetworkStack;
 import android.net.NetworkStats;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
-import android.net.TetherConfigParcel;
 import android.net.TetherStatsParcel;
 import android.net.UidRange;
 import android.net.UidRangeParcel;
+import android.net.shared.NetdUtils;
+import android.net.shared.RouteUtils;
+import android.net.shared.RouteUtils.ModifyOperation;
 import android.net.util.NetdService;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -897,48 +899,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void addRoute(int netId, RouteInfo route) {
-        modifyRoute(MODIFY_OPERATION_ADD, netId, route);
+        NetworkStack.checkNetworkStackPermission(mContext);
+        RouteUtils.modifyRoute(mNetdService, ModifyOperation.ADD, netId, route);
     }
 
     @Override
     public void removeRoute(int netId, RouteInfo route) {
-        modifyRoute(MODIFY_OPERATION_REMOVE, netId, route);
-    }
-
-    private void modifyRoute(boolean add, int netId, RouteInfo route) {
         NetworkStack.checkNetworkStackPermission(mContext);
-
-        final String ifName = route.getInterface();
-        final String dst = route.getDestination().toString();
-        final String nextHop;
-
-        switch (route.getType()) {
-            case RouteInfo.RTN_UNICAST:
-                if (route.hasGateway()) {
-                    nextHop = route.getGateway().getHostAddress();
-                } else {
-                    nextHop = INetd.NEXTHOP_NONE;
-                }
-                break;
-            case RouteInfo.RTN_UNREACHABLE:
-                nextHop = INetd.NEXTHOP_UNREACHABLE;
-                break;
-            case RouteInfo.RTN_THROW:
-                nextHop = INetd.NEXTHOP_THROW;
-                break;
-            default:
-                nextHop = INetd.NEXTHOP_NONE;
-                break;
-        }
-        try {
-            if (add) {
-                mNetdService.networkAddRoute(netId, ifName, dst, nextHop);
-            } else {
-                mNetdService.networkRemoveRoute(netId, ifName, dst, nextHop);
-            }
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
+        RouteUtils.modifyRoute(mNetdService, ModifyOperation.REMOVE, netId, route);
     }
 
     private ArrayList<String> readRouteList(String filename) {
@@ -1022,12 +990,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public void startTetheringWithConfiguration(boolean usingLegacyDnsProxy, String[] dhcpRange) {
         NetworkStack.checkNetworkStackPermission(mContext);
-        // an odd number of addrs will fail
         try {
-            final TetherConfigParcel config = new TetherConfigParcel();
-            config.usingLegacyDnsProxy = usingLegacyDnsProxy;
-            config.dhcpRanges = dhcpRange;
-            mNetdService.tetherStartWithConfiguration(config);
+            NetdUtils.tetherStart(mNetdService, usingLegacyDnsProxy, dhcpRange);
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
@@ -1059,26 +1023,21 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     public void tetherInterface(String iface) {
         NetworkStack.checkNetworkStackPermission(mContext);
         try {
-            mNetdService.tetherInterfaceAdd(iface);
+            final LinkAddress addr = getInterfaceConfig(iface).getLinkAddress();
+            final IpPrefix dest = new IpPrefix(addr.getAddress(), addr.getPrefixLength());
+            NetdUtils.tetherInterface(mNetdService, iface, dest);
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
-        List<RouteInfo> routes = new ArrayList<>();
-        // The RouteInfo constructor truncates the LinkAddress to a network prefix, thus making it
-        // suitable to use as a route destination.
-        routes.add(new RouteInfo(getInterfaceConfig(iface).getLinkAddress(), null, iface));
-        addInterfaceToLocalNetwork(iface, routes);
     }
 
     @Override
     public void untetherInterface(String iface) {
         NetworkStack.checkNetworkStackPermission(mContext);
         try {
-            mNetdService.tetherInterfaceRemove(iface);
+            NetdUtils.untetherInterface(mNetdService, iface);
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
-        } finally {
-            removeInterfaceFromLocalNetwork(iface);
         }
     }
 
@@ -2121,16 +2080,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public void addInterfaceToLocalNetwork(String iface, List<RouteInfo> routes) {
         modifyInterfaceInNetwork(MODIFY_OPERATION_ADD, INetd.LOCAL_NET_ID, iface);
-
-        for (RouteInfo route : routes) {
-            if (!route.isDefaultRoute()) {
-                modifyRoute(MODIFY_OPERATION_ADD, INetd.LOCAL_NET_ID, route);
-            }
-        }
-
-        // IPv6 link local should be activated always.
-        modifyRoute(MODIFY_OPERATION_ADD, INetd.LOCAL_NET_ID,
-                new RouteInfo(new IpPrefix("fe80::/64"), null, iface));
+        // modifyInterfaceInNetwork already check calling permission.
+        RouteUtils.addRoutesToLocalNetwork(mNetdService, iface, routes);
     }
 
     @Override
@@ -2140,17 +2091,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public int removeRoutesFromLocalNetwork(List<RouteInfo> routes) {
-        int failures = 0;
-
-        for (RouteInfo route : routes) {
-            try {
-                modifyRoute(MODIFY_OPERATION_REMOVE, INetd.LOCAL_NET_ID, route);
-            } catch (IllegalStateException e) {
-                failures++;
-            }
-        }
-
-        return failures;
+        NetworkStack.checkNetworkStackPermission(mContext);
+        return RouteUtils.removeRoutesFromLocalNetwork(mNetdService, routes);
     }
 
     @Override
