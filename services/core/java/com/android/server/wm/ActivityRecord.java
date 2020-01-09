@@ -243,9 +243,9 @@ import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.PipModeChangeItem;
 import android.app.servertransaction.ResumeActivityItem;
+import android.app.servertransaction.StartActivityItem;
 import android.app.servertransaction.StopActivityItem;
 import android.app.servertransaction.TopResumedActivityChangeItem;
-import android.app.servertransaction.WindowVisibilityItem;
 import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -4497,7 +4497,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             sleeping = false;
             app.postPendingUiCleanMsg(true);
             if (reportToClient) {
-                makeClientVisible();
+                mClientVisibilityDeferred = false;
+                makeActiveIfNeeded(starting);
             } else {
                 mClientVisibilityDeferred = true;
             }
@@ -4509,23 +4510,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             Slog.w(TAG, "Exception thrown making visible: " + intent.getComponent(), e);
         }
         handleAlreadyVisible();
-    }
-
-    /** Send visibility change message to the client and pause if needed. */
-    void makeClientVisible() {
-        mClientVisibilityDeferred = false;
-        try {
-            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
-                    WindowVisibilityItem.obtain(true /* showWindow */));
-            makeActiveIfNeeded(null /* activeActivity*/);
-            if (isState(STOPPING, STOPPED)) {
-                // Set state to STARTED in order to have consistent state with client while
-                // making an non-active activity visible from stopped.
-                setState(STARTED, "makeClientVisible");
-            }
-        } catch (Exception e) {
-            Slog.w(TAG, "Exception thrown sending visibility update: " + intent.getComponent(), e);
-        }
     }
 
     void makeInvisible() {
@@ -4556,14 +4540,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             switch (getState()) {
                 case STOPPING:
                 case STOPPED:
-                    if (attachedToProcess()) {
-                        if (DEBUG_VISIBILITY) {
-                            Slog.v(TAG_VISIBILITY, "Scheduling invisibility: " + this);
-                        }
-                        mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(),
-                                appToken, WindowVisibilityItem.obtain(false /* showWindow */));
-                    }
-
                     // Reset the flag indicating that an app can enter picture-in-picture once the
                     // activity is hidden
                     supportsEnterPipOnTaskSwitch = false;
@@ -4595,23 +4571,34 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean makeActiveIfNeeded(ActivityRecord activeActivity) {
         if (shouldResumeActivity(activeActivity)) {
             if (DEBUG_VISIBILITY) {
-                Slog.v("TAG_VISIBILITY", "Resume visible activity, " + this);
+                Slog.v(TAG_VISIBILITY, "Resume visible activity, " + this);
             }
             return getActivityStack().resumeTopActivityUncheckedLocked(activeActivity /* prev */,
                     null /* options */);
         } else if (shouldPauseActivity(activeActivity)) {
             if (DEBUG_VISIBILITY) {
-                Slog.v("TAG_VISIBILITY", "Pause visible activity, " + this);
+                Slog.v(TAG_VISIBILITY, "Pause visible activity, " + this);
             }
             // An activity must be in the {@link PAUSING} state for the system to validate
             // the move to {@link PAUSED}.
-            setState(PAUSING, "makeVisibleIfNeeded");
+            setState(PAUSING, "makeActiveIfNeeded");
             try {
                 mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                         PauseActivityItem.obtain(finishing, false /* userLeaving */,
                                 configChangeFlags, false /* dontReport */));
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending pause: " + intent.getComponent(), e);
+            }
+        } else if (shouldStartActivity()) {
+            if (DEBUG_VISIBILITY) {
+                Slog.v(TAG_VISIBILITY, "Start visible activity, " + this);
+            }
+            setState(STARTED, "makeActiveIfNeeded");
+            try {
+                mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+                        StartActivityItem.obtain());
+            } catch (Exception e) {
+                Slog.w(TAG, "Exception thrown sending start: " + intent.getComponent(), e);
             }
         }
         return false;
@@ -4653,6 +4640,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return shouldMakeActive(activeActivity) && isFocusable()
                 && getActivityStack().getVisibility(activeActivity) == STACK_VISIBILITY_VISIBLE
                 && canResumeByCompat();
+    }
+
+    /**
+     * Check if activity should be moved to STARTED state.
+     * NOTE: This will not check if activity should be made paused or resumed first, so it must only
+     * be called after checking with {@link #shouldResumeActivity(ActivityRecord)}
+     * and {@link #shouldPauseActivity(ActivityRecord)}.
+     */
+    private boolean shouldStartActivity() {
+        return mVisibleRequested && isState(STOPPED);
     }
 
     /**
@@ -4890,16 +4887,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             setState(STOPPING, "stopIfPossible");
             if (DEBUG_VISIBILITY) {
-                Slog.v(TAG_VISIBILITY, "Stopping visibleRequested="
-                        + mVisibleRequested + " for " + this);
-            }
-            if (!mVisibleRequested) {
-                setVisibility(false);
+                Slog.v(TAG_VISIBILITY, "Stopping:" + this);
             }
             EventLogTags.writeWmStopActivity(
                     mUserId, System.identityHashCode(this), shortComponentName);
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
-                    StopActivityItem.obtain(mVisibleRequested, configChangeFlags));
+                    StopActivityItem.obtain(configChangeFlags));
+
             if (stack.shouldSleepOrShutDownActivities()) {
                 setSleeping(true);
             }
@@ -7201,7 +7195,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // {@link ActivityTaskManagerService.activityStopped}).
         try {
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
-                    StopActivityItem.obtain(false /* showWindow */, 0 /* configChanges */));
+                    StopActivityItem.obtain(0 /* configChanges */));
         } catch (RemoteException e) {
             Slog.w(TAG, "Exception thrown during restart " + this, e);
         }

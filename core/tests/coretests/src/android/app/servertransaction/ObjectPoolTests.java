@@ -274,30 +274,15 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleStopItem() {
-        StopActivityItem emptyItem = StopActivityItem.obtain(false, 0);
-        StopActivityItem item = StopActivityItem.obtain(true, 4);
+        StopActivityItem emptyItem = StopActivityItem.obtain(0);
+        StopActivityItem item = StopActivityItem.obtain(4);
         assertNotSame(item, emptyItem);
         assertFalse(item.equals(emptyItem));
 
         item.recycle();
         assertEquals(item, emptyItem);
 
-        StopActivityItem item2 = StopActivityItem.obtain(true, 3);
-        assertSame(item, item2);
-        assertFalse(item2.equals(emptyItem));
-    }
-
-    @Test
-    public void testRecycleWindowVisibleItem() {
-        WindowVisibilityItem emptyItem = WindowVisibilityItem.obtain(false);
-        WindowVisibilityItem item = WindowVisibilityItem.obtain(true);
-        assertNotSame(item, emptyItem);
-        assertFalse(item.equals(emptyItem));
-
-        item.recycle();
-        assertEquals(item, emptyItem);
-
-        WindowVisibilityItem item2 = WindowVisibilityItem.obtain(true);
+        StopActivityItem item2 = StopActivityItem.obtain(3);
         assertSame(item, item2);
         assertFalse(item2.equals(emptyItem));
     }
