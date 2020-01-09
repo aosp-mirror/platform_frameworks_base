@@ -9123,6 +9123,7 @@ package android.telephony {
   }
 
   public class SmsMessage {
+    method @Nullable public static android.telephony.SmsMessage createFromNativeSmsSubmitPdu(@NonNull byte[], boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static byte[] getSubmitPduEncodedMessage(boolean, @NonNull String, @NonNull String, int, int, int, int, int, int);
   }
 
