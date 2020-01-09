@@ -155,7 +155,17 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
      * @param ss signal strength from modem.
      */
     public CellSignalStrengthNr(android.hardware.radio.V1_4.NrSignalStrength ss) {
-        this(ss.csiRsrp, ss.csiRsrq, ss.csiSinr, ss.ssRsrp, ss.ssRsrq, ss.ssSinr);
+        this(flip(ss.csiRsrp), flip(ss.csiRsrq), ss.csiSinr, flip(ss.ssRsrp), flip(ss.ssRsrq),
+                ss.ssSinr);
+    }
+
+    /**
+     * Flip sign cell strength value when taking in the value from hal
+     * @param val cell strength value
+     * @return flipped value
+     */
+    private static int flip(int val) {
+        return val != CellInfo.UNAVAILABLE ? -val : val;
     }
 
     /**
