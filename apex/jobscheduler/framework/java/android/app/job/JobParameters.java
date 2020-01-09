@@ -18,8 +18,7 @@ package android.app.job;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
-import android.app.job.IJobCallback;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.net.Network;
 import android.net.Uri;

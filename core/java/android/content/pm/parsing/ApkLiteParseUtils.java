@@ -18,7 +18,7 @@ package android.content.pm.parsing;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;

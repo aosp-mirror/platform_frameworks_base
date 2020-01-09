@@ -25,7 +25,7 @@ import static android.provider.settings.validators.SettingsValidators.URI_VALIDA
 import static android.provider.settings.validators.SettingsValidators.VIBRATION_INTENSITY_VALIDATOR;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.hardware.display.ColorDisplayManager;
 import android.os.BatteryManager;

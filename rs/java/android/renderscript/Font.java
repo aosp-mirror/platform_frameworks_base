@@ -16,16 +16,15 @@
 
 package android.renderscript;
 
+import android.compat.annotation.UnsupportedAppUsage;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
+import android.os.Environment;
+
 import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-
-import android.os.Environment;
-
-import android.annotation.UnsupportedAppUsage;
-import android.content.res.AssetManager;
-import android.content.res.Resources;
 
 /**
  * @hide

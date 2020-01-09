@@ -16,7 +16,7 @@
 
 package android.telecom;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
