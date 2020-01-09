@@ -16,6 +16,8 @@
 package com.android.server.pm;
 
 import static android.app.AppOpsManager.OP_INTERACT_ACROSS_PROFILES;
+import static android.content.Intent.FLAG_RECEIVER_REGISTERED_ONLY;
+import static android.content.pm.CrossProfileApps.ACTION_CAN_INTERACT_ACROSS_PROFILES_CHANGED;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
@@ -26,6 +28,7 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.AppOpsManager.Mode;
 import android.app.IApplicationThread;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -66,8 +69,6 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     private Context mContext;
     private Injector mInjector;
     private AppOpsService mAppOpsService;
-    private final DevicePolicyManagerInternal mDpmi;
-    private final IPackageManager mIpm;
 
     public CrossProfileAppsServiceImpl(Context context) {
         this(context, new InjectorImpl(context));
@@ -77,8 +78,6 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     CrossProfileAppsServiceImpl(Context context, Injector injector) {
         mContext = context;
         mInjector = injector;
-        mIpm = AppGlobals.getPackageManager();
-        mDpmi = LocalServices.getService(DevicePolicyManagerInternal.class);
     }
 
     @Override
@@ -144,7 +143,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             // must have the required permission and the users must be in the same profile group
             // in order to launch any of its own activities.
             if (callerUserId != userId) {
-                final int permissionFlag = ActivityManager.checkComponentPermission(
+                final int permissionFlag = mInjector.checkComponentPermission(
                         android.Manifest.permission.INTERACT_ACROSS_PROFILES, callingUid,
                         -1, true);
                 if (permissionFlag != PackageManager.PERMISSION_GRANTED
@@ -172,23 +171,27 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     public boolean canRequestInteractAcrossProfiles(String callingPackage) {
         Objects.requireNonNull(callingPackage);
         verifyCallingPackage(callingPackage);
-
-        final List<UserHandle> targetUserProfiles = getTargetUserProfilesUnchecked(
+        return canRequestInteractAcrossProfilesUnchecked(
                 callingPackage, mInjector.getCallingUserId());
+    }
+
+    private boolean canRequestInteractAcrossProfilesUnchecked(
+            String packageName, @UserIdInt int userId) {
+        List<UserHandle> targetUserProfiles = getTargetUserProfilesUnchecked(packageName, userId);
         if (targetUserProfiles.isEmpty()) {
             return false;
         }
-
         if (!hasRequestedAppOpPermission(
-                AppOpsManager.opToPermission(OP_INTERACT_ACROSS_PROFILES), callingPackage)) {
+                AppOpsManager.opToPermission(OP_INTERACT_ACROSS_PROFILES), packageName)) {
             return false;
         }
-        return isCrossProfilePackageWhitelisted(callingPackage);
+        return isCrossProfilePackageWhitelisted(packageName);
     }
 
     private boolean hasRequestedAppOpPermission(String permission, String packageName) {
         try {
-            String[] packages = mIpm.getAppOpPermissionPackages(permission);
+            String[] packages =
+                    mInjector.getIPackageManager().getAppOpPermissionPackages(permission);
             return ArrayUtils.contains(packages, packageName);
         } catch (RemoteException exc) {
             Slog.e(TAG, "PackageManager dead. Cannot get permission info");
@@ -206,7 +209,6 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         if (targetUserProfiles.isEmpty()) {
             return false;
         }
-
         final int callingUid = mInjector.getCallingUid();
         return isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS_FULL, callingUid)
                 || isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS, callingUid)
@@ -219,7 +221,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     private boolean isCrossProfilePackageWhitelisted(String packageName) {
         final long ident = mInjector.clearCallingIdentity();
         try {
-            return mDpmi.getAllCrossProfilePackages().contains(packageName);
+            return mInjector.getDevicePolicyManagerInternal()
+                    .getAllCrossProfilePackages().contains(packageName);
         } finally {
             mInjector.restoreCallingIdentity(ident);
         }
@@ -295,6 +298,104 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         }
     }
 
+    @Override
+    public void setInteractAcrossProfilesAppOp(String packageName, @Mode int newMode) {
+        final int callingUid = mInjector.getCallingUid();
+        if (!isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS_FULL, callingUid)
+                && !isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS, callingUid)) {
+            throw new SecurityException(
+                    "INTERACT_ACROSS_USERS or INTERACT_ACROSS_USERS_FULL is required to set the"
+                            + " app-op for interacting across profiles.");
+        }
+        if (!isPermissionGranted(Manifest.permission.MANAGE_APP_OPS_MODES, callingUid)) {
+            throw new SecurityException(
+                    "MANAGE_APP_OPS_MODES is required to set the app-op for interacting across"
+                            + " profiles.");
+        }
+        final int callingUserId = mInjector.getCallingUserId();
+        if (newMode == AppOpsManager.MODE_ALLOWED
+                && !canRequestInteractAcrossProfilesUnchecked(packageName, callingUserId)) {
+            // The user should not be prompted for apps that cannot request to interact across
+            // profiles. However, we return early here if required to avoid race conditions.
+            Slog.e(TAG, "Tried to turn on the appop for interacting across profiles for invalid"
+                    + " app " + packageName);
+            return;
+        }
+        final int[] profileIds =
+                mInjector.getUserManager().getProfileIds(callingUserId, /* enabledOnly= */ false);
+        for (int profileId : profileIds) {
+            if (!isPackageInstalled(packageName, profileId)) {
+                continue;
+            }
+            setInteractAcrossProfilesAppOpForUser(packageName, newMode, profileId);
+        }
+    }
+
+    private boolean isPackageInstalled(String packageName, @UserIdInt int userId) {
+        final int callingUid = mInjector.getCallingUid();
+        final long identity = mInjector.clearCallingIdentity();
+        try {
+            final PackageInfo info =
+                    mInjector.getPackageManagerInternal()
+                            .getPackageInfo(
+                                    packageName,
+                                    MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                                    callingUid,
+                                    userId);
+            return info != null;
+        } finally {
+            mInjector.restoreCallingIdentity(identity);
+        }
+    }
+
+    private void setInteractAcrossProfilesAppOpForUser(
+            String packageName, @Mode int newMode, @UserIdInt int userId) {
+        try {
+            setInteractAcrossProfilesAppOpForUserOrThrow(packageName, newMode, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG, "Missing package " + packageName + " on user ID " + userId, e);
+        }
+    }
+
+    private void setInteractAcrossProfilesAppOpForUserOrThrow(
+            String packageName, @Mode int newMode, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException {
+        final int uid = mInjector.getPackageManager()
+                .getPackageUidAsUser(packageName, /* flags= */ 0, userId);
+        if (currentModeEquals(newMode, packageName, uid)) {
+            Slog.w(TAG,"Attempt to set mode to existing value of " + newMode + " for "
+                    + packageName + " on user ID " + userId);
+            return;
+        }
+        mInjector.getAppOpsManager()
+                .setMode(OP_INTERACT_ACROSS_PROFILES,
+                        uid,
+                        packageName,
+                        newMode);
+        sendCanInteractAcrossProfilesChangedBroadcast(packageName, uid, UserHandle.of(userId));
+    }
+
+    private boolean currentModeEquals(@Mode int otherMode, String packageName, int uid) {
+        final String op =
+                AppOpsManager.permissionToOp(Manifest.permission.INTERACT_ACROSS_PROFILES);
+        return otherMode ==
+                mInjector.getAppOpsManager().unsafeCheckOpNoThrow(op, uid, packageName);
+    }
+
+    private void sendCanInteractAcrossProfilesChangedBroadcast(
+            String packageName, int uid, UserHandle userHandle) {
+        final Intent intent = new Intent(ACTION_CAN_INTERACT_ACROSS_PROFILES_CHANGED)
+                .setPackage(packageName);
+        if (!appDeclaresCrossProfileAttribute(uid)) {
+            intent.addFlags(FLAG_RECEIVER_REGISTERED_ONLY);
+        }
+        mInjector.sendBroadcastAsUser(intent, userHandle);
+    }
+
+    private boolean appDeclaresCrossProfileAttribute(int uid) {
+        return mInjector.getPackageManagerInternal().getPackage(uid).isCrossProfile();
+    }
+
     private boolean isSameProfileGroup(@UserIdInt int callerUserId, @UserIdInt int userId) {
         final long ident = mInjector.clearCallingIdentity();
         try {
@@ -311,8 +412,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         mInjector.getAppOpsManager().checkPackage(mInjector.getCallingUid(), callingPackage);
     }
 
-    private static boolean isPermissionGranted(String permission, int uid) {
-        return PackageManager.PERMISSION_GRANTED == ActivityManager.checkComponentPermission(
+    private boolean isPermissionGranted(String permission, int uid) {
+        return PackageManager.PERMISSION_GRANTED == mInjector.checkComponentPermission(
                 permission, uid, /* owningUid= */-1, /* exported= */ true);
     }
 
@@ -376,6 +477,27 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         public ActivityTaskManagerInternal getActivityTaskManagerInternal() {
             return LocalServices.getService(ActivityTaskManagerInternal.class);
         }
+
+        @Override
+        public IPackageManager getIPackageManager() {
+            return AppGlobals.getPackageManager();
+        }
+
+        @Override
+        public DevicePolicyManagerInternal getDevicePolicyManagerInternal() {
+            return LocalServices.getService(DevicePolicyManagerInternal.class);
+        }
+
+        @Override
+        public void sendBroadcastAsUser(Intent intent, UserHandle user) {
+            mContext.sendBroadcastAsUser(intent, user);
+        }
+
+        @Override
+        public int checkComponentPermission(
+                String permission, int uid, int owningUid, boolean exported) {
+            return ActivityManager.checkComponentPermission(permission, uid, owningUid, exported);
+        }
     }
 
     @VisibleForTesting
@@ -401,5 +523,13 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         ActivityManagerInternal getActivityManagerInternal();
 
         ActivityTaskManagerInternal getActivityTaskManagerInternal();
+
+        IPackageManager getIPackageManager();
+
+        DevicePolicyManagerInternal getDevicePolicyManagerInternal();
+
+        void sendBroadcastAsUser(Intent intent, UserHandle user);
+
+        int checkComponentPermission(String permission, int uid, int owningUid, boolean exported);
     }
 }

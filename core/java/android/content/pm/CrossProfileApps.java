@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.AppOpsManager.Mode;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -42,6 +43,18 @@ import java.util.Set;
  * use this class to start its main activity in managed profile.
  */
 public class CrossProfileApps {
+
+    /**
+     * Broadcast signalling that the receiving app's ability to interact across profiles has
+     * changed, as defined by the return value of {@link #canInteractAcrossProfiles()}.
+     *
+     * <p>Apps that have set the {@code android:crossProfile} manifest attribute to {@code true}
+     * can receive this broadcast in manifest broadcast receivers. Otherwise, it can only be
+     * received by dynamically-registered broadcast receivers.
+     */
+    public static final String ACTION_CAN_INTERACT_ACROSS_PROFILES_CHANGED =
+            "android.content.pm.action.CAN_INTERACT_ACROSS_PROFILES_CHANGED";
+
     private final Context mContext;
     private final ICrossProfileApps mService;
     private final UserManager mUserManager;
@@ -252,6 +265,38 @@ public class CrossProfileApps {
         final Uri packageUri = Uri.parse("package:" + mContext.getPackageName());
         settingsIntent.setData(packageUri);
         return settingsIntent;
+    }
+
+    /**
+     * Sets the app-op for {@link android.Manifest.permission#INTERACT_ACROSS_PROFILES} that is
+     * configurable by users in Settings. This configures it for the profile group of the calling
+     * package.
+     *
+     * <p>Before calling, check {@link #canRequestInteractAcrossProfiles()} and do not call if it is
+     * {@code false}. If presenting a user interface, do not allow the user to configure the app-op
+     * in that case.
+     *
+     * <p>The underlying app-op {@link android.app.AppOpsManager#OP_INTERACT_ACROSS_PROFILES} should
+     * never be set directly. This method ensures that the app-op is kept in sync for the app across
+     * each user in the profile group and that those apps are sent a broadcast when their ability to
+     * interact across profiles changes.
+     *
+     * <p>This method should be used whenever an app's ability to interact across profiles changes,
+     * as defined by the return value of {@link #canInteractAcrossProfiles()}. This includes user
+     * consent changes in Settings or during provisioning, plus changes to the admin or OEM consent
+     * whitelists that make the current app-op value invalid.
+     *
+     * @hide
+     */
+    @RequiresPermission(
+            allOf={android.Manifest.permission.MANAGE_APP_OPS_MODES,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
+    public void setInteractAcrossProfilesAppOp(@NonNull String packageName, @Mode int newMode) {
+        try {
+            mService.setInteractAcrossProfilesAppOp(packageName, newMode);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 
     private void verifyCanAccessUser(UserHandle userHandle) {
