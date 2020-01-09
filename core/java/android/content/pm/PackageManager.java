@@ -2323,6 +2323,13 @@ public abstract class PackageManager {
     public static final String FEATURE_TELEPHONY_GSM = "android.hardware.telephony.gsm";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * has a telephony radio that support data.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_DATA = "android.hardware.telephony.data";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device supports telephony carrier restriction mechanism.
      *
