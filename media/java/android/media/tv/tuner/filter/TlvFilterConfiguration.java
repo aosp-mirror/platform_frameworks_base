@@ -16,8 +16,6 @@
 
 package android.media.tv.tuner.filter;
 
-import android.media.tv.tuner.TunerConstants;
-
 /**
  * Filter configuration for a TLV filter.
  * @hide
@@ -33,6 +31,6 @@ public class TlvFilterConfiguration extends FilterConfiguration {
 
     @Override
     public int getType() {
-        return TunerConstants.FILTER_TYPE_TLV;
+        return FilterConfiguration.FILTER_TYPE_TLV;
     }
 }

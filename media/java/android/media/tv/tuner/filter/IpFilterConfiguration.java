@@ -16,8 +16,6 @@
 
 package android.media.tv.tuner.filter;
 
-import android.media.tv.tuner.TunerConstants;
-
 /**
  * Filter configuration for a IP filter.
  * @hide
@@ -35,6 +33,6 @@ public class IpFilterConfiguration extends FilterConfiguration {
 
     @Override
     public int getType() {
-        return TunerConstants.FILTER_TYPE_IP;
+        return FilterConfiguration.FILTER_TYPE_IP;
     }
 }
