@@ -30,7 +30,6 @@ import android.annotation.DimenRes;
 import android.annotation.DrawableRes;
 import android.annotation.FontRes;
 import android.annotation.FractionRes;
-import android.annotation.IntRange;
 import android.annotation.IntegerRes;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
@@ -41,13 +40,10 @@ import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.annotation.XmlRes;
-import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
-import android.content.res.loader.ResourceLoader;
-import android.content.res.loader.ResourceLoaderManager;
-import android.content.res.loader.ResourcesProvider;
+import android.content.res.loader.ResourcesLoader;
 import android.graphics.Movie;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -55,18 +51,17 @@ import android.graphics.drawable.Drawable.ConstantState;
 import android.graphics.drawable.DrawableInflater;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.LongSparseArray;
-import android.util.Pair;
 import android.util.Pools.SynchronizedPool;
 import android.util.TypedValue;
 import android.view.DisplayAdjustments;
 import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
@@ -117,6 +112,7 @@ public class Resources {
     static final String TAG = "Resources";
 
     private static final Object sSync = new Object();
+    private final Object mLock = new Object();
 
     // Used by BridgeResources in layoutlib
     @UnsupportedAppUsage
@@ -143,10 +139,7 @@ public class Resources {
     @UnsupportedAppUsage
     final ClassLoader mClassLoader;
 
-    private final Object mResourceLoaderLock = new Object();
-
-    @GuardedBy("mResourceLoaderLock")
-    private ResourceLoaderManager mResourceLoaderManager;
+    private UpdateCallbacks mCallbacks = null;
 
     /**
      * WeakReferences to Themes that were constructed from this Resources object.
@@ -240,6 +233,18 @@ public class Resources {
         }
     }
 
+    /** @hide */
+    public interface UpdateCallbacks extends ResourcesLoader.UpdateCallbacks {
+        /**
+         * Invoked when a {@link Resources} instance has a {@link ResourcesLoader} added, removed,
+         * or reordered.
+         *
+         * @param resources the instance being updated
+         * @param newLoaders the new set of loaders for the instance
+         */
+        void onLoadersChanged(Resources resources, List<ResourcesLoader> newLoaders);
+    }
+
     /**
      * Create a new Resources object on top of an existing set of assets in an
      * AssetManager.
@@ -303,12 +308,6 @@ public class Resources {
         mBaseApkAssetsSize = ArrayUtils.size(impl.getAssets().getApkAssets());
         mResourcesImpl = impl;
 
-        synchronized (mResourceLoaderLock) {
-            if (mResourceLoaderManager != null) {
-                mResourceLoaderManager.onImplUpdate(mResourcesImpl);
-            }
-        }
-
         // Create new ThemeImpls that are identical to the ones we have.
         synchronized (mThemeRefs) {
             final int count = mThemeRefs.size();
@@ -320,6 +319,15 @@ public class Resources {
                 }
             }
         }
+    }
+
+    /** @hide */
+    public void setCallbacks(UpdateCallbacks callbacks) {
+        if (mCallbacks != null) {
+            throw new IllegalStateException("callback already registered");
+        }
+
+        mCallbacks = callbacks;
     }
 
     /**
@@ -937,14 +945,6 @@ public class Resources {
     @UnsupportedAppUsage
     Drawable loadDrawable(@NonNull TypedValue value, int id, int density, @Nullable Theme theme)
             throws NotFoundException {
-        ResourceLoader loader = findLoader(value.assetCookie);
-        if (loader != null) {
-            Drawable drawable = loader.loadDrawable(value, id, density, theme);
-            if (drawable != null) {
-                return drawable;
-            }
-        }
-
         return mResourcesImpl.loadDrawable(this, value, id, density, theme);
     }
 
@@ -2337,14 +2337,6 @@ public class Resources {
     @UnsupportedAppUsage
     XmlResourceParser loadXmlResourceParser(String file, int id, int assetCookie,
                                             String type) throws NotFoundException {
-        ResourceLoader loader = findLoader(assetCookie);
-        if (loader != null) {
-            XmlResourceParser xml = loader.loadXmlResourceParser(file, id);
-            if (xml != null) {
-                return xml;
-            }
-        }
-
         return mResourcesImpl.loadXmlResourceParser(file, id, assetCookie, type);
     }
 
@@ -2371,136 +2363,106 @@ public class Resources {
         return theme.obtainStyledAttributes(set, attrs, 0, 0);
     }
 
-    private ResourceLoader findLoader(int assetCookie) {
-        ApkAssets[] apkAssetsArray = mResourcesImpl.getAssets().getApkAssets();
-        int apkAssetsIndex = assetCookie - 1;
-        if (apkAssetsIndex < apkAssetsArray.length && apkAssetsIndex >= 0) {
-            ApkAssets apkAssets = apkAssetsArray[apkAssetsIndex];
-            if (apkAssets.isForLoader()) {
-                List<Pair<ResourceLoader, ResourcesProvider>> loaders;
-                // Since we don't lock the entire resolution path anyways,
-                // only lock here instead of entire method. The list is copied
-                // and effectively a snapshot is used.
-                synchronized (mResourceLoaderLock) {
-                    loaders = mResourceLoaderManager.getInternalList();
-                }
-
-                if (!ArrayUtils.isEmpty(loaders)) {
-                    int size = loaders.size();
-                    for (int index = 0; index < size; index++) {
-                        Pair<ResourceLoader, ResourcesProvider> pair = loaders.get(index);
-                        if (pair.second.getApkAssets() == apkAssets) {
-                            return pair.first;
-                        }
-                    }
-                }
-            }
+    private void checkCallbacksRegistered() {
+        if (mCallbacks == null) {
+            throw new IllegalArgumentException("Cannot modify resource loaders of Resources"
+                    + " instances created outside of ResourcesManager");
         }
-
-        return null;
     }
 
     /**
-     * @return copied list of loaders and providers previously added
+     * Retrieves the list of loaders.
+     *
+     * <p>Loaders are listed in increasing precedence order. A loader will override the resources
+     * and assets of loaders listed before itself.
      */
     @NonNull
-    public List<Pair<ResourceLoader, ResourcesProvider>> getLoaders() {
-        synchronized (mResourceLoaderLock) {
-            return mResourceLoaderManager == null
-                    ? Collections.emptyList()
-                    : mResourceLoaderManager.getLoaders();
-        }
+    public List<ResourcesLoader> getLoaders() {
+        return mResourcesImpl.getAssets().getLoaders();
     }
 
     /**
-     * Add a custom {@link ResourceLoader} which is added to the paths searched by
-     * {@link AssetManager} when resolving a resource.
+     * Appends a loader to the end of the loader list. If the loader is already present in the
+     * loader list, the list will not be modified.
      *
-     * Resources are resolved as if the loader was a resource overlay, meaning the latest
-     * in the list, of equal or better config, is returned.
-     *
-     * {@link ResourcesProvider}s passed in here are not managed and a reference should be held
-     * to remove, re-use, or close them when necessary.
-     *
-     * @param resourceLoader an interface used to resolve file paths for drawables/XML files;
-     *                       a reference should be kept to remove the loader if necessary
-     * @param resourcesProvider an .apk or .arsc file representation
-     * @param index where to add the loader in the list
-     * @throws IllegalArgumentException if the resourceLoader is already added
-     * @throws IndexOutOfBoundsException if the index is invalid
+     * @param loader the loader to add
      */
-    public void addLoader(@NonNull ResourceLoader resourceLoader,
-            @NonNull ResourcesProvider resourcesProvider, @IntRange(from = 0) int index) {
-        synchronized (mResourceLoaderLock) {
-            if (mResourceLoaderManager == null) {
-                ResourcesManager.getInstance().registerForLoaders(this);
-                mResourceLoaderManager = new ResourceLoaderManager(mResourcesImpl);
+    public void addLoader(@NonNull ResourcesLoader loader) {
+        synchronized (mLock) {
+            checkCallbacksRegistered();
+
+            final List<ResourcesLoader> loaders = new ArrayList<>(
+                    mResourcesImpl.getAssets().getLoaders());
+            if (loaders.contains(loader)) {
+                return;
             }
 
-            mResourceLoaderManager.addLoader(resourceLoader, resourcesProvider, index);
+            loaders.add(loader);
+            mCallbacks.onLoadersChanged(this, loaders);
+            loader.registerOnProvidersChangedCallback(this, mCallbacks);
         }
     }
 
     /**
-     * @see #addLoader(ResourceLoader, ResourcesProvider, int).
+     * Removes a loader from the loaders. If the loader is not present in the loader list, the list
+     * will not be modified.
      *
-     * Adds to the end of the list.
-     *
-     * @return index the loader was added at
+     * @param loader the loader to remove
      */
-    public int addLoader(@NonNull ResourceLoader resourceLoader,
-            @NonNull ResourcesProvider resourcesProvider) {
-        synchronized (mResourceLoaderLock) {
-            int index = getLoaders().size();
-            addLoader(resourceLoader, resourcesProvider, index);
-            return index;
-        }
-    }
+    public void removeLoader(@NonNull ResourcesLoader loader) {
+        synchronized (mLock) {
+            checkCallbacksRegistered();
 
-    /**
-     * Remove a loader previously added by
-     * {@link #addLoader(ResourceLoader, ResourcesProvider, int)}
-     *
-     * The caller maintains responsibility for holding a reference to the matching
-     * {@link ResourcesProvider} and closing it after this method has been called.
-     *
-     * @param resourceLoader the same reference passed into [addLoader
-     * @return the index the loader was at in the list, or -1 if the loader was not found
-     */
-    public int removeLoader(@NonNull ResourceLoader resourceLoader) {
-        synchronized (mResourceLoaderLock) {
-            if (mResourceLoaderManager == null) {
-                return -1;
+            final List<ResourcesLoader> loaders = new ArrayList<>(
+                    mResourcesImpl.getAssets().getLoaders());
+            if (!loaders.remove(loader)) {
+                return;
             }
 
-            return mResourceLoaderManager.removeLoader(resourceLoader);
+            mCallbacks.onLoadersChanged(this, loaders);
+            loader.unregisterOnProvidersChangedCallback(this);
         }
     }
 
     /**
-     * Swap the current set of loaders. Preferred to multiple remove/add calls as this doesn't
-     * update the resource data structures after each modification.
+     * Sets the list of loaders.
      *
-     * Set to null or an empty list to clear the set of loaders.
-     *
-     * The caller maintains responsibility for holding references to the added
-     * {@link ResourcesProvider}s and closing them after this method has been called.
-     *
-     * @param resourceLoadersAndProviders a list of pairs to add
+     * @param loaders the new loaders
      */
-    public void setLoaders(
-            @Nullable List<Pair<ResourceLoader, ResourcesProvider>> resourceLoadersAndProviders) {
-        synchronized (mResourceLoaderLock) {
-            if (mResourceLoaderManager == null) {
-                if (ArrayUtils.isEmpty(resourceLoadersAndProviders)) {
-                    return;
+    public void setLoaders(@NonNull List<ResourcesLoader> loaders) {
+        synchronized (mLock) {
+            checkCallbacksRegistered();
+
+            final List<ResourcesLoader> oldLoaders = mResourcesImpl.getAssets().getLoaders();
+            int index = 0;
+            boolean modified = loaders.size() != oldLoaders.size();
+            final ArraySet<ResourcesLoader> seenLoaders = new ArraySet<>();
+            for (final ResourcesLoader loader : loaders) {
+                if (!seenLoaders.add(loader)) {
+                    throw new IllegalArgumentException("Loader " + loader + " present twice");
                 }
 
-                ResourcesManager.getInstance().registerForLoaders(this);
-                mResourceLoaderManager = new ResourceLoaderManager(mResourcesImpl);
+                if (!modified && oldLoaders.get(index++) != loader) {
+                    modified = true;
+                }
             }
 
-            mResourceLoaderManager.setLoaders(resourceLoadersAndProviders);
+            if (!modified) {
+                return;
+            }
+
+            mCallbacks.onLoadersChanged(this, loaders);
+            for (int i = 0, n = oldLoaders.size(); i < n; i++) {
+                oldLoaders.get(i).unregisterOnProvidersChangedCallback(this);
+            }
+            for (ResourcesLoader newLoader : loaders) {
+                newLoader.registerOnProvidersChangedCallback(this, mCallbacks);
+            }
         }
+    }
+
+    /** Removes all {@link ResourcesLoader ResourcesLoader(s)}. */
+    public void clearLoaders() {
+        setLoaders(Collections.emptyList());
     }
 }

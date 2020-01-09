@@ -8519,7 +8519,8 @@ public class PackageParser {
                 Display.DEFAULT_DISPLAY,
                 null,
                 systemResources.getCompatibilityInfo(),
-                systemResources.getClassLoader());
+                systemResources.getClassLoader(),
+                null);
 
         sUseRoundIcon = overlayableRes.getBoolean(com.android.internal.R.bool.config_useRoundIcon);
     }

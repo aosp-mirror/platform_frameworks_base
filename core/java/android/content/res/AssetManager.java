@@ -27,13 +27,12 @@ import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration.NativeConfig;
-import android.content.res.loader.ResourceLoader;
-import android.content.res.loader.ResourceLoaderManager;
+import android.content.res.loader.AssetsProvider;
+import android.content.res.loader.ResourcesLoader;
 import android.content.res.loader.ResourcesProvider;
 import android.os.ParcelFileDescriptor;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.Pair;
 import android.util.SparseArray;
 import android.util.TypedValue;
 
@@ -47,6 +46,7 @@ import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -113,12 +113,7 @@ public final class AssetManager implements AutoCloseable {
     @GuardedBy("this") private int mNumRefs = 1;
     @GuardedBy("this") private HashMap<Long, RuntimeException> mRefStacks;
 
-    private ResourceLoaderManager mResourceLoaderManager;
-
-    /** @hide */
-    public void setResourceLoaderManager(ResourceLoaderManager resourceLoaderManager) {
-        mResourceLoaderManager = resourceLoaderManager;
-    }
+    private ResourcesLoader[] mLoaders;
 
     /**
      * A Builder class that helps create an AssetManager with only a single invocation of
@@ -130,9 +125,15 @@ public final class AssetManager implements AutoCloseable {
      */
     public static class Builder {
         private ArrayList<ApkAssets> mUserApkAssets = new ArrayList<>();
+        private ArrayList<ResourcesLoader> mLoaders = new ArrayList<>();
 
         public Builder addApkAssets(ApkAssets apkAssets) {
             mUserApkAssets.add(apkAssets);
+            return this;
+        }
+
+        public Builder addLoader(ResourcesLoader loader) {
+            mLoaders.add(loader);
             return this;
         }
 
@@ -140,14 +141,39 @@ public final class AssetManager implements AutoCloseable {
             // Retrieving the system ApkAssets forces their creation as well.
             final ApkAssets[] systemApkAssets = getSystem().getApkAssets();
 
-            final int totalApkAssetCount = systemApkAssets.length + mUserApkAssets.size();
+            // Filter ApkAssets so that assets provided by multiple loaders are only included once
+            // in the AssetManager assets. The last appearance of the ApkAssets dictates its load
+            // order.
+            final ArrayList<ApkAssets> loaderApkAssets = new ArrayList<>();
+            final ArraySet<ApkAssets> uniqueLoaderApkAssets = new ArraySet<>();
+            for (int i = mLoaders.size() - 1; i >= 0; i--) {
+                final List<ApkAssets> currentLoaderApkAssets = mLoaders.get(i).getApkAssets();
+                for (int j = currentLoaderApkAssets.size() - 1; j >= 0; j--) {
+                    final ApkAssets apkAssets = currentLoaderApkAssets.get(j);
+                    if (uniqueLoaderApkAssets.contains(apkAssets)) {
+                        continue;
+                    }
+
+                    uniqueLoaderApkAssets.add(apkAssets);
+                    loaderApkAssets.add(0, apkAssets);
+                }
+            }
+
+            final int totalApkAssetCount = systemApkAssets.length + mUserApkAssets.size()
+                    + loaderApkAssets.size();
             final ApkAssets[] apkAssets = new ApkAssets[totalApkAssetCount];
 
             System.arraycopy(systemApkAssets, 0, apkAssets, 0, systemApkAssets.length);
 
-            final int userApkAssetCount = mUserApkAssets.size();
-            for (int i = 0; i < userApkAssetCount; i++) {
+            // Append user ApkAssets after system ApkAssets.
+            for (int i = 0, n = mUserApkAssets.size(); i < n; i++) {
                 apkAssets[i + systemApkAssets.length] = mUserApkAssets.get(i);
+            }
+
+            // Append ApkAssets provided by loaders to the end.
+            for (int i = 0, n = loaderApkAssets.size(); i < n; i++) {
+                apkAssets[i + systemApkAssets.length  + mUserApkAssets.size()] =
+                        loaderApkAssets.get(i);
             }
 
             // Calling this constructor prevents creation of system ApkAssets, which we took care
@@ -156,6 +182,9 @@ public final class AssetManager implements AutoCloseable {
             assetManager.mApkAssets = apkAssets;
             AssetManager.nativeSetApkAssets(assetManager.mObject, apkAssets,
                     false /*invalidateCaches*/);
+            assetManager.mLoaders = mLoaders.isEmpty() ? null
+                    : mLoaders.toArray(new ResourcesLoader[0]);
+
             return assetManager;
         }
     }
@@ -430,6 +459,12 @@ public final class AssetManager implements AutoCloseable {
             invalidateCachesLocked(-1);
             return count + 1;
         }
+    }
+
+    /** @hide */
+    @NonNull
+    public List<ResourcesLoader> getLoaders() {
+        return mLoaders == null ? Collections.emptyList() : Arrays.asList(mLoaders);
     }
 
     /**
@@ -1056,38 +1091,70 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
-    private InputStream searchLoaders(int cookie, @NonNull String fileName, int accessMode)
-            throws IOException {
-        if (mResourceLoaderManager == null) {
+    private ResourcesProvider findResourcesProvider(int assetCookie) {
+        if (mLoaders == null) {
             return null;
         }
 
-        List<Pair<ResourceLoader, ResourcesProvider>> loaders =
-                mResourceLoaderManager.getInternalList();
+        int apkAssetsIndex = assetCookie - 1;
+        if (apkAssetsIndex >= mApkAssets.length || apkAssetsIndex < 0) {
+            return null;
+        }
 
-        // A cookie of 0 means no specific ApkAssets, so search everything
+        final ApkAssets apkAssets = mApkAssets[apkAssetsIndex];
+        if (!apkAssets.isForLoader()) {
+            return null;
+        }
+
+        for (int i = mLoaders.length - 1; i >= 0; i--) {
+            final ResourcesLoader loader = mLoaders[i];
+            for (int j = 0, n = loader.getProviders().size(); j < n; j++) {
+                final ResourcesProvider provider = loader.getProviders().get(j);
+                if (apkAssets == provider.getApkAssets()) {
+                    return provider;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private InputStream searchLoaders(int cookie, @NonNull String fileName, int accessMode)
+            throws IOException {
+        if (mLoaders == null) {
+            return null;
+        }
+
         if (cookie == 0) {
-            for (int index = loaders.size() - 1; index >= 0; index--) {
-                Pair<ResourceLoader, ResourcesProvider> pair = loaders.get(index);
-                try {
-                    InputStream inputStream = pair.first.loadAsset(fileName, accessMode);
-                    if (inputStream != null) {
-                        return inputStream;
+            // A cookie of 0 means no specific ApkAssets, so search everything
+            for (int i = mLoaders.length - 1; i >= 0; i--) {
+                final ResourcesLoader loader = mLoaders[i];
+                final List<ResourcesProvider> providers = loader.getProviders();
+                for (int j = providers.size() - 1; j >= 0; j--) {
+                    final AssetsProvider assetsProvider = providers.get(j).getAssetsProvider();
+                    if (assetsProvider == null) {
+                        continue;
                     }
-                } catch (IOException ignored) {
-                    // When searching, ignore read failures
+
+                    try {
+                        final InputStream inputStream = assetsProvider.loadAsset(
+                                fileName, accessMode);
+                        if (inputStream != null) {
+                            return inputStream;
+                        }
+                    } catch (IOException ignored) {
+                        // When searching, ignore read failures
+                    }
                 }
             }
 
             return null;
         }
 
-        ApkAssets apkAssets = mApkAssets[cookie - 1];
-        for (int index = loaders.size() - 1; index >= 0; index--) {
-            Pair<ResourceLoader, ResourcesProvider> pair = loaders.get(index);
-            if (pair.second.getApkAssets() == apkAssets) {
-                return pair.first.loadAsset(fileName, accessMode);
-            }
+        final ResourcesProvider provider = findResourcesProvider(cookie);
+        if (provider != null && provider.getAssetsProvider() != null) {
+            return provider.getAssetsProvider().loadAsset(
+                    fileName, accessMode);
         }
 
         return null;
@@ -1095,43 +1162,48 @@ public final class AssetManager implements AutoCloseable {
 
     private AssetFileDescriptor searchLoadersFd(int cookie, @NonNull String fileName)
             throws IOException {
-        if (mResourceLoaderManager == null) {
+        if (mLoaders == null) {
             return null;
         }
 
-        List<Pair<ResourceLoader, ResourcesProvider>> loaders =
-                mResourceLoaderManager.getInternalList();
-
-        // A cookie of 0 means no specific ApkAssets, so search everything
         if (cookie == 0) {
-            for (int index = loaders.size() - 1; index >= 0; index--) {
-                Pair<ResourceLoader, ResourcesProvider> pair = loaders.get(index);
-                try {
-                    ParcelFileDescriptor fileDescriptor = pair.first.loadAssetFd(fileName);
-                    if (fileDescriptor != null) {
-                        return new AssetFileDescriptor(fileDescriptor, 0,
-                                AssetFileDescriptor.UNKNOWN_LENGTH);
+            // A cookie of 0 means no specific ApkAssets, so search everything
+            for (int i = mLoaders.length - 1; i >= 0; i--) {
+                final ResourcesLoader loader = mLoaders[i];
+                final List<ResourcesProvider> providers = loader.getProviders();
+                for (int j = providers.size() - 1; j >= 0; j--) {
+                    final AssetsProvider assetsProvider = providers.get(j).getAssetsProvider();
+                    if (assetsProvider == null) {
+                        continue;
                     }
-                } catch (IOException ignored) {
-                    // When searching, ignore read failures
+
+                    try {
+                        final ParcelFileDescriptor fileDescriptor = assetsProvider
+                                .loadAssetParcelFd(fileName);
+                        if (fileDescriptor != null) {
+                            return new AssetFileDescriptor(fileDescriptor, 0,
+                                    AssetFileDescriptor.UNKNOWN_LENGTH);
+                        }
+                    } catch (IOException ignored) {
+                        // When searching, ignore read failures
+                    }
                 }
             }
 
             return null;
         }
 
-        ApkAssets apkAssets = mApkAssets[cookie - 1];
-        for (int index = loaders.size() - 1; index >= 0; index--) {
-            Pair<ResourceLoader, ResourcesProvider> pair = loaders.get(index);
-            if (pair.second.getApkAssets() == apkAssets) {
-                ParcelFileDescriptor fileDescriptor = pair.first.loadAssetFd(fileName);
-                if (fileDescriptor != null) {
-                    return new AssetFileDescriptor(fileDescriptor, 0,
-                            AssetFileDescriptor.UNKNOWN_LENGTH);
-                }
-                return null;
+        final ResourcesProvider provider = findResourcesProvider(cookie);
+        if (provider != null && provider.getAssetsProvider() != null) {
+            final ParcelFileDescriptor fileDescriptor = provider.getAssetsProvider()
+                    .loadAssetParcelFd(fileName);
+            if (fileDescriptor != null) {
+                return new AssetFileDescriptor(fileDescriptor, 0,
+                        AssetFileDescriptor.UNKNOWN_LENGTH);
             }
+            return null;
         }
+
         return null;
     }
 

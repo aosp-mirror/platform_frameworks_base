@@ -365,7 +365,8 @@ public final class LoadedApk {
                 mResources = ResourcesManager.getInstance().getResources(null, mResDir,
                         splitPaths, mOverlayDirs, mApplicationInfo.sharedLibraryFiles,
                         Display.DEFAULT_DISPLAY, null, getCompatibilityInfo(),
-                        getClassLoader());
+                        getClassLoader(), mApplication == null ? null
+                                : mApplication.getResources().getLoaders());
             }
         }
         mAppComponentFactory = createAppFactory(aInfo, mDefaultClassLoader);
@@ -1158,7 +1159,7 @@ public final class LoadedApk {
             mResources = ResourcesManager.getInstance().getResources(null, mResDir,
                     splitPaths, mOverlayDirs, mApplicationInfo.sharedLibraryFiles,
                     Display.DEFAULT_DISPLAY, null, getCompatibilityInfo(),
-                    getClassLoader());
+                    getClassLoader(), null);
         }
         return mResources;
     }
