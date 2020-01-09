@@ -61,7 +61,6 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
     private int mShortcutType;
     private List<AccessibilityButtonTarget> mTargets = new ArrayList<>();
-    private List<AccessibilityButtonTarget> mReadyToBeDisabledTargets = new ArrayList<>();
     private AlertDialog mAlertDialog;
     private TargetAdapter mTargetAdapter;
 
@@ -117,7 +116,6 @@ public class AccessibilityButtonChooserActivity extends Activity {
                 ACCESSIBILITY_BUTTON);
         mTargets.addAll(getServiceTargets(this, mShortcutType));
 
-        // TODO(b/146815548): Will add title to separate which one type
         mTargetAdapter = new TargetAdapter(mTargets);
         mAlertDialog = new AlertDialog.Builder(this)
                 .setAdapter(mTargetAdapter, /* listener= */ null)
@@ -269,8 +267,10 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
             switch (target.getFragmentType()) {
                 case AccessibilityServiceFragmentType.LEGACY:
+                    updateLegacyActionItemVisibility(context, holder);
+                    break;
                 case AccessibilityServiceFragmentType.INVISIBLE:
-                    updateLegacyOrInvisibleActionItemVisibility(context, holder);
+                    updateInvisibleActionItemVisibility(context, holder);
                     break;
                 case AccessibilityServiceFragmentType.INTUITIVE:
                     updateIntuitiveActionItemVisibility(context, holder, target);
@@ -283,9 +283,21 @@ public class AccessibilityButtonChooserActivity extends Activity {
             }
         }
 
-        private void updateLegacyOrInvisibleActionItemVisibility(@NonNull Context context,
+        private void updateLegacyActionItemVisibility(@NonNull Context context,
                 @NonNull ViewHolder holder) {
-            final boolean isEditMenuMode = mShortcutMenuMode == ShortcutMenuMode.EDIT;
+            final boolean isEditMenuMode = (mShortcutMenuMode == ShortcutMenuMode.EDIT);
+
+            holder.mLabelView.setEnabled(!isEditMenuMode);
+            holder.mViewItem.setEnabled(!isEditMenuMode);
+            holder.mViewItem.setImageDrawable(context.getDrawable(R.drawable.ic_delete_item));
+            holder.mViewItem.setVisibility(View.VISIBLE);
+            holder.mSwitchItem.setVisibility(View.GONE);
+            holder.mItemContainer.setVisibility(isEditMenuMode ? View.VISIBLE : View.GONE);
+        }
+
+        private void updateInvisibleActionItemVisibility(@NonNull Context context,
+                @NonNull ViewHolder holder) {
+            final boolean isEditMenuMode = (mShortcutMenuMode == ShortcutMenuMode.EDIT);
 
             holder.mViewItem.setImageDrawable(context.getDrawable(R.drawable.ic_delete_item));
             holder.mViewItem.setVisibility(View.VISIBLE);
@@ -295,7 +307,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
         private void updateIntuitiveActionItemVisibility(@NonNull Context context,
                 @NonNull ViewHolder holder, AccessibilityButtonTarget target) {
-            final boolean isEditMenuMode = mShortcutMenuMode == ShortcutMenuMode.EDIT;
+            final boolean isEditMenuMode = (mShortcutMenuMode == ShortcutMenuMode.EDIT);
 
             holder.mViewItem.setImageDrawable(context.getDrawable(R.drawable.ic_delete_item));
             holder.mViewItem.setVisibility(isEditMenuMode ? View.VISIBLE : View.GONE);
@@ -306,7 +318,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
         private void updateBounceActionItemVisibility(@NonNull Context context,
                 @NonNull ViewHolder holder) {
-            final boolean isEditMenuMode = mShortcutMenuMode == ShortcutMenuMode.EDIT;
+            final boolean isEditMenuMode = (mShortcutMenuMode == ShortcutMenuMode.EDIT);
 
             holder.mViewItem.setImageDrawable(
                     isEditMenuMode ? context.getDrawable(R.drawable.ic_delete_item)
@@ -383,20 +395,23 @@ public class AccessibilityButtonChooserActivity extends Activity {
     }
 
     private void onTargetDeleted(AdapterView<?> parent, View view, int position, long id) {
-        // TODO(b/147027236): Will discuss with UX designer what UX behavior about deleting item
-        //  is good for user.
-        mReadyToBeDisabledTargets.add(mTargets.get(position));
-        mTargets.remove(position);
-        mTargetAdapter.notifyDataSetChanged();
+        // TODO(b/146967898): disable service when deleting the target and the target only have
+        //  last one shortcut item, only remove it from shortcut list otherwise.
+        if ((mShortcutType == ACCESSIBILITY_BUTTON) && (mTargets.get(position).mFragmentType
+                != AccessibilityServiceFragmentType.LEGACY)) {
+            mTargets.remove(position);
+            mTargetAdapter.notifyDataSetChanged();
+        }
+
+        if (mTargets.isEmpty()) {
+            mAlertDialog.dismiss();
+        }
     }
 
     private void onCancelButtonClicked() {
-        resetAndUpdateTargets();
-
         mTargetAdapter.setShortcutMenuMode(ShortcutMenuMode.LAUNCH);
         mTargetAdapter.notifyDataSetChanged();
 
-        mAlertDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setVisibility(View.GONE);
         mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(
                 getString(R.string.edit_accessibility_shortcut_menu_button));
 
@@ -407,49 +422,19 @@ public class AccessibilityButtonChooserActivity extends Activity {
         mTargetAdapter.setShortcutMenuMode(ShortcutMenuMode.EDIT);
         mTargetAdapter.notifyDataSetChanged();
 
-        mAlertDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText(
+        mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(
                 getString(R.string.cancel_accessibility_shortcut_menu_button));
-        mAlertDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setVisibility(View.VISIBLE);
-        mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(
-                getString(R.string.save_accessibility_shortcut_menu_button));
-
-        updateDialogListeners();
-    }
-
-    private void onSaveButtonClicked() {
-        disableTargets();
-        resetAndUpdateTargets();
-
-        mTargetAdapter.setShortcutMenuMode(ShortcutMenuMode.LAUNCH);
-        mTargetAdapter.notifyDataSetChanged();
-
-        mAlertDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setVisibility(View.GONE);
-        mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(
-                getString(R.string.edit_accessibility_shortcut_menu_button));
 
         updateDialogListeners();
     }
 
     private void updateDialogListeners() {
         final boolean isEditMenuMode =
-                mTargetAdapter.getShortcutMenuMode() == ShortcutMenuMode.EDIT;
+                (mTargetAdapter.getShortcutMenuMode() == ShortcutMenuMode.EDIT);
 
-        mAlertDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setOnClickListener(
-                view -> onCancelButtonClicked());
         mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(
-                isEditMenuMode ? view -> onSaveButtonClicked() : view -> onEditButtonClicked());
+                isEditMenuMode ? view -> onCancelButtonClicked() : view -> onEditButtonClicked());
         mAlertDialog.getListView().setOnItemClickListener(
                 isEditMenuMode ? this::onTargetDeleted : this::onTargetSelected);
-    }
-
-    private void disableTargets() {
-        for (AccessibilityButtonTarget service : mReadyToBeDisabledTargets) {
-            // TODO(b/146967898): disable services.
-        }
-    }
-
-    private void resetAndUpdateTargets() {
-        mTargets.clear();
-        mTargets.addAll(getServiceTargets(this, mShortcutType));
     }
 }

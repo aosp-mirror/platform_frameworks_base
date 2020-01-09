@@ -4358,10 +4358,7 @@
     <string name="accessibility_shortcut_menu_button">Empty</string>
 
     <!-- Text in button that edit the accessibility shortcut menu. [CHAR LIMIT=100] -->
-    <string name="edit_accessibility_shortcut_menu_button">Edit</string>
-
-    <!-- Text in button that save the accessibility shortcut menu changed status. [CHAR LIMIT=100] -->
-    <string name="save_accessibility_shortcut_menu_button">Save</string>
+    <string name="edit_accessibility_shortcut_menu_button">Edit shortcuts</string>
 
     <!-- Text in button that cancel the accessibility shortcut menu changed status. [CHAR LIMIT=100] -->
     <string name="cancel_accessibility_shortcut_menu_button">Cancel</string>

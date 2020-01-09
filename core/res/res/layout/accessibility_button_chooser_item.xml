@@ -36,7 +36,7 @@
         android:id="@+id/accessibility_button_target_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="14dp"
         android:layout_weight="1"
         android:textColor="?attr/textColorPrimary"/>
 
