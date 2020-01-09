@@ -6173,6 +6173,25 @@ package android.net.wifi {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_CARRIER_PROVISIONING) public android.net.wifi.WifiNetworkSuggestion.Builder setCarrierId(int);
   }
 
+  public final class WifiOemConfigStoreMigrationHook {
+    method @Nullable public static android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData load();
+  }
+
+  public static final class WifiOemConfigStoreMigrationHook.MigrationData implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public java.util.List<android.net.wifi.WifiConfiguration> getUserSavedNetworkConfigurations();
+    method @Nullable public android.net.wifi.SoftApConfiguration getUserSoftApConfiguration();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData> CREATOR;
+  }
+
+  public static final class WifiOemConfigStoreMigrationHook.MigrationData.Builder {
+    ctor public WifiOemConfigStoreMigrationHook.MigrationData.Builder();
+    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData build();
+    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
+    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
+  }
+
   public class WifiScanner {
     method @Deprecated public void configureWifiChange(int, int, int, int, int, android.net.wifi.WifiScanner.BssidInfo[]);
     method @Deprecated public void configureWifiChange(android.net.wifi.WifiScanner.WifiChangeSettings);
