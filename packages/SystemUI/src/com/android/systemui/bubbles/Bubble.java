@@ -32,20 +32,17 @@ import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -84,6 +81,18 @@ class Bubble {
 
     /** Whether flyout text should be suppressed, regardless of any other flags or state. */
     private boolean mSuppressFlyout;
+
+    /**
+     * Presentational info about the flyout.
+     */
+    public static class FlyoutMessage {
+        @Nullable public Drawable senderAvatar;
+        @Nullable public CharSequence senderName;
+        @Nullable public CharSequence message;
+        @Nullable public boolean isGroupChat;
+    }
+
+    private FlyoutMessage mFlyoutMessage;
 
     public static String groupId(NotificationEntry entry) {
         UserHandle user = entry.getSbn().getUser();
@@ -194,6 +203,7 @@ class Bubble {
 
         mShortcutInfo = info.shortcutInfo;
         mAppName = info.appName;
+        mFlyoutMessage = info.flyoutMessage;
 
         mExpandedView.update(this);
         mIconView.update(this, info.badgedBubbleImage, info.dotColor, info.dotPath);
@@ -307,6 +317,10 @@ class Bubble {
         mSuppressFlyout = suppressFlyout;
     }
 
+    FlyoutMessage getFlyoutMessage() {
+        return mFlyoutMessage;
+    }
+
     /**
      * Returns whether the notification for this bubble is a foreground service. It shows that this
      * is an ongoing bubble.
@@ -366,72 +380,6 @@ class Bubble {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return intent;
-    }
-
-    /**
-     * Returns our best guess for the most relevant text summary of the latest update to this
-     * notification, based on its type. Returns null if there should not be an update message.
-     */
-    CharSequence getUpdateMessage(Context context) {
-        final Notification underlyingNotif = mEntry.getSbn().getNotification();
-        final Class<? extends Notification.Style> style = underlyingNotif.getNotificationStyle();
-
-        try {
-            if (Notification.BigTextStyle.class.equals(style)) {
-                // Return the big text, it is big so probably important. If it's not there use the
-                // normal text.
-                CharSequence bigText =
-                        underlyingNotif.extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
-                return !TextUtils.isEmpty(bigText)
-                        ? bigText
-                        : underlyingNotif.extras.getCharSequence(Notification.EXTRA_TEXT);
-            } else if (Notification.MessagingStyle.class.equals(style)) {
-                final List<Notification.MessagingStyle.Message> messages =
-                        Notification.MessagingStyle.Message.getMessagesFromBundleArray(
-                                (Parcelable[]) underlyingNotif.extras.get(
-                                        Notification.EXTRA_MESSAGES));
-
-                final Notification.MessagingStyle.Message latestMessage =
-                        Notification.MessagingStyle.findLatestIncomingMessage(messages);
-
-                if (latestMessage != null) {
-                    final CharSequence personName = latestMessage.getSenderPerson() != null
-                            ? latestMessage.getSenderPerson().getName()
-                            : null;
-
-                    // Prepend the sender name if available since group chats also use messaging
-                    // style.
-                    if (!TextUtils.isEmpty(personName)) {
-                        return context.getResources().getString(
-                                R.string.notification_summary_message_format,
-                                personName,
-                                latestMessage.getText());
-                    } else {
-                        return latestMessage.getText();
-                    }
-                }
-            } else if (Notification.InboxStyle.class.equals(style)) {
-                CharSequence[] lines =
-                        underlyingNotif.extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
-
-                // Return the last line since it should be the most recent.
-                if (lines != null && lines.length > 0) {
-                    return lines[lines.length - 1];
-                }
-            } else if (Notification.MediaStyle.class.equals(style)) {
-                // Return nothing, media updates aren't typically useful as a text update.
-                return null;
-            } else {
-                // Default to text extra.
-                return underlyingNotif.extras.getCharSequence(Notification.EXTRA_TEXT);
-            }
-        } catch (ClassCastException | NullPointerException | ArrayIndexOutOfBoundsException e) {
-            // No use crashing, we'll just return null and the caller will assume there's no update
-            // message.
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     private int getDimenForPackageUser(Context context, int resId, String pkg, int userId) {

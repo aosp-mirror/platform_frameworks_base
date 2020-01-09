@@ -1086,13 +1086,15 @@
     <!-- How much the bubble flyout text container is elevated. -->
     <dimen name="bubble_flyout_elevation">4dp</dimen>
     <!-- How much padding is around the left and right sides of the flyout text. -->
-    <dimen name="bubble_flyout_padding_x">16dp</dimen>
+    <dimen name="bubble_flyout_padding_x">12dp</dimen>
     <!-- How much padding is around the top and bottom of the flyout text. -->
-    <dimen name="bubble_flyout_padding_y">8dp</dimen>
+    <dimen name="bubble_flyout_padding_y">10dp</dimen>
     <!-- Size of the triangle that points from the flyout to the bubble stack. -->
     <dimen name="bubble_flyout_pointer_size">6dp</dimen>
     <!-- How much space to leave between the flyout (tip of the arrow) and the bubble stack. -->
     <dimen name="bubble_flyout_space_from_bubble">8dp</dimen>
+    <!-- How much space to leave between the flyout text and the avatar displayed in the flyout. -->
+    <dimen name="bubble_flyout_avatar_message_space">6dp</dimen>
     <!-- Padding between status bar and bubbles when displayed in expanded state -->
     <dimen name="bubble_padding_top">16dp</dimen>
     <!-- Size of individual bubbles. -->

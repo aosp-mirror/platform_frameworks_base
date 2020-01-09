@@ -1376,9 +1376,10 @@ public class BubbleStackView extends FrameLayout {
      */
     @VisibleForTesting
     void animateInFlyoutForBubble(Bubble bubble) {
-        final CharSequence updateMessage = bubble.getUpdateMessage(getContext());
+        Bubble.FlyoutMessage flyoutMessage = bubble.getFlyoutMessage();
         final BadgedImageView bubbleView = bubble.getIconView();
-        if (updateMessage == null
+        if (flyoutMessage == null
+                || flyoutMessage.message == null
                 || !bubble.showFlyout()
                 || isExpanded()
                 || mIsExpansionAnimating
@@ -1431,8 +1432,8 @@ public class BubbleStackView extends FrameLayout {
                 };
                 mFlyout.postDelayed(mAnimateInFlyout, 200);
             };
-            mFlyout.setupFlyoutStartingAsDot(
-                    updateMessage, mStackAnimationController.getStackPosition(), getWidth(),
+            mFlyout.setupFlyoutStartingAsDot(flyoutMessage,
+                    mStackAnimationController.getStackPosition(), getWidth(),
                     mStackAnimationController.isStackOnLeftSide(),
                     bubble.getIconView().getDotColor() /* dotColor */,
                     expandFlyoutAfterDelay /* onLayoutComplete */,

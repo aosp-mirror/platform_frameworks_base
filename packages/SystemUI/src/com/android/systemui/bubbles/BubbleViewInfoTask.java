@@ -21,6 +21,9 @@ import static com.android.systemui.bubbles.BadgedImageView.WHITE_SCRIM_ALPHA;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.NonNull;
+import android.app.Notification;
+import android.app.Person;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -31,7 +34,9 @@ import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Parcelable;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.PathParser;
 import android.view.LayoutInflater;
@@ -41,8 +46,10 @@ import androidx.annotation.Nullable;
 import com.android.internal.graphics.ColorUtils;
 import com.android.launcher3.icons.BitmapInfo;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 /**
  * Simple task to inflate views & load necessary info to display a bubble.
@@ -98,6 +105,9 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         }
     }
 
+    /**
+     * Info necessary to render a bubble.
+     */
     static class BubbleViewInfo {
         BadgedImageView imageView;
         BubbleExpandedView expandedView;
@@ -106,6 +116,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         Bitmap badgedBubbleImage;
         int dotColor;
         Path dotPath;
+        Bubble.FlyoutMessage flyoutMessage;
 
         @Nullable
         static BubbleViewInfo populate(Context c, BubbleStackView stackView,
@@ -176,7 +187,80 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             info.dotPath = iconPath;
             info.dotColor = ColorUtils.blendARGB(badgeBitmapInfo.color,
                     Color.WHITE, WHITE_SCRIM_ALPHA);
+
+            // Flyout
+            info.flyoutMessage = extractFlyoutMessage(c, b.getEntry());
             return info;
         }
+    }
+
+
+    /**
+     * Returns our best guess for the most relevant text summary of the latest update to this
+     * notification, based on its type. Returns null if there should not be an update message.
+     */
+    @NonNull
+    static Bubble.FlyoutMessage extractFlyoutMessage(Context context,
+            NotificationEntry entry) {
+        final Notification underlyingNotif = entry.getSbn().getNotification();
+        final Class<? extends Notification.Style> style = underlyingNotif.getNotificationStyle();
+
+        Bubble.FlyoutMessage bubbleMessage = new Bubble.FlyoutMessage();
+        bubbleMessage.isGroupChat = underlyingNotif.extras.getBoolean(
+                Notification.EXTRA_IS_GROUP_CONVERSATION);
+        try {
+            if (Notification.BigTextStyle.class.equals(style)) {
+                // Return the big text, it is big so probably important. If it's not there use the
+                // normal text.
+                CharSequence bigText =
+                        underlyingNotif.extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
+                bubbleMessage.message = !TextUtils.isEmpty(bigText)
+                        ? bigText
+                        : underlyingNotif.extras.getCharSequence(Notification.EXTRA_TEXT);
+                return bubbleMessage;
+            } else if (Notification.MessagingStyle.class.equals(style)) {
+                final List<Notification.MessagingStyle.Message> messages =
+                        Notification.MessagingStyle.Message.getMessagesFromBundleArray(
+                                (Parcelable[]) underlyingNotif.extras.get(
+                                        Notification.EXTRA_MESSAGES));
+
+                final Notification.MessagingStyle.Message latestMessage =
+                        Notification.MessagingStyle.findLatestIncomingMessage(messages);
+                if (latestMessage != null) {
+                    bubbleMessage.message = latestMessage.getText();
+                    Person sender = latestMessage.getSenderPerson();
+                    bubbleMessage.senderName = sender != null
+                            ? sender.getName()
+                            : null;
+                    bubbleMessage.senderAvatar = sender != null
+                            ? sender.getIcon().loadDrawable(context)
+                            : null;
+                    return bubbleMessage;
+                }
+            } else if (Notification.InboxStyle.class.equals(style)) {
+                CharSequence[] lines =
+                        underlyingNotif.extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
+
+                // Return the last line since it should be the most recent.
+                if (lines != null && lines.length > 0) {
+                    bubbleMessage.message = lines[lines.length - 1];
+                    return bubbleMessage;
+                }
+            } else if (Notification.MediaStyle.class.equals(style)) {
+                // Return nothing, media updates aren't typically useful as a text update.
+                return bubbleMessage;
+            } else {
+                // Default to text extra.
+                bubbleMessage.message =
+                        underlyingNotif.extras.getCharSequence(Notification.EXTRA_TEXT);
+                return bubbleMessage;
+            }
+        } catch (ClassCastException | NullPointerException | ArrayIndexOutOfBoundsException e) {
+            // No use crashing, we'll just return null and the caller will assume there's no update
+            // message.
+            e.printStackTrace();
+        }
+
+        return bubbleMessage;
     }
 }
