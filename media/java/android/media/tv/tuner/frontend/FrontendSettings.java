@@ -19,6 +19,7 @@ package android.media.tv.tuner.frontend;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
 
 import java.lang.annotation.Retention;
@@ -29,6 +30,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@SystemApi
 public abstract class FrontendSettings {
     /** @hide */
     @IntDef({TYPE_UNDEFINED, TYPE_ANALOG, TYPE_ATSC, TYPE_ATSC3, TYPE_DVBC, TYPE_DVBS, TYPE_DVBT,

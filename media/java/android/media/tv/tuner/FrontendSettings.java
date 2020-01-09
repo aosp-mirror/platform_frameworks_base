@@ -16,33 +16,10 @@
 
 package android.media.tv.tuner;
 
-import android.annotation.SystemApi;
-
 /**
  * Frontend settings for tune and scan operations.
+ * TODO: remove
  * @hide
  */
-@SystemApi
 public abstract class FrontendSettings {
-    private final int mFrequency;
-
-    /** @hide */
-    public FrontendSettings(int frequency) {
-        mFrequency = frequency;
-    }
-
-    /**
-     * Returns the frontend type.
-     */
-    public abstract int getType();
-
-    /**
-     * Gets the frequency setting.
-     *
-     * @return the frequency in Hz.
-     */
-    public final int getFrequency() {
-        return mFrequency;
-    }
-
 }
