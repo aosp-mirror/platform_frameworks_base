@@ -18,13 +18,18 @@ package {
 
 apex {
     name: "com.android.sdkext",
-    manifest: "manifest.json",
+    defaults: [ "com.android.sdkext-defaults" ],
     binaries: [ "derive_sdk" ],
+    prebuilts: [ "cur_sdkinfo" ],
+    manifest: "manifest.json",
+}
+
+apex_defaults {
+    name: "com.android.sdkext-defaults",
     java_libs: [ "framework-sdkextensions" ],
     prebuilts: [
-      "com.android.sdkext.ldconfig",
-      "cur_sdkinfo",
-      "derive_sdk.rc",
+        "com.android.sdkext.ldconfig",
+        "derive_sdk.rc",
     ],
     key: "com.android.sdkext.key",
     certificate: ":com.android.sdkext.certificate",
