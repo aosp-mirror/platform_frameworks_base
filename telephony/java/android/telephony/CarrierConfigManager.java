@@ -3124,7 +3124,6 @@ public class CarrierConfigManager {
      *   EAP-AKA: "0"
      *   EAP-SIM: "1"
      *   EAP-AKA_PRIME: "6"
-     * @hide
      */
     public static final String ENABLE_EAP_METHOD_PREFIX_BOOL = "enable_eap_method_prefix_bool";
 
