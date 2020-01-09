@@ -881,31 +881,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullWifiBytesTransfer(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long token = Binder.clearCallingIdentity();
-        try {
-            // TODO: Consider caching the following call to get BatteryStatsInternal.
-            BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
-            String[] ifaces = bs.getWifiIfaces();
-            if (ifaces.length == 0) {
-                return;
-            }
-            if (mNetworkStatsService == null) {
-                Slog.e(TAG, "NetworkStats Service is not available!");
-                return;
-            }
-            // Combine all the metrics per Uid into one record.
-            NetworkStats stats = mNetworkStatsService.getDetailedUidStats(ifaces).groupedByUid();
-            addNetworkStats(tagId, pulledData, stats, false);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Pulling netstats for wifi bytes has error", e);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
     private void pullWifiBytesTransferByFgBg(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2382,149 +2357,180 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
         switch (tagId) {
-            case StatsLog.WIFI_BYTES_TRANSFER: {
-                pullWifiBytesTransfer(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
+            
             case StatsLog.MOBILE_BYTES_TRANSFER: {
                 pullMobileBytesTransfer(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG: {
                 pullWifiBytesTransferByFgBg(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG: {
                 pullMobileBytesTransferByFgBg(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.BLUETOOTH_BYTES_TRANSFER: {
                 pullBluetoothBytesTransfer(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.KERNEL_WAKELOCK: {
                 pullKernelWakelock(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.CPU_TIME_PER_FREQ: {
                 pullCpuTimePerFreq(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.CPU_TIME_PER_UID: {
                 pullKernelUidCpuTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.CPU_TIME_PER_UID_FREQ: {
                 pullKernelUidCpuFreqTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.CPU_CLUSTER_TIME: {
                 pullKernelUidCpuClusterTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.CPU_ACTIVE_TIME: {
                 pullKernelUidCpuActiveTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.WIFI_ACTIVITY_INFO: {
                 pullWifiActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.MODEM_ACTIVITY_INFO: {
                 pullModemActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.BLUETOOTH_ACTIVITY_INFO: {
                 pullBluetoothActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.SYSTEM_UPTIME: {
                 pullSystemUpTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.SYSTEM_ELAPSED_REALTIME: {
                 pullSystemElapsedRealtime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.PROCESS_MEMORY_STATE: {
                 pullProcessMemoryState(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.PROCESS_MEMORY_HIGH_WATER_MARK: {
                 pullProcessMemoryHighWaterMark(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.PROCESS_MEMORY_SNAPSHOT: {
                 pullProcessMemorySnapshot(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.SYSTEM_ION_HEAP_SIZE: {
                 pullSystemIonHeapSize(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.PROCESS_SYSTEM_ION_HEAP_SIZE: {
                 pullProcessSystemIonHeapSize(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.BINDER_CALLS: {
                 pullBinderCallsStats(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.BINDER_CALLS_EXCEPTIONS: {
                 pullBinderCallsStatsExceptions(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.LOOPER_STATS: {
                 pullLooperStats(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.DISK_STATS: {
                 pullDiskStats(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.DIRECTORY_USAGE: {
                 pullDirectoryUsage(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.APP_SIZE: {
                 pullAppSize(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.CATEGORY_SIZE: {
                 pullCategorySize(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.NUM_FINGERPRINTS_ENROLLED: {
                 pullNumBiometricsEnrolled(BiometricsProtoEnums.MODALITY_FINGERPRINT, tagId,
                         elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.NUM_FACES_ENROLLED: {
                 pullNumBiometricsEnrolled(BiometricsProtoEnums.MODALITY_FACE, tagId, elapsedNanos,
                         wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.PROC_STATS: {
                 pullProcessStats(ProcessStats.REPORT_ALL, tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.PROC_STATS_PKG_PROC: {
                 pullProcessStats(ProcessStats.REPORT_PKG_PROC_STATS, tagId, elapsedNanos,
                         wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.DISK_IO: {
                 pullDiskIo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.POWER_PROFILE: {
                 pullPowerProfile(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.BUILD_INFORMATION: {
                 pullBuildInformation(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.PROCESS_CPU_TIME: {
                 pullProcessCpuTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
@@ -2533,73 +2539,90 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 pullCpuTimePerThreadFreq(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.DEVICE_CALCULATED_POWER_USE: {
                 pullDeviceCalculatedPowerUse(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.DEVICE_CALCULATED_POWER_BLAME_UID: {
                 pullDeviceCalculatedPowerBlameUid(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER: {
                 pullDeviceCalculatedPowerBlameOther(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.TEMPERATURE: {
                 pullTemperature(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.COOLING_DEVICE: {
                 pullCoolingDevices(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.DEBUG_ELAPSED_CLOCK: {
                 pullDebugElapsedClock(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.DEBUG_FAILING_ELAPSED_CLOCK: {
                 pullDebugFailingElapsedClock(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.ROLE_HOLDER: {
                 pullRoleHolders(elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.DANGEROUS_PERMISSION_STATE: {
                 pullDangerousPermissionState(StatsLog.DANGEROUS_PERMISSION_STATE, elapsedNanos,
                         wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED: {
                 pullDangerousPermissionState(StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED,
                         elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.TIME_ZONE_DATA_INFO: {
                 pullTimeZoneDataInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.EXTERNAL_STORAGE_INFO: {
                 pullExternalStorageInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.APPS_ON_EXTERNAL_STORAGE_INFO: {
                 pullAppsOnExternalStorageInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.FACE_SETTINGS: {
                 pullFaceSettings(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.APP_OPS: {
                 pullAppOps(elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             case StatsLog.NOTIFICATION_REMOTE_VIEWS: {
                 pullNotificationStats(NotificationManagerService.REPORT_REMOTE_VIEWS,
                         tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+
             default:
                 Slog.w(TAG, "No such tagId data as " + tagId);
                 return null;
