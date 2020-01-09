@@ -800,7 +800,12 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const Config
       }
 
       // This is a normal reference.
-      return util::make_unique<Reference>(data, ref_type);
+      auto reference = util::make_unique<Reference>(data, ref_type);
+      if (res_value.dataType == android::Res_value::TYPE_DYNAMIC_REFERENCE ||
+          res_value.dataType == android::Res_value::TYPE_DYNAMIC_ATTRIBUTE) {
+        reference->is_dynamic = true;
+      }
+      return reference;
     } break;
   }
 

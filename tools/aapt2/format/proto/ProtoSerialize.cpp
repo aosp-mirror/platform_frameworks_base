@@ -418,6 +418,9 @@ static void SerializeReferenceToPb(const Reference& ref, pb::Reference* pb_ref) 
 
   pb_ref->set_private_(ref.private_reference);
   pb_ref->set_type(SerializeReferenceTypeToPb(ref.reference_type));
+  if (ref.is_dynamic) {
+    pb_ref->mutable_is_dynamic()->set_value(ref.is_dynamic);
+  }
 }
 
 template <typename T>
