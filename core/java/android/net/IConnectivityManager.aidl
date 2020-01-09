@@ -142,11 +142,15 @@ interface IConnectivityManager
 
     void setAirplaneMode(boolean enable);
 
-    int registerNetworkFactory(in Messenger messenger, in String name);
-
     boolean requestBandwidthUpdate(in Network network);
 
+    int registerNetworkFactory(in Messenger messenger, in String name);
     void unregisterNetworkFactory(in Messenger messenger);
+
+    int registerNetworkProvider(in Messenger messenger, in String name);
+    void unregisterNetworkProvider(in Messenger messenger);
+
+    void declareNetworkRequestUnfulfillable(in NetworkRequest request);
 
     int registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
             in NetworkCapabilities nc, int score, in NetworkMisc misc, in int factorySerialNumber);
