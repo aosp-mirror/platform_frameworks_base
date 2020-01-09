@@ -6336,6 +6336,8 @@ message PermissionGrantRequestResultReported {
         USER_DENIED_WITH_PREJUDICE_IN_SETTINGS = 14;
         // permission was automatically revoked after one-time permission expired
         AUTO_ONE_TIME_PERMISSION_REVOKED = 15;
+        // permission was automatically revoked for unused app
+        AUTO_UNUSED_APP_PERMISSION_REVOKED = 16;
     }
     // The result of the permission grant
     optional Result result = 6;
