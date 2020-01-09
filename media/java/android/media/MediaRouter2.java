@@ -39,7 +39,6 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +47,7 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * A new Media Router
@@ -118,7 +118,7 @@ public class MediaRouter2 {
     final Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
 
     @GuardedBy("sLock")
-    private List<String> mControlCategories = Collections.emptyList();
+    private RouteDiscoveryRequest mDiscoveryRequest = RouteDiscoveryRequest.EMPTY;
 
     // TODO: Make MediaRouter2 is always connected to the MediaRouterService.
     @GuardedBy("sLock")
@@ -152,7 +152,6 @@ public class MediaRouter2 {
         mMediaRouterService = IMediaRouterService.Stub.asInterface(
                 ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
         mPackageName = mContext.getPackageName();
-        //TODO: read control categories from the manifest
         mHandler = new Handler(Looper.getMainLooper());
 
         List<MediaRoute2Info> currentSystemRoutes = null;
@@ -188,24 +187,18 @@ public class MediaRouter2 {
 
     /**
      * Registers a callback to discover routes and to receive events when they change.
-     */
-    public void registerRouteCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull RouteCallback routeCallback) {
-        registerRouteCallback(executor, routeCallback, 0);
-    }
-
-    /**
-     * Registers a callback to discover routes and to receive events when they change.
      * <p>
      * If you register the same callback twice or more, it will be ignored.
      * </p>
      */
     public void registerRouteCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull RouteCallback routeCallback, int flags) {
+            @NonNull RouteCallback routeCallback,
+            @NonNull RouteDiscoveryRequest request) {
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(routeCallback, "callback must not be null");
+        Objects.requireNonNull(request, "request must not be null");
 
-        RouteCallbackRecord record = new RouteCallbackRecord(executor, routeCallback, flags);
+        RouteCallbackRecord record = new RouteCallbackRecord(executor, routeCallback, request);
         if (!mRouteCallbackRecords.addIfAbsent(record)) {
             Log.w(TAG, "Ignoring the same callback");
             return;
@@ -216,7 +209,8 @@ public class MediaRouter2 {
                 Client2 client = new Client2();
                 try {
                     mMediaRouterService.registerClient2(client, mPackageName);
-                    mMediaRouterService.setControlCategories(client, mControlCategories);
+                    updateDiscoveryRequestLocked();
+                    mMediaRouterService.setDiscoveryRequest2(client, mDiscoveryRequest);
                     mClient = client;
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to register media router.", ex);
@@ -238,7 +232,7 @@ public class MediaRouter2 {
         Objects.requireNonNull(routeCallback, "callback must not be null");
 
         if (!mRouteCallbackRecords.remove(
-                new RouteCallbackRecord(null, routeCallback, 0))) {
+                new RouteCallbackRecord(null, routeCallback, null))) {
             Log.w(TAG, "Ignoring unknown callback");
             return;
         }
@@ -256,30 +250,10 @@ public class MediaRouter2 {
         }
     }
 
-    //TODO(b/139033746): Rename "Control Category" when it's finalized.
-    /**
-     * Sets the control categories of the application.
-     * Routes that support at least one of the given control categories are handled
-     * by the media router.
-     */
-    public void setControlCategories(@NonNull Collection<String> controlCategories) {
-        Objects.requireNonNull(controlCategories, "control categories must not be null");
-
-        List<String> newControlCategories = new ArrayList<>(controlCategories);
-
-        synchronized (sRouterLock) {
-            mShouldUpdateRoutes = true;
-
-            // invoke callbacks due to control categories change
-            handleControlCategoriesChangedLocked(newControlCategories);
-            if (mClient != null) {
-                try {
-                    mMediaRouterService.setControlCategories(mClient, mControlCategories);
-                } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to set control categories.", ex);
-                }
-            }
-        }
+    private void updateDiscoveryRequestLocked() {
+        mDiscoveryRequest = new RouteDiscoveryRequest.Builder(
+                mRouteCallbackRecords.stream().map(record -> record.mRequest).collect(
+                        Collectors.toList())).build();
     }
 
     /**
@@ -287,8 +261,8 @@ public class MediaRouter2 {
      * known to the media router.
      * Please note that the list can be changed before callbacks are invoked.
      *
-     * @return the list of routes that support at least one of the control categories set by
-     * the application
+     * @return the list of routes that contains at least one of the route types in discovery
+     * requests registered by the application
      */
     @NonNull
     public List<MediaRoute2Info> getRoutes() {
@@ -298,7 +272,7 @@ public class MediaRouter2 {
 
                 List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
                 for (MediaRoute2Info route : mRoutes.values()) {
-                    if (route.supportsControlCategories(mControlCategories)) {
+                    if (route.containsRouteTypes(mDiscoveryRequest.getRouteTypes())) {
                         filteredRoutes.add(route);
                     }
                 }
@@ -350,26 +324,26 @@ public class MediaRouter2 {
      * Requests the media route provider service to create a session with the given route.
      *
      * @param route the route you want to create a session with.
-     * @param controlCategory the control category of the session. Should not be empty
+     * @param routeType the route type of the session. Should not be empty
      *
      * @see SessionCallback#onSessionCreated
      * @see SessionCallback#onSessionCreationFailed
      */
     @NonNull
     public void requestCreateSession(@NonNull MediaRoute2Info route,
-            @NonNull String controlCategory) {
+            @NonNull String routeType) {
         Objects.requireNonNull(route, "route must not be null");
-        if (TextUtils.isEmpty(controlCategory)) {
-            throw new IllegalArgumentException("controlCategory must not be empty");
+        if (TextUtils.isEmpty(routeType)) {
+            throw new IllegalArgumentException("routeType must not be empty");
         }
         // TODO: Check the given route exists
-        // TODO: Check the route supports the given controlCategory
+        // TODO: Check the route supports the given routeType
 
         final int requestId;
         requestId = mSessionCreationRequestCnt.getAndIncrement();
 
         SessionCreationRequest request = new SessionCreationRequest(
-                requestId, route, controlCategory);
+                requestId, route, routeType);
         mSessionCreationRequests.add(request);
 
         Client2 client;
@@ -379,7 +353,7 @@ public class MediaRouter2 {
         if (client != null) {
             try {
                 mMediaRouterService.requestCreateSession(
-                        client, route, controlCategory, requestId);
+                        client, route, routeType, requestId);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to request to create session.", ex);
                 mHandler.sendMessage(obtainMessage(MediaRouter2::createControllerOnHandler,
@@ -461,36 +435,6 @@ public class MediaRouter2 {
         }
     }
 
-    private void handleControlCategoriesChangedLocked(List<String> newControlCategories) {
-        List<MediaRoute2Info> addedRoutes = new ArrayList<>();
-        List<MediaRoute2Info> removedRoutes = new ArrayList<>();
-
-        List<String> prevControlCategories = mControlCategories;
-        mControlCategories = newControlCategories;
-
-        for (MediaRoute2Info route : mRoutes.values()) {
-            boolean preSupported = route.supportsControlCategories(prevControlCategories);
-            boolean postSupported = route.supportsControlCategories(newControlCategories);
-            if (preSupported == postSupported) {
-                continue;
-            }
-            if (preSupported) {
-                removedRoutes.add(route);
-            } else {
-                addedRoutes.add(route);
-            }
-        }
-
-        if (removedRoutes.size() > 0) {
-            mHandler.sendMessage(obtainMessage(MediaRouter2::notifyRoutesRemoved,
-                    MediaRouter2.this, removedRoutes));
-        }
-        if (addedRoutes.size() > 0) {
-            mHandler.sendMessage(obtainMessage(MediaRouter2::notifyRoutesAdded,
-                    MediaRouter2.this, addedRoutes));
-        }
-    }
-
     void addRoutesOnHandler(List<MediaRoute2Info> routes) {
         // TODO: When onRoutesAdded is first called,
         //  1) clear mRoutes before adding the routes
@@ -500,7 +444,7 @@ public class MediaRouter2 {
         synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.put(route.getId(), route);
-                if (route.supportsControlCategories(mControlCategories)) {
+                if (route.containsRouteTypes(mDiscoveryRequest.getRouteTypes())) {
                     addedRoutes.add(route);
                 }
             }
@@ -516,7 +460,7 @@ public class MediaRouter2 {
         synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.remove(route.getId());
-                if (route.supportsControlCategories(mControlCategories)) {
+                if (route.containsRouteTypes(mDiscoveryRequest.getRouteTypes())) {
                     removedRoutes.add(route);
                 }
             }
@@ -532,7 +476,7 @@ public class MediaRouter2 {
         synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.put(route.getId(), route);
-                if (route.supportsControlCategories(mControlCategories)) {
+                if (route.containsRouteTypes(mDiscoveryRequest.getRouteTypes())) {
                     changedRoutes.add(route);
                 }
             }
@@ -562,27 +506,27 @@ public class MediaRouter2 {
             mSessionCreationRequests.remove(matchingRequest);
 
             MediaRoute2Info requestedRoute = matchingRequest.mRoute;
-            String requestedControlCategory = matchingRequest.mControlCategory;
+            String requestedRouteType = matchingRequest.mRouteType;
 
             if (sessionInfo == null) {
                 // TODO: We may need to distinguish between failure and rejection.
                 //       One way can be introducing 'reason'.
-                notifySessionCreationFailed(requestedRoute, requestedControlCategory);
+                notifySessionCreationFailed(requestedRoute, requestedRouteType);
                 return;
-            } else if (!TextUtils.equals(requestedControlCategory,
-                    sessionInfo.getControlCategory())) {
-                Log.w(TAG, "The session has different control category from what we requested. "
-                        + "(requested=" + requestedControlCategory
-                        + ", actual=" + sessionInfo.getControlCategory()
+            } else if (!TextUtils.equals(requestedRouteType,
+                    sessionInfo.getRouteType())) {
+                Log.w(TAG, "The session has different route type from what we requested. "
+                        + "(requested=" + requestedRouteType
+                        + ", actual=" + sessionInfo.getRouteType()
                         + ")");
-                notifySessionCreationFailed(requestedRoute, requestedControlCategory);
+                notifySessionCreationFailed(requestedRoute, requestedRouteType);
                 return;
             } else if (!sessionInfo.getSelectedRoutes().contains(requestedRoute.getId())) {
                 Log.w(TAG, "The session does not contain the requested route. "
                         + "(requestedRouteId=" + requestedRoute.getId()
                         + ", actualRoutes=" + sessionInfo.getSelectedRoutes()
                         + ")");
-                notifySessionCreationFailed(requestedRoute, requestedControlCategory);
+                notifySessionCreationFailed(requestedRoute, requestedRouteType);
                 return;
             } else if (!TextUtils.equals(requestedRoute.getProviderId(),
                     sessionInfo.getProviderId())) {
@@ -590,7 +534,7 @@ public class MediaRouter2 {
                         + "(requested route's providerId=" + requestedRoute.getProviderId()
                         + ", actual providerId=" + sessionInfo.getProviderId()
                         + ")");
-                notifySessionCreationFailed(requestedRoute, requestedControlCategory);
+                notifySessionCreationFailed(requestedRoute, requestedRouteType);
                 return;
             }
         }
@@ -666,24 +610,41 @@ public class MediaRouter2 {
         notifyControllerReleased(matchingController);
     }
 
+    private List<MediaRoute2Info> filterRoutes(List<MediaRoute2Info> routes,
+            RouteDiscoveryRequest discoveryRequest) {
+        return routes.stream()
+                .filter(
+                        route -> route.containsRouteTypes(discoveryRequest.getRouteTypes()))
+                .collect(Collectors.toList());
+    }
+
     private void notifyRoutesAdded(List<MediaRoute2Info> routes) {
         for (RouteCallbackRecord record: mRouteCallbackRecords) {
-            record.mExecutor.execute(
-                    () -> record.mRouteCallback.onRoutesAdded(routes));
+            List<MediaRoute2Info> filteredRoutes = filterRoutes(routes, record.mRequest);
+            if (!filteredRoutes.isEmpty()) {
+                record.mExecutor.execute(
+                        () -> record.mRouteCallback.onRoutesAdded(filteredRoutes));
+            }
         }
     }
 
     private void notifyRoutesRemoved(List<MediaRoute2Info> routes) {
         for (RouteCallbackRecord record: mRouteCallbackRecords) {
-            record.mExecutor.execute(
-                    () -> record.mRouteCallback.onRoutesRemoved(routes));
+            List<MediaRoute2Info> filteredRoutes = filterRoutes(routes, record.mRequest);
+            if (!filteredRoutes.isEmpty()) {
+                record.mExecutor.execute(
+                        () -> record.mRouteCallback.onRoutesRemoved(filteredRoutes));
+            }
         }
     }
 
     private void notifyRoutesChanged(List<MediaRoute2Info> routes) {
         for (RouteCallbackRecord record: mRouteCallbackRecords) {
-            record.mExecutor.execute(
-                    () -> record.mRouteCallback.onRoutesChanged(routes));
+            List<MediaRoute2Info> filteredRoutes = filterRoutes(routes, record.mRequest);
+            if (!filteredRoutes.isEmpty()) {
+                record.mExecutor.execute(
+                        () -> record.mRouteCallback.onRoutesChanged(filteredRoutes));
+            }
         }
     }
 
@@ -694,10 +655,10 @@ public class MediaRouter2 {
         }
     }
 
-    private void notifySessionCreationFailed(MediaRoute2Info route, String controlCategory) {
+    private void notifySessionCreationFailed(MediaRoute2Info route, String routeType) {
         for (SessionCallbackRecord record: mSessionCallbackRecords) {
             record.mExecutor.execute(
-                    () -> record.mSessionCallback.onSessionCreationFailed(route, controlCategory));
+                    () -> record.mSessionCallback.onSessionCreationFailed(route, routeType));
         }
     }
 
@@ -764,10 +725,10 @@ public class MediaRouter2 {
          * Called when the session creation request failed.
          *
          * @param requestedRoute the route info which was used for the request
-         * @param requestedControlCategory the control category which was used for the request
+         * @param requestedRouteType the route type which was used for the request
          */
         public void onSessionCreationFailed(@NonNull MediaRoute2Info requestedRoute,
-                @NonNull String requestedControlCategory) {}
+                @NonNull String requestedRouteType) {}
 
         /**
          * Called when the session info has changed.
@@ -840,12 +801,12 @@ public class MediaRouter2 {
         }
 
         /**
-         * @return the category of routes that the session includes.
+         * @return the type of routes that the session includes.
          */
         @NonNull
-        public String getControlCategory() {
+        public String getRouteType() {
             synchronized (mControllerLock) {
-                return mSessionInfo.getControlCategory();
+                return mSessionInfo.getRouteType();
             }
         }
 
@@ -1104,11 +1065,11 @@ public class MediaRouter2 {
         // TODO: This method uses two locks (mLock outside, sLock inside).
         //       Check if there is any possiblity of deadlock.
         private List<MediaRoute2Info> getRoutesWithIdsLocked(List<String> routeIds) {
+
             List<MediaRoute2Info> routes = new ArrayList<>();
             synchronized (sRouterLock) {
                 for (String routeId : routeIds) {
-                    MediaRoute2Info route = mRoutes.get(
-                            MediaRoute2Info.toUniqueId(mSessionInfo.mProviderId, routeId));
+                    MediaRoute2Info route = mRoutes.get(routeId);
                     if (route != null) {
                         routes.add(route);
                     }
@@ -1121,13 +1082,13 @@ public class MediaRouter2 {
     final class RouteCallbackRecord {
         public final Executor mExecutor;
         public final RouteCallback mRouteCallback;
-        public final int mFlags;
+        public final RouteDiscoveryRequest mRequest;
 
         RouteCallbackRecord(@Nullable Executor executor, @NonNull RouteCallback routeCallback,
-                int flags) {
+                @Nullable RouteDiscoveryRequest request) {
             mRouteCallback = routeCallback;
             mExecutor = executor;
-            mFlags = flags;
+            mRequest = request;
         }
 
         @Override
@@ -1176,13 +1137,13 @@ public class MediaRouter2 {
 
     final class SessionCreationRequest {
         public final MediaRoute2Info mRoute;
-        public final String mControlCategory;
+        public final String mRouteType;
         public final int mRequestId;
 
         SessionCreationRequest(int requestId, @NonNull MediaRoute2Info route,
-                @NonNull String controlCategory) {
+                @NonNull String routeType) {
             mRoute = route;
-            mControlCategory = controlCategory;
+            mRouteType = routeType;
             mRequestId = requestId;
         }
     }

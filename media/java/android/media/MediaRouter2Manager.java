@@ -65,7 +65,7 @@ public class MediaRouter2Manager {
     @GuardedBy("mRoutesLock")
     private final Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
     @NonNull
-    final ConcurrentMap<String, List<String>> mControlCategoryMap = new ConcurrentHashMap<>();
+    final ConcurrentMap<String, List<String>> mRouteTypeMap = new ConcurrentHashMap<>();
 
     private AtomicInteger mNextRequestId = new AtomicInteger(1);
 
@@ -144,7 +144,7 @@ public class MediaRouter2Manager {
                 }
                 //TODO: clear mRoutes?
                 mClient = null;
-                mControlCategoryMap.clear();
+                mRouteTypeMap.clear();
             }
         }
     }
@@ -160,14 +160,14 @@ public class MediaRouter2Manager {
     public List<MediaRoute2Info> getAvailableRoutes(@NonNull String packageName) {
         Objects.requireNonNull(packageName, "packageName must not be null");
 
-        List<String> controlCategories = mControlCategoryMap.get(packageName);
-        if (controlCategories == null) {
+        List<String> routeTypes = mRouteTypeMap.get(packageName);
+        if (routeTypes == null) {
             return Collections.emptyList();
         }
         List<MediaRoute2Info> routes = new ArrayList<>();
         synchronized (mRoutesLock) {
             for (MediaRoute2Info route : mRoutes.values()) {
-                if (route.supportsControlCategories(controlCategories)) {
+                if (route.containsRouteTypes(routeTypes)) {
                     routes.add(route);
                 }
             }
@@ -352,15 +352,15 @@ public class MediaRouter2Manager {
         }
     }
 
-    void updateControlCategories(String packageName, List<String> categories) {
-        List<String> prevCategories = mControlCategoryMap.put(packageName, categories);
-        if ((prevCategories == null && categories.size() == 0)
-                || Objects.equals(categories, prevCategories)) {
+    void updateRouteTypes(String packageName, List<String> routeTypes) {
+        List<String> prevTypes = mRouteTypeMap.put(packageName, routeTypes);
+        if ((prevTypes == null && routeTypes.size() == 0)
+                || Objects.equals(routeTypes, prevTypes)) {
             return;
         }
         for (CallbackRecord record : mCallbackRecords) {
             record.mExecutor.execute(
-                    () -> record.mCallback.onControlCategoriesChanged(packageName, categories));
+                    () -> record.mCallback.onControlCategoriesChanged(packageName, routeTypes));
         }
     }
 
@@ -398,13 +398,13 @@ public class MediaRouter2Manager {
 
 
         /**
-         * Called when the control categories of an app is changed.
+         * Called when the route types of an app is changed.
          *
          * @param packageName the package name of the application
-         * @param controlCategories the list of control categories set by an application.
+         * @param routeTypes the list of route types set by an application.
          */
         public void onControlCategoriesChanged(@NonNull String packageName,
-                @NonNull List<String> controlCategories) {}
+                @NonNull List<String> routeTypes) {}
     }
 
     final class CallbackRecord {
@@ -440,10 +440,9 @@ public class MediaRouter2Manager {
                     MediaRouter2Manager.this, packageName, route));
         }
 
-        @Override
-        public void notifyControlCategoriesChanged(String packageName, List<String> categories) {
-            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::updateControlCategories,
-                    MediaRouter2Manager.this, packageName, categories));
+        public void notifyRouteTypesChanged(String packageName, List<String> routeTypes) {
+            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::updateRouteTypes,
+                    MediaRouter2Manager.this, packageName, routeTypes));
         }
 
         @Override
