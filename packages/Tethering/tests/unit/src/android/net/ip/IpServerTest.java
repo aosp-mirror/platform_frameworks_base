@@ -16,14 +16,14 @@
 
 package android.net.ip;
 
-import static android.net.ConnectivityManager.TETHERING_BLUETOOTH;
-import static android.net.ConnectivityManager.TETHERING_USB;
-import static android.net.ConnectivityManager.TETHERING_WIFI;
-import static android.net.ConnectivityManager.TETHERING_WIFI_P2P;
-import static android.net.ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR;
-import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
-import static android.net.ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR;
 import static android.net.INetd.IF_STATE_UP;
+import static android.net.TetheringManager.TETHERING_BLUETOOTH;
+import static android.net.TetheringManager.TETHERING_USB;
+import static android.net.TetheringManager.TETHERING_WIFI;
+import static android.net.TetheringManager.TETHERING_WIFI_P2P;
+import static android.net.TetheringManager.TETHER_ERROR_ENABLE_NAT_ERROR;
+import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
+import static android.net.TetheringManager.TETHER_ERROR_TETHER_IFACE_ERROR;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.ip.IpServer.STATE_AVAILABLE;
 import static android.net.ip.IpServer.STATE_LOCAL_ONLY;
