@@ -47,9 +47,13 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.statusbar.notification.collection.notifcollection.CoalescedEvent;
-import com.android.systemui.statusbar.notification.collection.notifcollection.GroupCoalescer;
-import com.android.systemui.statusbar.notification.collection.notifcollection.GroupCoalescer.BatchableNotificationHandler;
+import com.android.systemui.statusbar.notification.collection.coalescer.CoalescedEvent;
+import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
+import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer.BatchableNotificationHandler;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
+import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.util.Assert;
 
 import java.lang.annotation.Retention;
@@ -446,7 +450,7 @@ public class NotifCollection {
             REASON_TIMEOUT,
     })
     @Retention(RetentionPolicy.SOURCE)
-    @interface CancellationReason {}
+    public @interface CancellationReason {}
 
     public static final int REASON_UNKNOWN = 0;
 }

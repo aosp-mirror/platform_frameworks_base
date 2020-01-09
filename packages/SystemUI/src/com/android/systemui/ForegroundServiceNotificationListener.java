@@ -28,8 +28,8 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
-import com.android.systemui.statusbar.notification.collection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

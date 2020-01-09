@@ -21,7 +21,7 @@ import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager
-import com.android.systemui.statusbar.notification.collection.NotificationRowBinder
+import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder
 import com.android.systemui.statusbar.notification.logging.NotifLog
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone

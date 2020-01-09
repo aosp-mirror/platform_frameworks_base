@@ -19,10 +19,10 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
-import com.android.systemui.statusbar.notification.collection.NotifCollectionListener;
-import com.android.systemui.statusbar.notification.collection.NotifLifetimeExtender;
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

@@ -22,8 +22,8 @@ import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.log.RichEvent;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
-import com.android.systemui.statusbar.notification.collection.notifcollection.GroupCoalescer;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

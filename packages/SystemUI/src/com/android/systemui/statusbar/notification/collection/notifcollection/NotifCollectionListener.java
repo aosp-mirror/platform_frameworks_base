@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.collection;
+package com.android.systemui.statusbar.notification.collection.notifcollection;
 
+import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
  * Listener interface for {@link NotifCollection}.
@@ -36,7 +38,9 @@ public interface NotifCollectionListener {
     }
 
     /**
-     * Called immediately after a notification has been removed from the collection.
+     * Called whenever a notification is retracted by system server. This method is not called
+     * immediately after a user dismisses a notification: we wait until we receive confirmation from
+     * system server before considering the notification removed.
      */
     default void onEntryRemoved(
             NotificationEntry entry,

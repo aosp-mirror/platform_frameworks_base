@@ -26,11 +26,11 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
-import com.android.systemui.statusbar.notification.collection.NotifCollectionListener;
-import com.android.systemui.statusbar.notification.collection.NotifLifetimeExtender;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -25,6 +25,9 @@ import android.service.notification.StatusBarNotification;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.statusbar.notification.InflationException;
+import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
+import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 

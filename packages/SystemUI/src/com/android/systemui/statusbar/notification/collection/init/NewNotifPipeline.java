@@ -25,9 +25,9 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
-import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
 import com.android.systemui.statusbar.notification.collection.coordinator.NotifCoordinators;
-import com.android.systemui.statusbar.notification.collection.notifcollection.GroupCoalescer;
+import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

@@ -17,11 +17,11 @@
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
-import com.android.systemui.statusbar.notification.collection.NotifCollectionListener;
-import com.android.systemui.statusbar.notification.collection.NotifLifetimeExtender;
 import com.android.systemui.statusbar.notification.collection.init.NewNotifPipeline;
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 
 /**
  * Interface for registering callbacks to the {@link NewNotifPipeline}.
