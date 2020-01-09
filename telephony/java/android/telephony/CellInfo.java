@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.radio.V1_4.CellInfo.Info;
 import android.os.Parcel;
@@ -179,6 +180,18 @@ public abstract class CellInfo implements Parcelable {
      *
      * @return a time stamp in nanos since boot.
      */
+    @SuppressLint("MethodNameUnits")
+    public long getTimestampNanos() {
+        return mTimeStamp;
+    }
+
+    /**
+     * Approximate time this cell information was received from the modem.
+     *
+     * @return a time stamp in nanos since boot.
+     * @deprecated Use {@link #getTimestampNanos} instead.
+     */
+    @Deprecated
     public long getTimeStamp() {
         return mTimeStamp;
     }
