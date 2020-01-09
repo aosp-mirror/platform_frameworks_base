@@ -2356,6 +2356,7 @@ package android.provider {
   public final class Settings {
     field public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
     field public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE = "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
+    field public static final String ACTION_TETHER_PROVISIONING_UI = "android.settings.TETHER_PROVISIONING_UI";
     field public static final int RESET_MODE_PACKAGE_DEFAULTS = 1; // 0x1
   }
 
@@ -2372,6 +2373,7 @@ package android.provider {
     field public static final String LOW_POWER_MODE_STICKY = "low_power_sticky";
     field public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
     field public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
+    field public static final String TETHER_OFFLOAD_DISABLED = "tether_offload_disabled";
     field public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
   }
 
