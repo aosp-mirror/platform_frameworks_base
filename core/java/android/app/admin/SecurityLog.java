@@ -18,7 +18,7 @@ package android.app.admin;
 
 import android.annotation.IntDef;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;

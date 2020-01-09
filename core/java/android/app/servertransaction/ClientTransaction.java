@@ -17,9 +17,9 @@
 package android.app.servertransaction;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ClientTransactionHandler;
 import android.app.IApplicationThread;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;

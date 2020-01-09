@@ -19,7 +19,7 @@ package android.app.job;
 import static android.app.job.JobInfo.NETWORK_BYTES_UNKNOWN;
 
 import android.annotation.BytesLong;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Parcel;

@@ -19,7 +19,7 @@ package android.animation;
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Looper;
 import android.os.Trace;
