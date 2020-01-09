@@ -235,11 +235,16 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         Slog.v(TAG, "broadcast=ACTION_CANCEL_ENABLE_ROLLBACK token=" + token);
                     }
                     synchronized (mLock) {
+                        NewRollback found = null;
                         for (NewRollback rollback : mNewRollbacks) {
                             if (rollback.hasToken(token)) {
-                                rollback.setCancelled();
-                                return;
+                                found = rollback;
+                                break;
                             }
+                        }
+                        if (found != null) {
+                            mNewRollbacks.remove(found);
+                            found.rollback.delete(mAppDataRollbackHelper);
                         }
                     }
                 }
@@ -433,10 +438,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     rollback.delete(mAppDataRollbackHelper);
                 }
             }
-            for (NewRollback newRollback : mNewRollbacks) {
+            Iterator<NewRollback> iter2 = mNewRollbacks.iterator();
+            while (iter2.hasNext()) {
+                NewRollback newRollback = iter2.next();
                 if (newRollback.rollback.includesPackage(packageName)) {
-                    newRollback.setCancelled();
+                    iter2.remove();
+                    newRollback.rollback.delete(mAppDataRollbackHelper);
                 }
+
             }
         }
     }
@@ -1220,12 +1229,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             Slog.v(TAG, "completeEnableRollback id=" + rollback.info.getRollbackId());
         }
 
-        if (newRollback.isCancelled()) {
-            Slog.e(TAG, "Rollback has been cancelled by PackageManager");
-            rollback.delete(mAppDataRollbackHelper);
-            return null;
-        }
-
         // We are checking if number of packages (excluding apk-in-apex) we enabled for rollback is
         // equal to the number of sessions we are installing, to ensure we didn't skip enabling
         // of any sessions. If we successfully enable an apex, then we can assume we enabled
@@ -1348,9 +1351,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
          */
         private final int[] mPackageSessionIds;
 
-        @GuardedBy("mNewRollbackLock")
-        private boolean mIsCancelled = false;
-
         /**
          * The number of sessions in the install which are notified with success by
          * {@link PackageInstaller.SessionCallback#onFinished(int, boolean)}.
@@ -1383,32 +1383,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         boolean hasToken(int token) {
             synchronized (mNewRollbackLock) {
                 return mTokens.indexOf(token) != -1;
-            }
-        }
-
-        /**
-         * Returns true if this NewRollback has been cancelled.
-         *
-         * <p>Rollback could be invalidated and cancelled if RollbackManager receives
-         * {@link Intent#ACTION_CANCEL_ENABLE_ROLLBACK} from {@link PackageManager}.
-         *
-         * <p>The main underlying assumption here is that if enabling the rollback times out, then
-         * {@link PackageManager} will NOT send
-         * {@link PackageInstaller.SessionCallback#onFinished(int, boolean)} before it broadcasts
-         * {@link Intent#ACTION_CANCEL_ENABLE_ROLLBACK}.
-         */
-        boolean isCancelled() {
-            synchronized (mNewRollbackLock) {
-                return mIsCancelled;
-            }
-        }
-
-        /**
-         * Sets this NewRollback to be marked as cancelled.
-         */
-        void setCancelled() {
-            synchronized (mNewRollbackLock) {
-                mIsCancelled = true;
             }
         }
 
