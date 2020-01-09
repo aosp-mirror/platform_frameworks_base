@@ -194,6 +194,14 @@ public class LocalMediaManager implements BluetoothCallback {
         }
     }
 
+    void dispatchDeviceAttributesChanged() {
+        synchronized (mCallbacks) {
+            for (DeviceCallback callback : mCallbacks) {
+                callback.onDeviceAttributesChanged();
+            }
+        }
+    }
+
     /**
      * Stop scan MediaDevice
      */
@@ -306,14 +314,12 @@ public class LocalMediaManager implements BluetoothCallback {
             }
             mCurrentConnectedDevice = connectDevice;
             updatePhoneMediaDeviceSummary();
-            dispatchDeviceListUpdate();
+            dispatchDeviceAttributesChanged();
         }
 
         @Override
         public void onDeviceAttributesChanged() {
-            addPhoneDeviceIfNecessary();
-            removePhoneMediaDeviceIfNecessary();
-            dispatchDeviceListUpdate();
+            dispatchDeviceAttributesChanged();
         }
     }
 
@@ -327,7 +333,7 @@ public class LocalMediaManager implements BluetoothCallback {
          *
          * @param devices MediaDevice list
          */
-        void onDeviceListUpdate(List<MediaDevice> devices);
+        default void onDeviceListUpdate(List<MediaDevice> devices) {};
 
         /**
          * Callback for notifying the connected device is changed.
@@ -338,6 +344,12 @@ public class LocalMediaManager implements BluetoothCallback {
          * {@link MediaDeviceState#STATE_CONNECTING},
          * {@link MediaDeviceState#STATE_DISCONNECTED}
          */
-        void onSelectedDeviceStateChanged(MediaDevice device, @MediaDeviceState int state);
+        default void onSelectedDeviceStateChanged(MediaDevice device,
+                @MediaDeviceState int state) {};
+
+        /**
+         * Callback for notifying the device attributes is changed.
+         */
+        default void onDeviceAttributesChanged() {};
     }
 }
