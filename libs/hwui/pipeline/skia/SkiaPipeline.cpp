@@ -457,7 +457,10 @@ void SkiaPipeline::renderFrameImpl(const SkRect& clip,
                                    const Rect& contentDrawBounds, SkCanvas* canvas,
                                    const SkMatrix& preTransform) {
     SkAutoCanvasRestore saver(canvas, true);
-    canvas->androidFramework_setDeviceClipRestriction(preTransform.mapRect(clip).roundOut());
+    auto clipRestriction = preTransform.mapRect(clip).roundOut();
+    canvas->androidFramework_setDeviceClipRestriction(clipRestriction);
+    canvas->drawAnnotation(SkRect::Make(clipRestriction), "AndroidDeviceClipRestriction",
+        nullptr);
     canvas->concat(preTransform);
 
     // STOPSHIP: Revert, temporary workaround to clear always F16 frame buffer for b/74976293
