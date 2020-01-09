@@ -35,8 +35,8 @@ import com.android.internal.util.ArrayUtils;
 import libcore.util.EmptyArray;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -56,7 +56,7 @@ public class SQLiteQueryBuilder {
             "(?i)(AVG|COUNT|MAX|MIN|SUM|TOTAL|GROUP_CONCAT)\\((.+)\\)");
 
     private Map<String, String> mProjectionMap = null;
-    private List<Pattern> mProjectionGreylist = null;
+    private Collection<Pattern> mProjectionGreylist = null;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String mTables = "";
@@ -196,20 +196,16 @@ public class SQLiteQueryBuilder {
      * Sets a projection greylist of columns that will be allowed through, even
      * when {@link #setStrict(boolean)} is enabled. This provides a way for
      * abusive custom columns like {@code COUNT(*)} to continue working.
-     *
-     * @hide
      */
-    public void setProjectionGreylist(@Nullable List<Pattern> projectionGreylist) {
+    public void setProjectionGreylist(@Nullable Collection<Pattern> projectionGreylist) {
         mProjectionGreylist = projectionGreylist;
     }
 
     /**
      * Gets the projection greylist for the query, as last configured by
-     * {@link #setProjectionGreylist(List)}.
-     *
-     * @hide
+     * {@link #setProjectionGreylist}.
      */
-    public @Nullable List<Pattern> getProjectionGreylist() {
+    public @Nullable Collection<Pattern> getProjectionGreylist() {
         return mProjectionGreylist;
     }
 
@@ -244,25 +240,27 @@ public class SQLiteQueryBuilder {
     }
 
     /**
-     * When set, the selection is verified against malicious arguments.
-     * When using this class to create a statement using
+     * When set, the selection is verified against malicious arguments. When
+     * using this class to create a statement using
      * {@link #buildQueryString(boolean, String, String[], String, String, String, String, String)},
-     * non-numeric limits will raise an exception. If a projection map is specified, fields
-     * not in that map will be ignored.
-     * If this class is used to execute the statement directly using
+     * non-numeric limits will raise an exception. If a projection map is
+     * specified, fields not in that map will be ignored. If this class is used
+     * to execute the statement directly using
      * {@link #query(SQLiteDatabase, String[], String, String[], String, String, String)}
      * or
      * {@link #query(SQLiteDatabase, String[], String, String[], String, String, String, String)},
-     * additionally also parenthesis escaping selection are caught.
-     *
-     * To summarize: To get maximum protection against malicious third party apps (for example
-     * content provider consumers), make sure to do the following:
+     * additionally also parenthesis escaping selection are caught. To
+     * summarize: To get maximum protection against malicious third party apps
+     * (for example content provider consumers), make sure to do the following:
      * <ul>
      * <li>Set this value to true</li>
      * <li>Use a projection map</li>
-     * <li>Use one of the query overloads instead of getting the statement as a sql string</li>
+     * <li>Use one of the query overloads instead of getting the statement as a
+     * sql string</li>
      * </ul>
-     * By default, this value is false.
+     * <p>
+     * This feature is disabled by default on each newly constructed
+     * {@link SQLiteQueryBuilder} and needs to be manually enabled.
      */
     public void setStrict(boolean strict) {
         if (strict) {
@@ -287,6 +285,9 @@ public class SQLiteQueryBuilder {
      * This enforcement applies to {@link #insert}, {@link #query}, and
      * {@link #update} operations. Any enforcement failures will throw an
      * {@link IllegalArgumentException}.
+     * <p>
+     * This feature is disabled by default on each newly constructed
+     * {@link SQLiteQueryBuilder} and needs to be manually enabled.
      */
     public void setStrictColumns(boolean strictColumns) {
         if (strictColumns) {
@@ -323,6 +324,9 @@ public class SQLiteQueryBuilder {
      * {@link #delete} operations. This enforcement does not apply to trusted
      * inputs, such as those provided by {@link #appendWhere}. Any enforcement
      * failures will throw an {@link IllegalArgumentException}.
+     * <p>
+     * This feature is disabled by default on each newly constructed
+     * {@link SQLiteQueryBuilder} and needs to be manually enabled.
      */
     public void setStrictGrammar(boolean strictGrammar) {
         if (strictGrammar) {

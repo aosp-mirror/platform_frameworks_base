@@ -31,6 +31,9 @@ import static android.system.OsConstants.S_ISLNK;
 import static android.system.OsConstants.S_ISREG;
 import static android.system.OsConstants.S_IWOTH;
 
+import android.annotation.NonNull;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
@@ -253,6 +256,9 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      *             be opened with the requested mode.
      * @see #parseMode(String)
      */
+    // We can't accept a generic Executor here, since we need to use
+    // MessageQueue.addOnFileDescriptorEventListener()
+    @SuppressLint("ExecutorRegistration")
     public static ParcelFileDescriptor open(File file, int mode, Handler handler,
             final OnCloseListener listener) throws IOException {
         if (handler == null) {
@@ -268,9 +274,22 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         return fromFd(fd, handler, listener);
     }
 
-    /** {@hide} */
-    public static ParcelFileDescriptor fromPfd(ParcelFileDescriptor pfd, Handler handler,
-            final OnCloseListener listener) throws IOException {
+    /**
+     * Create a new ParcelFileDescriptor wrapping an already-opened file.
+     *
+     * @param pfd The already-opened file.
+     * @param handler to call listener from.
+     * @param listener to be invoked when the returned descriptor has been
+     *            closed.
+     * @return a new ParcelFileDescriptor pointing to the given file.
+     * @hide
+     */
+    @SystemApi
+    // We can't accept a generic Executor here, since we need to use
+    // MessageQueue.addOnFileDescriptorEventListener()
+    @SuppressLint("ExecutorRegistration")
+    public static @NonNull ParcelFileDescriptor wrap(@NonNull ParcelFileDescriptor pfd,
+            @NonNull Handler handler, @NonNull OnCloseListener listener) throws IOException {
         final FileDescriptor original = new FileDescriptor();
         original.setInt$(pfd.detachFd());
         return fromFd(original, handler, listener);

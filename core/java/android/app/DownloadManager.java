@@ -16,7 +16,9 @@
 
 package android.app;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -40,11 +42,13 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.provider.BaseColumns;
 import android.provider.Downloads;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
+import android.util.LongSparseArray;
 import android.util.Pair;
 
 import java.io.File;
@@ -1066,6 +1070,37 @@ public class DownloadManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setAccessFilename(boolean accessFilename) {
         mAccessFilename = accessFilename;
+    }
+
+    /**
+     * Notify {@link DownloadManager} that the given {@link MediaStore} items
+     * were just deleted so that {@link DownloadManager} internal data
+     * structures can be cleaned up.
+     *
+     * @param idToMime map from {@link BaseColumns#_ID} to
+     *            {@link ContentResolver#getType(Uri)}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE)
+    public void onMediaStoreDownloadsDeleted(@NonNull LongSparseArray<String> idToMime) {
+        try (ContentProviderClient client = mResolver
+                .acquireUnstableContentProviderClient(mBaseUri)) {
+           final Bundle callExtras = new Bundle();
+           final long[] ids = new long[idToMime.size()];
+           final String[] mimeTypes = new String[idToMime.size()];
+           for (int i = idToMime.size() - 1; i >= 0; --i) {
+               ids[i] = idToMime.keyAt(i);
+               mimeTypes[i] = idToMime.valueAt(i);
+           }
+           callExtras.putLongArray(android.provider.Downloads.EXTRA_IDS, ids);
+           callExtras.putStringArray(android.provider.Downloads.EXTRA_MIME_TYPES,
+                   mimeTypes);
+           client.call(android.provider.Downloads.CALL_MEDIASTORE_DOWNLOADS_DELETED,
+                   null, callExtras);
+        } catch (RemoteException e) {
+            // Should not happen
+        }
     }
 
     /**
