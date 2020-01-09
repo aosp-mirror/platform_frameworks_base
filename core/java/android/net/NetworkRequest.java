@@ -247,9 +247,8 @@ public class NetworkRequest implements Parcelable {
          * removing even the capabilities that are set by default when the object is constructed.
          *
          * @return The builder to facilitate chaining.
-         * @hide
          */
-        @UnsupportedAppUsage
+        @NonNull
         public Builder clearCapabilities() {
             mNetworkCapabilities.clearAll();
             return this;
