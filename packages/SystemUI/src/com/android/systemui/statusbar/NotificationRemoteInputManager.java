@@ -584,15 +584,7 @@ public class NotificationRemoteInputManager implements Dumpable {
 
     public void bindRow(ExpandableNotificationRow row) {
         row.setRemoteInputController(mRemoteInputController);
-    }
-
-    /**
-     * Return on-click handler for notification remote views
-     *
-     * @return on-click handler
-     */
-    public RemoteViews.OnClickHandler getRemoteViewsOnClickHandler() {
-        return mOnClickHandler;
+        row.setRemoteViewClickHandler(mOnClickHandler);
     }
 
     @VisibleForTesting

@@ -70,7 +70,6 @@ import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.init.NewNotifPipeline;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
-import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -147,7 +146,6 @@ public class CarStatusBarModule {
             NotificationGutsManager notificationGutsManager,
             NotificationLogger notificationLogger,
             NotificationEntryManager notificationEntryManager,
-            NotificationRowContentBinder notificationRowContentBinder,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             NotificationViewHierarchyManager notificationViewHierarchyManager,
             KeyguardViewMediator keyguardViewMediator,
@@ -234,7 +232,6 @@ public class CarStatusBarModule {
                 notificationGutsManager,
                 notificationLogger,
                 notificationEntryManager,
-                notificationRowContentBinder,
                 notificationInterruptionStateProvider,
                 notificationViewHierarchyManager,
                 keyguardViewMediator,
