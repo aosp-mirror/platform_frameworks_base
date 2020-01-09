@@ -20,7 +20,7 @@ apex {
     name: "com.android.sdkext",
     manifest: "manifest.json",
     binaries: [ "derive_sdk" ],
-    java_libs: [ "framework-sdkext" ],
+    java_libs: [ "framework-sdkextensions" ],
     prebuilts: [
       "com.android.sdkext.ldconfig",
       "cur_sdkinfo",
@@ -31,8 +31,8 @@ apex {
 }
 
 sdk {
-    name: "sdkext-sdk",
-    java_header_libs: [ "framework-sdkext-stubs-systemapi" ],
+    name: "sdkextensions-sdk",
+    java_header_libs: [ "framework-sdkextensions-stubs-systemapi" ],
 }
 
 apex_key {
