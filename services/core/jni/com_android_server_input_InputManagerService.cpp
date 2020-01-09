@@ -312,7 +312,6 @@ private:
     void updateInactivityTimeoutLocked();
     void handleInterceptActions(jint wmActions, nsecs_t when, uint32_t& policyFlags);
     void ensureSpriteControllerLocked();
-    const DisplayViewport* findDisplayViewportLocked(int32_t displayId);
     int32_t getPointerDisplayId();
     void updatePointerDisplayLocked();
     static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
@@ -388,16 +387,6 @@ bool NativeInputManager::checkAndClearExceptionFromCallback(JNIEnv* env, const c
         return true;
     }
     return false;
-}
-
-const DisplayViewport* NativeInputManager::findDisplayViewportLocked(int32_t displayId)
-        REQUIRES(mLock) {
-    for (const DisplayViewport& v : mLocked.viewports) {
-        if (v.displayId == displayId) {
-            return &v;
-        }
-    }
-    return nullptr;
 }
 
 void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray) {
@@ -547,6 +536,8 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
 
         outConfig->setDisplayViewports(mLocked.viewports);
 
+        outConfig->defaultPointerDisplayId = mLocked.pointerDisplayId;
+
         outConfig->disabledDevices = mLocked.disabledInputDevices;
     } // release lock
 }
@@ -564,8 +555,6 @@ sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32
         updateInactivityTimeoutLocked();
     }
 
-    updatePointerDisplayLocked();
-
     return controller;
 }
 
@@ -578,23 +567,6 @@ int32_t NativeInputManager::getPointerDisplayId() {
     }
 
     return pointerDisplayId;
-}
-
-void NativeInputManager::updatePointerDisplayLocked() REQUIRES(mLock) {
-    ATRACE_CALL();
-
-    sp<PointerController> controller = mLocked.pointerController.promote();
-    if (controller != nullptr) {
-        const DisplayViewport* viewport = findDisplayViewportLocked(mLocked.pointerDisplayId);
-        if (viewport == nullptr) {
-            ALOGW("Can't find pointer display viewport, fallback to default display.");
-            viewport = findDisplayViewportLocked(ADISPLAY_ID_DEFAULT);
-        }
-
-        if (viewport != nullptr) {
-            controller->setDisplayViewport(*viewport);
-        }
-    }
 }
 
 void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
