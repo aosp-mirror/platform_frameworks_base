@@ -320,8 +320,9 @@ public class MemoryUsageTest extends InstrumentationTestCase {
                             UserHandle.USER_CURRENT);
                 }
 
-                mAtm.startActivityAndWait(null, null, mLaunchIntent, mimeType,
-                        null, null, 0, mLaunchIntent.getFlags(), null, null,
+                mAtm.startActivityAndWait(null,
+                        getInstrumentation().getContext().getBasePackageName(), mLaunchIntent,
+                        mimeType, null, null, 0, mLaunchIntent.getFlags(), null, null,
                         UserHandle.USER_CURRENT_OR_SELF);
             } catch (RemoteException e) {
                 Log.w(TAG, "Error launching app", e);
