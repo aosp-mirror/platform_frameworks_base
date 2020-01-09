@@ -44,6 +44,7 @@ import android.os.UserHandle;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.view.Display;
 
+import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 

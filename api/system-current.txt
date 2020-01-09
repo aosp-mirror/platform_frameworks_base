@@ -11833,6 +11833,8 @@ package android.view.accessibility {
   public final class AccessibilityManager {
     method public int getAccessibilityWindowId(@Nullable android.os.IBinder);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void performAccessibilityShortcut();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void registerSystemAction(@NonNull android.app.RemoteAction, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void unregisterSystemAction(int);
   }
 
 }

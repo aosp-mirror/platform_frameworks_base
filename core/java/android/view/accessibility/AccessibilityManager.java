@@ -31,6 +31,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
+import android.app.RemoteAction;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1205,6 +1206,61 @@ public final class AccessibilityManager {
             service.performAccessibilityShortcut();
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error performing accessibility shortcut. ", re);
+        }
+    }
+
+    /**
+     * Register the provided {@link RemoteAction} with the given actionId
+     *
+     * @param action The remote action to be registered with the given actionId as system action.
+     * @param actionId The id uniquely identify the system action.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    public void registerSystemAction(@NonNull RemoteAction action, int actionId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.registerSystemAction(action, actionId);
+
+            if (DEBUG) {
+                Log.i(LOG_TAG, "System action " + action.getTitle() + " is registered.");
+            }
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error registering system action " + action.getTitle() + " ", re);
+        }
+    }
+
+   /**
+     * Unregister a system action with the given actionId
+     *
+     * @param actionId The id uniquely identify the system action to be unregistered.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    public void unregisterSystemAction(int actionId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.unregisterSystemAction(actionId);
+
+            if (DEBUG) {
+                Log.i(LOG_TAG, "System action with actionId " + actionId + " is unregistered.");
+            }
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error unregistering system action with actionId " + actionId + " ", re);
         }
     }
 

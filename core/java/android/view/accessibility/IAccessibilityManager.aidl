@@ -16,6 +16,7 @@
 
 package android.view.accessibility;
 
+import android.app.RemoteAction;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.IAccessibilityServiceClient;
@@ -82,4 +83,7 @@ interface IAccessibilityManager {
     int getAccessibilityWindowId(IBinder windowToken);
 
     long getRecommendedTimeoutMillis();
+
+    oneway void registerSystemAction(in RemoteAction action, int actionId);
+    oneway void unregisterSystemAction(int actionId);
 }
