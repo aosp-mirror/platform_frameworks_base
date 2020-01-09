@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.media.tv.tuner.TunerConstants.DemuxPidType;
 import android.media.tv.tuner.TunerConstants.FilterStatus;
 import android.media.tv.tuner.TunerConstants.FilterSubtype;
 import android.media.tv.tuner.TunerConstants.FilterType;
@@ -30,9 +29,7 @@ import android.media.tv.tuner.TunerConstants.LnbPosition;
 import android.media.tv.tuner.TunerConstants.LnbTone;
 import android.media.tv.tuner.TunerConstants.LnbVoltage;
 import android.media.tv.tuner.TunerConstants.Result;
-import android.media.tv.tuner.filter.FilterConfiguration;
 import android.media.tv.tuner.filter.FilterEvent;
-import android.media.tv.tuner.filter.Settings;
 import android.media.tv.tuner.frontend.FrontendCallback;
 import android.media.tv.tuner.frontend.FrontendInfo;
 import android.media.tv.tuner.frontend.FrontendStatus;
@@ -40,7 +37,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-import java.io.FileDescriptor;
 import java.util.List;
 
 /**
@@ -458,122 +454,11 @@ public final class Tuner implements AutoCloseable  {
      * Tuner data filter.
      *
      * <p> This class is used to filter wanted data according to the filter's configuration.
+     * TODO: remove
      */
     public class Filter {
-        private long mNativeContext;
-        private FilterCallback mCallback;
-        int mId;
-
-        private native int nativeConfigureFilter(
-                int type, int subType, FilterConfiguration settings);
-        private native int nativeGetId();
-        private native int nativeSetDataSource(Filter source);
-        private native int nativeStartFilter();
-        private native int nativeStopFilter();
-        private native int nativeFlushFilter();
-        private native int nativeRead(byte[] buffer, int offset, int size);
-        private native int nativeClose();
-
-        private Filter(int id) {
-            mId = id;
-        }
-
-        private void onFilterStatus(int status) {
-            if (mHandler != null) {
-                mHandler.sendMessage(
-                        mHandler.obtainMessage(MSG_ON_FILTER_STATUS, status, 0, this));
-            }
-        }
-
-        /**
-         * Configures the filter.
-         *
-         * @param settings the settings of the filter.
-         * @return result status of the operation.
-         * @hide
-         */
-        public int configure(FilterConfiguration settings) {
-            int subType = -1;
-            Settings s = settings.getSettings();
-            if (s != null) {
-                subType = s.getType();
-            }
-            return nativeConfigureFilter(settings.getType(), subType, settings);
-        }
-
-        /**
-         * Gets the filter Id.
-         *
-         * @return the hardware resource Id for the filter.
-         * @hide
-         */
-        public int getId() {
-            return nativeGetId();
-        }
-
-        /**
-         * Sets the filter's data source.
-         *
-         * A filter uses demux as data source by default. If the data was packetized
-         * by multiple protocols, multiple filters may need to work together to
-         * extract all protocols' header. Then a filter's data source can be output
-         * from another filter.
-         *
-         * @param source the filter instance which provides data input. Switch to
-         * use demux as data source if the filter instance is NULL.
-         * @return result status of the operation.
-         * @hide
-         */
-        public int setDataSource(@Nullable Filter source) {
-            return nativeSetDataSource(source);
-        }
-
-        /**
-         * Starts the filter.
-         *
-         * @return result status of the operation.
-         * @hide
-         */
-        public int start() {
-            return nativeStartFilter();
-        }
-
-
-        /**
-         * Stops the filter.
-         *
-         * @return result status of the operation.
-         * @hide
-         */
-        public int stop() {
-            return nativeStopFilter();
-        }
-
-        /**
-         * Flushes the filter.
-         *
-         * @return result status of the operation.
-         * @hide
-         */
-        public int flush() {
-            return nativeFlushFilter();
-        }
-
-        /** @hide */
-        public int read(@NonNull byte[] buffer, int offset, int size) {
-            size = Math.min(size, buffer.length - offset);
-            return nativeRead(buffer, offset, size);
-        }
-
-        /**
-         * Release the Filter instance.
-         *
-         * @return result status of the operation.
-         * @hide
-         */
-        public int close() {
-            return nativeClose();
-        }
+        FilterCallback mCallback;
+        private Filter() {}
     }
 
     private Filter openFilter(@FilterType int mainType, @FilterSubtype int subType, int bufferSize,
@@ -587,115 +472,6 @@ public final class Tuner implements AutoCloseable  {
             }
         }
         return filter;
-    }
-
-    /**
-     *  A timer filter is used to filter data based on timestamps.
-     *
-     *  <p> If the timestamp is set, data is discarded if its timestamp is smaller than the
-     *  timestamp in this time filter.
-     *
-     *  <p> The format of the timestamps is the same as PTS defined in ISO/IEC 13818-1:2019. The
-     *  timestamps may or may not be related to PTS or DTS.
-     *
-     * @hide
-     */
-    public class TimeFilter {
-        private native int nativeSetTimestamp(long timestamp);
-        private native int nativeClearTimestamp();
-        private native Long nativeGetTimestamp();
-        private native Long nativeGetSourceTime();
-        private native int nativeClose();
-
-        private boolean mEnable = false;
-
-        /**
-         * Set timestamp for time based filter.
-         *
-         * It is used to set initial timestamp and enable time filtering. Once set, the time will be
-         * increased automatically like a clock. Contents are discarded if their timestamps are
-         * older than the time in the time filter.
-         *
-         * This method can be called more than once to reset the initial timestamp.
-         *
-         * @param timestamp initial timestamp for the time filter before it's increased. It's
-         * based on the 90KHz counter, and it's the same format as PTS (Presentation Time Stamp)
-         * defined in ISO/IEC 13818-1:2019. The timestamps may or may not be related to PTS or DTS.
-         * @return result status of the operation.
-         */
-        @Result
-        public int setCurrentTimestamp(long timestamp) {
-            int res = nativeSetTimestamp(timestamp);
-            // TODO: use a constant for SUCCESS
-            if (res == 0) {
-                mEnable = true;
-            }
-            return res;
-        }
-
-        /**
-         * Clear the timestamp in the time filter.
-         *
-         * It is used to clear the time value of the time filter. Time filtering is disabled then.
-         *
-         * @return result status of the operation.
-         */
-        @Result
-        public int clearTimestamp() {
-            int res = nativeClearTimestamp();
-            if (res == 0) {
-                mEnable = false;
-            }
-            return res;
-        }
-
-        /**
-         * Get the current time in the time filter.
-         *
-         * It is used to inquiry current time in the time filter.
-         *
-         * @return current timestamp in the time filter. It's based on the 90KHz counter, and it's
-         * the same format as PTS (Presentation Time Stamp) defined in ISO/IEC 13818-1:2019. The
-         * timestamps may or may not be related to PTS or DTS. {@code null} if the timestamp is
-         * never set.
-         */
-        @Nullable
-        public Long getTimeStamp() {
-            if (!mEnable) {
-                return null;
-            }
-            return nativeGetTimestamp();
-        }
-
-        /**
-         * Get the timestamp from the beginning of incoming data stream.
-         *
-         * It is used to inquiry the timestamp from the beginning of incoming data stream.
-         *
-         * @return first timestamp of incoming data stream. It's based on the 90KHz counter, and
-         * it's the same format as PTS (Presentation Time Stamp) defined in ISO/IEC 13818-1:2019.
-         * The timestamps may or may not be related to PTS or DTS.
-         */
-        @Nullable
-        public Long getSourceTime() {
-            if (!mEnable) {
-                return null;
-            }
-            return nativeGetSourceTime();
-        }
-
-        /**
-         * Close the Time Filter instance
-         *
-         * It is to release the TimeFilter instance. Resources are reclaimed so the instance must
-         * not be accessed after this method is called.
-         *
-         * @return result status of the operation.
-         */
-        @Result
-        public int close() {
-            return nativeClose();
-        }
     }
 
     /**
@@ -822,81 +598,11 @@ public final class Tuner implements AutoCloseable  {
      * <p> Descrambler is a hardware component used to descramble data.
      *
      * <p> This class controls the TIS interaction with Tuner HAL.
-     * TODO: make it static and extends Closable.
+     * TODO: Remove
      */
     public class Descrambler {
-        private long mNativeContext;
-
-        private native int nativeAddPid(int pidType, int pid, Filter filter);
-        private native int nativeRemovePid(int pidType, int pid, Filter filter);
-        private native int nativeSetKeyToken(byte[] keyToken);
-        private native int nativeClose();
-
-        private Descrambler() {}
-
-        /**
-         * Add packets' PID to the descrambler for descrambling.
-         *
-         * The descrambler will start descrambling packets with this PID. Multiple PIDs can be added
-         * into one descrambler instance because descambling can happen simultaneously on packets
-         * from different PIDs.
-         *
-         * If the Descrambler previously contained a filter for the PID, the old filter is replaced
-         * by the specified filter.
-         *
-         * @param pidType the type of the PID.
-         * @param pid the PID of packets to start to be descrambled.
-         * @param filter an optional filter instance to identify upper stream.
-         * @return result status of the operation.
-         *
-         * @hide
-         */
-        public int addPid(@DemuxPidType int pidType, int pid, @Nullable Filter filter) {
-            return nativeAddPid(pidType, pid, filter);
+        private Descrambler() {
         }
-
-        /**
-         * Remove packets' PID from the descrambler
-         *
-         * The descrambler will stop descrambling packets with this PID.
-         *
-         * @param pidType the type of the PID.
-         * @param pid the PID of packets to stop to be descrambled.
-         * @param filter an optional filter instance to identify upper stream.
-         * @return result status of the operation.
-         *
-         * @hide
-         */
-        public int removePid(@DemuxPidType int pidType, int pid, @Nullable Filter filter) {
-            return nativeRemovePid(pidType, pid, filter);
-        }
-
-        /**
-         * Set a key token to link descrambler to a key slot
-         *
-         * A descrambler instance can have only one key slot to link, but a key slot can hold a few
-         * keys for different purposes.
-         *
-         * @param keyToken the token to be used to link the key slot.
-         * @return result status of the operation.
-         *
-         * @hide
-         */
-        public int setKeyToken(byte[] keyToken) {
-            return nativeSetKeyToken(keyToken);
-        }
-
-        /**
-         * Release the descrambler instance.
-         *
-         * @return result status of the operation.
-         *
-         * @hide
-         */
-        public int close() {
-            return nativeClose();
-        }
-
     }
 
     /**
@@ -909,137 +615,6 @@ public final class Tuner implements AutoCloseable  {
     public Descrambler openDescrambler() {
         TunerUtils.checkTunerPermission(mContext);
         return nativeOpenDescrambler();
-    }
-
-    // TODO: consider splitting Dvr to Playback and Recording
-    /** @hide */
-    public class Dvr {
-        private long mNativeContext;
-        private DvrCallback mCallback;
-
-        private native int nativeAttachFilter(Filter filter);
-        private native int nativeDetachFilter(Filter filter);
-        private native int nativeConfigureDvr(DvrSettings settings);
-        private native int nativeStartDvr();
-        private native int nativeStopDvr();
-        private native int nativeFlushDvr();
-        private native int nativeClose();
-        private native void nativeSetFileDescriptor(FileDescriptor fd);
-        private native int nativeRead(int size);
-        private native int nativeRead(byte[] bytes, int offset, int size);
-        private native int nativeWrite(int size);
-        private native int nativeWrite(byte[] bytes, int offset, int size);
-
-        private Dvr() {}
-
-        /**
-         * Attaches a filter to DVR interface for recording.
-         *
-         * @param filter the filter to be attached.
-         * @return result status of the operation.
-         */
-        public int attachFilter(Filter filter) {
-            return nativeAttachFilter(filter);
-        }
-
-        /**
-         * Detaches a filter from DVR interface.
-         *
-         * @param filter the filter to be detached.
-         * @return result status of the operation.
-         */
-        public int detachFilter(Filter filter) {
-            return nativeDetachFilter(filter);
-        }
-
-        /**
-         * Configures the DVR.
-         *
-         * @param settings the settings of the DVR interface.
-         * @return result status of the operation.
-         */
-        public int configure(DvrSettings settings) {
-            return nativeConfigureDvr(settings);
-        }
-
-        /**
-         * Starts DVR.
-         *
-         * Starts consuming playback data or producing data for recording.
-         *
-         * @return result status of the operation.
-         */
-        public int start() {
-            return nativeStartDvr();
-        }
-
-        /**
-         * Stops DVR.
-         *
-         * Stops consuming playback data or producing data for recording.
-         *
-         * @return result status of the operation.
-         */
-        public int stop() {
-            return nativeStopDvr();
-        }
-
-        /**
-         * Flushed DVR data.
-         *
-         * @return result status of the operation.
-         */
-        public int flush() {
-            return nativeFlushDvr();
-        }
-
-        /**
-         * closes the DVR instance to release resources.
-         *
-         * @return result status of the operation.
-         */
-        public int close() {
-            return nativeClose();
-        }
-
-        /**
-         * Sets file descriptor to read/write data.
-         */
-        public void setFileDescriptor(FileDescriptor fd) {
-            nativeSetFileDescriptor(fd);
-        }
-
-        /**
-         * Reads data from the file for DVR playback.
-         */
-        public int read(int size) {
-            return nativeRead(size);
-        }
-
-        /**
-         * Reads data from the buffer for DVR playback.
-         */
-        public int read(@NonNull byte[] bytes, int offset, int size) {
-            if (size + offset > bytes.length) {
-                throw new ArrayIndexOutOfBoundsException(
-                        "Array length=" + bytes.length + ", offset=" + offset + ", size=" + size);
-            }
-            return nativeRead(bytes, offset, size);
-        }
-
-        /**
-         * Writes recording data to file.
-         */
-        public int write(int size) {
-            return nativeWrite(size);
-        }
-
-        /**
-         * Writes recording data to buffer.
-         */
-        public int write(@NonNull byte[] bytes, int offset, int size) {
-            return nativeWrite(bytes, offset, size);
-        }
     }
 
     private Dvr openDvr(int type, int bufferSize) {
