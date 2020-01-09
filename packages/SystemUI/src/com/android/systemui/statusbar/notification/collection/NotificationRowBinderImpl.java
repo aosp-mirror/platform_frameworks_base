@@ -41,8 +41,8 @@ import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
-import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -65,7 +65,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             Dependency.get(NotificationInterruptionStateProvider.class);
 
     private final Context mContext;
-    private final NotificationRowContentBinder mRowContentBinder;
     private final NotificationMessagingUtil mMessagingUtil;
     private final ExpandableNotificationRow.ExpansionLogger mExpansionLogger =
             this::logNotificationExpansion;
@@ -77,7 +76,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private NotificationPresenter mPresenter;
     private NotificationListContainer mListContainer;
     private HeadsUpManager mHeadsUpManager;
-    private NotificationRowContentBinder.InflationCallback mInflationCallback;
+    private NotificationContentInflater.InflationCallback mInflationCallback;
     private ExpandableNotificationRow.OnAppOpsClickListener mOnAppOpsClickListener;
     private BindRowCallback mBindRowCallback;
     private NotificationClicker mNotificationClicker;
@@ -85,13 +84,11 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
 
     public NotificationRowBinderImpl(
             Context context,
-            NotificationRowContentBinder rowContentBinder,
             boolean allowLongPress,
             KeyguardBypassController keyguardBypassController,
             StatusBarStateController statusBarStateController,
             NotificationLogger logger) {
         mContext = context;
-        mRowContentBinder = rowContentBinder;
         mMessagingUtil = new NotificationMessagingUtil(context);
         mAllowLongPress = allowLongPress;
         mKeyguardBypassController = keyguardBypassController;
@@ -120,7 +117,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mOnAppOpsClickListener = mGutsManager::openGuts;
     }
 
-    public void setInflationCallback(NotificationRowContentBinder.InflationCallback callback) {
+    public void setInflationCallback(NotificationContentInflater.InflationCallback callback) {
         mInflationCallback = callback;
     }
 
@@ -159,6 +156,19 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private void bindRow(NotificationEntry entry, PackageManager pmUser,
             StatusBarNotification sbn, ExpandableNotificationRow row,
             Runnable onDismissRunnable) {
+        row.setExpansionLogger(mExpansionLogger, entry.getSbn().getKey());
+        row.setBypassController(mKeyguardBypassController);
+        row.setStatusBarStateController(mStatusBarStateController);
+        row.setGroupManager(mGroupManager);
+        row.setHeadsUpManager(mHeadsUpManager);
+        row.setOnExpandClickListener(mPresenter);
+        row.setInflationCallback(mInflationCallback);
+        if (mAllowLongPress) {
+            row.setLongPressListener(mGutsManager::openGuts);
+        }
+        mListContainer.bindRow(row);
+        getRemoteInputManager().bindRow(row);
+
         // Get the app name.
         // Note that Notification.Builder#bindHeaderAppName has similar logic
         // but since this field is used in the guts, it must be accurate.
@@ -176,32 +186,14 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         } catch (PackageManager.NameNotFoundException e) {
             // Do nothing
         }
-
-        row.initialize(
-                appname,
-                sbn.getKey(),
-                mExpansionLogger,
-                mKeyguardBypassController,
-                mGroupManager,
-                mHeadsUpManager,
-                mRowContentBinder,
-                mPresenter);
-
-        // TODO: Either move these into ExpandableNotificationRow#initialize or out of row entirely
-        row.setStatusBarStateController(mStatusBarStateController);
-        row.setInflationCallback(mInflationCallback);
-        row.setAppOpsOnClickListener(mOnAppOpsClickListener);
-        if (mAllowLongPress) {
-            row.setLongPressListener(mGutsManager::openGuts);
-        }
-        mListContainer.bindRow(row);
-        getRemoteInputManager().bindRow(row);
-
+        row.setAppName(appname);
         row.setOnDismissRunnable(onDismissRunnable);
         row.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (ENABLE_REMOTE_INPUT) {
             row.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
         }
+
+        row.setAppOpsOnClickListener(mOnAppOpsClickListener);
 
         mBindRowCallback.onBindRow(entry, pmUser, sbn, row);
     }
