@@ -439,8 +439,8 @@ java_library {
     srcs: [":framework-non-updatable-sources"],
     libs: [
         "framework-appsearch-stubs",
-        // TODO(b/146167933): Use framework-statsd-stubs
-        "framework-statsd",
+        "framework-sdkextensions-stubs-systemapi",
+        "framework-statsd", // TODO(b/146167933): Use framework-statsd-stubs
         "framework-permission-stubs",
         "framework-wifi-stubs",
         "ike-stubs",

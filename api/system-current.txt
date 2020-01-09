@@ -242,8 +242,10 @@ package android {
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
     field public static final int isVrOnly = 16844152; // 0x1010578
+    field public static final int minExtensionVersion = 16844306; // 0x1010612
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
+    field public static final int sdkVersion = 16844305; // 0x1010611
     field public static final int supportsAmbientMode = 16844173; // 0x101058d
     field public static final int userRestriction = 16844164; // 0x1010584
   }

@@ -349,6 +349,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
     }
     return true;
   });
+  manifest_action["uses-sdk"]["extension-sdk"];
 
   // Instrumentation actions.
   manifest_action["instrumentation"].Action(RequiredNameIsJavaClassName);
