@@ -23,6 +23,7 @@ import static android.telephony.TelephonyRegistryManager.SIM_ACTIVATION_TYPE_VOI
 
 import static java.util.Arrays.copyOf;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
@@ -114,6 +115,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         Context context;
 
         String callingPackage;
+        String callingFeatureId;
 
         IBinder binder;
 
@@ -147,7 +149,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         boolean canReadCallLog() {
             try {
                 return TelephonyPermissions.checkReadCallLog(
-                        context, subId, callerPid, callerUid, callingPackage);
+                        context, subId, callerPid, callerUid, callingPackage, callingFeatureId);
             } catch (SecurityException e) {
                 return false;
             }
@@ -570,7 +572,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void addOnSubscriptionsChangedListener(String callingPackage,
+    public void addOnSubscriptionsChangedListener(String callingPackage, String callingFeatureId,
             IOnSubscriptionsChangedListener callback) {
         int callerUserId = UserHandle.getCallingUserId();
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
@@ -592,6 +594,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             r.context = mContext;
             r.onSubscriptionsChangedListenerCallback = callback;
             r.callingPackage = callingPackage;
+            r.callingFeatureId = callingFeatureId;
             r.callerUid = Binder.getCallingUid();
             r.callerPid = Binder.getCallingPid();
             r.events = 0;
@@ -624,7 +627,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     @Override
     public void addOnOpportunisticSubscriptionsChangedListener(String callingPackage,
-            IOnSubscriptionsChangedListener callback) {
+            String callingFeatureId, IOnSubscriptionsChangedListener callback) {
         int callerUserId = UserHandle.getCallingUserId();
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
         if (VDBG) {
@@ -645,6 +648,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             r.context = mContext;
             r.onOpportunisticSubscriptionsChangedListenerCallback = callback;
             r.callingPackage = callingPackage;
+            r.callingFeatureId = callingFeatureId;
             r.callerUid = Binder.getCallingUid();
             r.callerPid = Binder.getCallingPid();
             r.events = 0;
@@ -720,21 +724,28 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    @Deprecated
     @Override
-    public void listen(String pkgForDebug, IPhoneStateListener callback, int events,
+    public void listen(String callingPackage, IPhoneStateListener callback, int events,
             boolean notifyNow) {
-        listenForSubscriber(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID, pkgForDebug, callback,
-                events, notifyNow);
+        listenWithFeature(callingPackage, null, callback, events, notifyNow);
     }
 
     @Override
-    public void listenForSubscriber(int subId, String pkgForDebug, IPhoneStateListener callback,
-            int events, boolean notifyNow) {
-        listen(pkgForDebug, callback, events, notifyNow, subId);
+    public void listenWithFeature(String callingPackage, String callingFeatureId,
+            IPhoneStateListener callback, int events, boolean notifyNow) {
+        listenForSubscriber(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID, callingPackage,
+                callingFeatureId, callback, events, notifyNow);
     }
 
-    private void listen(String callingPackage, IPhoneStateListener callback, int events,
-            boolean notifyNow, int subId) {
+    @Override
+    public void listenForSubscriber(int subId, String callingPackage, String callingFeatureId,
+            IPhoneStateListener callback, int events, boolean notifyNow) {
+        listen(callingPackage, callingFeatureId, callback, events, notifyNow, subId);
+    }
+
+    private void listen(String callingPackage, @Nullable String callingFeatureId,
+            IPhoneStateListener callback, int events, boolean notifyNow, int subId) {
         int callerUserId = UserHandle.getCallingUserId();
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
         String str = "listen: E pkg=" + callingPackage + " events=0x" + Integer.toHexString(events)
@@ -749,7 +760,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             // Checks permission and throws SecurityException for disallowed operations. For pre-M
             // apps whose runtime permission has been revoked, we return immediately to skip sending
             // events to the app without crashing it.
-            if (!checkListenerPermission(events, subId, callingPackage, "listen")) {
+            if (!checkListenerPermission(events, subId, callingPackage, callingFeatureId,
+                    "listen")) {
                 return;
             }
 
@@ -766,6 +778,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 r.context = mContext;
                 r.callback = callback;
                 r.callingPackage = callingPackage;
+                r.callingFeatureId = callingFeatureId;
                 r.callerUid = Binder.getCallingUid();
                 r.callerPid = Binder.getCallingPid();
                 // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
@@ -2286,8 +2299,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private boolean checkListenerPermission(
-            int events, int subId, String callingPackage, String message) {
+    private boolean checkListenerPermission(int events, int subId, String callingPackage,
+            @Nullable String callingFeatureId, String message) {
         LocationAccessPolicy.LocationPermissionQuery.Builder locationQueryBuilder =
                 new LocationAccessPolicy.LocationPermissionQuery.Builder()
                 .setCallingPackage(callingPackage)
@@ -2322,7 +2335,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         if ((events & ENFORCE_PHONE_STATE_PERMISSION_MASK) != 0) {
             if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(
-                    mContext, subId, callingPackage, message)) {
+                    mContext, subId, callingPackage, callingFeatureId, message)) {
                 return false;
             }
         }
