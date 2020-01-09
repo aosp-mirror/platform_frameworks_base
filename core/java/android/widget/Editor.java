@@ -152,7 +152,7 @@ public class Editor {
 
     // Specifies whether to allow starting a cursor drag by dragging anywhere over the text.
     @VisibleForTesting
-    public static boolean FLAG_ENABLE_CURSOR_DRAG = false;
+    public static boolean FLAG_ENABLE_CURSOR_DRAG = true;
     // Specifies whether to use the magnifier when pressing the insertion or selection handles.
     private static final boolean FLAG_USE_MAGNIFIER = true;
 
