@@ -7838,6 +7838,7 @@ package android.provider {
     field public static final String ACTION_NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS = "android.settings.NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS";
     field public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE = "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
+    field public static final String ACTION_TETHER_PROVISIONING_UI = "android.settings.TETHER_PROVISIONING_UI";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
@@ -7857,6 +7858,7 @@ package android.provider {
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS = "install_carrier_app_notification_sleep_millis";
     field public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
     field public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
+    field public static final String TETHER_OFFLOAD_DISABLED = "tether_offload_disabled";
     field public static final String TETHER_SUPPORTED = "tether_supported";
     field public static final String THEATER_MODE_ON = "theater_mode_on";
     field public static final String WEBVIEW_MULTIPROCESS = "webview_multiprocess";
