@@ -357,7 +357,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
             if (isNew) {
                 mBubbleIntent = mBubble.getBubbleIntent();
-                if (mBubbleIntent != null) {
+                if (mBubbleIntent != null || mBubble.getShortcutInfo() != null) {
                     setContentVisibility(false);
                     mActivityView.setVisibility(VISIBLE);
                 }
@@ -543,7 +543,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     }
 
     private boolean usingActivityView() {
-        return mBubbleIntent != null && mActivityView != null;
+        return (mBubbleIntent != null || mBubble.getShortcutInfo() != null)
+                && mActivityView != null;
     }
 
     /**

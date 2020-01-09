@@ -188,7 +188,9 @@ public class NotificationInterruptionStateProvider {
             return false;
         }
 
-        if (entry.getBubbleMetadata() == null || entry.getBubbleMetadata().getIntent() == null) {
+        if (entry.getBubbleMetadata() == null
+                || (entry.getBubbleMetadata().getShortcutId() == null
+                    && entry.getBubbleMetadata().getBubbleIntent() == null)) {
             if (DEBUG) {
                 Log.d(TAG, "No bubble up: notification: " + sbn.getKey()
                         + " doesn't have valid metadata");

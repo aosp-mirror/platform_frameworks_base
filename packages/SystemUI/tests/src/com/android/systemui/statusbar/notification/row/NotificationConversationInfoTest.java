@@ -195,8 +195,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 new Intent(mContext, BubblesTestActivity.class), 0);
         mBubbleSbn = new SbnBuilder(mSbn).setBubbleMetadata(
                 new Notification.BubbleMetadata.Builder()
-                        .setIntent(bubbleIntent)
-                        .setIcon(Icon.createWithResource(mContext, R.drawable.android)).build())
+                        .createIntentBubble(bubbleIntent,
+                                Icon.createWithResource(mContext, R.drawable.android)).build())
                 .build();
         mBubbleEntry = new NotificationEntryBuilder().setSbn(mBubbleSbn).build();
 
