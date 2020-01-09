@@ -16,7 +16,7 @@
 
 package android.app.backup;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
