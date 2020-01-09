@@ -160,7 +160,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
         final int userId = UserHandle.myUserId();
         final List<VolumeInfo> volumes = mStorageManager.getVolumes();
         for (VolumeInfo volume : volumes) {
-            if (!volume.isMountedReadable()) continue;
+            if (!volume.isMountedReadable() || volume.getMountUserId() != userId) continue;
 
             final String rootId;
             final String title;
@@ -192,9 +192,8 @@ public class ExternalStorageProvider extends FileSystemProvider {
                     title = mStorageManager.getBestVolumeDescription(privateVol);
                     storageUuid = StorageManager.convert(privateVol.fsUuid);
                 }
-            } else if ((volume.getType() == VolumeInfo.TYPE_PUBLIC
-                            || volume.getType() == VolumeInfo.TYPE_STUB)
-                    && volume.getMountUserId() == userId) {
+            } else if (volume.getType() == VolumeInfo.TYPE_PUBLIC
+                    || volume.getType() == VolumeInfo.TYPE_STUB) {
                 rootId = volume.getFsUuid();
                 title = mStorageManager.getBestVolumeDescription(volume);
                 storageUuid = null;
