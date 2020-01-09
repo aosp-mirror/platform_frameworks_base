@@ -22,6 +22,7 @@ import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
 import static android.Manifest.permission.NETWORK_STACK;
 import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
 import static android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 
 import android.content.BroadcastReceiver;
@@ -42,6 +43,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -161,15 +163,13 @@ public class PermissionMonitor {
     }
 
     @VisibleForTesting
-    boolean hasPermission(PackageInfo app, String permission) {
-        if (app.requestedPermissions != null) {
-            for (String p : app.requestedPermissions) {
-                if (permission.equals(p)) {
-                    return true;
-                }
-            }
+    boolean hasPermission(final PackageInfo app, final String permission) {
+        if (app.requestedPermissions == null || app.requestedPermissionsFlags == null) {
+            return false;
         }
-        return false;
+        final int index = ArrayUtils.indexOf(app.requestedPermissions, permission);
+        if (index < 0 || index >= app.requestedPermissionsFlags.length) return false;
+        return (app.requestedPermissionsFlags[index] & REQUESTED_PERMISSION_GRANTED) != 0;
     }
 
     private boolean hasNetworkPermission(PackageInfo app) {
