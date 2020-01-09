@@ -71,7 +71,6 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkInfo;
-import android.net.NetworkUtils;
 import android.net.TetherStatesParcel;
 import android.net.TetheringConfigurationParcel;
 import android.net.ip.IpServer;
@@ -291,13 +290,6 @@ public class Tethering {
         filter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         filter.addAction(UserManager.ACTION_USER_RESTRICTIONS_CHANGED);
         mContext.registerReceiver(mStateReceiver, filter, null, handler);
-
-        filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_MEDIA_SHARED);
-        filter.addAction(Intent.ACTION_MEDIA_UNSHARED);
-        filter.addDataScheme("file");
-        mContext.registerReceiver(mStateReceiver, filter, null, handler);
-
     }
 
     private class TetheringThreadExecutor implements Executor {
@@ -1384,12 +1376,17 @@ public class Tethering {
 
         protected void setDnsForwarders(final Network network, final LinkProperties lp) {
             // TODO: Set v4 and/or v6 DNS per available connectivity.
-            String[] dnsServers = mConfig.defaultIPv4DNS;
             final Collection<InetAddress> dnses = lp.getDnsServers();
             // TODO: Properly support the absence of DNS servers.
+            final String[] dnsServers;
             if (dnses != null && !dnses.isEmpty()) {
-                // TODO: remove this invocation of NetworkUtils.makeStrings().
-                dnsServers = NetworkUtils.makeStrings(dnses);
+                dnsServers = new String[dnses.size()];
+                int i = 0;
+                for (InetAddress dns : dnses) {
+                    dnsServers[i++] = dns.getHostAddress();
+                }
+            } else {
+                dnsServers = mConfig.defaultIPv4DNS;
             }
             final int netId = (network != null) ? network.netId : NETID_UNSET;
             try {

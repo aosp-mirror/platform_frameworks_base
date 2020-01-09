@@ -668,7 +668,7 @@ public class RouterAdvertisementDaemon {
     }
 
     private final class UnicastResponder extends Thread {
-        private final InetSocketAddress mSolicitor = new InetSocketAddress();
+        private final InetSocketAddress mSolicitor = new InetSocketAddress(0);
         // The recycled buffer for receiving Router Solicitations from clients.
         // If the RS is larger than IPV6_MIN_MTU the packets are truncated.
         // This is fine since currently only byte 0 is examined anyway.

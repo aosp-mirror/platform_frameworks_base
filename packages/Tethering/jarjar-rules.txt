@@ -11,6 +11,7 @@ rule com.android.internal.util.MessageUtils* com.android.networkstack.tethering.
 rule com.android.internal.util.Preconditions* com.android.networkstack.tethering.util.Preconditions@1
 rule com.android.internal.util.State* com.android.networkstack.tethering.util.State@1
 rule com.android.internal.util.StateMachine* com.android.networkstack.tethering.util.StateMachine@1
+rule com.android.internal.util.TrafficStatsConstants* com.android.networkstack.tethering.util.TrafficStatsConstants@1
 
 rule android.net.LocalLog* com.android.networkstack.tethering.LocalLog@1
 
