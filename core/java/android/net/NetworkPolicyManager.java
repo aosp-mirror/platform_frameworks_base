@@ -380,6 +380,7 @@ public class NetworkPolicyManager {
         @Override public void onMeteredIfacesChanged(String[] meteredIfaces) { }
         @Override public void onRestrictBackgroundChanged(boolean restrictBackground) { }
         @Override public void onUidPoliciesChanged(int uid, int uidPolicies) { }
-        @Override public void onSubscriptionOverride(int subId, int overrideMask, int overrideValue) { }
+        @Override public void onSubscriptionOverride(int subId, int overrideMask, int overrideValue,
+                long networkTypeMask) { }
     }
 }
