@@ -16,11 +16,14 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.SystemApi;
+
 /**
  * Meta data from AD (Audio Descriptor) according to ETSI TS 101 154 V2.1.1.
  *
  * @hide
  */
+@SystemApi
 public class AudioDescriptor {
     private final byte mAdFade;
     private final byte mAdPan;
@@ -68,7 +71,7 @@ public class AudioDescriptor {
      *
      * <p>A single ASCII character version designator (here "1" indicates revision 1).
      */
-    public char getVersionTextTag() {
+    public char getAdVersionTextTag() {
         return mVersionTextTag;
     }
 

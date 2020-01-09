@@ -18,12 +18,14 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.BytesLong;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 
 /**
  * Filter event sent from {@link Filter} objects with media type.
  *
  * @hide
  */
+@SystemApi
 public class MediaEvent extends FilterEvent{
     private final int mStreamId;
     private final boolean mIsPtsPresent;
@@ -62,11 +64,11 @@ public class MediaEvent extends FilterEvent{
     }
 
     /**
-     * Returns whether PTS is present.
+     * Returns whether PTS (Presentation Time Stamp) is present.
      *
      * @return {@code true} if PTS is present in PES header; {@code false} otherwise.
      */
-    public boolean getIsPtsPresent() {
+    public boolean isPtsPresent() {
         return mIsPtsPresent;
     }
 
@@ -109,7 +111,7 @@ public class MediaEvent extends FilterEvent{
      * @return {@code true} if the data is in secure area, and isn't mappable;
      *         {@code false} otherwise.
      */
-    public boolean getIsSecureMemory() {
+    public boolean isSecureMemory() {
         return mIsSecureMemory;
     }
 
@@ -134,7 +136,7 @@ public class MediaEvent extends FilterEvent{
      *
      * @return {@code true} if the data is in private; {@code false} otherwise.
      */
-    public boolean getIsPrivateData() {
+    public boolean isPrivateData() {
         return mIsPrivateData;
     }
 

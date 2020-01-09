@@ -4728,6 +4728,18 @@ package android.media.tv.tuner {
     field public static final int RESULT_SUCCESS = 0; // 0x0
     field public static final int RESULT_UNAVAILABLE = 1; // 0x1
     field public static final int RESULT_UNKNOWN_ERROR = 6; // 0x6
+    field public static final int SC_HEVC_INDEX_AUD = 2; // 0x2
+    field public static final int SC_HEVC_INDEX_SLICE_BLA_N_LP = 16; // 0x10
+    field public static final int SC_HEVC_INDEX_SLICE_BLA_W_RADL = 8; // 0x8
+    field public static final int SC_HEVC_INDEX_SLICE_CE_BLA_W_LP = 4; // 0x4
+    field public static final int SC_HEVC_INDEX_SLICE_IDR_N_LP = 64; // 0x40
+    field public static final int SC_HEVC_INDEX_SLICE_IDR_W_RADL = 32; // 0x20
+    field public static final int SC_HEVC_INDEX_SLICE_TRAIL_CRA = 128; // 0x80
+    field public static final int SC_HEVC_INDEX_SPS = 1; // 0x1
+    field public static final int SC_INDEX_B_FRAME = 4; // 0x4
+    field public static final int SC_INDEX_I_FRAME = 1; // 0x1
+    field public static final int SC_INDEX_P_FRAME = 2; // 0x2
+    field public static final int SC_INDEX_SEQUENCE = 8; // 0x8
   }
 
 }
@@ -4797,6 +4809,23 @@ package android.media.tv.tuner.dvr {
 
 package android.media.tv.tuner.filter {
 
+  public class AudioDescriptor {
+    method public byte getAdFade();
+    method public byte getAdGainCenter();
+    method public byte getAdGainFront();
+    method public byte getAdGainSurround();
+    method public byte getAdPan();
+    method public char getAdVersionTextTag();
+  }
+
+  public class DownloadEvent extends android.media.tv.tuner.filter.FilterEvent {
+    method public int getDataLength();
+    method public int getItemFragmentIndex();
+    method public int getItemId();
+    method public int getLastItemFragmentIndex();
+    method public int getMpuSequenceNumber();
+  }
+
   public class Filter implements java.lang.AutoCloseable {
     method public void close();
     method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
@@ -4846,6 +4875,34 @@ package android.media.tv.tuner.filter {
     ctor public FilterEvent();
   }
 
+  public class IpPayloadEvent extends android.media.tv.tuner.filter.FilterEvent {
+    method public int getDataLength();
+  }
+
+  public class MediaEvent extends android.media.tv.tuner.filter.FilterEvent {
+    method public long getAvDataId();
+    method public long getDataLength();
+    method @Nullable public android.media.tv.tuner.filter.AudioDescriptor getExtraMetaData();
+    method public int getMpuSequenceNumber();
+    method public long getOffset();
+    method public long getPts();
+    method public int getStreamId();
+    method public boolean isPrivateData();
+    method public boolean isPtsPresent();
+    method public boolean isSecureMemory();
+  }
+
+  public class MmtpRecordEvent extends android.media.tv.tuner.filter.FilterEvent {
+    method public long getDataLength();
+    method public int getScHevcIndexMask();
+  }
+
+  public class PesEvent extends android.media.tv.tuner.filter.FilterEvent {
+    method public int getDataLength();
+    method public int getMpuSequenceNumber();
+    method public int getStreamId();
+  }
+
   public class PesSettings extends android.media.tv.tuner.filter.Settings {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.PesSettings.Builder builder(@NonNull android.content.Context, int);
     method public int getStreamId();
@@ -4868,6 +4925,12 @@ package android.media.tv.tuner.filter {
   public abstract class Settings {
   }
 
+  public class TemiEvent extends android.media.tv.tuner.filter.FilterEvent {
+    method @NonNull public byte[] getDescriptorData();
+    method public byte getDescriptorTag();
+    method public long getPts();
+  }
+
   public class TsFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.TsFilterConfiguration.Builder builder(@NonNull android.content.Context);
     method @Nullable public android.media.tv.tuner.filter.Settings getSettings();
@@ -4879,6 +4942,13 @@ package android.media.tv.tuner.filter {
     method @NonNull public android.media.tv.tuner.filter.TsFilterConfiguration build();
     method @NonNull public android.media.tv.tuner.filter.TsFilterConfiguration.Builder setSettings(@NonNull android.media.tv.tuner.filter.Settings);
     method @NonNull public android.media.tv.tuner.filter.TsFilterConfiguration.Builder setTpid(int);
+  }
+
+  public class TsRecordEvent extends android.media.tv.tuner.filter.FilterEvent {
+    method public long getDataLength();
+    method public int getPacketId();
+    method public int getScIndexMask();
+    method public int getTsIndexMask();
   }
 
 }

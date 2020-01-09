@@ -16,11 +16,14 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.SystemApi;
+
 /**
  * Filter event sent from {@link Filter} objects with PES type.
  *
  * @hide
  */
+@SystemApi
 public class PesEvent extends FilterEvent {
     private final int mStreamId;
     private final int mDataLength;
