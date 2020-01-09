@@ -3192,6 +3192,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
             ipw.decreaseIndent();
 
+            mRequestStatistics.history.dump(ipw);
+
             ipw.println("Last Known Locations:");
             ipw.increaseIndent();
             for (Map.Entry<String, Location> entry : mLastLocation.entrySet()) {

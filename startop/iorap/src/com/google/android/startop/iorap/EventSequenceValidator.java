@@ -83,7 +83,7 @@ import com.android.server.wm.ActivityMetricsLaunchObserver;
  * could transition to INTENT_STARTED.
  *
  * <p> If any bad transition happened, the state becomse UNKNOWN. The UNKNOWN state
- * could be * accumulated, because during the UNKNOWN state more IntentStarted may
+ * could be accumulated, because during the UNKNOWN state more IntentStarted may
  * be triggered. To recover from UNKNOWN to INIT, all the accumualted IntentStarted
  * should termniate.
  *
@@ -100,7 +100,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   @Override
   public void onIntentStarted(@NonNull Intent intent, long timestampNs) {
     if (state == State.UNKNOWN) {
-      Log.e(TAG, "IntentStarted during UNKNOWN." + intent);
+      Log.wtf(TAG, "IntentStarted during UNKNOWN." + intent);
       incAccIntentStartedEvents();
       return;
     }
@@ -110,32 +110,32 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
         state != State.ACTIVITY_CANCELLED &&
         state != State.ACTIVITY_FINISHED &&
         state != State.REPORT_FULLY_DRAWN) {
-      Log.e(TAG,
+      Log.wtf(TAG,
           String.format("Cannot transition from %s to %s", state, State.INTENT_STARTED));
       incAccIntentStartedEvents();
       incAccIntentStartedEvents();
       return;
     }
 
-    Log.i(TAG, String.format("Tansition from %s to %s", state, State.INTENT_STARTED));
+    Log.i(TAG, String.format("Transition from %s to %s", state, State.INTENT_STARTED));
     state = State.INTENT_STARTED;
   }
 
   @Override
   public void onIntentFailed() {
     if (state == State.UNKNOWN) {
-      Log.e(TAG, "IntentFailed during UNKNOWN.");
+      Log.wtf(TAG, "IntentFailed during UNKNOWN.");
       decAccIntentStartedEvents();
       return;
     }
     if (state != State.INTENT_STARTED) {
-      Log.e(TAG,
+      Log.wtf(TAG,
           String.format("Cannot transition from %s to %s", state, State.INTENT_FAILED));
       incAccIntentStartedEvents();
       return;
     }
 
-    Log.i(TAG, String.format("Tansition from %s to %s", state, State.INTENT_FAILED));
+    Log.i(TAG, String.format("Transition from %s to %s", state, State.INTENT_FAILED));
     state = State.INTENT_FAILED;
   }
 
@@ -143,11 +143,11 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   public void onActivityLaunched(@NonNull @ActivityRecordProto byte[] activity,
       @Temperature int temperature) {
     if (state == State.UNKNOWN) {
-      Log.e(TAG, "onActivityLaunched during UNKNOWN.");
+      Log.wtf(TAG, "onActivityLaunched during UNKNOWN.");
       return;
     }
     if (state != State.INTENT_STARTED) {
-      Log.e(TAG,
+      Log.wtf(TAG,
           String.format("Cannot transition from %s to %s", state, State.ACTIVITY_LAUNCHED));
       incAccIntentStartedEvents();
       return;
@@ -160,12 +160,12 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   @Override
   public void onActivityLaunchCancelled(@Nullable @ActivityRecordProto byte[] activity) {
     if (state == State.UNKNOWN) {
-      Log.e(TAG, "onActivityLaunchCancelled during UNKNOWN.");
+      Log.wtf(TAG, "onActivityLaunchCancelled during UNKNOWN.");
       decAccIntentStartedEvents();
       return;
     }
     if (state != State.ACTIVITY_LAUNCHED) {
-      Log.e(TAG,
+      Log.wtf(TAG,
           String.format("Cannot transition from %s to %s", state, State.ACTIVITY_CANCELLED));
       incAccIntentStartedEvents();
       return;
@@ -179,13 +179,13 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   public void onActivityLaunchFinished(@NonNull @ActivityRecordProto byte[] activity,
       long timestampNs) {
     if (state == State.UNKNOWN) {
-      Log.e(TAG, "onActivityLaunchFinished during UNKNOWN.");
+      Log.wtf(TAG, "onActivityLaunchFinished during UNKNOWN.");
       decAccIntentStartedEvents();
       return;
     }
 
     if (state != State.ACTIVITY_LAUNCHED) {
-      Log.e(TAG,
+      Log.wtf(TAG,
           String.format("Cannot transition from %s to %s", state, State.ACTIVITY_FINISHED));
       incAccIntentStartedEvents();
       return;
@@ -199,7 +199,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   public void onReportFullyDrawn(@NonNull @ActivityRecordProto byte[] activity,
       long timestampNs) {
     if (state == State.UNKNOWN) {
-      Log.e(TAG, "onReportFullyDrawn during UNKNOWN.");
+      Log.wtf(TAG, "onReportFullyDrawn during UNKNOWN.");
       return;
     }
     if (state == State.INIT) {
@@ -207,7 +207,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
     }
 
     if (state != State.ACTIVITY_FINISHED) {
-      Log.e(TAG,
+      Log.wtf(TAG,
           String.format("Cannot transition from %s to %s", state, State.REPORT_FULLY_DRAWN));
       return;
     }
@@ -230,7 +230,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   private void incAccIntentStartedEvents() {
     if (accIntentStartedEvents < 0) {
       throw new AssertionError(
-          String.format("The number of unknows cannot be negative"));
+          String.format("The number of unknowns cannot be negative"));
     }
     if (accIntentStartedEvents == 0) {
       state = State.UNKNOWN;
@@ -243,7 +243,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   private void decAccIntentStartedEvents() {
     if (accIntentStartedEvents <= 0) {
       throw new AssertionError(
-          String.format("The number of unknows cannot be negative"));
+          String.format("The number of unknowns cannot be negative"));
     }
     if(accIntentStartedEvents == 1) {
       state = State.INIT;

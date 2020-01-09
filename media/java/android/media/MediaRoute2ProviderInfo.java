@@ -25,6 +25,7 @@ import android.util.ArrayMap;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -161,14 +162,17 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
                 return this;
             }
             mUniqueId = uniqueId;
-            final int count = mRoutes.size();
-            for (int i = 0; i < count; i++) {
-                MediaRoute2Info route = mRoutes.valueAt(i);
-                mRoutes.setValueAt(i, new MediaRoute2Info.Builder(route)
+
+            final ArrayMap<String, MediaRoute2Info> newRoutes = new ArrayMap<>();
+            for (Map.Entry<String, MediaRoute2Info> entry : mRoutes.entrySet()) {
+                MediaRoute2Info routeWithProviderId = new MediaRoute2Info.Builder(entry.getValue())
                         .setProviderId(mUniqueId)
-                        .build());
+                        .build();
+                newRoutes.put(routeWithProviderId.getId(), routeWithProviderId);
             }
 
+            mRoutes.clear();
+            mRoutes.putAll(newRoutes);
             return this;
         }
 

@@ -27,8 +27,8 @@ import static android.view.WindowInsets.Type.STATUS_BARS;
 import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.TAPPABLE_ELEMENT;
 import static android.view.WindowInsets.Type.all;
-import static android.view.WindowInsets.Type.compatSystemInsets;
 import static android.view.WindowInsets.Type.indexOf;
+import static android.view.WindowInsets.Type.systemBars;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -87,6 +87,8 @@ public final class WindowInsets {
     private final boolean mStableInsetsConsumed;
     private final boolean mDisplayCutoutConsumed;
 
+    private final int mCompatInsetTypes;
+
     /**
      * Since new insets may be added in the future that existing apps couldn't
      * know about, this fully empty constant shouldn't be made available to apps
@@ -112,7 +114,7 @@ public final class WindowInsets {
             boolean isRound, boolean alwaysConsumeSystemBars, DisplayCutout displayCutout) {
         this(createCompatTypeMap(systemWindowInsetsRect), createCompatTypeMap(stableInsetsRect),
                 createCompatVisibilityMap(createCompatTypeMap(systemWindowInsetsRect)),
-                isRound, alwaysConsumeSystemBars, displayCutout);
+                isRound, alwaysConsumeSystemBars, displayCutout, systemBars());
     }
 
     /**
@@ -131,7 +133,7 @@ public final class WindowInsets {
             @Nullable Insets[] typeMaxInsetsMap,
             boolean[] typeVisibilityMap,
             boolean isRound,
-            boolean alwaysConsumeSystemBars, DisplayCutout displayCutout) {
+            boolean alwaysConsumeSystemBars, DisplayCutout displayCutout, int compatInsetTypes) {
         mSystemWindowInsetsConsumed = typeInsetsMap == null;
         mTypeInsetsMap = mSystemWindowInsetsConsumed
                 ? new Insets[SIZE]
@@ -145,6 +147,7 @@ public final class WindowInsets {
         mTypeVisibilityMap = typeVisibilityMap;
         mIsRound = isRound;
         mAlwaysConsumeSystemBars = alwaysConsumeSystemBars;
+        mCompatInsetTypes = compatInsetTypes;
 
         mDisplayCutoutConsumed = displayCutout == null;
         mDisplayCutout = (mDisplayCutoutConsumed || displayCutout.isEmpty())
@@ -160,7 +163,8 @@ public final class WindowInsets {
         this(src.mSystemWindowInsetsConsumed ? null : src.mTypeInsetsMap,
                 src.mStableInsetsConsumed ? null : src.mTypeMaxInsetsMap,
                 src.mTypeVisibilityMap, src.mIsRound,
-                src.mAlwaysConsumeSystemBars, displayCutoutCopyConstructorArgument(src));
+                src.mAlwaysConsumeSystemBars, displayCutoutCopyConstructorArgument(src),
+                src.mCompatInsetTypes);
     }
 
     private static DisplayCutout displayCutoutCopyConstructorArgument(WindowInsets w) {
@@ -211,7 +215,8 @@ public final class WindowInsets {
     /** @hide */
     @UnsupportedAppUsage
     public WindowInsets(Rect systemWindowInsets) {
-        this(createCompatTypeMap(systemWindowInsets), null, new boolean[SIZE], false, false, null);
+        this(createCompatTypeMap(systemWindowInsets), null, new boolean[SIZE], false, false, null,
+                systemBars());
     }
 
     /**
@@ -280,7 +285,7 @@ public final class WindowInsets {
      */
     @NonNull
     public Insets getSystemWindowInsets() {
-        return getInsets(mTypeInsetsMap, compatSystemInsets());
+        return getInsets(mTypeInsetsMap, mCompatInsetTypes);
     }
 
     /**
@@ -439,7 +444,8 @@ public final class WindowInsets {
                 mStableInsetsConsumed ? null : mTypeMaxInsetsMap,
                 mTypeVisibilityMap,
                 mIsRound, mAlwaysConsumeSystemBars,
-                null /* displayCutout */);
+                null /* displayCutout */,
+                mCompatInsetTypes);
     }
 
 
@@ -485,7 +491,8 @@ public final class WindowInsets {
         return new WindowInsets(null, mStableInsetsConsumed ? null : mTypeMaxInsetsMap,
                 mTypeVisibilityMap,
                 mIsRound, mAlwaysConsumeSystemBars,
-                displayCutoutCopyConstructorArgument(this));
+                displayCutoutCopyConstructorArgument(this),
+                mCompatInsetTypes);
     }
 
     // TODO(b/119190588): replace @code with @link below
@@ -555,7 +562,7 @@ public final class WindowInsets {
      */
     @NonNull
     public Insets getStableInsets() {
-        return getInsets(mTypeMaxInsetsMap, compatSystemInsets());
+        return getInsets(mTypeMaxInsetsMap, mCompatInsetTypes);
     }
 
     /**
@@ -733,7 +740,8 @@ public final class WindowInsets {
     public WindowInsets consumeStableInsets() {
         return new WindowInsets(mSystemWindowInsetsConsumed ? null : mTypeInsetsMap, null,
                 mTypeVisibilityMap, mIsRound, mAlwaysConsumeSystemBars,
-                displayCutoutCopyConstructorArgument(this));
+                displayCutoutCopyConstructorArgument(this),
+                mCompatInsetTypes);
     }
 
     /**
@@ -817,7 +825,8 @@ public final class WindowInsets {
                         ? null
                         : mDisplayCutout == null
                                 ? DisplayCutout.NO_CUTOUT
-                                : mDisplayCutout.inset(left, top, right, bottom));
+                                : mDisplayCutout.inset(left, top, right, bottom),
+                mCompatInsetTypes);
     }
 
     @Override
@@ -1134,7 +1143,8 @@ public final class WindowInsets {
         public WindowInsets build() {
             return new WindowInsets(mSystemInsetsConsumed ? null : mTypeInsetsMap,
                     mStableInsetsConsumed ? null : mTypeMaxInsetsMap, mTypeVisibilityMap,
-                    mIsRound, mAlwaysConsumeSystemBars, mDisplayCutout);
+                    mIsRound, mAlwaysConsumeSystemBars, mDisplayCutout,
+                    systemBars());
         }
     }
 
@@ -1268,15 +1278,6 @@ public final class WindowInsets {
          */
         public static @InsetsType int systemBars() {
             return STATUS_BARS | NAVIGATION_BARS;
-        }
-
-        /**
-         * @return Inset types representing the list of bars that traditionally were denoted as
-         *         system insets.
-         * @hide
-         */
-        static @InsetsType int compatSystemInsets() {
-            return STATUS_BARS | NAVIGATION_BARS | IME;
         }
 
         /**

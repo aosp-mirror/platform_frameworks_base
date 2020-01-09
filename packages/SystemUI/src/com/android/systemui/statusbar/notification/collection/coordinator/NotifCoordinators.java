@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.NotifLifetimeExtender;
@@ -45,14 +46,19 @@ public class NotifCoordinators implements Dumpable {
      */
     @Inject
     public NotifCoordinators(
+            FeatureFlags featureFlags,
             KeyguardCoordinator keyguardCoordinator,
             RankingCoordinator rankingCoordinator,
             ForegroundCoordinator foregroundCoordinator,
-            DeviceProvisionedCoordinator deviceProvisionedCoordinator) {
+            DeviceProvisionedCoordinator deviceProvisionedCoordinator,
+            PreparationCoordinator preparationCoordinator) {
         mCoordinators.add(keyguardCoordinator);
         mCoordinators.add(rankingCoordinator);
         mCoordinators.add(foregroundCoordinator);
         mCoordinators.add(deviceProvisionedCoordinator);
+        if (featureFlags.isNewNotifPipelineRenderingEnabled()) {
+            mCoordinators.add(preparationCoordinator);
+        }
         // TODO: add new Coordinators here! (b/145134683, b/112656837)
     }
 

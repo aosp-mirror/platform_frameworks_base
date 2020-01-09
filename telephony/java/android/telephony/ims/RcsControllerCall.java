@@ -18,7 +18,7 @@ package android.telephony.ims;
 
 import android.content.Context;
 import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.ims.aidl.IRcsMessage;
 
 /**
@@ -35,8 +35,11 @@ class RcsControllerCall {
     }
 
     <R> R call(RcsServiceCall<R> serviceCall) throws RcsMessageStoreException {
-        IRcsMessage iRcsMessage = IRcsMessage.Stub.asInterface(ServiceManager.getService(
-                Context.TELEPHONY_RCS_MESSAGE_SERVICE));
+        IRcsMessage iRcsMessage = IRcsMessage.Stub.asInterface(
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getTelephonyRcsMessageServiceRegisterer()
+                        .get());
         if (iRcsMessage == null) {
             throw new RcsMessageStoreException("Could not connect to RCS storage service");
         }

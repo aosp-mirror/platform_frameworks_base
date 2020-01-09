@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.row;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -138,10 +137,10 @@ public interface NotificationRowContentBinder {
         /**
          * Callback for when there is an inflation exception
          *
-         * @param notification notification which failed to inflate content
+         * @param entry notification which failed to inflate content
          * @param e exception
          */
-        void handleInflationException(StatusBarNotification notification, Exception e);
+        void handleInflationException(NotificationEntry entry, Exception e);
 
         /**
          * Callback for after the content views finish inflating.

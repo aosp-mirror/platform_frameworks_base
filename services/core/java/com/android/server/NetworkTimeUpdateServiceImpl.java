@@ -36,11 +36,11 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.TimestampedValue;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.TimeUtils;
-import android.util.TimestampedValue;
 
 import com.android.internal.util.DumpUtils;
 

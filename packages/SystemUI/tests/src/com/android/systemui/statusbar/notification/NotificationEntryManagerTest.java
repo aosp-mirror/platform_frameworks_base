@@ -65,6 +65,7 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -86,7 +87,10 @@ import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotifRemoteViewCache;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -143,6 +147,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private RowInflaterTask mAsyncInflationTask;
     @Mock private NotificationRowBinder mMockedRowBinder;
     @Mock private NotifLog mNotifLog;
+    @Mock private FeatureFlags mFeatureFlags;
 
     private int mId;
     private NotificationEntry mEntry;
@@ -219,6 +224,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntry.expandedIcon = mock(StatusBarIconView.class);
 
+        when(mFeatureFlags.isNewNotifPipelineEnabled()).thenReturn(false);
+        when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
         mEntryManager = new TestableNotificationEntryManager(
                 mNotifLog,
                 mGroupManager,
@@ -230,19 +237,27 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                         mNotifLog,
                         mock(NotificationSectionsFeatureManager.class),
                         mock(PeopleNotificationIdentifier.class)),
-                mEnvironment
+                mEnvironment,
+                mFeatureFlags
         );
         mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mHeadsUpManager);
         mEntryManager.addNotificationEntryListener(mEntryListener);
         mEntryManager.setNotificationRemoveInterceptor(mRemoveInterceptor);
 
+        NotificationRowContentBinder contentBinder = new NotificationContentInflater(
+                mock(NotifRemoteViewCache.class),
+                mRemoteInputManager);
+
         NotificationRowBinderImpl notificationRowBinder =
-                new NotificationRowBinderImpl(mContext, true, /* allowLongPress */
+                new NotificationRowBinderImpl(mContext,
+                        contentBinder,
+                        true, /* allowLongPress */
                         mock(KeyguardBypassController.class),
                         mock(StatusBarStateController.class),
                         mock(NotificationLogger.class));
         notificationRowBinder.setUpWithPresenter(
-                mPresenter, mListContainer, mHeadsUpManager, mEntryManager, mBindCallback);
+                mPresenter, mListContainer, mHeadsUpManager, mBindCallback);
+        notificationRowBinder.setInflationCallback(mEntryManager);
         notificationRowBinder.setNotificationClicker(mock(NotificationClicker.class));
         mEntryManager.setRowBinder(notificationRowBinder);
 

@@ -19,10 +19,15 @@ package android.view;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
+import static android.view.WindowInsets.Type.IME;
 import static android.view.WindowInsets.Type.MANDATORY_SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.SIZE;
 import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
+import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.indexOf;
+import static android.view.WindowInsets.Type.systemBars;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
@@ -156,11 +161,10 @@ public class InsetsState implements Parcelable {
                     && source.getType() != ITYPE_IME;
             boolean skipSystemBars = ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
                     && (type == ITYPE_STATUS_BAR || type == ITYPE_NAVIGATION_BAR);
-            boolean skipIme = source.getType() == ITYPE_IME
-                    && (legacySoftInputMode & LayoutParams.SOFT_INPUT_ADJUST_RESIZE) == 0;
             boolean skipLegacyTypes = ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_NONE
-                    && (toPublicType(type) & Type.compatSystemInsets()) != 0;
-            if (skipSystemBars || skipIme || skipLegacyTypes || skipNonImeInImeMode) {
+                    && (type == ITYPE_STATUS_BAR || type == ITYPE_NAVIGATION_BAR
+                            || type == ITYPE_IME);
+            if (skipSystemBars || skipLegacyTypes || skipNonImeInImeMode) {
                 typeVisibilityMap[indexOf(toPublicType(type))] = source.isVisible();
                 continue;
             }
@@ -175,8 +179,11 @@ public class InsetsState implements Parcelable {
                         typeMaxInsetsMap, null /* typeSideMap */, null /* typeVisibilityMap */);
             }
         }
+        final int softInputAdjustMode = legacySoftInputMode & SOFT_INPUT_MASK_ADJUST;
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
-                alwaysConsumeSystemBars, cutout);
+                alwaysConsumeSystemBars, cutout, softInputAdjustMode == SOFT_INPUT_ADJUST_RESIZE
+                        ? systemBars() | ime()
+                        : systemBars());
     }
 
     private void processSource(InsetsSource source, Rect relativeFrame, boolean ignoreVisibility,

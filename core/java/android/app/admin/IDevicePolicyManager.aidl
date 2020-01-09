@@ -156,6 +156,7 @@ interface IDevicePolicyManager {
     void setProfileName(in ComponentName who, String profileName);
     void clearProfileOwner(in ComponentName who);
     boolean hasUserSetupCompleted();
+    boolean isOrganizationOwnedDeviceWithManagedProfile();
 
     boolean checkDeviceIdentifierAccess(in String packageName, int pid, int uid);
 

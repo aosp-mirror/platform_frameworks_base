@@ -37,24 +37,6 @@ MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const int64_t& id,
                       conditionSliced, fullLink, anomalyTrackers) {
 }
 
-unique_ptr<DurationTracker> MaxDurationTracker::clone(const int64_t eventTime) {
-    auto clonedTracker = make_unique<MaxDurationTracker>(*this);
-    for (auto it = clonedTracker->mInfos.begin(); it != clonedTracker->mInfos.end();) {
-        if (it->second.state  != kStopped) {
-            it->second.lastStartTime = eventTime;
-            it->second.lastDuration = 0;
-            it++;
-        } else {
-            it = clonedTracker->mInfos.erase(it);
-        }
-    }
-    if (clonedTracker->mInfos.empty()) {
-        return nullptr;
-    } else {
-        return clonedTracker;
-    }
-}
-
 bool MaxDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
     // ===========GuardRail==============
     if (mInfos.find(newKey) != mInfos.end()) {

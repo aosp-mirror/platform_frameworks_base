@@ -177,9 +177,9 @@ public class MediaRouter2 {
      * @hide
      */
     public static boolean checkRouteListContainsRouteId(@NonNull List<MediaRoute2Info> routeList,
-            @NonNull String uniqueRouteId) {
+            @NonNull String routeId) {
         for (MediaRoute2Info info : routeList) {
-            if (TextUtils.equals(uniqueRouteId, info.getUniqueId())) {
+            if (TextUtils.equals(routeId, info.getId())) {
                 return true;
             }
         }
@@ -499,7 +499,7 @@ public class MediaRouter2 {
         List<MediaRoute2Info> addedRoutes = new ArrayList<>();
         synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
-                mRoutes.put(route.getUniqueId(), route);
+                mRoutes.put(route.getId(), route);
                 if (route.supportsControlCategories(mControlCategories)) {
                     addedRoutes.add(route);
                 }
@@ -515,7 +515,7 @@ public class MediaRouter2 {
         List<MediaRoute2Info> removedRoutes = new ArrayList<>();
         synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
-                mRoutes.remove(route.getUniqueId());
+                mRoutes.remove(route.getId());
                 if (route.supportsControlCategories(mControlCategories)) {
                     removedRoutes.add(route);
                 }
@@ -531,7 +531,7 @@ public class MediaRouter2 {
         List<MediaRoute2Info> changedRoutes = new ArrayList<>();
         synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
-                mRoutes.put(route.getUniqueId(), route);
+                mRoutes.put(route.getId(), route);
                 if (route.supportsControlCategories(mControlCategories)) {
                     changedRoutes.add(route);
                 }
@@ -935,13 +935,13 @@ public class MediaRouter2 {
             }
 
             List<MediaRoute2Info> selectedRoutes = getSelectedRoutes();
-            if (checkRouteListContainsRouteId(selectedRoutes, route.getUniqueId())) {
+            if (checkRouteListContainsRouteId(selectedRoutes, route.getId())) {
                 Log.w(TAG, "Ignoring selecting a route that is already selected. route=" + route);
                 return;
             }
 
             List<MediaRoute2Info> selectableRoutes = getSelectableRoutes();
-            if (!checkRouteListContainsRouteId(selectableRoutes, route.getUniqueId())) {
+            if (!checkRouteListContainsRouteId(selectableRoutes, route.getId())) {
                 Log.w(TAG, "Ignoring selecting a non-selectable route=" + route);
                 return;
             }
@@ -982,13 +982,13 @@ public class MediaRouter2 {
             }
 
             List<MediaRoute2Info> selectedRoutes = getSelectedRoutes();
-            if (!checkRouteListContainsRouteId(selectedRoutes, route.getUniqueId())) {
+            if (!checkRouteListContainsRouteId(selectedRoutes, route.getId())) {
                 Log.w(TAG, "Ignoring deselecting a route that is not selected. route=" + route);
                 return;
             }
 
             List<MediaRoute2Info> deselectableRoutes = getDeselectableRoutes();
-            if (!checkRouteListContainsRouteId(deselectableRoutes, route.getUniqueId())) {
+            if (!checkRouteListContainsRouteId(deselectableRoutes, route.getId())) {
                 Log.w(TAG, "Ignoring deselecting a non-deselectable route=" + route);
                 return;
             }
@@ -1029,14 +1029,14 @@ public class MediaRouter2 {
             }
 
             List<MediaRoute2Info> selectedRoutes = getSelectedRoutes();
-            if (checkRouteListContainsRouteId(selectedRoutes, route.getUniqueId())) {
+            if (checkRouteListContainsRouteId(selectedRoutes, route.getId())) {
                 Log.w(TAG, "Ignoring transferring to a route that is already added. route="
                         + route);
                 return;
             }
 
             List<MediaRoute2Info> transferrableRoutes = getTransferrableRoutes();
-            if (!checkRouteListContainsRouteId(transferrableRoutes, route.getUniqueId())) {
+            if (!checkRouteListContainsRouteId(transferrableRoutes, route.getId())) {
                 Log.w(TAG, "Ignoring transferring to a non-transferrable route=" + route);
                 return;
             }
@@ -1084,8 +1084,12 @@ public class MediaRouter2 {
             }
         }
 
+        /**
+         * TODO: Change this to package private. (Hidden for debugging purposes)
+         * @hide
+         */
         @NonNull
-        RouteSessionInfo getRouteSessionInfo() {
+        public RouteSessionInfo getRouteSessionInfo() {
             synchronized (mControllerLock) {
                 return mSessionInfo;
             }

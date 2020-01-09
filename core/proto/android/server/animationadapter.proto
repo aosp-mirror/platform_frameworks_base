@@ -50,6 +50,7 @@ message AnimationSpecProto {
     optional WindowAnimationSpecProto window = 1;
     optional MoveAnimationSpecProto move = 2;
     optional AlphaAnimationSpecProto alpha = 3;
+    optional RotationAnimationSpecProto rotate = 4;
 }
 
 /* represents WindowAnimationSpec */
@@ -74,5 +75,14 @@ message AlphaAnimationSpecProto {
 
     optional float from = 1;
     optional float to = 2;
+    optional int64 duration_ms = 3;
+}
+
+/* represents RotationAnimationSpec */
+message RotationAnimationSpecProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional float start_luma = 1;
+    optional float end_luma = 2;
     optional int64 duration_ms = 3;
 }

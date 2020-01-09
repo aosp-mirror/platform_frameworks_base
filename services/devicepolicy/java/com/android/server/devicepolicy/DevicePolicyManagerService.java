@@ -8607,6 +8607,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public boolean isOrganizationOwnedDeviceWithManagedProfile() {
+        if (!mHasFeature) {
+            return false;
+        }
+        enforceManageUsers();
+
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            for (UserInfo ui : mUserManager.getUsers()) {
+                if (ui.isManagedProfile() && isProfileOwnerOfOrganizationOwnedDevice(ui.id)) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+    }
+
+    @Override
     public boolean checkDeviceIdentifierAccess(String packageName, int pid, int uid) {
         ensureCallerIdentityMatchesIfNotSystem(packageName, pid, uid);
 
@@ -14584,8 +14602,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             for (int i = 0; i < users.length; i++) {
                 final ComponentName componentName = getProfileOwner(users[i]);
                 if (componentName != null) {
-                    admins.add(getActiveAdminForCallerLocked(
-                            componentName, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER));
+                    ActiveAdmin admin = getActiveAdminUncheckedLocked(componentName, users[i]);
+                    if (admin != null) {
+                        admins.add(admin);
+                    }
                 }
             }
             return admins;

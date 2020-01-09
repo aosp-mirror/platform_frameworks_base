@@ -3636,6 +3636,29 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME_ZONE, 0);
     }
 
+    public void testIsOrganizationOwnedDevice() throws Exception {
+        setupProfileOwner();
+        // Set up the user manager to return correct user info
+        UserInfo managedProfileUserInfo = new UserInfo(DpmMockContext.CALLER_USER_HANDLE,
+                "managed profile",
+                UserInfo.FLAG_MANAGED_PROFILE);
+        when(getServices().userManager.getUsers())
+                .thenReturn(Arrays.asList(managedProfileUserInfo));
+
+        // Any caller without the MANAGE_USERS permission should get a security exception.
+        assertExpectException(SecurityException.class, null, () ->
+                dpm.isOrganizationOwnedDeviceWithManagedProfile());
+        // But when the right permission is granted, this should succeed.
+        mContext.permissions.add(android.Manifest.permission.MANAGE_USERS);
+        assertFalse(dpm.isOrganizationOwnedDeviceWithManagedProfile());
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
+        assertTrue(dpm.isOrganizationOwnedDeviceWithManagedProfile());
+
+        // A random caller from another user should also be able to get the right result.
+        mContext.binder.callingUid = DpmMockContext.ANOTHER_UID;
+        assertTrue(dpm.isOrganizationOwnedDeviceWithManagedProfile());
+    }
+
     public void testSetTime() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();

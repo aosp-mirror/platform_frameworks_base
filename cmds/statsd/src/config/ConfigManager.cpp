@@ -189,23 +189,9 @@ void ConfigManager::RemoveConfig(const ConfigKey& key) {
             // Remove from map
             uidIt->second.erase(key);
 
-            // No more configs for this uid, lets remove the active configs callback.
-            if (uidIt->second.empty()) {
-                auto itActiveConfigsChangedReceiver = mActiveConfigsChangedReceivers.find(uid);
-                    if (itActiveConfigsChangedReceiver != mActiveConfigsChangedReceivers.end()) {
-                        mActiveConfigsChangedReceivers.erase(itActiveConfigsChangedReceiver);
-                    }
-            }
-
             for (const sp<ConfigListener>& listener : mListeners) {
                 broadcastList.push_back(listener);
             }
-        }
-
-        auto itReceiver = mConfigReceivers.find(key);
-        if (itReceiver != mConfigReceivers.end()) {
-            // Remove from map
-            mConfigReceivers.erase(itReceiver);
         }
 
         // Remove from disk. There can still be a lingering file on disk so we check
@@ -238,12 +224,6 @@ void ConfigManager::RemoveConfigs(int uid) {
             // Remove from map
                 remove_saved_configs(*it);
                 removed.push_back(*it);
-                mConfigReceivers.erase(*it);
-        }
-
-        auto itActiveConfigsChangedReceiver = mActiveConfigsChangedReceivers.find(uid);
-        if (itActiveConfigsChangedReceiver != mActiveConfigsChangedReceivers.end()) {
-            mActiveConfigsChangedReceivers.erase(itActiveConfigsChangedReceiver);
         }
 
         mConfigs.erase(uidIt);
@@ -277,8 +257,6 @@ void ConfigManager::RemoveAllConfigs() {
             uidIt = mConfigs.erase(uidIt);
         }
 
-        mConfigReceivers.clear();
-        mActiveConfigsChangedReceivers.clear();
         for (const sp<ConfigListener>& listener : mListeners) {
             broadcastList.push_back(listener);
         }

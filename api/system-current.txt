@@ -677,6 +677,7 @@ package android.app {
   public class StatusBarManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.STATUS_BAR) public android.app.StatusBarManager.DisableInfo getDisableInfo();
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setDisabledForSetup(boolean);
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setDisabledForSimNetworkLock(boolean);
   }
 
   public static final class StatusBarManager.DisableInfo {
@@ -799,6 +800,7 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isDeviceProvisioned();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isDeviceProvisioningConfigApplied();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isManagedKiosk();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isOrganizationOwnedDeviceWithManagedProfile();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isUnattendedManagedKiosk();
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long);
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long, boolean);
@@ -1532,6 +1534,14 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
   }
 
+  public final class BluetoothHidHost implements android.bluetooth.BluetoothProfile {
+    method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
+    method public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice, int);
+    field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED";
+  }
+
   public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
     method protected void finalize();
     method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
@@ -1675,6 +1685,7 @@ package android.content {
     field public static final String EUICC_CARD_SERVICE = "euicc_card";
     field public static final String HDMI_CONTROL_SERVICE = "hdmi_control";
     field public static final String NETD_SERVICE = "netd";
+    field public static final String NETWORK_POLICY_SERVICE = "netpolicy";
     field public static final String NETWORK_SCORE_SERVICE = "network_score";
     field public static final String OEM_LOCK_SERVICE = "oem_lock";
     field public static final String PERMISSION_SERVICE = "permission";
@@ -1688,6 +1699,7 @@ package android.content {
     field public static final String TELEPHONY_REGISTRY_SERVICE = "telephony_registry";
     field public static final String TETHERING_SERVICE = "tethering";
     field public static final String VR_SERVICE = "vrmanager";
+    field public static final String WIFI_COND_SERVICE = "wificond";
     field @Deprecated public static final String WIFI_RTT_SERVICE = "rttmanager";
     field public static final String WIFI_SCANNING_SERVICE = "wifiscanner";
   }
@@ -4814,6 +4826,7 @@ package android.net {
   public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
     ctor public MatchAllNetworkSpecifier();
     method public int describeContents();
+    method public boolean satisfiedBy(android.net.NetworkSpecifier);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.MatchAllNetworkSpecifier> CREATOR;
   }
@@ -4875,6 +4888,12 @@ package android.net {
   public static interface NetworkScoreManager.NetworkScoreCallback {
     method public void clearScores();
     method public void updateScores(@NonNull java.util.List<android.net.ScoredNetwork>);
+  }
+
+  public abstract class NetworkSpecifier {
+    method public void assertValidFromUid(int);
+    method @Nullable public android.net.NetworkSpecifier redact();
+    method public abstract boolean satisfiedBy(@Nullable android.net.NetworkSpecifier);
   }
 
   public class NetworkStack {
@@ -4947,6 +4966,7 @@ package android.net {
   public final class StringNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
     ctor public StringNetworkSpecifier(@NonNull String);
     method public int describeContents();
+    method public boolean satisfiedBy(android.net.NetworkSpecifier);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.StringNetworkSpecifier> CREATOR;
     field @NonNull public final String specifier;
@@ -5730,6 +5750,7 @@ package android.net.wifi {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.SoftApCapability> CREATOR;
     field public static final int SOFTAP_FEATURE_ACS_OFFLOAD = 1; // 0x1
     field public static final int SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT = 2; // 0x2
+    field public static final int SOFTAP_FEATURE_WPA3_SAE = 4; // 0x4
   }
 
   public final class SoftApConfiguration implements android.os.Parcelable {
@@ -5738,6 +5759,7 @@ package android.net.wifi {
     method @Nullable public android.net.MacAddress getBssid();
     method public int getChannel();
     method public int getMaxNumberOfClients();
+    method @Nullable public String getPassphrase();
     method public int getSecurityType();
     method @Nullable public String getSsid();
     method @Nullable public String getWpa2Passphrase();
@@ -5750,6 +5772,8 @@ package android.net.wifi {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.SoftApConfiguration> CREATOR;
     field public static final int SECURITY_TYPE_OPEN = 0; // 0x0
     field public static final int SECURITY_TYPE_WPA2_PSK = 1; // 0x1
+    field public static final int SECURITY_TYPE_WPA3_SAE = 3; // 0x3
+    field public static final int SECURITY_TYPE_WPA3_SAE_TRANSITION = 2; // 0x2
   }
 
   public static final class SoftApConfiguration.Builder {
@@ -5761,6 +5785,7 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setChannel(int, int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setHiddenSsid(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setMaxNumberOfClients(int);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setPassphrase(@Nullable String, int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setSsid(@Nullable String);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setWpa2Passphrase(@Nullable String);
   }
@@ -5905,6 +5930,7 @@ package android.net.wifi {
   public class WifiManager {
     method @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE) public void addOnWifiUsabilityStatsListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.OnWifiUsabilityStatsListener);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void allowAutojoin(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void allowAutojoinPasspoint(@NonNull String, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void connect(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void connect(int, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void disable(int, @Nullable android.net.wifi.WifiManager.ActionListener);
@@ -5981,6 +6007,7 @@ package android.net.wifi {
     field public static final String EXTRA_OSU_NETWORK = "android.net.wifi.extra.OSU_NETWORK";
     field public static final String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
     field public static final String EXTRA_URL = "android.net.wifi.extra.URL";
+    field public static final String EXTRA_WIFI_AP_FAILURE_REASON = "android.net.wifi.extra.WIFI_AP_FAILURE_REASON";
     field public static final String EXTRA_WIFI_AP_INTERFACE_NAME = "android.net.wifi.extra.WIFI_AP_INTERFACE_NAME";
     field public static final String EXTRA_WIFI_AP_MODE = "android.net.wifi.extra.WIFI_AP_MODE";
     field public static final String EXTRA_WIFI_AP_STATE = "wifi_state";
@@ -6057,6 +6084,10 @@ package android.net.wifi {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiNetworkConnectionStatistics> CREATOR;
     field public int numConnection;
     field public int numUsage;
+  }
+
+  public final class WifiNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
+    method public boolean satisfiedBy(android.net.NetworkSpecifier);
   }
 
   public static final class WifiNetworkSuggestion.Builder {
@@ -6245,6 +6276,10 @@ package android.net.wifi.aware {
     method @Deprecated public android.net.NetworkSpecifier createNetworkSpecifierPmk(@NonNull android.net.wifi.aware.PeerHandle, @NonNull byte[]);
   }
 
+  public final class WifiAwareNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
+    method public boolean satisfiedBy(android.net.NetworkSpecifier);
+  }
+
   public class WifiAwareSession implements java.lang.AutoCloseable {
     method public android.net.NetworkSpecifier createNetworkSpecifierPmk(int, @NonNull byte[], @NonNull byte[]);
   }
@@ -6259,6 +6294,10 @@ package android.net.wifi.hotspot2 {
     method @Nullable public android.net.Uri getServerUri();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.hotspot2.OsuProvider> CREATOR;
+  }
+
+  public final class PasspointConfiguration implements android.os.Parcelable {
+    method public boolean isAutoJoinEnabled();
   }
 
   public abstract class ProvisioningCallback {
@@ -7035,7 +7074,22 @@ package android.os {
   }
 
   public class TelephonyServiceManager {
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getCarrierConfigServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getEuiccCardControllerServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getEuiccControllerService();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getIccPhoneBookServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getNetworkPolicyServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getOpportunisticNetworkServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getPackageManagerServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getPermissionManagerServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getPhoneSubServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getSmsServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getSubscriptionServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyImsServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyRcsMessageServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyRegistryServiceRegisterer();
     method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getWindowServiceRegisterer();
   }
 
   public static class TelephonyServiceManager.ServiceNotFoundException extends java.lang.Exception {
@@ -7051,11 +7105,13 @@ package android.os {
 
   public class UpdateEngine {
     ctor public UpdateEngine();
+    method @NonNull public android.os.UpdateEngine.AllocateSpaceResult allocateSpace(@NonNull String, @NonNull String[]);
     method public void applyPayload(String, long, long, String[]);
     method public void applyPayload(@NonNull android.os.ParcelFileDescriptor, long, long, @NonNull String[]);
     method public boolean bind(android.os.UpdateEngineCallback, android.os.Handler);
     method public boolean bind(android.os.UpdateEngineCallback);
     method public void cancel();
+    method public int cleanupAppliedPayload();
     method public void resetStatus();
     method public void resume();
     method public void suspend();
@@ -7063,14 +7119,21 @@ package android.os {
     method public boolean verifyPayloadMetadata(String);
   }
 
+  public static final class UpdateEngine.AllocateSpaceResult {
+    method public int errorCode();
+    method public long freeSpaceRequired();
+  }
+
   public static final class UpdateEngine.ErrorCodeConstants {
     ctor public UpdateEngine.ErrorCodeConstants();
+    field public static final int DEVICE_CORRUPTED = 61; // 0x3d
     field public static final int DOWNLOAD_PAYLOAD_VERIFICATION_ERROR = 12; // 0xc
     field public static final int DOWNLOAD_TRANSFER_ERROR = 9; // 0x9
     field public static final int ERROR = 1; // 0x1
     field public static final int FILESYSTEM_COPIER_ERROR = 4; // 0x4
     field public static final int INSTALL_DEVICE_OPEN_ERROR = 7; // 0x7
     field public static final int KERNEL_DEVICE_OPEN_ERROR = 8; // 0x8
+    field public static final int NOT_ENOUGH_SPACE = 60; // 0x3c
     field public static final int PAYLOAD_HASH_MISMATCH_ERROR = 10; // 0xa
     field public static final int PAYLOAD_MISMATCHED_TYPE_ERROR = 6; // 0x6
     field public static final int PAYLOAD_SIZE_MISMATCH_ERROR = 11; // 0xb
@@ -7883,7 +7946,71 @@ package android.provider {
   }
 
   public static final class Telephony.SimInfo {
+    field public static final String ACCESS_RULES = "access_rules";
+    field public static final String ACCESS_RULES_FROM_CARRIER_CONFIGS = "access_rules_from_carrier_configs";
+    field public static final String CARD_ID = "card_id";
+    field public static final String CARRIER_ID = "carrier_id";
+    field public static final String CARRIER_NAME = "carrier_name";
+    field public static final String CB_ALERT_REMINDER_INTERVAL = "alert_reminder_interval";
+    field public static final String CB_ALERT_SOUND_DURATION = "alert_sound_duration";
+    field public static final String CB_ALERT_SPEECH = "enable_alert_speech";
+    field public static final String CB_ALERT_VIBRATE = "enable_alert_vibrate";
+    field public static final String CB_AMBER_ALERT = "enable_cmas_amber_alerts";
+    field public static final String CB_CHANNEL_50_ALERT = "enable_channel_50_alerts";
+    field public static final String CB_CMAS_TEST_ALERT = "enable_cmas_test_alerts";
+    field public static final String CB_EMERGENCY_ALERT = "enable_emergency_alerts";
+    field public static final String CB_ETWS_TEST_ALERT = "enable_etws_test_alerts";
+    field public static final String CB_EXTREME_THREAT_ALERT = "enable_cmas_extreme_threat_alerts";
+    field public static final String CB_OPT_OUT_DIALOG = "show_cmas_opt_out_dialog";
+    field public static final String CB_SEVERE_THREAT_ALERT = "enable_cmas_severe_threat_alerts";
+    field public static final String COLOR = "color";
     field @NonNull public static final android.net.Uri CONTENT_URI;
+    field public static final String DATA_ENABLED_OVERRIDE_RULES = "data_enabled_override_rules";
+    field public static final String DATA_ROAMING = "data_roaming";
+    field public static final int DATA_ROAMING_DEFAULT = 0; // 0x0
+    field public static final int DATA_ROAMING_DISABLE = 0; // 0x0
+    field public static final int DATA_ROAMING_ENABLE = 1; // 0x1
+    field public static final String DISPLAY_NAME = "display_name";
+    field public static final String EHPLMNS = "ehplmns";
+    field public static final String ENHANCED_4G_MODE_ENABLED = "volte_vt_enabled";
+    field public static final String GROUP_OWNER = "group_owner";
+    field public static final String GROUP_UUID = "group_uuid";
+    field public static final String HPLMNS = "hplmns";
+    field public static final String ICC_ID = "icc_id";
+    field public static final String IMSI = "imsi";
+    field public static final String ISO_COUNTRY_CODE = "iso_country_code";
+    field public static final String IS_EMBEDDED = "is_embedded";
+    field public static final String IS_OPPORTUNISTIC = "is_opportunistic";
+    field public static final String IS_REMOVABLE = "is_removable";
+    field public static final String MCC = "mcc";
+    field public static final String MCC_STRING = "mcc_string";
+    field public static final String MNC = "mnc";
+    field public static final String MNC_STRING = "mnc_string";
+    field public static final String NAME_SOURCE = "name_source";
+    field public static final int NAME_SOURCE_CARRIER = 3; // 0x3
+    field public static final int NAME_SOURCE_DEFAULT = 0; // 0x0
+    field public static final int NAME_SOURCE_SIM_PNN = 4; // 0x4
+    field public static final int NAME_SOURCE_SIM_SPN = 1; // 0x1
+    field public static final int NAME_SOURCE_USER_INPUT = 2; // 0x2
+    field public static final String NUMBER = "number";
+    field public static final String PROFILE_CLASS = "profile_class";
+    field public static final int PROFILE_CLASS_DEFAULT = -1; // 0xffffffff
+    field public static final int PROFILE_CLASS_OPERATIONAL = 2; // 0x2
+    field public static final int PROFILE_CLASS_PROVISIONING = 1; // 0x1
+    field public static final int PROFILE_CLASS_TESTING = 0; // 0x0
+    field public static final int PROFILE_CLASS_UNSET = -1; // 0xffffffff
+    field public static final int SIM_NOT_INSERTED = -1; // 0xffffffff
+    field public static final String SIM_SLOT_INDEX = "sim_id";
+    field public static final String SUBSCRIPTION_TYPE = "subscription_type";
+    field public static final int SUBSCRIPTION_TYPE_LOCAL_SIM = 0; // 0x0
+    field public static final int SUBSCRIPTION_TYPE_REMOTE_SIM = 1; // 0x1
+    field public static final String UICC_APPLICATIONS_ENABLED = "uicc_applications_enabled";
+    field public static final String UNIQUE_KEY_SUBSCRIPTION_ID = "_id";
+    field public static final String VT_IMS_ENABLED = "vt_ims_enabled";
+    field public static final String WFC_IMS_ENABLED = "wfc_ims_enabled";
+    field public static final String WFC_IMS_MODE = "wfc_ims_mode";
+    field public static final String WFC_IMS_ROAMING_ENABLED = "wfc_ims_roaming_enabled";
+    field public static final String WFC_IMS_ROAMING_MODE = "wfc_ims_roaming_mode";
   }
 
   public static final class Telephony.Sms.Intents {
@@ -9150,30 +9277,37 @@ package android.telephony {
 
   public abstract class CellIdentity implements android.os.Parcelable {
     method @NonNull public abstract android.telephony.CellLocation asCellLocation();
+    method @NonNull public abstract android.telephony.CellIdentity sanitizeLocationInfo();
   }
 
   public final class CellIdentityCdma extends android.telephony.CellIdentity {
     method @NonNull public android.telephony.cdma.CdmaCellLocation asCellLocation();
+    method @NonNull public android.telephony.CellIdentityCdma sanitizeLocationInfo();
   }
 
   public final class CellIdentityGsm extends android.telephony.CellIdentity {
     method @NonNull public android.telephony.gsm.GsmCellLocation asCellLocation();
+    method @NonNull public android.telephony.CellIdentityGsm sanitizeLocationInfo();
   }
 
   public final class CellIdentityLte extends android.telephony.CellIdentity {
     method @NonNull public android.telephony.gsm.GsmCellLocation asCellLocation();
+    method @NonNull public android.telephony.CellIdentityLte sanitizeLocationInfo();
   }
 
   public final class CellIdentityNr extends android.telephony.CellIdentity {
     method @NonNull public android.telephony.CellLocation asCellLocation();
+    method @NonNull public android.telephony.CellIdentityNr sanitizeLocationInfo();
   }
 
   public final class CellIdentityTdscdma extends android.telephony.CellIdentity {
     method @NonNull public android.telephony.gsm.GsmCellLocation asCellLocation();
+    method @NonNull public android.telephony.CellIdentityTdscdma sanitizeLocationInfo();
   }
 
   public final class CellIdentityWcdma extends android.telephony.CellIdentity {
     method @NonNull public android.telephony.gsm.GsmCellLocation asCellLocation();
+    method @NonNull public android.telephony.CellIdentityWcdma sanitizeLocationInfo();
   }
 
   public final class DataFailCause {
@@ -10349,6 +10483,20 @@ package android.telephony {
   public abstract class VisualVoicemailService extends android.app.Service {
     method public static final void sendVisualVoicemailSms(android.content.Context, android.telecom.PhoneAccountHandle, String, short, String, android.app.PendingIntent);
     method public static final void setSmsFilterSettings(android.content.Context, android.telecom.PhoneAccountHandle, android.telephony.VisualVoicemailSmsFilterSettings);
+  }
+
+  public final class WapPushManagerConnector {
+    ctor public WapPushManagerConnector(@NonNull android.content.Context);
+    method public boolean bindToWapPushManagerService();
+    method @Nullable public String getConnectedWapPushManagerServicePackage();
+    method public int processMessage(@NonNull String, @NonNull String, @NonNull android.content.Intent);
+    method public void unbindWapPushManagerService();
+    field public static final int RESULT_APP_QUERY_FAILED = 2; // 0x2
+    field public static final int RESULT_EXCEPTION_CAUGHT = 16; // 0x10
+    field public static final int RESULT_FURTHER_PROCESSING = 32768; // 0x8000
+    field public static final int RESULT_INVALID_RECEIVER_NAME = 8; // 0x8
+    field public static final int RESULT_MESSAGE_HANDLED = 1; // 0x1
+    field public static final int RESULT_SIGNATURE_NO_MATCH = 4; // 0x4
   }
 
 }

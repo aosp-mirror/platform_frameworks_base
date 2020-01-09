@@ -205,6 +205,7 @@ import com.android.systemui.statusbar.notification.collection.init.NewNotifPipel
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -413,6 +414,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final NotificationGutsManager mGutsManager;
     private final NotificationLogger mNotificationLogger;
     private final NotificationEntryManager mEntryManager;
+    private final NotificationRowContentBinder mRowContentBinder;
     private NotificationListController mNotificationListController;
     private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
     private final NotificationViewHierarchyManager mViewHierarchyManager;
@@ -634,6 +636,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             NotificationGutsManager notificationGutsManager,
             NotificationLogger notificationLogger,
             NotificationEntryManager notificationEntryManager,
+            NotificationRowContentBinder notificationRowContentBinder,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             NotificationViewHierarchyManager notificationViewHierarchyManager,
             KeyguardViewMediator keyguardViewMediator,
@@ -715,6 +718,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGutsManager = notificationGutsManager;
         mNotificationLogger = notificationLogger;
         mEntryManager = notificationEntryManager;
+        mRowContentBinder = notificationRowContentBinder;
         mNotificationInterruptionStateProvider = notificationInterruptionStateProvider;
         mViewHierarchyManager = notificationViewHierarchyManager;
         mKeyguardViewMediator = keyguardViewMediator;
@@ -1240,6 +1244,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final NotificationRowBinderImpl rowBinder =
                 new NotificationRowBinderImpl(
                         mContext,
+                        mRowContentBinder,
                         mAllowNotificationLongPress,
                         mKeyguardBypassController,
                         mStatusBarStateController,
@@ -1272,7 +1277,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
 
-        mEntryManager.setRowBinder(rowBinder);
+        if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            mEntryManager.setRowBinder(rowBinder);
+            rowBinder.setInflationCallback(mEntryManager);
+        }
+
         mRemoteInputUriController.attach(mEntryManager);
 
         rowBinder.setNotificationClicker(new NotificationClicker(
@@ -1282,7 +1291,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationListController.bind();
 
         if (mFeatureFlags.isNewNotifPipelineEnabled()) {
-            mNewNotifPipeline.get().initialize(mNotificationListener);
+            mNewNotifPipeline.get().initialize(mNotificationListener, rowBinder);
         }
         mEntryManager.attach(mNotificationListener);
     }

@@ -387,6 +387,26 @@ public final class Log {
     public static native int println_native(int bufID, int priority, String tag, String msg);
 
     /**
+     * Send a log message to the "radio" log buffer, which can be dumped with
+     * {@code adb logcat -b radio}.
+     *
+     * <p>Only the telephony mainline module should use it.
+     *
+     * <p>Note ART will protect {@code MODULE_LIBRARIES} system APIs from regular app code.
+     *
+     * @param priority Log priority.
+     * @param tag Used to identify the source of a log message.  It usually identifies
+     *        the class or activity where the log call occurs.
+     * @param message The message you would like logged.
+     * @hide
+     */
+    // @SystemApi(client= SystemApi.Client.MODULE_LIBRARIES) // TODO Uncomment once http://ag/9956147 is in.
+    public static int logToRadioBuffer(@Level int priority, @Nullable String tag,
+            @Nullable String message) {
+        return println_native(LOG_ID_RADIO, priority, tag, message);
+    }
+
+    /**
      * Return the maximum payload the log daemon accepts without truncation.
      * @return LOGGER_ENTRY_MAX_PAYLOAD.
      */

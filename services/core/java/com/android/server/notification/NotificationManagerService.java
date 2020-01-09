@@ -236,7 +236,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.TriPredicate;
 import com.android.server.DeviceIdleInternal;
@@ -1182,21 +1181,14 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onNotificationBubbleChanged(String key, boolean isBubble) {
-            String pkg;
-            synchronized (mNotificationLock) {
-                NotificationRecord r = mNotificationsByKey.get(key);
-                pkg = r != null && r.sbn != null ? r.sbn.getPackageName() : null;
-            }
-            boolean isAppForeground = pkg != null
-                    && mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
                     final StatusBarNotification n = r.sbn;
                     final int callingUid = n.getUid();
-                    pkg = n.getPackageName();
+                    final String pkg = n.getPackageName();
                     if (isBubble && isNotificationAppropriateToBubble(r, pkg, callingUid,
-                            null /* oldEntry */, isAppForeground)) {
+                            null /* oldEntry */)) {
                         r.getNotification().flags |= FLAG_BUBBLE;
                     } else {
                         r.getNotification().flags &= ~FLAG_BUBBLE;
@@ -5386,7 +5378,7 @@ public class NotificationManagerService extends SystemService {
     private void flagNotificationForBubbles(NotificationRecord r, String pkg, int userId,
             NotificationRecord oldRecord, boolean isAppForeground) {
         Notification notification = r.getNotification();
-        if (isNotificationAppropriateToBubble(r, pkg, userId, oldRecord, isAppForeground)) {
+        if (isNotificationAppropriateToBubble(r, pkg, userId, oldRecord)) {
             notification.flags |= FLAG_BUBBLE;
         } else {
             notification.flags &= ~FLAG_BUBBLE;
@@ -5406,7 +5398,7 @@ public class NotificationManagerService extends SystemService {
      * accounting for user choice & policy.
      */
     private boolean isNotificationAppropriateToBubble(NotificationRecord r, String pkg, int userId,
-            NotificationRecord oldRecord, boolean isAppForeground) {
+            NotificationRecord oldRecord) {
         Notification notification = r.getNotification();
         if (!canBubble(r, pkg, userId)) {
             // no log: canBubble has its own
@@ -5416,11 +5408,6 @@ public class NotificationManagerService extends SystemService {
         if (mActivityManager.isLowRamDevice()) {
             logBubbleError(r.getKey(), "low ram device");
             return false;
-        }
-
-        if (isAppForeground) {
-            // If the app is foreground it always gets to bubble
-            return true;
         }
 
         if (oldRecord != null && (oldRecord.getNotification().flags & FLAG_BUBBLE) != 0) {
@@ -5438,7 +5425,7 @@ public class NotificationManagerService extends SystemService {
         boolean isMessageStyle = Notification.MessagingStyle.class.equals(
                 notification.getNotificationStyle());
         if (!isMessageStyle && (peopleList == null || peopleList.isEmpty())) {
-            logBubbleError(r.getKey(), "if not foreground, must have a person and be "
+            logBubbleError(r.getKey(), "Must have a person and be "
                     + "Notification.MessageStyle or Notification.CATEGORY_CALL");
             return false;
         }
@@ -5446,6 +5433,11 @@ public class NotificationManagerService extends SystemService {
         // Communication is a message or a call
         boolean isCall = CATEGORY_CALL.equals(notification.category);
         boolean hasForegroundService = (notification.flags & FLAG_FOREGROUND_SERVICE) != 0;
+        if (hasForegroundService && !isCall) {
+            logBubbleError(r.getKey(),
+                    "foreground services must be Notification.CATEGORY_CALL to bubble");
+            return false;
+        }
         if (isMessageStyle) {
             if (hasValidRemoteInput(notification)) {
                 return true;
@@ -5459,7 +5451,7 @@ public class NotificationManagerService extends SystemService {
             logBubbleError(r.getKey(), "calls require foreground service");
             return false;
         }
-        logBubbleError(r.getKey(), "if not foreground, must be "
+        logBubbleError(r.getKey(), "Must be "
                 + "Notification.MessageStyle or Notification.CATEGORY_CALL");
         return false;
     }

@@ -16,6 +16,9 @@
 
 package android.net;
 
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
+
 /**
  * Describes specific properties of a requested network for use in a {@link NetworkRequest}.
  *
@@ -31,7 +34,8 @@ public abstract class NetworkSpecifier {
      *
      * @hide
      */
-    public abstract boolean satisfiedBy(NetworkSpecifier other);
+    @SystemApi
+    public abstract boolean satisfiedBy(@Nullable NetworkSpecifier other);
 
     /**
      * Optional method which can be overridden by concrete implementations of NetworkSpecifier to
@@ -45,6 +49,7 @@ public abstract class NetworkSpecifier {
      *
      * @hide
      */
+    @SystemApi
     public void assertValidFromUid(int requestorUid) {
         // empty
     }
@@ -68,6 +73,8 @@ public abstract class NetworkSpecifier {
      *
      * @hide
      */
+    @SystemApi
+    @Nullable
     public NetworkSpecifier redact() {
         // TODO (b/122160111): convert default to null once all platform NetworkSpecifiers
         // implement this method.

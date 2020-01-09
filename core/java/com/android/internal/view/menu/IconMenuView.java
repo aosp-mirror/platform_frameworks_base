@@ -16,9 +16,7 @@
 
 package com.android.internal.view.menu;
 
-import com.android.internal.view.menu.MenuBuilder.ItemInvoker;
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -29,10 +27,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
+
+import com.android.internal.view.menu.MenuBuilder.ItemInvoker;
 
 import java.util.ArrayList;
 

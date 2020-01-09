@@ -30,7 +30,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyManager;
 import android.telephony.euicc.EuiccCardManager.ResetOption;
 
@@ -968,6 +968,10 @@ public class EuiccManager {
     }
 
     private static IEuiccController getIEuiccController() {
-        return IEuiccController.Stub.asInterface(ServiceManager.getService("econtroller"));
+        return IEuiccController.Stub.asInterface(
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getEuiccControllerService()
+                        .get());
     }
 }

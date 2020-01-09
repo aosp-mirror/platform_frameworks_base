@@ -22,30 +22,35 @@ import static com.android.systemui.statusbar.notification.row.NotificationRowCon
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.content.Context;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
-import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
-import android.util.ArrayMap;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RemoteViews;
+import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.InflationTask;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams;
@@ -58,6 +63,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
@@ -74,8 +81,11 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     private Notification.Builder mBuilder;
     private ExpandableNotificationRow mRow;
 
+    @Mock private NotifRemoteViewCache mCache;
+
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         mBuilder = new Notification.Builder(mContext).setSmallIcon(
                 R.drawable.ic_person)
                 .setContentTitle("Title")
@@ -84,7 +94,9 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         ExpandableNotificationRow row = new NotificationTestHelper(mContext, mDependency).createRow(
                 mBuilder.build());
         mRow = spy(row);
-        mNotificationInflater = new NotificationContentInflater();
+        mNotificationInflater = new NotificationContentInflater(
+                mCache,
+                mock(NotificationRemoteInputManager.class));
     }
 
     @Test
@@ -175,11 +187,13 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 result,
                 FLAG_CONTENT_VIEW_EXPANDED,
                 0,
-                new ArrayMap() /* cachedContentViews */, mRow,
+                mock(NotifRemoteViewCache.class),
+                mRow.getEntry(),
+                mRow,
                 true /* isNewView */, (v, p, r) -> true,
                 new InflationCallback() {
                     @Override
-                    public void handleInflationException(StatusBarNotification notification,
+                    public void handleInflationException(NotificationEntry entry,
                             Exception e) {
                         countDownLatch.countDown();
                         throw new RuntimeException("No Exception expected");
@@ -245,6 +259,71 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 NotificationContentInflater.canReapplyRemoteView(mediaView, decoratedMediaView));
     }
 
+    @Test
+    public void testUsesSameViewWhenCachedPossibleToReuse() throws Exception {
+        // GIVEN a cached view.
+        RemoteViews contractedRemoteView = mBuilder.createContentView();
+        when(mCache.hasCachedView(mRow.getEntry(), FLAG_CONTENT_VIEW_CONTRACTED))
+                .thenReturn(true);
+        when(mCache.getCachedView(mRow.getEntry(), FLAG_CONTENT_VIEW_CONTRACTED))
+                .thenReturn(contractedRemoteView);
+
+        // GIVEN existing bound view with same layout id.
+        View view = contractedRemoteView.apply(mContext, null /* parent */);
+        mRow.getPrivateLayout().setContractedChild(view);
+
+        // WHEN inflater inflates
+        inflateAndWait(mNotificationInflater, FLAG_CONTENT_VIEW_CONTRACTED, mRow);
+
+        // THEN the view should be re-used
+        assertEquals("Binder inflated a new view even though the old one was cached and usable.",
+                view, mRow.getPrivateLayout().getContractedChild());
+    }
+
+    @Test
+    public void testInflatesNewViewWhenCachedNotPossibleToReuse() throws Exception {
+        // GIVEN a cached remote view.
+        RemoteViews contractedRemoteView = mBuilder.createHeadsUpContentView();
+        when(mCache.hasCachedView(mRow.getEntry(), FLAG_CONTENT_VIEW_CONTRACTED))
+                .thenReturn(true);
+        when(mCache.getCachedView(mRow.getEntry(), FLAG_CONTENT_VIEW_CONTRACTED))
+                .thenReturn(contractedRemoteView);
+
+        // GIVEN existing bound view with different layout id.
+        View view = new TextView(mContext);
+        mRow.getPrivateLayout().setContractedChild(view);
+
+        // WHEN inflater inflates
+        inflateAndWait(mNotificationInflater, FLAG_CONTENT_VIEW_CONTRACTED, mRow);
+
+        // THEN the view should be a new view
+        assertNotEquals("Binder (somehow) used the same view when inflating.",
+                view, mRow.getPrivateLayout().getContractedChild());
+    }
+
+    @Test
+    public void testInflationCachesCreatedRemoteView() throws Exception {
+        // WHEN inflater inflates
+        inflateAndWait(mNotificationInflater, FLAG_CONTENT_VIEW_CONTRACTED, mRow);
+
+        // THEN inflater informs cache of the new remote view
+        verify(mCache).putCachedView(
+                eq(mRow.getEntry()),
+                eq(FLAG_CONTENT_VIEW_CONTRACTED),
+                any());
+    }
+
+    @Test
+    public void testUnbindRemovesCachedRemoteView() {
+        // WHEN inflated unbinds content
+        mNotificationInflater.unbindContent(mRow.getEntry(), mRow, FLAG_CONTENT_VIEW_HEADS_UP);
+
+        // THEN inflated informs cache to remove remote view
+        verify(mCache).removeCachedView(
+                eq(mRow.getEntry()),
+                eq(FLAG_CONTENT_VIEW_HEADS_UP));
+    }
+
     private static void inflateAndWait(NotificationContentInflater inflater,
             @InflationFlag int contentToInflate,
             ExpandableNotificationRow row)
@@ -261,7 +340,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         inflater.setInflateSynchronously(true);
         InflationCallback callback = new InflationCallback() {
             @Override
-            public void handleInflationException(StatusBarNotification notification,
+            public void handleInflationException(NotificationEntry entry,
                     Exception e) {
                 if (!expectingException) {
                     exceptionHolder.setException(e);

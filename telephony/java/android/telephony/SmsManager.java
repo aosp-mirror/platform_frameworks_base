@@ -35,7 +35,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -745,7 +744,11 @@ public final class SmsManager {
                     "Invalid pdu format. format must be either 3gpp or 3gpp2");
         }
         try {
-            ISms iSms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
+            ISms iSms = ISms.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getSmsServiceRegisterer()
+                            .get());
             if (iSms != null) {
                 iSms.injectSmsPduForSubscriber(
                         getSubscriptionId(), pdu, format, receivedIntent);
@@ -1535,7 +1538,10 @@ public final class SmsManager {
 
     private static ITelephony getITelephony() {
         ITelephony binder = ITelephony.Stub.asInterface(
-                ServiceManager.getService(Context.TELEPHONY_SERVICE));
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getTelephonyServiceRegisterer()
+                        .get());
         if (binder == null) {
             throw new RuntimeException("Could not find Telephony Service.");
         }
@@ -1573,7 +1579,11 @@ public final class SmsManager {
     }
 
     private static ISms getISmsService() {
-        return ISms.Stub.asInterface(ServiceManager.getService("isms"));
+        return ISms.Stub.asInterface(
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getSmsServiceRegisterer()
+                        .get());
     }
 
     /**
@@ -2007,7 +2017,11 @@ public final class SmsManager {
     public boolean isSMSPromptEnabled() {
         ISms iSms = null;
         try {
-            iSms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
+            iSms = ISms.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getSmsServiceRegisterer()
+                            .get());
             return iSms.isSMSPromptEnabled();
         } catch (RemoteException ex) {
             return false;

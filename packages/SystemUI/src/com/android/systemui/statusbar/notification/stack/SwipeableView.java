@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import android.animation.Animator;
-import android.animation.ValueAnimator;
-
 import androidx.annotation.Nullable;
 
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -31,10 +28,6 @@ public interface SwipeableView {
 
     /** Optionally creates a menu for this view. */
     @Nullable NotificationMenuRowPlugin createMenu();
-
-    /** Animator for translating the view, simulating a swipe. */
-    Animator getTranslateViewAnimator(
-            float leftTarget, ValueAnimator.AnimatorUpdateListener listener);
 
     /** Sets the translation amount for an in-progress swipe. */
     void setTranslation(float translate);

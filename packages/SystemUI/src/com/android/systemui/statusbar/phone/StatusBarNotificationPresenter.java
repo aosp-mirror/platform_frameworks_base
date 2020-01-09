@@ -217,7 +217,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             mEntryManager.addNotificationLifetimeExtenders(
                     remoteInputManager.getLifetimeExtenders());
             notificationRowBinder.setUpWithPresenter(this, notifListContainer, mHeadsUpManager,
-                    mEntryManager, this);
+                    this);
             mNotificationInterruptionStateProvider.setUpWithPresenter(
                     this, mHeadsUpManager, this::canHeadsUp);
             mLockscreenUserManager.setUpWithPresenter(this);

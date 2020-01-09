@@ -85,4 +85,44 @@ interface IStatsManagerService {
      * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
      */
     void unsetBroadcastSubscriber(long configKey, long subscriberId, in String packageName);
+
+    /**
+     * Returns the most recently registered experiment IDs.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    long[] getRegisteredExperimentIds();
+
+    /**
+     * Fetches metadata across statsd. Returns byte array representing wire-encoded proto.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    byte[] getMetadata(in String packageName);
+
+    /**
+     * Fetches data for the specified configuration key. Returns a byte array representing proto
+     * wire-encoded of ConfigMetricsReportList.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    byte[] getData(in long key, in String packageName);
+
+    /**
+     * Sets a configuration with the specified config id and subscribes to updates for this
+     * configuration id. Broadcasts will be sent if this configuration needs to be collected.
+     * The configuration must be a wire-encoded StatsdConfig. The receiver for this data is
+     * registered in a separate function.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    void addConfiguration(in long configId, in byte[] config, in String packageName);
+
+    /**
+     * Removes the configuration with the matching config id. No-op if this config id does not
+     * exist.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    void removeConfiguration(in long configId, in String packageName);
 }

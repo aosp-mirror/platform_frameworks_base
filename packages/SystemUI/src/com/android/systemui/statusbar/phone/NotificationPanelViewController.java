@@ -449,6 +449,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private PluginManager mPluginManager;
     private FrameLayout mPluginFrame;
     private NPVPluginManager mNPVPluginManager;
+    private int mOldLayoutDirection;
 
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
@@ -603,6 +604,13 @@ public class NotificationPanelViewController extends PanelViewController {
 
             }
         }, HomeControlsPlugin.class, false);
+
+        mView.setRtlChangeListener(layoutDirection -> {
+            if (layoutDirection != mOldLayoutDirection) {
+                mAffordanceHelper.onRtlPropertiesChanged();
+                mOldLayoutDirection = layoutDirection;
+            }
+        });
     }
 
     @Override

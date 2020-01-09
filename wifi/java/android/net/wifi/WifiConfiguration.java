@@ -253,9 +253,12 @@ public class WifiConfiguration implements Parcelable {
         /** LEAP/Network EAP (only used with LEAP) */
         public static final int LEAP = 2;
 
+        /** SAE (Used only for WPA3-Personal) */
+        public static final int SAE = 3;
+
         public static final String varName = "auth_alg";
 
-        public static final String[] strings = { "OPEN", "SHARED", "LEAP" };
+        public static final String[] strings = { "OPEN", "SHARED", "LEAP", "SAE" };
     }
 
     /**
@@ -468,10 +471,13 @@ public class WifiConfiguration implements Parcelable {
                 break;
             case SECURITY_TYPE_SAE:
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SAE);
+                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
                 requirePMF = true;
                 break;
             case SECURITY_TYPE_EAP_SUITE_B:
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SUITE_B_192);
+                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_256);
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
                 allowedGroupManagementCiphers.set(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256);
                 // Note: allowedSuiteBCiphers bitset will be set by the service once the
@@ -480,6 +486,8 @@ public class WifiConfiguration implements Parcelable {
                 break;
             case SECURITY_TYPE_OWE:
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.OWE);
+                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
                 requirePMF = true;
                 break;
             case SECURITY_TYPE_WAPI_PSK:

@@ -121,6 +121,7 @@ import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.leak.LeakReporter;
 import com.android.systemui.util.sensors.AsyncSensorManager;
+import com.android.systemui.wm.DisplayImeController;
 import com.android.systemui.wm.DisplayWindowController;
 import com.android.systemui.wm.SystemWindows;
 
@@ -321,6 +322,7 @@ public class Dependency {
     @Inject Lazy<StatusBar> mStatusBar;
     @Inject Lazy<DisplayWindowController> mDisplayWindowController;
     @Inject Lazy<SystemWindows> mSystemWindows;
+    @Inject Lazy<DisplayImeController> mDisplayImeController;
 
     @Inject
     public Dependency() {
@@ -509,6 +511,7 @@ public class Dependency {
         mProviders.put(StatusBar.class, mStatusBar::get);
         mProviders.put(DisplayWindowController.class, mDisplayWindowController::get);
         mProviders.put(SystemWindows.class, mSystemWindows::get);
+        mProviders.put(DisplayImeController.class, mDisplayImeController::get);
 
         // TODO(b/118592525): to support multi-display , we start to add something which is
         //                    per-display, while others may be global. I think it's time to add

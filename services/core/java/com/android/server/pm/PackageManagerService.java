@@ -13452,9 +13452,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Okay!
             targetPackageSetting.setInstallerPackageName(installerPackageName);
-            if (installerPackageName != null) {
-                mSettings.mInstallerPackages.add(installerPackageName);
-            }
+            mSettings.addInstallerPackageNames(targetPackageSetting.installSource);
             scheduleWriteSettingsLocked();
         }
     }
@@ -15160,7 +15158,8 @@ public class PackageManagerService extends IPackageManager.Stub
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "updateSettings");
 
         final String pkgName = pkg.getPackageName();
-        final String installerPackageName = installArgs.installSource.installerPackageName;
+        final InstallSource installSource = installArgs.installSource;
+        final String installerPackageName = installSource.installerPackageName;
         final int[] installedForUsers = res.origUsers;
         final int installReason = installArgs.installReason;
 
@@ -15171,7 +15170,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // For system-bundled packages, we assume that installing an upgraded version
             // of the package implies that the user actually wants to run that new code,
             // so we enable the package.
-            PackageSetting ps = mSettings.mPackages.get(pkgName);
+            final PackageSetting ps = mSettings.mPackages.get(pkgName);
             final int userId = installArgs.user.getIdentifier();
             if (ps != null) {
                 if (isSystemApp(pkg)) {
@@ -15208,8 +15207,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId, installerPackageName);
                 }
 
-                ps.setInstallSource(installArgs.installSource);
-
+                ps.setInstallSource(installSource);
+                mSettings.addInstallerPackageNames(installSource);
 
                 // When replacing an existing package, preserve the original install reason for all
                 // users that had the package installed before.
@@ -15239,7 +15238,6 @@ public class PackageManagerService extends IPackageManager.Stub
             res.name = pkgName;
             res.uid = pkg.getUid();
             res.pkg = pkg;
-            mSettings.setInstallerPackageName(pkgName, installerPackageName);
             res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
             //to update install status
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "writeSettings");

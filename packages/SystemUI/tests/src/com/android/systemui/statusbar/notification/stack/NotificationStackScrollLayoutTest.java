@@ -53,6 +53,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.EmptyShadeView;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -166,7 +167,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                         mock(NotificationSectionsFeatureManager.class),
                         mock(PeopleNotificationIdentifier.class)
                 ),
-                mock(NotificationEntryManager.KeyguardEnvironment.class));
+                mock(NotificationEntryManager.KeyguardEnvironment.class),
+                mock(FeatureFlags.class));
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mEntryManager.setUpForTest(mock(NotificationPresenter.class), null, mHeadsUpManager);
 

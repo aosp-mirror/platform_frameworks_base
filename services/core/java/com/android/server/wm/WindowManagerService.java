@@ -205,6 +205,7 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDisplayFoldListener;
+import android.view.IDisplayWindowInsetsController;
 import android.view.IDisplayWindowListener;
 import android.view.IDisplayWindowRotationController;
 import android.view.IDockedStackListener;
@@ -2768,6 +2769,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         true /* includingParents */);
             }
         }
+        syncInputTransactions();
     }
 
     /**
@@ -3720,6 +3722,48 @@ public class WindowManagerService extends IWindowManager.Stub
                     return null;
                 }
                 return dc.addShellRoot(client, windowType);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void setDisplayWindowInsetsController(
+            int displayId, IDisplayWindowInsetsController insetsController) {
+        if (mContext.checkCallingOrSelfPermission(MANAGE_APP_TOKENS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + MANAGE_APP_TOKENS);
+        }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    return;
+                }
+                dc.setRemoteInsetsController(insetsController);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void modifyDisplayWindowInsets(int displayId, InsetsState state) {
+        if (mContext.checkCallingOrSelfPermission(MANAGE_APP_TOKENS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + MANAGE_APP_TOKENS);
+        }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null || dc.mRemoteInsetsControlTarget == null) {
+                    return;
+                }
+                dc.getInsetsStateController().onInsetsModified(
+                        dc.mRemoteInsetsControlTarget, state);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -7314,7 +7358,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     // If there was a pending IME show(), reset it as IME has been
                     // requested to be hidden.
                     dc.getInsetsStateController().getImeSourceProvider().abortShowImePostLayout();
-                    dc.mInputMethodTarget.hideInsets(WindowInsets.Type.ime(), true /* fromIme */);
+                    dc.mInputMethodControlTarget.hideInsets(WindowInsets.Type.ime(),
+                            true /* fromIme */);
                 }
             }
         }

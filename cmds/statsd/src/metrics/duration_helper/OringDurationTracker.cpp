@@ -38,13 +38,6 @@ OringDurationTracker::OringDurationTracker(
     mLastStartTime = 0;
 }
 
-unique_ptr<DurationTracker> OringDurationTracker::clone(const int64_t eventTime) {
-    auto clonedTracker = make_unique<OringDurationTracker>(*this);
-    clonedTracker->mLastStartTime = eventTime;
-    clonedTracker->mDuration = 0;
-    return clonedTracker;
-}
-
 bool OringDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
     // ===========GuardRail==============
     // 1. Report the tuple count if the tuple count > soft limit

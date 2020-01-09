@@ -562,10 +562,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mScreenshotChordPowerKeyTriggered;
     private long mScreenshotChordPowerKeyTime;
 
-    private static final long MOVING_DISPLAY_TO_TOP_DURATION_MILLIS = 10;
-    private volatile boolean mMovingDisplayToTopKeyTriggered;
-    private volatile long mMovingDisplayToTopKeyTime;
-
     // Ringer toggle should reuse timing and triggering from screenshot power and a11y vol up
     private int mRingerToggleChord = VOLUME_HUSH_OFF;
 
@@ -633,7 +629,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_POWER_VERY_LONG_PRESS = 25;
     private static final int MSG_NOTIFY_USER_ACTIVITY = 26;
     private static final int MSG_RINGER_TOGGLE_CHORD = 27;
-    private static final int MSG_MOVE_DISPLAY_TO_TOP = 28;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -697,7 +692,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     accessibilityShortcutActivated();
                     break;
                 case MSG_BUGREPORT_TV:
-                    requestFullBugreport();
+                    requestFullBugreportOrLaunchHandlerApp();
                     break;
                 case MSG_ACCESSIBILITY_TV:
                     if (mAccessibilityShortcutController.isAccessibilityShortcutAvailable(false)) {
@@ -722,10 +717,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_RINGER_TOGGLE_CHORD:
                     handleRingerChordGesture();
-                    break;
-                case MSG_MOVE_DISPLAY_TO_TOP:
-                    mWindowManagerFuncs.moveDisplayToTop(msg.arg1);
-                    mMovingDisplayToTopKeyTriggered = false;
                     break;
             }
         }
@@ -2545,36 +2536,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public long interceptKeyBeforeDispatching(IBinder focusedToken, KeyEvent event,
             int policyFlags) {
-        final long result = interceptKeyBeforeDispatchingInner(focusedToken, event, policyFlags);
-        final int eventDisplayId = event.getDisplayId();
-        if (result == 0 && !mPerDisplayFocusEnabled
-                && eventDisplayId != INVALID_DISPLAY && eventDisplayId != mTopFocusedDisplayId) {
-            // An event is targeting a non-focused display. Try to move the display to top so that
-            // it can become the focused display to interact with the user.
-            final long eventDownTime = event.getDownTime();
-            if (mMovingDisplayToTopKeyTime < eventDownTime) {
-                // We have not handled this event yet. Move the display to top, and then tell
-                // dispatcher to try again later.
-                mMovingDisplayToTopKeyTime = eventDownTime;
-                mMovingDisplayToTopKeyTriggered = true;
-                mHandler.sendMessage(
-                        mHandler.obtainMessage(MSG_MOVE_DISPLAY_TO_TOP, eventDisplayId, 0));
-                return MOVING_DISPLAY_TO_TOP_DURATION_MILLIS;
-            } else if (mMovingDisplayToTopKeyTriggered) {
-                // The message has not been handled yet. Tell dispatcher to try again later.
-                return MOVING_DISPLAY_TO_TOP_DURATION_MILLIS;
-            }
-            // The target display is still not the top focused display. Drop the event because the
-            // display may not contain any window which can receive keys.
-            Slog.w(TAG, "Dropping key targeting non-focused display #" + eventDisplayId
-                    + " keyCode=" + KeyEvent.keyCodeToString(event.getKeyCode()));
-            return -1;
-        }
-        return result;
-    }
-
-    private long interceptKeyBeforeDispatchingInner(IBinder focusedToken, KeyEvent event,
-            int policyFlags) {
         final boolean keyguardOn = keyguardOn();
         final int keyCode = event.getKeyCode();
         final int repeatCount = event.getRepeatCount();
@@ -3061,12 +3022,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return mAccessibilityTvScheduled;
     }
 
-    private void requestFullBugreport() {
+    private void requestFullBugreportOrLaunchHandlerApp() {
         if ("1".equals(SystemProperties.get("ro.debuggable"))
                 || Settings.Global.getInt(mContext.getContentResolver(),
                         Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1) {
             try {
-                ActivityManager.getService().requestFullBugReport();
+                if (!ActivityManager.getService().launchBugReportHandlerApp()) {
+                    ActivityManager.getService().requestFullBugReport();
+                }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error taking bugreport", e);
             }
@@ -3613,7 +3576,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean canceled = event.isCanceled();
         final int keyCode = event.getKeyCode();
         final int displayId = event.getDisplayId();
-
         final boolean isInjected = (policyFlags & WindowManagerPolicy.FLAG_INJECTED) != 0;
 
         // If screen is off then we treat the case where the keyguard is open but hidden
@@ -4033,6 +3995,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (isWakeKey) {
             wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey,
                     PowerManager.WAKE_REASON_WAKE_KEY, "android.policy:KEY");
+        }
+
+        if ((result & ACTION_PASS_TO_USER) != 0) {
+            // If the key event is targeted to a specific display, then the user is interacting with
+            // that display. Therefore, give focus to the display that the user is interacting with.
+            if (!mPerDisplayFocusEnabled
+                    && displayId != INVALID_DISPLAY && displayId != mTopFocusedDisplayId) {
+                // An event is targeting a non-focused display. Move the display to top so that
+                // it can become the focused display to interact with the user.
+                // This should be done asynchronously, once the focus logic is fully moved to input
+                // from windowmanager. Currently, we need to ensure the setInputWindows completes,
+                // which would force the focus event to be queued before the current key event.
+                // TODO(b/70668286): post call to 'moveDisplayToTop' to mHandler instead
+                Log.i(TAG, "Moving non-focused display " + displayId + " to top "
+                        + "because a key is targeting it");
+                mWindowManagerFuncs.moveDisplayToTop(displayId);
+            }
         }
 
         return result;

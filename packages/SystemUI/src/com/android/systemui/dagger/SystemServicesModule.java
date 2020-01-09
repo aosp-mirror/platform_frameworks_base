@@ -27,6 +27,7 @@ import android.app.NotificationManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.content.pm.IPackageManager;
 import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
 import android.os.Handler;
@@ -121,6 +122,13 @@ public class SystemServicesModule {
     @Provides
     static IWindowManager provideIWindowManager() {
         return WindowManagerGlobal.getWindowManagerService();
+    }
+
+    /** */
+    @Singleton
+    @Provides
+    public IPackageManager provideIPackageManager() {
+        return IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
     }
 
     @Singleton

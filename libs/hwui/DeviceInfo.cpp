@@ -52,8 +52,8 @@ void DeviceInfo::setMaxTextureSize(int maxTextureSize) {
     DeviceInfo::get()->mMaxTextureSize = maxTextureSize;
 }
 
-void DeviceInfo::onDisplayConfigChanged() {
-    updateDisplayInfo();
+void DeviceInfo::onRefreshRateChanged(int64_t vsyncPeriod) {
+    mVsyncPeriod = vsyncPeriod;
 }
 
 void DeviceInfo::updateDisplayInfo() {
@@ -113,10 +113,11 @@ void DeviceInfo::updateDisplayInfo() {
     ADisplay* primaryDisplay = mDisplays[mPhysicalDisplayIndex];
     status_t status = ADisplay_getCurrentConfig(primaryDisplay, &mCurrentConfig);
     LOG_ALWAYS_FATAL_IF(status, "Failed to get display config, error %d", status);
+
     mWidth = ADisplayConfig_getWidth(mCurrentConfig);
     mHeight = ADisplayConfig_getHeight(mCurrentConfig);
     mDensity = ADisplayConfig_getDensity(mCurrentConfig);
-    mRefreshRate = ADisplayConfig_getFps(mCurrentConfig);
+    mVsyncPeriod = static_cast<int64_t>(1000000000 / ADisplayConfig_getFps(mCurrentConfig));
     mCompositorOffset = ADisplayConfig_getCompositorOffsetNanos(mCurrentConfig);
     mAppOffset = ADisplayConfig_getAppVsyncOffsetNanos(mCurrentConfig);
 }

@@ -88,7 +88,6 @@ import android.telephony.data.ApnSetting;
 import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
@@ -6757,6 +6756,34 @@ public class DevicePolicyManager {
     }
 
     /**
+     * @hide
+     * Privileged apps can use this method to find out if the device was provisioned as
+     * organization-owend device with a managed profile.
+     *
+     * This, together with checking whether the device has a device owner (by calling
+     * {@link #isDeviceManaged()}), could be used to learn whether the device is owned by an
+     * organization or an individual:
+     * If this method returns true OR {@link #isDeviceManaged()} returns true, then
+     * the device is owned by an organization. Otherwise, it's owned by an individual.
+     *
+     * @return {@code true} if the device was provisioned as organization-owned device,
+     * {@code false} otherwise.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public boolean isOrganizationOwnedDeviceWithManagedProfile() {
+        throwIfParentInstance("isOrganizationOwnedDeviceWithManagedProfile");
+        if (mService != null) {
+            try {
+                return mService.isOrganizationOwnedDeviceWithManagedProfile();
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns whether the specified package can read the device identifiers.
      *
      * @param packageName The package name of the app to check for device identifier access.
@@ -11215,12 +11242,12 @@ public class DevicePolicyManager {
      * #setCrossProfilePackages(ComponentName, Set)}.</li>
      * <li>The default package names set by the OEM that are allowed to request user consent for
      * cross-profile communication without being explicitly enabled by the admin, via
-     * {@link R.array#cross_profile_apps}</li>
+     * {@link com.android.internal.R.array#cross_profile_apps}</li>
      * </ul>
      *
      * @return the combined set of whitelisted package names set via
      * {@link #setCrossProfilePackages(ComponentName, Set)} and
-     * {@link R.array#cross_profile_apps}
+     * {@link com.android.internal.R.array#cross_profile_apps}
      *
      * @hide
      */

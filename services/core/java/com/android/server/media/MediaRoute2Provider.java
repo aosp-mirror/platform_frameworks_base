@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.RouteSessionInfo;
 
@@ -50,13 +49,13 @@ abstract class MediaRoute2Provider {
             String controlCategory, long requestId);
     public abstract void releaseSession(int sessionId);
 
-    public abstract void selectRoute(int sessionId, MediaRoute2Info route);
-    public abstract void deselectRoute(int sessionId, MediaRoute2Info route);
-    public abstract void transferToRoute(int sessionId, MediaRoute2Info route);
+    public abstract void selectRoute(int sessionId, String routeId);
+    public abstract void deselectRoute(int sessionId, String routeId);
+    public abstract void transferToRoute(int sessionId, String routeId);
 
-    public abstract void sendControlRequest(MediaRoute2Info route, Intent request);
-    public abstract void requestSetVolume(MediaRoute2Info route, int volume);
-    public abstract void requestUpdateVolume(MediaRoute2Info route, int delta);
+    public abstract void sendControlRequest(String routeId, Intent request);
+    public abstract void requestSetVolume(String routeId, int volume);
+    public abstract void requestUpdateVolume(String routeId, int delta);
 
     @NonNull
     public String getUniqueId() {

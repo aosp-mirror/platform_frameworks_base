@@ -25,6 +25,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -54,6 +55,11 @@ import java.util.concurrent.Executor;
  */
 @SystemApi
 public final class SoftApConfiguration implements Parcelable {
+
+    @VisibleForTesting
+    static final int PSK_MIN_LEN = 8;
+    @VisibleForTesting
+    static final int PSK_MAX_LEN = 63;
 
     /**
      * 2GHz band.
@@ -142,9 +148,10 @@ public final class SoftApConfiguration implements Parcelable {
     private final @Nullable MacAddress mBssid;
 
     /**
-     * Pre-shared key for WPA2-PSK encryption (non-null enables WPA2-PSK).
+     * Pre-shared key for WPA2-PSK or WPA3-SAE-Transition or WPA3-SAE encryption which depends on
+     * the security type.
      */
-    private final @Nullable String mWpa2Passphrase;
+    private final @Nullable String mPassphrase;
 
     /**
      * This is a network that does not broadcast its SSID, so an
@@ -186,20 +193,30 @@ public final class SoftApConfiguration implements Parcelable {
     public static final int SECURITY_TYPE_WPA2_PSK = 1;
 
     /** @hide */
+    @SystemApi
+    public static final int SECURITY_TYPE_WPA3_SAE_TRANSITION = 2;
+
+    /** @hide */
+    @SystemApi
+    public static final int SECURITY_TYPE_WPA3_SAE = 3;
+
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "SECURITY_TYPE" }, value = {
+    @IntDef(prefix = { "SECURITY_TYPE_" }, value = {
         SECURITY_TYPE_OPEN,
         SECURITY_TYPE_WPA2_PSK,
+        SECURITY_TYPE_WPA3_SAE_TRANSITION,
+        SECURITY_TYPE_WPA3_SAE,
     })
     public @interface SecurityType {}
 
     /** Private constructor for Builder and Parcelable implementation. */
     private SoftApConfiguration(@Nullable String ssid, @Nullable MacAddress bssid,
-            @Nullable String wpa2Passphrase, boolean hiddenSsid, @BandType int band, int channel,
+            @Nullable String passphrase, boolean hiddenSsid, @BandType int band, int channel,
             @SecurityType int securityType, int maxNumberOfClients) {
         mSsid = ssid;
         mBssid = bssid;
-        mWpa2Passphrase = wpa2Passphrase;
+        mPassphrase = passphrase;
         mHiddenSsid = hiddenSsid;
         mBand = band;
         mChannel = channel;
@@ -218,7 +235,7 @@ public final class SoftApConfiguration implements Parcelable {
         SoftApConfiguration other = (SoftApConfiguration) otherObj;
         return Objects.equals(mSsid, other.mSsid)
                 && Objects.equals(mBssid, other.mBssid)
-                && Objects.equals(mWpa2Passphrase, other.mWpa2Passphrase)
+                && Objects.equals(mPassphrase, other.mPassphrase)
                 && mHiddenSsid == other.mHiddenSsid
                 && mBand == other.mBand
                 && mChannel == other.mChannel
@@ -228,7 +245,7 @@ public final class SoftApConfiguration implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mSsid, mBssid, mWpa2Passphrase, mHiddenSsid,
+        return Objects.hash(mSsid, mBssid, mPassphrase, mHiddenSsid,
                 mBand, mChannel, mSecurityType, mMaxNumberOfClients);
     }
 
@@ -237,8 +254,8 @@ public final class SoftApConfiguration implements Parcelable {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("ssid=").append(mSsid);
         if (mBssid != null) sbuf.append(" \n bssid=").append(mBssid.toString());
-        sbuf.append(" \n Wpa2Passphrase =").append(
-                TextUtils.isEmpty(mWpa2Passphrase) ? "<empty>" : "<non-empty>");
+        sbuf.append(" \n Passphrase =").append(
+                TextUtils.isEmpty(mPassphrase) ? "<empty>" : "<non-empty>");
         sbuf.append(" \n HiddenSsid =").append(mHiddenSsid);
         sbuf.append(" \n Band =").append(mBand);
         sbuf.append(" \n Channel =").append(mChannel);
@@ -251,7 +268,7 @@ public final class SoftApConfiguration implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mSsid);
         dest.writeParcelable(mBssid, flags);
-        dest.writeString(mWpa2Passphrase);
+        dest.writeString(mPassphrase);
         dest.writeBoolean(mHiddenSsid);
         dest.writeInt(mBand);
         dest.writeInt(mChannel);
@@ -299,13 +316,26 @@ public final class SoftApConfiguration implements Parcelable {
         return mBssid;
     }
 
+    // TODO: Remove it after update the caller
     /**
      * Returns String set to be passphrase for the WPA2-PSK AP.
-     * {@link Builder#setWpa2Passphrase(String)}.
+     * {@link #setWpa2Passphrase(String)}.
      */
     @Nullable
     public String getWpa2Passphrase() {
-        return mWpa2Passphrase;
+        if (mSecurityType == SECURITY_TYPE_WPA2_PSK) {
+            return mPassphrase;
+        }
+        return null;
+    }
+
+    /**
+     * Returns String set to be passphrase for current AP.
+     * {@link #setPassphrase(String, @SecurityType int)}.
+     */
+    @Nullable
+    public String getPassphrase() {
+        return mPassphrase;
     }
 
     /**
@@ -360,23 +390,12 @@ public final class SoftApConfiguration implements Parcelable {
     public static final class Builder {
         private String mSsid;
         private MacAddress mBssid;
-        private String mWpa2Passphrase;
+        private String mPassphrase;
         private boolean mHiddenSsid;
         private int mBand;
         private int mChannel;
         private int mMaxNumberOfClients;
-
-        private int setSecurityType() {
-            int securityType = SECURITY_TYPE_OPEN;
-            if (!TextUtils.isEmpty(mWpa2Passphrase)) { // WPA2-PSK network.
-                securityType = SECURITY_TYPE_WPA2_PSK;
-            }
-            return securityType;
-        }
-
-        private void clearAllPassphrase() {
-            mWpa2Passphrase = null;
-        }
+        private int mSecurityType;
 
         /**
          * Constructs a Builder with default values (see {@link Builder}).
@@ -384,11 +403,12 @@ public final class SoftApConfiguration implements Parcelable {
         public Builder() {
             mSsid = null;
             mBssid = null;
-            mWpa2Passphrase = null;
+            mPassphrase = null;
             mHiddenSsid = false;
             mBand = BAND_2GHZ;
             mChannel = 0;
             mMaxNumberOfClients = 0;
+            mSecurityType = SECURITY_TYPE_OPEN;
         }
 
         /**
@@ -399,11 +419,12 @@ public final class SoftApConfiguration implements Parcelable {
 
             mSsid = other.mSsid;
             mBssid = other.mBssid;
-            mWpa2Passphrase = other.mWpa2Passphrase;
+            mPassphrase = other.mPassphrase;
             mHiddenSsid = other.mHiddenSsid;
             mBand = other.mBand;
             mChannel = other.mChannel;
             mMaxNumberOfClients = other.mMaxNumberOfClients;
+            mSecurityType = other.mSecurityType;
         }
 
         /**
@@ -413,8 +434,8 @@ public final class SoftApConfiguration implements Parcelable {
          */
         @NonNull
         public SoftApConfiguration build() {
-            return new SoftApConfiguration(mSsid, mBssid, mWpa2Passphrase,
-                mHiddenSsid, mBand, mChannel, setSecurityType(), mMaxNumberOfClients);
+            return new SoftApConfiguration(mSsid, mBssid, mPassphrase,
+                mHiddenSsid, mBand, mChannel, mSecurityType, mMaxNumberOfClients);
         }
 
         /**
@@ -461,6 +482,7 @@ public final class SoftApConfiguration implements Parcelable {
             return this;
         }
 
+        // TODO: Remove it after update the caller
         /**
          * Specifies that this AP should use WPA2-PSK with the given ASCII WPA2 passphrase.
          * When set to null, an open network is created.
@@ -473,15 +495,47 @@ public final class SoftApConfiguration implements Parcelable {
          */
         @NonNull
         public Builder setWpa2Passphrase(@Nullable String passphrase) {
-            if (passphrase != null) {
+            return setPassphrase(passphrase, SECURITY_TYPE_WPA2_PSK);
+        }
+
+        /**
+         * Specifies that this AP should use specific security type with the given ASCII passphrase.
+         *
+         * @param securityType one of the security types from {@link @SecurityType}.
+         * @param passphrase The passphrase to use for sepcific {@link @SecurityType} configuration
+         * or null with {@link @SecurityType#SECURITY_TYPE_OPEN}.
+         *
+         * @return Builder for chaining.
+         * @throws IllegalArgumentException when the passphrase length is invalid and
+         *         {@code securityType} is not {@link @SecurityType#SECURITY_TYPE_OPEN}
+         *         or non-null passphrase and {@code securityType} is
+         *         {@link @SecurityType#SECURITY_TYPE_OPEN}.
+         */
+        @NonNull
+        public Builder setPassphrase(@Nullable String passphrase, @SecurityType int securityType) {
+            if (securityType == SECURITY_TYPE_OPEN) {
+                if (passphrase != null) {
+                    throw new IllegalArgumentException(
+                            "passphrase should be null when security type is open");
+                }
+            } else {
+                Preconditions.checkStringNotEmpty(passphrase);
                 final CharsetEncoder asciiEncoder = StandardCharsets.US_ASCII.newEncoder();
                 if (!asciiEncoder.canEncode(passphrase)) {
                     throw new IllegalArgumentException("passphrase not ASCII encodable");
                 }
-                Preconditions.checkStringNotEmpty(passphrase);
+                if (securityType == SECURITY_TYPE_WPA2_PSK
+                        || securityType == SECURITY_TYPE_WPA3_SAE_TRANSITION) {
+                    if (passphrase.length() < PSK_MIN_LEN || passphrase.length() > PSK_MAX_LEN) {
+                        throw new IllegalArgumentException(
+                                "Password size must be at least " + PSK_MIN_LEN
+                                + " and no more than " + PSK_MAX_LEN
+                                + " for WPA2_PSK and WPA3_SAE_TRANSITION Mode");
+                    }
+                }
             }
-            clearAllPassphrase();
-            mWpa2Passphrase = passphrase;
+            mSecurityType = securityType;
+            mPassphrase = passphrase;
             return this;
         }
 

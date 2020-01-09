@@ -60,7 +60,6 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.WorkSource;
 import android.provider.Settings.SettingNotFoundException;
@@ -107,6 +106,7 @@ import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.SmsApplication;
+import com.android.telephony.Rlog;
 
 import dalvik.system.VMRuntime;
 
@@ -783,30 +783,6 @@ public class TelephonyManager {
      * @hide
      */
     public static final String EXTRA_PRECISE_DISCONNECT_CAUSE = "precise_disconnect_cause";
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
-     * for an String containing the data APN type.
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getStringExtra(String name)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_DATA_APN_TYPE = PhoneConstants.DATA_APN_TYPE_KEY;
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
-     * for an String containing the data APN.
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getStringExtra(String name)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_DATA_APN = PhoneConstants.DATA_APN_KEY;
 
     /**
      * Broadcast intent action for letting the default dialer to know to show voicemail
@@ -5107,7 +5083,11 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     private IPhoneSubInfo getSubscriberInfo() {
         // get it each time because that process crashes a lot
-        return IPhoneSubInfo.Stub.asInterface(ServiceManager.getService("iphonesubinfo"));
+        return IPhoneSubInfo.Stub.asInterface(
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getPhoneSubServiceRegisterer()
+                        .get());
     }
 
     /**
@@ -5320,11 +5300,19 @@ public class TelephonyManager {
     }
 
     private ITelephonyRegistry getTelephonyRegistry() {
-        return ITelephonyRegistry.Stub.asInterface(ServiceManager.getService("telephony.registry"));
+        return ITelephonyRegistry.Stub.asInterface(
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getTelephonyRegistryServiceRegisterer()
+                        .get());
     }
 
     private IOns getIOns() {
-        return IOns.Stub.asInterface(ServiceManager.getService("ions"));
+        return IOns.Stub.asInterface(
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getOpportunisticNetworkServiceRegisterer()
+                        .get());
     }
 
     //

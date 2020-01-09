@@ -89,24 +89,24 @@ interface IStatsd {
      *
      * Requires Manifest.permission.DUMP.
      */
-    byte[] getData(in long key, in String packageName);
+    byte[] getData(in long key, int callingUid);
 
     /**
      * Fetches metadata across statsd. Returns byte array representing wire-encoded proto.
      *
      * Requires Manifest.permission.DUMP.
      */
-    byte[] getMetadata(in String packageName);
+    byte[] getMetadata();
 
     /**
-     * Sets a configuration with the specified config key and subscribes to updates for this
+     * Sets a configuration with the specified config id and subscribes to updates for this
      * configuration key. Broadcasts will be sent if this configuration needs to be collected.
      * The configuration must be a wire-encoded StatsdConfig. The receiver for this data is
      * registered in a separate function.
      *
      * Requires Manifest.permission.DUMP.
      */
-    void addConfiguration(in long configKey, in byte[] config, in String packageName);
+    void addConfiguration(in long configId, in byte[] config, in int callingUid);
 
     /**
      * Registers the given pending intent for this config key. This intent is invoked when the
@@ -143,12 +143,12 @@ interface IStatsd {
     void removeActiveConfigsChangedOperation(int callingUid);
 
     /**
-     * Removes the configuration with the matching config key. No-op if this config key does not
+     * Removes the configuration with the matching config id. No-op if this config id does not
      * exist.
      *
      * Requires Manifest.permission.DUMP.
      */
-    void removeConfiguration(in long configKey, in String packageName);
+    void removeConfiguration(in long configId, in int callingUid);
 
     /**
      * Set the PendingIntentRef to be used when broadcasting subscriber

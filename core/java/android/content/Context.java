@@ -3992,6 +3992,7 @@ public abstract class Context {
      */
     public static final String NETWORK_STATS_SERVICE = "netstats";
     /** {@hide} */
+    @SystemApi
     public static final String NETWORK_POLICY_SERVICE = "netpolicy";
     /** {@hide} */
     public static final String NETWORK_WATCHLIST_SERVICE = "network_watchlist";
@@ -4015,6 +4016,7 @@ public abstract class Context {
      * @see android.net.wifi.WifiCondManager
      * @hide
      */
+    @SystemApi
     public static final String WIFI_COND_SERVICE = "wificond";
 
     /**

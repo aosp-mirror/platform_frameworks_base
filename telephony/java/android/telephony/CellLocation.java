@@ -19,7 +19,6 @@ package android.telephony;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
 
@@ -38,7 +37,11 @@ public abstract class CellLocation {
      */
     public static void requestLocationUpdate() {
         try {
-            ITelephony phone = ITelephony.Stub.asInterface(ServiceManager.getService("phone"));
+            ITelephony phone = ITelephony.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getTelephonyServiceRegisterer()
+                            .get());
             if (phone != null) {
                 phone.updateServiceLocation();
             }

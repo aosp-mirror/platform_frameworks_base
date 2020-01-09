@@ -18,7 +18,7 @@ package com.android.internal.widget;
 
 import android.annotation.DrawableRes;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;

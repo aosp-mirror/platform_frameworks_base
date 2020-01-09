@@ -25,14 +25,13 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
@@ -1018,7 +1017,10 @@ public class ImsMmTelManager implements RegistrationManager {
 
     private static ITelephony getITelephony() {
         ITelephony binder = ITelephony.Stub.asInterface(
-                ServiceManager.getService(Context.TELEPHONY_SERVICE));
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getTelephonyServiceRegisterer()
+                        .get());
         if (binder == null) {
             throw new RuntimeException("Could not find Telephony Service.");
         }

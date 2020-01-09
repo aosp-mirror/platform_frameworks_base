@@ -22,8 +22,8 @@ import static org.testng.Assert.assertThrows;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -51,6 +51,11 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     @Before
     public void setUp() throws Exception {
         getDevice().reboot();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        runPhase("testCleanUp");
     }
 
     /**
@@ -128,21 +133,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      * Tests passed network health check does not trigger watchdog staged rollbacks.
      */
     @Test
-    @Ignore("b/143514090")
     public void testNetworkPassedDoesNotRollback() throws Exception {
-        // Remove available rollbacks and uninstall NetworkStack on /data/
         runPhase("testNetworkPassedDoesNotRollback_Phase1");
-        // Reduce health check deadline, here unlike the network failed case, we use
-        // a longer deadline because joining a network can take a much longer time for
-        // reasons external to the device than 'not joining'
-        getDevice().executeShellCommand("device_config put rollback "
-                + "watchdog_request_timeout_millis 300000");
-        // Simulate re-installation of new NetworkStack with rollbacks enabled
-        getDevice().executeShellCommand("pm install -r --staged --enable-rollback "
-                + getNetworkStackPath());
-
-        // Sleep to allow writes to disk before reboot
-        Thread.sleep(5000);
         // Reboot device to activate staged package
         getDevice().reboot();
 
@@ -157,8 +149,6 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // on mobile data
         getDevice().waitForDeviceAvailable();
 
-        // Sleep for > health check deadline
-        Thread.sleep(310000);
         // Verify rollback was not executed after health check deadline
         runPhase("testNetworkPassedDoesNotRollback_Phase3");
     }
@@ -180,16 +170,9 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testRollbackWhitelistedApp() throws Exception {
-        try {
-            runPhase("testRollbackWhitelistedApp_Phase1");
-            getDevice().reboot();
-            runPhase("testRollbackWhitelistedApp_Phase2");
-        } finally {
-            // testNativeWatchdogTriggersRollback will fail if multiple staged sessions are
-            // committed on a device which doesn't support checkpoint. Let's clean up the rollback
-            // so there is only one rollback to commit when testing native crashes.
-            runPhase("testRollbackWhitelistedApp_cleanUp");
-        }
+        runPhase("testRollbackWhitelistedApp_Phase1");
+        getDevice().reboot();
+        runPhase("testRollbackWhitelistedApp_Phase2");
     }
 
     @Test

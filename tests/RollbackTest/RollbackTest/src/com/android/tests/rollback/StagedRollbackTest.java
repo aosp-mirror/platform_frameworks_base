@@ -324,6 +324,7 @@ public class StagedRollbackTest {
 
     @Test
     public void testNetworkPassedDoesNotRollback_Phase1() throws Exception {
+        // Remove available rollbacks and uninstall NetworkStack on /data/
         RollbackManager rm = RollbackUtils.getRollbackManager();
         String networkStack = getNetworkStackPackageName();
 
@@ -332,6 +333,15 @@ public class StagedRollbackTest {
 
         assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
                         networkStack)).isNull();
+
+        // Reduce health check deadline, here unlike the network failed case, we use
+        // a longer deadline because joining a network can take a much longer time for
+        // reasons external to the device than 'not joining'
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PROPERTY_WATCHDOG_REQUEST_TIMEOUT_MILLIS,
+                Integer.toString(300000), false);
+        // Simulate re-installation of new NetworkStack with rollbacks enabled
+        installNetworkStackPackage();
     }
 
     @Test
@@ -343,6 +353,9 @@ public class StagedRollbackTest {
 
     @Test
     public void testNetworkPassedDoesNotRollback_Phase3() throws Exception {
+        // Sleep for > health check deadline. We expect no rollback should happen during sleeping.
+        // If the device reboots for rollback, this device test will fail as well as the host test.
+        Thread.sleep(TimeUnit.SECONDS.toMillis(310));
         RollbackManager rm = RollbackUtils.getRollbackManager();
         assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
                         getNetworkStackPackageName())).isNull();
@@ -377,11 +390,6 @@ public class StagedRollbackTest {
     @Test
     public void testRollbackWhitelistedApp_Phase2() throws Exception {
         assertThat(RollbackUtils.getAvailableRollback(getModuleMetadataPackageName())).isNotNull();
-    }
-
-    @Test
-    public void testRollbackWhitelistedApp_cleanUp() throws Exception {
-        RollbackUtils.getRollbackManager().expireRollbackForPackage(getModuleMetadataPackageName());
     }
 
     @Test
@@ -420,6 +428,16 @@ public class StagedRollbackTest {
         // B's user data version is 1 as rollback committed.
         assertThat(InstallUtils.getUserDataVersion(TestApp.A)).isEqualTo(-1);
         assertThat(InstallUtils.getUserDataVersion(TestApp.B)).isEqualTo(1);
+    }
+
+    @Test
+    public void testCleanUp() throws Exception {
+        // testNativeWatchdogTriggersRollback will fail if multiple staged sessions are
+        // committed on a device which doesn't support checkpoint. Let's clean up all rollbacks
+        // so there is only one rollback to commit when testing native crashes.
+        RollbackManager rm  = RollbackUtils.getRollbackManager();
+        rm.getAvailableRollbacks().stream().flatMap(info -> info.getPackages().stream())
+                .map(info -> info.getPackageName()).forEach(rm::expireRollbackForPackage);
     }
 
     private static void runShellCommand(String cmd) {

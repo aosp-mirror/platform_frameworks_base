@@ -16,7 +16,8 @@
 
 package com.google.android.collect;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
+
 import java.util.ArrayList;
 import java.util.Collections;
 

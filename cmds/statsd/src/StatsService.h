@@ -99,15 +99,14 @@ public:
      * Binder call for clients to request data for this configuration key.
      */
     virtual Status getData(int64_t key,
-                           const String16& packageName,
+                           const int32_t callingUid,
                            vector<uint8_t>* output) override;
 
 
     /**
      * Binder call for clients to get metadata across all configs in statsd.
      */
-    virtual Status getMetadata(const String16& packageName,
-                               vector<uint8_t>* output) override;
+    virtual Status getMetadata(vector<uint8_t>* output) override;
 
 
     /**
@@ -116,7 +115,7 @@ public:
      */
     virtual Status addConfiguration(int64_t key,
                                     const vector<uint8_t>& config,
-                                    const String16& packageName) override;
+                                    const int32_t callingUid) override;
 
     /**
      * Binder call to let clients register the data fetch operation for a configuration.
@@ -146,7 +145,7 @@ public:
      * Binder call to allow clients to remove the specified configuration.
      */
     virtual Status removeConfiguration(int64_t key,
-                                       const String16& packageName) override;
+                                       const int32_t callingUid) override;
 
     /**
      * Binder call to associate the given config's subscriberId with the given pendingIntentRef.

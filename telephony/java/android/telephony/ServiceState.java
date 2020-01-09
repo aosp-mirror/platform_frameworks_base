@@ -545,7 +545,7 @@ public class ServiceState implements Parcelable {
      * @see #STATE_EMERGENCY_ONLY
      * @see #STATE_POWER_OFF
      *
-     * @return current data registration state {@link RegState}
+     * @return current data registration state
      *
      * @hide
      */
@@ -562,7 +562,7 @@ public class ServiceState implements Parcelable {
      * @see #STATE_EMERGENCY_ONLY
      * @see #STATE_POWER_OFF
      *
-     * @return current data registration state {@link RegState}
+     * @return current data registration state
      *
      * @hide
      */

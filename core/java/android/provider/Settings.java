@@ -68,7 +68,6 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.speech.tts.TextToSpeech;
-import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.ArrayMap;
@@ -12459,16 +12458,17 @@ public final class Settings {
 
         /**
          * Whether the Volte is enabled. If this setting is not set then we use the Carrier Config
-         * value {@link CarrierConfigManager#KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL}.
+         * value
+         * {@link android.telephony.CarrierConfigManager#KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL}.
          * <p>
          * Type: int (0 for false, 1 for true)
          * @hide
-         * @deprecated Use {@link android.telephony.SubscriptionManager#ENHANCED_4G_MODE_ENABLED}
+         * @deprecated Use {@link android.provider.Telephony.SimInfo#ENHANCED_4G_MODE_ENABLED}
          * instead.
          */
         @Deprecated
         public static final String ENHANCED_4G_MODE_ENABLED =
-                SubscriptionManager.ENHANCED_4G_MODE_ENABLED;
+                Telephony.SimInfo.ENHANCED_4G_MODE_ENABLED;
 
         /**
          * Whether VT (Video Telephony over IMS) is enabled
@@ -12476,10 +12476,10 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          *
          * @hide
-         * @deprecated Use {@link android.telephony.SubscriptionManager#VT_IMS_ENABLED} instead.
+         * @deprecated Use {@link android.provider.Telephony.SimInfo#VT_IMS_ENABLED} instead.
          */
         @Deprecated
-        public static final String VT_IMS_ENABLED = SubscriptionManager.VT_IMS_ENABLED;
+        public static final String VT_IMS_ENABLED = Telephony.SimInfo.VT_IMS_ENABLED;
 
         /**
          * Whether WFC is enabled
@@ -12487,10 +12487,10 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          *
          * @hide
-         * @deprecated Use {@link android.telephony.SubscriptionManager#WFC_IMS_ENABLED} instead.
+         * @deprecated Use {@link android.provider.Telephony.SimInfo#WFC_IMS_ENABLED} instead.
          */
         @Deprecated
-        public static final String WFC_IMS_ENABLED = SubscriptionManager.WFC_IMS_ENABLED;
+        public static final String WFC_IMS_ENABLED = Telephony.SimInfo.WFC_IMS_ENABLED;
 
         /**
          * WFC mode on home/non-roaming network.
@@ -12498,10 +12498,10 @@ public final class Settings {
          * Type: int - 2=Wi-Fi preferred, 1=Cellular preferred, 0=Wi-Fi only
          *
          * @hide
-         * @deprecated Use {@link android.telephony.SubscriptionManager#WFC_IMS_MODE} instead.
+         * @deprecated Use {@link android.provider.Telephony.SimInfo#WFC_IMS_MODE} instead.
          */
         @Deprecated
-        public static final String WFC_IMS_MODE = SubscriptionManager.WFC_IMS_MODE;
+        public static final String WFC_IMS_MODE = Telephony.SimInfo.WFC_IMS_MODE;
 
         /**
          * WFC mode on roaming network.
@@ -12509,11 +12509,11 @@ public final class Settings {
          * Type: int - see {@link #WFC_IMS_MODE} for values
          *
          * @hide
-         * @deprecated Use {@link android.telephony.SubscriptionManager#WFC_IMS_ROAMING_MODE}
+         * @deprecated Use {@link android.provider.Telephony.SimInfo#WFC_IMS_ROAMING_MODE}
          * instead.
          */
         @Deprecated
-        public static final String WFC_IMS_ROAMING_MODE = SubscriptionManager.WFC_IMS_ROAMING_MODE;
+        public static final String WFC_IMS_ROAMING_MODE = Telephony.SimInfo.WFC_IMS_ROAMING_MODE;
 
         /**
          * Whether WFC roaming is enabled
@@ -12521,12 +12521,12 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          *
          * @hide
-         * @deprecated Use {@link android.telephony.SubscriptionManager#WFC_IMS_ROAMING_ENABLED}
+         * @deprecated Use {@link android.provider.Telephony.SimInfo#WFC_IMS_ROAMING_ENABLED}
          * instead
          */
         @Deprecated
         public static final String WFC_IMS_ROAMING_ENABLED =
-                SubscriptionManager.WFC_IMS_ROAMING_ENABLED;
+                Telephony.SimInfo.WFC_IMS_ROAMING_ENABLED;
 
         /**
          * Whether user can enable/disable LTE as a preferred network. A carrier might control

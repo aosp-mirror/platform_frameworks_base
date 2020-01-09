@@ -44,6 +44,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.IWindow;
 import android.view.SurfaceControl.Transaction;
+import android.view.View;
 import android.view.WindowManager;
 
 import com.android.server.AttributeCache;
@@ -309,6 +310,16 @@ class WindowTestsBase extends SystemServiceTestsBase {
             // adding it to the token...
             token.addWindow(w);
             return w;
+        }
+    }
+
+    static void makeWindowVisible(WindowState... windows) {
+        for (WindowState win : windows) {
+            win.mViewVisibility = View.VISIBLE;
+            win.mRelayoutCalled = true;
+            win.mHasSurface = true;
+            win.mHidden = false;
+            win.showLw(false /* doAnimation */, false /* requestAnim */);
         }
     }
 

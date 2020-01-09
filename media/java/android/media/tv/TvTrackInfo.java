@@ -61,6 +61,8 @@ public final class TvTrackInfo implements Parcelable {
     private final boolean mEncrypted;
     private final int mAudioChannelCount;
     private final int mAudioSampleRate;
+    private final boolean mAudioDescription;
+    private final boolean mHardOfHearing;
     private final int mVideoWidth;
     private final int mVideoHeight;
     private final float mVideoFrameRate;
@@ -70,9 +72,9 @@ public final class TvTrackInfo implements Parcelable {
     private final Bundle mExtra;
 
     private TvTrackInfo(int type, String id, String language, CharSequence description,
-            boolean encrypted, int audioChannelCount, int audioSampleRate, int videoWidth,
-            int videoHeight, float videoFrameRate, float videoPixelAspectRatio,
-            byte videoActiveFormatDescription, Bundle extra) {
+            boolean encrypted, int audioChannelCount, int audioSampleRate, boolean audioDescription,
+            boolean hardOfHearing, int videoWidth, int videoHeight, float videoFrameRate,
+            float videoPixelAspectRatio, byte videoActiveFormatDescription, Bundle extra) {
         mType = type;
         mId = id;
         mLanguage = language;
@@ -80,6 +82,8 @@ public final class TvTrackInfo implements Parcelable {
         mEncrypted = encrypted;
         mAudioChannelCount = audioChannelCount;
         mAudioSampleRate = audioSampleRate;
+        mAudioDescription = audioDescription;
+        mHardOfHearing = hardOfHearing;
         mVideoWidth = videoWidth;
         mVideoHeight = videoHeight;
         mVideoFrameRate = videoFrameRate;
@@ -96,6 +100,8 @@ public final class TvTrackInfo implements Parcelable {
         mEncrypted = in.readInt() != 0;
         mAudioChannelCount = in.readInt();
         mAudioSampleRate = in.readInt();
+        mAudioDescription = in.readInt() != 0;
+        mHardOfHearing = in.readInt() != 0;
         mVideoWidth = in.readInt();
         mVideoHeight = in.readInt();
         mVideoFrameRate = in.readFloat();
@@ -169,6 +175,40 @@ public final class TvTrackInfo implements Parcelable {
             throw new IllegalStateException("Not an audio track");
         }
         return mAudioSampleRate;
+    }
+
+    /**
+     * Returns {@code true} if the track is an audio description intended for people with visual
+     * impairment, {@code false} otherwise. Valid only for {@link #TYPE_AUDIO} tracks.
+     *
+     * <p>For example of broadcast, audio description information may be referred to broadcast
+     * standard (e.g. ISO 639 Language Descriptor of ISO/IEC 13818-1, Supplementary Audio Language
+     * Descriptor, AC-3 Descriptor, Enhanced AC-3 Descriptor, AAC Descriptor of ETSI EN 300 468).
+     *
+     * @throws IllegalStateException if not called on an audio track
+     */
+    public boolean isAudioDescription() {
+        if (mType != TYPE_AUDIO) {
+            throw new IllegalStateException("Not an audio track");
+        }
+        return mAudioDescription;
+    }
+
+    /**
+     * Returns {@code true} if the track is intended for people with hearing impairment, {@code
+     * false} otherwise. Valid only for {@link #TYPE_AUDIO} and {@link #TYPE_SUBTITLE} tracks.
+     *
+     * <p>For example of broadcast, hard of hearing information may be referred to broadcast
+     * standard (e.g. ISO 639 Language Descriptor of ISO/IEC 13818-1, Supplementary Audio Language
+     * Descriptor, AC-3 Descriptor, Enhanced AC-3 Descriptor, AAC Descriptor of ETSI EN 300 468).
+     *
+     * @throws IllegalStateException if not called on an audio track or a subtitle track
+     */
+    public boolean isHardOfHearing() {
+        if (mType != TYPE_AUDIO && mType != TYPE_SUBTITLE) {
+            throw new IllegalStateException("Not an audio or a subtitle track");
+        }
+        return mHardOfHearing;
     }
 
     /**
@@ -266,6 +306,8 @@ public final class TvTrackInfo implements Parcelable {
         dest.writeInt(mEncrypted ? 1 : 0);
         dest.writeInt(mAudioChannelCount);
         dest.writeInt(mAudioSampleRate);
+        dest.writeInt(mAudioDescription ? 1 : 0);
+        dest.writeInt(mHardOfHearing ? 1 : 0);
         dest.writeInt(mVideoWidth);
         dest.writeInt(mVideoHeight);
         dest.writeFloat(mVideoFrameRate);
@@ -296,7 +338,9 @@ public final class TvTrackInfo implements Parcelable {
         switch (mType) {
             case TYPE_AUDIO:
                 return mAudioChannelCount == obj.mAudioChannelCount
-                        && mAudioSampleRate == obj.mAudioSampleRate;
+                        && mAudioSampleRate == obj.mAudioSampleRate
+                        && mAudioDescription == obj.mAudioDescription
+                        && mHardOfHearing == obj.mHardOfHearing;
 
             case TYPE_VIDEO:
                 return mVideoWidth == obj.mVideoWidth
@@ -304,6 +348,9 @@ public final class TvTrackInfo implements Parcelable {
                         && mVideoFrameRate == obj.mVideoFrameRate
                         && mVideoPixelAspectRatio == obj.mVideoPixelAspectRatio
                         && mVideoActiveFormatDescription == obj.mVideoActiveFormatDescription;
+
+            case TYPE_SUBTITLE:
+                return mHardOfHearing == obj.mHardOfHearing;
         }
 
         return true;
@@ -338,6 +385,8 @@ public final class TvTrackInfo implements Parcelable {
         private boolean mEncrypted;
         private int mAudioChannelCount;
         private int mAudioSampleRate;
+        private boolean mAudioDescription;
+        private boolean mHardOfHearing;
         private int mVideoWidth;
         private int mVideoHeight;
         private float mVideoFrameRate;
@@ -426,6 +475,48 @@ public final class TvTrackInfo implements Parcelable {
                 throw new IllegalStateException("Not an audio track");
             }
             mAudioSampleRate = audioSampleRate;
+            return this;
+        }
+
+        /**
+         * Sets the audio description attribute of the audio. Valid only for {@link #TYPE_AUDIO}
+         * tracks.
+         *
+         * <p>For example of broadcast, audio description information may be referred to broadcast
+         * standard (e.g. ISO 639 Language Descriptor of ISO/IEC 13818-1, Supplementary Audio
+         * Language Descriptor, AC-3 Descriptor, Enhanced AC-3 Descriptor, AAC Descriptor of ETSI EN
+         * 300 468).
+         *
+         * @param audioDescription The audio description attribute of the audio.
+         * @throws IllegalStateException if not called on an audio track
+         */
+        @NonNull
+        public Builder setAudioDescription(boolean audioDescription) {
+            if (mType != TYPE_AUDIO) {
+                throw new IllegalStateException("Not an audio track");
+            }
+            mAudioDescription = audioDescription;
+            return this;
+        }
+
+        /**
+         * Sets the hard of hearing attribute of the track. Valid only for {@link #TYPE_AUDIO} and
+         * {@link #TYPE_SUBTITLE} tracks.
+         *
+         * <p>For example of broadcast, hard of hearing information may be referred to broadcast
+         * standard (e.g. ISO 639 Language Descriptor of ISO/IEC 13818-1, Supplementary Audio
+         * Language Descriptor, AC-3 Descriptor, Enhanced AC-3 Descriptor, AAC Descriptor of ETSI EN
+         * 300 468).
+         *
+         * @param hardOfHearing The hard of hearing attribute of the track.
+         * @throws IllegalStateException if not called on an audio track or a subtitle track
+         */
+        @NonNull
+        public Builder setHardOfHearing(boolean hardOfHearing) {
+            if (mType != TYPE_AUDIO && mType != TYPE_SUBTITLE) {
+                throw new IllegalStateException("Not an audio track or a subtitle track");
+            }
+            mHardOfHearing = hardOfHearing;
             return this;
         }
 
@@ -531,8 +622,9 @@ public final class TvTrackInfo implements Parcelable {
          */
         public TvTrackInfo build() {
             return new TvTrackInfo(mType, mId, mLanguage, mDescription, mEncrypted,
-                    mAudioChannelCount, mAudioSampleRate, mVideoWidth, mVideoHeight,
-                    mVideoFrameRate, mVideoPixelAspectRatio, mVideoActiveFormatDescription, mExtra);
+                    mAudioChannelCount, mAudioSampleRate, mAudioDescription, mHardOfHearing,
+                    mVideoWidth, mVideoHeight, mVideoFrameRate, mVideoPixelAspectRatio,
+                    mVideoActiveFormatDescription, mExtra);
         }
     }
 }

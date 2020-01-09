@@ -17,9 +17,12 @@
 package android.bluetooth;
 
 import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Binder;
@@ -43,6 +46,7 @@ import java.util.List;
  *
  * @hide
  */
+@SystemApi
 public final class BluetoothHidHost implements BluetoothProfile {
     private static final String TAG = "BluetoothHidHost";
     private static final boolean DBG = true;
@@ -66,6 +70,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
      * receive.
      */
+    @SuppressLint("ActionValue")
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED";
@@ -325,7 +330,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
-    public List<BluetoothDevice> getConnectedDevices() {
+    public @NonNull List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled()) {
@@ -342,6 +347,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
 
     /**
      * {@inheritDoc}
+     *
+     * @hide
      */
     @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
@@ -363,7 +370,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
-    public int getConnectionState(BluetoothDevice device) {
+    public int getConnectionState(@Nullable BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
@@ -409,7 +416,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    public boolean setConnectionPolicy(BluetoothDevice device, int connectionPolicy) {
+    public boolean setConnectionPolicy(@Nullable BluetoothDevice device, int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
@@ -457,7 +464,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public int getConnectionPolicy(BluetoothDevice device) {
+    public int getConnectionPolicy(@Nullable BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {

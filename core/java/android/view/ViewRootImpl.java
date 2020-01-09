@@ -192,11 +192,6 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean MT_RENDERER_AVAILABLE = true;
 
     /**
-     * @hide
-     */
-    public static final boolean USE_BLAST_BUFFERQUEUE = false;
-
-    /**
      * If set to 2, the view system will switch from using rectangles retrieved from window to
      * dispatch to the view hierarchy to using {@link InsetsController}, that derives the insets
      * directly from the full configuration, enabling richer information about the insets state, as
@@ -1312,7 +1307,7 @@ public final class ViewRootImpl implements ViewParent,
             }
             mWindowAttributes.privateFlags |= compatibleWindowFlag;
 
-            if (USE_BLAST_BUFFERQUEUE) {
+            if (WindowManagerGlobal.USE_BLAST_ADAPTER) {
                 mWindowAttributes.privateFlags =
                     WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
             }
@@ -7273,7 +7268,7 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingStableInsets, mPendingBackDropFrame, mPendingDisplayCutout,
                 mPendingMergedConfiguration, mSurfaceControl, mTempInsets);
         if (mSurfaceControl.isValid()) {
-            if (USE_BLAST_BUFFERQUEUE == false) {
+            if (!WindowManagerGlobal.USE_BLAST_ADAPTER) {
                 mSurface.copyFrom(mSurfaceControl);
             } else {
                 mSurface.transferFrom(getOrCreateBLASTSurface(

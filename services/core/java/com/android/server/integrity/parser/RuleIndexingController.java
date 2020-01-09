@@ -17,6 +17,7 @@
 package com.android.server.integrity.parser;
 
 import static com.android.server.integrity.model.IndexingFileConstants.END_INDEXING_KEY;
+import static com.android.server.integrity.model.IndexingFileConstants.START_INDEXING_KEY;
 import static com.android.server.integrity.parser.BinaryFileOperations.getIntValue;
 import static com.android.server.integrity.parser.BinaryFileOperations.getStringValue;
 
@@ -24,25 +25,27 @@ import android.content.integrity.AppInstallMetadata;
 
 import com.android.server.integrity.model.BitInputStream;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /** Helper class to identify the necessary indexes that needs to be read. */
 public class RuleIndexingController {
 
-    private static TreeMap<String, Integer> sPackageNameBasedIndexes;
-    private static TreeMap<String, Integer> sAppCertificateBasedIndexes;
-    private static TreeMap<String, Integer> sUnindexedRuleIndexes;
+    private static LinkedHashMap<String, Integer> sPackageNameBasedIndexes;
+    private static LinkedHashMap<String, Integer> sAppCertificateBasedIndexes;
+    private static LinkedHashMap<String, Integer> sUnindexedRuleIndexes;
 
     /**
      * Provide the indexing file to read and the object will be constructed by reading and
      * identifying the indexes.
      */
-    public RuleIndexingController(FileInputStream fileInputStream) throws IOException {
-        BitInputStream bitInputStream = new BitInputStream(fileInputStream);
+    public RuleIndexingController(InputStream inputStream) throws IOException {
+        BitInputStream bitInputStream = new BitInputStream(inputStream);
         sPackageNameBasedIndexes = getNextIndexGroup(bitInputStream);
         sAppCertificateBasedIndexes = getNextIndexGroup(bitInputStream);
         sUnindexedRuleIndexes = getNextIndexGroup(bitInputStream);
@@ -52,24 +55,57 @@ public class RuleIndexingController {
      * Returns a list of integers with the starting and ending bytes of the rules that needs to be
      * read and evaluated.
      */
-    public List<List<Integer>> identifyRulesToEvaluate(AppInstallMetadata appInstallMetadata) {
-        // TODO(b/145493956): Identify and return the indexes that needs to be read.
-        return new ArrayList<>();
+    public List<RuleIndexRange> identifyRulesToEvaluate(AppInstallMetadata appInstallMetadata) {
+        ArrayList<RuleIndexRange> indexRanges = new ArrayList();
+
+        // Add the range for package name indexes rules.
+        indexRanges.add(
+                searchIndexingKeysRangeContainingKey(
+                        sPackageNameBasedIndexes, appInstallMetadata.getPackageName()));
+
+        // Add the range for app certificate indexes rules.
+        indexRanges.add(
+                searchIndexingKeysRangeContainingKey(
+                        sAppCertificateBasedIndexes, appInstallMetadata.getAppCertificate()));
+
+        // Add the range for unindexed rules.
+        indexRanges.add(
+                new RuleIndexRange(
+                        sUnindexedRuleIndexes.get(START_INDEXING_KEY),
+                        sUnindexedRuleIndexes.get(END_INDEXING_KEY)));
+
+        return indexRanges;
     }
 
-    private TreeMap<String, Integer> getNextIndexGroup(BitInputStream bitInputStream)
+    private LinkedHashMap<String, Integer> getNextIndexGroup(BitInputStream bitInputStream)
             throws IOException {
-        TreeMap<String, Integer> keyToIndexMap = new TreeMap<>();
+        LinkedHashMap<String, Integer> keyToIndexMap = new LinkedHashMap<>();
         while (bitInputStream.hasNext()) {
             String key = getStringValue(bitInputStream);
             int value = getIntValue(bitInputStream);
 
             keyToIndexMap.put(key, value);
 
-            if (key == END_INDEXING_KEY) {
+            if (key.matches(END_INDEXING_KEY)) {
                 break;
             }
         }
         return keyToIndexMap;
+    }
+
+    private RuleIndexRange searchIndexingKeysRangeContainingKey(
+            LinkedHashMap<String, Integer> indexMap, String searchedKey) {
+        TreeSet<String> keyTreeSet =
+                indexMap.keySet().stream()
+                        .filter(key -> !key.matches(START_INDEXING_KEY) && !key.matches(
+                                END_INDEXING_KEY))
+                        .collect(Collectors.toCollection(TreeSet::new));
+
+        String minIndex = keyTreeSet.floor(searchedKey);
+        String maxIndex = keyTreeSet.ceiling(searchedKey);
+
+        return new RuleIndexRange(
+                indexMap.get(minIndex == null ? START_INDEXING_KEY : minIndex),
+                indexMap.get(maxIndex == null ? END_INDEXING_KEY : maxIndex));
     }
 }

@@ -69,12 +69,6 @@ void SubscriberReporter::unsetBroadcastSubscriber(const ConfigKey& configKey,
     }
 }
 
-void SubscriberReporter::removeConfig(const ConfigKey& configKey) {
-    VLOG("SubscriberReporter::removeConfig called.");
-    lock_guard<std::mutex> lock(mLock);
-    mIntentMap.erase(configKey);
-}
-
 void SubscriberReporter::alertBroadcastSubscriber(const ConfigKey& configKey,
                                                   const Subscription& subscription,
                                                   const MetricDimensionKey& dimKey) const {

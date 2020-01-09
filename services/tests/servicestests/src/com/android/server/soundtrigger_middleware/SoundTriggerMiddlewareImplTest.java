@@ -60,8 +60,6 @@ import android.os.IHwBinder;
 import android.os.IHwInterface;
 import android.os.RemoteException;
 
-import androidx.test.runner.AndroidJUnit4;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -144,7 +142,11 @@ public class SoundTriggerMiddlewareImplTest {
         properties.maxSoundModels = 456;
         properties.maxKeyPhrases = 567;
         properties.maxUsers = 678;
-        properties.recognitionModes = 789;
+        properties.recognitionModes =
+                android.hardware.soundtrigger.V2_0.RecognitionMode.VOICE_TRIGGER
+                | android.hardware.soundtrigger.V2_0.RecognitionMode.USER_IDENTIFICATION
+                | android.hardware.soundtrigger.V2_0.RecognitionMode.USER_AUTHENTICATION
+                | android.hardware.soundtrigger.V2_0.RecognitionMode.GENERIC_TRIGGER;
         properties.captureTransition = true;
         properties.maxBufferMs = 321;
         properties.concurrentCapture = supportConcurrentCapture;
@@ -162,7 +164,10 @@ public class SoundTriggerMiddlewareImplTest {
         assertEquals(456, properties.maxSoundModels);
         assertEquals(567, properties.maxKeyPhrases);
         assertEquals(678, properties.maxUsers);
-        assertEquals(789, properties.recognitionModes);
+        assertEquals(RecognitionMode.GENERIC_TRIGGER
+                | RecognitionMode.USER_AUTHENTICATION
+                | RecognitionMode.USER_IDENTIFICATION
+                | RecognitionMode.VOICE_TRIGGER, properties.recognitionModes);
         assertTrue(properties.captureTransition);
         assertEquals(321, properties.maxBufferMs);
         assertEquals(supportConcurrentCapture, properties.concurrentCapture);

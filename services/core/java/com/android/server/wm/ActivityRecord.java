@@ -6107,11 +6107,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // This also avoids if the next activity never reports idle (e.g. animating view),
                 // the previous will need to wait until idle timeout to be stopped or destroyed.
                 mStackSupervisor.scheduleProcessStoppingAndFinishingActivities();
-            } else {
-                // Instead of doing the full stop routine here, let's just hide any activities
-                // we now can, and let them stop when the normal idle happens.
-                mStackSupervisor.processStoppingActivities(null /* launchedActivity */,
-                        true /* onlyUpdateVisibility */, true /* unused */, null /* unused */);
             }
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);

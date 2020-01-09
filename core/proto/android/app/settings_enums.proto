@@ -702,6 +702,12 @@ enum Action {
     // CATEGORY: SETTINGS
     // OS: R
     ACTION_DASHBOARD_VISIBLE_TIME = 1729;
+
+    // ACTION: Allow "Access all files" for an app
+    APP_SPECIAL_PERMISSION_MANAGE_EXT_STRG_ALLOW = 1730;
+
+    // ACTION: Deny "Access all files" for an app
+    APP_SPECIAL_PERMISSION_MANAGE_EXT_STRG_DENY = 1731;
 }
 
 /**
@@ -2541,5 +2547,10 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     FUELGAUGE_BATTERY_SHARE = 1821;
+
+    // OPEN: Settings -> Apps & Notifications -> Special App Access
+    // CATEGORY: SETTINGS
+    // OS: R
+    MANAGE_EXTERNAL_STORAGE = 1822;
 
 }

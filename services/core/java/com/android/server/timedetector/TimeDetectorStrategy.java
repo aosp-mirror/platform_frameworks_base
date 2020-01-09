@@ -22,7 +22,7 @@ import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
 import android.content.Intent;
-import android.util.TimestampedValue;
+import android.os.TimestampedValue;
 
 import java.io.PrintWriter;
 

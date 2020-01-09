@@ -113,7 +113,7 @@ droidstubs {
     srcs: [":services-sources"],
     installable: false,
     // TODO: remove the --hide options below
-    args: " --show-single-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES,process=android.annotation.SystemApi.Process.SYSTEM_SERVER\\)" +
+    args: " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES,process=android.annotation.SystemApi.Process.SYSTEM_SERVER\\)" +
         " --hide-annotation android.annotation.Hide" +
         " --hide-package com.google.android.startop.iorap" +
         " --hide ReferencesHidden" +

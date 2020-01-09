@@ -37,7 +37,8 @@ data class PersonModel(
     val key: PersonKey,
     val name: CharSequence,
     val avatar: Drawable,
-    val clickIntent: PendingIntent
+    val clickIntent: PendingIntent,
+    val userId: Int
 )
 
 /** Unique identifier for a Person in PeopleHub. */

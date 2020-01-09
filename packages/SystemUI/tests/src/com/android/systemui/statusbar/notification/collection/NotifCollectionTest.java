@@ -24,6 +24,7 @@ import static com.android.systemui.statusbar.notification.collection.NotifCollec
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -261,9 +262,13 @@ public class NotifCollectionTest extends SysuiTestCase {
                 .setRank(5)
                 .setExplanation("baz buzz")
                 .build();
+
+        // WHEN entry3's ranking update includes an update to its overrideGroupKey
+        final String newOverrideGroupKey = "newOverrideGroupKey";
         Ranking newRanking3 = new RankingBuilder(notif3.ranking)
                 .setRank(6)
                 .setExplanation("Penguin pizza")
+                .setOverrideGroupKey(newOverrideGroupKey)
                 .build();
 
         mNoMan.setRanking(notif1.sbn.getKey(), newRanking1);
@@ -275,6 +280,10 @@ public class NotifCollectionTest extends SysuiTestCase {
         assertEquals(newRanking1, entry1.getRanking());
         assertEquals(newRanking2, entry2.getRanking());
         assertEquals(newRanking3, entry3.getRanking());
+
+        // THEN the entry3's overrideGroupKey is updated along with its groupKey
+        assertEquals(newOverrideGroupKey, entry3.getSbn().getOverrideGroupKey());
+        assertNotNull(entry3.getSbn().getGroupKey());
     }
 
     @Test

@@ -24,8 +24,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.util.AttributeSet;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 public class NotificationPanelView extends PanelView {
 
     private static final boolean DEBUG = false;
@@ -38,14 +36,10 @@ public class NotificationPanelView extends PanelView {
     static final String COUNTER_PANEL_OPEN = "panel_open";
     static final String COUNTER_PANEL_OPEN_QS = "panel_open_qs";
 
-    @VisibleForTesting
-    protected KeyguardAffordanceHelper mAffordanceHelper;
-
-    private int mOldLayoutDirection;
-
     private int mCurrentPanelAlpha;
     private final Paint mAlphaPaint = new Paint();
     private boolean mDozing;
+    private RtlChangeListener mRtlChangeListener;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -57,9 +51,8 @@ public class NotificationPanelView extends PanelView {
 
     @Override
     public void onRtlPropertiesChanged(int layoutDirection) {
-        if (layoutDirection != mOldLayoutDirection) {
-            mAffordanceHelper.onRtlPropertiesChanged();
-            mOldLayoutDirection = layoutDirection;
+        if (mRtlChangeListener != null) {
+            mRtlChangeListener.onRtlPropertielsChanged(layoutDirection);
         }
     }
 
@@ -95,4 +88,11 @@ public class NotificationPanelView extends PanelView {
         return !mDozing;
     }
 
+    void setRtlChangeListener(RtlChangeListener listener) {
+        mRtlChangeListener = listener;
+    }
+
+    interface RtlChangeListener {
+        void onRtlPropertielsChanged(int layoutDirection);
+    }
 }

@@ -2076,54 +2076,11 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             boolean processPausingActivities, String reason) {
         // Stop any activities that are scheduled to do so but have been waiting for the transition
         // animation to finish.
-        processStoppingActivities(launchedActivity, false /* onlyUpdateVisibility */,
-                processPausingActivities, reason);
-
-        final int numFinishingActivities = mFinishingActivities.size();
-        if (numFinishingActivities == 0) {
-            return;
-        }
-
-        // Finish any activities that are scheduled to do so but have been waiting for the next one
-        // to start.
-        final ArrayList<ActivityRecord> finishingActivities = new ArrayList<>(mFinishingActivities);
-        mFinishingActivities.clear();
-        for (int i = 0; i < numFinishingActivities; i++) {
-            final ActivityRecord r = finishingActivities.get(i);
-            if (r.isInHistory()) {
-                r.destroyImmediately(true /* removeFromApp */, "finish-" + reason);
-            }
-        }
-    }
-
-    /** Stop or destroy the stopping activities if they are not interactive. */
-    void processStoppingActivities(ActivityRecord launchedActivity, boolean onlyUpdateVisibility,
-            boolean processPausingActivities, String reason) {
-        final int numStoppingActivities = mStoppingActivities.size();
-        if (numStoppingActivities == 0) {
-            return;
-        }
         ArrayList<ActivityRecord> readyToStopActivities = null;
-
-        final boolean nowVisible = mRootWindowContainer.allResumedActivitiesVisible();
-        for (int activityNdx = numStoppingActivities - 1; activityNdx >= 0; --activityNdx) {
-            final ActivityRecord s = mStoppingActivities.get(activityNdx);
-            if (nowVisible && s.finishing) {
-
-                // If this activity is finishing, it is sitting on top of
-                // everyone else but we now know it is no longer needed...
-                // so get rid of it.  Otherwise, we need to go through the
-                // normal flow and hide it once we determine that it is
-                // hidden by the activities in front of it.
-                if (DEBUG_STATES) Slog.v(TAG, "Before stopping, can hide: " + s);
-                s.setVisibility(false);
-            }
-            if (onlyUpdateVisibility) {
-                continue;
-            }
-
+        for (int i = mStoppingActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord s = mStoppingActivities.get(i);
             final boolean animating = s.isAnimating(TRANSITION);
-            if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + nowVisible
+            if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + s.nowVisible
                     + " animating=" + animating + " finishing=" + s.finishing);
 
             final ActivityStack stack = s.getActivityStack();
@@ -2145,7 +2102,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 }
                 readyToStopActivities.add(s);
 
-                mStoppingActivities.remove(activityNdx);
+                mStoppingActivities.remove(i);
             }
         }
 
@@ -2159,6 +2116,22 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 } else {
                     r.stopIfPossible();
                 }
+            }
+        }
+
+        final int numFinishingActivities = mFinishingActivities.size();
+        if (numFinishingActivities == 0) {
+            return;
+        }
+
+        // Finish any activities that are scheduled to do so but have been waiting for the next one
+        // to start.
+        final ArrayList<ActivityRecord> finishingActivities = new ArrayList<>(mFinishingActivities);
+        mFinishingActivities.clear();
+        for (int i = 0; i < numFinishingActivities; i++) {
+            final ActivityRecord r = finishingActivities.get(i);
+            if (r.isInHistory()) {
+                r.destroyImmediately(true /* removeFromApp */, "finish-" + reason);
             }
         }
     }

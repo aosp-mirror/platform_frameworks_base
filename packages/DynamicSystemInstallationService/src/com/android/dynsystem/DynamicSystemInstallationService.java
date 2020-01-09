@@ -262,10 +262,11 @@ public class DynamicSystemInstallationService extends Service
             return;
         }
 
+        stopForeground(true);
         mJustCancelledByUser = true;
 
         if (mInstallTask.cancel(false)) {
-            // Will cleanup and post status in onResult()
+            // Will stopSelf() in onResult()
             Log.d(TAG, "Cancel request filed successfully");
         } else {
             Log.e(TAG, "Trying to cancel installation while it's already completed.");

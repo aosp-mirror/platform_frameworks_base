@@ -280,8 +280,11 @@ public final class Settings {
     /** Map from package name to settings */
     final ArrayMap<String, PackageSetting> mPackages = new ArrayMap<>();
 
-    /** List of packages that installed other packages */
-    final ArraySet<String> mInstallerPackages = new ArraySet<>();
+    /**
+     * List of packages that were involved in installing other packages, i.e. are listed
+     * in at least one app's InstallSource.
+     */
+    private final ArraySet<String> mInstallerPackages = new ArraySet<>();
 
     /** Map from package name to appId and excluded userids */
     private final ArrayMap<String, KernelPackageState> mKernelMapping = new ArrayMap<>();
@@ -439,16 +442,6 @@ public final class Settings {
 
     public boolean canPropagatePermissionToInstantApp(String permName) {
         return mPermissions.canPropagatePermissionToInstantApp(permName);
-    }
-
-    void setInstallerPackageName(String pkgName, String installerPkgName) {
-        PackageSetting p = mPackages.get(pkgName);
-        if (p != null) {
-            p.setInstallerPackageName(installerPkgName);
-            if (installerPkgName != null) {
-                mInstallerPackages.add(installerPkgName);
-            }
-        }
     }
 
     /** Gets and optionally creates a new shared user id. */
@@ -3777,9 +3770,10 @@ public final class Settings {
         }
         if (packageSetting != null) {
             packageSetting.uidError = "true".equals(uidError);
-            packageSetting.installSource = InstallSource.create(
+            InstallSource installSource = InstallSource.create(
                     installInitiatingPackageName, installOriginatingPackageName,
                     installerPackageName, "true".equals(isOrphaned));
+            packageSetting.installSource = installSource;
             packageSetting.volumeUuid = volumeUuid;
             packageSetting.categoryHint = categoryHint;
             packageSetting.legacyNativeLibraryPathString = legacyNativeLibraryPathStr;
@@ -3809,9 +3803,7 @@ public final class Settings {
                 packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, 0, null);
             }
 
-            if (installerPackageName != null) {
-                mInstallerPackages.add(installerPackageName);
-            }
+            addInstallerPackageNames(installSource);
 
             int outerDepth = parser.getDepth();
             int type;
@@ -3867,6 +3859,18 @@ public final class Settings {
             }
         } else {
             XmlUtils.skipCurrentTag(parser);
+        }
+    }
+
+    void addInstallerPackageNames(InstallSource installSource) {
+        if (installSource.installerPackageName != null) {
+            mInstallerPackages.add(installSource.installerPackageName);
+        }
+        if (installSource.initiatingPackageName != null) {
+            mInstallerPackages.add(installSource.initiatingPackageName);
+        }
+        if (installSource.originatingPackageName != null) {
+            mInstallerPackages.add(installSource.originatingPackageName);
         }
     }
 

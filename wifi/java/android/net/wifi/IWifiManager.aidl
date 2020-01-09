@@ -90,6 +90,8 @@ interface IWifiManager
 
     void allowAutojoin(int netId, boolean choice);
 
+    void allowAutojoinPasspoint(String fqdn, boolean enableAutoJoin);
+
     boolean startScan(String packageName, String featureId);
 
     List<ScanResult> getScanResults(String callingPackage, String callingFeatureId);
