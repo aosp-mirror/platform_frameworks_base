@@ -15,13 +15,11 @@
  */
 package android.app;
 
-import static android.app.NotificationManager.IMPORTANCE_HIGH;
-
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.NotificationManager.Importance;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;

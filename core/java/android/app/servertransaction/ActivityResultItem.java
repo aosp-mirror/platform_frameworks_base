@@ -18,9 +18,9 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.ClientTransactionHandler;
 import android.app.ResultInfo;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
