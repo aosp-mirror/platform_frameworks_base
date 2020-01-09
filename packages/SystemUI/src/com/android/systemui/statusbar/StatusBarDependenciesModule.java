@@ -18,8 +18,6 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 
-import com.android.systemui.statusbar.notification.row.NotificationRowModule;
-
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -28,7 +26,7 @@ import dagger.Provides;
 /**
  * Dagger Module providing common dependencies of StatusBar.
  */
-@Module(includes = {NotificationRowModule.class})
+@Module
 public class StatusBarDependenciesModule {
     /**
      * Provides our instance of CommandQueue which is considered optional.

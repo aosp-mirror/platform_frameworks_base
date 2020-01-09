@@ -69,7 +69,6 @@ import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.init.NewNotifPipeline;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
-import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -126,7 +125,6 @@ public class StatusBarModule {
             NotificationGutsManager notificationGutsManager,
             NotificationLogger notificationLogger,
             NotificationEntryManager notificationEntryManager,
-            NotificationRowContentBinder notificationRowContentBinder,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             NotificationViewHierarchyManager notificationViewHierarchyManager,
             KeyguardViewMediator keyguardViewMediator,
@@ -209,7 +207,6 @@ public class StatusBarModule {
                 notificationGutsManager,
                 notificationLogger,
                 notificationEntryManager,
-                notificationRowContentBinder,
                 notificationInterruptionStateProvider,
                 notificationViewHierarchyManager,
                 keyguardViewMediator,

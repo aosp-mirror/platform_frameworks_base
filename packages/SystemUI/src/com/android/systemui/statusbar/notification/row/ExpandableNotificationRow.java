@@ -65,6 +65,7 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.Chronometer;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -149,7 +150,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private StatusBarStateController mStatusbarStateController;
     private KeyguardBypassController mBypassController;
     private LayoutListener mLayoutListener;
-    private NotificationRowContentBinder mNotificationContentBinder;
+    private final NotificationContentInflater mNotificationInflater;
     private int mIconTransformContentShift;
     private int mIconTransformContentShiftNoIcon;
     private int mMaxHeadsUpHeightBeforeN;
@@ -463,7 +464,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * Inflate views based off the inflation flags set. Inflation happens asynchronously.
      */
     public void inflateViews() {
-        mNotificationContentBinder.bindContent(mEntry, this, mInflationFlags, mBindParams,
+        mNotificationInflater.bindContent(mEntry, this, mInflationFlags, mBindParams,
                 false /* forceInflate */, mInflationCallback);
     }
 
@@ -477,7 +478,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         // View should not be reinflated in the future
         clearInflationFlags(inflationFlag);
         Runnable freeViewRunnable =
-                () -> mNotificationContentBinder.unbindContent(mEntry, this, inflationFlag);
+                () -> mNotificationInflater.unbindContent(mEntry, this, inflationFlag);
         switch (inflationFlag) {
             case FLAG_CONTENT_VIEW_HEADS_UP:
                 getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_HEADSUP,
@@ -851,7 +852,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mIsChildInGroup = isChildInGroup;
             if (mIsLowPriority) {
                 int flags = FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED;
-                mNotificationContentBinder.bindContent(mEntry, this, flags, mBindParams,
+                mNotificationInflater.bindContent(mEntry, this, flags, mBindParams,
                         false /* forceInflate */, mInflationCallback);
             }
         }
@@ -1258,7 +1259,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             l.reInflateViews();
         }
         mEntry.getSbn().clearPackageContext();
-        mNotificationContentBinder.bindContent(mEntry, this, mInflationFlags, mBindParams,
+        mNotificationInflater.bindContent(mEntry, this, mInflationFlags, mBindParams,
                 true /* forceInflate */, mInflationCallback);
     }
 
@@ -1633,6 +1634,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mBindParams.usesIncreasedHeadsUpHeight = use;
     }
 
+    public void setRemoteViewClickHandler(RemoteViews.OnClickHandler remoteViewClickHandler) {
+        mNotificationInflater.setRemoteViewClickHandler(remoteViewClickHandler);
+    }
+
     /**
      * Set callback for notification content inflation
      *
@@ -1647,7 +1652,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mNeedsRedaction = needsRedaction;
             if (needsRedaction) {
                 setInflationFlags(FLAG_CONTENT_VIEW_PUBLIC);
-                mNotificationContentBinder.bindContent(mEntry, this, FLAG_CONTENT_VIEW_PUBLIC,
+                mNotificationInflater.bindContent(mEntry, this, FLAG_CONTENT_VIEW_PUBLIC,
                         mBindParams, false /* forceInflate */, mInflationCallback);
             } else {
                 clearInflationFlags(FLAG_CONTENT_VIEW_PUBLIC);
@@ -1656,13 +1661,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    /**
-     * Set the binder implementation for notification content views.
-     *
-     * @param contentBinder content binder
-     */
-    public void setContentBinder(NotificationRowContentBinder contentBinder) {
-        mNotificationContentBinder = contentBinder;
+    @VisibleForTesting
+    public NotificationContentInflater getNotificationInflater() {
+        return mNotificationInflater;
     }
 
     public interface ExpansionLogger {
@@ -1671,6 +1672,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mNotificationInflater = new NotificationContentInflater();
         mMenuRow = new NotificationMenuRow(mContext);
         mImageResolver = new NotificationInlineImageResolver(context,
                 new NotificationInlineImageCache());
