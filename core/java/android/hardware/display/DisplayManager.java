@@ -748,6 +748,17 @@ public final class DisplayManager {
         return mGlobal.getDefaultBrightnessConfiguration();
     }
 
+
+    /**
+     * Gets the last requested minimal post processing setting for the display with displayId.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean isMinimalPostProcessingRequested(int displayId) {
+        return mGlobal.isMinimalPostProcessingRequested(displayId);
+    }
+
     /**
      * Temporarily sets the brightness of the display.
      * <p>
