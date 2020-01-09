@@ -165,6 +165,11 @@ message IncidentProto {
         (section).args = "security -L"
     ];
 
+    optional android.util.PersistedLogProto persisted_logs = 1116 [
+        (section).type = SECTION_COMMAND,
+        (section).args = "/system/bin/sh /system/bin/incident-helper-cmd -l run persisted_logs --limit 10MB"
+    ];
+
     // Stack dumps
     optional android.os.BackTraceProto native_traces = 1200 [
         (section).type = SECTION_TOMBSTONE,
