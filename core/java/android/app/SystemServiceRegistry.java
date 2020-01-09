@@ -89,6 +89,7 @@ import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.input.InputManager;
 import android.hardware.iris.IIrisService;
 import android.hardware.iris.IrisManager;
+import android.hardware.lights.LightsManager;
 import android.hardware.location.ContextHubManager;
 import android.hardware.radio.RadioManager;
 import android.hardware.usb.IUsbManager;
@@ -1262,6 +1263,13 @@ public final class SystemServiceRegistry {
                                 Context.DATA_LOADER_MANAGER_SERVICE);
                         return new DataLoaderManager(IDataLoaderManager.Stub.asInterface(b));
                     }});
+        registerService(Context.LIGHTS_SERVICE, LightsManager.class,
+            new CachedServiceFetcher<LightsManager>() {
+                @Override
+                public LightsManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                    return new LightsManager(ctx);
+                }});
         //TODO(b/136132412): refactor this: 1) merge IIncrementalManager.aidl and
         //IIncrementalManagerNative.aidl, 2) implement the binder interface in
         //IncrementalManagerService.java, 3) use JNI to call native functions
