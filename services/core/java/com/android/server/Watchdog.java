@@ -39,8 +39,10 @@ import android.system.StructRlimit;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.StatsLog;
 
+import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.ZygoteConnectionConstants;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.wm.SurfaceAnimationThread;
@@ -606,12 +608,17 @@ public class Watchdog extends Thread {
             pids.add(Process.myPid());
             if (mPhonePid > 0) pids.add(mPhonePid);
 
+            long anrTime = SystemClock.uptimeMillis();
+            ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(false);
             final File stack = ActivityManagerService.dumpStackTraces(
-                    pids, null, null, getInterestingNativePids());
+                    pids, processCpuTracker, new SparseArray<>(), getInterestingNativePids());
 
             // Give some extra time to make sure the stack traces get written.
             // The system's been hanging for a minute, another second or two won't hurt much.
             SystemClock.sleep(5000);
+
+            processCpuTracker.update();
+            String cpuInfo = processCpuTracker.printCurrentState(anrTime);
 
             // Trigger the kernel to dump all blocked threads, and backtraces on all CPUs to the kernel log
             doSysRq('w');
@@ -627,7 +634,7 @@ public class Watchdog extends Thread {
                         if (mActivity != null) {
                             mActivity.addErrorToDropBox(
                                     "watchdog", null, "system_server", null, null, null,
-                                    subject, null, stack, null);
+                                    subject, cpuInfo, stack, null);
                         }
                         StatsLog.write(StatsLog.SYSTEM_SERVER_WATCHDOG_OCCURRED, subject);
                     }
