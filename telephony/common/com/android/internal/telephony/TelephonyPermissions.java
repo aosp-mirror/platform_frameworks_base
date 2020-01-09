@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
@@ -95,16 +96,19 @@ public final class TelephonyPermissions {
      *              inaccesible to carrier-privileged apps).
      */
     public static boolean checkCallingOrSelfReadPhoneState(
-            Context context, int subId, String callingPackage, String message) {
+            Context context, int subId, String callingPackage, @Nullable String callingFeatureId,
+            String message) {
         return checkReadPhoneState(context, subId, Binder.getCallingPid(), Binder.getCallingUid(),
-                callingPackage, message);
+                callingPackage, callingFeatureId, message);
     }
 
     /** Identical to checkCallingOrSelfReadPhoneState but never throws SecurityException */
     public static boolean checkCallingOrSelfReadPhoneStateNoThrow(
-            Context context, int subId, String callingPackage, String message) {
+            Context context, int subId, String callingPackage, @Nullable String callingFeatureId,
+            String message) {
         try {
-            return checkCallingOrSelfReadPhoneState(context, subId, callingPackage, message);
+            return checkCallingOrSelfReadPhoneState(context, subId, callingPackage,
+                    callingFeatureId, message);
         } catch (SecurityException se) {
             return false;
         }
@@ -132,9 +136,11 @@ public final class TelephonyPermissions {
      * devices.
      */
     public static boolean checkReadPhoneState(
-            Context context, int subId, int pid, int uid, String callingPackage, String message) {
+            Context context, int subId, int pid, int uid, String callingPackage,
+            @Nullable  String callingFeatureId, String message) {
         return checkReadPhoneState(
-                context, TELEPHONY_SUPPLIER, subId, pid, uid, callingPackage, message);
+                context, TELEPHONY_SUPPLIER, subId, pid, uid, callingPackage, callingFeatureId,
+                message);
     }
 
     /**
@@ -174,7 +180,7 @@ public final class TelephonyPermissions {
     @VisibleForTesting
     public static boolean checkReadPhoneState(
             Context context, Supplier<ITelephony> telephonySupplier, int subId, int pid, int uid,
-            String callingPackage, String message) {
+            String callingPackage, @Nullable String callingFeatureId, String message) {
         try {
             context.enforcePermission(
                     android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, pid, uid, message);
@@ -217,10 +223,10 @@ public final class TelephonyPermissions {
      * @return {@code true} if the app can read phone state or has carrier privilege;
      *         {@code false} otherwise.
      */
-    public static boolean checkReadPhoneStateOnAnyActiveSub(
-            Context context, int pid, int uid, String callingPackage, String message) {
+    public static boolean checkReadPhoneStateOnAnyActiveSub(Context context, int pid, int uid,
+            String callingPackage, @Nullable String callingFeatureId, String message) {
         return checkReadPhoneStateOnAnyActiveSub(context, TELEPHONY_SUPPLIER, pid, uid,
-                    callingPackage, message);
+                    callingPackage, callingFeatureId, message);
     }
 
     /**
@@ -240,7 +246,7 @@ public final class TelephonyPermissions {
     @VisibleForTesting
     public static boolean checkReadPhoneStateOnAnyActiveSub(
             Context context, Supplier<ITelephony> telephonySupplier, int pid, int uid,
-            String callingPackage, String message) {
+            String callingPackage, @Nullable String callingFeatureId, String message) {
         try {
             context.enforcePermission(
                     android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, pid, uid, message);
@@ -283,9 +289,10 @@ public final class TelephonyPermissions {
      * </ul>
      */
     public static boolean checkCallingOrSelfReadDeviceIdentifiers(Context context,
-            String callingPackage, String message) {
+            String callingPackage, @Nullable String callingFeatureId, String message) {
         return checkCallingOrSelfReadDeviceIdentifiers(context,
-                SubscriptionManager.INVALID_SUBSCRIPTION_ID, callingPackage, message);
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID, callingPackage, callingFeatureId,
+                message);
     }
 
     /**
@@ -306,9 +313,9 @@ public final class TelephonyPermissions {
      * </ul>
      */
     public static boolean checkCallingOrSelfReadDeviceIdentifiers(Context context, int subId,
-            String callingPackage, String message) {
+            String callingPackage, @Nullable String callingFeatureId, String message) {
         return checkPrivilegedReadPermissionOrCarrierPrivilegePermission(
-                context, subId, callingPackage, message, true);
+                context, subId, callingPackage, callingFeatureId, message, true);
     }
 
     /**
@@ -328,9 +335,9 @@ public final class TelephonyPermissions {
      * </ul>
      */
     public static boolean checkCallingOrSelfReadSubscriberIdentifiers(Context context, int subId,
-            String callingPackage, String message) {
+            String callingPackage, @Nullable String callingFeatureId, String message) {
         return checkPrivilegedReadPermissionOrCarrierPrivilegePermission(
-                context, subId, callingPackage, message, false);
+                context, subId, callingPackage, callingFeatureId, message, false);
     }
 
     /**
@@ -352,8 +359,8 @@ public final class TelephonyPermissions {
      * </ul>
      */
     private static boolean checkPrivilegedReadPermissionOrCarrierPrivilegePermission(
-            Context context, int subId, String callingPackage, String message,
-            boolean allowCarrierPrivilegeOnAnySub) {
+            Context context, int subId, String callingPackage, @Nullable String callingFeatureId,
+            String message, boolean allowCarrierPrivilegeOnAnySub) {
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
         // Allow system and root access to the device identifiers.
@@ -479,9 +486,10 @@ public final class TelephonyPermissions {
      *      to it, {@code false} otherwise.
      */
     public static boolean checkReadCallLog(
-            Context context, int subId, int pid, int uid, String callingPackage) {
+            Context context, int subId, int pid, int uid, String callingPackage,
+            @Nullable String callingPackageName) {
         return checkReadCallLog(
-                context, TELEPHONY_SUPPLIER, subId, pid, uid, callingPackage);
+                context, TELEPHONY_SUPPLIER, subId, pid, uid, callingPackage, callingPackageName);
     }
 
     /**
@@ -492,7 +500,7 @@ public final class TelephonyPermissions {
     @VisibleForTesting
     public static boolean checkReadCallLog(
             Context context, Supplier<ITelephony> telephonySupplier, int subId, int pid, int uid,
-            String callingPackage) {
+            String callingPackage, @Nullable String callingFeatureId) {
 
         if (context.checkPermission(Manifest.permission.READ_CALL_LOG, pid, uid)
                 != PERMISSION_GRANTED) {
@@ -519,10 +527,11 @@ public final class TelephonyPermissions {
      * default SMS app and apps with READ_SMS or READ_PHONE_NUMBERS can also read phone numbers.
      */
     public static boolean checkCallingOrSelfReadPhoneNumber(
-            Context context, int subId, String callingPackage, String message) {
+            Context context, int subId, String callingPackage, @Nullable String callingFeatureId,
+            String message) {
         return checkReadPhoneNumber(
                 context, TELEPHONY_SUPPLIER, subId, Binder.getCallingPid(), Binder.getCallingUid(),
-                callingPackage, message);
+                callingPackage, callingFeatureId, message);
     }
 
     /**
@@ -534,7 +543,7 @@ public final class TelephonyPermissions {
     @VisibleForTesting
     public static boolean checkReadPhoneNumber(
             Context context, Supplier<ITelephony> telephonySupplier, int subId, int pid, int uid,
-            String callingPackage, String message) {
+            String callingPackage, @Nullable String callingFeatureId, String message) {
         // Default SMS app can always read it.
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         if (appOps.noteOp(AppOpsManager.OPSTR_WRITE_SMS, uid, callingPackage) ==
@@ -548,7 +557,8 @@ public final class TelephonyPermissions {
         // First, check if we can read the phone state.
         try {
             return checkReadPhoneState(
-                    context, telephonySupplier, subId, pid, uid, callingPackage, message);
+                    context, telephonySupplier, subId, pid, uid, callingPackage, callingFeatureId,
+                    message);
         } catch (SecurityException readPhoneStateSecurityException) {
         }
         // Can be read with READ_SMS too.
