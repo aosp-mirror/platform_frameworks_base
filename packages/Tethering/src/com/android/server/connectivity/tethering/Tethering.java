@@ -75,6 +75,7 @@ import android.net.NetworkUtils;
 import android.net.TetherStatesParcel;
 import android.net.TetheringConfigurationParcel;
 import android.net.ip.IpServer;
+import android.net.shared.NetdUtils;
 import android.net.util.BaseNetdUnsolicitedEventListener;
 import android.net.util.InterfaceSet;
 import android.net.util.PrefixUtils;
@@ -87,12 +88,12 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.telephony.PhoneStateListener;
@@ -101,6 +102,9 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
@@ -139,6 +143,8 @@ public class Tethering {
     };
     private static final SparseArray<String> sMagicDecoderRing =
             MessageUtils.findMessageNames(sMessageClasses);
+    // Keep in sync with NETID_UNSET in system/netd/include/netid_client.h
+    private static final int NETID_UNSET = 0;
 
     private static class TetherState {
         public final IpServer ipServer;
@@ -172,8 +178,6 @@ public class Tethering {
     private final Context mContext;
     private final ArrayMap<String, TetherState> mTetherStates;
     private final BroadcastReceiver mStateReceiver;
-    // Stopship: replace mNMService before production.
-    private final INetworkManagementService mNMService;
     private final INetworkStatsService mStatsService;
     private final INetworkPolicyManager mPolicyManager;
     private final Looper mLooper;
@@ -210,7 +214,6 @@ public class Tethering {
         mLog.mark("Tethering.constructed");
         mDeps = deps;
         mContext = mDeps.getContext();
-        mNMService = mDeps.getINetworkManagementService();
         mStatsService = mDeps.getINetworkStatsService();
         mPolicyManager = mDeps.getINetworkPolicyManager();
         mNetd = mDeps.getINetd(mContext);
@@ -225,10 +228,9 @@ public class Tethering {
 
         mHandler = mTetherMasterSM.getHandler();
         mOffloadController = new OffloadController(mHandler,
-                mDeps.getOffloadHardwareInterface(mHandler, mLog),
-                mContext.getContentResolver(), mNMService,
-                mLog);
-        mUpstreamNetworkMonitor = deps.getUpstreamNetworkMonitor(mContext, mTetherMasterSM, mLog,
+                mDeps.getOffloadHardwareInterface(mHandler, mLog), mContext.getContentResolver(),
+                mDeps.getINetworkManagementService(), mLog);
+        mUpstreamNetworkMonitor = mDeps.getUpstreamNetworkMonitor(mContext, mTetherMasterSM, mLog,
                 TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
         mForwardedDownstreams = new HashSet<>();
 
@@ -420,7 +422,6 @@ public class Tethering {
             maybeTrackNewInterfaceLocked(iface);
         }
     }
-
 
     void interfaceRemoved(String iface) {
         if (VDBG) Log.d(TAG, "interfaceRemoved " + iface);
@@ -1022,8 +1023,8 @@ public class Tethering {
 
         String[] ifaces = null;
         try {
-            ifaces = mNMService.listInterfaces();
-        } catch (Exception e) {
+            ifaces = mNetd.interfaceGetList();
+        } catch (RemoteException | ServiceSpecificException e) {
             Log.e(TAG, "Error listing Interfaces", e);
             return;
         }
@@ -1282,25 +1283,25 @@ public class Tethering {
         protected boolean turnOnMasterTetherSettings() {
             final TetheringConfiguration cfg = mConfig;
             try {
-                mNMService.setIpForwardingEnabled(true);
-            } catch (Exception e) {
+                mNetd.ipfwdEnableForwarding(TAG);
+            } catch (RemoteException | ServiceSpecificException e) {
                 mLog.e(e);
                 transitionTo(mSetIpForwardingEnabledErrorState);
                 return false;
             }
+
             // TODO: Randomize DHCPv4 ranges, especially in hotspot mode.
             // Legacy DHCP server is disabled if passed an empty ranges array
             final String[] dhcpRanges = cfg.enableLegacyDhcpServer
-                    ? cfg.legacyDhcpRanges
-                    : new String[0];
+                    ? cfg.legacyDhcpRanges : new String[0];
             try {
-                // TODO: Find a more accurate method name (startDHCPv4()?).
-                mNMService.startTethering(dhcpRanges);
-            } catch (Exception e) {
+                NetdUtils.tetherStart(mNetd, true /** usingLegacyDnsProxy */, dhcpRanges);
+            } catch (RemoteException | ServiceSpecificException e) {
                 try {
-                    mNMService.stopTethering();
-                    mNMService.startTethering(dhcpRanges);
-                } catch (Exception ee) {
+                    // Stop and retry.
+                    mNetd.tetherStop();
+                    NetdUtils.tetherStart(mNetd, true /** usingLegacyDnsProxy */, dhcpRanges);
+                } catch (RemoteException | ServiceSpecificException ee) {
                     mLog.e(ee);
                     transitionTo(mStartTetheringErrorState);
                     return false;
@@ -1312,15 +1313,15 @@ public class Tethering {
 
         protected boolean turnOffMasterTetherSettings() {
             try {
-                mNMService.stopTethering();
-            } catch (Exception e) {
+                mNetd.tetherStop();
+            } catch (RemoteException | ServiceSpecificException e) {
                 mLog.e(e);
                 transitionTo(mStopTetheringErrorState);
                 return false;
             }
             try {
-                mNMService.setIpForwardingEnabled(false);
-            } catch (Exception e) {
+                mNetd.ipfwdDisableForwarding(TAG);
+            } catch (RemoteException | ServiceSpecificException e) {
                 mLog.e(e);
                 transitionTo(mSetIpForwardingDisabledErrorState);
                 return false;
@@ -1390,12 +1391,13 @@ public class Tethering {
                 // TODO: remove this invocation of NetworkUtils.makeStrings().
                 dnsServers = NetworkUtils.makeStrings(dnses);
             }
+            final int netId = (network != null) ? network.netId : NETID_UNSET;
             try {
-                mNMService.setDnsForwarders(network, dnsServers);
+                mNetd.tetherDnsSet(netId, dnsServers);
                 mLog.log(String.format(
                         "SET DNS forwarders: network=%s dnsServers=%s",
                         network, Arrays.toString(dnsServers)));
-            } catch (Exception e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 // TODO: Investigate how this can fail and what exactly
                 // happens if/when such failures occur.
                 mLog.e("setting DNS forwarders failed, " + e);
@@ -1698,8 +1700,8 @@ public class Tethering {
                 Log.e(TAG, "Error in startTethering");
                 notify(IpServer.CMD_START_TETHERING_ERROR);
                 try {
-                    mNMService.setIpForwardingEnabled(false);
-                } catch (Exception e) { }
+                    mNetd.ipfwdDisableForwarding(TAG);
+                } catch (RemoteException | ServiceSpecificException e) { }
             }
         }
 
@@ -1709,8 +1711,8 @@ public class Tethering {
                 Log.e(TAG, "Error in stopTethering");
                 notify(IpServer.CMD_STOP_TETHERING_ERROR);
                 try {
-                    mNMService.setIpForwardingEnabled(false);
-                } catch (Exception e) { }
+                    mNetd.ipfwdDisableForwarding(TAG);
+                } catch (RemoteException | ServiceSpecificException e) { }
             }
         }
 
@@ -1720,11 +1722,11 @@ public class Tethering {
                 Log.e(TAG, "Error in setDnsForwarders");
                 notify(IpServer.CMD_SET_DNS_FORWARDERS_ERROR);
                 try {
-                    mNMService.stopTethering();
-                } catch (Exception e) { }
+                    mNetd.tetherStop();
+                } catch (RemoteException | ServiceSpecificException e) { }
                 try {
-                    mNMService.setIpForwardingEnabled(false);
-                } catch (Exception e) { }
+                    mNetd.ipfwdDisableForwarding(TAG);
+                } catch (RemoteException | ServiceSpecificException e) { }
             }
         }
 
@@ -1884,7 +1886,7 @@ public class Tethering {
         }
     }
 
-    void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+    void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter writer, @Nullable String[] args) {
         // Binder.java closes the resource for us.
         @SuppressWarnings("resource")
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
@@ -2065,7 +2067,7 @@ public class Tethering {
 
         mLog.log("adding TetheringInterfaceStateMachine for: " + iface);
         final TetherState tetherState = new TetherState(
-                new IpServer(iface, mLooper, interfaceType, mLog, mNMService, mStatsService,
+                new IpServer(iface, mLooper, interfaceType, mLog, mNetd, mStatsService,
                              makeControlCallback(), mConfig.enableLegacyDhcpServer,
                              mDeps.getIpServerDependencies()));
         mTetherStates.put(iface, tetherState);
