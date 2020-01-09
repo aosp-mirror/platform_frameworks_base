@@ -1558,9 +1558,8 @@ class ActivityStarter {
                 mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.mUserId);
         mService.getPackageManagerInternalLocked().grantImplicitAccess(
                 mStartActivity.mUserId, mIntent,
-                mCallingUid,
-                UserHandle.getAppId(mStartActivity.info.applicationInfo.uid)
-        );
+                UserHandle.getAppId(mStartActivity.info.applicationInfo.uid), mCallingUid,
+                true /*direct*/);
         if (newTask) {
             EventLogTags.writeWmCreateTask(mStartActivity.mUserId,
                     mStartActivity.getTask().mTaskId);

@@ -383,7 +383,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // Never review permissions
         doReturn(false).when(mMockPackageManager).isPermissionsReviewRequired(any(), anyInt());
         doNothing().when(mMockPackageManager).grantImplicitAccess(
-                anyInt(), any(), anyInt(), anyInt());
+                anyInt(), any(), anyInt(), anyInt(), anyBoolean());
         doNothing().when(mMockPackageManager).notifyPackageUse(anyString(), anyInt());
 
         final Intent intent = new Intent();

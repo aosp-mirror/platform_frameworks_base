@@ -23566,22 +23566,27 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public void grantImplicitAccess(int userId, Intent intent,
-                int callingUid, int targetAppId) {
+                int recipientAppId, int visibleUid, boolean direct) {
             synchronized (mLock) {
-                final AndroidPackage callingPackage = getPackage(callingUid);
-                final int targetUid = UserHandle.getUid(userId, targetAppId);
-                final AndroidPackage targetPackage = getPackage(targetUid);
-                if (callingPackage == null || targetPackage == null) {
+                final AndroidPackage visiblePackage = getPackage(visibleUid);
+                final int recipientUid = UserHandle.getUid(userId, recipientAppId);
+                if (visiblePackage == null || getPackage(recipientUid) == null) {
                     return;
                 }
 
-                final boolean instantApp = isInstantAppInternal(callingPackage.getPackageName(),
-                        userId, callingUid);
+                final boolean instantApp =
+                        isInstantAppInternal(visiblePackage.getPackageName(), userId, visibleUid);
                 if (instantApp) {
+                    if (!direct) {
+                        // if the interaction that lead to this granting access to an instant app
+                        // was indirect (i.e.: URI permission grant), do not actually execute the
+                        // grant.
+                        return;
+                    }
                     mInstantAppRegistry.grantInstantAccessLPw(userId, intent,
-                            UserHandle.getAppId(callingUid), targetAppId);
+                            recipientAppId, UserHandle.getAppId(visibleUid) /*instantAppId*/);
                 } else {
-                    mAppsFilter.grantImplicitAccess(callingUid, targetUid);
+                    mAppsFilter.grantImplicitAccess(recipientUid, visibleUid);
                 }
             }
         }

@@ -211,8 +211,9 @@ public class WebViewUpdateService extends SystemService {
                     PackageManagerInternal.class);
             final int webviewUid = pmInternal.getPackageUidInternal(
                     webViewPackageName, 0, UserHandle.getUserId(callingUid));
-            pmInternal.grantImplicitAccess(UserHandle.getUserId(callingUid), null, webviewUid,
-                    UserHandle.getAppId(callingUid));
+            pmInternal.grantImplicitAccess(UserHandle.getUserId(callingUid), null,
+                    UserHandle.getAppId(callingUid), webviewUid,
+                    true /*direct*/);
         }
 
         /**
