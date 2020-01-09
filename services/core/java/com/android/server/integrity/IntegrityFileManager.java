@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -153,14 +154,19 @@ public class IntegrityFileManager {
             throws IOException, RuleParseException {
         synchronized (RULES_LOCK) {
             // Try to identify indexes from the index file.
-            List<RuleIndexRange> ruleReadingIndexes =
-                    mRuleIndexingController.identifyRulesToEvaluate(appInstallMetadata);
+            List<RuleIndexRange> ruleReadingIndexes;
+            try {
+                ruleReadingIndexes =
+                        mRuleIndexingController.identifyRulesToEvaluate(appInstallMetadata);
+            } catch (Exception e) {
+                Slog.w(TAG, "Error identifying the rule indexes. Trying unindexed.", e);
+                ruleReadingIndexes = Collections.emptyList();
+            }
 
-            // Read the rules based on the index information.
-            // TODO(b/145493956): Provide the identified indexes to the rule reader.
+            // Read the rules based on the index information when available.
             try (FileInputStream inputStream =
                          new FileInputStream(new File(mRulesDir, RULES_FILE))) {
-                List<Rule> rules = mRuleParser.parse(inputStream);
+                List<Rule> rules = mRuleParser.parse(inputStream, ruleReadingIndexes);
                 return rules;
             }
         }

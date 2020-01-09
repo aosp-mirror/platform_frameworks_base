@@ -62,7 +62,8 @@ public final class RuleXmlParser implements RuleParser {
     }
 
     @Override
-    public List<Rule> parse(InputStream inputStream) throws RuleParseException {
+    public List<Rule> parse(InputStream inputStream, List<RuleIndexRange> indexRanges)
+            throws RuleParseException {
         try {
             XmlPullParser xmlPullParser = Xml.newPullParser();
             xmlPullParser.setInput(inputStream, StandardCharsets.UTF_8.name());
