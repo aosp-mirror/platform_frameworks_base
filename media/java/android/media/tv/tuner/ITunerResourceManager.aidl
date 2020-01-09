@@ -21,6 +21,7 @@ import android.media.tv.tuner.ITunerResourceManagerListener;
 import android.media.tv.tuner.ResourceClientProfile;
 import android.media.tv.tuner.TunerFrontendInfo;
 import android.media.tv.tuner.TunerFrontendRequest;
+import android.media.tv.tuner.TunerLnbRequest;
 
 /**
  * Interface of the Tuner Resource Manager. It manages resources used by TV Tuners.
@@ -100,6 +101,16 @@ interface ITunerResourceManager {
     void updateCasInfo(in int casSystemId, in int maxSessionNum);
 
     /*
+     * Updates the available Lnb resource information on the current device.
+     *
+     * <p><strong>Note:</strong> This update must happen before the first
+     * {@link #requestLnb(TunerLnbRequest, int[])} and {@link #releaseLnb(int)} call.
+     *
+     * @param lnbIds ids of the updating lnbs.
+     */
+    void setLnbInfoList(in int[] lnbIds);
+
+    /*
      * This API is used by the Tuner framework to request an available frontend from the TunerHAL.
      *
      * <p>There are three possible scenarios:
@@ -163,6 +174,30 @@ interface ITunerResourceManager {
     boolean requestCasSession(in CasSessionRequest request, out int[] sessionResourceId);
 
     /*
+     * This API is used by the Tuner framework to request an available Lnb from the TunerHAL.
+     *
+     * <p>There are three possible scenarios:
+     * <ul>
+     * <li>If there is Lnb available, the API would send the id back.
+     *
+     * <li>If no Lnb is available but the current request has a higher priority than other uses of
+     * lnbs, the API will send {@link ITunerResourceManagerCallback#onResourcesReclaim()} to the
+     * {@link Tuner}. Tuner would handle the resource reclaim on the holder of lower priority and
+     * notify the holder of its resource loss.
+     *
+     * <li>If no Lnb system can be granted, the API would return false.
+     * <ul>
+     *
+     * <p><strong>Note:</strong> {@link #setLnbInfos(int[])} must be called before this request.
+     *
+     * @param request {@link TunerLnbRequest} information of the current request.
+     * @param lnbId a one-element array to return the granted Lnb id.
+     *
+     * @return true if there is Lnb granted.
+     */
+    boolean requestLnb(in TunerLnbRequest request, out int[] lnbId);
+
+    /*
      * Notifies the TRM that the given frontend has been released.
      *
      * <p>Client must call this whenever it releases a Tuner frontend.
@@ -184,4 +219,15 @@ interface ITunerResourceManager {
      * @param sessionResourceId the id of the released CAS session.
      */
     void releaseCasSession(in int sessionResourceId);
+
+    /*
+     * Notifies the TRM that the Lnb with the given id was released.
+     *
+     * <p>Client must call this whenever it releases an Lnb.
+     *
+     * <p><strong>Note:</strong> {@link #setLnbInfos(int[])} must be called before this release.
+     *
+     * @param lnbId the id of the released Tuner Lnb.
+     */
+    void releaseLnb(in int lnbId);
 }
