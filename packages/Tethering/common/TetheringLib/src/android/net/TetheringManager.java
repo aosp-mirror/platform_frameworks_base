@@ -15,8 +15,6 @@
  */
 package android.net;
 
-import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
-
 import android.annotation.NonNull;
 import android.content.Context;
 import android.net.ConnectivityManager.OnTetheringEventCallback;
@@ -51,6 +49,103 @@ public class TetheringManager {
 
     private TetheringConfigurationParcel mTetheringConfiguration;
     private TetherStatesParcel mTetherStatesParcel;
+
+    /**
+     * Broadcast Action: A tetherable connection has come or gone.
+     * Uses {@code TetheringManager.EXTRA_AVAILABLE_TETHER},
+     * {@code TetheringManager.EXTRA_ACTIVE_LOCAL_ONLY},
+     * {@code TetheringManager.EXTRA_ACTIVE_TETHER}, and
+     * {@code TetheringManager.EXTRA_ERRORED_TETHER} to indicate
+     * the current state of tethering.  Each include a list of
+     * interface names in that state (may be empty).
+     */
+    public static final String ACTION_TETHER_STATE_CHANGED =
+            "android.net.conn.TETHER_STATE_CHANGED";
+
+    /**
+     * gives a String[] listing all the interfaces configured for
+     * tethering and currently available for tethering.
+     */
+    public static final String EXTRA_AVAILABLE_TETHER = "availableArray";
+
+    /**
+     * gives a String[] listing all the interfaces currently in local-only
+     * mode (ie, has DHCPv4+IPv6-ULA support and no packet forwarding)
+     */
+    public static final String EXTRA_ACTIVE_LOCAL_ONLY = "localOnlyArray";
+
+    /**
+     * gives a String[] listing all the interfaces currently tethered
+     * (ie, has DHCPv4 support and packets potentially forwarded/NATed)
+     */
+    public static final String EXTRA_ACTIVE_TETHER = "tetherArray";
+
+    /**
+     * gives a String[] listing all the interfaces we tried to tether and
+     * failed.  Use {@link #getLastTetherError} to find the error code
+     * for any interfaces listed here.
+     */
+    public static final String EXTRA_ERRORED_TETHER = "erroredArray";
+
+    /**
+     * Invalid tethering type.
+     * @see #startTethering.
+     */
+    public static final int TETHERING_INVALID   = -1;
+
+    /**
+     * Wifi tethering type.
+     * @see #startTethering.
+     */
+    public static final int TETHERING_WIFI      = 0;
+
+    /**
+     * USB tethering type.
+     * @see #startTethering.
+     */
+    public static final int TETHERING_USB       = 1;
+
+    /**
+     * Bluetooth tethering type.
+     * @see #startTethering.
+     */
+    public static final int TETHERING_BLUETOOTH = 2;
+
+    /**
+     * Wifi P2p tethering type.
+     * Wifi P2p tethering is set through events automatically, and don't
+     * need to start from #startTethering.
+     */
+    public static final int TETHERING_WIFI_P2P = 3;
+
+    /**
+     * Extra used for communicating with the TetherService. Includes the type of tethering to
+     * enable if any.
+     */
+    public static final String EXTRA_ADD_TETHER_TYPE = "extraAddTetherType";
+
+    /**
+     * Extra used for communicating with the TetherService. Includes the type of tethering for
+     * which to cancel provisioning.
+     */
+    public static final String EXTRA_REM_TETHER_TYPE = "extraRemTetherType";
+
+    /**
+     * Extra used for communicating with the TetherService. True to schedule a recheck of tether
+     * provisioning.
+     */
+    public static final String EXTRA_SET_ALARM = "extraSetAlarm";
+
+    /**
+     * Tells the TetherService to run a provision check now.
+     */
+    public static final String EXTRA_RUN_PROVISION = "extraRunProvision";
+
+    /**
+     * Extra used for communicating with the TetherService. Contains the {@link ResultReceiver}
+     * which will receive provisioning results. Can be left empty.
+     */
+    public static final String EXTRA_PROVISION_CALLBACK = "extraProvisionCallback";
 
     public static final int TETHER_ERROR_NO_ERROR           = 0;
     public static final int TETHER_ERROR_UNKNOWN_IFACE      = 1;
@@ -470,7 +565,7 @@ public class TetheringManager {
      * failed.  Re-attempting to tether may cause them to reset to the Tethered
      * state.  Alternatively, causing the interface to be destroyed and recreated
      * may cause them to reset to the available state.
-     * {@link ConnectivityManager#getLastTetherError} can be used to get more
+     * {@link TetheringManager#getLastTetherError} can be used to get more
      * information on the cause of the errors.
      *
      * @return an array of 0 or more String indicating the interface names
