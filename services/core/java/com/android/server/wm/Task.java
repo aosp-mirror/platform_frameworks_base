@@ -121,7 +121,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
-import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -2613,18 +2612,6 @@ class Task extends WindowContainer<WindowContainer> {
             return false;
         }
         return true;
-    }
-
-    @Override
-    protected void onAnimationFinished() {
-        super.onAnimationFinished();
-        // TODO(b/142617871): we may need to add animation type parameter on onAnimationFinished to
-        //  identify if the callback is for launch animation finish and then calling
-        //  activity#onAnimationFinished.
-        final ActivityRecord activity = getTopMostActivity();
-        if (activity != null) {
-            activity.onAnimationFinished();
-        }
     }
 
     @Override

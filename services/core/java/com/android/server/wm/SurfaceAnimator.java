@@ -55,7 +55,9 @@ class SurfaceAnimator {
     private final OnAnimationFinishedCallback mInnerAnimationFinishedCallback;
     @VisibleForTesting
     @Nullable
-    final Runnable mAnimationFinishedCallback;
+    final Runnable mStaticAnimationFinishedCallback;
+    @Nullable
+    private Runnable mAnimationFinishedCallback;
     private boolean mAnimationStartDelayed;
 
     /**
@@ -66,7 +68,7 @@ class SurfaceAnimator {
             WindowManagerService service) {
         mAnimatable = animatable;
         mService = service;
-        mAnimationFinishedCallback = animationFinishedCallback;
+        mStaticAnimationFinishedCallback = animationFinishedCallback;
         mInnerAnimationFinishedCallback = getFinishedCallback(animationFinishedCallback);
     }
 
@@ -89,9 +91,13 @@ class SurfaceAnimator {
                     if (anim != mAnimation) {
                         return;
                     }
+                    final Runnable animationFinishCallback = mAnimationFinishedCallback;
                     reset(mAnimatable.getPendingTransaction(), true /* destroyLeash */);
                     if (animationFinishedCallback != null) {
                         animationFinishedCallback.run();
+                    }
+                    if (animationFinishCallback != null) {
+                        animationFinishCallback.run();
                     }
                 };
                 if (!mAnimatable.shouldDeferAnimationFinish(resetAndInvokeFinish)) {
@@ -111,10 +117,13 @@ class SurfaceAnimator {
      * @param hidden Whether the container holding the child surfaces is currently visible or not.
      *               This is important as it will start with the leash hidden or visible before
      *               handing it to the component that is responsible to run the animation.
+     * @param animationFinishedCallback The callback being triggered when the animation finishes.
      */
-    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden) {
+    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
+            @Nullable Runnable animationFinishedCallback) {
         cancelAnimation(t, true /* restarting */, true /* forwardCancel */);
         mAnimation = anim;
+        mAnimationFinishedCallback = animationFinishedCallback;
         final SurfaceControl surface = mAnimatable.getSurfaceControl();
         if (surface == null) {
             Slog.w(TAG, "Unable to start animation, surface is null or no children.");
@@ -129,6 +138,10 @@ class SurfaceAnimator {
             return;
         }
         mAnimation.startAnimation(mLeash, t, mInnerAnimationFinishedCallback);
+    }
+
+    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden) {
+        startAnimation(t, anim, hidden, null /* animationFinishedCallback */);
     }
 
     /**
@@ -232,6 +245,7 @@ class SurfaceAnimator {
         cancelAnimation(t, true /* restarting */, true /* forwardCancel */);
         mLeash = from.mLeash;
         mAnimation = from.mAnimation;
+        mAnimationFinishedCallback = from.mAnimationFinishedCallback;
 
         // Cancel source animation, but don't let animation runner cancel the animation.
         from.cancelAnimation(t, false /* restarting */, false /* forwardCancel */);
@@ -258,13 +272,19 @@ class SurfaceAnimator {
         if (DEBUG_ANIM) Slog.i(TAG, "Cancelling animation restarting=" + restarting);
         final SurfaceControl leash = mLeash;
         final AnimationAdapter animation = mAnimation;
+        final Runnable animationFinishedCallback = mAnimationFinishedCallback;
         reset(t, false);
         if (animation != null) {
             if (!mAnimationStartDelayed && forwardCancel) {
                 animation.onAnimationCancelled(leash);
             }
-            if (!restarting && mAnimationFinishedCallback != null) {
-                mAnimationFinishedCallback.run();
+            if (!restarting) {
+                if (mStaticAnimationFinishedCallback != null) {
+                    mStaticAnimationFinishedCallback.run();
+                }
+                if (animationFinishedCallback != null) {
+                    animationFinishedCallback.run();
+                }
             }
         }
 
@@ -304,6 +324,7 @@ class SurfaceAnimator {
         }
         mLeash = null;
         mAnimation = null;
+        mAnimationFinishedCallback = null;
 
         if (reparent) {
             // Make sure to inform the animatable after the surface was reparented (or reparent

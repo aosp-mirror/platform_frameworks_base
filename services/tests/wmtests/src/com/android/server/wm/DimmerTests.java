@@ -27,8 +27,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
@@ -111,8 +114,12 @@ public class DimmerTests extends WindowTestsBase {
     private static class SurfaceAnimatorStarterImpl implements Dimmer.SurfaceAnimatorStarter {
         @Override
         public void startAnimation(SurfaceAnimator surfaceAnimator, SurfaceControl.Transaction t,
-                AnimationAdapter anim, boolean hidden) {
-            surfaceAnimator.mAnimationFinishedCallback.run();
+                AnimationAdapter anim, boolean hidden,
+                @Nullable Runnable animationFinishedCallback) {
+            surfaceAnimator.mStaticAnimationFinishedCallback.run();
+            if (animationFinishedCallback != null) {
+                animationFinishedCallback.run();
+            }
         }
     }
 
@@ -216,7 +223,8 @@ public class DimmerTests extends WindowTestsBase {
 
         mDimmer.updateDims(mTransaction, new Rect());
         verify(mSurfaceAnimatorStarter).startAnimation(any(SurfaceAnimator.class), any(
-                SurfaceControl.Transaction.class), any(AnimationAdapter.class), anyBoolean());
+                SurfaceControl.Transaction.class), any(AnimationAdapter.class), anyBoolean(),
+                isNull());
         verify(mHost.getPendingTransaction()).remove(dimLayer);
     }
 
@@ -273,7 +281,8 @@ public class DimmerTests extends WindowTestsBase {
         mDimmer.resetDimStates();
         mDimmer.updateDims(mTransaction, new Rect());
         verify(mSurfaceAnimatorStarter, never()).startAnimation(any(SurfaceAnimator.class), any(
-                SurfaceControl.Transaction.class), any(AnimationAdapter.class), anyBoolean());
+                SurfaceControl.Transaction.class), any(AnimationAdapter.class), anyBoolean(),
+                isNull());
         verify(mTransaction).remove(dimLayer);
     }
 

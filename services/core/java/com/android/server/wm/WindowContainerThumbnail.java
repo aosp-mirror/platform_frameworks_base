@@ -85,7 +85,8 @@ class WindowContainerThumbnail implements Animatable {
             // We can't use a delegating constructor since we need to
             // reference this::onAnimationFinished
             mSurfaceAnimator =
-                new SurfaceAnimator(this, this::onAnimationFinished, container.mWmService);
+                new SurfaceAnimator(this, null /* animationFinishedCallback */,
+                        container.mWmService);
         }
         mWidth = thumbnailHeader.getWidth();
         mHeight = thumbnailHeader.getHeight();
@@ -137,9 +138,6 @@ class WindowContainerThumbnail implements Animatable {
      */
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden) {
         mSurfaceAnimator.startAnimation(t, anim, hidden);
-    }
-
-    private void onAnimationFinished() {
     }
 
     void setShowing(Transaction pendingTransaction, boolean show) {

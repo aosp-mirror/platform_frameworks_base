@@ -21,6 +21,7 @@ import static com.android.server.wm.AlphaAnimationSpecProto.FROM;
 import static com.android.server.wm.AlphaAnimationSpecProto.TO;
 import static com.android.server.wm.AnimationSpecProto.ALPHA;
 
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
@@ -156,7 +157,8 @@ class Dimmer {
     @VisibleForTesting
     interface SurfaceAnimatorStarter {
         void startAnimation(SurfaceAnimator surfaceAnimator, SurfaceControl.Transaction t,
-                AnimationAdapter anim, boolean hidden);
+                AnimationAdapter anim, boolean hidden,
+                @Nullable Runnable animationFinishedCallback);
     }
 
     Dimmer(WindowContainer host) {
@@ -342,7 +344,8 @@ class Dimmer {
             SurfaceControl.Transaction t, float startAlpha, float endAlpha) {
         mSurfaceAnimatorStarter.startAnimation(animator, t, new LocalAnimationAdapter(
                 new AlphaAnimationSpec(startAlpha, endAlpha, getDimDuration(container)),
-                mHost.mWmService.mSurfaceAnimationRunner), false /* hidden */);
+                mHost.mWmService.mSurfaceAnimationRunner), false /* hidden */,
+                null /* animationFinishedCallback */);
     }
 
     private long getDimDuration(WindowContainer container) {

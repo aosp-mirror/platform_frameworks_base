@@ -5011,7 +5011,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private void startAnimation(Transaction t, AnimationAdapter adapter) {
-        startAnimation(t, adapter, mWinAnimator.mLastHidden);
+        startAnimation(t, adapter, mWinAnimator.mLastHidden, null /* animationFinishedCallback */);
     }
 
     @Override

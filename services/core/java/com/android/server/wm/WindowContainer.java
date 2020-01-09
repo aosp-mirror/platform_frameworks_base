@@ -562,6 +562,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return false;
     }
 
+    /** @return true if this window container is a descendant of the input container. */
+    boolean isDescendantOf(WindowContainer ancestor) {
+        final WindowContainer parent = getParent();
+        if (parent == ancestor) return true;
+        return (parent != null) && parent.isDescendantOf(ancestor);
+    }
+
     /**
      * Move a child from it's current place in siblings list to the specified position,
      * with an option to move all its parents to top.
@@ -1832,13 +1839,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param anim The animation to run.
      * @param hidden Whether our container is currently hidden. TODO This should use isVisible at
      *               some point but the meaning is too weird to work for all containers.
+     * @param animationFinishedCallback The callback being triggered when the animation finishes.
      */
-    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden) {
+    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
+            @Nullable Runnable animationFinishedCallback) {
         if (DEBUG_ANIM) Slog.v(TAG, "Starting animation on " + this + ": " + anim);
 
         // TODO: This should use isVisible() but because isVisible has a really weird meaning at
         // the moment this doesn't work for all animatable window containers.
-        mSurfaceAnimator.startAnimation(t, anim, hidden);
+        mSurfaceAnimator.startAnimation(t, anim, hidden, animationFinishedCallback);
+    }
+
+    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden) {
+        startAnimation(t, anim, hidden, null /* animationFinishedCallback */);
     }
 
     void transferAnimation(WindowContainer from) {
@@ -1891,7 +1904,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @see #getAnimationAdapter
      */
     boolean applyAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
-                           boolean isVoiceInteraction) {
+            boolean isVoiceInteraction, @Nullable Runnable animationFinishedCallback) {
         if (mWmService.mDisableTransitionAnimation) {
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: transition animation is disabled or skipped. "
@@ -1911,7 +1924,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 AnimationAdapter adapter = adapters.first;
                 AnimationAdapter thumbnailAdapter = adapters.second;
                 if (adapter != null) {
-                    startAnimation(getPendingTransaction(), adapter, !isVisible());
+                    startAnimation(getPendingTransaction(), adapter, !isVisible(),
+                            animationFinishedCallback);
                     if (adapter.getShowWallpaper()) {
                         getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                     }
