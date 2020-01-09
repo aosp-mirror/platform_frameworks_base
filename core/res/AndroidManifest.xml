@@ -1655,6 +1655,7 @@
     <!-- Allows holder to request bluetooth/wifi scan bypassing global "use location" setting and
          location permissions.
          <p>Not for use by third-party or privileged applications.
+         @SystemApi
          @hide
     -->
     <permission android:name="android.permission.RADIO_SCAN_WITHOUT_LOCATION"
