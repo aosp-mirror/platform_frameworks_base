@@ -78,7 +78,7 @@ public class DisplayModeDirectorTest {
         int displayId = 0;
 
         // With no votes present, DisplayModeDirector should allow any refresh rate.
-        assertEquals(new DisplayModeDirector.DesiredDisplayModeSpecs(/*defaultModeId=*/60,
+        assertEquals(new DisplayModeDirector.DesiredDisplayModeSpecs(/*baseModeId=*/60,
                              new DisplayModeDirector.RefreshRateRange(0f, Float.POSITIVE_INFINITY)),
                 createDisplayModeDirectorWithDisplayFpsRange(60, 90).getDesiredDisplayModeSpecs(
                         displayId));
@@ -105,7 +105,7 @@ public class DisplayModeDirectorTest {
                 director.injectVotesByDisplay(votesByDisplay);
                 assertEquals(
                         new DisplayModeDirector.DesiredDisplayModeSpecs(
-                                /*defaultModeId=*/minFps + i,
+                                /*baseModeId=*/minFps + i,
                                 new DisplayModeDirector.RefreshRateRange(minFps + i, maxFps - i)),
                         director.getDesiredDisplayModeSpecs(displayId));
             }
@@ -126,7 +126,7 @@ public class DisplayModeDirectorTest {
             votes.put(DisplayModeDirector.Vote.MIN_PRIORITY,
                     DisplayModeDirector.Vote.forRefreshRates(70, 80));
             director.injectVotesByDisplay(votesByDisplay);
-            assertEquals(new DisplayModeDirector.DesiredDisplayModeSpecs(/*defaultModeId=*/70,
+            assertEquals(new DisplayModeDirector.DesiredDisplayModeSpecs(/*baseModeId=*/70,
                                  new DisplayModeDirector.RefreshRateRange(70, 80)),
                     director.getDesiredDisplayModeSpecs(displayId));
         }
