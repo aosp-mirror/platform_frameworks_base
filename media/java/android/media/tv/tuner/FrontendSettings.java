@@ -17,7 +17,6 @@
 package android.media.tv.tuner;
 
 import android.annotation.SystemApi;
-import android.media.tv.tuner.TunerConstants.FrontendSettingsType;
 
 /**
  * Frontend settings for tune and scan operations.
@@ -35,7 +34,6 @@ public abstract class FrontendSettings {
     /**
      * Returns the frontend type.
      */
-    @FrontendSettingsType
     public abstract int getType();
 
     /**

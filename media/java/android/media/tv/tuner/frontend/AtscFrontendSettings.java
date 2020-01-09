@@ -16,9 +16,6 @@
 
 package android.media.tv.tuner.frontend;
 
-import android.media.tv.tuner.FrontendSettings;
-import android.media.tv.tuner.TunerConstants;
-
 /**
  * Frontend settings for ATSC.
  * @hide
@@ -32,6 +29,6 @@ public class AtscFrontendSettings extends FrontendSettings {
 
     @Override
     public int getType() {
-        return TunerConstants.FRONTEND_TYPE_ATSC;
+        return FrontendSettings.TYPE_ATSC;
     }
 }

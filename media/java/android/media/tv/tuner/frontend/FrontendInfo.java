@@ -16,7 +16,7 @@
 
 package android.media.tv.tuner.frontend;
 
-import android.media.tv.tuner.TunerConstants.FrontendType;
+import android.media.tv.tuner.frontend.FrontendSettings.Type;
 
 /**
  * Frontend info.
@@ -54,7 +54,7 @@ public class FrontendInfo {
         return mId;
     }
     /** Gets frontend type. */
-    @FrontendType
+    @Type
     public int getType() {
         return mType;
     }

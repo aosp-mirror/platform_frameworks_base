@@ -16,9 +16,6 @@
 
 package android.media.tv.tuner.frontend;
 
-import android.media.tv.tuner.FrontendSettings;
-import android.media.tv.tuner.TunerConstants;
-
 /**
  * Frontend settings for DVBS.
  * @hide
@@ -38,6 +35,6 @@ public class DvbsFrontendSettings extends FrontendSettings {
 
     @Override
     public int getType() {
-        return TunerConstants.FRONTEND_TYPE_DVBS;
+        return FrontendSettings.TYPE_DVBS;
     }
 }
