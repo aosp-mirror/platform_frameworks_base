@@ -4453,8 +4453,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         @Override
         public void onNewUserCreated(int userId) {
+            mDefaultPermissionGrantPolicy.grantDefaultPermissions(userId);
             synchronized (mLock) {
-                mDefaultPermissionGrantPolicy.grantDefaultPermissions(userId);
                 // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
                 PermissionManagerService.this.updateAllPermissions(
                         StorageManager.UUID_PRIVATE_INTERNAL, true, mDefaultPermissionCallback);
