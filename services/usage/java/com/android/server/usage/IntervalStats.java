@@ -28,6 +28,7 @@ import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_START;
 import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_STOP;
 import static android.app.usage.UsageEvents.Event.KEYGUARD_HIDDEN;
 import static android.app.usage.UsageEvents.Event.KEYGUARD_SHOWN;
+import static android.app.usage.UsageEvents.Event.LOCUS_ID_SET;
 import static android.app.usage.UsageEvents.Event.NOTIFICATION_INTERRUPTION;
 import static android.app.usage.UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE;
 import static android.app.usage.UsageEvents.Event.SCREEN_INTERACTIVE;
@@ -568,6 +569,16 @@ public class IntervalStats {
                         continue;
                     }
                     break;
+                case LOCUS_ID_SET:
+                    event.mLocusId = packagesTokenData.getString(packageToken, event.mLocusIdToken);
+                    if (event.mLocusId == null) {
+                        Slog.e(TAG, "Unable to parse locus " + event.mLocusIdToken
+                                + " for package " + packageToken);
+                        this.events.remove(i);
+                        dataOmitted = true;
+                        continue;
+                    }
+                    break;
             }
         }
         return dataOmitted;
@@ -673,6 +684,12 @@ public class IntervalStats {
                     if (!TextUtils.isEmpty(event.mNotificationChannelId)) {
                         event.mNotificationChannelIdToken = packagesTokenData.getTokenOrAdd(
                                 packageToken, event.mPackage, event.mNotificationChannelId);
+                    }
+                    break;
+                case LOCUS_ID_SET:
+                    if (!TextUtils.isEmpty(event.mLocusId)) {
+                        event.mLocusIdToken = packagesTokenData.getTokenOrAdd(packageToken,
+                                event.mPackage, event.mLocusId);
                     }
                     break;
             }

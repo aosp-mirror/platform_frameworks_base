@@ -21,6 +21,7 @@ import static android.app.usage.UsageEvents.Event.CONFIGURATION_CHANGE;
 import static android.app.usage.UsageEvents.Event.DEVICE_EVENT_PACKAGE_NAME;
 import static android.app.usage.UsageEvents.Event.DEVICE_SHUTDOWN;
 import static android.app.usage.UsageEvents.Event.FLUSH_TO_DISK;
+import static android.app.usage.UsageEvents.Event.LOCUS_ID_SET;
 import static android.app.usage.UsageEvents.Event.NOTIFICATION_INTERRUPTION;
 import static android.app.usage.UsageEvents.Event.SHORTCUT_INVOCATION;
 import static android.app.usage.UsageEvents.Event.USER_STOPPED;
@@ -30,6 +31,8 @@ import static android.app.usage.UsageStatsManager.USAGE_SOURCE_TASK_ROOT_ACTIVIT
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
@@ -52,6 +55,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.LocusId;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -1983,6 +1987,17 @@ public class UsageStatsService extends SystemService implements
             Event event = new Event(SHORTCUT_INVOCATION, SystemClock.elapsedRealtime());
             event.mPackage = packageName.intern();
             event.mShortcutId = shortcutId.intern();
+            reportEventOrAddToQueue(userId, event);
+        }
+
+        @Override
+        public void reportLocusUpdate(@NonNull ComponentName activity, @UserIdInt int userId,
+                @Nullable LocusId locusId, @NonNull  IBinder appToken) {
+            Event event = new Event(LOCUS_ID_SET, SystemClock.elapsedRealtime());
+            event.mLocusId = locusId.getId();
+            event.mPackage = activity.getPackageName();
+            event.mClass = activity.getClassName();
+            event.mInstanceId = appToken.hashCode();
             reportEventOrAddToQueue(userId, event);
         }
 

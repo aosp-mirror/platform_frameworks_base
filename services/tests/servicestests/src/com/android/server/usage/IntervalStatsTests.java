@@ -92,6 +92,9 @@ public class IntervalStatsTests {
                 case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
                     event.mNotificationChannelId = "channel" + (i % 5); //"random" channel
                     break;
+                case UsageEvents.Event.LOCUS_ID_SET:
+                    event.mLocusId = "locus" + (i % 7); //"random" locus
+                    break;
             }
 
             intervalStats.addEvent(event);

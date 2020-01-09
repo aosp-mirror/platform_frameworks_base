@@ -45,6 +45,7 @@ import android.content.CursorLoader;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.LocusId;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -1023,6 +1024,39 @@ public class Activity extends ContextThemeWrapper
      */
     public void setIntent(Intent newIntent) {
         mIntent = newIntent;
+    }
+
+    /**
+     * Sets the {@link android.content.LocusId} for this activity. The locus id
+     * helps identify different instances of the same {@code Activity} class.
+     * <p> For example, a locus id based on a specific conversation could be set on a
+     * conversation app's chat {@code Activity}. The system can then use this locus id
+     * along with app's contents to provide ranking signals in various UI surfaces
+     * including sharing, notifications, shortcuts and so on.
+     * <p> It is recommended to set the same locus id in the shortcut's locus id using
+     * {@link android.content.pm.ShortcutInfo.Builder#setLocusId(android.content.LocusId)
+     *      setLocusId}
+     * so that the system can learn appropriate ranking signals linking the activity's
+     * locus id with the matching shortcut.
+     *
+     * @param locusId  a unique, stable id that identifies this {@code Activity} instance from
+     *      others. This can be linked to a shortcut using
+     *      {@link android.content.pm.ShortcutInfo.Builder#setLocusId(android.content.LocusId)
+     *      setLocusId} with the same locus id string.
+     * @param bundle extras set or updated as part of this locus context. This may help provide
+     *      additional metadata such as URLs, conversation participants specific to this
+     *      {@code Activity}'s context.
+     *
+     * @see android.view.contentcapture.ContentCaptureManager
+     * @see android.view.contentcapture.ContentCaptureContext
+     */
+    public void setLocusContext(@Nullable LocusId locusId, @Nullable Bundle bundle) {
+        try {
+            ActivityManager.getService().setActivityLocusContext(mComponent, locusId, mToken);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+        // TODO(b/147750355): Pass locusId and bundle to the Content Capture.
     }
 
     /** Return the application that owns this activity. */

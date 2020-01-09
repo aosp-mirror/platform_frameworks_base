@@ -53,6 +53,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.content.LocusId;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
 import android.graphics.Point;
@@ -637,4 +638,13 @@ interface IActivityManager {
      * and the given process is imperceptible.
      */
     void killProcessesWhenImperceptible(in int[] pids, String reason);
+
+    /**
+     * Set locus context for a given activity.
+     * @param activity
+     * @param locusId a unique, stable id that identifies this activity instance from others.
+     * @param appToken ActivityRecord's appToken.
+     */
+    void setActivityLocusContext(in ComponentName activity, in LocusId locusId,
+            in IBinder appToken);
 }
