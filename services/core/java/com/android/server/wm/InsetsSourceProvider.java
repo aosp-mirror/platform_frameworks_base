@@ -129,6 +129,7 @@ class InsetsSourceProvider {
         if (win == null) {
             setServerVisible(false);
             mSource.setFrame(new Rect());
+            mSource.setVisibleFrame(null);
         } else if (mControllable) {
             mWin.setControllableInsetProvider(this);
             if (mControlTarget != null) {
@@ -160,6 +161,15 @@ class InsetsSourceProvider {
             mTmpRect.inset(mWin.mGivenContentInsets);
         }
         mSource.setFrame(mTmpRect);
+
+        if (mWin.mGivenVisibleInsets.left != 0 || mWin.mGivenVisibleInsets.top != 0
+                || mWin.mGivenVisibleInsets.right != 0 || mWin.mGivenVisibleInsets.bottom != 0) {
+            mTmpRect.set(mWin.getFrameLw());
+            mTmpRect.inset(mWin.mGivenVisibleInsets);
+            mSource.setVisibleFrame(mTmpRect);
+        } else {
+            mSource.setVisibleFrame(null);
+        }
     }
 
     /**

@@ -2061,7 +2061,8 @@ public class DisplayPolicy {
                         cf.set(displayFrames.mRestricted);
                     }
                     applyStableConstraints(sysUiFl, fl, cf, displayFrames);
-                    if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
+                    if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_NONE
+                            && adjust != SOFT_INPUT_ADJUST_NOTHING) {
                         vf.set(displayFrames.mCurrent);
                     } else {
                         vf.set(cf);
@@ -2138,7 +2139,8 @@ public class DisplayPolicy {
 
                 applyStableConstraints(sysUiFl, fl, cf, displayFrames);
 
-                if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
+                if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_NONE
+                        && adjust != SOFT_INPUT_ADJUST_NOTHING) {
                     vf.set(displayFrames.mCurrent);
                 } else {
                     vf.set(cf);
@@ -2179,7 +2181,8 @@ public class DisplayPolicy {
                         cf.set(displayFrames.mContent);
                         df.set(displayFrames.mContent);
                     }
-                    if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
+                    if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_NONE
+                            && adjust != SOFT_INPUT_ADJUST_NOTHING) {
                         vf.set(displayFrames.mCurrent);
                     } else {
                         vf.set(cf);
