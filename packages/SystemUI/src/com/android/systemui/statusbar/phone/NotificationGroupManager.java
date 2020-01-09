@@ -116,7 +116,13 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
      */
     private void onEntryRemovedInternal(NotificationEntry removed,
             final StatusBarNotification sbn) {
-        String groupKey = getGroupKey(sbn);
+        onEntryRemovedInternal(removed, sbn.getGroupKey(), sbn.isGroup(),
+                sbn.getNotification().isGroupSummary());
+    }
+
+    private void onEntryRemovedInternal(NotificationEntry removed, String notifGroupKey, boolean
+            isGroup, boolean isGroupSummary) {
+        String groupKey = getGroupKey(removed.getKey(), notifGroupKey);
         final NotificationGroup group = mGroupMap.get(groupKey);
         if (group == null) {
             // When an app posts 2 different notifications as summary of the same group, then a
@@ -125,7 +131,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
             // the close future. See b/23676310 for reference.
             return;
         }
-        if (isGroupChild(sbn)) {
+        if (isGroupChild(removed.getKey(), isGroup, isGroupSummary)) {
             group.children.remove(removed.getKey());
         } else {
             group.summary = null;
@@ -229,7 +235,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
     private int getNumberOfIsolatedChildren(String groupKey) {
         int count = 0;
         for (StatusBarNotification sbn : mIsolatedEntries.values()) {
-            if (sbn.getGroupKey().equals(groupKey) && isIsolated(sbn)) {
+            if (sbn.getGroupKey().equals(groupKey) && isIsolated(sbn.getKey())) {
                 count++;
             }
         }
@@ -238,31 +244,47 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
 
     private NotificationEntry getIsolatedChild(String groupKey) {
         for (StatusBarNotification sbn : mIsolatedEntries.values()) {
-            if (sbn.getGroupKey().equals(groupKey) && isIsolated(sbn)) {
+            if (sbn.getGroupKey().equals(groupKey) && isIsolated(sbn.getKey())) {
                 return mGroupMap.get(sbn.getKey()).summary;
             }
         }
         return null;
     }
 
-    public void onEntryUpdated(NotificationEntry entry,
-            StatusBarNotification oldNotification) {
-        String oldKey = oldNotification.getGroupKey();
-        String newKey = entry.getSbn().getGroupKey();
-        boolean groupKeysChanged = !oldKey.equals(newKey);
-        boolean wasGroupChild = isGroupChild(oldNotification);
+    /**
+     * Update an entry's group information
+     * @param entry notification entry to update
+     * @param oldNotification previous notification info before this update
+     */
+    public void onEntryUpdated(NotificationEntry entry, StatusBarNotification oldNotification) {
+        onEntryUpdated(entry, oldNotification.getGroupKey(), oldNotification.isGroup(),
+                oldNotification.getNotification().isGroupSummary());
+    }
+
+    /**
+     * Updates an entry's group information
+     * @param entry notification entry to update
+     * @param oldGroupKey the notification's previous group key before this update
+     * @param oldIsGroup whether this notification was a group before this update
+     * @param oldIsGroupSummary whether this notification was a group summary before this update
+     */
+    public void onEntryUpdated(NotificationEntry entry, String oldGroupKey, boolean oldIsGroup,
+            boolean oldIsGroupSummary) {
+        String newGroupKey = entry.getSbn().getGroupKey();
+        boolean groupKeysChanged = !oldGroupKey.equals(newGroupKey);
+        boolean wasGroupChild = isGroupChild(entry.getKey(), oldIsGroup, oldIsGroupSummary);
         boolean isGroupChild = isGroupChild(entry.getSbn());
         mIsUpdatingUnchangedGroup = !groupKeysChanged && wasGroupChild == isGroupChild;
-        if (mGroupMap.get(getGroupKey(oldNotification)) != null) {
-            onEntryRemovedInternal(entry, oldNotification);
+        if (mGroupMap.get(getGroupKey(entry.getKey(), oldGroupKey)) != null) {
+            onEntryRemovedInternal(entry, oldGroupKey, oldIsGroup, oldIsGroupSummary);
         }
         onEntryAdded(entry);
         mIsUpdatingUnchangedGroup = false;
-        if (isIsolated(entry.getSbn())) {
+        if (isIsolated(entry.getSbn().getKey())) {
             mIsolatedEntries.put(entry.getKey(), entry.getSbn());
             if (groupKeysChanged) {
-                updateSuppression(mGroupMap.get(oldKey));
-                updateSuppression(mGroupMap.get(newKey));
+                updateSuppression(mGroupMap.get(oldGroupKey));
+                updateSuppression(mGroupMap.get(newGroupKey));
             }
         } else if (!wasGroupChild && isGroupChild) {
             onEntryBecomingChild(entry);
@@ -418,10 +440,14 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
      * @return the key of the notification
      */
     public String getGroupKey(StatusBarNotification sbn) {
-        if (isIsolated(sbn)) {
-            return sbn.getKey();
+        return getGroupKey(sbn.getKey(), sbn.getGroupKey());
+    }
+
+    private String getGroupKey(String key, String groupKey) {
+        if (isIsolated(key)) {
+            return key;
         }
-        return sbn.getGroupKey();
+        return groupKey;
     }
 
     /** @return group expansion state after toggling. */
@@ -434,8 +460,8 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
         return group.expanded;
     }
 
-    private boolean isIsolated(StatusBarNotification sbn) {
-        return mIsolatedEntries.containsKey(sbn.getKey());
+    private boolean isIsolated(String sbnKey) {
+        return mIsolatedEntries.containsKey(sbnKey);
     }
 
     /**
@@ -445,7 +471,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
      * @return true if it is visually a group summary
      */
     public boolean isGroupSummary(StatusBarNotification sbn) {
-        if (isIsolated(sbn)) {
+        if (isIsolated(sbn.getKey())) {
             return true;
         }
         return sbn.getNotification().isGroupSummary();
@@ -458,10 +484,14 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
      * @return true if it is visually a group child
      */
     public boolean isGroupChild(StatusBarNotification sbn) {
-        if (isIsolated(sbn)) {
+        return isGroupChild(sbn.getKey(), sbn.isGroup(), sbn.getNotification().isGroupSummary());
+    }
+
+    private boolean isGroupChild(String key, boolean isGroup, boolean isGroupSummary) {
+        if (isIsolated(key)) {
             return false;
         }
-        return sbn.isGroup() && !sbn.getNotification().isGroupSummary();
+        return isGroup && !isGroupSummary;
     }
 
     @Override
