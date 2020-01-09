@@ -6053,6 +6053,11 @@ public abstract class PackageManager {
      * If the calling application does not hold the INSTALL_PACKAGES permission then
      * the result will always return {@code null} from
      * {@link InstallSourceInfo#getOriginatingPackageName()}.
+     * <p>
+     * If the package that requested the install has been uninstalled, then information about it
+     * will only be returned from {@link InstallSourceInfo#getInitiatingPackageName()} and
+     * {@link InstallSourceInfo#getInitiatingPackageSigningInfo()} if the calling package is
+     * requesting its own install information and is not an instant app.
      *
      * @param packageName The name of the package to query
      * @throws NameNotFoundException if the given package name is not installed
