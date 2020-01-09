@@ -3029,25 +3029,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
                 if (VDBG) log("NetworkFactory connected");
                 // Finish setting up the full connection
-                mNetworkFactoryInfos.get(msg.replyTo).asyncChannel.sendMessage(
-                        AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
-                // A network factory has connected.  Send it all current NetworkRequests.
-                for (NetworkRequestInfo nri : mNetworkRequests.values()) {
-                    if (nri.request.isListen()) continue;
-                    ensureRunningOnConnectivityServiceThread();
-                    NetworkAgentInfo nai = nri.mSatisfier;
-                    final int score;
-                    final int serial;
-                    if (nai != null) {
-                        score = nai.getCurrentScore();
-                        serial = nai.factorySerialNumber;
-                    } else {
-                        score = 0;
-                        serial = NetworkFactory.SerialNumber.NONE;
-                    }
-                    ac.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK, score, serial,
-                            nri.request);
-                }
+                NetworkFactoryInfo nfi = mNetworkFactoryInfos.get(msg.replyTo);
+                nfi.completeConnection();
+                sendAllRequestsToFactory(nfi);
             } else {
                 loge("Error connecting NetworkFactory");
                 mNetworkFactoryInfos.remove(msg.obj);
@@ -3430,8 +3414,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
 
             for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
-                nfi.asyncChannel.sendMessage(android.net.NetworkFactory.CMD_CANCEL_REQUEST,
-                        nri.request);
+                nfi.cancelRequest(nri.request);
             }
         } else {
             // listens don't have a singular affectedNetwork.  Check all networks to see
@@ -4927,15 +4910,32 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static class NetworkFactoryInfo {
         public final String name;
         public final Messenger messenger;
-        public final AsyncChannel asyncChannel;
+        private final AsyncChannel mAsyncChannel;
         public final int factorySerialNumber;
 
         NetworkFactoryInfo(String name, Messenger messenger, AsyncChannel asyncChannel,
                 int factorySerialNumber) {
             this.name = name;
             this.messenger = messenger;
-            this.asyncChannel = asyncChannel;
+            this.mAsyncChannel = asyncChannel;
             this.factorySerialNumber = factorySerialNumber;
+        }
+
+        void requestNetwork(NetworkRequest request, int score, int servingSerialNumber) {
+            mAsyncChannel.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK, score,
+                    servingSerialNumber, request);
+        }
+
+        void cancelRequest(NetworkRequest request) {
+            mAsyncChannel.sendMessage(android.net.NetworkFactory.CMD_CANCEL_REQUEST, request);
+        }
+
+        void connect(Context context, Handler handler) {
+            mAsyncChannel.connect(context, handler, messenger);
+        }
+
+        void completeConnection() {
+            mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
         }
     }
 
@@ -5325,7 +5325,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void handleRegisterNetworkFactory(NetworkFactoryInfo nfi) {
         if (DBG) log("Got NetworkFactory Messenger for " + nfi.name);
         mNetworkFactoryInfos.put(nfi.messenger, nfi);
-        nfi.asyncChannel.connect(mContext, mTrackerHandler, nfi.messenger);
+        nfi.connect(mContext, mTrackerHandler);
     }
 
     @Override
@@ -5961,8 +5961,26 @@ public class ConnectivityService extends IConnectivityManager.Stub
             log("sending new Min Network Score(" + score + "): " + networkRequest.toString());
         }
         for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
-            nfi.asyncChannel.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK, score,
-                    serial, networkRequest);
+            nfi.requestNetwork(networkRequest, score, serial);
+        }
+    }
+
+    /** Sends all current NetworkRequests to the specified factory. */
+    private void sendAllRequestsToFactory(NetworkFactoryInfo nfi) {
+        ensureRunningOnConnectivityServiceThread();
+        for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+            if (nri.request.isListen()) continue;
+            NetworkAgentInfo nai = nri.mSatisfier;
+            final int score;
+            final int serial;
+            if (nai != null) {
+                score = nai.getCurrentScore();
+                serial = nai.factorySerialNumber;
+            } else {
+                score = 0;
+                serial = NetworkFactory.SerialNumber.NONE;
+            }
+            nfi.requestNetwork(nri.request, score, serial);
         }
     }
 
