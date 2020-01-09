@@ -3391,6 +3391,7 @@ public abstract class Context {
             TELEPHONY_SUBSCRIPTION_SERVICE,
             CARRIER_CONFIG_SERVICE,
             EUICC_SERVICE,
+            MMS_SERVICE,
             TELECOM_SERVICE,
             CLIPBOARD_SERVICE,
             INPUT_METHOD_SERVICE,
@@ -3587,6 +3588,8 @@ public abstract class Context {
      * @see android.telephony.CarrierConfigManager
      * @see #EUICC_SERVICE
      * @see android.telephony.euicc.EuiccManager
+     * @see #MMS_SERVICE
+     * @see android.telephony.MmsManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
      * @see #UI_MODE_SERVICE
@@ -4260,6 +4263,15 @@ public abstract class Context {
      */
     @SystemApi
     public static final String EUICC_CARD_SERVICE = "euicc_card";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.telephony.MmsManager} to send/receive MMS messages.
+     *
+     * @see #getSystemService(String)
+     * @see android.telephony.MmsManager
+     */
+    public static final String MMS_SERVICE = "mms";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
