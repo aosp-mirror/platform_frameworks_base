@@ -10485,6 +10485,20 @@ package android.telephony {
     method public static final void setSmsFilterSettings(android.content.Context, android.telecom.PhoneAccountHandle, android.telephony.VisualVoicemailSmsFilterSettings);
   }
 
+  public final class WapPushManagerConnector {
+    ctor public WapPushManagerConnector(@NonNull android.content.Context);
+    method public boolean bindToWapPushManagerService();
+    method @Nullable public String getConnectedWapPushManagerServicePackage();
+    method public int processMessage(@NonNull String, @NonNull String, @NonNull android.content.Intent);
+    method public void unbindWapPushManagerService();
+    field public static final int RESULT_APP_QUERY_FAILED = 2; // 0x2
+    field public static final int RESULT_EXCEPTION_CAUGHT = 16; // 0x10
+    field public static final int RESULT_FURTHER_PROCESSING = 32768; // 0x8000
+    field public static final int RESULT_INVALID_RECEIVER_NAME = 8; // 0x8
+    field public static final int RESULT_MESSAGE_HANDLED = 1; // 0x1
+    field public static final int RESULT_SIGNATURE_NO_MATCH = 4; // 0x4
+  }
+
 }
 
 package android.telephony.cdma {
