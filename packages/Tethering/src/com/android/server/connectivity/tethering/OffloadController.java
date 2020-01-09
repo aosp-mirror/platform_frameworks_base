@@ -279,7 +279,7 @@ public class OffloadController {
                 entry.iface = kv.getKey();
                 entry.rxBytes = value.rxBytes;
                 entry.txBytes = value.txBytes;
-                stats.addValues(entry);
+                stats.addEntry(entry);
             }
 
             return stats;
