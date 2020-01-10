@@ -233,16 +233,20 @@ public class WifiManager {
     public @interface SuggestionConnectionStatusCode {}
 
     /**
-     * Broadcast intent action indicating whether Wi-Fi scanning is allowed currently
-     * @hide
+     * Broadcast intent action indicating whether Wi-Fi scanning is currently available.
+     * Available extras:
+     * - {@link #EXTRA_SCAN_AVAILABLE}
      */
-    public static final String WIFI_SCAN_AVAILABLE = "wifi_scan_available";
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_WIFI_SCAN_AVAILABLE =
+            "android.net.wifi.action.WIFI_SCAN_AVAILABLE";
 
     /**
-     * Extra int indicating scan availability, WIFI_STATE_ENABLED and WIFI_STATE_DISABLED
-     * @hide
+     * A boolean extra indicating whether scanning is currently available.
+     * Sent in the broadcast {@link #ACTION_WIFI_SCAN_AVAILABLE}.
+     * Its value is true if scanning is currently available, false otherwise.
      */
-    public static final String EXTRA_SCAN_AVAILABLE = "scan_enabled";
+    public static final String EXTRA_SCAN_AVAILABLE = "android.net.wifi.extra.SCAN_AVAILABLE";
 
     /**
      * Broadcast intent action indicating that the credential of a Wi-Fi network
