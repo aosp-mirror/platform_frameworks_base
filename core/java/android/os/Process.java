@@ -68,10 +68,9 @@ public class Process {
     public static final int LOG_UID = 1007;
 
     /**
-     * Defines the UID/GID for the WIFI supplicant process.
-     * @hide
+     * Defines the UID/GID for the WIFI native processes like wificond, supplicant, hostapd,
+     * vendor HAL, etc.
      */
-    @UnsupportedAppUsage
     public static final int WIFI_UID = 1010;
 
     /**
