@@ -1008,7 +1008,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-            mBroadcastDispatcher.registerReceiver(this, filter, mWorker);
+            mBroadcastDispatcher.registerReceiverWithHandler(this, filter, mWorker);
         }
 
         public void destroy() {

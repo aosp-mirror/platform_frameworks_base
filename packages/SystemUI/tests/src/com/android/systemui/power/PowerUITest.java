@@ -110,7 +110,7 @@ public class PowerUITest extends SysuiTestCase {
     @Test
     public void testReceiverIsRegisteredToDispatcherOnStart() {
         mPowerUI.start();
-        verify(mBroadcastDispatcher).registerReceiver(
+        verify(mBroadcastDispatcher).registerReceiverWithHandler(
                 any(BroadcastReceiver.class),
                 any(IntentFilter.class),
                 any(Handler.class)); //PowerUI does not call with User

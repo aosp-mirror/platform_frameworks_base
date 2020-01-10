@@ -179,7 +179,7 @@ public class PhoneStatusBarPolicy
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
-        broadcastDispatcher.registerReceiver(mIntentReceiver, filter, mHandler);
+        broadcastDispatcher.registerReceiverWithHandler(mIntentReceiver, filter, mHandler);
 
         // listen for user / profile change.
         try {

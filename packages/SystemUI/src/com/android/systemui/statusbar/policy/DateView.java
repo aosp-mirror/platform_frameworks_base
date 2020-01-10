@@ -96,7 +96,7 @@ public class DateView extends TextView {
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_LOCALE_CHANGED);
-        mBroadcastDispatcher.registerReceiver(mIntentReceiver, filter,
+        mBroadcastDispatcher.registerReceiverWithHandler(mIntentReceiver, filter,
                 Dependency.get(Dependency.TIME_TICK_HANDLER));
 
         updateClock();

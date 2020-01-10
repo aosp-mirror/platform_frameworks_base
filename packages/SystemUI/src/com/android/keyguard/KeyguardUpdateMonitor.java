@@ -1638,7 +1638,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        broadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, mHandler);
+        broadcastDispatcher.registerReceiverWithHandler(mBroadcastReceiver, filter, mHandler);
 
         final IntentFilter allUserFilter = new IntentFilter();
         allUserFilter.addAction(Intent.ACTION_USER_INFO_CHANGED);
@@ -1649,8 +1649,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         allUserFilter.addAction(ACTION_USER_UNLOCKED);
         allUserFilter.addAction(ACTION_USER_STOPPED);
         allUserFilter.addAction(ACTION_USER_REMOVED);
-        broadcastDispatcher.registerReceiver(mBroadcastAllReceiver, allUserFilter, mHandler,
-                UserHandle.ALL);
+        broadcastDispatcher.registerReceiverWithHandler(mBroadcastAllReceiver, allUserFilter,
+                mHandler, UserHandle.ALL);
 
         mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionListener);
         try {

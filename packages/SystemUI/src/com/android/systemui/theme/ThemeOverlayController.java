@@ -88,7 +88,7 @@ public class ThemeOverlayController extends SystemUI {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
-        mBroadcastDispatcher.registerReceiver(new BroadcastReceiver() {
+        mBroadcastDispatcher.registerReceiverWithHandler(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (DEBUG) Log.d(TAG, "Updating overlays for user switch / profile added.");

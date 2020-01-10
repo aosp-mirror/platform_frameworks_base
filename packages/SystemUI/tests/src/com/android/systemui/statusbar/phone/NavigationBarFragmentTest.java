@@ -190,7 +190,7 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
         mFragments.dispatchResume();
         processAllMessages();
 
-        verify(mBroadcastDispatcher).registerReceiver(
+        verify(mBroadcastDispatcher).registerReceiverWithHandler(
                 any(BroadcastReceiver.class),
                 any(IntentFilter.class),
                 any(Handler.class),
