@@ -1238,7 +1238,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // equal to the number of sessions we are installing, to ensure we didn't skip enabling
         // of any sessions. If we successfully enable an apex, then we can assume we enabled
         // rollback for the embedded apk-in-apex, if any.
-        if (rollback.getPackageCount(0 /*flags*/) != newRollback.getPackageSessionIdCount()) {
+        // TODO: add a helper instead of exposing 2 methods from Rollback
+        if (rollback.getPackageCount(0 /*flags*/) != rollback.getPackageSessionIdCount()) {
             Slog.e(TAG, "Failed to enable rollback for all packages in session.");
             rollback.delete(mAppDataRollbackHelper);
             return null;
@@ -1343,13 +1344,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         public final Rollback rollback;
 
         /**
-         * Session ids for all packages in the install. For multi-package sessions, this is the list
-         * of child session ids. For normal sessions, this list is a single element with the normal
-         * session id.
-         */
-        private final int[] mPackageSessionIds;
-
-        /**
          * The number of sessions in the install which are notified with success by
          * {@link PackageInstaller.SessionCallback#onFinished(int, boolean)}.
          * This NewRollback will be enabled only after all child sessions finished with success.
@@ -1359,28 +1353,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         private final Object mNewRollbackLock = new Object();
 
-        NewRollback(Rollback rollback, int[] packageSessionIds) {
+        NewRollback(Rollback rollback) {
             this.rollback = rollback;
-            this.mPackageSessionIds = packageSessionIds;
-        }
-
-        /**
-         * Returns true if this NewRollback contains the provided {@code packageSessionId}.
-         */
-        boolean containsSessionId(int packageSessionId) {
-            for (int id : mPackageSessionIds) {
-                if (id == packageSessionId) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /**
-         * Returns the number of package session ids in this NewRollback.
-         */
-        int getPackageSessionIdCount() {
-            return mPackageSessionIds.length;
         }
 
         /**
@@ -1390,7 +1364,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
          */
         boolean notifySessionWithSuccess() {
             synchronized (mNewRollbackLock) {
-                return ++mNumPackageSessionsWithSuccess == mPackageSessionIds.length;
+                return ++mNumPackageSessionsWithSuccess == rollback.getPackageSessionIdCount();
             }
         }
     }
@@ -1414,14 +1388,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     + " user=" + userId + " installer=" + installerPackageName);
         }
 
-        if (parentSession.isStaged()) {
-            rollback = mRollbackStore.createStagedRollback(rollbackId, parentSessionId, userId,
-                    installerPackageName);
-        } else {
-            rollback = mRollbackStore.createNonStagedRollback(rollbackId, userId,
-                    installerPackageName);
-        }
-
         int[] packageSessionIds;
         if (parentSession.isMultiPackage()) {
             packageSessionIds = parentSession.getChildSessionIds();
@@ -1429,7 +1395,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             packageSessionIds = new int[]{parentSessionId};
         }
 
-        return new NewRollback(rollback, packageSessionIds);
+        if (parentSession.isStaged()) {
+            rollback = mRollbackStore.createStagedRollback(rollbackId, parentSessionId, userId,
+                    installerPackageName, packageSessionIds);
+        } else {
+            rollback = mRollbackStore.createNonStagedRollback(rollbackId, userId,
+                    installerPackageName, packageSessionIds);
+        }
+
+        return new NewRollback(rollback);
     }
 
     /**
@@ -1443,7 +1417,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // We expect mNewRollbacks to be a very small list; linear search
         // should be plenty fast.
         for (NewRollback newRollback: mNewRollbacks) {
-            if (newRollback.containsSessionId(packageSessionId)) {
+            if (newRollback.rollback.containsSessionId(packageSessionId)) {
                 return newRollback;
             }
         }
