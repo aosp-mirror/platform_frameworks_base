@@ -48,7 +48,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -655,66 +654,5 @@ public class RuleBinaryParserTest {
                 RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "A rule must end with a '1' bit",
                 () -> binaryParser.parse(rule.array()));
-    }
-
-    @Test
-    public void testBinaryStream_multipleRules_indexingIdentifiesParsesIndexRangeCorrectly()
-            throws Exception {
-        String packageName2 = "com.test.2";
-
-        byte[] ruleBytes1 = getBytes(getRulesWithPackageName("com.test.1"));
-        byte[] ruleBytes2 = getBytes(getRulesWithPackageName(packageName2));
-        byte[] ruleBytes3 = getBytes(getRulesWithPackageName("com.test.3"));
-
-        ByteBuffer rule =
-                ByteBuffer.allocate(
-                        DEFAULT_FORMAT_VERSION_BYTES.length
-                                + ruleBytes1.length
-                                + ruleBytes2.length
-                                + ruleBytes3.length);
-        rule.put(DEFAULT_FORMAT_VERSION_BYTES);
-        rule.put(ruleBytes1);
-        rule.put(ruleBytes2);
-        rule.put(ruleBytes3);
-        InputStream inputStream = new ByteArrayInputStream(rule.array());
-
-        RuleParser binaryParser = new RuleBinaryParser();
-
-        List<RuleIndexRange> indexRanges = new ArrayList<>();
-        indexRanges.add(
-                new RuleIndexRange(
-                        DEFAULT_FORMAT_VERSION_BYTES.length + ruleBytes1.length,
-                        DEFAULT_FORMAT_VERSION_BYTES.length + ruleBytes1.length
-                                + ruleBytes2.length));
-        List<Rule> rules = binaryParser.parse(inputStream, indexRanges);
-
-        Rule expectedRule =
-                new Rule(
-                        new CompoundFormula(
-                                CompoundFormula.NOT,
-                                Collections.singletonList(
-                                        new AtomicFormula.StringAtomicFormula(
-                                                AtomicFormula.PACKAGE_NAME,
-                                                packageName2,
-                                                /* isHashedValue= */ false))),
-                        Rule.DENY);
-
-        assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
-    }
-
-    private static String getRulesWithPackageName(String packageName) {
-        return START_BIT
-                + COMPOUND_FORMULA_START_BITS
-                + NOT
-                + ATOMIC_FORMULA_START_BITS
-                + PACKAGE_NAME
-                + EQ
-                + IS_NOT_HASHED
-                + getBits(packageName.length(), VALUE_SIZE_BITS)
-                + getValueBits(packageName)
-                + COMPOUND_FORMULA_END_BITS
-                + DENY
-                + END_BIT;
-
     }
 }

@@ -48,6 +48,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -82,28 +83,28 @@ public class RuleBinarySerializer implements RuleSerializer {
             Map<Integer, TreeMap<String, List<Rule>>> indexedRules =
                     RuleIndexingDetailsIdentifier.splitRulesIntoIndexBuckets(rules);
 
+            // Serialize the rules.
             ByteTrackedOutputStream ruleFileByteTrackedOutputStream =
                     new ByteTrackedOutputStream(rulesFileOutputStream);
-
             serializeRuleFileMetadata(formatVersion, ruleFileByteTrackedOutputStream);
-
             Map<String, Integer> packageNameIndexes =
                     serializeRuleList(indexedRules.get(PACKAGE_NAME_INDEXED),
                             ruleFileByteTrackedOutputStream);
-            indexingFileOutputStream.write(
-                    serializeIndexes(packageNameIndexes, /* isIndexed= */true));
-
             Map<String, Integer> appCertificateIndexes =
                     serializeRuleList(indexedRules.get(APP_CERTIFICATE_INDEXED),
                             ruleFileByteTrackedOutputStream);
-            indexingFileOutputStream.write(
-                    serializeIndexes(appCertificateIndexes, /* isIndexed= */true));
-
             Map<String, Integer> unindexedRulesIndexes =
                     serializeRuleList(indexedRules.get(NOT_INDEXED),
                             ruleFileByteTrackedOutputStream);
-            indexingFileOutputStream.write(
-                    serializeIndexes(unindexedRulesIndexes, /* isIndexed= */false));
+
+            // Serialize their indexes.
+            BitOutputStream indexingBitOutputStream = new BitOutputStream();
+            serializeIndexGroup(packageNameIndexes, indexingBitOutputStream, /* isIndexed= */true);
+            serializeIndexGroup(appCertificateIndexes, indexingBitOutputStream, /* isIndexed= */
+                    true);
+            serializeIndexGroup(unindexedRulesIndexes, indexingBitOutputStream, /* isIndexed= */
+                    false);
+            indexingFileOutputStream.write(indexingBitOutputStream.toByteArray());
         } catch (Exception e) {
             throw new RuleSerializeException(e.getMessage(), e);
         }
@@ -126,7 +127,7 @@ public class RuleBinarySerializer implements RuleSerializer {
                 "serializeRuleList should never be called with null rule list.");
 
         BitOutputStream bitOutputStream = new BitOutputStream();
-        Map<String, Integer> indexMapping = new TreeMap();
+        Map<String, Integer> indexMapping = new LinkedHashMap();
         int indexTracker = 0;
 
         indexMapping.put(START_INDEXING_KEY, outputStream.getWrittenBytesCount());
@@ -220,8 +221,8 @@ public class RuleBinarySerializer implements RuleSerializer {
         }
     }
 
-    private byte[] serializeIndexes(Map<String, Integer> indexes, boolean isIndexed) {
-        BitOutputStream bitOutputStream = new BitOutputStream();
+    private void serializeIndexGroup(
+            Map<String, Integer> indexes, BitOutputStream bitOutputStream, boolean isIndexed) {
 
         // Output the starting location of this indexing group.
         serializeStringValue(START_INDEXING_KEY, /* isHashedValue= */false,
@@ -244,7 +245,8 @@ public class RuleBinarySerializer implements RuleSerializer {
         serializeStringValue(END_INDEXING_KEY, /*isHashedValue= */ false, bitOutputStream);
         serializeIntValue(indexes.get(END_INDEXING_KEY), bitOutputStream);
 
-        return bitOutputStream.toByteArray();
+        // This dummy bit is set for fixing the padding issue. songpan@ will fix it and remove it.
+        bitOutputStream.setNext();
     }
 
     private void serializeStringValue(
