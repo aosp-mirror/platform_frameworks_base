@@ -15,6 +15,7 @@
  */
 
 package android.app;
+
 import android.annotation.NonNull;
 import android.os.SystemProperties;
 import android.util.Log;
@@ -23,6 +24,7 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -164,6 +166,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     private static final String TAG = "PropertyInvalidatedCache";
     private static final boolean DEBUG = false;
     private static final boolean ENABLE = true;
+    private static final boolean VERIFY = false;
 
     private final Object mLock = new Object();
 
@@ -226,6 +229,18 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      * "negative cache" in the query: we don't cache null results at all.
      */
     protected abstract Result recompute(Query query);
+
+    /**
+     * Determines if a pair of responses are considered equal. Used to determine whether
+     * a cache is inadvertently returning stale results when VERIFY is set to true.
+     */
+    protected boolean debugCompareQueryResults(Result cachedResult, Result fetchedResult) {
+        // If a service crashes and returns a null result, the cached value remains valid.
+        if (fetchedResult != null) {
+            return Objects.equals(cachedResult, fetchedResult);
+        }
+        return true;
+    }
 
     /**
      * Make result up-to-date on a cache hit.  Called unlocked;
@@ -334,12 +349,12 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                             mCache.put(query, refreshedResult);
                         }
                     }
-                    return refreshedResult;
+                    return maybeCheckConsistency(query, refreshedResult);
                 }
                 if (DEBUG) {
                     Log.d(TAG, "cache hit for " + query);
                 }
-                return cachedResult;
+                return maybeCheckConsistency(query, cachedResult);
             }
             // Cache miss: make the value from scratch.
             if (DEBUG) {
@@ -353,7 +368,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                     mCache.put(query, result);
                 }
             }
-            return result;
+            return maybeCheckConsistency(query, result);
         }
     }
 
@@ -424,5 +439,16 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                             newValueString));
         }
         SystemProperties.set(name, newValueString);
+    }
+
+    private Result maybeCheckConsistency(Query query, Result proposedResult) {
+        if (VERIFY) {
+            Result resultToCompare = recompute(query);
+            boolean nonceChanged = (getCurrentNonce() != mLastSeenNonce);
+            if (!nonceChanged && !debugCompareQueryResults(proposedResult, resultToCompare)) {
+                throw new AssertionError("cache returned out of date response for " + query);
+            }
+        }
+        return proposedResult;
     }
 }
