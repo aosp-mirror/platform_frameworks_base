@@ -408,7 +408,9 @@ public class DynamicSystemInstallationService extends Service
                 break;
 
             case STATUS_READY:
-                builder.setContentText(getString(R.string.notification_install_completed));
+                String msgCompleted = getString(R.string.notification_install_completed);
+                builder.setContentText(msgCompleted)
+                        .setStyle(new Notification.BigTextStyle().bigText(msgCompleted));
 
                 builder.addAction(new Notification.Action.Builder(
                         null, getString(R.string.notification_action_discard),
@@ -421,7 +423,9 @@ public class DynamicSystemInstallationService extends Service
                 break;
 
             case STATUS_IN_USE:
-                builder.setContentText(getString(R.string.notification_dynsystem_in_use));
+                String msgInUse = getString(R.string.notification_dynsystem_in_use);
+                builder.setContentText(msgInUse)
+                        .setStyle(new Notification.BigTextStyle().bigText(msgInUse));
 
                 builder.addAction(new Notification.Action.Builder(
                         null, getString(R.string.notification_action_uninstall),
@@ -451,7 +455,49 @@ public class DynamicSystemInstallationService extends Service
     }
 
     private void postStatus(int status, int cause, Throwable detail) {
-        Log.d(TAG, "postStatus(): statusCode=" + status + ", causeCode=" + cause);
+        String statusString;
+        String causeString;
+
+        switch (status) {
+            case STATUS_NOT_STARTED:
+                statusString = "NOT_STARTED";
+                break;
+            case STATUS_IN_PROGRESS:
+                statusString = "IN_PROGRESS";
+                break;
+            case STATUS_READY:
+                statusString = "READY";
+                break;
+            case STATUS_IN_USE:
+                statusString = "IN_USE";
+                break;
+            default:
+                statusString = "UNKNOWN";
+                break;
+        }
+
+        switch (cause) {
+            case CAUSE_INSTALL_COMPLETED:
+                causeString = "INSTALL_COMPLETED";
+                break;
+            case CAUSE_INSTALL_CANCELLED:
+                causeString = "INSTALL_CANCELLED";
+                break;
+            case CAUSE_ERROR_IO:
+                causeString = "ERROR_IO";
+                break;
+            case CAUSE_ERROR_INVALID_URL:
+                causeString = "ERROR_INVALID_URL";
+                break;
+            case CAUSE_ERROR_EXCEPTION:
+                causeString = "ERROR_EXCEPTION";
+                break;
+            default:
+                causeString = "CAUSE_NOT_SPECIFIED";
+                break;
+        }
+
+        Log.d(TAG, "status=" + statusString + ", cause=" + causeString);
 
         boolean notifyOnNotificationBar = true;
 
