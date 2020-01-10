@@ -30,6 +30,7 @@ import com.android.internal.R;
 import com.android.internal.util.UserIcons;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class for handling cross profile operations. Apps can use this class to interact with its
@@ -166,6 +167,62 @@ public class CrossProfileApps {
         } else {
             return UserIcons.getDefaultUserIcon(
                     mResources, UserHandle.USER_SYSTEM, true /* light */);
+        }
+    }
+
+    /**
+     * Returns whether the calling package can request to interact across profiles.
+     *
+     * <p>The package's current ability to interact across profiles can be checked with
+     * {@link #canInteractAcrossProfiles()}.
+     *
+     * <p>Specifically, returns whether the following are all true:
+     * <ul>
+     * <li>{@link #getTargetUserProfiles()} returns a non-empty list for the calling user.</li>
+     * <li>The calling app has requested</li>
+     * {@code android.Manifest.permission.INTERACT_ACROSS_PROFILES} in its manifest.
+     * <li>The calling package has either been whitelisted by default by the OEM or has been
+     * explicitly whitelisted by the admin via
+     * {@link android.app.admin.DevicePolicyManager#setCrossProfilePackages(ComponentName, Set)}.
+     * </li>
+     * </ul>
+     *
+     * @return true if the calling package can request to interact across profiles.
+     */
+    public boolean canRequestInteractAcrossProfiles() {
+        try {
+            return mService.canRequestInteractAcrossProfiles(mContext.getPackageName());
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether the calling package can interact across profiles.
+     *
+     * <p>The package's current ability to request to interact across profiles can be checked with
+     * {@link #canRequestInteractAcrossProfiles()}.
+     *
+     * <p>Specifically, returns whether the following are all true:
+     * <ul>
+     * <li>{@link #getTargetUserProfiles()} returns a non-empty list for the calling user.</li>
+     * <li>The user has previously consented to cross-profile communication for the calling
+     * package.</li>
+     * <li>The calling package has either been whitelisted by default by the OEM or has been
+     * explicitly whitelisted by the admin via
+     * {@link android.app.admin.DevicePolicyManager#setCrossProfilePackages(ComponentName, Set)}.
+     * </li>
+     * </ul>
+     *
+     * @return true if the calling package can interact across profiles.
+     * @throws SecurityException if {@code mContext.getPackageName()} does not belong to the
+     * calling UID.
+     */
+    public boolean canInteractAcrossProfiles() {
+        try {
+            return mService.canInteractAcrossProfiles(mContext.getPackageName());
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
