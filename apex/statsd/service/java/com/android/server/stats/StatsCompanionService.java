@@ -75,7 +75,6 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.IPullAtomCallback;
 import android.os.IStatsCompanionService;
 import android.os.IStatsd;
 import android.os.IStoraged;
@@ -262,71 +261,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private final ShutdownEventReceiver mShutdownEventReceiver;
 
     private StatsManagerService mStatsManagerService;
-
-    private static final class PullerKey {
-        private final int mUid;
-        private final int mAtomTag;
-
-        PullerKey(int uid, int atom) {
-            mUid = uid;
-            mAtomTag = atom;
-        }
-
-        public int getUid() {
-            return mUid;
-        }
-
-        public int getAtom() {
-            return mAtomTag;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(mUid, mAtomTag);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof PullerKey) {
-                PullerKey other = (PullerKey) obj;
-                return this.mUid == other.getUid() && this.mAtomTag == other.getAtom();
-            }
-            return false;
-        }
-    }
-
-    private static final class PullerValue {
-        private final long mCoolDownNs;
-        private final long mTimeoutNs;
-        private int[] mAdditiveFields;
-        private IPullAtomCallback mCallback;
-
-        PullerValue(long coolDownNs, long timeoutNs, int[] additiveFields,
-                IPullAtomCallback callback) {
-            mCoolDownNs = coolDownNs;
-            mTimeoutNs = timeoutNs;
-            mAdditiveFields = additiveFields;
-            mCallback = callback;
-        }
-
-        public long getCoolDownNs() {
-            return mCoolDownNs;
-        }
-
-        public long getTimeoutNs() {
-            return mTimeoutNs;
-        }
-
-        public int[] getAdditiveFields() {
-            return mAdditiveFields;
-        }
-
-        public IPullAtomCallback getCallback() {
-            return mCallback;
-        }
-    }
-
-    private final HashMap<PullerKey, PullerValue> mPullers = new HashMap<>();
 
     private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
@@ -2634,57 +2568,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    @Override
-    public void registerPullAtomCallback(int atomTag, long coolDownNs, long timeoutNs,
-            int[] additiveFields, IPullAtomCallback pullerCallback) {
-        synchronized (sStatsdLock) {
-            // Always cache the puller in SCS.
-            // If statsd is down, we will register it when it comes back up.
-            int callingUid = Binder.getCallingUid();
-            final long token = Binder.clearCallingIdentity();
-            PullerKey key = new PullerKey(callingUid, atomTag);
-            PullerValue val = new PullerValue(
-                    coolDownNs, timeoutNs, additiveFields, pullerCallback);
-            mPullers.put(key, val);
-
-            if (sStatsd == null) {
-                Slog.w(TAG, "Could not access statsd for registering puller for atom " + atomTag);
-                return;
-            }
-            try {
-                sStatsd.registerPullAtomCallback(
-                        callingUid, atomTag, coolDownNs, timeoutNs, additiveFields, pullerCallback);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to access statsd to register puller for atom " + atomTag);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-    }
-
-    @Override
-    public void unregisterPullAtomCallback(int atomTag) {
-        synchronized (sStatsdLock) {
-            // Always remove the puller in SCS.
-            // If statsd is down, we will not register it when it comes back up.
-            int callingUid = Binder.getCallingUid();
-            final long token = Binder.clearCallingIdentity();
-            PullerKey key = new PullerKey(callingUid, atomTag);
-            mPullers.remove(key);
-
-            if (sStatsd == null) {
-                Slog.w(TAG, "Could not access statsd for registering puller for atom " + atomTag);
-                return;
-            }
-            try {
-                sStatsd.unregisterPullAtomCallback(callingUid, atomTag);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to access statsd to register puller for atom " + atomTag);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-    }
 
     // Statsd related code
 
@@ -2763,8 +2646,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     // Pull the latest state of UID->app name, version mapping when
                     // statsd starts.
                     informAllUidsLocked(mContext);
-                    // Register all pullers. If SCS has just started, this should be empty.
-                    registerAllPullersLocked();
                 } finally {
                     restoreCallingIdentity(token);
                 }
@@ -2773,17 +2654,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 Slog.e(TAG, "Failed to inform statsd that statscompanion is ready", e);
                 forgetEverythingLocked();
             }
-        }
-    }
-
-    @GuardedBy("sStatsdLock")
-    private void registerAllPullersLocked() throws RemoteException {
-        // TODO: pass in one call, using a file descriptor (similar to uidmap).
-        for (Map.Entry<PullerKey, PullerValue> entry : mPullers.entrySet()) {
-            PullerKey key = entry.getKey();
-            PullerValue val = entry.getValue();
-            sStatsd.registerPullAtomCallback(key.getUid(), key.getAtom(), val.getCoolDownNs(),
-                    val.getTimeoutNs(), val.getAdditiveFields(), val.getCallback());
         }
     }
 
