@@ -42,6 +42,7 @@ import com.android.server.integrity.model.BitTrackedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /** A helper class to parse rules into the {@link Rule} model from Binary representation. */
@@ -51,31 +52,64 @@ public class RuleBinaryParser implements RuleParser {
     public List<Rule> parse(byte[] ruleBytes) throws RuleParseException {
         try {
             BitTrackedInputStream bitTrackedInputStream = new BitTrackedInputStream(ruleBytes);
-            return parseRules(bitTrackedInputStream);
+            return parseRules(bitTrackedInputStream, /* indexRanges= */ Collections.emptyList());
         } catch (Exception e) {
             throw new RuleParseException(e.getMessage(), e);
         }
     }
 
     @Override
-    public List<Rule> parse(InputStream inputStream) throws RuleParseException {
+    public List<Rule> parse(InputStream inputStream, List<RuleIndexRange> indexRanges)
+            throws RuleParseException {
         try {
             BitTrackedInputStream bitTrackedInputStream = new BitTrackedInputStream(inputStream);
-            return parseRules(bitTrackedInputStream);
+            return parseRules(bitTrackedInputStream, indexRanges);
         } catch (Exception e) {
             throw new RuleParseException(e.getMessage(), e);
         }
     }
 
-    private List<Rule> parseRules(BitTrackedInputStream bitTrackedInputStream) throws IOException {
-        List<Rule> parsedRules = new ArrayList<>();
+    private List<Rule> parseRules(
+            BitTrackedInputStream bitTrackedInputStream,
+            List<RuleIndexRange> indexRanges)
+            throws IOException {
 
         // Read the rule binary file format version.
         bitTrackedInputStream.getNext(FORMAT_VERSION_BITS);
 
+        return indexRanges.isEmpty()
+                ? parseAllRules(bitTrackedInputStream)
+                : parseIndexedRules(bitTrackedInputStream, indexRanges);
+    }
+
+    private List<Rule> parseAllRules(BitTrackedInputStream bitTrackedInputStream)
+            throws IOException {
+        List<Rule> parsedRules = new ArrayList<>();
+
         while (bitTrackedInputStream.hasNext()) {
             if (bitTrackedInputStream.getNext(SIGNAL_BIT) == 1) {
                 parsedRules.add(parseRule(bitTrackedInputStream));
+            }
+        }
+
+        return parsedRules;
+    }
+
+    private List<Rule> parseIndexedRules(
+            BitTrackedInputStream bitTrackedInputStream, List<RuleIndexRange> indexRanges)
+            throws IOException {
+        List<Rule> parsedRules = new ArrayList<>();
+
+        for (RuleIndexRange range : indexRanges) {
+            // Skip the rules that are not in the range.
+            bitTrackedInputStream.setCursorToByteLocation(range.getStartIndex());
+
+            // Read the rules until we reach the end index.
+            while (bitTrackedInputStream.hasNext()
+                    && bitTrackedInputStream.getReadBitsCount() < range.getEndIndex()) {
+                if (bitTrackedInputStream.getNext(SIGNAL_BIT) == 1) {
+                    parsedRules.add(parseRule(bitTrackedInputStream));
+                }
             }
         }
 

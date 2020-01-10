@@ -73,7 +73,7 @@ public class RuleXmlParserTest {
                                                 /* isHashedValue= */ false))),
                         Rule.DENY);
 
-        List<Rule> rules = xmlParser.parse(inputStream);
+        List<Rule> rules = xmlParser.parse(inputStream, Collections.emptyList());
 
         assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
     }
@@ -623,7 +623,7 @@ public class RuleXmlParserTest {
         assertExpectException(
                 RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "Rules must start with RuleList <RL> tag",
-                () -> xmlParser.parse(inputStream));
+                () -> xmlParser.parse(inputStream, Collections.emptyList()));
     }
 
     private String generateTagWithAttribute(
