@@ -87,13 +87,15 @@ public class RollbackStoreTest {
             + "[{'versionRolledBackFrom':{'packageName':'blah','longVersionCode':55},"
             + "'versionRolledBackTo':{'packageName':'blah1','longVersionCode':50},'pendingBackups':"
             + "[59,1245,124544],'pendingRestores':[{'userId':498,'appId':32322,'seInfo':'wombles'},"
-            + "{'userId':-895,'appId':1,'seInfo':'pingu'}],'isApex':false,'installedUsers':"
+            + "{'userId':-895,'appId':1,'seInfo':'pingu'}],'isApex':false,'isApkInApex':false,"
+            + "'installedUsers':"
             + "[498468432,1111,98464],'ceSnapshotInodes':[{'userId':1,'ceSnapshotInode':-6},"
             + "{'userId':2222,'ceSnapshotInode':81641654445},{'userId':546546,"
             + "'ceSnapshotInode':345689375}]},{'versionRolledBackFrom':{'packageName':'chips',"
             + "'longVersionCode':28},'versionRolledBackTo':{'packageName':'com.chips.test',"
             + "'longVersionCode':48},'pendingBackups':[5],'pendingRestores':[{'userId':18,"
-            + "'appId':-12,'seInfo':''}],'isApex':false,'installedUsers':[55,79],"
+            + "'appId':-12,'seInfo':''}],'isApex':false,'isApkInApex':false,"
+            + "'installedUsers':[55,79],"
             + "'ceSnapshotInodes':[]}],'isStaged':false,'causePackages':[{'packageName':'hello',"
             + "'longVersionCode':23},{'packageName':'something','longVersionCode':999}],"
             + "'committedSessionId':45654465},'timestamp':'2019-10-01T12:29:08.855Z',"
@@ -155,7 +157,7 @@ public class RollbackStoreTest {
         PackageRollbackInfo pkgInfo1 =
                 new PackageRollbackInfo(new VersionedPackage("com.made.up", 18),
                         new VersionedPackage("com.something.else", 5), new IntArray(),
-                        new ArrayList<>(), false, new IntArray(), new SparseLongArray());
+                        new ArrayList<>(), false, false, new IntArray(), new SparseLongArray());
         pkgInfo1.getPendingBackups().add(8);
         pkgInfo1.getPendingBackups().add(888);
         pkgInfo1.getPendingBackups().add(88885);
@@ -175,7 +177,7 @@ public class RollbackStoreTest {
         PackageRollbackInfo pkgInfo2 = new PackageRollbackInfo(
                 new VersionedPackage("another.package", 2),
                 new VersionedPackage("com.test.ing", 48888), new IntArray(), new ArrayList<>(),
-                false, new IntArray(), new SparseLongArray());
+                false, false, new IntArray(), new SparseLongArray());
         pkgInfo2.getPendingBackups().add(57);
 
         pkgInfo2.getPendingRestores().add(
@@ -205,7 +207,7 @@ public class RollbackStoreTest {
 
         PackageRollbackInfo pkgInfo1 = new PackageRollbackInfo(new VersionedPackage("blah", 55),
                 new VersionedPackage("blah1", 50), new IntArray(), new ArrayList<>(),
-                false, new IntArray(), new SparseLongArray());
+                false, false, new IntArray(), new SparseLongArray());
         pkgInfo1.getPendingBackups().add(59);
         pkgInfo1.getPendingBackups().add(1245);
         pkgInfo1.getPendingBackups().add(124544);
@@ -224,7 +226,7 @@ public class RollbackStoreTest {
 
         PackageRollbackInfo pkgInfo2 = new PackageRollbackInfo(new VersionedPackage("chips", 28),
                 new VersionedPackage("com.chips.test", 48), new IntArray(), new ArrayList<>(),
-                false, new IntArray(), new SparseLongArray());
+                false, false, new IntArray(), new SparseLongArray());
         pkgInfo2.getPendingBackups().add(5);
 
         pkgInfo2.getPendingRestores().add(

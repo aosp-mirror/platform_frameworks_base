@@ -76,6 +76,11 @@ public final class PackageRollbackInfo implements Parcelable {
      */
     private final boolean mIsApex;
 
+    /**
+     * Whether this instance represents the PackageRollbackInfo for an APK in APEX.
+     */
+    private final boolean mIsApkInApex;
+
     /*
      * The list of users for which snapshots have been saved.
      */
@@ -157,6 +162,10 @@ public final class PackageRollbackInfo implements Parcelable {
     public @PackageManager.RollbackDataPolicy int getRollbackDataPolicy() {
         return mRollbackDataPolicy;
     }
+    /** @hide */
+    public boolean isApkInApex() {
+        return mIsApkInApex;
+    }
 
     /** @hide */
     public IntArray getSnapshottedUsers() {
@@ -190,17 +199,18 @@ public final class PackageRollbackInfo implements Parcelable {
     public PackageRollbackInfo(VersionedPackage packageRolledBackFrom,
             VersionedPackage packageRolledBackTo,
             @NonNull IntArray pendingBackups, @NonNull ArrayList<RestoreInfo> pendingRestores,
-            boolean isApex, @NonNull IntArray snapshottedUsers,
+            boolean isApex, boolean isApkInApex, @NonNull IntArray snapshottedUsers,
             @NonNull SparseLongArray ceSnapshotInodes) {
         this(packageRolledBackFrom, packageRolledBackTo, pendingBackups, pendingRestores, isApex,
-                snapshottedUsers, ceSnapshotInodes, PackageManager.RollbackDataPolicy.RESTORE);
+                isApkInApex, snapshottedUsers, ceSnapshotInodes,
+                PackageManager.RollbackDataPolicy.RESTORE);
     }
 
     /** @hide */
     public PackageRollbackInfo(VersionedPackage packageRolledBackFrom,
             VersionedPackage packageRolledBackTo,
             @NonNull IntArray pendingBackups, @NonNull ArrayList<RestoreInfo> pendingRestores,
-            boolean isApex, @NonNull IntArray snapshottedUsers,
+            boolean isApex, boolean isApkInApex, @NonNull IntArray snapshottedUsers,
             @NonNull SparseLongArray ceSnapshotInodes,
             @PackageManager.RollbackDataPolicy int rollbackDataPolicy) {
         this.mVersionRolledBackFrom = packageRolledBackFrom;
@@ -209,6 +219,7 @@ public final class PackageRollbackInfo implements Parcelable {
         this.mPendingRestores = pendingRestores;
         this.mIsApex = isApex;
         this.mRollbackDataPolicy = rollbackDataPolicy;
+        this.mIsApkInApex = isApkInApex;
         this.mSnapshottedUsers = snapshottedUsers;
         this.mCeSnapshotInodes = ceSnapshotInodes;
     }
@@ -217,6 +228,7 @@ public final class PackageRollbackInfo implements Parcelable {
         this.mVersionRolledBackFrom = VersionedPackage.CREATOR.createFromParcel(in);
         this.mVersionRolledBackTo = VersionedPackage.CREATOR.createFromParcel(in);
         this.mIsApex = in.readBoolean();
+        this.mIsApkInApex = in.readBoolean();
         this.mPendingRestores = null;
         this.mPendingBackups = null;
         this.mSnapshottedUsers = null;
@@ -234,6 +246,7 @@ public final class PackageRollbackInfo implements Parcelable {
         mVersionRolledBackFrom.writeToParcel(out, flags);
         mVersionRolledBackTo.writeToParcel(out, flags);
         out.writeBoolean(mIsApex);
+        out.writeBoolean(mIsApkInApex);
     }
 
     public static final @NonNull Parcelable.Creator<PackageRollbackInfo> CREATOR =

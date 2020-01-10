@@ -32,10 +32,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.content.pm.parsing.AndroidPackage;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.sysprop.ApexProperties;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Singleton;
 import android.util.Slog;
 
@@ -44,15 +47,20 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 
+import com.google.android.collect.Lists;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -97,12 +105,27 @@ abstract class ApexManager {
      * Minimal information about APEX mount points and the original APEX package they refer to.
      */
     static class ActiveApexInfo {
+        @Nullable public final String apexModuleName;
         public final File apexDirectory;
-        public final File preinstalledApexPath;
+        public final File preInstalledApexPath;
 
-        private ActiveApexInfo(File apexDirectory, File preinstalledApexPath) {
+        private ActiveApexInfo(File apexDirectory, File preInstalledApexPath) {
+            this(null, apexDirectory, preInstalledApexPath);
+        }
+
+        private ActiveApexInfo(@Nullable String apexModuleName, File apexDirectory,
+                File preInstalledApexPath) {
+            this.apexModuleName = apexModuleName;
             this.apexDirectory = apexDirectory;
-            this.preinstalledApexPath = preinstalledApexPath;
+            this.preInstalledApexPath = preInstalledApexPath;
+        }
+
+        private ActiveApexInfo(ApexInfo apexInfo) {
+            this(
+                    apexInfo.moduleName,
+                    new File(Environment.getApexDirectory() + File.separator
+                            + apexInfo.moduleName),
+                    new File(apexInfo.preinstalledModulePath));
         }
     }
 
@@ -232,6 +255,17 @@ abstract class ApexManager {
     abstract boolean uninstallApex(String apexPackagePath);
 
     /**
+     * Registers an APK package as an embedded apk of apex.
+     */
+    abstract void registerApkInApex(AndroidPackage pkg);
+
+    /**
+     * Returns list of {@code packageName} of apks inside the given apex.
+     * @param apexPackageName Package name of the apk container of apex
+     */
+    abstract List<String> getApksInApex(String apexPackageName);
+
+    /**
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.
@@ -255,15 +289,32 @@ abstract class ApexManager {
     static class ApexManagerImpl extends ApexManager {
         private final IApexService mApexService;
         private final Object mLock = new Object();
+
+        @GuardedBy("mLock")
+        private Set<ActiveApexInfo> mActiveApexInfosCache;
+
         /**
-         * A map from {@code APEX packageName} to the {@Link PackageInfo} generated from the {@code
-         * AndroidManifest.xml}
-         *
-         * <p>Note that key of this map is {@code packageName} field of the corresponding {@code
-         * AndroidManifest.xml}.
-          */
+         * Contains the list of {@code packageName}s of apks-in-apex for given
+         * {@code apexModuleName}. See {@link #mPackageNameToApexModuleName} to understand the
+         * difference between {@code packageName} and {@code apexModuleName}.
+         */
+        @GuardedBy("mLock")
+        private Map<String, List<String>> mApksInApex = new ArrayMap<>();
+
         @GuardedBy("mLock")
         private List<PackageInfo> mAllPackagesCache;
+
+        /**
+         * An APEX is a file format that delivers the apex-payload wrapped in an apk container. The
+         * apk container has a reference name, called {@code packageName}, which is found inside the
+         * {@code AndroidManifest.xml}. The apex payload inside the container also has a reference
+         * name, called {@code apexModuleName}, which is found in {@code apex_manifest.json} file.
+         *
+         * {@link #mPackageNameToApexModuleName} contains the mapping from {@code packageName} of
+         * the apk container to {@code apexModuleName} of the apex-payload inside.
+         */
+        @GuardedBy("mLock")
+        private Map<String, String> mPackageNameToApexModuleName;
 
         ApexManagerImpl(IApexService apexService) {
             mApexService = apexService;
@@ -291,18 +342,25 @@ abstract class ApexManager {
 
         @Override
         List<ActiveApexInfo> getActiveApexInfos() {
-            try {
-                return Arrays.stream(mApexService.getActivePackages())
-                        .map(apexInfo -> new ActiveApexInfo(
-                                new File(
-                                Environment.getApexDirectory() + File.separator
-                                        + apexInfo.moduleName),
-                                new File(apexInfo.preinstalledModulePath))).collect(
-                                Collectors.toList());
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to retrieve packages from apexservice", e);
+            synchronized (mLock) {
+                if (mActiveApexInfosCache == null) {
+                    try {
+                        mActiveApexInfosCache = new ArraySet<>();
+                        final ApexInfo[] activePackages = mApexService.getActivePackages();
+                        for (int i = 0; i < activePackages.length; i++) {
+                            ApexInfo apexInfo = activePackages[i];
+                            mActiveApexInfosCache.add(new ActiveApexInfo(apexInfo));
+                        }
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Unable to retrieve packages from apexservice", e);
+                    }
+                }
+                if (mActiveApexInfosCache != null) {
+                    return new ArrayList<>(mActiveApexInfosCache);
+                } else {
+                    return Collections.emptyList();
+                }
             }
-            return Collections.emptyList();
         }
 
         @Override
@@ -325,6 +383,7 @@ abstract class ApexManager {
                 }
                 try {
                     mAllPackagesCache = new ArrayList<>();
+                    mPackageNameToApexModuleName = new HashMap<>();
                     HashSet<String> activePackagesSet = new HashSet<>();
                     HashSet<String> factoryPackagesSet = new HashSet<>();
                     final ApexInfo[] allPkgs = mApexService.getAllPackages();
@@ -350,6 +409,7 @@ abstract class ApexManager {
                         final PackageInfo packageInfo =
                                 PackageParser.generatePackageInfo(pkg, ai, flags);
                         mAllPackagesCache.add(packageInfo);
+                        mPackageNameToApexModuleName.put(packageInfo.packageName, ai.moduleName);
                         if (ai.isActive) {
                             if (activePackagesSet.contains(packageInfo.packageName)) {
                                 throw new IllegalStateException(
@@ -366,7 +426,6 @@ abstract class ApexManager {
                             }
                             factoryPackagesSet.add(packageInfo.packageName);
                         }
-
                     }
                 } catch (RemoteException re) {
                     Slog.e(TAG, "Unable to retrieve packages from apexservice: " + re.toString());
@@ -533,6 +592,37 @@ abstract class ApexManager {
             }
         }
 
+        @Override
+        void registerApkInApex(AndroidPackage pkg) {
+            synchronized (mLock) {
+                final Iterator<ActiveApexInfo> it = mActiveApexInfosCache.iterator();
+                while (it.hasNext()) {
+                    final ActiveApexInfo aai = it.next();
+                    if (pkg.getBaseCodePath().startsWith(aai.apexDirectory.getAbsolutePath())) {
+                        List<String> apks = mApksInApex.get(aai.apexModuleName);
+                        if (apks == null) {
+                            apks = Lists.newArrayList();
+                            mApksInApex.put(aai.apexModuleName, apks);
+                        }
+                        apks.add(pkg.getPackageName());
+                    }
+                }
+            }
+        }
+
+        @Override
+        List<String> getApksInApex(String apexPackageName) {
+            // TODO(b/142712057): Avoid calling populateAllPackagesCacheIfNeeded during boot.
+            populateAllPackagesCacheIfNeeded();
+            synchronized (mLock) {
+                String moduleName = mPackageNameToApexModuleName.get(apexPackageName);
+                if (moduleName == null) {
+                    return Collections.emptyList();
+                }
+                return mApksInApex.getOrDefault(moduleName, Collections.emptyList());
+            }
+        }
+
         /**
          * Dump information about the packages contained in a particular cache
          * @param packagesCache the cache to print information about.
@@ -614,7 +704,6 @@ abstract class ApexManager {
      * updating APEX packages.
      */
     private static final class ApexManagerFlattenedApex extends ApexManager {
-
         @Override
         List<ActiveApexInfo> getActiveApexInfos() {
             // There is no apexd running in case of flattened apex
@@ -718,6 +807,16 @@ abstract class ApexManager {
         @Override
         boolean uninstallApex(String apexPackagePath) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        void registerApkInApex(AndroidPackage pkg) {
+            // No-op
+        }
+
+        @Override
+        List<String> getApksInApex(String apexPackageName) {
+            return Collections.emptyList();
         }
 
         @Override

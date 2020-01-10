@@ -435,9 +435,62 @@ public class StagedRollbackTest {
         // testNativeWatchdogTriggersRollback will fail if multiple staged sessions are
         // committed on a device which doesn't support checkpoint. Let's clean up all rollbacks
         // so there is only one rollback to commit when testing native crashes.
-        RollbackManager rm  = RollbackUtils.getRollbackManager();
+        RollbackManager rm = RollbackUtils.getRollbackManager();
         rm.getAvailableRollbacks().stream().flatMap(info -> info.getPackages().stream())
                 .map(info -> info.getPackageName()).forEach(rm::expireRollbackForPackage);
+    }
+
+    private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
+    private static final TestApp TEST_APEX_WITH_APK_V1 = new TestApp("TestApexWithApkV1",
+            APK_IN_APEX_TESTAPEX_NAME, 1, /*isApex*/true, APK_IN_APEX_TESTAPEX_NAME + "_v1.apex");
+    private static final TestApp TEST_APEX_WITH_APK_V2 = new TestApp("TestApexWithApkV2",
+            APK_IN_APEX_TESTAPEX_NAME, 2, /*isApex*/true, APK_IN_APEX_TESTAPEX_NAME + "_v2.apex");
+    private static final TestApp TEST_APP_A_V2_UNKNOWN = new TestApp("Av2Unknown", TestApp.A, 0,
+            /*isApex*/false, "TestAppAv2.apk");
+
+    @Test
+    public void testRollbackApexWithApk_Phase1() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+        InstallUtils.processUserData(TestApp.A);
+
+        int sessionId = Install.single(TEST_APEX_WITH_APK_V2).setStaged().setEnableRollback()
+                .commit();
+        InstallUtils.waitForSessionReady(sessionId);
+    }
+
+    @Test
+    public void testRollbackApexWithApk_Phase2() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(APK_IN_APEX_TESTAPEX_NAME)).isEqualTo(2);
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+        InstallUtils.processUserData(TestApp.A);
+
+        RollbackInfo available = RollbackUtils.getAvailableRollback(APK_IN_APEX_TESTAPEX_NAME);
+        assertThat(available).isStaged();
+        assertThat(available).packagesContainsExactly(
+                Rollback.from(TEST_APEX_WITH_APK_V2).to(TEST_APEX_WITH_APK_V1),
+                Rollback.from(TEST_APP_A_V2_UNKNOWN).to(TestApp.A1));
+
+        RollbackUtils.rollback(available.getRollbackId(), TEST_APEX_WITH_APK_V2);
+        RollbackInfo committed = RollbackUtils.getCommittedRollbackById(available.getRollbackId());
+        assertThat(committed).isNotNull();
+        assertThat(committed).isStaged();
+        assertThat(committed).packagesContainsExactly(
+                Rollback.from(TEST_APEX_WITH_APK_V2).to(TEST_APEX_WITH_APK_V1),
+                Rollback.from(TEST_APP_A_V2_UNKNOWN).to(TestApp.A1));
+        assertThat(committed).causePackagesContainsExactly(TEST_APEX_WITH_APK_V2);
+        assertThat(committed.getCommittedSessionId()).isNotEqualTo(-1);
+
+        // Note: The app is not rolled back until after the rollback is staged
+        // and the device has been rebooted.
+        InstallUtils.waitForSessionReady(committed.getCommittedSessionId());
+        assertThat(InstallUtils.getInstalledVersion(APK_IN_APEX_TESTAPEX_NAME)).isEqualTo(2);
+    }
+
+    @Test
+    public void testRollbackApexWithApk_Phase3() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(APK_IN_APEX_TESTAPEX_NAME)).isEqualTo(1);
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+        InstallUtils.processUserData(TestApp.A);
     }
 
     private static void runShellCommand(String cmd) {

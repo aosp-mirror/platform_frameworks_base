@@ -811,6 +811,12 @@ public abstract class PackageManagerInternal {
     public abstract boolean isApexPackage(String packageName);
 
     /**
+     * Returns list of {@code packageName} of apks inside the given apex.
+     * @param apexPackageName Package name of the apk container of apex
+     */
+    public abstract List<String> getApksInApex(String apexPackageName);
+
+    /**
      * Uninstalls given {@code packageName}.
      *
      * @param packageName apex package to uninstall.
