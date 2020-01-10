@@ -16,6 +16,8 @@
 
 package android.media;
 
+import static android.media.MediaRouter2Utils.toUniqueId;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -188,13 +190,6 @@ public final class MediaRoute2Info implements Parcelable {
         mVolumeHandling = in.readInt();
         mDeviceType = in.readInt();
         mExtras = in.readBundle();
-    }
-
-    /**
-     * @hide
-     */
-    public static String toUniqueId(String providerId, String routeId) {
-        return providerId + ":" + routeId;
     }
 
     /**

@@ -342,8 +342,7 @@ public class MediaRouter2 {
         final int requestId;
         requestId = mSessionCreationRequestCnt.getAndIncrement();
 
-        SessionCreationRequest request = new SessionCreationRequest(
-                requestId, route, routeType);
+        SessionCreationRequest request = new SessionCreationRequest(requestId, route, routeType);
         mSessionCreationRequests.add(request);
 
         Client2 client;
@@ -352,8 +351,7 @@ public class MediaRouter2 {
         }
         if (client != null) {
             try {
-                mMediaRouterService.requestCreateSession(
-                        client, route, routeType, requestId);
+                mMediaRouterService.requestCreateSession(client, route, routeType, requestId);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to request to create session.", ex);
                 mHandler.sendMessage(obtainMessage(MediaRouter2::createControllerOnHandler,
@@ -542,7 +540,7 @@ public class MediaRouter2 {
         if (sessionInfo != null) {
             RouteSessionController controller = new RouteSessionController(sessionInfo);
             synchronized (sRouterLock) {
-                mSessionControllers.put(controller.getUniqueSessionId(), controller);
+                mSessionControllers.put(controller.getSessionId(), controller);
             }
             notifySessionCreated(controller);
         }
@@ -556,12 +554,12 @@ public class MediaRouter2 {
 
         RouteSessionController matchingController;
         synchronized (sRouterLock) {
-            matchingController = mSessionControllers.get(sessionInfo.getUniqueSessionId());
+            matchingController = mSessionControllers.get(sessionInfo.getId());
         }
 
         if (matchingController == null) {
             Log.w(TAG, "changeSessionInfoOnHandler: Matching controller not found. uniqueSessionId="
-                    + sessionInfo.getUniqueSessionId());
+                    + sessionInfo.getId());
             return;
         }
 
@@ -582,7 +580,7 @@ public class MediaRouter2 {
             return;
         }
 
-        final String uniqueSessionId = sessionInfo.getUniqueSessionId();
+        final String uniqueSessionId = sessionInfo.getId();
         RouteSessionController matchingController;
         synchronized (sRouterLock) {
             matchingController = mSessionControllers.get(uniqueSessionId);
@@ -591,7 +589,7 @@ public class MediaRouter2 {
         if (matchingController == null) {
             if (DEBUG) {
                 Log.d(TAG, "releaseControllerOnHandler: Matching controller not found. "
-                        + "uniqueSessionId=" + sessionInfo.getUniqueSessionId());
+                        + "uniqueSessionId=" + sessionInfo.getId());
             }
             return;
         }
@@ -783,20 +781,9 @@ public class MediaRouter2 {
         /**
          * @return the ID of the session
          */
-        public int getSessionId() {
+        public String getSessionId() {
             synchronized (mControllerLock) {
-                return mSessionInfo.getSessionId();
-            }
-        }
-
-        /**
-         * @return the unique ID of the session
-         * @hide
-         */
-        @NonNull
-        public String getUniqueSessionId() {
-            synchronized (mControllerLock) {
-                return mSessionInfo.getUniqueSessionId();
+                return mSessionInfo.getId();
             }
         }
 
@@ -913,7 +900,7 @@ public class MediaRouter2 {
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.selectRoute(client, getUniqueSessionId(), route);
+                    mMediaRouterService.selectRoute(client, getSessionId(), route);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to select route for session.", ex);
                 }
@@ -960,7 +947,7 @@ public class MediaRouter2 {
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.deselectRoute(client, getUniqueSessionId(), route);
+                    mMediaRouterService.deselectRoute(client, getSessionId(), route);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to remove route from session.", ex);
                 }
@@ -1008,7 +995,7 @@ public class MediaRouter2 {
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.transferToRoute(client, getUniqueSessionId(), route);
+                    mMediaRouterService.transferToRoute(client, getSessionId(), route);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to transfer to route for session.", ex);
                 }
@@ -1033,12 +1020,12 @@ public class MediaRouter2 {
 
             Client2 client;
             synchronized (sRouterLock) {
-                mSessionControllers.remove(getUniqueSessionId(), this);
+                mSessionControllers.remove(getSessionId(), this);
                 client = mClient;
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.releaseSession(client, getUniqueSessionId());
+                    mMediaRouterService.releaseSession(client, getSessionId());
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to notify of controller release", ex);
                 }
@@ -1068,6 +1055,7 @@ public class MediaRouter2 {
 
             List<MediaRoute2Info> routes = new ArrayList<>();
             synchronized (sRouterLock) {
+                // TODO: Maybe able to change using Collection.stream()?
                 for (String routeId : routeIds) {
                     MediaRoute2Info route = mRoutes.get(routeId);
                     if (route != null) {

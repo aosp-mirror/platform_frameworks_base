@@ -86,7 +86,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     @Override
-    public void releaseSession(int sessionId) {
+    public void releaseSession(String sessionId) {
         if (mConnectionReady) {
             mActiveConnection.releaseSession(sessionId);
             updateBinding();
@@ -94,21 +94,21 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     @Override
-    public void selectRoute(int sessionId, String routeId) {
+    public void selectRoute(String sessionId, String routeId) {
         if (mConnectionReady) {
             mActiveConnection.selectRoute(sessionId, routeId);
         }
     }
 
     @Override
-    public void deselectRoute(int sessionId, String routeId) {
+    public void deselectRoute(String sessionId, String routeId) {
         if (mConnectionReady) {
             mActiveConnection.deselectRoute(sessionId, routeId);
         }
     }
 
     @Override
-    public void transferToRoute(int sessionId, String routeId) {
+    public void transferToRoute(String sessionId, String routeId) {
         if (mConnectionReady) {
             mActiveConnection.transferToRoute(sessionId, routeId);
         }
@@ -302,6 +302,11 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
                     + mComponentName);
             return;
         }
+
+        sessionInfo = new RouteSessionInfo.Builder(sessionInfo)
+                .setProviderId(getUniqueId())
+                .build();
+
         mCallback.onSessionInfoChanged(this, sessionInfo);
     }
 
@@ -355,7 +360,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             }
         }
 
-        public void releaseSession(int sessionId) {
+        public void releaseSession(String sessionId) {
             try {
                 mProvider.releaseSession(sessionId);
             } catch (RemoteException ex) {
@@ -363,7 +368,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             }
         }
 
-        public void selectRoute(int sessionId, String routeId) {
+        public void selectRoute(String sessionId, String routeId) {
             try {
                 mProvider.selectRoute(sessionId, routeId);
             } catch (RemoteException ex) {
@@ -371,7 +376,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             }
         }
 
-        public void deselectRoute(int sessionId, String routeId) {
+        public void deselectRoute(String sessionId, String routeId) {
             try {
                 mProvider.deselectRoute(sessionId, routeId);
             } catch (RemoteException ex) {
@@ -379,7 +384,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             }
         }
 
-        public void transferToRoute(int sessionId, String routeId) {
+        public void transferToRoute(String sessionId, String routeId) {
             try {
                 mProvider.transferToRoute(sessionId, routeId);
             } catch (RemoteException ex) {

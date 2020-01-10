@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -55,7 +56,7 @@ public abstract class MediaRoute2ProviderService extends Service {
     private MediaRoute2ProviderInfo mProviderInfo;
 
     @GuardedBy("mSessionLock")
-    private ArrayMap<Integer, RouteSessionInfo> mSessionInfo = new ArrayMap<>();
+    private ArrayMap<String, RouteSessionInfo> mSessionInfo = new ArrayMap<>();
 
     public MediaRoute2ProviderService() {
         mHandler = new Handler(Looper.getMainLooper());
@@ -106,7 +107,10 @@ public abstract class MediaRoute2ProviderService extends Service {
      *         null if the session is destroyed or id is not valid.
      */
     @Nullable
-    public final RouteSessionInfo getSessionInfo(int sessionId) {
+    public final RouteSessionInfo getSessionInfo(@NonNull String sessionId) {
+        if (TextUtils.isEmpty(sessionId)) {
+            throw new IllegalArgumentException("sessionId must not be empty");
+        }
         synchronized (mSessionLock) {
             return mSessionInfo.get(sessionId);
         }
@@ -134,7 +138,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      */
     public final void updateSessionInfo(@NonNull RouteSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
-        int sessionId = sessionInfo.getSessionId();
+        String sessionId = sessionInfo.getId();
         if (sessionInfo.getSelectedRoutes().isEmpty()) {
             releaseSession(sessionId);
             return;
@@ -160,7 +164,7 @@ public abstract class MediaRoute2ProviderService extends Service {
     public final void notifySessionInfoChanged(@NonNull RouteSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
-        int sessionId = sessionInfo.getSessionId();
+        String sessionId = sessionInfo.getId();
         synchronized (mSessionLock) {
             if (mSessionInfo.containsKey(sessionId)) {
                 mSessionInfo.put(sessionId, sessionInfo);
@@ -185,7 +189,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * controlled, pass a {@link Bundle} that contains how to control it.
      *
      * @param sessionInfo information of the new session.
-     *                    The {@link RouteSessionInfo#getSessionId() id} of the session must be
+     *                    The {@link RouteSessionInfo#getId() id} of the session must be
      *                    unique. Pass {@code null} to reject the request or inform clients that
      *                    session creation is failed.
      * @param requestId id of the previous request to create this session
@@ -194,13 +198,13 @@ public abstract class MediaRoute2ProviderService extends Service {
     // TODO: Maybe better to create notifySessionCreationFailed?
     public final void notifySessionCreated(@Nullable RouteSessionInfo sessionInfo, long requestId) {
         if (sessionInfo != null) {
-            int sessionId = sessionInfo.getSessionId();
+            String sessionId = sessionInfo.getId();
             synchronized (mSessionLock) {
                 if (mSessionInfo.containsKey(sessionId)) {
                     Log.w(TAG, "Ignoring duplicate session id.");
                     return;
                 }
-                mSessionInfo.put(sessionInfo.getSessionId(), sessionInfo);
+                mSessionInfo.put(sessionInfo.getId(), sessionInfo);
             }
             schedulePublishState();
         }
@@ -220,9 +224,12 @@ public abstract class MediaRoute2ProviderService extends Service {
      * {@link #onDestroySession} is called if the session is released.
      *
      * @param sessionId id of the session to be released
-     * @see #onDestroySession(int, RouteSessionInfo)
+     * @see #onDestroySession(String, RouteSessionInfo)
      */
-    public final void releaseSession(int sessionId) {
+    public final void releaseSession(@NonNull String sessionId) {
+        if (TextUtils.isEmpty(sessionId)) {
+            throw new IllegalArgumentException("sessionId must not be empty");
+        }
         //TODO: notify media router service of release.
         RouteSessionInfo sessionInfo;
         synchronized (mSessionLock) {
@@ -259,9 +266,10 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param sessionId id of the session being destroyed.
      * @param lastSessionInfo information of the session being destroyed.
-     * @see #releaseSession(int)
+     * @see #releaseSession(String)
      */
-    public abstract void onDestroySession(int sessionId, @NonNull RouteSessionInfo lastSessionInfo);
+    public abstract void onDestroySession(@NonNull String sessionId,
+            @NonNull RouteSessionInfo lastSessionInfo);
 
     //TODO: make a way to reject the request
     /**
@@ -274,7 +282,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param routeId id of the route
      * @see #updateSessionInfo(RouteSessionInfo)
      */
-    public abstract void onSelectRoute(int sessionId, @NonNull String routeId);
+    public abstract void onSelectRoute(@NonNull String sessionId, @NonNull String routeId);
 
     //TODO: make a way to reject the request
     /**
@@ -286,7 +294,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param sessionId id of the session
      * @param routeId id of the route
      */
-    public abstract void onDeselectRoute(int sessionId, @NonNull String routeId);
+    public abstract void onDeselectRoute(@NonNull String sessionId, @NonNull String routeId);
 
     //TODO: make a way to reject the request
     /**
@@ -298,7 +306,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param sessionId id of the session
      * @param routeId id of the route
      */
-    public abstract void onTransferToRoute(int sessionId, @NonNull String routeId);
+    public abstract void onTransferToRoute(@NonNull String sessionId, @NonNull String routeId);
 
     /**
      * Called when the {@link RouteDiscoveryRequest discovery request} has changed.
@@ -385,8 +393,12 @@ public abstract class MediaRoute2ProviderService extends Service {
                     requestId));
         }
         @Override
-        public void releaseSession(int sessionId) {
+        public void releaseSession(@NonNull String sessionId) {
             if (!checkCallerisSystem()) {
+                return;
+            }
+            if (TextUtils.isEmpty(sessionId)) {
+                Log.w(TAG, "releaseSession: Ignoring empty sessionId from system service.");
                 return;
             }
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::releaseSession,
@@ -394,8 +406,12 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void selectRoute(int sessionId, String routeId) {
+        public void selectRoute(@NonNull String sessionId, String routeId) {
             if (!checkCallerisSystem()) {
+                return;
+            }
+            if (TextUtils.isEmpty(sessionId)) {
+                Log.w(TAG, "selectRoute: Ignoring empty sessionId from system service.");
                 return;
             }
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSelectRoute,
@@ -403,8 +419,12 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void deselectRoute(int sessionId, String routeId) {
+        public void deselectRoute(@NonNull String sessionId, String routeId) {
             if (!checkCallerisSystem()) {
+                return;
+            }
+            if (TextUtils.isEmpty(sessionId)) {
+                Log.w(TAG, "deselectRoute: Ignoring empty sessionId from system service.");
                 return;
             }
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onDeselectRoute,
@@ -412,8 +432,12 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void transferToRoute(int sessionId, String routeId) {
+        public void transferToRoute(@NonNull String sessionId, String routeId) {
             if (!checkCallerisSystem()) {
+                return;
+            }
+            if (TextUtils.isEmpty(sessionId)) {
+                Log.w(TAG, "transferToRoute: Ignoring empty sessionId from system service.");
                 return;
             }
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onTransferToRoute,

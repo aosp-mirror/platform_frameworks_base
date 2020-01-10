@@ -48,8 +48,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     static final String BLUETOOTH_ROUTE_ID = "BLUETOOTH_ROUTE";
 
     // TODO: Move these to a proper place
-    public static final String CATEGORY_LIVE_AUDIO = "android.media.intent.category.LIVE_AUDIO";
-    public static final String CATEGORY_LIVE_VIDEO = "android.media.intent.category.LIVE_VIDEO";
+    public static final String TYPE_LIVE_AUDIO = "android.media.intent.route.TYPE_LIVE_AUDIO";
+    public static final String TYPE_LIVE_VIDEO = "android.media.intent.route.TYPE_LIVE_VIDEO";
 
     private final AudioManager mAudioManager;
     private final IAudioService mAudioService;
@@ -97,22 +97,22 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void releaseSession(int sessionId) {
+    public void releaseSession(String sessionId) {
         // Do nothing
     }
 
     @Override
-    public void selectRoute(int sessionId, String routeId) {
+    public void selectRoute(String sessionId, String routeId) {
         //TODO: implement method
     }
 
     @Override
-    public void deselectRoute(int sessionId, String routeId) {
+    public void deselectRoute(String sessionId, String routeId) {
         //TODO: implement method
     }
 
     @Override
-    public void transferToRoute(int sessionId, String routeId) {
+    public void transferToRoute(String sessionId, String routeId) {
         //TODO: implement method
     }
 
@@ -141,8 +141,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                         : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                 .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
                 .setVolume(mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
-                .addRouteType(CATEGORY_LIVE_AUDIO)
-                .addRouteType(CATEGORY_LIVE_VIDEO)
+                .addRouteType(TYPE_LIVE_AUDIO)
+                .addRouteType(TYPE_LIVE_VIDEO)
                 .build();
 
         AudioRoutesInfo newAudioRoutes = null;
@@ -181,8 +181,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                         : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                 .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
                 .setVolume(mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
-                .addRouteType(CATEGORY_LIVE_AUDIO)
-                .addRouteType(CATEGORY_LIVE_VIDEO)
+                .addRouteType(TYPE_LIVE_AUDIO)
+                .addRouteType(TYPE_LIVE_VIDEO)
                 .build();
 
         if (!TextUtils.equals(newRoutes.bluetoothName, mCurAudioRoutesInfo.bluetoothName)) {
@@ -193,7 +193,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                         mCurAudioRoutesInfo.bluetoothName)
                         .setDescription(mContext.getResources().getText(
                                 R.string.bluetooth_a2dp_audio_route_name).toString())
-                        .addRouteType(CATEGORY_LIVE_AUDIO)
+                        .addRouteType(TYPE_LIVE_AUDIO)
                         .build();
             } else {
                 mBluetoothA2dpRoute = null;
