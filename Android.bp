@@ -623,6 +623,7 @@ filegroup {
     visibility: ["//frameworks/opt/net/ike"],
     srcs: [
         "core/java/android/net/annotations/PolicyDirection.java",
+        "telephony/java/android/telephony/Annotation.java",
     ],
 }
 
