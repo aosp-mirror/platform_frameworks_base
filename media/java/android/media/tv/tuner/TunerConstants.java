@@ -38,35 +38,6 @@ public final class TunerConstants {
 
 
     /** @hide */
-    @IntDef({FRONTEND_TYPE_UNDEFINED, FRONTEND_TYPE_ANALOG, FRONTEND_TYPE_ATSC, FRONTEND_TYPE_ATSC3,
-            FRONTEND_TYPE_DVBC, FRONTEND_TYPE_DVBS, FRONTEND_TYPE_DVBT, FRONTEND_TYPE_ISDBS,
-            FRONTEND_TYPE_ISDBS3, FRONTEND_TYPE_ISDBT})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendType {}
-
-    /** @hide */
-    public static final int FRONTEND_TYPE_UNDEFINED = Constants.FrontendType.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_TYPE_ANALOG = Constants.FrontendType.ANALOG;
-    /** @hide */
-    public static final int FRONTEND_TYPE_ATSC = Constants.FrontendType.ATSC;
-    /** @hide */
-    public static final int FRONTEND_TYPE_ATSC3 = Constants.FrontendType.ATSC3;
-    /** @hide */
-    public static final int FRONTEND_TYPE_DVBC = Constants.FrontendType.DVBC;
-    /** @hide */
-    public static final int FRONTEND_TYPE_DVBS = Constants.FrontendType.DVBS;
-    /** @hide */
-    public static final int FRONTEND_TYPE_DVBT = Constants.FrontendType.DVBT;
-    /** @hide */
-    public static final int FRONTEND_TYPE_ISDBS = Constants.FrontendType.ISDBS;
-    /** @hide */
-    public static final int FRONTEND_TYPE_ISDBS3 = Constants.FrontendType.ISDBS3;
-    /** @hide */
-    public static final int FRONTEND_TYPE_ISDBT = Constants.FrontendType.ISDBT;
-
-
-    /** @hide */
     @IntDef({FRONTEND_EVENT_TYPE_LOCKED, FRONTEND_EVENT_TYPE_NO_SIGNAL,
             FRONTEND_EVENT_TYPE_LOST_LOCK})
     @Retention(RetentionPolicy.SOURCE)
@@ -102,30 +73,6 @@ public final class TunerConstants {
     /** @hide */
     public static final int DEMUX_MMPT_PID = 2;
 
-    /** @hide */
-    @IntDef({FRONTEND_SETTINGS_ANALOG, FRONTEND_SETTINGS_ATSC, FRONTEND_SETTINGS_ATSC3,
-            FRONTEND_SETTINGS_DVBS, FRONTEND_SETTINGS_DVBC, FRONTEND_SETTINGS_DVBT,
-            FRONTEND_SETTINGS_ISDBS, FRONTEND_SETTINGS_ISDBS3, FRONTEND_SETTINGS_ISDBT})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendSettingsType {}
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_ANALOG = 1;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_ATSC = 2;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_ATSC3 = 3;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_DVBS = 4;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_DVBC = 5;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_DVBT = 6;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_ISDBS = 7;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_ISDBS3 = 8;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_ISDBT = 9;
 
     /** @hide */
     @IntDef({FILTER_SUBTYPE_UNDEFINED, FILTER_SUBTYPE_SECTION, FILTER_SUBTYPE_PES,
@@ -725,73 +672,6 @@ public final class TunerConstants {
     /** @hide */
     public static final int HIERARCHY_4_INDEPTH =
             Constants.FrontendDvbtHierarchy.HIERARCHY_4_INDEPTH;
-
-    /** @hide */
-    @IntDef({FRONTEND_ANALOG_TYPE_UNDEFINED, FRONTEND_ANALOG_TYPE_PAL, FRONTEND_ANALOG_TYPE_SECAM,
-            FRONTEND_ANALOG_TYPE_NTSC})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendAnalogType {}
-    /** @hide */
-    public static final int FRONTEND_ANALOG_TYPE_UNDEFINED = Constants.FrontendAnalogType.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_TYPE_PAL = Constants.FrontendAnalogType.PAL;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_TYPE_SECAM = Constants.FrontendAnalogType.SECAM;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_TYPE_NTSC = Constants.FrontendAnalogType.NTSC;
-
-    /** @hide */
-    @IntDef({FRONTEND_ANALOG_SIF_UNDEFINED, FRONTEND_ANALOG_SIF_BG, FRONTEND_ANALOG_SIF_BG_A2,
-            FRONTEND_ANALOG_SIF_BG_NICAM, FRONTEND_ANALOG_SIF_I, FRONTEND_ANALOG_SIF_DK,
-            FRONTEND_ANALOG_SIF_DK1, FRONTEND_ANALOG_SIF_DK2, FRONTEND_ANALOG_SIF_DK3,
-            FRONTEND_ANALOG_SIF_DK_NICAM, FRONTEND_ANALOG_SIF_L, FRONTEND_ANALOG_SIF_M,
-            FRONTEND_ANALOG_SIF_M_BTSC, FRONTEND_ANALOG_SIF_M_A2, FRONTEND_ANALOG_SIF_M_EIA_J,
-            FRONTEND_ANALOG_SIF_I_NICAM, FRONTEND_ANALOG_SIF_L_NICAM, FRONTEND_ANALOG_SIF_L_PRIME})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendAnalogSifStandard {}
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_UNDEFINED =
-            Constants.FrontendAnalogSifStandard.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_BG = Constants.FrontendAnalogSifStandard.BG;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_BG_A2 = Constants.FrontendAnalogSifStandard.BG_A2;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_BG_NICAM =
-            Constants.FrontendAnalogSifStandard.BG_NICAM;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_I = Constants.FrontendAnalogSifStandard.I;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_DK = Constants.FrontendAnalogSifStandard.DK;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_DK1 = Constants.FrontendAnalogSifStandard.DK1;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_DK2 = Constants.FrontendAnalogSifStandard.DK2;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_DK3 = Constants.FrontendAnalogSifStandard.DK3;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_DK_NICAM =
-            Constants.FrontendAnalogSifStandard.DK_NICAM;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_L = Constants.FrontendAnalogSifStandard.L;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_M = Constants.FrontendAnalogSifStandard.M;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_M_BTSC = Constants.FrontendAnalogSifStandard.M_BTSC;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_M_A2 = Constants.FrontendAnalogSifStandard.M_A2;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_M_EIA_J =
-            Constants.FrontendAnalogSifStandard.M_EIA_J;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_I_NICAM =
-            Constants.FrontendAnalogSifStandard.I_NICAM;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_L_NICAM =
-            Constants.FrontendAnalogSifStandard.L_NICAM;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_L_PRIME =
-            Constants.FrontendAnalogSifStandard.L_PRIME;
 
     /** @hide */
     @IntDef({FRONTEND_ATSC_MODULATION_UNDEFINED, FRONTEND_ATSC_MODULATION_AUTO,
