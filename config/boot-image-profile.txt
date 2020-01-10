@@ -22519,8 +22519,6 @@ HSPLcom/android/internal/telephony/PhoneFactory;->makeDefaultPhone(Landroid/cont
 HSPLcom/android/internal/telephony/PhoneFactory;->makeDefaultPhones(Landroid/content/Context;)V
 HSPLcom/android/internal/telephony/PhoneInternalInterface$DataActivityState;-><init>(Ljava/lang/String;I)V
 HSPLcom/android/internal/telephony/PhoneInternalInterface$DataActivityState;->values()[Lcom/android/internal/telephony/PhoneInternalInterface$DataActivityState;
-HSPLcom/android/internal/telephony/PhoneStateIntentReceiver;-><init>(Landroid/content/Context;Landroid/os/Handler;)V
-HSPLcom/android/internal/telephony/PhoneStateIntentReceiver;->notifyServiceState(I)V
 HSPLcom/android/internal/telephony/PhoneSubInfoController;->callPhoneMethodWithPermissionCheck(ILjava/lang/String;Ljava/lang/String;Lcom/android/internal/telephony/PhoneSubInfoController$CallPhoneMethodHelper;Lcom/android/internal/telephony/PhoneSubInfoController$PermissionCheckHelper;)Ljava/lang/Object;
 HSPLcom/android/internal/telephony/PhoneSubInfoController;->getCarrierInfoForImsiEncryption(IILjava/lang/String;)Landroid/telephony/ImsiEncryptionInfo;
 HSPLcom/android/internal/telephony/PhoneSubInfoController;->getGroupIdLevel1ForSubscriber(ILjava/lang/String;)Ljava/lang/String;
@@ -37729,7 +37727,6 @@ Lcom/android/internal/telephony/PhoneFactory;
 Lcom/android/internal/telephony/PhoneInternalInterface$DataActivityState;
 Lcom/android/internal/telephony/PhoneInternalInterface;
 Lcom/android/internal/telephony/PhoneNotifier;
-Lcom/android/internal/telephony/PhoneStateIntentReceiver;
 Lcom/android/internal/telephony/PhoneSubInfoController$CallPhoneMethodHelper;
 Lcom/android/internal/telephony/PhoneSubInfoController$PermissionCheckHelper;
 Lcom/android/internal/telephony/PhoneSubInfoController;
