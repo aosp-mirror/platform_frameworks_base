@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package android.util;
+package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.os.SystemClock;
 
 import java.util.Objects;
 

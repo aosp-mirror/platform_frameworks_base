@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package android.util;
+package android.os;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
-
-import android.os.Parcel;
 
 import androidx.test.runner.AndroidJUnit4;
 
