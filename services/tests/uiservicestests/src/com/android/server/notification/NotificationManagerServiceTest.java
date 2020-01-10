@@ -471,16 +471,17 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mTestableLooper.processAllMessages();
     }
 
-    private void setUpPrefsForBubbles(boolean globalEnabled, boolean pkgEnabled,
-            boolean channelEnabled) {
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.bubblesEnabled()).thenReturn(globalEnabled);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(pkgEnabled);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), eq(null), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+    private void setUpPrefsForBubbles(String pkg, int uid, boolean globalEnabled,
+            boolean pkgEnabled, boolean channelEnabled) {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.NOTIFICATION_BUBBLES, globalEnabled ? 1 : 0);
+        mService.mPreferencesHelper.updateBubblesEnabled();
+        assertEquals(globalEnabled, mService.mPreferencesHelper.bubblesEnabled());
+        try {
+            mBinderService.setBubblesAllowed(pkg, uid, pkgEnabled);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
         mTestNotificationChannel.setAllowBubbles(channelEnabled);
     }
 
@@ -1763,8 +1764,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.TvExtender tv = new Notification.TvExtender().setChannelId("foo");
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "testTvExtenderChannelOverride_onTv", 0,
                 generateNotificationRecord(null, tv).getNotification(), 0);
-        verify(mPreferencesHelper, times(1)).getNotificationChannel(
-                anyString(), anyInt(), eq("foo"), eq(null), anyBoolean());
+        verify(mPreferencesHelper, times(1)).getConversationNotificationChannel(
+                anyString(), anyInt(), eq("foo"), eq(null), anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -1778,9 +1779,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.TvExtender tv = new Notification.TvExtender().setChannelId("foo");
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "testTvExtenderChannelOverride_notOnTv",
                 0, generateNotificationRecord(null, tv).getNotification(), 0);
-        verify(mPreferencesHelper, times(1)).getNotificationChannel(
+        verify(mPreferencesHelper, times(1)).getConversationNotificationChannel(
                 anyString(), anyInt(), eq(mTestNotificationChannel.getId()), eq(null),
-                anyBoolean());
+                anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -4759,7 +4760,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubble() throws RemoteException {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         NotificationRecord nr =
                 generateMessageBubbleNotifRecord(mTestNotificationChannel, "testFlagBubble");
@@ -4778,7 +4779,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubble_noFlag_appNotAllowed() throws RemoteException {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, false /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, false /* app */, true /* channel */);
 
         NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel,
                         "testFlagBubble_noFlag_appNotAllowed");
@@ -4797,7 +4798,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_whenAppForeground() throws RemoteException {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         // Notif with bubble metadata but not our other misc requirements
         Notification.Builder nb = new Notification.Builder(mContext,
@@ -4825,7 +4826,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_flag_messaging() throws RemoteException {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel,
                 "testFlagBubbleNotifs_flag_messaging");
@@ -4842,7 +4843,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_flag_phonecall() throws RemoteException {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBubbleMetadataBuilder().build();
@@ -4878,7 +4879,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_phonecall_noForegroundService() throws RemoteException {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBubbleMetadataBuilder().build();
@@ -4911,7 +4912,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_phonecall_noPerson() throws RemoteException {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBubbleMetadataBuilder().build();
@@ -4942,7 +4943,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_phonecall_noCategory() throws RemoteException {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBubbleMetadataBuilder().build();
@@ -4977,7 +4978,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_messaging_appNotAllowed() throws RemoteException {
         // Bubbles are NOT allowed!
-        setUpPrefsForBubbles(false /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, false /* app */, true /* channel */);
 
         NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel,
                 "testFlagBubbleNotifs_noFlag_messaging_appNotAllowed");
@@ -4995,7 +4996,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_notBubble() throws RemoteException {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         // Messaging notif WITHOUT bubble metadata
         Notification.Builder nb = getMessageStyleNotifBuilder(false /* addBubbleMetadata */,
@@ -5019,7 +5020,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_messaging_channelNotAllowed() throws RemoteException {
         // Bubbles are allowed except on this channel
-        setUpPrefsForBubbles(true /* global */, true /* app */, false /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, false /* channel */);
 
         NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel,
                 "testFlagBubbleNotifs_noFlag_messaging_channelNotAllowed");
@@ -5037,7 +5038,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_phonecall_notAllowed() throws RemoteException {
         // Bubbles are not allowed!
-        setUpPrefsForBubbles(false /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, false /* global */, true /* app */, true /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBubbleMetadataBuilder().build();
@@ -5072,7 +5073,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_phonecall_channelNotAllowed() throws RemoteException {
         // Bubbles are allowed, but not on channel.
-        setUpPrefsForBubbles(true /* global */, true /* app */, false /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, false /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBubbleMetadataBuilder().build();
@@ -5280,7 +5281,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testNotificationBubbleChanged_false() throws Exception {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         // Notif with bubble metadata
         NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel,
@@ -5311,7 +5312,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testNotificationBubbleChanged_true() throws Exception {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         // Notif that is not a bubble
         NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
@@ -5348,7 +5349,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testNotificationBubbleChanged_true_notAllowed() throws Exception {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         // Notif that is not a bubble
         NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel);
@@ -5547,7 +5548,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testNotificationBubbles_disabled_lowRamDevice() throws Exception {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         // And we are low ram
         when(mActivityManager.isLowRamDevice()).thenReturn(true);
@@ -5631,7 +5632,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testNotificationBubbles_flagAutoExpandForeground_fails_notForeground()
             throws Exception {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel,
                 "testNotificationBubbles_flagAutoExpandForeground_fails_notForeground");
@@ -5661,7 +5662,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testNotificationBubbles_flagAutoExpandForeground_succeeds_foreground()
             throws RemoteException {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel,
                 "testNotificationBubbles_flagAutoExpandForeground_succeeds_foreground");
@@ -5691,7 +5692,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testNotificationBubbles_bubbleChildrenStay_whenGroupSummaryDismissed()
             throws Exception {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         NotificationRecord nrSummary = addGroupWithBubblesAndValidateAdded(
                 true /* summaryAutoCancel */);
@@ -5714,7 +5715,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testNotificationBubbles_bubbleChildrenStay_whenGroupSummaryClicked()
             throws Exception {
         // Bubbles are allowed!
-        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
 
         NotificationRecord nrSummary = addGroupWithBubblesAndValidateAdded(
                 true /* summaryAutoCancel */);
@@ -5836,7 +5837,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.createConversationNotificationChannelForPackage(PKG, mUid, orig, "friend");
 
         NotificationChannel friendChannel = mBinderService.getConversationNotificationChannel(
-                PKG, 0, PKG, original.getId(), "friend");
+                PKG, 0, PKG, original.getId(), false, "friend");
 
         assertEquals(original.getName(), friendChannel.getName());
         assertEquals(original.getId(), friendChannel.getParentChannelId());
@@ -5874,9 +5875,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 conversationId);
 
         NotificationChannel messagesChild = mBinderService.getConversationNotificationChannel(
-                PKG, 0, PKG, messagesParent.getId(), conversationId);
+                PKG, 0, PKG, messagesParent.getId(), false, conversationId);
         NotificationChannel callsChild = mBinderService.getConversationNotificationChannel(
-                PKG, 0, PKG, callsParent.getId(), conversationId);
+                PKG, 0, PKG, callsParent.getId(), false, conversationId);
 
         assertEquals(messagesParent.getId(), messagesChild.getParentChannelId());
         assertEquals(conversationId, messagesChild.getConversationId());
@@ -5887,8 +5888,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.deleteConversationNotificationChannels(PKG, mUid, conversationId);
 
         assertNull(mBinderService.getConversationNotificationChannel(
-                PKG, 0, PKG, messagesParent.getId(), conversationId));
+                PKG, 0, PKG, messagesParent.getId(), false, conversationId));
         assertNull(mBinderService.getConversationNotificationChannel(
-                PKG, 0, PKG, callsParent.getId(), conversationId));
+                PKG, 0, PKG, callsParent.getId(), false, conversationId));
     }
 }

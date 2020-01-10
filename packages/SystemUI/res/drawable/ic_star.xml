@@ -1,5 +1,5 @@
 <!--
-  Copyright (C) 2017 The Android Open Source Project
+  Copyright (C) 2020 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License
   -->
+
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:width="24dp"
         android:height="24dp"
@@ -20,5 +21,5 @@
         android:viewportHeight="24.0">
     <path
         android:fillColor="@android:color/white"
-        android:pathData="M9,11h3.63L9,15.2L9,17h6v-2h-3.63L15,10.8L15,9L9,9v2zM16.056,3.346l1.282,-1.535 4.607,3.85 -1.28,1.54zM3.336,7.19l-1.28,-1.536L6.662,1.81l1.28,1.536zM12,6c3.86,0 7,3.14 7,7s-3.14,7 -7,7 -7,-3.14 -7,-7 3.14,-7 7,-7m0,-2c-4.97,0 -9,4.03 -9,9s4.03,9 9,9 9,-4.03 9,-9 -4.03,-9 -9,-9z"/>
+        android:pathData="M12,17.27L18.18,21l-1.64,-7.03L22,9.24l-7.19,-0.61L12,2 9.19,8.63 2,9.24l5.46,4.73L5.82,21 12,17.27z"/>
 </vector>

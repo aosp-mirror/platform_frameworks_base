@@ -472,7 +472,8 @@ public class NotificationManagerService extends SystemService {
     private static final String LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_VALUE = "value";
 
     private RankingHelper mRankingHelper;
-    private PreferencesHelper mPreferencesHelper;
+    @VisibleForTesting
+    PreferencesHelper mPreferencesHelper;
 
     private final UserProfiles mUserProfiles = new UserProfiles();
     private NotificationListeners mListeners;
@@ -3054,23 +3055,24 @@ public class NotificationManagerService extends SystemService {
         public NotificationChannel getNotificationChannel(String callingPkg, int userId,
                 String targetPkg, String channelId) {
             return getConversationNotificationChannel(
-                    callingPkg, userId, targetPkg, channelId, null);
+                    callingPkg, userId, targetPkg, channelId, true, null);
         }
 
         @Override
         public NotificationChannel getConversationNotificationChannel(String callingPkg, int userId,
-                String targetPkg, String channelId, String conversationId) {
+                String targetPkg, String channelId, boolean returnParentIfNoConversationChannel,
+                String conversationId) {
             if (canNotifyAsPackage(callingPkg, targetPkg, userId)
-                    || isCallingUidSystem()) {
+                    || isCallerIsSystemOrSystemUi()) {
                 int targetUid = -1;
                 try {
                     targetUid = mPackageManagerClient.getPackageUidAsUser(targetPkg, userId);
                 } catch (NameNotFoundException e) {
                     /* ignore */
                 }
-                return mPreferencesHelper.getNotificationChannel(
+                return mPreferencesHelper.getConversationNotificationChannel(
                         targetPkg, targetUid, channelId, conversationId,
-                        false /* includeDeleted */);
+                        returnParentIfNoConversationChannel, false /* includeDeleted */);
             }
             throw new SecurityException("Pkg " + callingPkg
                     + " cannot read channels for " + targetPkg + " in " + userId);
@@ -5255,9 +5257,15 @@ public class NotificationManagerService extends SystemService {
         if (mIsTelevision && (new Notification.TvExtender(notification)).getChannelId() != null) {
             channelId = (new Notification.TvExtender(notification)).getChannelId();
         }
-        final NotificationChannel channel = mPreferencesHelper.getNotificationChannel(pkg,
-                notificationUid, channelId, notification.getShortcutId(),
-                false /* includeDeleted */);
+        // TODO: flag this behavior
+        String shortcutId = notification.getShortcutId();
+        if (shortcutId == null
+            && notification.getNotificationStyle() == Notification.MessagingStyle.class) {
+            shortcutId = id + tag + NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
+        }
+        final NotificationChannel channel = mPreferencesHelper.getConversationNotificationChannel(
+                pkg, notificationUid, channelId, shortcutId,
+                true /* parent ok */, false /* includeDeleted */);
         if (channel == null) {
             final String noChannelStr = "No Channel found for "
                     + "pkg=" + pkg
@@ -7891,6 +7899,14 @@ public class NotificationManagerService extends SystemService {
     // TODO: Most calls should probably move to isCallerSystem.
     protected boolean isCallerSystemOrPhone() {
         return isUidSystemOrPhone(Binder.getCallingUid());
+    }
+
+    private boolean isCallerIsSystemOrSystemUi() {
+        if (isCallerSystemOrPhone()) {
+            return true;
+        }
+        return getContext().checkCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
+                == PERMISSION_GRANTED;
     }
 
     private void checkCallerIsSystemOrShell() {

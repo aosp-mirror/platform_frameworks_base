@@ -1150,6 +1150,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mMenuRow = plugin;
         if (mMenuRow.shouldUseDefaultMenuItems()) {
             ArrayList<MenuItem> items = new ArrayList<>();
+            items.add(NotificationMenuRow.createConversationItem(mContext));
             items.add(NotificationMenuRow.createInfoItem(mContext));
             items.add(NotificationMenuRow.createSnoozeItem(mContext));
             items.add(NotificationMenuRow.createAppOpsItem(mContext));
@@ -1163,7 +1164,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     public void onPluginDisconnected(NotificationMenuRowPlugin plugin) {
         boolean existed = mMenuRow.getMenuView() != null;
-        mMenuRow = new NotificationMenuRow(mContext); // Back to default
+        mMenuRow = new NotificationMenuRow(mContext);
         if (existed) {
             createMenu();
         }

@@ -354,6 +354,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel2.setGroup(ncg.getId());
         channel2.setVibrationPattern(new long[]{100, 67, 145, 156});
         channel2.setLightColor(Color.BLUE);
+        channel2.setConversationId("id1", "conversation");
 
         mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncg, true);
         mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncg2, true);
@@ -2822,8 +2823,20 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         friend.setConversationId(parent.getId(), conversationId);
         mHelper.createNotificationChannel(PKG_O, UID_O, friend, true, false);
 
-        compareChannelsParentChild(parent, mHelper.getNotificationChannel(
-                PKG_O, UID_O, parent.getId(), conversationId, false), conversationId);
+        compareChannelsParentChild(parent, mHelper.getConversationNotificationChannel(
+                PKG_O, UID_O, parent.getId(), conversationId, false, false), conversationId);
+    }
+
+    @Test
+    public void testGetNotificationChannel_conversationProvidedByNotCustomizedYet() {
+        String conversationId = "friend";
+
+        NotificationChannel parent =
+                new NotificationChannel("parent", "messages", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, parent, true, false);
+
+        compareChannels(parent, mHelper.getConversationNotificationChannel(
+                PKG_O, UID_O, parent.getId(), conversationId, true, false));
     }
 
     @Test

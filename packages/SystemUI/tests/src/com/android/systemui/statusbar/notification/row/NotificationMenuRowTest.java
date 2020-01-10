@@ -132,16 +132,6 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     }
 
     @Test
-    public void testNoAppOpsInSlowSwipe_biDirectionalSwipe() {
-        NotificationMenuRow row = new NotificationMenuRow(mContext, true);
-        row.createMenu(mRow, null);
-
-        ViewGroup container = (ViewGroup) row.getMenuView();
-        // in the new interruption model there is only the blocking item
-        assertEquals(1, container.getChildCount());
-    }
-
-    @Test
     public void testIsSnappedAndOnSameSide() {
         NotificationMenuRow row = Mockito.spy(new NotificationMenuRow((mContext)));
 
