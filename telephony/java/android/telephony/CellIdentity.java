@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import com.android.telephony.Rlog;
+
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;

@@ -25,7 +25,7 @@ import android.content.res.Resources;
 import android.os.RemoteException;
 import android.permission.IPermissionManager;
 import android.provider.Settings;
-import android.telephony.Rlog;
+import com.android.telephony.Rlog;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;

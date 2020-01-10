@@ -19,7 +19,7 @@ package com.android.internal.telephony;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.os.Build;
-import android.telephony.Rlog;
+import com.android.telephony.Rlog;
 import android.text.TextUtils;
 import android.util.SparseIntArray;
 
