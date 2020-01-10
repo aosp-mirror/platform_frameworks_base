@@ -7199,13 +7199,23 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    @NonNull
-    public AnimationBounds dispatchWindowInsetsAnimationStarted(
-            @NonNull InsetsAnimation animation, @NonNull AnimationBounds bounds) {
-        super.dispatchWindowInsetsAnimationStarted(animation, bounds);
+    public void dispatchWindowInsetsAnimationPrepare(
+            @NonNull InsetsAnimation animation) {
+        super.dispatchWindowInsetsAnimationPrepare(animation);
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
-            getChildAt(i).dispatchWindowInsetsAnimationStarted(animation, bounds);
+            getChildAt(i).dispatchWindowInsetsAnimationPrepare(animation);
+        }
+    }
+
+    @Override
+    @NonNull
+    public AnimationBounds dispatchWindowInsetsAnimationStart(
+            @NonNull InsetsAnimation animation, @NonNull AnimationBounds bounds) {
+        super.dispatchWindowInsetsAnimationStart(animation, bounds);
+        final int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            getChildAt(i).dispatchWindowInsetsAnimationStart(animation, bounds);
         }
         return bounds;
     }
@@ -7222,11 +7232,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    public void dispatchWindowInsetsAnimationFinished(@NonNull InsetsAnimation animation) {
-        super.dispatchWindowInsetsAnimationFinished(animation);
+    public void dispatchWindowInsetsAnimationFinish(@NonNull InsetsAnimation animation) {
+        super.dispatchWindowInsetsAnimationFinish(animation);
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
-            getChildAt(i).dispatchWindowInsetsAnimationFinished(animation);
+            getChildAt(i).dispatchWindowInsetsAnimationFinish(animation);
         }
     }
 

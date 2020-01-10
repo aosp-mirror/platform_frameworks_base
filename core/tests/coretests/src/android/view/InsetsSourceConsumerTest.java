@@ -96,7 +96,7 @@ public class InsetsSourceConsumerTest {
     @Test
     public void testHide() {
         mConsumer.hide();
-        assertFalse("Consumer should not be visible", mConsumer.isVisible());
+        assertFalse("Consumer should not be visible", mConsumer.isRequestedVisible());
         verify(mSpyInsetsSource).setVisible(eq(false));
     }
 
@@ -106,7 +106,7 @@ public class InsetsSourceConsumerTest {
         // Insets source starts out visible
         mConsumer.hide();
         mConsumer.show();
-        assertTrue("Consumer should be visible", mConsumer.isVisible());
+        assertTrue("Consumer should be visible", mConsumer.isRequestedVisible());
         verify(mSpyInsetsSource).setVisible(eq(false));
         verify(mSpyInsetsSource).setVisible(eq(true));
     }

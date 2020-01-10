@@ -1464,6 +1464,7 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
         mApplyInsetsRequested = true;
+        requestLayout();
 
         // If this changes during traversal, no need to schedule another one as it will dispatch it
         // during the current traversal.

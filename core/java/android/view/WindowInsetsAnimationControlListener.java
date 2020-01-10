@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.Hide;
 import android.annotation.NonNull;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.inputmethod.EditorInfo;
@@ -24,6 +25,12 @@ import android.view.inputmethod.EditorInfo;
  * Interface that informs the client about {@link WindowInsetsAnimationController} state changes.
  */
 public interface WindowInsetsAnimationControlListener {
+
+    /**
+     * @hide
+     */
+    default void onPrepare(int types) {
+    }
 
     /**
      * Called when the animation is ready to be controlled. This may be delayed when the IME needs

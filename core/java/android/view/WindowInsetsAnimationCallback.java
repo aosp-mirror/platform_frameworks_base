@@ -20,6 +20,7 @@ import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Insets;
+import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.animation.Interpolator;
 
@@ -30,7 +31,47 @@ import android.view.animation.Interpolator;
 public interface WindowInsetsAnimationCallback {
 
     /**
-     * Called when an inset animation gets started.
+     * Called when an insets animation is about to start and before the views have been laid out in
+     * the end state of the animation. The ordering of events during an insets animation is the
+     * following:
+     * <p>
+     * <ul>
+     *     <li>Application calls {@link WindowInsetsController#hideInputMethod()},
+     *     {@link WindowInsetsController#showInputMethod()},
+     *     {@link WindowInsetsController#controlInputMethodAnimation(long, WindowInsetsAnimationControlListener)}</li>
+     *     <li>onPrepare is called on the view hierarchy listeners</li>
+     *     <li>{@link View#onApplyWindowInsets} will be called with the end state of the
+     *     animation</li>
+     *     <li>View hierarchy gets laid out according to the changes the application has requested
+     *     due to the new insets being dispatched</li>
+     *     <li>{@link #onStart} is called <em>before</em> the view
+     *     hierarchy gets drawn in the new laid out state</li>
+     *     <li>{@link #onProgress} is called immediately after with the animation start state</li>
+     *     <li>The frame gets drawn.</li>
+     * </ul>
+     * <p>
+     * This ordering allows the application to inspect the end state after the animation has
+     * finished, and then revert to the starting state of the animation in the first
+     * {@link #onProgress} callback by using post-layout view properties like {@link View#setX} and
+     * related methods.
+     * <p>
+     * Note: If the animation is application controlled by using
+     * {@link WindowInsetsController#controlInputMethodAnimation}, the end state of the animation
+     * is undefined as the application may decide on the end state only by passing in the
+     * {@code shown} parameter when calling {@link WindowInsetsAnimationController#finish}. In this
+     * situation, the system will dispatch the insets in the opposite visibility state before the
+     * animation starts. Example: When controlling the input method with
+     * {@link WindowInsetsController#controlInputMethodAnimation} and the input method is currently
+     * showing, {@link View#onApplyWindowInsets} will receive a {@link WindowInsets} instance for
+     * which {@link WindowInsets#isVisible} will return {@code false} for {@link Type#ime}.
+     *
+     * @param animation The animation that is about to start.
+     */
+    default void onPrepare(@NonNull InsetsAnimation animation) {
+    }
+
+    /**
+     * Called when an insets animation gets started.
      * <p>
      * Note that, like {@link #onProgress}, dispatch of the animation start event is hierarchical:
      * It will starts at the root of the view hierarchy and then traverse it and invoke the callback
@@ -45,7 +86,7 @@ public interface WindowInsetsAnimationCallback {
      *         subtree of the hierarchy.
      */
     @NonNull
-    default AnimationBounds onStarted(
+    default AnimationBounds onStart(
             @NonNull InsetsAnimation animation, @NonNull AnimationBounds bounds) {
         return bounds;
     }
@@ -72,12 +113,12 @@ public interface WindowInsetsAnimationCallback {
     WindowInsets onProgress(@NonNull WindowInsets insets);
 
     /**
-     * Called when an inset animation has finished.
+     * Called when an insets animation has finished.
      *
      * @param animation The animation that has finished running. This will be the same instance as
-     *                  passed into {@link #onStarted}
+     *                  passed into {@link #onStart}
      */
-    default void onFinished(@NonNull InsetsAnimation animation) {
+    default void onFinish(@NonNull InsetsAnimation animation) {
     }
 
     /**
@@ -253,14 +294,14 @@ public interface WindowInsetsAnimationCallback {
 
         /**
          * Insets both the lower and upper bound by the specified insets. This is to be used in
-         * {@link WindowInsetsAnimationCallback#onStarted} to indicate that a part of the insets has
+         * {@link WindowInsetsAnimationCallback#onStart} to indicate that a part of the insets has
          * been used to offset or clip its children, and the children shouldn't worry about that
          * part anymore.
          *
          * @param insets The amount to inset.
          * @return A copy of this instance inset in the given directions.
          * @see WindowInsets#inset
-         * @see WindowInsetsAnimationCallback#onStarted
+         * @see WindowInsetsAnimationCallback#onStart
          */
         @NonNull
         public AnimationBounds inset(@NonNull Insets insets) {
