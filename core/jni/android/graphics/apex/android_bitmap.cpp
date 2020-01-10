@@ -122,6 +122,99 @@ AndroidBitmapInfo ABitmap_getInfo(ABitmap* bitmapHandle) {
     return getInfo(bitmap->info(), bitmap->rowBytes());
 }
 
+static bool nearlyEqual(float a, float b) {
+    // By trial and error, this is close enough to match for the ADataSpaces we
+    // compare for.
+    return ::fabs(a-b) < .002f;
+}
+
+static bool nearlyEqual(const skcms_TransferFunction& x, const skcms_TransferFunction& y) {
+    return nearlyEqual(x.g, y.g)
+        && nearlyEqual(x.a, y.a)
+        && nearlyEqual(x.b, y.b)
+        && nearlyEqual(x.c, y.c)
+        && nearlyEqual(x.d, y.d)
+        && nearlyEqual(x.e, y.e)
+        && nearlyEqual(x.f, y.f);
+}
+
+static bool nearlyEqual(const skcms_Matrix3x3& x, const skcms_Matrix3x3& y) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (!nearlyEqual(x.vals[i][j], y.vals[i][j])) return false;
+        }
+    }
+    return true;
+}
+
+static constexpr skcms_TransferFunction k2Dot6 =
+      { 2.6f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+
+// Skia's SkNamedGamut::kDCIP3 is based on a white point of D65. This gamut
+// matches the white point used by ColorSpace.Named.DCIP3.
+static constexpr skcms_Matrix3x3 kDCIP3 = {{
+  { 0.486143, 0.323835, 0.154234 },
+  { 0.226676, 0.710327, 0.0629966 },
+  { 0.000800549, 0.0432385, 0.78275 },
+}};
+
+ADataSpace ABitmap_getDataSpace(ABitmap* bitmapHandle) {
+    Bitmap* bitmap = TypeCast::toBitmap(bitmapHandle);
+    const SkImageInfo& info = bitmap->info();
+    SkColorSpace* colorSpace = info.colorSpace();
+    if (!colorSpace) {
+        return ADATASPACE_UNKNOWN;
+    }
+
+    if (colorSpace->isSRGB()) {
+        if (info.colorType() == kRGBA_F16_SkColorType) {
+            return ADATASPACE_SCRGB;
+        }
+        return ADATASPACE_SRGB;
+    }
+
+    skcms_TransferFunction fn;
+    LOG_ALWAYS_FATAL_IF(!colorSpace->isNumericalTransferFn(&fn));
+
+    skcms_Matrix3x3 gamut;
+    LOG_ALWAYS_FATAL_IF(!colorSpace->toXYZD50(&gamut));
+
+    if (nearlyEqual(gamut, SkNamedGamut::kSRGB)) {
+        if (nearlyEqual(fn, SkNamedTransferFn::kLinear)) {
+            // Skia doesn't differentiate amongst the RANGES. In Java, we associate
+            // LINEAR_EXTENDED_SRGB with F16, and LINEAR_SRGB with other Configs.
+            // Make the same association here.
+            if (info.colorType() == kRGBA_F16_SkColorType) {
+                return ADATASPACE_SCRGB_LINEAR;
+            }
+            return ADATASPACE_SRGB_LINEAR;
+        }
+
+        if (nearlyEqual(fn, SkNamedTransferFn::kRec2020)) {
+            return ADATASPACE_BT709;
+        }
+    }
+
+    if (nearlyEqual(fn, SkNamedTransferFn::kSRGB) && nearlyEqual(gamut, SkNamedGamut::kDCIP3)) {
+        return ADATASPACE_DISPLAY_P3;
+    }
+
+    if (nearlyEqual(fn, SkNamedTransferFn::k2Dot2) && nearlyEqual(gamut, SkNamedGamut::kAdobeRGB)) {
+        return ADATASPACE_ADOBE_RGB;
+    }
+
+    if (nearlyEqual(fn, SkNamedTransferFn::kRec2020)
+            && nearlyEqual(gamut, SkNamedGamut::kRec2020)) {
+        return ADATASPACE_BT2020;
+    }
+
+    if (nearlyEqual(fn, k2Dot6) && nearlyEqual(gamut, kDCIP3)) {
+        return ADATASPACE_DCI_P3;
+    }
+
+    return ADATASPACE_UNKNOWN;
+}
+
 AndroidBitmapInfo ABitmap_getInfoFromJava(JNIEnv* env, jobject bitmapObj) {
     uint32_t rowBytes = 0;
     SkImageInfo imageInfo = GraphicsJNI::getBitmapInfo(env, bitmapObj, &rowBytes);
