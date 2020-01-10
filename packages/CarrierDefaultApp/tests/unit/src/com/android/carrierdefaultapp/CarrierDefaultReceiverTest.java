@@ -15,6 +15,7 @@
  */
 package com.android.carrierdefaultapp;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -26,10 +27,9 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.test.InstrumentationTestCase;
-
-import com.android.internal.telephony.PhoneConstants;
 
 import org.junit.After;
 import org.junit.Before;
@@ -69,6 +69,7 @@ public class CarrierDefaultReceiverTest extends InstrumentationTestCase {
         mContext.injectSystemService(NotificationManager.class, mNotificationMgr);
         mContext.injectSystemService(TelephonyManager.class, mTelephonyMgr);
         mContext.injectSystemService(CarrierConfigManager.class, mCarrierConfigMgr);
+        doReturn(mTelephonyMgr).when(mTelephonyMgr).createForSubscriptionId(anyInt());
 
         mReceiver = new CarrierDefaultBroadcastReceiver();
     }
@@ -88,7 +89,7 @@ public class CarrierDefaultReceiverTest extends InstrumentationTestCase {
         doReturn(b).when(mCarrierConfigMgr).getConfig();
 
         Intent intent = new Intent(TelephonyManager.ACTION_CARRIER_SIGNAL_REDIRECTED);
-        intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+        intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
         mReceiver.onReceive(mContext, intent);
 
         mContext.waitForMs(100);
