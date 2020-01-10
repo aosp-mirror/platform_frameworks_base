@@ -165,9 +165,3 @@ prebuilt_etc {
     name: "protolog.conf.json.gz",
     src: ":services.core.json.gz",
 }
-
-platform_compat_config {
-    name: "services-core-platform-compat-config",
-    src: ":services.core.unboosted",
-}
-

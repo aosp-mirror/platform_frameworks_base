@@ -18,8 +18,3 @@ java_library_static {
         "compat-changeid-annotation-processor",
     ],
 }
-
-platform_compat_config {
-    name: "services-devicepolicy-platform-compat-config",
-    src: ":services.devicepolicy",
-}
