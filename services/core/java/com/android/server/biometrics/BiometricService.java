@@ -1400,7 +1400,8 @@ public class BiometricService extends SystemService {
                     if (mCurrentAuthSession.mTokenEscrow != null) {
                         mKeyStore.addAuthToken(mCurrentAuthSession.mTokenEscrow);
                     }
-                    mCurrentAuthSession.mClientReceiver.onAuthenticationSucceeded();
+                    mCurrentAuthSession.mClientReceiver.onAuthenticationSucceeded(
+                            Utils.getAuthenticationTypeForResult(reason));
                     break;
 
                 case BiometricPrompt.DISMISSED_REASON_NEGATIVE:
