@@ -40,7 +40,7 @@ import android.os.UserHandle;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.PackageChangeReceiver;
-import com.android.telephony.Rlog;
+import android.util.Log;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -569,7 +569,7 @@ public final class SmsApplication {
             int mode = appOps.unsafeCheckOp(opStr, applicationData.mUid,
                     applicationData.mPackageName);
             if (mode != AppOpsManager.MODE_ALLOWED) {
-                Rlog.e(LOG_TAG, applicationData.mPackageName + " lost "
+                Log.e(LOG_TAG, applicationData.mPackageName + " lost "
                         + opStr + ": "
                         + (updateIfNeeded ? " (fixing)" : " (no permission to fix)"));
                 if (updateIfNeeded) {
@@ -647,7 +647,7 @@ public final class SmsApplication {
                     int uid = packageManager.getPackageInfo(oldPackageName, 0).applicationInfo.uid;
                     setExclusiveAppops(oldPackageName, appOps, uid, AppOpsManager.MODE_DEFAULT);
                 } catch (NameNotFoundException e) {
-                    Rlog.w(LOG_TAG, "Old SMS package not found: " + oldPackageName);
+                    Log.w(LOG_TAG, "Old SMS package not found: " + oldPackageName);
                 }
             }
 
@@ -754,7 +754,7 @@ public final class SmsApplication {
         // the package signature matches system signature.
         final int result = packageManager.checkSignatures(context.getPackageName(), packageName);
         if (result != PackageManager.SIGNATURE_MATCH) {
-            Rlog.e(LOG_TAG, packageName + " does not have system signature");
+            Log.e(LOG_TAG, packageName + " does not have system signature");
             return;
         }
         try {
@@ -762,13 +762,13 @@ public final class SmsApplication {
             int mode = appOps.unsafeCheckOp(AppOpsManager.OPSTR_WRITE_SMS, info.applicationInfo.uid,
                     packageName);
             if (mode != AppOpsManager.MODE_ALLOWED) {
-                Rlog.w(LOG_TAG, packageName + " does not have OP_WRITE_SMS:  (fixing)");
+                Log.w(LOG_TAG, packageName + " does not have OP_WRITE_SMS:  (fixing)");
                 setExclusiveAppops(packageName, appOps, info.applicationInfo.uid,
                         AppOpsManager.MODE_ALLOWED);
             }
         } catch (NameNotFoundException e) {
             // No whitelisted system app on this device
-            Rlog.e(LOG_TAG, "Package not found: " + packageName);
+            Log.e(LOG_TAG, "Package not found: " + packageName);
         }
 
     }

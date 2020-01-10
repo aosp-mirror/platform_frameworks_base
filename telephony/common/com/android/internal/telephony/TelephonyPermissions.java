@@ -30,7 +30,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import com.android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -598,7 +597,7 @@ public final class TelephonyPermissions {
             return;
         }
 
-        if (DBG) Rlog.d(LOG_TAG, "No modify permission, check carrier privilege next.");
+        if (DBG) Log.d(LOG_TAG, "No modify permission, check carrier privilege next.");
         enforceCallingOrSelfCarrierPrivilege(subId, message);
     }
 
@@ -616,7 +615,7 @@ public final class TelephonyPermissions {
         }
 
         if (DBG) {
-            Rlog.d(LOG_TAG, "No READ_PHONE_STATE permission, check carrier privilege next.");
+            Log.d(LOG_TAG, "No READ_PHONE_STATE permission, check carrier privilege next.");
         }
 
         enforceCallingOrSelfCarrierPrivilege(subId, message);
@@ -636,7 +635,7 @@ public final class TelephonyPermissions {
         }
 
         if (DBG) {
-            Rlog.d(LOG_TAG, "No READ_PRIVILEDED_PHONE_STATE permission, "
+            Log.d(LOG_TAG, "No READ_PRIVILEDED_PHONE_STATE permission, "
                     + "check carrier privilege next.");
         }
 
@@ -664,7 +663,7 @@ public final class TelephonyPermissions {
             Supplier<ITelephony> telephonySupplier, int subId, int uid, String message) {
         if (getCarrierPrivilegeStatus(telephonySupplier, subId, uid)
                 != TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
-            if (DBG) Rlog.e(LOG_TAG, "No Carrier Privilege.");
+            if (DBG) Log.e(LOG_TAG, "No Carrier Privilege.");
             throw new SecurityException(message);
         }
     }
@@ -694,7 +693,7 @@ public final class TelephonyPermissions {
         } catch (RemoteException e) {
             // Fallback below.
         }
-        Rlog.e(LOG_TAG, "Phone process is down, cannot check carrier privileges");
+        Log.e(LOG_TAG, "Phone process is down, cannot check carrier privileges");
         return TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
     }
 
