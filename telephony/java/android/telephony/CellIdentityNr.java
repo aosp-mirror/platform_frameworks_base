@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
@@ -77,6 +78,7 @@ public final class CellIdentityNr extends CellIdentity {
      * @return a CellLocation object for this CellIdentity.
      * @hide
      */
+    @NonNull
     @Override
     public CellLocation asCellLocation() {
         return new GsmCellLocation();

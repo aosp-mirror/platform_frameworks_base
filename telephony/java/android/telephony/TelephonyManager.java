@@ -1867,13 +1867,9 @@ public class TelephonyManager {
                 return null;
             }
 
-            Bundle bundle = telephony.getCellLocation(mContext.getOpPackageName(), null);
-            if (bundle == null || bundle.isEmpty()) {
-                Rlog.d(TAG, "getCellLocation returning null because CellLocation is unavailable");
-                return null;
-            }
-
-            CellLocation cl = CellLocation.newFromBundle(bundle);
+            CellIdentity cellIdentity = telephony.getCellLocation(mContext.getOpPackageName(),
+                    null);
+            CellLocation cl = cellIdentity.asCellLocation();
             if (cl == null || cl.isEmpty()) {
                 Rlog.d(TAG, "getCellLocation returning null because CellLocation is empty or"
                         + " phone type doesn't match CellLocation type");

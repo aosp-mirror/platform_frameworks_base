@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -232,6 +233,7 @@ public final class CellIdentityLte extends CellIdentity {
      *
      * @hide
      */
+    @NonNull
     @Override
     public GsmCellLocation asCellLocation() {
         GsmCellLocation cl = new GsmCellLocation();
