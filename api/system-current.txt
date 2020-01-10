@@ -10583,6 +10583,8 @@ package android.telephony {
     field public static final String EXTRA_ERROR_CODE = "errorCode";
     field public static final String EXTRA_PCO_ID = "pcoId";
     field public static final String EXTRA_PCO_VALUE = "pcoValue";
+    field public static final String EXTRA_PHONE_IN_ECM_STATE = "android.telephony.extra.PHONE_IN_ECM_STATE";
+    field public static final String EXTRA_PHONE_IN_EMERGENCY_CALL = "android.telephony.extra.PHONE_IN_EMERGENCY_CALL";
     field public static final String EXTRA_REDIRECTION_URL = "redirectionUrl";
     field public static final String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
     field public static final String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL = "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
