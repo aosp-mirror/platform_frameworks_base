@@ -18,7 +18,7 @@ package android.widget;
 
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;

@@ -19,7 +19,7 @@ package android.view.accessibility;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
