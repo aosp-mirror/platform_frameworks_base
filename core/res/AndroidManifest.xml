@@ -370,6 +370,7 @@
     <protected-broadcast android:name="android.net.wifi.STATE_CHANGE" />
     <protected-broadcast android:name="android.net.wifi.LINK_CONFIGURATION_CHANGED" />
     <protected-broadcast android:name="android.net.wifi.CONFIGURED_NETWORKS_CHANGE" />
+    <protected-broadcast android:name="android.net.wifi.action.NETWORK_SETTINGS_RESET" />
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_DEAUTH_IMMINENT" />
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_ICON" />
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_OSU_PROVIDERS_LIST" />
