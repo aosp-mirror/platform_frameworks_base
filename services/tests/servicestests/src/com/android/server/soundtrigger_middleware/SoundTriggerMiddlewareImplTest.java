@@ -327,7 +327,9 @@ public class SoundTriggerMiddlewareImplTest {
             }).when(driver).getProperties_2_3(any());
         }
 
-        mService = new SoundTriggerMiddlewareImpl(mHalDriver, mAudioSessionProvider);
+        mService = new SoundTriggerMiddlewareImpl(() -> {
+            return mHalDriver;
+        }, mAudioSessionProvider);
     }
 
     private int loadGenericModel_2_0(ISoundTriggerModule module, int hwHandle)
@@ -725,12 +727,12 @@ public class SoundTriggerMiddlewareImplTest {
 
             @Override
             public boolean linkToDeath(DeathRecipient recipient, long cookie) {
-                throw new UnsupportedOperationException();
+                return true;
             }
 
             @Override
             public boolean unlinkToDeath(DeathRecipient recipient) {
-                throw new UnsupportedOperationException();
+                return true;
             }
         };
 

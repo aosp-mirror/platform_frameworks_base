@@ -344,18 +344,18 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
 
         @Override
         public void onStart() {
-            ISoundTriggerHw[] services;
-            try {
-                services = new ISoundTriggerHw[]{ISoundTriggerHw.getService(true)};
-                Log.d(TAG, "Connected to default ISoundTriggerHw");
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to connect to default ISoundTriggerHw", e);
-                services = new ISoundTriggerHw[0];
-            }
+            HalFactory[] factories = new HalFactory[]{() -> {
+                try {
+                    Log.d(TAG, "Connecting to default ISoundTriggerHw");
+                    return ISoundTriggerHw.getService(true);
+                } catch (RemoteException e) {
+                    throw e.rethrowAsRuntimeException();
+                }
+            }};
 
             publishBinderService(Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE,
                     new SoundTriggerMiddlewareService(
-                            new SoundTriggerMiddlewareImpl(services,
+                            new SoundTriggerMiddlewareImpl(factories,
                                     new AudioSessionProviderImpl()),
                             getContext()));
         }
@@ -679,7 +679,7 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
                 } catch (RemoteException e) {
                     // Dead client will be handled by binderDied() - no need to handle here.
                     // In any case, client callbacks are considered best effort.
-                    Log.e(TAG, "Client callback execption.", e);
+                    Log.e(TAG, "Client callback exception.", e);
                 }
             }
         }
@@ -695,7 +695,7 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
                 } catch (RemoteException e) {
                     // Dead client will be handled by binderDied() - no need to handle here.
                     // In any case, client callbacks are considered best effort.
-                    Log.e(TAG, "Client callback execption.", e);
+                    Log.e(TAG, "Client callback exception.", e);
                 }
             }
         }
@@ -708,7 +708,20 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
                 } catch (RemoteException e) {
                     // Dead client will be handled by binderDied() - no need to handle here.
                     // In any case, client callbacks are considered best effort.
-                    Log.e(TAG, "Client callback execption.", e);
+                    Log.e(TAG, "Client callback exception.", e);
+                }
+            }
+        }
+
+        @Override
+        public void onModuleDied() {
+            synchronized (this) {
+                try {
+                    mCallback.onModuleDied();
+                } catch (RemoteException e) {
+                    // Dead client will be handled by binderDied() - no need to handle here.
+                    // In any case, client callbacks are considered best effort.
+                    Log.e(TAG, "Client callback exception.", e);
                 }
             }
         }

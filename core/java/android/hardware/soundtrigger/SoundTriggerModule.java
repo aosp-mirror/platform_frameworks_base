@@ -370,6 +370,12 @@ public class SoundTriggerModule {
         }
 
         @Override
+        public synchronized void onModuleDied() {
+            Message m = mHandler.obtainMessage(EVENT_SERVICE_DIED);
+            mHandler.sendMessage(m);
+        }
+
+        @Override
         public synchronized void binderDied() {
             Message m = mHandler.obtainMessage(EVENT_SERVICE_DIED);
             mHandler.sendMessage(m);

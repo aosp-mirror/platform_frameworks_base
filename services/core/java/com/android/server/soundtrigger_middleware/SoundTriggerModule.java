@@ -30,7 +30,9 @@ import android.media.soundtrigger_middleware.SoundModelType;
 import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
 import android.media.soundtrigger_middleware.Status;
 import android.os.IBinder;
+import android.os.IHwBinder;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -57,6 +59,7 @@ import java.util.Set;
  * gracefully handle driver malfunction and such behavior will result in undefined behavior. If this
  * service is to used with an untrusted driver, the driver must be wrapped with validation / error
  * recovery code.
+ * <li>Recovery from driver death is supported.</li>
  * <li>RemoteExceptions thrown by the driver are treated as RuntimeExceptions - they are not
  * considered recoverable faults and should not occur in a properly functioning system.
  * <li>There is no binder instance associated with this implementation. Do not call asBinder().
@@ -79,9 +82,10 @@ import java.util.Set;
  *
  * @hide
  */
-class SoundTriggerModule {
+class SoundTriggerModule implements IHwBinder.DeathRecipient {
     static private final String TAG = "SoundTriggerModule";
-    @NonNull private final ISoundTriggerHw2 mHalService;
+    @NonNull private HalFactory mHalFactory;
+    @NonNull private ISoundTriggerHw2 mHalService;
     @NonNull private final SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider;
     private final Set<Session> mActiveSessions = new HashSet<>();
     private int mNumLoadedModels = 0;
@@ -91,15 +95,16 @@ class SoundTriggerModule {
     /**
      * Ctor.
      *
-     * @param halService The underlying HAL driver.
+     * @param halFactory A factory for the underlying HAL driver.
      */
-    SoundTriggerModule(@NonNull android.hardware.soundtrigger.V2_0.ISoundTriggerHw halService,
+    SoundTriggerModule(@NonNull HalFactory halFactory,
             @NonNull SoundTriggerMiddlewareImpl.AudioSessionProvider audioSessionProvider) {
-        assert halService != null;
-        mHalService = new SoundTriggerHw2Compat(halService);
+        assert halFactory != null;
+        mHalFactory = halFactory;
         mAudioSessionProvider = audioSessionProvider;
-        mProperties = ConversionUtil.hidl2aidlProperties(mHalService.getProperties());
 
+        attachToHal();
+        mProperties = ConversionUtil.hidl2aidlProperties(mHalService.getProperties());
         // We conservatively assume that external capture is active until explicitly told otherwise.
         mRecognitionAvailable = mProperties.concurrentCapture;
     }
@@ -145,6 +150,7 @@ class SoundTriggerModule {
      */
     synchronized void setExternalCaptureState(boolean active) {
         Log.d(TAG, String.format("setExternalCaptureState(active=%b)", active));
+
         if (mProperties.concurrentCapture) {
             // If we support concurrent capture, we don't care about any of this.
             return;
@@ -160,6 +166,23 @@ class SoundTriggerModule {
         for (Session session : mActiveSessions) {
             session.notifyRecognitionAvailability();
         }
+    }
+
+    @Override
+    public synchronized  void serviceDied(long cookie) {
+        Log.w(TAG, String.format("Underlying HAL driver died."));
+        for (Session session : mActiveSessions) {
+            session.moduleDied();
+        }
+        attachToHal();
+    }
+
+    /**
+     * Attached to the HAL service via factory.
+     */
+    private void attachToHal() {
+        mHalService = new SoundTriggerHw2Compat(mHalFactory.create());
+        mHalService.linkToDeath(this, 0);
     }
 
     /**
@@ -204,7 +227,11 @@ class SoundTriggerModule {
         public void detach() {
             Log.d(TAG, "detach()");
             synchronized (SoundTriggerModule.this) {
+                if (mCallback == null) {
+                    return;
+                }
                 removeSession(this);
+                mCallback = null;
             }
         }
 
@@ -212,6 +239,7 @@ class SoundTriggerModule {
         public int loadModel(@NonNull SoundModel model) {
             Log.d(TAG, String.format("loadModel(model=%s)", model));
             synchronized (SoundTriggerModule.this) {
+                checkValid();
                 if (mNumLoadedModels == mProperties.maxSoundModels) {
                     throw new RecoverableException(Status.RESOURCE_CONTENTION,
                             "Maximum number of models loaded.");
@@ -227,6 +255,7 @@ class SoundTriggerModule {
         public int loadPhraseModel(@NonNull PhraseSoundModel model) {
             Log.d(TAG, String.format("loadPhraseModel(model=%s)", model));
             synchronized (SoundTriggerModule.this) {
+                checkValid();
                 if (mNumLoadedModels == mProperties.maxSoundModels) {
                     throw new RecoverableException(Status.RESOURCE_CONTENTION,
                             "Maximum number of models loaded.");
@@ -243,6 +272,7 @@ class SoundTriggerModule {
         public void unloadModel(int modelHandle) {
             Log.d(TAG, String.format("unloadModel(handle=%d)", modelHandle));
             synchronized (SoundTriggerModule.this) {
+                checkValid();
                 mLoadedModels.get(modelHandle).unload();
                 --mNumLoadedModels;
             }
@@ -253,6 +283,7 @@ class SoundTriggerModule {
             Log.d(TAG,
                     String.format("startRecognition(handle=%d, config=%s)", modelHandle, config));
             synchronized (SoundTriggerModule.this) {
+                checkValid();
                 mLoadedModels.get(modelHandle).startRecognition(config);
             }
         }
@@ -269,6 +300,7 @@ class SoundTriggerModule {
         public void forceRecognitionEvent(int modelHandle) {
             Log.d(TAG, String.format("forceRecognitionEvent(handle=%d)", modelHandle));
             synchronized (SoundTriggerModule.this) {
+                checkValid();
                 mLoadedModels.get(modelHandle).forceRecognitionEvent();
             }
         }
@@ -279,6 +311,7 @@ class SoundTriggerModule {
                     String.format("setModelParameter(handle=%d, param=%d, value=%d)", modelHandle,
                             modelParam, value));
             synchronized (SoundTriggerModule.this) {
+                checkValid();
                 mLoadedModels.get(modelHandle).setParameter(modelParam, value);
             }
         }
@@ -288,6 +321,7 @@ class SoundTriggerModule {
             Log.d(TAG, String.format("getModelParameter(handle=%d, param=%d)", modelHandle,
                     modelParam));
             synchronized (SoundTriggerModule.this) {
+                checkValid();
                 return mLoadedModels.get(modelHandle).getParameter(modelParam);
             }
         }
@@ -298,6 +332,7 @@ class SoundTriggerModule {
             Log.d(TAG, String.format("queryModelParameterSupport(handle=%d, param=%d)", modelHandle,
                     modelParam));
             synchronized (SoundTriggerModule.this) {
+                checkValid();
                 return mLoadedModels.get(modelHandle).queryModelParameterSupport(modelParam);
             }
         }
@@ -318,6 +353,25 @@ class SoundTriggerModule {
                 // Dead client will be handled by binderDied() - no need to handle here.
                 // In any case, client callbacks are considered best effort.
                 Log.e(TAG, "Client callback execption.", e);
+            }
+        }
+
+        /**
+         * The underlying module HAL is dead.
+         */
+        private void moduleDied() {
+            try {
+                mCallback.onModuleDied();
+                removeSession(this);
+                mCallback = null;
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
+            }
+        }
+
+        private void checkValid() {
+            if (mCallback == null) {
+                throw new ServiceSpecificException(Status.DEAD_OBJECT);
             }
         }
 
