@@ -5948,12 +5948,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" apps="); pw.print(mAppsFreezingScreen);
             final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
             pw.print("  mRotation="); pw.print(defaultDisplayContent.getRotation());
-            pw.print("  mLastWindowForcedOrientation=");
-                    pw.print(defaultDisplayContent.getLastWindowForcedOrientation());
-                    pw.print(" mLastOrientation=");
-                            pw.println(defaultDisplayContent.getLastOrientation());
-                    pw.print(" waitingForConfig=");
-                            pw.println(defaultDisplayContent.mWaitingForConfig);
+            pw.print("  mLastOrientation=");
+                    pw.println(defaultDisplayContent.getLastOrientation());
+            pw.print(" waitingForConfig=");
+                    pw.println(defaultDisplayContent.mWaitingForConfig);
 
             pw.print("  Animation settings: disabled="); pw.print(mAnimationsDisabled);
                     pw.print(" window="); pw.print(mWindowAnimationScaleSetting);

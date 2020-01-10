@@ -397,14 +397,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private int mCurrentOverrideConfigurationChanges;
 
     /**
-     * Orientation forced by some window. If there is no visible window that specifies orientation
-     * it is set to {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED}.
-     *
-     * @see NonAppWindowContainers#getOrientation()
-     */
-    private int mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
-
-    /**
      * Last orientation forced by the keyguard. It is applied when keyguard is shown and is not
      * occluded.
      *
@@ -1248,11 +1240,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @ScreenOrientation
     int getLastOrientation() {
         return mDisplayRotation.getLastOrientation();
-    }
-
-    @ScreenOrientation
-    int getLastWindowForcedOrientation() {
-        return mLastWindowForcedOrientation;
     }
 
     void registerRemoteAnimations(RemoteAnimationDefinition definition) {
@@ -2101,16 +2088,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         if (mWmService.mDisplayFrozen) {
-            if (mLastWindowForcedOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
-                ProtoLog.v(WM_DEBUG_ORIENTATION,
-                        "Display id=%d is frozen, return %d", mDisplayId,
-                        mLastWindowForcedOrientation);
-                // If the display is frozen, some activities may be in the middle of restarting, and
-                // thus have removed their old window. If the window has the flag to hide the lock
-                // screen, then the lock screen can re-appear and inflict its own orientation on us.
-                // Keep the orientation stable until this all settles down.
-                return mLastWindowForcedOrientation;
-            } else if (policy.isKeyguardLocked()) {
+            if (policy.isKeyguardLocked()) {
                 // Use the last orientation the while the display is frozen with the keyguard
                 // locked. This could be the keyguard forced orientation or from a SHOW_WHEN_LOCKED
                 // window. We don't want to check the show when locked window directly though as
@@ -2121,11 +2099,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         mDisplayId, getLastOrientation());
                 return getLastOrientation();
             }
-        } else {
-            final int orientation = mAboveAppWindowsContainers.getOrientation();
-            if (orientation != SCREEN_ORIENTATION_UNSET) {
-                return orientation;
-            }
+        }
+        final int orientation = mAboveAppWindowsContainers.getOrientation();
+        if (orientation != SCREEN_ORIENTATION_UNSET) {
+            return orientation;
         }
 
         // Top system windows are not requesting an orientation. Start searching from apps.
@@ -4088,6 +4065,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         DisplayChildWindowContainer(WindowManagerService service) {
             super(service);
+            // TODO(display-area): move to ConfigurationContainer?
+            mOrientation = SCREEN_ORIENTATION_UNSET;
         }
 
         @Override
@@ -4482,7 +4461,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         @Override
-        int getOrientation() {
+        int getOrientation(int candidate) {
             if (isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)) {
                 // Apps and their containers are not allowed to specify an orientation while the
                 // docked stack is visible...except for the home stack if the docked stack is
@@ -4500,7 +4479,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 return SCREEN_ORIENTATION_UNSPECIFIED;
             }
 
-            final int orientation = super.getOrientation();
+            final int orientation = super.getOrientation(candidate);
             if (orientation != SCREEN_ORIENTATION_UNSET
                     && orientation != SCREEN_ORIENTATION_BEHIND) {
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
@@ -4755,11 +4734,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         token2.mOwnerCanManageAppTokens) ? -1 : 1;
 
         private final Predicate<WindowState> mGetOrientingWindow = w -> {
-            if (!w.isVisibleLw() || !w.mLegacyPolicyVisibilityAfterAnim) {
-                return false;
+            final WindowManagerPolicy policy = mWmService.mPolicy;
+            if (policy.isKeyguardHostWindow(w.mAttrs)) {
+                if (mWmService.mKeyguardGoingAway) {
+                    return false;
+                }
+                // Consider unoccluding only when all unknown visibilities have been
+                // resolved, as otherwise we just may be starting another occluding activity.
+                final boolean isUnoccluding =
+                        mDisplayContent.mAppTransition.getAppTransition()
+                                == TRANSIT_KEYGUARD_UNOCCLUDE
+                                && mDisplayContent.mUnknownAppVisibilityController.allResolved();
+                // If keyguard is showing, or we're unoccluding, force the keyguard's orientation,
+                // even if SystemUI hasn't updated the attrs yet.
+                if (policy.isKeyguardShowingAndNotOccluded() || isUnoccluding) {
+                    return true;
+                }
             }
             final int req = w.mAttrs.screenOrientation;
-            if(req == SCREEN_ORIENTATION_UNSPECIFIED || req == SCREEN_ORIENTATION_BEHIND
+            if (req == SCREEN_ORIENTATION_UNSPECIFIED || req == SCREEN_ORIENTATION_BEHIND
                     || req == SCREEN_ORIENTATION_UNSET) {
                 return false;
             }
@@ -4786,39 +4779,27 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         @Override
-        int getOrientation() {
-            final WindowManagerPolicy policy = mWmService.mPolicy;
+        int getOrientation(int candidate) {
             // Find a window requesting orientation.
             final WindowState win = getWindow(mGetOrientingWindow);
 
             if (win != null) {
-                final int req = win.mAttrs.screenOrientation;
-                if (policy.isKeyguardHostWindow(win.mAttrs)) {
-                    mLastKeyguardForcedOrientation = req;
-                    if (mWmService.mKeyguardGoingAway) {
-                        // Keyguard can't affect the orientation if it is going away...
-                        mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
-                        return SCREEN_ORIENTATION_UNSET;
-                    }
-                }
+                int req = win.mAttrs.screenOrientation;
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
                         "%s forcing orientation to %d for display id=%d", win, req,
                         mDisplayId);
-                return (mLastWindowForcedOrientation = req);
+                if (mWmService.mPolicy.isKeyguardHostWindow(win.mAttrs)) {
+                    // SystemUI controls the Keyguard orientation asynchronously, and mAttrs may be
+                    // stale. We record / use the last known override.
+                    if (req != SCREEN_ORIENTATION_UNSET && req != SCREEN_ORIENTATION_UNSPECIFIED) {
+                        mDisplayContent.mLastKeyguardForcedOrientation = req;
+                    } else {
+                        req = mDisplayContent.mLastKeyguardForcedOrientation;
+                    }
+                }
+                return req;
             }
-
-            mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
-
-            // Only allow force setting the orientation when all unknown visibilities have been
-            // resolved, as otherwise we just may be starting another occluding activity.
-            final boolean isUnoccluding =
-                    mAppTransition.getAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE
-                            && mUnknownAppVisibilityController.allResolved();
-            if (policy.isKeyguardShowingAndNotOccluded() || isUnoccluding) {
-                return mLastKeyguardForcedOrientation;
-            }
-
-            return SCREEN_ORIENTATION_UNSET;
+            return candidate;
         }
 
         @Override
@@ -4862,6 +4843,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         public void setNeedsLayer() {
             mNeedsLayer = true;
+        }
+
+        @Override
+        int getOrientation(int candidate) {
+            // IME does not participate in orientation.
+            return candidate;
         }
 
         @Override
