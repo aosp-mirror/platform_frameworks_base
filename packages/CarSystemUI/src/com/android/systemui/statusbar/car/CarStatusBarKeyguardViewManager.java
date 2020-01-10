@@ -24,6 +24,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.R;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.navigationbar.car.CarNavigationBarController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.NavigationModeController;
@@ -40,6 +41,8 @@ import javax.inject.Singleton;
 public class CarStatusBarKeyguardViewManager extends StatusBarKeyguardViewManager {
 
     protected boolean mShouldHideNavBar;
+    private final CarNavigationBarController mCarNavigationBarController;
+    private final FullscreenUserSwitcher mFullscreenUserSwitcher;
 
     @Inject
     public CarStatusBarKeyguardViewManager(Context context,
@@ -52,13 +55,17 @@ public class CarStatusBarKeyguardViewManager extends StatusBarKeyguardViewManage
             DockManager dockManager,
             StatusBarWindowController statusBarWindowController,
             KeyguardStateController keyguardStateController,
-            NotificationMediaManager notificationMediaManager) {
+            NotificationMediaManager notificationMediaManager,
+            CarNavigationBarController carNavigationBarController,
+            FullscreenUserSwitcher fullscreenUserSwitcher) {
         super(context, callback, lockPatternUtils, sysuiStatusBarStateController,
                 configurationController, keyguardUpdateMonitor, navigationModeController,
                 dockManager, statusBarWindowController, keyguardStateController,
                 notificationMediaManager);
         mShouldHideNavBar = context.getResources()
                 .getBoolean(R.bool.config_hideNavWhenKeyguardBouncerShown);
+        mCarNavigationBarController = carNavigationBarController;
+        mFullscreenUserSwitcher = fullscreenUserSwitcher;
     }
 
     @Override
@@ -66,8 +73,10 @@ public class CarStatusBarKeyguardViewManager extends StatusBarKeyguardViewManage
         if (!mShouldHideNavBar) {
             return;
         }
-        CarStatusBar statusBar = (CarStatusBar) mStatusBar;
-        statusBar.setNavBarVisibility(navBarVisible ? View.VISIBLE : View.GONE);
+        int visibility = navBarVisible ? View.VISIBLE : View.GONE;
+        mCarNavigationBarController.setBottomWindowVisibility(visibility);
+        mCarNavigationBarController.setLeftWindowVisibility(visibility);
+        mCarNavigationBarController.setRightWindowVisibility(visibility);
     }
 
     /**
@@ -86,8 +95,7 @@ public class CarStatusBarKeyguardViewManager extends StatusBarKeyguardViewManage
      */
     @Override
     public void onCancelClicked() {
-        CarStatusBar statusBar = (CarStatusBar) mStatusBar;
-        statusBar.showUserSwitcher();
+        mFullscreenUserSwitcher.show();
     }
 
     /**

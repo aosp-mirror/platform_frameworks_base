@@ -54,6 +54,7 @@ public class SystemUIPrimaryWindowController implements
     private ViewGroup mBaseLayout;
     private WindowManager.LayoutParams mLp;
     private WindowManager.LayoutParams mLpChanged;
+    private boolean mIsAttached = false;
 
     @Inject
     public SystemUIPrimaryWindowController(
@@ -86,8 +87,17 @@ public class SystemUIPrimaryWindowController implements
         return mBaseLayout;
     }
 
+    /** Returns {@code true} if the window is already attached. */
+    public boolean isAttached() {
+        return mIsAttached;
+    }
+
     /** Attaches the window to the window manager. */
     public void attach() {
+        if (mIsAttached) {
+            return;
+        }
+        mIsAttached = true;
         // Now that the status bar window encompasses the sliding panel and its
         // translucent backdrop, the entire thing is made TRANSLUCENT and is
         // hardware-accelerated.
@@ -98,13 +108,14 @@ public class SystemUIPrimaryWindowController implements
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                         | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 PixelFormat.TRANSLUCENT);
         mLp.token = new Binder();
         mLp.gravity = Gravity.TOP;
         mLp.setFitWindowInsetsTypes(/* types= */ 0);
         mLp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
-        mLp.setTitle("NotificationShade");
+        mLp.setTitle("SystemUIPrimaryWindow");
         mLp.packageName = mContext.getPackageName();
         mLp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
@@ -118,8 +129,11 @@ public class SystemUIPrimaryWindowController implements
             // TODO: Update this so that the windowing type gets the full height of the display
             //  when we use MATCH_PARENT.
             mLpChanged.height = mDisplayHeight + mNavBarHeight;
+            mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         } else {
             mLpChanged.height = mStatusBarHeight;
+            // TODO: Allow touches to go through to the status bar to handle notification panel.
+            mLpChanged.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         }
         updateWindow();
     }
@@ -131,7 +145,9 @@ public class SystemUIPrimaryWindowController implements
 
     private void updateWindow() {
         if (mLp != null && mLp.copyFrom(mLpChanged) != 0) {
-            mWindowManager.updateViewLayout(mBaseLayout, mLp);
+            if (isAttached()) {
+                mWindowManager.updateViewLayout(mBaseLayout, mLp);
+            }
         }
     }
 }
