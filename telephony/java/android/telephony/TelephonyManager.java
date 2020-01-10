@@ -107,6 +107,7 @@ import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.SmsApplication;
+import com.android.telephony.Rlog;
 
 import dalvik.system.VMRuntime;
 
