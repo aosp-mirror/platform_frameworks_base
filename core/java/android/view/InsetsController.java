@@ -19,6 +19,8 @@ package android.view;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.toPublicType;
 import static android.view.WindowInsets.Type.all;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -28,7 +30,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.net.InvalidPacketException.ErrorCode;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -781,20 +782,41 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     @Override
-    public void setSystemBarsAppearance(@Appearance int appearance) {
-        if (mViewRoot.mWindowAttributes.insetsFlags.appearance != appearance) {
-            mViewRoot.mWindowAttributes.insetsFlags.appearance = appearance;
+    public void setSystemBarsAppearance(@Appearance int appearance, @Appearance int mask) {
+        mViewRoot.mWindowAttributes.privateFlags |= PRIVATE_FLAG_APPEARANCE_CONTROLLED;
+        final InsetsFlags insetsFlags = mViewRoot.mWindowAttributes.insetsFlags;
+        if (insetsFlags.appearance != appearance) {
+            insetsFlags.appearance = (insetsFlags.appearance & ~mask) | (appearance & mask);
             mViewRoot.mWindowAttributesChanged = true;
             mViewRoot.scheduleTraversals();
         }
     }
 
     @Override
+    public @Appearance int getSystemBarsAppearance() {
+        if ((mViewRoot.mWindowAttributes.privateFlags & PRIVATE_FLAG_APPEARANCE_CONTROLLED) == 0) {
+            // We only return the requested appearance, not the implied one.
+            return 0;
+        }
+        return mViewRoot.mWindowAttributes.insetsFlags.appearance;
+    }
+
+    @Override
     public void setSystemBarsBehavior(@Behavior int behavior) {
+        mViewRoot.mWindowAttributes.privateFlags |= PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
         if (mViewRoot.mWindowAttributes.insetsFlags.behavior != behavior) {
             mViewRoot.mWindowAttributes.insetsFlags.behavior = behavior;
             mViewRoot.mWindowAttributesChanged = true;
             mViewRoot.scheduleTraversals();
         }
+    }
+
+    @Override
+    public @Appearance int getSystemBarsBehavior() {
+        if ((mViewRoot.mWindowAttributes.privateFlags & PRIVATE_FLAG_BEHAVIOR_CONTROLLED) == 0) {
+            // We only return the requested behavior, not the implied one.
+            return 0;
+        }
+        return mViewRoot.mWindowAttributes.insetsFlags.behavior;
     }
 }

@@ -29,7 +29,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Interface to control windows that generate insets.
  *
- * TODO Needs more information and examples once the API is more baked.
+ * TODO(118118435): Needs more information and examples once the API is more baked.
  */
 public interface WindowInsetsController {
 
@@ -205,19 +205,45 @@ public interface WindowInsetsController {
 
     /**
      * Controls the appearance of system bars.
+     * <p>
+     * For example, the following statement adds {@link #APPEARANCE_LIGHT_STATUS_BARS}:
+     * <pre>
+     * setSystemBarsAppearance(APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS)
+     * </pre>
+     * And the following statement clears it:
+     * <pre>
+     * setSystemBarsAppearance(0, APPEARANCE_LIGHT_STATUS_BARS)
+     * </pre>
      *
      * @param appearance Bitmask of {@link Appearance} flags.
-     * @see Appearance
+     * @param mask Specifies which flags of appearance should be changed.
+     * @see #getSystemBarsAppearance
      */
-    void setSystemBarsAppearance(@Appearance int appearance);
+    void setSystemBarsAppearance(@Appearance int appearance, @Appearance int mask);
+
+    /**
+     * Retrieves the requested appearance of system bars.
+     *
+     * @return The requested bitmask of system bar appearance controlled by this window.
+     * @see #setSystemBarsAppearance(int, int)
+     */
+    @Appearance int getSystemBarsAppearance();
 
     /**
      * Controls the behavior of system bars.
      *
      * @param behavior Determines how the bars behave when being hidden by the application.
-     * @see Behavior
+     * @see #getSystemBarsBehavior
      */
     void setSystemBarsBehavior(@Behavior int behavior);
+
+    /**
+     * Retrieves the requested behavior of system bars.
+     *
+     * @return the system bar behavior controlled by this window.
+     * @see #setSystemBarsBehavior(int)
+     */
+    @Behavior int getSystemBarsBehavior();
 
     /**
      * @hide
