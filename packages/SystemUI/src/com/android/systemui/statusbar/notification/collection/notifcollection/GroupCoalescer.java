@@ -259,7 +259,7 @@ public class GroupCoalescer implements Dumpable {
         pw.println("Coalesced notifications:");
         for (EventBatch batch : mBatches.values()) {
             pw.println("   Batch " + batch.mGroupKey + ":");
-            pw.println("       Created" + (now - batch.mCreatedTimestamp) + "ms ago");
+            pw.println("       Created " + (now - batch.mCreatedTimestamp) + "ms ago");
             for (CoalescedEvent event : batch.mMembers) {
                 pw.println("       " + event.getKey());
                 eventCount++;
@@ -299,5 +299,5 @@ public class GroupCoalescer implements Dumpable {
         void onNotificationBatchPosted(List<CoalescedEvent> events);
     }
 
-    private static final int GROUP_LINGER_DURATION = 40;
+    private static final int GROUP_LINGER_DURATION = 500;
 }
