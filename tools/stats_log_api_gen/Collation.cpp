@@ -434,7 +434,7 @@ int collate_atoms(const Descriptor *descriptor, Atoms *atoms) {
     AtomDecl nonChainedAtomDecl(atomField->number(), atomField->name(), atom->name());
     vector<java_type_t> nonChainedSignature;
     if (get_non_chained_node(atom, &nonChainedAtomDecl, &nonChainedSignature)) {
-        auto it = atoms->non_chained_signatures_to_modules.find(signature);
+        auto it = atoms->non_chained_signatures_to_modules.find(nonChainedSignature);
         if (it == atoms->non_chained_signatures_to_modules.end()) {
             set<string> modules_non_chained;
             if (atomDecl.hasModule) {
