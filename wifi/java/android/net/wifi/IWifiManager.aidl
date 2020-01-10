@@ -250,4 +250,6 @@ interface IWifiManager
     void unregisterSuggestionConnectionStatusListener(int listenerIdentifier, String packageName);
 
     int calculateSignalLevel(int rssi);
+
+    List<WifiConfiguration> getWifiConfigForMatchedNetworkSuggestionsSharedWithUser(in List<ScanResult> scanResults);
 }
