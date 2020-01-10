@@ -169,11 +169,11 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.image = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         data.finisher = null;
         data.mActionsReadyListener = null;
+        data.createDeleteAction = true;
         SaveImageInBackgroundTask task = new SaveImageInBackgroundTask(mContext, data);
         List<Notification.Action> actions = task.populateNotificationActions(
                 mContext, mContext.getResources(),
-                Uri.parse("Screenshot_123.png"),
-                CompletableFuture.completedFuture(Collections.emptyList()));
+                Uri.parse("Screenshot_123.png"));
 
         Assert.assertEquals(actions.size(), 3);
         boolean isShareFound = false;
@@ -184,7 +184,8 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
             Assert.assertNotNull(intent);
             Bundle bundle = intent.getExtras();
             Assert.assertTrue(bundle.containsKey(GlobalScreenshot.EXTRA_ID));
-            Assert.assertTrue(bundle.containsKey(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED));
+            Assert.assertTrue(
+                    bundle.containsKey(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED));
 
             if (action.title.equals(GlobalScreenshot.ACTION_TYPE_DELETE)) {
                 isDeleteFound = intent.getAction() == null;
