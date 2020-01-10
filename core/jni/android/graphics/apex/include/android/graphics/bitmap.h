@@ -17,7 +17,6 @@
 #define ANDROID_GRAPHICS_BITMAP_H
 
 #include <android/bitmap.h>
-#include <android/data_space.h>
 #include <jni.h>
 #include <sys/cdefs.h>
 
@@ -50,7 +49,6 @@ void ABitmap_acquireRef(ABitmap* bitmap);
 void ABitmap_releaseRef(ABitmap* bitmap);
 
 AndroidBitmapInfo ABitmap_getInfo(ABitmap* bitmap);
-ADataSpace ABitmap_getDataSpace(ABitmap* bitmap);
 
 void* ABitmap_getPixels(ABitmap* bitmap);
 void ABitmap_notifyPixelsChanged(ABitmap* bitmap);
@@ -108,7 +106,6 @@ namespace graphics {
         ABitmap* get() const { return mBitmap; }
 
         AndroidBitmapInfo getInfo() const { return ABitmap_getInfo(mBitmap); }
-        ADataSpace getDataSpace() const { return ABitmap_getDataSpace(mBitmap); }
         void* getPixels() const { return ABitmap_getPixels(mBitmap); }
         void notifyPixelsChanged() const { ABitmap_notifyPixelsChanged(mBitmap); }
 
