@@ -10272,6 +10272,10 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void sendMultipartTextMessageWithoutPersisting(String, String, java.util.List<java.lang.String>, java.util.List<android.app.PendingIntent>, java.util.List<android.app.PendingIntent>);
   }
 
+  public class SmsMessage {
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static byte[] getSubmitPduEncodedMessage(boolean, @NonNull String, @NonNull String, int, int, int, int, int, int);
+  }
+
   public class SubscriptionInfo implements android.os.Parcelable {
     method public boolean areUiccApplicationsEnabled();
     method @Nullable public java.util.List<android.telephony.UiccAccessRule> getAccessRules();

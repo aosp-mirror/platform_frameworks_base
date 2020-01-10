@@ -20,8 +20,13 @@ import com.android.telephony.Rlog;
 
 import static android.telephony.TelephonyManager.PHONE_TYPE_CDMA;
 
+import android.Manifest;
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.StringDef;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.os.Binder;
@@ -31,8 +36,10 @@ import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
 import com.android.internal.telephony.Sms7BitEncodingTranslator;
 import com.android.internal.telephony.SmsConstants;
+import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.SmsMessageBase.SubmitPduBase;
+import com.android.internal.telephony.cdma.sms.UserData;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -55,6 +62,16 @@ public class SmsMessage {
     public enum MessageClass{
         UNKNOWN, CLASS_0, CLASS_1, CLASS_2, CLASS_3;
     }
+
+    /** @hide */
+    @IntDef(prefix = { "ENCODING_" }, value = {
+            ENCODING_UNKNOWN,
+            ENCODING_7BIT,
+            ENCODING_8BIT,
+            ENCODING_16BIT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EncodingSize {}
 
     /** User data text encoding code unit size */
     public static final int ENCODING_UNKNOWN = 0;
@@ -630,6 +647,83 @@ public class SmsMessage {
         }
 
         return new SubmitPdu(spb);
+    }
+
+    /**
+     * Get an SMS-SUBMIT PDU's encoded message.
+     * This is used by Bluetooth MAP profile to handle long non UTF-8 SMS messages.
+     *
+     * @param isTypeGsm true when message's type is GSM, false when type is CDMA
+     * @param destinationAddress the address of the destination for the message
+     * @param message message content
+     * @param encoding User data text encoding code unit size
+     * @param languageTable GSM national language table to use, specified by 3GPP
+     *                      23.040 9.2.3.24.16
+     * @param languageShiftTable GSM national language shift table to use, specified by 3GPP
+     *                           23.040 9.2.3.24.15
+     * @param refNumber parameter to create SmsHeader
+     * @param seqNumber parameter to create SmsHeader
+     * @param msgCount parameter to create SmsHeader
+     * @return a byte[] containing the encoded message
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @SystemApi
+    @NonNull
+    public static byte[] getSubmitPduEncodedMessage(boolean isTypeGsm,
+            @NonNull String destinationAddress,
+            @NonNull String message,
+            @EncodingSize int encoding, int languageTable,
+            int languageShiftTable, int refNumber,
+            int seqNumber, int msgCount) {
+        byte[] data;
+        SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
+        concatRef.refNumber = refNumber;
+        concatRef.seqNumber = seqNumber;  // 1-based sequence
+        concatRef.msgCount = msgCount;
+        // We currently set this to true since our messaging app will never
+        // send more than 255 parts (it converts the message to MMS well before that).
+        // However, we should support 3rd party messaging apps that might need 16-bit
+        // references
+        // Note:  It's not sufficient to just flip this bit to true; it will have
+        // ripple effects (several calculations assume 8-bit ref).
+        concatRef.isEightBits = true;
+        SmsHeader smsHeader = new SmsHeader();
+        smsHeader.concatRef = concatRef;
+
+        /* Depending on the type, call either GSM or CDMA getSubmitPdu(). The encoding
+         * will be determined(again) by getSubmitPdu().
+         * All packets need to be encoded using the same encoding, as the bMessage
+         * only have one filed to describe the encoding for all messages in a concatenated
+         * SMS... */
+        if (encoding == ENCODING_7BIT) {
+            smsHeader.languageTable = languageTable;
+            smsHeader.languageShiftTable = languageShiftTable;
+        }
+
+        if (isTypeGsm) {
+            data = com.android.internal.telephony.gsm.SmsMessage.getSubmitPdu(null,
+                    destinationAddress, message, false,
+                    SmsHeader.toByteArray(smsHeader), encoding, languageTable,
+                    languageShiftTable).encodedMessage;
+        } else { // SMS_TYPE_CDMA
+            UserData uData = new UserData();
+            uData.payloadStr = message;
+            uData.userDataHeader = smsHeader;
+            if (encoding == ENCODING_7BIT) {
+                uData.msgEncoding = UserData.ENCODING_GSM_7BIT_ALPHABET;
+            } else { // assume UTF-16
+                uData.msgEncoding = UserData.ENCODING_UNICODE_16;
+            }
+            uData.msgEncodingSet = true;
+            data = com.android.internal.telephony.cdma.SmsMessage.getSubmitPdu(
+                    destinationAddress, uData, false).encodedMessage;
+        }
+        if (data == null) {
+            return new byte[0];
+        }
+        return data;
     }
 
     /**
