@@ -22793,7 +22793,7 @@ public class PackageManagerService extends IPackageManager.Stub
             ArrayList<String> systemPackageNames = new ArrayList<>(pkgNames.length);
 
             for (String pkgName: pkgNames) {
-                synchronized (mPackages) {
+                synchronized (mLock) {
                     if (pkgName == null) {
                         continue;
                     }
@@ -23634,7 +23634,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Nullable
     public PackageSetting getPackageSetting(String packageName) {
-        synchronized (mPackages) {
+        synchronized (mLock) {
             packageName = resolveInternalPackageNameLPr(
                     packageName, PackageManager.VERSION_CODE_HIGHEST);
             return mSettings.mPackages.get(packageName);
