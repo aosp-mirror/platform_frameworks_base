@@ -182,6 +182,12 @@ public final class SoftApConfiguration implements Parcelable {
     private final @SecurityType int mSecurityType;
 
     /**
+     * Delay in milliseconds before shutting down soft AP when
+     * there are no connected devices.
+     */
+    private final int mShutdownTimeoutMillis;
+
+    /**
      * Security types we support.
      */
     /** @hide */
@@ -213,7 +219,7 @@ public final class SoftApConfiguration implements Parcelable {
     /** Private constructor for Builder and Parcelable implementation. */
     private SoftApConfiguration(@Nullable String ssid, @Nullable MacAddress bssid,
             @Nullable String passphrase, boolean hiddenSsid, @BandType int band, int channel,
-            @SecurityType int securityType, int maxNumberOfClients) {
+            @SecurityType int securityType, int maxNumberOfClients, int shutdownTimeoutMillis) {
         mSsid = ssid;
         mBssid = bssid;
         mPassphrase = passphrase;
@@ -222,6 +228,7 @@ public final class SoftApConfiguration implements Parcelable {
         mChannel = channel;
         mSecurityType = securityType;
         mMaxNumberOfClients = maxNumberOfClients;
+        mShutdownTimeoutMillis = shutdownTimeoutMillis;
     }
 
     @Override
@@ -240,13 +247,14 @@ public final class SoftApConfiguration implements Parcelable {
                 && mBand == other.mBand
                 && mChannel == other.mChannel
                 && mSecurityType == other.mSecurityType
-                && mMaxNumberOfClients == other.mMaxNumberOfClients;
+                && mMaxNumberOfClients == other.mMaxNumberOfClients
+                && mShutdownTimeoutMillis == other.mShutdownTimeoutMillis;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mSsid, mBssid, mPassphrase, mHiddenSsid,
-                mBand, mChannel, mSecurityType, mMaxNumberOfClients);
+                mBand, mChannel, mSecurityType, mMaxNumberOfClients, mShutdownTimeoutMillis);
     }
 
     @Override
@@ -261,6 +269,7 @@ public final class SoftApConfiguration implements Parcelable {
         sbuf.append(" \n Channel =").append(mChannel);
         sbuf.append(" \n SecurityType=").append(getSecurityType());
         sbuf.append(" \n MaxClient=").append(mMaxNumberOfClients);
+        sbuf.append(" \n ShutdownTimeoutMillis=").append(mShutdownTimeoutMillis);
         return sbuf.toString();
     }
 
@@ -274,6 +283,7 @@ public final class SoftApConfiguration implements Parcelable {
         dest.writeInt(mChannel);
         dest.writeInt(mSecurityType);
         dest.writeInt(mMaxNumberOfClients);
+        dest.writeInt(mShutdownTimeoutMillis);
     }
 
     @Override
@@ -289,7 +299,7 @@ public final class SoftApConfiguration implements Parcelable {
                     in.readString(),
                     in.readParcelable(MacAddress.class.getClassLoader()),
                     in.readString(), in.readBoolean(), in.readInt(), in.readInt(), in.readInt(),
-                    in.readInt());
+                    in.readInt(), in.readInt());
         }
 
         @Override
@@ -381,6 +391,15 @@ public final class SoftApConfiguration implements Parcelable {
     }
 
     /**
+     * Returns the shutdown timeout in milliseconds.
+     * The Soft AP will shutdown when there are no devices associated to it for
+     * the timeout duration. See {@link Builder#setShutdownTimeoutMillis(int)}.
+     */
+    public int getShutdownTimeoutMillis() {
+        return mShutdownTimeoutMillis;
+    }
+
+    /**
      * Builds a {@link SoftApConfiguration}, which allows an app to configure various aspects of a
      * Soft AP.
      *
@@ -396,6 +415,7 @@ public final class SoftApConfiguration implements Parcelable {
         private int mChannel;
         private int mMaxNumberOfClients;
         private int mSecurityType;
+        private int mShutdownTimeoutMillis;
 
         /**
          * Constructs a Builder with default values (see {@link Builder}).
@@ -409,6 +429,7 @@ public final class SoftApConfiguration implements Parcelable {
             mChannel = 0;
             mMaxNumberOfClients = 0;
             mSecurityType = SECURITY_TYPE_OPEN;
+            mShutdownTimeoutMillis = 0;
         }
 
         /**
@@ -425,6 +446,7 @@ public final class SoftApConfiguration implements Parcelable {
             mChannel = other.mChannel;
             mMaxNumberOfClients = other.mMaxNumberOfClients;
             mSecurityType = other.mSecurityType;
+            mShutdownTimeoutMillis = other.mShutdownTimeoutMillis;
         }
 
         /**
@@ -435,7 +457,8 @@ public final class SoftApConfiguration implements Parcelable {
         @NonNull
         public SoftApConfiguration build() {
             return new SoftApConfiguration(mSsid, mBssid, mPassphrase,
-                mHiddenSsid, mBand, mChannel, mSecurityType, mMaxNumberOfClients);
+                    mHiddenSsid, mBand, mChannel, mSecurityType, mMaxNumberOfClients,
+                    mShutdownTimeoutMillis);
         }
 
         /**
@@ -641,6 +664,31 @@ public final class SoftApConfiguration implements Parcelable {
                 throw new IllegalArgumentException("maxNumberOfClients should be not negative");
             }
             mMaxNumberOfClients = maxNumberOfClients;
+            return this;
+        }
+
+        /**
+         * Specifies the shutdown timeout in milliseconds.
+         * The Soft AP will shut down when there are no devices connected to it for
+         * the timeout duration.
+         *
+         * Specify a value of 0 to have the framework automatically use default timeout
+         * setting which defined in {@link R.integer.config_wifi_framework_soft_ap_timeout_delay}
+         *
+         * <p>
+         * <li>If not set, defaults to 0</li>
+         * <li>The shut down timout will apply when
+         * {@link Settings.Global.SOFT_AP_TIMEOUT_ENABLED} is true</li>
+         *
+         * @param timeoutMillis milliseconds of the timeout delay.
+         * @return Builder for chaining.
+         */
+        @NonNull
+        public Builder setShutdownTimeoutMillis(int timeoutMillis) {
+            if (timeoutMillis < 0) {
+                throw new IllegalArgumentException("Invalid timeout value");
+            }
+            mShutdownTimeoutMillis = timeoutMillis;
             return this;
         }
     }
