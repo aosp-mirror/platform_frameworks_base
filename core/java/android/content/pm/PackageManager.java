@@ -229,7 +229,7 @@ public abstract class PackageManager {
             MATCH_ALL,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ModuleInfoFlags {}
+    public @interface InstalledModulesFlags {}
 
     /** @hide */
     @IntDef(flag = true, prefix = { "GET_", "MATCH_" }, value = {
@@ -579,6 +579,22 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int ONLY_IF_NO_MATCH_FOUND = 0x00000004;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "MODULE_" }, value = {
+            MODULE_APEX_NAME,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ModuleInfoFlags {}
+
+    /**
+     * Flag for {@link #getModuleInfo}: allow ModuleInfo to be retrieved using the apex module
+     * name, rather than the package name.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MODULE_APEX_NAME = 0x00000001;
 
     /** @hide */
     @IntDef(prefix = { "PERMISSION_" }, value = {
@@ -3928,7 +3944,7 @@ public abstract class PackageManager {
      *         there are no installed modules, an empty list is returned.
      */
     @NonNull
-    public List<ModuleInfo> getInstalledModules(@ModuleInfoFlags int flags) {
+    public List<ModuleInfo> getInstalledModules(@InstalledModulesFlags int flags) {
         throw new UnsupportedOperationException(
                 "getInstalledModules not implemented in subclass");
     }
