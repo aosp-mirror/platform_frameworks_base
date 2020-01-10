@@ -25,8 +25,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -36,7 +34,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.PhoneConstants;
@@ -314,10 +311,20 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
 
         @Override
         public void run() {
-            try {
-                if (DEBUG) Log.v(TAG, "call supplyPukReportResult()");
-                final int[] result = ITelephony.Stub.asInterface(ServiceManager
-                    .checkService("phone")).supplyPukReportResultForSubscriber(mSubId, mPuk, mPin);
+            if (DEBUG) Log.v(TAG, "call supplyPukReportResult()");
+            TelephonyManager telephonyManager =
+                    ((TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE))
+                            .createForSubscriptionId(mSubId);
+            final int[] result = telephonyManager.supplyPukReportResult(mPuk, mPin);
+            if (result == null || result.length == 0) {
+                Log.e(TAG, "Error result for supplyPukReportResult.");
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onSimLockChangedResponse(PhoneConstants.PIN_GENERAL_FAILURE, -1);
+                    }
+                });
+            } else {
                 if (DEBUG) {
                     Log.v(TAG, "supplyPukReportResult returned: " + result[0] + " " + result[1]);
                 }
@@ -325,14 +332,6 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
                     @Override
                     public void run() {
                         onSimLockChangedResponse(result[0], result[1]);
-                    }
-                });
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException for supplyPukReportResult:", e);
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onSimLockChangedResponse(PhoneConstants.PIN_GENERAL_FAILURE, -1);
                     }
                 });
             }
