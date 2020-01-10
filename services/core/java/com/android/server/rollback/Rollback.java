@@ -93,19 +93,6 @@ class Rollback {
      */
     static final int ROLLBACK_STATE_DELETED = 4;
 
-    @IntDef(flag = true, prefix = { "MATCH_" }, value = {
-            MATCH_APK_IN_APEX,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    @interface RollbackInfoFlags {}
-
-    /**
-     * {@link RollbackInfo} flag: include {@code RollbackInfo} packages that are apk-in-apex.
-     * These packages do not have their own sessions. They are embedded in an apex which has a
-     * session id.
-     */
-    static final int MATCH_APK_IN_APEX = 1;
-
     /**
      * The session ID for the staged session if this rollback data represents a staged session,
      * {@code -1} otherwise.
@@ -783,33 +770,6 @@ class Rollback {
     }
 
     /**
-     * Returns the number of {@link PackageRollbackInfo} we are storing in this {@link Rollback}
-     * instance. By default, this method does not include apk-in-apex package in the count.
-     *
-     * @param flags Apk-in-apex packages can be included in the count by passing
-     * {@link Rollback#MATCH_APK_IN_APEX}
-     *
-     * @return Counts number of {@link PackageRollbackInfo} stored in the {@link Rollback}
-     * according to {@code flags} passed
-     */
-    int getPackageCount(@RollbackInfoFlags int flags) {
-        synchronized (mLock) {
-            List<PackageRollbackInfo> packages = info.getPackages();
-            if ((flags & MATCH_APK_IN_APEX) != 0) {
-                return packages.size();
-            }
-
-            int packagesWithoutApkInApex = 0;
-            for (PackageRollbackInfo rollbackInfo : packages) {
-                if (!rollbackInfo.isApkInApex()) {
-                    packagesWithoutApkInApex++;
-                }
-            }
-            return packagesWithoutApkInApex;
-        }
-    }
-
-    /**
      * Adds a rollback token to be associated with this rollback. This may be used to
      * identify which rollback should be removed in case {@link PackageManager} sends an
      * {@link Intent#ACTION_CANCEL_ENABLE_ROLLBACK} intent.
@@ -842,13 +802,6 @@ class Rollback {
     }
 
     /**
-     * Returns the number of package session ids in this rollback.
-     */
-    int getPackageSessionIdCount() {
-        return mPackageSessionIds.length;
-    }
-
-    /**
      * Called when a child session finished with success.
      * Returns true when all child sessions are notified with success. This rollback will be
      * enabled only after all child sessions finished with success.
@@ -856,6 +809,23 @@ class Rollback {
     boolean notifySessionWithSuccess() {
         synchronized (mLock) {
             return ++mNumPackageSessionsWithSuccess == mPackageSessionIds.length;
+        }
+    }
+
+    /**
+     * Returns true if all packages in this rollback are enabled. We won't enable this rollback
+     * until all packages are enabled. Note we don't count apk-in-apex here since they are enabled
+     * automatically when the embedding apex is enabled.
+     */
+    boolean allPackagesEnabled() {
+        synchronized (mLock) {
+            int packagesWithoutApkInApex = 0;
+            for (PackageRollbackInfo rollbackInfo : info.getPackages()) {
+                if (!rollbackInfo.isApkInApex()) {
+                    packagesWithoutApkInApex++;
+                }
+            }
+            return packagesWithoutApkInApex == mPackageSessionIds.length;
         }
     }
 
