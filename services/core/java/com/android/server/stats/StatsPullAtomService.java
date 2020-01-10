@@ -456,11 +456,41 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerMobileBytesTransfer() {
-        // No op.
+        int tagId = StatsLog.MOBILE_BYTES_TRANSFER;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {2, 3, 4, 5})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullMobileBytesTransfer(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullMobileBytesTransfer() {
-        // No op.
+    private int pullMobileBytesTransfer(int atomTag, List<StatsEvent> pulledData) {
+        INetworkStatsService networkStatsService = getINetworkStatsService();
+        if (networkStatsService == null) {
+            Slog.e(TAG, "NetworkStats Service is not available!");
+            return StatsManager.PULL_SKIP;
+        }
+        long token = Binder.clearCallingIdentity();
+        try {
+            BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
+            String[] ifaces = bs.getMobileIfaces();
+            if (ifaces.length == 0) {
+                return StatsManager.PULL_SKIP;
+            }
+            // Combine all the metrics per Uid into one record.
+            NetworkStats stats = networkStatsService.getDetailedUidStats(ifaces).groupedByUid();
+            addNetworkStats(atomTag, pulledData, stats, false);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Pulling netstats for mobile bytes has error", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerMobileBytesTransferBackground() {

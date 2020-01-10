@@ -815,30 +815,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullMobileBytesTransfer(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long token = Binder.clearCallingIdentity();
-        try {
-            BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
-            String[] ifaces = bs.getMobileIfaces();
-            if (ifaces.length == 0) {
-                return;
-            }
-            if (mNetworkStatsService == null) {
-                Slog.e(TAG, "NetworkStats Service is not available!");
-                return;
-            }
-            // Combine all the metrics per Uid into one record.
-            NetworkStats stats = mNetworkStatsService.getDetailedUidStats(ifaces).groupedByUid();
-            addNetworkStats(tagId, pulledData, stats, false);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Pulling netstats for mobile bytes has error", e);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
     private void pullBluetoothBytesTransfer(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2267,11 +2243,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
         switch (tagId) {
-
-            case StatsLog.MOBILE_BYTES_TRANSFER: {
-                pullMobileBytesTransfer(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
 
             case StatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG: {
                 pullMobileBytesTransferByFgBg(tagId, elapsedNanos, wallClockNanos, ret);
