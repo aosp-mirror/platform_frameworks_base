@@ -833,6 +833,7 @@ public class WifiScanner {
      * delivered to the listener. It is possible that onFullResult will not be called for all
      * results of the first scan if the listener was registered during the scan.
      *
+     * @param executor the Executor on which to run the callback.
      * @param listener specifies the object to report events to. This object is also treated as a
      *                 key for this request, and must also be specified to cancel the request.
      *                 Multiple requests should also not share this object.
@@ -955,15 +956,32 @@ public class WifiScanner {
      * starts a single scan and reports results asynchronously
      * @param settings specifies various parameters for the scan; for more information look at
      * {@link ScanSettings}
-     * @param workSource WorkSource to blame for power usage
      * @param listener specifies the object to report events to. This object is also treated as a
      *                 key for this scan, and must also be specified to cancel the scan. Multiple
      *                 scans should also not share this object.
+     * @param workSource WorkSource to blame for power usage
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void startScan(ScanSettings settings, ScanListener listener, WorkSource workSource) {
+        startScan(settings, null, listener, workSource);
+    }
+
+    /**
+     * starts a single scan and reports results asynchronously
+     * @param settings specifies various parameters for the scan; for more information look at
+     * {@link ScanSettings}
+     * @param executor the Executor on which to run the callback.
+     * @param listener specifies the object to report events to. This object is also treated as a
+     *                 key for this scan, and must also be specified to cancel the scan. Multiple
+     *                 scans should also not share this object.
+     * @param workSource WorkSource to blame for power usage
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+    public void startScan(ScanSettings settings, @Nullable @CallbackExecutor Executor executor,
+            ScanListener listener, WorkSource workSource) {
         Objects.requireNonNull(listener, "listener cannot be null");
-        int key = addListener(listener);
+        int key = addListener(listener, executor);
         if (key == INVALID_KEY) return;
         validateChannel();
         Bundle scanParams = new Bundle();
@@ -1029,16 +1047,17 @@ public class WifiScanner {
      * {@link ScanSettings}
      * @param pnoSettings specifies various parameters for PNO; for more information look at
      * {@link PnoSettings}
+     * @param executor the Executor on which to run the callback.
      * @param listener specifies the object to report events to. This object is also treated as a
      *                 key for this scan, and must also be specified to cancel the scan. Multiple
      *                 scans should also not share this object.
      * {@hide}
      */
     public void startConnectedPnoScan(ScanSettings scanSettings, PnoSettings pnoSettings,
-            PnoScanListener listener) {
+            @NonNull @CallbackExecutor Executor executor, PnoScanListener listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
         Objects.requireNonNull(pnoSettings, "pnoSettings cannot be null");
-        int key = addListener(listener);
+        int key = addListener(listener, executor);
         if (key == INVALID_KEY) return;
         validateChannel();
         pnoSettings.isConnected = true;
@@ -1057,10 +1076,10 @@ public class WifiScanner {
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     public void startDisconnectedPnoScan(ScanSettings scanSettings, PnoSettings pnoSettings,
-            PnoScanListener listener) {
+            @NonNull @CallbackExecutor Executor executor, PnoScanListener listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
         Objects.requireNonNull(pnoSettings, "pnoSettings cannot be null");
-        int key = addListener(listener);
+        int key = addListener(listener, executor);
         if (key == INVALID_KEY) return;
         validateChannel();
         pnoSettings.isConnected = false;

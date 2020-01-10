@@ -366,7 +366,7 @@ public class WifiScannerTest {
 
     /**
      * Test behavior of {@link WifiScanner#startDisconnectedPnoScan(ScanSettings, PnoSettings,
-     * WifiScanner.PnoScanListener)}
+     * Executor, WifiScanner.PnoScanListener)}
      * @throws Exception
      */
     @Test
@@ -375,7 +375,8 @@ public class WifiScannerTest {
         PnoSettings pnoSettings = new PnoSettings();
         WifiScanner.PnoScanListener pnoScanListener = mock(WifiScanner.PnoScanListener.class);
 
-        mWifiScanner.startDisconnectedPnoScan(scanSettings, pnoSettings, pnoScanListener);
+        mWifiScanner.startDisconnectedPnoScan(
+                scanSettings, pnoSettings, mock(Executor.class), pnoScanListener);
         mLooper.dispatchAll();
 
         ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
@@ -396,7 +397,7 @@ public class WifiScannerTest {
 
     /**
      * Test behavior of {@link WifiScanner#startConnectedPnoScan(ScanSettings, PnoSettings,
-     * WifiScanner.PnoScanListener)}
+     * Executor, WifiScanner.PnoScanListener)}
      * @throws Exception
      */
     @Test
@@ -405,7 +406,8 @@ public class WifiScannerTest {
         PnoSettings pnoSettings = new PnoSettings();
         WifiScanner.PnoScanListener pnoScanListener = mock(WifiScanner.PnoScanListener.class);
 
-        mWifiScanner.startConnectedPnoScan(scanSettings, pnoSettings, pnoScanListener);
+        mWifiScanner.startConnectedPnoScan(
+                scanSettings, pnoSettings, mock(Executor.class), pnoScanListener);
         mLooper.dispatchAll();
 
         ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
@@ -426,7 +428,7 @@ public class WifiScannerTest {
 
     /**
      * Test behavior of {@link WifiScanner#stopPnoScan(ScanListener)}
-     * WifiScanner.PnoScanListener)}
+     * Executor, WifiScanner.PnoScanListener)}
      * @throws Exception
      */
     @Test
@@ -435,7 +437,8 @@ public class WifiScannerTest {
         PnoSettings pnoSettings = new PnoSettings();
         WifiScanner.PnoScanListener pnoScanListener = mock(WifiScanner.PnoScanListener.class);
 
-        mWifiScanner.startDisconnectedPnoScan(scanSettings, pnoSettings, pnoScanListener);
+        mWifiScanner.startDisconnectedPnoScan(
+                scanSettings, pnoSettings, mock(Executor.class), pnoScanListener);
         mLooper.dispatchAll();
         mWifiScanner.stopPnoScan(pnoScanListener);
         mLooper.dispatchAll();
