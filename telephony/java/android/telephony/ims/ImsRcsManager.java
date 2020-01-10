@@ -35,6 +35,8 @@ import android.telephony.ims.feature.RcsFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.util.Log;
 
+import com.android.internal.telephony.IIntegerConsumer;
+
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -154,9 +156,20 @@ public class ImsRcsManager implements RegistrationManager {
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
         }
+
+        IImsRcsController imsRcsController = getIImsRcsController();
+        if (imsRcsController == null) {
+            Log.e(TAG, "Register registration callback: IImsRcsController is null");
+            throw new ImsException("Cannot find remote IMS service",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+
         c.setExecutor(executor);
-        throw new UnsupportedOperationException("registerImsRegistrationCallback is not"
-                + "supported.");
+        try {
+            imsRcsController.registerImsRegistrationCallback(mSubId, c.getBinder());
+        } catch (RemoteException | IllegalStateException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
     }
 
     /**{@inheritDoc}*/
@@ -167,8 +180,18 @@ public class ImsRcsManager implements RegistrationManager {
         if (c == null) {
             throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
         }
-        throw new UnsupportedOperationException("unregisterImsRegistrationCallback is not"
-                + "supported.");
+
+        IImsRcsController imsRcsController = getIImsRcsController();
+        if (imsRcsController == null) {
+            Log.e(TAG, "Unregister registration callback: IImsRcsController is null");
+            throw new IllegalStateException("Cannot find remote IMS service");
+        }
+
+        try {
+            imsRcsController.unregisterImsRegistrationCallback(mSubId, c.getBinder());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
     }
 
     /**{@inheritDoc}*/
@@ -182,8 +205,23 @@ public class ImsRcsManager implements RegistrationManager {
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
         }
-        throw new UnsupportedOperationException("getRegistrationState is not"
-                + "supported.");
+
+        IImsRcsController imsRcsController = getIImsRcsController();
+        if (imsRcsController == null) {
+            Log.e(TAG, "Get registration state error: IImsRcsController is null");
+            throw new IllegalStateException("Cannot find remote IMS service");
+        }
+
+        try {
+            imsRcsController.getImsRcsRegistrationState(mSubId, new IIntegerConsumer.Stub() {
+                @Override
+                public void accept(int result) {
+                    executor.execute(() -> stateCallback.accept(result));
+                }
+            });
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
     }
 
     /**{@inheritDoc}*/
@@ -198,10 +236,25 @@ public class ImsRcsManager implements RegistrationManager {
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
         }
-        throw new UnsupportedOperationException("getRegistrationTransportType is not"
-                + "supported.");
-    }
 
+        IImsRcsController imsRcsController = getIImsRcsController();
+        if (imsRcsController == null) {
+            Log.e(TAG, "Get registration transport type error: IImsRcsController is null");
+            throw new IllegalStateException("Cannot find remote IMS service");
+        }
+
+        try {
+            imsRcsController.getImsRcsRegistrationTransportType(mSubId,
+                    new IIntegerConsumer.Stub() {
+                        @Override
+                        public void accept(int result) {
+                            executor.execute(() -> transportTypeCallback.accept(result));
+                        }
+                    });
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
 
     /**
      * Registers an {@link AvailabilityCallback} with the system, which will provide RCS

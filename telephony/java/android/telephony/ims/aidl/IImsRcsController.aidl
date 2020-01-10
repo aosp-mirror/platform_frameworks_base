@@ -19,6 +19,9 @@ package android.telephony.ims.aidl;
 import android.net.Uri;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IRcsUceControllerCallback;
+import android.telephony.ims.aidl.IImsRegistrationCallback;
+
+import com.android.internal.telephony.IIntegerConsumer;
 
 /**
  * Interface used to interact with the Telephony IMS.
@@ -26,6 +29,13 @@ import android.telephony.ims.aidl.IRcsUceControllerCallback;
  * {@hide}
  */
 interface IImsRcsController {
+    // IMS RCS registration commands
+    void registerImsRegistrationCallback(int subId, IImsRegistrationCallback c);
+    void unregisterImsRegistrationCallback(int subId, IImsRegistrationCallback c);
+    void getImsRcsRegistrationState(int subId, IIntegerConsumer consumer);
+    void getImsRcsRegistrationTransportType(int subId, IIntegerConsumer consumer);
+
+    // IMS RCS capability commands
     void registerRcsAvailabilityCallback(int subId, IImsCapabilityCallback c);
     void unregisterRcsAvailabilityCallback(int subId, IImsCapabilityCallback c);
     boolean isCapable(int subId, int capability, int radioTech);
