@@ -32,7 +32,6 @@ import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
 
-import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
@@ -58,11 +57,13 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * The implementation of {@link NotifListBuilder}.
+ * The second half of {@link NotifPipeline}. Sits downstream of the NotifCollection and transforms
+ * its "notification set" into the "shade list", the filtered, grouped, and sorted list of
+ * notifications that are currently present in the notification shade.
  */
 @MainThread
 @Singleton
-public class NotifListBuilderImpl implements NotifListBuilder {
+public class NotifListBuilderImpl {
     private final SystemClock mSystemClock;
     private final NotifLog mNotifLog;
 
@@ -117,32 +118,28 @@ public class NotifListBuilderImpl implements NotifListBuilder {
         mOnRenderListListener = onRenderListListener;
     }
 
-    @Override
-    public void addOnBeforeTransformGroupsListener(OnBeforeTransformGroupsListener listener) {
+    void addOnBeforeTransformGroupsListener(OnBeforeTransformGroupsListener listener) {
         Assert.isMainThread();
 
         mPipelineState.requireState(STATE_IDLE);
         mOnBeforeTransformGroupsListeners.add(listener);
     }
 
-    @Override
-    public void addOnBeforeSortListener(OnBeforeSortListener listener) {
+    void addOnBeforeSortListener(OnBeforeSortListener listener) {
         Assert.isMainThread();
 
         mPipelineState.requireState(STATE_IDLE);
         mOnBeforeSortListeners.add(listener);
     }
 
-    @Override
-    public void addOnBeforeRenderListListener(OnBeforeRenderListListener listener) {
+    void addOnBeforeRenderListListener(OnBeforeRenderListListener listener) {
         Assert.isMainThread();
 
         mPipelineState.requireState(STATE_IDLE);
         mOnBeforeRenderListListeners.add(listener);
     }
 
-    @Override
-    public void addPreGroupFilter(NotifFilter filter) {
+    void addPreGroupFilter(NotifFilter filter) {
         Assert.isMainThread();
         mPipelineState.requireState(STATE_IDLE);
 
@@ -150,8 +147,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
         filter.setInvalidationListener(this::onPreGroupFilterInvalidated);
     }
 
-    @Override
-    public void addPreRenderFilter(NotifFilter filter) {
+    void addPreRenderFilter(NotifFilter filter) {
         Assert.isMainThread();
         mPipelineState.requireState(STATE_IDLE);
 
@@ -159,8 +155,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
         filter.setInvalidationListener(this::onPreRenderFilterInvalidated);
     }
 
-    @Override
-    public void addPromoter(NotifPromoter promoter) {
+    void addPromoter(NotifPromoter promoter) {
         Assert.isMainThread();
         mPipelineState.requireState(STATE_IDLE);
 
@@ -168,8 +163,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
         promoter.setInvalidationListener(this::onPromoterInvalidated);
     }
 
-    @Override
-    public void setSectionsProvider(SectionsProvider provider) {
+    void setSectionsProvider(SectionsProvider provider) {
         Assert.isMainThread();
         mPipelineState.requireState(STATE_IDLE);
 
@@ -177,8 +171,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
         provider.setInvalidationListener(this::onSectionsProviderInvalidated);
     }
 
-    @Override
-    public void setComparators(List<NotifComparator> comparators) {
+    void setComparators(List<NotifComparator> comparators) {
         Assert.isMainThread();
         mPipelineState.requireState(STATE_IDLE);
 
@@ -189,8 +182,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
         }
     }
 
-    @Override
-    public List<ListEntry> getActiveNotifs() {
+    List<ListEntry> getShadeList() {
         Assert.isMainThread();
         return mReadOnlyNotifList;
     }
@@ -276,7 +268,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
     }
 
     /**
-     * The core algorithm of the pipeline. See the top comment in {@link NotifListBuilder} for
+     * The core algorithm of the pipeline. See the top comment in {@link NotifPipeline} for
      * details on our contracts with other code.
      *
      * Once the build starts we are very careful to protect against reentrant code. Anything that

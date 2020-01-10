@@ -27,7 +27,7 @@ import android.util.Log;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 
@@ -49,7 +49,7 @@ public class ForegroundServiceNotificationListener {
     public ForegroundServiceNotificationListener(Context context,
             ForegroundServiceController foregroundServiceController,
             NotificationEntryManager notificationEntryManager,
-            NotifCollection notifCollection) {
+            NotifPipeline notifPipeline) {
         mContext = context;
         mForegroundServiceController = foregroundServiceController;
 
@@ -77,7 +77,7 @@ public class ForegroundServiceNotificationListener {
         });
         mEntryManager.addNotificationLifetimeExtender(new ForegroundServiceLifetimeExtender());
 
-        notifCollection.addCollectionListener(new NotifCollectionListener() {
+        notifPipeline.addCollectionListener(new NotifCollectionListener() {
             @Override
             public void onEntryAdded(NotificationEntry entry) {
                 addNotification(entry, entry.getImportance());

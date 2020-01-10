@@ -17,10 +17,11 @@
 package com.android.systemui.statusbar.notification.collection.listbuilder;
 
 import com.android.systemui.statusbar.notification.collection.ListEntry;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 
 import java.util.List;
 
-/** See {@link NotifListBuilder#addOnBeforeSortListener(OnBeforeSortListener)} */
+/** See {@link NotifPipeline#addOnBeforeSortListener(OnBeforeSortListener)} */
 public interface OnBeforeSortListener {
     /**
      * Called after the notif list has been filtered and grouped but before sections have been

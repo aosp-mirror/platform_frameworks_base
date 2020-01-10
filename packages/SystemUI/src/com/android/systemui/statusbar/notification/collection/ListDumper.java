@@ -16,13 +16,11 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
-import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
-
 import java.util.List;
 
 
 /**
- * Utility class for dumping the results of a {@link NotifListBuilder} to a debug string.
+ * Utility class for dumping the results of a {@link NotifListBuilderImpl} to a debug string.
  */
 public class ListDumper {
 

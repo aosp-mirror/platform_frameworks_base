@@ -33,7 +33,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.RankingBuilder;
-import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
@@ -50,7 +50,7 @@ import org.mockito.MockitoAnnotations;
 public class RankingCoordinatorTest extends SysuiTestCase {
 
     @Mock private StatusBarStateController mStatusBarStateController;
-    @Mock private NotifListBuilderImpl mNotifListBuilder;
+    @Mock private NotifPipeline mNotifPipeline;
     private NotificationEntry mEntry;
     private RankingCoordinator mRankingCoordinator;
     private NotifFilter mRankingFilter;
@@ -62,8 +62,8 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         mEntry = new NotificationEntryBuilder().build();
 
         ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
-        mRankingCoordinator.attach(null, mNotifListBuilder);
-        verify(mNotifListBuilder, times(1)).addPreGroupFilter(filterCaptor.capture());
+        mRankingCoordinator.attach(mNotifPipeline);
+        verify(mNotifPipeline, times(1)).addPreGroupFilter(filterCaptor.capture());
         mRankingFilter = filterCaptor.getValue();
     }
 

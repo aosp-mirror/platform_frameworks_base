@@ -17,13 +17,13 @@
 package com.android.systemui.statusbar.notification.collection.listbuilder.pluggable;
 
 import com.android.systemui.statusbar.notification.collection.ListEntry;
-import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 
 import java.util.Comparator;
 import java.util.List;
 
 /**
- * Pluggable for participating in notif sorting. See {@link NotifListBuilder#setComparators(List)}.
+ * Pluggable for participating in notif sorting. See {@link NotifPipeline#setComparators(List)}.
  */
 public abstract class NotifComparator
         extends Pluggable<NotifComparator>

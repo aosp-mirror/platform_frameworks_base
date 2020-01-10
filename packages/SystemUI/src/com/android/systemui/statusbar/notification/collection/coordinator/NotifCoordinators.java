@@ -18,8 +18,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.FeatureFlags;
-import com.android.systemui.statusbar.notification.collection.NotifCollection;
-import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
@@ -33,8 +32,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Handles the attachment of the {@link NotifListBuilder} and {@link NotifCollection} to the
- * {@link Coordinator}s, so that the Coordinators can register their respective callbacks.
+ * Handles the attachment of {@link Coordinator}s to the {@link NotifPipeline} so that the
+ * Coordinators can register their respective callbacks.
  */
 @Singleton
 public class NotifCoordinators implements Dumpable {
@@ -63,14 +62,12 @@ public class NotifCoordinators implements Dumpable {
     }
 
     /**
-     * Sends the initialized notifListBuilder and notifCollection to each
-     * coordinator to indicate the notifListBuilder is ready to accept {@link Pluggable}s
-     * and the notifCollection is ready to accept {@link NotifCollectionListener}s and
-     * {@link NotifLifetimeExtender}s.
+     * Sends the pipeline to each coordinator when the pipeline is ready to accept
+     * {@link Pluggable}s, {@link NotifCollectionListener}s and {@link NotifLifetimeExtender}s.
      */
-    public void attach(NotifCollection notifCollection, NotifListBuilder notifListBuilder) {
+    public void attach(NotifPipeline pipeline) {
         for (Coordinator c : mCoordinators) {
-            c.attach(notifCollection, notifListBuilder);
+            c.attach(pipeline);
         }
     }
 

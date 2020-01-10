@@ -17,13 +17,14 @@
 package com.android.systemui.statusbar.notification.collection.listbuilder;
 
 import com.android.systemui.statusbar.notification.collection.ListEntry;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 
 import java.util.List;
 
 /**
  * See
- * {@link NotifListBuilder#addOnBeforeTransformGroupsListener(OnBeforeTransformGroupsListener)}
+ * {@link NotifPipeline#addOnBeforeTransformGroupsListener(OnBeforeTransformGroupsListener)}
  */
 public interface OnBeforeTransformGroupsListener {
     /**

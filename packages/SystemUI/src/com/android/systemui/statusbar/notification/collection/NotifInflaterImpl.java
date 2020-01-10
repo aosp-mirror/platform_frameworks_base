@@ -110,7 +110,7 @@ public class NotifInflaterImpl implements NotifInflater {
                                 DISMISS_SENTIMENT_NEUTRAL,
                                 NotificationVisibility.obtain(entry.getKey(),
                                         entry.getRanking().getRank(),
-                                        mNotifCollection.getNotifs().size(),
+                                        mNotifCollection.getActiveNotifs().size(),
                                         true,
                                         NotificationLogger.getNotificationLocation(entry))
                         ));

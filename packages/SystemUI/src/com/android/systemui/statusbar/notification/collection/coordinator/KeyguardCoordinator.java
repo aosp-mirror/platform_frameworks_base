@@ -39,9 +39,8 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
-import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -86,9 +85,9 @@ public class KeyguardCoordinator implements Coordinator {
     }
 
     @Override
-    public void attach(NotifCollection notifCollection, NotifListBuilder notifListBuilder) {
+    public void attach(NotifPipeline pipeline) {
         setupInvalidateNotifListCallbacks();
-        notifListBuilder.addPreRenderFilter(mNotifFilter);
+        pipeline.addPreRenderFilter(mNotifFilter);
     }
 
     private final NotifFilter mNotifFilter = new NotifFilter(TAG) {

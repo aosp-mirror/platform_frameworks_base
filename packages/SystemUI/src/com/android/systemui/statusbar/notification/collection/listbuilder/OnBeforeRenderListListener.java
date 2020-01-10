@@ -17,10 +17,11 @@
 package com.android.systemui.statusbar.notification.collection.listbuilder;
 
 import com.android.systemui.statusbar.notification.collection.ListEntry;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 
 import java.util.List;
 
-/** See {@link NotifListBuilder#addOnBeforeRenderListListener(OnBeforeRenderListListener)} */
+/** See {@link NotifPipeline#addOnBeforeRenderListListener(OnBeforeRenderListListener)} */
 public interface OnBeforeRenderListListener {
     /**
      * Called at the end of the pipeline after the notif list has been finalized but before it has

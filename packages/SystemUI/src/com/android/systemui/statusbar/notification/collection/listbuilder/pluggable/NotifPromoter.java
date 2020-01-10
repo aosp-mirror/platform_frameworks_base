@@ -16,13 +16,13 @@
 
 package com.android.systemui.statusbar.notification.collection.listbuilder.pluggable;
 
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
 
 /**
  *  Pluggable for participating in notif promotion. Notif promoters can upgrade notifications
  *  from being children of a group to top-level notifications. See
- *  {@link NotifListBuilder#addPromoter(NotifPromoter)}.
+ *  {@link NotifPipeline#addPromoter}.
  */
 public abstract class NotifPromoter extends Pluggable<NotifPromoter> {
     protected NotifPromoter(String name) {

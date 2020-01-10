@@ -16,11 +16,10 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
-import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
-import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.logging.NotifEvent;
@@ -55,10 +54,10 @@ public class PreparationCoordinator implements Coordinator {
     }
 
     @Override
-    public void attach(NotifCollection notifCollection, NotifListBuilder notifListBuilder) {
-        notifCollection.addCollectionListener(mNotifCollectionListener);
-        notifListBuilder.addPreRenderFilter(mNotifInflationErrorFilter);
-        notifListBuilder.addPreRenderFilter(mNotifInflatingFilter);
+    public void attach(NotifPipeline pipeline) {
+        pipeline.addCollectionListener(mNotifCollectionListener);
+        pipeline.addPreRenderFilter(mNotifInflationErrorFilter);
+        pipeline.addPreRenderFilter(mNotifInflatingFilter);
     }
 
     private final NotifCollectionListener mNotifCollectionListener = new NotifCollectionListener() {
