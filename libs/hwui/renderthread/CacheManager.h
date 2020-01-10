@@ -50,6 +50,7 @@ public:
 
     size_t getCacheSize() const { return mMaxResourceBytes; }
     size_t getBackgroundCacheSize() const { return mBackgroundResourceBytes; }
+    void onFrameCompleted();
 
 private:
     friend class RenderThread;

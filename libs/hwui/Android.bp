@@ -215,6 +215,7 @@ cc_defaults {
         android: {
 
             srcs: [
+                "pipeline/skia/ATraceMemoryDump.cpp",
                 "pipeline/skia/GLFunctorDrawable.cpp",
                 "pipeline/skia/LayerDrawable.cpp",
                 "pipeline/skia/ShaderCache.cpp",
@@ -244,7 +245,6 @@ cc_defaults {
                 "DeviceInfo.cpp",
                 "FrameInfo.cpp",
                 "FrameInfoVisualizer.cpp",
-                "GpuMemoryTracker.cpp",
                 "HardwareBitmapUploader.cpp",
                 "HWUIProperties.sysprop",
                 "JankTracker.cpp",
@@ -325,7 +325,6 @@ cc_test {
         "tests/unit/DamageAccumulatorTests.cpp",
         "tests/unit/DeferredLayerUpdaterTests.cpp",
         "tests/unit/FatVectorTests.cpp",
-        "tests/unit/GpuMemoryTrackerTests.cpp",
         "tests/unit/GraphicsStatsServiceTests.cpp",
         "tests/unit/LayerUpdateQueueTests.cpp",
         "tests/unit/LinearAllocatorTests.cpp",

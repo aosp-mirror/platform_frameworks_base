@@ -270,7 +270,6 @@ void RenderThread::setGrContext(sk_sp<GrContext> context) {
     }
     mGrContext = std::move(context);
     if (mGrContext) {
-        mRenderState->onContextCreated();
         DeviceInfo::setMaxTextureSize(mGrContext->maxRenderTargetSize());
     }
 }
