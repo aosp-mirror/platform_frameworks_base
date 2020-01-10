@@ -19,6 +19,7 @@ package android.telephony;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -181,7 +182,8 @@ public abstract class CellIdentity implements Parcelable {
      * @return a CellLocation object for this CellIdentity
      * @hide
      */
-    public abstract CellLocation asCellLocation();
+    @SystemApi
+    public abstract @NonNull CellLocation asCellLocation();
 
     @Override
     public boolean equals(Object other) {

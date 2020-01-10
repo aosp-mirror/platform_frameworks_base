@@ -24,7 +24,6 @@ import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
@@ -984,8 +983,11 @@ public class PhoneStateListener {
                     () -> mExecutor.execute(() -> psl.onCallForwardingIndicatorChanged(cfi)));
         }
 
-        public void onCellLocationChanged(Bundle bundle) {
-            CellLocation location = CellLocation.newFromBundle(bundle);
+        public void onCellLocationChanged(CellIdentity cellIdentity) {
+            // There is no system/public API to create an CellIdentity in system server,
+            // so the server pass a null to indicate an empty initial location.
+            CellLocation location =
+                    cellIdentity == null ? CellLocation.getEmpty() : cellIdentity.asCellLocation();
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
 
