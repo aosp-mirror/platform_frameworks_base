@@ -18,12 +18,15 @@ package com.android.systemui.statusbar.notification
 
 import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.NotificationPresenter
+import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager
+import com.android.systemui.statusbar.notification.collection.NotificationRowBinder
 import com.android.systemui.statusbar.notification.logging.NotifLog
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.NotificationGroupManager
+import com.android.systemui.util.leak.LeakDetector
 
 import java.util.concurrent.CountDownLatch
 
@@ -35,8 +38,12 @@ class TestableNotificationEntryManager(
     gm: NotificationGroupManager,
     rm: NotificationRankingManager,
     ke: KeyguardEnvironment,
-    ff: FeatureFlags
-) : NotificationEntryManager(log, gm, rm, ke, ff) {
+    ff: FeatureFlags,
+    rb: dagger.Lazy<NotificationRowBinder>,
+    notificationRemoteInputManagerLazy: dagger.Lazy<NotificationRemoteInputManager>,
+    leakDetector: LeakDetector
+) : NotificationEntryManager(log, gm, rm, ke, ff, rb,
+        notificationRemoteInputManagerLazy, leakDetector) {
 
     public var countDownLatch: CountDownLatch = CountDownLatch(1)
 

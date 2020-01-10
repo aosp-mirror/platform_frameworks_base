@@ -52,6 +52,7 @@ public class TestableDependency extends Dependency {
     @Override
     protected <T> T createDependency(Object key) {
         if (mObjs.containsKey(key)) return (T) mObjs.get(key);
+
         mInstantiatedObjects.add(key);
         return super.createDependency(key);
     }

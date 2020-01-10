@@ -32,7 +32,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
@@ -67,6 +66,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  * NotificationEntryManager is responsible for the adding, removing, and updating of
@@ -126,8 +127,9 @@ public class NotificationEntryManager implements
             new ArrayMap<>();
 
     // Lazily retrieved dependencies
-    private NotificationRemoteInputManager mRemoteInputManager;
-    private NotificationRowBinder mNotificationRowBinder;
+    private final Lazy<NotificationRowBinder> mNotificationRowBinderLazy;
+    private final Lazy<NotificationRemoteInputManager> mRemoteInputManagerLazy;
+    private final LeakDetector mLeakDetector;
 
     private final KeyguardEnvironment mKeyguardEnvironment;
     private final NotificationGroupManager mGroupManager;
@@ -173,12 +175,18 @@ public class NotificationEntryManager implements
             NotificationGroupManager groupManager,
             NotificationRankingManager rankingManager,
             KeyguardEnvironment keyguardEnvironment,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            Lazy<NotificationRowBinder> notificationRowBinderLazy,
+            Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
+            LeakDetector leakDetector) {
         mNotifLog = notifLog;
         mGroupManager = groupManager;
         mRankingManager = rankingManager;
         mKeyguardEnvironment = keyguardEnvironment;
         mFeatureFlags = featureFlags;
+        mNotificationRowBinderLazy = notificationRowBinderLazy;
+        mRemoteInputManagerLazy = notificationRemoteInputManagerLazy;
+        mLeakDetector = leakDetector;
     }
 
     /** Once called, the NEM will start processing notification events from system server. */
@@ -202,20 +210,6 @@ public class NotificationEntryManager implements
     /** Sets the {@link NotificationRemoveInterceptor}. */
     public void setNotificationRemoveInterceptor(NotificationRemoveInterceptor interceptor) {
         mRemoveInterceptor = interceptor;
-    }
-
-    /**
-     * Our dependencies can have cyclic references, so some need to be lazy
-     */
-    private NotificationRemoteInputManager getRemoteInputManager() {
-        if (mRemoteInputManager == null) {
-            mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
-        }
-        return mRemoteInputManager;
-    }
-
-    public void setRowBinder(NotificationRowBinder notificationRowBinder) {
-        mNotificationRowBinder = notificationRowBinder;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -468,7 +462,7 @@ public class NotificationEntryManager implements
                 handleGroupSummaryRemoved(key);
                 removeVisibleNotification(key);
                 updateNotifications("removeNotificationInternal");
-                Dependency.get(LeakDetector.class).trackGarbage(entry);
+                mLeakDetector.trackGarbage(entry);
                 removedByUser |= entryDismissed;
 
                 mNotifLog.log(NotifEvent.NOTIF_REMOVED, entry.getSbn(),
@@ -507,8 +501,8 @@ public class NotificationEntryManager implements
                 boolean isForeground = (entry.getSbn().getNotification().flags
                         & Notification.FLAG_FOREGROUND_SERVICE) != 0;
                 boolean keepForReply =
-                        getRemoteInputManager().shouldKeepForRemoteInputHistory(childEntry)
-                        || getRemoteInputManager().shouldKeepForSmartReplyHistory(childEntry);
+                        mRemoteInputManagerLazy.get().shouldKeepForRemoteInputHistory(childEntry)
+                        || mRemoteInputManagerLazy.get().shouldKeepForSmartReplyHistory(childEntry);
                 if (isForeground || keepForReply) {
                     // the child is a foreground service notification which we can't remove or it's
                     // a child we're keeping around for reply!
@@ -536,12 +530,13 @@ public class NotificationEntryManager implements
 
         NotificationEntry entry = new NotificationEntry(notification, ranking);
 
-        Dependency.get(LeakDetector.class).trackInstance(entry);
+        mLeakDetector.trackInstance(entry);
 
         // Construct the expanded view.
         if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
-            requireBinder().inflateViews(entry, () -> performRemoveNotification(notification,
-                    REASON_CANCEL));
+            mNotificationRowBinderLazy.get()
+                    .inflateViews(entry, () -> performRemoveNotification(notification,
+                            REASON_CANCEL));
         }
 
         abortExistingInflation(key, "addNotification");
@@ -586,15 +581,16 @@ public class NotificationEntryManager implements
         }
 
         if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
-            requireBinder().inflateViews(entry, () -> performRemoveNotification(notification,
-                    REASON_CANCEL));
+            mNotificationRowBinderLazy.get()
+                    .inflateViews(entry, () -> performRemoveNotification(notification,
+                            REASON_CANCEL));
         }
 
         updateNotifications("updateNotificationInternal");
 
         if (DEBUG) {
             // Is this for you?
-            boolean isForCurrentUser = Dependency.get(KeyguardEnvironment.class)
+            boolean isForCurrentUser = mKeyguardEnvironment
                     .isNotificationForCurrentProfiles(notification);
             Log.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
         }
@@ -644,11 +640,12 @@ public class NotificationEntryManager implements
 
         // By comparing the old and new UI adjustments, reinflate the view accordingly.
         for (NotificationEntry entry : entries) {
-            requireBinder().onNotificationRankingUpdated(
-                    entry,
-                    oldImportances.get(entry.getKey()),
-                    oldAdjustments.get(entry.getKey()),
-                    NotificationUiAdjustment.extractFromNotificationEntry(entry));
+            mNotificationRowBinderLazy.get()
+                    .onNotificationRankingUpdated(
+                            entry,
+                            oldImportances.get(entry.getKey()),
+                            oldAdjustments.get(entry.getKey()),
+                            NotificationUiAdjustment.extractFromNotificationEntry(entry));
         }
 
         updateNotifications("updateNotificationRanking");
@@ -726,14 +723,6 @@ public class NotificationEntryManager implements
         if (activeExtender != null) {
             activeExtender.setShouldManageLifetime(entry, false);
         }
-    }
-
-    private NotificationRowBinder requireBinder() {
-        if (mNotificationRowBinder == null) {
-            throw new RuntimeException("You must initialize NotificationEntryManager by calling"
-                    + "setRowBinder() before using.");
-        }
-        return mNotificationRowBinder;
     }
 
     /*

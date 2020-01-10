@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
+import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
 
@@ -29,7 +30,6 @@ import android.util.Log;
 import android.view.ViewGroup;
 
 import com.android.internal.util.NotificationMessagingUtil;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -52,27 +52,30 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.Objects;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 /** Handles inflating and updating views for notifications. */
+@Singleton
 public class NotificationRowBinderImpl implements NotificationRowBinder {
 
     private static final String TAG = "NotificationViewManager";
 
-    private final NotificationGroupManager mGroupManager =
-            Dependency.get(NotificationGroupManager.class);
-    private final NotificationGutsManager mGutsManager =
-            Dependency.get(NotificationGutsManager.class);
-    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider =
-            Dependency.get(NotificationInterruptionStateProvider.class);
+    private final NotificationGroupManager mGroupManager;
+    private final NotificationGutsManager mGutsManager;
+    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
 
     private final Context mContext;
     private final NotificationMessagingUtil mMessagingUtil;
     private final ExpandableNotificationRow.ExpansionLogger mExpansionLogger =
             this::logNotificationExpansion;
+    private final NotificationRemoteInputManager mNotificationRemoteInputManager;
+    private final NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     private final boolean mAllowLongPress;
     private final KeyguardBypassController mKeyguardBypassController;
     private final StatusBarStateController mStatusBarStateController;
 
-    private NotificationRemoteInputManager mRemoteInputManager;
     private NotificationPresenter mPresenter;
     private NotificationListContainer mListContainer;
     private HeadsUpManager mHeadsUpManager;
@@ -82,25 +85,29 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private NotificationClicker mNotificationClicker;
     private final NotificationLogger mNotificationLogger;
 
+    @Inject
     public NotificationRowBinderImpl(
             Context context,
-            boolean allowLongPress,
+            NotificationRemoteInputManager notificationRemoteInputManager,
+            NotificationLockscreenUserManager notificationLockscreenUserManager,
+            @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             KeyguardBypassController keyguardBypassController,
             StatusBarStateController statusBarStateController,
+            NotificationGroupManager notificationGroupManager,
+            NotificationGutsManager notificationGutsManager,
+            NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             NotificationLogger logger) {
         mContext = context;
         mMessagingUtil = new NotificationMessagingUtil(context);
+        mNotificationRemoteInputManager = notificationRemoteInputManager;
+        mNotificationLockscreenUserManager = notificationLockscreenUserManager;
         mAllowLongPress = allowLongPress;
         mKeyguardBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
+        mGroupManager = notificationGroupManager;
+        mGutsManager = notificationGutsManager;
+        mNotificationInterruptionStateProvider = notificationInterruptionStateProvider;
         mNotificationLogger = logger;
-    }
-
-    private NotificationRemoteInputManager getRemoteInputManager() {
-        if (mRemoteInputManager == null) {
-            mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
-        }
-        return mRemoteInputManager;
     }
 
     /**
@@ -167,7 +174,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             row.setLongPressListener(mGutsManager::openGuts);
         }
         mListContainer.bindRow(row);
-        getRemoteInputManager().bindRow(row);
+        mNotificationRemoteInputManager.bindRow(row);
 
         // Get the app name.
         // Note that Notification.Builder#bindHeaderAppName has similar logic
@@ -263,8 +270,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         if (mNotificationInterruptionStateProvider.shouldHeadsUp(entry)) {
             row.setInflationFlags(FLAG_CONTENT_VIEW_HEADS_UP);
         }
-        row.setNeedsRedaction(
-                Dependency.get(NotificationLockscreenUserManager.class).needsRedaction(entry));
+        row.setNeedsRedaction(mNotificationLockscreenUserManager.needsRedaction(entry));
         row.inflateViews();
 
         // bind the click event to the content area

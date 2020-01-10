@@ -71,6 +71,7 @@ import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
+import com.android.systemui.statusbar.notification.collection.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.people.PeopleHubSectionFooterViewAdapter;
@@ -89,6 +90,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.DeviceConfigProxyFake;
+import com.android.systemui.util.leak.LeakDetector;
 
 import org.junit.After;
 import org.junit.Before;
@@ -170,7 +172,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                         mock(HighPriorityProvider.class)
                 ),
                 mock(NotificationEntryManager.KeyguardEnvironment.class),
-                mock(FeatureFlags.class));
+                mock(FeatureFlags.class),
+                () -> mock(NotificationRowBinder.class),
+                () -> mRemoteInputManager,
+                mock(LeakDetector.class));
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mEntryManager.setUpForTest(mock(NotificationPresenter.class), null, mHeadsUpManager);
 
