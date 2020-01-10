@@ -940,16 +940,15 @@ public final class MediaSessionManager {
         /**
          * Called when a media key event is dispatched through the media session service. The
          * session token can be {@link null} if the framework has sent the media key event to the
-         * media button receiver to revive the media app's playback.
-         *
-         * the session is dead when , but the framework sent
+         * media button receiver to revive the media app's playback after the corresponding session
+         * is released.
          *
          * @param event Dispatched media key event.
          * @param packageName Package
          * @param sessionToken The media session's token. Can be {@code null}.
          */
         default void onMediaKeyEventDispatched(@NonNull KeyEvent event, @NonNull String packageName,
-                @NonNull MediaSession.Token sessionToken) { }
+                @Nullable MediaSession.Token sessionToken) { }
     }
 
     /**
