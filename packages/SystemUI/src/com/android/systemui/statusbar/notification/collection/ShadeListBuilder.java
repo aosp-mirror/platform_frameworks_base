@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.collection;
 
 import static com.android.systemui.statusbar.notification.collection.GroupEntry.ROOT_ENTRY;
-import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpList;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_BUILD_STARTED;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_FINALIZING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_GROUPING;
@@ -32,6 +31,8 @@ import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
 
+import com.android.systemui.DumpController;
+import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
@@ -46,6 +47,8 @@ import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,7 +66,7 @@ import javax.inject.Singleton;
  */
 @MainThread
 @Singleton
-public class ShadeListBuilder {
+public class ShadeListBuilder implements Dumpable {
     private final SystemClock mSystemClock;
     private final NotifLog mNotifLog;
 
@@ -92,10 +95,14 @@ public class ShadeListBuilder {
     private final List<ListEntry> mReadOnlyNotifList = Collections.unmodifiableList(mNotifList);
 
     @Inject
-    public ShadeListBuilder(SystemClock systemClock, NotifLog notifLog) {
+    public ShadeListBuilder(
+            SystemClock systemClock,
+            NotifLog notifLog,
+            DumpController dumpController) {
         Assert.isMainThread();
         mSystemClock = systemClock;
         mNotifLog = notifLog;
+        dumpController.registerDumpable(TAG, this);
     }
 
     /**
@@ -324,7 +331,7 @@ public class ShadeListBuilder {
 
         // Step 6: Dispatch the new list, first to any listeners and then to the view layer
         mNotifLog.log(NotifEvent.DISPATCH_FINAL_LIST, "List finalized, is:\n"
-                + dumpList(mNotifList));
+                + ListDumper.dumpTree(mNotifList, false, "\t\t"));
         dispatchOnBeforeRenderList(mReadOnlyNotifList);
         if (mOnRenderListListener != null) {
             mOnRenderListListener.onRenderList(mReadOnlyNotifList);
@@ -770,6 +777,19 @@ public class ShadeListBuilder {
         for (int i = 0; i < mOnBeforeRenderListListeners.size(); i++) {
             mOnBeforeRenderListListeners.get(i).onBeforeRenderList(entries);
         }
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("\t" + TAG + " shade notifications:");
+        if (getShadeList().size() == 0) {
+            pw.println("\t\t None");
+        }
+
+        pw.println(ListDumper.dumpTree(
+                getShadeList(),
+                true,
+                "\t\t"));
     }
 
     /** See {@link #setOnRenderListListener(OnRenderListListener)} */

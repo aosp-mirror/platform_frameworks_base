@@ -47,6 +47,8 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.DumpController;
+import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.notification.collection.coalescer.CoalescedEvent;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer.BatchableNotificationHandler;
@@ -56,6 +58,8 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.util.Assert;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -92,7 +96,7 @@ import javax.inject.Singleton;
  */
 @MainThread
 @Singleton
-public class NotifCollection {
+public class NotifCollection implements Dumpable {
     private final IStatusBarService mStatusBarService;
 
     private final Map<String, NotificationEntry> mNotificationSet = new ArrayMap<>();
@@ -107,9 +111,10 @@ public class NotifCollection {
     private boolean mAmDispatchingToOtherCode;
 
     @Inject
-    public NotifCollection(IStatusBarService statusBarService) {
+    public NotifCollection(IStatusBarService statusBarService, DumpController dumpController) {
         Assert.isMainThread();
         mStatusBarService = statusBarService;
+        dumpController.registerDumpable(TAG, this);
     }
 
     /** Initializes the NotifCollection and registers it to receive notification events. */
@@ -442,4 +447,19 @@ public class NotifCollection {
     public @interface CancellationReason {}
 
     public static final int REASON_UNKNOWN = 0;
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        final List<NotificationEntry> entries = new ArrayList<>(getActiveNotifs());
+
+        pw.println("\t" + TAG + " unsorted/unfiltered notifications:");
+        if (entries.size() == 0) {
+            pw.println("\t\t None");
+        }
+        pw.println(
+                ListDumper.dumpList(
+                        entries,
+                        true,
+                        "\t\t"));
+    }
 }
