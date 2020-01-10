@@ -16,28 +16,62 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.media.tv.tuner.TunerConstants.FilterType;
+import android.hardware.tv.tuner.V1_0.Constants;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * Demux Filter configuration.
+ * Filter configuration used to configure filters.
  *
  * @hide
  */
 public abstract class FilterConfiguration {
-    @Nullable
-    protected final Settings mSettings;
 
-    protected FilterConfiguration(Settings settings) {
+    /** @hide */
+    @IntDef({FILTER_TYPE_TS, FILTER_TYPE_MMTP, FILTER_TYPE_IP, FILTER_TYPE_TLV, FILTER_TYPE_ALP})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FilterType {}
+
+    /**
+     * TS filter type.
+     */
+    public static final int FILTER_TYPE_TS = Constants.DemuxFilterMainType.TS;
+    /**
+     * MMTP filter type.
+     */
+    public static final int FILTER_TYPE_MMTP = Constants.DemuxFilterMainType.MMTP;
+    /**
+     * IP filter type.
+     */
+    public static final int FILTER_TYPE_IP = Constants.DemuxFilterMainType.IP;
+    /**
+     * TLV filter type.
+     */
+    public static final int FILTER_TYPE_TLV = Constants.DemuxFilterMainType.TLV;
+    /**
+     * ALP filter type.
+     */
+    public static final int FILTER_TYPE_ALP = Constants.DemuxFilterMainType.ALP;
+
+    @Nullable
+    private final Settings mSettings;
+
+    /* package */ FilterConfiguration(Settings settings) {
         mSettings = settings;
     }
 
     /**
-     * Gets filter configuration type
+     * Gets filter configuration type.
+     * @hide
      */
     @FilterType
     public abstract int getType();
 
+    /** @hide */
+    @Nullable
     public Settings getSettings() {
         return mSettings;
     }

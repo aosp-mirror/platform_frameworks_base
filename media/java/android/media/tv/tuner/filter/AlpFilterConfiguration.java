@@ -16,8 +16,6 @@
 
 package android.media.tv.tuner.filter;
 
-import android.media.tv.tuner.TunerConstants;
-
 /**
  * Filter configuration for a ALP filter.
  * @hide
@@ -32,6 +30,6 @@ public class AlpFilterConfiguration extends FilterConfiguration {
 
     @Override
     public int getType() {
-        return TunerConstants.FILTER_TYPE_ALP;
+        return FilterConfiguration.FILTER_TYPE_ALP;
     }
 }

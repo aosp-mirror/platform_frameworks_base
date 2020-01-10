@@ -128,21 +128,6 @@ public final class TunerConstants {
     public static final int FRONTEND_SETTINGS_ISDBT = 9;
 
     /** @hide */
-    @IntDef({FILTER_TYPE_TS, FILTER_TYPE_MMTP, FILTER_TYPE_IP, FILTER_TYPE_TLV, FILTER_TYPE_ALP})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FilterType {}
-    /** @hide */
-    public static final int FILTER_TYPE_TS = Constants.DemuxFilterMainType.TS;
-    /** @hide */
-    public static final int FILTER_TYPE_MMTP = Constants.DemuxFilterMainType.MMTP;
-    /** @hide */
-    public static final int FILTER_TYPE_IP = Constants.DemuxFilterMainType.IP;
-    /** @hide */
-    public static final int FILTER_TYPE_TLV = Constants.DemuxFilterMainType.TLV;
-    /** @hide */
-    public static final int FILTER_TYPE_ALP = Constants.DemuxFilterMainType.ALP;
-
-    /** @hide */
     @IntDef({FILTER_SUBTYPE_UNDEFINED, FILTER_SUBTYPE_SECTION, FILTER_SUBTYPE_PES,
             FILTER_SUBTYPE_AUDIO, FILTER_SUBTYPE_VIDEO, FILTER_SUBTYPE_DOWNLOAD,
             FILTER_SUBTYPE_RECORD, FILTER_SUBTYPE_TS, FILTER_SUBTYPE_PCR, FILTER_SUBTYPE_TEMI,

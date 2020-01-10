@@ -18,18 +18,20 @@ package android.media.tv.tuner.filter;
 
 /**
  * Settings for filters of different subtypes.
+ *
  * @hide
  */
 public abstract class Settings {
-    protected final int mType;
+    private final int mType;
 
-    protected Settings(int type) {
+    /* package */ Settings(int type) {
         mType = type;
     }
 
     /**
      * Gets filter settings type.
-     * @return
+     *
+     * @hide
      */
     public int getType() {
         return mType;
