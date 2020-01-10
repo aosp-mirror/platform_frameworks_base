@@ -2395,7 +2395,7 @@ package android.hardware.biometrics {
 package android.hardware.camera2 {
 
   public abstract class CameraDevice implements java.lang.AutoCloseable {
-    method public abstract void createCustomCaptureSession(android.hardware.camera2.params.InputConfiguration, @NonNull java.util.List<android.hardware.camera2.params.OutputConfiguration>, int, @NonNull android.hardware.camera2.CameraCaptureSession.StateCallback, @Nullable android.os.Handler) throws android.hardware.camera2.CameraAccessException;
+    method @Deprecated public abstract void createCustomCaptureSession(android.hardware.camera2.params.InputConfiguration, @NonNull java.util.List<android.hardware.camera2.params.OutputConfiguration>, int, @NonNull android.hardware.camera2.CameraCaptureSession.StateCallback, @Nullable android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     field public static final int SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED = 1; // 0x1
     field public static final int SESSION_OPERATION_MODE_NORMAL = 0; // 0x0
     field public static final int SESSION_OPERATION_MODE_VENDOR_START = 32768; // 0x8000
