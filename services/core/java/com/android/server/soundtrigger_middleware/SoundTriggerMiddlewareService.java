@@ -257,10 +257,10 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
         switch (status) {
             case PermissionChecker.PERMISSION_GRANTED:
                 return;
-            case PermissionChecker.PERMISSION_DENIED:
+            case PermissionChecker.PERMISSION_HARD_DENIED:
                 throw new SecurityException(
                         String.format("Caller must have the %s permission.", permission));
-            case PermissionChecker.PERMISSION_DENIED_APP_OP:
+            case PermissionChecker.PERMISSION_SOFT_DENIED:
                 throw new ServiceSpecificException(Status.TEMPORARY_PERMISSION_DENIED,
                         String.format("Caller must have the %s permission.", permission));
             default:
