@@ -1610,6 +1610,22 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             pw.decreaseIndent();
             pw.println();
 
+            pw.println("Stats Providers:");
+            pw.increaseIndent();
+            invokeForAllStatsProviderCallbacks((cb) -> {
+                pw.println(cb.mTag + " Xt:");
+                pw.increaseIndent();
+                pw.print(cb.getCachedStats(STATS_PER_IFACE).toString());
+                pw.decreaseIndent();
+                if (includeUid) {
+                    pw.println(cb.mTag + " Uid:");
+                    pw.increaseIndent();
+                    pw.print(cb.getCachedStats(STATS_PER_UID).toString());
+                    pw.decreaseIndent();
+                }
+            });
+            pw.decreaseIndent();
+
             pw.println("Dev stats:");
             pw.increaseIndent();
             mDevRecorder.dumpLocked(pw, fullHistory);
