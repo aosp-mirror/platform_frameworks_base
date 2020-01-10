@@ -16,6 +16,7 @@
 
 #include <android/bitmap.h>
 #include <android/graphics/bitmap.h>
+#include <android/data_space.h>
 
 int AndroidBitmap_getInfo(JNIEnv* env, jobject jbitmap,
                           AndroidBitmapInfo* info) {
@@ -27,6 +28,15 @@ int AndroidBitmap_getInfo(JNIEnv* env, jobject jbitmap,
         *info = ABitmap_getInfoFromJava(env, jbitmap);
     }
     return ANDROID_BITMAP_RESULT_SUCCESS;
+}
+
+int32_t AndroidBitmap_getDataSpace(JNIEnv* env, jobject jbitmap) {
+    if (NULL == env || NULL == jbitmap) {
+        return ADATASPACE_UNKNOWN; // Or return a real error?
+    }
+
+    android::graphics::Bitmap bitmap(env, jbitmap);
+    return bitmap.getDataSpace();
 }
 
 int AndroidBitmap_lockPixels(JNIEnv* env, jobject jbitmap, void** addrPtr) {

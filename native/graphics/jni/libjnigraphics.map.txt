@@ -1,6 +1,7 @@
 LIBJNIGRAPHICS {
   global:
     AndroidBitmap_getInfo;
+    AndroidBitmap_getDataSpace;
     AndroidBitmap_lockPixels;
     AndroidBitmap_unlockPixels;
   local:
