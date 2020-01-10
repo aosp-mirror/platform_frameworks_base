@@ -16,6 +16,9 @@
 
 package com.android.internal.logging;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 /**
  * Logging interface for UI events. Normal implementation is UiEventLoggerImpl.
  * For testing, use fake implementation UiEventLoggerFake.
@@ -26,13 +29,24 @@ public interface UiEventLogger {
     /** Put your Event IDs in enums that implement this interface, and document them using the
      * UiEventEnum annotation.
      * Event IDs must be globally unique. This will be enforced by tooling (forthcoming).
-     * OEMs should use event IDs above 100000.
+     * OEMs should use event IDs above 100000 and below 1000000 (1 million).
      */
     interface UiEventEnum {
         int getId();
     }
+
     /**
-     * Log a simple event, with no package or instance ID.
+     * Log a simple event, with no package information. Does nothing if event.getId() <= 0.
+     * @param event an enum implementing UiEventEnum interface.
      */
-    void log(UiEventEnum eventID);
+    void log(@NonNull UiEventEnum event);
+
+    /**
+     * Log an event with package information. Does nothing if event.getId() <= 0.
+     * Give both uid and packageName if both are known, but one may be omitted if unknown.
+     * @param event an enum implementing UiEventEnum interface.
+     * @param uid the uid of the relevant app, if known (0 otherwise).
+     * @param packageName the package name of the relevant app, if known (null otherwise).
+     */
+    void log(@NonNull UiEventEnum event, int uid, @Nullable String packageName);
 }
