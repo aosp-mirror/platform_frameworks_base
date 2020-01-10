@@ -74,6 +74,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManager.EnforcingUser;
+import android.os.UserManager.QuietModeFlag;
 import android.os.UserManagerInternal;
 import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.os.storage.StorageManager;
@@ -914,7 +915,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean requestQuietModeEnabled(@NonNull String callingPackage, boolean enableQuietMode,
-            @UserIdInt int userId, @Nullable IntentSender target) {
+            @UserIdInt int userId, @Nullable IntentSender target, @QuietModeFlag int flags) {
         Objects.requireNonNull(callingPackage);
 
         if (enableQuietMode && target != null) {
@@ -925,24 +926,24 @@ public class UserManagerService extends IUserManager.Stub {
         ensureCanModifyQuietMode(callingPackage, Binder.getCallingUid(), userId, target != null);
         final long identity = Binder.clearCallingIdentity();
         try {
-            boolean result = false;
             if (enableQuietMode) {
                 setQuietModeEnabled(
                         userId, true /* enableQuietMode */, target, callingPackage);
-                result = true;
-            } else {
-                boolean needToShowConfirmCredential =
-                        mLockPatternUtils.isSecure(userId)
-                                && !StorageManager.isUserKeyUnlocked(userId);
-                if (needToShowConfirmCredential) {
-                    showConfirmCredentialToDisableQuietMode(userId, target);
-                } else {
-                    setQuietModeEnabled(
-                            userId, false /* enableQuietMode */, target, callingPackage);
-                    result = true;
-                }
+                return true;
             }
-            return result;
+            boolean needToShowConfirmCredential =
+                    mLockPatternUtils.isSecure(userId)
+                            && !StorageManager.isUserKeyUnlocked(userId);
+            if (needToShowConfirmCredential) {
+                if ((flags & UserManager.QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED) != 0) {
+                    return false;
+                }
+                showConfirmCredentialToDisableQuietMode(userId, target);
+                return false;
+            }
+            setQuietModeEnabled(
+                    userId, false /* enableQuietMode */, target, callingPackage);
+            return true;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
