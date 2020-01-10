@@ -19,6 +19,7 @@ package com.android.internal.location;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,8 +37,6 @@ import android.util.Log;
 import com.android.internal.R;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.telephony.GsmAlphabet;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.TimeUnit;
@@ -126,7 +125,7 @@ public class GpsNetInitiatedHandler {
 
     public static class GpsNiNotification
     {
-        @android.annotation.UnsupportedAppUsage
+        @android.compat.annotation.UnsupportedAppUsage
         public GpsNiNotification() {
         }
         public int notificationId;
