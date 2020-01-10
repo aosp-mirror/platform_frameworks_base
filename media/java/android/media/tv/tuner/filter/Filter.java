@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner;
+package android.media.tv.tuner.filter;
 
+import android.annotation.BytesLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.tv.tuner.Tuner.FilterCallback;
-import android.media.tv.tuner.filter.FilterConfiguration;
-import android.media.tv.tuner.filter.Settings;
 
 /**
  * Tuner data filter.
  *
- * <p> This class is used to filter wanted data according to the filter's configuration.
+ * <p>This class is used to filter wanted data according to the filter's configuration.
+ *
  * @hide
  */
 public class Filter implements AutoCloseable {
     private long mNativeContext;
     private FilterCallback mCallback;
-    int mId;
+    private final int mId;
 
     private native int nativeConfigureFilter(
             int type, int subType, FilterConfiguration settings);
     private native int nativeGetId();
-    private native int nativeSetDataSource(Tuner.Filter source);
+    private native int nativeSetDataSource(Filter source);
     private native int nativeStartFilter();
     private native int nativeStopFilter();
     private native int nativeFlushFilter();
-    private native int nativeRead(byte[] buffer, int offset, int size);
+    private native int nativeRead(byte[] buffer, long offset, long size);
     private native int nativeClose();
 
     private Filter(int id) {
@@ -53,24 +53,20 @@ public class Filter implements AutoCloseable {
     /**
      * Configures the filter.
      *
-     * @param settings the settings of the filter.
+     * @param config the configuration of the filter.
      * @return result status of the operation.
-     * @hide
      */
-    public int configure(FilterConfiguration settings) {
+    public int configure(@NonNull FilterConfiguration config) {
         int subType = -1;
-        Settings s = settings.getSettings();
+        Settings s = config.getSettings();
         if (s != null) {
             subType = s.getType();
         }
-        return nativeConfigureFilter(settings.getType(), subType, settings);
+        return nativeConfigureFilter(config.getType(), subType, config);
     }
 
     /**
      * Gets the filter Id.
-     *
-     * @return the hardware resource Id for the filter.
-     * @hide
      */
     public int getId() {
         return nativeGetId();
@@ -87,17 +83,15 @@ public class Filter implements AutoCloseable {
      * @param source the filter instance which provides data input. Switch to
      * use demux as data source if the filter instance is NULL.
      * @return result status of the operation.
-     * @hide
      */
-    public int setDataSource(@Nullable Tuner.Filter source) {
+    public int setDataSource(@Nullable Filter source) {
         return nativeSetDataSource(source);
     }
 
     /**
-     * Starts the filter.
+     * Starts filtering data.
      *
      * @return result status of the operation.
-     * @hide
      */
     public int start() {
         return nativeStartFilter();
@@ -105,35 +99,38 @@ public class Filter implements AutoCloseable {
 
 
     /**
-     * Stops the filter.
+     * Stops filtering data.
      *
      * @return result status of the operation.
-     * @hide
      */
     public int stop() {
         return nativeStopFilter();
     }
 
     /**
-     * Flushes the filter.
+     * Flushes the filter. Data in filter buffer is cleared.
      *
      * @return result status of the operation.
-     * @hide
      */
     public int flush() {
         return nativeFlushFilter();
     }
 
-    /** @hide */
-    public int read(@NonNull byte[] buffer, int offset, int size) {
+    /**
+     * Copies filtered data from filter buffer to the given byte array.
+     *
+     * @param buffer the buffer to store the filtered data.
+     * @param offset the index of the first byte in {@code buffer} to write.
+     * @param size the maximum number of bytes to read.
+     * @return the number of bytes read.
+     */
+    public int read(@NonNull byte[] buffer, @BytesLong long offset, @BytesLong long size) {
         size = Math.min(size, buffer.length - offset);
         return nativeRead(buffer, offset, size);
     }
 
     /**
-     * Release the Filter instance.
-     *
-     * @hide
+     * Releases the Filter instance.
      */
     @Override
     public void close() {
