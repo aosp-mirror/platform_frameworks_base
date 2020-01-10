@@ -118,10 +118,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           .pullTimeoutNs = NS_PER_SEC / 2,
          }},
 
-        // system_uptime
-        {{.atomTag = android::util::SYSTEM_UPTIME},
-         {.puller = new StatsCompanionServicePuller(android::util::SYSTEM_UPTIME)}},
-
         // remaining_battery_capacity
         {{.atomTag = android::util::REMAINING_BATTERY_CAPACITY},
          {.puller = new ResourceHealthManagerPuller(android::util::REMAINING_BATTERY_CAPACITY)}},

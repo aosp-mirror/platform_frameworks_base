@@ -711,11 +711,22 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerSystemUptime() {
-        // No op.
+        int tagId = StatsLog.SYSTEM_UPTIME;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullSystemUptime(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullSystemUptime() {
-        // No op.
+    private int pullSystemUptime(int atomTag, List<StatsEvent> pulledData) {
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeLong(SystemClock.elapsedRealtime())
+                .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerRemainingBatteryCapacity() {

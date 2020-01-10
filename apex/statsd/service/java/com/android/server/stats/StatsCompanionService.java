@@ -918,13 +918,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullSystemUpTime(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-        e.writeLong(SystemClock.uptimeMillis());
-        pulledData.add(e);
-    }
-
     private void pullProcessMemoryState(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2145,11 +2138,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.MODEM_ACTIVITY_INFO: {
                 pullModemActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.SYSTEM_UPTIME: {
-                pullSystemUpTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 
