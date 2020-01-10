@@ -1287,21 +1287,13 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private SurfaceControl.ScreenshotGraphicBuffer screenshotInternal(int displayId) {
-        synchronized (mSyncRoot) {
-            final IBinder token = getDisplayToken(displayId);
-            if (token == null) {
-                return null;
-            }
-            final LogicalDisplay logicalDisplay = mLogicalDisplays.get(displayId);
-            if (logicalDisplay == null) {
-                return null;
-            }
-
-            final DisplayInfo displayInfo = logicalDisplay.getDisplayInfoLocked();
-            return SurfaceControl.screenshotToBufferWithSecureLayersUnsafe(token, new Rect(),
-                    displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight(),
-                    false /* useIdentityTransform */, 0 /* rotation */);
+        final IBinder token = getDisplayToken(displayId);
+        if (token == null) {
+            return null;
         }
+        return SurfaceControl.screenshotToBufferWithSecureLayersUnsafe(
+                        token, new Rect(), 0 /* width */, 0 /* height */,
+                        false /* useIdentityTransform */, 0 /* rotation */);
     }
 
     @VisibleForTesting
