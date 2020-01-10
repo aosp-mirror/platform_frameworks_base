@@ -80,20 +80,6 @@ public final class TunerConstants {
 
 
     /** @hide */
-    @IntDef({DATA_FORMAT_TS, DATA_FORMAT_PES, DATA_FORMAT_ES, DATA_FORMAT_SHV_TLV})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface DataFormat {}
-    /** @hide */
-    public static final int DATA_FORMAT_TS = Constants.DataFormat.TS;
-    /** @hide */
-    public static final int DATA_FORMAT_PES = Constants.DataFormat.PES;
-    /** @hide */
-    public static final int DATA_FORMAT_ES = Constants.DataFormat.ES;
-    /** @hide */
-    public static final int DATA_FORMAT_SHV_TLV = Constants.DataFormat.SHV_TLV;
-
-
-    /** @hide */
     @IntDef({DEMUX_T_PID, DEMUX_MMPT_PID})
     @Retention(RetentionPolicy.SOURCE)
     public @interface DemuxPidType {}
@@ -171,8 +157,8 @@ public final class TunerConstants {
     public static final int FILTER_SUBTYPE_PTP = 16;
 
     /** @hide */
-    @IntDef({FILTER_STATUS_DATA_READY, FILTER_STATUS_LOW_WATER, FILTER_STATUS_HIGH_WATER,
-            FILTER_STATUS_OVERFLOW})
+    @IntDef(flag = true, prefix = "FILTER_STATUS_", value = {FILTER_STATUS_DATA_READY,
+            FILTER_STATUS_LOW_WATER, FILTER_STATUS_HIGH_WATER, FILTER_STATUS_OVERFLOW})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FilterStatus {}
 
@@ -1251,15 +1237,6 @@ public final class TunerConstants {
     public static final int FILTER_SETTINGS_TLV = Constants.DemuxFilterMainType.TLV;
     /** @hide */
     public static final int FILTER_SETTINGS_ALP = Constants.DemuxFilterMainType.ALP;
-
-    /** @hide */
-    @IntDef({DVR_SETTINGS_RECORD, DVR_SETTINGS_PLAYBACK})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface DvrSettingsType {}
-    /** @hide */
-    public static final int DVR_SETTINGS_RECORD = Constants.DvrType.RECORD;
-    /** @hide */
-    public static final int DVR_SETTINGS_PLAYBACK = Constants.DvrType.PLAYBACK;
 
 
     /** @hide */
