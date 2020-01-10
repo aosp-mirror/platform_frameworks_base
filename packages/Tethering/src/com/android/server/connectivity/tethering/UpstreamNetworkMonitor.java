@@ -16,9 +16,12 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.net.ConnectivityManager.TYPE_BLUETOOTH;
+import static android.net.ConnectivityManager.TYPE_ETHERNET;
+import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
-import static android.net.ConnectivityManager.TYPE_NONE;
+import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
@@ -35,8 +38,10 @@ import android.net.util.PrefixUtils;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.util.Log;
+import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.StateMachine;
 
 import java.util.HashMap;
@@ -77,10 +82,24 @@ public class UpstreamNetworkMonitor {
     public static final int EVENT_ON_LINKPROPERTIES = 2;
     public static final int EVENT_ON_LOST           = 3;
     public static final int NOTIFY_LOCAL_PREFIXES   = 10;
+    // This value is used by deprecated preferredUpstreamIfaceTypes selection which is default
+    // disabled.
+    @VisibleForTesting
+    public static final int TYPE_NONE = -1;
 
     private static final int CALLBACK_LISTEN_ALL = 1;
     private static final int CALLBACK_DEFAULT_INTERNET = 2;
     private static final int CALLBACK_MOBILE_REQUEST = 3;
+
+    private static final SparseIntArray sLegacyTypeToTransport = new SparseIntArray();
+    static {
+        sLegacyTypeToTransport.put(TYPE_MOBILE,       NetworkCapabilities.TRANSPORT_CELLULAR);
+        sLegacyTypeToTransport.put(TYPE_MOBILE_DUN,   NetworkCapabilities.TRANSPORT_CELLULAR);
+        sLegacyTypeToTransport.put(TYPE_MOBILE_HIPRI, NetworkCapabilities.TRANSPORT_CELLULAR);
+        sLegacyTypeToTransport.put(TYPE_WIFI,         NetworkCapabilities.TRANSPORT_WIFI);
+        sLegacyTypeToTransport.put(TYPE_BLUETOOTH,    NetworkCapabilities.TRANSPORT_BLUETOOTH);
+        sLegacyTypeToTransport.put(TYPE_ETHERNET,     NetworkCapabilities.TRANSPORT_ETHERNET);
+    }
 
     private final Context mContext;
     private final SharedLog mLog;
@@ -202,7 +221,7 @@ public class UpstreamNetworkMonitor {
         final int legacyType = mDunRequired ? TYPE_MOBILE_DUN : TYPE_MOBILE_HIPRI;
 
         final NetworkRequest mobileUpstreamRequest = new NetworkRequest.Builder()
-                .setCapabilities(ConnectivityManager.networkCapabilitiesForType(legacyType))
+                .setCapabilities(networkCapabilitiesForType(legacyType))
                 .build();
 
         // The existing default network and DUN callbacks will be notified.
@@ -354,16 +373,6 @@ public class UpstreamNetworkMonitor {
         notifyTarget(EVENT_ON_LINKPROPERTIES, network);
     }
 
-    private void handleSuspended(Network network) {
-        if (!network.equals(mTetheringUpstreamNetwork)) return;
-        mLog.log("SUSPENDED current upstream: " + network);
-    }
-
-    private void handleResumed(Network network) {
-        if (!network.equals(mTetheringUpstreamNetwork)) return;
-        mLog.log("RESUMED current upstream: " + network);
-    }
-
     private void handleLost(Network network) {
         // There are few TODOs within ConnectivityService's rematching code
         // pertaining to spurious onLost() notifications.
@@ -453,20 +462,6 @@ public class UpstreamNetworkMonitor {
         }
 
         @Override
-        public void onNetworkSuspended(Network network) {
-            if (mCallbackType == CALLBACK_LISTEN_ALL) {
-                handleSuspended(network);
-            }
-        }
-
-        @Override
-        public void onNetworkResumed(Network network) {
-            if (mCallbackType == CALLBACK_LISTEN_ALL) {
-                handleResumed(network);
-            }
-        }
-
-        @Override
         public void onLost(Network network) {
             if (mCallbackType == CALLBACK_DEFAULT_INTERNET) {
                 mDefaultInternetNetwork = null;
@@ -510,7 +505,7 @@ public class UpstreamNetworkMonitor {
         for (int type : preferredTypes) {
             NetworkCapabilities nc;
             try {
-                nc = ConnectivityManager.networkCapabilitiesForType(type);
+                nc = networkCapabilitiesForType(type);
             } catch (IllegalArgumentException iae) {
                 Log.e(TAG, "No NetworkCapabilities mapping for legacy type: " + type);
                 continue;
@@ -571,5 +566,29 @@ public class UpstreamNetworkMonitor {
         }
 
         return null;
+    }
+
+    /**
+     * Given a legacy type (TYPE_WIFI, ...) returns the corresponding NetworkCapabilities instance.
+     * This function is used for deprecated legacy type and be disabled by default.
+     */
+    @VisibleForTesting
+    public static NetworkCapabilities networkCapabilitiesForType(int type) {
+        final NetworkCapabilities nc = new NetworkCapabilities();
+
+        // Map from type to transports.
+        final int notFound = -1;
+        final int transport = sLegacyTypeToTransport.get(type, notFound);
+        Preconditions.checkArgument(transport != notFound, "unknown legacy type: " + type);
+        nc.addTransportType(transport);
+
+        if (type == TYPE_MOBILE_DUN) {
+            nc.addCapability(NetworkCapabilities.NET_CAPABILITY_DUN);
+            // DUN is restricted network, see NetworkCapabilities#FORCE_RESTRICTED_CAPABILITIES.
+            nc.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
+        } else {
+            nc.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        }
+        return nc;
     }
 }
