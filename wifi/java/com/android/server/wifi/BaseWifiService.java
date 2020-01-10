@@ -254,6 +254,11 @@ public class BaseWifiService extends IWifiManager.Stub {
     }
 
     @Override
+    public boolean isWifiStandardSupported(int standard) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean needs5GHzToAnyApBandConversion() {
         throw new UnsupportedOperationException();
     }
