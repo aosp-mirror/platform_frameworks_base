@@ -25,6 +25,7 @@ cc_binary_host {
     srcs: ["agent.cpp"],
     static_libs: [
         "libbase",
+        "liblog",
         "libz",
         "slicer",
     ],
