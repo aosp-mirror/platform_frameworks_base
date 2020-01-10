@@ -55,6 +55,13 @@ java_library {
     jarjar_rules: "jarjar_rules.txt",
 
     plugins: ["java_api_finder"],
+
+    hostdex: true, // for hiddenapi check
+    visibility: ["//frameworks/av/apex:__subpackages__"],
+    apex_available: [
+        "com.android.media",
+        "test_com.android.media",
+    ],
 }
 
 filegroup {

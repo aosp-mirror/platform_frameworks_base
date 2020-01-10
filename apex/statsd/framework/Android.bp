@@ -37,7 +37,16 @@ java_library {
         // TODO(b/146230220): Use framework-system-stubs instead.
         "android_system_stubs_current",
     ],
-    // TODO:(b/146210774): Add apex_available field.
+    hostdex: true, // for hiddenapi check
+    visibility: [
+        "//frameworks/base/apex/statsd:__subpackages__",
+        //TODO(b/146167933) remove this when framework is built with framework-statsd-stubs
+        "//frameworks/base",
+    ],
+    apex_available: [
+        "com.android.os.statsd",
+        "test_com.android.os.statsd",
+    ],
 }
 
 droidstubs {
