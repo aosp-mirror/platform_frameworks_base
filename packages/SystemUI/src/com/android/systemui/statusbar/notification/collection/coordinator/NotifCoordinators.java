@@ -76,6 +76,7 @@ public class NotifCoordinators implements Dumpable {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println();
         pw.println(TAG + ":");
         for (Coordinator c : mCoordinators) {
             pw.println("\t" + c.getClass());
