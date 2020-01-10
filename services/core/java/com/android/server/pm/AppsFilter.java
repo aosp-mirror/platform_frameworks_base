@@ -53,6 +53,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * The entity responsible for filtering visibility between apps based on declarations in their
@@ -219,10 +220,15 @@ public class AppsFilter {
                 continue;
             }
             final Uri data = intent.getData();
-            if ("content".equalsIgnoreCase(intent.getScheme())
-                    && data != null
-                    && Objects.equals(provider.getAuthority(), data.getAuthority())) {
-                return true;
+            if (!"content".equalsIgnoreCase(intent.getScheme()) || data == null
+                    || provider.getAuthority() == null) {
+                continue;
+            }
+            StringTokenizer authorities = new StringTokenizer(provider.getAuthority(), ";", false);
+            while (authorities.hasMoreElements()) {
+                if (Objects.equals(authorities.nextElement(), data.getAuthority())) {
+                    return true;
+                }
             }
         }
         for (int s = ArrayUtils.size(potentialTarget.getServices()) - 1; s >= 0; s--) {
@@ -632,7 +638,7 @@ public class AppsFilter {
     private static void log(SettingBase callingPkgSetting, PackageSetting targetPkgSetting,
             String description, Throwable throwable) {
         Slog.wtf(TAG,
-                "interaction: " + callingPkgSetting.toString()
+                "interaction: " + callingPkgSetting
                         + " -> " + targetPkgSetting.name + " "
                         + description, throwable);
     }

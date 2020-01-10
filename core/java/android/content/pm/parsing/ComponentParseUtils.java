@@ -58,6 +58,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.XmlUtils;
 
@@ -812,6 +813,11 @@ public class ComponentParseUtils {
 
         public boolean isExported() {
             return exported;
+        }
+
+        @VisibleForTesting
+        public void setExported(boolean exported) {
+            this.exported = exported;
         }
 
         public List<ParsedProviderIntentInfo> getIntents() {
