@@ -1200,7 +1200,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 NewRollback newRollback;
                 synchronized (mLock) {
                     newRollback = getNewRollbackForPackageSessionLocked(sessionId);
-                    if (newRollback != null && newRollback.notifySessionWithSuccess()) {
+                    if (newRollback != null && newRollback.rollback.notifySessionWithSuccess()) {
                         mNewRollbacks.remove(newRollback);
                     } else {
                         // Not all child sessions finished with success.
@@ -1344,29 +1344,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private static class NewRollback {
         public final Rollback rollback;
 
-        /**
-         * The number of sessions in the install which are notified with success by
-         * {@link PackageInstaller.SessionCallback#onFinished(int, boolean)}.
-         * This NewRollback will be enabled only after all child sessions finished with success.
-         */
-        @GuardedBy("mNewRollbackLock")
-        private int mNumPackageSessionsWithSuccess;
-
         private final Object mNewRollbackLock = new Object();
 
         NewRollback(Rollback rollback) {
             this.rollback = rollback;
-        }
-
-        /**
-         * Called when a child session finished with success.
-         * Returns true when all child sessions are notified with success. This NewRollback will be
-         * enabled only after all child sessions finished with success.
-         */
-        boolean notifySessionWithSuccess() {
-            synchronized (mNewRollbackLock) {
-                return ++mNumPackageSessionsWithSuccess == rollback.getPackageSessionIdCount();
-            }
         }
     }
 
