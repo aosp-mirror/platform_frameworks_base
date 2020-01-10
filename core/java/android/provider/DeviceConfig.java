@@ -424,6 +424,7 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
+    @TestApi
     @NonNull
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static Properties getProperties(@NonNull String namespace, @NonNull String ... names) {
@@ -593,6 +594,7 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static boolean setProperties(@NonNull Properties properties) throws BadConfigException {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
@@ -817,6 +819,7 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static class BadConfigException extends Exception {}
 
     /**
