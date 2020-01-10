@@ -60,11 +60,6 @@ const int64_t NO_ALARM_UPDATE = INT64_MAX;
 
 std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
 
-        // wifi_bytes_transfer_by_fg_bg
-        {{.atomTag = android::util::WIFI_BYTES_TRANSFER_BY_FG_BG},
-         {.additiveFields = {3, 4, 5, 6},
-          .puller = new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER_BY_FG_BG)}},
-
         // mobile_bytes_transfer
         {{.atomTag = android::util::MOBILE_BYTES_TRANSFER},
          {.additiveFields = {2, 3, 4, 5},

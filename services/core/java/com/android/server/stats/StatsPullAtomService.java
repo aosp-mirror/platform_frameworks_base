@@ -327,11 +327,12 @@ public class StatsPullAtomService extends SystemService {
     }
     private void registerWifiBytesTransfer() {
         int tagId = StatsLog.WIFI_BYTES_TRANSFER;
-        PullAtomMetadata metaData = PullAtomMetadata.newBuilder()
-                .setAdditiveFields(new int[] {2, 3, 4, 5}).build();
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {2, 3, 4, 5})
+                .build();
         mStatsManager.registerPullAtomCallback(
                 tagId,
-                metaData,
+                metadata,
                 (atomTag, data) -> pullWifiBytesTransfer(atomTag, data),
                 Executors.newSingleThreadExecutor()
         );
@@ -356,6 +357,7 @@ public class StatsPullAtomService extends SystemService {
             addNetworkStats(atomTag, pulledData, stats, false);
         } catch (RemoteException e) {
             Slog.e(TAG, "Pulling netstats for wifi bytes has error", e);
+            return StatsManager.PULL_SKIP;
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -382,12 +384,75 @@ public class StatsPullAtomService extends SystemService {
         }
     }
 
-    private void registerWifiBytesTransferBackground() {
-        // No op.
+    /**
+     * Allows rollups per UID but keeping the set (foreground/background) slicing.
+     * Adapted from groupedByUid in frameworks/base/core/java/android/net/NetworkStats.java
+     */
+    private NetworkStats rollupNetworkStatsByFGBG(NetworkStats stats) {
+        final NetworkStats ret = new NetworkStats(stats.getElapsedRealtime(), 1);
+
+        final NetworkStats.Entry entry = new NetworkStats.Entry();
+        entry.iface = NetworkStats.IFACE_ALL;
+        entry.tag = NetworkStats.TAG_NONE;
+        entry.metered = NetworkStats.METERED_ALL;
+        entry.roaming = NetworkStats.ROAMING_ALL;
+
+        int size = stats.size();
+        NetworkStats.Entry recycle = new NetworkStats.Entry(); // Used for retrieving values
+        for (int i = 0; i < size; i++) {
+            stats.getValues(i, recycle);
+
+            // Skip specific tags, since already counted in TAG_NONE
+            if (recycle.tag != NetworkStats.TAG_NONE) continue;
+
+            entry.set = recycle.set; // Allows slicing by background/foreground
+            entry.uid = recycle.uid;
+            entry.rxBytes = recycle.rxBytes;
+            entry.rxPackets = recycle.rxPackets;
+            entry.txBytes = recycle.txBytes;
+            entry.txPackets = recycle.txPackets;
+            // Operations purposefully omitted since we don't use them for statsd.
+            ret.combineValues(entry);
+        }
+        return ret;
     }
 
-    private void pullWifiBytesTransferBackground() {
-        // No op.
+    private void registerWifiBytesTransferBackground() {
+        int tagId = StatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {3, 4, 5, 6})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullWifiBytesTransferBackground(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
+    }
+
+    private int pullWifiBytesTransferBackground(int atomTag, List<StatsEvent> pulledData) {
+        INetworkStatsService networkStatsService = getINetworkStatsService();
+        if (networkStatsService == null) {
+            Slog.e(TAG, "NetworkStats Service is not available!");
+            return StatsManager.PULL_SKIP;
+        }
+        long token = Binder.clearCallingIdentity();
+        try {
+            BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
+            String[] ifaces = bs.getWifiIfaces();
+            if (ifaces.length == 0) {
+                return StatsManager.PULL_SKIP;
+            }
+            NetworkStats stats = rollupNetworkStatsByFGBG(
+                    networkStatsService.getDetailedUidStats(ifaces));
+            addNetworkStats(atomTag, pulledData, stats, true);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Pulling netstats for wifi bytes w/ fg/bg has error", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerMobileBytesTransfer() {

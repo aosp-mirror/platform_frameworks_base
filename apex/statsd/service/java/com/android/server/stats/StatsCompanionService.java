@@ -815,30 +815,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullWifiBytesTransferByFgBg(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long token = Binder.clearCallingIdentity();
-        try {
-            BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
-            String[] ifaces = bs.getWifiIfaces();
-            if (ifaces.length == 0) {
-                return;
-            }
-            if (mNetworkStatsService == null) {
-                Slog.e(TAG, "NetworkStats Service is not available!");
-                return;
-            }
-            NetworkStats stats = rollupNetworkStatsByFGBG(
-                    mNetworkStatsService.getDetailedUidStats(ifaces));
-            addNetworkStats(tagId, pulledData, stats, true);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Pulling netstats for wifi bytes w/ fg/bg has error", e);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
     private void pullMobileBytesTransfer(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2291,14 +2267,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
         switch (tagId) {
-            
+
             case StatsLog.MOBILE_BYTES_TRANSFER: {
                 pullMobileBytesTransfer(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG: {
-                pullWifiBytesTransferByFgBg(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 
