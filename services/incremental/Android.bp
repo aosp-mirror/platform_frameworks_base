@@ -47,6 +47,8 @@ cc_defaults {
     shared_libs: [
         "libandroidfw",
         "libbinder",
+        "libcrypto",
+        "libcutils",
         "libincfs",
         "liblog",
         "libz",

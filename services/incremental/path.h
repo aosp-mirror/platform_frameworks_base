@@ -67,6 +67,20 @@ inline details::CStrWrapper c_str(std::string_view sv) {
     return {sv};
 }
 
+std::string_view relativize(std::string_view parent, std::string_view nested);
+inline std::string_view relativize(const char* parent, const char* nested) {
+    return relativize(std::string_view(parent), std::string_view(nested));
+}
+inline std::string_view relativize(std::string_view parent, const char* nested) {
+    return relativize(parent, std::string_view(nested));
+}
+inline std::string_view relativize(const char* parent, std::string_view nested) {
+    return relativize(std::string_view(parent), nested);
+}
+
+std::string_view relativize(std::string&& parent, std::string_view nested) = delete;
+std::string_view relativize(std::string_view parent, std::string&& nested) = delete;
+
 bool isAbsolute(std::string_view path);
 std::string normalize(std::string_view path);
 std::string_view dirname(std::string_view path);
