@@ -16,13 +16,13 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.media.tv.tuner.Lnb;
 import android.media.tv.tuner.TunerConstants;
 import android.media.tv.tuner.TunerConstants.FrontendDvbcSpectralInversion;
 import android.media.tv.tuner.TunerConstants.FrontendDvbtHierarchy;
 import android.media.tv.tuner.TunerConstants.FrontendInnerFec;
 import android.media.tv.tuner.TunerConstants.FrontendModulation;
 import android.media.tv.tuner.TunerConstants.FrontendStatusType;
-import android.media.tv.tuner.TunerConstants.LnbVoltage;
 
 /**
  * Frontend status
@@ -128,7 +128,7 @@ public class FrontendStatus {
         return (int) mValue;
     }
     /** Power Voltage Type for LNB. */
-    @LnbVoltage
+    @Lnb.Voltage
     public int getLnbVoltage() {
         if (mType != TunerConstants.FRONTEND_STATUS_TYPE_LNB_VOLTAGE) {
             throw new IllegalStateException();
