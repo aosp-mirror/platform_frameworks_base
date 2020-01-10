@@ -30,7 +30,7 @@ public class UiEventLoggerFake implements UiEventLogger {
     /**
      * Immutable data class used to record fake log events.
      */
-    public class FakeUiEvent {
+    public static class FakeUiEvent {
         public final int eventId;
         public final int uid;
         public final String packageName;
@@ -44,15 +44,20 @@ public class UiEventLoggerFake implements UiEventLogger {
 
     private Queue<FakeUiEvent> mLogs = new LinkedList<FakeUiEvent>();
 
-    @Override
-    public void log(UiEventEnum event) {
-        final int eventId = event.getId();
-        if (eventId > 0) {
-            mLogs.offer(new FakeUiEvent(eventId, 0, null));
-        }
-    }
-
     public Queue<FakeUiEvent> getLogs() {
         return mLogs;
+    }
+
+    @Override
+    public void log(UiEventEnum event) {
+        log(event, 0, null);
+    }
+
+    @Override
+    public void log(UiEventEnum event, int uid, String packageName) {
+        final int eventId = event.getId();
+        if (eventId > 0) {
+            mLogs.offer(new FakeUiEvent(eventId, uid, packageName));
+        }
     }
 }
