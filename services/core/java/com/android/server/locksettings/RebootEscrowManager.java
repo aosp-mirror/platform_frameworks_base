@@ -25,11 +25,13 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserManager;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.RebootEscrowListener;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -109,20 +111,50 @@ class RebootEscrowManager {
     }
 
     void loadRebootEscrowDataIfAvailable() {
-        IRebootEscrow rebootEscrow = mInjector.getRebootEscrow();
-        if (rebootEscrow == null) {
+        List<UserInfo> users = mUserManager.getUsers();
+        List<UserInfo> rebootEscrowUsers = new ArrayList<>();
+        for (UserInfo user : users) {
+            if (mCallbacks.isUserSecure(user.id) && mStorage.hasRebootEscrow(user.id)) {
+                rebootEscrowUsers.add(user);
+            }
+        }
+
+        if (rebootEscrowUsers.isEmpty()) {
             return;
         }
 
-        final SecretKeySpec escrowKey;
+        SecretKeySpec escrowKey = getAndClearRebootEscrowKey();
+        if (escrowKey == null) {
+            Slog.w(TAG, "Had reboot escrow data for users, but no key; removing escrow storage.");
+            for (UserInfo user : users) {
+                mStorage.removeRebootEscrow(user.id);
+            }
+            StatsLog.write(StatsLog.REBOOT_ESCROW_RECOVERY_REPORTED, false);
+            return;
+        }
+
+        boolean allUsersUnlocked = true;
+        for (UserInfo user : rebootEscrowUsers) {
+            allUsersUnlocked &= restoreRebootEscrowForUser(user.id, escrowKey);
+        }
+        StatsLog.write(StatsLog.REBOOT_ESCROW_RECOVERY_REPORTED, allUsersUnlocked);
+    }
+
+    private SecretKeySpec getAndClearRebootEscrowKey() {
+        IRebootEscrow rebootEscrow = mInjector.getRebootEscrow();
+        if (rebootEscrow == null) {
+            return null;
+        }
+
         try {
             byte[] escrowKeyBytes = rebootEscrow.retrieveKey();
             if (escrowKeyBytes == null) {
-                return;
+                Slog.w(TAG, "Had reboot escrow data for users, but could not retrieve key");
+                return null;
             } else if (escrowKeyBytes.length != 32) {
                 Slog.e(TAG, "IRebootEscrow returned key of incorrect size "
                         + escrowKeyBytes.length);
-                return;
+                return null;
             }
 
             // Make sure we didn't get the null key.
@@ -132,29 +164,22 @@ class RebootEscrowManager {
             }
             if (zero == 0) {
                 Slog.w(TAG, "IRebootEscrow returned an all-zeroes key");
-                return;
+                return null;
             }
 
             // Overwrite the existing key with the null key
             rebootEscrow.storeKey(new byte[32]);
 
-            escrowKey = RebootEscrowData.fromKeyBytes(escrowKeyBytes);
+            return RebootEscrowData.fromKeyBytes(escrowKeyBytes);
         } catch (RemoteException e) {
             Slog.w(TAG, "Could not retrieve escrow data");
-            return;
-        }
-
-        List<UserInfo> users = mUserManager.getUsers();
-        for (UserInfo user : users) {
-            if (mCallbacks.isUserSecure(user.id)) {
-                restoreRebootEscrowForUser(user.id, escrowKey);
-            }
+            return null;
         }
     }
 
-    private void restoreRebootEscrowForUser(@UserIdInt int userId, SecretKeySpec escrowKey) {
+    private boolean restoreRebootEscrowForUser(@UserIdInt int userId, SecretKeySpec escrowKey) {
         if (!mStorage.hasRebootEscrow(userId)) {
-            return;
+            return false;
         }
 
         try {
@@ -165,9 +190,11 @@ class RebootEscrowManager {
 
             mCallbacks.onRebootEscrowRestored(escrowData.getSpVersion(),
                     escrowData.getSyntheticPassword(), userId);
+            return true;
         } catch (IOException e) {
             Slog.w(TAG, "Could not load reboot escrow data for user " + userId, e);
         }
+        return false;
     }
 
     void callToRebootEscrowIfNeeded(@UserIdInt int userId, byte spVersion,

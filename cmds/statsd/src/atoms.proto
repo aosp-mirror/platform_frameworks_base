@@ -333,6 +333,7 @@ message Atom {
         MediaProviderSchemaChange media_provider_schema_change = 236 [(module) = "mediaprovider"];
         MediaProviderIdleMaintenance media_provider_idle_maintenance =
             237 [(module) = "mediaprovider"];
+        RebootEscrowRecoveryReported reboot_escrow_recovery_reported = 238;
     }
 
     // Pulled events will start at field 10000.
@@ -7336,6 +7337,17 @@ message UpdateEngineSuccessfulUpdateReported {
 
     // The number of reboot of the device during a successful update.
     optional int32 reboot_count = 7;
+}
+
+/**
+ * Reported when the RebootEscrow HAL has attempted to recover the escrowed
+ * key to indicate whether it was successful or not.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/locksettings/RebootEscrowManager.java
+ */
+message RebootEscrowRecoveryReported {
+    optional bool successful = 1;
 }
 
 /**
