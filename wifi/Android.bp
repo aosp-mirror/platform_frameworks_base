@@ -60,11 +60,14 @@ java_library {
     sdk_version: "core_platform",
     static_libs: [
         "framework-wifi-util-lib",
+        "android.hardware.wifi-V1.0-java-constants",
     ],
     libs: [
         // TODO(b/140299412) should be framework-system-stubs once we fix all @hide dependencies
         "framework-minus-apex",
-        "unsupportedappusage",
+        "framework-annotations-lib",
+        "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
+        "unsupportedappusage-annotation", // for dalvik.annotation.compat.UnsupportedAppUsage
     ],
     srcs: [
         ":framework-wifi-updatable-sources",

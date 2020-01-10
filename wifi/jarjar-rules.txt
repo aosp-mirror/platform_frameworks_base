@@ -18,7 +18,6 @@ rule android.util.LocalLog* com.android.server.x.wifi.util.LocalLog@1
 rule android.util.Rational* com.android.server.x.wifi.util.Rational@1
 
 rule android.os.BasicShellCommandHandler* com.android.server.x.wifi.os.BasicShellCommandHandler@1
-rule android.os.HandlerExecutor* com.android.server.x.wifi.os.HandlerExecutor@1
 
 # Use our statically linked bouncy castle library
 rule org.bouncycastle.** com.android.server.x.wifi.bouncycastle.@1
@@ -31,6 +30,9 @@ rule android.sysprop.** com.android.server.x.wifi.sysprop.@1
 # used by both framework-wifi and wifi-service
 rule android.content.pm.BaseParceledListSlice* android.x.net.wifi.util.BaseParceledListSlice@1
 rule android.content.pm.ParceledListSlice* android.x.net.wifi.util.ParceledListSlice@1
+rule android.net.shared.Inet4AddressUtils* android.x.net.wifi.util.Inet4AddressUtils@1
+rule android.os.HandlerExecutor* android.x.net.wifi.util.HandlerExecutor@1
+rule android.telephony.Annotation* android.x.net.wifi.util.TelephonyAnnotation@1
 rule com.android.internal.util.AsyncChannel* android.x.net.wifi.util.AsyncChannel@1
 rule com.android.internal.util.AsyncService* android.x.net.wifi.util.AsyncService@1
 rule com.android.internal.util.Preconditions* android.x.net.wifi.util.Preconditions@1
