@@ -611,63 +611,89 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     int setParameter(UUID modelId, @ModelParams int modelParam, int value) {
         synchronized (mLock) {
-            MetricsLogger.count(mContext, "sth_set_parameter", 1);
-            if (modelId == null || mModule == null) {
-                return SoundTrigger.STATUS_ERROR;
-            }
-            ModelData modelData = mModelDataMap.get(modelId);
-            if (modelData == null) {
-                Slog.w(TAG, "SetParameter: Invalid model id:" + modelId);
-                return SoundTrigger.STATUS_BAD_VALUE;
-            }
-            if (!modelData.isModelLoaded()) {
-                Slog.i(TAG, "SetParameter: Given model is not loaded:" + modelId);
-                return SoundTrigger.STATUS_BAD_VALUE;
-            }
-
-            return mModule.setParameter(modelData.getHandle(), modelParam, value);
+            return setParameterLocked(mModelDataMap.get(modelId), modelParam, value);
         }
     }
 
-    int getParameter(@NonNull UUID modelId, @ModelParams int modelParam)
-            throws UnsupportedOperationException, IllegalArgumentException {
+    int setKeyphraseParameter(int keyphraseId, @ModelParams int modelParam, int value) {
         synchronized (mLock) {
-            MetricsLogger.count(mContext, "sth_get_parameter", 1);
-            if (mModule == null) {
-                throw new UnsupportedOperationException("SoundTriggerModule not initialized");
-            }
-
-            ModelData modelData = mModelDataMap.get(modelId);
-            if (modelData == null) {
-                throw new IllegalArgumentException("Invalid model id:" + modelId);
-            }
-            if (!modelData.isModelLoaded()) {
-                throw new UnsupportedOperationException("Given model is not loaded:" + modelId);
-            }
-
-            return mModule.getParameter(modelData.getHandle(), modelParam);
+            return setParameterLocked(getKeyphraseModelDataLocked(keyphraseId), modelParam, value);
         }
+    }
+
+    private int setParameterLocked(@Nullable ModelData modelData, @ModelParams int modelParam,
+            int value) {
+        MetricsLogger.count(mContext, "sth_set_parameter", 1);
+        if (mModule == null) {
+            return SoundTrigger.STATUS_NO_INIT;
+        }
+        if (modelData == null || !modelData.isModelLoaded()) {
+            Slog.i(TAG, "SetParameter: Given model is not loaded:" + modelData);
+            return SoundTrigger.STATUS_BAD_VALUE;
+        }
+
+        return mModule.setParameter(modelData.getHandle(), modelParam, value);
+    }
+
+    int getParameter(@NonNull UUID modelId, @ModelParams int modelParam) {
+        synchronized (mLock) {
+            return getParameterLocked(mModelDataMap.get(modelId), modelParam);
+        }
+    }
+
+    int getKeyphraseParameter(int keyphraseId, @ModelParams int modelParam) {
+        synchronized (mLock) {
+            return getParameterLocked(getKeyphraseModelDataLocked(keyphraseId), modelParam);
+        }
+    }
+
+    private int getParameterLocked(@Nullable ModelData modelData, @ModelParams int modelParam) {
+        MetricsLogger.count(mContext, "sth_get_parameter", 1);
+        if (mModule == null) {
+            throw new UnsupportedOperationException("SoundTriggerModule not initialized");
+        }
+
+        if (modelData == null) {
+            throw new IllegalArgumentException("Invalid model id");
+        }
+        if (!modelData.isModelLoaded()) {
+            throw new UnsupportedOperationException("Given model is not loaded:" + modelData);
+        }
+
+        return mModule.getParameter(modelData.getHandle(), modelParam);
     }
 
     @Nullable
     ModelParamRange queryParameter(@NonNull UUID modelId, @ModelParams int modelParam) {
         synchronized (mLock) {
-            MetricsLogger.count(mContext, "sth_query_parameter", 1);
-            if (mModule == null) {
-                return null;
-            }
-            ModelData modelData = mModelDataMap.get(modelId);
-            if (modelData == null) {
-                Slog.w(TAG, "queryParameter: Invalid model id:" + modelId);
-                return null;
-            }
-            if (!modelData.isModelLoaded()) {
-                Slog.i(TAG, "queryParameter: Given model is not loaded:" + modelId);
-                return null;
-            }
-
-            return mModule.queryParameter(modelData.getHandle(), modelParam);
+            return queryParameterLocked(mModelDataMap.get(modelId), modelParam);
         }
+    }
+
+    @Nullable
+    ModelParamRange queryKeyphraseParameter(int keyphraseId, @ModelParams int modelParam) {
+        synchronized (mLock) {
+            return queryParameterLocked(getKeyphraseModelDataLocked(keyphraseId), modelParam);
+        }
+    }
+
+    @Nullable
+    private ModelParamRange queryParameterLocked(@Nullable ModelData modelData,
+            @ModelParams int modelParam) {
+        MetricsLogger.count(mContext, "sth_query_parameter", 1);
+        if (mModule == null) {
+            return null;
+        }
+        if (modelData == null) {
+            Slog.w(TAG, "queryParameter: Invalid model id");
+            return null;
+        }
+        if (!modelData.isModelLoaded()) {
+            Slog.i(TAG, "queryParameter: Given model is not loaded:" + modelData);
+            return null;
+        }
+
+        return mModule.queryParameter(modelData.getHandle(), modelParam);
     }
 
     //---- SoundTrigger.StatusListener methods
