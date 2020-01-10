@@ -16,6 +16,9 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.verify;
@@ -67,13 +70,13 @@ public class MapClientProfileTest {
     @Test
     public void connect_shouldConnectBluetoothMapClient() {
         mProfile.connect(mBluetoothDevice);
-        verify(mService).connect(mBluetoothDevice);
+        verify(mService).setConnectionPolicy(mBluetoothDevice, CONNECTION_POLICY_ALLOWED);
     }
 
     @Test
     public void disconnect_shouldDisconnectBluetoothMapClient() {
         mProfile.disconnect(mBluetoothDevice);
-        verify(mService).disconnect(mBluetoothDevice);
+        verify(mService).setConnectionPolicy(mBluetoothDevice, CONNECTION_POLICY_FORBIDDEN);
     }
 
     @Test

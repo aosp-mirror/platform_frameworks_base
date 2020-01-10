@@ -16,6 +16,9 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -146,17 +149,18 @@ public class HearingAidProfile implements LocalBluetoothProfile {
     }
 
     public boolean connect(BluetoothDevice device) {
-        if (mService == null) return false;
-        return mService.connect(device);
+        if (mService == null) {
+            return false;
+        }
+        return mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
     }
 
     public boolean disconnect(BluetoothDevice device) {
-        if (mService == null) return false;
-        // Downgrade priority as user is disconnecting the hearing aid.
-        if (mService.getConnectionPolicy(device) > BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
-            mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_ALLOWED);
+        if (mService == null) {
+            return false;
         }
-        return mService.disconnect(device);
+
+        return mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
     }
 
     public int getConnectionStatus(BluetoothDevice device) {
@@ -180,12 +184,12 @@ public class HearingAidProfile implements LocalBluetoothProfile {
         if (mService == null) {
             return false;
         }
-        return mService.getConnectionPolicy(device) > BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+        return mService.getConnectionPolicy(device) > CONNECTION_POLICY_FORBIDDEN;
     }
 
     public int getPreferred(BluetoothDevice device) {
         if (mService == null) {
-            return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+            return CONNECTION_POLICY_FORBIDDEN;
         }
         return mService.getConnectionPolicy(device);
     }
@@ -195,11 +199,11 @@ public class HearingAidProfile implements LocalBluetoothProfile {
             return;
         }
         if (preferred) {
-            if (mService.getConnectionPolicy(device) < BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
-                mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_ALLOWED);
+            if (mService.getConnectionPolicy(device) < CONNECTION_POLICY_ALLOWED) {
+                mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
             }
         } else {
-            mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_FORBIDDEN);
+            mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
         }
     }
 
