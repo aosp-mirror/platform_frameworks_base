@@ -203,7 +203,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             ConfigurationController configurationController, ActivityStarter activityStarter,
             KeyguardStateController keyguardStateController, UserManager userManager,
             TrustManager trustManager, IActivityManager iActivityManager,
-            TelecomManager telecomManager, MetricsLogger metricsLogger,
+            @Nullable TelecomManager telecomManager, MetricsLogger metricsLogger,
             BlurUtils blurUtils, SysuiColorExtractor colorExtractor,
             IStatusBarService statusBarService,
             NotificationShadeWindowController notificationShadeWindowController,
@@ -561,13 +561,16 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         @Override
         public void onPress() {
             mMetricsLogger.action(MetricsEvent.ACTION_EMERGENCY_DIALER_FROM_POWER_MENU);
-            Intent intent = mTelecomManager.createLaunchEmergencyDialerIntent(null /* number */);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra(EmergencyDialerConstants.EXTRA_ENTRY_TYPE,
-                    EmergencyDialerConstants.ENTRY_TYPE_POWER_MENU);
-            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+            if (mTelecomManager != null) {
+                Intent intent = mTelecomManager.createLaunchEmergencyDialerIntent(
+                        null /* number */);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                        | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra(EmergencyDialerConstants.EXTRA_ENTRY_TYPE,
+                        EmergencyDialerConstants.ENTRY_TYPE_POWER_MENU);
+                mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+            }
         }
     }
 

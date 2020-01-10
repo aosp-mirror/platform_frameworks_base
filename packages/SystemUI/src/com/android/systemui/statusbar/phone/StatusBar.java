@@ -676,6 +676,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             KeyguardDismissUtil keyguardDismissUtil,
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
+            PhoneStatusBarPolicy phoneStatusBarPolicy,
             DismissCallbackRegistry dismissCallbackRegistry,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
         super(context);
@@ -751,6 +752,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardDismissUtil = keyguardDismissUtil;
         mExtensionController = extensionController;
         mUserInfoControllerImpl = userInfoControllerImpl;
+        mIconPolicy = phoneStatusBarPolicy;
         mDismissCallbackRegistry = dismissCallbackRegistry;
 
         mBubbleExpandListener =
@@ -875,8 +877,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // end old BaseStatusBar.start().
 
         // Lastly, call to the icon policy to install/update all the icons.
-        mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController, mCommandQueue,
-                mBroadcastDispatcher, mUiBgExecutor);
+        mIconPolicy.init();
         mSignalPolicy = new StatusBarSignalPolicy(mContext, mIconController);
 
         mKeyguardStateController.addCallback(this);
