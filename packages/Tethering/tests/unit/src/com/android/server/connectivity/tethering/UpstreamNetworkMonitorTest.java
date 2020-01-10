@@ -18,12 +18,13 @@ package com.android.server.connectivity.tethering;
 
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
-import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+
+import static com.android.server.connectivity.tethering.UpstreamNetworkMonitor.TYPE_NONE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -538,13 +539,15 @@ public class UpstreamNetworkMonitorTest {
                 mUNM.selectPreferredUpstreamType(preferredTypes));
         verify(mEntitleMgr, times(1)).maybeRunProvisioning();
     }
+
     private void assertSatisfiesLegacyType(int legacyType, UpstreamNetworkState ns) {
         if (legacyType == TYPE_NONE) {
             assertTrue(ns == null);
             return;
         }
 
-        final NetworkCapabilities nc = ConnectivityManager.networkCapabilitiesForType(legacyType);
+        final NetworkCapabilities nc =
+                UpstreamNetworkMonitor.networkCapabilitiesForType(legacyType);
         assertTrue(nc.satisfiedByNetworkCapabilities(ns.networkCapabilities));
     }
 
