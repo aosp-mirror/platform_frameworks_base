@@ -17,11 +17,11 @@
 package android.content;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
-import android.text.TextUtils;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
+import android.text.TextUtils;
 
 /**
  * Value type that represents a SyncAdapterType. This object overrides {@link #equals} and

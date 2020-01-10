@@ -18,12 +18,12 @@ package android.content.res;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.Resources.Theme;
 import android.content.res.Resources.ThemeKey;
-import android.util.LongSparseArray;
 import android.util.ArrayMap;
+import android.util.LongSparseArray;
 
 import java.lang.ref.WeakReference;
 
