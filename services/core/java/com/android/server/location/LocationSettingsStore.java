@@ -16,6 +16,8 @@
 
 package com.android.server.location;
 
+import static android.location.LocationManager.FUSED_PROVIDER;
+import static android.location.LocationManager.PASSIVE_PROVIDER;
 import static android.provider.Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS;
 import static android.provider.Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST;
 import static android.provider.Settings.Global.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS;
@@ -28,6 +30,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -248,11 +251,37 @@ public class LocationSettingsStore {
                 DEFAULT_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS);
     }
 
+    /**
+     * Retrieve maximum age of the last location.
+     */
     public long getMaxLastLocationAgeMs() {
         return Settings.Global.getLong(
                 mContext.getContentResolver(),
                 LOCATION_LAST_LOCATION_MAX_AGE_MILLIS,
                 DEFAULT_MAX_LAST_LOCATION_AGE_MS);
+    }
+
+    /**
+     * Set a value for the deprecated LOCATION_PROVIDERS_ALLOWED setting. This is used purely for
+     * backwards compatibility for old clients, and may be removed in the future.
+     */
+    public void setLocationProviderAllowed(String provider, boolean enabled, int userId) {
+        // fused and passive provider never get public updates for legacy reasons
+        if (FUSED_PROVIDER.equals(provider) || PASSIVE_PROVIDER.equals(provider)) {
+            return;
+        }
+
+        long identity = Binder.clearCallingIdentity();
+        try {
+            // update LOCATION_PROVIDERS_ALLOWED for best effort backwards compatibility
+            Settings.Secure.putStringForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                    (enabled ? "+" : "-") + provider,
+                    userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**
