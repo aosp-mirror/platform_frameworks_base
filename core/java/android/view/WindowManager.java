@@ -1878,13 +1878,6 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_FIT_INSETS_CONTROLLED = 0x10000000;
 
         /**
-         * Flag to indicate that the window only draws the bottom bar background so that we don't
-         * extend it to system bar areas at other sides.
-         * @hide
-         */
-        public static final int PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND = 0x20000000;
-
-        /**
          * An internal annotation for flags that can be specified to {@link #softInputMode}.
          *
          * @hide
@@ -1994,11 +1987,7 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
                         equals = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
-                        name = "FIT_INSETS_CONTROLLED"),
-                @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND,
-                        equals = PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND,
-                        name = "ONLY_DRAW_BOTTOM_BAR_BACKGROUND")
+                        name = "FIT_INSETS_CONTROLLED")
         })
         @TestApi
         public int privateFlags;
