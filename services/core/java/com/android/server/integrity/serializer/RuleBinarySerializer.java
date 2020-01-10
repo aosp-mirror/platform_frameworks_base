@@ -42,6 +42,7 @@ import android.content.integrity.Rule;
 import com.android.internal.util.Preconditions;
 import com.android.server.integrity.IntegrityUtils;
 import com.android.server.integrity.model.BitOutputStream;
+import com.android.server.integrity.model.ByteTrackedOutputStream;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -109,7 +110,8 @@ public class RuleBinarySerializer implements RuleSerializer {
     }
 
     private void serializeRuleFileMetadata(Optional<Integer> formatVersion,
-            ByteTrackedOutputStream outputStream) throws IOException {
+            ByteTrackedOutputStream outputStream)
+            throws IOException {
         int formatVersionValue = formatVersion.orElse(DEFAULT_FORMAT_VERSION);
 
         BitOutputStream bitOutputStream = new BitOutputStream();

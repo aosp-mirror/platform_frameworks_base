@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.integrity.serializer;
+package com.android.server.integrity.model;
 
 import static com.google.common.truth.Truth.assertThat;
-
-import com.android.server.integrity.model.BitOutputStream;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
