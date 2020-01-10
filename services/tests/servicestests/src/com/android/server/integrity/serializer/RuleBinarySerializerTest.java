@@ -139,10 +139,12 @@ public class RuleBinarySerializerTest {
                 SERIALIZED_START_INDEXING_KEY
                         + getBits(DEFAULT_FORMAT_VERSION_BYTES.length, /* numOfBits= */ 32)
                         + SERIALIZED_END_INDEXING_KEY
-                        + getBits(DEFAULT_FORMAT_VERSION_BYTES.length, /* numOfBits= */32);
+                        + getBits(DEFAULT_FORMAT_VERSION_BYTES.length, /* numOfBits= */ 32);
         byte[] expectedIndexingBytes =
-                getBytes(serializedIndexingBytes + serializedIndexingBytes
-                        + serializedIndexingBytes + getBits(1, 1));
+                getBytes(
+                        serializedIndexingBytes
+                                + serializedIndexingBytes
+                                + serializedIndexingBytes);
         expectedIndexingOutputStream.write(expectedIndexingBytes);
         assertThat(indexingOutputStream.toByteArray())
                 .isEqualTo(expectedIndexingOutputStream.toByteArray());
@@ -200,11 +202,14 @@ public class RuleBinarySerializerTest {
                 SERIALIZED_START_INDEXING_KEY
                         + getBits(DEFAULT_FORMAT_VERSION_BYTES.length, /* numOfBits= */ 32)
                         + SERIALIZED_END_INDEXING_KEY
-                        + getBits(DEFAULT_FORMAT_VERSION_BYTES.length
-                        + getBytes(expectedBits).length, /* numOfBits= */ 32);
-        expectedIndexingOutputStream.write(getBytes(
-                expectedIndexingBitsForIndexed + expectedIndexingBitsForIndexed
-                        + expectedIndexingBitsForUnindexed + getBits(1, 1)));
+                        + getBits(
+                                DEFAULT_FORMAT_VERSION_BYTES.length + getBytes(expectedBits).length,
+                                /* numOfBits= */ 32);
+        expectedIndexingOutputStream.write(
+                getBytes(
+                        expectedIndexingBitsForIndexed
+                                + expectedIndexingBitsForIndexed
+                                + expectedIndexingBitsForUnindexed));
 
         assertThat(indexingOutputStream.toByteArray())
                 .isEqualTo(expectedIndexingOutputStream.toByteArray());
@@ -513,16 +518,19 @@ public class RuleBinarySerializerTest {
         // and 225 non-indexed rules..
         List<Rule> ruleList = new ArrayList();
         for (int count = 0; count < ruleCount; count++) {
-            ruleList.add(getRuleWithPackageNameAndSampleInstallerName(
-                    String.format("%s%04d", packagePrefix, count)));
+            ruleList.add(
+                    getRuleWithPackageNameAndSampleInstallerName(
+                            String.format("%s%04d", packagePrefix, count)));
         }
         for (int count = 0; count < ruleCount; count++) {
-            ruleList.add(getRuleWithAppCertificateAndSampleInstallerName(
-                    String.format("%s%04d", appCertificatePrefix, count)));
+            ruleList.add(
+                    getRuleWithAppCertificateAndSampleInstallerName(
+                            String.format("%s%04d", appCertificatePrefix, count)));
         }
         for (int count = 0; count < ruleCount; count++) {
-            ruleList.add(getNonIndexedRuleWithInstallerName(
-                    String.format("%s%04d", installerNamePrefix, count)));
+            ruleList.add(
+                    getNonIndexedRuleWithInstallerName(
+                            String.format("%s%04d", installerNamePrefix, count)));
         }
 
         // Serialize the rules.
@@ -543,8 +551,7 @@ public class RuleBinarySerializerTest {
         int totalBytesWritten = DEFAULT_FORMAT_VERSION_BYTES.length;
 
         String expectedIndexingBytesForPackageNameIndexed =
-                SERIALIZED_START_INDEXING_KEY
-                        + getBits(totalBytesWritten, /* numOfBits= */ 32);
+                SERIALIZED_START_INDEXING_KEY + getBits(totalBytesWritten, /* numOfBits= */ 32);
         for (int count = 0; count < ruleCount; count++) {
             String packageName = String.format("%s%04d", packagePrefix, count);
             if (count > 0 && count % INDEXING_BLOCK_SIZE == 0) {
@@ -556,18 +563,17 @@ public class RuleBinarySerializerTest {
             }
 
             byte[] bytesForPackage =
-                    getBytes(getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(
-                            packageName));
+                    getBytes(
+                            getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(
+                                    packageName));
             expectedOrderedRuleOutputStream.write(bytesForPackage);
             totalBytesWritten += bytesForPackage.length;
         }
         expectedIndexingBytesForPackageNameIndexed +=
-                SERIALIZED_END_INDEXING_KEY
-                        + getBits(totalBytesWritten, /* numOfBits= */ 32);
+                SERIALIZED_END_INDEXING_KEY + getBits(totalBytesWritten, /* numOfBits= */ 32);
 
         String expectedIndexingBytesForAppCertificateIndexed =
-                SERIALIZED_START_INDEXING_KEY
-                        + getBits(totalBytesWritten, /* numOfBits= */ 32);
+                SERIALIZED_START_INDEXING_KEY + getBits(totalBytesWritten, /* numOfBits= */ 32);
         for (int count = 0; count < ruleCount; count++) {
             String appCertificate = String.format("%s%04d", appCertificatePrefix, count);
             if (count > 0 && count % INDEXING_BLOCK_SIZE == 0) {
@@ -579,33 +585,32 @@ public class RuleBinarySerializerTest {
             }
 
             byte[] bytesForPackage =
-                    getBytes(getSerializedCompoundRuleWithCertificateNameAndSampleInstallerName(
-                            appCertificate));
+                    getBytes(
+                            getSerializedCompoundRuleWithCertificateNameAndSampleInstallerName(
+                                    appCertificate));
             expectedOrderedRuleOutputStream.write(bytesForPackage);
             totalBytesWritten += bytesForPackage.length;
         }
         expectedIndexingBytesForAppCertificateIndexed +=
-                SERIALIZED_END_INDEXING_KEY
-                        + getBits(totalBytesWritten, /* numOfBits= */ 32);
+                SERIALIZED_END_INDEXING_KEY + getBits(totalBytesWritten, /* numOfBits= */ 32);
 
         String expectedIndexingBytesForUnindexed =
-                SERIALIZED_START_INDEXING_KEY
-                        + getBits(totalBytesWritten, /* numOfBits= */ 32);
+                SERIALIZED_START_INDEXING_KEY + getBits(totalBytesWritten, /* numOfBits= */ 32);
         for (int count = 0; count < ruleCount; count++) {
             byte[] bytesForPackage =
-                    getBytes(getSerializedCompoundRuleWithInstallerNameAndInstallerCert(
-                            String.format("%s%04d", installerNamePrefix, count)));
+                    getBytes(
+                            getSerializedCompoundRuleWithInstallerNameAndInstallerCert(
+                                    String.format("%s%04d", installerNamePrefix, count)));
             expectedOrderedRuleOutputStream.write(bytesForPackage);
             totalBytesWritten += bytesForPackage.length;
         }
         expectedIndexingBytesForUnindexed +=
-                SERIALIZED_END_INDEXING_KEY
-                        + getBits(totalBytesWritten, /* numOfBits= */ 32);
+                SERIALIZED_END_INDEXING_KEY + getBits(totalBytesWritten, /* numOfBits= */ 32);
         expectedIndexingOutputStream.write(
-                getBytes(expectedIndexingBytesForPackageNameIndexed
-                        + expectedIndexingBytesForAppCertificateIndexed
-                        + expectedIndexingBytesForUnindexed
-                        + getBits(1, 1)));
+                getBytes(
+                        expectedIndexingBytesForPackageNameIndexed
+                                + expectedIndexingBytesForAppCertificateIndexed
+                                + expectedIndexingBytesForUnindexed));
 
         assertThat(ruleOutputStream.toByteArray())
                 .isEqualTo(expectedOrderedRuleOutputStream.toByteArray());

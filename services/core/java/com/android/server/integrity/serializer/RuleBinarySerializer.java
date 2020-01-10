@@ -97,42 +97,38 @@ public class RuleBinarySerializer implements RuleSerializer {
                             ruleFileByteTrackedOutputStream);
             LinkedHashMap<String, Integer> unindexedRulesIndexes =
                     serializeRuleList(
-                            indexedRules.get(NOT_INDEXED),
-                            ruleFileByteTrackedOutputStream);
+                            indexedRules.get(NOT_INDEXED), ruleFileByteTrackedOutputStream);
 
             // Serialize their indexes.
-            BitOutputStream indexingBitOutputStream = new BitOutputStream();
-            serializeIndexGroup(packageNameIndexes, indexingBitOutputStream, /* isIndexed= */true);
-            serializeIndexGroup(appCertificateIndexes, indexingBitOutputStream, /* isIndexed= */
-                    true);
-            serializeIndexGroup(unindexedRulesIndexes, indexingBitOutputStream, /* isIndexed= */
-                    false);
-            // TODO(b/147609625): This dummy bit is set for fixing the padding issue. Remove when
-            // the issue is fixed and correct the tests that does this padding too.
-            indexingBitOutputStream.setNext();
-            indexingFileOutputStream.write(indexingBitOutputStream.toByteArray());
+            BitOutputStream indexingBitOutputStream = new BitOutputStream(indexingFileOutputStream);
+            serializeIndexGroup(packageNameIndexes, indexingBitOutputStream, /* isIndexed= */ true);
+            serializeIndexGroup(
+                    appCertificateIndexes, indexingBitOutputStream, /* isIndexed= */ true);
+            serializeIndexGroup(
+                    unindexedRulesIndexes, indexingBitOutputStream, /* isIndexed= */ false);
+            indexingBitOutputStream.flush();
         } catch (Exception e) {
             throw new RuleSerializeException(e.getMessage(), e);
         }
     }
 
-    private void serializeRuleFileMetadata(Optional<Integer> formatVersion,
-            ByteTrackedOutputStream outputStream)
+    private void serializeRuleFileMetadata(
+            Optional<Integer> formatVersion, ByteTrackedOutputStream outputStream)
             throws IOException {
         int formatVersionValue = formatVersion.orElse(DEFAULT_FORMAT_VERSION);
 
-        BitOutputStream bitOutputStream = new BitOutputStream();
+        BitOutputStream bitOutputStream = new BitOutputStream(outputStream);
         bitOutputStream.setNext(FORMAT_VERSION_BITS, formatVersionValue);
-        outputStream.write(bitOutputStream.toByteArray());
+        bitOutputStream.flush();
     }
 
     private LinkedHashMap<String, Integer> serializeRuleList(
             Map<String, List<Rule>> rulesMap, ByteTrackedOutputStream outputStream)
             throws IOException {
-        Preconditions.checkArgument(rulesMap != null,
-                "serializeRuleList should never be called with null rule list.");
+        Preconditions.checkArgument(
+                rulesMap != null, "serializeRuleList should never be called with null rule list.");
 
-        BitOutputStream bitOutputStream = new BitOutputStream();
+        BitOutputStream bitOutputStream = new BitOutputStream(outputStream);
         LinkedHashMap<String, Integer> indexMapping = new LinkedHashMap();
         indexMapping.put(START_INDEXING_KEY, outputStream.getWrittenBytesCount());
 
@@ -145,9 +141,8 @@ public class RuleBinarySerializer implements RuleSerializer {
             }
 
             for (Rule rule : rulesMap.get(key)) {
-                bitOutputStream.clear();
                 serializeRule(rule, bitOutputStream);
-                outputStream.write(bitOutputStream.toByteArray());
+                bitOutputStream.flush();
                 indexTracker++;
             }
         }
@@ -156,7 +151,7 @@ public class RuleBinarySerializer implements RuleSerializer {
         return indexMapping;
     }
 
-    private void serializeRule(Rule rule, BitOutputStream bitOutputStream) {
+    private void serializeRule(Rule rule, BitOutputStream bitOutputStream) throws IOException {
         if (rule == null) {
             throw new IllegalArgumentException("Null rule can not be serialized");
         }
@@ -171,7 +166,8 @@ public class RuleBinarySerializer implements RuleSerializer {
         bitOutputStream.setNext();
     }
 
-    private void serializeFormula(Formula formula, BitOutputStream bitOutputStream) {
+    private void serializeFormula(Formula formula, BitOutputStream bitOutputStream)
+            throws IOException {
         if (formula instanceof AtomicFormula) {
             serializeAtomicFormula((AtomicFormula) formula, bitOutputStream);
         } else if (formula instanceof CompoundFormula) {
@@ -183,7 +179,7 @@ public class RuleBinarySerializer implements RuleSerializer {
     }
 
     private void serializeCompoundFormula(
-            CompoundFormula compoundFormula, BitOutputStream bitOutputStream) {
+            CompoundFormula compoundFormula, BitOutputStream bitOutputStream) throws IOException {
         if (compoundFormula == null) {
             throw new IllegalArgumentException("Null compound formula can not be serialized");
         }
@@ -197,7 +193,7 @@ public class RuleBinarySerializer implements RuleSerializer {
     }
 
     private void serializeAtomicFormula(
-            AtomicFormula atomicFormula, BitOutputStream bitOutputStream) {
+            AtomicFormula atomicFormula, BitOutputStream bitOutputStream) throws IOException {
         if (atomicFormula == null) {
             throw new IllegalArgumentException("Null atomic formula can not be serialized");
         }
@@ -231,11 +227,10 @@ public class RuleBinarySerializer implements RuleSerializer {
     private void serializeIndexGroup(
             LinkedHashMap<String, Integer> indexes,
             BitOutputStream bitOutputStream,
-            boolean isIndexed) {
-
+            boolean isIndexed)
+            throws IOException {
         // Output the starting location of this indexing group.
-        serializeStringValue(
-                START_INDEXING_KEY, /* isHashedValue= */false, bitOutputStream);
+        serializeStringValue(START_INDEXING_KEY, /* isHashedValue= */ false, bitOutputStream);
         serializeIntValue(indexes.get(START_INDEXING_KEY), bitOutputStream);
 
         // If the group is indexed, output the locations of the indexes.
@@ -243,8 +238,8 @@ public class RuleBinarySerializer implements RuleSerializer {
             for (Map.Entry<String, Integer> entry : indexes.entrySet()) {
                 if (!entry.getKey().equals(START_INDEXING_KEY)
                         && !entry.getKey().equals(END_INDEXING_KEY)) {
-                    serializeStringValue(entry.getKey(), /* isHashedValue= */false,
-                            bitOutputStream);
+                    serializeStringValue(
+                            entry.getKey(), /* isHashedValue= */ false, bitOutputStream);
                     serializeIntValue(entry.getValue(), bitOutputStream);
                 }
             }
@@ -256,7 +251,8 @@ public class RuleBinarySerializer implements RuleSerializer {
     }
 
     private void serializeStringValue(
-            String value, boolean isHashedValue, BitOutputStream bitOutputStream) {
+            String value, boolean isHashedValue, BitOutputStream bitOutputStream)
+            throws IOException {
         if (value == null) {
             throw new IllegalArgumentException("String value can not be null.");
         }
@@ -269,11 +265,12 @@ public class RuleBinarySerializer implements RuleSerializer {
         }
     }
 
-    private void serializeIntValue(int value, BitOutputStream bitOutputStream) {
+    private void serializeIntValue(int value, BitOutputStream bitOutputStream) throws IOException {
         bitOutputStream.setNext(/* numOfBits= */ 32, value);
     }
 
-    private void serializeBooleanValue(boolean value, BitOutputStream bitOutputStream) {
+    private void serializeBooleanValue(boolean value, BitOutputStream bitOutputStream)
+            throws IOException {
         bitOutputStream.setNext(value);
     }
 

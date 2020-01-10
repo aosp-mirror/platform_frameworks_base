@@ -188,7 +188,7 @@ public class RuleEvaluatorTest {
     }
 
     @Test
-    public void testEvaluateRules_ruleNotInDNF_ignoreAndAllow() {
+    public void testEvaluateRules_orRules() {
         CompoundFormula compoundFormula =
                 new CompoundFormula(
                         CompoundFormula.OR,
@@ -206,11 +206,11 @@ public class RuleEvaluatorTest {
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
-        assertEquals(ALLOW, result.getEffect());
+        assertEquals(DENY, result.getEffect());
     }
 
     @Test
-    public void testEvaluateRules_compoundFormulaWithNot_allow() {
+    public void testEvaluateRules_compoundFormulaWithNot_deny() {
         CompoundFormula openSubFormula =
                 new CompoundFormula(
                         CompoundFormula.AND,
@@ -230,7 +230,7 @@ public class RuleEvaluatorTest {
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
-        assertEquals(ALLOW, result.getEffect());
+        assertEquals(DENY, result.getEffect());
     }
 
     @Test
