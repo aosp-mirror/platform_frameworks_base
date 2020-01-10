@@ -163,6 +163,7 @@ import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
+import android.view.ITaskOrganizer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -803,6 +804,16 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
                 false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,
                 false /* creating */);
+
+        windowingMode = getWindowingMode();
+        /*
+         * Different windowing modes may be managed by different task organizers. If
+         * getTaskOrganizer returns null, we still call transferToTaskOrganizer to
+         * make sure we clear it.
+         */
+        final ITaskOrganizer org =
+            mWmService.mAtmService.mTaskOrganizerController.getTaskOrganizer(windowingMode);
+        transferToTaskOrganizer(org);
     }
 
     /**
@@ -1647,6 +1658,33 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     boolean isTopActivityVisible() {
         final ActivityRecord topActivity = getTopNonFinishingActivity();
         return topActivity != null && topActivity.mVisibleRequested;
+    }
+
+    /**
+     * Indicate whether the first task in this stack is controlled by a TaskOrganizer. We aren't
+     * expecting to use the TaskOrganizer in multiple task per stack scenarios so checking
+     * the first one is ok.
+     */
+    boolean isControlledByTaskOrganizer() {
+        return getChildCount() > 0 && getTopMostTask().mTaskOrganizer != null;
+    }
+
+    private static void transferSingleTaskToOrganizer(Task tr, ITaskOrganizer organizer) {
+        tr.setTaskOrganizer(organizer);
+    }
+
+    /**
+     * Transfer control of the leashes and IWindowContainers to the given ITaskOrganizer.
+     * This will (or shortly there-after) invoke the taskAppeared callbacks.
+     * If the tasks had a previous TaskOrganizer, setTaskOrganizer will take care of
+     * emitting the taskVanished callbacks.
+     */
+    void transferToTaskOrganizer(ITaskOrganizer organizer) {
+        final PooledConsumer c = PooledLambda.obtainConsumer(
+                ActivityStack::transferSingleTaskToOrganizer,
+                PooledLambda.__(Task.class), organizer);
+        forAllTasks(c);
+        c.recycle();
     }
 
     /**
@@ -3577,6 +3615,15 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     void animateResizePinnedStack(Rect toBounds, Rect sourceHintBounds, int animationDuration,
             boolean fromFullscreen) {
         if (!inPinnedWindowingMode()) return;
+
+        /**
+         * TODO(b/146594635): Remove all PIP animation code from WM once SysUI handles animation.
+         * If this PIP Task is controlled by a TaskOrganizer, the animation occurs entirely
+         * on the TaskOrganizer side, so we just hand over the leash without doing any animation.
+         * We have to be careful to not schedule the enter-pip callback as the TaskOrganizer
+         * needs to have flexibility to schedule that at an appropriate point in the animation.
+         */
+        if (isControlledByTaskOrganizer()) return;
         if (toBounds == null /* toFullscreen */) {
             final Configuration parentConfig = getParent().getConfiguration();
             final ActivityRecord top = topRunningNonOverlayTaskActivity();

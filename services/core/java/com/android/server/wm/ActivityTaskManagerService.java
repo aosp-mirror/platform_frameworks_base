@@ -226,6 +226,7 @@ import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationRunner;
+import android.view.ITaskOrganizer;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowContainerTransaction;
@@ -661,6 +662,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     CompatModePackages mCompatModePackages;
 
     private FontScaleSettingObserver mFontScaleSettingObserver;
+
+    /**
+     * Stores the registration and state of TaskOrganizers in use.
+     */
+    TaskOrganizerController mTaskOrganizerController =
+        new TaskOrganizerController(this, mGlobalLock);
 
     private int mDeviceOwnerUid = Process.INVALID_UID;
 
@@ -1271,6 +1278,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .execute();
     }
 
+    @Override
+    public final void registerTaskOrganizer(ITaskOrganizer organizer, int windowingMode) {
+        enforceCallerIsRecentsOrHasPermission(
+                MANAGE_ACTIVITY_STACKS, "registerTaskOrganizer()");
+        synchronized (mGlobalLock) {
+            mTaskOrganizerController.registerTaskOrganizer(organizer, windowingMode);
+        }
+    }
 
     @Override
     public IBinder requestStartActivityPermissionToken(IBinder delegatorToken) {
@@ -3319,6 +3334,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    private void applyWindowContainerChange(ConfigurationContainer cc,
+            WindowContainerTransaction.Change c) {
+        sanitizeAndApplyConfigChange(cc, c);
+
+        Rect enterPipBounds = c.getEnterPipBounds();
+        if (enterPipBounds != null) {
+            Task tr = (Task) cc;
+            mStackSupervisor.updatePictureInPictureMode(tr,
+                    enterPipBounds, true);
+        }
+    }
+
     @Override
     public void applyContainerTransaction(WindowContainerTransaction t) {
         mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "applyContainerTransaction()");
@@ -3335,7 +3362,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             entries.next();
                     final ConfigurationContainer cc = ConfigurationContainer.RemoteToken.fromBinder(
                             entry.getKey()).getContainer();
-                    sanitizeAndApplyConfigChange(cc, entry.getValue());
+                    applyWindowContainerChange(cc, entry.getValue());
                 }
             }
         } finally {
@@ -4057,7 +4084,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     throw new IllegalArgumentException("Stack: " + stack
                             + " doesn't support animated resize.");
                 }
-                if (animate) {
+                /**
+                 * TODO(b/146594635): Remove all PIP animation code from WM
+                 * once SysUI handles animation. Don't even try to animate TaskOrganized tasks.
+                 */
+                if (animate && !stack.isControlledByTaskOrganizer()) {
                     stack.animateResizePinnedStack(null /* destBounds */,
                             null /* sourceHintBounds */, animationDuration,
                             false /* fromFullscreen */);

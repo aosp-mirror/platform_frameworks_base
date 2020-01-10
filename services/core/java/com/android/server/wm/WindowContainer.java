@@ -342,7 +342,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mSurfaceControl == null) {
             // If we don't yet have a surface, but we now have a parent, we should
             // build a surface.
-            mSurfaceControl = makeSurface().build();
+            setSurfaceControl(makeSurface().build());
             getPendingTransaction().show(mSurfaceControl);
             updateSurfacePosition();
         } else {
@@ -496,7 +496,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 mParent.getPendingTransaction().merge(getPendingTransaction());
             }
 
-            mSurfaceControl = null;
+            setSurfaceControl(null);
             mLastSurfacePosition.set(0, 0);
             scheduleAnimation();
         }
@@ -2208,5 +2208,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             return null;
         }
         return mParent.getDimmer();
+    }
+
+    void setSurfaceControl(SurfaceControl sc) {
+        mSurfaceControl = sc;
     }
 }

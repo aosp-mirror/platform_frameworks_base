@@ -117,9 +117,11 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -130,6 +132,7 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
+import android.view.ITaskOrganizer;
 import android.view.RemoteAnimationTarget;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -425,6 +428,14 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     /**
+     * The TaskOrganizer which is delegated presentation of this task. If set the Task will
+     * emit an IWindowContainer (allowing access to it's SurfaceControl leash) to the organizers
+     * taskAppeared callback, and emit a taskRemoved callback when the Task is vanished.
+     */
+    ITaskOrganizer mTaskOrganizer;
+
+
+    /**
      * Don't use constructor directly. Use {@link #create(ActivityTaskManagerService, int,
      * ActivityInfo, Intent, TaskDescription)} instead.
      */
@@ -443,6 +454,22 @@ class Task extends WindowContainer<WindowContainer> {
                 info.supportsPictureInPicture(), false /*_realActivitySuspended*/,
                 false /*userSetupComplete*/, INVALID_MIN_SIZE, INVALID_MIN_SIZE, info,
                 _voiceSession, _voiceInteractor, stack);
+    }
+
+    class TaskToken extends RemoteToken {
+        TaskToken(ConfigurationContainer container) {
+            super(container);
+        }
+
+        @Override
+        public SurfaceControl getLeash() {
+            // We need to copy the SurfaceControl instead of returning the original
+            // because the Parcel FLAGS PARCELABLE_WRITE_RETURN_VALUE cause SurfaceControls
+            // to release themselves.
+            SurfaceControl sc = new SurfaceControl();
+            sc.copyFrom(getSurfaceControl());
+            return sc;
+        }
     }
 
     /** Don't use constructor directly. This is only used by XML parser. */
@@ -469,7 +496,7 @@ class Task extends WindowContainer<WindowContainer> {
         mTaskDescription = _lastTaskDescription;
         // Tasks have no set orientation value (including SCREEN_ORIENTATION_UNSPECIFIED).
         setOrientation(SCREEN_ORIENTATION_UNSET);
-        mRemoteToken = new RemoteToken(this);
+        mRemoteToken = new TaskToken(this);
         affinityIntent = _affinityIntent;
         affinity = _affinity;
         rootAffinity = _rootAffinity;
@@ -2179,6 +2206,10 @@ class Task extends WindowContainer<WindowContainer> {
     void removeImmediately() {
         if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
         EventLogTags.writeWmTaskRemoved(mTaskId, "removeTask");
+
+        // If applicable let the TaskOrganizer know the Task is vanishing.
+        setTaskOrganizer(null);
+
         super.removeImmediately();
     }
 
@@ -2567,6 +2598,12 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     boolean shouldAnimate() {
+        /**
+         * Animations are handled by the TaskOrganizer implementation.
+         */
+        if (isControlledByTaskOrganizer()) {
+            return false;
+        }
         // Don't animate while the task runs recents animation but only if we are in the mode
         // where we cancel with deferred screenshot, which means that the controller has
         // transformed the task.
@@ -3443,5 +3480,92 @@ class Task extends WindowContainer<WindowContainer> {
             Slog.e(TAG, "restoreTask: Unexpected name=" + name);
             XmlUtils.skipCurrentTag(in);
         }
+    }
+
+    boolean isControlledByTaskOrganizer() {
+        return mTaskOrganizer != null;
+    }
+
+    @Override
+    protected void reparentSurfaceControl(SurfaceControl.Transaction t, SurfaceControl newParent) {
+        /**
+         * Avoid yanking back control from the TaskOrganizer, which has presumably reparented the
+         * Surface in to its own hierarchy.
+         */
+        if (isControlledByTaskOrganizer()) {
+            return;
+        }
+        super.reparentSurfaceControl(t, newParent);
+    }
+
+    private void sendTaskAppeared() {
+        if (mSurfaceControl != null && mTaskOrganizer != null) {
+            mAtmService.mTaskOrganizerController.onTaskAppeared(mTaskOrganizer, this);
+        }
+    }
+
+    private void sendTaskVanished() {
+        if (mTaskOrganizer != null) {
+            mAtmService.mTaskOrganizerController.onTaskVanished(mTaskOrganizer, this);
+        }
+   }
+
+    void setTaskOrganizer(ITaskOrganizer organizer) {
+        // Let the old organizer know it has lost control.
+        if (mTaskOrganizer != null) {
+            sendTaskVanished();
+        }
+        mTaskOrganizer = organizer;
+        sendTaskAppeared();
+    }
+
+    // Called on Binder death.
+    void taskOrganizerDied() {
+        mTaskOrganizer = null;
+    }
+
+    @Override
+    void setSurfaceControl(SurfaceControl sc) {
+        super.setSurfaceControl(sc);
+        // If the TaskOrganizer was set before we created the SurfaceControl, we need to
+        // emit the callbacks now.
+        sendTaskAppeared();
+    }
+
+    @Override
+    public void updateSurfacePosition() {
+        // Avoid fighting with the TaskOrganizer over Surface position.
+        if (isControlledByTaskOrganizer()) {
+            getPendingTransaction().setPosition(mSurfaceControl, 0, 0);
+            scheduleAnimation();
+            return;
+        } else {
+            super.updateSurfacePosition();
+        }
+    }
+
+    @Override
+    void getRelativeDisplayedPosition(Point outPos) {
+        // In addition to updateSurfacePosition, we keep other code that sets
+        // position from fighting with the TaskOrganizer
+        if (isControlledByTaskOrganizer()) {
+            outPos.set(0, 0);
+            return;
+        }
+        super.getRelativeDisplayedPosition(outPos);
+    }
+
+    @Override
+    public void setWindowingMode(int windowingMode) {
+        super.setWindowingMode(windowingMode);
+        windowingMode = getWindowingMode();
+        /*
+         * Different windowing modes may be managed by different task organizers. If
+         * getTaskOrganizer returns null, we still call transferToTaskOrganizer to
+         * make sure we clear it.
+         */
+        final ITaskOrganizer org =
+            mAtmService.mTaskOrganizerController.getTaskOrganizer(windowingMode);
+        setTaskOrganizer(org);
     }
 }

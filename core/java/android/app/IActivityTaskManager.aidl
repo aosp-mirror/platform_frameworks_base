@@ -68,6 +68,7 @@ import android.os.StrictMode;
 import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
 import android.view.IRecentsAnimationRunner;
+import android.view.ITaskOrganizer;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationAdapter;
 import android.view.WindowContainerTransaction;
@@ -121,6 +122,9 @@ interface IActivityTaskManager {
             in Intent intent, in String resolvedType, in IBinder resultTo, in String resultWho,
             int requestCode, int flags, in ProfilerInfo profilerInfo, in Bundle options,
             IBinder permissionToken, boolean ignoreTargetSecurity, int userId);
+
+    void registerTaskOrganizer(in ITaskOrganizer organizer, int windowingMode);
+
     boolean isActivityStartAllowedOnDisplay(int displayId, in Intent intent, in String resolvedType,
             int userId);
 
