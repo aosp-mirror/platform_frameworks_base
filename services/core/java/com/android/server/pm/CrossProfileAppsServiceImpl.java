@@ -37,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
+import android.content.pm.CrossProfileAppsInternal;
 import android.content.pm.ICrossProfileApps;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -81,6 +82,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     CrossProfileAppsServiceImpl(Context context, Injector injector) {
         mContext = context;
         mInjector = injector;
+
+        LocalServices.addService(CrossProfileAppsInternal.class, new LocalService());
     }
 
     @Override
@@ -255,8 +258,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         Objects.requireNonNull(callingPackage);
         verifyCallingPackage(callingPackage);
 
-        final List<UserHandle> targetUserProfiles = getTargetUserProfilesUnchecked(
-                callingPackage, mInjector.getCallingUserId());
+        final List<UserHandle> targetUserProfiles = getTargetUserProfilesUnchecked(callingPackage,
+                mInjector.getCallingUserId());
         if (targetUserProfiles.isEmpty()) {
             return false;
         }
@@ -684,5 +687,31 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         void sendBroadcastAsUser(Intent intent, UserHandle user);
 
         int checkComponentPermission(String permission, int uid, int owningUid, boolean exported);
+    }
+
+    class LocalService extends CrossProfileAppsInternal {
+        @Override
+        public boolean verifyPackageHasInteractAcrossProfilePermission(String packageName,
+                @UserIdInt int userId) throws PackageManager.NameNotFoundException {
+            final int uid = Objects.requireNonNull(
+                    mInjector.getPackageManager().getApplicationInfoAsUser(
+                            Objects.requireNonNull(packageName), /* flags= */ 0, userId)).uid;
+            return verifyUidHasInteractAcrossProfilePermission(packageName, uid);
+        }
+
+        @Override
+        public boolean verifyUidHasInteractAcrossProfilePermission(String packageName, int uid) {
+            Objects.requireNonNull(packageName);
+
+            return isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS_FULL, uid)
+                    || isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS, uid)
+                    || isPermissionGranted(Manifest.permission.INTERACT_ACROSS_PROFILES, uid)
+                    || PermissionChecker.checkPermissionForPreflight(
+                            mContext,
+                            Manifest.permission.INTERACT_ACROSS_PROFILES,
+                            PermissionChecker.PID_UNKNOWN,
+                            uid,
+                            packageName) == PermissionChecker.PERMISSION_GRANTED;
+        }
     }
 }

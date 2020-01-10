@@ -81,6 +81,8 @@ import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.app.admin.DevicePolicyManager.WIPE_SILENTLY;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
@@ -92,6 +94,7 @@ import static android.security.keystore.AttestationUtils.USE_INDIVIDUAL_ATTESTAT
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_DEVICE_OWNER;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_PROFILE_OWNER;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
@@ -162,6 +165,7 @@ import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.CrossProfileApps;
+import android.content.pm.CrossProfileAppsInternal;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -174,6 +178,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.StringParceledListSlice;
 import android.content.pm.UserInfo;
+import android.content.pm.parsing.AndroidPackage;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -8887,9 +8892,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 UserInfo parent = mUserManager.getProfileParent(userId);
                 Intent intent = new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED);
                 intent.putExtra(Intent.EXTRA_USER, new UserHandle(userId));
+                UserHandle parentHandle = new UserHandle(parent.id);
+                mLocalService.broadcastIntentToCrossProfileManifestReceiversAsUser(intent,
+                        parentHandle, /* requiresPermission= */ true);
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY |
                         Intent.FLAG_RECEIVER_FOREGROUND);
-                mContext.sendBroadcastAsUser(intent, new UserHandle(parent.id));
+                mContext.sendBroadcastAsUser(intent, parentHandle);
             });
         }
     }
@@ -12251,6 +12259,105 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return DevicePolicyManagerService.this.getAllCrossProfilePackages();
         }
 
+        /**
+         * Sends the {@code intent} to the packages with cross profile capabilities.
+         *
+         * <p>This means the application must have the {@code crossProfile} property and
+         * and at least one of the following permissions:
+         *
+         * <ul>
+         *     <li>{@link android.Manifest.permission.INTERACT_ACROSS_PROFILES}
+         *     <li>{@link android.Manifest.permission.INTERACT_ACROSS_USERS}
+         *     <li>{@link android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission or the
+         *     {@link AppOpsManager.OP_INTERACT_ACROSS_PROFILES} app operation authorization.
+         * </ul>
+         *
+         * <p>Note: The intent itself is not modified but copied before use.
+         *
+         * @param intent Template for the intent sent to the packages.
+         * @param parentHandle Handle of the user that will receive the intents.
+         * @param requiresPermission If false, all packages with the {@code crossProfile} property
+         *                           will receive the intent.
+         */
+        @Override
+        public void broadcastIntentToCrossProfileManifestReceiversAsUser(Intent intent,
+                UserHandle parentHandle, boolean requiresPermission) {
+            Objects.requireNonNull(intent);
+            Objects.requireNonNull(parentHandle);
+            final int userId = parentHandle.getIdentifier();
+            Slog.i(LOG_TAG,
+                    String.format("Sending %s broadcast to manifest receivers.",
+                            intent.getAction()));
+            try {
+                final List<ResolveInfo> receivers = mIPackageManager.queryIntentReceivers(
+                        intent, /* resolvedType= */ null,
+                        STOCK_PM_FLAGS, parentHandle.getIdentifier()).getList();
+                for (ResolveInfo receiver : receivers) {
+                    final String packageName = receiver.getComponentInfo().packageName;
+                    if (checkCrossProfilePackagePermissions(packageName, userId,
+                            requiresPermission)) {
+                        Slog.i(LOG_TAG,
+                                String.format("Sending %s broadcast to %s.", intent.getAction(),
+                                        packageName));
+                        final Intent packageIntent = new Intent(intent)
+                                .setComponent(receiver.getComponentInfo().getComponentName())
+                                .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                        mContext.sendBroadcastAsUser(packageIntent, parentHandle);
+                    }
+                }
+            } catch (RemoteException ex) {
+                Slog.w(LOG_TAG,
+                        String.format("Cannot get list of broadcast receivers for %s because: %s.",
+                                intent.getAction(), ex));
+            }
+        }
+
+        /**
+         * Checks whether the package {@code packageName} has the required permissions to receive
+         * cross-profile broadcasts on behalf of the user {@code userId}.
+         */
+        private boolean checkCrossProfilePackagePermissions(String packageName,
+                @UserIdInt int userId, boolean requiresPermission) {
+            final PackageManagerInternal pmInternal = LocalServices.getService(
+                    PackageManagerInternal.class);
+            final AndroidPackage androidPackage = pmInternal.getPackage(packageName);
+            if (androidPackage == null || !androidPackage.isCrossProfile()) {
+                return false;
+            }
+            if (!requiresPermission) {
+                return true;
+            }
+            if (!isPackageEnabled(packageName, userId)) {
+                return false;
+            }
+            try {
+                final CrossProfileAppsInternal crossProfileAppsService = LocalServices.getService(
+                        CrossProfileAppsInternal.class);
+                return crossProfileAppsService.verifyPackageHasInteractAcrossProfilePermission(
+                        packageName, userId);
+            } catch (NameNotFoundException ex) {
+                Slog.w(LOG_TAG,
+                        String.format("Cannot find the package %s to check for permissions.",
+                                packageName));
+                return false;
+            }
+        }
+
+        private boolean isPackageEnabled(String packageName, @UserIdInt int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                final PackageInfo info = mInjector.getPackageManagerInternal()
+                        .getPackageInfo(
+                                packageName,
+                                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                                callingUid,
+                                userId);
+                return info != null && info.applicationInfo.enabled;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
     }
 
     private Intent createShowAdminSupportIntent(ComponentName admin, int userId) {

@@ -35,13 +35,16 @@ import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyEventLogger;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.CrossProfileAppsInternal;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.pm.UserInfo.UserInfoFlag;
@@ -257,6 +260,10 @@ public class UserManagerService extends IUserManager.Stub {
 
     /** Installs system packages based on user-type. */
     private final UserSystemPackageInstaller mSystemPackageInstaller;
+
+    private PackageManagerInternal mPmInternal;
+    private CrossProfileAppsInternal mCrossProfileAppsInternal;
+    private DevicePolicyManagerInternal mDevicePolicyManagerInternal;
 
     /**
      * Internal non-parcelable wrapper for UserInfo that is not exposed to other system apps.
@@ -944,6 +951,8 @@ public class UserManagerService extends IUserManager.Stub {
         intent.putExtra(Intent.EXTRA_QUIET_MODE, inQuietMode);
         intent.putExtra(Intent.EXTRA_USER, profileHandle);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, profileHandle.getIdentifier());
+        getDevicePolicyManagerInternal().broadcastIntentToCrossProfileManifestReceiversAsUser(
+                intent, parentHandle, /* requiresPermission= */ true);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mContext.sendBroadcastAsUser(intent, parentHandle);
     }
@@ -3845,11 +3854,15 @@ public class UserManagerService extends IUserManager.Stub {
 
     private void sendProfileRemovedBroadcast(int parentUserId, int removedUserId) {
         Intent managedProfileIntent = new Intent(Intent.ACTION_MANAGED_PROFILE_REMOVED);
-        managedProfileIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY |
-                Intent.FLAG_RECEIVER_FOREGROUND);
         managedProfileIntent.putExtra(Intent.EXTRA_USER, new UserHandle(removedUserId));
         managedProfileIntent.putExtra(Intent.EXTRA_USER_HANDLE, removedUserId);
-        mContext.sendBroadcastAsUser(managedProfileIntent, new UserHandle(parentUserId), null);
+        final UserHandle parentHandle = new UserHandle(parentUserId);
+        getDevicePolicyManagerInternal().broadcastIntentToCrossProfileManifestReceiversAsUser(
+                managedProfileIntent, parentHandle, /* requiresPermission= */ false);
+        managedProfileIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                | Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendBroadcastAsUser(managedProfileIntent, parentHandle,
+                /* receiverPermission= */null);
     }
 
     @Override
@@ -5095,7 +5108,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Check if the calling package name matches with the calling UID, throw
+     * Checks if the calling package name matches with the calling UID, throw
      * {@link SecurityException} if not.
      */
     private void verifyCallingPackage(String callingPackage, int callingUid) {
@@ -5104,5 +5117,31 @@ public class UserManagerService extends IUserManager.Stub {
             throw new SecurityException("Specified package " + callingPackage
                     + " does not match the calling uid " + callingUid);
         }
+    }
+
+    /** Retrieves the internal package manager interface. */
+    private PackageManagerInternal getPackageManagerInternal() {
+        // Don't need to synchonize; worst-case scenario LocalServices will be called twice.
+        if (mPmInternal == null) {
+            mPmInternal = LocalServices.getService(PackageManagerInternal.class);
+        }
+        return mPmInternal;
+    }
+
+    /** Retrieve the internal cross profile apps interface. */
+    private CrossProfileAppsInternal getCrossProfileAppsInternal() {
+        if (mCrossProfileAppsInternal == null) {
+            mCrossProfileAppsInternal = LocalServices.getService(CrossProfileAppsInternal.class);
+        }
+        return mCrossProfileAppsInternal;
+    }
+
+    /** Returns the internal device policy manager interface. */
+    private DevicePolicyManagerInternal getDevicePolicyManagerInternal() {
+        if (mDevicePolicyManagerInternal == null) {
+            mDevicePolicyManagerInternal =
+                    LocalServices.getService(DevicePolicyManagerInternal.class);
+        }
+        return mDevicePolicyManagerInternal;
     }
 }
