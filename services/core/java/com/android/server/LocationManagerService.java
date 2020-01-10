@@ -69,7 +69,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
 import android.stats.location.LocationStatsEnums;
@@ -84,7 +83,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -105,6 +103,7 @@ import com.android.server.location.LocationUsageLogger;
 import com.android.server.location.MockProvider;
 import com.android.server.location.MockableLocationProvider;
 import com.android.server.location.PassiveProvider;
+import com.android.server.location.UserInfoStore;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.io.ByteArrayOutputStream;
@@ -194,6 +193,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private final Object mLock = new Object();
     private final Context mContext;
     private final Handler mHandler;
+    private final UserInfoStore mUserInfoStore;
     private final LocationSettingsStore mSettingsStore;
     private final LocationUsageLogger mLocationUsageLogger;
 
@@ -203,7 +203,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     private PackageManager mPackageManager;
     private PowerManager mPowerManager;
     private ActivityManager mActivityManager;
-    private UserManager mUserManager;
 
     private GeofenceManager mGeofenceManager;
     private LocationFudger mLocationFudger;
@@ -237,10 +236,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     private final HashMap<String, Location> mLastLocationCoarseInterval =
             new HashMap<>();
 
-    // current active user on the device
-    private int mCurrentUserId;
-    private int[] mCurrentUserProfiles;
-
     @GuardedBy("mLock")
     @PowerManager.LocationPowerSaveMode
     private int mBatterySaverMode;
@@ -248,11 +243,9 @@ public class LocationManagerService extends ILocationManager.Stub {
     private LocationManagerService(Context context) {
         mContext = context;
         mHandler = FgThread.getHandler();
+        mUserInfoStore = new UserInfoStore(mContext);
         mSettingsStore = new LocationSettingsStore(mContext, mHandler);
         mLocationUsageLogger = new LocationUsageLogger();
-
-        mCurrentUserId = UserHandle.USER_NULL;
-        mCurrentUserProfiles = new int[]{UserHandle.USER_NULL};
 
         // set up passive provider -  we do this early because it has no dependencies on system
         // services or external code that isn't ready yet, and because this allows the variable to
@@ -277,6 +270,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     private void onSystemReady() {
+        mUserInfoStore.onSystemReady();
         mSettingsStore.onSystemReady();
 
         synchronized (mLock) {
@@ -284,7 +278,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             mAppOps = mContext.getSystemService(AppOpsManager.class);
             mPowerManager = mContext.getSystemService(PowerManager.class);
             mActivityManager = mContext.getSystemService(ActivityManager.class);
-            mUserManager = mContext.getSystemService(UserManager.class);
 
             mLocationFudger = new LocationFudger(mContext, mHandler);
             mGeofenceManager = new GeofenceManager(mContext, mSettingsStore);
@@ -372,10 +365,13 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
             }.register(mContext, mHandler.getLooper(), true);
 
+            mUserInfoStore.addListener((oldUserId, newUserId) -> {
+                synchronized (mLock) {
+                    onUserChangedLocked(oldUserId, newUserId);
+                }
+            });
+
             IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
-            intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
-            intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
             intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
             intentFilter.addAction(Intent.ACTION_SCREEN_ON);
 
@@ -388,14 +384,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                     }
                     synchronized (mLock) {
                         switch (action) {
-                            case Intent.ACTION_USER_SWITCHED:
-                                onUserChangedLocked(
-                                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
-                                break;
-                            case Intent.ACTION_MANAGED_PROFILE_ADDED:
-                            case Intent.ACTION_MANAGED_PROFILE_REMOVED:
-                                onUserProfilesChangedLocked();
-                                break;
                             case Intent.ACTION_SCREEN_ON:
                             case Intent.ACTION_SCREEN_OFF:
                                 onScreenStateChangedLocked();
@@ -405,11 +393,10 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
             }, UserHandle.ALL, intentFilter, null, mHandler);
 
-            // switching the user from null to system here performs the bulk of the initialization
+            // switching the user from null to current here performs the bulk of the initialization
             // work. the user being changed will cause a reload of all user specific settings, which
             // causes initialization, and propagates changes until a steady state is reached
-            mCurrentUserId = UserHandle.USER_NULL;
-            onUserChangedLocked(ActivityManager.getCurrentUser());
+            onUserChangedLocked(UserHandle.USER_NULL, mUserInfoStore.getCurrentUserId());
         }
     }
 
@@ -551,16 +538,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @GuardedBy("mLock")
-    private void onUserProfilesChangedLocked() {
-        mCurrentUserProfiles = mUserManager.getProfileIdsWithDisabled(mCurrentUserId);
-    }
-
-    @GuardedBy("mLock")
-    private boolean isCurrentProfileLocked(int userId) {
-        return ArrayUtils.contains(mCurrentUserProfiles, userId);
-    }
-
-    @GuardedBy("mLock")
     private void ensureFallbackFusedProviderPresentLocked(String[] pkgs) {
         PackageManager pm = mContext.getPackageManager();
         String systemPackageName = mContext.getPackageName();
@@ -568,7 +545,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         List<ResolveInfo> rInfos = pm.queryIntentServicesAsUser(
                 new Intent(FUSED_LOCATION_SERVICE_ACTION),
-                PackageManager.GET_META_DATA, mCurrentUserId);
+                PackageManager.GET_META_DATA, mUserInfoStore.getCurrentUserId());
         for (ResolveInfo rInfo : rInfos) {
             String packageName = rInfo.serviceInfo.packageName;
 
@@ -752,27 +729,18 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @GuardedBy("mLock")
-    private void onUserChangedLocked(int userId) {
-        if (mCurrentUserId == userId) {
-            return;
-        }
-
+    private void onUserChangedLocked(int oldUserId, int newUserId) {
         if (D) {
-            Log.d(TAG, "foreground user is changing to " + userId);
+            Log.d(TAG, "foreground user is changing to " + newUserId);
         }
 
-        int oldUserId = mCurrentUserId;
-        mCurrentUserId = userId;
-        onUserProfilesChangedLocked();
-
-        // let providers know the current user has changed
         for (LocationProviderManager manager : mProviderManagers) {
             // update LOCATION_PROVIDERS_ALLOWED for best effort backwards compatibility
             mSettingsStore.setLocationProviderAllowed(manager.getName(),
-                    manager.isUseable(mCurrentUserId), mCurrentUserId);
+                    manager.isUseable(newUserId), newUserId);
 
             manager.onUseableChangedLocked(oldUserId);
-            manager.onUseableChangedLocked(mCurrentUserId);
+            manager.onUseableChangedLocked(newUserId);
         }
     }
 
@@ -786,8 +754,12 @@ public class LocationManagerService extends ILocationManager.Stub {
         // acquiring mLock makes operations on mProvider atomic, but is otherwise unnecessary
         protected final MockableLocationProvider mProvider;
 
+        // useable state for parent user ids, no entry implies false. location state is only kept
+        // for parent user ids, the location state for a profile user id is assumed to be the same
+        // as for the parent. if querying this structure, ensure that the user id being used is a
+        // parent id or the results may be incorrect.
         @GuardedBy("mLock")
-        private final SparseArray<Boolean> mUseable;  // combined state for each user id
+        private final SparseArray<Boolean> mUseable;
 
         private LocationProviderManager(String name) {
             mName = name;
@@ -795,6 +767,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             // initialize last since this lets our reference escape
             mProvider = new MockableLocationProvider(mContext, mLock, this);
+
+            // we can assume all users start with unuseable location state since the initial state
+            // of all providers is disabled. no need to initialize mUseable further.
         }
 
         public String getName() {
@@ -868,29 +843,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             mProvider.sendExtraCommand(uid, pid, command, extras);
         }
 
-        public void dump(FileDescriptor fd, IndentingPrintWriter pw, String[] args) {
-            synchronized (mLock) {
-                pw.print(mName + " provider");
-                if (mProvider.isMock()) {
-                    pw.print(" [mock]");
-                }
-                pw.println(":");
-
-                pw.increaseIndent();
-
-                pw.println("useable=" + isUseable(mCurrentUserId));
-                if (!isUseable(mCurrentUserId)) {
-                    pw.println("enabled=" + mProvider.getState().enabled);
-                }
-
-                pw.println("properties=" + mProvider.getState().properties);
-            }
-
-            mProvider.dump(fd, pw, args);
-
-            pw.decreaseIndent();
-        }
-
         @GuardedBy("mLock")
         @Override
         public void onReportLocation(Location location) {
@@ -927,18 +879,20 @@ public class LocationManagerService extends ILocationManager.Stub {
                 // it would be more correct to call this for all users, but we know this can
                 // only affect the current user since providers are disabled for non-current
                 // users
-                onUseableChangedLocked(mCurrentUserId);
+                onUseableChangedLocked(mUserInfoStore.getCurrentUserId());
             }
         }
 
-        @GuardedBy("mLock")
         public boolean isUseable() {
-            return isUseable(mCurrentUserId);
+            return isUseable(mUserInfoStore.getCurrentUserId());
         }
 
-        @GuardedBy("mLock")
         public boolean isUseable(int userId) {
             synchronized (mLock) {
+                // normalize user id to always refer to parent since profile state is always the
+                // same as parent state
+                userId = mUserInfoStore.getParentUserId(userId);
+
                 return mUseable.get(userId, Boolean.FALSE);
             }
         }
@@ -950,15 +904,20 @@ public class LocationManagerService extends ILocationManager.Stub {
                 return;
             }
 
+            // normalize user id to always refer to parent since profile state is always the same
+            // as parent state
+            userId = mUserInfoStore.getParentUserId(userId);
+
             // if any property that contributes to "useability" here changes state, it MUST result
             // in a direct or indrect call to onUseableChangedLocked. this allows the provider to
             // guarantee that it will always eventually reach the correct state.
-            boolean useable = isCurrentProfileLocked(userId)
+            boolean useable = (userId == mUserInfoStore.getCurrentUserId())
                     && mSettingsStore.isLocationEnabled(userId) && mProvider.getState().enabled;
 
             if (useable == isUseable(userId)) {
                 return;
             }
+
             mUseable.put(userId, useable);
 
             if (D) {
@@ -985,6 +944,30 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             updateProviderUseableLocked(this);
+        }
+
+        public void dump(FileDescriptor fd, IndentingPrintWriter pw, String[] args) {
+            synchronized (mLock) {
+                pw.print(mName + " provider");
+                if (mProvider.isMock()) {
+                    pw.print(" [mock]");
+                }
+                pw.println(":");
+
+                pw.increaseIndent();
+
+                boolean useable = isUseable();
+                pw.println("useable=" + useable);
+                if (!useable) {
+                    pw.println("enabled=" + mProvider.getState().enabled);
+                }
+
+                pw.println("properties=" + mProvider.getState().properties);
+            }
+
+            mProvider.dump(fd, pw, args);
+
+            pw.decreaseIndent();
         }
     }
 
@@ -1626,7 +1609,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         ArrayList<UpdateRecord> records = mRecordsByProvider.get(manager.getName());
         if (records != null) {
             for (UpdateRecord record : records) {
-                if (!isCurrentProfileLocked(
+                if (!mUserInfoStore.isCurrentUserOrProfile(
                         UserHandle.getUserId(record.mReceiver.mCallerIdentity.mUid))) {
                     continue;
                 }
@@ -1691,7 +1674,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             // initialize the low power mode to true and set to false if any of the records requires
             providerRequest.setLowPowerMode(true);
             for (UpdateRecord record : records) {
-                if (!isCurrentProfileLocked(
+                if (!mUserInfoStore.isCurrentUserOrProfile(
                         UserHandle.getUserId(record.mReceiver.mCallerIdentity.mUid))) {
                     continue;
                 }
@@ -1750,7 +1733,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 // TODO: overflow
                 long thresholdInterval = (providerRequest.getInterval() + 1000) * 3 / 2;
                 for (UpdateRecord record : records) {
-                    if (isCurrentProfileLocked(
+                    if (mUserInfoStore.isCurrentUserOrProfile(
                             UserHandle.getUserId(record.mReceiver.mCallerIdentity.mUid))) {
                         LocationRequest locationRequest = record.mRequest;
 
@@ -2243,8 +2226,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                 if (manager == null) return null;
 
                 // only the current user or location providers may get location this way
-                if (!isCurrentProfileLocked(UserHandle.getUserId(uid)) && !isProviderPackage(
-                        packageName)) {
+                if (!mUserInfoStore.isCurrentUserOrProfile(UserHandle.getUserId(uid))
+                        && !isProviderPackage(packageName)) {
                     return null;
                 }
 
@@ -2773,12 +2756,11 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             int receiverUserId = UserHandle.getUserId(receiver.mCallerIdentity.mUid);
-            if (!isCurrentProfileLocked(receiverUserId)
+            if (!mUserInfoStore.isCurrentUserOrProfile(receiverUserId)
                     && !isProviderPackage(receiver.mCallerIdentity.mPackageName)) {
                 if (D) {
                     Log.d(TAG, "skipping loc update for background user " + receiverUserId +
-                            " (current user: " + mCurrentUserId + ", app: " +
-                            receiver.mCallerIdentity.mPackageName + ")");
+                            " (app: " + receiver.mCallerIdentity.mPackageName + ")");
                 }
                 continue;
             }
@@ -3028,9 +3010,17 @@ public class LocationManagerService extends ILocationManager.Stub {
                     + TimeUtils.logTimeOfDay(System.currentTimeMillis()));
             ipw.println(", Current Elapsed Time: "
                     + TimeUtils.formatDuration(SystemClock.elapsedRealtime()));
-            ipw.println("Current user: " + mCurrentUserId + " " + Arrays.toString(
-                    mCurrentUserProfiles));
-            ipw.println("Location Mode: " + isLocationEnabledForUser(mCurrentUserId));
+
+            ipw.println("User Info:");
+            ipw.increaseIndent();
+            mUserInfoStore.dump(fd, ipw, args);
+            ipw.decreaseIndent();
+
+            ipw.println("Location Settings:");
+            ipw.increaseIndent();
+            mSettingsStore.dump(fd, ipw, args);
+            ipw.decreaseIndent();
+
             ipw.println("Battery Saver Location Mode: "
                     + locationPowerSaveModeToString(mBatterySaverMode));
 
@@ -3096,21 +3086,14 @@ public class LocationManagerService extends ILocationManager.Stub {
                 mLocationFudger.dump(fd, ipw, args);
                 ipw.decreaseIndent();
             }
-        }
 
-        ipw.println("Location Settings:");
-        ipw.increaseIndent();
-        mSettingsStore.dump(fd, ipw, args);
-        ipw.decreaseIndent();
+            ipw.println("Location Providers:");
+            ipw.increaseIndent();
+            for (LocationProviderManager manager : mProviderManagers) {
+                manager.dump(fd, ipw, args);
+            }
+            ipw.decreaseIndent();
 
-        ipw.println("Location Providers:");
-        ipw.increaseIndent();
-        for (LocationProviderManager manager : mProviderManagers) {
-            manager.dump(fd, ipw, args);
-        }
-        ipw.decreaseIndent();
-
-        synchronized (mLock) {
             if (mGnssManagerService != null) {
                 ipw.println("GNSS:");
                 ipw.increaseIndent();
