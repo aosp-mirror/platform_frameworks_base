@@ -5364,4 +5364,9 @@
     <string name="resolver_no_apps_available_explanation">We couldn\u2019t find any apps</string>
     <!-- Button which switches on the disabled work profile [CHAR LIMIT=NONE] -->
     <string name="resolver_switch_on_work">Switch on work</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permlab_accessCallAudio">Record or play audio in telephony calls</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_accessCallAudio">Allows this app, when assigned as default dialer application, to record or play audio in telephony calls.</string>
 </resources>
