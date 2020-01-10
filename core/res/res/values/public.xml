@@ -3000,7 +3000,6 @@
     <public-group type="attr" first-id="0x01010607">
       <public name="importantForContentCapture" />
       <public name="forceQueryable" />
-      <!-- @hide @SystemApi -->
       <public name="resourcesMap" />
       <public name="animatedImageDrawable"/>
       <public name="htmlDescription"/>
