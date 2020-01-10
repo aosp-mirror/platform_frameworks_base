@@ -143,6 +143,10 @@ cc_library_shared {
         "libutils",
     ],
 
+    header_libs: [
+        "libstagefright_foundation_headers",
+    ],
+
     export_include_dirs: ["."],
 
     cflags: [
