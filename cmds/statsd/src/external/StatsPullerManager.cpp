@@ -41,7 +41,6 @@
 #include "StatsCallbackPullerDeprecated.h"
 #include "StatsCompanionServicePuller.h"
 #include "SubsystemSleepStatePuller.h"
-#include "SurfaceflingerStatsPuller.h"
 #include "TrainInfoPuller.h"
 #include "statslog.h"
 
@@ -273,10 +272,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // App ops
         {{.atomTag = android::util::APP_OPS},
          {.puller = new StatsCompanionServicePuller(android::util::APP_OPS)}},
-        // SurfaceflingerStatsGlobalInfo
-        {{.atomTag = android::util::SURFACEFLINGER_STATS_GLOBAL_INFO},
-         {.puller =
-                  new SurfaceflingerStatsPuller(android::util::SURFACEFLINGER_STATS_GLOBAL_INFO)}},
         // VmsClientStats
         {{.atomTag = android::util::VMS_CLIENT_STATS},
          {.additiveFields = {5, 6, 7, 8, 9, 10},
