@@ -24,8 +24,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemClock;
+import android.os.TimestampedValue;
 import android.util.Log;
-import android.util.TimestampedValue;
 
 /**
  * The interface through which system components can send signals to the TimeDetectorService.
