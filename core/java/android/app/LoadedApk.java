@@ -251,7 +251,7 @@ public final class LoadedApk {
     }
 
     private AppComponentFactory createAppFactory(ApplicationInfo appInfo, ClassLoader cl) {
-        if (appInfo.appComponentFactory != null && cl != null) {
+        if (mIncludeCode && appInfo.appComponentFactory != null && cl != null) {
             try {
                 return (AppComponentFactory)
                         cl.loadClass(appInfo.appComponentFactory).newInstance();
