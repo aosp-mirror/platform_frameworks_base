@@ -30,6 +30,14 @@ import javax.inject.Singleton
 /**
  * Controller that allows any [Dumpable] to subscribe and be dumped along with other SystemUI
  * dependencies.
+ *
+ * To dump a specific dumpable on-demand:
+ *
+ * ```
+ * $ adb shell dumpsys activity service com.android.systemui/.SystemUIService dependency DumpController <tag1>,<tag2>,<tag3>
+ * ```
+ *
+ * Where tag1, tag2, etc. are the tags of the dumpables you want to dump.
  */
 @Singleton
 class DumpController @Inject constructor() : Dumpable {
