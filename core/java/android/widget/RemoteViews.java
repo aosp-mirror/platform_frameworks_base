@@ -565,7 +565,8 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private static void visitIconUri(Icon icon, @NonNull Consumer<Uri> visitor) {
-        if (icon != null && icon.getType() == Icon.TYPE_URI) {
+        if (icon != null && (icon.getType() == Icon.TYPE_URI
+                || icon.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP)) {
             visitor.accept(icon.getUri());
         }
     }
