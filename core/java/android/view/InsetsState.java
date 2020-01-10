@@ -19,12 +19,14 @@ package android.view;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
+import static android.view.ViewRootImpl.sNewInsetsMode;
 import static android.view.WindowInsets.Type.IME;
 import static android.view.WindowInsets.Type.MANDATORY_SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.SIZE;
 import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.indexOf;
+import static android.view.WindowInsets.Type.isVisibleInsetsType;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
@@ -41,6 +43,7 @@ import android.util.SparseIntArray;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -184,6 +187,32 @@ public class InsetsState implements Parcelable {
                 alwaysConsumeSystemBars, cutout, softInputAdjustMode == SOFT_INPUT_ADJUST_RESIZE
                         ? systemBars() | ime()
                         : systemBars());
+    }
+
+    public Rect calculateVisibleInsets(Rect frame, Rect legacyVisibleInsets,
+            @SoftInputModeFlags int softInputMode) {
+        if (sNewInsetsMode == NEW_INSETS_MODE_NONE) {
+            return legacyVisibleInsets;
+        }
+
+        Insets insets = Insets.NONE;
+        for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
+            InsetsSource source = mSources.get(type);
+            if (source == null) {
+                continue;
+            }
+            if (sNewInsetsMode != NEW_INSETS_MODE_FULL && type != ITYPE_IME) {
+                continue;
+            }
+
+            // Ignore everything that's not a system bar or IME.
+            int publicType = InsetsState.toPublicType(type);
+            if (!isVisibleInsetsType(publicType, softInputMode)) {
+                continue;
+            }
+            insets = Insets.max(source.calculateVisibleInsets(frame), insets);
+        }
+        return insets.toRect();
     }
 
     private void processSource(InsetsSource source, Rect relativeFrame, boolean ignoreVisibility,

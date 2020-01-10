@@ -42,6 +42,7 @@ import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimationCallback.AnimationBounds;
 import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
+import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
@@ -296,6 +297,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 legacyContentInsets, legacyStableInsets, legacySoftInputMode,
                 null /* typeSideMap */);
         return mLastInsets;
+    }
+
+    /**
+     * @see InsetsState#calculateVisibleInsets(Rect, Rect, int)
+     */
+    public Rect calculateVisibleInsets(Rect legacyVisibleInsets,
+            @SoftInputModeFlags int softInputMode) {
+        return mState.calculateVisibleInsets(mFrame, legacyVisibleInsets, softInputMode);
     }
 
     /**
