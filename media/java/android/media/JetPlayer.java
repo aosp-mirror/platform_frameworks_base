@@ -17,7 +17,7 @@
 package android.media;
 
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
 import android.os.Handler;
 import android.os.Looper;

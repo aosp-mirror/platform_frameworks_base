@@ -16,13 +16,13 @@
 
 package android.media;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.media.MediaCodec.BufferInfo;
 import android.util.Log;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 
 /**
