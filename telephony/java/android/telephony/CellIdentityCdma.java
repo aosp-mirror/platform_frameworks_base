@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.telephony.cdma.CdmaCellLocation;
 
@@ -198,6 +199,7 @@ public final class CellIdentityCdma extends CellIdentity {
     }
 
     /** @hide */
+    @NonNull
     @Override
     public CdmaCellLocation asCellLocation() {
         CdmaCellLocation cl = new CdmaCellLocation();

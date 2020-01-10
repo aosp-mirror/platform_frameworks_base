@@ -22,9 +22,6 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Binder;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.Annotation.CallState;
@@ -642,10 +639,14 @@ public class TelephonyRegistryManager {
     }
 
     /**
-     * TODO change from bundle to CellLocation?
+     * Notify {@link android.telephony.CellLocation} changed.
+     *
+     * <p>To be compatible with {@link TelephonyRegistry}, use {@link CellIdentity} which is
+     * parcelable, and convert to CellLocation in client code.
+     *
      * @hide
      */
-    public void notifyCellLocation(int subId, Bundle cellLocation) {
+    public void notifyCellLocation(int subId, CellIdentity cellLocation) {
         try {
             sRegistry.notifyCellLocationForSubscriber(subId, cellLocation);
         } catch (RemoteException ex) {
