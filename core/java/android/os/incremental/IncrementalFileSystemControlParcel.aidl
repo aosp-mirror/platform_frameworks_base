@@ -17,11 +17,12 @@
 package android.os.incremental;
 
 /**
- * Wraps two file descriptors that Incremental Service uses to communicate
+ * Wraps the file descriptors Incremental Service uses to communicate
  * with Incremental FileSystem.
  * @hide
  */
 parcelable IncrementalFileSystemControlParcel {
     @nullable ParcelFileDescriptor cmd;
+    @nullable ParcelFileDescriptor pendingReads;
     @nullable ParcelFileDescriptor log;
 }
