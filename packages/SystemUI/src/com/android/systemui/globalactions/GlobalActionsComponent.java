@@ -19,7 +19,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.Dependency;
 import com.android.systemui.SystemUI;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
@@ -29,6 +28,7 @@ import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 /**
@@ -38,23 +38,29 @@ import javax.inject.Singleton;
 public class GlobalActionsComponent extends SystemUI implements Callbacks, GlobalActionsManager {
 
     private final CommandQueue mCommandQueue;
+    private final ExtensionController mExtensionController;
+    private final Provider<GlobalActions> mGlobalActionsProvider;
     private GlobalActions mPlugin;
     private Extension<GlobalActions> mExtension;
     private IStatusBarService mBarService;
 
     @Inject
-    public GlobalActionsComponent(Context context, CommandQueue commandQueue) {
+    public GlobalActionsComponent(Context context, CommandQueue commandQueue,
+            ExtensionController extensionController,
+            Provider<GlobalActions> globalActionsProvider) {
         super(context);
         mCommandQueue = commandQueue;
+        mExtensionController = extensionController;
+        mGlobalActionsProvider = globalActionsProvider;
     }
 
     @Override
     public void start() {
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        mExtension = Dependency.get(ExtensionController.class).newExtension(GlobalActions.class)
+        mExtension = mExtensionController.newExtension(GlobalActions.class)
                 .withPlugin(GlobalActions.class)
-                .withDefault(() -> new GlobalActionsImpl(mContext, mCommandQueue))
+                .withDefault(mGlobalActionsProvider::get)
                 .withCallback(this::onExtensionCallback)
                 .build();
         mPlugin = mExtension.get();

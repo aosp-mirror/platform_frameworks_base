@@ -45,24 +45,32 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import javax.inject.Inject;
+
+import dagger.Lazy;
+
 public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
         PluginListener<GlobalActionsPanelPlugin> {
 
     private static final float SHUTDOWN_SCRIM_ALPHA = 0.95f;
 
     private final Context mContext;
+    private final Lazy<GlobalActionsDialog> mGlobalActionsDialogLazy;
     private final KeyguardStateController mKeyguardStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final ExtensionController.Extension<GlobalActionsPanelPlugin> mPanelExtension;
     private GlobalActionsPanelPlugin mPlugin;
     private final CommandQueue mCommandQueue;
-    private GlobalActionsDialog mGlobalActions;
+    private GlobalActionsDialog mGlobalActionsDialog;
     private boolean mDisabled;
     private final PluginManager mPluginManager;
     private final String mPluginPackageName;
 
-    public GlobalActionsImpl(Context context, CommandQueue commandQueue) {
+    @Inject
+    public GlobalActionsImpl(Context context, CommandQueue commandQueue,
+            Lazy<GlobalActionsDialog> globalActionsDialogLazy) {
         mContext = context;
+        mGlobalActionsDialogLazy = globalActionsDialogLazy;
         mKeyguardStateController = Dependency.get(KeyguardStateController.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mPluginManager = Dependency.get(PluginManager.class);
@@ -83,19 +91,17 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
         mCommandQueue.removeCallback(this);
         mPluginManager.removePluginListener(this);
         if (mPlugin != null) mPlugin.onDestroy();
-        if (mGlobalActions != null) {
-            mGlobalActions.destroy();
-            mGlobalActions = null;
+        if (mGlobalActionsDialog != null) {
+            mGlobalActionsDialog.destroy();
+            mGlobalActionsDialog = null;
         }
     }
 
     @Override
     public void showGlobalActions(GlobalActionsManager manager) {
         if (mDisabled) return;
-        if (mGlobalActions == null) {
-            mGlobalActions = new GlobalActionsDialog(mContext, manager);
-        }
-        mGlobalActions.showDialog(mKeyguardStateController.isShowing(),
+        mGlobalActionsDialog = mGlobalActionsDialogLazy.get();
+        mGlobalActionsDialog.showDialog(mKeyguardStateController.isShowing(),
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 mPlugin != null ? mPlugin : mPanelExtension.get());
         Dependency.get(KeyguardUpdateMonitor.class).requestFaceAuth();
@@ -189,8 +195,8 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
         final boolean disabled = (state2 & DISABLE2_GLOBAL_ACTIONS) != 0;
         if (displayId != mContext.getDisplayId() || disabled == mDisabled) return;
         mDisabled = disabled;
-        if (disabled && mGlobalActions != null) {
-            mGlobalActions.dismissDialog();
+        if (disabled && mGlobalActionsDialog != null) {
+            mGlobalActionsDialog.dismissDialog();
         }
     }
 
