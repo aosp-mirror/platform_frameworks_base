@@ -16,10 +16,10 @@
 
 package android.security;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.app.KeyguardManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.face.FaceManager;
@@ -31,7 +31,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.security.KeyStoreException;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
