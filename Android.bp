@@ -221,7 +221,6 @@ filegroup {
         ":framework-sax-sources",
         ":framework-telecomm-sources",
         ":framework-telephony-common-sources",
-        ":framework-telephony-sources",
         ":framework-wifi-annotations",
         ":framework-wifi-non-updatable-sources",
         ":PacProcessor-aidl-sources",
@@ -256,6 +255,9 @@ filegroup {
         // etc.
         ":framework-javastream-protos",
         ":framework-statslog-gen",
+
+        // telephony annotations
+        ":framework-telephony-annotations",
     ],
 }
 
@@ -270,6 +272,7 @@ filegroup {
         ":framework-mediaprovider-sources",
         ":framework-permission-sources",
         ":framework-wifi-updatable-sources",
+        ":framework-telephony-sources",
         ":ike-srcs",
     ]
 }
@@ -303,7 +306,6 @@ java_defaults {
             "rs/java",
             "sax/java",
             "telecomm/java",
-            "telephony/java",
             "wifi/java",
         ],
     },
@@ -383,6 +385,7 @@ java_defaults {
         "updatable_media_stubs",
         "framework_mediaprovider_stubs",
         "framework-tethering",
+        "framework-telephony-stubs",
     ],
 
     jarjar_rules: ":framework-jarjar-rules",
@@ -469,6 +472,7 @@ java_library {
         "//frameworks/base/apex/jobscheduler/framework",
         "//frameworks/base/apex/permission/framework",
         "//frameworks/base/apex/statsd/service",
+        "//frameworks/base/telephony",
         "//frameworks/base/wifi",
         "//frameworks/opt/net/wifi/service",
     ],
@@ -501,6 +505,9 @@ java_library {
         "ike-stubs",
         // TODO(b/147200698): should be the stub of framework-tethering
         "framework-tethering",
+        // TODO (b/147688669) should be framework-telephony-stubs
+        "framework-telephony",
+        // TODO(jiyong): add stubs for APEXes here
     ],
     sdk_version: "core_platform",
     apex_available: ["//apex_available:platform"],
@@ -1226,3 +1233,82 @@ build = [
     "StubLibraries.bp",
     "ApiDocs.bp",
 ]
+
+// TODO(b/147699819): move to frameworks/base/telephony/ folder
+droidstubs {
+    name: "framework-telephony-stubs-srcs",
+    srcs: [
+        ":framework-telephony-sources",
+        ":framework_native_aidl",
+        ":framework-javastream-protos",
+    ],
+    aidl: {
+        local_include_dirs: [
+            "core/java",
+            "telecomm/java"
+        ],
+    },
+    libs: [
+        "framework-annotations-lib",
+        "android.hardware.radio-V1.5-java",
+    ],
+    defaults: ["framework-module-stubs-defaults-systemapi"],
+    filter_packages: ["android.telephony"],
+    sdk_version: "system_current",
+}
+
+java_library {
+    name: "framework-telephony-stubs",
+    srcs: [":framework-telephony-stubs-srcs"],
+    // TODO(b/147699819): move public aidls to a separate folder and potentially remove
+    // below aidl exports.
+    aidl: {
+        export_include_dirs: ["telephony/java"],
+    },
+    sdk_version: "system_current",
+}
+
+java_library {
+    name: "framework-telephony",
+    srcs: [
+        ":framework-telephony-sources",
+    ],
+    // TODO: change to framework-system-stub to build against system APIs.
+    libs: [
+        "framework-minus-apex",
+        "unsupportedappusage",
+    ],
+    static_libs: [
+        "libphonenumber-platform",
+        "app-compat-annotations",
+    ],
+    sdk_version: "core_platform",
+    aidl: {
+        export_include_dirs: ["telephony/java"],
+        include_dirs: [
+            "frameworks/native/aidl/binder",
+            "frameworks/native/aidl/gui",
+        ]
+    },
+    jarjar_rules: ":telephony-framework-jarjar-rules",
+    dxflags: [
+        "--core-library",
+        "--multi-dex",
+    ],
+    // This is to break the dependency from boot jars.
+    dex_preopt: {
+        enabled: false,
+    },
+    installable: true,
+}
+
+filegroup {
+    // TODO (b/147690217): move to frameworks/base/telephony/common.
+    name: "framework-telephony-annotations",
+    srcs: ["telephony/java/android/telephony/Annotation.java"],
+}
+
+filegroup {
+    name: "telephony-framework-jarjar-rules",
+    srcs: ["telephony/framework-telephony-jarjar-rules.txt"],
+}

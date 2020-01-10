@@ -1,0 +1,4 @@
+rule android.telephony.Annotation* android.telephony.framework.Annotation@1
+rule com.android.i18n.phonenumbers.** com.android.telephony.framework.phonenumbers.@1
+#TODO: add jarjar rules for statically linked util classes
+
