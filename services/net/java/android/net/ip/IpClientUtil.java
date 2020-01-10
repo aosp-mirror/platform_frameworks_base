@@ -119,6 +119,7 @@ public class IpClientUtil {
         @Override
         public void onNewDhcpResults(DhcpResultsParcelable dhcpResults) {
             mCb.onNewDhcpResults(fromStableParcelable(dhcpResults));
+            mCb.onNewDhcpResults(dhcpResults);
         }
 
         @Override
