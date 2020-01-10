@@ -17,7 +17,6 @@ package android.net;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
@@ -26,6 +25,7 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.net.annotations.PolicyDirection;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -41,8 +41,6 @@ import dalvik.system.CloseGuard;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -77,11 +75,6 @@ public final class IpSecManager {
      * <p>See {@link #applyTransportModeTransform(Socket, int, IpSecTransform)}.
      */
     public static final int DIRECTION_OUT = 1;
-
-    /** @hide */
-    @IntDef(value = {DIRECTION_IN, DIRECTION_OUT})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface PolicyDirection {}
 
     /**
      * The Security Parameter Index (SPI) 0 indicates an unknown or invalid index.
