@@ -20,10 +20,12 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ComponentParseUtils;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
@@ -108,6 +110,7 @@ public class AppsFilter {
     private final FeatureConfig mFeatureConfig;
 
     private final OverlayReferenceMapper mOverlayReferenceMapper;
+    private PackageParser.SigningDetails mSystemSigningDetails;
 
     AppsFilter(FeatureConfig featureConfig, String[] forceQueryableWhitelist,
             boolean systemAppsQueryable,
@@ -320,6 +323,17 @@ public class AppsFilter {
      */
     public void addPackage(PackageSetting newPkgSetting,
             ArrayMap<String, PackageSetting> existingSettings) {
+        if (Objects.equals("android", newPkgSetting.name)) {
+            // let's set aside the framework signatures
+            mSystemSigningDetails = newPkgSetting.signatures.mSigningDetails;
+            // and since we add overlays before we add the framework, let's revisit already added
+            // packages for signature matches
+            for (PackageSetting setting : existingSettings.values()) {
+                if (isSystemSigned(mSystemSigningDetails, setting)) {
+                    mForceQueryable.add(setting.appId);
+                }
+            }
+        }
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "filter.addPackage");
         try {
             final AndroidPackage newPkg = newPkgSetting.pkg;
@@ -335,7 +349,9 @@ public class AppsFilter {
                             || (newPkgSetting.isSystem() && (mSystemAppsQueryable
                             || ArrayUtils.contains(mForceQueryableByDevicePackageNames,
                             newPkg.getPackageName())));
-            if (newIsForceQueryable) {
+            if (newIsForceQueryable
+                    || (mSystemSigningDetails != null
+                            && isSystemSigned(mSystemSigningDetails, newPkgSetting))) {
                 mForceQueryable.add(newPkgSetting.appId);
             }
 
@@ -379,6 +395,12 @@ public class AppsFilter {
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
+    }
+
+    private static boolean isSystemSigned(@NonNull PackageParser.SigningDetails sysSigningDetails,
+            PackageSetting pkgSetting) {
+        return pkgSetting.isSystem()
+            && pkgSetting.signatures.mSigningDetails.signaturesMatchExactly(sysSigningDetails);
     }
 
     /**
