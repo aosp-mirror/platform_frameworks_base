@@ -40,7 +40,7 @@ import org.mockito.MockitoAnnotations;
  * Tests for the {@link ActivityStack} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:AnimatingActivityRegistryTest
+ *  atest WmTests:AnimatingActivityRegistryTest
  */
 @SmallTest
 @Presubmit

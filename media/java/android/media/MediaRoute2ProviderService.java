@@ -246,11 +246,11 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param packageName the package name of the application that selected the route
      * @param routeId the id of the route initially being connected
-     * @param controlCategory the control category of the new session
+     * @param routeType the route type of the new session
      * @param requestId the id of this session creation request
      */
     public abstract void onCreateSession(@NonNull String packageName, @NonNull String routeId,
-            @NonNull String controlCategory, long requestId);
+            @NonNull String routeType, long requestId);
 
     /**
      * Called when a session is about to be destroyed.
@@ -299,6 +299,25 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param routeId id of the route
      */
     public abstract void onTransferToRoute(int sessionId, @NonNull String routeId);
+
+    /**
+     * Called when the {@link RouteDiscoveryRequest discovery request} has changed.
+     * <p>
+     * Whenever an application registers a {@link MediaRouter2.RouteCallback callback},
+     * it also provides a discovery request to specify types of routes that it is interested in.
+     * The media router combines all of these discovery request into a single discovery request
+     * and notifies each provider.
+     * </p><p>
+     * The provider should examine {@link RouteDiscoveryRequest#getRouteTypes() route types}
+     * in the discovery request to determine what kind of routes it should try to discover
+     * and whether it should perform active or passive scans. In many cases, the provider may be
+     * able to save power by not performing any scans when the request doesn't have any matching
+     * route types.
+     * </p>
+     *
+     * @param request the new discovery request
+     */
+    public void onDiscoveryRequestChanged(@NonNull RouteDiscoveryRequest request) {}
 
     /**
      * Updates provider info and publishes routes and session info.
@@ -357,12 +376,12 @@ public abstract class MediaRoute2ProviderService extends Service {
 
         @Override
         public void requestCreateSession(String packageName, String routeId,
-                String controlCategory, long requestId) {
+                String routeType, long requestId) {
             if (!checkCallerisSystem()) {
                 return;
             }
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onCreateSession,
-                    MediaRoute2ProviderService.this, packageName, routeId, controlCategory,
+                    MediaRoute2ProviderService.this, packageName, routeId, routeType,
                     requestId));
         }
         @Override

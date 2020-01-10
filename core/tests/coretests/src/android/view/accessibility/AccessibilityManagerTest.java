@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.accessibility;
+package android.view.accessibility;
 
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertSame;
@@ -29,16 +29,17 @@ import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Instrumentation;
+import android.app.PendingIntent;
+import android.app.RemoteAction;
+import android.content.Intent;
+import android.graphics.drawable.Icon;
 import android.os.UserHandle;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.IAccessibilityManager;
-import android.view.accessibility.IAccessibilityManagerClient;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.IntPair;
+import com.android.server.accessibility.test.MessageCapturingHandler;
 
 import org.junit.After;
 import org.junit.Before;
@@ -57,6 +58,16 @@ import java.util.List;
 public class AccessibilityManagerTest {
     private static final boolean WITH_A11Y_ENABLED = true;
     private static final boolean WITH_A11Y_DISABLED = false;
+    private static final String LABEL = "label";
+    private static final String INTENT_ACTION = "TESTACTION";
+    private static final String DESCRIPTION = "description";
+    private static final PendingIntent TEST_PENDING_INTENT = PendingIntent.getBroadcast(
+            InstrumentationRegistry.getTargetContext(), 0, new Intent(INTENT_ACTION), 0);
+    private static final RemoteAction TEST_ACTION = new RemoteAction(
+            Icon.createWithContentUri("content://test"),
+            LABEL,
+            DESCRIPTION,
+            TEST_PENDING_INTENT);
 
     @Mock private IAccessibilityManager mMockService;
     private MessageCapturingHandler mHandler;
@@ -119,6 +130,29 @@ public class AccessibilityManagerTest {
         manager.interrupt();
 
         verify(mMockService).interrupt(UserHandle.USER_CURRENT);
+    }
+
+    @Test
+    public void testRegisterSystemAction() throws Exception {
+        AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
+        RemoteAction action = new RemoteAction(
+                Icon.createWithContentUri("content://test"),
+                LABEL,
+                DESCRIPTION,
+                TEST_PENDING_INTENT);
+        final int actionId = 0;
+        manager.registerSystemAction(TEST_ACTION, actionId);
+
+        verify(mMockService).registerSystemAction(TEST_ACTION, actionId);
+    }
+
+    @Test
+    public void testUnregisterSystemAction() throws Exception {
+        AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
+        final int actionId = 0;
+        manager.unregisterSystemAction(actionId);
+
+        verify(mMockService).unregisterSystemAction(actionId);
     }
 
     @Test

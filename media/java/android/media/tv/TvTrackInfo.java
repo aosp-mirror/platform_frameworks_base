@@ -63,6 +63,7 @@ public final class TvTrackInfo implements Parcelable {
     private final int mAudioSampleRate;
     private final boolean mAudioDescription;
     private final boolean mHardOfHearing;
+    private final boolean mSpokenSubtitle;
     private final int mVideoWidth;
     private final int mVideoHeight;
     private final float mVideoFrameRate;
@@ -73,8 +74,9 @@ public final class TvTrackInfo implements Parcelable {
 
     private TvTrackInfo(int type, String id, String language, CharSequence description,
             boolean encrypted, int audioChannelCount, int audioSampleRate, boolean audioDescription,
-            boolean hardOfHearing, int videoWidth, int videoHeight, float videoFrameRate,
-            float videoPixelAspectRatio, byte videoActiveFormatDescription, Bundle extra) {
+            boolean hardOfHearing, boolean spokenSubtitle, int videoWidth, int videoHeight,
+            float videoFrameRate, float videoPixelAspectRatio, byte videoActiveFormatDescription,
+            Bundle extra) {
         mType = type;
         mId = id;
         mLanguage = language;
@@ -84,6 +86,7 @@ public final class TvTrackInfo implements Parcelable {
         mAudioSampleRate = audioSampleRate;
         mAudioDescription = audioDescription;
         mHardOfHearing = hardOfHearing;
+        mSpokenSubtitle = spokenSubtitle;
         mVideoWidth = videoWidth;
         mVideoHeight = videoHeight;
         mVideoFrameRate = videoFrameRate;
@@ -102,6 +105,7 @@ public final class TvTrackInfo implements Parcelable {
         mAudioSampleRate = in.readInt();
         mAudioDescription = in.readInt() != 0;
         mHardOfHearing = in.readInt() != 0;
+        mSpokenSubtitle = in.readInt() != 0;
         mVideoWidth = in.readInt();
         mVideoHeight = in.readInt();
         mVideoFrameRate = in.readFloat();
@@ -212,6 +216,22 @@ public final class TvTrackInfo implements Parcelable {
     }
 
     /**
+     * Returns {@code true} if the track is a spoken subtitle for people with visual impairment,
+     * {@code false} otherwise. Valid only for {@link #TYPE_AUDIO} tracks.
+     *
+     * <p>For example of broadcast, spoken subtitle information may be referred to broadcast
+     * standard (e.g. Supplementary Audio Language Descriptor of ETSI EN 300 468).
+     *
+     * @throws IllegalStateException if not called on an audio track
+     */
+    public boolean isSpokenSubtitle() {
+        if (mType != TYPE_AUDIO) {
+            throw new IllegalStateException("Not an audio track");
+        }
+        return mSpokenSubtitle;
+    }
+
+    /**
      * Returns the width of the video, in the unit of pixels. Valid only for {@link #TYPE_VIDEO}
      * tracks.
      *
@@ -308,6 +328,7 @@ public final class TvTrackInfo implements Parcelable {
         dest.writeInt(mAudioSampleRate);
         dest.writeInt(mAudioDescription ? 1 : 0);
         dest.writeInt(mHardOfHearing ? 1 : 0);
+        dest.writeInt(mSpokenSubtitle ? 1 : 0);
         dest.writeInt(mVideoWidth);
         dest.writeInt(mVideoHeight);
         dest.writeFloat(mVideoFrameRate);
@@ -331,6 +352,7 @@ public final class TvTrackInfo implements Parcelable {
         if (!TextUtils.equals(mId, obj.mId) || mType != obj.mType
                 || !TextUtils.equals(mLanguage, obj.mLanguage)
                 || !TextUtils.equals(mDescription, obj.mDescription)
+                || mEncrypted != obj.mEncrypted
                 || !Objects.equals(mExtra, obj.mExtra)) {
             return false;
         }
@@ -340,7 +362,8 @@ public final class TvTrackInfo implements Parcelable {
                 return mAudioChannelCount == obj.mAudioChannelCount
                         && mAudioSampleRate == obj.mAudioSampleRate
                         && mAudioDescription == obj.mAudioDescription
-                        && mHardOfHearing == obj.mHardOfHearing;
+                        && mHardOfHearing == obj.mHardOfHearing
+                        && mSpokenSubtitle == obj.mSpokenSubtitle;
 
             case TYPE_VIDEO:
                 return mVideoWidth == obj.mVideoWidth
@@ -387,6 +410,7 @@ public final class TvTrackInfo implements Parcelable {
         private int mAudioSampleRate;
         private boolean mAudioDescription;
         private boolean mHardOfHearing;
+        private boolean mSpokenSubtitle;
         private int mVideoWidth;
         private int mVideoHeight;
         private float mVideoFrameRate;
@@ -521,6 +545,25 @@ public final class TvTrackInfo implements Parcelable {
         }
 
         /**
+         * Sets the spoken subtitle attribute of the audio. Valid only for {@link #TYPE_AUDIO}
+         * tracks.
+         *
+         * <p>For example of broadcast, spoken subtitle information may be referred to broadcast
+         * standard (e.g. Supplementary Audio Language Descriptor of ETSI EN 300 468).
+         *
+         * @param spokenSubtitle The spoken subtitle attribute of the audio.
+         * @throws IllegalStateException if not called on an audio track
+         */
+        @NonNull
+        public Builder setSpokenSubtitle(boolean spokenSubtitle) {
+            if (mType != TYPE_AUDIO) {
+                throw new IllegalStateException("Not an audio track");
+            }
+            mSpokenSubtitle = spokenSubtitle;
+            return this;
+        }
+
+        /**
          * Sets the width of the video, in the unit of pixels. Valid only for {@link #TYPE_VIDEO}
          * tracks.
          *
@@ -623,8 +666,8 @@ public final class TvTrackInfo implements Parcelable {
         public TvTrackInfo build() {
             return new TvTrackInfo(mType, mId, mLanguage, mDescription, mEncrypted,
                     mAudioChannelCount, mAudioSampleRate, mAudioDescription, mHardOfHearing,
-                    mVideoWidth, mVideoHeight, mVideoFrameRate, mVideoPixelAspectRatio,
-                    mVideoActiveFormatDescription, mExtra);
+                    mSpokenSubtitle, mVideoWidth, mVideoHeight, mVideoFrameRate,
+                    mVideoPixelAspectRatio, mVideoActiveFormatDescription, mExtra);
         }
     }
 }

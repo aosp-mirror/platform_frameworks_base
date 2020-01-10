@@ -103,6 +103,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
+import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.DexManager;
@@ -356,6 +357,8 @@ public final class ProcessList {
     private boolean mOomLevelsSet = false;
 
     private boolean mAppDataIsolationEnabled = false;
+
+    private ArrayList<String> mAppDataIsolationWhitelistedApps;
 
     /**
      * Temporary to avoid allocations.  Protected by main lock.
@@ -645,6 +648,9 @@ public final class ProcessList {
         // want some apps enabled while some apps disabled
         mAppDataIsolationEnabled =
                 SystemProperties.getBoolean(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
+        mAppDataIsolationWhitelistedApps = new ArrayList<>(
+                SystemConfig.getInstance().getAppDataIsolationWhitelistedApps());
+
 
         if (sKillHandler == null) {
             sKillThread = new ServiceThread(TAG + ":kill",
@@ -1555,20 +1561,27 @@ public final class ProcessList {
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }
-
+                int numGids = 3;
+                if (mountExternal == Zygote.MOUNT_EXTERNAL_INSTALLER
+                        || mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+                    numGids++;
+                }
                 /*
                  * Add shared application and profile GIDs so applications can share some
                  * resources like shared libraries and access user-wide resources
                  */
                 if (ArrayUtils.isEmpty(permGids)) {
-                    gids = new int[3];
+                    gids = new int[numGids];
                 } else {
-                    gids = new int[permGids.length + 3];
-                    System.arraycopy(permGids, 0, gids, 3, permGids.length);
+                    gids = new int[permGids.length + numGids];
+                    System.arraycopy(permGids, 0, gids, numGids, permGids.length);
                 }
                 gids[0] = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
                 gids[1] = UserHandle.getCacheAppGid(UserHandle.getAppId(uid));
                 gids[2] = UserHandle.getUserGid(UserHandle.getUserId(uid));
+                if (numGids > 3) {
+                    gids[3] = Process.SDCARD_RW_GID;
+                }
 
                 // Replace any invalid GIDs
                 if (gids[0] == UserHandle.ERR_GID) gids[0] = gids[2];
@@ -1905,6 +1918,16 @@ public final class ProcessList {
                 result.put(packageName, Pair.create(volumeUuid, inode));
             }
         }
+        if (mAppDataIsolationWhitelistedApps != null) {
+            for (String packageName : mAppDataIsolationWhitelistedApps) {
+                String volumeUuid = pmInt.getPackage(packageName).getVolumeUuid();
+                long inode = pmInt.getCeDataInode(packageName, userId);
+                if (inode != 0) {
+                    result.put(packageName, Pair.create(volumeUuid, inode));
+                }
+            }
+        }
+
         return result;
     }
 

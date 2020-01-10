@@ -152,7 +152,9 @@ sk_sp<Bitmap> Bitmap::createFrom(AHardwareBuffer* hardwareBuffer, sk_sp<SkColorS
     AHardwareBuffer_describe(hardwareBuffer, &bufferDesc);
     SkImageInfo info = uirenderer::BufferDescriptionToImageInfo(bufferDesc, colorSpace);
 
-    const size_t rowBytes = info.bytesPerPixel() * bufferDesc.stride;
+    // If the stride is 0 we have to use the width as an approximation (eg, compressed buffer)
+    const auto bufferStride = bufferDesc.stride > 0 ? bufferDesc.stride : bufferDesc.width;
+    const size_t rowBytes = info.bytesPerPixel() * bufferStride;
     return sk_sp<Bitmap>(new Bitmap(hardwareBuffer, info, rowBytes, palette));
 }
 

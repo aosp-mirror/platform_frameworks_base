@@ -35,6 +35,7 @@ import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.app.RemoteAction;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -148,6 +149,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     //       their capabilities are ready.
     private static final int WAIT_MOTION_INJECTOR_TIMEOUT_MILLIS = 1000;
 
+    static final String FUNCTION_REGISTER_SYSTEM_ACTION = "registerSystemAction";
+    static final String FUNCTION_UNREGISTER_SYSTEM_ACTION = "unregisterSystemAction";
     private static final String FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE =
         "registerUiTestAutomationService";
 
@@ -253,6 +256,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    @VisibleForTesting
+    AccessibilityManagerService(
+            Context context,
+            PackageManager packageManager,
+            AccessibilitySecurityPolicy securityPolicy,
+            SystemActionPerformer systemActionPerformer,
+            AccessibilityWindowManager a11yWindowManager,
+            AccessibilityDisplayListener a11yDisplayListener) {
+        mContext = context;
+        mPowerManager =  (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
+        mMainHandler = new MainHandler(mContext.getMainLooper());
+        mActivityTaskManagerService = LocalServices.getService(ActivityTaskManagerInternal.class);
+        mPackageManager = packageManager;
+        mSecurityPolicy = securityPolicy;
+        mSystemActionPerformer = systemActionPerformer;
+        mA11yWindowManager = a11yWindowManager;
+        mA11yDisplayListener = a11yDisplayListener;
+        init();
+    }
+
     /**
      * Creates a new instance.
      *
@@ -260,21 +284,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     public AccessibilityManagerService(Context context) {
         mContext = context;
-        mPackageManager = mContext.getPackageManager();
-        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mPowerManager =  (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
-        mSecurityPolicy = new AccessibilitySecurityPolicy(mContext, this);
         mMainHandler = new MainHandler(mContext.getMainLooper());
+        mActivityTaskManagerService = LocalServices.getService(ActivityTaskManagerInternal.class);
+        mPackageManager = mContext.getPackageManager();
+        mSecurityPolicy = new AccessibilitySecurityPolicy(mContext, this);
         mSystemActionPerformer = new SystemActionPerformer(mContext, mWindowManagerService);
         mA11yWindowManager = new AccessibilityWindowManager(mLock, mMainHandler,
                 mWindowManagerService, this, mSecurityPolicy, this);
         mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
-        mSecurityPolicy.setAccessibilityWindowManager(mA11yWindowManager);
-        mActivityTaskManagerService = LocalServices.getService(ActivityTaskManagerInternal.class);
+        init();
+    }
 
+    private void init() {
+        mSecurityPolicy.setAccessibilityWindowManager(mA11yWindowManager);
         registerBroadcastReceivers();
         new AccessibilityContentObserver(mMainHandler).register(
-                context.getContentResolver());
+                mContext.getContentResolver());
     }
 
     @Override
@@ -621,6 +648,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
         event.recycle();
+    }
+
+    /**
+     * This is the implementation of AccessibilityManager system API.
+     * System UI calls into this method through AccessibilityManager system API to register a
+     * system action.
+     */
+    @Override
+    public void registerSystemAction(RemoteAction action, int actionId) {
+        mSecurityPolicy.enforceCallingPermission(Manifest.permission.MANAGE_ACCESSIBILITY,
+                FUNCTION_REGISTER_SYSTEM_ACTION);
+        mSystemActionPerformer.registerSystemAction(actionId, action);
+    }
+
+    /**
+     * This is the implementation of AccessibilityManager system API.
+     * System UI calls into this method through AccessibilityManager system API to unregister a
+     * system action.
+     */
+    @Override
+    public void unregisterSystemAction(int actionId) {
+        mSecurityPolicy.enforceCallingPermission(Manifest.permission.MANAGE_ACCESSIBILITY,
+                FUNCTION_UNREGISTER_SYSTEM_ACTION);
+        mSystemActionPerformer.unregisterSystemAction(actionId);
     }
 
     @Override

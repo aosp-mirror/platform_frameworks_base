@@ -110,6 +110,7 @@ import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.init.NewNotifPipeline;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
@@ -276,6 +277,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             NotificationGutsManager notificationGutsManager,
             NotificationLogger notificationLogger,
             NotificationEntryManager notificationEntryManager,
+            NotificationRowContentBinder notificationRowContentBinder,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             NotificationViewHierarchyManager notificationViewHierarchyManager,
             KeyguardViewMediator keyguardViewMediator,
@@ -363,6 +365,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 notificationGutsManager,
                 notificationLogger,
                 notificationEntryManager,
+                notificationRowContentBinder,
                 notificationInterruptionStateProvider,
                 notificationViewHierarchyManager,
                 keyguardViewMediator,

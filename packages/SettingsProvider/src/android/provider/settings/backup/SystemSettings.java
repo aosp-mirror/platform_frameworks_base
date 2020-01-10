@@ -16,7 +16,7 @@
 
 package android.provider.settings.backup;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.provider.Settings;
 
 /** Information about the system settings to back up */

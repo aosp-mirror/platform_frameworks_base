@@ -83,12 +83,14 @@ public final class MediaRoute2Info implements Parcelable {
      * controlled from this object. An example of fixed playback volume is a remote player,
      * playing over HDMI where the user prefers to control the volume on the HDMI sink, rather
      * than attenuate at the source.
+     *
      * @see #getVolumeHandling()
      */
     public static final int PLAYBACK_VOLUME_FIXED = 0;
     /**
      * Playback information indicating the playback volume is variable and can be controlled
      * from this object.
+     *
      * @see #getVolumeHandling()
      */
     public static final int PLAYBACK_VOLUME_VARIABLE = 1;
@@ -148,7 +150,7 @@ public final class MediaRoute2Info implements Parcelable {
     @Nullable
     final String mClientPackageName;
     @NonNull
-    final List<String> mSupportedCategories;
+    final List<String> mRouteTypes;
     final int mVolume;
     final int mVolumeMax;
     final int mVolumeHandling;
@@ -164,7 +166,7 @@ public final class MediaRoute2Info implements Parcelable {
         mConnectionState = builder.mConnectionState;
         mIconUri = builder.mIconUri;
         mClientPackageName = builder.mClientPackageName;
-        mSupportedCategories = builder.mSupportedCategories;
+        mRouteTypes = builder.mRouteTypes;
         mVolume = builder.mVolume;
         mVolumeMax = builder.mVolumeMax;
         mVolumeHandling = builder.mVolumeHandling;
@@ -180,7 +182,7 @@ public final class MediaRoute2Info implements Parcelable {
         mConnectionState = in.readInt();
         mIconUri = in.readParcelable(null);
         mClientPackageName = in.readString();
-        mSupportedCategories = in.createStringArrayList();
+        mRouteTypes = in.createStringArrayList();
         mVolume = in.readInt();
         mVolumeMax = in.readInt();
         mVolumeHandling = in.readInt();
@@ -226,7 +228,7 @@ public final class MediaRoute2Info implements Parcelable {
                 && (mConnectionState == other.mConnectionState)
                 && Objects.equals(mIconUri, other.mIconUri)
                 && Objects.equals(mClientPackageName, other.mClientPackageName)
-                && Objects.equals(mSupportedCategories, other.mSupportedCategories)
+                && Objects.equals(mRouteTypes, other.mRouteTypes)
                 && (mVolume == other.mVolume)
                 && (mVolumeMax == other.mVolumeMax)
                 && (mVolumeHandling == other.mVolumeHandling)
@@ -238,7 +240,7 @@ public final class MediaRoute2Info implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mId, mName, mDescription, mConnectionState, mIconUri,
-                mSupportedCategories, mVolume, mVolumeMax, mVolumeHandling, mDeviceType);
+                mRouteTypes, mVolume, mVolumeMax, mVolumeHandling, mDeviceType);
     }
 
     /**
@@ -327,8 +329,8 @@ public final class MediaRoute2Info implements Parcelable {
      * Gets the supported categories of the route.
      */
     @NonNull
-    public List<String> getSupportedCategories() {
-        return mSupportedCategories;
+    public List<String> getRouteTypes() {
+        return mRouteTypes;
     }
 
     //TODO: once device types are confirmed, reflect those into the comment.
@@ -372,32 +374,15 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
-     * Returns if the route supports the specified control category
+     * Returns if the route contains at least one of the specified route types.
      *
-     * @param controlCategory control category to consider
-     * @return true if the route supports at the category
+     * @param routeTypes the list of route types to consider
+     * @return true if the route contains at least one type in the list
      */
-    public boolean supportsControlCategory(@NonNull String controlCategory) {
-        Objects.requireNonNull(controlCategory, "control category must not be null");
-        for (String supportedCategory : getSupportedCategories()) {
-            if (TextUtils.equals(controlCategory, supportedCategory)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    //TODO: Move this if we re-define control category / selector things.
-    /**
-     * Returns if the route supports at least one of the specified control categories
-     *
-     * @param controlCategories the list of control categories to consider
-     * @return true if the route supports at least one category
-     */
-    public boolean supportsControlCategories(@NonNull Collection<String> controlCategories) {
-        Objects.requireNonNull(controlCategories, "control categories must not be null");
-        for (String controlCategory : controlCategories) {
-            if (supportsControlCategory(controlCategory)) {
+    public boolean containsRouteTypes(@NonNull Collection<String> routeTypes) {
+        Objects.requireNonNull(routeTypes, "routeTypes must not be null");
+        for (String routeType : routeTypes) {
+            if (getRouteTypes().contains(routeType)) {
                 return true;
             }
         }
@@ -418,7 +403,7 @@ public final class MediaRoute2Info implements Parcelable {
         dest.writeInt(mConnectionState);
         dest.writeParcelable(mIconUri, flags);
         dest.writeString(mClientPackageName);
-        dest.writeStringList(mSupportedCategories);
+        dest.writeStringList(mRouteTypes);
         dest.writeInt(mVolume);
         dest.writeInt(mVolumeMax);
         dest.writeInt(mVolumeHandling);
@@ -456,7 +441,7 @@ public final class MediaRoute2Info implements Parcelable {
         int mConnectionState;
         Uri mIconUri;
         String mClientPackageName;
-        List<String> mSupportedCategories;
+        List<String> mRouteTypes;
         int mVolume;
         int mVolumeMax;
         int mVolumeHandling = PLAYBACK_VOLUME_FIXED;
@@ -467,7 +452,7 @@ public final class MediaRoute2Info implements Parcelable {
         public Builder(@NonNull String id, @NonNull CharSequence name) {
             setId(id);
             setName(name);
-            mSupportedCategories = new ArrayList<>();
+            mRouteTypes = new ArrayList<>();
         }
 
         public Builder(@NonNull MediaRoute2Info routeInfo) {
@@ -484,7 +469,7 @@ public final class MediaRoute2Info implements Parcelable {
             mConnectionState = routeInfo.mConnectionState;
             mIconUri = routeInfo.mIconUri;
             setClientPackageName(routeInfo.mClientPackageName);
-            setSupportedCategories(routeInfo.mSupportedCategories);
+            setRouteTypes(routeInfo.mRouteTypes);
             setVolume(routeInfo.mVolume);
             setVolumeMax(routeInfo.mVolumeMax);
             setVolumeHandling(routeInfo.mVolumeHandling);
@@ -589,35 +574,35 @@ public final class MediaRoute2Info implements Parcelable {
         }
 
         /**
-         * Sets the supported categories of the route.
+         * Sets the types of the route.
          */
         @NonNull
-        public Builder setSupportedCategories(@NonNull Collection<String> categories) {
-            mSupportedCategories = new ArrayList<>();
-            return addSupportedCategories(categories);
+        public Builder setRouteTypes(@NonNull Collection<String> routeTypes) {
+            mRouteTypes = new ArrayList<>();
+            return addRouteTypes(routeTypes);
         }
 
         /**
-         * Adds supported categories for the route.
+         * Adds types for the route.
          */
         @NonNull
-        public Builder addSupportedCategories(@NonNull Collection<String> categories) {
-            Objects.requireNonNull(categories, "categories must not be null");
-            for (String category: categories) {
-                addSupportedCategory(category);
+        public Builder addRouteTypes(@NonNull Collection<String> routeTypes) {
+            Objects.requireNonNull(routeTypes, "routeTypes must not be null");
+            for (String routeType: routeTypes) {
+                addRouteType(routeType);
             }
             return this;
         }
 
         /**
-         * Add a supported category for the route.
+         * Add a type for the route.
          */
         @NonNull
-        public Builder addSupportedCategory(@NonNull String category) {
-            if (TextUtils.isEmpty(category)) {
-                throw new IllegalArgumentException("category must not be null or empty");
+        public Builder addRouteType(@NonNull String routeType) {
+            if (TextUtils.isEmpty(routeType)) {
+                throw new IllegalArgumentException("routeType must not be null or empty");
             }
-            mSupportedCategories.add(category);
+            mRouteTypes.add(routeType);
             return this;
         }
 

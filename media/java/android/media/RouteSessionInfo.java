@@ -48,7 +48,7 @@ public class RouteSessionInfo implements Parcelable {
 
     final int mSessionId;
     final String mPackageName;
-    final String mControlCategory;
+    final String mRouteType;
     @Nullable
     final String mProviderId;
     final List<String> mSelectedRoutes;
@@ -63,7 +63,7 @@ public class RouteSessionInfo implements Parcelable {
 
         mSessionId = builder.mSessionId;
         mPackageName = builder.mPackageName;
-        mControlCategory = builder.mControlCategory;
+        mRouteType = builder.mRouteType;
         mProviderId = builder.mProviderId;
 
         mSelectedRoutes = Collections.unmodifiableList(builder.mSelectedRoutes);
@@ -79,7 +79,7 @@ public class RouteSessionInfo implements Parcelable {
 
         mSessionId = src.readInt();
         mPackageName = ensureString(src.readString());
-        mControlCategory = ensureString(src.readString());
+        mRouteType = ensureString(src.readString());
         mProviderId = src.readString();
 
         mSelectedRoutes = ensureList(src.createStringArrayList());
@@ -154,7 +154,7 @@ public class RouteSessionInfo implements Parcelable {
      */
     public boolean isValid() {
         return !TextUtils.isEmpty(mPackageName)
-                && !TextUtils.isEmpty(mControlCategory)
+                && !TextUtils.isEmpty(mRouteType)
                 && mSelectedRoutes.size() > 0;
     }
 
@@ -175,12 +175,12 @@ public class RouteSessionInfo implements Parcelable {
     }
 
     /**
-     * Gets the control category of the session.
-     * Routes that don't support the category can't be added to the session.
+     * Gets the route type of the session.
+     * Routes that don't have the type can't be added to the session.
      */
     @NonNull
-    public String getControlCategory() {
-        return mControlCategory;
+    public String getRouteType() {
+        return mRouteType;
     }
 
     /**
@@ -254,7 +254,7 @@ public class RouteSessionInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mSessionId);
         dest.writeString(mPackageName);
-        dest.writeString(mControlCategory);
+        dest.writeString(mRouteType);
         dest.writeString(mProviderId);
         dest.writeStringList(mSelectedRoutes);
         dest.writeStringList(mSelectableRoutes);
@@ -268,7 +268,7 @@ public class RouteSessionInfo implements Parcelable {
         StringBuilder result = new StringBuilder()
                 .append("RouteSessionInfo{ ")
                 .append("sessionId=").append(mSessionId)
-                .append(", controlCategory=").append(mControlCategory)
+                .append(", routeType=").append(mRouteType)
                 .append(", selectedRoutes={")
                 .append(String.join(",", mSelectedRoutes))
                 .append("}")
@@ -291,7 +291,7 @@ public class RouteSessionInfo implements Parcelable {
     public static final class Builder {
         final String mPackageName;
         final int mSessionId;
-        final String mControlCategory;
+        final String mRouteType;
         String mProviderId;
         final List<String> mSelectedRoutes;
         final List<String> mSelectableRoutes;
@@ -300,11 +300,11 @@ public class RouteSessionInfo implements Parcelable {
         Bundle mControlHints;
 
         public Builder(int sessionId, @NonNull String packageName,
-                @NonNull String controlCategory) {
+                @NonNull String routeType) {
             mSessionId = sessionId;
             mPackageName = Objects.requireNonNull(packageName, "packageName must not be null");
-            mControlCategory = Objects.requireNonNull(controlCategory,
-                    "controlCategory must not be null");
+            mRouteType = Objects.requireNonNull(routeType,
+                    "routeType must not be null");
 
             mSelectedRoutes = new ArrayList<>();
             mSelectableRoutes = new ArrayList<>();
@@ -315,7 +315,7 @@ public class RouteSessionInfo implements Parcelable {
         public Builder(RouteSessionInfo sessionInfo) {
             mSessionId = sessionInfo.mSessionId;
             mPackageName = sessionInfo.mPackageName;
-            mControlCategory = sessionInfo.mControlCategory;
+            mRouteType = sessionInfo.mRouteType;
             mProviderId = sessionInfo.mProviderId;
 
             mSelectedRoutes = new ArrayList<>(sessionInfo.mSelectedRoutes);

@@ -36,7 +36,7 @@ public class ContentProviderResult implements Parcelable {
     public final @Nullable Uri uri;
     public final @Nullable Integer count;
     public final @Nullable Bundle extras;
-    public final @Nullable Exception exception;
+    public final @Nullable Throwable exception;
 
     public ContentProviderResult(@NonNull Uri uri) {
         this(Objects.requireNonNull(uri), null, null, null);
@@ -50,12 +50,12 @@ public class ContentProviderResult implements Parcelable {
         this(null, null, Objects.requireNonNull(extras), null);
     }
 
-    public ContentProviderResult(@NonNull Exception exception) {
+    public ContentProviderResult(@NonNull Throwable exception) {
         this(null, null, null, exception);
     }
 
     /** {@hide} */
-    public ContentProviderResult(Uri uri, Integer count, Bundle extras, Exception exception) {
+    public ContentProviderResult(Uri uri, Integer count, Bundle extras, Throwable exception) {
         this.uri = uri;
         this.count = count;
         this.extras = extras;
@@ -79,7 +79,7 @@ public class ContentProviderResult implements Parcelable {
             extras = null;
         }
         if (source.readInt() != 0) {
-            exception = (Exception) ParcelableException.readFromParcel(source);
+            exception = ParcelableException.readFromParcel(source);
         } else {
             exception = null;
         }

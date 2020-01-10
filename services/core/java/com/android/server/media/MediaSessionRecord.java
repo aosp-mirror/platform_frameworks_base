@@ -56,13 +56,15 @@ import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * This is the system implementation of a Session. Apps will interact with the
  * MediaSession wrapper class instead.
  */
-public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable {
+// TODO(jaewan): Do not call service method directly -- introduce listener instead.
+public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionRecordImpl {
     private static final String TAG = "MediaSessionRecord";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -71,6 +73,24 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable
      * command before reverting to the last reported volume.
      */
     private static final int OPTIMISTIC_VOLUME_TIMEOUT = 1000;
+
+    /**
+     * These are states that usually indicate the user took an action and should
+     * bump priority regardless of the old state.
+     */
+    private static final List<Integer> ALWAYS_PRIORITY_STATES = Arrays.asList(
+            PlaybackState.STATE_FAST_FORWARDING,
+            PlaybackState.STATE_REWINDING,
+            PlaybackState.STATE_SKIPPING_TO_PREVIOUS,
+            PlaybackState.STATE_SKIPPING_TO_NEXT);
+    /**
+     * These are states that usually indicate the user took an action if they
+     * were entered from a non-priority state.
+     */
+    private static final List<Integer> TRANSITION_PRIORITY_STATES = Arrays.asList(
+            PlaybackState.STATE_BUFFERING,
+            PlaybackState.STATE_CONNECTING,
+            PlaybackState.STATE_PLAYING);
 
     private final MessageHandler mHandler;
 
@@ -170,6 +190,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable
      *
      * @return Info that identifies this session.
      */
+    @Override
     public String getPackageName() {
         return mPackageName;
     }
@@ -188,6 +209,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable
      *
      * @return The UID for this session.
      */
+    @Override
     public int getUid() {
         return mOwnerUid;
     }
@@ -197,6 +219,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable
      *
      * @return The user id for this session.
      */
+    @Override
     public int getUserId() {
         return mUserId;
     }
@@ -207,6 +230,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable
      *
      * @return True if this is a system priority session, false otherwise
      */
+    @Override
     public boolean isSystemPriority() {
         return (mFlags & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0;
     }
@@ -220,7 +244,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable
      * @param opPackageName The op package that made the original volume request.
      * @param pid The pid that made the original volume request.
      * @param uid The uid that made the original volume request.
-     * @param caller caller binder. can be {@code null} if it's from the volume key.
      * @param asSystemService {@code true} if the event sent to the session as if it was come from
      *          the system service instead of the app process. This helps sessions to distinguish
      *          between the key injection by the app and key events from the hardware devices.
@@ -318,9 +341,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable
 
     /**
      * Check if this session has been set to active by the app.
+     * <p>
+     * It's not used to prioritize sessions for dispatching media keys since API 26, but still used
+     * to filter session list in MediaSessionManager#getActiveSessions().
      *
      * @return True if the session is active, false otherwise.
      */
+    @Override
     public boolean isActive() {
         return mIsActive && !mDestroyed;
     }
@@ -333,6 +360,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable
      * @param expected True if playback is expected to be active. false otherwise.
      * @return True if the session's playback matches with the expectation. false otherwise.
      */
+    @Override
     public boolean checkPlaybackActiveState(boolean expected) {
         if (mPlaybackState == null) {
             return false;
@@ -345,13 +373,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable
      *
      * @return {@code true} if the playback is local.
      */
-    public boolean isPlaybackLocal() {
+    @Override
+    public boolean isPlaybackTypeLocal() {
         return mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL;
     }
 
     @Override
     public void binderDied() {
-        mService.sessionDied(this);
+        mService.onSessionDied(this);
     }
 
     /**
@@ -383,7 +412,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable
      * @param sequenceId (optional) sequence id. Use this only when a wake lock is needed.
      * @param cb (optional) result receiver to receive callback. Use this only when a wake lock is
      *           needed.
-     * @return {@code true} if the attempt to send media button was successfuly.
+     * @return {@code true} if the attempt to send media button was successfully.
      *         {@code false} otherwise.
      */
     public boolean sendMediaButton(String packageName, int pid, int uid, boolean asSystemService,
@@ -392,6 +421,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable
                 cb);
     }
 
+    @Override
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + mTag + " " + this);
 
@@ -712,7 +742,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable
         public void destroySession() throws RemoteException {
             final long token = Binder.clearCallingIdentity();
             try {
-                mService.destroySession(MediaSessionRecord.this);
+                mService.onSessionDied(MediaSessionRecord.this);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -734,7 +764,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable
             mIsActive = active;
             final long token = Binder.clearCallingIdentity();
             try {
-                mService.updateSession(MediaSessionRecord.this);
+                mService.onSessionActiveStateChanged(MediaSessionRecord.this);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -801,12 +831,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable
                     ? PlaybackState.STATE_NONE : mPlaybackState.getState();
             int newState = state == null
                     ? PlaybackState.STATE_NONE : state.getState();
+            boolean shouldUpdatePriority = ALWAYS_PRIORITY_STATES.contains(newState)
+                    || (!TRANSITION_PRIORITY_STATES.contains(oldState)
+                    && TRANSITION_PRIORITY_STATES.contains(newState));
             synchronized (mLock) {
                 mPlaybackState = state;
             }
             final long token = Binder.clearCallingIdentity();
             try {
-                mService.onSessionPlaystateChanged(MediaSessionRecord.this, oldState, newState);
+                mService.onSessionPlaybackStateChanged(
+                        MediaSessionRecord.this, shouldUpdatePriority);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

@@ -60,7 +60,7 @@ import java.util.concurrent.CountDownLatch;
  * Test class for {@link SurfaceAnimationRunner}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:SurfaceAnimationRunnerTest
+ *  atest WmTests:SurfaceAnimationRunnerTest
  */
 @SmallTest
 @Presubmit

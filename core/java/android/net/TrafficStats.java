@@ -89,7 +89,7 @@ public class TrafficStats {
      *
      * @hide
      */
-    public static final int UID_TETHERING = -5;
+    public static final int UID_TETHERING = NetworkStats.UID_TETHERING;
 
     /**
      * Tag values in this range are reserved for the network stack. The network stack is

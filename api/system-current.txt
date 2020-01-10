@@ -567,6 +567,7 @@ package android.app {
   }
 
   public class DownloadManager {
+    method @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE) public void onMediaStoreDownloadsDeleted(@NonNull android.util.LongSparseArray<java.lang.String>);
     field public static final String ACTION_DOWNLOAD_COMPLETED = "android.intent.action.DOWNLOAD_COMPLETED";
   }
 
@@ -1654,11 +1655,17 @@ package android.content {
     method @NonNull public final android.os.UserHandle getSendingUser();
   }
 
+  public abstract class ContentProvider implements android.content.ComponentCallbacks2 {
+    method public int checkUriPermission(@NonNull android.net.Uri, int, int);
+  }
+
   public class ContentProviderClient implements java.lang.AutoCloseable {
     method @RequiresPermission(android.Manifest.permission.REMOVE_TASKS) public void setDetectNotResponding(long);
   }
 
   public abstract class ContentResolver {
+    method @NonNull public static android.net.Uri decodeFromFile(@NonNull java.io.File);
+    method @NonNull public static java.io.File encodeToFile(@NonNull android.net.Uri);
     method @Nullable @RequiresPermission("android.permission.CACHE_CONTENT") public android.os.Bundle getCache(@NonNull android.net.Uri);
     method @RequiresPermission("android.permission.CACHE_CONTENT") public void putCache(@NonNull android.net.Uri, @Nullable android.os.Bundle);
   }
@@ -3581,9 +3588,17 @@ package android.hardware.usb {
   }
 
   public class UsbManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public long getCurrentFunctions();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_USB) public java.util.List<android.hardware.usb.UsbPort> getPorts();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void grantPermission(android.hardware.usb.UsbDevice, String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void setCurrentFunctions(long);
     field @RequiresPermission(android.Manifest.permission.MANAGE_USB) public static final String ACTION_USB_PORT_CHANGED = "android.hardware.usb.action.USB_PORT_CHANGED";
+    field public static final String ACTION_USB_STATE = "android.hardware.usb.action.USB_STATE";
+    field public static final long FUNCTION_NONE = 0L; // 0x0L
+    field public static final long FUNCTION_RNDIS = 32L; // 0x20L
+    field public static final String USB_CONFIGURED = "configured";
+    field public static final String USB_CONNECTED = "connected";
+    field public static final String USB_FUNCTION_RNDIS = "rndis";
   }
 
   public final class UsbPort {
@@ -4680,6 +4695,7 @@ package android.net {
     method @Deprecated @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public String getCaptivePortalServerUrl();
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void getLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEntitlementResultListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
+    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public int registerNetworkProvider(@NonNull android.net.NetworkProvider);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_AIRPLANE_MODE, android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void setAirplaneMode(boolean);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public boolean shouldAvoidBadWifi();
@@ -4687,6 +4703,7 @@ package android.net {
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback, android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void stopTethering(int);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void unregisterNetworkProvider(@NonNull android.net.NetworkProvider);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void unregisterTetheringEventCallback(@NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
     field public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC = "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
     field public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT = "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
@@ -4857,6 +4874,17 @@ package android.net {
     field public final android.net.WifiKey wifiKey;
   }
 
+  public class NetworkProvider {
+    ctor public NetworkProvider(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void declareNetworkRequestUnfulfillable(@NonNull android.net.NetworkRequest);
+    method @Nullable public android.os.Messenger getMessenger();
+    method @NonNull public String getName();
+    method public int getProviderId();
+    method public void onNetworkRequested(@NonNull android.net.NetworkRequest, int, int);
+    method public void onRequestWithdrawn(@NonNull android.net.NetworkRequest);
+    field public static final int ID_NONE = -1; // 0xffffffff
+  }
+
   public abstract class NetworkRecommendationProvider {
     ctor public NetworkRecommendationProvider(android.content.Context, java.util.concurrent.Executor);
     method public final android.os.IBinder getBinder();
@@ -4898,6 +4926,33 @@ package android.net {
 
   public class NetworkStack {
     field public static final String PERMISSION_MAINLINE_NETWORK_STACK = "android.permission.MAINLINE_NETWORK_STACK";
+  }
+
+  public final class NetworkStats implements android.os.Parcelable {
+    ctor public NetworkStats(long, int);
+    method @NonNull public android.net.NetworkStats add(@NonNull android.net.NetworkStats);
+    method @NonNull public android.net.NetworkStats addValues(@NonNull android.net.NetworkStats.Entry);
+    method public int describeContents();
+    method @NonNull public android.net.NetworkStats subtract(@NonNull android.net.NetworkStats);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStats> CREATOR;
+    field public static final int DEFAULT_NETWORK_NO = 0; // 0x0
+    field public static final int DEFAULT_NETWORK_YES = 1; // 0x1
+    field @Nullable public static final String IFACE_ALL;
+    field public static final String IFACE_VT = "vt_data0";
+    field public static final int METERED_NO = 0; // 0x0
+    field public static final int METERED_YES = 1; // 0x1
+    field public static final int ROAMING_NO = 0; // 0x0
+    field public static final int ROAMING_YES = 1; // 0x1
+    field public static final int SET_DEFAULT = 0; // 0x0
+    field public static final int SET_FOREGROUND = 1; // 0x1
+    field public static final int TAG_NONE = 0; // 0x0
+    field public static final int UID_ALL = -1; // 0xffffffff
+    field public static final int UID_TETHERING = -5; // 0xfffffffb
+  }
+
+  public static class NetworkStats.Entry {
+    ctor public NetworkStats.Entry(@Nullable String, int, int, int, int, int, int, long, long, long, long, long);
   }
 
   public final class RouteInfo implements android.os.Parcelable {
@@ -5487,6 +5542,25 @@ package android.net.metrics {
     method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setDurationMs(long);
     method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setProbeType(int, boolean);
     method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setReturnCode(int);
+  }
+
+}
+
+package android.net.netstats.provider {
+
+  public abstract class AbstractNetworkStatsProvider {
+    ctor public AbstractNetworkStatsProvider();
+    method public abstract void requestStatsUpdate(int);
+    method public abstract void setAlert(long);
+    method public abstract void setLimit(@NonNull String, long);
+    field public static final int QUOTA_UNLIMITED = -1; // 0xffffffff
+  }
+
+  public class NetworkStatsProviderCallback {
+    method public void onAlertReached();
+    method public void onLimitReached();
+    method public void onStatsUpdated(int, @NonNull android.net.NetworkStats, @NonNull android.net.NetworkStats);
+    method public void unregister();
   }
 
 }
@@ -6966,6 +7040,10 @@ package android.os {
     method public boolean hasSingleFileDescriptor();
   }
 
+  public class ParcelFileDescriptor implements java.io.Closeable android.os.Parcelable {
+    method @NonNull public static android.os.ParcelFileDescriptor wrap(@NonNull android.os.ParcelFileDescriptor, @NonNull android.os.Handler, @NonNull android.os.ParcelFileDescriptor.OnCloseListener) throws java.io.IOException;
+  }
+
   public final class PowerManager {
     method @RequiresPermission(allOf={android.Manifest.permission.READ_DREAM_STATE, android.Manifest.permission.WRITE_DREAM_STATE}) public void dream(long);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public boolean forceSuspend();
@@ -7367,6 +7445,10 @@ package android.os.storage {
     method @WorkerThread public long getAllocatableBytes(@NonNull java.util.UUID, @RequiresPermission int) throws java.io.IOException;
     method public static boolean hasIsolatedStorage();
     field @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE) public static final int FLAG_ALLOCATE_AGGRESSIVE = 1; // 0x1
+  }
+
+  public final class StorageVolume implements android.os.Parcelable {
+    method @NonNull public String getId();
   }
 
 }
@@ -7788,6 +7870,7 @@ package android.provider {
     field public static final String ACTION_NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS = "android.settings.NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS";
     field public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE = "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
+    field public static final String ACTION_TETHER_PROVISIONING_UI = "android.settings.TETHER_PROVISIONING_UI";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
@@ -7807,6 +7890,7 @@ package android.provider {
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS = "install_carrier_app_notification_sleep_millis";
     field public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
     field public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
+    field public static final String TETHER_OFFLOAD_DISABLED = "tether_offload_disabled";
     field public static final String TETHER_SUPPORTED = "tether_supported";
     field public static final String THEATER_MODE_ON = "theater_mode_on";
     field public static final String WEBVIEW_MULTIPROCESS = "webview_multiprocess";
@@ -10315,10 +10399,10 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getVoiceActivationState();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean handlePinMmi(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean handlePinMmiForSubscriber(int, String);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean iccCloseLogicalChannelBySlot(int, int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean iccCloseLogicalChannelBySlot(int, int);
     method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.IccOpenLogicalChannelResponse iccOpenLogicalChannelBySlot(int, @Nullable String, int);
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String iccTransmitApduBasicChannelBySlot(int, int, int, int, int, int, @Nullable String);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String iccTransmitApduLogicalChannelBySlot(int, int, int, int, int, int, int, @Nullable String);
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String iccTransmitApduBasicChannelBySlot(int, int, int, int, int, int, @Nullable String);
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String iccTransmitApduLogicalChannelBySlot(int, int, int, int, int, int, int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAnyRadioPoweredOn();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApnMetered(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApplicationOnUicc(int);
@@ -11749,6 +11833,8 @@ package android.view.accessibility {
   public final class AccessibilityManager {
     method public int getAccessibilityWindowId(@Nullable android.os.IBinder);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void performAccessibilityShortcut();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void registerSystemAction(@NonNull android.app.RemoteAction, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void unregisterSystemAction(int);
   }
 
 }

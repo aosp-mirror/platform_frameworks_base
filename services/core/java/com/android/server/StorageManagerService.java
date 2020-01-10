@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.ACCESS_MTP;
 import static android.Manifest.permission.INSTALL_PACKAGES;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -111,6 +112,7 @@ import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 import android.provider.DeviceConfig;
+import android.provider.Downloads;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.sysprop.VoldProperties;
@@ -366,6 +368,8 @@ class StorageManagerService extends IStorageManager.Stub
     private String mMoveTargetUuid;
 
     private volatile int mMediaStoreAuthorityAppId = -1;
+
+    private volatile int mDownloadsAuthorityAppId = -1;
 
     private volatile int mCurrentUserId = UserHandle.USER_SYSTEM;
 
@@ -1786,6 +1790,15 @@ class StorageManagerService extends IStorageManager.Stub
                 UserHandle.getUserId(UserHandle.USER_SYSTEM));
         if (provider != null) {
             mMediaStoreAuthorityAppId = UserHandle.getAppId(provider.applicationInfo.uid);
+        }
+
+        provider = mPmInternal.resolveContentProvider(
+                Downloads.Impl.AUTHORITY, PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.getUserId(UserHandle.USER_SYSTEM));
+
+        if (provider != null) {
+            mDownloadsAuthorityAppId = UserHandle.getAppId(provider.applicationInfo.uid);
         }
 
         try {
@@ -3879,6 +3892,19 @@ class StorageManagerService extends IStorageManager.Stub
                 // all processes that share a UID with MediaProvider; but this is fine, since
                 // those processes anyway share the same rights as MediaProvider.
                 return Zygote.MOUNT_EXTERNAL_PASS_THROUGH;
+            }
+
+            if (mIsFuseEnabled && mDownloadsAuthorityAppId == UserHandle.getAppId(uid)) {
+                // DownloadManager can write in app-private directories on behalf of apps;
+                // give it write access to Android/
+                return Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE;
+            }
+
+            final boolean hasMtp = mIPackageManager.checkUidPermission(ACCESS_MTP, uid) ==
+                    PERMISSION_GRANTED;
+            if (mIsFuseEnabled && hasMtp) {
+                // The process hosting the MTP server should be able to write in Android/
+                return Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE;
             }
 
             // Determine if caller is holding runtime permission

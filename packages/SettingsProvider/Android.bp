@@ -8,6 +8,7 @@ android_app {
     libs: [
         "telephony-common",
         "ims-common",
+        "unsupportedappusage",
     ],
     static_libs: [
         "junit",
@@ -40,6 +41,7 @@ android_test {
     libs: [
         "android.test.base",
         "android.test.mock",
+        "unsupportedappusage",
     ],
     resource_dirs: ["res"],
     aaptflags: [

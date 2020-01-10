@@ -61,7 +61,7 @@ import org.mockito.MockitoAnnotations;
 
 /**
  * Build/Install/Run:
- *  atest FrameworksServicesTests:RemoteAnimationControllerTest
+ *  atest WmTests:RemoteAnimationControllerTest
  */
 @SmallTest
 @Presubmit

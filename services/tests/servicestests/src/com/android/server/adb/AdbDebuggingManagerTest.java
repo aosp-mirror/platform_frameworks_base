@@ -672,6 +672,30 @@ public final class AdbDebuggingManagerTest {
                 connectionTime2, mKeyStore.getLastConnectionTime(TEST_KEY_2));
     }
 
+    @Test
+    public void testClearAuthorizationsBeforeAdbEnabled() throws Exception {
+        // The adb key store is not instantiated until adb is enabled; however if the user attempts
+        // to clear the adb authorizations when adb is disabled after a boot a NullPointerException
+        // was thrown as deleteKeyStore is invoked against the key store. This test ensures the
+        // key store can be successfully cleared when adb is disabled.
+        mHandler = mManager.new AdbDebuggingHandler(FgThread.get().getLooper());
+
+        clearKeyStore();
+    }
+
+    @Test
+    public void testClearAuthorizationsDeletesKeyFiles() throws Exception {
+        mAdbKeyFile.createNewFile();
+        mAdbKeyXmlFile.createNewFile();
+
+        clearKeyStore();
+
+        assertFalse("The adb key file should have been deleted after revocation of the grants",
+                mAdbKeyFile.exists());
+        assertFalse("The adb xml key file should have been deleted after revocation of the grants",
+                mAdbKeyXmlFile.exists());
+    }
+
     /**
      * Runs an adb test with the provided configuration.
      *

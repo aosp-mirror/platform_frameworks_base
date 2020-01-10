@@ -319,7 +319,8 @@ enum MountExternalKind {
   MOUNT_EXTERNAL_INSTALLER = 5,
   MOUNT_EXTERNAL_FULL = 6,
   MOUNT_EXTERNAL_PASS_THROUGH = 7,
-  MOUNT_EXTERNAL_COUNT = 8
+  MOUNT_EXTERNAL_ANDROID_WRITABLE = 8,
+  MOUNT_EXTERNAL_COUNT = 9
 };
 
 // The order of entries here must be kept in sync with MountExternalKind enum values.
@@ -331,6 +332,8 @@ static const std::array<const std::string, MOUNT_EXTERNAL_COUNT> ExternalStorage
   "/mnt/runtime/write",   // MOUNT_EXTERNAL_LEGACY
   "/mnt/runtime/write",   // MOUNT_EXTERNAL_INSTALLER
   "/mnt/runtime/full",    // MOUNT_EXTERNAL_FULL
+  "/mnt/runtime/full",    // MOUNT_EXTERNAL_PASS_THROUGH (only used w/ FUSE)
+  "/mnt/runtime/full",    // MOUNT_EXTERNAL_ANDROID_WRITABLE (only used w/ FUSE)
 };
 
 // Must match values in com.android.internal.os.Zygote.
@@ -755,12 +758,7 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
              multiuser_get_uid(user_id, AID_EVERYBODY), fail_fn);
 
   if (isFuse) {
-    if (mount_mode == MOUNT_EXTERNAL_PASS_THROUGH || mount_mode ==
-        MOUNT_EXTERNAL_INSTALLER || mount_mode == MOUNT_EXTERNAL_FULL) {
-      // For now, MediaProvider, installers and "full" get the pass_through mount
-      // view, which is currently identical to the sdcardfs write view.
-      //
-      // TODO(b/146189163): scope down MOUNT_EXTERNAL_INSTALLER
+    if (mount_mode == MOUNT_EXTERNAL_PASS_THROUGH) {
       BindMount(pass_through_source, "/storage", fail_fn);
     } else {
       BindMount(user_source, "/storage", fail_fn);

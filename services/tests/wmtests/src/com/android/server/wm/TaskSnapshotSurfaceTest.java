@@ -53,7 +53,7 @@ import org.junit.runner.RunWith;
  * Test class for {@link TaskSnapshotSurface}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:TaskSnapshotSurfaceTest
+ *  atest WmTests:TaskSnapshotSurfaceTest
  */
 @SmallTest
 @Presubmit

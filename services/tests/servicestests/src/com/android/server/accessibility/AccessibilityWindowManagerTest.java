@@ -53,6 +53,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 
 import com.android.server.accessibility.AccessibilityWindowManager.RemoteAccessibilityConnection;
+import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.WindowsForAccessibilityCallback;
 

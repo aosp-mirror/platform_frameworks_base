@@ -26,11 +26,11 @@ import static android.net.dhcp.IDhcpServer.STATUS_UNKNOWN_ERROR;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.net.IIntResultListener;
 import android.net.INetworkStackConnector;
 import android.net.ITetheringConnector;
 import android.net.ITetheringEventCallback;
+import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
@@ -307,9 +307,15 @@ public class TetheringService extends Service {
             mDeps = new TetheringDependencies() {
                 @Override
                 public NetworkRequest getDefaultNetworkRequest() {
-                    ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(
-                            Context.CONNECTIVITY_SERVICE);
-                    return cm.getDefaultRequest();
+                    // TODO: b/147280869, add a proper system API to replace this.
+                    final NetworkRequest trackDefaultRequest = new NetworkRequest.Builder()
+                            .clearCapabilities()
+                            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+                            .addCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
+                            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+                            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                            .build();
+                    return trackDefaultRequest;
                 }
 
                 @Override

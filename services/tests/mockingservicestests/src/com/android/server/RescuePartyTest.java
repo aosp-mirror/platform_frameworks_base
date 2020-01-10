@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.VersionedPackage;
 import android.os.RecoverySystem;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -39,6 +40,8 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
+import com.android.server.RescueParty.RescuePartyObserver;
 import com.android.server.am.SettingsToPropertiesMapper;
 import com.android.server.utils.FlagNamespaceUtils;
 
@@ -57,12 +60,14 @@ import java.util.HashMap;
  * Test RescueParty.
  */
 public class RescuePartyTest {
-    private static final int PERSISTENT_APP_UID = 12;
     private static final long CURRENT_NETWORK_TIME_MILLIS = 0L;
     private static final String FAKE_NATIVE_NAMESPACE1 = "native1";
     private static final String FAKE_NATIVE_NAMESPACE2 = "native2";
     private static final String[] FAKE_RESET_NATIVE_NAMESPACES =
             {FAKE_NATIVE_NAMESPACE1, FAKE_NATIVE_NAMESPACE2};
+
+    private static VersionedPackage sFailingPackage = new VersionedPackage("com.package.name", 1);
+    private static final String PROP_DISABLE_RESCUE = "persist.sys.disable_rescue";
 
     private MockitoSession mSession;
 
@@ -182,25 +187,25 @@ public class RescuePartyTest {
 
     @Test
     public void testPersistentAppCrashDetectionWithExecutionForAllRescueLevels() {
-        notePersistentAppCrash(RescueParty.TRIGGER_COUNT);
+        notePersistentAppCrash();
 
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS);
         assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
-        notePersistentAppCrash(RescueParty.TRIGGER_COUNT);
+        notePersistentAppCrash();
 
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_CHANGES);
         assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
-        notePersistentAppCrash(RescueParty.TRIGGER_COUNT);
+        notePersistentAppCrash();
 
         verifySettingsResets(Settings.RESET_MODE_TRUSTED_DEFAULTS);
         assertEquals(RescueParty.LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
-        notePersistentAppCrash(RescueParty.TRIGGER_COUNT);
+        notePersistentAppCrash();
 
         verify(() -> RecoverySystem.rebootPromptAndWipeUserData(mMockContext, RescueParty.TAG));
         assertEquals(RescueParty.LEVEL_FACTORY_RESET,
@@ -221,20 +226,6 @@ public class RescuePartyTest {
     }
 
     @Test
-    public void testPersistentAppCrashDetectionWithWrongInterval() {
-        notePersistentAppCrash(RescueParty.TRIGGER_COUNT - 1);
-
-        // last persistent app crash is just outside of the boot loop detection window
-        doReturn(CURRENT_NETWORK_TIME_MILLIS
-                + RescueParty.PERSISTENT_APP_CRASH_TRIGGER_WINDOW_MILLIS + 1)
-                .when(() -> RescueParty.getElapsedRealtime());
-        notePersistentAppCrash(/*numTimes=*/1);
-
-        assertEquals(RescueParty.LEVEL_NONE,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
-    }
-
-    @Test
     public void testBootLoopDetectionWithProperInterval() {
         noteBoot(RescueParty.TRIGGER_COUNT - 1);
 
@@ -249,30 +240,8 @@ public class RescuePartyTest {
     }
 
     @Test
-    public void testPersistentAppCrashDetectionWithProperInterval() {
-        notePersistentAppCrash(RescueParty.TRIGGER_COUNT - 1);
-
-        // last persistent app crash is just inside of the boot loop detection window
-        doReturn(CURRENT_NETWORK_TIME_MILLIS
-                + RescueParty.PERSISTENT_APP_CRASH_TRIGGER_WINDOW_MILLIS)
-                .when(() -> RescueParty.getElapsedRealtime());
-        notePersistentAppCrash(/*numTimes=*/1);
-
-        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS);
-        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
-    }
-
-    @Test
     public void testBootLoopDetectionWithWrongTriggerCount() {
         noteBoot(RescueParty.TRIGGER_COUNT - 1);
-        assertEquals(RescueParty.LEVEL_NONE,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
-    }
-
-    @Test
-    public void testPersistentAppCrashDetectionWithWrongTriggerCount() {
-        notePersistentAppCrash(RescueParty.TRIGGER_COUNT - 1);
         assertEquals(RescueParty.LEVEL_NONE,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
     }
@@ -319,6 +288,77 @@ public class RescuePartyTest {
                         FAKE_NATIVE_NAMESPACE2, /*makeDefault=*/true));
     }
 
+    @Test
+    public void testExplicitlyEnablingAndDisablingRescue() {
+        SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(false));
+        SystemProperties.set(PROP_DISABLE_RESCUE, Boolean.toString(true));
+        assertEquals(RescuePartyObserver.getInstance(mMockContext).execute(sFailingPackage,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING), false);
+
+        SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(true));
+        assertTrue(RescuePartyObserver.getInstance(mMockContext).execute(sFailingPackage,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING));
+    }
+
+    @Test
+    public void testHealthCheckLevels() {
+        RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
+
+        // Ensure that no action is taken for cases where the failure reason is unknown
+        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
+                RescueParty.LEVEL_FACTORY_RESET));
+        assertEquals(observer.onHealthCheckFailed(null, PackageWatchdog.FAILURE_REASON_UNKNOWN),
+                PackageHealthObserverImpact.USER_IMPACT_NONE);
+
+        /*
+        For the following cases, ensure that the returned user impact corresponds with the user
+        impact of the next available rescue level, not the current one.
+         */
+        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
+                RescueParty.LEVEL_NONE));
+        assertEquals(observer.onHealthCheckFailed(null,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING),
+                PackageHealthObserverImpact.USER_IMPACT_LOW);
+
+        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
+                RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS));
+        assertEquals(observer.onHealthCheckFailed(null,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING),
+                PackageHealthObserverImpact.USER_IMPACT_LOW);
+
+
+        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
+                RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES));
+        assertEquals(observer.onHealthCheckFailed(null,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING),
+                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+
+
+        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
+                RescueParty.LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS));
+        assertEquals(observer.onHealthCheckFailed(null,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING),
+                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+
+
+        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
+                RescueParty.LEVEL_FACTORY_RESET));
+        assertEquals(observer.onHealthCheckFailed(null,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING),
+                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+    }
+
+    @Test
+    public void testRescueLevelIncrementsWhenExecuted() {
+        RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
+        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
+                RescueParty.LEVEL_NONE));
+        observer.execute(sFailingPackage,
+                PackageWatchdog.FAILURE_REASON_APP_CRASH);
+        assertEquals(SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, -1),
+                RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS);
+    }
+
     private void verifySettingsResets(int resetMode) {
         verify(() -> Settings.Global.resetToDefaultsAsUser(mMockContentResolver, null,
                 resetMode, UserHandle.USER_SYSTEM));
@@ -332,9 +372,8 @@ public class RescuePartyTest {
         }
     }
 
-    private void notePersistentAppCrash(int numTimes) {
-        for (int i = 0; i < numTimes; i++) {
-            RescueParty.noteAppCrash(mMockContext, PERSISTENT_APP_UID);
-        }
+    private void notePersistentAppCrash() {
+        RescuePartyObserver.getInstance(mMockContext).execute(new VersionedPackage(
+                "com.package.name", 1), PackageWatchdog.FAILURE_REASON_UNKNOWN);
     }
 }

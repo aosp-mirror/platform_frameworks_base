@@ -85,6 +85,7 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
 import com.android.server.accessibility.AccessibilityWindowManager.RemoteAccessibilityConnection;
+import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.Before;

@@ -272,14 +272,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
             // Check whether surface flinger spontaneously changed display config specs out from
             // under us. If so, schedule a traversal to reapply our display config specs.
-            if (mDisplayModeSpecs.defaultModeId != 0) {
-                int activeDefaultMode =
+            if (mDisplayModeSpecs.baseModeId != 0) {
+                int activeBaseMode =
                         findMatchingModeIdLocked(physicalDisplayConfigSpecs.defaultConfig);
                 // If we can't map the defaultConfig index to a mode, then the physical display
                 // configs must have changed, and the code below for handling changes to the
                 // list of available modes will take care of updating display config specs.
-                if (activeDefaultMode != 0) {
-                    if (mDisplayModeSpecs.defaultModeId != activeDefaultMode
+                if (activeBaseMode != 0) {
+                    if (mDisplayModeSpecs.baseModeId != activeBaseMode
                             || mDisplayModeSpecs.refreshRateRange.min
                                     != physicalDisplayConfigSpecs.minRefreshRate
                             || mDisplayModeSpecs.refreshRateRange.max
@@ -312,14 +312,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mDefaultModeId = activeRecord.mMode.getModeId();
             }
 
-            // Determine whether the display mode specs' default mode is still there.
-            if (mSupportedModes.indexOfKey(mDisplayModeSpecs.defaultModeId) < 0) {
-                if (mDisplayModeSpecs.defaultModeId != 0) {
+            // Determine whether the display mode specs' base mode is still there.
+            if (mSupportedModes.indexOfKey(mDisplayModeSpecs.baseModeId) < 0) {
+                if (mDisplayModeSpecs.baseModeId != 0) {
                     Slog.w(TAG,
-                            "DisplayModeSpecs default mode no longer available, using currently"
-                                    + " active mode as default.");
+                            "DisplayModeSpecs base mode no longer available, using currently"
+                                    + " active mode.");
                 }
-                mDisplayModeSpecs.defaultModeId = activeRecord.mMode.getModeId();
+                mDisplayModeSpecs.baseModeId = activeRecord.mMode.getModeId();
                 mDisplayModeSpecsInvalid = true;
             }
 
@@ -648,13 +648,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         @Override
         public void setDesiredDisplayModeSpecsLocked(
                 DisplayModeDirector.DesiredDisplayModeSpecs displayModeSpecs) {
-            if (displayModeSpecs.defaultModeId == 0) {
+            if (displayModeSpecs.baseModeId == 0) {
                 // Bail if the caller is requesting a null mode. We'll get called again shortly with
                 // a valid mode.
                 return;
             }
-            int defaultPhysIndex = findDisplayInfoIndexLocked(displayModeSpecs.defaultModeId);
-            if (defaultPhysIndex < 0) {
+            int basePhysIndex = findDisplayInfoIndexLocked(displayModeSpecs.baseModeId);
+            if (basePhysIndex < 0) {
                 // When a display is hotplugged, it's possible for a mode to be removed that was
                 // previously valid. Because of the way display changes are propagated through the
                 // framework, and the caching of the display mode specs in LogicalDisplay, it's
@@ -662,8 +662,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 // mode. This should only happen in extremely rare cases. A followup call will
                 // contain a valid mode id.
                 Slog.w(TAG,
-                        "Ignoring request for invalid default mode id "
-                                + displayModeSpecs.defaultModeId);
+                        "Ignoring request for invalid base mode id " + displayModeSpecs.baseModeId);
                 updateDeviceInfoLocked();
                 return;
             }
@@ -673,7 +672,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 getHandler().sendMessage(PooledLambda.obtainMessage(
                         LocalDisplayDevice::setDesiredDisplayModeSpecsAsync, this,
                         getDisplayTokenLocked(),
-                        new SurfaceControl.DesiredDisplayConfigSpecs(defaultPhysIndex,
+                        new SurfaceControl.DesiredDisplayConfigSpecs(basePhysIndex,
                                 mDisplayModeSpecs.refreshRateRange.min,
                                 mDisplayModeSpecs.refreshRateRange.max)));
             }

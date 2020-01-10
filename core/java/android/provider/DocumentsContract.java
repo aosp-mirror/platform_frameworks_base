@@ -553,7 +553,9 @@ public final class DocumentsContract {
         /**
          * Flag indicating that a document is a directory that wants to block itself
          * from being selected when the user launches an {@link Intent#ACTION_OPEN_DOCUMENT_TREE}
-         * intent. Only valid when {@link #COLUMN_MIME_TYPE} is {@link #MIME_TYPE_DIR}.
+         * intent. Individual files can still be selected when launched via other intents
+         * like {@link Intent#ACTION_OPEN_DOCUMENT} and {@link Intent#ACTION_GET_CONTENT}.
+         * Only valid when {@link #COLUMN_MIME_TYPE} is {@link #MIME_TYPE_DIR}.
          * <p>
          * Note that this flag <em>only</em> applies to the single directory to which it is
          * applied. It does <em>not</em> block the user from selecting either a parent or

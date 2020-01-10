@@ -2448,14 +2448,18 @@ public final class SmsManager {
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
      * @throws IllegalArgumentException if contentUri is empty
+     * @deprecated use {@link MmsManager#sendMultimediaMessage} instead.
      */
     public void sendMultimediaMessage(Context context, Uri contentUri, String locationUrl,
             Bundle configOverrides, PendingIntent sentIntent) {
         if (contentUri == null) {
             throw new IllegalArgumentException("Uri contentUri null");
         }
-        MmsManager.getInstance().sendMultimediaMessage(getSubscriptionId(), contentUri,
-                    locationUrl, configOverrides, sentIntent);
+        MmsManager m = (MmsManager) context.getSystemService(Context.MMS_SERVICE);
+        if (m != null) {
+            m.sendMultimediaMessage(getSubscriptionId(), contentUri, locationUrl, configOverrides,
+                    sentIntent);
+        }
     }
 
     /**
@@ -2479,6 +2483,7 @@ public final class SmsManager {
      * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is downloaded, or the download is failed
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
+     * @deprecated use {@link MmsManager#downloadMultimediaMessage} instead.
      */
     public void downloadMultimediaMessage(Context context, String locationUrl, Uri contentUri,
             Bundle configOverrides, PendingIntent downloadedIntent) {
@@ -2488,8 +2493,11 @@ public final class SmsManager {
         if (contentUri == null) {
             throw new IllegalArgumentException("Uri contentUri null");
         }
-        MmsManager.getInstance().downloadMultimediaMessage(getSubscriptionId(), locationUrl,
-                contentUri, configOverrides, downloadedIntent);
+        MmsManager m = (MmsManager) context.getSystemService(Context.MMS_SERVICE);
+        if (m != null) {
+            m.downloadMultimediaMessage(getSubscriptionId(), locationUrl, contentUri,
+                    configOverrides, downloadedIntent);
+        }
     }
 
     // MMS send/download failure result codes
@@ -2531,9 +2539,9 @@ public final class SmsManager {
      * </p>
      *
      * @return the bundle key/values pairs that contains MMS configuration values
+     *  or an empty bundle if they cannot be found.
      */
-    @Nullable
-    public Bundle getCarrierConfigValues() {
+    @NonNull public Bundle getCarrierConfigValues() {
         try {
             ISms iSms = getISmsService();
             if (iSms != null) {
@@ -2542,7 +2550,7 @@ public final class SmsManager {
         } catch (RemoteException ex) {
             // ignore it
         }
-        return null;
+        return new Bundle();
     }
 
     /**

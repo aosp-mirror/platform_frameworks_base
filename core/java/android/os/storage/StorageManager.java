@@ -31,6 +31,7 @@ import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.BytesLong;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -72,6 +73,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.sysprop.VoldProperties;
@@ -93,7 +95,6 @@ import com.android.internal.os.AppFuseMount;
 import com.android.internal.os.FuseAppLoop;
 import com.android.internal.os.FuseUnavailableMountException;
 import com.android.internal.os.RoSystemProperties;
-import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 
 import dalvik.system.BlockGuard;
@@ -114,6 +115,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -305,109 +307,85 @@ public class StorageManager {
     private final Looper mLooper;
     private final AtomicInteger mNextNonce = new AtomicInteger(0);
 
+    @GuardedBy("mDelegates")
     private final ArrayList<StorageEventListenerDelegate> mDelegates = new ArrayList<>();
 
-    private static class StorageEventListenerDelegate extends IStorageEventListener.Stub implements
-            Handler.Callback {
-        private static final int MSG_STORAGE_STATE_CHANGED = 1;
-        private static final int MSG_VOLUME_STATE_CHANGED = 2;
-        private static final int MSG_VOLUME_RECORD_CHANGED = 3;
-        private static final int MSG_VOLUME_FORGOTTEN = 4;
-        private static final int MSG_DISK_SCANNED = 5;
-        private static final int MSG_DISK_DESTROYED = 6;
+    private class StorageEventListenerDelegate extends IStorageEventListener.Stub {
+        final Executor mExecutor;
+        final StorageEventListener mListener;
+        final StorageVolumeCallback mCallback;
 
-        final StorageEventListener mCallback;
-        final Handler mHandler;
-
-        public StorageEventListenerDelegate(StorageEventListener callback, Looper looper) {
+        public StorageEventListenerDelegate(@NonNull Executor executor,
+                @NonNull StorageEventListener listener, @NonNull StorageVolumeCallback callback) {
+            mExecutor = executor;
+            mListener = listener;
             mCallback = callback;
-            mHandler = new Handler(looper, this);
-        }
-
-        @Override
-        public boolean handleMessage(Message msg) {
-            final SomeArgs args = (SomeArgs) msg.obj;
-            switch (msg.what) {
-                case MSG_STORAGE_STATE_CHANGED:
-                    mCallback.onStorageStateChanged((String) args.arg1, (String) args.arg2,
-                            (String) args.arg3);
-                    args.recycle();
-                    return true;
-                case MSG_VOLUME_STATE_CHANGED:
-                    mCallback.onVolumeStateChanged((VolumeInfo) args.arg1, args.argi2, args.argi3);
-                    args.recycle();
-                    return true;
-                case MSG_VOLUME_RECORD_CHANGED:
-                    mCallback.onVolumeRecordChanged((VolumeRecord) args.arg1);
-                    args.recycle();
-                    return true;
-                case MSG_VOLUME_FORGOTTEN:
-                    mCallback.onVolumeForgotten((String) args.arg1);
-                    args.recycle();
-                    return true;
-                case MSG_DISK_SCANNED:
-                    mCallback.onDiskScanned((DiskInfo) args.arg1, args.argi2);
-                    args.recycle();
-                    return true;
-                case MSG_DISK_DESTROYED:
-                    mCallback.onDiskDestroyed((DiskInfo) args.arg1);
-                    args.recycle();
-                    return true;
-            }
-            args.recycle();
-            return false;
         }
 
         @Override
         public void onUsbMassStorageConnectionChanged(boolean connected) throws RemoteException {
-            // Ignored
+            mExecutor.execute(() -> {
+                mListener.onUsbMassStorageConnectionChanged(connected);
+            });
         }
 
         @Override
         public void onStorageStateChanged(String path, String oldState, String newState) {
-            final SomeArgs args = SomeArgs.obtain();
-            args.arg1 = path;
-            args.arg2 = oldState;
-            args.arg3 = newState;
-            mHandler.obtainMessage(MSG_STORAGE_STATE_CHANGED, args).sendToTarget();
+            mExecutor.execute(() -> {
+                mListener.onStorageStateChanged(path, oldState, newState);
+
+                if (path != null) {
+                    for (StorageVolume sv : getStorageVolumes()) {
+                        if (Objects.equals(path, sv.getPath())) {
+                            mCallback.onStateChanged(sv);
+                        }
+                    }
+                }
+            });
         }
 
         @Override
         public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
-            final SomeArgs args = SomeArgs.obtain();
-            args.arg1 = vol;
-            args.argi2 = oldState;
-            args.argi3 = newState;
-            mHandler.obtainMessage(MSG_VOLUME_STATE_CHANGED, args).sendToTarget();
+            mExecutor.execute(() -> {
+                mListener.onVolumeStateChanged(vol, oldState, newState);
+
+                final File path = vol.getPathForUser(UserHandle.myUserId());
+                if (path != null) {
+                    for (StorageVolume sv : getStorageVolumes()) {
+                        if (Objects.equals(path.getAbsolutePath(), sv.getPath())) {
+                            mCallback.onStateChanged(sv);
+                        }
+                    }
+                }
+            });
         }
 
         @Override
         public void onVolumeRecordChanged(VolumeRecord rec) {
-            final SomeArgs args = SomeArgs.obtain();
-            args.arg1 = rec;
-            mHandler.obtainMessage(MSG_VOLUME_RECORD_CHANGED, args).sendToTarget();
+            mExecutor.execute(() -> {
+                mListener.onVolumeRecordChanged(rec);
+            });
         }
 
         @Override
         public void onVolumeForgotten(String fsUuid) {
-            final SomeArgs args = SomeArgs.obtain();
-            args.arg1 = fsUuid;
-            mHandler.obtainMessage(MSG_VOLUME_FORGOTTEN, args).sendToTarget();
+            mExecutor.execute(() -> {
+                mListener.onVolumeForgotten(fsUuid);
+            });
         }
 
         @Override
         public void onDiskScanned(DiskInfo disk, int volumeCount) {
-            final SomeArgs args = SomeArgs.obtain();
-            args.arg1 = disk;
-            args.argi2 = volumeCount;
-            mHandler.obtainMessage(MSG_DISK_SCANNED, args).sendToTarget();
+            mExecutor.execute(() -> {
+                mListener.onDiskScanned(disk, volumeCount);
+            });
         }
 
         @Override
         public void onDiskDestroyed(DiskInfo disk) throws RemoteException {
-            final SomeArgs args = SomeArgs.obtain();
-            args.arg1 = disk;
-            mHandler.obtainMessage(MSG_DISK_DESTROYED, args).sendToTarget();
+            mExecutor.execute(() -> {
+                mListener.onDiskDestroyed(disk);
+            });
         }
     }
 
@@ -525,8 +503,8 @@ public class StorageManager {
     @UnsupportedAppUsage
     public void registerListener(StorageEventListener listener) {
         synchronized (mDelegates) {
-            final StorageEventListenerDelegate delegate = new StorageEventListenerDelegate(listener,
-                    mLooper);
+            final StorageEventListenerDelegate delegate = new StorageEventListenerDelegate(
+                    mContext.getMainExecutor(), listener, new StorageVolumeCallback());
             try {
                 mStorageManager.registerListener(delegate);
             } catch (RemoteException e) {
@@ -548,7 +526,76 @@ public class StorageManager {
         synchronized (mDelegates) {
             for (Iterator<StorageEventListenerDelegate> i = mDelegates.iterator(); i.hasNext();) {
                 final StorageEventListenerDelegate delegate = i.next();
-                if (delegate.mCallback == listener) {
+                if (delegate.mListener == listener) {
+                    try {
+                        mStorageManager.unregisterListener(delegate);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                    i.remove();
+                }
+            }
+        }
+    }
+
+    /**
+     * Callback that delivers {@link StorageVolume} related events.
+     * <p>
+     * For example, this can be used to detect when a volume changes to the
+     * {@link Environment#MEDIA_MOUNTED} or {@link Environment#MEDIA_UNMOUNTED}
+     * states.
+     *
+     * @see StorageManager#registerStorageVolumeCallback
+     * @see StorageManager#unregisterStorageVolumeCallback
+     */
+    public static class StorageVolumeCallback {
+        /**
+         * Called when {@link StorageVolume#getState()} changes, such as
+         * changing to the {@link Environment#MEDIA_MOUNTED} or
+         * {@link Environment#MEDIA_UNMOUNTED} states.
+         * <p>
+         * The given argument is a snapshot in time and can be used to process
+         * events in the order they occurred, or you can call
+         * {@link StorageManager#getStorageVolumes()} to observe the latest
+         * value.
+         */
+        public void onStateChanged(@NonNull StorageVolume volume) { }
+    }
+
+    /**
+     * Registers the given callback to listen for {@link StorageVolume} changes.
+     * <p>
+     * For example, this can be used to detect when a volume changes to the
+     * {@link Environment#MEDIA_MOUNTED} or {@link Environment#MEDIA_UNMOUNTED}
+     * states.
+     *
+     * @see StorageManager#unregisterStorageVolumeCallback
+     */
+    public void registerStorageVolumeCallback(@CallbackExecutor @NonNull Executor executor,
+            @NonNull StorageVolumeCallback callback) {
+        synchronized (mDelegates) {
+            final StorageEventListenerDelegate delegate = new StorageEventListenerDelegate(
+                    executor, new StorageEventListener(), callback);
+            try {
+                mStorageManager.registerListener(delegate);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mDelegates.add(delegate);
+        }
+    }
+
+    /**
+     * Unregisters the given callback from listening for {@link StorageVolume}
+     * changes.
+     *
+     * @see StorageManager#registerStorageVolumeCallback
+     */
+    public void unregisterStorageVolumeCallback(@NonNull StorageVolumeCallback callback) {
+        synchronized (mDelegates) {
+            for (Iterator<StorageEventListenerDelegate> i = mDelegates.iterator(); i.hasNext();) {
+                final StorageEventListenerDelegate delegate = i.next();
+                if (delegate.mCallback == callback) {
                     try {
                         mStorageManager.unregisterListener(delegate);
                     } catch (RemoteException e) {
@@ -829,7 +876,14 @@ public class StorageManager {
      */
     public @NonNull UUID getUuidForPath(@NonNull File path) throws IOException {
         Preconditions.checkNotNull(path);
-        final String pathString = path.getCanonicalPath();
+        String pathString = path.getCanonicalPath();
+        if (path.getPath().startsWith("/sdcard")) {
+            // On FUSE enabled devices, realpath(2) /sdcard is /mnt/user/<userid>/emulated/<userid>
+            // as opposed to /storage/emulated/<userid>.
+            // And vol.path below expects to match with a path starting with /storage
+            pathString = pathString.replaceFirst("^/mnt/user/[0-9]+/", "/storage/");
+        }
+
         if (FileUtils.contains(Environment.getDataDirectory().getAbsolutePath(), pathString)) {
             return UUID_DEFAULT;
         }

@@ -157,8 +157,13 @@ public class SystemActionPerformer {
     /**
      * This method is called to register a system action. If a system action is already registered
      * with the given id, the existing system action will be overwritten.
+     *
+     * This method is supposed to be package internal since this class is meant to be used by
+     * AccessibilityManagerService only. But Mockito has a bug which requiring this to be public
+     * to be mocked.
      */
-    void registerSystemAction(int id, RemoteAction action) {
+    @VisibleForTesting
+    public void registerSystemAction(int id, RemoteAction action) {
         synchronized (mSystemActionLock) {
             mRegisteredSystemActions.put(id, action);
         }
@@ -170,8 +175,13 @@ public class SystemActionPerformer {
     /**
      * This method is called to unregister a system action previously registered through
      * registerSystemAction.
+     *
+     * This method is supposed to be package internal since this class is meant to be used by
+     * AccessibilityManagerService only. But Mockito has a bug which requiring this to be public
+     * to be mocked.
      */
-    void unregisterSystemAction(int id) {
+    @VisibleForTesting
+    public void unregisterSystemAction(int id) {
         synchronized (mSystemActionLock) {
             mRegisteredSystemActions.remove(id);
         }

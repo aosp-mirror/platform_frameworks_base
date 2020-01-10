@@ -87,7 +87,10 @@ import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotifRemoteViewCache;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -241,8 +244,14 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntryManager.addNotificationEntryListener(mEntryListener);
         mEntryManager.setNotificationRemoveInterceptor(mRemoveInterceptor);
 
+        NotificationRowContentBinder contentBinder = new NotificationContentInflater(
+                mock(NotifRemoteViewCache.class),
+                mRemoteInputManager);
+
         NotificationRowBinderImpl notificationRowBinder =
-                new NotificationRowBinderImpl(mContext, true, /* allowLongPress */
+                new NotificationRowBinderImpl(mContext,
+                        contentBinder,
+                        true, /* allowLongPress */
                         mock(KeyguardBypassController.class),
                         mock(StatusBarStateController.class),
                         mock(NotificationLogger.class));

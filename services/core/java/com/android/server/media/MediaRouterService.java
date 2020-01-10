@@ -39,6 +39,7 @@ import android.media.MediaRouter;
 import android.media.MediaRouterClientState;
 import android.media.RemoteDisplayState;
 import android.media.RemoteDisplayState.RemoteDisplayInfo;
+import android.media.RouteDiscoveryRequest;
 import android.media.RouteSessionInfo;
 import android.os.Binder;
 import android.os.Handler;
@@ -459,8 +460,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void requestCreateSession(IMediaRouter2Client client, MediaRoute2Info route,
-            String controlCategory, int requestId) {
-        mService2.requestCreateSession(client, route, controlCategory, requestId);
+            String routeType, int requestId) {
+        mService2.requestCreateSession(client, route, routeType, requestId);
     }
 
     // Binder call
@@ -519,8 +520,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     }
     // Binder call
     @Override
-    public void setControlCategories(IMediaRouter2Client client, List<String> categories) {
-        mService2.setControlCategories(client, categories);
+    public void setDiscoveryRequest2(IMediaRouter2Client client, RouteDiscoveryRequest request) {
+        mService2.setDiscoveryRequest2(client, request);
     }
 
     // Binder call

@@ -696,6 +696,10 @@ static jobject android_media_tv_Tuner_open_filter(
     return tuner->openFilter(filterType, bufferSize);
 }
 
+static jobject android_media_tv_Tuner_open_time_filter(JNIEnv, jobject) {
+    return NULL;
+}
+
 static DemuxFilterSettings getFilterSettings(
         JNIEnv *env, int type, int subtype, jobject filterSettingsObj) {
     DemuxFilterSettings filterSettings;
@@ -837,6 +841,28 @@ static int android_media_tv_Tuner_read_filter_fmq(
 }
 
 static int android_media_tv_Tuner_close_filter(JNIEnv*, jobject) {
+    return 0;
+}
+
+// TODO: implement TimeFilter functions
+static int android_media_tv_Tuner_time_filter_set_timestamp(
+        JNIEnv, jobject, jlong) {
+    return 0;
+}
+
+static int android_media_tv_Tuner_time_filter_clear_timestamp(JNIEnv, jobject) {
+    return 0;
+}
+
+static jobject android_media_tv_Tuner_time_filter_get_timestamp(JNIEnv, jobject) {
+    return NULL;
+}
+
+static jobject android_media_tv_Tuner_time_filter_get_source_time(JNIEnv, jobject) {
+    return NULL;
+}
+
+static int android_media_tv_Tuner_time_filter_close(JNIEnv, jobject) {
     return 0;
 }
 
@@ -1119,6 +1145,8 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_get_frontend_info },
     { "nativeOpenFilter", "(III)Landroid/media/tv/tuner/Tuner$Filter;",
             (void *)android_media_tv_Tuner_open_filter },
+    { "nativeOpenTimeFilter", "()Landroid/media/tv/tuner/Tuner$TimeFilter;",
+            (void *)android_media_tv_Tuner_open_time_filter },
     { "nativeGetLnbIds", "()Ljava/util/List;",
             (void *)android_media_tv_Tuner_get_lnb_ids },
     { "nativeOpenLnbById", "(I)Landroid/media/tv/tuner/Tuner$Lnb;",
@@ -1142,6 +1170,16 @@ static const JNINativeMethod gFilterMethods[] = {
     { "nativeFlushFilter", "()I", (void *)android_media_tv_Tuner_flush_filter },
     { "nativeRead", "([BII)I", (void *)android_media_tv_Tuner_read_filter_fmq },
     { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_filter },
+};
+
+static const JNINativeMethod gTimeFilterMethods[] = {
+    { "nativeSetTimeStamp", "(J)I", (void *)android_media_tv_Tuner_time_filter_set_timestamp },
+    { "nativeClearTimeStamp", "()I", (void *)android_media_tv_Tuner_time_filter_clear_timestamp },
+    { "nativeGetTimeStamp", "()Ljava/lang/Long;",
+            (void *)android_media_tv_Tuner_time_filter_get_timestamp },
+    { "nativeGetSourceTime", "()Ljava/lang/Long;",
+            (void *)android_media_tv_Tuner_time_filter_get_source_time },
+    { "nativeClose", "()I", (void *)android_media_tv_Tuner_time_filter_close },
 };
 
 static const JNINativeMethod gDescramblerMethods[] = {
@@ -1191,6 +1229,13 @@ static bool register_android_media_tv_Tuner(JNIEnv *env) {
             gFilterMethods,
             NELEM(gFilterMethods)) != JNI_OK) {
         ALOGE("Failed to register filter native methods");
+        return false;
+    }
+    if (AndroidRuntime::registerNativeMethods(
+            env, "android/media/tv/tuner/Tuner$TimeFilter",
+            gTimeFilterMethods,
+            NELEM(gTimeFilterMethods)) != JNI_OK) {
+        ALOGE("Failed to register time filter native methods");
         return false;
     }
     if (AndroidRuntime::registerNativeMethods(

@@ -70,6 +70,9 @@ class InsetsSourceProvider {
      */
     private boolean mServerVisible;
 
+    private boolean mSeamlessRotating;
+    private long mFinishSeamlessRotateFrameNumber = -1;
+
     private final boolean mControllable;
 
     InsetsSourceProvider(InsetsSource source, InsetsStateController stateController,
@@ -170,7 +173,9 @@ class InsetsSourceProvider {
         updateSourceFrame();
         if (mControl != null) {
             final Rect frame = mWin.getWindowFrames().mFrame;
-            if (mControl.setSurfacePosition(frame.left, frame.top)) {
+            if (mControl.setSurfacePosition(frame.left, frame.top) && mControlTarget != null) {
+                // The leash has been stale, we need to create a new one for the client.
+                updateControlForTarget(mControlTarget, true /* force */);
                 mStateController.notifyControlChanged(mControlTarget);
             }
         }
@@ -189,6 +194,11 @@ class InsetsSourceProvider {
     }
 
     void updateControlForTarget(@Nullable InsetsControlTarget target, boolean force) {
+        if (mSeamlessRotating) {
+            // We are un-rotating the window against the display rotation. We don't want the target
+            // to control the window for now.
+            return;
+        }
         if (mWin == null) {
             mControlTarget = target;
             return;
@@ -203,11 +213,39 @@ class InsetsSourceProvider {
         }
         mAdapter = new ControlAdapter();
         setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
-        mWin.startAnimation(mDisplayContent.getPendingTransaction(), mAdapter,
-                !mClientVisible /* hidden */);
+        final Transaction t = mDisplayContent.getPendingTransaction();
+        mWin.startAnimation(t, mAdapter, !mClientVisible /* hidden */);
+        final SurfaceControl leash = mAdapter.mCapturedLeash;
+        final long frameNumber = mFinishSeamlessRotateFrameNumber;
+        mFinishSeamlessRotateFrameNumber = -1;
+        if (frameNumber >= 0 && mWin.mHasSurface && leash != null) {
+            // We just finished the seamless rotation. We don't want to change the position or the
+            // window crop of the surface controls (including the leash) until the client finishes
+            // drawing the new frame of the new orientation. Although we cannot defer the reparent
+            // operation, it is fine, because reparent won't cause any visual effect.
+            final SurfaceControl barrier = mWin.mWinAnimator.mSurfaceController.mSurfaceControl;
+            t.deferTransactionUntil(mWin.getSurfaceControl(), barrier, frameNumber);
+            t.deferTransactionUntil(leash, barrier, frameNumber);
+        }
         mControlTarget = target;
-        mControl = new InsetsSourceControl(mSource.getType(), mAdapter.mCapturedLeash,
+        mControl = new InsetsSourceControl(mSource.getType(), leash,
                 new Point(mWin.getWindowFrames().mFrame.left, mWin.getWindowFrames().mFrame.top));
+    }
+
+    void startSeamlessRotation() {
+        if (!mSeamlessRotating) {
+            mSeamlessRotating = true;
+
+            // This will revoke the leash and clear the control target.
+            mWin.cancelAnimation();
+        }
+    }
+
+    void finishSeamlessRotation(boolean timeout) {
+        if (mSeamlessRotating) {
+            mSeamlessRotating = false;
+            mFinishSeamlessRotateFrameNumber = timeout ? -1 : mWin.getFrameNumber();
+        }
     }
 
     boolean onInsetsModified(InsetsControlTarget caller, InsetsSource modifiedSource) {

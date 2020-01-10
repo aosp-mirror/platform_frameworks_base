@@ -355,7 +355,7 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.mMediaDeviceCallback.onConnectedDeviceChanged(TEST_DEVICE_ID_2);
 
         assertThat(mLocalMediaManager.getCurrentConnectedDevice()).isEqualTo(device2);
-        verify(mCallback).onDeviceListUpdate(any());
+        verify(mCallback).onDeviceAttributesChanged();
     }
 
     @Test
@@ -373,7 +373,7 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onConnectedDeviceChanged(TEST_DEVICE_ID_1);
 
-        verify(mCallback, never()).onDeviceListUpdate(any());
+        verify(mCallback, never()).onDeviceAttributesChanged();
     }
 
     @Test
@@ -382,6 +382,6 @@ public class LocalMediaManagerTest {
 
         mLocalMediaManager.mMediaDeviceCallback.onDeviceAttributesChanged();
 
-        verify(mCallback).onDeviceListUpdate(any());
+        verify(mCallback).onDeviceAttributesChanged();
     }
 }

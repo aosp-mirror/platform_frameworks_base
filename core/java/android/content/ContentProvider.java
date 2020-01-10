@@ -27,6 +27,7 @@ import static android.os.Trace.TRACE_TAG_DATABASE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.AppOpsManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.PackageManager;
@@ -942,7 +943,18 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         return null;
     }
 
-    /** {@hide} */
+    /**
+     * Return the package name of the caller that initiated the request being
+     * processed on the current thread. The returned package will have
+     * <em>not</em> been verified to belong to the calling UID. Returns
+     * {@code null} if not currently processing a request.
+     * <p>
+     * This will always return {@code null} when processing
+     * {@link #getType(Uri)} or {@link #getStreamTypes(Uri, String)} requests.
+     *
+     * @see Binder#getCallingUid()
+     * @see Context#grantUriPermission(String, Uri, int)
+     */
     public final @Nullable String getCallingPackageUnchecked() {
         final Pair<String, String> pkg = mCallingPackage.get();
         if (pkg != null) {
@@ -952,7 +964,14 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         return null;
     }
 
-    /** {@hide} */
+    /**
+     * Called whenever the value of {@link #getCallingPackage()} changes, giving
+     * the provider an opportunity to invalidate any security related caching it
+     * may be performing.
+     * <p>
+     * This typically happens when a {@link ContentProvider} makes a nested call
+     * back into itself when already processing a call from a remote process.
+     */
     public void onCallingPackageChanged() {
     }
 
@@ -1390,8 +1409,11 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * @param uri The URI to query. This will be the full URI sent by the client.
      * @param projection The list of columns to put into the cursor.
      *            If {@code null} provide a default set of columns.
-     * @param queryArgs A Bundle containing all additional information necessary for the query.
-     *            Values in the Bundle may include SQL style arguments.
+     * @param queryArgs A Bundle containing additional information necessary for
+     *            the operation. Arguments may include SQL style arguments, such
+     *            as {@link ContentResolver#QUERY_ARG_SQL_LIMIT}, but note that
+     *            the documentation for each individual provider will indicate
+     *            which arguments they support.
      * @param cancellationSignal A signal to cancel the operation in progress,
      *            or {@code null}.
      * @return a Cursor or {@code null}.
@@ -1525,8 +1547,24 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         return false;
     }
 
-    /** {@hide} */
+    /**
+     * Perform a detailed internal check on a {@link Uri} to determine if a UID
+     * is able to access it with specific mode flags.
+     * <p>
+     * This method is typically used when the provider implements more dynamic
+     * access controls that cannot be expressed with {@code <path-permission>}
+     * style static rules.
+     *
+     * @param uri the {@link Uri} to perform an access check on.
+     * @param uid the UID to check the permission for.
+     * @param modeFlags the access flags to use for the access check, such as
+     *            {@link Intent#FLAG_GRANT_READ_URI_PERMISSION}.
+     * @return {@link PackageManager#PERMISSION_GRANTED} if access is allowed,
+     *         otherwise {@link PackageManager#PERMISSION_DENIED}.
+     * @hide
+     */
     @Override
+    @SystemApi
     public int checkUriPermission(@NonNull Uri uri, int uid, @Intent.AccessUriMode int modeFlags) {
         return PackageManager.PERMISSION_DENIED;
     }
@@ -1574,9 +1612,14 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      *
      * @param uri The content:// URI of the insertion request.
      * @param values A set of column_name/value pairs to add to the database.
-     * @param extras A Bundle containing all additional information necessary
-     *            for the insert.
+     * @param extras A Bundle containing additional information necessary for
+     *            the operation. Arguments may include SQL style arguments, such
+     *            as {@link ContentResolver#QUERY_ARG_SQL_LIMIT}, but note that
+     *            the documentation for each individual provider will indicate
+     *            which arguments they support.
      * @return The URI for the newly inserted item.
+     * @throws IllegalArgumentException if the provider doesn't support one of
+     *             the requested Bundle arguments.
      */
     @Override
     public @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues values,
@@ -1653,10 +1696,13 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      *
      * @param uri The full URI to query, including a row ID (if a specific
      *            record is requested).
-     * @param extras A Bundle containing all additional information necessary
-     *            for the delete. Values in the Bundle may include SQL style
-     *            arguments.
-     * @return The number of rows affected.
+     * @param extras A Bundle containing additional information necessary for
+     *            the operation. Arguments may include SQL style arguments, such
+     *            as {@link ContentResolver#QUERY_ARG_SQL_LIMIT}, but note that
+     *            the documentation for each individual provider will indicate
+     *            which arguments they support.
+     * @throws IllegalArgumentException if the provider doesn't support one of
+     *             the requested Bundle arguments.
      * @throws SQLException
      */
     @Override
@@ -1699,10 +1745,14 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * @param uri The URI to query. This can potentially have a record ID if
      *            this is an update request for a specific record.
      * @param values A set of column_name/value pairs to update in the database.
-     * @param extras A Bundle containing all additional information necessary
-     *            for the update. Values in the Bundle may include SQL style
-     *            arguments.
+     * @param extras A Bundle containing additional information necessary for
+     *            the operation. Arguments may include SQL style arguments, such
+     *            as {@link ContentResolver#QUERY_ARG_SQL_LIMIT}, but note that
+     *            the documentation for each individual provider will indicate
+     *            which arguments they support.
      * @return the number of rows affected.
+     * @throws IllegalArgumentException if the provider doesn't support one of
+     *             the requested Bundle arguments.
      */
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values,
