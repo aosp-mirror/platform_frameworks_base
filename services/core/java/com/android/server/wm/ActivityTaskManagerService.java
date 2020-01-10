@@ -6136,13 +6136,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void notifyDockedStackMinimizedChanged(boolean minimized) {
-            synchronized (mGlobalLock) {
-                mRootWindowContainer.setDockedStackMinimized(minimized);
-            }
-        }
-
-        @Override
         public int startActivitiesAsPackage(String packageName, @Nullable String featureId,
                 int userId, Intent[] intents, Bundle bOptions) {
             Objects.requireNonNull(intents, "intents");

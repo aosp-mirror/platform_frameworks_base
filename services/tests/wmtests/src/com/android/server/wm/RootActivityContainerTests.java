@@ -251,13 +251,12 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true)
                 .setStack(stack).build();
 
-        // Under split screen primary we should be focusable when not minimized
-        mRootWindowContainer.setDockedStackMinimized(false);
+        // Created stacks are focusable by default.
         assertTrue(stack.isTopActivityFocusable());
         assertTrue(activity.isFocusable());
 
-        // Under split screen primary we should not be focusable when minimized
-        mRootWindowContainer.setDockedStackMinimized(true);
+        // If the stack is made unfocusable, its activities should inherit that.
+        stack.setFocusable(false);
         assertFalse(stack.isTopActivityFocusable());
         assertFalse(activity.isFocusable());
 
