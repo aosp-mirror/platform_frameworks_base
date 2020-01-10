@@ -182,14 +182,15 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void notifySingleTaskDisplayDrawn(int displayId);
 
     /**
-     * Start activity {@code intents} as if {@code packageName} on user {@code userId} did it.
+     * Start activity {@code intents} as if {@code packageName/featureId} on user {@code userId} did
+     * it.
      *
      * - DO NOT call it with the calling UID cleared.
      * - All the necessary caller permission checks must be done at callsites.
      *
      * @return error codes used by {@link IActivityManager#startActivity} and its siblings.
      */
-    public abstract int startActivitiesAsPackage(String packageName,
+    public abstract int startActivitiesAsPackage(String packageName, String featureId,
             int userId, Intent[] intents, Bundle bOptions);
 
     /**
@@ -199,6 +200,7 @@ public abstract class ActivityTaskManagerInternal {
      * @param realCallingPid PID of the real caller.
      * @param realCallingUid UID of the real caller.
      * @param callingPackage Make a call as if this package did.
+     * @param callingFeatureId Make a call as if this feature in the package did.
      * @param intents Intents to start.
      * @param userId Start the intents on this user.
      * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
@@ -208,16 +210,17 @@ public abstract class ActivityTaskManagerInternal {
      *        from originatingPendingIntent
      */
     public abstract int startActivitiesInPackage(int uid, int realCallingPid, int realCallingUid,
-            String callingPackage, Intent[] intents, String[] resolvedTypes, IBinder resultTo,
-            SafeActivityOptions options, int userId, boolean validateIncomingUser,
-            PendingIntentRecord originatingPendingIntent,
+            String callingPackage, @Nullable String callingFeatureId, Intent[] intents,
+            String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
+            boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
             boolean allowBackgroundActivityStart);
 
     public abstract int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
-            String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags, SafeActivityOptions options,
-            int userId, Task inTask, String reason, boolean validateIncomingUser,
-            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart);
+            String callingPackage, @Nullable String callingFeaturId, Intent intent,
+            String resolvedType, IBinder resultTo, String resultWho, int requestCode,
+            int startFlags, SafeActivityOptions options, int userId, Task inTask, String reason,
+            boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
+            boolean allowBackgroundActivityStart);
 
     /**
      * Start activity {@code intent} without calling user-id check.
@@ -228,7 +231,7 @@ public abstract class ActivityTaskManagerInternal {
      * @return error codes used by {@link IActivityManager#startActivity} and its siblings.
      */
     public abstract int startActivityAsUser(IApplicationThread caller, String callingPackage,
-            Intent intent, @Nullable Bundle options, int userId);
+            @Nullable String callingFeatureId, Intent intent, @Nullable Bundle options, int userId);
 
     /**
      * Called when Keyguard flags might have changed.
@@ -388,7 +391,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract ActivityTokens getTopActivityForTask(int taskId);
 
     public abstract IIntentSender getIntentSender(int type, String packageName,
-            int callingUid, int userId, IBinder token, String resultWho,
+            @Nullable String featureId, int callingUid, int userId, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes, int flags,
             Bundle bOptions);
 

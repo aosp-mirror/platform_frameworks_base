@@ -125,7 +125,7 @@ class AppTaskImpl extends IAppTask.Stub {
     }
 
     @Override
-    public int startActivity(IBinder whoThread, String callingPackage,
+    public int startActivity(IBinder whoThread, String callingPackage, String callingFeatureId,
             Intent intent, String resolvedType, Bundle bOptions) {
         checkCaller();
         mService.assertPackageMatchesCallingUid(callingPackage);
@@ -148,6 +148,7 @@ class AppTaskImpl extends IAppTask.Stub {
         return mService.getActivityStartController().obtainStarter(intent, "AppTaskImpl")
                 .setCaller(appThread)
                 .setCallingPackage(callingPackage)
+                .setCallingFeatureId(callingFeatureId)
                 .setResolvedType(resolvedType)
                 .setActivityOptions(bOptions)
                 .setUserId(callingUser)

@@ -5810,9 +5810,9 @@ public class Activity extends ContextThemeWrapper
                 intent.prepareToLeaveProcess(this);
                 result = ActivityTaskManager.getService()
                     .startActivity(mMainThread.getApplicationThread(), getBasePackageName(),
-                            intent, intent.resolveTypeIfNeeded(getContentResolver()), mToken,
-                            mEmbeddedID, requestCode, ActivityManager.START_FLAG_ONLY_IF_NEEDED,
-                            null, options);
+                            getFeatureId(), intent,
+                            intent.resolveTypeIfNeeded(getContentResolver()), mToken, mEmbeddedID,
+                            requestCode, ActivityManager.START_FLAG_ONLY_IF_NEEDED, null, options);
             } catch (RemoteException e) {
                 // Empty
             }
@@ -6606,8 +6606,8 @@ public class Activity extends ContextThemeWrapper
         try {
             data.prepareToLeaveProcess(this);
             IIntentSender target =
-                ActivityManager.getService().getIntentSender(
-                        ActivityManager.INTENT_SENDER_ACTIVITY_RESULT, packageName,
+                ActivityManager.getService().getIntentSenderWithFeature(
+                        ActivityManager.INTENT_SENDER_ACTIVITY_RESULT, packageName, getFeatureId(),
                         mParent == null ? mToken : mParent.mToken,
                         mEmbeddedID, requestCode, new Intent[] { data }, null, flags, null,
                         getUserId());

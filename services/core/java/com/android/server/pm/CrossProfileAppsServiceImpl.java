@@ -44,9 +44,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.stats.devicepolicy.DevicePolicyEnums;
@@ -54,10 +52,8 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
-import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.ArrayList;
@@ -69,7 +65,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
     private Context mContext;
     private Injector mInjector;
-    private AppOpsService mAppOpsService;
+    private AppOpsManager mAppOpsManager;
 
     public CrossProfileAppsServiceImpl(Context context) {
         this(context, new InjectorImpl(context));
@@ -100,6 +96,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     public void startActivityAsUser(
             IApplicationThread caller,
             String callingPackage,
+            String callingFeatureId,
             ComponentName component,
             @UserIdInt int userId,
             boolean launchMainActivity) throws RemoteException {
@@ -165,7 +162,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         launchIntent.setPackage(null);
         launchIntent.setComponent(component);
         mInjector.getActivityTaskManagerInternal().startActivityAsUser(
-                caller, callingPackage, launchIntent,
+                caller, callingPackage, callingFeatureId, launchIntent,
                 launchMainActivity
                         ? ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle()
                         : null,
@@ -176,6 +173,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     public void startActivityAsUserByIntent(
             IApplicationThread caller,
             String callingPackage,
+            String callingFeatureId,
             Intent intent,
             @UserIdInt int userId) throws RemoteException {
         Objects.requireNonNull(callingPackage);
@@ -212,8 +210,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
         verifyActivityCanHandleIntent(launchIntent, callingUid, userId);
 
-        mInjector.getActivityTaskManagerInternal().startActivityAsUser(
-                caller, callingPackage, launchIntent, /* options= */ null, userId);
+        mInjector.getActivityTaskManagerInternal().startActivityAsUser(caller, callingPackage,
+                callingFeatureId, launchIntent, /* options= */ null, userId);
     }
 
     @Override
@@ -545,12 +543,11 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                 permission, uid, /* owningUid= */-1, /* exported= */ true);
     }
 
-    private AppOpsService getAppOpsService() {
-        if (mAppOpsService == null) {
-            IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
-            mAppOpsService = (AppOpsService) IAppOpsService.Stub.asInterface(b);
+    private AppOpsManager getAppOpsManager() {
+        if (mAppOpsManager == null) {
+            mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         }
-        return mAppOpsService;
+        return mAppOpsManager;
     }
 
     private static class InjectorImpl implements Injector {

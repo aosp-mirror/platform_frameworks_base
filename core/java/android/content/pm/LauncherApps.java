@@ -714,7 +714,7 @@ public class LauncherApps {
         }
         try {
             mService.startActivityAsUser(mContext.getIApplicationThread(),
-                    mContext.getPackageName(),
+                    mContext.getPackageName(), mContext.getFeatureId(),
                     component, sourceBounds, opts, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -732,8 +732,8 @@ public class LauncherApps {
             @Nullable Rect sourceBounds, @Nullable Bundle opts) {
         try {
             mService.startSessionDetailsActivityAsUser(mContext.getIApplicationThread(),
-                    mContext.getPackageName(), sessionInfo, sourceBounds, opts,
-                    sessionInfo.getUser());
+                    mContext.getPackageName(), mContext.getFeatureId(), sessionInfo, sourceBounds,
+                    opts, sessionInfo.getUser());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -753,7 +753,7 @@ public class LauncherApps {
         logErrorForInvalidProfileAccess(user);
         try {
             mService.showAppDetailsAsUser(mContext.getIApplicationThread(),
-                    mContext.getPackageName(),
+                    mContext.getPackageName(), mContext.getFeatureId(),
                     component, sourceBounds, opts, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -1290,9 +1290,9 @@ public class LauncherApps {
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
             int userId) {
         try {
-            final boolean success =
-                    mService.startShortcut(mContext.getPackageName(), packageName, shortcutId,
-                    sourceBounds, startActivityOptions, userId);
+            final boolean success = mService.startShortcut(mContext.getPackageName(), packageName,
+                    null /* default featureId */, shortcutId, sourceBounds, startActivityOptions,
+                    userId);
             if (!success) {
                 throw new ActivityNotFoundException("Shortcut could not be started");
             }

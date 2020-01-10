@@ -85,16 +85,17 @@ import java.util.List;
  * {@hide}
  */
 interface IActivityTaskManager {
-    int startActivity(in IApplicationThread caller, in String callingPackage, in Intent intent,
-            in String resolvedType, in IBinder resultTo, in String resultWho, int requestCode,
+    int startActivity(in IApplicationThread caller, in String callingPackage,
+            in String callingFeatureId, in Intent intent, in String resolvedType,
+            in IBinder resultTo, in String resultWho, int requestCode,
             int flags, in ProfilerInfo profilerInfo, in Bundle options);
     int startActivities(in IApplicationThread caller, in String callingPackage,
-            in Intent[] intents, in String[] resolvedTypes, in IBinder resultTo,
-            in Bundle options, int userId);
+            in String callingFeatureId, in Intent[] intents, in String[] resolvedTypes,
+            in IBinder resultTo, in Bundle options, int userId);
     int startActivityAsUser(in IApplicationThread caller, in String callingPackage,
-            in Intent intent, in String resolvedType, in IBinder resultTo, in String resultWho,
-            int requestCode, int flags, in ProfilerInfo profilerInfo,
-            in Bundle options, int userId);
+            in String callingFeatureId, in Intent intent, in String resolvedType,
+            in IBinder resultTo, in String resultWho, int requestCode, int flags,
+            in ProfilerInfo profilerInfo, in Bundle options, int userId);
     boolean startNextMatchingActivity(in IBinder callingActivity,
             in Intent intent, in Bundle options);
     int startActivityIntentSender(in IApplicationThread caller,
@@ -102,19 +103,19 @@ interface IActivityTaskManager {
             in String resolvedType, in IBinder resultTo, in String resultWho, int requestCode,
             int flagsMask, int flagsValues, in Bundle options);
     WaitResult startActivityAndWait(in IApplicationThread caller, in String callingPackage,
-            in Intent intent, in String resolvedType, in IBinder resultTo, in String resultWho,
-            int requestCode, int flags, in ProfilerInfo profilerInfo, in Bundle options,
-            int userId);
+            in String callingFeatureId, in Intent intent, in String resolvedType,
+            in IBinder resultTo, in String resultWho, int requestCode, int flags,
+            in ProfilerInfo profilerInfo, in Bundle options, int userId);
     int startActivityWithConfig(in IApplicationThread caller, in String callingPackage,
-            in Intent intent, in String resolvedType, in IBinder resultTo, in String resultWho,
-            int requestCode, int startFlags, in Configuration newConfig,
-            in Bundle options, int userId);
-    int startVoiceActivity(in String callingPackage, int callingPid, int callingUid,
-            in Intent intent, in String resolvedType, in IVoiceInteractionSession session,
-            in IVoiceInteractor interactor, int flags, in ProfilerInfo profilerInfo,
-            in Bundle options, int userId);
-    int startAssistantActivity(in String callingPackage, int callingPid, int callingUid,
-            in Intent intent, in String resolvedType, in Bundle options, int userId);
+            in String callingFeatureId, in Intent intent, in String resolvedType,
+            in IBinder resultTo, in String resultWho, int requestCode, int startFlags,
+            in Configuration newConfig, in Bundle options, int userId);
+    int startVoiceActivity(in String callingPackage, in String callingFeatureId, int callingPid,
+            int callingUid, in Intent intent, in String resolvedType,
+            in IVoiceInteractionSession session, in IVoiceInteractor interactor, int flags,
+            in ProfilerInfo profilerInfo, in Bundle options, int userId);
+    int startAssistantActivity(in String callingPackage, in String callingFeatureId, int callingPid,
+            int callingUid, in Intent intent, in String resolvedType, in Bundle options, int userId);
     void startRecentsActivity(in Intent intent, in IAssistDataReceiver assistDataReceiver,
             in IRecentsAnimationRunner recentsAnimationRunner);
     int startActivityFromRecents(int taskId, in Bundle options);
