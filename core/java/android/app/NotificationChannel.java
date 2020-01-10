@@ -23,6 +23,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ShortcutInfo;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Parcel;
@@ -57,6 +58,22 @@ public final class NotificationChannel implements Parcelable {
     public static final String DEFAULT_CHANNEL_ID = "miscellaneous";
 
     /**
+     * The formatter used by the system to create an id for notification
+     * channels when it automatically creates conversation channels on behalf of an app. The format
+     * string takes two arguments, in this order: the
+     * {@link #getId()} of the original notification channel, and the
+     * {@link ShortcutInfo#getId() id} of the conversation.
+     */
+    public static final String CONVERSATION_CHANNEL_ID_FORMAT = "%1$s : %2$s";
+
+    /**
+     * TODO: STOPSHIP  remove
+     * Conversation id to use for apps that aren't providing them yet.
+     * @hide
+     */
+    public static final String PLACEHOLDER_CONVERSATION_ID = "placeholder_id";
+
+    /**
      * The maximum length for text fields in a NotificationChannel. Fields will be truncated at this
      * limit.
      */
@@ -85,6 +102,8 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_BLOCKABLE_SYSTEM = "blockable_system";
     private static final String ATT_ALLOW_BUBBLE = "can_bubble";
     private static final String ATT_ORIG_IMP = "orig_imp";
+    private static final String ATT_PARENT_CHANNEL = "parent";
+    private static final String ATT_CONVERSATION_ID = "conv_id";
     private static final String DELIMITER = ",";
 
     /**
@@ -147,7 +166,7 @@ public final class NotificationChannel implements Parcelable {
     private static final boolean DEFAULT_ALLOW_BUBBLE = true;
 
     @UnsupportedAppUsage
-    private final String mId;
+    private String mId;
     private String mName;
     private String mDesc;
     private int mImportance = DEFAULT_IMPORTANCE;
@@ -172,6 +191,8 @@ public final class NotificationChannel implements Parcelable {
     private boolean mAllowBubbles = DEFAULT_ALLOW_BUBBLE;
     private boolean mImportanceLockedByOEM;
     private boolean mImportanceLockedDefaultApp;
+    private String mParentId = null;
+    private String mConversationId = null;
 
     /**
      * Creates a notification channel.
@@ -236,6 +257,8 @@ public final class NotificationChannel implements Parcelable {
         mAllowBubbles = in.readBoolean();
         mImportanceLockedByOEM = in.readBoolean();
         mOriginalImportance = in.readInt();
+        mParentId = in.readString();
+        mConversationId = in.readString();
     }
 
     @Override
@@ -291,6 +314,8 @@ public final class NotificationChannel implements Parcelable {
         dest.writeBoolean(mAllowBubbles);
         dest.writeBoolean(mImportanceLockedByOEM);
         dest.writeInt(mOriginalImportance);
+        dest.writeString(mParentId);
+        dest.writeString(mConversationId);
     }
 
     /**
@@ -361,6 +386,13 @@ public final class NotificationChannel implements Parcelable {
     }
 
     // Modifiable by apps on channel creation.
+
+    /**
+     * @hide
+     */
+    public void setId(String id) {
+        mId = id;
+    }
 
     /**
      * Sets what group this channel belongs to.
@@ -502,6 +534,23 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * Sets this channel as being person-centric. Different settings and functionality may be
+     * exposed for people-centric channels.
+     *
+     * @param parentChannelId The {@link #getId()} id} of the generic channel that notifications of
+     *                        this type would be posted to in absence of a specific conversation id.
+     *                        For example, if this channel represents 'Messages from Person A', the
+     *                        parent channel would be 'Messages.'
+     * @param conversationId The {@link ShortcutInfo#getId()} of the shortcut representing this
+     *                       channel's conversation.
+     */
+    public void setConversationId(@Nullable String parentChannelId,
+            @Nullable String conversationId) {
+        mParentId = parentChannelId;
+        mConversationId = conversationId;
+    }
+
+    /**
      * Returns the id of this channel.
      */
     public String getId() {
@@ -619,6 +668,22 @@ public final class NotificationChannel implements Parcelable {
      */
     public boolean canBubble() {
         return mAllowBubbles;
+    }
+
+    /**
+     * Returns the {@link #getId() id} of the parent notification channel to this channel, if it's
+     * a conversation related channel. See {@link #setConversationId(String, String)}.
+     */
+    public @Nullable String getParentChannelId() {
+        return mParentId;
+    }
+
+    /**
+     * Returns the {@link ShortcutInfo#getId() id} of the conversation backing this channel, if it's
+     * associated with a conversation. See {@link #setConversationId(String, String)}.
+     */
+    public @Nullable String getConversationId() {
+        return mConversationId;
     }
 
     /**
@@ -761,6 +826,8 @@ public final class NotificationChannel implements Parcelable {
         setBlockableSystem(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
         setAllowBubbles(safeBool(parser, ATT_ALLOW_BUBBLE, DEFAULT_ALLOW_BUBBLE));
         setOriginalImportance(safeInt(parser, ATT_ORIG_IMP, DEFAULT_IMPORTANCE));
+        setConversationId(parser.getAttributeValue(ATT_PARENT_CHANNEL, null),
+                parser.getAttributeValue(ATT_CONVERSATION_ID, null));
     }
 
     @Nullable
@@ -884,6 +951,12 @@ public final class NotificationChannel implements Parcelable {
         }
         if (getOriginalImportance() != DEFAULT_IMPORTANCE) {
             out.attribute(null, ATT_ORIG_IMP, Integer.toString(getOriginalImportance()));
+        }
+        if (getParentChannelId() != null) {
+            out.attribute(null, ATT_PARENT_CHANNEL, getParentChannelId());
+        }
+        if (getConversationId() != null) {
+            out.attribute(null, ATT_CONVERSATION_ID, getConversationId());
         }
 
         // mImportanceLockedDefaultApp and mImportanceLockedByOEM have a different source of
@@ -1042,7 +1115,9 @@ public final class NotificationChannel implements Parcelable {
                 && Objects.equals(getAudioAttributes(), that.getAudioAttributes())
                 && mImportanceLockedByOEM == that.mImportanceLockedByOEM
                 && mImportanceLockedDefaultApp == that.mImportanceLockedDefaultApp
-                && mOriginalImportance == that.mOriginalImportance;
+                && mOriginalImportance == that.mOriginalImportance
+                && Objects.equals(getParentChannelId(), that.getParentChannelId())
+                && Objects.equals(getConversationId(), that.getConversationId());
     }
 
     @Override
@@ -1052,7 +1127,8 @@ public final class NotificationChannel implements Parcelable {
                 getUserLockedFields(),
                 isFgServiceShown(), mVibrationEnabled, mShowBadge, isDeleted(), getGroup(),
                 getAudioAttributes(), isBlockableSystem(), mAllowBubbles,
-                mImportanceLockedByOEM, mImportanceLockedDefaultApp, mOriginalImportance);
+                mImportanceLockedByOEM, mImportanceLockedDefaultApp, mOriginalImportance,
+                mParentId, mConversationId);
         result = 31 * result + Arrays.hashCode(mVibration);
         return result;
     }
@@ -1063,26 +1139,7 @@ public final class NotificationChannel implements Parcelable {
         String output = "NotificationChannel{"
                 + "mId='" + mId + '\''
                 + ", mName=" + redactedName
-                + ", mDescription=" + (!TextUtils.isEmpty(mDesc) ? "hasDescription " : "")
-                + ", mImportance=" + mImportance
-                + ", mBypassDnd=" + mBypassDnd
-                + ", mLockscreenVisibility=" + mLockscreenVisibility
-                + ", mSound=" + mSound
-                + ", mLights=" + mLights
-                + ", mLightColor=" + mLightColor
-                + ", mVibration=" + Arrays.toString(mVibration)
-                + ", mUserLockedFields=" + Integer.toHexString(mUserLockedFields)
-                + ", mFgServiceShown=" + mFgServiceShown
-                + ", mVibrationEnabled=" + mVibrationEnabled
-                + ", mShowBadge=" + mShowBadge
-                + ", mDeleted=" + mDeleted
-                + ", mGroup='" + mGroup + '\''
-                + ", mAudioAttributes=" + mAudioAttributes
-                + ", mBlockableSystem=" + mBlockableSystem
-                + ", mAllowBubbles=" + mAllowBubbles
-                + ", mImportanceLockedByOEM=" + mImportanceLockedByOEM
-                + ", mImportanceLockedDefaultApp=" + mImportanceLockedDefaultApp
-                + ", mOriginalImp=" + mOriginalImportance
+                + getFieldsString()
                 + '}';
         pw.println(prefix + output);
     }
@@ -1092,7 +1149,12 @@ public final class NotificationChannel implements Parcelable {
         return "NotificationChannel{"
                 + "mId='" + mId + '\''
                 + ", mName=" + mName
-                + ", mDescription=" + (!TextUtils.isEmpty(mDesc) ? "hasDescription " : "")
+                + getFieldsString()
+                + '}';
+    }
+
+    private String getFieldsString() {
+        return  ", mDescription=" + (!TextUtils.isEmpty(mDesc) ? "hasDescription " : "")
                 + ", mImportance=" + mImportance
                 + ", mBypassDnd=" + mBypassDnd
                 + ", mLockscreenVisibility=" + mLockscreenVisibility
@@ -1112,7 +1174,8 @@ public final class NotificationChannel implements Parcelable {
                 + ", mImportanceLockedByOEM=" + mImportanceLockedByOEM
                 + ", mImportanceLockedDefaultApp=" + mImportanceLockedDefaultApp
                 + ", mOriginalImp=" + mOriginalImportance
-                + '}';
+                + ", mParent=" + mParentId
+                + ", mConversationId" + mConversationId;
     }
 
     /** @hide */

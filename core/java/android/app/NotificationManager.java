@@ -843,6 +843,25 @@ public class NotificationManager {
     }
 
     /**
+     * Returns the notification channel settings for a given channel and conversation id.
+     *
+     * <p>The channel must belong to your package, or to a package you are an approved notification
+     * delegate for (see {@link #canNotifyAsPackage(String)}), or it will not be returned. To query
+     * a channel as a notification delegate, call this method from a context created for that
+     * package (see {@link Context#createPackageContext(String, int)}).</p>
+     */
+    public @Nullable NotificationChannel getNotificationChannel(@NonNull String channelId,
+            @NonNull String conversationId) {
+        INotificationManager service = getService();
+        try {
+            return service.getConversationNotificationChannel(mContext.getOpPackageName(),
+                    mContext.getUserId(), mContext.getPackageName(), channelId, conversationId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns all notification channels belonging to the calling package.
      *
      * <p>Approved notification delegates (see {@link #canNotifyAsPackage(String)}) can query

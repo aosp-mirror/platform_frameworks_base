@@ -43,7 +43,8 @@ public class NotificationChannelExtractor implements NotificationSignalExtractor
         }
 
         record.updateNotificationChannel(mConfig.getNotificationChannel(record.sbn.getPackageName(),
-                record.sbn.getUid(), record.getChannel().getId(), false));
+                record.sbn.getUid(), record.getChannel().getId(),
+                record.getNotification().getShortcutId(), false));
 
         return null;
     }

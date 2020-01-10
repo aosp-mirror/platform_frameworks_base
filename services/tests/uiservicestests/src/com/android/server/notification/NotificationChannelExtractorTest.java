@@ -20,7 +20,6 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
 import static org.mockito.Matchers.any;
@@ -65,11 +64,10 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
 
         NotificationChannel updatedChannel =
                 new NotificationChannel("a", "", IMPORTANCE_HIGH);
-        when(mConfig.getNotificationChannel(any(), anyInt(), eq("a"), eq(false)))
+        when(mConfig.getNotificationChannel(any(), anyInt(), eq("a"), eq(null), eq(false)))
                 .thenReturn(updatedChannel);
 
         assertNull(extractor.process(r));
         assertEquals(updatedChannel, r.getChannel());
     }
-
 }
