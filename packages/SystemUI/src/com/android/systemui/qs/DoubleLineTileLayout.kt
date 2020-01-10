@@ -68,7 +68,7 @@ class DoubleLineTileLayout(context: Context) : ViewGroup(context), QSPanel.QSTil
     override fun updateResources(): Boolean {
         with(mContext.resources) {
             smallTileSize = getDimensionPixelSize(R.dimen.qs_quick_tile_size)
-            cellMarginHorizontal = getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal)
+            cellMarginHorizontal = getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal) / 2
             cellMarginVertical = getDimensionPixelSize(R.dimen.new_qs_vertical_margin)
         }
         requestLayout()

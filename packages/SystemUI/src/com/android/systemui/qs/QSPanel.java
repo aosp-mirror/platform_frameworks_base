@@ -184,21 +184,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         // Add media carousel
         if (useQsMediaPlayer(context)) {
-            HorizontalScrollView mediaScrollView = new HorizontalScrollView(mContext);
-            mediaScrollView.setHorizontalScrollBarEnabled(false);
-            int playerHeight = (int) getResources().getDimension(R.dimen.qs_media_height);
-            int padding = (int) getResources().getDimension(R.dimen.qs_media_padding);
-            LayoutParams lpView = new LayoutParams(LayoutParams.MATCH_PARENT, playerHeight);
-            lpView.setMarginStart(padding);
-            lpView.setMarginEnd(padding);
-            addView(mediaScrollView, lpView);
-
-            LayoutParams lpCarousel = new LayoutParams(LayoutParams.MATCH_PARENT,
-                    LayoutParams.WRAP_CONTENT);
-            mMediaCarousel = new LinearLayout(mContext);
-            mMediaCarousel.setOrientation(LinearLayout.HORIZONTAL);
-            mediaScrollView.addView(mMediaCarousel, lpCarousel);
-            mediaScrollView.setVisibility(View.GONE);
+            HorizontalScrollView mediaScrollView = (HorizontalScrollView) LayoutInflater.from(
+                    mContext).inflate(R.layout.media_carousel, this, false);
+            mMediaCarousel = mediaScrollView.findViewById(R.id.media_carousel);
+            addView(mediaScrollView);
         } else {
             mMediaCarousel = null;
         }

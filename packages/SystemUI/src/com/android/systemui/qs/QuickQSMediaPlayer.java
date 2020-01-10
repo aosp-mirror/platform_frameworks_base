@@ -106,7 +106,7 @@ public class QuickQSMediaPlayer {
                     }
                 }
             });
-            btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_replay));
+            btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_play));
             btn.setImageTintList(ColorStateList.valueOf(mForegroundColor));
             btn.setVisibility(View.VISIBLE);
         }
@@ -136,14 +136,25 @@ public class QuickQSMediaPlayer {
      * @param actionsContainer a LinearLayout containing the media action buttons
      * @param actionsToShow indices of which actions to display in the mini player
      *                      (max 3: Notification.MediaStyle.MAX_MEDIA_BUTTONS_IN_COMPACT)
+     * @param contentIntent Intent to send when user taps on the view
      */
     public void setMediaSession(MediaSession.Token token, Icon icon, int iconColor, int bgColor,
-            View actionsContainer, int[] actionsToShow) {
-        Log.d(TAG, "Setting media session: " + token);
+            View actionsContainer, int[] actionsToShow, PendingIntent contentIntent) {
         mToken = token;
         mForegroundColor = iconColor;
         mBackgroundColor = bgColor;
-        mController = new MediaController(mContext, token);
+
+        String oldPackage = "";
+        if (mController != null) {
+            oldPackage = mController.getPackageName();
+        }
+        MediaController controller = new MediaController(mContext, token);
+        boolean samePlayer = mToken.equals(token) && oldPackage.equals(controller.getPackageName());
+        if (mController != null && !samePlayer && !isPlaying(controller)) {
+            // Only update if this is a different session and currently playing
+            return;
+        }
+        mController = controller;
         MediaMetadata mMediaMetadata = mController.getMetadata();
 
         // Try to find a receiver for the media button that matches this app
@@ -153,7 +164,6 @@ public class QuickQSMediaPlayer {
         if (info != null) {
             for (ResolveInfo inf : info) {
                 if (inf.activityInfo.packageName.equals(mController.getPackageName())) {
-                    Log.d(TAG, "Found receiver for package: " + inf);
                     mRecvComponent = inf.getComponentInfo().getComponentName();
                 }
             }
@@ -164,6 +174,16 @@ public class QuickQSMediaPlayer {
             Log.e(TAG, "Media metadata was null");
             return;
         }
+
+        // Action
+        mMediaNotifView.setOnClickListener(v -> {
+            try {
+                contentIntent.send();
+                mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+            } catch (PendingIntent.CanceledException e) {
+                Log.e(TAG, "Pending intent was canceled: " + e.getMessage());
+            }
+        });
 
         // Album art
         addAlbumArtBackground(mMediaMetadata, mBackgroundColor);
@@ -237,12 +257,12 @@ public class QuickQSMediaPlayer {
      * Check whether the media controlled by this player is currently playing
      * @return whether it is playing, or false if no controller information
      */
-    public boolean isPlaying() {
-        if (mController == null) {
+    public boolean isPlaying(MediaController controller) {
+        if (controller == null) {
             return false;
         }
 
-        PlaybackState state = mController.getPlaybackState();
+        PlaybackState state = controller.getPlaybackState();
         if (state == null) {
             return false;
         }
@@ -261,12 +281,11 @@ public class QuickQSMediaPlayer {
     private void addAlbumArtBackground(MediaMetadata metadata, int bgColor) {
         Bitmap albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
         float radius = mContext.getResources().getDimension(R.dimen.qs_media_corner_radius);
-        if (albumArt != null) {
-            Rect bounds = new Rect();
-            mMediaNotifView.getBoundsOnScreen(bounds);
-            int width = bounds.width();
-            int height = bounds.height();
-
+        Rect bounds = new Rect();
+        mMediaNotifView.getBoundsOnScreen(bounds);
+        int width = bounds.width();
+        int height = bounds.height();
+        if (albumArt != null && width > 0 && height > 0) {
             Bitmap original = albumArt.copy(Bitmap.Config.ARGB_8888, true);
             Bitmap scaled = scaleBitmap(original, width, height);
             Canvas canvas = new Canvas(scaled);
