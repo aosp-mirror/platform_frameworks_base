@@ -27,6 +27,9 @@ namespace protos {
 class GraphicsStatsProto;
 }
 
+typedef void (*DumpMemoryFn)(void* buffer, int bufferOffset, int bufferSize, int totalSize,
+                             void* param1, void* param2);
+
 /*
  * The exported entry points used by GraphicsStatsService.java in f/b/services/core
  *
@@ -40,6 +43,7 @@ public:
     enum class DumpType {
         Text,
         Protobuf,
+        ProtobufStatsd,
     };
 
     ANDROID_API static void saveBuffer(const std::string& path, const std::string& package,
@@ -52,6 +56,8 @@ public:
                                       int64_t startTime, int64_t endTime, const ProfileData* data);
     ANDROID_API static void addToDump(Dump* dump, const std::string& path);
     ANDROID_API static void finishDump(Dump* dump);
+    ANDROID_API static void finishDumpInMemory(Dump* dump, const DumpMemoryFn& reader, void* param1,
+                                               void* param2);
 
     // Visible for testing
     static bool parseFromFile(const std::string& path, protos::GraphicsStatsProto* output);

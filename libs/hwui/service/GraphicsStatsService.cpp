@@ -16,24 +16,28 @@
 
 #include "GraphicsStatsService.h"
 
-#include "JankTracker.h"
-#include "protos/graphicsstats.pb.h"
-
-#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
-#include <log/log.h>
-
 #include <errno.h>
 #include <fcntl.h>
+#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <inttypes.h>
+#include <log/log.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <algorithm>
+#include <map>
+#include <vector>
+
+#include "JankTracker.h"
+#include "protos/graphicsstats.pb.h"
+
 namespace android {
 namespace uirenderer {
 
 using namespace google::protobuf;
+using namespace uirenderer::protos;
 
 constexpr int32_t sCurrentFileVersion = 1;
 constexpr int32_t sHeaderSize = 4;
@@ -42,9 +46,9 @@ static_assert(sizeof(sCurrentFileVersion) == sHeaderSize, "Header size is wrong"
 constexpr int sHistogramSize = ProfileData::HistogramSize();
 constexpr int sGPUHistogramSize = ProfileData::GPUHistogramSize();
 
-static bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto,
-                                      const std::string& package, int64_t versionCode,
-                                      int64_t startTime, int64_t endTime, const ProfileData* data);
+static bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto, const std::string& package,
+                                      int64_t versionCode, int64_t startTime, int64_t endTime,
+                                      const ProfileData* data);
 static void dumpAsTextToFd(protos::GraphicsStatsProto* proto, int outFd);
 
 class FileDescriptor {
@@ -57,7 +61,7 @@ public:
         }
     }
     bool valid() { return mFd != -1; }
-    operator int() { return mFd; } // NOLINT(google-explicit-constructor)
+    operator int() { return mFd; }  // NOLINT(google-explicit-constructor)
 
 private:
     int mFd;
@@ -167,6 +171,8 @@ bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto, const std::str
     }
     proto->set_package_name(package);
     proto->set_version_code(versionCode);
+    proto->set_pipeline(data->pipelineType() == RenderPipelineType::SkiaGL ?
+            GraphicsStatsProto_PipelineType_GL : GraphicsStatsProto_PipelineType_VULKAN);
     auto summary = proto->mutable_summary();
     summary->set_total_frames(summary->total_frames() + data->totalFrameCount());
     summary->set_janky_frames(summary->janky_frames() + data->jankFrameCount());
@@ -179,8 +185,8 @@ bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto, const std::str
     summary->set_slow_bitmap_upload_count(summary->slow_bitmap_upload_count() +
                                           data->jankTypeCount(kSlowSync));
     summary->set_slow_draw_count(summary->slow_draw_count() + data->jankTypeCount(kSlowRT));
-    summary->set_missed_deadline_count(summary->missed_deadline_count()
-            + data->jankTypeCount(kMissedDeadline));
+    summary->set_missed_deadline_count(summary->missed_deadline_count() +
+                                       data->jankTypeCount(kMissedDeadline));
 
     bool creatingHistogram = false;
     if (proto->histogram_size() == 0) {
@@ -365,16 +371,68 @@ void GraphicsStatsService::saveBuffer(const std::string& path, const std::string
 
 class GraphicsStatsService::Dump {
 public:
-    Dump(int outFd, DumpType type) : mFd(outFd), mType(type) {}
+    Dump(int outFd, DumpType type) : mFd(outFd), mType(type) {
+        if (mFd == -1 && mType == DumpType::Protobuf) {
+            mType = DumpType::ProtobufStatsd;
+        }
+    }
     int fd() { return mFd; }
     DumpType type() { return mType; }
     protos::GraphicsStatsServiceDumpProto& proto() { return mProto; }
+    void mergeStat(const protos::GraphicsStatsProto& stat);
+    void updateProto();
 
 private:
+    // use package name and app version for a key
+    typedef std::pair<std::string, int64_t> DumpKey;
+
+    std::map<DumpKey, protos::GraphicsStatsProto> mStats;
     int mFd;
     DumpType mType;
     protos::GraphicsStatsServiceDumpProto mProto;
 };
+
+void GraphicsStatsService::Dump::mergeStat(const protos::GraphicsStatsProto& stat) {
+    auto dumpKey = std::make_pair(stat.package_name(), stat.version_code());
+    auto findIt = mStats.find(dumpKey);
+    if (findIt == mStats.end()) {
+        mStats[dumpKey] = stat;
+    } else {
+        auto summary = findIt->second.mutable_summary();
+        summary->set_total_frames(summary->total_frames() + stat.summary().total_frames());
+        summary->set_janky_frames(summary->janky_frames() + stat.summary().janky_frames());
+        summary->set_missed_vsync_count(summary->missed_vsync_count() +
+                                        stat.summary().missed_vsync_count());
+        summary->set_high_input_latency_count(summary->high_input_latency_count() +
+                                              stat.summary().high_input_latency_count());
+        summary->set_slow_ui_thread_count(summary->slow_ui_thread_count() +
+                                          stat.summary().slow_ui_thread_count());
+        summary->set_slow_bitmap_upload_count(summary->slow_bitmap_upload_count() +
+                                              stat.summary().slow_bitmap_upload_count());
+        summary->set_slow_draw_count(summary->slow_draw_count() + stat.summary().slow_draw_count());
+        summary->set_missed_deadline_count(summary->missed_deadline_count() +
+                                           stat.summary().missed_deadline_count());
+        for (int bucketIndex = 0; bucketIndex < findIt->second.histogram_size(); bucketIndex++) {
+            auto bucket = findIt->second.mutable_histogram(bucketIndex);
+            bucket->set_frame_count(bucket->frame_count() +
+                                    stat.histogram(bucketIndex).frame_count());
+        }
+        for (int bucketIndex = 0; bucketIndex < findIt->second.gpu_histogram_size();
+             bucketIndex++) {
+            auto bucket = findIt->second.mutable_gpu_histogram(bucketIndex);
+            bucket->set_frame_count(bucket->frame_count() +
+                                    stat.gpu_histogram(bucketIndex).frame_count());
+        }
+        findIt->second.set_stats_start(std::min(findIt->second.stats_start(), stat.stats_start()));
+        findIt->second.set_stats_end(std::max(findIt->second.stats_end(), stat.stats_end()));
+    }
+}
+
+void GraphicsStatsService::Dump::updateProto() {
+    for (auto& stat : mStats) {
+        mProto.add_stats()->CopyFrom(stat.second);
+    }
+}
 
 GraphicsStatsService::Dump* GraphicsStatsService::createDump(int outFd, DumpType type) {
     return new Dump(outFd, type);
@@ -396,8 +454,9 @@ void GraphicsStatsService::addToDump(Dump* dump, const std::string& path,
               path.empty() ? "<empty>" : path.c_str(), data);
         return;
     }
-
-    if (dump->type() == DumpType::Protobuf) {
+    if (dump->type() == DumpType::ProtobufStatsd) {
+        dump->mergeStat(statsProto);
+    } else if (dump->type() == DumpType::Protobuf) {
         dump->proto().add_stats()->CopyFrom(statsProto);
     } else {
         dumpAsTextToFd(&statsProto, dump->fd());
@@ -409,7 +468,9 @@ void GraphicsStatsService::addToDump(Dump* dump, const std::string& path) {
     if (!parseFromFile(path, &statsProto)) {
         return;
     }
-    if (dump->type() == DumpType::Protobuf) {
+    if (dump->type() == DumpType::ProtobufStatsd) {
+        dump->mergeStat(statsProto);
+    } else if (dump->type() == DumpType::Protobuf) {
         dump->proto().add_stats()->CopyFrom(statsProto);
     } else {
         dumpAsTextToFd(&statsProto, dump->fd());
@@ -422,6 +483,80 @@ void GraphicsStatsService::finishDump(Dump* dump) {
         dump->proto().SerializeToZeroCopyStream(&stream);
     }
     delete dump;
+}
+
+class MemOutputStreamLite : public io::ZeroCopyOutputStream {
+public:
+    explicit MemOutputStreamLite() : mCopyAdapter(), mImpl(&mCopyAdapter) {}
+    virtual ~MemOutputStreamLite() {}
+
+    virtual bool Next(void** data, int* size) override { return mImpl.Next(data, size); }
+
+    virtual void BackUp(int count) override { mImpl.BackUp(count); }
+
+    virtual int64 ByteCount() const override { return mImpl.ByteCount(); }
+
+    bool Flush() { return mImpl.Flush(); }
+
+    void copyData(const DumpMemoryFn& reader, void* param1, void* param2) {
+        int bufferOffset = 0;
+        int totalSize = mCopyAdapter.mBuffersSize - mCopyAdapter.mCurrentBufferUnusedSize;
+        int totalDataLeft = totalSize;
+        for (auto& it : mCopyAdapter.mBuffers) {
+            int bufferSize = std::min(totalDataLeft, (int)it.size());  // last buffer is not full
+            reader(it.data(), bufferOffset, bufferSize, totalSize, param1, param2);
+            bufferOffset += bufferSize;
+            totalDataLeft -= bufferSize;
+        }
+    }
+
+private:
+    struct MemAdapter : public io::CopyingOutputStream {
+        // Data is stored in an array of buffers.
+        // JNI SetByteArrayRegion assembles data in one continuous Java byte[] buffer.
+        std::vector<std::vector<unsigned char>> mBuffers;
+        int mBuffersSize = 0;                     // total bytes allocated in mBuffers
+        int mCurrentBufferUnusedSize = 0;         // unused bytes in the last buffer mBuffers.back()
+        unsigned char* mCurrentBuffer = nullptr;  // pointer to next free byte in mBuffers.back()
+
+        explicit MemAdapter() {}
+        virtual ~MemAdapter() {}
+
+        virtual bool Write(const void* buffer, int size) override {
+            while (size > 0) {
+                if (0 == mCurrentBufferUnusedSize) {
+                    mCurrentBufferUnusedSize =
+                            std::max(size, mBuffersSize ? 2 * mBuffersSize : 10000);
+                    mBuffers.emplace_back();
+                    mBuffers.back().resize(mCurrentBufferUnusedSize);
+                    mCurrentBuffer = mBuffers.back().data();
+                    mBuffersSize += mCurrentBufferUnusedSize;
+                }
+                int dataMoved = std::min(mCurrentBufferUnusedSize, size);
+                memcpy(mCurrentBuffer, buffer, dataMoved);
+                mCurrentBufferUnusedSize -= dataMoved;
+                mCurrentBuffer += dataMoved;
+                buffer = reinterpret_cast<const unsigned char*>(buffer) + dataMoved;
+                size -= dataMoved;
+            }
+            return true;
+        }
+    };
+
+    MemOutputStreamLite::MemAdapter mCopyAdapter;
+    io::CopyingOutputStreamAdaptor mImpl;
+};
+
+void GraphicsStatsService::finishDumpInMemory(Dump* dump, const DumpMemoryFn& reader, void* param1,
+                                              void* param2) {
+    MemOutputStreamLite stream;
+    dump->updateProto();
+    bool success = dump->proto().SerializeToZeroCopyStream(&stream) && stream.Flush();
+    delete dump;
+    if (!success) {
+        return;
+    }
+    stream.copyData(reader, param1, param2);
 }
 
 } /* namespace uirenderer */

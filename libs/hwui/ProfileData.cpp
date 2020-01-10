@@ -15,6 +15,7 @@
  */
 
 #include "ProfileData.h"
+#include "Properties.h"
 
 #include <cinttypes>
 
@@ -102,6 +103,7 @@ void ProfileData::mergeWith(const ProfileData& other) {
         mGPUFrameCounts[i] >>= divider;
         mGPUFrameCounts[i] += other.mGPUFrameCounts[i];
     }
+    mPipelineType = other.mPipelineType;
 }
 
 void ProfileData::dump(int fd) const {
@@ -157,6 +159,7 @@ void ProfileData::reset() {
     mTotalFrameCount = 0;
     mJankFrameCount = 0;
     mStatStartTime = systemTime(SYSTEM_TIME_MONOTONIC);
+    mPipelineType = Properties::getRenderPipelineType();
 }
 
 void ProfileData::reportFrame(int64_t duration) {

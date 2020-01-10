@@ -32,6 +32,10 @@ message GraphicsStatsServiceDumpProto {
 }
 
 message GraphicsStatsProto {
+    enum PipelineType {
+        GL = 0;
+        VULKAN = 1;
+    }
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // The package name of the app
@@ -54,6 +58,9 @@ message GraphicsStatsProto {
 
     // The gpu frame time histogram for the package
     repeated GraphicsStatsHistogramBucketProto gpu_histogram = 7;
+
+    // HWUI renders pipeline type: GL or Vulkan
+    optional PipelineType pipeline = 8;
 }
 
 message GraphicsStatsJankSummaryProto {
