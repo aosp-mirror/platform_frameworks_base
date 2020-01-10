@@ -183,6 +183,9 @@
 
     <uses-permission android:name="android.permission.MANAGE_APPOPS" />
 
+    <!-- Permission required for storage tests - FuseDaemonHostTest -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+
     <!-- Permission needed to run network tests in CTS -->
     <uses-permission android:name="android.permission.MANAGE_TEST_NETWORKS" />
     <!-- Permission needed to test tcp keepalive offload. -->
