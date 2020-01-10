@@ -4005,21 +4005,128 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             PackageManagerServiceUtils.enforceShellRestriction(mUserManagerInt,
                     UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
         }
-        if (!requirePermissionWhenSameUser && userId == UserHandle.getUserId(callingUid)) return;
-        if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID) {
-            if (requireFullPermission) {
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
-            } else {
-                try {
-                    mContext.enforceCallingOrSelfPermission(
-                            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
-                } catch (SecurityException se) {
-                    mContext.enforceCallingOrSelfPermission(
-                            android.Manifest.permission.INTERACT_ACROSS_USERS, message);
-                }
-            }
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (hasCrossUserPermission(
+                callingUid, callingUserId, userId, requireFullPermission,
+                requirePermissionWhenSameUser)) {
+            return;
         }
+        String errorMessage = buildInvalidCrossUserPermissionMessage(
+                message, requireFullPermission);
+        Slog.w(TAG, errorMessage);
+        throw new SecurityException(errorMessage);
+    }
+
+    /**
+     * Checks if the request is from the system or an app that has the appropriate cross-user
+     * permissions defined as follows:
+     * <ul>
+     * <li>INTERACT_ACROSS_USERS_FULL if {@code requireFullPermission} is true.</li>
+     * <li>INTERACT_ACROSS_USERS if the given {@userId} is in a different profile group
+     * to the caller.</li>
+     * <li>Otherwise, INTERACT_ACROSS_PROFILES if the given {@userId} is in the same profile group
+     * as the caller.</li>
+     * </ul>
+     *
+     * @param checkShell whether to prevent shell from access if there's a debugging restriction
+     * @param message the message to log on security exception
+     */
+    private void enforceCrossUserOrProfilePermission(int callingUid, int userId,
+            boolean requireFullPermission, boolean checkShell,
+            String message) {
+        if (userId < 0) {
+            throw new IllegalArgumentException("Invalid userId " + userId);
+        }
+        if (checkShell) {
+            PackageManagerServiceUtils.enforceShellRestriction(mUserManagerInt,
+                    UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
+        }
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (hasCrossUserPermission(callingUid, callingUserId, userId, requireFullPermission,
+                /*requirePermissionWhenSameUser= */ false)) {
+            return;
+        }
+        final boolean isSameProfileGroup = isSameProfileGroup(callingUserId, userId);
+        if (isSameProfileGroup
+                && hasPermission(android.Manifest.permission.INTERACT_ACROSS_PROFILES)) {
+            return;
+        }
+        String errorMessage = buildInvalidCrossUserOrProfilePermissionMessage(
+                message, requireFullPermission, isSameProfileGroup);
+        Slog.w(TAG, errorMessage);
+        throw new SecurityException(errorMessage);
+    }
+
+    private boolean hasCrossUserPermission(
+            int callingUid, int callingUserId, int userId, boolean requireFullPermission,
+            boolean requirePermissionWhenSameUser) {
+        if (!requirePermissionWhenSameUser && userId == callingUserId) {
+            return true;
+        }
+        if (callingUid == Process.SYSTEM_UID || callingUid == Process.ROOT_UID) {
+            return true;
+        }
+        if (requireFullPermission) {
+            return hasPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+        }
+        return hasPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                || hasPermission(Manifest.permission.INTERACT_ACROSS_USERS);
+    }
+
+    private boolean hasPermission(String permission) {
+        return mContext.checkCallingOrSelfPermission(permission)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean isSameProfileGroup(@UserIdInt int callerUserId, @UserIdInt int userId) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return UserManagerService.getInstance().isSameProfileGroup(callerUserId, userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private static String buildInvalidCrossUserPermissionMessage(
+            String message, boolean requireFullPermission) {
+        StringBuilder builder = new StringBuilder();
+        if (message != null) {
+            builder.append(message);
+            builder.append(": ");
+        }
+        builder.append("Requires ");
+        builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+        if (requireFullPermission) {
+            builder.append(".");
+            return builder.toString();
+        }
+        builder.append(" or ");
+        builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS);
+        builder.append(".");
+        return builder.toString();
+    }
+
+    private static String buildInvalidCrossUserOrProfilePermissionMessage(
+            String message, boolean requireFullPermission, boolean isSameProfileGroup) {
+        StringBuilder builder = new StringBuilder();
+        if (message != null) {
+            builder.append(message);
+            builder.append(": ");
+        }
+        builder.append("Requires ");
+        builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+        if (requireFullPermission) {
+            builder.append(".");
+            return builder.toString();
+        }
+        builder.append(" or ");
+        builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS);
+        if (isSameProfileGroup) {
+            builder.append(" or ");
+            builder.append(android.Manifest.permission.INTERACT_ACROSS_PROFILES);
+        }
+        builder.append(".");
+        return builder.toString();
     }
 
     @GuardedBy({"mSettings.mLock", "mLock"})
@@ -4215,6 +4322,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             PermissionManagerService.this.enforceCrossUserPermission(callingUid, userId,
                     requireFullPermission, checkShell, requirePermissionWhenSameUser, message);
         }
+
+        @Override
+        public void enforceCrossUserOrProfilePermission(int callingUid, int userId,
+                boolean requireFullPermission, boolean checkShell, String message) {
+            PermissionManagerService.this.enforceCrossUserOrProfilePermission(callingUid,
+                    userId,
+                    requireFullPermission,
+                    checkShell,
+                    message);
+        }
+
         @Override
         public void enforceGrantRevokeRuntimePermissionPermissions(String message) {
             PermissionManagerService.this.enforceGrantRevokeRuntimePermissionPermissions(message);

@@ -5344,8 +5344,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
         flags = updateFlagsForComponent(flags, userId);
-        mPermissionManager.enforceCrossUserPermission(callingUid, userId,
-                false /* requireFullPermission */, false /* checkShell */, "get service info");
+        mPermissionManager.enforceCrossUserOrProfilePermission(
+                callingUid, userId, false /* requireFullPermission */, false /* checkShell */,
+                "get service info");
         synchronized (mLock) {
             ParsedService s = mComponentResolver.getService(component);
             if (DEBUG_PACKAGE_INFO) Log.v(
@@ -7795,8 +7796,10 @@ public class PackageManagerService extends IPackageManager.Stub
             String resolvedType, int flags, int userId, int callingUid,
             boolean includeInstantApps) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
-        mPermissionManager.enforceCrossUserPermission(callingUid, userId,
-                false /*requireFullPermission*/, false /*checkShell*/,
+        mPermissionManager.enforceCrossUserOrProfilePermission(callingUid,
+                userId,
+                false /*requireFullPermission*/,
+                false /*checkShell*/,
                 "query intent receivers");
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         flags = updateFlagsForResolve(flags, userId, callingUid, includeInstantApps);

@@ -2068,7 +2068,7 @@ public final class ActiveServices {
                 + " type=" + resolvedType + " callingUid=" + callingUid);
 
         userId = mAm.mUserController.handleIncomingUser(callingPid, callingUid, userId, false,
-                ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE, "service",
+                ActivityManagerInternal.ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE, "service",
                 callingPackage);
 
         ServiceMap smap = getServiceMapLocked(userId);

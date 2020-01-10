@@ -271,6 +271,15 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      */
     public abstract void enforceCrossUserPermission(int callingUid, int userId,
             boolean requireFullPermission, boolean checkShell, @NonNull String message);
+
+    /**
+     * Similar to {@link #enforceCrossUserPermission(int, int, boolean, boolean, String)}
+     * but also allows INTERACT_ACROSS_PROFILES permission if calling user and {@code userId} are
+     * in the same profile group.
+     */
+    public abstract void enforceCrossUserOrProfilePermission(int callingUid, int userId,
+            boolean requireFullPermission, boolean checkShell, @NonNull String message);
+
     /**
      * @see #enforceCrossUserPermission(int, int, boolean, boolean, String)
      * @param requirePermissionWhenSameUser When {@code true}, still require the cross user
