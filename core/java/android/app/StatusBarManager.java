@@ -267,6 +267,7 @@ public class StatusBarManager {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public void expandNotificationsPanel() {
         try {
             final IStatusBarService svc = getService();
@@ -284,6 +285,7 @@ public class StatusBarManager {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public void collapsePanels() {
         try {
             final IStatusBarService svc = getService();
