@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner;
+package android.media.tv.tuner.filter;
 
 import android.annotation.Nullable;
 import android.media.tv.tuner.TunerConstants.Result;
