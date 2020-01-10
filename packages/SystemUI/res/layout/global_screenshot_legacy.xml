@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2020 The Android Open Source Project
+<!-- Copyright (C) 2011 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -16,36 +16,27 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <ImageView android:id="@+id/global_screenshot_background"
+    <ImageView android:id="@+id/global_screenshot_legacy_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@android:color/black"
         android:visibility="gone" />
-    <ImageView android:id="@+id/global_screenshot"
+    <ImageView android:id="@+id/global_screenshot_legacy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@drawable/screenshot_panel"
         android:visibility="gone"
         android:adjustViewBounds="true" />
-    <ImageView android:id="@+id/global_screenshot_flash"
+    <ImageView android:id="@+id/global_screenshot_legacy_flash"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@android:color/white"
         android:visibility="gone" />
     <com.android.systemui.screenshot.ScreenshotSelectorView
-        android:id="@+id/global_screenshot_selector"
+        android:id="@+id/global_screenshot_legacy_selector"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
         android:pointerIcon="crosshair"/>
-    <LinearLayout
-        android:id="@+id/global_screenshot_actions"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center"
-        android:gravity="center"
-        android:paddingVertical="@dimen/screenshot_action_container_padding"
-        android:visibility="gone"
-        android:background="@drawable/action_chip_container_background"/>
 </FrameLayout>
