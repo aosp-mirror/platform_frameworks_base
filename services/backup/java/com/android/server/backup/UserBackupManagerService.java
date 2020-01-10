@@ -3545,14 +3545,7 @@ public class UserBackupManagerService {
         try {
             if (args != null) {
                 for (String arg : args) {
-                    if ("-h".equals(arg)) {
-                        pw.println("'dumpsys backup' optional arguments:");
-                        pw.println("  -h       : this help text");
-                        pw.println("  a[gents] : dump information about defined backup agents");
-                        pw.println("  users    : dump the list of users for which backup service "
-                                + "is running");
-                        return;
-                    } else if ("agents".startsWith(arg)) {
+                    if ("agents".startsWith(arg)) {
                         dumpAgents(pw);
                         return;
                     } else if ("transportclients".equals(arg.toLowerCase())) {
@@ -3583,8 +3576,10 @@ public class UserBackupManagerService {
     }
 
     private void dumpInternal(PrintWriter pw) {
+        // Add prefix for only non-system users so that system user dumpsys is the same as before
+        String userPrefix = mUserId == UserHandle.USER_SYSTEM ? "" : "User " + mUserId + ":";
         synchronized (mQueueLock) {
-            pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled")
+            pw.println(userPrefix + "Backup Manager is " + (mEnabled ? "enabled" : "disabled")
                     + " / " + (!mSetupComplete ? "not " : "") + "setup complete / "
                     + (this.mPendingInits.size() == 0 ? "not " : "") + "pending init");
             pw.println("Auto-restore is " + (mAutoRestore ? "enabled" : "disabled"));
@@ -3594,13 +3589,13 @@ public class UserBackupManagerService {
                     + " (now = " + System.currentTimeMillis() + ')');
             pw.println("  next scheduled: " + KeyValueBackupJob.nextScheduled(mUserId));
 
-            pw.println("Transport whitelist:");
+            pw.println(userPrefix + "Transport whitelist:");
             for (ComponentName transport : mTransportManager.getTransportWhitelist()) {
                 pw.print("    ");
                 pw.println(transport.flattenToShortString());
             }
 
-            pw.println("Available transports:");
+            pw.println(userPrefix + "Available transports:");
             final String[] transports = listAllTransports();
             if (transports != null) {
                 for (String t : transports) {
@@ -3626,18 +3621,18 @@ public class UserBackupManagerService {
 
             mTransportManager.dumpTransportClients(pw);
 
-            pw.println("Pending init: " + mPendingInits.size());
+            pw.println(userPrefix + "Pending init: " + mPendingInits.size());
             for (String s : mPendingInits) {
                 pw.println("    " + s);
             }
 
-            pw.print("Ancestral: ");
+            pw.print(userPrefix + "Ancestral: ");
             pw.println(Long.toHexString(mAncestralToken));
-            pw.print("Current:   ");
+            pw.print(userPrefix + "Current:   ");
             pw.println(Long.toHexString(mCurrentToken));
 
             int numPackages = mBackupParticipants.size();
-            pw.println("Participants:");
+            pw.println(userPrefix + "Participants:");
             for (int i = 0; i < numPackages; i++) {
                 int uid = mBackupParticipants.keyAt(i);
                 pw.print("  uid: ");
@@ -3648,7 +3643,7 @@ public class UserBackupManagerService {
                 }
             }
 
-            pw.println("Ancestral packages: "
+            pw.println(userPrefix + "Ancestral packages: "
                     + (mAncestralPackages == null ? "none" : mAncestralPackages.size()));
             if (mAncestralPackages != null) {
                 for (String pkg : mAncestralPackages) {
@@ -3657,17 +3652,17 @@ public class UserBackupManagerService {
             }
 
             Set<String> processedPackages = mProcessedPackagesJournal.getPackagesCopy();
-            pw.println("Ever backed up: " + processedPackages.size());
+            pw.println(userPrefix + "Ever backed up: " + processedPackages.size());
             for (String pkg : processedPackages) {
                 pw.println("    " + pkg);
             }
 
-            pw.println("Pending key/value backup: " + mPendingBackups.size());
+            pw.println(userPrefix + "Pending key/value backup: " + mPendingBackups.size());
             for (BackupRequest req : mPendingBackups.values()) {
                 pw.println("    " + req);
             }
 
-            pw.println("Full backup queue:" + mFullBackupQueue.size());
+            pw.println(userPrefix + "Full backup queue:" + mFullBackupQueue.size());
             for (FullBackupEntry entry : mFullBackupQueue) {
                 pw.print("    ");
                 pw.print(entry.lastBackup);
