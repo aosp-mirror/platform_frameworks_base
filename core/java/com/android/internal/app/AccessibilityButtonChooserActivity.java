@@ -16,6 +16,7 @@
 package com.android.internal.app;
 
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -24,13 +25,17 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
+import android.util.ArraySet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,7 +54,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.StringJoiner;
 
 /**
  * Activity used to display and persist a service or feature target for the Accessibility button.
@@ -59,10 +67,44 @@ public class AccessibilityButtonChooserActivity extends Activity {
     private static final String MAGNIFICATION_COMPONENT_ID =
             "com.android.server.accessibility.MagnificationController";
 
+    private static final char SERVICES_SEPARATOR = ':';
+    private static final TextUtils.SimpleStringSplitter sStringColonSplitter =
+            new TextUtils.SimpleStringSplitter(SERVICES_SEPARATOR);
+    private static final int ACCESSIBILITY_BUTTON_USER_TYPE = convertToUserType(
+            ACCESSIBILITY_BUTTON);
+    private static final int ACCESSIBILITY_SHORTCUT_KEY_USER_TYPE = convertToUserType(
+            ACCESSIBILITY_SHORTCUT_KEY);
+
     private int mShortcutType;
     private List<AccessibilityButtonTarget> mTargets = new ArrayList<>();
     private AlertDialog mAlertDialog;
     private TargetAdapter mTargetAdapter;
+
+    /**
+     * Annotation for different user shortcut type UI type.
+     *
+     * {@code DEFAULT} for displaying default value.
+     * {@code SOFTWARE} for displaying specifying the accessibility services or features which
+     * choose accessibility button in the navigation bar as preferred shortcut.
+     * {@code HARDWARE} for displaying specifying the accessibility services or features which
+     * choose accessibility shortcut as preferred shortcut.
+     * {@code TRIPLETAP} for displaying specifying magnification to be toggled via quickly
+     * tapping screen 3 times as preferred shortcut.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            UserShortcutType.DEFAULT,
+            UserShortcutType.SOFTWARE,
+            UserShortcutType.HARDWARE,
+            UserShortcutType.TRIPLETAP,
+    })
+    /** Denotes the user shortcut type. */
+    public @interface UserShortcutType {
+        int DEFAULT = 0;
+        int SOFTWARE = 1; // 1 << 0
+        int HARDWARE = 2; // 1 << 1
+        int TRIPLETAP = 4; // 1 << 2
+    }
 
     /**
      * Annotation for different accessibilityService fragment UI type.
@@ -395,16 +437,60 @@ public class AccessibilityButtonChooserActivity extends Activity {
     }
 
     private void onTargetDeleted(AdapterView<?> parent, View view, int position, long id) {
-        // TODO(b/146967898): disable service when deleting the target and the target only have
-        //  last one shortcut item, only remove it from shortcut list otherwise.
-        if ((mShortcutType == ACCESSIBILITY_BUTTON) && (mTargets.get(position).mFragmentType
-                != AccessibilityServiceFragmentType.LEGACY)) {
-            mTargets.remove(position);
-            mTargetAdapter.notifyDataSetChanged();
+        final AccessibilityButtonTarget target = mTargets.get(position);
+        final ComponentName targetComponentName =
+                ComponentName.unflattenFromString(target.getId());
+
+        switch (target.getFragmentType()) {
+            case AccessibilityServiceFragmentType.INVISIBLE:
+                onInvisibleTargetDeleted(targetComponentName);
+                break;
+            case AccessibilityServiceFragmentType.INTUITIVE:
+                onIntuitiveTargetDeleted(targetComponentName);
+                break;
+            case AccessibilityServiceFragmentType.LEGACY:
+            case AccessibilityServiceFragmentType.BOUNCE:
+                // Do nothing
+                break;
+            default:
+                throw new IllegalStateException("Unexpected fragment type");
         }
+
+        mTargets.remove(position);
+        mTargetAdapter.notifyDataSetChanged();
 
         if (mTargets.isEmpty()) {
             mAlertDialog.dismiss();
+        }
+    }
+
+    private void onInvisibleTargetDeleted(ComponentName componentName) {
+        if (mShortcutType == ACCESSIBILITY_BUTTON) {
+            optOutValueFromSettings(this, ACCESSIBILITY_BUTTON_USER_TYPE, componentName);
+
+            if (!hasValueInSettings(this,
+                    ACCESSIBILITY_SHORTCUT_KEY_USER_TYPE, componentName)) {
+                setAccessibilityServiceState(this, componentName, /* enabled= */ false);
+            }
+        } else if (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
+            optOutValueFromSettings(this, ACCESSIBILITY_SHORTCUT_KEY_USER_TYPE, componentName);
+
+            if (!hasValueInSettings(this,
+                    ACCESSIBILITY_BUTTON_USER_TYPE, componentName)) {
+                setAccessibilityServiceState(this, componentName, /* enabled= */ false);
+            }
+        } else {
+            throw new IllegalArgumentException("Unsupported shortcut type:" + mShortcutType);
+        }
+    }
+
+    private void onIntuitiveTargetDeleted(ComponentName componentName) {
+        if (mShortcutType == ACCESSIBILITY_BUTTON) {
+            optOutValueFromSettings(this, ACCESSIBILITY_BUTTON_USER_TYPE, componentName);
+        } else if (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
+            optOutValueFromSettings(this, ACCESSIBILITY_SHORTCUT_KEY_USER_TYPE, componentName);
+        } else {
+            throw new IllegalArgumentException("Unsupported shortcut type:" + mShortcutType);
         }
     }
 
@@ -436,5 +522,167 @@ public class AccessibilityButtonChooserActivity extends Activity {
                 isEditMenuMode ? view -> onCancelButtonClicked() : view -> onEditButtonClicked());
         mAlertDialog.getListView().setOnItemClickListener(
                 isEditMenuMode ? this::onTargetDeleted : this::onTargetSelected);
+    }
+
+    /**
+     * @return the set of enabled accessibility services for {@param userId}. If there are no
+     * services, it returns the unmodifiable {@link Collections#emptySet()}.
+     */
+    private Set<ComponentName> getEnabledServicesFromSettings(Context context, int userId) {
+        final String enabledServicesSetting = Settings.Secure.getStringForUser(
+                context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                userId);
+        if (TextUtils.isEmpty(enabledServicesSetting)) {
+            return Collections.emptySet();
+        }
+
+        final Set<ComponentName> enabledServices = new HashSet<>();
+        final TextUtils.StringSplitter colonSplitter =
+                new TextUtils.SimpleStringSplitter(SERVICES_SEPARATOR);
+        colonSplitter.setString(enabledServicesSetting);
+
+        for (String componentNameString : colonSplitter) {
+            final ComponentName enabledService = ComponentName.unflattenFromString(
+                    componentNameString);
+            if (enabledService != null) {
+                enabledServices.add(enabledService);
+            }
+        }
+
+        return enabledServices;
+    }
+
+    /**
+     * Changes an accessibility component's state.
+     */
+    private void setAccessibilityServiceState(Context context, ComponentName componentName,
+            boolean enabled) {
+        setAccessibilityServiceState(context, componentName, enabled, UserHandle.myUserId());
+    }
+
+    /**
+     * Changes an accessibility component's state for {@param userId}.
+     */
+    private void setAccessibilityServiceState(Context context, ComponentName componentName,
+            boolean enabled, int userId) {
+        Set<ComponentName> enabledServices = getEnabledServicesFromSettings(
+                context, userId);
+
+        if (enabledServices.isEmpty()) {
+            enabledServices = new ArraySet<>(/* capacity= */ 1);
+        }
+
+        if (enabled) {
+            enabledServices.add(componentName);
+        } else {
+            enabledServices.remove(componentName);
+        }
+
+        final StringBuilder enabledServicesBuilder = new StringBuilder();
+        for (ComponentName enabledService : enabledServices) {
+            enabledServicesBuilder.append(enabledService.flattenToString());
+            enabledServicesBuilder.append(
+                    SERVICES_SEPARATOR);
+        }
+
+        final int enabledServicesBuilderLength = enabledServicesBuilder.length();
+        if (enabledServicesBuilderLength > 0) {
+            enabledServicesBuilder.deleteCharAt(enabledServicesBuilderLength - 1);
+        }
+
+        Settings.Secure.putStringForUser(context.getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                enabledServicesBuilder.toString(), userId);
+    }
+
+    /**
+     * Opts out component name into colon-separated {@code shortcutType} key's string in Settings.
+     *
+     * @param context The current context.
+     * @param shortcutType The preferred shortcut type user selected.
+     * @param componentName The component name that need to be opted out from Settings.
+     */
+    private void optOutValueFromSettings(
+            Context context, int shortcutType, ComponentName componentName) {
+        final StringJoiner joiner = new StringJoiner(String.valueOf(SERVICES_SEPARATOR));
+        final String targetsKey = convertToKey(shortcutType);
+        final String targetsValue = Settings.Secure.getString(context.getContentResolver(),
+                targetsKey);
+
+        if (TextUtils.isEmpty(targetsValue)) {
+            return;
+        }
+
+        sStringColonSplitter.setString(targetsValue);
+        while (sStringColonSplitter.hasNext()) {
+            final String name = sStringColonSplitter.next();
+            if (TextUtils.isEmpty(name) || (componentName.flattenToString()).equals(name)) {
+                continue;
+            }
+            joiner.add(name);
+        }
+
+        Settings.Secure.putString(context.getContentResolver(), targetsKey, joiner.toString());
+    }
+
+    /**
+     * Returns if component name existed in Settings.
+     *
+     * @param context The current context.
+     * @param shortcutType The preferred shortcut type user selected.
+     * @param componentName The component name that need to be checked existed in Settings.
+     * @return {@code true} if componentName existed in Settings.
+     */
+    private boolean hasValueInSettings(Context context, @UserShortcutType int shortcutType,
+            @NonNull ComponentName componentName) {
+        final String targetKey = convertToKey(shortcutType);
+        final String targetString = Settings.Secure.getString(context.getContentResolver(),
+                targetKey);
+
+        if (TextUtils.isEmpty(targetString)) {
+            return false;
+        }
+
+        sStringColonSplitter.setString(targetString);
+        while (sStringColonSplitter.hasNext()) {
+            final String name = sStringColonSplitter.next();
+            if ((componentName.flattenToString()).equals(name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Converts {@link UserShortcutType} to key in Settings.
+     *
+     * @param type The shortcut type.
+     * @return Mapping key in Settings.
+     */
+    private String convertToKey(@UserShortcutType int type) {
+        switch (type) {
+            case UserShortcutType.SOFTWARE:
+                return Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT;
+            case UserShortcutType.HARDWARE:
+                return Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
+            case UserShortcutType.TRIPLETAP:
+                return Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED;
+            default:
+                throw new IllegalArgumentException(
+                        "Unsupported user shortcut type: " + type);
+        }
+    }
+
+    private static @UserShortcutType int convertToUserType(@ShortcutType int type) {
+        switch (type) {
+            case ACCESSIBILITY_BUTTON:
+                return UserShortcutType.SOFTWARE;
+            case ACCESSIBILITY_SHORTCUT_KEY:
+                return UserShortcutType.HARDWARE;
+            default:
+                throw new IllegalArgumentException(
+                        "Unsupported shortcut type:" + type);
+        }
     }
 }
