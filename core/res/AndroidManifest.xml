@@ -2057,8 +2057,10 @@
         android:protectionLevel="signature|privileged" />
 
     <!-- Allows read only access to precise phone state.
-         @hide Pending API council approval -->
+         Allows reading of detailed information about phone state for special-use applications
+         such as dialers, carrier applications, or ims applications. -->
     <permission android:name="android.permission.READ_PRECISE_PHONE_STATE"
+        android:permissionGroup="android.permission-group.UNDEFINED"
         android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows read access to privileged phone state.
