@@ -236,9 +236,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     }
                     synchronized (mLock) {
                         NewRollback found = null;
-                        for (NewRollback rollback : mNewRollbacks) {
-                            if (rollback.hasToken(token)) {
-                                found = rollback;
+                        for (NewRollback newRollback : mNewRollbacks) {
+                            if (newRollback.rollback.hasToken(token)) {
+                                found = newRollback;
                                 break;
                             }
                         }
@@ -807,7 +807,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 mNewRollbacks.add(newRollback);
             }
         }
-        newRollback.addToken(token);
+        newRollback.rollback.addToken(token);
 
         return enableRollbackForPackageSession(newRollback.rollback, packageSession);
     }
@@ -1338,13 +1338,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         public final Rollback rollback;
 
         /**
-         * This array holds all of the rollback tokens associated with package sessions included in
-         * this rollback.
-         */
-        @GuardedBy("mNewRollbackLock")
-        private final IntArray mTokens = new IntArray();
-
-        /**
          * Session ids for all packages in the install. For multi-package sessions, this is the list
          * of child session ids. For normal sessions, this list is a single element with the normal
          * session id.
@@ -1364,26 +1357,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         NewRollback(Rollback rollback, int[] packageSessionIds) {
             this.rollback = rollback;
             this.mPackageSessionIds = packageSessionIds;
-        }
-
-        /**
-         * Adds a rollback token to be associated with this NewRollback. This may be used to
-         * identify which rollback should be cancelled in case {@link PackageManager} sends an
-         * {@link Intent#ACTION_CANCEL_ENABLE_ROLLBACK} intent.
-         */
-        void addToken(int token) {
-            synchronized (mNewRollbackLock) {
-                mTokens.add(token);
-            }
-        }
-
-        /**
-         * Returns true if this NewRollback is associated with the provided {@code token}.
-         */
-        boolean hasToken(int token) {
-            synchronized (mNewRollbackLock) {
-                return mTokens.indexOf(token) != -1;
-            }
         }
 
         /**
