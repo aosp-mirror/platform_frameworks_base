@@ -22,6 +22,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Parcelable;
 
@@ -126,13 +127,15 @@ public class TestAccessPointBuilder {
     @Keep
     public TestAccessPointBuilder setLevel(int level) {
         // Reversal of WifiManager.calculateSignalLevels
+        WifiManager wifiManager = mContext.getSystemService(WifiManager.class);
+        int maxSignalLevel = wifiManager.getMaxSignalLevel();
         if (level == 0) {
             mRssi = MIN_RSSI;
-        } else if (level >= AccessPoint.SIGNAL_LEVELS) {
+        } else if (level > maxSignalLevel) {
             mRssi = MAX_RSSI;
         } else {
             float inputRange = MAX_RSSI - MIN_RSSI;
-            float outputRange = AccessPoint.SIGNAL_LEVELS - 1;
+            float outputRange = maxSignalLevel;
             mRssi = (int) (level * inputRange / outputRange + MIN_RSSI);
         }
         return this;

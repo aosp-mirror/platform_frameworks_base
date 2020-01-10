@@ -211,13 +211,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private static final int EAP_WPA = 1; // WPA-EAP
     private static final int EAP_WPA2_WPA3 = 2; // RSN-EAP
 
-    /**
-     * The number of distinct wifi levels.
-     *
-     * <p>Must keep in sync with {@link R.array.wifi_signal} and {@link WifiManager#RSSI_LEVELS}.
-     */
-    public static final int SIGNAL_LEVELS = 5;
-
     public static final int UNREACHABLE_RSSI = Integer.MIN_VALUE;
 
     public static final String KEY_PREFIX_AP = "AP:";
@@ -453,9 +446,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return other.getSpeed() - getSpeed();
         }
 
+        WifiManager wifiManager = getWifiManager();
         // Sort by signal strength, bucketed by level
-        int difference = WifiManager.calculateSignalLevel(other.mRssi, SIGNAL_LEVELS)
-                - WifiManager.calculateSignalLevel(mRssi, SIGNAL_LEVELS);
+        int difference = wifiManager.calculateSignalLevel(other.mRssi)
+                - wifiManager.calculateSignalLevel(mRssi);
         if (difference != 0) {
             return difference;
         }
@@ -869,13 +863,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     /**
-     * Returns the number of levels to show for a Wifi icon, from 0 to {@link #SIGNAL_LEVELS}-1.
+     * Returns the number of levels to show for a Wifi icon, from 0 to
+     * {@link WifiManager#getMaxSignalLevel()}.
      *
-     * <p>Use {@#isReachable()} to determine if an AccessPoint is in range, as this method will
+     * <p>Use {@link #isReachable()} to determine if an AccessPoint is in range, as this method will
      * always return at least 0.
      */
     public int getLevel() {
-        return WifiManager.calculateSignalLevel(mRssi, SIGNAL_LEVELS);
+        return getWifiManager().calculateSignalLevel(mRssi);
     }
 
     public int getRssi() {

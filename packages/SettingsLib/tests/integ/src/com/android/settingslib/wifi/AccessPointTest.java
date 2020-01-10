@@ -83,7 +83,6 @@ import java.util.concurrent.CountDownLatch;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class AccessPointTest {
-
     private static final String TEST_SSID = "\"test_ssid\"";
     private static final String ROAMING_SSID = "\"roaming_ssid\"";
     private static final String OSU_FRIENDLY_NAME = "osu_friendly_name";
@@ -98,6 +97,7 @@ public class AccessPointTest {
             20 * DateUtils.MINUTE_IN_MILLIS;
 
     private Context mContext;
+    private int mMaxSignalLevel;
     private WifiInfo mWifiInfo;
     @Mock private Context mMockContext;
     @Mock private WifiManager mMockWifiManager;
@@ -128,6 +128,7 @@ public class AccessPointTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = InstrumentationRegistry.getTargetContext();
+        mMaxSignalLevel = mContext.getSystemService(WifiManager.class).getMaxSignalLevel();
         mWifiInfo = new WifiInfo();
         mWifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(TEST_SSID));
         mWifiInfo.setBSSID(TEST_BSSID);
@@ -180,7 +181,7 @@ public class AccessPointTest {
 
     @Test
     public void testCompareTo_GivesHighLevelBeforeLowLevel() {
-        final int highLevel = AccessPoint.SIGNAL_LEVELS - 1;
+        final int highLevel = mMaxSignalLevel;
         final int lowLevel = 1;
         assertThat(highLevel).isGreaterThan(lowLevel);
 
@@ -226,7 +227,7 @@ public class AccessPointTest {
                 .setReachable(true).build();
         AccessPoint saved = new TestAccessPointBuilder(mContext).setSaved(true).build();
         AccessPoint highLevelAndReachable = new TestAccessPointBuilder(mContext)
-                .setLevel(AccessPoint.SIGNAL_LEVELS - 1).build();
+                .setLevel(mMaxSignalLevel).build();
         AccessPoint firstName = new TestAccessPointBuilder(mContext).setSsid("a").build();
         AccessPoint lastname = new TestAccessPointBuilder(mContext).setSsid("z").build();
 
@@ -520,6 +521,8 @@ public class AccessPointTest {
         when(packageManager.getApplicationInfoAsUser(eq(appPackageName), anyInt(), anyInt()))
                 .thenReturn(applicationInfo);
         when(applicationInfo.loadLabel(packageManager)).thenReturn(appLabel);
+        when(context.getSystemService(Context.WIFI_SERVICE)).thenReturn(mMockWifiManager);
+        when(mMockWifiManager.calculateSignalLevel(rssi)).thenReturn(4);
 
         NetworkInfo networkInfo =
                 new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
@@ -636,14 +639,14 @@ public class AccessPointTest {
     public void testBuilder_setLevel() {
         AccessPoint testAp;
 
-        for (int i = 0; i < AccessPoint.SIGNAL_LEVELS; i++) {
+        for (int i = 0; i <= mMaxSignalLevel; i++) {
             testAp = new TestAccessPointBuilder(mContext).setLevel(i).build();
             assertThat(testAp.getLevel()).isEqualTo(i);
         }
 
         // numbers larger than the max level should be set to max
-        testAp = new TestAccessPointBuilder(mContext).setLevel(AccessPoint.SIGNAL_LEVELS).build();
-        assertThat(testAp.getLevel()).isEqualTo(AccessPoint.SIGNAL_LEVELS - 1);
+        testAp = new TestAccessPointBuilder(mContext).setLevel(mMaxSignalLevel + 1).build();
+        assertThat(testAp.getLevel()).isEqualTo(mMaxSignalLevel);
 
         // numbers less than 0 should give level 0
         testAp = new TestAccessPointBuilder(mContext).setLevel(-100).build();
@@ -653,7 +656,7 @@ public class AccessPointTest {
     @Test
     public void testBuilder_settingReachableAfterLevelDoesNotAffectLevel() {
         int level = 1;
-        assertThat(level).isLessThan(AccessPoint.SIGNAL_LEVELS - 1);
+        assertThat(level).isLessThan(mMaxSignalLevel);
 
         AccessPoint testAp =
                 new TestAccessPointBuilder(mContext).setLevel(level).setReachable(true).build();
