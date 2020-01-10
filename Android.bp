@@ -619,6 +619,14 @@ java_library {
 }
 
 filegroup {
+    name: "framework-ike-shared-srcs",
+    visibility: ["//frameworks/opt/net/ike"],
+    srcs: [
+        "core/java/android/net/annotations/PolicyDirection.java",
+    ],
+}
+
+filegroup {
     name: "framework-networkstack-shared-srcs",
     srcs: [
         // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
