@@ -267,8 +267,6 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                     ExpandableNotificationRow notifRow = mock(ExpandableNotificationRow.class,
                             RETURNS_DEEP_STUBS);
                     when(notifRow.getVisibility()).thenReturn(View.VISIBLE);
-                    when(notifRow.getEntry().isHighPriority())
-                            .thenReturn(children[i] == ChildType.HIPRI);
                     when(notifRow.getEntry().getBucket()).thenReturn(
                             children[i] == ChildType.HIPRI ? BUCKET_ALERTING : BUCKET_SILENT);
                     when(notifRow.getParent()).thenReturn(mNssl);

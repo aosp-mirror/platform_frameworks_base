@@ -24,6 +24,7 @@ import android.service.notification.StatusBarNotification
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.notification.NotificationFilter
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
+import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
 import com.android.systemui.statusbar.notification.logging.NotifEvent
 import com.android.systemui.statusbar.notification.logging.NotifLog
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
@@ -54,7 +55,8 @@ open class NotificationRankingManager @Inject constructor(
     private val notifFilter: NotificationFilter,
     private val notifLog: NotifLog,
     sectionsFeatureManager: NotificationSectionsFeatureManager,
-    private val peopleNotificationIdentifier: PeopleNotificationIdentifier
+    private val peopleNotificationIdentifier: PeopleNotificationIdentifier,
+    private val highPriorityProvider: HighPriorityProvider
 ) {
 
     var rankingMap: RankingMap? = null
@@ -81,6 +83,9 @@ open class NotificationRankingManager @Inject constructor(
         val aHeadsUp = a.isRowHeadsUp
         val bHeadsUp = b.isRowHeadsUp
 
+        val aIsHighPriority = a.isHighPriority()
+        val bIsHighPriority = b.isHighPriority()
+
         when {
             usePeopleFiltering && aIsPeople != bIsPeople -> if (aIsPeople) -1 else 1
             aHeadsUp != bHeadsUp -> if (aHeadsUp) -1 else 1
@@ -90,8 +95,8 @@ open class NotificationRankingManager @Inject constructor(
             aMedia != bMedia -> if (aMedia) -1 else 1
             // Upsort PRIORITY_MAX system notifications
             aSystemMax != bSystemMax -> if (aSystemMax) -1 else 1
-            a.isHighPriority != b.isHighPriority ->
-                -1 * a.isHighPriority.compareTo(b.isHighPriority)
+            aIsHighPriority != bIsHighPriority ->
+                -1 * aIsHighPriority.compareTo(bIsHighPriority)
             aRank != bRank -> aRank - bRank
             else -> nb.notification.`when`.compareTo(na.notification.`when`)
         }
@@ -154,7 +159,7 @@ open class NotificationRankingManager @Inject constructor(
     ) {
         if (usePeopleFiltering && entry.isPeopleNotification()) {
             entry.bucket = BUCKET_PEOPLE
-        } else if (isHeadsUp || isMedia || isSystemMax || entry.isHighPriority) {
+        } else if (isHeadsUp || isMedia || isSystemMax || entry.isHighPriority()) {
             entry.bucket = BUCKET_ALERTING
         } else {
             entry.bucket = BUCKET_SILENT
@@ -178,10 +183,6 @@ open class NotificationRankingManager @Inject constructor(
                         // TODO: notify group manager here?
                         groupManager.onEntryUpdated(entry, oldSbn)
                     }
-
-                    // TODO: (b/145659174) remove after moving to new NotifPipeline
-                    // (should be able to remove all groupManager code post-migration)
-                    entry.invalidateDerivedMembers()
                 }
             }
         }
@@ -191,6 +192,9 @@ open class NotificationRankingManager @Inject constructor(
             sbn.isPeopleNotification()
     private fun StatusBarNotification.isPeopleNotification() =
             peopleNotificationIdentifier.isPeopleNotification(this)
+
+    private fun NotificationEntry.isHighPriority() =
+            highPriorityProvider.isHighPriority(this)
 }
 
 // Convenience functions

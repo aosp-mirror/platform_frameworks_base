@@ -70,6 +70,7 @@ import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -113,6 +114,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private StatusBar mStatusBar;
     @Mock private AccessibilityManager mAccessibilityManager;
+    @Mock private HighPriorityProvider mHighPriorityProvider;
 
     @Before
     public void setUp() {
@@ -128,7 +130,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
 
         mGutsManager = new NotificationGutsManager(mContext, mVisualStabilityManager,
-                () -> mStatusBar, mHandler, mAccessibilityManager);
+                () -> mStatusBar, mHandler, mAccessibilityManager, mHighPriorityProvider);
         mGutsManager.setUpWithPresenter(mPresenter, mStackScroller,
                 mCheckSaveListener, mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
@@ -391,6 +393,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 .build();
 
         when(row.getIsNonblockable()).thenReturn(false);
+        when(mHighPriorityProvider.isHighPriority(entry)).thenReturn(true);
         StatusBarNotification statusBarNotification = entry.getSbn();
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
 
