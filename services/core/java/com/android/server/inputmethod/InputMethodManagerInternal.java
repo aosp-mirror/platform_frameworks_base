@@ -68,8 +68,9 @@ public abstract class InputMethodManagerInternal {
      * @param autofillId {@link AutofillId} of currently focused field.
      * @param cb {@link IInlineSuggestionsRequestCallback} used to pass back the request object.
      */
-    public abstract void onCreateInlineSuggestionsRequest(ComponentName componentName,
-            AutofillId autofillId, IInlineSuggestionsRequestCallback cb);
+    public abstract void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
+            ComponentName componentName, AutofillId autofillId,
+            IInlineSuggestionsRequestCallback cb);
 
     /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
@@ -95,8 +96,9 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public void onCreateInlineSuggestionsRequest(ComponentName componentName,
-                        AutofillId autofillId, IInlineSuggestionsRequestCallback cb) {
+                public void onCreateInlineSuggestionsRequest(int userId,
+                        ComponentName componentName, AutofillId autofillId,
+                        IInlineSuggestionsRequestCallback cb) {
                 }
             };
 
