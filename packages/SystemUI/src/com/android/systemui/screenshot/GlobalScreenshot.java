@@ -16,9 +16,11 @@
 
 package com.android.systemui.screenshot;
 
+import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_SCROLLING_ENABLED;
 import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_SCREENSHOT;
 
 import android.animation.Animator;
@@ -48,6 +50,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
@@ -540,13 +543,16 @@ public class GlobalScreenshot {
             });
             mActionsView.addView(actionChip);
         }
-        TextView scrollChip = (TextView) inflater.inflate(
-                R.layout.global_screenshot_action_chip, mActionsView, false);
-        Toast scrollNotImplemented = Toast.makeText(
-                mContext, "Not implemented", Toast.LENGTH_SHORT);
-        scrollChip.setText("Scroll"); // TODO (mkephart): add resource and translate
-        scrollChip.setOnClickListener(v -> scrollNotImplemented.show());
-        mActionsView.addView(scrollChip);
+
+        if (DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI, SCREENSHOT_SCROLLING_ENABLED, false)) {
+            TextView scrollChip = (TextView) inflater.inflate(
+                    R.layout.global_screenshot_action_chip, mActionsView, false);
+            Toast scrollNotImplemented = Toast.makeText(
+                    mContext, "Not implemented", Toast.LENGTH_SHORT);
+            scrollChip.setText("Scroll"); // TODO (mkephart): add resource and translate
+            scrollChip.setOnClickListener(v -> scrollNotImplemented.show());
+            mActionsView.addView(scrollChip);
+        }
 
         ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
         mActionsView.setY(mDisplayMetrics.heightPixels);

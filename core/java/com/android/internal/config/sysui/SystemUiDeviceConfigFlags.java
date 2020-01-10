@@ -350,7 +350,12 @@ public final class SystemUiDeviceConfigFlags {
      * (boolean) Whether screenshot flow going to the corner (instead of shown in a notification)
      * is enabled.
      */
-    public static final String SCREENSHOT_CORNER_FLOW = "screenshot_corner_flow";
+    public static final String SCREENSHOT_CORNER_FLOW = "enable_screenshot_corner_flow";
+
+    /**
+     * (boolean) Whether scrolling screenshots are enabled.
+     */
+    public static final String SCREENSHOT_SCROLLING_ENABLED = "enable_screenshot_scrolling";
 
     private SystemUiDeviceConfigFlags() {
     }
