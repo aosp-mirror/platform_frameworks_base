@@ -22,7 +22,7 @@ import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.log.RichEvent;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
+import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
 
 import java.lang.annotation.Retention;
@@ -67,7 +67,7 @@ public class NotifEvent extends RichEvent {
     }
 
     /**
-     * @return if this event occurred in {@link NotifListBuilderImpl}
+     * @return if this event occurred in {@link ShadeListBuilder}
      */
     static boolean isListBuilderEvent(@EventType int type) {
         return isBetweenInclusive(type, 0, TOTAL_LIST_BUILDER_EVENT_TYPES);
@@ -161,7 +161,7 @@ public class NotifEvent extends RichEvent {
     private static final int TOTAL_EVENT_LABELS = EVENT_LABELS.length;
 
     /**
-     * Events related to {@link NotifListBuilderImpl}
+     * Events related to {@link ShadeListBuilder}
      */
     public static final int WARN = 0;
     public static final int ON_BUILD_LIST = 1;

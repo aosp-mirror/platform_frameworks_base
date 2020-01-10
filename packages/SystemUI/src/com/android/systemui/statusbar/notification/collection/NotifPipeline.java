@@ -68,14 +68,14 @@ import javax.inject.Singleton;
 @Singleton
 public class NotifPipeline {
     private final NotifCollection mNotifCollection;
-    private final NotifListBuilderImpl mNotifListBuilder;
+    private final ShadeListBuilder mShadeListBuilder;
 
     @Inject
     public NotifPipeline(
             NotifCollection notifCollection,
-            NotifListBuilderImpl notifListBuilder) {
+            ShadeListBuilder shadeListBuilder) {
         mNotifCollection = notifCollection;
-        mNotifListBuilder = notifListBuilder;
+        mShadeListBuilder = shadeListBuilder;
     }
 
     /**
@@ -111,7 +111,7 @@ public class NotifPipeline {
      * called on that notif).
      */
     public void addPreGroupFilter(NotifFilter filter) {
-        mNotifListBuilder.addPreGroupFilter(filter);
+        mShadeListBuilder.addPreGroupFilter(filter);
     }
 
     /**
@@ -119,7 +119,7 @@ public class NotifPipeline {
      * performed but before NotifPromoters have had a chance to promote children out of groups.
      */
     public void addOnBeforeTransformGroupsListener(OnBeforeTransformGroupsListener listener) {
-        mNotifListBuilder.addOnBeforeTransformGroupsListener(listener);
+        mShadeListBuilder.addOnBeforeTransformGroupsListener(listener);
     }
 
     /**
@@ -130,7 +130,7 @@ public class NotifPipeline {
      * other promoters are called on it).
      */
     public void addPromoter(NotifPromoter promoter) {
-        mNotifListBuilder.addPromoter(promoter);
+        mShadeListBuilder.addPromoter(promoter);
     }
 
     /**
@@ -138,7 +138,7 @@ public class NotifPipeline {
      * have been determined or the notifs have been sorted.
      */
     public void addOnBeforeSortListener(OnBeforeSortListener listener) {
-        mNotifListBuilder.addOnBeforeSortListener(listener);
+        mShadeListBuilder.addOnBeforeSortListener(listener);
     }
 
     /**
@@ -149,7 +149,7 @@ public class NotifPipeline {
      * numerical comparison.
      */
     public void setSectionsProvider(SectionsProvider provider) {
-        mNotifListBuilder.setSectionsProvider(provider);
+        mShadeListBuilder.setSectionsProvider(provider);
     }
 
     /**
@@ -158,7 +158,7 @@ public class NotifPipeline {
      * zero, the pipeline falls back to sorting by rank (and, failing that, Notification.when).
      */
     public void setComparators(List<NotifComparator> comparators) {
-        mNotifListBuilder.setComparators(comparators);
+        mShadeListBuilder.setComparators(comparators);
     }
 
     /**
@@ -169,7 +169,7 @@ public class NotifPipeline {
      * notif).
      */
     public void addPreRenderFilter(NotifFilter filter) {
-        mNotifListBuilder.addPreRenderFilter(filter);
+        mShadeListBuilder.addPreRenderFilter(filter);
     }
 
     /**
@@ -177,7 +177,7 @@ public class NotifPipeline {
      * been handed off to the view layer.
      */
     public void addOnBeforeRenderListListener(OnBeforeRenderListListener listener) {
-        mNotifListBuilder.addOnBeforeRenderListListener(listener);
+        mShadeListBuilder.addOnBeforeRenderListListener(listener);
     }
 
     /**
@@ -186,6 +186,6 @@ public class NotifPipeline {
      * will return the current state of the list, which will likely be only partially-generated.
      */
     public List<ListEntry> getShadeList() {
-        return mNotifListBuilder.getShadeList();
+        return mShadeListBuilder.getShadeList();
     }
 }

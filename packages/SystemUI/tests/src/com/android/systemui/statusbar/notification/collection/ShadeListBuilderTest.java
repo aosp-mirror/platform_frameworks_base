@@ -38,7 +38,7 @@ import android.util.ArrayMap;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl.OnRenderListListener;
+import com.android.systemui.statusbar.notification.collection.ShadeListBuilder.OnRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
@@ -73,9 +73,9 @@ import java.util.stream.Collectors;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class NotifListBuilderImplTest extends SysuiTestCase {
+public class ShadeListBuilderTest extends SysuiTestCase {
 
-    private NotifListBuilderImpl mListBuilder;
+    private ShadeListBuilder mListBuilder;
     private FakeSystemClock mSystemClock = new FakeSystemClock();
 
     @Mock private NotifLog mNotifLog;
@@ -100,7 +100,7 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
 
-        mListBuilder = new NotifListBuilderImpl(mSystemClock, mNotifLog);
+        mListBuilder = new ShadeListBuilder(mSystemClock, mNotifLog);
         mListBuilder.setOnRenderListListener(mOnRenderListListener);
 
         mListBuilder.attach(mNotifCollection);

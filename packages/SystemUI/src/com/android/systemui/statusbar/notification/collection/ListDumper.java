@@ -20,7 +20,7 @@ import java.util.List;
 
 
 /**
- * Utility class for dumping the results of a {@link NotifListBuilderImpl} to a debug string.
+ * Utility class for dumping the results of a {@link ShadeListBuilder} to a debug string.
  */
 public class ListDumper {
 

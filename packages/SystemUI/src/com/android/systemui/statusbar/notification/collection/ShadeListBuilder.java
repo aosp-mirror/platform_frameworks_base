@@ -63,7 +63,7 @@ import javax.inject.Singleton;
  */
 @MainThread
 @Singleton
-public class NotifListBuilderImpl {
+public class ShadeListBuilder {
     private final SystemClock mSystemClock;
     private final NotifLog mNotifLog;
 
@@ -92,7 +92,7 @@ public class NotifListBuilderImpl {
     private final List<ListEntry> mReadOnlyNotifList = Collections.unmodifiableList(mNotifList);
 
     @Inject
-    public NotifListBuilderImpl(SystemClock systemClock, NotifLog notifLog) {
+    public ShadeListBuilder(SystemClock systemClock, NotifLog notifLog) {
         Assert.isMainThread();
         mSystemClock = systemClock;
         mNotifLog = notifLog;

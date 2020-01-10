@@ -18,13 +18,13 @@ package com.android.systemui.statusbar.notification.collection.listbuilder;
 
 import android.annotation.IntDef;
 
-import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
+import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Used by {@link NotifListBuilderImpl} to track its internal state machine.
+ * Used by {@link ShadeListBuilder} to track its internal state machine.
  */
 public class PipelineState {
 
