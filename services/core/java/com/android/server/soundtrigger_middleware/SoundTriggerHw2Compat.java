@@ -112,18 +112,23 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
     }
 
     @Override
-    public android.hardware.soundtrigger.V2_1.ISoundTriggerHw.Properties getProperties() {
+    public android.hardware.soundtrigger.V2_3.Properties getProperties() {
         try {
             AtomicInteger retval = new AtomicInteger(-1);
-            AtomicReference<android.hardware.soundtrigger.V2_1.ISoundTriggerHw.Properties>
+            AtomicReference<android.hardware.soundtrigger.V2_3.Properties>
                     properties =
                     new AtomicReference<>();
-            as2_0().getProperties(
-                    (r, p) -> {
-                        retval.set(r);
-                        properties.set(p);
-                    });
-            handleHalStatus(retval.get(), "getProperties");
+            try {
+                as2_3().getProperties_2_3(
+                        (r, p) -> {
+                            retval.set(r);
+                            properties.set(p);
+                        });
+            } catch (NotSupported e) {
+                // Fall-back to the 2.0 version:
+                return getProperties_2_0();
+            }
+            handleHalStatus(retval.get(), "getProperties_2_3");
             return properties.get();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -310,6 +315,21 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
     @Override
     public String interfaceDescriptor() throws RemoteException {
         return as2_0().interfaceDescriptor();
+    }
+
+    private android.hardware.soundtrigger.V2_3.Properties getProperties_2_0()
+            throws RemoteException {
+        AtomicInteger retval = new AtomicInteger(-1);
+        AtomicReference<android.hardware.soundtrigger.V2_0.ISoundTriggerHw.Properties>
+                properties =
+                new AtomicReference<>();
+        as2_0().getProperties(
+                (r, p) -> {
+                    retval.set(r);
+                    properties.set(p);
+                });
+        handleHalStatus(retval.get(), "getProperties");
+        return Hw2CompatUtil.convertProperties_2_0_to_2_3(properties.get());
     }
 
     private int loadSoundModel_2_0(

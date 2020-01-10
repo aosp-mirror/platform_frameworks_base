@@ -47,6 +47,7 @@ class ConversionUtil {
                 properties.description,
                 properties.uuid,
                 properties.version,
+                properties.supportedModelArch,
                 properties.maxSoundModels,
                 properties.maxKeyPhrases,
                 properties.maxUsers,

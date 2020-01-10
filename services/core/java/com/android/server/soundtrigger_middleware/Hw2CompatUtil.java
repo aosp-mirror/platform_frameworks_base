@@ -74,4 +74,12 @@ class Hw2CompatUtil {
         config_2_0.data = HidlMemoryUtil.hidlMemoryToByteList(config.data);
         return config_2_0;
     }
+
+    static android.hardware.soundtrigger.V2_3.Properties convertProperties_2_0_to_2_3(
+            android.hardware.soundtrigger.V2_0.ISoundTriggerHw.Properties properties) {
+        android.hardware.soundtrigger.V2_3.Properties properties_2_3 =
+                new android.hardware.soundtrigger.V2_3.Properties();
+        properties_2_3.base = properties;
+        return properties_2_3;
+    }
 }
