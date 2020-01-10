@@ -18,6 +18,7 @@ package android.net;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.net.wifi.ScanResult;
@@ -107,7 +108,7 @@ public class NetworkKeyTest {
 
     @Test
     public void createFromScanResult_nullSsid() {
-        ScanResult scanResult = new ScanResult();
+        ScanResult scanResult = mock(ScanResult.class);
         scanResult.BSSID = VALID_BSSID;
 
         assertNull(NetworkKey.createFromScanResult(scanResult));
@@ -115,7 +116,7 @@ public class NetworkKeyTest {
 
     @Test
     public void createFromScanResult_emptySsid() {
-        ScanResult scanResult = new ScanResult();
+        ScanResult scanResult = mock(ScanResult.class);
         scanResult.SSID = "";
         scanResult.BSSID = VALID_BSSID;
 
@@ -124,7 +125,7 @@ public class NetworkKeyTest {
 
     @Test
     public void createFromScanResult_noneSsid() {
-        ScanResult scanResult = new ScanResult();
+        ScanResult scanResult = mock(ScanResult.class);
         scanResult.SSID = WifiManager.UNKNOWN_SSID;
         scanResult.BSSID = VALID_BSSID;
 
@@ -133,7 +134,7 @@ public class NetworkKeyTest {
 
     @Test
     public void createFromScanResult_nullBssid() {
-        ScanResult scanResult = new ScanResult();
+        ScanResult scanResult = mock(ScanResult.class);
         scanResult.SSID = VALID_UNQUOTED_SSID;
 
         assertNull(NetworkKey.createFromScanResult(scanResult));
@@ -141,7 +142,7 @@ public class NetworkKeyTest {
 
     @Test
     public void createFromScanResult_emptyBssid() {
-        ScanResult scanResult = new ScanResult();
+        ScanResult scanResult = mock(ScanResult.class);
         scanResult.SSID = VALID_UNQUOTED_SSID;
         scanResult.BSSID = "";
 
@@ -150,7 +151,7 @@ public class NetworkKeyTest {
 
     @Test
     public void createFromScanResult_invalidBssid() {
-        ScanResult scanResult = new ScanResult();
+        ScanResult scanResult = mock(ScanResult.class);
         scanResult.SSID = VALID_UNQUOTED_SSID;
         scanResult.BSSID = INVALID_BSSID;
 
@@ -159,7 +160,7 @@ public class NetworkKeyTest {
 
     @Test
     public void createFromScanResult_validSsid() {
-        ScanResult scanResult = new ScanResult();
+        ScanResult scanResult = mock(ScanResult.class);
         scanResult.SSID = VALID_UNQUOTED_SSID;
         scanResult.BSSID = VALID_BSSID;
 
