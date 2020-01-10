@@ -45,7 +45,12 @@ import android.database.ContentObserver;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CancellationSignal;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
+import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -55,8 +60,11 @@ import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.service.contentcapture.ActivityEvent.ActivityEventType;
+import android.service.contentcapture.IDataShareCallback;
+import android.service.contentcapture.IDataShareReadAdapter;
 import android.util.ArraySet;
 import android.util.LocalLog;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -64,7 +72,10 @@ import android.view.contentcapture.ContentCaptureCondition;
 import android.view.contentcapture.ContentCaptureHelper;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.DataRemovalRequest;
+import android.view.contentcapture.DataShareRequest;
+import android.view.contentcapture.DataShareWriteAdapter;
 import android.view.contentcapture.IContentCaptureManager;
+import android.view.contentcapture.IDataShareWriteAdapter;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AbstractRemoteService;
@@ -77,9 +88,16 @@ import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * A service used to observe the contents of the screen.
@@ -94,6 +112,9 @@ public final class ContentCaptureManagerService extends
     static final String RECEIVER_BUNDLE_EXTRA_SESSIONS = "sessions";
 
     private static final int MAX_TEMP_SERVICE_DURATION_MS = 1_000 * 60 * 2; // 2 minutes
+    private static final int MAX_DATA_SHARE_FILE_DESCRIPTORS_TTL_MS =  1_000 * 60 * 5; // 5 minutes
+    private static final int MAX_CONCURRENT_FILE_SHARING_REQUESTS = 10;
+    private static final int DATA_SHARE_BYTE_BUFFER_LENGTH = 1_024;
 
     private final LocalService mLocalService = new LocalService();
 
@@ -125,6 +146,12 @@ public final class ContentCaptureManagerService extends
     @GuardedBy("mLock") int mDevCfgTextChangeFlushingFrequencyMs;
     @GuardedBy("mLock") int mDevCfgLogHistorySize;
     @GuardedBy("mLock") int mDevCfgIdleUnbindTimeoutMs;
+
+    private final Executor mDataShareExecutor = Executors.newCachedThreadPool();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+
+    @GuardedBy("mLock")
+    private final Set<String> mPackagesWithShareRequests = new HashSet<>();
 
     final GlobalContentCaptureOptions mGlobalContentCaptureOptions =
             new GlobalContentCaptureOptions();
@@ -618,6 +645,33 @@ public final class ContentCaptureManagerService extends
         }
 
         @Override
+        public void shareData(@NonNull DataShareRequest request,
+                @NonNull IDataShareWriteAdapter clientAdapter) {
+            Preconditions.checkNotNull(request);
+            Preconditions.checkNotNull(clientAdapter);
+
+            assertCalledByPackageOwner(request.getPackageName());
+
+            final int userId = UserHandle.getCallingUserId();
+            synchronized (mLock) {
+                final ContentCapturePerUserService service = getServiceForUserLocked(userId);
+
+                if (mPackagesWithShareRequests.size() >= MAX_CONCURRENT_FILE_SHARING_REQUESTS
+                        || mPackagesWithShareRequests.contains(request.getPackageName())) {
+                    try {
+                        clientAdapter.error(DataShareWriteAdapter.ERROR_CONCURRENT_REQUEST);
+                    } catch (RemoteException e) {
+                        Slog.e(mTag, "Failed to send error message to client");
+                    }
+                    return;
+                }
+
+                service.onDataSharedLocked(request,
+                        new DataShareCallbackDelegate(request, clientAdapter));
+            }
+        }
+
+        @Override
         public void isContentCaptureFeatureEnabled(@NonNull IResultReceiver result) {
             boolean enabled;
             synchronized (mLock) {
@@ -857,6 +911,181 @@ public final class ContentCaptureManagerService extends
                 if (mTemporaryServices.size() > 0) {
                     pw.print(prefix); pw.print("Temp services: "); pw.println(mTemporaryServices);
                 }
+            }
+        }
+    }
+
+    // TODO(b/148265162): DataShareCallbackDelegate should be a static class keeping week references
+    //  to the needed info
+    private class DataShareCallbackDelegate extends IDataShareCallback.Stub {
+
+        @NonNull private final DataShareRequest mDataShareRequest;
+        @NonNull private final IDataShareWriteAdapter mClientAdapter;
+
+        DataShareCallbackDelegate(@NonNull DataShareRequest dataShareRequest,
+                @NonNull IDataShareWriteAdapter clientAdapter) {
+            mDataShareRequest = dataShareRequest;
+            mClientAdapter = clientAdapter;
+        }
+
+        @Override
+        public void accept(IDataShareReadAdapter serviceAdapter)
+                            throws RemoteException {
+            Slog.i(mTag, "Data share request accepted by Content Capture service");
+
+            Pair<ParcelFileDescriptor, ParcelFileDescriptor> clientPipe = createPipe();
+            if (clientPipe == null) {
+                mClientAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
+                serviceAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
+                return;
+            }
+
+            ParcelFileDescriptor source_in = clientPipe.second;
+            ParcelFileDescriptor sink_in = clientPipe.first;
+
+            Pair<ParcelFileDescriptor, ParcelFileDescriptor> servicePipe = createPipe();
+            if (servicePipe == null) {
+                bestEffortCloseFileDescriptors(source_in, sink_in);
+
+                mClientAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
+                serviceAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
+                return;
+            }
+
+            ParcelFileDescriptor source_out = servicePipe.second;
+            ParcelFileDescriptor sink_out = servicePipe.first;
+
+            ICancellationSignal cancellationSignalTransport =
+                    CancellationSignal.createTransport();
+            mPackagesWithShareRequests.add(mDataShareRequest.getPackageName());
+
+            mClientAdapter.write(source_in);
+            serviceAdapter.start(sink_out, cancellationSignalTransport);
+
+            // TODO(b/148264965): use cancellation signals for timeouts and cancelling
+            CancellationSignal cancellationSignal =
+                    CancellationSignal.fromTransport(cancellationSignalTransport);
+
+            cancellationSignal.setOnCancelListener(() -> {
+                try {
+                    // TODO(b/148264965): this should propagate with the cancellation signal to the
+                    // client
+                    mClientAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
+                } catch (RemoteException e) {
+                    Slog.e(mTag, "Failed to propagate cancel operation to the caller", e);
+                }
+            });
+
+            // File descriptor received by the client app will be a copy of the current one. Close
+            // the one that belongs to the system server, so there's only 1 open left for the
+            // current pipe.
+            bestEffortCloseFileDescriptor(source_in);
+
+            mDataShareExecutor.execute(() -> {
+                try (InputStream fis =
+                             new ParcelFileDescriptor.AutoCloseInputStream(sink_in);
+                     OutputStream fos =
+                             new ParcelFileDescriptor.AutoCloseOutputStream(source_out)) {
+
+                    byte[] byteBuffer = new byte[DATA_SHARE_BYTE_BUFFER_LENGTH];
+                    while (true) {
+                        int readBytes = fis.read(byteBuffer);
+
+                        if (readBytes == -1) {
+                            break;
+                        }
+
+                        fos.write(byteBuffer, 0 /* offset */, readBytes);
+                    }
+                } catch (IOException e) {
+                    Slog.e(mTag, "Failed to pipe client and service streams", e);
+                }
+            });
+
+            mHandler.postDelayed(() -> {
+                synchronized (mLock) {
+                    mPackagesWithShareRequests.remove(mDataShareRequest.getPackageName());
+
+                    // Interaction finished successfully <=> all data has been written to Content
+                    // Capture Service. If it hasn't been read successfully, service would be able
+                    // to signal through the cancellation signal.
+                    boolean finishedSuccessfully = !sink_in.getFileDescriptor().valid()
+                            && !source_out.getFileDescriptor().valid();
+
+                    if (finishedSuccessfully) {
+                        Slog.i(mTag, "Content capture data sharing session terminated "
+                                + "successfully for package '"
+                                + mDataShareRequest.getPackageName()
+                                + "'");
+                    } else {
+                        Slog.i(mTag, "Reached the timeout of Content Capture data sharing session "
+                                + "for package '"
+                                + mDataShareRequest.getPackageName()
+                                + "', terminating the pipe.");
+                    }
+
+                    // Ensure all the descriptors are closed after the session.
+                    bestEffortCloseFileDescriptors(source_in, sink_in, source_out, sink_out);
+
+                    if (!finishedSuccessfully) {
+                        try {
+                            mClientAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
+                        } catch (RemoteException e) {
+                            Slog.e(mTag, "Failed to call error() to client", e);
+                        }
+                        try {
+                            serviceAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
+                        } catch (RemoteException e) {
+                            Slog.e(mTag, "Failed to call error() to service", e);
+                        }
+                    }
+                }
+            }, MAX_DATA_SHARE_FILE_DESCRIPTORS_TTL_MS);
+        }
+
+        @Override
+        public void reject() throws RemoteException {
+            Slog.i(mTag, "Data share request rejected by Content Capture service");
+
+            mClientAdapter.rejected();
+        }
+
+        private Pair<ParcelFileDescriptor, ParcelFileDescriptor> createPipe() {
+            ParcelFileDescriptor[] fileDescriptors;
+            try {
+                fileDescriptors = ParcelFileDescriptor.createPipe();
+            } catch (IOException e) {
+                Slog.e(mTag, "Failed to create a content capture data-sharing pipe", e);
+                return null;
+            }
+
+            if (fileDescriptors.length != 2) {
+                Slog.e(mTag, "Failed to create a content capture data-sharing pipe, "
+                        + "unexpected number of file descriptors");
+                return null;
+            }
+
+            if (!fileDescriptors[0].getFileDescriptor().valid()
+                    || !fileDescriptors[1].getFileDescriptor().valid()) {
+                Slog.e(mTag, "Failed to create a content capture data-sharing pipe, didn't "
+                        + "receive a pair of valid file descriptors.");
+                return null;
+            }
+
+            return Pair.create(fileDescriptors[0], fileDescriptors[1]);
+        }
+
+        private void bestEffortCloseFileDescriptor(ParcelFileDescriptor fd) {
+            try {
+                fd.close();
+            } catch (IOException e) {
+                Slog.e(mTag, "Failed to close a file descriptor", e);
+            }
+        }
+
+        private void bestEffortCloseFileDescriptors(ParcelFileDescriptor... fds) {
+            for (ParcelFileDescriptor fd : fds) {
+                bestEffortCloseFileDescriptor(fd);
             }
         }
     }

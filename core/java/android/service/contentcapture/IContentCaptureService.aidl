@@ -20,8 +20,10 @@ import android.content.ComponentName;
 import android.os.IBinder;
 import android.service.contentcapture.ActivityEvent;
 import android.service.contentcapture.SnapshotData;
+import android.service.contentcapture.IDataShareCallback;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.DataRemovalRequest;
+import android.view.contentcapture.DataShareRequest;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -40,5 +42,6 @@ oneway interface IContentCaptureService {
     void onSessionFinished(int sessionId);
     void onActivitySnapshot(int sessionId, in SnapshotData snapshotData);
     void onDataRemovalRequest(in DataRemovalRequest request);
+    void onDataShared(in DataShareRequest request, in IDataShareCallback callback);
     void onActivityEvent(in ActivityEvent event);
 }
