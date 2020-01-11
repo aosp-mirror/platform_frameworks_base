@@ -5408,14 +5408,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         long[] pattern;
         switch (effectId) {
             case HapticFeedbackConstants.CONTEXT_CLICK:
-                return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
+                return VibrationEffect.get(VibrationEffect.EFFECT_POP);
             case HapticFeedbackConstants.TEXT_HANDLE_MOVE:
                 if (!mHapticTextHandleEnabled) {
                     return null;
                 }
-                // fallthrough
-            case HapticFeedbackConstants.CLOCK_TICK:
                 return VibrationEffect.get(VibrationEffect.EFFECT_TEXTURE_TICK);
+            case HapticFeedbackConstants.CLOCK_TICK:
+                return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
             case HapticFeedbackConstants.KEYBOARD_RELEASE:
             case HapticFeedbackConstants.VIRTUAL_KEY_RELEASE:
             case HapticFeedbackConstants.ENTRY_BUMP:
@@ -5425,14 +5425,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case HapticFeedbackConstants.KEYBOARD_TAP: // == KEYBOARD_PRESS
             case HapticFeedbackConstants.VIRTUAL_KEY:
             case HapticFeedbackConstants.EDGE_RELEASE:
-            case HapticFeedbackConstants.CONFIRM:
             case HapticFeedbackConstants.GESTURE_START:
                 return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
             case HapticFeedbackConstants.LONG_PRESS:
             case HapticFeedbackConstants.EDGE_SQUEEZE:
+            case HapticFeedbackConstants.CONFIRM:
                 return VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
             case HapticFeedbackConstants.REJECT:
-                return VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+                return VibrationEffect.get(VibrationEffect.EFFECT_THUD);
 
             case HapticFeedbackConstants.CALENDAR_DATE:
                 pattern = mCalendarDateVibePattern;
