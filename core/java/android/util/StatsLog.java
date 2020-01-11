@@ -244,6 +244,16 @@ public final class StatsLog extends StatsLogInternal {
      */
     private static native void writeImpl(@NonNull byte[] buffer, int size, int atomId);
 
+    /**
+     * Write an event to stats log using the raw format encapsulated in StatsEvent.
+     *
+     * @param statsEvent    The StatsEvent object containing the encoded buffer of data to write.
+     * @hide
+     */
+    public static void write(@NonNull final StatsEvent statsEvent) {
+        writeImpl(statsEvent.getBytes(), statsEvent.getNumBytes(), statsEvent.getAtomId());
+    }
+
     private static void enforceDumpCallingPermission(Context context) {
         context.enforceCallingPermission(android.Manifest.permission.DUMP, "Need DUMP permission.");
     }
