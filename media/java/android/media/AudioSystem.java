@@ -33,6 +33,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /* IF YOU CHANGE ANY OF THE CONSTANTS IN THIS FILE, DO NOT FORGET
@@ -1076,6 +1077,41 @@ public class AudioSystem
     public static native boolean getMasterMute();
     @UnsupportedAppUsage
     public static native int getDevicesForStream(int stream);
+
+    /**
+     * Do not use directly, see {@link AudioManager#getDevicesForAttributes(AudioAttributes)}
+     * Get the audio devices that would be used for the routing of the given audio attributes.
+     * @param attributes the {@link AudioAttributes} for which the routing is being queried
+     * @return an empty list if there was an issue with the request, a list of audio devices
+     *   otherwise (typically one device, except for duplicated paths).
+     */
+    public static @NonNull ArrayList<AudioDeviceAddress> getDevicesForAttributes(
+            @NonNull AudioAttributes attributes) {
+        Objects.requireNonNull(attributes);
+        final AudioDeviceAddress[] devices = new AudioDeviceAddress[MAX_DEVICE_ROUTING];
+        final int res = getDevicesForAttributes(attributes, devices);
+        final ArrayList<AudioDeviceAddress> routeDevices = new ArrayList<>();
+        if (res != SUCCESS) {
+            Log.e(TAG, "error " + res + " in getDevicesForAttributes for " + attributes);
+            return routeDevices;
+        }
+
+        for (AudioDeviceAddress device : devices) {
+            if (device != null) {
+                routeDevices.add(device);
+            }
+        }
+        return routeDevices;
+    }
+
+    /**
+     * Maximum number of audio devices a track is ever routed to, determines the size of the
+     * array passed to {@link #getDevicesForAttributes(AudioAttributes, AudioDeviceAddress[])}
+     */
+    private static final int MAX_DEVICE_ROUTING = 4;
+
+    private static native int getDevicesForAttributes(@NonNull AudioAttributes aa,
+                                                      @NonNull AudioDeviceAddress[] devices);
 
     /** @hide returns true if master mono is enabled. */
     public static native boolean getMasterMono();

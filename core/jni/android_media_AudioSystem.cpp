@@ -2312,6 +2312,48 @@ android_media_AudioSystem_getPreferredDeviceForStrategy(JNIEnv *env, jobject thi
     return jStatus;
 }
 
+static jint
+android_media_AudioSystem_getDevicesForAttributes(JNIEnv *env, jobject thiz,
+        jobject jaa, jobjectArray jDeviceArray)
+{
+    const jsize maxResultSize = env->GetArrayLength(jDeviceArray);
+    // the JNI is always expected to provide us with an array capable of holding enough
+    // devices i.e. the most we ever route a track to. This is preferred over receiving an ArrayList
+    // with reverse JNI to make the array grow as need as this would be less efficient, and some
+    // components call this method often
+    if (jDeviceArray == nullptr || maxResultSize == 0) {
+        ALOGE("%s invalid array to store AudioDeviceAddress", __FUNCTION__);
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+
+    JNIAudioAttributeHelper::UniqueAaPtr paa = JNIAudioAttributeHelper::makeUnique();
+    jint jStatus = JNIAudioAttributeHelper::nativeFromJava(env, jaa, paa.get());
+    if (jStatus != (jint) AUDIO_JAVA_SUCCESS) {
+        return jStatus;
+    }
+
+    AudioDeviceTypeAddrVector devices;
+    jStatus = check_AudioSystem_Command(
+            AudioSystem::getDevicesForAttributes(*(paa.get()), &devices));
+    if (jStatus != NO_ERROR) {
+        return jStatus;
+    }
+
+    if (devices.size() > maxResultSize) {
+        return AUDIO_JAVA_INVALID_OPERATION;
+    }
+    size_t index = 0;
+    jobject jAudioDeviceAddress = NULL;
+    for (const auto& device : devices) {
+        jStatus = createAudioDeviceAddressFromNative(env, &jAudioDeviceAddress, &device);
+        if (jStatus != AUDIO_JAVA_SUCCESS) {
+            return jStatus;
+        }
+        env->SetObjectArrayElement(jDeviceArray, index++, jAudioDeviceAddress);
+    }
+    return jStatus;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -2395,6 +2437,7 @@ static const JNINativeMethod gMethods[] = {
     {"setPreferredDeviceForStrategy", "(IILjava/lang/String;)I", (void *)android_media_AudioSystem_setPreferredDeviceForStrategy},
     {"removePreferredDeviceForStrategy", "(I)I", (void *)android_media_AudioSystem_removePreferredDeviceForStrategy},
     {"getPreferredDeviceForStrategy", "(I[Landroid/media/AudioDeviceAddress;)I", (void *)android_media_AudioSystem_getPreferredDeviceForStrategy},
+    {"getDevicesForAttributes", "(Landroid/media/AudioAttributes;[Landroid/media/AudioDeviceAddress;)I", (void *)android_media_AudioSystem_getDevicesForAttributes}
 };
 
 static const JNINativeMethod gEventHandlerMethods[] = {

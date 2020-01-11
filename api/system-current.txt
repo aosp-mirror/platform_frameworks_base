@@ -4063,6 +4063,10 @@ package android.media {
     field public static final int ROLE_OUTPUT = 2; // 0x2
   }
 
+  public final class AudioDeviceInfo {
+    field public static final int TYPE_REMOTE_SUBMIX = 25; // 0x19
+  }
+
   public final class AudioFocusInfo implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.media.AudioAttributes getAttributes();
@@ -4090,6 +4094,7 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int dispatchAudioFocusChange(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioProductStrategy> getAudioProductStrategies();
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioVolumeGroup> getAudioVolumeGroups();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAddress> getDevicesForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMaxVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMinVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioDeviceAddress getPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
