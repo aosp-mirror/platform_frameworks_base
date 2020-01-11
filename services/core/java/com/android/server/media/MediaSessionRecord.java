@@ -135,6 +135,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
     private int mMaxVolume = 0;
     private int mCurrentVolume = 0;
     private int mOptimisticVolume = -1;
+    private String mVolumeControlId;
     // End volume handling fields
 
     private boolean mIsActive = false;
@@ -714,7 +715,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_REMOTE) {
                 int current = mOptimisticVolume != -1 ? mOptimisticVolume : mCurrentVolume;
                 return new PlaybackInfo(mVolumeType, mVolumeControlType, mMaxVolume, current,
-                        mAudioAttrs);
+                        mAudioAttrs, mVolumeControlId);
             }
             volumeType = mVolumeType;
             attributes = mAudioAttrs;
@@ -723,7 +724,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         int max = mAudioManager.getStreamMaxVolume(stream);
         int current = mAudioManager.getStreamVolume(stream);
         return new PlaybackInfo(volumeType, VolumeProvider.VOLUME_CONTROL_ABSOLUTE, max,
-                current, attributes);
+                current, attributes, null);
     }
 
     private final Runnable mClearOptimisticVolumeRunnable = new Runnable() {
@@ -886,6 +887,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             synchronized (mLock) {
                 typeChanged = mVolumeType == PlaybackInfo.PLAYBACK_TYPE_REMOTE;
                 mVolumeType = PlaybackInfo.PLAYBACK_TYPE_LOCAL;
+                mVolumeControlId = null;
                 if (attributes != null) {
                     mAudioAttrs = attributes;
                 } else {
@@ -904,13 +906,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         }
 
         @Override
-        public void setPlaybackToRemote(int control, int max) throws RemoteException {
+        public void setPlaybackToRemote(int control, int max, String controlId)
+                throws RemoteException {
             boolean typeChanged;
             synchronized (mLock) {
                 typeChanged = mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL;
                 mVolumeType = PlaybackInfo.PLAYBACK_TYPE_REMOTE;
                 mVolumeControlType = control;
                 mMaxVolume = max;
+                mVolumeControlId = controlId;
             }
             if (typeChanged) {
                 final long token = Binder.clearCallingIdentity();

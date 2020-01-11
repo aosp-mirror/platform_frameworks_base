@@ -335,7 +335,7 @@ public final class MediaSession {
 
         try {
             mBinder.setPlaybackToRemote(volumeProvider.getVolumeControl(),
-                    volumeProvider.getMaxVolume());
+                    volumeProvider.getMaxVolume(), volumeProvider.getVolumeControlId());
             mBinder.setCurrentVolume(volumeProvider.getCurrentVolume());
         } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setPlaybackToRemote.", e);
