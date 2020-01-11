@@ -80,6 +80,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -775,6 +776,16 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     @Override
+    public @NonNull List<AccessibilityNodeInfo.AccessibilityAction> getSystemActions() {
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return Collections.emptyList();
+            }
+        }
+        return mSystemActionPerformer.getSystemActions();
+    }
+
+    @Override
     public boolean isFingerprintGestureDetectionAvailable() {
         if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
             return false;
@@ -1252,6 +1263,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 gestureEvent).sendToTarget();
     }
 
+    public void notifySystemActionsChangedLocked() {
+        mInvocationHandler.sendEmptyMessage(
+                InvocationHandler.MSG_ON_SYSTEM_ACTIONS_CHANGED);
+    }
+
     public void notifyClearAccessibilityNodeInfoCache() {
         mInvocationHandler.sendEmptyMessage(
                 InvocationHandler.MSG_CLEAR_ACCESSIBILITY_CACHE);
@@ -1346,6 +1362,18 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error during sending gesture " + gestureInfo
                         + " to " + mService, re);
+            }
+        }
+    }
+
+    private void notifySystemActionsChangedInternal() {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null) {
+            try {
+                listener.onSystemActionsChanged();
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Error sending system actions change to " + mService,
+                        re);
             }
         }
     }
@@ -1544,6 +1572,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         private static final int MSG_ON_SOFT_KEYBOARD_STATE_CHANGED = 6;
         private static final int MSG_ON_ACCESSIBILITY_BUTTON_CLICKED = 7;
         private static final int MSG_ON_ACCESSIBILITY_BUTTON_AVAILABILITY_CHANGED = 8;
+        private static final int MSG_ON_SYSTEM_ACTIONS_CHANGED = 9;
 
         /** List of magnification callback states, mapping from displayId -> Boolean */
         @GuardedBy("mlock")
@@ -1591,7 +1620,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                     final boolean available = (message.arg1 != 0);
                     notifyAccessibilityButtonAvailabilityChangedInternal(available);
                 } break;
-
+                case MSG_ON_SYSTEM_ACTIONS_CHANGED: {
+                    notifySystemActionsChangedInternal();
+                    break;
+                }
                 default: {
                     throw new IllegalArgumentException("Unknown message: " + type);
                 }
