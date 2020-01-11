@@ -415,8 +415,14 @@ public final class Tuner implements AutoCloseable  {
         return mFrontend.mId;
     }
 
-    /** @hide */
-    private static DemuxCapabilities getDemuxCapabilities() {
+    /**
+     * Gets Demux capabilities.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @Nullable
+    public static DemuxCapabilities getDemuxCapabilities(@NonNull Context context) {
+        TunerUtils.checkTunerPermission(context);
         return nativeGetDemuxCapabilities();
     }
 
