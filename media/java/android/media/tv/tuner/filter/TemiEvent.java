@@ -16,12 +16,46 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.NonNull;
+import android.media.tv.tuner.Tuner.Filter;
+
 /**
- * TEMI event.
+ * Filter event sent from {@link Filter} objects for Timed External Media Information (TEMI) data.
+ *
  * @hide
  */
 public class TemiEvent extends FilterEvent {
-    private long mPts;
-    private byte mDescrTag;
-    private byte[] mDescrData;
+    private final long mPts;
+    private final byte mDescrTag;
+    private final byte[] mDescrData;
+
+    // This constructor is used by JNI code only
+    private TemiEvent(long pts, byte descrTag, byte[] descrData) {
+        mPts = pts;
+        mDescrTag = descrTag;
+        mDescrData = descrData;
+    }
+
+
+    /**
+     * Gets PTS (Presentation Time Stamp) for audio or video frame.
+     */
+    public long getPts() {
+        return mPts;
+    }
+
+    /**
+     * Gets TEMI descriptor tag.
+     */
+    public byte getDescriptorTag() {
+        return mDescrTag;
+    }
+
+    /**
+     * Gets TEMI descriptor.
+     */
+    @NonNull
+    public byte[] getDescriptorData() {
+        return mDescrData;
+    }
 }

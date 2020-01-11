@@ -16,11 +16,34 @@
 
 package android.media.tv.tuner.filter;
 
+import android.media.tv.tuner.Tuner.Filter;
+
 /**
- * MMPT record event.
+ * Filter event sent from {@link Filter} objects with MMTP type.
+ *
  * @hide
  */
 public class MmtpRecordEvent extends FilterEvent {
-    private int mScHevcIndexMask;
-    private long mByteNumber;
+    private final int mScHevcIndexMask;
+    private final long mByteNumber;
+
+    // This constructor is used by JNI code only
+    private MmtpRecordEvent(int scHevcIndexMask, long byteNumber) {
+        mScHevcIndexMask = scHevcIndexMask;
+        mByteNumber = byteNumber;
+    }
+
+    /**
+     * Gets indexes which can be tagged by NAL unit group in HEVC according to ISO/IEC 23008-2.
+     */
+    public int getScHevcIndexMask() {
+        return mScHevcIndexMask;
+    }
+
+    /**
+     * Gets the byte number from beginning of the filter's output.
+     */
+    public long getByteNumber() {
+        return mByteNumber;
+    }
 }
