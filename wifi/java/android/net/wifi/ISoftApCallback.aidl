@@ -55,9 +55,17 @@ oneway interface ISoftApCallback
 
 
     /**
-     * Service to manager callback providing information of softap.
+     * Service to manager callback providing capability of softap.
      *
      * @param capability is the softap capability. {@link SoftApCapability}
      */
     void onCapabilityChanged(in SoftApCapability capability);
+
+    /**
+     * Service to manager callback providing blocked client of softap with specific reason code.
+     *
+     * @param client the currently blocked client.
+     * @param blockedReason one of blocked reason from {@link WifiManager.SapClientBlockedReason}
+     */
+    void onBlockedClientConnecting(in WifiClient client, int blockedReason);
 }

@@ -70,6 +70,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.net.DhcpInfo;
+import android.net.MacAddress;
 import android.net.wifi.WifiManager.LocalOnlyHotspotCallback;
 import android.net.wifi.WifiManager.LocalOnlyHotspotObserver;
 import android.net.wifi.WifiManager.LocalOnlyHotspotReservation;
@@ -894,6 +895,25 @@ public class WifiManagerTest {
         callbackCaptor.getValue().onCapabilityChanged(testSoftApCapability);
         mLooper.dispatchAll();
         verify(mSoftApCallback).onCapabilityChanged(testSoftApCapability);
+    }
+
+    /*
+     * Verify client-provided callback is being called through callback proxy
+     */
+    @Test
+    public void softApCallbackProxyCallsOnBlockedClientConnecting() throws Exception {
+        WifiClient testWifiClient = new WifiClient(MacAddress.fromString("22:33:44:55:66:77"));
+        ArgumentCaptor<ISoftApCallback.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(ISoftApCallback.Stub.class);
+        mWifiManager.registerSoftApCallback(new HandlerExecutor(mHandler), mSoftApCallback);
+        verify(mWifiService).registerSoftApCallback(any(IBinder.class), callbackCaptor.capture(),
+                anyInt());
+
+        callbackCaptor.getValue().onBlockedClientConnecting(testWifiClient,
+                WifiManager.SAP_CLIENT_BLOCK_REASON_CODE_NO_MORE_STAS);
+        mLooper.dispatchAll();
+        verify(mSoftApCallback).onBlockedClientConnecting(testWifiClient,
+                WifiManager.SAP_CLIENT_BLOCK_REASON_CODE_NO_MORE_STAS);
     }
 
     /*

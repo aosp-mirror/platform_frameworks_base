@@ -25,6 +25,8 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 @SmallTest
@@ -112,12 +114,18 @@ public class SoftApConfigurationTest {
 
     @Test
     public void testWpa2WithAllFieldCustomized() {
+        List<MacAddress> testBlockedClientList = new ArrayList<>();
+        List<MacAddress> testAllowedClientList = new ArrayList<>();
+        testBlockedClientList.add(MacAddress.fromString("11:22:33:44:55:66"));
+        testAllowedClientList.add(MacAddress.fromString("aa:bb:cc:dd:ee:ff"));
         SoftApConfiguration original = new SoftApConfiguration.Builder()
                 .setPassphrase("secretsecret", SoftApConfiguration.SECURITY_TYPE_WPA2_PSK)
                 .setChannel(149, SoftApConfiguration.BAND_5GHZ)
                 .setHiddenSsid(true)
                 .setMaxNumberOfClients(10)
                 .setShutdownTimeoutMillis(500000)
+                .enableClientControlByUser(true)
+                .setClientList(testBlockedClientList, testAllowedClientList)
                 .build();
         assertThat(original.getPassphrase()).isEqualTo("secretsecret");
         assertThat(original.getSecurityType()).isEqualTo(
@@ -127,6 +135,9 @@ public class SoftApConfigurationTest {
         assertThat(original.isHiddenSsid()).isEqualTo(true);
         assertThat(original.getMaxNumberOfClients()).isEqualTo(10);
         assertThat(original.getShutdownTimeoutMillis()).isEqualTo(500000);
+        assertThat(original.isClientControlByUserEnabled()).isEqualTo(true);
+        assertThat(original.getBlockedClientList()).isEqualTo(testBlockedClientList);
+        assertThat(original.getAllowedClientList()).isEqualTo(testAllowedClientList);
 
         SoftApConfiguration unparceled = parcelUnparcel(original);
         assertThat(unparceled).isNotSameAs(original);
@@ -237,5 +248,18 @@ public class SoftApConfigurationTest {
         SoftApConfiguration original = new SoftApConfiguration.Builder()
                 .setShutdownTimeoutMillis(-1)
                 .build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testsetClientListExceptionWhenExistMacAddressInBothList() {
+        final MacAddress testMacAddress_1 = MacAddress.fromString("22:33:44:55:66:77");
+        final MacAddress testMacAddress_2 = MacAddress.fromString("aa:bb:cc:dd:ee:ff");
+        ArrayList<MacAddress> testAllowedClientList = new ArrayList<>();
+        testAllowedClientList.add(testMacAddress_1);
+        testAllowedClientList.add(testMacAddress_2);
+        ArrayList<MacAddress> testBlockedClientList = new ArrayList<>();
+        testBlockedClientList.add(testMacAddress_1);
+        SoftApConfiguration.Builder configBuilder = new SoftApConfiguration.Builder();
+        configBuilder.setClientList(testBlockedClientList, testAllowedClientList);
     }
 }
