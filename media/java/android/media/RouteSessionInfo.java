@@ -33,8 +33,7 @@ import java.util.Objects;
  * Describes a route session that is made when a media route is selected.
  * @hide
  */
-public class RouteSessionInfo implements Parcelable {
-
+public final class RouteSessionInfo implements Parcelable {
     @NonNull
     public static final Creator<RouteSessionInfo> CREATOR =
             new Creator<RouteSessionInfo>() {
@@ -70,6 +69,7 @@ public class RouteSessionInfo implements Parcelable {
         mRouteFeature = builder.mRouteFeature;
         mProviderId = builder.mProviderId;
 
+        // TODO: Needs to check that the routes already have unique IDs.
         mSelectedRoutes = Collections.unmodifiableList(
                 convertToUniqueRouteIds(builder.mSelectedRoutes));
         mSelectableRoutes = Collections.unmodifiableList(
@@ -110,18 +110,6 @@ public class RouteSessionInfo implements Parcelable {
             return Collections.unmodifiableList(list);
         }
         return Collections.emptyList();
-    }
-
-    /**
-     * Returns whether the session info is valid or not
-     *
-     * TODO in this CL: Remove this method.
-     */
-    public boolean isValid() {
-        return !TextUtils.isEmpty(mId)
-                && !TextUtils.isEmpty(mClientPackageName)
-                && !TextUtils.isEmpty(mRouteFeature)
-                && mSelectedRoutes.size() > 0;
     }
 
     /**
@@ -236,6 +224,32 @@ public class RouteSessionInfo implements Parcelable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof RouteSessionInfo)) {
+            return false;
+        }
+
+        RouteSessionInfo other = (RouteSessionInfo) obj;
+        return Objects.equals(mId, other.mId)
+                && Objects.equals(mClientPackageName, other.mClientPackageName)
+                && Objects.equals(mRouteFeature, other.mRouteFeature)
+                && Objects.equals(mProviderId, other.mProviderId)
+                && Objects.equals(mSelectedRoutes, other.mSelectedRoutes)
+                && Objects.equals(mSelectableRoutes, other.mSelectableRoutes)
+                && Objects.equals(mDeselectableRoutes, other.mDeselectableRoutes)
+                && Objects.equals(mTransferrableRoutes, other.mTransferrableRoutes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mId, mClientPackageName, mRouteFeature, mProviderId,
+                mSelectedRoutes, mSelectableRoutes, mDeselectableRoutes, mTransferrableRoutes);
+    }
+
+    @Override
     public String toString() {
         StringBuilder result = new StringBuilder()
                 .append("RouteSessionInfo{ ")
@@ -297,6 +311,10 @@ public class RouteSessionInfo implements Parcelable {
          * {@link MediaRoute2ProviderService}.
          * </p>
          *
+         * @param id ID of the session. Must not be empty.
+         * @param clientPackageName package name of the client app which uses this session.
+         *                          If is is unknown, then just use an empty string.
+         * @param routeFeature the route feature of session. Must not be empty.
          * @see MediaRoute2Info#getId()
          */
         public Builder(@NonNull String id, @NonNull String clientPackageName,
@@ -304,10 +322,14 @@ public class RouteSessionInfo implements Parcelable {
             if (TextUtils.isEmpty(id)) {
                 throw new IllegalArgumentException("id must not be empty");
             }
+            Objects.requireNonNull(clientPackageName, "clientPackageName must not be null");
+            if (TextUtils.isEmpty(routeFeature)) {
+                throw new IllegalArgumentException("routeFeature must not be empty");
+            }
+
             mId = id;
-            mClientPackageName = Objects.requireNonNull(
-                    clientPackageName, "clientPackageName must not be null");
-            mRouteFeature = Objects.requireNonNull(routeFeature, "routeFeature must not be null");
+            mClientPackageName = clientPackageName;
+            mRouteFeature = routeFeature;
             mSelectedRoutes = new ArrayList<>();
             mSelectableRoutes = new ArrayList<>();
             mDeselectableRoutes = new ArrayList<>();
@@ -338,8 +360,6 @@ public class RouteSessionInfo implements Parcelable {
 
         /**
          * Sets the provider ID of the session.
-         * Also, calling this method will make all type of route IDs be unique by adding
-         * {@code providerId:} as a prefix. So do NOT call this method twice on same instance.
          *
          * @hide
          */
@@ -362,20 +382,26 @@ public class RouteSessionInfo implements Parcelable {
         }
 
         /**
-         * Adds a route to the selected routes.
+         * Adds a route to the selected routes. The {@code routeId} must not be empty.
          */
         @NonNull
         public Builder addSelectedRoute(@NonNull String routeId) {
-            mSelectedRoutes.add(Objects.requireNonNull(routeId, "routeId must not be null"));
+            if (TextUtils.isEmpty(routeId)) {
+                throw new IllegalArgumentException("routeId must not be empty");
+            }
+            mSelectedRoutes.add(routeId);
             return this;
         }
 
         /**
-         * Removes a route from the selected routes.
+         * Removes a route from the selected routes. The {@code routeId} must not be empty.
          */
         @NonNull
         public Builder removeSelectedRoute(@NonNull String routeId) {
-            mSelectedRoutes.remove(Objects.requireNonNull(routeId, "routeId must not be null"));
+            if (TextUtils.isEmpty(routeId)) {
+                throw new IllegalArgumentException("routeId must not be empty");
+            }
+            mSelectedRoutes.remove(routeId);
             return this;
         }
 
@@ -389,20 +415,26 @@ public class RouteSessionInfo implements Parcelable {
         }
 
         /**
-         * Adds a route to the selectable routes.
+         * Adds a route to the selectable routes. The {@code routeId} must not be empty.
          */
         @NonNull
         public Builder addSelectableRoute(@NonNull String routeId) {
-            mSelectableRoutes.add(Objects.requireNonNull(routeId, "routeId must not be null"));
+            if (TextUtils.isEmpty(routeId)) {
+                throw new IllegalArgumentException("routeId must not be empty");
+            }
+            mSelectableRoutes.add(routeId);
             return this;
         }
 
         /**
-         * Removes a route from the selectable routes.
+         * Removes a route from the selectable routes. The {@code routeId} must not be empty.
          */
         @NonNull
         public Builder removeSelectableRoute(@NonNull String routeId) {
-            mSelectableRoutes.remove(Objects.requireNonNull(routeId, "routeId must not be null"));
+            if (TextUtils.isEmpty(routeId)) {
+                throw new IllegalArgumentException("routeId must not be empty");
+            }
+            mSelectableRoutes.remove(routeId);
             return this;
         }
 
@@ -416,20 +448,26 @@ public class RouteSessionInfo implements Parcelable {
         }
 
         /**
-         * Adds a route to the deselectable routes.
+         * Adds a route to the deselectable routes. The {@code routeId} must not be empty.
          */
         @NonNull
         public Builder addDeselectableRoute(@NonNull String routeId) {
-            mDeselectableRoutes.add(Objects.requireNonNull(routeId, "routeId must not be null"));
+            if (TextUtils.isEmpty(routeId)) {
+                throw new IllegalArgumentException("routeId must not be empty");
+            }
+            mDeselectableRoutes.add(routeId);
             return this;
         }
 
         /**
-         * Removes a route from the deselectable routes.
+         * Removes a route from the deselectable routes. The {@code routeId} must not be empty.
          */
         @NonNull
         public Builder removeDeselectableRoute(@NonNull String routeId) {
-            mDeselectableRoutes.remove(Objects.requireNonNull(routeId, "routeId must not be null"));
+            if (TextUtils.isEmpty(routeId)) {
+                throw new IllegalArgumentException("routeId must not be empty");
+            }
+            mDeselectableRoutes.remove(routeId);
             return this;
         }
 
@@ -443,21 +481,26 @@ public class RouteSessionInfo implements Parcelable {
         }
 
         /**
-         * Adds a route to the transferrable routes.
+         * Adds a route to the transferrable routes. The {@code routeId} must not be empty.
          */
         @NonNull
         public Builder addTransferrableRoute(@NonNull String routeId) {
-            mTransferrableRoutes.add(Objects.requireNonNull(routeId, "routeId must not be null"));
+            if (TextUtils.isEmpty(routeId)) {
+                throw new IllegalArgumentException("routeId must not be empty");
+            }
+            mTransferrableRoutes.add(routeId);
             return this;
         }
 
         /**
-         * Removes a route from the transferrable routes.
+         * Removes a route from the transferrable routes. The {@code routeId} must not be empty.
          */
         @NonNull
         public Builder removeTransferrableRoute(@NonNull String routeId) {
-            mTransferrableRoutes.remove(
-                    Objects.requireNonNull(routeId, "routeId must not be null"));
+            if (TextUtils.isEmpty(routeId)) {
+                throw new IllegalArgumentException("routeId must not be empty");
+            }
+            mTransferrableRoutes.remove(routeId);
             return this;
         }
 
@@ -472,9 +515,14 @@ public class RouteSessionInfo implements Parcelable {
 
         /**
          * Builds a route session info.
+         *
+         * @throws IllegalArgumentException if no selected routes are added.
          */
         @NonNull
         public RouteSessionInfo build() {
+            if (mSelectedRoutes.isEmpty()) {
+                throw new IllegalArgumentException("selectedRoutes must not be empty");
+            }
             return new RouteSessionInfo(this);
         }
     }

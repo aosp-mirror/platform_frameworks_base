@@ -145,7 +145,6 @@ public abstract class MediaRoute2ProviderService extends Service {
     /**
      * Updates the information of a session.
      * If the session is destroyed or not created before, it will be ignored.
-     * A session will be destroyed if it has no selected route.
      * Call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify clients of
      * session info changes.
      *
@@ -156,10 +155,6 @@ public abstract class MediaRoute2ProviderService extends Service {
     public final void updateSessionInfo(@NonNull RouteSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
         String sessionId = sessionInfo.getId();
-        if (sessionInfo.getSelectedRoutes().isEmpty()) {
-            releaseSession(sessionId);
-            return;
-        }
 
         synchronized (mSessionLock) {
             if (mSessionInfo.containsKey(sessionId)) {
