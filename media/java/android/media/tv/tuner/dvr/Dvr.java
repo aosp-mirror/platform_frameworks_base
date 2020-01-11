@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner;
+package android.media.tv.tuner.dvr;
 
+import android.annotation.BytesLong;
 import android.annotation.NonNull;
 import android.media.tv.tuner.Tuner.DvrCallback;
 import android.media.tv.tuner.Tuner.Filter;
-import android.media.tv.tuner.dvr.DvrSettings;
+import android.media.tv.tuner.TunerConstants.Result;
 import android.os.ParcelFileDescriptor;
 
-/** @hide */
+/**
+ * Digital Video Record (DVR) interface provides record control on Demux's output buffer and
+ * playback control on Demux's input buffer.
+ *
+ * @hide
+ */
 public class Dvr {
     private long mNativeContext;
     private DvrCallback mCallback;
@@ -35,10 +41,10 @@ public class Dvr {
     private native int nativeFlushDvr();
     private native int nativeClose();
     private native void nativeSetFileDescriptor(int fd);
-    private native int nativeRead(int size);
-    private native int nativeRead(byte[] bytes, int offset, int size);
-    private native int nativeWrite(int size);
-    private native int nativeWrite(byte[] bytes, int offset, int size);
+    private native int nativeRead(long size);
+    private native int nativeRead(byte[] bytes, long offset, long size);
+    private native int nativeWrite(long size);
+    private native int nativeWrite(byte[] bytes, long offset, long size);
 
     private Dvr() {}
 
@@ -48,7 +54,8 @@ public class Dvr {
      * @param filter the filter to be attached.
      * @return result status of the operation.
      */
-    public int attachFilter(Filter filter) {
+    @Result
+    public int attachFilter(@NonNull Filter filter) {
         return nativeAttachFilter(filter);
     }
 
@@ -58,7 +65,8 @@ public class Dvr {
      * @param filter the filter to be detached.
      * @return result status of the operation.
      */
-    public int detachFilter(Filter filter) {
+    @Result
+    public int detachFilter(@NonNull Filter filter) {
         return nativeDetachFilter(filter);
     }
 
@@ -68,17 +76,19 @@ public class Dvr {
      * @param settings the settings of the DVR interface.
      * @return result status of the operation.
      */
-    public int configure(DvrSettings settings) {
+    @Result
+    public int configure(@NonNull DvrSettings settings) {
         return nativeConfigureDvr(settings);
     }
 
     /**
      * Starts DVR.
      *
-     * Starts consuming playback data or producing data for recording.
+     * <p>Starts consuming playback data or producing data for recording.
      *
      * @return result status of the operation.
      */
+    @Result
     public int start() {
         return nativeStartDvr();
     }
@@ -86,10 +96,11 @@ public class Dvr {
     /**
      * Stops DVR.
      *
-     * Stops consuming playback data or producing data for recording.
+     * <p>Stops consuming playback data or producing data for recording.
      *
      * @return result status of the operation.
      */
+    @Result
     public int stop() {
         return nativeStopDvr();
     }
@@ -97,39 +108,53 @@ public class Dvr {
     /**
      * Flushed DVR data.
      *
+     * <p>The data in DVR buffer is cleared.
+     *
      * @return result status of the operation.
      */
+    @Result
     public int flush() {
         return nativeFlushDvr();
     }
 
     /**
-     * closes the DVR instance to release resources.
+     * Closes the DVR instance to release resources.
      *
      * @return result status of the operation.
      */
+    @Result
     public int close() {
         return nativeClose();
     }
 
     /**
      * Sets file descriptor to read/write data.
+     *
+     * @param fd the file descriptor to read/write data.
      */
-    public void setFileDescriptor(ParcelFileDescriptor fd) {
+    public void setFileDescriptor(@NonNull ParcelFileDescriptor fd) {
         nativeSetFileDescriptor(fd.getFd());
     }
 
     /**
      * Reads data from the file for DVR playback.
+     *
+     * @param size the maximum number of bytes to read.
+     * @return the number of bytes read.
      */
-    public int read(int size) {
+    public int read(@BytesLong long size) {
         return nativeRead(size);
     }
 
     /**
-     * Reads data from the buffer for DVR playback.
+     * Reads data from the buffer for DVR playback and copies to the given byte array.
+     *
+     * @param bytes the byte array to store the data.
+     * @param offset the index of the first byte in {@code bytes} to copy to.
+     * @param size the maximum number of bytes to read.
+     * @return the number of bytes read.
      */
-    public int read(@NonNull byte[] bytes, int offset, int size) {
+    public int read(@NonNull byte[] bytes, @BytesLong long offset, @BytesLong long size) {
         if (size + offset > bytes.length) {
             throw new ArrayIndexOutOfBoundsException(
                     "Array length=" + bytes.length + ", offset=" + offset + ", size=" + size);
@@ -139,15 +164,23 @@ public class Dvr {
 
     /**
      * Writes recording data to file.
+     *
+     * @param size the maximum number of bytes to write.
+     * @return the number of bytes written.
      */
-    public int write(int size) {
+    public int write(@BytesLong long size) {
         return nativeWrite(size);
     }
 
     /**
      * Writes recording data to buffer.
+     *
+     * @param bytes the byte array stores the data to be written to DVR.
+     * @param offset the index of the first byte in {@code bytes} to be written to DVR.
+     * @param size the maximum number of bytes to write.
+     * @return the number of bytes written.
      */
-    public int write(@NonNull byte[] bytes, int offset, int size) {
+    public int write(@NonNull byte[] bytes, @BytesLong long offset, @BytesLong long size) {
         return nativeWrite(bytes, offset, size);
     }
 }
