@@ -186,18 +186,6 @@ cc_library_shared {
         "libcutils",
         "libstatslog",
     ],
-    target: {
-        android: {
-            shared_libs: [
-                "libutils",
-            ],
-        },
-        host: {
-            static_libs: [
-                "libutils",
-            ],
-        },
-    },
 }
 
 
