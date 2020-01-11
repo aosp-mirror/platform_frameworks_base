@@ -119,7 +119,9 @@ public class AlwaysOnHotwordDetector {
     @IntDef(flag = true, prefix = { "RECOGNITION_FLAG_" }, value = {
             RECOGNITION_FLAG_NONE,
             RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO,
-            RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS
+            RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS,
+            RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION,
+            RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION,
     })
     public @interface RecognitionFlags {}
 
@@ -144,6 +146,26 @@ public class AlwaysOnHotwordDetector {
      */
     public static final int RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS = 0x2;
 
+    /**
+     * Audio capabilities flag for {@link #startRecognition(int)} that indicates
+     * if the underlying recognition should use AEC.
+     * This capability may or may not be supported by the system, and support can be queried
+     * by calling {@link #getSupportedAudioCapabilities()}. The corresponding capabilities field for
+     * this flag is {@link #AUDIO_CAPABILITY_ECHO_CANCELLATION}. If this flag is passed without the
+     * audio capability supported, there will be no audio effect applied.
+     */
+    public static final int RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION = 0x4;
+
+    /**
+     * Audio capabilities flag for {@link #startRecognition(int)} that indicates
+     * if the underlying recognition should use noise suppression.
+     * This capability may or may not be supported by the system, and support can be queried
+     * by calling {@link #getSupportedAudioCapabilities()}. The corresponding capabilities field for
+     * this flag is {@link #AUDIO_CAPABILITY_NOISE_SUPPRESSION}. If this flag is passed without the
+     * audio capability supported, there will be no audio effect applied.
+     */
+    public static final int RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION = 0x8;
+
     //---- Recognition mode flags. Return codes for getSupportedRecognitionModes() ----//
     // Must be kept in sync with the related attribute defined as searchKeyphraseRecognitionFlags.
 
@@ -167,6 +189,30 @@ public class AlwaysOnHotwordDetector {
      */
     public static final int RECOGNITION_MODE_USER_IDENTIFICATION
             = SoundTrigger.RECOGNITION_MODE_USER_IDENTIFICATION;
+
+    //-- Audio capabilities. Values in returned bit field for getSupportedAudioCapabilities() --//
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "AUDIO_CAPABILITY_" }, value = {
+            AUDIO_CAPABILITY_ECHO_CANCELLATION,
+            AUDIO_CAPABILITY_NOISE_SUPPRESSION,
+    })
+    public @interface AudioCapabilities {}
+
+    /**
+     * If set the underlying module supports AEC.
+     * Returned by {@link #getSupportedAudioCapabilities()}
+     */
+    public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION =
+            SoundTrigger.ModuleProperties.CAPABILITY_ECHO_CANCELLATION;
+
+    /**
+     * If set, the underlying module supports noise suppression.
+     * Returned by {@link #getSupportedAudioCapabilities()}
+     */
+    public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION =
+            SoundTrigger.ModuleProperties.CAPABILITY_NOISE_SUPPRESSION;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -448,6 +494,37 @@ public class AlwaysOnHotwordDetector {
     }
 
     /**
+     * Get the audio capabilities supported by the platform which can be enabled when
+     * starting a recognition.
+     *
+     * @see #AUDIO_CAPABILITY_ECHO_CANCELLATION
+     * @see #AUDIO_CAPABILITY_NOISE_SUPPRESSION
+     *
+     * @return Bit field encoding of the AudioCapabilities supported.
+     */
+    @AudioCapabilities
+    public int getSupportedAudioCapabilities() {
+        if (DBG) Slog.d(TAG, "getSupportedAudioCapabilities()");
+        synchronized (mLock) {
+            return getSupportedAudioCapabilitiesLocked();
+        }
+    }
+
+    private int getSupportedAudioCapabilitiesLocked() {
+        try {
+            ModuleProperties properties =
+                    mModelManagementService.getDspModuleProperties(mVoiceInteractionService);
+            if (properties != null) {
+                return properties.audioCapabilities;
+            }
+
+            return 0;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Starts recognition for the associated keyphrase.
      *
      * @see #RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
@@ -711,12 +788,21 @@ public class AlwaysOnHotwordDetector {
                 (recognitionFlags&RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO) != 0;
         boolean allowMultipleTriggers =
                 (recognitionFlags&RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS) != 0;
+
+        int audioCapabilities = 0;
+        if ((recognitionFlags & RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION) != 0) {
+            audioCapabilities |= AUDIO_CAPABILITY_ECHO_CANCELLATION;
+        }
+        if ((recognitionFlags & RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION) != 0) {
+            audioCapabilities |= AUDIO_CAPABILITY_NOISE_SUPPRESSION;
+        }
+
         int code = STATUS_ERROR;
         try {
             code = mModelManagementService.startRecognition(mVoiceInteractionService,
                     mKeyphraseMetadata.id, mLocale.toLanguageTag(), mInternalCallback,
                     new RecognitionConfig(captureTriggerAudio, allowMultipleTriggers,
-                            recognitionExtra, null /* additional data */));
+                            recognitionExtra, null /* additional data */, audioCapabilities));
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException in startRecognition!", e);
         }

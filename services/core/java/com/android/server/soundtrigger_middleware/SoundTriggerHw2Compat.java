@@ -217,16 +217,15 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
 
     @Override
     public void startRecognition(int modelHandle,
-            android.hardware.soundtrigger.V2_1.ISoundTriggerHw.RecognitionConfig config,
+            android.hardware.soundtrigger.V2_3.RecognitionConfig config,
             Callback callback, int cookie) {
         try {
             try {
-                int retval = as2_1().startRecognition_2_1(modelHandle, config,
-                        new SoundTriggerCallback(callback), cookie);
-                handleHalStatus(retval, "startRecognition_2_1");
+                int retval = as2_3().startRecognition_2_3(modelHandle, config);
+                handleHalStatus(retval, "startRecognition_2_3");
             } catch (NotSupported e) {
                 // Fall-back to the 2.0 version:
-                startRecognition_2_0(modelHandle, config, callback, cookie);
+                startRecognition_2_1(modelHandle, config, callback, cookie);
             }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -369,13 +368,31 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
         return handle.get();
     }
 
+    private void startRecognition_2_1(int modelHandle,
+            android.hardware.soundtrigger.V2_3.RecognitionConfig config,
+            Callback callback, int cookie) {
+        try {
+            try {
+                android.hardware.soundtrigger.V2_1.ISoundTriggerHw.RecognitionConfig config_2_1 =
+                        Hw2CompatUtil.convertRecognitionConfig_2_3_to_2_1(config);
+                int retval = as2_1().startRecognition_2_1(modelHandle, config_2_1,
+                        new SoundTriggerCallback(callback), cookie);
+                handleHalStatus(retval, "startRecognition_2_1");
+            } catch (NotSupported e) {
+                // Fall-back to the 2.0 version:
+                startRecognition_2_0(modelHandle, config, callback, cookie);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
     private void startRecognition_2_0(int modelHandle,
-            android.hardware.soundtrigger.V2_1.ISoundTriggerHw.RecognitionConfig config,
+            android.hardware.soundtrigger.V2_3.RecognitionConfig config,
             Callback callback, int cookie)
             throws RemoteException {
-
         android.hardware.soundtrigger.V2_0.ISoundTriggerHw.RecognitionConfig config_2_0 =
-                Hw2CompatUtil.convertRecognitionConfig_2_1_to_2_0(config);
+                Hw2CompatUtil.convertRecognitionConfig_2_3_to_2_0(config);
         int retval = as2_0().startRecognition(modelHandle, config_2_0,
                 new SoundTriggerCallback(callback), cookie);
         handleHalStatus(retval, "startRecognition");

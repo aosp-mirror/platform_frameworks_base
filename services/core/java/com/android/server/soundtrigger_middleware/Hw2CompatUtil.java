@@ -66,12 +66,17 @@ class Hw2CompatUtil {
         return model_2_0;
     }
 
-    static android.hardware.soundtrigger.V2_0.ISoundTriggerHw.RecognitionConfig convertRecognitionConfig_2_1_to_2_0(
-            android.hardware.soundtrigger.V2_1.ISoundTriggerHw.RecognitionConfig config) {
+    static android.hardware.soundtrigger.V2_1.ISoundTriggerHw.RecognitionConfig convertRecognitionConfig_2_3_to_2_1(
+            android.hardware.soundtrigger.V2_3.RecognitionConfig config) {
+        return config.base;
+    }
+
+    static android.hardware.soundtrigger.V2_0.ISoundTriggerHw.RecognitionConfig convertRecognitionConfig_2_3_to_2_0(
+            android.hardware.soundtrigger.V2_3.RecognitionConfig config) {
         android.hardware.soundtrigger.V2_0.ISoundTriggerHw.RecognitionConfig config_2_0 =
-                config.header;
+                config.base.header;
         // Note: this mutates the input!
-        config_2_0.data = HidlMemoryUtil.hidlMemoryToByteList(config.data);
+        config_2_0.data = HidlMemoryUtil.hidlMemoryToByteList(config.base.data);
         return config_2_0;
     }
 

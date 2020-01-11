@@ -3567,7 +3567,10 @@ package android.hardware.soundtrigger {
   public static final class SoundTrigger.ModuleProperties implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
+    field public static final int CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> CREATOR;
+    field public final int audioCapabilities;
     field @NonNull public final String description;
     field public final int id;
     field @NonNull public final String implementor;
@@ -4363,6 +4366,8 @@ package android.media.soundtrigger {
     method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public boolean stopRecognition();
     field public static final int RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS = 2; // 0x2
     field public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 1; // 0x1
+    field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION = 4; // 0x4
+    field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION = 8; // 0x8
   }
 
   public abstract static class SoundTriggerDetector.Callback {

@@ -58,4 +58,11 @@ parcelable SoundTriggerModuleProperties {
      * Rated power consumption when detection is active with TDB
      * silence/sound/speech ratio */
     int powerConsumptionMw;
+    /**
+     * Bit field encoding of the AudioCapabilities
+     * supported by the firmware.
+     * This property is supported for soundtrigger HAL v2.3 and above.
+     * If running a previous version, this value will be 0.
+     */
+    int audioCapabilities;
 }

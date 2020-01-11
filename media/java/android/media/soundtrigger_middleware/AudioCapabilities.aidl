@@ -15,25 +15,18 @@
  */
 package android.media.soundtrigger_middleware;
 
-import android.media.soundtrigger_middleware.PhraseRecognitionExtra;
-
 /**
- * Configuration for tuning behavior of an active recognition process.
- * {@hide}
+ * AudioCapabilities supported by the implemented HAL driver.
+ * @hide
  */
-parcelable RecognitionConfig {
-    /* Capture and buffer audio for this recognition instance. */
-    boolean captureRequested;
-
-    /* Configuration for each key phrase. */
-    PhraseRecognitionExtra[] phraseRecognitionExtras;
-
+@Backing(type="int")
+enum AudioCapabilities {
     /**
-     * Bit field encoding of the AudioCapabilities
-     * supported by the firmware.
+     * If set the underlying module supports AEC.
      */
-    int audioCapabilities;
-
-    /** Opaque capture configuration data. */
-    byte[] data;
+    ECHO_CANCELLATION = 1 << 0,
+    /**
+     * If set, the underlying module supports noise suppression.
+     */
+    NOISE_SUPPRESSION = 1 << 1,
 }
