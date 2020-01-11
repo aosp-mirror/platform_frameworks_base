@@ -398,6 +398,42 @@ public class DevicePolicyManager {
             "android.app.action.PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE";
 
     /**
+     * Activity action: Starts the provisioning flow which sets up a financed device.
+     *
+     * <p>During financed device provisioning, a device admin app is downloaded and set as the owner
+     * of the device. A device owner has full control over the device. The device owner can not be
+     * modified by the user.
+     *
+     * <p>A typical use case would be a device that is bought from the reseller through financing
+     * program.
+     *
+     * <p>An intent with this action can be sent only on an unprovisioned device.
+     *
+     * <p>Unlike {@link #ACTION_PROVISION_MANAGED_DEVICE}, the provisioning message can only be sent
+     * by a privileged app with the permission
+     * {@link android.Manifest.permission#DISPATCH_PROVISIONING_MESSAGE}.
+     *
+     * <p>The provisioning intent contains the following properties:
+     * <ul>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_ICON_URI}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_SUPPORT_URL}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_ORGANIZATION_NAME}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
+     * </ul>
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_PROVISION_FINANCED_DEVICE =
+            "android.app.action.PROVISION_FINANCED_DEVICE";
+
+    /**
      * Activity action: Starts the provisioning flow which sets up a managed device.
      * Must be started with {@link android.app.Activity#startActivityForResult(Intent, int)}.
      *
@@ -864,6 +900,7 @@ public class DevicePolicyManager {
      * The name is displayed only during provisioning.
      *
      * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     * or {@link #ACTION_PROVISION_FINANCED_DEVICE}
      *
      * @hide
      */
@@ -876,6 +913,7 @@ public class DevicePolicyManager {
      * during provisioning. If the url is not HTTPS, an error will be shown.
      *
      * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     * or {@link #ACTION_PROVISION_FINANCED_DEVICE}
      *
      * @hide
      */
@@ -888,6 +926,7 @@ public class DevicePolicyManager {
      * as the app label of the package.
      *
      * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     * or {@link #ACTION_PROVISION_FINANCED_DEVICE}
      *
      * @hide
      */
@@ -912,6 +951,7 @@ public class DevicePolicyManager {
      * {@link android.content.ClipData} of the intent too.
      *
      * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     * or {@link #ACTION_PROVISION_FINANCED_DEVICE}
      *
      * @hide
      */
