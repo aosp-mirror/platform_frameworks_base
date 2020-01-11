@@ -107,7 +107,8 @@ public final class BarringInfo implements Parcelable {
         @IntDef(prefix = "BARRING_TYPE_", value =
                     {BARRING_TYPE_NONE,
                     BARRING_TYPE_UNCONDITIONAL,
-                    BARRING_TYPE_CONDITIONAL})
+                    BARRING_TYPE_CONDITIONAL,
+                    BARRING_TYPE_UNKNOWN})
         public @interface BarringType {}
 
         /** Barring is inactive */
@@ -119,6 +120,9 @@ public final class BarringInfo implements Parcelable {
         public static final int BARRING_TYPE_CONDITIONAL =
                 android.hardware.radio.V1_5.BarringType.CONDITIONAL;
 
+        /** If a modem does not report barring info, then the barring type will be UNKNOWN */
+        public static final int BARRING_TYPE_UNKNOWN = -1;
+
         private final @BarringType int mBarringType;
 
         private final boolean mIsConditionallyBarred;
@@ -126,8 +130,8 @@ public final class BarringInfo implements Parcelable {
         private final int mConditionalBarringTimeSeconds;
 
         /** @hide */
-        public BarringServiceInfo() {
-            this(BARRING_TYPE_NONE, false, 0, 0);
+        public BarringServiceInfo(@BarringType int type) {
+            this(type, false, 0, 0);
         }
 
         /** @hide */
@@ -311,7 +315,13 @@ public final class BarringInfo implements Parcelable {
      */
     public @NonNull BarringServiceInfo getBarringServiceInfo(@BarringServiceType int service) {
         BarringServiceInfo bsi = mBarringServiceInfos.get(service);
-        return (bsi != null) ? bsi : new BarringServiceInfo();
+        // If barring is reported but not for a particular service, then we report the barring
+        // type as UNKNOWN; if the modem reports barring info but doesn't report for a particular
+        // service then we can safely assume that the service isn't barred (for instance because
+        // that particular service isn't applicable to the current RAN).
+        return (bsi != null) ? bsi : new BarringServiceInfo(
+                mBarringServiceInfos.size() > 0 ? BarringServiceInfo.BARRING_TYPE_NONE :
+                        BarringServiceInfo.BARRING_TYPE_UNKNOWN);
     }
 
     /** @hide */
