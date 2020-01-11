@@ -101,6 +101,14 @@ public class SoundTrigger {
         /** Voice detection engine version */
         public final int version;
 
+        /**
+         * String naming the architecture used for running the supported models.
+         * (eg. a platform running models on a DSP could implement this string to convey the DSP
+         * architecture used)
+         */
+        @NonNull
+        public final String supportedModelArch;
+
         /** Maximum number of active sound models */
         public final int maxSoundModels;
 
@@ -130,15 +138,17 @@ public class SoundTrigger {
         public final boolean returnsTriggerInEvent;
 
         ModuleProperties(int id, @NonNull String implementor, @NonNull String description,
-                @NonNull String uuid, int version, int maxSoundModels, int maxKeyphrases,
-                int maxUsers, int recognitionModes, boolean supportsCaptureTransition,
-                int maxBufferMs, boolean supportsConcurrentCapture,
-                int powerConsumptionMw, boolean returnsTriggerInEvent) {
+                @NonNull String uuid, int version, @NonNull String supportedModelArch,
+                int maxSoundModels, int maxKeyphrases, int maxUsers, int recognitionModes,
+                boolean supportsCaptureTransition, int maxBufferMs,
+                boolean supportsConcurrentCapture, int powerConsumptionMw,
+                boolean returnsTriggerInEvent) {
             this.id = id;
             this.implementor = requireNonNull(implementor);
             this.description = requireNonNull(description);
             this.uuid = UUID.fromString(requireNonNull(uuid));
             this.version = version;
+            this.supportedModelArch = requireNonNull(supportedModelArch);
             this.maxSoundModels = maxSoundModels;
             this.maxKeyphrases = maxKeyphrases;
             this.maxUsers = maxUsers;
@@ -167,6 +177,7 @@ public class SoundTrigger {
             String description = in.readString();
             String uuid = in.readString();
             int version = in.readInt();
+            String supportedModelArch = in.readString();
             int maxSoundModels = in.readInt();
             int maxKeyphrases = in.readInt();
             int maxUsers = in.readInt();
@@ -177,7 +188,7 @@ public class SoundTrigger {
             int powerConsumptionMw = in.readInt();
             boolean returnsTriggerInEvent = in.readByte() == 1;
             return new ModuleProperties(id, implementor, description, uuid, version,
-                    maxSoundModels, maxKeyphrases, maxUsers, recognitionModes,
+                    supportedModelArch, maxSoundModels, maxKeyphrases, maxUsers, recognitionModes,
                     supportsCaptureTransition, maxBufferMs, supportsConcurrentCapture,
                     powerConsumptionMw, returnsTriggerInEvent);
         }
@@ -189,6 +200,7 @@ public class SoundTrigger {
             dest.writeString(description);
             dest.writeString(uuid.toString());
             dest.writeInt(version);
+            dest.writeString(supportedModelArch);
             dest.writeInt(maxSoundModels);
             dest.writeInt(maxKeyphrases);
             dest.writeInt(maxUsers);
@@ -208,7 +220,8 @@ public class SoundTrigger {
         @Override
         public String toString() {
             return "ModuleProperties [id=" + id + ", implementor=" + implementor + ", description="
-                    + description + ", uuid=" + uuid + ", version=" + version + ", maxSoundModels="
+                    + description + ", uuid=" + uuid + ", version=" + version
+                    + " , supportedModelArch=" + supportedModelArch + ", maxSoundModels="
                     + maxSoundModels + ", maxKeyphrases=" + maxKeyphrases + ", maxUsers="
                     + maxUsers + ", recognitionModes=" + recognitionModes
                     + ", supportsCaptureTransition=" + supportsCaptureTransition + ", maxBufferMs="
@@ -588,19 +601,19 @@ public class SoundTrigger {
         }
     }
 
-    /*****************************************************************************
+    /**
      * A ModelParamRange is a representation of supported parameter range for a
      * given loaded model.
-     ****************************************************************************/
+     */
     public static final class ModelParamRange implements Parcelable {
 
         /**
-         * start of supported range inclusive
+         * The inclusive start of supported range.
          */
         public final int start;
 
         /**
-         * end of supported range inclusive
+         * The inclusive end of supported range.
          */
         public final int end;
 
@@ -609,29 +622,63 @@ public class SoundTrigger {
             this.end = end;
         }
 
+        /** @hide */
         private ModelParamRange(@NonNull Parcel in) {
             this.start = in.readInt();
             this.end = in.readInt();
         }
 
         @NonNull
-        public static final Creator<ModelParamRange> CREATOR = new Creator<ModelParamRange>() {
-            @Override
-            @NonNull
-            public ModelParamRange createFromParcel(@NonNull Parcel in) {
-                return new ModelParamRange(in);
-            }
+        public static final Creator<ModelParamRange> CREATOR =
+                new Creator<ModelParamRange>() {
+                    @Override
+                    @NonNull
+                    public ModelParamRange createFromParcel(@NonNull Parcel in) {
+                        return new ModelParamRange(in);
+                    }
 
-            @Override
-            @NonNull
-            public ModelParamRange[] newArray(int size) {
-                return new ModelParamRange[size];
-            }
-        };
+                    @Override
+                    @NonNull
+                    public ModelParamRange[] newArray(int size) {
+                        return new ModelParamRange[size];
+                    }
+                };
 
+        /** @hide */
         @Override
         public int describeContents() {
             return 0;
+        }
+
+        /** @hide */
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (start);
+            result = prime * result + (end);
+            return result;
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            ModelParamRange other = (ModelParamRange) obj;
+            if (start != other.start) {
+                return false;
+            }
+            if (end != other.end) {
+                return false;
+            }
+            return true;
         }
 
         @Override

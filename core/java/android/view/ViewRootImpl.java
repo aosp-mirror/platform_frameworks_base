@@ -1464,6 +1464,7 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
         mApplyInsetsRequested = true;
+        requestLayout();
 
         // If this changes during traversal, no need to schedule another one as it will dispatch it
         // during the current traversal.
@@ -2102,6 +2103,12 @@ public final class ViewRootImpl implements ViewParent,
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
     }
 
+    private void updateVisibleInsets() {
+        Rect visibleInsets = mInsetsController.calculateVisibleInsets(mPendingVisibleInsets,
+                mWindowAttributes.softInputMode);
+        mAttachInfo.mVisibleInsets.set(visibleInsets);
+    }
+
     InsetsController getInsetsController() {
         return mInsetsController;
     }
@@ -2250,7 +2257,7 @@ public final class ViewRootImpl implements ViewParent,
                     insetsChanged = true;
                 }
                 if (!mPendingVisibleInsets.equals(mAttachInfo.mVisibleInsets)) {
-                    mAttachInfo.mVisibleInsets.set(mPendingVisibleInsets);
+                    updateVisibleInsets();
                     if (DEBUG_LAYOUT) Log.v(mTag, "Visible insets changing to: "
                             + mAttachInfo.mVisibleInsets);
                 }
@@ -2316,6 +2323,7 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mApplyInsetsRequested) {
             mApplyInsetsRequested = false;
+            updateVisibleInsets();
             dispatchApplyInsets(host);
             if (mLayoutRequested) {
                 // Short-circuit catching a new layout request here, so
@@ -2500,7 +2508,7 @@ public final class ViewRootImpl implements ViewParent,
                     contentInsetsChanged = true;
                 }
                 if (visibleInsetsChanged) {
-                    mAttachInfo.mVisibleInsets.set(mPendingVisibleInsets);
+                    updateVisibleInsets();
                     if (DEBUG_LAYOUT) Log.v(mTag, "Visible insets changing to: "
                             + mAttachInfo.mVisibleInsets);
                 }

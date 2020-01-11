@@ -123,32 +123,6 @@ public class TelephonyIntents {
     public static final String ACTION_EMERGENCY_CALL_STATE_CHANGED
             = TelephonyManager.ACTION_EMERGENCY_CALL_STATE_CHANGED;
 
-    /**
-     * Broadcast Action: The phone's signal strength has changed. The intent will have the
-     * following extra values:</p>
-     * <ul>
-     *   <li><em>phoneName</em> - A string version of the phone name.</li>
-     *   <li><em>asu</em> - A numeric value for the signal strength.
-     *          An ASU is 0-31 or -1 if unknown (for GSM, dBm = -113 - 2 * asu).
-     *          The following special values are defined:
-     *          <ul><li>0 means "-113 dBm or less".</li><li>31 means "-51 dBm or greater".</li></ul>
-     *   </li>
-     * </ul>
-     *
-     * <p class="note">
-     * You can <em>not</em> receive this through components declared
-     * in manifests, only by exlicitly registering for it with
-     * {@link android.content.Context#registerReceiver(android.content.BroadcastReceiver,
-     * android.content.IntentFilter) Context.registerReceiver()}.
-     *
-     * <p class="note">
-     * Requires the READ_PHONE_STATE permission.
-     *
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     */
-    public static final String ACTION_SIGNAL_STRENGTH_CHANGED = "android.intent.action.SIG_STR";
-
 
     /**
      * Broadcast Action: The data connection state has changed for any one of the

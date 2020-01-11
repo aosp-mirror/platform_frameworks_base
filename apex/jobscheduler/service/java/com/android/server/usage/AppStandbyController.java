@@ -47,6 +47,7 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -101,7 +102,6 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.usage.AppIdleHistory.AppUsageHistory;
-import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -109,6 +109,7 @@ import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -1014,14 +1015,57 @@ public class AppStandbyController implements AppStandbyInternal {
         }
     }
 
-    @VisibleForTesting
-    void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
-            int reason, long elapsedRealtime) {
-        setAppStandbyBucket(packageName, userId, newBucket, reason, elapsedRealtime, false);
+    @Override
+    public void setAppStandbyBucket(@NonNull String packageName, int bucket, int userId,
+            int callingUid, int callingPid) {
+        setAppStandbyBuckets(
+                Collections.singletonList(new AppStandbyInfo(packageName, bucket)),
+                userId, callingUid, callingPid);
     }
 
     @Override
-    public void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
+    public void setAppStandbyBuckets(@NonNull List<AppStandbyInfo> appBuckets, int userId,
+            int callingUid, int callingPid) {
+        userId = ActivityManager.handleIncomingUser(
+                callingPid, callingUid, userId, false, true, "setAppStandbyBucket", null);
+        final boolean shellCaller = callingUid == Process.ROOT_UID
+                || callingUid == Process.SHELL_UID;
+        final boolean systemCaller = UserHandle.isCore(callingUid);
+        final int reason = systemCaller ? REASON_MAIN_FORCED : REASON_MAIN_PREDICTED;
+        final int packageFlags = PackageManager.MATCH_ANY_USER
+                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                | PackageManager.MATCH_DIRECT_BOOT_AWARE;
+        final int numApps = appBuckets.size();
+        final long elapsedRealtime = mInjector.elapsedRealtime();
+        for (int i = 0; i < numApps; ++i) {
+            final AppStandbyInfo bucketInfo = appBuckets.get(i);
+            final String packageName = bucketInfo.mPackageName;
+            final int bucket = bucketInfo.mStandbyBucket;
+            if (bucket < STANDBY_BUCKET_ACTIVE || bucket > STANDBY_BUCKET_NEVER) {
+                throw new IllegalArgumentException("Cannot set the standby bucket to " + bucket);
+            }
+            final int packageUid = mInjector.getPackageManagerInternal()
+                    .getPackageUid(packageName, packageFlags, userId);
+            // Caller cannot set their own standby state
+            if (packageUid == callingUid) {
+                throw new IllegalArgumentException("Cannot set your own standby bucket");
+            }
+            if (packageUid < 0) {
+                throw new IllegalArgumentException(
+                        "Cannot set standby bucket for non existent package (" + packageName + ")");
+            }
+            setAppStandbyBucket(packageName, userId, bucket, reason, elapsedRealtime, shellCaller);
+        }
+    }
+
+    @VisibleForTesting
+    void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
+            int reason) {
+        setAppStandbyBucket(
+                packageName, userId, newBucket, reason, mInjector.elapsedRealtime(), false);
+    }
+
+    private void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
             int reason, long elapsedRealtime, boolean resetTimeout) {
         synchronized (mAppIdleLock) {
             // If the package is not installed, don't allow the bucket to be set.
@@ -1442,6 +1486,10 @@ public class AppStandbyController implements AppStandbyInternal {
 
         void noteEvent(int event, String packageName, int uid) throws RemoteException {
             mBatteryStats.noteEvent(event, packageName, uid);
+        }
+
+        PackageManagerInternal getPackageManagerInternal() {
+            return mPackageManagerInternal;
         }
 
         boolean isPackageEphemeral(int userId, String packageName) {

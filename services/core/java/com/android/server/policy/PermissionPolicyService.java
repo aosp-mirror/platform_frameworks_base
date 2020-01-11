@@ -58,6 +58,7 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
@@ -68,7 +69,7 @@ import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 
 /**
  * This is a permission policy that governs over all permission mechanism
@@ -280,7 +281,7 @@ public final class PermissionPolicyService extends SystemService {
             if (DEBUG) Slog.i(LOG_TAG, "defaultPermsWereGrantedSinceBoot(" + userId + ")");
 
             // Now call into the permission controller to apply policy around permissions
-            final CountDownLatch latch = new CountDownLatch(1);
+            final AndroidFuture<Boolean> future = new AndroidFuture<>();
 
             // We need to create a local manager that does not schedule work on the main
             // there as we are on the main thread and want to block until the work is
@@ -290,22 +291,22 @@ public final class PermissionPolicyService extends SystemService {
                             getUserContext(getContext(), UserHandle.of(userId)),
                             FgThread.getHandler());
             permissionControllerManager.grantOrUpgradeDefaultRuntimePermissions(
-                    FgThread.getExecutor(),
-                    (Boolean success) -> {
-                        if (!success) {
+                    FgThread.getExecutor(), successful -> {
+                        if (successful) {
+                            future.complete(null);
+                        } else {
                             // We are in an undefined state now, let us crash and have
                             // rescue party suggest a wipe to recover to a good one.
-                            final String message = "Error granting/upgrading runtime permissions";
+                            final String message = "Error granting/upgrading runtime permissions"
+                                    + " for user " + userId;
                             Slog.wtf(LOG_TAG, message);
-                            throw new IllegalStateException(message);
+                            future.completeExceptionally(new IllegalStateException(message));
                         }
-                        latch.countDown();
-                    }
-            );
+                    });
             try {
-                latch.await();
-            } catch (InterruptedException e) {
-                /* ignore */
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new IllegalStateException(e);
             }
 
             permissionControllerManager.updateUserSensitive();

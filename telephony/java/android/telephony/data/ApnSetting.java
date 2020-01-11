@@ -28,7 +28,7 @@ import android.provider.Telephony;
 import android.provider.Telephony.Carriers;
 import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.NetworkType;
-import android.telephony.Rlog;
+import com.android.telephony.Rlog;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;

@@ -770,6 +770,13 @@ public class PreferencesHelper implements RankingConfig {
                 channel.setShowBadge(false);
             }
             channel.setOriginalImportance(channel.getImportance());
+
+            // validate parent
+            if (channel.getParentChannelId() != null) {
+                Preconditions.checkArgument(r.channels.containsKey(channel.getParentChannelId()),
+                        "Tried to create a conversation channel without a preexisting parent");
+            }
+
             r.channels.put(channel.getId(), channel);
             if (channel.canBypassDnd() != mAreChannelsBypassingDnd) {
                 updateChannelsBypassingDnd(mContext.getUserId());
@@ -851,6 +858,13 @@ public class PreferencesHelper implements RankingConfig {
     public NotificationChannel getNotificationChannel(String pkg, int uid, String channelId,
             boolean includeDeleted) {
         Objects.requireNonNull(pkg);
+        return getNotificationChannel(pkg, uid, channelId, null, includeDeleted);
+    }
+
+    @Override
+    public NotificationChannel getNotificationChannel(String pkg, int uid, String channelId,
+            String conversationId, boolean includeDeleted) {
+        Preconditions.checkNotNull(pkg);
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
@@ -859,11 +873,48 @@ public class PreferencesHelper implements RankingConfig {
             if (channelId == null) {
                 channelId = NotificationChannel.DEFAULT_CHANNEL_ID;
             }
-            final NotificationChannel nc = r.channels.get(channelId);
-            if (nc != null && (includeDeleted || !nc.isDeleted())) {
-                return nc;
+            if (conversationId == null) {
+                final NotificationChannel nc = r.channels.get(channelId);
+                if (nc != null && (includeDeleted || !nc.isDeleted())) {
+                    return nc;
+                }
+            } else {
+                // look for an automatically created conversation specific channel
+                return findConversationChannel(r, channelId, conversationId, includeDeleted);
             }
             return null;
+        }
+    }
+
+    private NotificationChannel findConversationChannel(PackagePreferences p, String parentId,
+            String conversationId, boolean includeDeleted) {
+        for (NotificationChannel nc : p.channels.values()) {
+            if (conversationId.equals(nc.getConversationId())
+                    && parentId.equals(nc.getParentChannelId())
+                    && (includeDeleted || !nc.isDeleted())) {
+                return nc;
+            }
+        }
+        return null;
+    }
+
+    public List<NotificationChannel> getNotificationChannelsByConversationId(String pkg, int uid,
+            String conversationId) {
+        Preconditions.checkNotNull(pkg);
+        Preconditions.checkNotNull(conversationId);
+        List<NotificationChannel> channels = new ArrayList<>();
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                return channels;
+            }
+            for (NotificationChannel nc : r.channels.values()) {
+                if (conversationId.equals(nc.getConversationId())
+                        && !nc.isDeleted()) {
+                    channels.add(nc);
+                }
+            }
+            return channels;
         }
     }
 

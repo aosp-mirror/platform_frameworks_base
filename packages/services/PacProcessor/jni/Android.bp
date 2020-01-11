@@ -37,4 +37,10 @@ cc_library_shared {
         "-Wunused",
         "-Wunreachable-code",
     ],
+    sanitize: {
+        cfi: true,
+        diag: {
+            cfi: true,
+        },
+    },
 }

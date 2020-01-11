@@ -98,7 +98,7 @@ public class AppDataRollbackHelperTest {
             final int[] installedUsers) {
         return new PackageRollbackInfo(
                 new VersionedPackage(packageName, 2), new VersionedPackage(packageName, 1),
-                new IntArray(), new ArrayList<>(), false, IntArray.wrap(installedUsers),
+                new IntArray(), new ArrayList<>(), false, false, IntArray.wrap(installedUsers),
                 new SparseLongArray());
     }
 

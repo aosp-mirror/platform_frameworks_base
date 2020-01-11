@@ -41,7 +41,6 @@
 #include "StatsCallbackPullerDeprecated.h"
 #include "StatsCompanionServicePuller.h"
 #include "SubsystemSleepStatePuller.h"
-#include "SurfaceflingerStatsPuller.h"
 #include "TrainInfoPuller.h"
 #include "statslog.h"
 
@@ -60,161 +59,200 @@ namespace statsd {
 const int64_t NO_ALARM_UPDATE = INT64_MAX;
 
 std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
-        // wifi_bytes_transfer
-        {{.atomTag = android::util::WIFI_BYTES_TRANSFER},
-         {.additiveFields = {2, 3, 4, 5},
-          .puller = new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER)}},
+
         // wifi_bytes_transfer_by_fg_bg
         {{.atomTag = android::util::WIFI_BYTES_TRANSFER_BY_FG_BG},
          {.additiveFields = {3, 4, 5, 6},
           .puller = new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER_BY_FG_BG)}},
+
         // mobile_bytes_transfer
         {{.atomTag = android::util::MOBILE_BYTES_TRANSFER},
          {.additiveFields = {2, 3, 4, 5},
           .puller = new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER)}},
+
         // mobile_bytes_transfer_by_fg_bg
         {{.atomTag = android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG},
          {.additiveFields = {3, 4, 5, 6},
           .puller =
                   new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG)}},
+
         // bluetooth_bytes_transfer
         {{.atomTag = android::util::BLUETOOTH_BYTES_TRANSFER},
          {.additiveFields = {2, 3},
           .puller = new StatsCompanionServicePuller(android::util::BLUETOOTH_BYTES_TRANSFER)}},
+
         // kernel_wakelock
         {{.atomTag = android::util::KERNEL_WAKELOCK},
          {.puller = new StatsCompanionServicePuller(android::util::KERNEL_WAKELOCK)}},
+
         // subsystem_sleep_state
         {{.atomTag = android::util::SUBSYSTEM_SLEEP_STATE},
          {.puller = new SubsystemSleepStatePuller()}},
+
         // on_device_power_measurement
         {{.atomTag = android::util::ON_DEVICE_POWER_MEASUREMENT},
          {.puller = new PowerStatsPuller()}},
+
         // cpu_time_per_freq
         {{.atomTag = android::util::CPU_TIME_PER_FREQ},
          {.additiveFields = {3},
           .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_FREQ)}},
+
         // cpu_time_per_uid
         {{.atomTag = android::util::CPU_TIME_PER_UID},
          {.additiveFields = {2, 3},
           .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID)}},
+
         // cpu_time_per_uid_freq
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
         {{.atomTag = android::util::CPU_TIME_PER_UID_FREQ},
          {.additiveFields = {4},
           .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID_FREQ)}},
+
         // cpu_active_time
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
         {{.atomTag = android::util::CPU_ACTIVE_TIME},
          {.additiveFields = {2},
           .puller = new StatsCompanionServicePuller(android::util::CPU_ACTIVE_TIME)}},
+
         // cpu_cluster_time
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
         {{.atomTag = android::util::CPU_CLUSTER_TIME},
          {.additiveFields = {3},
           .puller = new StatsCompanionServicePuller(android::util::CPU_CLUSTER_TIME)}},
+
         // wifi_activity_energy_info
         {{.atomTag = android::util::WIFI_ACTIVITY_INFO},
          {.puller = new StatsCompanionServicePuller(android::util::WIFI_ACTIVITY_INFO)}},
+
         // modem_activity_info
         {{.atomTag = android::util::MODEM_ACTIVITY_INFO},
          {.puller = new StatsCompanionServicePuller(android::util::MODEM_ACTIVITY_INFO)}},
+
         // bluetooth_activity_info
         {{.atomTag = android::util::BLUETOOTH_ACTIVITY_INFO},
          {.puller = new StatsCompanionServicePuller(android::util::BLUETOOTH_ACTIVITY_INFO)}},
+
         // system_elapsed_realtime
         {{.atomTag = android::util::SYSTEM_ELAPSED_REALTIME},
          {.coolDownNs = NS_PER_SEC,
           .puller = new StatsCompanionServicePuller(android::util::SYSTEM_ELAPSED_REALTIME),
           .pullTimeoutNs = NS_PER_SEC / 2,
          }},
+
         // system_uptime
         {{.atomTag = android::util::SYSTEM_UPTIME},
          {.puller = new StatsCompanionServicePuller(android::util::SYSTEM_UPTIME)}},
+
         // remaining_battery_capacity
         {{.atomTag = android::util::REMAINING_BATTERY_CAPACITY},
          {.puller = new ResourceHealthManagerPuller(android::util::REMAINING_BATTERY_CAPACITY)}},
+
         // full_battery_capacity
         {{.atomTag = android::util::FULL_BATTERY_CAPACITY},
          {.puller = new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)}},
+
         // battery_voltage
         {{.atomTag = android::util::BATTERY_VOLTAGE},
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)}},
+
         // battery_level
         {{.atomTag = android::util::BATTERY_LEVEL},
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_LEVEL)}},
+
         // battery_cycle_count
         {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
+
         // process_memory_state
         {{.atomTag = android::util::PROCESS_MEMORY_STATE},
          {.additiveFields = {4, 5, 6, 7, 8},
           .puller = new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}},
+
         // process_memory_high_water_mark
         {{.atomTag = android::util::PROCESS_MEMORY_HIGH_WATER_MARK},
          {.puller =
                   new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_HIGH_WATER_MARK)}},
+
         // process_memory_snapshot
         {{.atomTag = android::util::PROCESS_MEMORY_SNAPSHOT},
          {.puller = new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_SNAPSHOT)}},
+
         // system_ion_heap_size
         {{.atomTag = android::util::SYSTEM_ION_HEAP_SIZE},
          {.puller = new StatsCompanionServicePuller(android::util::SYSTEM_ION_HEAP_SIZE)}},
+
         // process_system_ion_heap_size
         {{.atomTag = android::util::PROCESS_SYSTEM_ION_HEAP_SIZE},
          {.puller = new StatsCompanionServicePuller(android::util::PROCESS_SYSTEM_ION_HEAP_SIZE)}},
+
         // temperature
         {{.atomTag = android::util::TEMPERATURE},
          {.puller = new StatsCompanionServicePuller(android::util::TEMPERATURE)}},
+
         // cooling_device
         {{.atomTag = android::util::COOLING_DEVICE},
          {.puller = new StatsCompanionServicePuller(android::util::COOLING_DEVICE)}},
+
         // binder_calls
         {{.atomTag = android::util::BINDER_CALLS},
          {.additiveFields = {4, 5, 6, 8, 12},
           .puller = new StatsCompanionServicePuller(android::util::BINDER_CALLS)}},
+
         // binder_calls_exceptions
         {{.atomTag = android::util::BINDER_CALLS_EXCEPTIONS},
          {.puller = new StatsCompanionServicePuller(android::util::BINDER_CALLS_EXCEPTIONS)}},
+
         // looper_stats
         {{.atomTag = android::util::LOOPER_STATS},
          {.additiveFields = {5, 6, 7, 8, 9},
           .puller = new StatsCompanionServicePuller(android::util::LOOPER_STATS)}},
+
         // Disk Stats
         {{.atomTag = android::util::DISK_STATS},
          {.puller = new StatsCompanionServicePuller(android::util::DISK_STATS)}},
+
         // Directory usage
         {{.atomTag = android::util::DIRECTORY_USAGE},
          {.puller = new StatsCompanionServicePuller(android::util::DIRECTORY_USAGE)}},
+
         // Size of app's code, data, and cache
         {{.atomTag = android::util::APP_SIZE},
          {.puller = new StatsCompanionServicePuller(android::util::APP_SIZE)}},
+
         // Size of specific categories of files. Eg. Music.
         {{.atomTag = android::util::CATEGORY_SIZE},
          {.puller = new StatsCompanionServicePuller(android::util::CATEGORY_SIZE)}},
+
         // Number of fingerprints enrolled for each user.
         {{.atomTag = android::util::NUM_FINGERPRINTS_ENROLLED},
          {.puller = new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS_ENROLLED)}},
+
         // Number of faces enrolled for each user.
         {{.atomTag = android::util::NUM_FACES_ENROLLED},
          {.puller = new StatsCompanionServicePuller(android::util::NUM_FACES_ENROLLED)}},
+
         // ProcStats.
         {{.atomTag = android::util::PROC_STATS},
          {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS)}},
+
         // ProcStatsPkgProc.
         {{.atomTag = android::util::PROC_STATS_PKG_PROC},
          {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS_PKG_PROC)}},
+
         // Disk I/O stats per uid.
         {{.atomTag = android::util::DISK_IO},
          {.additiveFields = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
           .coolDownNs = 3 * NS_PER_SEC,
           .puller = new StatsCompanionServicePuller(android::util::DISK_IO)}},
+
         // PowerProfile constants for power model calculations.
         {{.atomTag = android::util::POWER_PROFILE},
          {.puller = new StatsCompanionServicePuller(android::util::POWER_PROFILE)}},
+
         // Process cpu stats. Min cool-down is 5 sec, inline with what AcitivityManagerService uses.
         {{.atomTag = android::util::PROCESS_CPU_TIME},
          {.coolDownNs = 5 * NS_PER_SEC /* min cool-down in seconds*/,
@@ -222,68 +260,83 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::CPU_TIME_PER_THREAD_FREQ},
          {.additiveFields = {7, 9, 11, 13, 15, 17, 19, 21},
           .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_THREAD_FREQ)}},
+
         // DeviceCalculatedPowerUse.
         {{.atomTag = android::util::DEVICE_CALCULATED_POWER_USE},
          {.puller = new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_USE)}},
+
         // DeviceCalculatedPowerBlameUid.
         {{.atomTag = android::util::DEVICE_CALCULATED_POWER_BLAME_UID},
          {.puller = new StatsCompanionServicePuller(
                   android::util::DEVICE_CALCULATED_POWER_BLAME_UID)}},
+
         // DeviceCalculatedPowerBlameOther.
         {{.atomTag = android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER},
          {.puller = new StatsCompanionServicePuller(
                   android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER)}},
+
         // DebugElapsedClock.
         {{.atomTag = android::util::DEBUG_ELAPSED_CLOCK},
          {.additiveFields = {1, 2, 3, 4},
           .puller = new StatsCompanionServicePuller(android::util::DEBUG_ELAPSED_CLOCK)}},
+
         // DebugFailingElapsedClock.
         {{.atomTag = android::util::DEBUG_FAILING_ELAPSED_CLOCK},
          {.additiveFields = {1, 2, 3, 4},
           .puller = new StatsCompanionServicePuller(android::util::DEBUG_FAILING_ELAPSED_CLOCK)}},
+
         // BuildInformation.
         {{.atomTag = android::util::BUILD_INFORMATION},
          {.puller = new StatsCompanionServicePuller(android::util::BUILD_INFORMATION)}},
+
         // RoleHolder.
         {{.atomTag = android::util::ROLE_HOLDER},
          {.puller = new StatsCompanionServicePuller(android::util::ROLE_HOLDER)}},
+
         // PermissionState.
         {{.atomTag = android::util::DANGEROUS_PERMISSION_STATE},
          {.puller = new StatsCompanionServicePuller(android::util::DANGEROUS_PERMISSION_STATE)}},
+
         // TrainInfo.
         {{.atomTag = android::util::TRAIN_INFO}, {.puller = new TrainInfoPuller()}},
+
         // TimeZoneDataInfo.
         {{.atomTag = android::util::TIME_ZONE_DATA_INFO},
          {.puller = new StatsCompanionServicePuller(android::util::TIME_ZONE_DATA_INFO)}},
+
         // ExternalStorageInfo
         {{.atomTag = android::util::EXTERNAL_STORAGE_INFO},
          {.puller = new StatsCompanionServicePuller(android::util::EXTERNAL_STORAGE_INFO)}},
+
         // GpuStatsGlobalInfo
         {{.atomTag = android::util::GPU_STATS_GLOBAL_INFO},
          {.puller = new GpuStatsPuller(android::util::GPU_STATS_GLOBAL_INFO)}},
+
         // GpuStatsAppInfo
         {{.atomTag = android::util::GPU_STATS_APP_INFO},
          {.puller = new GpuStatsPuller(android::util::GPU_STATS_APP_INFO)}},
+
         // AppsOnExternalStorageInfo
         {{.atomTag = android::util::APPS_ON_EXTERNAL_STORAGE_INFO},
          {.puller = new StatsCompanionServicePuller(android::util::APPS_ON_EXTERNAL_STORAGE_INFO)}},
+
         // Face Settings
         {{.atomTag = android::util::FACE_SETTINGS},
          {.puller = new StatsCompanionServicePuller(android::util::FACE_SETTINGS)}},
+
         // App ops
         {{.atomTag = android::util::APP_OPS},
          {.puller = new StatsCompanionServicePuller(android::util::APP_OPS)}},
-        // SurfaceflingerStatsGlobalInfo
-        {{.atomTag = android::util::SURFACEFLINGER_STATS_GLOBAL_INFO},
-         {.puller =
-                  new SurfaceflingerStatsPuller(android::util::SURFACEFLINGER_STATS_GLOBAL_INFO)}},
+
         // VmsClientStats
         {{.atomTag = android::util::VMS_CLIENT_STATS},
          {.additiveFields = {5, 6, 7, 8, 9, 10},
           .puller = new CarStatsPuller(android::util::VMS_CLIENT_STATS)}},
+
         // NotiifcationRemoteViews.
         {{.atomTag = android::util::NOTIFICATION_REMOTE_VIEWS},
          {.puller = new StatsCompanionServicePuller(android::util::NOTIFICATION_REMOTE_VIEWS)}},
+
         // PermissionStateSampled.
         {{.atomTag = android::util::DANGEROUS_PERMISSION_STATE_SAMPLED},
          {.puller =

@@ -16,45 +16,54 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.NonNull;
 import android.media.tv.tuner.TunerConstants;
 import android.media.tv.tuner.TunerUtils;
+import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
 
 /**
  * Filter Settings for a PES Data.
+ *
  * @hide
  */
 public class PesSettings extends Settings {
-    private int mStreamId;
-    private boolean mIsRaw;
+    private final int mStreamId;
+    private final boolean mIsRaw;
 
-    private PesSettings(int mainType, int streamId, boolean isRaw) {
+    private PesSettings(@FilterType int mainType, int streamId, boolean isRaw) {
         super(TunerUtils.getFilterSubtype(mainType, TunerConstants.FILTER_SUBTYPE_PES));
         mStreamId = streamId;
         mIsRaw = isRaw;
     }
 
     /**
-     * Creates a builder for PesSettings.
+     * Creates a builder for {@link PesSettings}.
+     *
+     * @param mainType the filter main type of the settings.
      */
-    public static Builder newBuilder(int mainType) {
+    @NonNull
+    public static Builder newBuilder(@FilterType int mainType) {
         return new Builder(mainType);
     }
 
     /**
-     * Builder for PesSettings.
+     * Builder for {@link PesSettings}.
      */
     public static class Builder {
         private final int mMainType;
         private int mStreamId;
         private boolean mIsRaw;
 
-        public Builder(int mainType) {
+        private Builder(int mainType) {
             mMainType = mainType;
         }
 
         /**
          * Sets stream ID.
+         *
+         * @param streamId the stream ID.
          */
+        @NonNull
         public Builder setStreamId(int streamId) {
             mStreamId = streamId;
             return this;
@@ -62,16 +71,20 @@ public class PesSettings extends Settings {
 
         /**
          * Sets whether it's raw.
-         * true if the filter send onFilterStatus instead of onFilterEvent.
+         *
+         * @param isRaw {@code true} if the data is raw. Filter sends onFilterStatus callback
+         * instead of onFilterEvent for raw data. {@code false} otherwise.
          */
+        @NonNull
         public Builder setIsRaw(boolean isRaw) {
             mIsRaw = isRaw;
             return this;
         }
 
         /**
-         * Builds a PesSettings instance.
+         * Builds a {@link PesSettings} object.
          */
+        @NonNull
         public PesSettings build() {
             return new PesSettings(mMainType, mStreamId, mIsRaw);
         }

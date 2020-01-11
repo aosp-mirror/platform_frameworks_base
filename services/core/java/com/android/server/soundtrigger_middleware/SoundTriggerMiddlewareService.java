@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.PermissionChecker;
 import android.hardware.soundtrigger.V2_0.ISoundTriggerHw;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
@@ -32,6 +33,7 @@ import android.media.soundtrigger_middleware.RecognitionEvent;
 import android.media.soundtrigger_middleware.RecognitionStatus;
 import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
+import android.media.soundtrigger_middleware.Status;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
@@ -223,23 +225,48 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
     }
 
     /**
-     * Throws a {@link SecurityException} if caller doesn't have the right permissions to use this
-     * service.
+     * Throws a {@link SecurityException} if caller permanently doesn't have the given permission,
+     * or a {@link ServiceSpecificException} with a {@link Status#TEMPORARY_PERMISSION_DENIED} if
+     * caller temporarily doesn't have the right permissions to use this service.
      */
     private void checkPermissions() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.RECORD_AUDIO,
-                "Caller must have the android.permission.RECORD_AUDIO permission.");
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD,
-                "Caller must have the android.permission.CAPTURE_AUDIO_HOTWORD permission.");
+        enforcePermission(Manifest.permission.RECORD_AUDIO);
+        enforcePermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD);
     }
 
     /**
-     * Throws a {@link SecurityException} if caller doesn't have the right permissions to preempt
-     * active sound trigger sessions.
+     * Throws a {@link SecurityException} if caller permanently doesn't have the given permission,
+     * or a {@link ServiceSpecificException} with a {@link Status#TEMPORARY_PERMISSION_DENIED} if
+     * caller temporarily doesn't have the right permissions to preempt active sound trigger
+     * sessions.
      */
     private void checkPreemptPermissions() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.PREEMPT_SOUND_TRIGGER,
-                "Caller must have the android.permission.PREEMPT_SOUND_TRIGGER permission.");
+        enforcePermission(Manifest.permission.PREEMPT_SOUND_TRIGGER);
+    }
+
+    /**
+     * Throws a {@link SecurityException} if caller permanently doesn't have the given permission,
+     * or a {@link ServiceSpecificException} with a {@link Status#TEMPORARY_PERMISSION_DENIED} if
+     * caller temporarily doesn't have the given permission.
+     *
+     * @param permission The permission to check.
+     */
+    private void enforcePermission(String permission) {
+        final int status = PermissionChecker.checkCallingOrSelfPermissionForPreflight(mContext,
+                permission);
+        switch (status) {
+            case PermissionChecker.PERMISSION_GRANTED:
+                return;
+            case PermissionChecker.PERMISSION_DENIED:
+                throw new SecurityException(
+                        String.format("Caller must have the %s permission.", permission));
+            case PermissionChecker.PERMISSION_DENIED_APP_OP:
+                throw new ServiceSpecificException(Status.TEMPORARY_PERMISSION_DENIED,
+                        String.format("Caller must have the %s permission.", permission));
+            default:
+                throw new InternalServerError(
+                        new RuntimeException("Unexpected perimission check result."));
+        }
     }
 
     /** State of a sound model. */

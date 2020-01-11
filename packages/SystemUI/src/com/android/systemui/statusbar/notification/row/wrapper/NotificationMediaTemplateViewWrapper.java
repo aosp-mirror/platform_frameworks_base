@@ -28,6 +28,7 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.metrics.LogMaker;
 import android.os.Handler;
+import android.service.notification.StatusBarNotification;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -176,27 +177,30 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         final MediaSession.Token token = mRow.getEntry().getSbn().getNotification().extras
                 .getParcelable(Notification.EXTRA_MEDIA_SESSION);
 
-        if (Utils.useQsMediaPlayer(mContext)) {
+        if (Utils.useQsMediaPlayer(mContext) && token != null) {
             final int[] compactActions = mRow.getEntry().getSbn().getNotification().extras
                     .getIntArray(Notification.EXTRA_COMPACT_ACTIONS);
             int tintColor = getNotificationHeader().getOriginalIconColor();
             StatusBarWindowController ctrl = Dependency.get(StatusBarWindowController.class);
             QuickQSPanel panel = ctrl.getStatusBarView().findViewById(
                     com.android.systemui.R.id.quick_qs_panel);
+            StatusBarNotification sbn = mRow.getEntry().getSbn();
+            Notification notif = sbn.getNotification();
             panel.getMediaPlayer().setMediaSession(token,
-                    mRow.getEntry().getSbn().getNotification().getSmallIcon(),
+                    notif.getSmallIcon(),
                     tintColor,
                     mBackgroundColor,
                     mActions,
-                    compactActions);
+                    compactActions,
+                    notif.contentIntent);
             QSPanel bigPanel = ctrl.getStatusBarView().findViewById(
                     com.android.systemui.R.id.quick_settings_panel);
             bigPanel.addMediaSession(token,
-                    mRow.getEntry().getSbn().getNotification().getSmallIcon(),
+                    notif.getSmallIcon(),
                     tintColor,
                     mBackgroundColor,
                     mActions,
-                    mRow.getEntry().getSbn());
+                    sbn);
         }
 
         boolean showCompactSeekbar = mMediaManager.getShowCompactMediaSeekbar();

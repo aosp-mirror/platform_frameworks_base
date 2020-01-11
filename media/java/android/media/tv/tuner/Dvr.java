@@ -19,6 +19,7 @@ package android.media.tv.tuner;
 import android.annotation.NonNull;
 import android.media.tv.tuner.Tuner.DvrCallback;
 import android.media.tv.tuner.Tuner.Filter;
+import android.media.tv.tuner.dvr.DvrSettings;
 import android.os.ParcelFileDescriptor;
 
 /** @hide */

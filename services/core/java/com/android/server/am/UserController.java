@@ -16,12 +16,14 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.app.ActivityManager.USER_OP_ERROR_IS_SYSTEM;
 import static android.app.ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
 import static android.app.ActivityManager.USER_OP_IS_CURRENT;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
+import static android.app.ActivityManagerInternal.ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
@@ -1641,9 +1643,10 @@ class UserController implements Handler.Callback {
 
         if (callingUid != 0 && callingUid != SYSTEM_UID) {
             final boolean allow;
+            final boolean isSameProfileGroup = isSameProfileGroup(callingUserId, targetUserId);
             if (mInjector.isCallerRecents(callingUid)
                     && callingUserId == getCurrentUserId()
-                    && isSameProfileGroup(callingUserId, targetUserId)) {
+                    && isSameProfileGroup) {
                 // If the caller is Recents and it is running in the current user, we then allow it
                 // to access its profiles.
                 allow = true;
@@ -1654,6 +1657,9 @@ class UserController implements Handler.Callback {
             } else if (allowMode == ALLOW_FULL_ONLY) {
                 // We require full access, sucks to be you.
                 allow = false;
+            } else if (canInteractWithAcrossProfilesPermission(
+                    allowMode, isSameProfileGroup, callingPid, callingUid)) {
+                allow = true;
             } else if (mInjector.checkComponentPermission(INTERACT_ACROSS_USERS, callingPid,
                     callingUid, -1, true) != PackageManager.PERMISSION_GRANTED) {
                 // If the caller does not have either permission, they are always doomed.
@@ -1661,10 +1667,11 @@ class UserController implements Handler.Callback {
             } else if (allowMode == ALLOW_NON_FULL) {
                 // We are blanket allowing non-full access, you lucky caller!
                 allow = true;
-            } else if (allowMode == ALLOW_NON_FULL_IN_PROFILE) {
+            } else if (allowMode == ALLOW_NON_FULL_IN_PROFILE
+                        || allowMode == ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE) {
                 // We may or may not allow this depending on whether the two users are
                 // in the same profile.
-                allow = isSameProfileGroup(callingUserId, targetUserId);
+                allow = isSameProfileGroup;
             } else {
                 throw new IllegalArgumentException("Unknown mode: " + allowMode);
             }
@@ -1690,6 +1697,11 @@ class UserController implements Handler.Callback {
                     if (allowMode != ALLOW_FULL_ONLY) {
                         builder.append(" or ");
                         builder.append(INTERACT_ACROSS_USERS);
+                        if (isSameProfileGroup
+                                && allowMode == ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE) {
+                            builder.append(" or ");
+                            builder.append(INTERACT_ACROSS_PROFILES);
+                        }
                     }
                     String msg = builder.toString();
                     Slog.w(TAG, msg);
@@ -1708,6 +1720,19 @@ class UserController implements Handler.Callback {
             }
         }
         return targetUserId;
+    }
+
+    private boolean canInteractWithAcrossProfilesPermission(
+            int allowMode, boolean isSameProfileGroup, int callingPid, int callingUid) {
+        if (allowMode != ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE) {
+            return false;
+        }
+        if (!isSameProfileGroup) {
+            return false;
+        }
+        return mInjector.checkComponentPermission(
+                INTERACT_ACROSS_PROFILES, callingPid, callingUid, /*owningUid= */-1,
+                /*exported= */true) == PackageManager.PERMISSION_GRANTED;
     }
 
     int unsafeConvertIncomingUser(@UserIdInt int userId) {

@@ -341,6 +341,7 @@ class RollbackStore {
         json.put("pendingRestores", convertToJsonArray(pendingRestores));
 
         json.put("isApex", info.isApex());
+        json.put("isApkInApex", info.isApkInApex());
 
         // Field is named 'installedUsers' for legacy reasons.
         json.put("installedUsers", convertToJsonArray(snapshottedUsers));
@@ -364,6 +365,7 @@ class RollbackStore {
                 json.getJSONArray("pendingRestores"));
 
         final boolean isApex = json.getBoolean("isApex");
+        final boolean isApkInApex = json.getBoolean("isApkInApex");
 
         // Field is named 'installedUsers' for legacy reasons.
         final IntArray snapshottedUsers = convertToIntArray(json.getJSONArray("installedUsers"));
@@ -375,8 +377,8 @@ class RollbackStore {
                 PackageManager.RollbackDataPolicy.RESTORE);
 
         return new PackageRollbackInfo(versionRolledBackFrom, versionRolledBackTo,
-                pendingBackups, pendingRestores, isApex, snapshottedUsers, ceSnapshotInodes,
-                rollbackDataPolicy);
+                pendingBackups, pendingRestores, isApex, isApkInApex, snapshottedUsers,
+                ceSnapshotInodes, rollbackDataPolicy);
     }
 
     private static JSONArray versionedPackagesToJson(List<VersionedPackage> packages)

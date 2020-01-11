@@ -48,6 +48,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -97,8 +98,10 @@ public class RuleBinaryParserTest {
     private static final byte[] DEFAULT_FORMAT_VERSION_BYTES =
             getBytes(getBits(DEFAULT_FORMAT_VERSION, FORMAT_VERSION_BITS));
 
+    private static final List<RuleIndexRange> NO_INDEXING = Collections.emptyList();
+
     @Test
-    public void testBinaryStream_validCompoundFormula() throws Exception {
+    public void testBinaryStream_validCompoundFormula_noIndexing() throws Exception {
         String packageName = "com.test.app";
         String ruleBits =
                 START_BIT
@@ -131,13 +134,13 @@ public class RuleBinaryParserTest {
                                                 /* isHashedValue= */ false))),
                         Rule.DENY);
 
-        List<Rule> rules = binaryParser.parse(inputStream);
+        List<Rule> rules = binaryParser.parse(inputStream, NO_INDEXING);
 
         assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
     }
 
     @Test
-    public void testBinaryString_validCompoundFormula_notConnector() throws Exception {
+    public void testBinaryString_validCompoundFormula_notConnector_noIndexing() throws Exception {
         String packageName = "com.test.app";
         String ruleBits =
                 START_BIT
@@ -175,7 +178,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_validCompoundFormula_andConnector() throws Exception {
+    public void testBinaryString_validCompoundFormula_andConnector_noIndexing() throws Exception {
         String packageName = "com.test.app";
         String appCertificate = "test_cert";
         String ruleBits =
@@ -223,7 +226,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_validCompoundFormula_orConnector() throws Exception {
+    public void testBinaryString_validCompoundFormula_orConnector_noIndexing() throws Exception {
         String packageName = "com.test.app";
         String appCertificate = "test_cert";
         String ruleBits =
@@ -272,7 +275,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_validAtomicFormula_stringValue() throws Exception {
+    public void testBinaryString_validAtomicFormula_stringValue_noIndexing() throws Exception {
         String packageName = "com.test.app";
         String ruleBits =
                 START_BIT
@@ -304,7 +307,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_validAtomicFormula_hashedValue() throws Exception {
+    public void testBinaryString_validAtomicFormula_hashedValue_noIndexing() throws Exception {
         String appCertificate = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
         String ruleBits =
                 START_BIT
@@ -337,7 +340,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_validAtomicFormula_integerValue() throws Exception {
+    public void testBinaryString_validAtomicFormula_integerValue_noIndexing() throws Exception {
         int versionCode = 1;
         String ruleBits =
                 START_BIT
@@ -365,7 +368,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_validAtomicFormula_booleanValue() throws Exception {
+    public void testBinaryString_validAtomicFormula_booleanValue_noIndexing() throws Exception {
         String isPreInstalled = "1";
         String ruleBits =
                 START_BIT
@@ -392,7 +395,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_invalidAtomicFormula() throws Exception {
+    public void testBinaryString_invalidAtomicFormula_noIndexing() {
         int versionCode = 1;
         String ruleBits =
                 START_BIT
@@ -415,7 +418,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_withNoRuleList() throws RuleParseException {
+    public void testBinaryString_withNoRuleList_noIndexing() throws RuleParseException {
         ByteBuffer rule = ByteBuffer.allocate(DEFAULT_FORMAT_VERSION_BYTES.length);
         rule.put(DEFAULT_FORMAT_VERSION_BYTES);
         RuleParser binaryParser = new RuleBinaryParser();
@@ -426,7 +429,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_withEmptyRule() throws RuleParseException {
+    public void testBinaryString_withEmptyRule_noIndexing() {
         String ruleBits = START_BIT;
         byte[] ruleBytes = getBytes(ruleBits);
         ByteBuffer rule =
@@ -442,7 +445,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_invalidCompoundFormula_invalidNumberOfFormulas() throws Exception {
+    public void testBinaryString_invalidCompoundFormula_invalidNumberOfFormulas_noIndexing() {
         String packageName = "com.test.app";
         String appCertificate = "test_cert";
         String ruleBits =
@@ -478,7 +481,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_invalidRule_invalidOperator() throws Exception {
+    public void testBinaryString_invalidRule_invalidOperator_noIndexing() {
         int versionCode = 1;
         String ruleBits =
                 START_BIT
@@ -506,7 +509,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_invalidRule_invalidEffect() throws Exception {
+    public void testBinaryString_invalidRule_invalidEffect_noIndexing() {
         String packageName = "com.test.app";
         String ruleBits =
                 START_BIT
@@ -536,7 +539,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_invalidRule_invalidConnector() throws Exception {
+    public void testBinaryString_invalidRule_invalidConnector_noIndexing() {
         String packageName = "com.test.app";
         String ruleBits =
                 START_BIT
@@ -566,7 +569,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_invalidRule_invalidKey() throws Exception {
+    public void testBinaryString_invalidRule_invalidKey_noIndexing() {
         String packageName = "com.test.app";
         String ruleBits =
                 START_BIT
@@ -596,7 +599,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_invalidRule_invalidSeparator() throws Exception {
+    public void testBinaryString_invalidRule_invalidSeparator_noIndexing() {
         String packageName = "com.test.app";
         String ruleBits =
                 START_BIT
@@ -626,7 +629,7 @@ public class RuleBinaryParserTest {
     }
 
     @Test
-    public void testBinaryString_invalidRule_invalidEndMarker() throws Exception {
+    public void testBinaryString_invalidRule_invalidEndMarker_noIndexing() {
         String packageName = "com.test.app";
         String ruleBits =
                 START_BIT
@@ -652,5 +655,66 @@ public class RuleBinaryParserTest {
                 RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "A rule must end with a '1' bit",
                 () -> binaryParser.parse(rule.array()));
+    }
+
+    @Test
+    public void testBinaryStream_multipleRules_indexingIdentifiesParsesIndexRangeCorrectly()
+            throws Exception {
+        String packageName2 = "com.test.2";
+
+        byte[] ruleBytes1 = getBytes(getRulesWithPackageName("com.test.1"));
+        byte[] ruleBytes2 = getBytes(getRulesWithPackageName(packageName2));
+        byte[] ruleBytes3 = getBytes(getRulesWithPackageName("com.test.3"));
+
+        ByteBuffer rule =
+                ByteBuffer.allocate(
+                        DEFAULT_FORMAT_VERSION_BYTES.length
+                                + ruleBytes1.length
+                                + ruleBytes2.length
+                                + ruleBytes3.length);
+        rule.put(DEFAULT_FORMAT_VERSION_BYTES);
+        rule.put(ruleBytes1);
+        rule.put(ruleBytes2);
+        rule.put(ruleBytes3);
+        InputStream inputStream = new ByteArrayInputStream(rule.array());
+
+        RuleParser binaryParser = new RuleBinaryParser();
+
+        List<RuleIndexRange> indexRanges = new ArrayList<>();
+        indexRanges.add(
+                new RuleIndexRange(
+                        DEFAULT_FORMAT_VERSION_BYTES.length + ruleBytes1.length,
+                        DEFAULT_FORMAT_VERSION_BYTES.length + ruleBytes1.length
+                                + ruleBytes2.length));
+        List<Rule> rules = binaryParser.parse(inputStream, indexRanges);
+
+        Rule expectedRule =
+                new Rule(
+                        new CompoundFormula(
+                                CompoundFormula.NOT,
+                                Collections.singletonList(
+                                        new AtomicFormula.StringAtomicFormula(
+                                                AtomicFormula.PACKAGE_NAME,
+                                                packageName2,
+                                                /* isHashedValue= */ false))),
+                        Rule.DENY);
+
+        assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
+    }
+
+    private static String getRulesWithPackageName(String packageName) {
+        return START_BIT
+                + COMPOUND_FORMULA_START_BITS
+                + NOT
+                + ATOMIC_FORMULA_START_BITS
+                + PACKAGE_NAME
+                + EQ
+                + IS_NOT_HASHED
+                + getBits(packageName.length(), VALUE_SIZE_BITS)
+                + getValueBits(packageName)
+                + COMPOUND_FORMULA_END_BITS
+                + DENY
+                + END_BIT;
+
     }
 }

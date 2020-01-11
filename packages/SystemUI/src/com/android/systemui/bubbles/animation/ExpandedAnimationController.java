@@ -97,13 +97,11 @@ public class ExpandedAnimationController
     private boolean mSpringingBubbleToTouch = false;
 
     private int mExpandedViewPadding;
-    private float mLauncherGridDiff;
 
     public ExpandedAnimationController(Point displaySize, int expandedViewPadding,
             int orientation) {
         updateOrientation(orientation, displaySize);
         mExpandedViewPadding = expandedViewPadding;
-        mLauncherGridDiff = 30f;
     }
 
     /**
@@ -569,15 +567,7 @@ public class ExpandedAnimationController
      * @return Space between bubbles in row above expanded view.
      */
     private float getSpaceBetweenBubbles() {
-        /**
-         * Ordered left to right:
-         *  Screen edge
-         *      [mExpandedViewPadding]
-         *  Expanded view edge
-         *      [launcherGridDiff] --- arbitrary value until launcher exports widths
-         *  Launcher's app icon grid edge that we must match
-         */
-        final float rowMargins = (mExpandedViewPadding + mLauncherGridDiff) * 2;
+        final float rowMargins = mExpandedViewPadding * 2;
         final float maxRowWidth = getWidthForDisplayingBubbles() - rowMargins;
 
         final float totalBubbleWidth = mBubblesMaxRendered * mBubbleSizePx;

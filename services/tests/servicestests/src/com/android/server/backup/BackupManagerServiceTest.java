@@ -27,6 +27,7 @@ import static junit.framework.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -59,6 +60,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -83,6 +85,8 @@ public class BackupManagerServiceTest {
     @Mock
     private UserBackupManagerService mUserBackupManagerService;
     @Mock
+    private UserBackupManagerService mNonSystemUserBackupManagerService;
+    @Mock
     private Context mContextMock;
     @Mock
     private PrintWriter mPrintWriterMock;
@@ -105,7 +109,7 @@ public class BackupManagerServiceTest {
 
         mUserServices = new SparseArray<>();
         mUserServices.append(UserHandle.USER_SYSTEM, mUserBackupManagerService);
-        mUserServices.append(NON_USER_SYSTEM, mUserBackupManagerService);
+        mUserServices.append(NON_USER_SYSTEM, mNonSystemUserBackupManagerService);
 
         when(mUserManagerMock.getUserInfo(UserHandle.USER_SYSTEM)).thenReturn(mUserInfoMock);
         when(mUserManagerMock.getUserInfo(NON_USER_SYSTEM)).thenReturn(mUserInfoMock);
@@ -512,6 +516,26 @@ public class BackupManagerServiceTest {
         mService.dump(mFileDescriptorStub, mPrintWriterMock, new String[0]);
 
         verifyNoMoreInteractions(mUserBackupManagerService);
+        verifyNoMoreInteractions(mNonSystemUserBackupManagerService);
+    }
+
+    /**
+     * Test that {@link BackupManagerService#dump()} dumps system user information before non-system
+     * user information.
+     */
+
+    @Test
+    public void testDump_systemUserFirst() {
+        String[] args = new String[0];
+        mService.dumpWithoutCheckingPermission(mFileDescriptorStub, mPrintWriterMock, args);
+
+        InOrder inOrder =
+                inOrder(mUserBackupManagerService, mNonSystemUserBackupManagerService);
+        inOrder.verify(mUserBackupManagerService)
+                .dump(mFileDescriptorStub, mPrintWriterMock, args);
+        inOrder.verify(mNonSystemUserBackupManagerService)
+                .dump(mFileDescriptorStub, mPrintWriterMock, args);
+        inOrder.verifyNoMoreInteractions();
     }
 
     @Test

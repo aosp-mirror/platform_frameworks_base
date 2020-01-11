@@ -16,10 +16,6 @@
 
 package android.media.tv.tuner.frontend;
 
-
-import android.media.tv.tuner.FrontendSettings;
-import android.media.tv.tuner.TunerConstants;
-
 import java.util.List;
 
 /**
@@ -37,6 +33,6 @@ public class Atsc3FrontendSettings extends FrontendSettings {
 
     @Override
     public int getType() {
-        return TunerConstants.FRONTEND_TYPE_ATSC3;
+        return FrontendSettings.TYPE_ATSC3;
     }
 }

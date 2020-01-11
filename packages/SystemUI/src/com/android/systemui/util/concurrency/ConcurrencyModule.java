@@ -83,17 +83,19 @@ public abstract class ConcurrencyModule {
      * Provide a Background-Thread Executor by default.
      */
     @Provides
+    @Singleton
     public static Executor provideExecutor(@Background Looper looper) {
-        return new ExecutorImpl(new Handler(looper));
+        return new ExecutorImpl(looper);
     }
 
     /**
      * Provide a Background-Thread Executor.
      */
     @Provides
+    @Singleton
     @Background
     public static Executor provideBackgroundExecutor(@Background Looper looper) {
-        return new ExecutorImpl(new Handler(looper));
+        return new ExecutorImpl(looper);
     }
 
     /**
@@ -109,26 +111,29 @@ public abstract class ConcurrencyModule {
      * Provide a Background-Thread Executor by default.
      */
     @Provides
+    @Singleton
     public static DelayableExecutor provideDelayableExecutor(@Background Looper looper) {
-        return new ExecutorImpl(new Handler(looper));
+        return new ExecutorImpl(looper);
     }
 
     /**
      * Provide a Background-Thread Executor.
      */
     @Provides
+    @Singleton
     @Background
     public static DelayableExecutor provideBackgroundDelayableExecutor(@Background Looper looper) {
-        return new ExecutorImpl(new Handler(looper));
+        return new ExecutorImpl(looper);
     }
 
     /**
      * Provide a Main-Thread Executor.
      */
     @Provides
+    @Singleton
     @Main
     public static DelayableExecutor provideMainDelayableExecutor(@Main Looper looper) {
-        return new ExecutorImpl(new Handler(looper));
+        return new ExecutorImpl(looper);
     }
 
     /**

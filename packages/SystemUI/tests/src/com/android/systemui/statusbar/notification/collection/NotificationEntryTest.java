@@ -21,8 +21,6 @@ import static android.app.Notification.CATEGORY_CALL;
 import static android.app.Notification.CATEGORY_EVENT;
 import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.CATEGORY_REMINDER;
-import static android.app.NotificationManager.IMPORTANCE_HIGH;
-import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
@@ -89,44 +87,6 @@ public class NotificationEntryTest extends SysuiTestCase {
                 .setNotification(n.build())
                 .setUser(new UserHandle(ActivityManager.getCurrentUser()))
                 .build();
-    }
-
-    @Test
-    public void testIsHighPriority_notificationUpdates() {
-        // GIVEN a notification with high importance
-        final NotificationEntry entryHigh = new NotificationEntryBuilder()
-                .setImportance(IMPORTANCE_HIGH)
-                .build();
-
-        // WHEN we get the value for the high priority entry, we're caching the high priority value
-        assertTrue(entryHigh.isHighPriority());
-
-        // WHEN we change the ranking and derived members (high priority) are invalidated
-        entryHigh.setRanking(
-                new RankingBuilder()
-                        .setKey(entryHigh.getKey())
-                        .setImportance(IMPORTANCE_MIN)
-                        .build());
-        entryHigh.invalidateDerivedMembers();
-
-        // THEN the priority is recalculated and is now low
-        assertFalse(entryHigh.isHighPriority());
-
-        // WHEN the sbn is updated to have messaging style (high priority characteristic)
-        //  AND the entry invalidates its derived members
-        final Notification notification =
-                new Notification.Builder(mContext, "test")
-                        .setStyle(new Notification.MessagingStyle(""))
-                        .build();
-        final StatusBarNotification sbn = entryHigh.getSbn();
-        entryHigh.setSbn(new StatusBarNotification(
-                sbn.getPackageName(), sbn.getPackageName(),
-                sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
-                notification, sbn.getUser(), sbn.getOverrideGroupKey(), 0));
-        entryHigh.invalidateDerivedMembers();
-
-        // THEN the priority is recalculated and is now high
-        assertTrue(entryHigh.isHighPriority());
     }
 
     @Test

@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +34,7 @@ import java.util.Objects;
  * @hide
  */
 public class RouteSessionInfo implements Parcelable {
+
     @NonNull
     public static final Creator<RouteSessionInfo> CREATOR =
             new Creator<RouteSessionInfo>() {
@@ -46,8 +48,10 @@ public class RouteSessionInfo implements Parcelable {
                 }
             };
 
-    final int mSessionId;
-    final String mPackageName;
+    public static final String TAG = "RouteSessionInfo";
+
+    final String mId;
+    final String mClientPackageName;
     final String mRouteType;
     @Nullable
     final String mProviderId;
@@ -61,15 +65,19 @@ public class RouteSessionInfo implements Parcelable {
     RouteSessionInfo(@NonNull Builder builder) {
         Objects.requireNonNull(builder, "builder must not be null.");
 
-        mSessionId = builder.mSessionId;
-        mPackageName = builder.mPackageName;
+        mId = builder.mId;
+        mClientPackageName = builder.mClientPackageName;
         mRouteType = builder.mRouteType;
         mProviderId = builder.mProviderId;
 
-        mSelectedRoutes = Collections.unmodifiableList(builder.mSelectedRoutes);
-        mSelectableRoutes = Collections.unmodifiableList(builder.mSelectableRoutes);
-        mDeselectableRoutes = Collections.unmodifiableList(builder.mDeselectableRoutes);
-        mTransferrableRoutes = Collections.unmodifiableList(builder.mTransferrableRoutes);
+        mSelectedRoutes = Collections.unmodifiableList(
+                convertToUniqueRouteIds(builder.mSelectedRoutes));
+        mSelectableRoutes = Collections.unmodifiableList(
+                convertToUniqueRouteIds(builder.mSelectableRoutes));
+        mDeselectableRoutes = Collections.unmodifiableList(
+                convertToUniqueRouteIds(builder.mDeselectableRoutes));
+        mTransferrableRoutes = Collections.unmodifiableList(
+                convertToUniqueRouteIds(builder.mTransferrableRoutes));
 
         mControlHints = builder.mControlHints;
     }
@@ -77,8 +85,8 @@ public class RouteSessionInfo implements Parcelable {
     RouteSessionInfo(@NonNull Parcel src) {
         Objects.requireNonNull(src, "src must not be null.");
 
-        mSessionId = src.readInt();
-        mPackageName = ensureString(src.readString());
+        mId = ensureString(src.readString());
+        mClientPackageName = ensureString(src.readString());
         mRouteType = ensureString(src.readString());
         mProviderId = src.readString();
 
@@ -105,73 +113,50 @@ public class RouteSessionInfo implements Parcelable {
     }
 
     /**
-     * Gets non-unique session id (int) from unique session id (string).
-     * If the corresponding session id could not be generated, it will return null.
-     * @hide
-     */
-    @Nullable
-    public static Integer getSessionId(@NonNull String uniqueSessionId) {
-        int lastIndexOfSeparator = uniqueSessionId.lastIndexOf("/");
-        if (lastIndexOfSeparator == -1 || lastIndexOfSeparator + 1 >= uniqueSessionId.length()) {
-            return null;
-        }
-
-        String integerString = uniqueSessionId.substring(lastIndexOfSeparator + 1);
-        if (TextUtils.isEmpty(integerString)) {
-            return null;
-        }
-
-        try {
-            return Integer.parseInt(integerString);
-        } catch (NumberFormatException ex) {
-            return null;
-        }
-    }
-
-    /**
-     * Gets provider ID (string) from unique session id (string).
-     * If the corresponding provider ID could not be generated, it will return null.
-     * @hide
-     *
-     * TODO: This logic seems error-prone. Consider to use long uniqueId.
-     */
-    @Nullable
-    public static String getProviderId(@NonNull String uniqueSessionId) {
-        int lastIndexOfSeparator = uniqueSessionId.lastIndexOf("/");
-        if (lastIndexOfSeparator == -1) {
-            return null;
-        }
-
-        String result = uniqueSessionId.substring(0, lastIndexOfSeparator);
-        if (TextUtils.isEmpty(result)) {
-            return null;
-        }
-        return result;
-    }
-
-    /**
      * Returns whether the session info is valid or not
+     *
+     * TODO in this CL: Remove this method.
      */
     public boolean isValid() {
-        return !TextUtils.isEmpty(mPackageName)
+        return !TextUtils.isEmpty(mId)
+                && !TextUtils.isEmpty(mClientPackageName)
                 && !TextUtils.isEmpty(mRouteType)
                 && mSelectedRoutes.size() > 0;
     }
 
     /**
-     * Gets the id of the session
+     * Gets the id of the session. The sessions which are given by {@link MediaRouter2} will have
+     * unique IDs.
+     * <p>
+     * In order to ensure uniqueness in {@link MediaRouter2} side, the value of this method
+     * can be different from what was set in {@link MediaRoute2ProviderService}.
+     *
+     * @see Builder#Builder(String, String, String)
      */
     @NonNull
-    public int getSessionId() {
-        return mSessionId;
+    public String getId() {
+        if (mProviderId != null) {
+            return MediaRouter2Utils.toUniqueId(mProviderId, mId);
+        } else {
+            return mId;
+        }
+    }
+
+    /**
+     * Gets the original id set by {@link Builder#Builder(String, String, String)}.
+     * @hide
+     */
+    @NonNull
+    public String getOriginalId() {
+        return mId;
     }
 
     /**
      * Gets the client package name of the session
      */
     @NonNull
-    public String getPackageName() {
-        return mPackageName;
+    public String getClientPackageName() {
+        return mClientPackageName;
     }
 
     /**
@@ -190,19 +175,6 @@ public class RouteSessionInfo implements Parcelable {
     @Nullable
     public String getProviderId() {
         return mProviderId;
-    }
-
-    /**
-     * Gets the unique id of the session.
-     * @hide
-     */
-    @NonNull
-    public String getUniqueSessionId() {
-        StringBuilder sessionIdBuilder = new StringBuilder()
-                .append(mProviderId)
-                .append("/")
-                .append(mSessionId);
-        return sessionIdBuilder.toString();
     }
 
     /**
@@ -252,8 +224,8 @@ public class RouteSessionInfo implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(mSessionId);
-        dest.writeString(mPackageName);
+        dest.writeString(mId);
+        dest.writeString(mClientPackageName);
         dest.writeString(mRouteType);
         dest.writeString(mProviderId);
         dest.writeStringList(mSelectedRoutes);
@@ -267,7 +239,7 @@ public class RouteSessionInfo implements Parcelable {
     public String toString() {
         StringBuilder result = new StringBuilder()
                 .append("RouteSessionInfo{ ")
-                .append("sessionId=").append(mSessionId)
+                .append("sessionId=").append(mId)
                 .append(", routeType=").append(mRouteType)
                 .append(", selectedRoutes={")
                 .append(String.join(",", mSelectedRoutes))
@@ -285,12 +257,30 @@ public class RouteSessionInfo implements Parcelable {
         return result.toString();
     }
 
+    private List<String> convertToUniqueRouteIds(@NonNull List<String> routeIds) {
+        if (routeIds == null) {
+            Log.w(TAG, "routeIds is null. Returning an empty list");
+            return Collections.emptyList();
+        }
+
+        // mProviderId can be null if not set. Return the original list for this case.
+        if (mProviderId == null) {
+            return routeIds;
+        }
+
+        List<String> result = new ArrayList<>();
+        for (String routeId : routeIds) {
+            result.add(MediaRouter2Utils.toUniqueId(mProviderId, routeId));
+        }
+        return result;
+    }
+
     /**
      * Builder class for {@link RouteSessionInfo}.
      */
     public static final class Builder {
-        final String mPackageName;
-        final int mSessionId;
+        final String mId;
+        final String mClientPackageName;
         final String mRouteType;
         String mProviderId;
         final List<String> mSelectedRoutes;
@@ -299,22 +289,42 @@ public class RouteSessionInfo implements Parcelable {
         final List<String> mTransferrableRoutes;
         Bundle mControlHints;
 
-        public Builder(int sessionId, @NonNull String packageName,
+        /**
+         * Constructor for builder to create {@link RouteSessionInfo}.
+         * <p>
+         * In order to ensure ID uniqueness in {@link MediaRouter2} side, the value of
+         * {@link RouteSessionInfo#getId()} can be different from what was set in
+         * {@link MediaRoute2ProviderService}.
+         * </p>
+         *
+         * @see MediaRoute2Info#getId()
+         */
+        public Builder(@NonNull String id, @NonNull String clientPackageName,
                 @NonNull String routeType) {
-            mSessionId = sessionId;
-            mPackageName = Objects.requireNonNull(packageName, "packageName must not be null");
-            mRouteType = Objects.requireNonNull(routeType,
-                    "routeType must not be null");
-
+            if (TextUtils.isEmpty(id)) {
+                throw new IllegalArgumentException("id must not be empty");
+            }
+            mId = id;
+            mClientPackageName = Objects.requireNonNull(
+                    clientPackageName, "clientPackageName must not be null");
+            mRouteType = Objects.requireNonNull(routeType, "routeType must not be null");
             mSelectedRoutes = new ArrayList<>();
             mSelectableRoutes = new ArrayList<>();
             mDeselectableRoutes = new ArrayList<>();
             mTransferrableRoutes = new ArrayList<>();
         }
 
-        public Builder(RouteSessionInfo sessionInfo) {
-            mSessionId = sessionInfo.mSessionId;
-            mPackageName = sessionInfo.mPackageName;
+        /**
+         * Constructor for builder to create {@link RouteSessionInfo} with
+         * existing {@link RouteSessionInfo} instance.
+         *
+         * @param sessionInfo the existing instance to copy data from.
+         */
+        public Builder(@NonNull RouteSessionInfo sessionInfo) {
+            Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
+
+            mId = sessionInfo.mId;
+            mClientPackageName = sessionInfo.mClientPackageName;
             mRouteType = sessionInfo.mRouteType;
             mProviderId = sessionInfo.mProviderId;
 
@@ -334,21 +344,12 @@ public class RouteSessionInfo implements Parcelable {
          * @hide
          */
         @NonNull
-        public Builder setProviderId(String providerId) {
-            mProviderId = providerId;
-            convertToUniqueRouteIds(providerId, mSelectedRoutes);
-            convertToUniqueRouteIds(providerId, mSelectableRoutes);
-            convertToUniqueRouteIds(providerId, mDeselectableRoutes);
-            convertToUniqueRouteIds(providerId, mTransferrableRoutes);
-            return this;
-        }
-
-        private void convertToUniqueRouteIds(@NonNull String providerId,
-                @NonNull List<String> routeIds) {
-            for (int i = 0; i < routeIds.size(); i++) {
-                String routeId = routeIds.get(i);
-                routeIds.set(i, MediaRoute2Info.toUniqueId(providerId, routeId));
+        public Builder setProviderId(@NonNull String providerId) {
+            if (TextUtils.isEmpty(providerId)) {
+                throw new IllegalArgumentException("providerId must not be empty");
             }
+            mProviderId = providerId;
+            return this;
         }
 
         /**

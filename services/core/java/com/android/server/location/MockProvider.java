@@ -19,7 +19,6 @@ package com.android.server.location;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.location.Location;
-import android.os.WorkSource;
 
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
@@ -34,41 +33,33 @@ import java.io.PrintWriter;
  */
 public class MockProvider extends AbstractLocationProvider {
 
-    private boolean mEnabled;
     @Nullable private Location mLocation;
 
-    public MockProvider(Context context,
-            LocationProviderManager locationProviderManager, ProviderProperties properties) {
-        super(context, locationProviderManager);
-
-        mEnabled = true;
-        mLocation = null;
-
+    public MockProvider(Context context, ProviderProperties properties) {
+        // using a direct executor is only acceptable because this class is so simple it is trivial
+        // to verify that it does not acquire any locks or re-enter LMS from callbacks
+        super(context, Runnable::run);
         setProperties(properties);
     }
 
     /** Sets the enabled state of this mock provider. */
-    public void setEnabled(boolean enabled) {
-        mEnabled = enabled;
-        super.setEnabled(enabled);
+    public void setProviderEnabled(boolean enabled) {
+        setEnabled(enabled);
     }
 
     /** Sets the location to report for this mock provider. */
-    public void setLocation(Location l) {
-        mLocation = new Location(l);
-        if (!mLocation.isFromMockProvider()) {
-            mLocation.setIsFromMockProvider(true);
-        }
-        if (mEnabled) {
-            reportLocation(mLocation);
-        }
+    public void setProviderLocation(Location l) {
+        Location location = new Location(l);
+        location.setIsFromMockProvider(true);
+        mLocation = location;
+        reportLocation(location);
     }
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("last location=" + mLocation);
+        pw.println("last mock location=" + mLocation);
     }
 
     @Override
-    public void onSetRequest(ProviderRequest request, WorkSource source) {}
+    public void onSetRequest(ProviderRequest request) {}
 }

@@ -20,7 +20,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerConstants.FilterSubtype;
-import android.media.tv.tuner.TunerConstants.FilterType;
+import android.media.tv.tuner.filter.FilterConfiguration;
+import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
 
 /**
  * Utility class for tuner framework.
@@ -50,7 +51,7 @@ public final class TunerUtils {
      * @param subtype filter subtype.
      */
     public static int getFilterSubtype(@FilterType int mainType, @FilterSubtype int subtype) {
-        if (mainType == TunerConstants.FILTER_TYPE_TS) {
+        if (mainType == FilterConfiguration.FILTER_TYPE_TS) {
             switch (subtype) {
                 case TunerConstants.FILTER_SUBTYPE_UNDEFINED:
                     return Constants.DemuxTsFilterType.UNDEFINED;
@@ -73,7 +74,7 @@ public final class TunerUtils {
                 default:
                     break;
             }
-        } else if (mainType == TunerConstants.FILTER_TYPE_MMTP) {
+        } else if (mainType == FilterConfiguration.FILTER_TYPE_MMTP) {
             switch (subtype) {
                 case TunerConstants.FILTER_SUBTYPE_UNDEFINED:
                     return Constants.DemuxMmtpFilterType.UNDEFINED;
@@ -95,7 +96,7 @@ public final class TunerUtils {
                     break;
             }
 
-        } else if (mainType == TunerConstants.FILTER_TYPE_IP) {
+        } else if (mainType == FilterConfiguration.FILTER_TYPE_IP) {
             switch (subtype) {
                 case TunerConstants.FILTER_SUBTYPE_UNDEFINED:
                     return Constants.DemuxIpFilterType.UNDEFINED;
@@ -112,7 +113,7 @@ public final class TunerUtils {
                 default:
                     break;
             }
-        } else if (mainType == TunerConstants.FILTER_TYPE_TLV) {
+        } else if (mainType == FilterConfiguration.FILTER_TYPE_TLV) {
             switch (subtype) {
                 case TunerConstants.FILTER_SUBTYPE_UNDEFINED:
                     return Constants.DemuxTlvFilterType.UNDEFINED;
@@ -125,7 +126,7 @@ public final class TunerUtils {
                 default:
                     break;
             }
-        } else if (mainType == TunerConstants.FILTER_TYPE_ALP) {
+        } else if (mainType == FilterConfiguration.FILTER_TYPE_ALP) {
             switch (subtype) {
                 case TunerConstants.FILTER_SUBTYPE_UNDEFINED:
                     return Constants.DemuxAlpFilterType.UNDEFINED;

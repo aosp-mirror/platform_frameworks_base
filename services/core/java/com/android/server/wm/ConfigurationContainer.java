@@ -666,4 +666,8 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             return sb.toString();
         }
     }
+
+    RemoteToken getRemoteToken() {
+        return mRemoteToken;
+    }
 }

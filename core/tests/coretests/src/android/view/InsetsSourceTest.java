@@ -108,5 +108,30 @@ public class InsetsSourceTest {
         assertEquals(Insets.of(0, 100, 0, 0), insets);
     }
 
+    @Test
+    public void testCalculateVisibleInsets_default() {
+        mSource.setFrame(new Rect(0, 0, 500, 100));
+        Insets insets = mSource.calculateVisibleInsets(new Rect(100, 0, 500, 500));
+        assertEquals(Insets.of(0, 100, 0, 0), insets);
+    }
+
+    @Test
+    public void testCalculateVisibleInsets_override() {
+        mSource.setFrame(new Rect(0, 0, 500, 100));
+        mSource.setVisibleFrame(new Rect(0, 0, 500, 200));
+        Insets insets = mSource.calculateVisibleInsets(new Rect(100, 0, 500, 500));
+        assertEquals(Insets.of(0, 200, 0, 0), insets);
+    }
+
+    @Test
+    public void testCalculateVisibleInsets_invisible() {
+        mSource.setFrame(new Rect(0, 0, 500, 100));
+        mSource.setVisibleFrame(new Rect(0, 0, 500, 200));
+        mSource.setVisible(false);
+        Insets insets = mSource.calculateVisibleInsets(new Rect(100, 0, 500, 500));
+        assertEquals(Insets.of(0, 0, 0, 0), insets);
+    }
+
+
     // Parcel and equals already tested via InsetsStateTest
 }

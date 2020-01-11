@@ -400,6 +400,7 @@ public class MediaRouter2Test {
             assertTrue(createRouteMap(controller2.getSelectedRoutes()).containsKey(ROUTE_ID2));
             assertTrue(TextUtils.equals(TYPE_SAMPLE, controller1.getRouteType()));
             assertTrue(TextUtils.equals(TYPE_SAMPLE, controller2.getRouteType()));
+
         } finally {
             releaseControllers(createdControllers);
             mRouter2.unregisterRouteCallback(routeCallback);
@@ -486,20 +487,21 @@ public class MediaRouter2Test {
             public void onSessionInfoChanged(RouteSessionController controller,
                     RouteSessionInfo oldInfo, RouteSessionInfo newInfo) {
                 if (onSessionCreatedLatch.getCount() != 0
-                        || controllers.get(0).getSessionId() != controller.getSessionId()) {
+                        || !TextUtils.equals(
+                                controllers.get(0).getSessionId(), controller.getSessionId())) {
                     return;
                 }
 
                 if (onSessionInfoChangedLatchForSelect.getCount() != 0) {
                     // Check oldInfo
-                    assertEquals(controller.getSessionId(), oldInfo.getSessionId());
+                    assertEquals(controller.getSessionId(), oldInfo.getId());
                     assertEquals(1, oldInfo.getSelectedRoutes().size());
                     assertTrue(oldInfo.getSelectedRoutes().contains(ROUTE_ID1));
                     assertTrue(oldInfo.getSelectableRoutes().contains(
                             ROUTE_ID4_TO_SELECT_AND_DESELECT));
 
                     // Check newInfo
-                    assertEquals(controller.getSessionId(), newInfo.getSessionId());
+                    assertEquals(controller.getSessionId(), newInfo.getId());
                     assertEquals(2, newInfo.getSelectedRoutes().size());
                     assertTrue(newInfo.getSelectedRoutes().contains(ROUTE_ID1));
                     assertTrue(newInfo.getSelectedRoutes().contains(
@@ -510,7 +512,7 @@ public class MediaRouter2Test {
                     onSessionInfoChangedLatchForSelect.countDown();
                 } else {
                     // Check newInfo
-                    assertEquals(controller.getSessionId(), newInfo.getSessionId());
+                    assertEquals(controller.getSessionId(), newInfo.getId());
                     assertEquals(1, newInfo.getSelectedRoutes().size());
                     assertTrue(newInfo.getSelectedRoutes().contains(ROUTE_ID1));
                     assertFalse(newInfo.getSelectedRoutes().contains(
@@ -587,18 +589,19 @@ public class MediaRouter2Test {
             public void onSessionInfoChanged(RouteSessionController controller,
                     RouteSessionInfo oldInfo, RouteSessionInfo newInfo) {
                 if (onSessionCreatedLatch.getCount() != 0
-                        || controllers.get(0).getSessionId() != controller.getSessionId()) {
+                        || !TextUtils.equals(
+                                controllers.get(0).getSessionId(), controller.getSessionId())) {
                     return;
                 }
 
                 // Check oldInfo
-                assertEquals(controller.getSessionId(), oldInfo.getSessionId());
+                assertEquals(controller.getSessionId(), oldInfo.getId());
                 assertEquals(1, oldInfo.getSelectedRoutes().size());
                 assertTrue(oldInfo.getSelectedRoutes().contains(ROUTE_ID1));
                 assertTrue(oldInfo.getTransferrableRoutes().contains(ROUTE_ID5_TO_TRANSFER_TO));
 
                 // Check newInfo
-                assertEquals(controller.getSessionId(), newInfo.getSessionId());
+                assertEquals(controller.getSessionId(), newInfo.getId());
                 assertEquals(1, newInfo.getSelectedRoutes().size());
                 assertFalse(newInfo.getSelectedRoutes().contains(ROUTE_ID1));
                 assertTrue(newInfo.getSelectedRoutes().contains(ROUTE_ID5_TO_TRANSFER_TO));
@@ -665,7 +668,8 @@ public class MediaRouter2Test {
             public void onSessionInfoChanged(RouteSessionController controller,
                     RouteSessionInfo oldInfo, RouteSessionInfo newInfo) {
                 if (onSessionCreatedLatch.getCount() != 0
-                        || controllers.get(0).getSessionId() != controller.getSessionId()) {
+                        || !TextUtils.equals(
+                                controllers.get(0).getSessionId(), controller.getSessionId())) {
                     return;
                 }
                 onSessionInfoChangedLatch.countDown();

@@ -17,6 +17,7 @@
 package android.os;
 
 import android.app.PendingIntent;
+import android.os.IPullAtomCallback;
 
 /**
   * Binder interface to communicate with the Java-based statistics service helper.
@@ -125,4 +126,11 @@ interface IStatsManagerService {
      * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
      */
     void removeConfiguration(in long configId, in String packageName);
+
+    /** Tell StatsManagerService to register a puller for the given atom tag with statsd. */
+    oneway void registerPullAtomCallback(int atomTag, long coolDownNs, long timeoutNs,
+            in int[] additiveFields, IPullAtomCallback pullerCallback);
+
+    /** Tell StatsManagerService to unregister the pulller for the given atom tag from statsd. */
+    oneway void unregisterPullAtomCallback(int atomTag);
 }

@@ -79,7 +79,8 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         IntentFilter filter = new IntentFilter();
         filter.addAction(LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION);
         filter.addAction(LocationManager.MODE_CHANGED_ACTION);
-        mBroadcastDispatcher.registerReceiver(this, filter, new Handler(bgLooper), UserHandle.ALL);
+        mBroadcastDispatcher.registerReceiverWithHandler(this, filter,
+                new Handler(bgLooper), UserHandle.ALL);
 
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mStatusBarManager

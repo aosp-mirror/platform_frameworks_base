@@ -112,6 +112,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -133,6 +134,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestablePermissions;
 import android.testing.TestableResources;
 import android.text.Html;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -475,7 +477,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPreferencesHelper.bubblesEnabled()).thenReturn(globalEnabled);
         when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(pkgEnabled);
         when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
+                anyString(), anyInt(), anyString(), eq(null), anyBoolean())).thenReturn(
                 mTestNotificationChannel);
         when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
                 mTestNotificationChannel.getImportance());
@@ -1762,7 +1764,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "testTvExtenderChannelOverride_onTv", 0,
                 generateNotificationRecord(null, tv).getNotification(), 0);
         verify(mPreferencesHelper, times(1)).getNotificationChannel(
-                anyString(), anyInt(), eq("foo"), anyBoolean());
+                anyString(), anyInt(), eq("foo"), eq(null), anyBoolean());
     }
 
     @Test
@@ -1777,7 +1779,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "testTvExtenderChannelOverride_notOnTv",
                 0, generateNotificationRecord(null, tv).getNotification(), 0);
         verify(mPreferencesHelper, times(1)).getNotificationChannel(
-                anyString(), anyInt(), eq(mTestNotificationChannel.getId()), anyBoolean());
+                anyString(), anyInt(), eq(mTestNotificationChannel.getId()), eq(null),
+                anyBoolean());
     }
 
     @Test
@@ -3210,9 +3213,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final NotificationVisibility nv = NotificationVisibility.obtain(r.getKey(), 1, 2, true);
         mService.mNotificationDelegate.onNotificationVisibilityChanged(
                 new NotificationVisibility[] {nv}, new NotificationVisibility[]{});
+        verify(mAssistants).notifyAssistantVisibilityChangedLocked(eq(r.sbn), eq(true));
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasSeen());
         mService.mNotificationDelegate.onNotificationVisibilityChanged(
                 new NotificationVisibility[] {}, new NotificationVisibility[]{nv});
+        verify(mAssistants).notifyAssistantVisibilityChangedLocked(eq(r.sbn), eq(false));
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasSeen());
     }
 
@@ -4463,6 +4468,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testOnPanelRevealedAndHidden() {
+        int items = 5;
+        mService.mNotificationDelegate.onPanelRevealed(false, items);
+        verify(mAssistants, times(1)).onPanelRevealed(eq(items));
+
+        mService.mNotificationDelegate.onPanelHidden();
+        verify(mAssistants, times(1)).onPanelHidden();
+    }
+
+    @Test
     public void testOnNotificationSmartReplySent() {
         final int replyIndex = 2;
         final String reply = "Hello";
@@ -5044,10 +5059,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nb.build(), new UserHandle(mUid), null, 0);
         // Make sure it has foreground service
         sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
-        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
-                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
         waitForIdle();
 
         // yes phone call, yes person, yes foreground service, but not allowed, no bubble
@@ -5801,5 +5815,80 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         verify(mHistoryManager, times(1)).addNotification(any());
+    }
+
+    @Test
+    public void createConversationNotificationChannel() throws Exception {
+        NotificationChannel original = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        original.setAllowBubbles(!original.canBubble());
+        original.setShowBadge(!original.canShowBadge());
+
+        Parcel parcel = Parcel.obtain();
+        original.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        NotificationChannel orig = NotificationChannel.CREATOR.createFromParcel(parcel);
+        assertEquals(original, orig);
+        assertFalse(TextUtils.isEmpty(orig.getName()));
+
+        mBinderService.createNotificationChannels(PKG, new ParceledListSlice(Arrays.asList(
+                orig)));
+
+        mBinderService.createConversationNotificationChannelForPackage(PKG, mUid, orig, "friend");
+
+        NotificationChannel friendChannel = mBinderService.getConversationNotificationChannel(
+                PKG, 0, PKG, original.getId(), "friend");
+
+        assertEquals(original.getName(), friendChannel.getName());
+        assertEquals(original.getId(), friendChannel.getParentChannelId());
+        assertEquals("friend", friendChannel.getConversationId());
+        assertEquals(null, original.getConversationId());
+        assertEquals(original.canShowBadge(), friendChannel.canShowBadge());
+        assertEquals(original.canBubble(), friendChannel.canBubble());
+        assertFalse(original.getId().equals(friendChannel.getId()));
+        assertNotNull(friendChannel.getId());
+    }
+
+    @Test
+    public void deleteConversationNotificationChannels() throws Exception {
+        NotificationChannel messagesParent =
+                new NotificationChannel("messages", "messages", IMPORTANCE_HIGH);
+        Parcel msgParcel = Parcel.obtain();
+        messagesParent.writeToParcel(msgParcel, 0);
+        msgParcel.setDataPosition(0);
+
+        NotificationChannel callsParent =
+                new NotificationChannel("calls", "calls", IMPORTANCE_HIGH);
+        Parcel callParcel = Parcel.obtain();
+        callsParent.writeToParcel(callParcel, 0);
+        callParcel.setDataPosition(0);
+
+        mBinderService.createNotificationChannels(PKG, new ParceledListSlice(Arrays.asList(
+                messagesParent, callsParent)));
+
+        String conversationId = "friend";
+
+        mBinderService.createConversationNotificationChannelForPackage(
+                PKG, mUid, NotificationChannel.CREATOR.createFromParcel(msgParcel), conversationId);
+        mBinderService.createConversationNotificationChannelForPackage(
+                PKG, mUid, NotificationChannel.CREATOR.createFromParcel(callParcel),
+                conversationId);
+
+        NotificationChannel messagesChild = mBinderService.getConversationNotificationChannel(
+                PKG, 0, PKG, messagesParent.getId(), conversationId);
+        NotificationChannel callsChild = mBinderService.getConversationNotificationChannel(
+                PKG, 0, PKG, callsParent.getId(), conversationId);
+
+        assertEquals(messagesParent.getId(), messagesChild.getParentChannelId());
+        assertEquals(conversationId, messagesChild.getConversationId());
+
+        assertEquals(callsParent.getId(), callsChild.getParentChannelId());
+        assertEquals(conversationId, callsChild.getConversationId());
+
+        mBinderService.deleteConversationNotificationChannels(PKG, mUid, conversationId);
+
+        assertNull(mBinderService.getConversationNotificationChannel(
+                PKG, 0, PKG, messagesParent.getId(), conversationId));
+        assertNull(mBinderService.getConversationNotificationChannel(
+                PKG, 0, PKG, callsParent.getId(), conversationId));
     }
 }

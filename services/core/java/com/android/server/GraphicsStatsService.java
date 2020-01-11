@@ -38,11 +38,13 @@ import android.view.IGraphicsStats;
 import android.view.IGraphicsStatsCallback;
 
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FastPrintWriter;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -77,6 +79,8 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
 
     private static final int SAVE_BUFFER = 1;
     private static final int DELETE_OLD = 2;
+
+    private static final int AID_STATSD = 1066; // Statsd uid is set to 1066 forever.
 
     // This isn't static because we need this to happen after registerNativeMethods, however
     // the class is loaded (and thus static ctor happens) before that occurs.
@@ -121,6 +125,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
                 return true;
             }
         });
+        nativeInit();
     }
 
     /**
@@ -184,6 +189,86 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
             Binder.restoreCallingIdentity(callingIdentity);
         }
         return pfd;
+    }
+
+    // If lastFullDay is true, pullGraphicsStats returns stats for the last complete day/24h period
+    // that does not include today. If lastFullDay is false, pullGraphicsStats returns stats for the
+    // current day.
+    // This method is invoked from native code only.
+    @SuppressWarnings({"UnusedDeclaration"})
+    private long pullGraphicsStats(boolean lastFullDay) throws RemoteException {
+        int uid = Binder.getCallingUid();
+
+        // DUMP and PACKAGE_USAGE_STATS permissions are required to invoke this method.
+        // TODO: remove exception for statsd daemon after required permissions are granted. statsd
+        // TODO: should have these permissions granted by data/etc/platform.xml, but it does not.
+        if (uid != AID_STATSD) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new FastPrintWriter(sw);
+            if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) {
+                pw.flush();
+                throw new RemoteException(sw.toString());
+            }
+        }
+
+        long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            return pullGraphicsStatsImpl(lastFullDay);
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
+        }
+    }
+
+    private long pullGraphicsStatsImpl(boolean lastFullDay) {
+        long targetDay;
+        if (lastFullDay) {
+            // Get stats from yesterday. Stats stay constant, because the day is over.
+            targetDay = normalizeDate(System.currentTimeMillis() - 86400000).getTimeInMillis();
+        } else {
+            // Get stats from today. Stats may change as more apps are run today.
+            targetDay = normalizeDate(System.currentTimeMillis()).getTimeInMillis();
+        }
+
+        // Find active buffers for targetDay.
+        ArrayList<HistoricalBuffer> buffers;
+        synchronized (mLock) {
+            buffers = new ArrayList<>(mActive.size());
+            for (int i = 0; i < mActive.size(); i++) {
+                ActiveBuffer buffer = mActive.get(i);
+                if (buffer.mInfo.startTime == targetDay) {
+                    try {
+                        buffers.add(new HistoricalBuffer(buffer));
+                    } catch (IOException ex) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+
+        // Dump active and historic buffers for targetDay in a serialized
+        // GraphicsStatsServiceDumpProto proto.
+        long dump = nCreateDump(-1, true);
+        try {
+            synchronized (mFileAccessLock) {
+                HashSet<File> skipList = dumpActiveLocked(dump, buffers);
+                buffers.clear();
+                String subPath = String.format("%d", targetDay);
+                File dateDir = new File(mGraphicsStatsDir, subPath);
+                if (dateDir.exists()) {
+                    for (File pkg : dateDir.listFiles()) {
+                        for (File version : pkg.listFiles()) {
+                            File data = new File(version, "total");
+                            if (skipList.contains(data)) {
+                                continue;
+                            }
+                            nAddToDump(dump, data.getAbsolutePath());
+                        }
+                    }
+                }
+            }
+        } finally {
+            return nFinishDumpInMemory(dump);
+        }
     }
 
     private ParcelFileDescriptor getPfd(MemoryFile file) {
@@ -379,12 +464,21 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
         }
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        nativeDestructor();
+    }
+
+    private native void nativeInit();
+    private static native void nativeDestructor();
+
     private static native int nGetAshmemSize();
     private static native long nCreateDump(int outFd, boolean isProto);
     private static native void nAddToDump(long dump, String path, String packageName,
             long versionCode, long startTime, long endTime, byte[] data);
     private static native void nAddToDump(long dump, String path);
     private static native void nFinishDump(long dump);
+    private static native long nFinishDumpInMemory(long dump);
     private static native void nSaveBuffer(String path, String packageName, long versionCode,
             long startTime, long endTime, byte[] data);
 

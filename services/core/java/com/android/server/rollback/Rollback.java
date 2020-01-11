@@ -62,7 +62,7 @@ class Rollback {
 
     private static final String TAG = "RollbackManager";
 
-    @IntDef(flag = true, prefix = { "ROLLBACK_STATE_" }, value = {
+    @IntDef(prefix = { "ROLLBACK_STATE_" }, value = {
             ROLLBACK_STATE_ENABLING,
             ROLLBACK_STATE_AVAILABLE,
             ROLLBACK_STATE_COMMITTED,
@@ -91,6 +91,19 @@ class Rollback {
      * The rollback has been deleted.
      */
     static final int ROLLBACK_STATE_DELETED = 4;
+
+    @IntDef(flag = true, prefix = { "MATCH_" }, value = {
+            MATCH_APK_IN_APEX,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface RollbackInfoFlags {}
+
+    /**
+     * {@link RollbackInfo} flag: include {@code RollbackInfo} packages that are apk-in-apex.
+     * These packages do not have their own sessions. They are embedded in an apex which has a
+     * session id.
+     */
+    static final int MATCH_APK_IN_APEX = 1;
 
     /**
      * The session ID for the staged session if this rollback data represents a staged session,
@@ -323,13 +336,37 @@ class Rollback {
                 new VersionedPackage(packageName, newVersion),
                 new VersionedPackage(packageName, installedVersion),
                 new IntArray() /* pendingBackups */, new ArrayList<>() /* pendingRestores */,
-                isApex, new IntArray(), new SparseLongArray() /* ceSnapshotInodes */,
-                rollbackDataPolicy);
+                isApex, false /* isApkInApex */, new IntArray(),
+                new SparseLongArray() /* ceSnapshotInodes */, rollbackDataPolicy);
 
         synchronized (mLock) {
             info.getPackages().add(packageRollbackInfo);
         }
 
+        return true;
+    }
+
+    /**
+     * Enables this rollback for the provided apk-in-apex.
+     *
+     * @return boolean True if the rollback was enabled successfully for the specified package.
+     */
+    boolean enableForPackageInApex(String packageName, long installedVersion,
+            int rollbackDataPolicy) {
+        // TODO(b/142712057): Extract the new version number of apk-in-apex
+        // The new version for the apk-in-apex is set to 0 for now. If the package is then further
+        // updated via non-staged install flow, then RollbackManagerServiceImpl#onPackageReplaced()
+        // will be called and this rollback will be deleted. Other ways of package update have not
+        // been handled yet.
+        PackageRollbackInfo packageRollbackInfo = new PackageRollbackInfo(
+                new VersionedPackage(packageName, 0 /* newVersion */),
+                new VersionedPackage(packageName, installedVersion),
+                new IntArray() /* pendingBackups */, new ArrayList<>() /* pendingRestores */,
+                false /* isApex */, true /* isApkInApex */, new IntArray(),
+                new SparseLongArray() /* ceSnapshotInodes */, rollbackDataPolicy);
+        synchronized (mLock) {
+            info.getPackages().add(packageRollbackInfo);
+        }
         return true;
     }
 
@@ -428,6 +465,11 @@ class Rollback {
                         parentSessionId);
 
                 for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
+                    if (pkgRollbackInfo.isApkInApex()) {
+                        // No need to issue a downgrade install request for apk-in-apex. It will
+                        // be rolled back when its parent apex is downgraded.
+                        continue;
+                    }
                     PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                             PackageInstaller.SessionParams.MODE_FULL_INSTALL);
                     String installerPackageName = mInstallerPackageName;
@@ -453,7 +495,8 @@ class Rollback {
                             this, pkgRollbackInfo.getPackageName());
                     if (packageCodePaths == null) {
                         sendFailure(context, statusReceiver, RollbackManager.STATUS_FAILURE,
-                                "Backup copy of package inaccessible");
+                                "Backup copy of package: "
+                                        + pkgRollbackInfo.getPackageName() + " is inaccessible");
                         return;
                     }
 
@@ -696,9 +739,30 @@ class Rollback {
         }
     }
 
-    int getPackageCount() {
+    /**
+     * Returns the number of {@link PackageRollbackInfo} we are storing in this {@link Rollback}
+     * instance. By default, this method does not include apk-in-apex package in the count.
+     *
+     * @param flags Apk-in-apex packages can be included in the count by passing
+     * {@link Rollback#MATCH_APK_IN_APEX}
+     *
+     * @return Counts number of {@link PackageRollbackInfo} stored in the {@link Rollback}
+     * according to {@code flags} passed
+     */
+    int getPackageCount(@RollbackInfoFlags int flags) {
         synchronized (mLock) {
-            return info.getPackages().size();
+            List<PackageRollbackInfo> packages = info.getPackages();
+            if ((flags & MATCH_APK_IN_APEX) != 0) {
+                return packages.size();
+            }
+
+            int packagesWithoutApkInApex = 0;
+            for (PackageRollbackInfo rollbackInfo : packages) {
+                if (!rollbackInfo.isApkInApex()) {
+                    packagesWithoutApkInApex++;
+                }
+            }
+            return packagesWithoutApkInApex;
         }
     }
 

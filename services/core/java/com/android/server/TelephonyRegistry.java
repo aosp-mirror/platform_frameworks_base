@@ -83,7 +83,6 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.ITelephonyRegistry;
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyPermissions;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -2194,6 +2193,17 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private static final String PHONE_CONSTANTS_STATE_KEY = "state";
     private static final String PHONE_CONSTANTS_SUBSCRIPTION_KEY = "subscription";
 
+    /**
+     * Broadcast Action: The phone's signal strength has changed. The intent will have the
+     * following extra values:
+     *   phoneName - A string version of the phone name.
+     *   asu - A numeric value for the signal strength.
+     *         An ASU is 0-31 or -1 if unknown (for GSM, dBm = -113 - 2 * asu).
+     *         The following special values are defined:
+     *         0 means "-113 dBm or less".31 means "-51 dBm or greater".
+     */
+    public static final String ACTION_SIGNAL_STRENGTH_CHANGED = "android.intent.action.SIG_STR";
+
     private void broadcastServiceStateChanged(ServiceState state, int phoneId, int subId) {
         long ident = Binder.clearCallingIdentity();
         try {
@@ -2228,7 +2238,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             Binder.restoreCallingIdentity(ident);
         }
 
-        Intent intent = new Intent(TelephonyIntents.ACTION_SIGNAL_STRENGTH_CHANGED);
+        Intent intent = new Intent(ACTION_SIGNAL_STRENGTH_CHANGED);
         Bundle data = new Bundle();
         fillInSignalStrengthNotifierBundle(signalStrength, data);
         intent.putExtras(data);

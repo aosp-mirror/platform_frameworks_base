@@ -1568,44 +1568,16 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public void setAppStandbyBucket(String packageName,
-                int bucket, int userId) {
+        public void setAppStandbyBucket(String packageName, int bucket, int userId) {
             getContext().enforceCallingPermission(Manifest.permission.CHANGE_APP_IDLE_STATE,
                     "No permission to change app standby state");
 
-            if (bucket < UsageStatsManager.STANDBY_BUCKET_ACTIVE
-                    || bucket > UsageStatsManager.STANDBY_BUCKET_NEVER) {
-                throw new IllegalArgumentException("Cannot set the standby bucket to " + bucket);
-            }
             final int callingUid = Binder.getCallingUid();
-            try {
-                userId = ActivityManager.getService().handleIncomingUser(
-                        Binder.getCallingPid(), callingUid, userId, false, true,
-                        "setAppStandbyBucket", null);
-            } catch (RemoteException re) {
-                throw re.rethrowFromSystemServer();
-            }
-            final boolean shellCaller = callingUid == 0 || callingUid == Process.SHELL_UID;
-            final boolean systemCaller = UserHandle.isCore(callingUid);
-            final int reason = systemCaller
-                    ? UsageStatsManager.REASON_MAIN_FORCED
-                    : UsageStatsManager.REASON_MAIN_PREDICTED;
+            final int callingPid = Binder.getCallingPid();
             final long token = Binder.clearCallingIdentity();
             try {
-                final int packageUid = mPackageManagerInternal.getPackageUid(packageName,
-                        PackageManager.MATCH_ANY_USER | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                        | PackageManager.MATCH_DIRECT_BOOT_AWARE, userId);
-                // Caller cannot set their own standby state
-                if (packageUid == callingUid) {
-                    throw new IllegalArgumentException("Cannot set your own standby bucket");
-                }
-                if (packageUid < 0) {
-                    throw new IllegalArgumentException(
-                            "Cannot set standby bucket for non existent package (" + packageName
-                                    + ")");
-                }
-                mAppStandby.setAppStandbyBucket(packageName, userId, bucket, reason,
-                        SystemClock.elapsedRealtime(), shellCaller);
+                mAppStandby.setAppStandbyBucket(packageName, bucket, userId,
+                        callingUid, callingPid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1643,37 +1615,11 @@ public class UsageStatsService extends SystemService implements
                     "No permission to change app standby state");
 
             final int callingUid = Binder.getCallingUid();
-            try {
-                userId = ActivityManager.getService().handleIncomingUser(
-                        Binder.getCallingPid(), callingUid, userId, false, true,
-                        "setAppStandbyBucket", null);
-            } catch (RemoteException re) {
-                throw re.rethrowFromSystemServer();
-            }
-            final boolean shellCaller = callingUid == 0 || callingUid == Process.SHELL_UID;
-            final int reason = shellCaller
-                    ? UsageStatsManager.REASON_MAIN_FORCED
-                    : UsageStatsManager.REASON_MAIN_PREDICTED;
+            final int callingPid = Binder.getCallingPid();
             final long token = Binder.clearCallingIdentity();
             try {
-                final long elapsedRealtime = SystemClock.elapsedRealtime();
-                List<AppStandbyInfo> bucketList = appBuckets.getList();
-                for (AppStandbyInfo bucketInfo : bucketList) {
-                    final String packageName = bucketInfo.mPackageName;
-                    final int bucket = bucketInfo.mStandbyBucket;
-                    if (bucket < UsageStatsManager.STANDBY_BUCKET_ACTIVE
-                            || bucket > UsageStatsManager.STANDBY_BUCKET_NEVER) {
-                        throw new IllegalArgumentException(
-                                "Cannot set the standby bucket to " + bucket);
-                    }
-                    // Caller cannot set their own standby state
-                    if (mPackageManagerInternal.getPackageUid(packageName,
-                            PackageManager.MATCH_ANY_USER, userId) == callingUid) {
-                        throw new IllegalArgumentException("Cannot set your own standby bucket");
-                    }
-                    mAppStandby.setAppStandbyBucket(packageName, userId, bucket, reason,
-                            elapsedRealtime, shellCaller);
-                }
+                mAppStandby.setAppStandbyBuckets(appBuckets.getList(), userId,
+                        callingUid, callingPid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

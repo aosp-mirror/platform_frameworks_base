@@ -1366,6 +1366,36 @@ public class WifiManager {
     }
 
     /**
+     * Retrieve a list of {@link WifiConfiguration} for available {@link WifiNetworkSuggestion}
+     * matching the given list of {@link ScanResult}.
+     *
+     * An available {@link WifiNetworkSuggestion} must satisfy:
+     * <ul>
+     * <li> Matching one of the {@link ScanResult} from the given list.
+     * <li> and {@link WifiNetworkSuggestion.Builder#setIsUserAllowedToManuallyConnect(boolean)} set
+     * to true.
+     * </ul>
+     *
+     * @param scanResults a list of scanResult.
+     * @return a list of @link WifiConfiguration} for available {@link WifiNetworkSuggestion}
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD
+    })
+    @NonNull
+    public List<WifiConfiguration> getWifiConfigForMatchedNetworkSuggestionsSharedWithUser(
+            @NonNull List<ScanResult> scanResults) {
+        try {
+            return mService.getWifiConfigForMatchedNetworkSuggestionsSharedWithUser(scanResults);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
      * Returns a list of unique Hotspot 2.0 OSU (Online Sign-Up) providers associated with a given
      * list of ScanResult.
      *

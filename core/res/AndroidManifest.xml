@@ -370,6 +370,7 @@
     <protected-broadcast android:name="android.net.wifi.STATE_CHANGE" />
     <protected-broadcast android:name="android.net.wifi.LINK_CONFIGURATION_CHANGED" />
     <protected-broadcast android:name="android.net.wifi.CONFIGURED_NETWORKS_CHANGE" />
+    <protected-broadcast android:name="android.net.wifi.action.NETWORK_SETTINGS_RESET" />
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_DEAUTH_IMMINENT" />
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_ICON" />
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_OSU_PROVIDERS_LIST" />
@@ -933,11 +934,10 @@
 
     <!-- Allows an application a broad access to external storage in scoped storage.
          Intended to be used by few apps that need to manage files on behalf of the users.
-         <p>Protection level: signature|appop
-         <p>This protection level is temporary and will most likely be changed to |preinstalled -->
+         <p>Protection level: signature|appop|preinstalled -->
     <permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         android:permissionGroup="android.permission-group.UNDEFINED"
-        android:protectionLevel="signature|appop" />
+        android:protectionLevel="signature|appop|preinstalled" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device location                          -->
@@ -1655,6 +1655,7 @@
     <!-- Allows holder to request bluetooth/wifi scan bypassing global "use location" setting and
          location permissions.
          <p>Not for use by third-party or privileged applications.
+         @SystemApi
          @hide
     -->
     <permission android:name="android.permission.RADIO_SCAN_WITHOUT_LOCATION"
@@ -2070,8 +2071,10 @@
         android:protectionLevel="signature|privileged" />
 
     <!-- Allows read only access to precise phone state.
-         @hide Pending API council approval -->
+         Allows reading of detailed information about phone state for special-use applications
+         such as dialers, carrier applications, or ims applications. -->
     <permission android:name="android.permission.READ_PRECISE_PHONE_STATE"
+        android:permissionGroup="android.permission-group.UNDEFINED"
         android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows read access to privileged phone state.

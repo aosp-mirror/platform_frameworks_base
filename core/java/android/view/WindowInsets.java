@@ -29,6 +29,8 @@ import static android.view.WindowInsets.Type.TAPPABLE_ELEMENT;
 import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.indexOf;
 import static android.view.WindowInsets.Type.systemBars;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -40,6 +42,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.SparseArray;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethod;
 
@@ -1288,6 +1291,17 @@ public final class WindowInsets {
          */
         public static @InsetsType int all() {
             return 0xFFFFFFFF;
+        }
+
+        /**
+         * Checks whether the specified type is considered to be part of visible insets.
+         * @hide
+         */
+        public static boolean isVisibleInsetsType(int type,
+                @SoftInputModeFlags int softInputModeFlags) {
+            int softInputMode = softInputModeFlags & SOFT_INPUT_MASK_ADJUST;
+            return (type & Type.systemBars()) != 0
+                    || (softInputMode != SOFT_INPUT_ADJUST_NOTHING && (type & Type.ime()) != 0);
         }
     }
 

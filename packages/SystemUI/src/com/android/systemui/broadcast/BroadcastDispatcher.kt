@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.IntentFilter
 import android.os.Handler
+import android.os.HandlerExecutor
 import android.os.Looper
 import android.os.Message
 import android.os.UserHandle
@@ -32,13 +33,14 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import java.io.FileDescriptor
 import java.io.PrintWriter
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
 
 data class ReceiverData(
     val receiver: BroadcastReceiver,
     val filter: IntentFilter,
-    val handler: Handler,
+    val executor: Executor,
     val user: UserHandle
 )
 
@@ -76,8 +78,33 @@ open class BroadcastDispatcher @Inject constructor (
      * @param filter A filter to determine what broadcasts should be dispatched to this receiver.
      *               It will only take into account actions and categories for filtering. It must
      *               have at least one action.
-     * @param handler A handler to dispatch [BroadcastReceiver.onReceive]. By default, it is the
-     *                main handler. Pass `null` to use the default.
+     * @param handler A handler to dispatch [BroadcastReceiver.onReceive].
+     * @param user A user handle to determine which broadcast should be dispatched to this receiver.
+     *             By default, it is the current user.
+     * @throws IllegalArgumentException if the filter has other constraints that are not actions or
+     *                                  categories or the filter has no actions.
+     */
+    @Deprecated(message = "Replacing Handler for Executor in SystemUI",
+            replaceWith = ReplaceWith("registerReceiver(receiver, filter, executor, user)"))
+    @JvmOverloads
+    fun registerReceiverWithHandler(
+        receiver: BroadcastReceiver,
+        filter: IntentFilter,
+        handler: Handler,
+        user: UserHandle = context.user
+    ) {
+        registerReceiver(receiver, filter, HandlerExecutor(handler), user)
+    }
+
+    /**
+     * Register a receiver for broadcast with the dispatcher
+     *
+     * @param receiver A receiver to dispatch the [Intent]
+     * @param filter A filter to determine what broadcasts should be dispatched to this receiver.
+     *               It will only take into account actions and categories for filtering. It must
+     *               have at least one action.
+     * @param executor An executor to dispatch [BroadcastReceiver.onReceive]. Pass null to use an
+     *                 executor in the main thread (default).
      * @param user A user handle to determine which broadcast should be dispatched to this receiver.
      *             By default, it is the current user.
      * @throws IllegalArgumentException if the filter has other constraints that are not actions or
@@ -85,15 +112,15 @@ open class BroadcastDispatcher @Inject constructor (
      */
     @JvmOverloads
     fun registerReceiver(
-        receiver: BroadcastReceiver,
-        filter: IntentFilter,
-        handler: Handler? = mainHandler,
-        user: UserHandle = context.user
+            receiver: BroadcastReceiver,
+            filter: IntentFilter,
+            executor: Executor? = context.mainExecutor,
+            user: UserHandle = context.user
     ) {
         checkFilter(filter)
         this.handler
                 .obtainMessage(MSG_ADD_RECEIVER,
-                ReceiverData(receiver, filter, handler ?: mainHandler, user))
+                        ReceiverData(receiver, filter, executor ?: context.mainExecutor, user))
                 .sendToTarget()
     }
 

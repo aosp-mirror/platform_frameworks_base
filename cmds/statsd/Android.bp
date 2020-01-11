@@ -78,7 +78,6 @@ cc_defaults {
         "src/external/StatsPuller.cpp",
         "src/external/StatsPullerManager.cpp",
         "src/external/SubsystemSleepStatePuller.cpp",
-        "src/external/SurfaceflingerStatsPuller.cpp",
         "src/external/TrainInfoPuller.cpp",
         "src/FieldValue.cpp",
         "src/guardrail/StatsdStats.cpp",
@@ -148,7 +147,6 @@ cc_defaults {
         "libincident",
         "libservices",
         "libstatsmetadata",
-        "libtimestats_proto",
         "libutils",
     ],
 }
@@ -297,7 +295,6 @@ cc_test {
         "tests/external/puller_util_test.cpp",
         "tests/external/StatsCallbackPuller_test.cpp",
         "tests/external/StatsPuller_test.cpp",
-        "tests/external/SurfaceflingerStatsPuller_test.cpp",
         "tests/FieldValue_test.cpp",
         "tests/guardrail/StatsdStats_test.cpp",
         "tests/indexed_priority_queue_test.cpp",

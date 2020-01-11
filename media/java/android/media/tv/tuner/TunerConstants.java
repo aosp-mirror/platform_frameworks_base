@@ -38,35 +38,6 @@ public final class TunerConstants {
 
 
     /** @hide */
-    @IntDef({FRONTEND_TYPE_UNDEFINED, FRONTEND_TYPE_ANALOG, FRONTEND_TYPE_ATSC, FRONTEND_TYPE_ATSC3,
-            FRONTEND_TYPE_DVBC, FRONTEND_TYPE_DVBS, FRONTEND_TYPE_DVBT, FRONTEND_TYPE_ISDBS,
-            FRONTEND_TYPE_ISDBS3, FRONTEND_TYPE_ISDBT})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendType {}
-
-    /** @hide */
-    public static final int FRONTEND_TYPE_UNDEFINED = Constants.FrontendType.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_TYPE_ANALOG = Constants.FrontendType.ANALOG;
-    /** @hide */
-    public static final int FRONTEND_TYPE_ATSC = Constants.FrontendType.ATSC;
-    /** @hide */
-    public static final int FRONTEND_TYPE_ATSC3 = Constants.FrontendType.ATSC3;
-    /** @hide */
-    public static final int FRONTEND_TYPE_DVBC = Constants.FrontendType.DVBC;
-    /** @hide */
-    public static final int FRONTEND_TYPE_DVBS = Constants.FrontendType.DVBS;
-    /** @hide */
-    public static final int FRONTEND_TYPE_DVBT = Constants.FrontendType.DVBT;
-    /** @hide */
-    public static final int FRONTEND_TYPE_ISDBS = Constants.FrontendType.ISDBS;
-    /** @hide */
-    public static final int FRONTEND_TYPE_ISDBS3 = Constants.FrontendType.ISDBS3;
-    /** @hide */
-    public static final int FRONTEND_TYPE_ISDBT = Constants.FrontendType.ISDBT;
-
-
-    /** @hide */
     @IntDef({FRONTEND_EVENT_TYPE_LOCKED, FRONTEND_EVENT_TYPE_NO_SIGNAL,
             FRONTEND_EVENT_TYPE_LOST_LOCK})
     @Retention(RetentionPolicy.SOURCE)
@@ -80,20 +51,6 @@ public final class TunerConstants {
 
 
     /** @hide */
-    @IntDef({DATA_FORMAT_TS, DATA_FORMAT_PES, DATA_FORMAT_ES, DATA_FORMAT_SHV_TLV})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface DataFormat {}
-    /** @hide */
-    public static final int DATA_FORMAT_TS = Constants.DataFormat.TS;
-    /** @hide */
-    public static final int DATA_FORMAT_PES = Constants.DataFormat.PES;
-    /** @hide */
-    public static final int DATA_FORMAT_ES = Constants.DataFormat.ES;
-    /** @hide */
-    public static final int DATA_FORMAT_SHV_TLV = Constants.DataFormat.SHV_TLV;
-
-
-    /** @hide */
     @IntDef({DEMUX_T_PID, DEMUX_MMPT_PID})
     @Retention(RetentionPolicy.SOURCE)
     public @interface DemuxPidType {}
@@ -102,45 +59,6 @@ public final class TunerConstants {
     /** @hide */
     public static final int DEMUX_MMPT_PID = 2;
 
-    /** @hide */
-    @IntDef({FRONTEND_SETTINGS_ANALOG, FRONTEND_SETTINGS_ATSC, FRONTEND_SETTINGS_ATSC3,
-            FRONTEND_SETTINGS_DVBS, FRONTEND_SETTINGS_DVBC, FRONTEND_SETTINGS_DVBT,
-            FRONTEND_SETTINGS_ISDBS, FRONTEND_SETTINGS_ISDBS3, FRONTEND_SETTINGS_ISDBT})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendSettingsType {}
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_ANALOG = 1;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_ATSC = 2;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_ATSC3 = 3;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_DVBS = 4;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_DVBC = 5;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_DVBT = 6;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_ISDBS = 7;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_ISDBS3 = 8;
-    /** @hide */
-    public static final int FRONTEND_SETTINGS_ISDBT = 9;
-
-    /** @hide */
-    @IntDef({FILTER_TYPE_TS, FILTER_TYPE_MMTP, FILTER_TYPE_IP, FILTER_TYPE_TLV, FILTER_TYPE_ALP})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FilterType {}
-    /** @hide */
-    public static final int FILTER_TYPE_TS = Constants.DemuxFilterMainType.TS;
-    /** @hide */
-    public static final int FILTER_TYPE_MMTP = Constants.DemuxFilterMainType.MMTP;
-    /** @hide */
-    public static final int FILTER_TYPE_IP = Constants.DemuxFilterMainType.IP;
-    /** @hide */
-    public static final int FILTER_TYPE_TLV = Constants.DemuxFilterMainType.TLV;
-    /** @hide */
-    public static final int FILTER_TYPE_ALP = Constants.DemuxFilterMainType.ALP;
 
     /** @hide */
     @IntDef({FILTER_SUBTYPE_UNDEFINED, FILTER_SUBTYPE_SECTION, FILTER_SUBTYPE_PES,
@@ -186,8 +104,8 @@ public final class TunerConstants {
     public static final int FILTER_SUBTYPE_PTP = 16;
 
     /** @hide */
-    @IntDef({FILTER_STATUS_DATA_READY, FILTER_STATUS_LOW_WATER, FILTER_STATUS_HIGH_WATER,
-            FILTER_STATUS_OVERFLOW})
+    @IntDef(flag = true, prefix = "FILTER_STATUS_", value = {FILTER_STATUS_DATA_READY,
+            FILTER_STATUS_LOW_WATER, FILTER_STATUS_HIGH_WATER, FILTER_STATUS_OVERFLOW})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FilterStatus {}
 
@@ -742,73 +660,6 @@ public final class TunerConstants {
             Constants.FrontendDvbtHierarchy.HIERARCHY_4_INDEPTH;
 
     /** @hide */
-    @IntDef({FRONTEND_ANALOG_TYPE_UNDEFINED, FRONTEND_ANALOG_TYPE_PAL, FRONTEND_ANALOG_TYPE_SECAM,
-            FRONTEND_ANALOG_TYPE_NTSC})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendAnalogType {}
-    /** @hide */
-    public static final int FRONTEND_ANALOG_TYPE_UNDEFINED = Constants.FrontendAnalogType.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_TYPE_PAL = Constants.FrontendAnalogType.PAL;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_TYPE_SECAM = Constants.FrontendAnalogType.SECAM;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_TYPE_NTSC = Constants.FrontendAnalogType.NTSC;
-
-    /** @hide */
-    @IntDef({FRONTEND_ANALOG_SIF_UNDEFINED, FRONTEND_ANALOG_SIF_BG, FRONTEND_ANALOG_SIF_BG_A2,
-            FRONTEND_ANALOG_SIF_BG_NICAM, FRONTEND_ANALOG_SIF_I, FRONTEND_ANALOG_SIF_DK,
-            FRONTEND_ANALOG_SIF_DK1, FRONTEND_ANALOG_SIF_DK2, FRONTEND_ANALOG_SIF_DK3,
-            FRONTEND_ANALOG_SIF_DK_NICAM, FRONTEND_ANALOG_SIF_L, FRONTEND_ANALOG_SIF_M,
-            FRONTEND_ANALOG_SIF_M_BTSC, FRONTEND_ANALOG_SIF_M_A2, FRONTEND_ANALOG_SIF_M_EIA_J,
-            FRONTEND_ANALOG_SIF_I_NICAM, FRONTEND_ANALOG_SIF_L_NICAM, FRONTEND_ANALOG_SIF_L_PRIME})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendAnalogSifStandard {}
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_UNDEFINED =
-            Constants.FrontendAnalogSifStandard.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_BG = Constants.FrontendAnalogSifStandard.BG;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_BG_A2 = Constants.FrontendAnalogSifStandard.BG_A2;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_BG_NICAM =
-            Constants.FrontendAnalogSifStandard.BG_NICAM;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_I = Constants.FrontendAnalogSifStandard.I;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_DK = Constants.FrontendAnalogSifStandard.DK;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_DK1 = Constants.FrontendAnalogSifStandard.DK1;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_DK2 = Constants.FrontendAnalogSifStandard.DK2;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_DK3 = Constants.FrontendAnalogSifStandard.DK3;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_DK_NICAM =
-            Constants.FrontendAnalogSifStandard.DK_NICAM;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_L = Constants.FrontendAnalogSifStandard.L;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_M = Constants.FrontendAnalogSifStandard.M;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_M_BTSC = Constants.FrontendAnalogSifStandard.M_BTSC;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_M_A2 = Constants.FrontendAnalogSifStandard.M_A2;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_M_EIA_J =
-            Constants.FrontendAnalogSifStandard.M_EIA_J;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_I_NICAM =
-            Constants.FrontendAnalogSifStandard.I_NICAM;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_L_NICAM =
-            Constants.FrontendAnalogSifStandard.L_NICAM;
-    /** @hide */
-    public static final int FRONTEND_ANALOG_SIF_L_PRIME =
-            Constants.FrontendAnalogSifStandard.L_PRIME;
-
-    /** @hide */
     @IntDef({FRONTEND_ATSC_MODULATION_UNDEFINED, FRONTEND_ATSC_MODULATION_AUTO,
             FRONTEND_ATSC_MODULATION_MOD_8VSB, FRONTEND_ATSC_MODULATION_MOD_16VSB})
     @Retention(RetentionPolicy.SOURCE)
@@ -1267,79 +1118,47 @@ public final class TunerConstants {
     /** @hide */
     public static final int FILTER_SETTINGS_ALP = Constants.DemuxFilterMainType.ALP;
 
-    /** @hide */
-    @IntDef({DVR_SETTINGS_RECORD, DVR_SETTINGS_PLAYBACK})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface DvrSettingsType {}
-    /** @hide */
-    public static final int DVR_SETTINGS_RECORD = Constants.DvrType.RECORD;
-    /** @hide */
-    public static final int DVR_SETTINGS_PLAYBACK = Constants.DvrType.PLAYBACK;
-
-
-    /** @hide */
-    @IntDef({LNB_VOLTAGE_NONE, LNB_VOLTAGE_5V, LNB_VOLTAGE_11V, LNB_VOLTAGE_12V, LNB_VOLTAGE_13V,
-            LNB_VOLTAGE_14V, LNB_VOLTAGE_15V, LNB_VOLTAGE_18V, LNB_VOLTAGE_19V})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface LnbVoltage {}
-    /** @hide */
-    public static final int LNB_VOLTAGE_NONE = Constants.LnbVoltage.NONE;
-    /** @hide */
-    public static final int LNB_VOLTAGE_5V = Constants.LnbVoltage.VOLTAGE_5V;
-    /** @hide */
-    public static final int LNB_VOLTAGE_11V = Constants.LnbVoltage.VOLTAGE_11V;
-    /** @hide */
-    public static final int LNB_VOLTAGE_12V = Constants.LnbVoltage.VOLTAGE_12V;
-    /** @hide */
-    public static final int LNB_VOLTAGE_13V = Constants.LnbVoltage.VOLTAGE_13V;
-    /** @hide */
-    public static final int LNB_VOLTAGE_14V = Constants.LnbVoltage.VOLTAGE_14V;
-    /** @hide */
-    public static final int LNB_VOLTAGE_15V = Constants.LnbVoltage.VOLTAGE_15V;
-    /** @hide */
-    public static final int LNB_VOLTAGE_18V = Constants.LnbVoltage.VOLTAGE_18V;
-    /** @hide */
-    public static final int LNB_VOLTAGE_19V = Constants.LnbVoltage.VOLTAGE_19V;
-
-    /** @hide */
-    @IntDef({LNB_TONE_NONE, LNB_TONE_CONTINUOUS})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface LnbTone {}
-    /** @hide */
-    public static final int LNB_TONE_NONE = Constants.LnbTone.NONE;
-    /** @hide */
-    public static final int LNB_TONE_CONTINUOUS = Constants.LnbTone.CONTINUOUS;
-
-    /** @hide */
-    @IntDef({LNB_POSITION_UNDEFINED, LNB_POSITION_A, LNB_POSITION_B})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface LnbPosition {}
-    /** @hide */
-    public static final int LNB_POSITION_UNDEFINED = Constants.LnbPosition.UNDEFINED;
-    /** @hide */
-    public static final int LNB_POSITION_A = Constants.LnbPosition.POSITION_A;
-    /** @hide */
-    public static final int LNB_POSITION_B = Constants.LnbPosition.POSITION_B;
-
 
     /** @hide */
     @IntDef({RESULT_SUCCESS, RESULT_UNAVAILABLE, RESULT_NOT_INITIALIZED, RESULT_INVALID_STATE,
             RESULT_INVALID_ARGUMENT, RESULT_OUT_OF_MEMORY, RESULT_UNKNOWN_ERROR})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Result {}
-    /** @hide */
+
+    /**
+     * Operation succeeded.
+     * @hide
+     */
     public static final int RESULT_SUCCESS = Constants.Result.SUCCESS;
-    /** @hide */
+    /**
+     * Operation failed because the corresponding resources are not available.
+     * @hide
+     */
     public static final int RESULT_UNAVAILABLE = Constants.Result.UNAVAILABLE;
-    /** @hide */
+    /**
+     * Operation failed because the corresponding resources are not initialized.
+     * @hide
+     */
     public static final int RESULT_NOT_INITIALIZED = Constants.Result.NOT_INITIALIZED;
-    /** @hide */
+    /**
+     * Operation failed because it's not in a valid state.
+     * @hide
+     */
     public static final int RESULT_INVALID_STATE = Constants.Result.INVALID_STATE;
-    /** @hide */
+    /**
+     * Operation failed because there are invalid arguments.
+     * @hide
+     */
     public static final int RESULT_INVALID_ARGUMENT = Constants.Result.INVALID_ARGUMENT;
-    /** @hide */
+    /**
+     * Memory allocation failed.
+     * @hide
+     */
     public static final int RESULT_OUT_OF_MEMORY = Constants.Result.OUT_OF_MEMORY;
-    /** @hide */
+    /**
+     * Operation failed due to unknown errors.
+     * @hide
+     */
     public static final int RESULT_UNKNOWN_ERROR = Constants.Result.UNKNOWN_ERROR;
 
     private TunerConstants() {

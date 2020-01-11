@@ -20,10 +20,12 @@
 #include "Layer.h"
 #include "Properties.h"
 #include "RenderThread.h"
+#include "pipeline/skia/ATraceMemoryDump.h"
 #include "pipeline/skia/ShaderCache.h"
 #include "pipeline/skia/SkiaMemoryTracer.h"
 #include "renderstate/RenderState.h"
 #include "thread/CommonPool.h"
+#include <utils/Trace.h>
 
 #include <GrContextOptions.h>
 #include <SkExecutor.h>
@@ -182,6 +184,18 @@ void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState)
 
     log.appendFormat("Total GPU memory usage:\n");
     gpuTracer.logTotals(log);
+}
+
+void CacheManager::onFrameCompleted() {
+    if (ATRACE_ENABLED()) {
+        static skiapipeline::ATraceMemoryDump tracer;
+        tracer.startFrame();
+        SkGraphics::DumpMemoryStatistics(&tracer);
+        if (mGrContext) {
+            mGrContext->dumpMemoryStatistics(&tracer);
+        }
+        tracer.logTraces();
+    }
 }
 
 } /* namespace renderthread */

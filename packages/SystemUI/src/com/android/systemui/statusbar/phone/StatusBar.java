@@ -29,7 +29,6 @@ import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 
-import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
@@ -205,7 +204,6 @@ import com.android.systemui.statusbar.notification.collection.init.NewNotifPipel
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
-import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -366,7 +364,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final BypassHeadsUpNotifier mBypassHeadsUpNotifier;
-    private final boolean mAllowNotificationLongPress;
     private final Lazy<NewNotifPipeline> mNewNotifPipeline;
     private final FalsingManager mFalsingManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -389,6 +386,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final KeyguardDismissUtil mKeyguardDismissUtil;
     private final ExtensionController mExtensionController;
     private final UserInfoControllerImpl mUserInfoControllerImpl;
+    private final NotificationRowBinderImpl mNotificationRowBinder;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
 
     // expanded notifications
@@ -414,7 +412,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final NotificationGutsManager mGutsManager;
     private final NotificationLogger mNotificationLogger;
     private final NotificationEntryManager mEntryManager;
-    private final NotificationRowContentBinder mRowContentBinder;
     private NotificationListController mNotificationListController;
     private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
     private final NotificationViewHierarchyManager mViewHierarchyManager;
@@ -628,7 +625,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             HeadsUpManagerPhone headsUpManagerPhone,
             DynamicPrivacyController dynamicPrivacyController,
             BypassHeadsUpNotifier bypassHeadsUpNotifier,
-            @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowNotificationLongPress,
             Lazy<NewNotifPipeline> newNotifPipeline,
             FalsingManager falsingManager,
             BroadcastDispatcher broadcastDispatcher,
@@ -636,7 +632,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             NotificationGutsManager notificationGutsManager,
             NotificationLogger notificationLogger,
             NotificationEntryManager notificationEntryManager,
-            NotificationRowContentBinder notificationRowContentBinder,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             NotificationViewHierarchyManager notificationViewHierarchyManager,
             KeyguardViewMediator keyguardViewMediator,
@@ -696,6 +691,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             KeyguardDismissUtil keyguardDismissUtil,
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
+            NotificationRowBinderImpl notificationRowBinder,
             DismissCallbackRegistry dismissCallbackRegistry) {
         super(context);
         mFeatureFlags = featureFlags;
@@ -710,7 +706,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mHeadsUpManager = headsUpManagerPhone;
         mDynamicPrivacyController = dynamicPrivacyController;
         mBypassHeadsUpNotifier = bypassHeadsUpNotifier;
-        mAllowNotificationLongPress = allowNotificationLongPress;
         mNewNotifPipeline = newNotifPipeline;
         mFalsingManager = falsingManager;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -718,7 +713,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGutsManager = notificationGutsManager;
         mNotificationLogger = notificationLogger;
         mEntryManager = notificationEntryManager;
-        mRowContentBinder = notificationRowContentBinder;
         mNotificationInterruptionStateProvider = notificationInterruptionStateProvider;
         mViewHierarchyManager = notificationViewHierarchyManager;
         mKeyguardViewMediator = keyguardViewMediator;
@@ -776,6 +770,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardDismissUtil = keyguardDismissUtil;
         mExtensionController = extensionController;
         mUserInfoControllerImpl = userInfoControllerImpl;
+        mNotificationRowBinder = notificationRowBinder;
         mDismissCallbackRegistry = dismissCallbackRegistry;
 
         mBubbleExpandListener =
@@ -1241,20 +1236,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarWindowViewController, this, mNotificationPanelViewController,
                 (NotificationListContainer) mStackScroller);
 
-        final NotificationRowBinderImpl rowBinder =
-                new NotificationRowBinderImpl(
-                        mContext,
-                        mRowContentBinder,
-                        mAllowNotificationLongPress,
-                        mKeyguardBypassController,
-                        mStatusBarStateController,
-                        mNotificationLogger);
-
         // TODO: inject this.
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanelViewController,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
                 mScrimController, mActivityLaunchAnimator, mDynamicPrivacyController,
-                mNotificationAlertingManager, rowBinder, mKeyguardStateController,
+                mNotificationAlertingManager, mNotificationRowBinder, mKeyguardStateController,
                 mKeyguardIndicationController,
                 this /* statusBar */, mShadeController, mCommandQueue, mInitController);
 
@@ -1278,20 +1264,19 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
 
         if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
-            mEntryManager.setRowBinder(rowBinder);
-            rowBinder.setInflationCallback(mEntryManager);
+            mNotificationRowBinder.setInflationCallback(mEntryManager);
         }
 
         mRemoteInputUriController.attach(mEntryManager);
 
-        rowBinder.setNotificationClicker(new NotificationClicker(
+        mNotificationRowBinder.setNotificationClicker(new NotificationClicker(
                 Optional.of(this), mBubbleController, mNotificationActivityStarter));
 
         mGroupAlertTransferHelper.bind(mEntryManager, mGroupManager);
         mNotificationListController.bind();
 
         if (mFeatureFlags.isNewNotifPipelineEnabled()) {
-            mNewNotifPipeline.get().initialize(mNotificationListener, rowBinder);
+            mNewNotifPipeline.get().initialize(mNotificationListener, mNotificationRowBinder);
         }
         mEntryManager.attach(mNotificationListener);
     }

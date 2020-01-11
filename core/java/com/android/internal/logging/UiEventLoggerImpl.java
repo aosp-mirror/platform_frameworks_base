@@ -24,14 +24,16 @@ import android.util.StatsLog;
  * See UiEventReported atom in atoms.proto for more context.
  */
 public class UiEventLoggerImpl implements UiEventLogger {
-    /**
-     * Log a simple event, with no package or instance ID.
-     */
     @Override
     public void log(UiEventEnum event) {
+        log(event, 0, null);
+    }
+
+    @Override
+    public void log(UiEventEnum event, int uid, String packageName) {
         final int eventID = event.getId();
         if (eventID > 0) {
-            StatsLog.write(StatsLog.UI_EVENT_REPORTED, eventID, 0, null);
+            StatsLog.write(StatsLog.UI_EVENT_REPORTED, eventID, uid, packageName);
         }
     }
 }

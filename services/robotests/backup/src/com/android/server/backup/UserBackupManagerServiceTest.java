@@ -81,7 +81,10 @@ import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 
 /**
@@ -1238,12 +1241,48 @@ public class UserBackupManagerServiceTest {
         assertThat(service.getAncestralSerialNumber()).isEqualTo(testSerialNumber2);
     }
 
+    /**
+     * Test that {@link UserBackupManagerService#dump()} for system user does not prefix dump with
+     * "User 0:".
+     */
+    @Test
+    public void testDump_forSystemUser_DoesNotHaveUserPrefix() throws Exception {
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        UserBackupManagerService service =
+                BackupManagerServiceTestUtils.createUserBackupManagerServiceAndRunTasks(
+                        UserHandle.USER_SYSTEM,
+                        mContext,
+                        mBackupThread,
+                        mBaseStateDir,
+                        mDataDir,
+                        mTransportManager);
+
+        StringWriter dump = new StringWriter();
+        service.dump(new FileDescriptor(), new PrintWriter(dump), new String[0]);
+
+        assertThat(dump.toString()).startsWith("Backup Manager is ");
+    }
+
+    /**
+     * Test that {@link UserBackupManagerService#dump()} for non-system user prefixes dump with
+     * "User <userid>:".
+     */
+    @Test
+    public void testDump_forNonSystemUser_HasUserPrefix() throws Exception {
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        UserBackupManagerService service = createUserBackupManagerServiceAndRunTasks();
+
+        StringWriter dump = new StringWriter();
+        service.dump(new FileDescriptor(), new PrintWriter(dump), new String[0]);
+
+        assertThat(dump.toString()).startsWith("User " + USER_ID + ":" + "Backup Manager is ");
+    }
+
     private File createTestFile() throws IOException {
         File testFile = new File(mContext.getFilesDir(), "test");
         testFile.createNewFile();
         return testFile;
     }
-
 
     /**
      * We can't mock the void method {@link #schedule(Context, long, BackupManagerConstants)} so we

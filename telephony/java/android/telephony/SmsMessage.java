@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import com.android.telephony.Rlog;
+
 import static android.telephony.TelephonyManager.PHONE_TYPE_CDMA;
 
 import android.annotation.Nullable;

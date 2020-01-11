@@ -26,7 +26,6 @@ import android.content.Context;
 import android.os.IBinder;
 import android.os.IPullAtomCallback;
 import android.os.IPullAtomResultReceiver;
-import android.os.IStatsCompanionService;
 import android.os.IStatsManagerService;
 import android.os.IStatsPullerCallback;
 import android.os.IStatsd;
@@ -59,9 +58,6 @@ public final class StatsManager {
 
     @GuardedBy("sLock")
     private IStatsd mService;
-
-    @GuardedBy("sLock")
-    private IStatsCompanionService mStatsCompanion;
 
     @GuardedBy("sLock")
     private IStatsManagerService mStatsManagerService;
@@ -538,7 +534,7 @@ public final class StatsManager {
         }
         synchronized (sLock) {
             try {
-                IStatsCompanionService service = getIStatsCompanionServiceLocked();
+                IStatsManagerService service = getIStatsManagerServiceLocked();
                 PullAtomCallbackInternal rec =
                     new PullAtomCallbackInternal(atomTag, callback, executor);
                 service.registerPullAtomCallback(atomTag, coolDownNs, timeoutNs, additiveFields,
@@ -560,7 +556,7 @@ public final class StatsManager {
     public void unregisterPullAtomCallback(int atomTag) {
         synchronized (sLock) {
             try {
-                IStatsCompanionService service = getIStatsCompanionServiceLocked();
+                IStatsManagerService service = getIStatsManagerServiceLocked();
                 service.unregisterPullAtomCallback(atomTag);
             } catch (RemoteException e) {
                 throw new RuntimeException("Unable to unregister pull atom callback");
@@ -743,16 +739,6 @@ public final class StatsManager {
             throw new StatsUnavailableException("could not connect when linkToDeath", e);
         }
         return mService;
-    }
-
-    @GuardedBy("sLock")
-    private IStatsCompanionService getIStatsCompanionServiceLocked() {
-        if (mStatsCompanion != null) {
-            return mStatsCompanion;
-        }
-        mStatsCompanion = IStatsCompanionService.Stub.asInterface(
-                ServiceManager.getService("statscompanion"));
-        return mStatsCompanion;
     }
 
     @GuardedBy("sLock")

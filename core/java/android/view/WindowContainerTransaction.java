@@ -62,6 +62,18 @@ public class WindowContainerTransaction implements Parcelable {
         return this;
     }
 
+    /**
+     * Notify activies within the hiearchy of a container that they have entered picture-in-picture
+     * mode with the given bounds.
+     */
+    public WindowContainerTransaction scheduleFinishEnterPip(IWindowContainer container,
+            Rect bounds) {
+        Change chg = getOrCreateChange(container.asBinder());
+        chg.mSchedulePipCallback = true;
+        chg.mPinnedBounds = new Rect(bounds);
+        return this;
+    }
+
     public Map<IBinder, Change> getChanges() {
         return mChanges;
     }
@@ -104,12 +116,20 @@ public class WindowContainerTransaction implements Parcelable {
         private @ActivityInfo.Config int mConfigSetMask = 0;
         private @WindowConfiguration.WindowConfig int mWindowSetMask = 0;
 
+        private boolean mSchedulePipCallback = false;
+        private Rect mPinnedBounds = null;
+
         public Change() {}
 
         protected Change(Parcel in) {
             mConfiguration.readFromParcel(in);
             mConfigSetMask = in.readInt();
             mWindowSetMask = in.readInt();
+            mSchedulePipCallback = (in.readInt() != 0);
+            if (mSchedulePipCallback ) {
+                mPinnedBounds = new Rect();
+                mPinnedBounds.readFromParcel(in);
+            }
         }
 
         public Configuration getConfiguration() {
@@ -124,6 +144,14 @@ public class WindowContainerTransaction implements Parcelable {
         @WindowConfiguration.WindowConfig
         public int getWindowSetMask() {
             return mWindowSetMask;
+        }
+
+        /**
+         * Returns the bounds to be used for scheduling the enter pip callback
+         * or null if no callback is to be scheduled.
+         */
+        public Rect getEnterPipBounds() {
+            return mPinnedBounds;
         }
 
         @Override
@@ -151,6 +179,11 @@ public class WindowContainerTransaction implements Parcelable {
             mConfiguration.writeToParcel(dest, flags);
             dest.writeInt(mConfigSetMask);
             dest.writeInt(mWindowSetMask);
+
+            dest.writeInt(mSchedulePipCallback ? 1 : 0);
+            if (mSchedulePipCallback ) {
+                mPinnedBounds.writeToParcel(dest, flags);
+            }
         }
 
         @Override

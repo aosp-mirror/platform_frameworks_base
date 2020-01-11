@@ -42,24 +42,29 @@ Acquire the dispatcher by using `@Inject` to obtain a `BroadcastDispatcher`. The
 
 ```kotlin
 /**
-    * Register a receiver for broadcast with the dispatcher
-    *
-    * @param receiver A receiver to dispatch the [Intent]
-    * @param filter A filter to determine what broadcasts should be dispatched to this receiver.
-    *               It will only take into account actions and categories for filtering. It must
-    *               have at least one action.
-    * @param handler A handler to dispatch [BroadcastReceiver.onReceive]. By default, it is the
-    *                main handler. Pass `null` to use the default.
-    * @param user A user handle to determine which broadcast should be dispatched to this receiver.
-    *             By default, it is the current user.
-    * @throws IllegalArgumentException if the filter has other constraints that are not actions or
-    *                                  categories or the filter has no actions.
-    */
+ * Register a receiver for broadcast with the dispatcher
+ *
+ * @param receiver A receiver to dispatch the [Intent]
+ * @param filter A filter to determine what broadcasts should be dispatched to this receiver.
+ *               It will only take into account actions and categories for filtering. It must
+ *               have at least one action.
+ * @param executor An executor to dispatch [BroadcastReceiver.onReceive]. Pass null to use an
+ *                 executor in the main thread (default).
+ * @param user A user handle to determine which broadcast should be dispatched to this receiver.
+ *             By default, it is the current user.
+ * @throws IllegalArgumentException if the filter has other constraints that are not actions or
+ *                                  categories or the filter has no actions.
+ */
 @JvmOverloads
-fun registerReceiver(BroadcastReceiver, IntentFilter, Handler? = mainHandler, UserHandle = context.user)
+fun registerReceiver(
+        BroadcastReceiver, 
+        IntentFilter, 
+        Executor? = context.mainExecutor,
+        UserHandle = context.user
+) {
 ```
 
-All subscriptions are done with the same overloaded method. As specified in the doc, in order to pass a `UserHandle` with the default `Handler`, pass `null` for the `Handler`.
+All subscriptions are done with the same overloaded method. As specified in the doc, in order to pass a `UserHandle` with the default `Executor`, pass `null` for the `Executor`.
 
 In the same way as with `Context`, subscribing the same `BroadcastReceiver` for the same user using different filters will result on two subscriptions, not in replacing the filter.
 

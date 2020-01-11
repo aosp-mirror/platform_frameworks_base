@@ -116,12 +116,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
         /**
          * Whether this network is shared credential with user to allow user manually connect.
          */
-        private boolean mIsUserAllowed;
+        private boolean mIsSharedWithUser;
 
         /**
-         * Whether the setIsUserAllowedToManuallyConnect have been called.
+         * Whether the setCredentialSharedWithUser have been called.
          */
-        private boolean mIsUserAllowedBeenSet;
+        private boolean mIsSharedWithUserSet;
         /**
          * Pre-shared key for use with WAPI-PSK networks.
          */
@@ -146,8 +146,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mIsAppInteractionRequired = false;
             mIsUserInteractionRequired = false;
             mIsMetered = false;
-            mIsUserAllowed = true;
-            mIsUserAllowedBeenSet = false;
+            mIsSharedWithUser = true;
+            mIsSharedWithUserSet = false;
             mPriority = UNASSIGNED_PRIORITY;
             mCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
             mWapiPskPassphrase = null;
@@ -430,13 +430,13 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * <li>If not set, defaults to true (i.e. allow user to manually connect) for secure
          * networks and false for open networks.</li>
          *
-         * @param isAllowed {@code true} to indicate that the credentials may be used by the user to
+         * @param isShared {@code true} to indicate that the credentials may be used by the user to
          *                              manually connect to the network, {@code false} otherwise.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public @NonNull Builder setIsUserAllowedToManuallyConnect(boolean isAllowed) {
-            mIsUserAllowed = isAllowed;
-            mIsUserAllowedBeenSet = true;
+        public @NonNull Builder setCredentialSharedWithUser(boolean isShared) {
+            mIsSharedWithUser = isShared;
+            mIsSharedWithUserSet = true;
             return this;
         }
 
@@ -602,11 +602,11 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 }
                 wifiConfiguration = buildWifiConfiguration();
                 if (wifiConfiguration.isOpenNetwork()) {
-                    if (mIsUserAllowedBeenSet && mIsUserAllowed) {
+                    if (mIsSharedWithUserSet && mIsSharedWithUser) {
                         throw new IllegalStateException("Open network should not be "
-                                + "setIsUserAllowedToManuallyConnect to true");
+                                + "setCredentialSharedWithUser to true");
                     }
-                    mIsUserAllowed = false;
+                    mIsSharedWithUser = false;
                 }
             }
 
@@ -615,7 +615,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                     mPasspointConfiguration,
                     mIsAppInteractionRequired,
                     mIsUserInteractionRequired,
-                    mIsUserAllowed);
+                    mIsSharedWithUser);
         }
     }
 

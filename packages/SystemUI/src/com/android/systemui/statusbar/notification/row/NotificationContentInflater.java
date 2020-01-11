@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
 
@@ -27,6 +26,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.CancellationSignal;
 import android.service.notification.StatusBarNotification;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -35,7 +35,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ImageMessageConsumer;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.InflationTask;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor;
@@ -50,30 +49,17 @@ import com.android.systemui.util.Assert;
 
 import java.util.HashMap;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * {@link NotificationContentInflater} binds content to a {@link ExpandableNotificationRow} by
  * asynchronously building the content's {@link RemoteViews} and applying it to the row.
  */
-@Singleton
-@VisibleForTesting(visibility = PACKAGE)
 public class NotificationContentInflater implements NotificationRowContentBinder {
 
     public static final String TAG = "NotifContentInflater";
 
+    private RemoteViews.OnClickHandler mRemoteViewClickHandler;
     private boolean mInflateSynchronously = false;
-    private final NotificationRemoteInputManager mRemoteInputManager;
-    private final NotifRemoteViewCache mRemoteViewCache;
-
-    @Inject
-    public NotificationContentInflater(
-            NotifRemoteViewCache remoteViewCache,
-            NotificationRemoteInputManager remoteInputManager) {
-        mRemoteViewCache = remoteViewCache;
-        mRemoteInputManager = remoteInputManager;
-    }
+    private final ArrayMap<Integer, RemoteViews> mCachedContentViews = new ArrayMap<>();
 
     @Override
     public void bindContent(
@@ -90,27 +76,27 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             return;
         }
 
-        StatusBarNotification sbn = entry.getSbn();
+        StatusBarNotification sbn = row.getEntry().getSbn();
 
         // To check if the notification has inline image and preload inline image if necessary.
         row.getImageResolver().preloadImages(sbn.getNotification());
 
         if (forceInflate) {
-            mRemoteViewCache.clearCache(entry);
+            mCachedContentViews.clear();
         }
 
         AsyncInflationTask task = new AsyncInflationTask(
+                sbn,
                 mInflateSynchronously,
                 contentToBind,
-                mRemoteViewCache,
-                entry,
+                mCachedContentViews,
                 row,
                 bindParams.isLowPriority,
                 bindParams.isChildInGroup,
                 bindParams.usesIncreasedHeight,
                 bindParams.usesIncreasedHeadsUpHeight,
                 callback,
-                mRemoteInputManager.getRemoteViewsOnClickHandler());
+                mRemoteViewClickHandler);
         if (mInflateSynchronously) {
             task.onPostExecute(task.doInBackground());
         } else {
@@ -137,15 +123,13 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         result = inflateSmartReplyViews(result, reInflateFlags, entry,
                 row.getContext(), packageContext, row.getHeadsUpManager(),
                 row.getExistingSmartRepliesAndActions());
-
         apply(
                 inflateSynchronously,
                 result,
                 reInflateFlags,
-                mRemoteViewCache,
-                entry,
+                mCachedContentViews,
                 row,
-                mRemoteInputManager.getRemoteViewsOnClickHandler(),
+                mRemoteViewClickHandler,
                 null);
         return result;
     }
@@ -165,11 +149,20 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         int curFlag = 1;
         while (contentToUnbind != 0) {
             if ((contentToUnbind & curFlag) != 0) {
-                freeNotificationView(entry, row, curFlag);
+                freeNotificationView(row, curFlag);
             }
             contentToUnbind &= ~curFlag;
             curFlag = curFlag << 1;
         }
+    }
+
+    /**
+     * Set click handler for notification remote views
+     *
+     * @param remoteViewClickHandler click handler for remote views
+     */
+    public void setRemoteViewClickHandler(RemoteViews.OnClickHandler remoteViewClickHandler) {
+        mRemoteViewClickHandler = remoteViewClickHandler;
     }
 
     /**
@@ -178,20 +171,20 @@ public class NotificationContentInflater implements NotificationRowContentBinder
      *
      * @param inflateFlag the flag corresponding to the content view which should be freed
      */
-    private void freeNotificationView(NotificationEntry entry, ExpandableNotificationRow row,
+    private void freeNotificationView(ExpandableNotificationRow row,
             @InflationFlag int inflateFlag) {
         switch (inflateFlag) {
             case FLAG_CONTENT_VIEW_HEADS_UP:
                 if (row.getPrivateLayout().isContentViewInactive(VISIBLE_TYPE_HEADSUP)) {
                     row.getPrivateLayout().setHeadsUpChild(null);
-                    mRemoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP);
+                    mCachedContentViews.remove(FLAG_CONTENT_VIEW_HEADS_UP);
                     row.getPrivateLayout().setHeadsUpInflatedSmartReplies(null);
                 }
                 break;
             case FLAG_CONTENT_VIEW_PUBLIC:
                 if (row.getPublicLayout().isContentViewInactive(VISIBLE_TYPE_CONTRACTED)) {
                     row.getPublicLayout().setContractedChild(null);
-                    mRemoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC);
+                    mCachedContentViews.remove(FLAG_CONTENT_VIEW_PUBLIC);
                 }
                 break;
             case FLAG_CONTENT_VIEW_CONTRACTED:
@@ -252,12 +245,11 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         return result;
     }
 
-    private static CancellationSignal apply(
+    public static CancellationSignal apply(
             boolean inflateSynchronously,
             InflationProgress result,
             @InflationFlag int reInflateFlags,
-            NotifRemoteViewCache remoteViewCache,
-            NotificationEntry entry,
+            ArrayMap<Integer, RemoteViews> cachedContentViews,
             ExpandableNotificationRow row,
             RemoteViews.OnClickHandler remoteViewClickHandler,
             @Nullable InflationCallback callback) {
@@ -269,7 +261,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         if ((reInflateFlags & flag) != 0) {
             boolean isNewView =
                     !canReapplyRemoteView(result.newContentView,
-                            remoteViewCache.getCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED));
+                            cachedContentViews.get(FLAG_CONTENT_VIEW_CONTRACTED));
             ApplyCallback applyCallback = new ApplyCallback() {
                 @Override
                 public void setResultView(View v) {
@@ -281,8 +273,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     return result.newContentView;
                 }
             };
-            applyRemoteView(inflateSynchronously, result, reInflateFlags, flag, remoteViewCache,
-                    entry, row, isNewView, remoteViewClickHandler, callback, privateLayout,
+            applyRemoteView(inflateSynchronously, result, reInflateFlags, flag, cachedContentViews,
+                    row, isNewView, remoteViewClickHandler, callback, privateLayout,
                     privateLayout.getContractedChild(), privateLayout.getVisibleWrapper(
                             NotificationContentView.VISIBLE_TYPE_CONTRACTED),
                     runningInflations, applyCallback);
@@ -293,7 +285,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             if (result.newExpandedView != null) {
                 boolean isNewView =
                         !canReapplyRemoteView(result.newExpandedView,
-                                remoteViewCache.getCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED));
+                                cachedContentViews.get(FLAG_CONTENT_VIEW_EXPANDED));
                 ApplyCallback applyCallback = new ApplyCallback() {
                     @Override
                     public void setResultView(View v) {
@@ -305,8 +297,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                         return result.newExpandedView;
                     }
                 };
-                applyRemoteView(inflateSynchronously, result, reInflateFlags, flag, remoteViewCache,
-                        entry, row, isNewView, remoteViewClickHandler,
+                applyRemoteView(inflateSynchronously, result, reInflateFlags, flag,
+                        cachedContentViews, row, isNewView, remoteViewClickHandler,
                         callback, privateLayout, privateLayout.getExpandedChild(),
                         privateLayout.getVisibleWrapper(
                                 NotificationContentView.VISIBLE_TYPE_EXPANDED), runningInflations,
@@ -319,7 +311,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             if (result.newHeadsUpView != null) {
                 boolean isNewView =
                         !canReapplyRemoteView(result.newHeadsUpView,
-                                remoteViewCache.getCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP));
+                                cachedContentViews.get(FLAG_CONTENT_VIEW_HEADS_UP));
                 ApplyCallback applyCallback = new ApplyCallback() {
                     @Override
                     public void setResultView(View v) {
@@ -331,8 +323,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                         return result.newHeadsUpView;
                     }
                 };
-                applyRemoteView(inflateSynchronously, result, reInflateFlags, flag, remoteViewCache,
-                        entry, row, isNewView, remoteViewClickHandler,
+                applyRemoteView(inflateSynchronously, result, reInflateFlags, flag,
+                        cachedContentViews, row, isNewView, remoteViewClickHandler,
                         callback, privateLayout, privateLayout.getHeadsUpChild(),
                         privateLayout.getVisibleWrapper(
                                 VISIBLE_TYPE_HEADSUP), runningInflations,
@@ -344,7 +336,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         if ((reInflateFlags & flag) != 0) {
             boolean isNewView =
                     !canReapplyRemoteView(result.newPublicView,
-                            remoteViewCache.getCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC));
+                            cachedContentViews.get(FLAG_CONTENT_VIEW_PUBLIC));
             ApplyCallback applyCallback = new ApplyCallback() {
                 @Override
                 public void setResultView(View v) {
@@ -356,16 +348,15 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     return result.newPublicView;
                 }
             };
-            applyRemoteView(inflateSynchronously, result, reInflateFlags, flag, remoteViewCache,
-                    entry, row, isNewView, remoteViewClickHandler, callback,
+            applyRemoteView(inflateSynchronously, result, reInflateFlags, flag, cachedContentViews,
+                    row, isNewView, remoteViewClickHandler, callback,
                     publicLayout, publicLayout.getContractedChild(),
                     publicLayout.getVisibleWrapper(NotificationContentView.VISIBLE_TYPE_CONTRACTED),
                     runningInflations, applyCallback);
         }
 
         // Let's try to finish, maybe nobody is even inflating anything
-        finishIfDone(result, reInflateFlags, remoteViewCache, runningInflations, callback, entry,
-                row);
+        finishIfDone(result, reInflateFlags, cachedContentViews, runningInflations, callback, row);
         CancellationSignal cancellationSignal = new CancellationSignal();
         cancellationSignal.setOnCancelListener(
                 () -> runningInflations.values().forEach(CancellationSignal::cancel));
@@ -378,8 +369,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             final InflationProgress result,
             final @InflationFlag int reInflateFlags,
             @InflationFlag int inflationId,
-            final NotifRemoteViewCache remoteViewCache,
-            final NotificationEntry entry,
+            final ArrayMap<Integer, RemoteViews> cachedContentViews,
             final ExpandableNotificationRow row,
             boolean isNewView,
             RemoteViews.OnClickHandler remoteViewClickHandler,
@@ -432,8 +422,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     existingWrapper.onReinflated();
                 }
                 runningInflations.remove(inflationId);
-                finishIfDone(result, reInflateFlags, remoteViewCache, runningInflations,
-                        callback, entry, row);
+                finishIfDone(result, reInflateFlags, cachedContentViews, runningInflations,
+                        callback, row);
             }
 
             @Override
@@ -498,11 +488,11 @@ public class NotificationContentInflater implements NotificationRowContentBinder
      * @return true if the inflation was finished
      */
     private static boolean finishIfDone(InflationProgress result,
-            @InflationFlag int reInflateFlags, NotifRemoteViewCache remoteViewCache,
+            @InflationFlag int reInflateFlags, ArrayMap<Integer, RemoteViews> cachedContentViews,
             HashMap<Integer, CancellationSignal> runningInflations,
-            @Nullable InflationCallback endListener, NotificationEntry entry,
-            ExpandableNotificationRow row) {
+            @Nullable InflationCallback endListener, ExpandableNotificationRow row) {
         Assert.isMainThread();
+        NotificationEntry entry = row.getEntry();
         NotificationContentView privateLayout = row.getPrivateLayout();
         NotificationContentView publicLayout = row.getPublicLayout();
         if (runningInflations.isEmpty()) {
@@ -510,27 +500,23 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 if (result.inflatedContentView != null) {
                     // New view case
                     privateLayout.setContractedChild(result.inflatedContentView);
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED,
-                            result.newContentView);
-                } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED)) {
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_CONTRACTED, result.newContentView);
+                } else if (cachedContentViews.get(FLAG_CONTENT_VIEW_CONTRACTED) != null) {
                     // Reinflation case. Only update if it's still cached (i.e. view has not been
                     // freed while inflating).
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED,
-                            result.newContentView);
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_CONTRACTED, result.newContentView);
                 }
             }
 
             if ((reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0) {
                 if (result.inflatedExpandedView != null) {
                     privateLayout.setExpandedChild(result.inflatedExpandedView);
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED,
-                            result.newExpandedView);
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_EXPANDED, result.newExpandedView);
                 } else if (result.newExpandedView == null) {
                     privateLayout.setExpandedChild(null);
-                    remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED);
-                } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED)) {
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED,
-                            result.newExpandedView);
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_EXPANDED, null);
+                } else if (cachedContentViews.get(FLAG_CONTENT_VIEW_EXPANDED) != null) {
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_EXPANDED, result.newExpandedView);
                 }
                 if (result.newExpandedView != null) {
                     privateLayout.setExpandedInflatedSmartReplies(
@@ -544,14 +530,12 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             if ((reInflateFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
                 if (result.inflatedHeadsUpView != null) {
                     privateLayout.setHeadsUpChild(result.inflatedHeadsUpView);
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP,
-                            result.newHeadsUpView);
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_HEADS_UP, result.newHeadsUpView);
                 } else if (result.newHeadsUpView == null) {
                     privateLayout.setHeadsUpChild(null);
-                    remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP);
-                } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP)) {
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP,
-                            result.newHeadsUpView);
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_HEADS_UP, null);
+                } else if (cachedContentViews.get(FLAG_CONTENT_VIEW_HEADS_UP) != null) {
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_HEADS_UP, result.newHeadsUpView);
                 }
                 if (result.newHeadsUpView != null) {
                     privateLayout.setHeadsUpInflatedSmartReplies(
@@ -564,18 +548,16 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             if ((reInflateFlags & FLAG_CONTENT_VIEW_PUBLIC) != 0) {
                 if (result.inflatedPublicView != null) {
                     publicLayout.setContractedChild(result.inflatedPublicView);
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC,
-                            result.newPublicView);
-                } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC)) {
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC,
-                            result.newPublicView);
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_PUBLIC, result.newPublicView);
+                } else if (cachedContentViews.get(FLAG_CONTENT_VIEW_PUBLIC) != null) {
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_PUBLIC, result.newPublicView);
                 }
             }
 
             entry.headsUpStatusBarText = result.headsUpStatusBarText;
             entry.headsUpStatusBarTextPublic = result.headsUpStatusBarTextPublic;
             if (endListener != null) {
-                endListener.onAsyncInflationFinished(entry, reInflateFlags);
+                endListener.onAsyncInflationFinished(row.getEntry(), reInflateFlags);
             }
             return true;
         }
@@ -633,7 +615,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     public static class AsyncInflationTask extends AsyncTask<Void, Void, InflationProgress>
             implements InflationCallback, InflationTask {
 
-        private final NotificationEntry mEntry;
+        private final StatusBarNotification mSbn;
         private final Context mContext;
         private final boolean mInflateSynchronously;
         private final boolean mIsLowPriority;
@@ -642,17 +624,17 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private final InflationCallback mCallback;
         private final boolean mUsesIncreasedHeadsUpHeight;
         private @InflationFlag int mReInflateFlags;
-        private final NotifRemoteViewCache mRemoteViewCache;
+        private final ArrayMap<Integer, RemoteViews> mCachedContentViews;
         private ExpandableNotificationRow mRow;
         private Exception mError;
         private RemoteViews.OnClickHandler mRemoteViewClickHandler;
         private CancellationSignal mCancellationSignal;
 
         private AsyncInflationTask(
+                StatusBarNotification notification,
                 boolean inflateSynchronously,
                 @InflationFlag int reInflateFlags,
-                NotifRemoteViewCache cache,
-                NotificationEntry entry,
+                ArrayMap<Integer, RemoteViews> cachedContentViews,
                 ExpandableNotificationRow row,
                 boolean isLowPriority,
                 boolean isChildInGroup,
@@ -660,11 +642,11 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 boolean usesIncreasedHeadsUpHeight,
                 InflationCallback callback,
                 RemoteViews.OnClickHandler remoteViewClickHandler) {
-            mEntry = entry;
             mRow = row;
+            mSbn = notification;
             mInflateSynchronously = inflateSynchronously;
             mReInflateFlags = reInflateFlags;
-            mRemoteViewCache = cache;
+            mCachedContentViews = cachedContentViews;
             mContext = mRow.getContext();
             mIsLowPriority = isLowPriority;
             mIsChildInGroup = isChildInGroup;
@@ -672,6 +654,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             mUsesIncreasedHeadsUpHeight = usesIncreasedHeadsUpHeight;
             mRemoteViewClickHandler = remoteViewClickHandler;
             mCallback = callback;
+            NotificationEntry entry = row.getEntry();
             entry.setInflationTask(this);
         }
 
@@ -684,13 +667,12 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         @Override
         protected InflationProgress doInBackground(Void... params) {
             try {
-                final StatusBarNotification sbn = mEntry.getSbn();
                 final Notification.Builder recoveredBuilder
                         = Notification.Builder.recoverBuilder(mContext,
-                        sbn.getNotification());
+                        mSbn.getNotification());
 
-                Context packageContext = sbn.getPackageContext(mContext);
-                Notification notification = sbn.getNotification();
+                Context packageContext = mSbn.getPackageContext(mContext);
+                Notification notification = mSbn.getNotification();
                 if (notification.isMediaNotification()) {
                     MediaNotificationProcessor processor = new MediaNotificationProcessor(mContext,
                             packageContext);
@@ -699,7 +681,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 InflationProgress inflationProgress = createRemoteViews(mReInflateFlags,
                         recoveredBuilder, mIsLowPriority, mIsChildInGroup, mUsesIncreasedHeight,
                         mUsesIncreasedHeadsUpHeight, packageContext);
-                return inflateSmartReplyViews(inflationProgress, mReInflateFlags, mEntry,
+                return inflateSmartReplyViews(inflationProgress, mReInflateFlags, mRow.getEntry(),
                         mRow.getContext(), packageContext, mRow.getHeadsUpManager(),
                         mRow.getExistingSmartRepliesAndActions());
             } catch (Exception e) {
@@ -712,15 +694,15 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         protected void onPostExecute(InflationProgress result) {
             if (mError == null) {
                 mCancellationSignal = apply(mInflateSynchronously, result, mReInflateFlags,
-                        mRemoteViewCache, mEntry, mRow, mRemoteViewClickHandler, this);
+                        mCachedContentViews, mRow, mRemoteViewClickHandler, this);
             } else {
                 handleError(mError);
             }
         }
 
         private void handleError(Exception e) {
-            mEntry.onInflationTaskFinished();
-            StatusBarNotification sbn = mEntry.getSbn();
+            mRow.getEntry().onInflationTaskFinished();
+            StatusBarNotification sbn = mRow.getEntry().getSbn();
             final String ident = sbn.getPackageName() + "/0x"
                     + Integer.toHexString(sbn.getId());
             Log.e(StatusBar.TAG, "couldn't inflate view for notification " + ident, e);
@@ -754,10 +736,10 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         @Override
         public void onAsyncInflationFinished(NotificationEntry entry,
                 @InflationFlag int inflatedFlags) {
-            mEntry.onInflationTaskFinished();
+            mRow.getEntry().onInflationTaskFinished();
             mRow.onNotificationUpdated();
             if (mCallback != null) {
-                mCallback.onAsyncInflationFinished(mEntry, inflatedFlags);
+                mCallback.onAsyncInflationFinished(mRow.getEntry(), inflatedFlags);
             }
 
             // Notify the resolver that the inflation task has finished,

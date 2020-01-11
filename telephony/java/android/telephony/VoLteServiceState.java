@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import com.android.telephony.Rlog;
+
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Bundle;
@@ -51,8 +53,7 @@ public final class VoLteServiceState implements Parcelable {
     /**
      * Create a new VoLteServiceState from a intent notifier Bundle
      *
-     * This method is used by PhoneStateIntentReceiver and maybe by
-     * external applications.
+     * This method is maybe used by external applications.
      *
      * @param m Bundle from intent notifier
      * @return newly created VoLteServiceState

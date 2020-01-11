@@ -120,6 +120,60 @@ public class EditorTouchStateTest {
     }
 
     @Test
+    public void testUpdate_doubleTap_delayAfterFirstDownEvent() throws Exception {
+        // Simulate an ACTION_DOWN event.
+        long event1Time = 1000;
+        MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
+        mTouchState.update(event1, mConfig);
+        assertSingleTap(mTouchState, 20f, 30f, 0, 0, false);
+
+        // Simulate an ACTION_UP event with a delay that's longer than the double-tap timeout.
+        long event2Time = 1000 + ViewConfiguration.getDoubleTapTimeout() + 1;
+        MotionEvent event2 = upEvent(event1Time, event2Time, 20f, 30f);
+        mTouchState.update(event2, mConfig);
+        assertSingleTap(mTouchState, 20f, 30f, 20f, 30f, false);
+
+        // Generate an ACTION_DOWN event whose time is within the double-tap timeout when
+        // calculated from the last ACTION_UP event time. Even though the time between the last up
+        // and this down event is within the double-tap timeout, this should not be considered a
+        // double-tap (since the first down event had a longer delay).
+        long event3Time = event2Time + 1;
+        MotionEvent event3 = downEvent(event3Time, event3Time, 22f, 33f);
+        mTouchState.update(event3, mConfig);
+        assertSingleTap(mTouchState, 22f, 33f, 20f, 30f, false);
+    }
+
+    @Test
+    public void testUpdate_quickTapAfterDrag() throws Exception {
+        // Simulate an ACTION_DOWN event.
+        long event1Time = 1000;
+        MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
+        mTouchState.update(event1, mConfig);
+        assertSingleTap(mTouchState, 20f, 30f, 0, 0, false);
+
+        // Simulate an ACTION_MOVE event.
+        long event2Time = 1001;
+        MotionEvent event2 = moveEvent(event1Time, event2Time, 200f, 31f);
+        mTouchState.update(event2, mConfig);
+        assertSingleTap(mTouchState, 20f, 30f, 0, 0, true);
+
+        // Simulate an ACTION_UP event with a delay that's longer than the double-tap timeout.
+        long event3Time = 5000;
+        MotionEvent event3 = upEvent(event1Time, event3Time, 200f, 31f);
+        mTouchState.update(event3, mConfig);
+        assertSingleTap(mTouchState, 20f, 30f, 200f, 31f, false);
+
+        // Generate an ACTION_DOWN event whose time is within the double-tap timeout when
+        // calculated from the last ACTION_UP event time. Even though the time between the last up
+        // and this down event is within the double-tap timeout, this should not be considered a
+        // double-tap (since the first down event had a longer delay).
+        long event4Time = event3Time + 1;
+        MotionEvent event4 = downEvent(event4Time, event4Time, 200f, 31f);
+        mTouchState.update(event4, mConfig);
+        assertSingleTap(mTouchState, 200f, 31f, 200f, 31f, false);
+    }
+
+    @Test
     public void testUpdate_tripleClick_mouse() throws Exception {
         // Simulate an ACTION_DOWN event.
         long event1Time = 1000;

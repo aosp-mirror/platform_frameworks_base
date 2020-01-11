@@ -21,8 +21,10 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOM
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.app.IActivityManager;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
@@ -30,11 +32,13 @@ import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -44,13 +48,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.sysprop.TelephonyProperties;
 import android.telecom.TelecomManager;
@@ -92,6 +94,7 @@ import com.android.systemui.MultiListLayout;
 import com.android.systemui.MultiListLayout.MultiListAdapter;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
@@ -105,6 +108,8 @@ import com.android.systemui.volume.SystemUIInterpolators.LogAccelerateInterpolat
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Helper to show the global actions dialog.  Each item is an {@link Action} that
@@ -146,6 +151,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final LockPatternUtils mLockPatternUtils;
     private final KeyguardManager mKeyguardManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final ContentResolver mContentResolver;
+    private final Resources mResources;
+    private final UserManager mUserManager;
+    private final TrustManager mTrustManager;
+    private final IActivityManager mIActivityManager;
+    private final TelecomManager mTelecomManager;
+    private final MetricsLogger mMetricsLogger;
 
     private ArrayList<Action> mItems;
     private ActionsDialog mDialog;
@@ -161,8 +173,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private boolean mIsWaitingForEcmExit = false;
     private boolean mHasTelephony;
     private boolean mHasVibrator;
-    private boolean mHasLogoutButton;
-    private boolean mHasLockdownButton;
     private final boolean mShowSilentToggle;
     private final EmergencyAffordanceManager mEmergencyAffordanceManager;
     private final ScreenshotHelper mScreenshotHelper;
@@ -173,17 +183,32 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     /**
      * @param context everything needs a context :(
      */
-    public GlobalActionsDialog(Context context, GlobalActionsManager windowManagerFuncs) {
+    @Inject
+    public GlobalActionsDialog(Context context, GlobalActionsManager windowManagerFuncs,
+            AudioManager audioManager, IDreamManager iDreamManager,
+            DevicePolicyManager devicePolicyManager, LockPatternUtils lockPatternUtils,
+            KeyguardManager keyguardManager, BroadcastDispatcher broadcastDispatcher,
+            ConnectivityManager connectivityManager, TelephonyManager telephonyManager,
+            ContentResolver contentResolver, @Nullable Vibrator vibrator, @Main Resources resources,
+            ConfigurationController configurationController, ActivityStarter activityStarter,
+            KeyguardStateController keyguardStateController, UserManager userManager,
+            TrustManager trustManager, IActivityManager iActivityManager,
+            TelecomManager telecomManager, MetricsLogger metricsLogger) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mWindowManagerFuncs = windowManagerFuncs;
-        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-        mDreamManager = IDreamManager.Stub.asInterface(
-                ServiceManager.getService(DreamService.DREAM_SERVICE));
-        mDevicePolicyManager = (DevicePolicyManager) mContext.getSystemService(
-                Context.DEVICE_POLICY_SERVICE);
-        mLockPatternUtils = new LockPatternUtils(mContext);
-        mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-        mBroadcastDispatcher = Dependency.get(BroadcastDispatcher.class);
+        mAudioManager = audioManager;
+        mDreamManager = iDreamManager;
+        mDevicePolicyManager = devicePolicyManager;
+        mLockPatternUtils = lockPatternUtils;
+        mKeyguardManager = keyguardManager;
+        mBroadcastDispatcher = broadcastDispatcher;
+        mContentResolver = contentResolver;
+        mResources = resources;
+        mUserManager = userManager;
+        mTrustManager = trustManager;
+        mIActivityManager = iActivityManager;
+        mTelecomManager = telecomManager;
+        mMetricsLogger = metricsLogger;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -192,32 +217,25 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         filter.addAction(TelephonyManager.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter);
 
-        ConnectivityManager cm = (ConnectivityManager)
-                context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mHasTelephony = cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+        mHasTelephony = connectivityManager.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
 
         // get notified of phone state changes
-        TelephonyManager telephonyManager =
-                (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_SERVICE_STATE);
-        mContext.getContentResolver().registerContentObserver(
+        contentResolver.registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON), true,
                 mAirplaneModeObserver);
-        Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = vibrator != null && vibrator.hasVibrator();
 
-        mShowSilentToggle = SHOW_SILENT_TOGGLE && !mContext.getResources().getBoolean(
+        mShowSilentToggle = SHOW_SILENT_TOGGLE && !resources.getBoolean(
                 R.bool.config_useFixedVolume);
 
         mEmergencyAffordanceManager = new EmergencyAffordanceManager(context);
         mScreenshotHelper = new ScreenshotHelper(context);
         mScreenRecordHelper = new ScreenRecordHelper(context);
 
-        Dependency.get(ConfigurationController.class).addCallback(this);
+        configurationController.addCallback(this);
 
-        mActivityStarter = Dependency.get(ActivityStarter.class);
-        KeyguardStateController keyguardStateController =
-                Dependency.get(KeyguardStateController.class);
+        mActivityStarter = activityStarter;
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onUnlockedChanged() {
@@ -343,12 +361,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         onAirplaneModeChanged();
 
         mItems = new ArrayList<Action>();
-        String[] defaultActions = mContext.getResources().getStringArray(
-                R.array.config_globalActionsList);
+        String[] defaultActions = mResources.getStringArray(R.array.config_globalActionsList);
 
         ArraySet<String> addedKeys = new ArraySet<String>();
-        mHasLogoutButton = false;
-        mHasLockdownButton = false;
         for (int i = 0; i < defaultActions.length; i++) {
             String actionKey = defaultActions[i];
             if (addedKeys.contains(actionKey)) {
@@ -360,7 +375,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
                 mItems.add(mAirplaneModeOn);
             } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
-                if (Settings.Global.getInt(mContext.getContentResolver(),
+                if (Settings.Global.getInt(mContentResolver,
                         Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0 && isCurrentUserOwner()) {
                     mItems.add(new BugReportAction());
                 }
@@ -375,11 +390,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             } else if (GLOBAL_ACTION_KEY_SETTINGS.equals(actionKey)) {
                 mItems.add(getSettingsAction());
             } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey)) {
-                if (Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                if (Settings.Secure.getIntForUser(mContentResolver,
                             Settings.Secure.LOCKDOWN_IN_POWER_MENU, 0, getCurrentUser().id) != 0
                         && shouldDisplayLockdown()) {
                     mItems.add(getLockdownAction());
-                    mHasLockdownButton = true;
                 }
             } else if (GLOBAL_ACTION_KEY_VOICEASSIST.equals(actionKey)) {
                 mItems.add(getVoiceAssistAction());
@@ -393,7 +407,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 if (mDevicePolicyManager.isLogoutEnabled()
                         && getCurrentUser().id != UserHandle.USER_SYSTEM) {
                     mItems.add(new LogoutAction());
-                    mHasLogoutButton = true;
                 }
             } else if (GLOBAL_ACTION_KEY_EMERGENCY.equals(actionKey)) {
                 if (!mEmergencyAffordanceManager.needsEmergencyAffordance()) {
@@ -474,8 +487,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public boolean onLongPress() {
-            UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            if (!um.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
+            if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
                 mWindowManagerFuncs.reboot(true);
                 return true;
             }
@@ -560,9 +572,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public void onPress() {
-            MetricsLogger.action(mContext, MetricsEvent.ACTION_EMERGENCY_DIALER_FROM_POWER_MENU);
-            Intent intent = mContext.getSystemService(TelecomManager.class)
-                    .createLaunchEmergencyDialerIntent(null /* number */);
+            mMetricsLogger.action(MetricsEvent.ACTION_EMERGENCY_DIALER_FROM_POWER_MENU);
+            Intent intent = mTelecomManager.createLaunchEmergencyDialerIntent(null /* number */);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
                     | Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -579,8 +590,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public boolean onLongPress() {
-            UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            if (!um.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
+            if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
                 mWindowManagerFuncs.reboot(true);
                 return true;
             }
@@ -618,8 +628,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 @Override
                 public void run() {
                     mScreenshotHelper.takeScreenshot(1, true, true, mHandler, null);
-                    MetricsLogger.action(mContext,
-                            MetricsEvent.ACTION_SCREENSHOT_POWER_MENU);
+                    mMetricsLogger.action(MetricsEvent.ACTION_SCREENSHOT_POWER_MENU);
                 }
             }, 500);
         }
@@ -666,11 +675,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 public void run() {
                     try {
                         // Take an "interactive" bugreport.
-                        MetricsLogger.action(mContext,
+                        mMetricsLogger.action(
                                 MetricsEvent.ACTION_BUGREPORT_FROM_POWER_MENU_INTERACTIVE);
-                        if (!ActivityManager.getService().launchBugReportHandlerApp()) {
+                        if (!mIActivityManager.launchBugReportHandlerApp()) {
                             Log.w(TAG, "Bugreport handler could not be launched");
-                            ActivityManager.getService().requestInteractiveBugReport();
+                            mIActivityManager.requestInteractiveBugReport();
                         }
                     } catch (RemoteException e) {
                     }
@@ -687,8 +696,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
             try {
                 // Take a "full" bugreport.
-                MetricsLogger.action(mContext, MetricsEvent.ACTION_BUGREPORT_FROM_POWER_MENU_FULL);
-                ActivityManager.getService().requestFullBugReport();
+                mMetricsLogger.action(MetricsEvent.ACTION_BUGREPORT_FROM_POWER_MENU_FULL);
+                mIActivityManager.requestFullBugReport();
             } catch (RemoteException e) {
             }
             return false;
@@ -726,8 +735,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mHandler.postDelayed(() -> {
                 try {
                     int currentUserId = getCurrentUser().id;
-                    ActivityManager.getService().switchUser(UserHandle.USER_SYSTEM);
-                    ActivityManager.getService().stopUser(currentUserId, true /*force*/, null);
+                    mIActivityManager.switchUser(UserHandle.USER_SYSTEM);
+                    mIActivityManager.stopUser(currentUserId, true /*force*/, null);
                 } catch (RemoteException re) {
                     Log.e(TAG, "Couldn't logout user " + re);
                 }
@@ -834,20 +843,18 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     private void lockProfiles() {
-        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        final TrustManager tm = (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
         final int currentUserId = getCurrentUser().id;
-        final int[] profileIds = um.getEnabledProfileIds(currentUserId);
+        final int[] profileIds = mUserManager.getEnabledProfileIds(currentUserId);
         for (final int id : profileIds) {
             if (id != currentUserId) {
-                tm.setDeviceLockedForUser(id, true);
+                mTrustManager.setDeviceLockedForUser(id, true);
             }
         }
     }
 
     private UserInfo getCurrentUser() {
         try {
-            return ActivityManager.getService().getCurrentUser();
+            return mIActivityManager.getCurrentUser();
         } catch (RemoteException re) {
             return null;
         }
@@ -859,9 +866,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     private void addUsersToMenu(ArrayList<Action> items) {
-        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        if (um.isUserSwitcherEnabled()) {
-            List<UserInfo> users = um.getUsers();
+        if (mUserManager.isUserSwitcherEnabled()) {
+            List<UserInfo> users = mUserManager.getUsers();
             UserInfo currentUser = getCurrentUser();
             for (final UserInfo user : users) {
                 if (user.supportsSwitchToByUser()) {
@@ -875,7 +881,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                                     + (isCurrentUser ? " \u2714" : "")) {
                         public void onPress() {
                             try {
-                                ActivityManager.getService().switchUser(user.id);
+                                mIActivityManager.switchUser(user.id);
                             } catch (RemoteException re) {
                                 Log.e(TAG, "Couldn't switch user " + re);
                             }
@@ -932,7 +938,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     /** {@inheritDoc} */
     public void onShow(DialogInterface dialog) {
-        MetricsLogger.visible(mContext, MetricsEvent.POWER_MENU);
+        mMetricsLogger.visible(MetricsEvent.POWER_MENU);
     }
 
     /**
@@ -1492,7 +1498,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         if (mHasTelephony) return;
 
         boolean airplaneModeOn = Settings.Global.getInt(
-                mContext.getContentResolver(),
+                mContentResolver,
                 Settings.Global.AIRPLANE_MODE_ON,
                 0) == 1;
         mAirplaneState = airplaneModeOn ? ToggleAction.State.On : ToggleAction.State.Off;
@@ -1504,7 +1510,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      */
     private void changeAirplaneModeSystemSetting(boolean on) {
         Settings.Global.putInt(
-                mContext.getContentResolver(),
+                mContentResolver,
                 Settings.Global.AIRPLANE_MODE_ON,
                 on ? 1 : 0);
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);

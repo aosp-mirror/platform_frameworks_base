@@ -76,7 +76,7 @@ public class WifiNetworkSuggestionTest {
                 .setSsid(TEST_SSID)
                 .setWpa2Passphrase(TEST_PRESHARED_KEY)
                 .setIsAppInteractionRequired(true)
-                .setIsUserAllowedToManuallyConnect(false)
+                .setCredentialSharedWithUser(false)
                 .setPriority(0)
                 .build();
 
@@ -151,7 +151,7 @@ public class WifiNetworkSuggestionTest {
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
                 .setWpa3Passphrase(TEST_PRESHARED_KEY)
-                .setIsUserAllowedToManuallyConnect(true)
+                .setCredentialSharedWithUser(true)
                 .build();
 
         assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
@@ -709,14 +709,14 @@ public class WifiNetworkSuggestionTest {
 
     /**
      * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
-     * when {@link WifiNetworkSuggestion.Builder#setIsUserAllowedToManuallyConnect(boolean)} to
+     * when {@link WifiNetworkSuggestion.Builder#setCredentialSharedWithUser(boolean)} to
      * true on a open network suggestion.
      */
     @Test(expected = IllegalStateException.class)
     public void testSetIsUserAllowedToManuallyConnectToWithOpenNetwork() {
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
-                .setIsUserAllowedToManuallyConnect(true)
+                .setCredentialSharedWithUser(true)
                 .build();
     }
 }

@@ -1446,26 +1446,45 @@ public class SoundTriggerService extends SystemService {
         @Override
         public int startRecognition(int keyphraseId, KeyphraseSoundModel soundModel,
                 IRecognitionStatusCallback listener, RecognitionConfig recognitionConfig) {
-            if (!isInitialized()) return STATUS_ERROR;
+            if (!isInitialized()) throw new UnsupportedOperationException();
             return mSoundTriggerHelper.startKeyphraseRecognition(keyphraseId, soundModel, listener,
                     recognitionConfig);
         }
 
         @Override
         public synchronized int stopRecognition(int keyphraseId, IRecognitionStatusCallback listener) {
-            if (!isInitialized()) return STATUS_ERROR;
+            if (!isInitialized()) throw new UnsupportedOperationException();
             return mSoundTriggerHelper.stopKeyphraseRecognition(keyphraseId, listener);
         }
 
         @Override
         public ModuleProperties getModuleProperties() {
-            if (!isInitialized()) return null;
+            if (!isInitialized()) throw new UnsupportedOperationException();
             return mSoundTriggerHelper.getModuleProperties();
         }
 
         @Override
+        public int setParameter(int keyphraseId, @ModelParams int modelParam, int value) {
+            if (!isInitialized()) throw new UnsupportedOperationException();
+            return mSoundTriggerHelper.setKeyphraseParameter(keyphraseId, modelParam, value);
+        }
+
+        @Override
+        public int getParameter(int keyphraseId, @ModelParams int modelParam) {
+            if (!isInitialized()) throw new UnsupportedOperationException();
+            return mSoundTriggerHelper.getKeyphraseParameter(keyphraseId, modelParam);
+        }
+
+        @Override
+        @Nullable
+        public ModelParamRange queryParameter(int keyphraseId, @ModelParams int modelParam) {
+            if (!isInitialized()) throw new UnsupportedOperationException();
+            return mSoundTriggerHelper.queryKeyphraseParameter(keyphraseId, modelParam);
+        }
+
+        @Override
         public int unloadKeyphraseModel(int keyphraseId) {
-            if (!isInitialized()) return STATUS_ERROR;
+            if (!isInitialized()) throw new UnsupportedOperationException();
             return mSoundTriggerHelper.unloadKeyphraseSoundModel(keyphraseId);
         }
 

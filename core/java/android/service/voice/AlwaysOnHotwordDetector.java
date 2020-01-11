@@ -168,6 +168,22 @@ public class AlwaysOnHotwordDetector {
     public static final int RECOGNITION_MODE_USER_IDENTIFICATION
             = SoundTrigger.RECOGNITION_MODE_USER_IDENTIFICATION;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "MODEL_PARAM_" }, value = {
+            MODEL_PARAM_THRESHOLD_FACTOR,
+    })
+    public @interface ModelParams {}
+
+    /**
+     * Controls the sensitivity threshold adjustment factor for a given model.
+     * Negative value corresponds to less sensitive model (high threshold) and
+     * a positive value corresponds to a more sensitive model (low threshold).
+     * Default value is 0.
+     */
+    public static final int MODEL_PARAM_THRESHOLD_FACTOR =
+            android.hardware.soundtrigger.ModelParams.THRESHOLD_FACTOR;
+
     static final String TAG = "AlwaysOnHotwordDetector";
     static final boolean DBG = false;
 
@@ -196,6 +212,53 @@ public class AlwaysOnHotwordDetector {
     private final Handler mHandler;
 
     private int mAvailability = STATE_NOT_READY;
+
+    /**
+     *  A ModelParamRange is a representation of supported parameter range for a
+     *  given loaded model.
+     */
+    public static final class ModelParamRange {
+        private final SoundTrigger.ModelParamRange mModelParamRange;
+
+        /** @hide */
+        ModelParamRange(SoundTrigger.ModelParamRange modelParamRange) {
+            mModelParamRange = modelParamRange;
+        }
+
+        /**
+         * The inclusive start of supported range.
+         *
+         * @return start of range
+         */
+        public int start() {
+            return mModelParamRange.start;
+        }
+
+        /**
+         * The inclusive end of supported range.
+         *
+         * @return end of range
+         */
+        public int end() {
+            return mModelParamRange.end;
+        }
+
+        @Override
+        @NonNull
+        public String toString() {
+            return mModelParamRange.toString();
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            return mModelParamRange.equals(obj);
+        }
+
+        @Override
+        public int hashCode() {
+            return mModelParamRange.hashCode();
+        }
+    }
 
     /**
      * Additional payload for {@link Callback#onDetected}.
@@ -445,6 +508,83 @@ public class AlwaysOnHotwordDetector {
     }
 
     /**
+     * Set a model specific {@link ModelParams} with the given value. This
+     * parameter will keep its value for the duration the model is loaded regardless of starting and
+     * stopping recognition. Once the model is unloaded, the value will be lost.
+     * {@link AlwaysOnHotwordDetector#queryParameter} should be checked first before calling this
+     * method.
+     *
+     * @param modelParam   {@link ModelParams}
+     * @param value        Value to set
+     * @return - {@link SoundTrigger#STATUS_OK} in case of success
+     *         - {@link SoundTrigger#STATUS_NO_INIT} if the native service cannot be reached
+     *         - {@link SoundTrigger#STATUS_BAD_VALUE} invalid input parameter
+     *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence or
+     *           if API is not supported by HAL
+     */
+    public int setParameter(@ModelParams int modelParam, int value) {
+        if (DBG) {
+            Slog.d(TAG, "setParameter(" + modelParam + ", " + value + ")");
+        }
+
+        synchronized (mLock) {
+            if (mAvailability == STATE_INVALID) {
+                throw new IllegalStateException("setParameter called on an invalid detector");
+            }
+
+            return setParameterLocked(modelParam, value);
+        }
+    }
+
+    /**
+     * Get a model specific {@link ModelParams}. This parameter will keep its value
+     * for the duration the model is loaded regardless of starting and stopping recognition.
+     * Once the model is unloaded, the value will be lost. If the value is not set, a default
+     * value is returned. See {@link ModelParams} for parameter default values.
+     * {@link AlwaysOnHotwordDetector#queryParameter} should be checked first before
+     * calling this method.
+     *
+     * @param modelParam   {@link ModelParams}
+     * @return value of parameter
+     */
+    public int getParameter(@ModelParams int modelParam) {
+        if (DBG) {
+            Slog.d(TAG, "getParameter(" + modelParam + ")");
+        }
+
+        synchronized (mLock) {
+            if (mAvailability == STATE_INVALID) {
+                throw new IllegalStateException("getParameter called on an invalid detector");
+            }
+
+            return getParameterLocked(modelParam);
+        }
+    }
+
+    /**
+     * Determine if parameter control is supported for the given model handle.
+     * This method should be checked prior to calling {@link AlwaysOnHotwordDetector#setParameter}
+     * or {@link AlwaysOnHotwordDetector#getParameter}.
+     *
+     * @param modelParam {@link ModelParams}
+     * @return supported range of parameter, null if not supported
+     */
+    @Nullable
+    public ModelParamRange queryParameter(@ModelParams int modelParam) {
+        if (DBG) {
+            Slog.d(TAG, "queryParameter(" + modelParam + ")");
+        }
+
+        synchronized (mLock) {
+            if (mAvailability == STATE_INVALID) {
+                throw new IllegalStateException("queryParameter called on an invalid detector");
+            }
+
+            return queryParameterLocked(modelParam);
+        }
+    }
+
+    /**
      * Creates an intent to start the enrollment for the associated keyphrase.
      * This intent must be invoked using {@link Context#startForegroundService(Intent)}.
      * Starting re-enrollment is only valid if the keyphrase is un-enrolled,
@@ -599,6 +739,47 @@ public class AlwaysOnHotwordDetector {
             Slog.w(TAG, "stopRecognition() failed with error code " + code);
         }
         return code;
+    }
+
+    private int setParameterLocked(@ModelParams int modelParam, int value) {
+        try {
+            int code = mModelManagementService.setParameter(mVoiceInteractionService,
+                    mKeyphraseMetadata.id, modelParam, value);
+
+            if (code != STATUS_OK) {
+                Slog.w(TAG, "setParameter failed with error code " + code);
+            }
+
+            return code;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private int getParameterLocked(@ModelParams int modelParam) {
+        try {
+            return mModelManagementService.getParameter(mVoiceInteractionService,
+                    mKeyphraseMetadata.id, modelParam);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Nullable
+    private ModelParamRange queryParameterLocked(@ModelParams int modelParam) {
+        try {
+            SoundTrigger.ModelParamRange modelParamRange =
+                    mModelManagementService.queryParameter(mVoiceInteractionService,
+                            mKeyphraseMetadata.id, modelParam);
+
+            if (modelParamRange == null) {
+                return null;
+            }
+
+            return new ModelParamRange(modelParamRange);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     private void notifyStateChangedLocked() {

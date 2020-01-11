@@ -193,7 +193,7 @@ class UserBroadcastDispatcher(
                         it.filter.hasAction(intent.action) &&
                             it.filter.matchCategories(intent.categories) == null }
                     ?.forEach {
-                        it.handler.post {
+                        it.executor.execute {
                             if (DEBUG) Log.w(TAG,
                                     "[$index] Dispatching ${intent.action} to ${it.receiver}")
                             it.receiver.pendingResult = pendingResult

@@ -46,6 +46,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.AlphaOptimizedImageView;
 import com.android.systemui.statusbar.notification.row.NotificationGuts.GutsContent;
+import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
@@ -269,7 +270,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         }
         mAppOpsItem = createAppOpsItem(mContext);
         if (mIsUsingBidirectionalSwipe) {
-            mInfoItem = createInfoItem(mContext, !mParent.getEntry().isHighPriority());
+            mInfoItem = createInfoItem(mContext,
+                    mParent.getEntry().getBucket() == NotificationSectionsManager.BUCKET_SILENT);
         } else {
             mInfoItem = createInfoItem(mContext);
         }

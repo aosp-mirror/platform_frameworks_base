@@ -226,6 +226,61 @@ public class EditorCursorDragTest {
     }
 
     @Test
+    public void testEditor_onTouchEvent_quickTapAfterDrag() throws Throwable {
+        String text = "Hi world!";
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
+
+        TextView tv = mActivity.findViewById(R.id.textview);
+        Editor editor = tv.getEditorForTesting();
+
+        // Simulate a tap-and-drag gesture.
+        long event1Time = 1001;
+        MotionEvent event1 = downEvent(event1Time, event1Time, 5f, 10f);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event1));
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+
+        long event2Time = 1002;
+        MotionEvent event2 = moveEvent(event1Time, event2Time, 50f, 10f);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event2));
+        assertTrue(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+
+        long event3Time = 1003;
+        MotionEvent event3 = moveEvent(event1Time, event3Time, 100f, 10f);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event3));
+        assertTrue(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+
+        long event4Time = 2004;
+        MotionEvent event4 = upEvent(event1Time, event4Time, 100f, 10f);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event4));
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+
+        // Simulate a quick tap after the drag, near the location where the drag ended.
+        long event5Time = 2005;
+        MotionEvent event5 = downEvent(event5Time, event5Time, 90f, 10f);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event5));
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+
+        long event6Time = 2006;
+        MotionEvent event6 = upEvent(event5Time, event6Time, 90f, 10f);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event6));
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+
+        // Simulate another quick tap in the same location; now selection should be triggered.
+        long event7Time = 2007;
+        MotionEvent event7 = downEvent(event7Time, event7Time, 90f, 10f);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event7));
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertTrue(editor.getSelectionController().isCursorBeingModified());
+    }
+
+    @Test
     public void testEditor_onTouchEvent_cursorDrag() throws Throwable {
         String text = "testEditor_onTouchEvent_cursorDrag";
         onView(withId(R.id.textview)).perform(replaceText(text));
@@ -237,29 +292,25 @@ public class EditorCursorDragTest {
         // Simulate a tap-and-drag gesture. This should trigger a cursor drag.
         long event1Time = 1001;
         MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
-        mActivity.runOnUiThread(() -> editor.onTouchEvent(event1));
-        mInstrumentation.waitForIdleSync();
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event1));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event2Time = 1002;
         MotionEvent event2 = moveEvent(event1Time, event2Time, 21f, 30f);
-        mActivity.runOnUiThread(() -> editor.onTouchEvent(event2));
-        mInstrumentation.waitForIdleSync();
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event2));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event3Time = 1003;
-        MotionEvent event3 = moveEvent(event3Time, event3Time, 120f, 30f);
-        mActivity.runOnUiThread(() -> editor.onTouchEvent(event3));
-        mInstrumentation.waitForIdleSync();
+        MotionEvent event3 = moveEvent(event1Time, event3Time, 120f, 30f);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event3));
         assertTrue(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event4Time = 1004;
-        MotionEvent event4 = upEvent(event3Time, event4Time, 120f, 30f);
-        mActivity.runOnUiThread(() -> editor.onTouchEvent(event4));
-        mInstrumentation.waitForIdleSync();
+        MotionEvent event4 = upEvent(event1Time, event4Time, 120f, 30f);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event4));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
     }
@@ -276,36 +327,31 @@ public class EditorCursorDragTest {
         // Simulate a double-tap followed by a drag. This should trigger a selection drag.
         long event1Time = 1001;
         MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
-        mActivity.runOnUiThread(() -> editor.onTouchEvent(event1));
-        mInstrumentation.waitForIdleSync();
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event1));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event2Time = 1002;
         MotionEvent event2 = upEvent(event1Time, event2Time, 20f, 30f);
-        mActivity.runOnUiThread(() -> editor.onTouchEvent(event2));
-        mInstrumentation.waitForIdleSync();
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event2));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event3Time = 1003;
         MotionEvent event3 = downEvent(event3Time, event3Time, 20f, 30f);
-        mActivity.runOnUiThread(() -> editor.onTouchEvent(event3));
-        mInstrumentation.waitForIdleSync();
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event3));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertTrue(editor.getSelectionController().isCursorBeingModified());
 
         long event4Time = 1004;
         MotionEvent event4 = moveEvent(event3Time, event4Time, 120f, 30f);
-        mActivity.runOnUiThread(() -> editor.onTouchEvent(event4));
-        mInstrumentation.waitForIdleSync();
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event4));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertTrue(editor.getSelectionController().isCursorBeingModified());
 
         long event5Time = 1005;
         MotionEvent event5 = upEvent(event3Time, event5Time, 120f, 30f);
-        mActivity.runOnUiThread(() -> editor.onTouchEvent(event5));
-        mInstrumentation.waitForIdleSync();
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event5));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
     }

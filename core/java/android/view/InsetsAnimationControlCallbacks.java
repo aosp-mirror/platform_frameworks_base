@@ -16,17 +16,28 @@
 
 package android.view;
 
+import android.view.InsetsController.LayoutInsetsDuringAnimation;
+import android.view.WindowInsetsAnimationCallback.AnimationBounds;
+import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
+
 /**
  * Provide an interface to let InsetsAnimationControlImpl call back into its owner.
  * @hide
  */
 public interface InsetsAnimationControlCallbacks {
+
     /**
-     * Dispatch the animation started event to all listeners.
-     * @param animation
+     * Executes the necessary code to start the animation in the correct order, including:
+     * <ul>
+     *     <li>Dispatch {@link WindowInsetsAnimationCallback#onPrepare}</li>
+     *     <li>Update insets state and run layout according to {@code layoutDuringAnimation}</li>
+     *     <li>Dispatch {@link WindowInsetsAnimationCallback#onStart}</li>
+     *     <li>Dispatch {@link WindowInsetsAnimationControlListener#onReady}</li>
+     * </ul>
      */
-    void dispatchAnimationStarted(WindowInsetsAnimationCallback.InsetsAnimation animation,
-            WindowInsetsAnimationCallback.AnimationBounds bounds);
+    void startAnimation(InsetsAnimationControlImpl controller,
+            WindowInsetsAnimationControlListener listener, int types, InsetsAnimation animation,
+            AnimationBounds bounds, @LayoutInsetsDuringAnimation int layoutDuringAnimation);
 
     /**
      * Schedule the apply by posting the animation callback.

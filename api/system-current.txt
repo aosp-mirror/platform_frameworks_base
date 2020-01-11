@@ -152,6 +152,7 @@ package android {
     field public static final String PROVIDE_RESOLVER_RANKER_SERVICE = "android.permission.PROVIDE_RESOLVER_RANKER_SERVICE";
     field public static final String PROVIDE_TRUST_AGENT = "android.permission.PROVIDE_TRUST_AGENT";
     field public static final String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
+    field public static final String RADIO_SCAN_WITHOUT_LOCATION = "android.permission.RADIO_SCAN_WITHOUT_LOCATION";
     field public static final String READ_ACTIVE_EMERGENCY_SESSION = "android.permission.READ_ACTIVE_EMERGENCY_SESSION";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String READ_CONTENT_RATING_SYSTEMS = "android.permission.READ_CONTENT_RATING_SYSTEMS";
@@ -240,7 +241,6 @@ package android {
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
-    field public static final int resourcesMap = 16844297; // 0x1010609
     field public static final int supportsAmbientMode = 16844173; // 0x101058d
     field public static final int userRestriction = 16844164; // 0x1010584
   }
@@ -1535,6 +1535,10 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
   }
 
+  public final class BluetoothHidDevice implements android.bluetooth.BluetoothProfile {
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
+  }
+
   public final class BluetoothHidHost implements android.bluetooth.BluetoothProfile {
     method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
@@ -1543,12 +1547,20 @@ package android.bluetooth {
     field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED";
   }
 
+  public final class BluetoothMap implements android.bluetooth.BluetoothProfile {
+    method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice, int);
+    field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED";
+  }
+
   public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
     method protected void finalize();
     method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
     method public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
     method public boolean isTetheringOn();
     method public void setBluetoothTethering(boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED";
     field public static final String EXTRA_LOCAL_ROLE = "android.bluetooth.pan.extra.LOCAL_ROLE";
     field public static final int LOCAL_NAP_ROLE = 1; // 0x1
@@ -1671,7 +1683,6 @@ package android.content {
   }
 
   public abstract class Context {
-    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public boolean bindServiceAsUser(@RequiresPermission android.content.Intent, android.content.ServiceConnection, int, android.os.UserHandle);
     method @NonNull public android.content.Context createContextAsUser(@NonNull android.os.UserHandle, int);
     method public abstract android.content.Context createCredentialProtectedStorageContext();
     method @NonNull public android.content.Context createPackageContextAsUser(@NonNull String, int, @NonNull android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -1780,6 +1791,7 @@ package android.content {
     field @Deprecated public static final String EXTRA_SIM_STATE = "ss";
     field public static final String EXTRA_UNKNOWN_INSTANT_APP = "android.intent.extra.UNKNOWN_INSTANT_APP";
     field public static final String EXTRA_VERIFICATION_BUNDLE = "android.intent.extra.VERIFICATION_BUNDLE";
+    field public static final int FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT = 67108864; // 0x4000000
     field public static final String METADATA_SETUP_VERSION = "android.SETUP_VERSION";
     field @Deprecated public static final String SIM_ABSENT_ON_PERM_DISABLED = "PERM_DISABLED";
     field @Deprecated public static final String SIM_LOCKED_NETWORK = "NETWORK";
@@ -3545,7 +3557,6 @@ package android.hardware.soundtrigger {
   }
 
   public static final class SoundTrigger.ModelParamRange implements android.os.Parcelable {
-    method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.ModelParamRange> CREATOR;
     field public final int end;
@@ -3566,6 +3577,7 @@ package android.hardware.soundtrigger {
     field public final int powerConsumptionMw;
     field public final int recognitionModes;
     field public final boolean returnsTriggerInEvent;
+    field @NonNull public final String supportedModelArch;
     field public final boolean supportsCaptureTransition;
     field public final boolean supportsConcurrentCapture;
     field @NonNull public final java.util.UUID uuid;
@@ -4311,7 +4323,7 @@ package android.media.session {
   }
 
   public static interface MediaSessionManager.OnMediaKeyEventDispatchedListener {
-    method public default void onMediaKeyEventDispatched(@NonNull android.view.KeyEvent, @NonNull String, @NonNull android.media.session.MediaSession.Token);
+    method public default void onMediaKeyEventDispatched(@NonNull android.view.KeyEvent, @NonNull String, @Nullable android.media.session.MediaSession.Token);
   }
 
   public static interface MediaSessionManager.OnMediaKeyEventSessionChangedListener {
@@ -4367,9 +4379,9 @@ package android.media.soundtrigger {
     method public int getDetectionServiceOperationsTimeout();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.media.soundtrigger.SoundTriggerManager.Model getModel(java.util.UUID);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.hardware.soundtrigger.SoundTrigger.ModuleProperties getModuleProperties();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int getParameter(@NonNull java.util.UUID, int) throws java.lang.IllegalArgumentException, java.lang.UnsupportedOperationException;
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int getParameter(@NonNull java.util.UUID, int);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.hardware.soundtrigger.SoundTrigger.ModelParamRange queryParameter(@Nullable java.util.UUID, int);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int setParameter(@Nullable java.util.UUID, int, int) throws java.lang.IllegalArgumentException, java.lang.UnsupportedOperationException;
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int setParameter(@Nullable java.util.UUID, int, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public void updateModel(android.media.soundtrigger.SoundTriggerManager.Model);
   }
 
@@ -4855,6 +4867,7 @@ package android.net {
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
+    method public boolean deduceRestrictedCapability();
     method @NonNull public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
     method @NonNull public android.net.NetworkCapabilities setSSID(@Nullable String);
@@ -5835,8 +5848,8 @@ package android.net.wifi {
     method public int getMaxNumberOfClients();
     method @Nullable public String getPassphrase();
     method public int getSecurityType();
+    method public int getShutdownTimeoutMillis();
     method @Nullable public String getSsid();
-    method @Nullable public String getWpa2Passphrase();
     method public boolean isHiddenSsid();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int BAND_2GHZ = 1; // 0x1
@@ -5860,8 +5873,8 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setHiddenSsid(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setMaxNumberOfClients(int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setPassphrase(@Nullable String, int);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setShutdownTimeoutMillis(int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setSsid(@Nullable String);
-    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setWpa2Passphrase(@Nullable String);
   }
 
   public final class SoftApInfo implements android.os.Parcelable {
@@ -6024,6 +6037,7 @@ package android.net.wifi {
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public void getWifiActivityEnergyInfoAsync(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.OnWifiActivityEnergyInfoListener);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public android.net.wifi.WifiConfiguration getWifiApConfiguration();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public int getWifiApState();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.List<android.net.wifi.WifiConfiguration> getWifiConfigForMatchedNetworkSuggestionsSharedWithUser(@NonNull java.util.List<android.net.wifi.ScanResult>);
     method public boolean isApMacRandomizationSupported();
     method public boolean isConnectedMacRandomizationSupported();
     method @Deprecated public boolean isDeviceToDeviceRttSupported();
@@ -6166,6 +6180,25 @@ package android.net.wifi {
 
   public static final class WifiNetworkSuggestion.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_CARRIER_PROVISIONING) public android.net.wifi.WifiNetworkSuggestion.Builder setCarrierId(int);
+  }
+
+  public final class WifiOemConfigStoreMigrationHook {
+    method @Nullable public static android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData load();
+  }
+
+  public static final class WifiOemConfigStoreMigrationHook.MigrationData implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public java.util.List<android.net.wifi.WifiConfiguration> getUserSavedNetworkConfigurations();
+    method @Nullable public android.net.wifi.SoftApConfiguration getUserSoftApConfiguration();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData> CREATOR;
+  }
+
+  public static final class WifiOemConfigStoreMigrationHook.MigrationData.Builder {
+    ctor public WifiOemConfigStoreMigrationHook.MigrationData.Builder();
+    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData build();
+    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
+    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
   }
 
   public class WifiScanner {
@@ -7185,7 +7218,7 @@ package android.os {
     ctor public UpdateEngine();
     method @NonNull public android.os.UpdateEngine.AllocateSpaceResult allocateSpace(@NonNull String, @NonNull String[]);
     method public void applyPayload(String, long, long, String[]);
-    method public void applyPayload(@NonNull android.os.ParcelFileDescriptor, long, long, @NonNull String[]);
+    method public void applyPayload(@NonNull android.content.res.AssetFileDescriptor, @NonNull String[]);
     method public boolean bind(android.os.UpdateEngineCallback, android.os.Handler);
     method public boolean bind(android.os.UpdateEngineCallback);
     method public void cancel();
@@ -7270,7 +7303,6 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean hasUserRestrictionForUser(@NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isAdminUser();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isGuestUser();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isManagedProfile();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isManagedProfile(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isPrimaryUser();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isRestrictedProfile();
@@ -7860,6 +7892,7 @@ package android.provider {
   }
 
   public final class Settings {
+    method public static boolean checkAndNoteWriteSettingsOperation(@NonNull android.content.Context, int, @NonNull String, boolean);
     field public static final String ACTION_ACCESSIBILITY_DETAILS_SETTINGS = "android.settings.ACCESSIBILITY_DETAILS_SETTINGS";
     field public static final String ACTION_BUGREPORT_HANDLER_SETTINGS = "android.settings.BUGREPORT_HANDLER_SETTINGS";
     field public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
@@ -8658,7 +8691,10 @@ package android.service.notification {
     method @Nullable public android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification, @NonNull android.app.NotificationChannel);
     method public void onNotificationExpansionChanged(@NonNull String, boolean, boolean);
     method public abstract void onNotificationSnoozedUntilContext(@NonNull android.service.notification.StatusBarNotification, @NonNull String);
+    method public void onNotificationVisibilityChanged(@NonNull String, boolean);
     method public void onNotificationsSeen(@NonNull java.util.List<java.lang.String>);
+    method public void onPanelHidden();
+    method public void onPanelRevealed(int);
     method public void onSuggestedReplySent(@NonNull String, @NonNull CharSequence, int);
     method public final void unsnoozeNotification(@NonNull String);
     field public static final String SERVICE_INTERFACE = "android.service.notification.NotificationAssistantService";
@@ -10407,6 +10443,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApnMetered(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApplicationOnUicc(int);
     method public boolean isCurrentSimOperator(@NonNull String, int, @Nullable String);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataConnectionEnabled();
     method public boolean isDataConnectivityPossible();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();

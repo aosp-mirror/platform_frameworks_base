@@ -2819,6 +2819,9 @@ public final class Settings {
         if (installSource.initiatingPackageName != null) {
             serializer.attribute(null, "installInitiator", installSource.initiatingPackageName);
         }
+        if (installSource.isInitiatingPackageUninstalled) {
+            serializer.attribute(null, "installInitiatorUninstalled", "true");
+        }
         if (installSource.originatingPackageName != null) {
             serializer.attribute(null, "installOriginator", installSource.originatingPackageName);
         }
@@ -2835,6 +2838,11 @@ public final class Settings {
         writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
 
         pkg.signatures.writeXml(serializer, "sigs", mPastSignatures);
+
+        if (installSource.initiatingPackageSignatures != null) {
+            installSource.initiatingPackageSignatures.writeXml(
+                    serializer, "install-initiator-sigs", mPastSignatures);
+        }
 
         writePermissionsLPr(serializer, pkg.getPermissionsState().getInstallPermissionStates());
 
@@ -3571,6 +3579,7 @@ public final class Settings {
         String isOrphaned = null;
         String installOriginatingPackageName = null;
         String installInitiatingPackageName = null;
+        String installInitiatorUninstalled = null;
         String volumeUuid = null;
         String categoryHintString = null;
         String updateAvailable = null;
@@ -3616,6 +3625,8 @@ public final class Settings {
             isOrphaned = parser.getAttributeValue(null, "isOrphaned");
             installInitiatingPackageName = parser.getAttributeValue(null, "installInitiator");
             installOriginatingPackageName = parser.getAttributeValue(null, "installOriginator");
+            installInitiatorUninstalled = parser.getAttributeValue(null,
+                    "installInitiatorUninstalled");
             volumeUuid = parser.getAttributeValue(null, "volumeUuid");
             categoryHintString = parser.getAttributeValue(null, "categoryHint");
             if (categoryHintString != null) {
@@ -3772,7 +3783,8 @@ public final class Settings {
             packageSetting.uidError = "true".equals(uidError);
             InstallSource installSource = InstallSource.create(
                     installInitiatingPackageName, installOriginatingPackageName,
-                    installerPackageName, "true".equals(isOrphaned));
+                    installerPackageName, "true".equals(isOrphaned),
+                    "true".equals(installInitiatorUninstalled));
             packageSetting.installSource = installSource;
             packageSetting.volumeUuid = volumeUuid;
             packageSetting.categoryHint = categoryHint;
@@ -3849,6 +3861,11 @@ public final class Settings {
                         mKeySetRefs.put(id, 1);
                     }
                     packageSetting.keySetData.addDefinedKeySet(id, alias);
+                } else if (tagName.equals("install-initiator-sigs")) {
+                    final PackageSignatures signatures = new PackageSignatures();
+                    signatures.readXml(parser, mPastSignatures);
+                    packageSetting.installSource =
+                            packageSetting.installSource.setInitiatingPackageSignatures(signatures);
                 } else if (tagName.equals(TAG_DOMAIN_VERIFICATION)) {
                     readDomainVerificationLPw(parser, packageSetting);
                 } else {

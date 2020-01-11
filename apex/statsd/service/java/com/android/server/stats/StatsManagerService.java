@@ -24,6 +24,7 @@ import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Binder;
+import android.os.IPullAtomCallback;
 import android.os.IStatsManagerService;
 import android.os.IStatsd;
 import android.os.Process;
@@ -60,8 +61,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
     @GuardedBy("mLock")
     private ArrayMap<ConfigKey, PendingIntentRef> mDataFetchPirMap = new ArrayMap<>();
     @GuardedBy("mLock")
-    private ArrayMap<Integer, PendingIntentRef> mActiveConfigsPirMap =
-            new ArrayMap<>();
+    private ArrayMap<Integer, PendingIntentRef> mActiveConfigsPirMap = new ArrayMap<>();
     @GuardedBy("mLock")
     private ArrayMap<ConfigKey, ArrayMap<Long, PendingIntentRef>> mBroadcastSubscriberPirMap =
             new ArrayMap<>();
@@ -72,8 +72,8 @@ public class StatsManagerService extends IStatsManagerService.Stub {
     }
 
     private static class ConfigKey {
-        private int mUid;
-        private long mConfigId;
+        private final int mUid;
+        private final long mConfigId;
 
         ConfigKey(int uid, long configId) {
             mUid = uid;
@@ -100,6 +100,126 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 return this.mUid == other.getUid() && this.mConfigId == other.getConfigId();
             }
             return false;
+        }
+    }
+
+    private static class PullerKey {
+        private final int mUid;
+        private final int mAtomTag;
+
+        PullerKey(int uid, int atom) {
+            mUid = uid;
+            mAtomTag = atom;
+        }
+
+        public int getUid() {
+            return mUid;
+        }
+
+        public int getAtom() {
+            return mAtomTag;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mUid, mAtomTag);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof PullerKey) {
+                PullerKey other = (PullerKey) obj;
+                return this.mUid == other.getUid() && this.mAtomTag == other.getAtom();
+            }
+            return false;
+        }
+    }
+
+    private static class PullerValue {
+        private final long mCoolDownNs;
+        private final long mTimeoutNs;
+        private final int[] mAdditiveFields;
+        private final IPullAtomCallback mCallback;
+
+        PullerValue(long coolDownNs, long timeoutNs, int[] additiveFields,
+                IPullAtomCallback callback) {
+            mCoolDownNs = coolDownNs;
+            mTimeoutNs = timeoutNs;
+            mAdditiveFields = additiveFields;
+            mCallback = callback;
+        }
+
+        public long getCoolDownNs() {
+            return mCoolDownNs;
+        }
+
+        public long getTimeoutNs() {
+            return mTimeoutNs;
+        }
+
+        public int[] getAdditiveFields() {
+            return mAdditiveFields;
+        }
+
+        public IPullAtomCallback getCallback() {
+            return mCallback;
+        }
+    }
+
+    private final ArrayMap<PullerKey, PullerValue> mPullers = new ArrayMap<>();
+
+    @Override
+    public void registerPullAtomCallback(int atomTag, long coolDownNs, long timeoutNs,
+            int[] additiveFields, IPullAtomCallback pullerCallback) {
+        int callingUid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+        PullerKey key = new PullerKey(callingUid, atomTag);
+        PullerValue val = new PullerValue(coolDownNs, timeoutNs, additiveFields, pullerCallback);
+
+        // Always cache the puller in StatsManagerService. If statsd is down, we will register the
+        // puller when statsd comes back up.
+        synchronized (mLock) {
+            mPullers.put(key, val);
+        }
+
+        IStatsd statsd = getStatsdNonblocking();
+        if (statsd == null) {
+            return;
+        }
+
+        try {
+            statsd.registerPullAtomCallback(
+                    callingUid, atomTag, coolDownNs, timeoutNs, additiveFields, pullerCallback);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to access statsd to register puller for atom " + atomTag);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public void unregisterPullAtomCallback(int atomTag) {
+        int callingUid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+        PullerKey key = new PullerKey(callingUid, atomTag);
+
+        // Always remove the puller from StatsManagerService even if statsd is down. When statsd
+        // comes back up, we will not re-register the removed puller.
+        synchronized (mLock) {
+            mPullers.remove(key);
+        }
+
+        IStatsd statsd = getStatsdNonblocking();
+        if (statsd == null) {
+            return;
+        }
+
+        try {
+            statsd.unregisterPullAtomCallback(callingUid, atomTag);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to access statsd to unregister puller for atom " + atomTag);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -441,46 +561,85 @@ public class StatsManagerService extends IStatsManagerService.Stub {
         if (statsd == null) {
             return;
         }
-        // Since we do not want to make an IPC with the a lock held, we first create local deep
-        // copies of the data with the lock held before iterating through the maps.
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            registerAllPullers(statsd);
+            registerAllDataFetchOperations(statsd);
+            registerAllActiveConfigsChangedOperations(statsd);
+            registerAllBroadcastSubscribers(statsd);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "StatsManager failed to (re-)register data with statsd");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    // Pre-condition: the Binder calling identity has already been cleared
+    private void registerAllPullers(IStatsd statsd) throws RemoteException {
+        // Since we do not want to make an IPC with the lock held, we first create a copy of the
+        // data with the lock held before iterating through the map.
+        ArrayMap<PullerKey, PullerValue> pullersCopy;
+        synchronized (mLock) {
+            pullersCopy = new ArrayMap<>(mPullers);
+        }
+
+        for (Map.Entry<PullerKey, PullerValue> entry : pullersCopy.entrySet()) {
+            PullerKey key = entry.getKey();
+            PullerValue value = entry.getValue();
+            statsd.registerPullAtomCallback(key.getUid(), key.getAtom(), value.getCoolDownNs(),
+                    value.getTimeoutNs(), value.getAdditiveFields(), value.getCallback());
+        }
+    }
+
+    // Pre-condition: the Binder calling identity has already been cleared
+    private void registerAllDataFetchOperations(IStatsd statsd) throws RemoteException {
+        // Since we do not want to make an IPC with the lock held, we first create a copy of the
+        // data with the lock held before iterating through the map.
         ArrayMap<ConfigKey, PendingIntentRef> dataFetchCopy;
-        ArrayMap<Integer, PendingIntentRef> activeConfigsChangedCopy;
-        ArrayMap<ConfigKey, ArrayMap<Long, PendingIntentRef>> broadcastSubscriberCopy;
         synchronized (mLock) {
             dataFetchCopy = new ArrayMap<>(mDataFetchPirMap);
-            activeConfigsChangedCopy = new ArrayMap<>(mActiveConfigsPirMap);
-            broadcastSubscriberCopy = new ArrayMap<>();
-            for (Map.Entry<ConfigKey, ArrayMap<Long, PendingIntentRef>> entry
-                    : mBroadcastSubscriberPirMap.entrySet()) {
-                broadcastSubscriberCopy.put(entry.getKey(), new ArrayMap<>(entry.getValue()));
-            }
         }
+
         for (Map.Entry<ConfigKey, PendingIntentRef> entry : dataFetchCopy.entrySet()) {
             ConfigKey key = entry.getKey();
-            try {
-                statsd.setDataFetchOperation(key.getConfigId(), entry.getValue(), key.getUid());
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to setDataFetchOperation from pirMap");
+            statsd.setDataFetchOperation(key.getConfigId(), entry.getValue(), key.getUid());
+        }
+    }
+
+    // Pre-condition: the Binder calling identity has already been cleared
+    private void registerAllActiveConfigsChangedOperations(IStatsd statsd) throws RemoteException {
+        // Since we do not want to make an IPC with the lock held, we first create a copy of the
+        // data with the lock held before iterating through the map.
+        ArrayMap<Integer, PendingIntentRef> activeConfigsChangedCopy;
+        synchronized (mLock) {
+            activeConfigsChangedCopy = new ArrayMap<>(mActiveConfigsPirMap);
+        }
+
+        for (Map.Entry<Integer, PendingIntentRef> entry : activeConfigsChangedCopy.entrySet()) {
+            statsd.setActiveConfigsChangedOperation(entry.getValue(), entry.getKey());
+        }
+    }
+
+    // Pre-condition: the Binder calling identity has already been cleared
+    private void registerAllBroadcastSubscribers(IStatsd statsd) throws RemoteException {
+        // Since we do not want to make an IPC with the lock held, we first create a deep copy of
+        // the data with the lock held before iterating through the map.
+        ArrayMap<ConfigKey, ArrayMap<Long, PendingIntentRef>> broadcastSubscriberCopy =
+                new ArrayMap<>();
+        synchronized (mLock) {
+            for (Map.Entry<ConfigKey, ArrayMap<Long, PendingIntentRef>> entry :
+                    mBroadcastSubscriberPirMap.entrySet()) {
+                broadcastSubscriberCopy.put(entry.getKey(), new ArrayMap(entry.getValue()));
             }
         }
-        for (Map.Entry<Integer, PendingIntentRef> entry
-                : activeConfigsChangedCopy.entrySet()) {
-            try {
-                statsd.setActiveConfigsChangedOperation(entry.getValue(), entry.getKey());
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to setActiveConfigsChangedOperation from pirMap");
-            }
-        }
-        for (Map.Entry<ConfigKey, ArrayMap<Long, PendingIntentRef>> entry
-                : broadcastSubscriberCopy.entrySet()) {
+
+        for (Map.Entry<ConfigKey, ArrayMap<Long, PendingIntentRef>> entry :
+                mBroadcastSubscriberPirMap.entrySet()) {
+            ConfigKey configKey = entry.getKey();
             for (Map.Entry<Long, PendingIntentRef> subscriberEntry : entry.getValue().entrySet()) {
-                ConfigKey configKey = entry.getKey();
-                try {
-                    statsd.setBroadcastSubscriber(configKey.getConfigId(), subscriberEntry.getKey(),
-                            subscriberEntry.getValue(), configKey.getUid());
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to setBroadcastSubscriber from pirMap");
-                }
+                statsd.setBroadcastSubscriber(configKey.getConfigId(), subscriberEntry.getKey(),
+                        subscriberEntry.getValue(), configKey.getUid());
             }
         }
     }

@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Represents a set of grouped notifications. The final notification list is usually a mix of
@@ -58,22 +57,15 @@ public class GroupEntry extends ListEntry {
 
     @VisibleForTesting
     public void setSummary(@Nullable NotificationEntry summary) {
-        if (!Objects.equals(mSummary, summary)) {
-            mSummary = summary;
-            onGroupingUpdated();
-        }
+        mSummary = summary;
     }
 
     void clearChildren() {
-        if (mChildren.size() != 0) {
-            mChildren.clear();
-            onGroupingUpdated();
-        }
+        mChildren.clear();
     }
 
     void addChild(NotificationEntry child) {
         mChildren.add(child);
-        onGroupingUpdated();
     }
 
     void sortChildren(Comparator<? super NotificationEntry> c) {

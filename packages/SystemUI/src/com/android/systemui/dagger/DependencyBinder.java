@@ -21,9 +21,12 @@ import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.appops.AppOpsControllerImpl;
 import com.android.systemui.classifier.FalsingManagerProxy;
 import com.android.systemui.doze.DozeHost;
+import com.android.systemui.globalactions.GlobalActionsComponent;
+import com.android.systemui.globalactions.GlobalActionsImpl;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.PowerNotificationWarnings;
@@ -95,6 +98,17 @@ public abstract class DependencyBinder {
     @Binds
     public abstract BluetoothController provideBluetoothController(
             BluetoothControllerImpl controllerImpl);
+
+    /**
+     */
+    @Binds
+    public abstract GlobalActions provideGlobalActions(GlobalActionsImpl controllerImpl);
+
+    /**
+     */
+    @Binds
+    public abstract GlobalActions.GlobalActionsManager provideGlobalActionsManager(
+            GlobalActionsComponent controllerImpl);
 
     /**
      */

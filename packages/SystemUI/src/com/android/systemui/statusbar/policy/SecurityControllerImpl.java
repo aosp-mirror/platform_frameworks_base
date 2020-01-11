@@ -126,7 +126,8 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         IntentFilter filter = new IntentFilter();
         filter.addAction(KeyChain.ACTION_TRUST_STORE_CHANGED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
-        broadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, bgHandler, UserHandle.ALL);
+        broadcastDispatcher.registerReceiverWithHandler(mBroadcastReceiver, filter, bgHandler,
+                UserHandle.ALL);
 
         // TODO: re-register network callback on user change.
         mConnectivityManager.registerNetworkCallback(REQUEST, mNetworkCallback);

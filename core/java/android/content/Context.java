@@ -3240,15 +3240,40 @@ public abstract class Context {
     }
 
     /**
-     * Same as {@link #bindService(Intent, ServiceConnection, int)}, but with an explicit userHandle
-     * argument for use by system server and other multi-user aware code.
-     * @hide
+     * Binds to a service in the given {@code user} in the same manner as
+     * {@link #bindService(Intent, ServiceConnection, int)}.
+     *
+     * <p>If the given {@code user} is in the same profile group and the target package is the
+     * same as the caller, {@code android.Manifest.permission.INTERACT_ACROSS_PROFILES} is
+     * sufficient. Otherwise, requires {@code android.Manifest.permission.INTERACT_ACROSS_USERS}
+     * for interacting with other users.
+     *
+     * @param service Identifies the service to connect to.  The Intent must
+     *      specify an explicit component name.
+     * @param conn Receives information as the service is started and stopped.
+     *      This must be a valid ServiceConnection object; it must not be null.
+     * @param flags Operation options for the binding.  May be 0,
+     *          {@link #BIND_AUTO_CREATE}, {@link #BIND_DEBUG_UNBIND},
+     *          {@link #BIND_NOT_FOREGROUND}, {@link #BIND_ABOVE_CLIENT},
+     *          {@link #BIND_ALLOW_OOM_MANAGEMENT}, {@link #BIND_WAIVE_PRIORITY}.
+     *          {@link #BIND_IMPORTANT}, or
+     *          {@link #BIND_ADJUST_WITH_ACTIVITY}.
+     * @return {@code true} if the system is in the process of bringing up a
+     *         service that your client has permission to bind to; {@code false}
+     *         if the system couldn't find the service. If this value is {@code true}, you
+     *         should later call {@link #unbindService} to release the
+     *         connection.
+     *
+     * @throws SecurityException if the client does not have the required permission to bind.
      */
-    @SystemApi
     @SuppressWarnings("unused")
-    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
-    public boolean bindServiceAsUser(@RequiresPermission Intent service, ServiceConnection conn,
-            int flags, UserHandle user) {
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES
+    })
+    public boolean bindServiceAsUser(
+            @NonNull @RequiresPermission Intent service, @NonNull ServiceConnection conn, int flags,
+            @NonNull UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -3391,7 +3416,6 @@ public abstract class Context {
             TELEPHONY_SUBSCRIPTION_SERVICE,
             CARRIER_CONFIG_SERVICE,
             EUICC_SERVICE,
-            MMS_SERVICE,
             TELECOM_SERVICE,
             CLIPBOARD_SERVICE,
             INPUT_METHOD_SERVICE,
@@ -3588,8 +3612,6 @@ public abstract class Context {
      * @see android.telephony.CarrierConfigManager
      * @see #EUICC_SERVICE
      * @see android.telephony.euicc.EuiccManager
-     * @see #MMS_SERVICE
-     * @see android.telephony.MmsManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
      * @see #UI_MODE_SERVICE
@@ -4263,15 +4285,6 @@ public abstract class Context {
      */
     @SystemApi
     public static final String EUICC_CARD_SERVICE = "euicc_card";
-
-    /**
-     * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.telephony.MmsManager} to send/receive MMS messages.
-     *
-     * @see #getSystemService(String)
-     * @see android.telephony.MmsManager
-     */
-    public static final String MMS_SERVICE = "mms";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a

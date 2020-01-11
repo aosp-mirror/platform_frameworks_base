@@ -333,10 +333,11 @@ message Atom {
         MediaProviderSchemaChange media_provider_schema_change = 236 [(module) = "mediaprovider"];
         MediaProviderIdleMaintenance media_provider_idle_maintenance =
             237 [(module) = "mediaprovider"];
+        RebootEscrowRecoveryReported reboot_escrow_recovery_reported = 238;
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10068
+    // Next: 10069
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -405,6 +406,7 @@ message Atom {
         VmsClientStats vms_client_stats = 10065;
         NotificationRemoteViews notification_remote_views = 10066;
         DangerousPermissionStateSampled dangerous_permission_state_sampled = 10067;
+        GraphicsStats graphics_stats = 10068;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -7338,6 +7340,17 @@ message UpdateEngineSuccessfulUpdateReported {
 }
 
 /**
+ * Reported when the RebootEscrow HAL has attempted to recover the escrowed
+ * key to indicate whether it was successful or not.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/locksettings/RebootEscrowManager.java
+ */
+message RebootEscrowRecoveryReported {
+    optional bool successful = 1;
+}
+
+/**
  * Global display pipeline metrics reported by SurfaceFlinger.
  * Pulled from:
  *    frameworks/native/services/surfaceflinger/TimeStats/TimeStats.cpp
@@ -7553,3 +7566,69 @@ message DangerousPermissionStateSampled {
     optional int32 permission_flags = 4;
 }
 
+/**
+ * HWUI renders pipeline type: GL (0) or Vulkan (1).
+ */
+enum PipelineType {
+    GL = 0;
+    VULKAN = 1;
+}
+
+/**
+ * HWUI stats for a given app.
+ */
+message GraphicsStats {
+    // The package name of the app
+    optional string package_name = 1;
+
+    // The version code of the app
+    optional int64 version_code = 2;
+
+    // The start & end timestamps in UTC as
+    // milliseconds since January 1, 1970
+    // Compatible with java.util.Date#setTime()
+    optional int64 stats_start = 3;
+
+    optional int64 stats_end = 4;
+
+    // HWUI renders pipeline type: GL or Vulkan.
+    optional PipelineType pipeline = 5;
+
+    // Distinct frame count.
+    optional int32 total_frames = 6;
+
+    // Number of "missed vsync" events.
+    optional int32 missed_vsync_count = 7;
+
+    // Number of frames in triple-buffering scenario (high input latency)
+    optional int32 high_input_latency_count = 8;
+
+    // Number of "slow UI thread" events.
+    optional int32 slow_ui_thread_count = 9;
+
+    // Number of "slow bitmap upload" events.
+    optional int32 slow_bitmap_upload_count = 10;
+
+    // Number of "slow draw" events.
+    optional int32 slow_draw_count = 11;
+
+    // Number of frames that missed their deadline (aka, visibly janked)
+    optional int32 missed_deadline_count = 12;
+
+    // The frame time histogram for the package
+    optional FrameTimingHistogram cpu_histogram = 13
+    [(android.os.statsd.log_mode) = MODE_BYTES];
+
+    // The gpu frame time histogram for the package
+    optional FrameTimingHistogram gpu_histogram = 14
+    [(android.os.statsd.log_mode) = MODE_BYTES];
+
+    // UI mainline module version.
+    optional int64 version_ui_module = 15;
+
+    // If true, these are HWUI stats for up to a 24h period for a given app from today.
+    // If false, these are HWUI stats for a 24h period for a given app from the last complete
+    // day (yesterday). Stats from yesterday stay constant, while stats from today may change as
+    // more apps are running / rendering.
+    optional bool is_today = 16;
+}

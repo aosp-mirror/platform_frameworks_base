@@ -492,6 +492,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int SCAN_AS_PRODUCT = 1 << 20;
     static final int SCAN_AS_SYSTEM_EXT = 1 << 21;
     static final int SCAN_AS_ODM = 1 << 22;
+    static final int SCAN_AS_APK_IN_APEX = 1 << 23;
 
     @IntDef(flag = true, prefix = { "SCAN_" }, value = {
             SCAN_NO_DEX,
@@ -2589,6 +2590,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     & (SCAN_AS_VENDOR | SCAN_AS_ODM | SCAN_AS_PRODUCT | SCAN_AS_SYSTEM_EXT)) != 0) {
                 return true;
             }
+            if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
+                return true;
+            }
             return false;
         }
 
@@ -3332,7 +3336,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            mInstallerService = new PackageInstallerService(mContext, this, mApexManager);
+            mInstallerService = new PackageInstallerService(mContext, this);
             final Pair<ComponentName, String> instantAppResolverComponent =
                     getInstantAppResolverLPr();
             if (instantAppResolverComponent != null) {
@@ -5344,8 +5348,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
         flags = updateFlagsForComponent(flags, userId);
-        mPermissionManager.enforceCrossUserPermission(callingUid, userId,
-                false /* requireFullPermission */, false /* checkShell */, "get service info");
+        mPermissionManager.enforceCrossUserOrProfilePermission(
+                callingUid, userId, false /* requireFullPermission */, false /* checkShell */,
+                "get service info");
         synchronized (mLock) {
             ParsedService s = mComponentResolver.getService(component);
             if (DEBUG_PACKAGE_INFO) Log.v(
@@ -7795,8 +7800,10 @@ public class PackageManagerService extends IPackageManager.Stub
             String resolvedType, int flags, int userId, int callingUid,
             boolean includeInstantApps) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
-        mPermissionManager.enforceCrossUserPermission(callingUid, userId,
-                false /*requireFullPermission*/, false /*checkShell*/,
+        mPermissionManager.enforceCrossUserOrProfilePermission(callingUid,
+                userId,
+                false /*requireFullPermission*/,
+                false /*checkShell*/,
                 "query intent receivers");
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         flags = updateFlagsForResolve(flags, userId, callingUid, includeInstantApps);
@@ -11710,6 +11717,9 @@ public class PackageManagerService extends IPackageManager.Stub
             mSettings.insertPackageSettingLPw(pkgSetting, pkg);
             // Add the new setting to mPackages
             mPackages.put(pkg.getAppInfoPackageName(), pkg);
+            if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
+                mApexManager.registerApkInApex(pkg);
+            }
 
             // Add the package's KeySets to the global KeySetManagerService
             KeySetManagerService ksms = mSettings.mKeySetManagerService;
@@ -15158,10 +15168,10 @@ public class PackageManagerService extends IPackageManager.Stub
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "updateSettings");
 
         final String pkgName = pkg.getPackageName();
-        final InstallSource installSource = installArgs.installSource;
-        final String installerPackageName = installSource.installerPackageName;
         final int[] installedForUsers = res.origUsers;
         final int installReason = installArgs.installReason;
+        InstallSource installSource = installArgs.installSource;
+        final String installerPackageName = installSource.installerPackageName;
 
         if (DEBUG_INSTALL) Slog.d(TAG, "New package installed in " + pkg.getCodePath());
         synchronized (mLock) {
@@ -15207,6 +15217,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId, installerPackageName);
                 }
 
+                if (installSource.initiatingPackageName != null) {
+                    final PackageSetting ips = mSettings.mPackages.get(
+                            installSource.initiatingPackageName);
+                    if (ips != null) {
+                        installSource = installSource.setInitiatingPackageSignatures(
+                                ips.signatures);
+                    }
+                }
                 ps.setInstallSource(installSource);
                 mSettings.addInstallerPackageNames(installSource);
 
@@ -17749,10 +17767,10 @@ public class PackageManagerService extends IPackageManager.Stub
             ApexManager.ActiveApexInfo apexInfo) {
         for (int i = 0, size = SYSTEM_PARTITIONS.size(); i < size; i++) {
             SystemPartition sp = SYSTEM_PARTITIONS.get(i);
-            if (apexInfo.preinstalledApexPath.getAbsolutePath().startsWith(
+            if (apexInfo.preInstalledApexPath.getAbsolutePath().startsWith(
                     sp.folder.getAbsolutePath())) {
-                return new SystemPartition(apexInfo.apexDirectory, sp.scanFlag,
-                        false /* hasOverlays */);
+                return new SystemPartition(apexInfo.apexDirectory,
+                        sp.scanFlag | SCAN_AS_APK_IN_APEX, false /* hasOverlays */);
             }
         }
         return null;
@@ -19372,7 +19390,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // PermissionController manages default home directly.
             return false;
         }
-        mPermissionManager.setDefaultHome(currentPackageName, userId, (successful) -> {
+        mPermissionManager.setDefaultHome(packageName, userId, (successful) -> {
             if (successful) {
                 postPreferredActivityChangedBroadcast(userId);
             }
@@ -19976,19 +19994,25 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            // All installSource strings are interned, so == is ok here
-            if (installSource.initiatingPackageName == installSource.installerPackageName) {
-                // The installer and initiator will often be the same, and when they are
-                // we can skip doing the same check again.
-                initiatingPackageName = installerPackageName;
+            if (installSource.isInitiatingPackageUninstalled) {
+                // TODO(b/146555198) Allow the app itself to see the info
+                // (at least for non-instant apps)
+                initiatingPackageName = null;
             } else {
-                initiatingPackageName = installSource.initiatingPackageName;
-                final PackageSetting ps = mSettings.mPackages.get(initiatingPackageName);
-                if (ps == null || shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                    initiatingPackageName = null;
+                // All installSource strings are interned, so == is ok here
+                if (installSource.initiatingPackageName == installSource.installerPackageName) {
+                    // The installer and initiator will often be the same, and when they are
+                    // we can skip doing the same check again.
+                    initiatingPackageName = installerPackageName;
+                } else {
+                    initiatingPackageName = installSource.initiatingPackageName;
+                    final PackageSetting ps = mSettings.mPackages.get(initiatingPackageName);
+                    if (ps == null || shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                        initiatingPackageName = null;
+                    }
                 }
-
             }
+
             originatingPackageName = installSource.originatingPackageName;
             if (originatingPackageName != null) {
                 final PackageSetting ps = mSettings.mPackages.get(originatingPackageName);
@@ -20108,8 +20132,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Disable any carrier apps. We do this very early in boot to prevent the apps from being
         // disabled after already being started.
         CarrierAppUtils.disableCarrierAppsUntilPrivileged(mContext.getOpPackageName(), this,
-                mPermissionManagerService, mContext.getContentResolver(),
-                UserHandle.USER_SYSTEM);
+                mPermissionManagerService, UserHandle.USER_SYSTEM, mContext);
 
         disableSkuSpecificApps();
 
@@ -22777,7 +22800,7 @@ public class PackageManagerService extends IPackageManager.Stub
             ArrayList<String> systemPackageNames = new ArrayList<>(pkgNames.length);
 
             for (String pkgName: pkgNames) {
-                synchronized (mPackages) {
+                synchronized (mLock) {
                     if (pkgName == null) {
                         continue;
                     }
@@ -23438,6 +23461,11 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public List<String> getApksInApex(String apexPackageName) {
+            return PackageManagerService.this.mApexManager.getApksInApex(apexPackageName);
+        }
+
+        @Override
         public void uninstallApex(String packageName, long versionCode, int userId,
                 IntentSender intentSender, int flags) {
             final int callerUid = Binder.getCallingUid();
@@ -23618,7 +23646,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Nullable
     public PackageSetting getPackageSetting(String packageName) {
-        synchronized (mPackages) {
+        synchronized (mLock) {
             packageName = resolveInternalPackageNameLPr(
                     packageName, PackageManager.VERSION_CODE_HIGHEST);
             return mSettings.mPackages.get(packageName);

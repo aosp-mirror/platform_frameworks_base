@@ -47,11 +47,11 @@ abstract class MediaRoute2Provider {
 
     public abstract void requestCreateSession(String packageName, String routeId,
             String routeType, long requestId);
-    public abstract void releaseSession(int sessionId);
+    public abstract void releaseSession(String sessionId);
 
-    public abstract void selectRoute(int sessionId, String routeId);
-    public abstract void deselectRoute(int sessionId, String routeId);
-    public abstract void transferToRoute(int sessionId, String routeId);
+    public abstract void selectRoute(String sessionId, String routeId);
+    public abstract void deselectRoute(String sessionId, String routeId);
+    public abstract void transferToRoute(String sessionId, String routeId);
 
     public abstract void sendControlRequest(String routeId, Intent request);
     public abstract void requestSetVolume(String routeId, int volume);

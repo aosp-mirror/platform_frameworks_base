@@ -266,7 +266,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
-        mBroadcastDispatcher.registerReceiver(mIntentReceiver, filter, mHandler);
+        mBroadcastDispatcher.registerReceiverWithHandler(mIntentReceiver, filter, mHandler);
 
         mOverlay.addOnLayoutChangeListener(new OnLayoutChangeListener() {
             @Override

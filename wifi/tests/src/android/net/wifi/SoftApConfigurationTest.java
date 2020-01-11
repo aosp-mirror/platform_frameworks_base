@@ -117,6 +117,7 @@ public class SoftApConfigurationTest {
                 .setChannel(149, SoftApConfiguration.BAND_5GHZ)
                 .setHiddenSsid(true)
                 .setMaxNumberOfClients(10)
+                .setShutdownTimeoutMillis(500000)
                 .build();
         assertThat(original.getPassphrase()).isEqualTo("secretsecret");
         assertThat(original.getSecurityType()).isEqualTo(
@@ -125,6 +126,7 @@ public class SoftApConfigurationTest {
         assertThat(original.getChannel()).isEqualTo(149);
         assertThat(original.isHiddenSsid()).isEqualTo(true);
         assertThat(original.getMaxNumberOfClients()).isEqualTo(10);
+        assertThat(original.getShutdownTimeoutMillis()).isEqualTo(500000);
 
         SoftApConfiguration unparceled = parcelUnparcel(original);
         assertThat(unparceled).isNotSameAs(original);
@@ -230,4 +232,10 @@ public class SoftApConfigurationTest {
                 .build();
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalieShutdownTimeoutMillis() {
+        SoftApConfiguration original = new SoftApConfiguration.Builder()
+                .setShutdownTimeoutMillis(-1)
+                .build();
+    }
 }

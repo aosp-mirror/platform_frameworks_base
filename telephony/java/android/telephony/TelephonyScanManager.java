@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import com.android.telephony.Rlog;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.Nullable;

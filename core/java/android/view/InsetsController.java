@@ -37,16 +37,20 @@ import android.util.SparseArray;
 import android.view.InsetsSourceConsumer.ShowResult;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimationCallback.AnimationBounds;
 import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
+import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
 /**
@@ -65,6 +69,37 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @IntDef ({DIRECTION_NONE, DIRECTION_SHOW, DIRECTION_HIDE})
     private @interface AnimationDirection{}
+
+    /**
+     * Layout mode during insets animation: The views should be laid out as if the changing inset
+     * types are fully shown. Before starting the animation, {@link View#onApplyWindowInsets} will
+     * be called as if the changing insets types are shown, which will result in the views being
+     * laid out as if the insets are fully shown.
+     */
+    static final int LAYOUT_INSETS_DURING_ANIMATION_SHOWN = 0;
+
+    /**
+     * Layout mode during insets animation: The views should be laid out as if the changing inset
+     * types are fully hidden. Before starting the animation, {@link View#onApplyWindowInsets} will
+     * be called as if the changing insets types are hidden, which will result in the views being
+     * laid out as if the insets are fully hidden.
+     */
+    static final int LAYOUT_INSETS_DURING_ANIMATION_HIDDEN = 1;
+
+    /**
+     * Determines the behavior of how the views should be laid out during an insets animation that
+     * is controlled by the application by calling {@link #controlWindowInsetsAnimation}.
+     * <p>
+     * When the animation is system-initiated, the layout mode is always chosen such that the
+     * pre-animation layout will represent the opposite of the starting state, i.e. when insets
+     * are appearing, {@link #LAYOUT_INSETS_DURING_ANIMATION_SHOWN} will be used. When insets
+     * are disappearing, {@link #LAYOUT_INSETS_DURING_ANIMATION_HIDDEN} will be used.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {LAYOUT_INSETS_DURING_ANIMATION_SHOWN,
+            LAYOUT_INSETS_DURING_ANIMATION_HIDDEN})
+    @interface LayoutInsetsDuringAnimation {
+    }
 
     /**
      * Translation animation evaluator.
@@ -109,11 +144,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         @Override
         public void onReady(WindowInsetsAnimationController controller, int types) {
             mController = controller;
-            if (mShow) {
-                showDirectly(types);
-            } else {
-                hideDirectly(types);
-            }
+
             mAnimationDirection = mShow ? DIRECTION_SHOW : DIRECTION_HIDE;
             mAnimator = ObjectAnimator.ofObject(
                     controller,
@@ -131,7 +162,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     onAnimationFinish();
                 }
             });
+            mStartingAnimation = true;
             mAnimator.start();
+            mStartingAnimation = false;
         }
 
         @Override
@@ -185,6 +218,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private int mPendingTypesToShow;
 
     private int mLastLegacySoftInputMode;
+    private boolean mStartingAnimation;
 
     private SyncRtSurfaceTransactionApplier mApplier;
 
@@ -266,6 +300,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /**
+     * @see InsetsState#calculateVisibleInsets(Rect, Rect, int)
+     */
+    public Rect calculateVisibleInsets(Rect legacyVisibleInsets,
+            @SoftInputModeFlags int softInputMode) {
+        return mState.calculateVisibleInsets(mFrame, legacyVisibleInsets, softInputMode);
+    }
+
+    /**
      * Called when the server has dispatched us a new set of inset controls.
      */
     public void onControlsChanged(InsetsSourceControl[] activeControls) {
@@ -312,7 +354,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 // Only one animator (with multiple InsetsType) can run at a time.
                 // previous one should be cancelled for simplicity.
                 cancelExistingAnimation();
-            } else if (consumer.isVisible()
+            } else if (consumer.isRequestedVisible()
                     && (mAnimationDirection == DIRECTION_NONE
                     || mAnimationDirection == DIRECTION_HIDE)) {
                 // no-op: already shown or animating in (because window visibility is
@@ -338,7 +380,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             InsetsSourceConsumer consumer = getSourceConsumer(internalTypes.valueAt(i));
             if (mAnimationDirection == DIRECTION_SHOW) {
                 cancelExistingAnimation();
-            } else if (!consumer.isVisible()
+            } else if (!consumer.isRequestedVisible()
                     && (mAnimationDirection == DIRECTION_NONE
                     || mAnimationDirection == DIRECTION_HIDE)) {
                 // no-op: already hidden or animating out.
@@ -363,12 +405,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             listener.onCancelled();
             return;
         }
-        controlAnimationUnchecked(types, listener, mFrame, fromIme, durationMs, false /* fade */);
+        controlAnimationUnchecked(types, listener, mFrame, fromIme, durationMs, false /* fade */,
+                getLayoutInsetsDuringAnimationMode(types));
     }
 
     private void controlAnimationUnchecked(@InsetsType int types,
             WindowInsetsAnimationControlListener listener, Rect frame, boolean fromIme,
-            long durationMs, boolean fade) {
+            long durationMs, boolean fade,
+            @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
         if (types == 0) {
             // nothing to animate.
             return;
@@ -398,7 +442,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
 
         final InsetsAnimationControlImpl controller = new InsetsAnimationControlImpl(controls,
-                frame, mState, listener, typesReady, this, durationMs, fade);
+                frame, mState, listener, typesReady, this, durationMs, fade,
+                layoutInsetsDuringAnimation);
         mAnimationControls.add(controller);
     }
 
@@ -412,7 +457,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         boolean isReady = true;
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
             InsetsSourceConsumer consumer = getSourceConsumer(internalTypes.valueAt(i));
-            boolean setVisible = !consumer.isVisible();
+            boolean setVisible = !consumer.isRequestedVisible();
             if (setVisible) {
                 // Show request
                 switch(consumer.requestShow(fromIme)) {
@@ -452,6 +497,29 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         typesReady |= mPendingTypesToShow;
         mPendingTypesToShow = 0;
         return typesReady;
+    }
+
+    private @LayoutInsetsDuringAnimation int getLayoutInsetsDuringAnimationMode(
+            @InsetsType int types) {
+
+        final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
+
+        // Generally, we want to layout the opposite of the current state. This is to make animation
+        // callbacks easy to use: The can capture the layout values and then treat that as end-state
+        // during the animation.
+        //
+        // However, if controlling multiple sources, we want to treat it as shown if any of the
+        // types is currently hidden.
+        for (int i = internalTypes.size() - 1; i >= 0; i--) {
+            InsetsSourceConsumer consumer = mSourceConsumers.get(internalTypes.valueAt(i));
+            if (consumer == null) {
+                continue;
+            }
+            if (!consumer.isRequestedVisible()) {
+                return LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
+            }
+        }
+        return LAYOUT_INSETS_DURING_ANIMATION_HIDDEN;
     }
 
     private void cancelExistingControllers(@InsetsType int types) {
@@ -597,7 +665,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         // and hidden state insets are correct.
         controlAnimationUnchecked(
                 types, listener, mState.getDisplayFrame(), fromIme, listener.getDurationMs(),
-                true /* fade */);
+                true /* fade */, show
+                        ? LAYOUT_INSETS_DURING_ANIMATION_SHOWN
+                        : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN);
     }
 
     private void hideDirectly(@InsetsType int types) {
@@ -629,18 +699,40 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     @Override
-    public void dispatchAnimationStarted(InsetsAnimation animation, AnimationBounds bounds) {
-        mViewRoot.mView.dispatchWindowInsetsAnimationStarted(animation, bounds);
+    public void startAnimation(InsetsAnimationControlImpl controller,
+            WindowInsetsAnimationControlListener listener, int types, InsetsAnimation animation,
+            AnimationBounds bounds, int layoutDuringAnimation) {
+        if (layoutDuringAnimation == LAYOUT_INSETS_DURING_ANIMATION_SHOWN) {
+            showDirectly(types);
+        } else {
+            hideDirectly(types);
+        }
+        mViewRoot.mView.dispatchWindowInsetsAnimationPrepare(animation);
+        mViewRoot.mView.getViewTreeObserver().addOnPreDrawListener(new OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                mViewRoot.mView.getViewTreeObserver().removeOnPreDrawListener(this);
+                mViewRoot.mView.dispatchWindowInsetsAnimationStart(animation, bounds);
+                listener.onReady(controller, types);
+                return true;
+            }
+        });
+        mViewRoot.mView.invalidate();
     }
 
     @VisibleForTesting
     public void dispatchAnimationFinished(InsetsAnimation animation) {
-        mViewRoot.mView.dispatchWindowInsetsAnimationFinished(animation);
+        mViewRoot.mView.dispatchWindowInsetsAnimationFinish(animation);
     }
 
     @VisibleForTesting
     @Override
     public void scheduleApplyChangeInsets() {
+        if (mStartingAnimation) {
+            mAnimCallback.run();
+            mAnimCallbackScheduled = false;
+            return;
+        }
         if (!mAnimCallbackScheduled) {
             mViewRoot.mChoreographer.postCallback(Choreographer.CALLBACK_INSETS_ANIMATION,
                     mAnimCallback, null /* token*/);

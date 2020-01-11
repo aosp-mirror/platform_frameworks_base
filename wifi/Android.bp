@@ -32,6 +32,7 @@ filegroup {
         // framework-wifi.jar. This is not a good idea, should move WifiNetworkScoreCache
         // to a separate package.
         "java/android/net/wifi/WifiNetworkScoreCache.java",
+        "java/android/net/wifi/WifiOemConfigStoreMigrationHook.java",
         "java/android/net/wifi/wificond/*.java",
         ":libwificond_ipc_aidl",
     ],
@@ -67,10 +68,15 @@ java_library {
     optimize: {
         enabled: false
     },
+    hostdex: true, // for hiddenapi check
     visibility: [
         "//frameworks/base", // TODO(b/140299412) remove once all dependencies are fixed
         "//frameworks/opt/net/wifi/service:__subpackages__",
     ] + test_access_hidden_api_whitelist,
+    apex_available: [
+        "com.android.wifi",
+        "test_com.android.wifi",
+    ],
     plugins: ["java_api_finder"],
 }
 

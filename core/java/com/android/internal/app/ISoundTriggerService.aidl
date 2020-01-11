@@ -61,10 +61,6 @@ interface ISoundTriggerService {
     int setParameter(in ParcelUuid soundModelId, in ModelParams modelParam,
         int value);
 
-    /**
-     * @throws UnsupportedOperationException if hal or model do not support this API.
-     * @throws IllegalArgumentException if invalid model handle or parameter is passed.
-     */
     int getParameter(in ParcelUuid soundModelId, in ModelParams modelParam);
 
     @nullable SoundTrigger.ModelParamRange queryParameter(in ParcelUuid soundModelId,

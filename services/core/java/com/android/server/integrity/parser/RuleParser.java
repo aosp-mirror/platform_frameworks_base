@@ -28,5 +28,6 @@ public interface RuleParser {
     List<Rule> parse(byte[] ruleBytes) throws RuleParseException;
 
     /** Parse rules from an input stream. */
-    List<Rule> parse(InputStream inputStream) throws RuleParseException;
+    List<Rule> parse(InputStream inputStream, List<RuleIndexRange> ruleIndexRanges)
+            throws RuleParseException;
 }

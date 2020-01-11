@@ -16,9 +16,6 @@
 
 package android.media.tv.tuner.frontend;
 
-import android.media.tv.tuner.FrontendSettings;
-import android.media.tv.tuner.TunerConstants;
-
 /**
  * Frontend settings for ISDBS.
  * @hide
@@ -37,6 +34,6 @@ public class IsdbsFrontendSettings extends FrontendSettings {
 
     @Override
     public int getType() {
-        return TunerConstants.FRONTEND_TYPE_ISDBS;
+        return FrontendSettings.TYPE_ISDBS;
     }
 }

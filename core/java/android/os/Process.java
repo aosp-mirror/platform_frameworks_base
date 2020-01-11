@@ -68,10 +68,9 @@ public class Process {
     public static final int LOG_UID = 1007;
 
     /**
-     * Defines the UID/GID for the WIFI supplicant process.
-     * @hide
+     * Defines the UID/GID for the WIFI native processes like wificond, supplicant, hostapd,
+     * vendor HAL, etc.
      */
-    @UnsupportedAppUsage
     public static final int WIFI_UID = 1010;
 
     /**
@@ -758,11 +757,12 @@ public class Process {
 
     /**
      * Set the priority of a thread, based on Linux priorities.
-     * 
-     * @param tid The identifier of the thread/process to change.
+     *
+     * @param tid The identifier of the thread/process to change. It should be
+     * the native thread id but not the managed id of {@link java.lang.Thread}.
      * @param priority A Linux priority level, from -20 for highest scheduling
      * priority to 19 for lowest scheduling priority.
-     * 
+     *
      * @throws IllegalArgumentException Throws IllegalArgumentException if
      * <var>tid</var> does not exist.
      * @throws SecurityException Throws SecurityException if your process does

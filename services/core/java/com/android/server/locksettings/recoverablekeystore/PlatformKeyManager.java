@@ -67,8 +67,9 @@ import javax.crypto.spec.GCMParameterSpec;
  * @hide
  */
 public class PlatformKeyManager {
-    private static final String TAG = "PlatformKeyManager";
+    static final int MIN_GENERATION_ID_FOR_UNLOCKED_DEVICE_REQUIRED = 1000000;
 
+    private static final String TAG = "PlatformKeyManager";
     private static final String KEY_ALGORITHM = "AES";
     private static final int KEY_SIZE_BITS = 256;
     private static final String KEY_ALIAS_PREFIX =
@@ -131,14 +132,14 @@ public class PlatformKeyManager {
 
     /**
      * Returns {@code true} if the platform key is available. A platform key won't be available if
-     * the user has not set up a lock screen.
+     * device is locked.
      *
      * @param userId The ID of the user to whose lock screen the platform key must be bound.
      *
      * @hide
      */
-    public boolean isAvailable(int userId) {
-        return mContext.getSystemService(KeyguardManager.class).isDeviceSecure(userId);
+    public boolean isDeviceLocked(int userId) {
+        return mContext.getSystemService(KeyguardManager.class).isDeviceLocked(userId);
     }
 
     /**
@@ -169,7 +170,6 @@ public class PlatformKeyManager {
      * @param userId The ID of the user to whose lock screen the platform key must be bound.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never happen.
      * @throws KeyStoreException if there is an error in AndroidKeyStore.
-     * @throws InsecureUserException if the user does not have a lock screen set.
      * @throws IOException if there was an issue with local database update.
      * @throws RemoteException if there was an issue communicating with {@link IGateKeeperService}.
      *
@@ -177,13 +177,8 @@ public class PlatformKeyManager {
      */
     @VisibleForTesting
     void regenerate(int userId)
-            throws NoSuchAlgorithmException, KeyStoreException, InsecureUserException, IOException,
+            throws NoSuchAlgorithmException, KeyStoreException, IOException,
                     RemoteException {
-        if (!isAvailable(userId)) {
-            throw new InsecureUserException(String.format(
-                    Locale.US, "%d does not have a lock screen set.", userId));
-        }
-
         int generationId = getGenerationId(userId);
         int nextId;
         if (generationId == -1) {
@@ -192,6 +187,7 @@ public class PlatformKeyManager {
             invalidatePlatformKey(userId, generationId);
             nextId = generationId + 1;
         }
+        generationId = Math.max(generationId, MIN_GENERATION_ID_FOR_UNLOCKED_DEVICE_REQUIRED);
         generateAndLoadKey(userId, nextId);
     }
 
@@ -203,7 +199,6 @@ public class PlatformKeyManager {
      * @throws KeyStoreException if there was an AndroidKeyStore error.
      * @throws UnrecoverableKeyException if the key could not be recovered.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never occur.
-     * @throws InsecureUserException if the user does not have a lock screen set.
      * @throws IOException if there was an issue with local database update.
      * @throws RemoteException if there was an issue communicating with {@link IGateKeeperService}.
      *
@@ -211,7 +206,7 @@ public class PlatformKeyManager {
      */
     public PlatformEncryptionKey getEncryptKey(int userId)
             throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException,
-                    InsecureUserException, IOException, RemoteException {
+                    IOException, RemoteException {
         init(userId);
         try {
             // Try to see if the decryption key is still accessible before using the encryption key.
@@ -234,12 +229,11 @@ public class PlatformKeyManager {
      * @throws KeyStoreException if there was an AndroidKeyStore error.
      * @throws UnrecoverableKeyException if the key could not be recovered.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never occur.
-     * @throws InsecureUserException if the user does not have a lock screen set.
      *
      * @hide
      */
     private PlatformEncryptionKey getEncryptKeyInternal(int userId) throws KeyStoreException,
-           UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException {
+            UnrecoverableKeyException, NoSuchAlgorithmException {
         int generationId = getGenerationId(userId);
         String alias = getEncryptAlias(userId, generationId);
         if (!isKeyLoaded(userId, generationId)) {
@@ -258,7 +252,6 @@ public class PlatformKeyManager {
      * @throws KeyStoreException if there was an AndroidKeyStore error.
      * @throws UnrecoverableKeyException if the key could not be recovered.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never occur.
-     * @throws InsecureUserException if the user does not have a lock screen set.
      * @throws IOException if there was an issue with local database update.
      * @throws RemoteException if there was an issue communicating with {@link IGateKeeperService}.
      *
@@ -266,7 +259,7 @@ public class PlatformKeyManager {
      */
     public PlatformDecryptionKey getDecryptKey(int userId)
             throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException,
-                    InsecureUserException, IOException, RemoteException {
+                    IOException, RemoteException {
         init(userId);
         try {
             PlatformDecryptionKey decryptionKey = getDecryptKeyInternal(userId);
@@ -288,12 +281,11 @@ public class PlatformKeyManager {
      * @throws KeyStoreException if there was an AndroidKeyStore error.
      * @throws UnrecoverableKeyException if the key could not be recovered.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never occur.
-     * @throws InsecureUserException if the user does not have a lock screen set.
      *
      * @hide
      */
     private PlatformDecryptionKey getDecryptKeyInternal(int userId) throws KeyStoreException,
-           UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException {
+            UnrecoverableKeyException, NoSuchAlgorithmException {
         int generationId = getGenerationId(userId);
         String alias = getDecryptAlias(userId, generationId);
         if (!isKeyLoaded(userId, generationId)) {
@@ -340,13 +332,8 @@ public class PlatformKeyManager {
      * @hide
      */
     void init(int userId)
-            throws KeyStoreException, NoSuchAlgorithmException, InsecureUserException, IOException,
+            throws KeyStoreException, NoSuchAlgorithmException, IOException,
                     RemoteException {
-        if (!isAvailable(userId)) {
-            throw new InsecureUserException(String.format(
-                    Locale.US, "%d does not have a lock screen set.", userId));
-        }
-
         int generationId = getGenerationId(userId);
         if (isKeyLoaded(userId, generationId)) {
             Log.i(TAG, String.format(
@@ -363,6 +350,7 @@ public class PlatformKeyManager {
             generationId++;
         }
 
+        generationId = Math.max(generationId, MIN_GENERATION_ID_FOR_UNLOCKED_DEVICE_REQUIRED);
         generateAndLoadKey(userId, generationId);
     }
 
@@ -440,12 +428,16 @@ public class PlatformKeyManager {
 
         KeyProtection.Builder decryptionKeyProtection =
                 new KeyProtection.Builder(KeyProperties.PURPOSE_DECRYPT)
-                    .setUserAuthenticationRequired(true)
-                    .setUserAuthenticationValidityDurationSeconds(
-                            USER_AUTHENTICATION_VALIDITY_DURATION_SECONDS)
                     .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE);
-        if (userId != UserHandle.USER_SYSTEM) {
+        // Skip UserAuthenticationRequired for main user
+        if (userId ==  UserHandle.USER_SYSTEM) {
+            decryptionKeyProtection.setUnlockedDeviceRequired(true);
+        } else {
+            // With setUnlockedDeviceRequired, KeyStore thinks that device is locked .
+            decryptionKeyProtection.setUserAuthenticationRequired(true);
+            decryptionKeyProtection.setUserAuthenticationValidityDurationSeconds(
+                            USER_AUTHENTICATION_VALIDITY_DURATION_SECONDS);
             // Bind decryption key to secondary profile lock screen secret.
             long secureUserId = getGateKeeperService().getSecureUserId(userId);
             // TODO(b/124095438): Propagate this failure instead of silently failing.

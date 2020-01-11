@@ -149,7 +149,8 @@ public interface WindowInsetsController {
      *
      * @param types The {@link InsetsType}s the application has requested to control.
      * @param durationMillis duration of animation in
-     *                       {@link java.util.concurrent.TimeUnit#MILLISECONDS}
+     *                       {@link java.util.concurrent.TimeUnit#MILLISECONDS}, or -1 if the
+     *                       animation doesn't have a predetermined duration.
      * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when the
      *                 windows are ready to be controlled, among other callbacks.
      * @hide
@@ -162,7 +163,8 @@ public interface WindowInsetsController {
      * modifying the position of the IME when it's causing insets.
      *
      * @param durationMillis duration of the animation in
-     *                       {@link java.util.concurrent.TimeUnit#MILLISECONDS}
+     *                       {@link java.util.concurrent.TimeUnit#MILLISECONDS}, or -1 if the
+     *                       animation doesn't have a predetermined duration.
      * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when the
      *                 IME are ready to be controlled, among other callbacks.
      */

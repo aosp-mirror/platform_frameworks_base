@@ -15,35 +15,45 @@
  */
 package com.android.server.pm;
 
+import static android.app.AppOpsManager.OP_INTERACT_ACROSS_PROFILES;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
+import android.Manifest;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
+import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.app.admin.DevicePolicyEventLogger;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ICrossProfileApps;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
+import com.android.internal.app.IAppOpsService;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
+import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.ArrayList;
@@ -55,6 +65,9 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
     private Context mContext;
     private Injector mInjector;
+    private AppOpsService mAppOpsService;
+    private final DevicePolicyManagerInternal mDpmi;
+    private final IPackageManager mIpm;
 
     public CrossProfileAppsServiceImpl(Context context) {
         this(context, new InjectorImpl(context));
@@ -64,6 +77,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     CrossProfileAppsServiceImpl(Context context, Injector injector) {
         mContext = context;
         mInjector = injector;
+        mIpm = AppGlobals.getPackageManager();
+        mDpmi = LocalServices.getService(DevicePolicyManagerInternal.class);
     }
 
     @Override
@@ -153,6 +168,63 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                 userId);
     }
 
+    @Override
+    public boolean canRequestInteractAcrossProfiles(String callingPackage) {
+        Objects.requireNonNull(callingPackage);
+        verifyCallingPackage(callingPackage);
+
+        final List<UserHandle> targetUserProfiles = getTargetUserProfilesUnchecked(
+                callingPackage, mInjector.getCallingUserId());
+        if (targetUserProfiles.isEmpty()) {
+            return false;
+        }
+
+        if (!hasRequestedAppOpPermission(
+                AppOpsManager.opToPermission(OP_INTERACT_ACROSS_PROFILES), callingPackage)) {
+            return false;
+        }
+        return isCrossProfilePackageWhitelisted(callingPackage);
+    }
+
+    private boolean hasRequestedAppOpPermission(String permission, String packageName) {
+        try {
+            String[] packages = mIpm.getAppOpPermissionPackages(permission);
+            return ArrayUtils.contains(packages, packageName);
+        } catch (RemoteException exc) {
+            Slog.e(TAG, "PackageManager dead. Cannot get permission info");
+            return false;
+        }
+    }
+
+    @Override
+    public boolean canInteractAcrossProfiles(String callingPackage) {
+        Objects.requireNonNull(callingPackage);
+        verifyCallingPackage(callingPackage);
+
+        final List<UserHandle> targetUserProfiles = getTargetUserProfilesUnchecked(
+                callingPackage, mInjector.getCallingUserId());
+        if (targetUserProfiles.isEmpty()) {
+            return false;
+        }
+
+        final int callingUid = mInjector.getCallingUid();
+        return isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS_FULL, callingUid)
+                || isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS, callingUid)
+                || isPermissionGranted(Manifest.permission.INTERACT_ACROSS_PROFILES, callingUid)
+                || AppOpsManager.MODE_ALLOWED == getAppOpsService().noteOperation(
+                OP_INTERACT_ACROSS_PROFILES, callingUid, callingPackage, /* featureId= */ null,
+                /*shouldCollectAsyncNotedOp= */false, /*message= */null);
+    }
+
+    private boolean isCrossProfilePackageWhitelisted(String packageName) {
+        final long ident = mInjector.clearCallingIdentity();
+        try {
+            return mDpmi.getAllCrossProfilePackages().contains(packageName);
+        } finally {
+            mInjector.restoreCallingIdentity(ident);
+        }
+    }
+
     private List<UserHandle> getTargetUserProfilesUnchecked(
             String callingPackage, @UserIdInt int callingUserId) {
         final long ident = mInjector.clearCallingIdentity();
@@ -237,6 +309,19 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
      */
     private void verifyCallingPackage(String callingPackage) {
         mInjector.getAppOpsManager().checkPackage(mInjector.getCallingUid(), callingPackage);
+    }
+
+    private static boolean isPermissionGranted(String permission, int uid) {
+        return PackageManager.PERMISSION_GRANTED == ActivityManager.checkComponentPermission(
+                permission, uid, /* owningUid= */-1, /* exported= */ true);
+    }
+
+    private AppOpsService getAppOpsService() {
+        if (mAppOpsService == null) {
+            IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
+            mAppOpsService = (AppOpsService) IAppOpsService.Stub.asInterface(b);
+        }
+        return mAppOpsService;
     }
 
     private static class InjectorImpl implements Injector {

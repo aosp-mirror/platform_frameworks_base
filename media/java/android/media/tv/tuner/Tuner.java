@@ -23,13 +23,11 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.tuner.TunerConstants.FilterStatus;
 import android.media.tv.tuner.TunerConstants.FilterSubtype;
-import android.media.tv.tuner.TunerConstants.FilterType;
 import android.media.tv.tuner.TunerConstants.FrontendScanType;
-import android.media.tv.tuner.TunerConstants.LnbPosition;
-import android.media.tv.tuner.TunerConstants.LnbTone;
-import android.media.tv.tuner.TunerConstants.LnbVoltage;
 import android.media.tv.tuner.TunerConstants.Result;
+import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
 import android.media.tv.tuner.filter.FilterEvent;
+import android.media.tv.tuner.filter.TimeFilter;
 import android.media.tv.tuner.frontend.FrontendCallback;
 import android.media.tv.tuner.frontend.FrontendInfo;
 import android.media.tv.tuner.frontend.FrontendStatus;
@@ -218,11 +216,6 @@ public final class Tuner implements AutoCloseable  {
                         filter.mCallback.onFilterStatusChanged(filter, msg.arg1);
                     }
                     break;
-                }
-                case MSG_ON_LNB_EVENT: {
-                    if (mLnb != null && mLnb.mCallback != null) {
-                        mLnb.mCallback.onEvent(msg.arg1);
-                    }
                 }
                 default:
                     // fall through
@@ -423,8 +416,14 @@ public final class Tuner implements AutoCloseable  {
         return mFrontend.mId;
     }
 
-    /** @hide */
-    private static DemuxCapabilities getDemuxCapabilities() {
+    /**
+     * Gets Demux capabilities.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @Nullable
+    public static DemuxCapabilities getDemuxCapabilities(@NonNull Context context) {
+        TunerUtils.checkTunerPermission(context);
         return nativeGetDemuxCapabilities();
     }
 
@@ -472,102 +471,6 @@ public final class Tuner implements AutoCloseable  {
             }
         }
         return filter;
-    }
-
-    /**
-     * Open a time filter instance.
-     *
-     * It is used to open time filter of demux.
-     *
-     * @return a time filter instance.
-     * @hide
-     */
-    public TimeFilter openTimeFilter() {
-        return nativeOpenTimeFilter();
-    }
-
-    /** @hide */
-    public class Lnb {
-        private int mId;
-        private LnbCallback mCallback;
-
-        private native int nativeSetVoltage(int voltage);
-        private native int nativeSetTone(int tone);
-        private native int nativeSetSatellitePosition(int position);
-        private native int nativeSendDiseqcMessage(byte[] message);
-        private native int nativeClose();
-
-        private Lnb(int id) {
-            mId = id;
-        }
-
-        public void setCallback(@Nullable LnbCallback callback) {
-            mCallback = callback;
-            if (mCallback == null) {
-                return;
-            }
-            if (mHandler == null) {
-                mHandler = createEventHandler();
-            }
-        }
-
-        /**
-         * Sets the LNB's power voltage.
-         *
-         * @param voltage the power voltage the Lnb to use.
-         * @return result status of the operation.
-         */
-        @Result
-        public int setVoltage(@LnbVoltage int voltage) {
-            return nativeSetVoltage(voltage);
-        }
-
-        /**
-         * Sets the LNB's tone mode.
-         *
-         * @param tone the tone mode the Lnb to use.
-         * @return result status of the operation.
-         */
-        @Result
-        public int setTone(@LnbTone int tone) {
-            return nativeSetTone(tone);
-        }
-
-        /**
-         * Selects the LNB's position.
-         *
-         * @param position the position the Lnb to use.
-         * @return result status of the operation.
-         */
-        @Result
-        public int setSatellitePosition(@LnbPosition int position) {
-            return nativeSetSatellitePosition(position);
-        }
-
-        /**
-         * Sends DiSEqC (Digital Satellite Equipment Control) message.
-         *
-         * The response message from the device comes back through callback onDiseqcMessage.
-         *
-         * @param message a byte array of data for DiSEqC message which is specified by EUTELSAT Bus
-         *         Functional Specification Version 4.2.
-         *
-         * @return result status of the operation.
-         */
-        @Result
-        public int sendDiseqcMessage(byte[] message) {
-            return nativeSendDiseqcMessage(message);
-        }
-
-        /**
-         * Releases the LNB instance
-         *
-         * @return result status of the operation.
-         */
-        @Result
-        public int close() {
-            return nativeClose();
-        }
     }
 
     private List<Integer> getLnbIds() {

@@ -31,6 +31,8 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
+import com.android.systemui.statusbar.notification.collection.NotificationRowBinder;
+import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
@@ -81,6 +83,11 @@ public abstract class SystemUIModule {
         return new KeyguardLiftController(statusBarStateController, asyncSensorManager,
                 keyguardUpdateMonitor, dumpController);
     }
+
+    /** */
+    @Binds
+    public abstract NotificationRowBinder bindNotificationRowBinder(
+            NotificationRowBinderImpl notificationRowBinder);
 
     @Singleton
     @Provides

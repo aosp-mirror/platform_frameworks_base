@@ -307,6 +307,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
             case Icon.TYPE_RESOURCE:
                 return a.getResPackage().equals(b.getResPackage()) && a.getResId() == b.getResId();
             case Icon.TYPE_URI:
+            case Icon.TYPE_URI_ADAPTIVE_BITMAP:
                 return a.getUriString().equals(b.getUriString());
             default:
                 return false;

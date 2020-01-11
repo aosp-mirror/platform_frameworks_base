@@ -26,17 +26,24 @@ import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.trust.TrustManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
+import android.media.AudioManager;
+import android.net.ConnectivityManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.Vibrator;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+import android.telecom.TelecomManager;
+import android.telephony.TelephonyManager;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -66,6 +73,12 @@ public class SystemServicesModule {
         return context.getSystemService(AccessibilityManager.class);
     }
 
+    @Provides
+    @Singleton
+    static ActivityManager provideActivityManager(Context context) {
+        return context.getSystemService(ActivityManager.class);
+    }
+
     @Singleton
     @Provides
     static AlarmManager provideAlarmManager(Context context) {
@@ -74,10 +87,21 @@ public class SystemServicesModule {
 
     @Provides
     @Singleton
-    static ActivityManager provideActivityManager(Context context) {
-        return context.getSystemService(ActivityManager.class);
+    static AudioManager provideAudioManager(Context context) {
+        return context.getSystemService(AudioManager.class);
     }
 
+    @Provides
+    @Singleton
+    static ConnectivityManager provideConnectivityManagager(Context context) {
+        return context.getSystemService(ConnectivityManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static ContentResolver provideContentResolver(Context context) {
+        return context.getContentResolver();
+    }
 
     @Provides
     @DisplayId
@@ -181,6 +205,31 @@ public class SystemServicesModule {
     @Provides
     static SensorPrivacyManager provideSensorPrivacyManager(Context context) {
         return context.getSystemService(SensorPrivacyManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static TelecomManager provideTelecomManager(Context context) {
+        return context.getSystemService(TelecomManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static TelephonyManager provideTelephonyManager(Context context) {
+        return context.getSystemService(TelephonyManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static TrustManager provideTrustManager(Context context) {
+        return context.getSystemService(TrustManager.class);
+    }
+
+    @Provides
+    @Singleton
+    @Nullable
+    static Vibrator provideVibrator(Context context) {
+        return context.getSystemService(Vibrator.class);
     }
 
     @Provides

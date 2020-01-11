@@ -16,6 +16,8 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -119,10 +121,8 @@ public class MapProfile implements LocalBluetoothProfile {
         if (mService == null) {
             return false;
         }
-        if (mService.getConnectionPolicy(device) > BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
-            mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_ALLOWED);
-        }
-        return mService.disconnect(device);
+
+        return mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
     }
 
     public int getConnectionStatus(BluetoothDevice device) {
@@ -136,12 +136,12 @@ public class MapProfile implements LocalBluetoothProfile {
         if (mService == null) {
             return false;
         }
-        return mService.getConnectionPolicy(device) > BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+        return mService.getConnectionPolicy(device) > CONNECTION_POLICY_FORBIDDEN;
     }
 
     public int getPreferred(BluetoothDevice device) {
         if (mService == null) {
-            return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+            return CONNECTION_POLICY_FORBIDDEN;
         }
         return mService.getConnectionPolicy(device);
     }
@@ -155,7 +155,7 @@ public class MapProfile implements LocalBluetoothProfile {
                 mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_ALLOWED);
             }
         } else {
-            mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_FORBIDDEN);
+            mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
         }
     }
 
