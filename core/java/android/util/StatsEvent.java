@@ -31,14 +31,23 @@ import com.android.internal.annotations.VisibleForTesting;
  *
  * <p>Usage:</p>
  * <pre>
+ *      // Pushed event
+ *      StatsEvent statsEvent = StatsEvent.newBuilder()
+ *          .setAtomId(atomId)
+ *          .writeBoolean(false)
+ *          .writeString("annotated String field")
+ *          .addBooleanAnnotation(annotationId, true)
+ *          .usePooledBuffer()
+ *          .build();
+ *      StatsLog.write(statsEvent);
+ *
+ *      // Pulled event
  *      StatsEvent statsEvent = StatsEvent.newBuilder()
  *          .setAtomId(atomId)
  *          .writeBoolean(false)
  *          .writeString("annotated String field")
  *          .addBooleanAnnotation(annotationId, true)
  *          .build();
- *
- *      StatsLog.write(statsEvent);
  * </pre>
  * @hide
  **/
@@ -210,12 +219,15 @@ public final class StatsEvent {
     private static final int MAX_PAYLOAD_SIZE = LOGGER_ENTRY_MAX_PAYLOAD - 4;
 
     private final int mAtomId;
-    private final Buffer mBuffer;
+    private final byte[] mPayload;
+    private Buffer mBuffer;
     private final int mNumBytes;
 
-    private StatsEvent(final int atomId, @NonNull final Buffer buffer, final int numBytes) {
+    private StatsEvent(final int atomId, @Nullable final Buffer buffer,
+            @NonNull final byte[] payload, final int numBytes) {
         mAtomId = atomId;
         mBuffer = buffer;
+        mPayload = payload;
         mNumBytes = numBytes;
     }
 
@@ -243,7 +255,7 @@ public final class StatsEvent {
      **/
     @NonNull
     public byte[] getBytes() {
-        return mBuffer.getBytes();
+        return mPayload;
     }
 
     /**
@@ -256,10 +268,14 @@ public final class StatsEvent {
     }
 
     /**
-     * Recycle this StatsEvent object.
+     * Recycle resources used by this StatsEvent object.
+     * No actions should be taken on this StatsEvent after release() is called.
      **/
     public void release() {
-        mBuffer.release();
+        if (mBuffer != null) {
+            mBuffer.release();
+            mBuffer = null;
+        }
     }
 
     /**
@@ -280,7 +296,18 @@ public final class StatsEvent {
      *         optional string field3 = 3 [(annotation1) = true];
      *     }
      *
-     *     // StatsEvent construction.
+     *     // StatsEvent construction for pushed event.
+     *     StatsEvent.newBuilder()
+     *     StatsEvent statsEvent = StatsEvent.newBuilder()
+     *         .setAtomId(atomId)
+     *         .writeInt(3) // field1
+     *         .writeLong(8L) // field2
+     *         .writeString("foo") // field 3
+     *         .addBooleanAnnotation(annotation1Id, true)
+     *         .usePooledBuffer()
+     *         .build();
+     *
+     *     // StatsEvent construction for pulled event.
      *     StatsEvent.newBuilder()
      *     StatsEvent statsEvent = StatsEvent.newBuilder()
      *         .setAtomId(atomId)
@@ -306,6 +333,7 @@ public final class StatsEvent {
         private byte mLastType;
         private int mNumElements;
         private int mErrorMask;
+        private boolean mUsePooledBuffer = false;
 
         private Builder(final Buffer buffer) {
             mBuffer = buffer;
@@ -569,6 +597,17 @@ public final class StatsEvent {
         }
 
         /**
+         * Indicates to reuse Buffer's byte array as the underlying payload in StatsEvent.
+         * This should be called for pushed events to reduce memory allocations and garbage
+         * collections.
+         **/
+        @NonNull
+        public Builder usePooledBuffer() {
+            mUsePooledBuffer = true;
+            return this;
+        }
+
+        /**
          * Builds a StatsEvent object with values entered in this Builder.
          **/
         @NonNull
@@ -599,7 +638,18 @@ public final class StatsEvent {
                 size = mPos;
             }
 
-            return new StatsEvent(mAtomId, mBuffer, size);
+            if (mUsePooledBuffer) {
+                return new StatsEvent(mAtomId, mBuffer, mBuffer.getBytes(), size);
+            } else {
+                // Create a copy of the buffer with the required number of bytes.
+                final byte[] payload = new byte[size];
+                System.arraycopy(mBuffer.getBytes(), 0, payload, 0, size);
+
+                // Return Buffer instance to the pool.
+                mBuffer.release();
+
+                return new StatsEvent(mAtomId, null, payload, size);
+            }
         }
 
         private void writeTypeId(final byte typeId) {

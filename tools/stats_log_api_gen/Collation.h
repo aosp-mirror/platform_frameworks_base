@@ -111,6 +111,7 @@ struct Atoms {
     set<AtomDecl> decls;
     set<AtomDecl> non_chained_decls;
     map<vector<java_type_t>, set<string>> non_chained_signatures_to_modules;
+    int maxPushedAtomId;
 };
 
 /**

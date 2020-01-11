@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <stdio.h>
 #include <vector>
+#include "statslog.h"
 #include "../metrics/metrics_test_helper.h"
 
 #ifdef __ANDROID__

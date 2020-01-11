@@ -44,7 +44,7 @@ public class StatsEventTest {
     @Test
     public void testNoFields() {
         final long minTimestamp = SystemClock.elapsedRealtimeNanos();
-        final StatsEvent statsEvent = StatsEvent.newBuilder().build();
+        final StatsEvent statsEvent = StatsEvent.newBuilder().usePooledBuffer().build();
         final long maxTimestamp = SystemClock.elapsedRealtimeNanos();
 
         final int expectedAtomId = 0;
@@ -99,6 +99,7 @@ public class StatsEventTest {
                 .writeBoolean(field2)
                 .writeInt(field3)
                 .writeInt(field4)
+                .usePooledBuffer()
                 .build();
         final long maxTimestamp = SystemClock.elapsedRealtimeNanos();
 
@@ -167,6 +168,7 @@ public class StatsEventTest {
                 .writeString(field1)
                 .writeFloat(field2)
                 .writeByteArray(field3)
+                .usePooledBuffer()
                 .build();
         final long maxTimestamp = SystemClock.elapsedRealtimeNanos();
 
@@ -230,6 +232,7 @@ public class StatsEventTest {
                 .setAtomId(expectedAtomId)
                 .writeAttributionChain(uids, tags)
                 .writeLong(field2)
+                .usePooledBuffer()
                 .build();
         final long maxTimestamp = SystemClock.elapsedRealtimeNanos();
 
@@ -299,6 +302,7 @@ public class StatsEventTest {
         final StatsEvent statsEvent = StatsEvent.newBuilder()
                 .setAtomId(expectedAtomId)
                 .writeKeyValuePairs(intMap, longMap, stringMap, floatMap)
+                .usePooledBuffer()
                 .build();
         final long maxTimestamp = SystemClock.elapsedRealtimeNanos();
 
@@ -392,6 +396,7 @@ public class StatsEventTest {
                 .addBooleanAnnotation(field1AnnotationId, field1AnnotationValue)
                 .writeBoolean(field2)
                 .addIntAnnotation(field2AnnotationId, field2AnnotationValue)
+                .usePooledBuffer()
                 .build();
         final long maxTimestamp = SystemClock.elapsedRealtimeNanos();
 
