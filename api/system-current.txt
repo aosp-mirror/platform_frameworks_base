@@ -6947,7 +6947,6 @@ package android.provider {
     field @NonNull public static final String ENABLE_CMAS_PRESIDENTIAL_PREF = "enable_cmas_presidential_alerts";
     field @NonNull public static final String ENABLE_CMAS_SEVERE_THREAT_PREF = "enable_cmas_severe_threat_alerts";
     field @NonNull public static final String ENABLE_EMERGENCY_PERF = "enable_emergency_alerts";
-    field @NonNull public static final String ENABLE_FULL_VOLUME_PREF = "use_full_volume";
     field @NonNull public static final String ENABLE_PUBLIC_SAFETY_PREF = "enable_public_safety_messages";
     field @NonNull public static final String ENABLE_STATE_LOCAL_TEST_PREF = "enable_state_local_test_alerts";
     field @NonNull public static final String ENABLE_TEST_ALERT_PREF = "enable_test_alerts";

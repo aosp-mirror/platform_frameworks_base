@@ -847,9 +847,12 @@ public class CarrierConfigManager {
             "carrier_force_disable_etws_cmas_test_bool";
 
     /**
-     * The default flag specifying whether "Turn on Notifications" option will be always shown in
-     * Settings->More->Emergency broadcasts menu regardless developer options is turned on or not.
+     * The default flag specifying whether "Allow alerts" option will be always shown in
+     * emergency alerts settings regardless developer options is turned on or not.
+     *
+     * @deprecated The allow alerts option is always shown now. No longer need a config for that.
      */
+    @Deprecated
     public static final String KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL =
             "always_show_emergency_alert_onoff_bool";
 
