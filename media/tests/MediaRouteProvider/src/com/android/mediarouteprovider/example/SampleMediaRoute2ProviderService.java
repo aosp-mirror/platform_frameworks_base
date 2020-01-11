@@ -237,12 +237,19 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         MediaRoute2Info route = mRoutes.get(routeId);
 
         mRouteSessionMap.remove(routeId);
-        if (sessionInfo == null || route == null) {
+        if (sessionInfo == null || route == null
+                || !sessionInfo.getSelectedRoutes().contains(routeId)) {
             return;
         }
+
         mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
                 .setClientPackageName(null)
                 .build());
+
+        if (sessionInfo.getSelectedRoutes().size() == 1) {
+            releaseSession(sessionId);
+            return;
+        }
 
         RouteSessionInfo newSessionInfo = new RouteSessionInfo.Builder(sessionInfo)
                 .removeSelectedRoute(routeId)
