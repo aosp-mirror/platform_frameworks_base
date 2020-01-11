@@ -494,11 +494,41 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerMobileBytesTransferBackground() {
-        // No op.
+        int tagId = StatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {3, 4, 5, 6})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullMobileBytesTransferBackground(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullMobileBytesTransferBackground() {
-        // No op.
+    private int pullMobileBytesTransferBackground(int atomTag, List<StatsEvent> pulledData) {
+        INetworkStatsService networkStatsService = getINetworkStatsService();
+        if (networkStatsService == null) {
+            Slog.e(TAG, "NetworkStats Service is not available!");
+            return StatsManager.PULL_SKIP;
+        }
+        long token = Binder.clearCallingIdentity();
+        try {
+            BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
+            String[] ifaces = bs.getMobileIfaces();
+            if (ifaces.length == 0) {
+                return StatsManager.PULL_SKIP;
+            }
+            NetworkStats stats = rollupNetworkStatsByFGBG(
+                    networkStatsService.getDetailedUidStats(ifaces));
+            addNetworkStats(atomTag, pulledData, stats, true);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Pulling netstats for mobile bytes w/ fg/bg has error", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerBluetoothBytesTransfer() {
