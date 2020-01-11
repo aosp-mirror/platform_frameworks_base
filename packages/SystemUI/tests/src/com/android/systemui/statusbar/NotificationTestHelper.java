@@ -47,6 +47,9 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpansionLogger;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
+import com.android.systemui.statusbar.notification.row.NotifRemoteViewCache;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
@@ -72,6 +75,7 @@ public class NotificationTestHelper {
     public static final UserHandle USER_HANDLE = UserHandle.of(ActivityManager.getCurrentUser());
 
     private static final String GROUP_KEY = "gruKey";
+    private static final String APP_NAME = "appName";
 
     private final Context mContext;
     private int mId;
@@ -303,9 +307,6 @@ public class NotificationTestHelper {
                 null /* root */,
                 false /* attachToRoot */);
         ExpandableNotificationRow row = mRow;
-        row.setGroupManager(mGroupManager);
-        row.setHeadsUpManager(mHeadsUpManager);
-        row.setAboveShelfChangedListener(aboveShelf -> {});
 
         final NotificationChannel channel =
                 new NotificationChannel(
@@ -329,6 +330,23 @@ public class NotificationTestHelper {
         entry.setRow(row);
         entry.createIcons(mContext, entry.getSbn());
         row.setEntry(entry);
+
+        NotificationContentInflater contentBinder = new NotificationContentInflater(
+                mock(NotifRemoteViewCache.class),
+                mock(NotificationRemoteInputManager.class));
+        contentBinder.setInflateSynchronously(true);
+
+        row.initialize(
+                APP_NAME,
+                entry.getKey(),
+                mock(ExpansionLogger.class),
+                mock(KeyguardBypassController.class),
+                mGroupManager,
+                mHeadsUpManager,
+                contentBinder,
+                mock(OnExpandClickListener.class));
+        row.setAboveShelfChangedListener(aboveShelf -> { });
+
         row.setInflationFlags(extraInflationFlags);
         inflateAndWait(row);
 
@@ -341,7 +359,6 @@ public class NotificationTestHelper {
 
     private static void inflateAndWait(ExpandableNotificationRow row) throws Exception {
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        row.getNotificationInflater().setInflateSynchronously(true);
         NotificationContentInflater.InflationCallback callback =
                 new NotificationContentInflater.InflationCallback() {
                     @Override
