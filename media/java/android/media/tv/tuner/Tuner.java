@@ -27,6 +27,7 @@ import android.media.tv.tuner.TunerConstants.FrontendScanType;
 import android.media.tv.tuner.TunerConstants.Result;
 import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
 import android.media.tv.tuner.filter.FilterEvent;
+import android.media.tv.tuner.filter.TimeFilter;
 import android.media.tv.tuner.frontend.FrontendCallback;
 import android.media.tv.tuner.frontend.FrontendInfo;
 import android.media.tv.tuner.frontend.FrontendStatus;
