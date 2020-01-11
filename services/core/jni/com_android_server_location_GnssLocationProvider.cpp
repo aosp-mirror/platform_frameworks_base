@@ -202,6 +202,7 @@ struct GnssDeathRecipient : virtual public hidl_death_recipient
 
 // Must match the value from GnssMeasurement.java
 static const uint32_t ADR_STATE_HALF_CYCLE_REPORTED = (1<<4);
+static const uint32_t SVID_FLAGS_HAS_BASEBAND_CN0 = (1<<4);
 
 sp<GnssDeathRecipient> gnssHalDeathRecipient = nullptr;
 sp<IGnss_V1_0> gnssHal = nullptr;
@@ -631,6 +632,16 @@ private:
     template<class T>
     Return<void> gnssSvStatusCbImpl(const T& svStatus);
 
+    template<class T>
+    uint32_t getHasBasebandCn0DbHzFlag(const T& svStatus) {
+        return 0;
+    }
+
+    template<class T>
+    double getBasebandCn0DbHz(const T& svStatus, size_t i) {
+        return 0.0;
+    }
+
     uint32_t getGnssSvInfoListSize(const IGnssCallback_V1_0::GnssSvStatus& svStatus) {
         return svStatus.numSvs;
     }
@@ -655,8 +666,6 @@ private:
 
     const IGnssCallback_V1_0::GnssSvInfo& getGnssSvInfoOfIndex(
             const hidl_vec<IGnssCallback_V2_1::GnssSvInfo>& svInfoList, size_t i) {
-        // TODO(b/144850155): fill baseband CN0 after it's available in Java object.
-        ALOGD("getGnssSvInfoOfIndex %d: baseband C/N0: %f", (int) i, svInfoList[i].basebandCN0DbHz);
         return svInfoList[i].v2_0.v1_0;
     }
 
@@ -718,6 +727,18 @@ Return<void> GnssCallback::gnssStatusCb(const IGnssCallback_V2_0::GnssStatusValu
     return Void();
 }
 
+template<>
+uint32_t GnssCallback::getHasBasebandCn0DbHzFlag(const hidl_vec<IGnssCallback_V2_1::GnssSvInfo>&
+        svStatus) {
+    return SVID_FLAGS_HAS_BASEBAND_CN0;
+}
+
+template<>
+double GnssCallback::getBasebandCn0DbHz(const hidl_vec<IGnssCallback_V2_1::GnssSvInfo>& svInfoList,
+        size_t i) {
+    return svInfoList[i].basebandCN0DbHz;
+}
+
 template<class T>
 Return<void> GnssCallback::gnssSvStatusCbImpl(const T& svStatus) {
     JNIEnv* env = getJniEnv();
@@ -755,8 +776,8 @@ Return<void> GnssCallback::gnssSvStatusCbImpl(const T& svStatus) {
         elev[i] = info.elevationDegrees;
         azim[i] = info.azimuthDegrees;
         carrierFreq[i] = info.carrierFrequencyHz;
-        // TODO(b/144850155): fill svidWithFlags with hasBasebandCn0DbHz based on HAL versions
-        basebandCn0s[i] = 0.0;
+        svidWithFlags[i] |= getHasBasebandCn0DbHzFlag(svStatus);
+        basebandCn0s[i] = getBasebandCn0DbHz(svStatus, i);
     }
 
     env->ReleaseIntArrayElements(svidWithFlagArray, svidWithFlags, 0);
@@ -1182,8 +1203,8 @@ void GnssMeasurementCallback::translateSingleGnssMeasurement
         const IGnssMeasurementCallback_V2_1::GnssMeasurement* measurement_V2_1,
         JavaObject& object) {
     translateSingleGnssMeasurement(&(measurement_V2_1->v2_0), object);
-    // TODO(b/144850155): fill baseband CN0 after it's available in Java object
-    ALOGD("baseband CN0DbHz = %f\n", measurement_V2_1->basebandCN0DbHz);
+
+    SET(BasebandCn0DbHz, measurement_V2_1->basebandCN0DbHz);
 }
 
 template<class T>
