@@ -31,9 +31,9 @@ static void write_native_stats_write_body_q(FILE* out, const vector<java_type_t>
 
     fprintf(out, "%s    {\n", indent.c_str());
     fprintf(out, "%s        std::lock_guard<std::mutex> lock(mLogdRetryMutex);\n", indent.c_str());
-    fprintf(out, "%s        if ((android::elapsedRealtimeNano() - lastRetryTimestampNs) <= "
+    fprintf(out, "%s        if ((get_elapsed_realtime_ns() - lastRetryTimestampNs) <= "
                             "kMinRetryIntervalNs) break;\n", indent.c_str());
-    fprintf(out, "%s        lastRetryTimestampNs = android::elapsedRealtimeNano();\n",
+    fprintf(out, "%s        lastRetryTimestampNs = get_elapsed_realtime_ns();\n",
             indent.c_str());
     fprintf(out, "%s    }\n", indent.c_str());
     fprintf(out, "%s    std::this_thread::sleep_for(std::chrono::milliseconds(10));\n",
@@ -54,7 +54,17 @@ void write_native_cpp_includes_q(FILE* out) {
     fprintf(out, "#endif\n");
     fprintf(out, "#include <stats_event_list.h>\n");
     fprintf(out, "#include <log/log.h>\n");
-    fprintf(out, "#include <utils/SystemClock.h>\n");
+    fprintf(out, "#include <time.h>\n");
+}
+
+void write_native_get_timestamp_ns_q(FILE* out) {
+    fprintf(out, "\n");
+    fprintf(out, "static int64_t get_elapsed_realtime_ns() {\n");
+    fprintf(out, "    struct timespec t;\n");
+    fprintf(out, "    t.tv_sec = t.tv_nsec = 0;\n");
+    fprintf(out, "    clock_gettime(CLOCK_BOOTTIME, &t);\n");
+    fprintf(out, "    return (int64_t)t.tv_sec * 1000000000LL + t.tv_nsec;\n");
+    fprintf(out, "}\n");
 }
 
 void write_native_stats_log_cpp_globals_q(FILE* out) {
@@ -88,7 +98,7 @@ void write_native_try_stats_write_methods_q(FILE* out, const Atoms& atoms,
         int argIndex = 1;
         fprintf(out, "  if (kStatsdEnabled) {\n");
         fprintf(out, "    stats_event_list event(kStatsEventTag);\n");
-        fprintf(out, "    event << android::elapsedRealtimeNano();\n\n");
+        fprintf(out, "    event << get_elapsed_realtime_ns();\n\n");
         fprintf(out, "    event << code;\n\n");
         for (vector<java_type_t>::const_iterator arg = signature.begin();
             arg != signature.end(); arg++) {
@@ -225,7 +235,7 @@ void write_native_try_stats_write_non_chained_methods_q(FILE* out, const Atoms& 
         int argIndex = 1;
         fprintf(out, "  if (kStatsdEnabled) {\n");
         fprintf(out, "    stats_event_list event(kStatsEventTag);\n");
-        fprintf(out, "    event << android::elapsedRealtimeNano();\n\n");
+        fprintf(out, "    event << get_elapsed_realtime_ns();\n\n");
         fprintf(out, "    event << code;\n\n");
         for (vector<java_type_t>::const_iterator arg = signature.begin();
             arg != signature.end(); arg++) {
