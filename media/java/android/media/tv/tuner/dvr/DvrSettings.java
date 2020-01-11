@@ -20,7 +20,6 @@ import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.hardware.tv.tuner.V1_0.Constants;
-import android.media.tv.tuner.Dvr;
 import android.media.tv.tuner.TunerConstants.FilterStatus;
 
 import java.lang.annotation.Retention;
