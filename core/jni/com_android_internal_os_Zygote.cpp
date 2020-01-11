@@ -746,9 +746,6 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
 
   const userid_t user_id = multiuser_get_user_id(uid);
   const std::string user_source = StringPrintf("/mnt/user/%d", user_id);
-  const std::string pass_through_source = StringPrintf("/mnt/pass_through/%d", user_id);
-  bool isFuse = GetBoolProperty(kPropFuse, false);
-
   // Shell is neither AID_ROOT nor AID_EVERYBODY. Since it equally needs 'execute' access to
   // /mnt/user/0 to 'adb shell ls /sdcard' for instance, we set the uid bit of /mnt/user/0 to
   // AID_SHELL. This gives shell access along with apps running as group everybody (user 0 apps)
@@ -757,9 +754,15 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
   PrepareDir(user_source, 0710, user_id ? AID_ROOT : AID_SHELL,
              multiuser_get_uid(user_id, AID_EVERYBODY), fail_fn);
 
+  bool isFuse = GetBoolProperty(kPropFuse, false);
+
   if (isFuse) {
     if (mount_mode == MOUNT_EXTERNAL_PASS_THROUGH) {
+      const std::string pass_through_source = StringPrintf("/mnt/pass_through/%d", user_id);
       BindMount(pass_through_source, "/storage", fail_fn);
+    } else if (mount_mode == MOUNT_EXTERNAL_INSTALLER) {
+      const std::string installer_source = StringPrintf("/mnt/installer/%d", user_id);
+      BindMount(installer_source, "/storage", fail_fn);
     } else {
       BindMount(user_source, "/storage", fail_fn);
     }
