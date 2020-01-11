@@ -65,7 +65,7 @@ public class MediaRouter2Manager {
     @GuardedBy("mRoutesLock")
     private final Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
     @NonNull
-    final ConcurrentMap<String, List<String>> mRouteTypeMap = new ConcurrentHashMap<>();
+    final ConcurrentMap<String, List<String>> mPreferredFeaturesMap = new ConcurrentHashMap<>();
 
     private AtomicInteger mNextRequestId = new AtomicInteger(1);
 
@@ -144,7 +144,7 @@ public class MediaRouter2Manager {
                 }
                 //TODO: clear mRoutes?
                 mClient = null;
-                mRouteTypeMap.clear();
+                mPreferredFeaturesMap.clear();
             }
         }
     }
@@ -160,14 +160,14 @@ public class MediaRouter2Manager {
     public List<MediaRoute2Info> getAvailableRoutes(@NonNull String packageName) {
         Objects.requireNonNull(packageName, "packageName must not be null");
 
-        List<String> routeTypes = mRouteTypeMap.get(packageName);
-        if (routeTypes == null) {
+        List<String> preferredFeatures = mPreferredFeaturesMap.get(packageName);
+        if (preferredFeatures == null) {
             return Collections.emptyList();
         }
         List<MediaRoute2Info> routes = new ArrayList<>();
         synchronized (mRoutesLock) {
             for (MediaRoute2Info route : mRoutes.values()) {
-                if (route.containsRouteTypes(routeTypes)) {
+                if (route.hasAnyFeatures(preferredFeatures)) {
                     routes.add(route);
                 }
             }
@@ -352,15 +352,15 @@ public class MediaRouter2Manager {
         }
     }
 
-    void updateRouteTypes(String packageName, List<String> routeTypes) {
-        List<String> prevTypes = mRouteTypeMap.put(packageName, routeTypes);
-        if ((prevTypes == null && routeTypes.size() == 0)
-                || Objects.equals(routeTypes, prevTypes)) {
+    void updatePreferredFeatures(String packageName, List<String> preferredFeatures) {
+        List<String> prevFeatures = mPreferredFeaturesMap.put(packageName, preferredFeatures);
+        if ((prevFeatures == null && preferredFeatures.size() == 0)
+                || Objects.equals(preferredFeatures, prevFeatures)) {
             return;
         }
         for (CallbackRecord record : mCallbackRecords) {
-            record.mExecutor.execute(
-                    () -> record.mCallback.onControlCategoriesChanged(packageName, routeTypes));
+            record.mExecutor.execute(() -> record.mCallback
+                    .onControlCategoriesChanged(packageName, preferredFeatures));
         }
     }
 
@@ -398,13 +398,13 @@ public class MediaRouter2Manager {
 
 
         /**
-         * Called when the route types of an app is changed.
+         * Called when the preferred route features of an app is changed.
          *
          * @param packageName the package name of the application
-         * @param routeTypes the list of route types set by an application.
+         * @param preferredFeatures the list of preferred route features set by an application.
          */
         public void onControlCategoriesChanged(@NonNull String packageName,
-                @NonNull List<String> routeTypes) {}
+                @NonNull List<String> preferredFeatures) {}
     }
 
     final class CallbackRecord {
@@ -440,9 +440,9 @@ public class MediaRouter2Manager {
                     MediaRouter2Manager.this, packageName, route));
         }
 
-        public void notifyRouteTypesChanged(String packageName, List<String> routeTypes) {
-            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::updateRouteTypes,
-                    MediaRouter2Manager.this, packageName, routeTypes));
+        public void notifyPreferredFeaturesChanged(String packageName, List<String> features) {
+            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::updatePreferredFeatures,
+                    MediaRouter2Manager.this, packageName, features));
         }
 
         @Override

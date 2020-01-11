@@ -36,12 +36,22 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * @hide
+ * Base class for media route provider services.
+ * <p>
+ * The system media router service will bind to media route provider services when a
+ * {@link RouteDiscoveryPreference discovery preference} is registered via
+ * a {@link MediaRouter2 media router} by an application.
+ * </p><p>
+ * To implement your own media route provider service, extend this class and
+ * override {@link #onDiscoveryPreferenceChanged(RouteDiscoveryPreference)} to publish
+ * {@link MediaRoute2Info routes}.
+ * </p>
  */
 public abstract class MediaRoute2ProviderService extends Service {
     private static final String TAG = "MR2ProviderService";
@@ -63,6 +73,7 @@ public abstract class MediaRoute2ProviderService extends Service {
     }
 
     @Override
+    @NonNull
     public IBinder onBind(@NonNull Intent intent) {
         //TODO: Allow binding from media router service only?
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
@@ -79,6 +90,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param routeId the id of the target route
      * @param request the media control request intent
+     * @hide
      */
     //TODO: Discuss what to use for request (e.g., Intent? Request class?)
     public abstract void onControlRequest(@NonNull String routeId, @NonNull Intent request);
@@ -88,6 +100,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param routeId the id of the route
      * @param volume the target volume
+     * @hide
      */
     public abstract void onSetVolume(@NonNull String routeId, int volume);
 
@@ -96,6 +109,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param routeId id of the route
      * @param delta the delta to add to the current volume
+     * @hide
      */
     public abstract void onUpdateVolume(@NonNull String routeId, int delta);
 
@@ -105,6 +119,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param sessionId id of the session
      * @return information of the session with the given id.
      *         null if the session is destroyed or id is not valid.
+     * @hide
      */
     @Nullable
     public final RouteSessionInfo getSessionInfo(@NonNull String sessionId) {
@@ -118,6 +133,7 @@ public abstract class MediaRoute2ProviderService extends Service {
 
     /**
      * Gets the list of {@link RouteSessionInfo session info} that the provider service maintains.
+     * @hide
      */
     @NonNull
     public final List<RouteSessionInfo> getAllSessionInfo() {
@@ -135,6 +151,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param sessionInfo new session information
      * @see #notifySessionCreated(RouteSessionInfo, long)
+     * @hide
      */
     public final void updateSessionInfo(@NonNull RouteSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
@@ -193,6 +210,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      *                    unique. Pass {@code null} to reject the request or inform clients that
      *                    session creation is failed.
      * @param requestId id of the previous request to create this session
+     * @hide
      */
     // TODO: fail reason?
     // TODO: Maybe better to create notifySessionCreationFailed?
@@ -225,6 +243,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param sessionId id of the session to be released
      * @see #onDestroySession(String, RouteSessionInfo)
+     * @hide
      */
     public final void releaseSession(@NonNull String sessionId) {
         if (TextUtils.isEmpty(sessionId)) {
@@ -253,11 +272,12 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param packageName the package name of the application that selected the route
      * @param routeId the id of the route initially being connected
-     * @param routeType the route type of the new session
+     * @param routeFeature the route feature of the new session
      * @param requestId the id of this session creation request
+     * @hide
      */
     public abstract void onCreateSession(@NonNull String packageName, @NonNull String routeId,
-            @NonNull String routeType, long requestId);
+            @NonNull String routeFeature, long requestId);
 
     /**
      * Called when a session is about to be destroyed.
@@ -267,6 +287,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param sessionId id of the session being destroyed.
      * @param lastSessionInfo information of the session being destroyed.
      * @see #releaseSession(String)
+     * @hide
      */
     public abstract void onDestroySession(@NonNull String sessionId,
             @NonNull RouteSessionInfo lastSessionInfo);
@@ -281,6 +302,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param sessionId id of the session
      * @param routeId id of the route
      * @see #updateSessionInfo(RouteSessionInfo)
+     * @hide
      */
     public abstract void onSelectRoute(@NonNull String sessionId, @NonNull String routeId);
 
@@ -293,6 +315,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param sessionId id of the session
      * @param routeId id of the route
+     * @hide
      */
     public abstract void onDeselectRoute(@NonNull String sessionId, @NonNull String routeId);
 
@@ -305,33 +328,37 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param sessionId id of the session
      * @param routeId id of the route
+     * @hide
      */
     public abstract void onTransferToRoute(@NonNull String sessionId, @NonNull String routeId);
 
     /**
-     * Called when the {@link RouteDiscoveryRequest discovery request} has changed.
+     * Called when the {@link RouteDiscoveryPreference discovery preference} has changed.
      * <p>
      * Whenever an application registers a {@link MediaRouter2.RouteCallback callback},
-     * it also provides a discovery request to specify types of routes that it is interested in.
-     * The media router combines all of these discovery request into a single discovery request
-     * and notifies each provider.
+     * it also provides a discovery preference to specify features of routes that it is interested
+     * in. The media router combines all of these discovery request into a single discovery
+     * preference and notifies each provider.
      * </p><p>
-     * The provider should examine {@link RouteDiscoveryRequest#getRouteTypes() route types}
-     * in the discovery request to determine what kind of routes it should try to discover
-     * and whether it should perform active or passive scans. In many cases, the provider may be
-     * able to save power by not performing any scans when the request doesn't have any matching
-     * route types.
+     * The provider should examine {@link RouteDiscoveryPreference#getPreferredFeatures()
+     * preferred features} in the discovery preference to determine what kind of routes it should
+     * try to discover and whether it should perform active or passive scans. In many cases,
+     * the provider may be able to save power by not performing any scans when the request doesn't
+     * have any matching route features.
      * </p>
      *
-     * @param request the new discovery request
+     * @param preference the new discovery preference
      */
-    public void onDiscoveryRequestChanged(@NonNull RouteDiscoveryRequest request) {}
+    public void onDiscoveryPreferenceChanged(@NonNull RouteDiscoveryPreference preference) {}
 
     /**
-     * Updates provider info and publishes routes and session info.
+     * Updates routes of the provider and notifies the system media router service.
      */
-    public final void updateProviderInfo(@NonNull MediaRoute2ProviderInfo providerInfo) {
-        mProviderInfo = Objects.requireNonNull(providerInfo, "providerInfo must not be null");
+    public final void notifyRoutes(@NonNull Collection<MediaRoute2Info> routes) {
+        Objects.requireNonNull(routes, "routes must not be null");
+        mProviderInfo = new MediaRoute2ProviderInfo.Builder()
+                .addRoutes(routes)
+                .build();
         schedulePublishState();
     }
 
@@ -384,12 +411,12 @@ public abstract class MediaRoute2ProviderService extends Service {
 
         @Override
         public void requestCreateSession(String packageName, String routeId,
-                String routeType, long requestId) {
+                String routeFeature, long requestId) {
             if (!checkCallerisSystem()) {
                 return;
             }
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onCreateSession,
-                    MediaRoute2ProviderService.this, packageName, routeId, routeType,
+                    MediaRoute2ProviderService.this, packageName, routeId, routeFeature,
                     requestId));
         }
         @Override

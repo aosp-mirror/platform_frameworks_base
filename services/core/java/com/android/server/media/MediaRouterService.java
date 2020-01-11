@@ -39,7 +39,7 @@ import android.media.MediaRouter;
 import android.media.MediaRouterClientState;
 import android.media.RemoteDisplayState;
 import android.media.RemoteDisplayState.RemoteDisplayInfo;
-import android.media.RouteDiscoveryRequest;
+import android.media.RouteDiscoveryPreference;
 import android.media.RouteSessionInfo;
 import android.os.Binder;
 import android.os.Handler;
@@ -520,7 +520,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     }
     // Binder call
     @Override
-    public void setDiscoveryRequest2(IMediaRouter2Client client, RouteDiscoveryRequest request) {
+    public void setDiscoveryRequest2(IMediaRouter2Client client, RouteDiscoveryPreference request) {
         mService2.setDiscoveryRequest2(client, request);
     }
 

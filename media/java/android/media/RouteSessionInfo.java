@@ -52,7 +52,7 @@ public class RouteSessionInfo implements Parcelable {
 
     final String mId;
     final String mClientPackageName;
-    final String mRouteType;
+    final String mRouteFeature;
     @Nullable
     final String mProviderId;
     final List<String> mSelectedRoutes;
@@ -67,7 +67,7 @@ public class RouteSessionInfo implements Parcelable {
 
         mId = builder.mId;
         mClientPackageName = builder.mClientPackageName;
-        mRouteType = builder.mRouteType;
+        mRouteFeature = builder.mRouteFeature;
         mProviderId = builder.mProviderId;
 
         mSelectedRoutes = Collections.unmodifiableList(
@@ -87,7 +87,7 @@ public class RouteSessionInfo implements Parcelable {
 
         mId = ensureString(src.readString());
         mClientPackageName = ensureString(src.readString());
-        mRouteType = ensureString(src.readString());
+        mRouteFeature = ensureString(src.readString());
         mProviderId = src.readString();
 
         mSelectedRoutes = ensureList(src.createStringArrayList());
@@ -120,7 +120,7 @@ public class RouteSessionInfo implements Parcelable {
     public boolean isValid() {
         return !TextUtils.isEmpty(mId)
                 && !TextUtils.isEmpty(mClientPackageName)
-                && !TextUtils.isEmpty(mRouteType)
+                && !TextUtils.isEmpty(mRouteFeature)
                 && mSelectedRoutes.size() > 0;
     }
 
@@ -160,12 +160,12 @@ public class RouteSessionInfo implements Parcelable {
     }
 
     /**
-     * Gets the route type of the session.
-     * Routes that don't have the type can't be added to the session.
+     * Gets the route feature of the session.
+     * Routes that don't have the feature can't be selected into the session.
      */
     @NonNull
-    public String getRouteType() {
-        return mRouteType;
+    public String getRouteFeature() {
+        return mRouteFeature;
     }
 
     /**
@@ -226,7 +226,7 @@ public class RouteSessionInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mId);
         dest.writeString(mClientPackageName);
-        dest.writeString(mRouteType);
+        dest.writeString(mRouteFeature);
         dest.writeString(mProviderId);
         dest.writeStringList(mSelectedRoutes);
         dest.writeStringList(mSelectableRoutes);
@@ -240,7 +240,7 @@ public class RouteSessionInfo implements Parcelable {
         StringBuilder result = new StringBuilder()
                 .append("RouteSessionInfo{ ")
                 .append("sessionId=").append(mId)
-                .append(", routeType=").append(mRouteType)
+                .append(", routeFeature=").append(mRouteFeature)
                 .append(", selectedRoutes={")
                 .append(String.join(",", mSelectedRoutes))
                 .append("}")
@@ -281,7 +281,7 @@ public class RouteSessionInfo implements Parcelable {
     public static final class Builder {
         final String mId;
         final String mClientPackageName;
-        final String mRouteType;
+        final String mRouteFeature;
         String mProviderId;
         final List<String> mSelectedRoutes;
         final List<String> mSelectableRoutes;
@@ -300,14 +300,14 @@ public class RouteSessionInfo implements Parcelable {
          * @see MediaRoute2Info#getId()
          */
         public Builder(@NonNull String id, @NonNull String clientPackageName,
-                @NonNull String routeType) {
+                @NonNull String routeFeature) {
             if (TextUtils.isEmpty(id)) {
                 throw new IllegalArgumentException("id must not be empty");
             }
             mId = id;
             mClientPackageName = Objects.requireNonNull(
                     clientPackageName, "clientPackageName must not be null");
-            mRouteType = Objects.requireNonNull(routeType, "routeType must not be null");
+            mRouteFeature = Objects.requireNonNull(routeFeature, "routeFeature must not be null");
             mSelectedRoutes = new ArrayList<>();
             mSelectableRoutes = new ArrayList<>();
             mDeselectableRoutes = new ArrayList<>();
@@ -325,7 +325,7 @@ public class RouteSessionInfo implements Parcelable {
 
             mId = sessionInfo.mId;
             mClientPackageName = sessionInfo.mClientPackageName;
-            mRouteType = sessionInfo.mRouteType;
+            mRouteFeature = sessionInfo.mRouteFeature;
             mProviderId = sessionInfo.mProviderId;
 
             mSelectedRoutes = new ArrayList<>(sessionInfo.mSelectedRoutes);
