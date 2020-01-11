@@ -17,7 +17,7 @@
 package android.media;
 
 import android.media.MediaRoute2Info;
-import android.media.RouteSessionInfo;
+import android.media.RoutingSessionInfo;
 import android.os.Bundle;
 
 /**
@@ -28,7 +28,7 @@ oneway interface IMediaRouter2Client {
     void notifyRoutesAdded(in List<MediaRoute2Info> routes);
     void notifyRoutesRemoved(in List<MediaRoute2Info> routes);
     void notifyRoutesChanged(in List<MediaRoute2Info> routes);
-    void notifySessionCreated(in @nullable RouteSessionInfo sessionInfo, int requestId);
-    void notifySessionInfoChanged(in RouteSessionInfo sessionInfo);
-    void notifySessionReleased(in RouteSessionInfo sessionInfo);
+    void notifySessionCreated(in @nullable RoutingSessionInfo sessionInfo, int requestId);
+    void notifySessionInfoChanged(in RoutingSessionInfo sessionInfo);
+    void notifySessionReleased(in RoutingSessionInfo sessionInfo);
 }

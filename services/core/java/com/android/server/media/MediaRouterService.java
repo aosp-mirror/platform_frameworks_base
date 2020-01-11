@@ -40,7 +40,7 @@ import android.media.MediaRouterClientState;
 import android.media.RemoteDisplayState;
 import android.media.RemoteDisplayState.RemoteDisplayInfo;
 import android.media.RouteDiscoveryPreference;
-import android.media.RouteSessionInfo;
+import android.media.RoutingSessionInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -552,7 +552,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public List<RouteSessionInfo> getActiveSessions(IMediaRouter2Manager manager) {
+    public List<RoutingSessionInfo> getActiveSessions(IMediaRouter2Manager manager) {
         return mService2.getActiveSessions(manager);
     }
 

@@ -32,7 +32,7 @@ import android.media.IMediaRouter2Manager;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.RouteDiscoveryPreference;
-import android.media.RouteSessionInfo;
+import android.media.RoutingSessionInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -370,7 +370,7 @@ class MediaRouter2ServiceImpl {
     }
 
     @NonNull
-    public List<RouteSessionInfo> getActiveSessions(IMediaRouter2Manager manager) {
+    public List<RoutingSessionInfo> getActiveSessions(IMediaRouter2Manager manager) {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -653,7 +653,7 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    private List<RouteSessionInfo> getActiveSessionsLocked(IMediaRouter2Manager manager) {
+    private List<RoutingSessionInfo> getActiveSessionsLocked(IMediaRouter2Manager manager) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
@@ -661,7 +661,7 @@ class MediaRouter2ServiceImpl {
             return Collections.emptyList();
         }
 
-        List<RouteSessionInfo> sessionInfos = new ArrayList<>();
+        List<RoutingSessionInfo> sessionInfos = new ArrayList<>();
         for (MediaRoute2Provider provider : managerRecord.mUserRecord.mHandler.mMediaProviders) {
             sessionInfos.addAll(provider.getSessionInfos());
         }
@@ -876,20 +876,21 @@ class MediaRouter2ServiceImpl {
 
         @Override
         public void onSessionCreated(@NonNull MediaRoute2Provider provider,
-                @Nullable RouteSessionInfo sessionInfo, long requestId) {
+                @Nullable RoutingSessionInfo sessionInfo, long requestId) {
             sendMessage(PooledLambda.obtainMessage(UserHandler::onSessionCreatedOnHandler,
                     this, provider, sessionInfo, requestId));
         }
 
         @Override
         public void onSessionInfoChanged(@NonNull MediaRoute2Provider provider,
-                @NonNull RouteSessionInfo sessionInfo) {
+                @NonNull RoutingSessionInfo sessionInfo) {
             sendMessage(PooledLambda.obtainMessage(UserHandler::onSessionInfoChangedOnHandler,
                     this, provider, sessionInfo));
         }
 
         @Override
-        public void onSessionReleased(MediaRoute2Provider provider, RouteSessionInfo sessionInfo) {
+        public void onSessionReleased(MediaRoute2Provider provider,
+                RoutingSessionInfo sessionInfo) {
             sendMessage(PooledLambda.obtainMessage(UserHandler::onSessionReleasedOnHandler,
                     this, provider, sessionInfo));
         }
@@ -1131,7 +1132,7 @@ class MediaRouter2ServiceImpl {
         }
 
         private void onSessionCreatedOnHandler(@NonNull MediaRoute2Provider provider,
-                @Nullable RouteSessionInfo sessionInfo, long requestId) {
+                @Nullable RoutingSessionInfo sessionInfo, long requestId) {
             SessionCreationRequest matchingRequest = null;
 
             for (SessionCreationRequest request : mSessionCreationRequests) {
@@ -1182,7 +1183,7 @@ class MediaRouter2ServiceImpl {
         }
 
         private void onSessionInfoChangedOnHandler(@NonNull MediaRoute2Provider provider,
-                @NonNull RouteSessionInfo sessionInfo) {
+                @NonNull RoutingSessionInfo sessionInfo) {
 
             Client2Record client2Record = mSessionToClientMap.get(
                     sessionInfo.getId());
@@ -1196,7 +1197,7 @@ class MediaRouter2ServiceImpl {
         }
 
         private void onSessionReleasedOnHandler(@NonNull MediaRoute2Provider provider,
-                @NonNull RouteSessionInfo sessionInfo) {
+                @NonNull RoutingSessionInfo sessionInfo) {
 
             Client2Record client2Record = mSessionToClientMap.get(sessionInfo.getId());
             if (client2Record == null) {
@@ -1208,8 +1209,8 @@ class MediaRouter2ServiceImpl {
             // TODO: Tell managers for the session release
         }
 
-        private void notifySessionCreated(Client2Record clientRecord, RouteSessionInfo sessionInfo,
-                int requestId) {
+        private void notifySessionCreated(Client2Record clientRecord,
+                RoutingSessionInfo sessionInfo, int requestId) {
             try {
                 clientRecord.mClient.notifySessionCreated(sessionInfo, requestId);
             } catch (RemoteException ex) {
@@ -1228,7 +1229,7 @@ class MediaRouter2ServiceImpl {
         }
 
         private void notifySessionInfoChanged(Client2Record clientRecord,
-                RouteSessionInfo sessionInfo) {
+                RoutingSessionInfo sessionInfo) {
             try {
                 clientRecord.mClient.notifySessionInfoChanged(sessionInfo);
             } catch (RemoteException ex) {
@@ -1238,7 +1239,7 @@ class MediaRouter2ServiceImpl {
         }
 
         private void notifySessionReleased(Client2Record clientRecord,
-                RouteSessionInfo sessionInfo) {
+                RoutingSessionInfo sessionInfo) {
             try {
                 clientRecord.mClient.notifySessionReleased(sessionInfo);
             } catch (RemoteException ex) {
