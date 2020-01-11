@@ -51,16 +51,6 @@ public final class TunerConstants {
 
 
     /** @hide */
-    @IntDef({DEMUX_T_PID, DEMUX_MMPT_PID})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface DemuxPidType {}
-    /** @hide */
-    public static final int DEMUX_T_PID = 1;
-    /** @hide */
-    public static final int DEMUX_MMPT_PID = 2;
-
-
-    /** @hide */
     @IntDef({FILTER_SUBTYPE_UNDEFINED, FILTER_SUBTYPE_SECTION, FILTER_SUBTYPE_PES,
             FILTER_SUBTYPE_AUDIO, FILTER_SUBTYPE_VIDEO, FILTER_SUBTYPE_DOWNLOAD,
             FILTER_SUBTYPE_RECORD, FILTER_SUBTYPE_TS, FILTER_SUBTYPE_PCR, FILTER_SUBTYPE_TEMI,
