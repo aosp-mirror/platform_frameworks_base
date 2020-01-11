@@ -18,10 +18,6 @@
 
 #include "Collation.h"
 
-#include <map>
-#include <set>
-#include <vector>
-
 #include <stdio.h>
 #include <string.h>
 
@@ -30,10 +26,12 @@ namespace stats_log_api_gen {
 
 using namespace std;
 
-int write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl,
-                                    const string& moduleName, const string& javaClass,
-                                    const string& javaPackage, const bool supportQ);
+int write_stats_log_cpp(FILE *out, const Atoms &atoms, const AtomDecl &attributionDecl,
+        const string& moduleName, const string& cppNamespace, const string& importHeader,
+        const bool supportQ);
+
+int write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl,
+        const string& moduleName, const string& cppNamespace);
 
 }  // namespace stats_log_api_gen
 }  // namespace android
-

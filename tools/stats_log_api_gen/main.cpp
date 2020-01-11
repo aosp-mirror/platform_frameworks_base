@@ -1,10 +1,12 @@
 
 
 #include "Collation.h"
+#include "atoms_info_writer.h"
 #if !defined(STATS_SCHEMA_LEGACY)
 #include "java_writer.h"
 #endif
 #include "java_writer_q.h"
+#include "native_writer.h"
 #include "utils.h"
 
 #include "frameworks/base/cmds/statsd/src/atoms.pb.h"
@@ -18,8 +20,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "android-base/strings.h"
-
 using namespace google::protobuf;
 using namespace std;
 
@@ -27,750 +27,6 @@ namespace android {
 namespace stats_log_api_gen {
 
 using android::os::statsd::Atom;
-
-static void write_atoms_info_cpp(FILE *out, const Atoms &atoms) {
-    std::set<string> kTruncatingAtomNames = {"mobile_radio_power_state_changed",
-                                                 "audio_state_changed",
-                                                 "call_state_changed",
-                                                 "phone_signal_strength_changed",
-                                                 "mobile_bytes_transfer_by_fg_bg",
-                                                 "mobile_bytes_transfer"};
-    fprintf(out,
-            "const std::set<int> "
-            "AtomsInfo::kTruncatingTimestampAtomBlackList = {\n");
-    for (set<string>::const_iterator blacklistedAtom = kTruncatingAtomNames.begin();
-         blacklistedAtom != kTruncatingAtomNames.end(); blacklistedAtom++) {
-            fprintf(out, " %s,\n", make_constant_name(*blacklistedAtom).c_str());
-    }
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
-
-    fprintf(out,
-            "const std::set<int> AtomsInfo::kAtomsWithAttributionChain = {\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
-        for (vector<AtomField>::const_iterator field = atom->fields.begin();
-             field != atom->fields.end(); field++) {
-            if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                string constant = make_constant_name(atom->name);
-                fprintf(out, " %s,\n", constant.c_str());
-                break;
-            }
-        }
-    }
-
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
-
-    fprintf(out,
-            "const std::set<int> AtomsInfo::kWhitelistedAtoms = {\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
-        if (atom->whitelisted) {
-            string constant = make_constant_name(atom->name);
-            fprintf(out, " %s,\n", constant.c_str());
-        }
-    }
-
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
-
-    fprintf(out, "static std::map<int, int> getAtomUidField() {\n");
-    fprintf(out, "  std::map<int, int> uidField;\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
-        if (atom->uidField == 0) {
-            continue;
-        }
-        fprintf(out,
-                "\n    // Adding uid field for atom "
-                "(%d)%s\n",
-                atom->code, atom->name.c_str());
-        fprintf(out, "    uidField[static_cast<int>(%s)] = %d;\n",
-                make_constant_name(atom->name).c_str(), atom->uidField);
-    }
-
-    fprintf(out, "    return uidField;\n");
-    fprintf(out, "};\n");
-
-    fprintf(out,
-            "const std::map<int, int> AtomsInfo::kAtomsWithUidField = "
-            "getAtomUidField();\n");
-
-    fprintf(out,
-            "static std::map<int, StateAtomFieldOptions> "
-            "getStateAtomFieldOptions() {\n");
-    fprintf(out, "    std::map<int, StateAtomFieldOptions> options;\n");
-    fprintf(out, "    StateAtomFieldOptions opt;\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
-        if (atom->primaryFields.size() == 0 && atom->exclusiveField == 0) {
-            continue;
-        }
-        fprintf(out,
-                "\n    // Adding primary and exclusive fields for atom "
-                "(%d)%s\n",
-                atom->code, atom->name.c_str());
-        fprintf(out, "    opt.primaryFields.clear();\n");
-        for (const auto& field : atom->primaryFields) {
-            fprintf(out, "    opt.primaryFields.push_back(%d);\n", field);
-        }
-
-        fprintf(out, "    opt.exclusiveField = %d;\n", atom->exclusiveField);
-        fprintf(out, "    options[static_cast<int>(%s)] = opt;\n",
-                make_constant_name(atom->name).c_str());
-    }
-
-    fprintf(out, "    return options;\n");
-    fprintf(out, "}\n");
-
-    fprintf(out,
-            "const std::map<int, StateAtomFieldOptions> "
-            "AtomsInfo::kStateAtomsFieldOptions = "
-            "getStateAtomFieldOptions();\n");
-
-    fprintf(out,
-            "static std::map<int, std::vector<int>> "
-            "getBinaryFieldAtoms() {\n");
-    fprintf(out, "    std::map<int, std::vector<int>> options;\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
-        if (atom->binaryFields.size() == 0) {
-            continue;
-        }
-        fprintf(out,
-                "\n    // Adding binary fields for atom "
-                "(%d)%s\n",
-                atom->code, atom->name.c_str());
-
-        for (const auto& field : atom->binaryFields) {
-            fprintf(out, "    options[static_cast<int>(%s)].push_back(%d);\n",
-                    make_constant_name(atom->name).c_str(), field);
-        }
-    }
-
-    fprintf(out, "    return options;\n");
-    fprintf(out, "}\n");
-
-    fprintf(out,
-            "const std::map<int, std::vector<int>> "
-            "AtomsInfo::kBytesFieldAtoms = "
-            "getBinaryFieldAtoms();\n");
-}
-
-// Writes namespaces for the cpp and header files, returning the number of namespaces written.
-void write_namespace(FILE* out, const string& cppNamespaces) {
-    vector<string> cppNamespaceVec = android::base::Split(cppNamespaces, ",");
-    for (string cppNamespace : cppNamespaceVec) {
-        fprintf(out, "namespace %s {\n", cppNamespace.c_str());
-    }
-}
-
-// Writes namespace closing brackets for cpp and header files.
-void write_closing_namespace(FILE* out, const string& cppNamespaces) {
-    vector<string> cppNamespaceVec = android::base::Split(cppNamespaces, ",");
-    for (auto it = cppNamespaceVec.rbegin(); it != cppNamespaceVec.rend(); ++it) {
-        fprintf(out, "} // namespace %s\n", it->c_str());
-    }
-}
-
-static int write_stats_log_cpp(FILE *out, const Atoms &atoms, const AtomDecl &attributionDecl,
-                               const string& moduleName, const string& cppNamespace,
-                               const string& importHeader) {
-    // Print prelude
-    fprintf(out, "// This file is autogenerated\n");
-    fprintf(out, "\n");
-
-    fprintf(out, "#include <mutex>\n");
-    fprintf(out, "#include <chrono>\n");
-    fprintf(out, "#include <thread>\n");
-    fprintf(out, "#ifdef __ANDROID__\n");
-    fprintf(out, "#include <cutils/properties.h>\n");
-    fprintf(out, "#endif\n");
-    fprintf(out, "#include <stats_event_list.h>\n");
-    fprintf(out, "#include <log/log.h>\n");
-    fprintf(out, "#include <%s>\n", importHeader.c_str());
-    fprintf(out, "#include <utils/SystemClock.h>\n");
-    fprintf(out, "\n");
-
-    write_namespace(out, cppNamespace);
-    fprintf(out, "// the single event tag id for all stats logs\n");
-    fprintf(out, "const static int kStatsEventTag = 1937006964;\n");
-    fprintf(out, "#ifdef __ANDROID__\n");
-    fprintf(out, "const static bool kStatsdEnabled = property_get_bool(\"ro.statsd.enable\", true);\n");
-    fprintf(out, "#else\n");
-    fprintf(out, "const static bool kStatsdEnabled = false;\n");
-    fprintf(out, "#endif\n");
-
-    // AtomsInfo is only used by statsd internally and is not needed for other modules.
-    if (moduleName == DEFAULT_MODULE_NAME) {
-        write_atoms_info_cpp(out, atoms);
-    }
-
-    fprintf(out, "int64_t lastRetryTimestampNs = -1;\n");
-    fprintf(out, "const int64_t kMinRetryIntervalNs = NS_PER_SEC * 60 * 20; // 20 minutes\n");
-    fprintf(out, "static std::mutex mLogdRetryMutex;\n");
-
-    // Print write methods
-    fprintf(out, "\n");
-    for (auto signature_to_modules_it = atoms.signatures_to_modules.begin();
-        signature_to_modules_it != atoms.signatures_to_modules.end(); signature_to_modules_it++) {
-        if (!signature_needed_for_module(signature_to_modules_it->second, moduleName)) {
-            continue;
-        }
-        vector<java_type_t> signature = signature_to_modules_it->first;
-        int argIndex;
-
-        fprintf(out, "int\n");
-        fprintf(out, "try_stats_write(int32_t code");
-        argIndex = 1;
-        for (vector<java_type_t>::const_iterator arg = signature.begin();
-            arg != signature.end(); arg++) {
-            if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                for (auto chainField : attributionDecl.fields) {
-                    if (chainField.javaType == JAVA_TYPE_STRING) {
-                            fprintf(out, ", const std::vector<%s>& %s",
-                                 cpp_type_name(chainField.javaType),
-                                 chainField.name.c_str());
-                    } else {
-                            fprintf(out, ", const %s* %s, size_t %s_length",
-                                 cpp_type_name(chainField.javaType),
-                                 chainField.name.c_str(), chainField.name.c_str());
-                    }
-                }
-            } else if (*arg == JAVA_TYPE_KEY_VALUE_PAIR) {
-                fprintf(out, ", const std::map<int, int32_t>& arg%d_1, "
-                             "const std::map<int, int64_t>& arg%d_2, "
-                             "const std::map<int, char const*>& arg%d_3, "
-                             "const std::map<int, float>& arg%d_4",
-                             argIndex, argIndex, argIndex, argIndex);
-            } else {
-                fprintf(out, ", %s arg%d", cpp_type_name(*arg), argIndex);
-            }
-            argIndex++;
-        }
-        fprintf(out, ")\n");
-
-        fprintf(out, "{\n");
-        argIndex = 1;
-        fprintf(out, "  if (kStatsdEnabled) {\n");
-        fprintf(out, "    stats_event_list event(kStatsEventTag);\n");
-        fprintf(out, "    event << android::elapsedRealtimeNano();\n\n");
-        fprintf(out, "    event << code;\n\n");
-        for (vector<java_type_t>::const_iterator arg = signature.begin();
-            arg != signature.end(); arg++) {
-            if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                for (const auto &chainField : attributionDecl.fields) {
-                    if (chainField.javaType == JAVA_TYPE_STRING) {
-                        fprintf(out, "    if (%s_length != %s.size()) {\n",
-                            attributionDecl.fields.front().name.c_str(), chainField.name.c_str());
-                        fprintf(out, "        return -EINVAL;\n");
-                        fprintf(out, "    }\n");
-                    }
-                }
-                fprintf(out, "\n    event.begin();\n");
-                fprintf(out, "    for (size_t i = 0; i < %s_length; ++i) {\n",
-                    attributionDecl.fields.front().name.c_str());
-                fprintf(out, "        event.begin();\n");
-                for (const auto &chainField : attributionDecl.fields) {
-                    if (chainField.javaType == JAVA_TYPE_STRING) {
-                        fprintf(out, "        if (%s[i] != NULL) {\n", chainField.name.c_str());
-                        fprintf(out, "           event << %s[i];\n", chainField.name.c_str());
-                        fprintf(out, "        } else {\n");
-                        fprintf(out, "           event << \"\";\n");
-                        fprintf(out, "        }\n");
-                    } else {
-                        fprintf(out, "        event << %s[i];\n", chainField.name.c_str());
-                    }
-                }
-                fprintf(out, "        event.end();\n");
-                fprintf(out, "    }\n");
-                fprintf(out, "    event.end();\n\n");
-            } else if (*arg == JAVA_TYPE_KEY_VALUE_PAIR) {
-                    fprintf(out, "    event.begin();\n\n");
-                    fprintf(out, "    for (const auto& it : arg%d_1) {\n", argIndex);
-                    fprintf(out, "         event.begin();\n");
-                    fprintf(out, "         event << it.first;\n");
-                    fprintf(out, "         event << it.second;\n");
-                    fprintf(out, "         event.end();\n");
-                    fprintf(out, "    }\n");
-
-                    fprintf(out, "    for (const auto& it : arg%d_2) {\n", argIndex);
-                    fprintf(out, "         event.begin();\n");
-                    fprintf(out, "         event << it.first;\n");
-                    fprintf(out, "         event << it.second;\n");
-                    fprintf(out, "         event.end();\n");
-                    fprintf(out, "    }\n");
-
-                    fprintf(out, "    for (const auto& it : arg%d_3) {\n", argIndex);
-                    fprintf(out, "         event.begin();\n");
-                    fprintf(out, "         event << it.first;\n");
-                    fprintf(out, "         event << it.second;\n");
-                    fprintf(out, "         event.end();\n");
-                    fprintf(out, "    }\n");
-
-                    fprintf(out, "    for (const auto& it : arg%d_4) {\n", argIndex);
-                    fprintf(out, "         event.begin();\n");
-                    fprintf(out, "         event << it.first;\n");
-                    fprintf(out, "         event << it.second;\n");
-                    fprintf(out, "         event.end();\n");
-                    fprintf(out, "    }\n");
-
-                    fprintf(out, "    event.end();\n\n");
-            } else if (*arg == JAVA_TYPE_BYTE_ARRAY) {
-                fprintf(out,
-                        "    event.AppendCharArray(arg%d.arg, "
-                        "arg%d.arg_length);\n",
-                        argIndex, argIndex);
-            } else {
-                if (*arg == JAVA_TYPE_STRING) {
-                    fprintf(out, "    if (arg%d == NULL) {\n", argIndex);
-                    fprintf(out, "        arg%d = \"\";\n", argIndex);
-                    fprintf(out, "    }\n");
-                }
-                fprintf(out, "    event << arg%d;\n", argIndex);
-            }
-            argIndex++;
-        }
-
-        fprintf(out, "    return event.write(LOG_ID_STATS);\n");
-        fprintf(out, "  } else {\n");
-        fprintf(out, "    return 1;\n");
-        fprintf(out, "  }\n");
-        fprintf(out, "}\n");
-        fprintf(out, "\n");
-    }
-
-   for (auto signature_to_modules_it = atoms.signatures_to_modules.begin();
-       signature_to_modules_it != atoms.signatures_to_modules.end(); signature_to_modules_it++) {
-       if (!signature_needed_for_module(signature_to_modules_it->second, moduleName)) {
-           continue;
-       }
-       vector<java_type_t> signature = signature_to_modules_it->first;
-       int argIndex;
-
-       fprintf(out, "int\n");
-       fprintf(out, "stats_write(int32_t code");
-       argIndex = 1;
-       for (vector<java_type_t>::const_iterator arg = signature.begin();
-           arg != signature.end(); arg++) {
-           if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-               for (auto chainField : attributionDecl.fields) {
-                   if (chainField.javaType == JAVA_TYPE_STRING) {
-                           fprintf(out, ", const std::vector<%s>& %s",
-                                cpp_type_name(chainField.javaType),
-                                chainField.name.c_str());
-                   } else {
-                           fprintf(out, ", const %s* %s, size_t %s_length",
-                                cpp_type_name(chainField.javaType),
-                                chainField.name.c_str(), chainField.name.c_str());
-                   }
-               }
-           } else if (*arg == JAVA_TYPE_KEY_VALUE_PAIR) {
-               fprintf(out,
-                       ", const std::map<int, int32_t>& arg%d_1, "
-                       "const std::map<int, int64_t>& arg%d_2, "
-                       "const std::map<int, char const*>& arg%d_3, "
-                       "const std::map<int, float>& arg%d_4",
-                       argIndex, argIndex, argIndex, argIndex);
-           } else {
-               fprintf(out, ", %s arg%d", cpp_type_name(*arg), argIndex);
-           }
-           argIndex++;
-       }
-       fprintf(out, ")\n");
-
-       fprintf(out, "{\n");
-       fprintf(out, "  int ret = 0;\n");
-
-       fprintf(out, "  for(int retry = 0; retry < 2; ++retry) {\n");
-       fprintf(out, "      ret =  try_stats_write(code");
-
-       argIndex = 1;
-       for (vector<java_type_t>::const_iterator arg = signature.begin();
-           arg != signature.end(); arg++) {
-           if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-               for (auto chainField : attributionDecl.fields) {
-                   if (chainField.javaType == JAVA_TYPE_STRING) {
-                           fprintf(out, ", %s",
-                                chainField.name.c_str());
-                   } else {
-                           fprintf(out, ",  %s,  %s_length",
-                                chainField.name.c_str(), chainField.name.c_str());
-                   }
-               }
-           } else if (*arg == JAVA_TYPE_KEY_VALUE_PAIR) {
-               fprintf(out, ", arg%d_1, arg%d_2, arg%d_3, arg%d_4", argIndex,
-                       argIndex, argIndex, argIndex);
-           } else {
-               fprintf(out, ", arg%d", argIndex);
-           }
-           argIndex++;
-       }
-       fprintf(out, ");\n");
-       fprintf(out, "      if (ret >= 0) { break; }\n");
-
-       fprintf(out, "      {\n");
-       fprintf(out, "          std::lock_guard<std::mutex> lock(mLogdRetryMutex);\n");
-       fprintf(out, "          if ((android::elapsedRealtimeNano() - lastRetryTimestampNs) <= "
-                                "kMinRetryIntervalNs) break;\n");
-       fprintf(out, "          lastRetryTimestampNs = android::elapsedRealtimeNano();\n");
-       fprintf(out, "      }\n");
-       fprintf(out, "      std::this_thread::sleep_for(std::chrono::milliseconds(10));\n");
-       fprintf(out, "  }\n");
-       fprintf(out, "  if (ret < 0) {\n");
-       fprintf(out, "      note_log_drop(ret, code);\n");
-       fprintf(out, "  }\n");
-       fprintf(out, "  return ret;\n");
-       fprintf(out, "}\n");
-       fprintf(out, "\n");
-   }
-
-    for (auto signature_it = atoms.non_chained_signatures_to_modules.begin();
-            signature_it != atoms.non_chained_signatures_to_modules.end(); signature_it++) {
-        if (!signature_needed_for_module(signature_it->second, moduleName)) {
-            continue;
-        }
-        vector<java_type_t> signature = signature_it->first;
-        int argIndex;
-
-        fprintf(out, "int\n");
-        fprintf(out, "try_stats_write_non_chained(int32_t code");
-        argIndex = 1;
-        for (vector<java_type_t>::const_iterator arg = signature.begin();
-            arg != signature.end(); arg++) {
-            fprintf(out, ", %s arg%d", cpp_type_name(*arg), argIndex);
-            argIndex++;
-        }
-        fprintf(out, ")\n");
-
-        fprintf(out, "{\n");
-        argIndex = 1;
-        fprintf(out, "  if (kStatsdEnabled) {\n");
-        fprintf(out, "    stats_event_list event(kStatsEventTag);\n");
-        fprintf(out, "    event << android::elapsedRealtimeNano();\n\n");
-        fprintf(out, "    event << code;\n\n");
-        for (vector<java_type_t>::const_iterator arg = signature.begin();
-            arg != signature.end(); arg++) {
-            if (argIndex == 1) {
-                fprintf(out, "    event.begin();\n\n");
-                fprintf(out, "    event.begin();\n");
-            }
-            if (*arg == JAVA_TYPE_STRING) {
-                fprintf(out, "    if (arg%d == NULL) {\n", argIndex);
-                fprintf(out, "        arg%d = \"\";\n", argIndex);
-                fprintf(out, "    }\n");
-            }
-            if (*arg == JAVA_TYPE_BYTE_ARRAY) {
-                fprintf(out,
-                        "    event.AppendCharArray(arg%d.arg, "
-                        "arg%d.arg_length);",
-                        argIndex, argIndex);
-            } else {
-                fprintf(out, "    event << arg%d;\n", argIndex);
-            }
-            if (argIndex == 2) {
-                fprintf(out, "    event.end();\n\n");
-                fprintf(out, "    event.end();\n\n");
-            }
-            argIndex++;
-        }
-
-        fprintf(out, "    return event.write(LOG_ID_STATS);\n");
-        fprintf(out, "  } else {\n");
-        fprintf(out, "    return 1;\n");
-        fprintf(out, "  }\n");
-        fprintf(out, "}\n");
-        fprintf(out, "\n");
-    }
-
-    for (auto signature_it = atoms.non_chained_signatures_to_modules.begin();
-            signature_it != atoms.non_chained_signatures_to_modules.end(); signature_it++) {
-       if (!signature_needed_for_module(signature_it->second, moduleName)) {
-           continue;
-       }
-       vector<java_type_t> signature = signature_it->first;
-       int argIndex;
-
-       fprintf(out, "int\n");
-       fprintf(out, "stats_write_non_chained(int32_t code");
-       argIndex = 1;
-       for (vector<java_type_t>::const_iterator arg = signature.begin();
-           arg != signature.end(); arg++) {
-           fprintf(out, ", %s arg%d", cpp_type_name(*arg), argIndex);
-           argIndex++;
-       }
-       fprintf(out, ")\n");
-
-       fprintf(out, "{\n");
-
-       fprintf(out, "  int ret = 0;\n");
-       fprintf(out, "  for(int retry = 0; retry < 2; ++retry) {\n");
-       fprintf(out, "      ret =  try_stats_write_non_chained(code");
-
-       argIndex = 1;
-       for (vector<java_type_t>::const_iterator arg = signature.begin();
-           arg != signature.end(); arg++) {
-           fprintf(out, ", arg%d",   argIndex);
-           argIndex++;
-       }
-       fprintf(out, ");\n");
-       fprintf(out, "      if (ret >= 0) { break; }\n");
-
-       fprintf(out, "      {\n");
-       fprintf(out, "          std::lock_guard<std::mutex> lock(mLogdRetryMutex);\n");
-       fprintf(out, "          if ((android::elapsedRealtimeNano() - lastRetryTimestampNs) <= "
-                                "kMinRetryIntervalNs) break;\n");
-       fprintf(out, "          lastRetryTimestampNs = android::elapsedRealtimeNano();\n");
-       fprintf(out, "      }\n");
-
-       fprintf(out, "      std::this_thread::sleep_for(std::chrono::milliseconds(10));\n");
-       fprintf(out, "  }\n");
-       fprintf(out, "  if (ret < 0) {\n");
-       fprintf(out, "      note_log_drop(ret, code);\n");
-       fprintf(out, "  }\n");
-       fprintf(out, "  return ret;\n\n");
-       fprintf(out, "}\n");
-
-       fprintf(out, "\n");
-   }
-
-
-    // Print footer
-    fprintf(out, "\n");
-    write_closing_namespace(out, cppNamespace);
-
-    return 0;
-}
-
-static void write_cpp_usage(
-    FILE* out, const string& method_name, const string& atom_code_name,
-    const AtomDecl& atom, const AtomDecl &attributionDecl) {
-    fprintf(out, "     * Usage: %s(StatsLog.%s", method_name.c_str(),
-            atom_code_name.c_str());
-
-    for (vector<AtomField>::const_iterator field = atom.fields.begin();
-            field != atom.fields.end(); field++) {
-        if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-            for (auto chainField : attributionDecl.fields) {
-                if (chainField.javaType == JAVA_TYPE_STRING) {
-                    fprintf(out, ", const std::vector<%s>& %s",
-                         cpp_type_name(chainField.javaType),
-                         chainField.name.c_str());
-                } else {
-                    fprintf(out, ", const %s* %s, size_t %s_length",
-                         cpp_type_name(chainField.javaType),
-                         chainField.name.c_str(), chainField.name.c_str());
-                }
-            }
-        } else if (field->javaType == JAVA_TYPE_KEY_VALUE_PAIR) {
-            fprintf(out, ", const std::map<int, int32_t>& %s_int"
-                         ", const std::map<int, int64_t>& %s_long"
-                         ", const std::map<int, char const*>& %s_str"
-                         ", const std::map<int, float>& %s_float",
-                         field->name.c_str(),
-                         field->name.c_str(),
-                         field->name.c_str(),
-                         field->name.c_str());
-        } else {
-            fprintf(out, ", %s %s", cpp_type_name(field->javaType), field->name.c_str());
-        }
-    }
-    fprintf(out, ");\n");
-}
-
-static void write_cpp_method_header(
-        FILE* out,
-        const string& method_name,
-        const map<vector<java_type_t>, set<string>>& signatures_to_modules,
-        const AtomDecl &attributionDecl, const string& moduleName) {
-
-    for (auto signature_to_modules_it = signatures_to_modules.begin();
-            signature_to_modules_it != signatures_to_modules.end(); signature_to_modules_it++) {
-        // Skip if this signature is not needed for the module.
-        if (!signature_needed_for_module(signature_to_modules_it->second, moduleName)) {
-            continue;
-        }
-
-        vector<java_type_t> signature = signature_to_modules_it->first;
-        fprintf(out, "int %s(int32_t code", method_name.c_str());
-        int argIndex = 1;
-        for (vector<java_type_t>::const_iterator arg = signature.begin();
-                arg != signature.end(); arg++) {
-            if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                for (auto chainField : attributionDecl.fields) {
-                    if (chainField.javaType == JAVA_TYPE_STRING) {
-                        fprintf(out, ", const std::vector<%s>& %s",
-                            cpp_type_name(chainField.javaType), chainField.name.c_str());
-                    } else {
-                        fprintf(out, ", const %s* %s, size_t %s_length",
-                            cpp_type_name(chainField.javaType),
-                            chainField.name.c_str(), chainField.name.c_str());
-                    }
-                }
-            } else if (*arg == JAVA_TYPE_KEY_VALUE_PAIR) {
-                fprintf(out, ", const std::map<int, int32_t>& arg%d_1, "
-                             "const std::map<int, int64_t>& arg%d_2, "
-                             "const std::map<int, char const*>& arg%d_3, "
-                             "const std::map<int, float>& arg%d_4",
-                             argIndex, argIndex, argIndex, argIndex);
-            } else {
-                fprintf(out, ", %s arg%d", cpp_type_name(*arg), argIndex);
-            }
-            argIndex++;
-        }
-        fprintf(out, ");\n");
-
-    }
-}
-
-static int
-write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl,
-        const string& moduleName, const string& cppNamespace)
-{
-    // Print prelude
-    fprintf(out, "// This file is autogenerated\n");
-    fprintf(out, "\n");
-    fprintf(out, "#pragma once\n");
-    fprintf(out, "\n");
-    fprintf(out, "#include <stdint.h>\n");
-    fprintf(out, "#include <vector>\n");
-    fprintf(out, "#include <map>\n");
-    fprintf(out, "#include <set>\n");
-    fprintf(out, "\n");
-
-    write_namespace(out, cppNamespace);
-    fprintf(out, "\n");
-    fprintf(out, "/*\n");
-    fprintf(out, " * API For logging statistics events.\n");
-    fprintf(out, " */\n");
-    fprintf(out, "\n");
-    fprintf(out, "/**\n");
-    fprintf(out, " * Constants for atom codes.\n");
-    fprintf(out, " */\n");
-    fprintf(out, "enum {\n");
-
-    std::map<int, set<AtomDecl>::const_iterator> atom_code_to_non_chained_decl_map;
-    build_non_chained_decl_map(atoms, &atom_code_to_non_chained_decl_map);
-
-    size_t i = 0;
-    int maxPushedAtomId = 2;
-    // Print atom constants
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-        atom != atoms.decls.end(); atom++) {
-        // Skip if the atom is not needed for the module.
-        if (!atom_needed_for_module(*atom, moduleName)) {
-            continue;
-        }
-        string constant = make_constant_name(atom->name);
-        fprintf(out, "\n");
-        fprintf(out, "    /**\n");
-        fprintf(out, "     * %s %s\n", atom->message.c_str(), atom->name.c_str());
-        write_cpp_usage(out, "stats_write", constant, *atom, attributionDecl);
-
-        auto non_chained_decl = atom_code_to_non_chained_decl_map.find(atom->code);
-        if (non_chained_decl != atom_code_to_non_chained_decl_map.end()) {
-            write_cpp_usage(out, "stats_write_non_chained", constant, *non_chained_decl->second,
-                attributionDecl);
-        }
-        fprintf(out, "     */\n");
-        char const* const comma = (i == atoms.decls.size() - 1) ? "" : ",";
-        fprintf(out, "    %s = %d%s\n", constant.c_str(), atom->code, comma);
-        if (atom->code < PULL_ATOM_START_ID && atom->code > maxPushedAtomId) {
-            maxPushedAtomId = atom->code;
-        }
-        i++;
-    }
-    fprintf(out, "\n");
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
-
-    // Print constants for the enum values.
-    fprintf(out, "//\n");
-    fprintf(out, "// Constants for enum values\n");
-    fprintf(out, "//\n\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-        atom != atoms.decls.end(); atom++) {
-        // Skip if the atom is not needed for the module.
-        if (!atom_needed_for_module(*atom, moduleName)) {
-            continue;
-        }
-
-        for (vector<AtomField>::const_iterator field = atom->fields.begin();
-            field != atom->fields.end(); field++) {
-            if (field->javaType == JAVA_TYPE_ENUM) {
-                fprintf(out, "// Values for %s.%s\n", atom->message.c_str(),
-                    field->name.c_str());
-                for (map<int, string>::const_iterator value = field->enumValues.begin();
-                    value != field->enumValues.end(); value++) {
-                    fprintf(out, "const int32_t %s__%s__%s = %d;\n",
-                        make_constant_name(atom->message).c_str(),
-                        make_constant_name(field->name).c_str(),
-                        make_constant_name(value->second).c_str(),
-                        value->first);
-                }
-                fprintf(out, "\n");
-            }
-        }
-    }
-
-    fprintf(out, "struct BytesField {\n");
-    fprintf(out,
-            "  BytesField(char const* array, size_t len) : arg(array), "
-            "arg_length(len) {}\n");
-    fprintf(out, "  char const* arg;\n");
-    fprintf(out, "  size_t arg_length;\n");
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
-
-    // This metadata is only used by statsd, which uses the default libstatslog.
-    if (moduleName == DEFAULT_MODULE_NAME) {
-
-        fprintf(out, "struct StateAtomFieldOptions {\n");
-        fprintf(out, "  std::vector<int> primaryFields;\n");
-        fprintf(out, "  int exclusiveField;\n");
-        fprintf(out, "};\n");
-        fprintf(out, "\n");
-
-        fprintf(out, "struct AtomsInfo {\n");
-        fprintf(out,
-                "  const static std::set<int> "
-                "kTruncatingTimestampAtomBlackList;\n");
-        fprintf(out, "  const static std::map<int, int> kAtomsWithUidField;\n");
-        fprintf(out,
-                "  const static std::set<int> kAtomsWithAttributionChain;\n");
-        fprintf(out,
-                "  const static std::map<int, StateAtomFieldOptions> "
-                "kStateAtomsFieldOptions;\n");
-        fprintf(out,
-                "  const static std::map<int, std::vector<int>> "
-                "kBytesFieldAtoms;");
-        fprintf(out,
-                "  const static std::set<int> kWhitelistedAtoms;\n");
-        fprintf(out, "};\n");
-
-        fprintf(out, "const static int kMaxPushedAtomId = %d;\n\n",
-                maxPushedAtomId);
-    }
-
-    // Print write methods
-    fprintf(out, "//\n");
-    fprintf(out, "// Write methods\n");
-    fprintf(out, "//\n");
-    write_cpp_method_header(out, "stats_write", atoms.signatures_to_modules, attributionDecl,
-            moduleName);
-
-    fprintf(out, "//\n");
-    fprintf(out, "// Write flattened methods\n");
-    fprintf(out, "//\n");
-    write_cpp_method_header(out, "stats_write_non_chained", atoms.non_chained_signatures_to_modules,
-        attributionDecl, moduleName);
-
-    fprintf(out, "\n");
-    write_closing_namespace(out, cppNamespace);
-
-    return 0;
-}
 
 // Hide the JNI write helpers that are not used in the new schema.
 // TODO(b/145100015): Remove this and other JNI related functionality once StatsEvent migration is
@@ -1235,20 +491,28 @@ print_usage()
     fprintf(stderr, "usage: stats-log-api-gen OPTIONS\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "OPTIONS\n");
-    fprintf(stderr, "  --cpp FILENAME       the header file to output\n");
-    fprintf(stderr, "  --header FILENAME    the cpp file to output\n");
+    fprintf(stderr, "  --cpp FILENAME       the header file to output for write helpers\n");
+    fprintf(stderr, "  --header FILENAME    the cpp file to output for write helpers\n");
+    fprintf(stderr,
+            "  --atomsInfoCpp FILENAME       the header file to output for statsd metadata\n");
+    fprintf(stderr, "  --atomsInfoHeader FILENAME    the cpp file to output for statsd metadata\n");
     fprintf(stderr, "  --help               this message\n");
     fprintf(stderr, "  --java FILENAME      the java file to output\n");
     fprintf(stderr, "  --jni FILENAME       the jni file to output\n");
     fprintf(stderr, "  --module NAME        optional, module name to generate outputs for\n");
     fprintf(stderr, "  --namespace COMMA,SEP,NAMESPACE   required for cpp/header with module\n");
     fprintf(stderr, "                                    comma separated namespace of the files\n");
-    fprintf(stderr, "  --importHeader NAME  required for cpp/jni to say which header to import\n");
+    fprintf(stderr,"  --importHeader NAME  required for cpp/jni to say which header to import "
+            "for write helpers\n");
+    fprintf(stderr,"  --atomsInfoImportHeader NAME  required for cpp to say which header to import "
+            "for statsd metadata\n");
     fprintf(stderr, "  --javaPackage PACKAGE             the package for the java file.\n");
     fprintf(stderr, "                                    required for java with module\n");
     fprintf(stderr, "  --javaClass CLASS    the class name of the java class.\n");
     fprintf(stderr, "                       Optional for Java with module.\n");
-    fprintf(stderr, "                       Default is \"StatsLogInternal\"\n");}
+    fprintf(stderr, "                       Default is \"StatsLogInternal\"\n");
+    fprintf(stderr, "  --supportQ           Include support for Android Q.\n");
+}
 
 /**
  * Do the argument parsing and execute the tasks.
@@ -1260,12 +524,16 @@ run(int argc, char const*const* argv)
     string headerFilename;
     string javaFilename;
     string jniFilename;
+    string atomsInfoCppFilename;
+    string atomsInfoHeaderFilename;
 
     string moduleName = DEFAULT_MODULE_NAME;
     string cppNamespace = DEFAULT_CPP_NAMESPACE;
     string cppHeaderImport = DEFAULT_CPP_HEADER_IMPORT;
+    string atomsInfoCppHeaderImport = DEFAULT_ATOMS_INFO_CPP_HEADER_IMPORT;
     string javaPackage = DEFAULT_JAVA_PACKAGE;
     string javaClass = DEFAULT_JAVA_CLASS;
+    bool supportQ = false;
 
     int index = 1;
     while (index < argc) {
@@ -1335,15 +603,47 @@ run(int argc, char const*const* argv)
                 return 1;
             }
             javaClass = argv[index];
+        } else if (0 == strcmp("--atomsInfoHeader", argv[index])) {
+            index++;
+            if (index >= argc) {
+                print_usage();
+                return 1;
+            }
+            atomsInfoHeaderFilename = argv[index];
+        } else if (0 == strcmp("--atomsInfoCpp", argv[index])) {
+            index++;
+            if (index >= argc) {
+                print_usage();
+                return 1;
+            }
+            atomsInfoCppFilename = argv[index];
+        } else if (0 == strcmp("--atomsInfoImportHeader", argv[index])) {
+            index++;
+            if (index >= argc) {
+                print_usage();
+                return 1;
+            }
+            atomsInfoCppHeaderImport = argv[index];
+        } else if (0 == strcmp("--supportQ", argv[index])) {
+            supportQ = true;
         }
+
         index++;
     }
 
     if (cppFilename.size() == 0
             && headerFilename.size() == 0
             && javaFilename.size() == 0
-            && jniFilename.size() == 0) {
+            && jniFilename.size() == 0
+            && atomsInfoHeaderFilename.size() == 0
+            && atomsInfoCppFilename.size() == 0) {
         print_usage();
+        return 1;
+    }
+
+    if (DEFAULT_MODULE_NAME == moduleName && supportQ) {
+        // Support for Q schema is not needed for default module.
+        fprintf(stderr, "%s cannot support Q schema\n", moduleName.c_str());
         return 1;
     }
 
@@ -1358,6 +658,30 @@ run(int argc, char const*const* argv)
     vector<java_type_t> attributionSignature;
     collate_atom(android::os::statsd::AttributionNode::descriptor(),
                  &attributionDecl, &attributionSignature);
+
+    // Write the atoms info .cpp file
+    if (atomsInfoCppFilename.size() != 0) {
+        FILE* out = fopen(atomsInfoCppFilename.c_str(), "w");
+        if (out == NULL) {
+            fprintf(stderr, "Unable to open file for write: %s\n", atomsInfoCppFilename.c_str());
+            return 1;
+        }
+        errorCount = android::stats_log_api_gen::write_atoms_info_cpp(
+            out, atoms, cppNamespace, atomsInfoCppHeaderImport, cppHeaderImport);
+        fclose(out);
+    }
+
+    // Write the atoms info .h file
+    if (atomsInfoHeaderFilename.size() != 0) {
+        FILE* out = fopen(atomsInfoHeaderFilename.c_str(), "w");
+        if (out == NULL) {
+            fprintf(stderr, "Unable to open file for write: %s\n", atomsInfoHeaderFilename.c_str());
+            return 1;
+        }
+        errorCount = android::stats_log_api_gen::write_atoms_info_header(out, atoms, cppNamespace);
+        fclose(out);
+    }
+
 
     // Write the .cpp file
     if (cppFilename.size() != 0) {
@@ -1377,7 +701,7 @@ run(int argc, char const*const* argv)
             return 1;
         }
         errorCount = android::stats_log_api_gen::write_stats_log_cpp(
-            out, atoms, attributionDecl, moduleName, cppNamespace, cppHeaderImport);
+            out, atoms, attributionDecl, moduleName, cppNamespace, cppHeaderImport, supportQ);
         fclose(out);
     }
 
@@ -1425,7 +749,7 @@ run(int argc, char const*const* argv)
             javaPackage = "android.util";
         }
         errorCount = android::stats_log_api_gen::write_stats_log_java(
-                out, atoms, attributionDecl, moduleName, javaClass, javaPackage);
+                out, atoms, attributionDecl, moduleName, javaClass, javaPackage, supportQ);
 #endif
 
         fclose(out);
