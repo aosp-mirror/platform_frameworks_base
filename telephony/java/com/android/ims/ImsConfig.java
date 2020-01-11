@@ -178,7 +178,7 @@ public class ImsConfig {
          * SIP T1 timer value in milliseconds. See RFC 3261 for define.
          * Value is in Integer format.
          */
-        public static final int SIP_T1_TIMER = 7;
+        public static final int SIP_T1_TIMER = ProvisioningManager.KEY_T1_TIMER_VALUE_MS;
 
         /**
          * SIP T2 timer value in milliseconds.  See RFC 3261 for define.
@@ -196,13 +196,15 @@ public class ImsConfig {
          * VoLTE status for VLT/s status of Enabled (1), or Disabled (0).
          * Value is in Integer format.
          */
-        public static final int VLT_SETTING_ENABLED = 10;
+        public static final int VLT_SETTING_ENABLED =
+                ProvisioningManager.KEY_VOLTE_PROVISIONING_STATUS;
 
         /**
          * VoLTE status for LVC/s status of Enabled (1), or Disabled (0).
          * Value is in Integer format.
          */
-        public static final int LVC_SETTING_ENABLED = 11;
+        public static final int LVC_SETTING_ENABLED =
+                ProvisioningManager.KEY_VT_PROVISIONING_STATUS;
         /**
          * Domain Name for the device to populate the request URI for REGISTRATION.
          * Value is in String format.
@@ -222,48 +224,56 @@ public class ImsConfig {
          * Requested expiration for Published Online availability.
          * Value is in Integer format.
          */
-        public static final int PUBLISH_TIMER = 15;
+        public static final int PUBLISH_TIMER = ProvisioningManager.KEY_RCS_PUBLISH_TIMER_SEC;
         /**
          * Requested expiration for Published Offline availability.
          * Value is in Integer format.
          */
-        public static final int PUBLISH_TIMER_EXTENDED = 16;
+        public static final int PUBLISH_TIMER_EXTENDED =
+                ProvisioningManager.KEY_RCS_PUBLISH_TIMER_EXTENDED_SEC;
         /**
          *
          * Value is in Integer format.
          */
-        public static final int CAPABILITY_DISCOVERY_ENABLED = 17;
+        public static final int CAPABILITY_DISCOVERY_ENABLED =
+                ProvisioningManager.KEY_RCS_CAPABILITY_DISCOVERY_ENABLED;
         /**
          * Period of time the capability information of the  contact is cached on handset.
          * Value is in Integer format.
          */
-        public static final int CAPABILITIES_CACHE_EXPIRATION = 18;
+        public static final int CAPABILITIES_CACHE_EXPIRATION =
+                ProvisioningManager.KEY_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC;
         /**
          * Peiod of time the availability information of a contact is cached on device.
          * Value is in Integer format.
          */
-        public static final int AVAILABILITY_CACHE_EXPIRATION = 19;
+        public static final int AVAILABILITY_CACHE_EXPIRATION =
+                ProvisioningManager.KEY_RCS_AVAILABILITY_CACHE_EXPIRATION_SEC;
         /**
          * Interval between successive capabilities polling.
          * Value is in Integer format.
          */
-        public static final int CAPABILITIES_POLL_INTERVAL = 20;
+        public static final int CAPABILITIES_POLL_INTERVAL =
+                ProvisioningManager.KEY_RCS_CAPABILITIES_POLL_INTERVAL_SEC;
         /**
          * Minimum time between two published messages from the device.
          * Value is in Integer format.
          */
-        public static final int SOURCE_THROTTLE_PUBLISH = 21;
+        public static final int SOURCE_THROTTLE_PUBLISH =
+                ProvisioningManager.KEY_RCS_PUBLISH_SOURCE_THROTTLE_MS;
         /**
          * The Maximum number of MDNs contained in one Request Contained List.
          * Value is in Integer format.
          */
-        public static final int MAX_NUMENTRIES_IN_RCL = 22;
+        public static final int MAX_NUMENTRIES_IN_RCL =
+                ProvisioningManager.KEY_RCS_MAX_NUM_ENTRIES_IN_RCL;
         /**
          * Expiration timer for subscription of a Request Contained List, used in capability
          * polling.
          * Value is in Integer format.
          */
-        public static final int CAPAB_POLL_LIST_SUB_EXP = 23;
+        public static final int CAPAB_POLL_LIST_SUB_EXP =
+                ProvisioningManager.KEY_RCS_CAPABILITY_POLL_LIST_SUB_EXP_SEC;
         /**
          * Applies compression to LIST Subscription.
          * Value is in Integer format. Enable (1), Disable(0).
@@ -273,7 +283,8 @@ public class ImsConfig {
          * VOLTE Status for EAB/s status of Enabled (1), or Disabled (0).
          * Value is in Integer format.
          */
-        public static final int EAB_SETTING_ENABLED = 25;
+        public static final int EAB_SETTING_ENABLED =
+                ProvisioningManager.KEY_EAB_PROVISIONING_STATUS;
         /**
          * Wi-Fi calling roaming status.
          * Value is in Integer format. ON (1), OFF(0).
