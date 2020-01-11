@@ -60,11 +60,6 @@ const int64_t NO_ALARM_UPDATE = INT64_MAX;
 
 std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
 
-        // bluetooth_bytes_transfer
-        {{.atomTag = android::util::BLUETOOTH_BYTES_TRANSFER},
-         {.additiveFields = {2, 3},
-          .puller = new StatsCompanionServicePuller(android::util::BLUETOOTH_BYTES_TRANSFER)}},
-
         // kernel_wakelock
         {{.atomTag = android::util::KERNEL_WAKELOCK},
          {.puller = new StatsCompanionServicePuller(android::util::KERNEL_WAKELOCK)}},

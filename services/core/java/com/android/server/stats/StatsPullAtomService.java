@@ -186,6 +186,12 @@ public class StatsPullAtomService extends SystemService {
     private static final String TAG = "StatsPullAtomService";
     private static final boolean DEBUG = true;
 
+    private static final String RESULT_RECEIVER_CONTROLLER_KEY = "controller_activity";
+    /**
+     * How long to wait on an individual subsystem to return its stats.
+     */
+    private static final long EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS = 2000;
+
     private final Object mNetworkStatsLock = new Object();
     @GuardedBy("mNetworkStatsLock")
     private INetworkStatsService mNetworkStatsService;
@@ -532,11 +538,76 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerBluetoothBytesTransfer() {
-        // No op.
+        int tagId = StatsLog.BLUETOOTH_BYTES_TRANSFER;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {2, 3})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullBluetoothBytesTransfer(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullBluetoothBytesTransfer() {
-        // No op.
+    /**
+     * Helper method to extract the Parcelable controller info from a
+     * SynchronousResultReceiver.
+     */
+    private static <T extends Parcelable> T awaitControllerInfo(
+            @Nullable SynchronousResultReceiver receiver) {
+        if (receiver == null) {
+            return null;
+        }
+
+        try {
+            final SynchronousResultReceiver.Result result =
+                    receiver.awaitResult(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS);
+            if (result.bundle != null) {
+                // This is the final destination for the Bundle.
+                result.bundle.setDefusable(true);
+
+                final T data = result.bundle.getParcelable(RESULT_RECEIVER_CONTROLLER_KEY);
+                if (data != null) {
+                    return data;
+                }
+            }
+            Slog.e(TAG, "no controller energy info supplied for " + receiver.getName());
+        } catch (TimeoutException e) {
+            Slog.w(TAG, "timeout reading " + receiver.getName() + " stats");
+        }
+        return null;
+    }
+
+    private synchronized BluetoothActivityEnergyInfo fetchBluetoothData() {
+        // TODO: Investigate whether the synchronized keyword is needed.
+        final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter != null) {
+            SynchronousResultReceiver bluetoothReceiver = new SynchronousResultReceiver(
+                    "bluetooth");
+            adapter.requestControllerActivityEnergyInfo(bluetoothReceiver);
+            return awaitControllerInfo(bluetoothReceiver);
+        } else {
+            Slog.e(TAG, "Failed to get bluetooth adapter!");
+            return null;
+        }
+    }
+
+    private int pullBluetoothBytesTransfer(int atomTag, List<StatsEvent> pulledData) {
+        BluetoothActivityEnergyInfo info = fetchBluetoothData();
+        if (info == null || info.getUidTraffic() == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        for (UidTraffic traffic : info.getUidTraffic()) {
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(traffic.getUid())
+                    .writeLong(traffic.getRxBytes())
+                    .writeLong(traffic.getTxBytes())
+                    .build();
+            pulledData.add(e);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerKernelWakelock() {

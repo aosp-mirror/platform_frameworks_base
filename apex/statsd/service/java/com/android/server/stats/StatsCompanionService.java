@@ -761,22 +761,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullBluetoothBytesTransfer(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        BluetoothActivityEnergyInfo info = fetchBluetoothData();
-        if (info.getUidTraffic() != null) {
-            for (UidTraffic traffic : info.getUidTraffic()) {
-                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
-                        wallClockNanos);
-                e.writeInt(traffic.getUid());
-                e.writeLong(traffic.getRxBytes());
-                e.writeLong(traffic.getTxBytes());
-                pulledData.add(e);
-            }
-        }
-    }
-
     private void pullCpuTimePerFreq(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2165,11 +2149,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
         switch (tagId) {
-
-            case StatsLog.BLUETOOTH_BYTES_TRANSFER: {
-                pullBluetoothBytesTransfer(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
 
             case StatsLog.KERNEL_WAKELOCK: {
                 pullKernelWakelock(tagId, elapsedNanos, wallClockNanos, ret);
