@@ -4924,6 +4924,11 @@ package android.view {
     method public abstract String asyncImpl() default "";
   }
 
+  public class SurfaceControlViewHost {
+    method public void addView(@NonNull android.view.View, android.view.WindowManager.LayoutParams);
+    method public void relayout(android.view.WindowManager.LayoutParams);
+  }
+
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
     method public android.view.View getTooltipView();
     method public boolean isAutofilled();

@@ -7814,40 +7814,52 @@ public class WindowManagerService extends IWindowManager.Stub
      * views.
      */
     void grantInputChannel(int callingUid, int callingPid, int displayId, SurfaceControl surface,
-            IWindow window, IBinder hostInputToken, InputChannel outInputChannel) {
-        InputApplicationHandle applicationHandle = null;
+            IWindow window, IBinder hostInputToken, int flags, InputChannel outInputChannel) {
+        final InputApplicationHandle applicationHandle;
         final String name;
         final InputChannel[] inputChannels;
         final InputChannel clientChannel;
         final InputChannel serverChannel;
         synchronized (mGlobalLock) {
-            final WindowState hostWindow = mInputToWindowMap.get(hostInputToken);
-            final String hostWindowName = (hostWindow != null)
-                    ? hostWindow.getWindowTag().toString() : "Internal";
-            name = "EmbeddedWindow{ u" + UserHandle.getUserId(callingUid)
-                    + " " + hostWindowName + "}";
+            EmbeddedWindowController.EmbeddedWindow win =
+                    new EmbeddedWindowController.EmbeddedWindow(window,
+                            mInputToWindowMap.get(hostInputToken), callingUid, callingPid);
+            name = win.getName();
 
             inputChannels = InputChannel.openInputChannelPair(name);
             serverChannel = inputChannels[0];
             clientChannel = inputChannels[1];
             mInputManager.registerInputChannel(serverChannel);
-            mEmbeddedWindowController.add(serverChannel.getToken(), window, hostWindow, callingUid,
-                    callingPid);
-
-            if (hostWindow != null
-                    && hostWindow.mInputWindowHandle.inputApplicationHandle != null) {
-                applicationHandle = new InputApplicationHandle(
-                        hostWindow.mInputWindowHandle.inputApplicationHandle);
+            mEmbeddedWindowController.add(clientChannel.getToken(), win);
+            if (serverChannel.getToken() != clientChannel.getToken()) {
+                throw new IllegalStateException("Client and Server channel are expected to"
+                        + "be the same");
             }
+
+            applicationHandle = win.getApplicationHandle();
         }
+
+        updateInputChannel(clientChannel.getToken(), callingUid, callingPid, displayId, surface,
+                name, applicationHandle, flags);
 
         clientChannel.transferTo(outInputChannel);
         clientChannel.dispose();
+        // Prevent the java finalizer from breaking the input channel. But we won't
+        // do any further management so we just release the java ref and let the
+        // InputDispatcher hold the last ref.
+        serverChannel.release();
+    }
 
+    private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,
+            int displayId, SurfaceControl surface, String name,
+            InputApplicationHandle applicationHandle, int flags) {
         InputWindowHandle h = new InputWindowHandle(applicationHandle, displayId);
-        h.token = serverChannel.getToken();
+        h.token = channelToken;
         h.name = name;
-        h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+
+        final int sanitizedFlags = flags & (LayoutParams.FLAG_NOT_TOUCHABLE
+                | LayoutParams.FLAG_SLIPPERY);
+        h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | sanitizedFlags;
         h.layoutParamsType = 0;
         h.dispatchingTimeoutNanos = -1;
         h.canReceiveKeys = false;
@@ -7862,15 +7874,34 @@ public class WindowManagerService extends IWindowManager.Stub
 
         h.replaceTouchableRegionWithCrop(null);
 
-        SurfaceSession s = new SurfaceSession();
         SurfaceControl.Transaction t = mTransactionFactory.get();
         t.setInputWindowInfo(surface, h);
         t.apply();
+        t.close();
+    }
 
-        // Prevent the java finalizer from breaking the input channel. But we won't
-        // do any further management so we just release the java ref and let the
-        // InputDispatcher hold the last ref.
-        serverChannel.release();
+    /**
+     * Updates the flags on an existing surface's input channel. This assumes the surface provided
+     * is the one associated with the provided input-channel. If this isn't the case, behavior
+     * is undefined.
+     */
+    void updateInputChannel(IBinder channelToken, int displayId, SurfaceControl surface,
+            int flags) {
+        final InputApplicationHandle applicationHandle;
+        final String name;
+        final EmbeddedWindowController.EmbeddedWindow win;
+        synchronized (mGlobalLock) {
+            win = mEmbeddedWindowController.get(channelToken);
+            if (win == null) {
+                Slog.e(TAG, "Couldn't find window for provided channelToken.");
+                return;
+            }
+            name = win.getName();
+            applicationHandle = win.getApplicationHandle();
+        }
+
+        updateInputChannel(channelToken, win.mOwnerUid, win.mOwnerPid, displayId, surface, name,
+                applicationHandle, flags);
     }
 
     /** Return whether layer tracing is enabled */

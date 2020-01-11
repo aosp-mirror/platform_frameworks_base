@@ -138,6 +138,7 @@ public class SurfaceControlViewHost {
     /**
      * @hide
      */
+    @TestApi
     public void addView(@NonNull View view, WindowManager.LayoutParams attrs) {
         mViewRoot.setView(view, attrs, null);
     }
@@ -161,6 +162,7 @@ public class SurfaceControlViewHost {
     /**
      * @hide
      */
+    @TestApi
     public void relayout(WindowManager.LayoutParams attrs) {
         mViewRoot.setLayoutParams(attrs, false);
         mViewRoot.setReportNextDraw();
