@@ -523,7 +523,9 @@ public final class Settings {
      * Input: The Intent's data URI specifies bootstrapping information for authenticating and
      * provisioning the peer, and uses a "DPP" scheme. The URI should be attached to the intent
      * using {@link Intent#setData(Uri)}. The calling app can obtain a DPP URI in any
-     * way, e.g. by scanning a QR code or other out-of-band methods.
+     * way, e.g. by scanning a QR code or other out-of-band methods. The calling app may also
+     * attach the {@link #EXTRA_EASY_CONNECT_BAND_LIST} extra to provide information
+     * about the bands supported by the enrollee device.
      * <p>
      * Output: After calling {@link android.app.Activity#startActivityForResult}, the callback
      * {@code onActivityResult} will have resultCode {@link android.app.Activity#RESULT_OK} if
@@ -595,17 +597,29 @@ public final class Settings {
     /**
      * Activity Extra: The Band List that the Enrollee supports.
      * <p>
-     * An extra returned on the result intent received when using the {@link
-     * #ACTION_PROCESS_WIFI_EASY_CONNECT_URI} intent to launch the Easy Connect Operation. This
-     * extra contains the bands the Enrollee supports, expressed as the Global Operating Class,
-     * see Table E-4 in IEEE Std 802.11-2016 Global operating classes. This value is populated only
-     * by remote R2 devices, and only for the following error codes: {@link
-     * android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_CANNOT_FIND_NETWORK}
-     * {@link android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_ENROLLEE_AUTHENTICATION}
+     * This extra contains the bands the Enrollee supports, expressed as the Global Operating
+     * Class, see Table E-4 in IEEE Std 802.11-2016 Global operating classes. It is used both as
+     * input, to configure the Easy Connect operation and as output of the operation.
+     * <p>
+     * As input: an optional extra to be attached to the
+     * {@link #ACTION_PROCESS_WIFI_EASY_CONNECT_URI}. If attached, it indicates the bands which
+     * the remote device (enrollee, device-to-be-configured) supports. The Settings operation
+     * may take this into account when presenting the user with list of networks configurations
+     * to be used. The calling app may obtain this information in any out-of-band method. The
+     * information should be attached as an array of raw integers - using the
+     * {@link Intent#putExtra(String, int[])}.
+     * <p>
+     * As output: an extra returned on the result intent received when using the
+     * {@link #ACTION_PROCESS_WIFI_EASY_CONNECT_URI} intent to launch the Easy Connect Operation
+     * . This value is populated only by remote R2 devices, and only for the following error
+     * codes:
+     * {@link android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_CANNOT_FIND_NETWORK},
+     * {@link android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_ENROLLEE_AUTHENTICATION},
+     * or
      * {@link android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_ENROLLEE_REJECTED_CONFIGURATION}.
-     * Therefore, always check if this extra is available using {@link Intent#hasExtra(String)}. If
-     * there is no error, i.e. if the operation returns {@link android.app.Activity#RESULT_OK}, then
-     * this extra is not attached to the result intent.
+     * Therefore, always check if this extra is available using {@link Intent#hasExtra(String)}.
+     * If there is no error, i.e. if the operation returns {@link android.app.Activity#RESULT_OK}
+     * , then this extra is not attached to the result intent.
      * <p>
      * Use the {@link Intent#getIntArrayExtra(String)} to obtain the list.
      */
