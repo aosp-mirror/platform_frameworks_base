@@ -113,13 +113,13 @@ public class VibratorService extends IVibratorService.Stub
     private static final int ONEPLUS_SCALE = 100000;
     private static final int ONEPLUS_BREAK_CONSTANT = 9990;
     private static final int ONEPLUS_EFFECT_THRESHOLD = 100;
-    private static final long ONEPLUS_EFFECT_CLICK = 4509994;
+    private static final long ONEPLUS_EFFECT_CLICK = 5909995;
     private static final long ONEPLUS_EFFECT_DOUBLE_CLICK = 3509993;
     private static final long ONEPLUS_EFFECT_HEAVY_CLICK = 1600051;
-    private static final long ONEPLUS_EFFECT_TEXTURE_TICK = 900021;
-    private static final long ONEPLUS_EFFECT_TICK = 1100111;
+    private static final long ONEPLUS_EFFECT_TEXTURE_TICK = 1100111;
+    private static final long ONEPLUS_EFFECT_TICK = 1100031;
     private static final long ONEPLUS_EFFECT_POP = 1100041;
-    private static final long ONEPLUS_EFFECT_THUD = 3509009;
+    private static final long ONEPLUS_EFFECT_THUD = 3000003;
 
     // A mapping from the intensity adjustment to the scaling to apply, where the intensity
     // adjustment is defined as the delta between the default intensity level and the user selected
