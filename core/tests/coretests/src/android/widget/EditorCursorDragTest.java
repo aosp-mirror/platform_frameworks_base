@@ -32,6 +32,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
 import android.app.Instrumentation;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 
 import androidx.test.InstrumentationRegistry;
@@ -281,6 +282,35 @@ public class EditorCursorDragTest {
     }
 
     @Test
+    public void testEditor_onTouchEvent_mouseDrag() throws Throwable {
+        String text = "testEditor_onTouchEvent_mouseDrag";
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
+
+        TextView tv = mActivity.findViewById(R.id.textview);
+        Editor editor = tv.getEditorForTesting();
+
+        // Simulate a mouse click and drag. This should NOT trigger a cursor drag.
+        long event1Time = 1001;
+        MotionEvent event1 = mouseDownEvent(event1Time, event1Time, 20f, 30f);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event1));
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+
+        long event2Time = 1002;
+        MotionEvent event2 = mouseMoveEvent(event1Time, event2Time, 120f, 30f);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event2));
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertTrue(editor.getSelectionController().isCursorBeingModified());
+
+        long event3Time = 1003;
+        MotionEvent event3 = mouseUpEvent(event1Time, event3Time, 120f, 30f);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event3));
+        assertFalse(editor.getInsertionController().isCursorBeingModified());
+        assertFalse(editor.getSelectionController().isCursorBeingModified());
+    }
+
+    @Test
     public void testEditor_onTouchEvent_cursorDrag() throws Throwable {
         String text = "testEditor_onTouchEvent_cursorDrag";
         onView(withId(R.id.textview)).perform(replaceText(text));
@@ -366,5 +396,26 @@ public class EditorCursorDragTest {
 
     private static MotionEvent moveEvent(long downTime, long eventTime, float x, float y) {
         return MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_MOVE, x, y, 0);
+    }
+
+    private static MotionEvent mouseDownEvent(long downTime, long eventTime, float x, float y) {
+        MotionEvent event = downEvent(downTime, eventTime, x, y);
+        event.setSource(InputDevice.SOURCE_MOUSE);
+        event.setButtonState(MotionEvent.BUTTON_PRIMARY);
+        return event;
+    }
+
+    private static MotionEvent mouseUpEvent(long downTime, long eventTime, float x, float y) {
+        MotionEvent event = upEvent(downTime, eventTime, x, y);
+        event.setSource(InputDevice.SOURCE_MOUSE);
+        event.setButtonState(0);
+        return event;
+    }
+
+    private static MotionEvent mouseMoveEvent(long downTime, long eventTime, float x, float y) {
+        MotionEvent event = moveEvent(downTime, eventTime, x, y);
+        event.setSource(InputDevice.SOURCE_MOUSE);
+        event.setButtonState(MotionEvent.BUTTON_PRIMARY);
+        return event;
     }
 }
