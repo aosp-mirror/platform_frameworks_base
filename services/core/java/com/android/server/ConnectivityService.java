@@ -84,12 +84,12 @@ import android.net.MatchAllNetworkSpecifier;
 import android.net.NattSocketKeepalive;
 import android.net.Network;
 import android.net.NetworkAgent;
+import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkConfig;
 import android.net.NetworkFactory;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
-import android.net.NetworkMisc;
 import android.net.NetworkMonitorManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkProvider;
@@ -2631,8 +2631,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     if (nai.everConnected) {
                         loge("ERROR: cannot call explicitlySelected on already-connected network");
                     }
-                    nai.networkMisc.explicitlySelected = toBool(msg.arg1);
-                    nai.networkMisc.acceptUnvalidated = toBool(msg.arg1) && toBool(msg.arg2);
+                    nai.networkAgentConfig.explicitlySelected = toBool(msg.arg1);
+                    nai.networkAgentConfig.acceptUnvalidated = toBool(msg.arg1) && toBool(msg.arg2);
                     // Mark the network as temporarily accepting partial connectivity so that it
                     // will be validated (and possibly become default) even if it only provides
                     // partial internet access. Note that if user connects to partial connectivity
@@ -2640,7 +2640,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     // out of wifi coverage) and if the same wifi is available again, the device
                     // will auto connect to this wifi even though the wifi has "no internet".
                     // TODO: Evaluate using a separate setting in IpMemoryStore.
-                    nai.networkMisc.acceptPartialConnectivity = toBool(msg.arg2);
+                    nai.networkAgentConfig.acceptPartialConnectivity = toBool(msg.arg2);
                     break;
                 }
                 case NetworkAgent.EVENT_SOCKET_KEEPALIVE: {
@@ -2672,10 +2672,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         }
                         // Only show the notification when the private DNS is broken and the
                         // PRIVATE_DNS_BROKEN notification hasn't shown since last valid.
-                        if (privateDnsBroken && !nai.networkMisc.hasShownBroken) {
+                        if (privateDnsBroken && !nai.networkAgentConfig.hasShownBroken) {
                             showNetworkNotification(nai, NotificationType.PRIVATE_DNS_BROKEN);
                         }
-                        nai.networkMisc.hasShownBroken = privateDnsBroken;
+                        nai.networkAgentConfig.hasShownBroken = privateDnsBroken;
                     } else if (nai.networkCapabilities.isPrivateDnsBroken()) {
                         // If probePrivateDnsCompleted is false but nai.networkCapabilities says
                         // private DNS is broken, it means this network is being reevaluated.
@@ -2685,7 +2685,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         nai.networkCapabilities.setPrivateDnsBroken(false);
                         final int oldScore = nai.getCurrentScore();
                         updateCapabilities(oldScore, nai, nai.networkCapabilities);
-                        nai.networkMisc.hasShownBroken = false;
+                        nai.networkAgentConfig.hasShownBroken = false;
                     }
                     break;
                 }
@@ -2744,7 +2744,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             // If network becomes valid, the hasShownBroken should be reset for
                             // that network so that the notification will be fired when the private
                             // DNS is broken again.
-                            nai.networkMisc.hasShownBroken = false;
+                            nai.networkAgentConfig.hasShownBroken = false;
                         }
                     } else if (partialConnectivityChanged) {
                         updateCapabilities(nai.getCurrentScore(), nai, nai.networkCapabilities);
@@ -2803,9 +2803,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
                             break;
                         }
-                        if (!nai.networkMisc.provisioningNotificationDisabled) {
+                        if (!nai.networkAgentConfig.provisioningNotificationDisabled) {
                             mNotifier.showNotification(netId, NotificationType.SIGN_IN, nai, null,
-                                    (PendingIntent) msg.obj, nai.networkMisc.explicitlySelected);
+                                    (PendingIntent) msg.obj,
+                                    nai.networkAgentConfig.explicitlySelected);
                         }
                     }
                     break;
@@ -3170,8 +3171,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // This should never fail.  Specifying an already in use NetID will cause failure.
             if (networkAgent.isVPN()) {
                 mNetd.networkCreateVpn(networkAgent.network.netId,
-                        (networkAgent.networkMisc == null
-                                || !networkAgent.networkMisc.allowBypass));
+                        (networkAgent.networkAgentConfig == null
+                                || !networkAgent.networkAgentConfig.allowBypass));
             } else {
                 mNetd.networkCreatePhysical(networkAgent.network.netId,
                         getNetworkPermission(networkAgent.networkCapabilities));
@@ -3471,16 +3472,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
 
-        if (!nai.networkMisc.explicitlySelected) {
+        if (!nai.networkAgentConfig.explicitlySelected) {
             Slog.wtf(TAG, "BUG: setAcceptUnvalidated non non-explicitly selected network");
         }
 
-        if (accept != nai.networkMisc.acceptUnvalidated) {
-            nai.networkMisc.acceptUnvalidated = accept;
+        if (accept != nai.networkAgentConfig.acceptUnvalidated) {
+            nai.networkAgentConfig.acceptUnvalidated = accept;
             // If network becomes partial connectivity and user already accepted to use this
             // network, we should respect the user's option and don't need to popup the
             // PARTIAL_CONNECTIVITY notification to user again.
-            nai.networkMisc.acceptPartialConnectivity = accept;
+            nai.networkAgentConfig.acceptPartialConnectivity = accept;
             rematchAllNetworksAndRequests();
             sendUpdatedScoreToFactories(nai);
         }
@@ -3517,8 +3518,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
 
-        if (accept != nai.networkMisc.acceptPartialConnectivity) {
-            nai.networkMisc.acceptPartialConnectivity = accept;
+        if (accept != nai.networkAgentConfig.acceptPartialConnectivity) {
+            nai.networkAgentConfig.acceptPartialConnectivity = accept;
         }
 
         // TODO: Use the current design or save the user choice into IpMemoryStore.
@@ -3728,7 +3729,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 action = ConnectivityManager.ACTION_PROMPT_PARTIAL_CONNECTIVITY;
                 // Don't bother the user with a high-priority notification if the network was not
                 // explicitly selected by the user.
-                highPriority = nai.networkMisc.explicitlySelected;
+                highPriority = nai.networkAgentConfig.explicitlySelected;
                 break;
             default:
                 Slog.wtf(TAG, "Unknown notification type " + type);
@@ -3761,14 +3762,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // automatically connects to a network that has partial Internet access, the user will
         // always be able to use it, either because they've already chosen "don't ask again" or
         // because we have prompt them.
-        if (nai.partialConnectivity && !nai.networkMisc.acceptPartialConnectivity) {
+        if (nai.partialConnectivity && !nai.networkAgentConfig.acceptPartialConnectivity) {
             return true;
         }
 
         // If a network has no Internet access, only prompt if the network was explicitly selected
         // and if the user has not already told us to use the network regardless of whether it
         // validated or not.
-        if (nai.networkMisc.explicitlySelected && !nai.networkMisc.acceptUnvalidated) {
+        if (nai.networkAgentConfig.explicitlySelected
+                && !nai.networkAgentConfig.acceptUnvalidated) {
             return true;
         }
 
@@ -5490,9 +5492,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // tree.
     public int registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
-            int currentScore, NetworkMisc networkMisc) {
+            int currentScore, NetworkAgentConfig networkAgentConfig) {
         return registerNetworkAgent(messenger, networkInfo, linkProperties, networkCapabilities,
-                currentScore, networkMisc, NetworkProvider.ID_NONE);
+                currentScore, networkAgentConfig, NetworkProvider.ID_NONE);
     }
 
     /**
@@ -5507,12 +5509,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
      *         later : see {@link #updateCapabilities}.
      * @param currentScore the initial score of the network. See
      *         {@link NetworkAgentInfo#getCurrentScore}.
-     * @param networkMisc metadata about the network. This is never updated.
+     * @param networkAgentConfig metadata about the network. This is never updated.
      * @param providerId the ID of the provider owning this NetworkAgent.
      */
     public int registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
-            int currentScore, NetworkMisc networkMisc, int providerId) {
+            int currentScore, NetworkAgentConfig networkAgentConfig, int providerId) {
         enforceNetworkFactoryPermission();
 
         LinkProperties lp = new LinkProperties(linkProperties);
@@ -5524,8 +5526,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ns.putIntExtension(NetworkScore.LEGACY_SCORE, currentScore);
         final NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(),
                 new Network(mNetIdManager.reserveNetId()), new NetworkInfo(networkInfo), lp, nc,
-                ns, mContext, mTrackerHandler, new NetworkMisc(networkMisc), this, mNetd,
-                mDnsResolver, mNMS, providerId);
+                ns, mContext, mTrackerHandler, new NetworkAgentConfig(networkAgentConfig), this,
+                mNetd, mDnsResolver, mNMS, providerId);
         // Make sure the network capabilities reflect what the agent info says.
         nai.getAndSetNetworkCapabilities(mixInCapabilities(nai, nc));
         final String extraInfo = networkInfo.getExtraInfo();
@@ -5946,7 +5948,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             LinkProperties lp) {
         if (nc == null || lp == null) return false;
         return nai.isVPN()
-                && !nai.networkMisc.allowBypass
+                && !nai.networkAgentConfig.allowBypass
                 && nc.getEstablishingVpnAppUid() != Process.SYSTEM_UID
                 && lp.getInterfaceName() != null
                 && (lp.hasIPv4DefaultRoute() || lp.hasIPv6DefaultRoute());
@@ -6637,7 +6639,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // command must be sent after updating LinkProperties to maximize chances of
             // NetworkMonitor seeing the correct LinkProperties when starting.
             // TODO: pass LinkProperties to the NetworkMonitor in the notifyNetworkConnected call.
-            if (networkAgent.networkMisc.acceptPartialConnectivity) {
+            if (networkAgent.networkAgentConfig.acceptPartialConnectivity) {
                 networkAgent.networkMonitor().setAcceptPartialConnectivity();
             }
             networkAgent.networkMonitor().notifyNetworkConnected(
