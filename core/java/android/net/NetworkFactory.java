@@ -146,13 +146,6 @@ public class NetworkFactory extends Handler {
         mCapabilityFilter = filter;
     }
 
-    private void assertOnLooperThread(Looper looper) {
-        if (Thread.currentThread().getId() != looper.getThread().getId()) {
-            throw new AssertionError("Unexpected thread: "
-                    + Thread.currentThread().getId() + " != " + looper.getThread().getId());
-        }
-    }
-
     public void register() {
         if (mProvider != null) {
             Log.e(LOG_TAG, "Ignoring attempt to register already-registered NetworkFactory");
@@ -164,13 +157,11 @@ public class NetworkFactory extends Handler {
             @Override
             public void onNetworkRequested(@NonNull NetworkRequest request, int score,
                     int servingFactoryProviderId) {
-                assertOnLooperThread(getLooper());
                 handleAddRequest((NetworkRequest) request, score, servingFactoryProviderId);
             }
 
             @Override
             public void onRequestWithdrawn(@NonNull NetworkRequest request) {
-                assertOnLooperThread(getLooper());
                 handleRemoveRequest(request);
             }
         };
