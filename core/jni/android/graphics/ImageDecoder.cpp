@@ -475,7 +475,7 @@ static void ImageDecoder_nClose(JNIEnv* /*env*/, jobject /*clazz*/, jlong native
 
 static jstring ImageDecoder_nGetMimeType(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
     auto* decoder = reinterpret_cast<ImageDecoder*>(nativePtr);
-    return encodedFormatToString(env, decoder->mCodec->getEncodedFormat());
+    return getMimeTypeAsJavaString(env, decoder->mCodec->getEncodedFormat());
 }
 
 static jobject ImageDecoder_nGetColorSpace(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
