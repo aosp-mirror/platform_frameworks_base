@@ -84,6 +84,11 @@ public class ProvisioningManager {
             "STRING_QUERY_RESULT_ERROR_NOT_READY";
 
     /**
+     * There is no existing configuration for the queried provisioning key.
+     */
+    public static final int PROVISIONING_RESULT_UNKNOWN = -1;
+
+    /**
      * The integer result of provisioning for the queried key is disabled.
      */
     public static final int PROVISIONING_VALUE_DISABLED = 0;
@@ -93,6 +98,151 @@ public class ProvisioningManager {
      */
     public static final int PROVISIONING_VALUE_ENABLED = 1;
 
+
+    // Inheriting values from ImsConfig for backwards compatibility.
+    /**
+     * An integer key representing the SIP T1 timer value in milliseconds for the associated
+     * subscription.
+     * <p>
+     * The SIP T1 timer is an estimate of the round-trip time and will retransmit
+     * INVITE transactions that are longer than T1 milliseconds over unreliable transports, doubling
+     * the time before retransmission every time there is no response. See RFC3261, section 17.1.1.1
+     * for more details.
+     * <p>
+     * The value is an integer.
+     * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     */
+    public static final int KEY_T1_TIMER_VALUE_MS = 7;
+
+    /**
+     * An integer key representing the voice over LTE (VoLTE) provisioning status for the
+     * associated subscription. Determines whether the user can register for voice services over
+     * LTE.
+     * <p>
+     * Use {@link #PROVISIONING_VALUE_ENABLED} to enable VoLTE provisioning and
+     * {@link #PROVISIONING_VALUE_DISABLED} to disable VoLTE provisioning.
+     * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     */
+    public static final int KEY_VOLTE_PROVISIONING_STATUS = 10;
+
+    /**
+     * An integer key representing the video telephony (VT) provisioning status for the
+     * associated subscription. Determines whether the user can register for video services over
+     * LTE.
+     * <p>
+     * Use {@link #PROVISIONING_VALUE_ENABLED} to enable VT provisioning and
+     * {@link #PROVISIONING_VALUE_DISABLED} to disable VT provisioning.
+     * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     */
+    public static final int KEY_VT_PROVISIONING_STATUS = 11;
+
+    /**
+     * An integer key associated with the carrier configured SIP PUBLISH timer, which dictates the
+     * expiration time in seconds for published online availability in RCS presence.
+     * <p>
+     * Value is in Integer format.
+     * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     */
+    public static final int KEY_RCS_PUBLISH_TIMER_SEC = 15;
+
+    /**
+     * An integer key associated with the carrier configured expiration time in seconds for
+     * RCS presence published offline availability in RCS presence.
+     * <p>
+     * Value is in Integer format.
+     * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     */
+    public static final int KEY_RCS_PUBLISH_TIMER_EXTENDED_SEC = 16;
+
+    /**
+     * An integer key associated with whether or not capability discovery is provisioned for this
+     * subscription. Any capability requests will be ignored by the RCS service.
+     * <p>
+     * The value is an integer, either {@link #PROVISIONING_VALUE_DISABLED} if capability
+     * discovery is disabled or {@link #PROVISIONING_VALUE_ENABLED} if capability discovery is
+     * enabled.
+     * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     */
+    public static final int KEY_RCS_CAPABILITY_DISCOVERY_ENABLED = 17;
+
+    /**
+     * An integer key associated with the period of time the capability information of each contact
+     * is cached on the device.
+     * <p>
+     * Value is in Integer format.
+     * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     */
+    public static final int KEY_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC = 18;
+
+    /**
+     * An integer key associated with the period of time in seconds that the availability
+     * information of a contact is cached on the device.
+     * <p>
+     * Value is in Integer format.
+     * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     */
+    public static final int KEY_RCS_AVAILABILITY_CACHE_EXPIRATION_SEC = 19;
+
+    /**
+     * An integer key associated with the carrier configured interval in seconds expected between
+     * successive capability polling attempts.
+     * <p>
+     * Value is in Integer format.
+     * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     */
+    public static final int KEY_RCS_CAPABILITIES_POLL_INTERVAL_SEC = 20;
+
+    /**
+     * An integer key representing the minimum time allowed between two consecutive presence publish
+     * messages from the device.
+     * <p>
+     * Value is in Integer format.
+     * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     */
+    public static final int KEY_RCS_PUBLISH_SOURCE_THROTTLE_MS = 21;
+
+    /**
+     * An integer key associated with the maximum number of MDNs contained in one SIP Request
+     * Contained List (RCS) used to retrieve the RCS capabilities of the contacts book.
+     * <p>
+     * Value is in Integer format.
+     * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     */
+    public static final int KEY_RCS_MAX_NUM_ENTRIES_IN_RCL = 22;
+
+    /**
+     * An integer associated with the expiration timer used duriing the SIP subscription of a
+     * Request Contained List (RCL), which is used to retrieve the RCS capabilities of the contact
+     * book.
+     * <p>
+     * Value is in Integer format.
+     * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     */
+    public static final int KEY_RCS_CAPABILITY_POLL_LIST_SUB_EXP_SEC = 23;
+
+    /**
+     * An integer key representing the RCS enhanced address book (EAB) provisioning status for the
+     * associated subscription. Determines whether or not SIP OPTIONS or presence will be used to
+     * retrieve RCS capabilities for the user's contacts.
+     * <p>
+     * Use {@link #PROVISIONING_VALUE_ENABLED} to enable EAB provisioning and
+     * {@link #PROVISIONING_VALUE_DISABLED} to disable EAB provisioning.
+     * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     */
+    public static final int KEY_EAB_PROVISIONING_STATUS = 25;
 
     /**
      * Override the user-defined WiFi Roaming enabled setting for this subscription, defined in
@@ -269,7 +419,7 @@ public class ProvisioningManager {
      *
      * @param key An integer that represents the provisioning key, which is defined by the OEM.
      * @return an integer value for the provided key, or
-     * {@link ImsConfigImplBase#CONFIG_RESULT_UNKNOWN} if the key doesn't exist.
+     * {@link #PROVISIONING_RESULT_UNKNOWN} if the key doesn't exist.
      * @throws IllegalArgumentException if the key provided was invalid.
      */
     @WorkerThread

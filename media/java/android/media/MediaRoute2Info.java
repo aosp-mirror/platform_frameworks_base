@@ -36,7 +36,6 @@ import java.util.Objects;
 
 /**
  * Describes the properties of a route.
- * @hide
  */
 public final class MediaRoute2Info implements Parcelable {
     @NonNull
@@ -56,7 +55,7 @@ public final class MediaRoute2Info implements Parcelable {
     @IntDef({CONNECTION_STATE_DISCONNECTED, CONNECTION_STATE_CONNECTING,
             CONNECTION_STATE_CONNECTED})
     @Retention(RetentionPolicy.SOURCE)
-    private @interface ConnectionState {}
+    public @interface ConnectionState {}
 
     /**
      * The default connection state indicating the route is disconnected.
@@ -99,16 +98,15 @@ public final class MediaRoute2Info implements Parcelable {
 
     /** @hide */
     @IntDef({
-            DEVICE_TYPE_UNKNOWN, DEVICE_TYPE_TV,
-            DEVICE_TYPE_SPEAKER, DEVICE_TYPE_BLUETOOTH})
+            DEVICE_TYPE_UNKNOWN, DEVICE_TYPE_REMOTE_TV,
+            DEVICE_TYPE_REMOTE_SPEAKER, DEVICE_TYPE_BLUETOOTH})
     @Retention(RetentionPolicy.SOURCE)
-    private @interface DeviceType {}
+    public @interface DeviceType {}
 
     /**
      * The default receiver device type of the route indicating the type is unknown.
      *
      * @see #getDeviceType
-     * @hide
      */
     public static final int DEVICE_TYPE_UNKNOWN = 0;
 
@@ -118,7 +116,7 @@ public final class MediaRoute2Info implements Parcelable {
      *
      * @see #getDeviceType
      */
-    public static final int DEVICE_TYPE_TV = 1;
+    public static final int DEVICE_TYPE_REMOTE_TV = 1;
 
     /**
      * A receiver device type of the route indicating the presentation of the media is happening
@@ -126,14 +124,13 @@ public final class MediaRoute2Info implements Parcelable {
      *
      * @see #getDeviceType
      */
-    public static final int DEVICE_TYPE_SPEAKER = 2;
+    public static final int DEVICE_TYPE_REMOTE_SPEAKER = 2;
 
     /**
      * A receiver device type of the route indicating the presentation of the media is happening
      * on a bluetooth device such as a bluetooth speaker.
      *
      * @see #getDeviceType
-     * @hide
      */
     public static final int DEVICE_TYPE_BLUETOOTH = 3;
 
@@ -152,7 +149,7 @@ public final class MediaRoute2Info implements Parcelable {
     @Nullable
     final String mClientPackageName;
     @NonNull
-    final List<String> mRouteTypes;
+    final List<String> mFeatures;
     final int mVolume;
     final int mVolumeMax;
     final int mVolumeHandling;
@@ -168,7 +165,7 @@ public final class MediaRoute2Info implements Parcelable {
         mConnectionState = builder.mConnectionState;
         mIconUri = builder.mIconUri;
         mClientPackageName = builder.mClientPackageName;
-        mRouteTypes = builder.mRouteTypes;
+        mFeatures = builder.mFeatures;
         mVolume = builder.mVolume;
         mVolumeMax = builder.mVolumeMax;
         mVolumeHandling = builder.mVolumeHandling;
@@ -184,7 +181,7 @@ public final class MediaRoute2Info implements Parcelable {
         mConnectionState = in.readInt();
         mIconUri = in.readParcelable(null);
         mClientPackageName = in.readString();
-        mRouteTypes = in.createStringArrayList();
+        mFeatures = in.createStringArrayList();
         mVolume = in.readInt();
         mVolumeMax = in.readInt();
         mVolumeHandling = in.readInt();
@@ -223,7 +220,7 @@ public final class MediaRoute2Info implements Parcelable {
                 && (mConnectionState == other.mConnectionState)
                 && Objects.equals(mIconUri, other.mIconUri)
                 && Objects.equals(mClientPackageName, other.mClientPackageName)
-                && Objects.equals(mRouteTypes, other.mRouteTypes)
+                && Objects.equals(mFeatures, other.mFeatures)
                 && (mVolume == other.mVolume)
                 && (mVolumeMax == other.mVolumeMax)
                 && (mVolumeHandling == other.mVolumeHandling)
@@ -235,7 +232,7 @@ public final class MediaRoute2Info implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mId, mName, mDescription, mConnectionState, mIconUri,
-                mRouteTypes, mVolume, mVolumeMax, mVolumeHandling, mDeviceType);
+                mFeatures, mVolume, mVolumeMax, mVolumeHandling, mDeviceType);
     }
 
     /**
@@ -245,7 +242,7 @@ public final class MediaRoute2Info implements Parcelable {
      * In order to ensure uniqueness in {@link MediaRouter2} side, the value of this method
      * can be different from what was set in {@link MediaRoute2ProviderService}.
      *
-     * @see Builder#setId(String)
+     * @see Builder#Builder(String, CharSequence)
      */
     @NonNull
     public String getId() {
@@ -257,7 +254,7 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
-     * Gets the original id set by {@link Builder#setId(String)}.
+     * Gets the original id set by {@link Builder#Builder(String, CharSequence)}.
      * @hide
      */
     @NonNull
@@ -324,16 +321,16 @@ public final class MediaRoute2Info implements Parcelable {
      * Gets the supported categories of the route.
      */
     @NonNull
-    public List<String> getRouteTypes() {
-        return mRouteTypes;
+    public List<String> getFeatures() {
+        return mFeatures;
     }
 
-    //TODO: once device types are confirmed, reflect those into the comment.
     /**
      * Gets the type of the receiver device associated with this route.
      *
      * @return The type of the receiver device associated with this route:
-     * {@link #DEVICE_TYPE_TV} or {@link #DEVICE_TYPE_SPEAKER}.
+     * {@link #DEVICE_TYPE_REMOTE_TV}, {@link #DEVICE_TYPE_REMOTE_SPEAKER},
+     * {@link #DEVICE_TYPE_BLUETOOTH}.
      */
     @DeviceType
     public int getDeviceType() {
@@ -369,15 +366,15 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
-     * Returns if the route contains at least one of the specified route types.
+     * Returns if the route has at least one of the specified route features.
      *
-     * @param routeTypes the list of route types to consider
-     * @return true if the route contains at least one type in the list
+     * @param features the list of route features to consider
+     * @return true if the route has at least one feature in the list
      */
-    public boolean containsRouteTypes(@NonNull Collection<String> routeTypes) {
-        Objects.requireNonNull(routeTypes, "routeTypes must not be null");
-        for (String routeType : routeTypes) {
-            if (getRouteTypes().contains(routeType)) {
+    public boolean hasAnyFeatures(@NonNull Collection<String> features) {
+        Objects.requireNonNull(features, "features must not be null");
+        for (String feature : features) {
+            if (getFeatures().contains(feature)) {
                 return true;
             }
         }
@@ -398,7 +395,7 @@ public final class MediaRoute2Info implements Parcelable {
         dest.writeInt(mConnectionState);
         dest.writeParcelable(mIconUri, flags);
         dest.writeString(mClientPackageName);
-        dest.writeStringList(mRouteTypes);
+        dest.writeStringList(mFeatures);
         dest.writeInt(mVolume);
         dest.writeInt(mVolumeMax);
         dest.writeInt(mVolumeHandling);
@@ -428,15 +425,15 @@ public final class MediaRoute2Info implements Parcelable {
      * Builder for {@link MediaRoute2Info media route info}.
      */
     public static final class Builder {
-        String mId;
+        final String mId;
         String mProviderId;
-        CharSequence mName;
+        final CharSequence mName;
         CharSequence mDescription;
         @ConnectionState
         int mConnectionState;
         Uri mIconUri;
         String mClientPackageName;
-        List<String> mRouteTypes;
+        List<String> mFeatures;
         int mVolume;
         int mVolumeMax;
         int mVolumeHandling = PLAYBACK_VOLUME_FIXED;
@@ -444,27 +441,43 @@ public final class MediaRoute2Info implements Parcelable {
         int mDeviceType = DEVICE_TYPE_UNKNOWN;
         Bundle mExtras;
 
+        /**
+         * Constructor for builder to create {@link MediaRoute2Info}.
+         * <p>
+         * In order to ensure ID uniqueness, the {@link MediaRoute2Info#getId() ID} of a route info
+         * obtained from {@link MediaRouter2} can be different from what was set in
+         * {@link MediaRoute2ProviderService}.
+         * </p>
+         * @param id
+         * @param name
+         */
         public Builder(@NonNull String id, @NonNull CharSequence name) {
-            setId(id);
-            setName(name);
-            mRouteTypes = new ArrayList<>();
+            if (TextUtils.isEmpty(id)) {
+                throw new IllegalArgumentException("id must not be empty");
+            }
+            if (TextUtils.isEmpty(name)) {
+                throw new IllegalArgumentException("name must not be empty");
+            }
+            mId = id;
+            mName = name;
+            mFeatures = new ArrayList<>();
         }
 
         public Builder(@NonNull MediaRoute2Info routeInfo) {
             if (routeInfo == null) {
                 throw new IllegalArgumentException("route info must not be null");
             }
+            mId = routeInfo.mId;
+            mName = routeInfo.mName;
 
-            setId(routeInfo.mId);
             if (!TextUtils.isEmpty(routeInfo.mProviderId)) {
                 setProviderId(routeInfo.mProviderId);
             }
-            setName(routeInfo.mName);
             mDescription = routeInfo.mDescription;
             mConnectionState = routeInfo.mConnectionState;
             mIconUri = routeInfo.mIconUri;
             setClientPackageName(routeInfo.mClientPackageName);
-            setRouteTypes(routeInfo.mRouteTypes);
+            mFeatures = new ArrayList<>(routeInfo.mFeatures);
             setVolume(routeInfo.mVolume);
             setVolumeMax(routeInfo.mVolumeMax);
             setVolumeHandling(routeInfo.mVolumeHandling);
@@ -472,26 +485,6 @@ public final class MediaRoute2Info implements Parcelable {
             if (routeInfo.mExtras != null) {
                 mExtras = new Bundle(routeInfo.mExtras);
             }
-        }
-
-        /**
-         * Sets the unique id of the route. The value given here must be unique for each of your
-         * route.
-         * <p>
-         * In order to ensure uniqueness in {@link MediaRouter2} side, the value of
-         * {@link MediaRoute2Info#getId()} can be different from what was set in
-         * {@link MediaRoute2ProviderService}.
-         * </p>
-         *
-         * @see MediaRoute2Info#getId()
-         */
-        @NonNull
-        public Builder setId(@NonNull String id) {
-            if (TextUtils.isEmpty(id)) {
-                throw new IllegalArgumentException("id must not be null or empty");
-            }
-            mId = id;
-            return this;
         }
 
         /**
@@ -508,20 +501,10 @@ public final class MediaRoute2Info implements Parcelable {
         }
 
         /**
-         * Sets the user-visible name of the route.
-         */
-        @NonNull
-        public Builder setName(@NonNull CharSequence name) {
-            Objects.requireNonNull(name, "name must not be null");
-            mName = name;
-            return this;
-        }
-
-        /**
          * Sets the user-visible description of the route.
          */
         @NonNull
-        public Builder setDescription(@Nullable String description) {
+        public Builder setDescription(@Nullable CharSequence description) {
             mDescription = description;
             return this;
         }
@@ -569,35 +552,35 @@ public final class MediaRoute2Info implements Parcelable {
         }
 
         /**
-         * Sets the types of the route.
+         * Clears the features of the route.
          */
         @NonNull
-        public Builder setRouteTypes(@NonNull Collection<String> routeTypes) {
-            mRouteTypes = new ArrayList<>();
-            return addRouteTypes(routeTypes);
+        public Builder clearFeatures() {
+            mFeatures = new ArrayList<>();
+            return this;
         }
 
         /**
-         * Adds types for the route.
+         * Adds features for the route.
          */
         @NonNull
-        public Builder addRouteTypes(@NonNull Collection<String> routeTypes) {
-            Objects.requireNonNull(routeTypes, "routeTypes must not be null");
-            for (String routeType: routeTypes) {
-                addRouteType(routeType);
+        public Builder addFeatures(@NonNull Collection<String> features) {
+            Objects.requireNonNull(features, "features must not be null");
+            for (String feature : features) {
+                addFeature(feature);
             }
             return this;
         }
 
         /**
-         * Add a type for the route.
+         * Adds a feature for the route.
          */
         @NonNull
-        public Builder addRouteType(@NonNull String routeType) {
-            if (TextUtils.isEmpty(routeType)) {
-                throw new IllegalArgumentException("routeType must not be null or empty");
+        public Builder addFeature(@NonNull String feature) {
+            if (TextUtils.isEmpty(feature)) {
+                throw new IllegalArgumentException("feature must not be null or empty");
             }
-            mRouteTypes.add(routeType);
+            mFeatures.add(feature);
             return this;
         }
 
@@ -642,7 +625,7 @@ public final class MediaRoute2Info implements Parcelable {
          */
         @NonNull
         public Builder setExtras(@Nullable Bundle extras) {
-            mExtras = extras;
+            mExtras = new Bundle(extras);
             return this;
         }
 

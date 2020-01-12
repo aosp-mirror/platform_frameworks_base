@@ -12212,6 +12212,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 case DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE:
                     return checkManagedProfileProvisioningPreCondition(packageName, callingUserId);
                 case DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE:
+                case DevicePolicyManager.ACTION_PROVISION_FINANCED_DEVICE:
                     return checkDeviceOwnerProvisioningPreCondition(callingUserId);
                 case DevicePolicyManager.ACTION_PROVISION_MANAGED_USER:
                     return checkManagedUserProvisioningPreCondition(callingUserId);

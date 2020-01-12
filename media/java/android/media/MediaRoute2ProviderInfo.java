@@ -93,6 +93,9 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
 
     /**
      * Gets the route for the given route id or null if no matching route exists.
+     * Please note that id should be original id.
+     *
+     * @see MediaRoute2Info#getOriginalId()
      */
     @Nullable
     public MediaRoute2Info getRoute(@NonNull String routeId) {
@@ -168,7 +171,7 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
                 MediaRoute2Info routeWithProviderId = new MediaRoute2Info.Builder(entry.getValue())
                         .setProviderId(mUniqueId)
                         .build();
-                newRoutes.put(routeWithProviderId.getId(), routeWithProviderId);
+                newRoutes.put(routeWithProviderId.getOriginalId(), routeWithProviderId);
             }
 
             mRoutes.clear();
@@ -183,14 +186,14 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
         public Builder addRoute(@NonNull MediaRoute2Info route) {
             Objects.requireNonNull(route, "route must not be null");
 
-            if (mRoutes.containsValue(route)) {
-                throw new IllegalArgumentException("route descriptor already added");
+            if (mRoutes.containsKey(route.getOriginalId())) {
+                throw new IllegalArgumentException("A route with the same id is already added");
             }
             if (mUniqueId != null) {
-                mRoutes.put(route.getId(),
+                mRoutes.put(route.getOriginalId(),
                         new MediaRoute2Info.Builder(route).setProviderId(mUniqueId).build());
             } else {
-                mRoutes.put(route.getId(), route);
+                mRoutes.put(route.getOriginalId(), route);
             }
             return this;
         }

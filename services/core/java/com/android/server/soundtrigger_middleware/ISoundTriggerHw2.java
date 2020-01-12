@@ -92,12 +92,12 @@ public interface ISoundTriggerHw2 {
     void stopAllRecognitions();
 
     /**
-     * @see android.hardware.soundtrigger.V2_2.ISoundTriggerHw#startRecognition_2_1(int,
-     * android.hardware.soundtrigger.V2_1.ISoundTriggerHw.RecognitionConfig,
+     * @see android.hardware.soundtrigger.V2_3.ISoundTriggerHw#startRecognition_2_3(int,
+     * android.hardware.soundtrigger.V2_3.RecognitionConfig,
      * android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback, int)
      */
     void startRecognition(int modelHandle,
-            android.hardware.soundtrigger.V2_1.ISoundTriggerHw.RecognitionConfig config,
+            android.hardware.soundtrigger.V2_3.RecognitionConfig config,
             SoundTriggerHw2Compat.Callback callback, int cookie);
 
     /**

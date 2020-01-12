@@ -28,6 +28,12 @@ parcelable RecognitionConfig {
     /* Configuration for each key phrase. */
     PhraseRecognitionExtra[] phraseRecognitionExtras;
 
+    /**
+     * Bit field encoding of the AudioCapabilities
+     * supported by the firmware.
+     */
+    int audioCapabilities;
+
     /** Opaque capture configuration data. */
     byte[] data;
 }

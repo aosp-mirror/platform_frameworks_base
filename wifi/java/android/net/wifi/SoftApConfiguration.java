@@ -32,6 +32,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -182,6 +185,22 @@ public final class SoftApConfiguration implements Parcelable {
     private final @SecurityType int mSecurityType;
 
     /**
+     * The flag to indicate client need to authorize by user
+     * when client is connecting to AP.
+     */
+    private final boolean mClientControlByUser;
+
+    /**
+     * The list of blocked client that can't associate to the AP.
+     */
+    private final List<MacAddress> mBlockedClientList;
+
+    /**
+     * The list of allowed client that can associate to the AP.
+     */
+    private final List<MacAddress> mAllowedClientList;
+
+    /**
      * Delay in milliseconds before shutting down soft AP when
      * there are no connected devices.
      */
@@ -219,7 +238,9 @@ public final class SoftApConfiguration implements Parcelable {
     /** Private constructor for Builder and Parcelable implementation. */
     private SoftApConfiguration(@Nullable String ssid, @Nullable MacAddress bssid,
             @Nullable String passphrase, boolean hiddenSsid, @BandType int band, int channel,
-            @SecurityType int securityType, int maxNumberOfClients, int shutdownTimeoutMillis) {
+            @SecurityType int securityType, int maxNumberOfClients, int shutdownTimeoutMillis,
+            boolean clientControlByUser, @NonNull List<MacAddress> blockedList,
+            @NonNull List<MacAddress> allowedList) {
         mSsid = ssid;
         mBssid = bssid;
         mPassphrase = passphrase;
@@ -229,6 +250,9 @@ public final class SoftApConfiguration implements Parcelable {
         mSecurityType = securityType;
         mMaxNumberOfClients = maxNumberOfClients;
         mShutdownTimeoutMillis = shutdownTimeoutMillis;
+        mClientControlByUser = clientControlByUser;
+        mBlockedClientList = new ArrayList<>(blockedList);
+        mAllowedClientList = new ArrayList<>(allowedList);
     }
 
     @Override
@@ -248,13 +272,17 @@ public final class SoftApConfiguration implements Parcelable {
                 && mChannel == other.mChannel
                 && mSecurityType == other.mSecurityType
                 && mMaxNumberOfClients == other.mMaxNumberOfClients
-                && mShutdownTimeoutMillis == other.mShutdownTimeoutMillis;
+                && mShutdownTimeoutMillis == other.mShutdownTimeoutMillis
+                && mClientControlByUser == other.mClientControlByUser
+                && Objects.equals(mBlockedClientList, other.mBlockedClientList)
+                && Objects.equals(mAllowedClientList, other.mAllowedClientList);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mSsid, mBssid, mPassphrase, mHiddenSsid,
-                mBand, mChannel, mSecurityType, mMaxNumberOfClients, mShutdownTimeoutMillis);
+                mBand, mChannel, mSecurityType, mMaxNumberOfClients, mShutdownTimeoutMillis,
+                mClientControlByUser, mBlockedClientList, mAllowedClientList);
     }
 
     @Override
@@ -270,6 +298,9 @@ public final class SoftApConfiguration implements Parcelable {
         sbuf.append(" \n SecurityType=").append(getSecurityType());
         sbuf.append(" \n MaxClient=").append(mMaxNumberOfClients);
         sbuf.append(" \n ShutdownTimeoutMillis=").append(mShutdownTimeoutMillis);
+        sbuf.append(" \n ClientControlByUser=").append(mClientControlByUser);
+        sbuf.append(" \n BlockedClientList=").append(mBlockedClientList);
+        sbuf.append(" \n AllowedClientList=").append(mAllowedClientList);
         return sbuf.toString();
     }
 
@@ -284,6 +315,9 @@ public final class SoftApConfiguration implements Parcelable {
         dest.writeInt(mSecurityType);
         dest.writeInt(mMaxNumberOfClients);
         dest.writeInt(mShutdownTimeoutMillis);
+        dest.writeBoolean(mClientControlByUser);
+        dest.writeTypedList(mBlockedClientList);
+        dest.writeTypedList(mAllowedClientList);
     }
 
     @Override
@@ -299,7 +333,9 @@ public final class SoftApConfiguration implements Parcelable {
                     in.readString(),
                     in.readParcelable(MacAddress.class.getClassLoader()),
                     in.readString(), in.readBoolean(), in.readInt(), in.readInt(), in.readInt(),
-                    in.readInt(), in.readInt());
+                    in.readInt(), in.readInt(), in.readBoolean(),
+                    in.createTypedArrayList(MacAddress.CREATOR),
+                    in.createTypedArrayList(MacAddress.CREATOR));
         }
 
         @Override
@@ -387,6 +423,34 @@ public final class SoftApConfiguration implements Parcelable {
     }
 
     /**
+     * Returns a flag indicating whether clients need to be pre-approved by the user.
+     * (true: authorization required) or not (false: not required).
+     * {@link Builder#enableClientControlByUser(Boolean)}.
+     */
+    public boolean isClientControlByUserEnabled() {
+        return mClientControlByUser;
+    }
+
+    /**
+     * Returns List of clients which aren't allowed to associate to the AP.
+     *
+     * Clients are configured using {@link Builder#setClientList(List, List)}
+     */
+    @NonNull
+    public List<MacAddress> getBlockedClientList() {
+        return mBlockedClientList;
+    }
+
+    /**
+     * List of clients which are allowed to associate to the AP.
+     * Clients are configured using {@link Builder#setClientList(List, List)}
+     */
+    @NonNull
+    public List<MacAddress> getAllowedClientList() {
+        return mAllowedClientList;
+    }
+
+    /**
      * Builds a {@link SoftApConfiguration}, which allows an app to configure various aspects of a
      * Soft AP.
      *
@@ -403,6 +467,9 @@ public final class SoftApConfiguration implements Parcelable {
         private int mMaxNumberOfClients;
         private int mSecurityType;
         private int mShutdownTimeoutMillis;
+        private boolean mClientControlByUser;
+        private List<MacAddress> mBlockedClientList;
+        private List<MacAddress> mAllowedClientList;
 
         /**
          * Constructs a Builder with default values (see {@link Builder}).
@@ -417,6 +484,9 @@ public final class SoftApConfiguration implements Parcelable {
             mMaxNumberOfClients = 0;
             mSecurityType = SECURITY_TYPE_OPEN;
             mShutdownTimeoutMillis = 0;
+            mClientControlByUser = false;
+            mBlockedClientList = new ArrayList<>();
+            mAllowedClientList = new ArrayList<>();
         }
 
         /**
@@ -434,6 +504,9 @@ public final class SoftApConfiguration implements Parcelable {
             mMaxNumberOfClients = other.mMaxNumberOfClients;
             mSecurityType = other.mSecurityType;
             mShutdownTimeoutMillis = other.mShutdownTimeoutMillis;
+            mClientControlByUser = other.mClientControlByUser;
+            mBlockedClientList = new ArrayList<>(other.mBlockedClientList);
+            mAllowedClientList = new ArrayList<>(other.mAllowedClientList);
         }
 
         /**
@@ -445,7 +518,8 @@ public final class SoftApConfiguration implements Parcelable {
         public SoftApConfiguration build() {
             return new SoftApConfiguration(mSsid, mBssid, mPassphrase,
                     mHiddenSsid, mBand, mChannel, mSecurityType, mMaxNumberOfClients,
-                    mShutdownTimeoutMillis);
+                    mShutdownTimeoutMillis, mClientControlByUser, mBlockedClientList,
+                    mAllowedClientList);
         }
 
         /**
@@ -660,6 +734,83 @@ public final class SoftApConfiguration implements Parcelable {
                 throw new IllegalArgumentException("Invalid timeout value");
             }
             mShutdownTimeoutMillis = timeoutMillis;
+            return this;
+        }
+
+        /**
+         * Configure the Soft AP to require manual user control of client association.
+         * If disabled (the default) then any client can associate to this Soft AP using the
+         * correct credentials until the Soft AP capacity is reached (capacity is hardware, carrier,
+         * or user limited - using {@link #setMaxNumberOfClients(int)}).
+         *
+         * If manual user control is enabled then clients will be accepted, rejected, or require
+         * a user approval based on the configuration provided by
+         * {@link #setClientList(List, List)}.
+         *
+         * <p>
+         * This method requires hardware support. Hardware support can be determined using
+         * {@link WifiManager.SoftApCallback#onCapabilityChanged(SoftApCapability)} and
+         * {@link SoftApCapability#isFeatureSupported(int)}
+         * with {@link SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT}
+         *
+         * <p>
+         * If the method is called on a device without hardware support then starting the soft AP
+         * using {@link WifiManager#startTetheredHotspot(SoftApConfiguration)} will fail with
+         * {@link WifiManager#SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION}.
+         *
+         * <p>
+         * <li>If not set, defaults to false (i.e The authoriztion is not required).</li>
+         *
+         * @param enabled true for enabling the control by user, false otherwise.
+         * @return Builder for chaining.
+         */
+        @NonNull
+        public Builder enableClientControlByUser(boolean enabled) {
+            mClientControlByUser = enabled;
+            return this;
+        }
+
+
+        /**
+         * This method together with {@link enableClientControlByUser(boolean)} control client
+         * connections to the AP. If {@link enableClientControlByUser(false)} is configured than
+         * this API has no effect and clients are allowed to associate to the AP (within limit of
+         * max number of clients).
+         *
+         * If {@link enableClientControlByUser(true)} is configured then this API configures
+         * 2 lists:
+         * <ul>
+         * <li>List of clients which are blocked. These are rejected.</li>
+         * <li>List of clients which are explicitly allowed. These are auto-accepted.</li>
+         * </ul>
+         *
+         * <p>
+         * All other clients which attempt to associate, whose MAC addresses are on neither list,
+         * are:
+         * <ul>
+         * <li>Rejected</li>
+         * <li>A callback {@link WifiManager.SoftApCallback#onBlockedClientConnecting(WifiClient)}
+         * is issued (which allows the user to add them to the allowed client list if desired).<li>
+         * </ul>
+         *
+         * @param blockedClientList list of clients which are not allowed to associate to the AP.
+         * @param allowedClientList list of clients which are allowed to associate to the AP
+         *                          without user pre-approval.
+         * @return Builder for chaining.
+         */
+        @NonNull
+        public Builder setClientList(@NonNull List<MacAddress> blockedClientList,
+                @NonNull List<MacAddress> allowedClientList) {
+            mBlockedClientList = new ArrayList<>(blockedClientList);
+            mAllowedClientList = new ArrayList<>(allowedClientList);
+            Iterator<MacAddress> iterator = mAllowedClientList.iterator();
+            while (iterator.hasNext()) {
+                MacAddress client = iterator.next();
+                int index = mBlockedClientList.indexOf(client);
+                if (index != -1) {
+                    throw new IllegalArgumentException("A MacAddress exist in both list");
+                }
+            }
             return this;
         }
     }

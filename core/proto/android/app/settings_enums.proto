@@ -2553,4 +2553,8 @@ enum PageId {
     // OS: R
     MANAGE_EXTERNAL_STORAGE = 1822;
 
+    // Open: Settings > DND > People
+    // OS: R
+    DND_PEOPLE = 1823;
+
 }

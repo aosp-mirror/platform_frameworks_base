@@ -38,7 +38,7 @@ public class DataUsageUtils {
         final SubscriptionManager subscriptionManager = context.getSystemService(
                 SubscriptionManager.class);
         final NetworkTemplate mobileAll = NetworkTemplate.buildTemplateMobileAll(
-                telephonyManager.getSubscriberId(subId));
+                telephonyManager.createForSubscriptionId(subId).getSubscriberId());
 
         if (!subscriptionManager.isActiveSubId(subId)) {
             Log.i(TAG, "Subscription is not active: " + subId);

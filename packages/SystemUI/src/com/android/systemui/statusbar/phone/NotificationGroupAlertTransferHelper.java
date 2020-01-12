@@ -32,7 +32,6 @@ import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.NotificationContentInflater.AsyncInflationTask;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.phone.NotificationGroupManager.NotificationGroup;
 import com.android.systemui.statusbar.phone.NotificationGroupManager.OnGroupChangeListener;
@@ -428,7 +427,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
          * The notification is still pending inflation but we've decided that we no longer need
          * the content view (e.g. suppression might have changed and we decided we need to transfer
          * back). However, there is no way to abort just this inflation if other inflation requests
-         * have started (see {@link AsyncInflationTask#supersedeTask(InflationTask)}). So instead
+         * have started (see {@link InflationTask#supersedeTask(InflationTask)}). So instead
          * we just flag it as aborted and free when it's inflated.
          */
         boolean mAbortOnInflation;

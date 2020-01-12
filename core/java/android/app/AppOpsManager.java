@@ -726,7 +726,17 @@ public class AppOpsManager {
     /** @hide Capture the device's display contents and/or audio */
     @UnsupportedAppUsage
     public static final int OP_PROJECT_MEDIA = 46;
-    /** @hide Activate a VPN connection without user intervention. */
+    /**
+     * Start (without additional user intervention) a VPN connection, as used by {@link
+     * android.net.VpnService} along with as Platform VPN connections, as used by {@link
+     * android.net.VpnManager}
+     *
+     * <p>This appop is granted to apps that have already been given user consent to start
+     * VpnService based VPN connections. As this is a superset of OP_ACTIVATE_PLATFORM_VPN, this
+     * appop also allows the starting of Platform VPNs.
+     *
+     * @hide
+     */
     @UnsupportedAppUsage
     public static final int OP_ACTIVATE_VPN = 47;
     /** @hide Access the WallpaperManagerAPI to write wallpapers. */
@@ -852,10 +862,21 @@ public class AppOpsManager {
     public static final int OP_MANAGE_EXTERNAL_STORAGE = 92;
     /** @hide Communicate cross-profile within the same profile group. */
     public static final int OP_INTERACT_ACROSS_PROFILES = 93;
+    /**
+     * Start (without additional user intervention) a Platform VPN connection, as used by {@link
+     * android.net.VpnManager}
+     *
+     * <p>This appop is granted to apps that have already been given user consent to start Platform
+     * VPN connections. This appop is insufficient to start VpnService based VPNs; OP_ACTIVATE_VPN
+     * is needed for that.
+     *
+     * @hide
+     */
+    public static final int OP_ACTIVATE_PLATFORM_VPN = 94;
 
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 94;
+    public static final int _NUM_OP = 95;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1149,6 +1170,8 @@ public class AppOpsManager {
     /** @hide Communicate cross-profile within the same profile group. */
     @SystemApi
     public static final String OPSTR_INTERACT_ACROSS_PROFILES = "android:interact_across_profiles";
+    /** @hide Start Platform VPN without user intervention */
+    public static final String OPSTR_ACTIVATE_PLATFORM_VPN = "android:activate_platform_vpn";
 
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
@@ -1333,6 +1356,7 @@ public class AppOpsManager {
             OP_QUERY_ALL_PACKAGES,              // QUERY_ALL_PACKAGES
             OP_MANAGE_EXTERNAL_STORAGE,         // MANAGE_EXTERNAL_STORAGE
             OP_INTERACT_ACROSS_PROFILES,        //INTERACT_ACROSS_PROFILES
+            OP_ACTIVATE_PLATFORM_VPN,           // ACTIVATE_PLATFORM_VPN
     };
 
     /**
@@ -1433,6 +1457,7 @@ public class AppOpsManager {
             OPSTR_QUERY_ALL_PACKAGES,
             OPSTR_MANAGE_EXTERNAL_STORAGE,
             OPSTR_INTERACT_ACROSS_PROFILES,
+            OPSTR_ACTIVATE_PLATFORM_VPN,
     };
 
     /**
@@ -1533,7 +1558,8 @@ public class AppOpsManager {
             "ACCESS_MEDIA_LOCATION",
             "QUERY_ALL_PACKAGES",
             "MANAGE_EXTERNAL_STORAGE",
-            "INTERACT_ACROSS_PROFILES"
+            "INTERACT_ACROSS_PROFILES",
+            "ACTIVATE_PLATFORM_VPN",
     };
 
     /**
@@ -1636,6 +1662,7 @@ public class AppOpsManager {
             null, // no permission for OP_QUERY_ALL_PACKAGES
             Manifest.permission.MANAGE_EXTERNAL_STORAGE,
             android.Manifest.permission.INTERACT_ACROSS_PROFILES,
+            null, // no permission for OP_ACTIVATE_PLATFORM_VPN
     };
 
     /**
@@ -1738,6 +1765,7 @@ public class AppOpsManager {
             null, // QUERY_ALL_PACKAGES
             null, // MANAGE_EXTERNAL_STORAGE
             null, // INTERACT_ACROSS_PROFILES
+            null, // ACTIVATE_PLATFORM_VPN
     };
 
     /**
@@ -1839,6 +1867,7 @@ public class AppOpsManager {
             false, // QUERY_ALL_PACKAGES
             false, // MANAGE_EXTERNAL_STORAGE
             false, // INTERACT_ACROSS_PROFILES
+            false, // ACTIVATE_PLATFORM_VPN
     };
 
     /**
@@ -1939,6 +1968,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // QUERY_ALL_PACKAGES
             AppOpsManager.MODE_DEFAULT, // MANAGE_EXTERNAL_STORAGE
             AppOpsManager.MODE_DEFAULT, // INTERACT_ACROSS_PROFILES
+            AppOpsManager.MODE_IGNORED, // ACTIVATE_PLATFORM_VPN
     };
 
     /**
@@ -2043,6 +2073,7 @@ public class AppOpsManager {
             false, // QUERY_ALL_PACKAGES
             false, // MANAGE_EXTERNAL_STORAGE
             false, // INTERACT_ACROSS_PROFILES
+            false, // ACTIVATE_PLATFORM_VPN
     };
 
     /**

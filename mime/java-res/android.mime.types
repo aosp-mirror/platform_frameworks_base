@@ -46,6 +46,7 @@
 # <extension1> and <extension2> are mapped (or remapped) to <mimeType>.
 
 ?application/epub+zip epub
+?application/lrc lrc
 ?application/pkix-cert cer
 ?application/rss+xml rss
 ?application/sdp sdp
@@ -65,6 +66,7 @@
 ?application/x-mpegurl m3u m3u8
 ?application/x-pem-file pem
 ?application/x-pkcs12 p12 pfx
+?application/x-subrip srt
 ?application/x-webarchive webarchive
 ?application/x-webarchive-xml webarchivexml
 ?application/x-x509-server-cert crt
