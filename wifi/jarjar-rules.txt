@@ -23,6 +23,8 @@ rule android.os.BasicShellCommandHandler* com.android.server.x.wifi.os.BasicShel
 rule org.bouncycastle.** com.android.server.x.wifi.bouncycastle.@1
 # Use our statically linked protobuf library
 rule com.google.protobuf.** com.android.server.x.wifi.protobuf.@1
+# use statically linked SystemMessageProto
+rule com.android.internal.messages.SystemMessageProto* com.android.server.x.wifi.messages.SystemMessageProto@1
 # Use our statically linked PlatformProperties library
 rule android.sysprop.** com.android.server.x.wifi.sysprop.@1
 

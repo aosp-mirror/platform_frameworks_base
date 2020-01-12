@@ -27,3 +27,8 @@ java_library_static {
     srcs: ["src/metrics_constants/metrics_constants.proto"],
     sdk_version: "system_current",
 }
+
+filegroup {
+    name: "system-messages-proto-src",
+    srcs: ["src/system_messages.proto"],
+}
