@@ -53,6 +53,7 @@ import "frameworks/base/core/proto/android/stats/mediametrics/mediametrics.proto
 import "frameworks/base/core/proto/android/stats/mediaprovider/mediaprovider_enums.proto";
 import "frameworks/base/core/proto/android/stats/storage/storage_enums.proto";
 import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
+import "frameworks/base/core/proto/android/stats/sysui/notification_enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
@@ -339,6 +340,9 @@ message Atom {
         BootTimeEventUtcTime boot_time_event_utc_time_reported = 241;
         BootTimeEventErrorCode boot_time_event_error_code_reported = 242;
         UserspaceRebootReported userspace_reboot_reported = 243;
+        NotificationReported notification_reported = 244;
+        NotificationPanelReported notification_panel_reported = 245;
+        NotificationChannelModified notification_panel_modified = 246;
     }
 
     // Pulled events will start at field 10000.
@@ -3309,6 +3313,10 @@ message GenericAtom {
  * this button" or "this dialog was displayed".
  * Keep the UI event stream clean: don't use for system or background events.
  * Log using the UiEventLogger wrapper - don't write with the StatsLog API directly.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/
+ *   frameworks/base/packages/SystemUI/src/com/android/systemui/
  */
 message UiEventReported {
     // The event_id.
@@ -3318,6 +3326,122 @@ message UiEventReported {
     optional int32 uid = 2 [(is_uid) = true];
     optional string package_name = 3;
 }
+
+/**
+ * Reports a notification was created or updated.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/notification/
+ */
+message NotificationReported {
+    // The event_id (as for UiEventReported).
+    optional int32 event_id = 1;
+    // The notifying app's uid and package.
+    optional int32 uid = 2 [(is_uid) = true];
+    optional string package_name = 3;
+    // A small system-assigned identifier for the notification.
+    // Locally probably-unique, but expect collisions across users and/or days.
+    optional int32 instance_id = 4;
+    // The app-assigned notification ID and tag
+    optional int32 notification_id = 5;
+    optional string notification_tag = 6;
+    optional string channel_id = 7;  // App-assigned channel ID
+
+    // Grouping information
+    optional string group_id = 8;  // Group the notification currently belongs to
+    optional int32 group_instance_id = 9;  // Instance_id of the group-summary notification
+    optional bool is_group_summary = 10;  // Tags the group-summary notification
+
+    // Attributes
+    optional string category = 11;   // App-assigned notification category (API-defined strings)
+    optional int32 style = 12;       // App-assigned notification style
+    optional int32 num_people = 13;  // Number of Person records attached to the notification
+
+    // Ordering, importance and interruptiveness
+
+    optional int32 position = 14;    // Position in NotificationManager's list
+
+    optional android.stats.sysui.NotificationImportance importance = 15;
+    optional int32 alerting = 16;    // Bitfield, 1=buzz 2=beep 4=blink
+
+    enum NotificationImportanceExplanation {
+        IMPORTANCE_EXPLANATION_UNKNOWN = 0;
+        IMPORTANCE_EXPLANATION_APP = 1;     // App-specified channel importance.
+        IMPORTANCE_EXPLANATION_USER = 2;    // User-specified channel importance.
+        IMPORTANCE_EXPLANATION_ASST = 3;    // Notification Assistant override.
+        IMPORTANCE_EXPLANATION_SYSTEM = 4;  // System override.
+        // Like _APP, but based on pre-channels priority signal.
+        IMPORTANCE_EXPLANATION_APP_PRE_CHANNELS = 5;
+    }
+
+    optional NotificationImportanceExplanation importance_source = 17;
+    optional android.stats.sysui.NotificationImportance importance_initial = 18;
+    optional NotificationImportanceExplanation importance_initial_source = 19;
+    optional android.stats.sysui.NotificationImportance importance_asst = 20;
+    optional int32 assistant_hash = 21;
+    optional float assistant_ranking_score = 22;
+}
+
+message Notification {
+    // The notifying app's uid and package.
+    optional int32 uid = 1 [(is_uid) = true];
+    optional string package_name = 2;
+    // A small system-assigned identifier for the notification.
+    optional int32 instance_id = 3;
+
+    // Grouping information.
+    optional int32 group_instance_id = 4;
+    optional bool is_group_summary = 5;
+
+    // The section of the shade that the notification is in.
+    // See NotificationSectionsManager.PriorityBucket.
+    enum NotificationSection {
+        SECTION_UNKNOWN = 0;
+        SECTION_PEOPLE = 1;
+        SECTION_ALERTING = 2;
+        SECTION_SILENT = 3;
+    }
+    optional NotificationSection section = 6;
+}
+
+message NotificationList {
+    repeated Notification notifications = 1;  // An ordered sequence of notifications.
+}
+
+/**
+ * Reports a notification panel was displayed, e.g. from the lockscreen or status bar.
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/
+ */
+message NotificationPanelReported {
+    // The event_id (as for UiEventReported).
+    optional int32 event_id = 1;
+    optional int32 num_notifications = 2;
+    // The notifications in the panel, in the order that they appear there.
+    optional NotificationList notifications = 3 [(log_mode) = MODE_BYTES];
+}
+
+/**
+ * Reports a notification channel, or channel group, was created, updated, or deleted.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/notification/
+ */
+message NotificationChannelModified {
+    // The event_id (as for UiEventReported).
+    optional int32 event_id = 1;
+    // The notifying app's uid and package.
+    optional int32 uid = 2 [(is_uid) = true];
+    optional string package_name = 3;
+    // App-assigned notification channel ID or channel-group ID
+    optional string channel_id = 4;
+    // Previous importance setting, if applicable
+    optional android.stats.sysui.NotificationImportance old_importance = 5;
+    // New importance setting
+    optional android.stats.sysui.NotificationImportance importance = 6;
+}
+
 
 /**
  * Logs when a biometric acquire event occurs.
