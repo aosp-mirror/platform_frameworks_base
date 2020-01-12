@@ -1515,7 +1515,7 @@
     <string name="sync_really_delete" msgid="5657871730315579051">"Kustuta üksused"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Võtke kustutamised tagasi"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Ära tee praegu midagi"</string>
-    <string name="choose_account_label" msgid="5557833752759831548">"Konto valimine"</string>
+    <string name="choose_account_label" msgid="5557833752759831548">"Valige konto"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Konto lisamine"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"Lisa konto"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Suurendamine"</string>
