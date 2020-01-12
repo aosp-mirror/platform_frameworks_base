@@ -33,8 +33,8 @@ import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.NetworkAgentConfig;
 import android.net.NetworkInfo;
-import android.net.NetworkMisc;
 import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.test.TestLooper;
@@ -63,7 +63,7 @@ public class Nat464XlatTest {
     static final int NETID = 42;
 
     @Mock ConnectivityService mConnectivity;
-    @Mock NetworkMisc mMisc;
+    @Mock NetworkAgentConfig mAgentConfig;
     @Mock IDnsResolver mDnsResolver;
     @Mock INetd mNetd;
     @Mock INetworkManagementService mNms;
@@ -93,7 +93,7 @@ public class Nat464XlatTest {
         mNai.networkInfo = new NetworkInfo(null);
         mNai.networkInfo.setType(ConnectivityManager.TYPE_WIFI);
         when(mNai.connService()).thenReturn(mConnectivity);
-        when(mNai.netMisc()).thenReturn(mMisc);
+        when(mNai.netAgentConfig()).thenReturn(mAgentConfig);
         when(mNai.handler()).thenReturn(mHandler);
 
         when(mNms.getInterfaceConfig(eq(STACKED_IFACE))).thenReturn(mConfig);
@@ -104,7 +104,7 @@ public class Nat464XlatTest {
         String msg = String.format("requiresClat expected %b for type=%d state=%s skip=%b "
                 + "nat64Prefix=%s addresses=%s", expected, nai.networkInfo.getType(),
                 nai.networkInfo.getDetailedState(),
-                mMisc.skip464xlat, nai.linkProperties.getNat64Prefix(),
+                mAgentConfig.skip464xlat, nai.linkProperties.getNat64Prefix(),
                 nai.linkProperties.getLinkAddresses());
         assertEquals(msg, expected, Nat464Xlat.requiresClat(nai));
     }
@@ -113,7 +113,7 @@ public class Nat464XlatTest {
         String msg = String.format("shouldStartClat expected %b for type=%d state=%s skip=%b "
                 + "nat64Prefix=%s addresses=%s", expected, nai.networkInfo.getType(),
                 nai.networkInfo.getDetailedState(),
-                mMisc.skip464xlat, nai.linkProperties.getNat64Prefix(),
+                mAgentConfig.skip464xlat, nai.linkProperties.getNat64Prefix(),
                 nai.linkProperties.getLinkAddresses());
         assertEquals(msg, expected, Nat464Xlat.shouldStartClat(nai));
     }
@@ -151,11 +151,11 @@ public class Nat464XlatTest {
                 assertRequiresClat(true, mNai);
                 assertShouldStartClat(true, mNai);
 
-                mMisc.skip464xlat = true;
+                mAgentConfig.skip464xlat = true;
                 assertRequiresClat(false, mNai);
                 assertShouldStartClat(false, mNai);
 
-                mMisc.skip464xlat = false;
+                mAgentConfig.skip464xlat = false;
                 assertRequiresClat(true, mNai);
                 assertShouldStartClat(true, mNai);
 

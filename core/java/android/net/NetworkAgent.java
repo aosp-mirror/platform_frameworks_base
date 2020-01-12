@@ -221,8 +221,8 @@ public abstract class NetworkAgent {
         this(looper, context, logTag, ni, nc, lp, score, null, NetworkProvider.ID_NONE);
     }
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
-            NetworkCapabilities nc, LinkProperties lp, int score, NetworkMisc misc) {
-        this(looper, context, logTag, ni, nc, lp, score, misc, NetworkProvider.ID_NONE);
+            NetworkCapabilities nc, LinkProperties lp, int score, NetworkAgentConfig config) {
+        this(looper, context, logTag, ni, nc, lp, score, config, NetworkProvider.ID_NONE);
     }
 
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
@@ -231,7 +231,7 @@ public abstract class NetworkAgent {
     }
 
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
-            NetworkCapabilities nc, LinkProperties lp, int score, NetworkMisc misc,
+            NetworkCapabilities nc, LinkProperties lp, int score, NetworkAgentConfig config,
             int providerId) {
         mHandler = new NetworkAgentHandler(looper);
         LOG_TAG = logTag;
@@ -245,7 +245,7 @@ public abstract class NetworkAgent {
         ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
         network = cm.registerNetworkAgent(new Messenger(mHandler), new NetworkInfo(ni),
-                new LinkProperties(lp), new NetworkCapabilities(nc), score, misc,
+                new LinkProperties(lp), new NetworkCapabilities(nc), score, config,
                 providerId);
     }
 
