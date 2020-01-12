@@ -318,7 +318,8 @@ public final class TvTrackInfo implements Parcelable {
      * @param flags The flags used for parceling.
      */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        Preconditions.checkNotNull(dest);
         dest.writeInt(mType);
         dest.writeString(mId);
         dest.writeString(mLanguage);
@@ -387,11 +388,13 @@ public final class TvTrackInfo implements Parcelable {
     public static final @android.annotation.NonNull Parcelable.Creator<TvTrackInfo> CREATOR =
             new Parcelable.Creator<TvTrackInfo>() {
                 @Override
+                @NonNull
                 public TvTrackInfo createFromParcel(Parcel in) {
                     return new TvTrackInfo(in);
                 }
 
                 @Override
+                @NonNull
                 public TvTrackInfo[] newArray(int size) {
                     return new TvTrackInfo[size];
                 }
@@ -444,7 +447,9 @@ public final class TvTrackInfo implements Parcelable {
          *
          * @param language The language string encoded by either ISO 639-1 or ISO 639-2/T.
          */
-        public final Builder setLanguage(String language) {
+        @NonNull
+        public  Builder setLanguage(@NonNull String language) {
+            Preconditions.checkNotNull(language);
             mLanguage = language;
             return this;
         }
@@ -454,7 +459,9 @@ public final class TvTrackInfo implements Parcelable {
          *
          * @param description The user readable description.
          */
-        public final Builder setDescription(CharSequence description) {
+        @NonNull
+        public  Builder setDescription(@NonNull CharSequence description) {
+            Preconditions.checkNotNull(description);
             mDescription = description;
             return this;
         }
@@ -479,7 +486,8 @@ public final class TvTrackInfo implements Parcelable {
          * @param audioChannelCount The audio channel count.
          * @throws IllegalStateException if not called on an audio track
          */
-        public final Builder setAudioChannelCount(int audioChannelCount) {
+        @NonNull
+        public Builder setAudioChannelCount(int audioChannelCount) {
             if (mType != TYPE_AUDIO) {
                 throw new IllegalStateException("Not an audio track");
             }
@@ -494,7 +502,8 @@ public final class TvTrackInfo implements Parcelable {
          * @param audioSampleRate The audio sample rate.
          * @throws IllegalStateException if not called on an audio track
          */
-        public final Builder setAudioSampleRate(int audioSampleRate) {
+        @NonNull
+        public Builder setAudioSampleRate(int audioSampleRate) {
             if (mType != TYPE_AUDIO) {
                 throw new IllegalStateException("Not an audio track");
             }
@@ -570,7 +579,8 @@ public final class TvTrackInfo implements Parcelable {
          * @param videoWidth The width of the video.
          * @throws IllegalStateException if not called on a video track
          */
-        public final Builder setVideoWidth(int videoWidth) {
+        @NonNull
+        public Builder setVideoWidth(int videoWidth) {
             if (mType != TYPE_VIDEO) {
                 throw new IllegalStateException("Not a video track");
             }
@@ -585,7 +595,8 @@ public final class TvTrackInfo implements Parcelable {
          * @param videoHeight The height of the video.
          * @throws IllegalStateException if not called on a video track
          */
-        public final Builder setVideoHeight(int videoHeight) {
+        @NonNull
+        public Builder setVideoHeight(int videoHeight) {
             if (mType != TYPE_VIDEO) {
                 throw new IllegalStateException("Not a video track");
             }
@@ -600,7 +611,8 @@ public final class TvTrackInfo implements Parcelable {
          * @param videoFrameRate The frame rate of the video.
          * @throws IllegalStateException if not called on a video track
          */
-        public final Builder setVideoFrameRate(float videoFrameRate) {
+        @NonNull
+        public Builder setVideoFrameRate(float videoFrameRate) {
             if (mType != TYPE_VIDEO) {
                 throw new IllegalStateException("Not a video track");
             }
@@ -620,7 +632,8 @@ public final class TvTrackInfo implements Parcelable {
          * @param videoPixelAspectRatio The pixel aspect ratio of the video.
          * @throws IllegalStateException if not called on a video track
          */
-        public final Builder setVideoPixelAspectRatio(float videoPixelAspectRatio) {
+        @NonNull
+        public Builder setVideoPixelAspectRatio(float videoPixelAspectRatio) {
             if (mType != TYPE_VIDEO) {
                 throw new IllegalStateException("Not a video track");
             }
@@ -640,7 +653,8 @@ public final class TvTrackInfo implements Parcelable {
          * @param videoActiveFormatDescription The AFD code of the video.
          * @throws IllegalStateException if not called on a video track
          */
-        public final Builder setVideoActiveFormatDescription(byte videoActiveFormatDescription) {
+        @NonNull
+        public Builder setVideoActiveFormatDescription(byte videoActiveFormatDescription) {
             if (mType != TYPE_VIDEO) {
                 throw new IllegalStateException("Not a video track");
             }
@@ -653,7 +667,9 @@ public final class TvTrackInfo implements Parcelable {
          *
          * @param extra The extra information.
          */
-        public final Builder setExtra(Bundle extra) {
+        @NonNull
+        public Builder setExtra(@NonNull Bundle extra) {
+            Preconditions.checkNotNull(extra);
             mExtra = new Bundle(extra);
             return this;
         }
@@ -663,6 +679,7 @@ public final class TvTrackInfo implements Parcelable {
          *
          * @return The new {@link TvTrackInfo} instance
          */
+        @NonNull
         public TvTrackInfo build() {
             return new TvTrackInfo(mType, mId, mLanguage, mDescription, mEncrypted,
                     mAudioChannelCount, mAudioSampleRate, mAudioDescription, mHardOfHearing,
