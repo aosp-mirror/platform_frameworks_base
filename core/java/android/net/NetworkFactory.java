@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
@@ -27,7 +28,6 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Protocol;
 
@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @hide
  **/
 public class NetworkFactory extends Handler {
-    /** @hide */
+    /* TODO: delete when all callers have migrated to NetworkProvider IDs. */
     public static class SerialNumber {
         // Guard used by no network factory.
         public static final int NONE = -1;
@@ -124,7 +124,6 @@ public class NetworkFactory extends Handler {
 
     private final Context mContext;
     private final ArrayList<Message> mPreConnectedQueue = new ArrayList<Message>();
-    private AsyncChannel mAsyncChannel;
     private final String LOG_TAG;
 
     private final SparseArray<NetworkRequestInfo> mNetworkRequests =
@@ -135,6 +134,7 @@ public class NetworkFactory extends Handler {
 
     private int mRefCount = 0;
     private Messenger mMessenger = null;
+    private NetworkProvider mProvider = null;
     private int mSerialNumber;
 
     @UnsupportedAppUsage
@@ -146,56 +146,53 @@ public class NetworkFactory extends Handler {
         mCapabilityFilter = filter;
     }
 
-    public void register() {
-        if (DBG) log("Registering NetworkFactory");
-        if (mMessenger == null) {
-            mMessenger = new Messenger(this);
-            mSerialNumber = ConnectivityManager.from(mContext).registerNetworkFactory(mMessenger,
-                    LOG_TAG);
+    private void assertOnLooperThread(Looper looper) {
+        if (Thread.currentThread().getId() != looper.getThread().getId()) {
+            throw new AssertionError("Unexpected thread: "
+                    + Thread.currentThread().getId() + " != " + looper.getThread().getId());
         }
     }
 
-    public void unregister() {
-        if (DBG) log("Unregistering NetworkFactory");
-        if (mMessenger != null) {
-            ConnectivityManager.from(mContext).unregisterNetworkFactory(mMessenger);
-            mMessenger = null;
+    public void register() {
+        if (mProvider != null) {
+            Log.e(LOG_TAG, "Ignoring attempt to register already-registered NetworkFactory");
+            return;
         }
+        if (DBG) log("Registering NetworkFactory");
+
+        mProvider = new NetworkProvider(mContext, NetworkFactory.this.getLooper(), LOG_TAG) {
+            @Override
+            public void onNetworkRequested(@NonNull NetworkRequest request, int score,
+                    int servingFactorySerialNumber) {
+                assertOnLooperThread(getLooper());
+                handleAddRequest((NetworkRequest) request, score, servingFactorySerialNumber);
+            }
+
+            @Override
+            public void onRequestWithdrawn(@NonNull NetworkRequest request) {
+                assertOnLooperThread(getLooper());
+                handleRemoveRequest(request);
+            }
+        };
+
+        mMessenger = new Messenger(this);
+        mSerialNumber = ConnectivityManager.from(mContext).registerNetworkProvider(mProvider);
+    }
+
+    public void unregister() {
+        if (mProvider == null) {
+            Log.e(LOG_TAG, "Ignoring attempt to unregister unregistered NetworkFactory");
+            return;
+        }
+        if (DBG) log("Unregistering NetworkFactory");
+
+        ConnectivityManager.from(mContext).unregisterNetworkProvider(mProvider);
+        mProvider = null;
     }
 
     @Override
     public void handleMessage(Message msg) {
         switch (msg.what) {
-            case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION: {
-                if (mAsyncChannel != null) {
-                    log("Received new connection while already connected!");
-                    break;
-                }
-                if (VDBG) log("NetworkFactory fully connected");
-                AsyncChannel ac = new AsyncChannel();
-                ac.connected(null, this, msg.replyTo);
-                ac.replyToMessage(msg, AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED,
-                        AsyncChannel.STATUS_SUCCESSFUL);
-                mAsyncChannel = ac;
-                for (Message m : mPreConnectedQueue) {
-                    ac.sendMessage(m);
-                }
-                mPreConnectedQueue.clear();
-                break;
-            }
-            case AsyncChannel.CMD_CHANNEL_DISCONNECT: {
-                if (VDBG) log("CMD_CHANNEL_DISCONNECT");
-                if (mAsyncChannel != null) {
-                    mAsyncChannel.disconnect();
-                    mAsyncChannel = null;
-                }
-                break;
-            }
-            case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
-                if (DBG) log("NetworkFactory channel lost");
-                mAsyncChannel = null;
-                break;
-            }
             case CMD_REQUEST_NETWORK: {
                 handleAddRequest((NetworkRequest) msg.obj, msg.arg1, msg.arg2);
                 break;
@@ -408,12 +405,7 @@ public class NetworkFactory extends Handler {
     protected void releaseRequestAsUnfulfillableByAnyFactory(NetworkRequest r) {
         post(() -> {
             if (DBG) log("releaseRequestAsUnfulfillableByAnyFactory: " + r);
-            Message msg = obtainMessage(EVENT_UNFULFILLABLE_REQUEST, r);
-            if (mAsyncChannel != null) {
-                mAsyncChannel.sendMessage(msg);
-            } else {
-                mPreConnectedQueue.add(msg);
-            }
+            ConnectivityManager.from(mContext).declareNetworkRequestUnfulfillable(r);
         });
     }
 
