@@ -47,7 +47,6 @@ import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
 
 import androidx.test.filters.MediumTest;
-import androidx.test.filters.Suppress;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -193,7 +192,6 @@ public class TextViewActivityMouseTest {
     }
 
     @Test
-    @Suppress // Consistently failing. b/29591177
     public void testDragAndDrop_longClick() {
         final String text = "abc def ghi.";
         onView(withId(R.id.textview)).perform(mouseClick());
