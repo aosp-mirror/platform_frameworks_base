@@ -39,6 +39,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
@@ -1208,22 +1210,27 @@ public class WifiConfiguration implements Parcelable {
      */
     @SystemApi
     public static class NetworkSelectionStatus {
-        // Quality Network Selection Status enable, temporary disabled, permanently disabled
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(prefix = "NETWORK_SELECTION_",
+                value = {
+                NETWORK_SELECTION_ENABLED,
+                NETWORK_SELECTION_TEMPORARY_DISABLED,
+                NETWORK_SELECTION_PERMANENTLY_DISABLED})
+        public @interface NetworkEnabledStatus {}
         /**
-         * This network is allowed to join Quality Network Selection
-         * @hide
+         * This network will be considered as a potential candidate to connect to during network
+         * selection.
          */
         public static final int NETWORK_SELECTION_ENABLED = 0;
         /**
-         * network was temporary disabled. Can be re-enabled after a time period expire
-         * @hide
+         * This network was temporary disabled. May be re-enabled after a time out.
          */
-        public static final int NETWORK_SELECTION_TEMPORARY_DISABLED  = 1;
+        public static final int NETWORK_SELECTION_TEMPORARY_DISABLED = 1;
         /**
-         * network was permanently disabled.
-         * @hide
+         * This network was permanently disabled.
          */
-        public static final int NETWORK_SELECTION_PERMANENTLY_DISABLED  = 2;
+        public static final int NETWORK_SELECTION_PERMANENTLY_DISABLED = 2;
         /**
          * Maximum Network selection status
          * @hide
@@ -1455,6 +1462,7 @@ public class WifiConfiguration implements Parcelable {
          * Network selection status, should be in one of three status: enable, temporaily disabled
          * or permanently disabled
          */
+        @NetworkEnabledStatus
         private int mStatus;
 
         /**
@@ -1635,6 +1643,56 @@ public class WifiConfiguration implements Parcelable {
         }
 
         /**
+         * NetworkSelectionStatus exports an immutable public API.
+         * However, test code has a need to construct a NetworkSelectionStatus in a specific state.
+         * (Note that mocking using Mockito does not work if the object needs to be parceled and
+         * unparceled.)
+         * Export a @SystemApi Builder to allow tests to construct a NetworkSelectionStatus object
+         * in the desired state, without sacrificing NetworkSelectionStatus's immutability.
+         */
+        @VisibleForTesting
+        public static final class Builder {
+            private final NetworkSelectionStatus mNetworkSelectionStatus =
+                    new NetworkSelectionStatus();
+
+            /**
+             * Set the current network selection status.
+             * One of:
+             * {@link #NETWORK_SELECTION_ENABLED},
+             * {@link #NETWORK_SELECTION_TEMPORARY_DISABLED},
+             * {@link #NETWORK_SELECTION_PERMANENTLY_DISABLED}
+             * @see NetworkSelectionStatus#getNetworkSelectionStatus()
+             */
+            @NonNull
+            public Builder setNetworkSelectionStatus(@NetworkEnabledStatus int status) {
+                mNetworkSelectionStatus.setNetworkSelectionStatus(status);
+                return this;
+            }
+
+            /**
+             *
+             * Set the current network's disable reason.
+             * One of the {@link #NETWORK_SELECTION_ENABLE} or DISABLED_* constants.
+             * e.g. {@link #DISABLED_ASSOCIATION_REJECTION}.
+             * @see NetworkSelectionStatus#getNetworkSelectionDisableReason()
+             */
+            @NonNull
+            public Builder setNetworkSelectionDisableReason(
+                    @NetworkSelectionDisableReason int reason) {
+                mNetworkSelectionStatus.setNetworkSelectionDisableReason(reason);
+                return this;
+            }
+
+            /**
+             * Build a NetworkSelectionStatus object.
+             */
+            @NonNull
+            public NetworkSelectionStatus build() {
+                return mNetworkSelectionStatus;
+            }
+        }
+
+        /**
          * Get the network disable reason string for a reason code (for debugging).
          * @param reason specific error reason. One of the {@link #NETWORK_SELECTION_ENABLE} or
          *               DISABLED_* constants e.g. {@link #DISABLED_ASSOCIATION_REJECTION}.
@@ -1660,10 +1718,13 @@ public class WifiConfiguration implements Parcelable {
         }
 
         /**
-         * get current network network selection status
-         * @return return current network network selection status
-         * @hide
+         * Get the current network network selection status.
+         * One of:
+         * {@link #NETWORK_SELECTION_ENABLED},
+         * {@link #NETWORK_SELECTION_TEMPORARY_DISABLED},
+         * {@link #NETWORK_SELECTION_PERMANENTLY_DISABLED}
          */
+        @NetworkEnabledStatus
         public int getNetworkSelectionStatus() {
             return mStatus;
         }
@@ -1965,10 +2026,11 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
-     * Set the network selection status
+     * Set the network selection status.
      * @hide
      */
-    public void setNetworkSelectionStatus(NetworkSelectionStatus status) {
+    @SystemApi
+    public void setNetworkSelectionStatus(@NonNull NetworkSelectionStatus status) {
         mNetworkSelectionStatus = status;
     }
 

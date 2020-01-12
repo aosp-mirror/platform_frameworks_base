@@ -17,6 +17,7 @@
 package android.net.wifi;
 
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -26,6 +27,8 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -353,6 +356,72 @@ public class WifiInfo implements Parcelable {
             mRxSuccessRate = source.mRxSuccessRate;
             score = source.score;
             mWifiStandard = source.mWifiStandard;
+        }
+    }
+
+    /**
+     * WifiInfo exports an immutable public API.
+     * However, test code has a need to construct a WifiInfo in a specific state.
+     * (Note that mocking using Mockito does not work if the object needs to be parceled and
+     * unparceled.)
+     * Export a @SystemApi Builder to allow tests to construct a WifiInfo object
+     * in the desired state, without sacrificing WifiInfo's immutability.
+     *
+     * @hide
+     */
+    // This builder was not made public to reduce confusion for external developers as there are
+    // no legitimate uses for this builder except for testing.
+    @SystemApi
+    @VisibleForTesting
+    public static final class Builder {
+        private final WifiInfo mWifiInfo = new WifiInfo();
+
+        /**
+         * Set the SSID, in the form of a raw byte array.
+         * @see WifiInfo#getSSID()
+         */
+        @NonNull
+        public Builder setSsid(@NonNull byte[] ssid) {
+            mWifiInfo.setSSID(WifiSsid.createFromByteArray(ssid));
+            return this;
+        }
+
+        /**
+         * Set the BSSID.
+         * @see WifiInfo#getBSSID()
+         */
+        @NonNull
+        public Builder setBssid(@NonNull String bssid) {
+            mWifiInfo.setBSSID(bssid);
+            return this;
+        }
+
+        /**
+         * Set the RSSI, in dBm.
+         * @see WifiInfo#getRssi()
+         */
+        @NonNull
+        public Builder setRssi(int rssi) {
+            mWifiInfo.setRssi(rssi);
+            return this;
+        }
+
+        /**
+         * Set the network ID.
+         * @see WifiInfo#getNetworkId()
+         */
+        @NonNull
+        public Builder setNetworkId(int networkId) {
+            mWifiInfo.setNetworkId(networkId);
+            return this;
+        }
+
+        /**
+         * Build a WifiInfo object.
+         */
+        @NonNull
+        public WifiInfo build() {
+            return mWifiInfo;
         }
     }
 
