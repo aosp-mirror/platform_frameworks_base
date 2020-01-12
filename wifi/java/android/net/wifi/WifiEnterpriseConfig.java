@@ -1028,8 +1028,10 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * @hide
+     * Get the client private key as supplied in {@link #setClientKeyEntryWithCertificateChain}, or
+     * null if unset.
      */
+    @Nullable
     public PrivateKey getClientPrivateKey() {
         return mClientPrivateKey;
     }
