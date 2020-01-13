@@ -8097,6 +8097,7 @@ package android.provider {
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static boolean putString(@NonNull android.content.ContentResolver, @NonNull String, @Nullable String, @Nullable String, boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void resetToDefaults(@NonNull android.content.ContentResolver, @Nullable String);
+    field public static final String AIRPLANE_MODE_TOGGLEABLE_RADIOS = "airplane_mode_toggleable_radios";
     field public static final String APP_STANDBY_ENABLED = "app_standby_enabled";
     field public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
     field public static final String CARRIER_APP_NAMES = "carrier_app_names";
@@ -8109,13 +8110,21 @@ package android.provider {
     field public static final String EUICC_UNSUPPORTED_COUNTRIES = "euicc_unsupported_countries";
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT = "install_carrier_app_notification_persistent";
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS = "install_carrier_app_notification_sleep_millis";
+    field public static final String NETWORK_RECOMMENDATIONS_ENABLED = "network_recommendations_enabled";
     field public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
     field public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
+    field public static final String SOFT_AP_TIMEOUT_ENABLED = "soft_ap_timeout_enabled";
     field public static final String TETHER_OFFLOAD_DISABLED = "tether_offload_disabled";
     field public static final String TETHER_SUPPORTED = "tether_supported";
     field public static final String THEATER_MODE_ON = "theater_mode_on";
     field public static final String WEBVIEW_MULTIPROCESS = "webview_multiprocess";
     field public static final String WIFI_BADGING_THRESHOLDS = "wifi_badging_thresholds";
+    field public static final String WIFI_P2P_DEVICE_NAME = "wifi_p2p_device_name";
+    field public static final String WIFI_P2P_PENDING_FACTORY_RESET = "wifi_p2p_pending_factory_reset";
+    field public static final String WIFI_SCAN_ALWAYS_AVAILABLE = "wifi_scan_always_enabled";
+    field public static final String WIFI_SCAN_THROTTLE_ENABLED = "wifi_scan_throttle_enabled";
+    field public static final String WIFI_SCORE_PARAMS = "wifi_score_params";
+    field public static final String WIFI_VERBOSE_LOGGING_ENABLED = "wifi_verbose_logging_enabled";
     field public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
   }
 
