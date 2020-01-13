@@ -19,6 +19,15 @@ import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTT
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.internal.app.AccessibilityButtonChooserActivity.WhiteListingFeatureElementIndex.COMPONENT_ID;
+import static com.android.internal.app.AccessibilityButtonChooserActivity.WhiteListingFeatureElementIndex.FRAGMENT_TYPE;
+import static com.android.internal.app.AccessibilityButtonChooserActivity.WhiteListingFeatureElementIndex.ICON_ID;
+import static com.android.internal.app.AccessibilityButtonChooserActivity.WhiteListingFeatureElementIndex.LABEL_ID;
+import static com.android.internal.app.AccessibilityButtonChooserActivity.WhiteListingFeatureElementIndex.SETTINGS_KEY;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -63,10 +72,6 @@ import java.util.StringJoiner;
  * Activity used to display and persist a service or feature target for the Accessibility button.
  */
 public class AccessibilityButtonChooserActivity extends Activity {
-
-    private static final String MAGNIFICATION_COMPONENT_ID =
-            "com.android.server.accessibility.MagnificationController";
-
     private static final char SERVICES_SEPARATOR = ':';
     private static final TextUtils.SimpleStringSplitter sStringColonSplitter =
             new TextUtils.SimpleStringSplitter(SERVICES_SEPARATOR);
@@ -76,7 +81,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
             ACCESSIBILITY_SHORTCUT_KEY);
 
     private int mShortcutType;
-    private List<AccessibilityButtonTarget> mTargets = new ArrayList<>();
+    private final List<AccessibilityButtonTarget> mTargets = new ArrayList<>();
     private AlertDialog mAlertDialog;
     private TargetAdapter mTargetAdapter;
 
@@ -99,7 +104,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
             UserShortcutType.TRIPLETAP,
     })
     /** Denotes the user shortcut type. */
-    public @interface UserShortcutType {
+    private @interface UserShortcutType {
         int DEFAULT = 0;
         int SOFTWARE = 1; // 1 << 0
         int HARDWARE = 2; // 1 << 1
@@ -122,7 +127,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
             AccessibilityServiceFragmentType.INTUITIVE,
             AccessibilityServiceFragmentType.BOUNCE,
     })
-    public @interface AccessibilityServiceFragmentType {
+    private @interface AccessibilityServiceFragmentType {
         int LEGACY = 0;
         int INVISIBLE = 1;
         int INTUITIVE = 2;
@@ -140,10 +145,60 @@ public class AccessibilityButtonChooserActivity extends Activity {
             ShortcutMenuMode.LAUNCH,
             ShortcutMenuMode.EDIT,
     })
-    public @interface ShortcutMenuMode {
+    private @interface ShortcutMenuMode {
         int LAUNCH = 0;
         int EDIT = 1;
     }
+
+    /**
+     * Annotation for align the element index of white listing feature
+     * {@code WHITE_LISTING_FEATURES}.
+     *
+     * {@code COMPONENT_ID} is to get the service component name.
+     * {@code LABEL_ID} is to get the service label text.
+     * {@code ICON_ID} is to get the service icon.
+     * {@code FRAGMENT_TYPE} is to get the service fragment type.
+     * {@code SETTINGS_KEY} is to get the service settings key.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            WhiteListingFeatureElementIndex.COMPONENT_ID,
+            WhiteListingFeatureElementIndex.LABEL_ID,
+            WhiteListingFeatureElementIndex.ICON_ID,
+            WhiteListingFeatureElementIndex.FRAGMENT_TYPE,
+            WhiteListingFeatureElementIndex.SETTINGS_KEY,
+    })
+    @interface WhiteListingFeatureElementIndex {
+        int COMPONENT_ID = 0;
+        int LABEL_ID = 1;
+        int ICON_ID = 2;
+        int FRAGMENT_TYPE = 3;
+        int SETTINGS_KEY = 4;
+    }
+
+    private static final String[][] WHITE_LISTING_FEATURES = {
+            {
+                    COLOR_INVERSION_COMPONENT_NAME.flattenToString(),
+                    String.valueOf(R.string.color_inversion_feature_name),
+                    String.valueOf(R.drawable.ic_accessibility_color_inversion),
+                    String.valueOf(AccessibilityServiceFragmentType.INTUITIVE),
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
+            },
+            {
+                    DALTONIZER_COMPONENT_NAME.flattenToString(),
+                    String.valueOf(R.string.color_correction_feature_name),
+                    String.valueOf(R.drawable.ic_accessibility_color_correction),
+                    String.valueOf(AccessibilityServiceFragmentType.INTUITIVE),
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
+            },
+            {
+                    MAGNIFICATION_CONTROLLER_NAME,
+                    String.valueOf(R.string.accessibility_magnification_chooser_text),
+                    String.valueOf(R.drawable.ic_accessibility_magnification),
+                    String.valueOf(AccessibilityServiceFragmentType.INVISIBLE),
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
+            },
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -199,6 +254,20 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
     private static List<AccessibilityButtonTarget> getServiceTargets(@NonNull Context context,
             @ShortcutType int shortcutType) {
+        final List<AccessibilityButtonTarget> targets = new ArrayList<>();
+        targets.addAll(getAccessibilityServiceTargets(context));
+        targets.addAll(getWhiteListingServiceTargets(context));
+
+        final AccessibilityManager ams = (AccessibilityManager) context.getSystemService(
+                Context.ACCESSIBILITY_SERVICE);
+        final List<String> requiredTargets = ams.getAccessibilityShortcutTargets(shortcutType);
+        targets.removeIf(target -> !requiredTargets.contains(target.getId()));
+
+        return targets;
+    }
+
+    private static List<AccessibilityButtonTarget> getAccessibilityServiceTargets(
+            @NonNull Context context) {
         final AccessibilityManager ams = (AccessibilityManager) context.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
         final List<AccessibilityServiceInfo> installedServices =
@@ -209,27 +278,71 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
         final List<AccessibilityButtonTarget> targets = new ArrayList<>(installedServices.size());
         for (AccessibilityServiceInfo info : installedServices) {
-            if ((info.flags & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0) {
-                targets.add(new AccessibilityButtonTarget(context, info));
-            }
-        }
-
-        final List<String> requiredTargets = ams.getAccessibilityShortcutTargets(shortcutType);
-        targets.removeIf(target -> !requiredTargets.contains(target.getId()));
-
-        // TODO(b/146815874): Will replace it with white list services.
-        if (Settings.Secure.getInt(context.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED, 0) == 1) {
-            final AccessibilityButtonTarget magnificationTarget = new AccessibilityButtonTarget(
-                    context,
-                    MAGNIFICATION_COMPONENT_ID,
-                    R.string.accessibility_magnification_chooser_text,
-                    R.drawable.ic_accessibility_magnification,
-                    AccessibilityServiceFragmentType.INTUITIVE);
-            targets.add(magnificationTarget);
+            targets.add(new AccessibilityButtonTarget(context, info));
         }
 
         return targets;
+    }
+
+    private static List<AccessibilityButtonTarget> getWhiteListingServiceTargets(
+            @NonNull Context context) {
+        final List<AccessibilityButtonTarget> targets = new ArrayList<>();
+
+        for (int i = 0; i < WHITE_LISTING_FEATURES.length; i++) {
+            final AccessibilityButtonTarget target = new AccessibilityButtonTarget(
+                    context,
+                    WHITE_LISTING_FEATURES[i][COMPONENT_ID],
+                    Integer.parseInt(WHITE_LISTING_FEATURES[i][LABEL_ID]),
+                    Integer.parseInt(WHITE_LISTING_FEATURES[i][ICON_ID]),
+                    Integer.parseInt(WHITE_LISTING_FEATURES[i][FRAGMENT_TYPE]));
+            targets.add(target);
+        }
+
+        return targets;
+    }
+
+    private static boolean isWhiteListingServiceEnabled(@NonNull Context context,
+            AccessibilityButtonTarget target) {
+
+        for (int i = 0; i < WHITE_LISTING_FEATURES.length; i++) {
+            if (WHITE_LISTING_FEATURES[i][COMPONENT_ID].equals(target.getId())) {
+                return Settings.Secure.getInt(context.getContentResolver(),
+                        WHITE_LISTING_FEATURES[i][SETTINGS_KEY],
+                        /* settingsValueOff */ 0) == /* settingsValueOn */ 1;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean isWhiteListingService(String componentId) {
+        for (int i = 0; i < WHITE_LISTING_FEATURES.length; i++) {
+            if (WHITE_LISTING_FEATURES[i][COMPONENT_ID].equals(componentId)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void disableWhiteListingService(String componentId) {
+        for (int i = 0; i < WHITE_LISTING_FEATURES.length; i++) {
+            if (WHITE_LISTING_FEATURES[i][COMPONENT_ID].equals(componentId)) {
+                Settings.Secure.putInt(getContentResolver(),
+                        WHITE_LISTING_FEATURES[i][SETTINGS_KEY], /* settingsValueOn */ 1);
+                return;
+            }
+        }
+    }
+
+    private void disableService(ComponentName componentName) {
+        final String componentId = componentName.flattenToString();
+
+        if (isWhiteListingService(componentId)) {
+            disableWhiteListingService(componentName.flattenToString());
+        } else {
+            setAccessibilityServiceState(this, componentName, /* enabled= */ false);
+        }
     }
 
     private static class ViewHolder {
@@ -350,11 +463,14 @@ public class AccessibilityButtonChooserActivity extends Activity {
         private void updateIntuitiveActionItemVisibility(@NonNull Context context,
                 @NonNull ViewHolder holder, AccessibilityButtonTarget target) {
             final boolean isEditMenuMode = (mShortcutMenuMode == ShortcutMenuMode.EDIT);
+            final boolean isServiceEnabled = isWhiteListingService(target.getId())
+                    ? isWhiteListingServiceEnabled(context, target)
+                    : isAccessibilityServiceEnabled(context, target);
 
             holder.mViewItem.setImageDrawable(context.getDrawable(R.drawable.ic_delete_item));
             holder.mViewItem.setVisibility(isEditMenuMode ? View.VISIBLE : View.GONE);
             holder.mSwitchItem.setVisibility(isEditMenuMode ? View.GONE : View.VISIBLE);
-            holder.mSwitchItem.setChecked(!isEditMenuMode && isServiceEnabled(context, target));
+            holder.mSwitchItem.setChecked(!isEditMenuMode && isServiceEnabled);
             holder.mItemContainer.setVisibility(View.VISIBLE);
         }
 
@@ -411,7 +527,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
         }
     }
 
-    private static boolean isServiceEnabled(@NonNull Context context,
+    private static boolean isAccessibilityServiceEnabled(@NonNull Context context,
             AccessibilityButtonTarget target) {
         final AccessibilityManager ams = (AccessibilityManager) context.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
@@ -470,14 +586,14 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
             if (!hasValueInSettings(this,
                     ACCESSIBILITY_SHORTCUT_KEY_USER_TYPE, componentName)) {
-                setAccessibilityServiceState(this, componentName, /* enabled= */ false);
+                disableService(componentName);
             }
         } else if (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
             optOutValueFromSettings(this, ACCESSIBILITY_SHORTCUT_KEY_USER_TYPE, componentName);
 
             if (!hasValueInSettings(this,
                     ACCESSIBILITY_BUTTON_USER_TYPE, componentName)) {
-                setAccessibilityServiceState(this, componentName, /* enabled= */ false);
+                disableService(componentName);
             }
         } else {
             throw new IllegalArgumentException("Unsupported shortcut type:" + mShortcutType);
