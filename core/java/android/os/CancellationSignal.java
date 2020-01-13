@@ -16,9 +16,7 @@
 
 package android.os;
 
-import android.os.ICancellationSignal;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Provides the ability to cancel an operation in progress.

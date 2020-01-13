@@ -16,10 +16,8 @@
 
 package android.provider;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -30,8 +28,6 @@ import android.net.Uri;
 import android.provider.BrowserContract.Bookmarks;
 import android.provider.BrowserContract.Combined;
 import android.provider.BrowserContract.History;
-import android.provider.BrowserContract.Searches;
-import android.util.Log;
 import android.webkit.WebIconDatabase;
 
 public class Browser {

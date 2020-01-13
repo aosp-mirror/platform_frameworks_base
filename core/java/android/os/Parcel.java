@@ -19,7 +19,7 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;

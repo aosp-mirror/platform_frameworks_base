@@ -16,7 +16,7 @@
 
 package android.os;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
