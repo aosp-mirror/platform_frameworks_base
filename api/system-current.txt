@@ -4878,6 +4878,23 @@ package android.net {
     field public final int netId;
   }
 
+  public final class NetworkAgentConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public String getSubscriberId();
+    method public boolean isNat64DetectionEnabled();
+    method public boolean isProvisioningNotificationEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkAgentConfig> CREATOR;
+  }
+
+  public static class NetworkAgentConfig.Builder {
+    ctor public NetworkAgentConfig.Builder();
+    method @NonNull public android.net.NetworkAgentConfig build();
+    method @NonNull public android.net.NetworkAgentConfig.Builder disableNat64Detection();
+    method @NonNull public android.net.NetworkAgentConfig.Builder disableProvisioningNotification();
+    method @NonNull public android.net.NetworkAgentConfig.Builder setSubscriberId(@Nullable String);
+  }
+
   public final class NetworkCapabilities implements android.os.Parcelable {
     method public boolean deduceRestrictedCapability();
     method @NonNull public int[] getTransportTypes();
