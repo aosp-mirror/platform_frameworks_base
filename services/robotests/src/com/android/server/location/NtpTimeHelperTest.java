@@ -3,6 +3,7 @@ package com.android.server.location;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import android.os.Looper;
 import android.os.SystemClock;
@@ -52,8 +53,10 @@ public class NtpTimeHelperTest {
 
     @Test
     public void handleInjectNtpTime_cachedAgeLow_injectTime() throws InterruptedException {
-        doReturn(NtpTimeHelper.NTP_INTERVAL - 1).when(mMockNtpTrustedTime).getCacheAge();
-        doReturn(MOCK_NTP_TIME).when(mMockNtpTrustedTime).getCachedNtpTime();
+        NtpTrustedTime.TimeResult result = mock(NtpTrustedTime.TimeResult.class);
+        doReturn(NtpTimeHelper.NTP_INTERVAL - 1).when(result).getAgeMillis();
+        doReturn(MOCK_NTP_TIME).when(result).getTimeMillis();
+        doReturn(result).when(mMockNtpTrustedTime).getCachedTimeResult();
 
         mNtpTimeHelper.retrieveAndInjectNtpTime();
 
@@ -64,7 +67,9 @@ public class NtpTimeHelperTest {
     @Test
     public void handleInjectNtpTime_injectTimeFailed_injectTimeDelayed()
             throws InterruptedException {
-        doReturn(NtpTimeHelper.NTP_INTERVAL + 1).when(mMockNtpTrustedTime).getCacheAge();
+        NtpTrustedTime.TimeResult result1 = mock(NtpTrustedTime.TimeResult.class);
+        doReturn(NtpTimeHelper.NTP_INTERVAL + 1).when(result1).getAgeMillis();
+        doReturn(result1).when(mMockNtpTrustedTime).getCachedTimeResult();
         doReturn(false).when(mMockNtpTrustedTime).forceRefresh();
 
         mNtpTimeHelper.retrieveAndInjectNtpTime();
@@ -72,8 +77,10 @@ public class NtpTimeHelperTest {
         assertThat(mCountDownLatch.await(2, TimeUnit.SECONDS)).isFalse();
 
         doReturn(true).when(mMockNtpTrustedTime).forceRefresh();
-        doReturn(1L).when(mMockNtpTrustedTime).getCacheAge();
-        doReturn(MOCK_NTP_TIME).when(mMockNtpTrustedTime).getCachedNtpTime();
+        NtpTrustedTime.TimeResult result2 = mock(NtpTrustedTime.TimeResult.class);
+        doReturn(1L).when(result2).getAgeMillis();
+        doReturn(MOCK_NTP_TIME).when(result2).getTimeMillis();
+        doReturn(result2).when(mMockNtpTrustedTime).getCachedTimeResult();
         SystemClock.sleep(NtpTimeHelper.RETRY_INTERVAL);
 
         waitForTasksToBePostedOnHandlerAndRunThem();
