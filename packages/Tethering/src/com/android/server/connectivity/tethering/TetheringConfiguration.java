@@ -21,7 +21,7 @@ import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
-import static android.provider.Settings.Global.TETHER_ENABLE_LEGACY_DHCP_SERVER;
+import static android.provider.DeviceConfig.NAMESPACE_CONNECTIVITY;
 
 import static com.android.internal.R.array.config_mobile_hotspot_provision_app;
 import static com.android.internal.R.array.config_tether_bluetooth_regexs;
@@ -33,13 +33,13 @@ import static com.android.internal.R.array.config_tether_wifi_regexs;
 import static com.android.internal.R.bool.config_tether_upstream_automatic;
 import static com.android.internal.R.integer.config_mobile_hotspot_provision_check_period;
 import static com.android.internal.R.string.config_mobile_hotspot_provision_app_no_ui;
+import static com.android.networkstack.tethering.R.bool.config_tether_enable_legacy_dhcp_server;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.TetheringConfigurationParcel;
 import android.net.util.SharedLog;
-import android.provider.Settings;
+import android.provider.DeviceConfig;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -84,6 +84,12 @@ public class TetheringConfiguration {
 
     private static final String[] DEFAULT_IPV4_DNS = {"8.8.4.4", "8.8.8.8"};
 
+    /**
+     * Use the old dnsmasq DHCP server for tethering instead of the framework implementation.
+     */
+    public static final String TETHER_ENABLE_LEGACY_DHCP_SERVER =
+            "tether_enable_legacy_dhcp_server";
+
     public final String[] tetherableUsbRegexs;
     public final String[] tetherableWifiRegexs;
     public final String[] tetherableWifiP2pRegexs;
@@ -122,7 +128,7 @@ public class TetheringConfiguration {
 
         legacyDhcpRanges = getLegacyDhcpRanges(res);
         defaultIPv4DNS = copy(DEFAULT_IPV4_DNS);
-        enableLegacyDhcpServer = getEnableLegacyDhcpServer(ctx);
+        enableLegacyDhcpServer = getEnableLegacyDhcpServer(res);
 
         provisioningApp = getResourceStringArray(res, config_mobile_hotspot_provision_app);
         provisioningAppNoUi = getProvisioningAppNoUi(res);
@@ -332,10 +338,14 @@ public class TetheringConfiguration {
         }
     }
 
-    private static boolean getEnableLegacyDhcpServer(Context ctx) {
-        final ContentResolver cr = ctx.getContentResolver();
-        final int intVal = Settings.Global.getInt(cr, TETHER_ENABLE_LEGACY_DHCP_SERVER, 0);
-        return intVal != 0;
+    private boolean getEnableLegacyDhcpServer(final Resources res) {
+        return getResourceBoolean(res, config_tether_enable_legacy_dhcp_server)
+                || getDeviceConfigBoolean(TETHER_ENABLE_LEGACY_DHCP_SERVER);
+    }
+
+    @VisibleForTesting
+    protected boolean getDeviceConfigBoolean(final String name) {
+        return DeviceConfig.getBoolean(NAMESPACE_CONNECTIVITY, name, false /** defaultValue */);
     }
 
     private Resources getResources(Context ctx, int subId) {
