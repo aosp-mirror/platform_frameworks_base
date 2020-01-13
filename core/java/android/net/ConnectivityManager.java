@@ -3121,8 +3121,6 @@ public class ConnectivityManager {
     @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public int registerNetworkProvider(@NonNull NetworkProvider provider) {
         if (provider.getProviderId() != NetworkProvider.ID_NONE) {
-            // TODO: Provide a better method for checking this by moving NetworkFactory.SerialNumber
-            // out of NetworkFactory.
             throw new IllegalStateException("NetworkProviders can only be registered once");
         }
 
@@ -3176,8 +3174,7 @@ public class ConnectivityManager {
     @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public int registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkMisc misc) {
-        return registerNetworkAgent(messenger, ni, lp, nc, score, misc,
-                NetworkFactory.SerialNumber.NONE);
+        return registerNetworkAgent(messenger, ni, lp, nc, score, misc, NetworkProvider.ID_NONE);
     }
 
     /**
@@ -3187,10 +3184,9 @@ public class ConnectivityManager {
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public int registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
-            NetworkCapabilities nc, int score, NetworkMisc misc, int factorySerialNumber) {
+            NetworkCapabilities nc, int score, NetworkMisc misc, int providerId) {
         try {
-            return mService.registerNetworkAgent(messenger, ni, lp, nc, score, misc,
-                    factorySerialNumber);
+            return mService.registerNetworkAgent(messenger, ni, lp, nc, score, misc, providerId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
