@@ -18,7 +18,7 @@ package android.text;
 
 import android.annotation.ColorInt;
 import android.annotation.Px;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Paint;
 
 /**

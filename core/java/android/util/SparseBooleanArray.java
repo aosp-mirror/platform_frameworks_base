@@ -16,7 +16,7 @@
 
 package android.util;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
