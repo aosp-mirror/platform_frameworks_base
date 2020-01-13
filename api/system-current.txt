@@ -1035,6 +1035,7 @@ package android.app.backup {
     field public static final int AGENT_ERROR = -1003; // 0xfffffc15
     field public static final int AGENT_UNKNOWN = -1004; // 0xfffffc14
     field public static final String EXTRA_TRANSPORT_REGISTRATION = "android.app.backup.extra.TRANSPORT_REGISTRATION";
+    field public static final int FLAG_DATA_NOT_CHANGED = 8; // 0x8
     field public static final int FLAG_INCREMENTAL = 2; // 0x2
     field public static final int FLAG_NON_INCREMENTAL = 4; // 0x4
     field public static final int FLAG_USER_INITIATED = 1; // 0x1
