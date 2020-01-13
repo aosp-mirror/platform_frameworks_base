@@ -7456,8 +7456,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        // TODO (b/145286957) Refactor security checks
-        enforceDeviceOwnerOrProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
+        enforceProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
 
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.settingsGlobalPutInt(Settings.Global.AUTO_TIME, enabled ? 1 : 0));
@@ -7478,7 +7477,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        enforceDeviceOwnerOrProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
+        enforceProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
 
         return mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) > 0;
     }
@@ -7492,8 +7491,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        // TODO (b/145286957) Refactor security checks
-        enforceDeviceOwnerOrProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
+        enforceProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
 
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.settingsGlobalPutInt(Global.AUTO_TIME_ZONE, enabled ? 1 : 0));
@@ -7514,7 +7512,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        enforceDeviceOwnerOrProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
+        enforceProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
 
         return mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) > 0;
     }
@@ -9061,23 +9059,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 "Only profile owner, device owner and system may call this method.");
     }
 
-    private ActiveAdmin enforceDeviceOwnerOrProfileOwnerOnUser0OrProfileOwnerOrganizationOwned() {
+    private void enforceProfileOwnerOnUser0OrProfileOwnerOrganizationOwned() {
         synchronized (getLockObject()) {
-            // Check if there is a device owner
-            ActiveAdmin deviceOwner = getActiveAdminWithPolicyForUidLocked(null,
-                    DeviceAdminInfo.USES_POLICY_DEVICE_OWNER, mInjector.binderGetCallingUid());
-            if (deviceOwner != null) return deviceOwner;
+            // Check if there is a device owner or profile owner of an organization-owned device
+            ActiveAdmin owner = getActiveAdminWithPolicyForUidLocked(null,
+                    DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER,
+                    mInjector.binderGetCallingUid());
+            if (owner != null) {
+                return;
+            }
 
-            ActiveAdmin profileOwner = getActiveAdminWithPolicyForUidLocked(null,
+            // Checks whether the caller is a profile owner on user 0 rather than
+            // checking whether the active admin is on user 0
+            owner = getActiveAdminWithPolicyForUidLocked(null,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, mInjector.binderGetCallingUid());
-
-            // Check if there is a profile owner of an organization owned device
-            if (isProfileOwnerOfOrganizationOwnedDevice(profileOwner)) return profileOwner;
-
-            // Check if there is a profile owner called on user 0
-            if (profileOwner != null) {
-                enforceCallerSystemUserHandle();
-                return profileOwner;
+            if (owner != null && owner.getUserHandle().isSystem()) {
+                return;
             }
         }
         throw new SecurityException("No active admin found");
