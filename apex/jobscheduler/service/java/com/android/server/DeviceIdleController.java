@@ -761,6 +761,7 @@ public class DeviceIdleController extends SystemService
         @Override
         public void onTrigger(TriggerEvent event) {
             synchronized (DeviceIdleController.this) {
+                // One_shot sensors (which call onTrigger) are unregistered when onTrigger is called
                 active = false;
                 motionLocked();
             }
@@ -769,6 +770,9 @@ public class DeviceIdleController extends SystemService
         @Override
         public void onSensorChanged(SensorEvent event) {
             synchronized (DeviceIdleController.this) {
+                // Since one_shot sensors are unregistered when onTrigger is called, unregister
+                // listeners here so that the MotionListener is in a consistent state when it calls
+                // out to motionLocked.
                 mSensorManager.unregisterListener(this, mMotionSensor);
                 active = false;
                 motionLocked();
