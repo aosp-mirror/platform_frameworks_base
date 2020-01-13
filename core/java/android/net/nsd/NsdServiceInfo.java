@@ -17,13 +17,13 @@
 package android.net.nsd;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
-import android.os.Parcelable;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Base64;
 import android.util.Log;
-import android.util.ArrayMap;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;

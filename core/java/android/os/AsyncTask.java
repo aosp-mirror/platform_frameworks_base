@@ -18,8 +18,8 @@ package android.os;
 
 import android.annotation.MainThread;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.util.ArrayDeque;
 import java.util.concurrent.Callable;
