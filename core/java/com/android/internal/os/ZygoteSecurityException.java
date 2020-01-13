@@ -16,7 +16,7 @@
 
 package com.android.internal.os;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Exception thrown when a security policy is violated.

@@ -21,8 +21,8 @@ import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.YEAR_IN_MILLIS;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;

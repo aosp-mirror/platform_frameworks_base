@@ -16,14 +16,13 @@
 
 package com.android.internal.preference;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 /**
  * The {@link YesNoPreference} is a preference to show a dialog with Yes and No
