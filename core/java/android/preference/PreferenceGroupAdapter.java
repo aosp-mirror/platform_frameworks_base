@@ -16,7 +16,7 @@
 
 package android.preference;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.preference.Preference.OnPreferenceChangeInternalListener;

@@ -32,7 +32,7 @@ import static android.system.OsConstants.S_ISREG;
 import static android.system.OsConstants.S_IWOTH;
 
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
 import android.os.MessageQueue.OnFileDescriptorEventListener;
