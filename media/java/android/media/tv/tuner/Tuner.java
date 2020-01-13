@@ -590,6 +590,16 @@ public final class Tuner implements AutoCloseable  {
         return new Lnb(0);
     }
 
+    /**
+     * Open a time filter object.
+     *
+     * @return the opened time filter object. {@code null} if the operation failed.
+     */
+    @Nullable
+    public TimeFilter openTimeFilter() {
+        return nativeOpenTimeFilter();
+    }
+
     private List<Integer> getLnbIds() {
         mLnbIds = nativeGetLnbIds();
         return mLnbIds;
