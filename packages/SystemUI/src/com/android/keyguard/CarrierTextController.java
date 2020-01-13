@@ -348,7 +348,7 @@ public class CarrierTextController {
             }
             if (simState == IccCardConstants.State.READY) {
                 ServiceState ss = mKeyguardUpdateMonitor.mServiceStates.get(subId);
-                if (ss != null && ss.getDataRegState() == ServiceState.STATE_IN_SERVICE) {
+                if (ss != null && ss.getDataRegistrationState() == ServiceState.STATE_IN_SERVICE) {
                     // hack for WFC (IWLAN) not turning off immediately once
                     // Wi-Fi is disassociated or disabled
                     if (ss.getRilDataRadioTechnology() != ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN
