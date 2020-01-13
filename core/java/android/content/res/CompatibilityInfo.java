@@ -16,7 +16,7 @@
 
 package android.content.res;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Canvas;
 import android.graphics.PointF;
