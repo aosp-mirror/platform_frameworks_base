@@ -1,5 +1,22 @@
 LIBJNIGRAPHICS {
   global:
+    AImageDecoder_createFromAAsset;
+    AImageDecoder_createFromFd;
+    AImageDecoder_createFromBuffer;
+    AImageDecoder_delete;
+    AImageDecoder_setAndroidBitmapFormat;
+    AImageDecoder_setAlphaFlags;
+    AImageDecoder_getHeaderInfo;
+    AImageDecoder_getMinimumStride;
+    AImageDecoder_decodeImage;
+    AImageDecoder_setTargetSize;
+    AImageDecoder_setCrop;
+    AImageDecoderHeaderInfo_getWidth;
+    AImageDecoderHeaderInfo_getHeight;
+    AImageDecoderHeaderInfo_getMimeType;
+    AImageDecoderHeaderInfo_getAlphaFlags;
+    AImageDecoderHeaderInfo_isAnimated;
+    AImageDecoderHeaderInfo_getAndroidBitmapFormat;
     AndroidBitmap_getInfo;
     AndroidBitmap_lockPixels;
     AndroidBitmap_unlockPixels;
