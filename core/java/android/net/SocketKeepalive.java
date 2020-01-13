@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -53,7 +54,11 @@ import java.util.concurrent.Executor;
 public abstract class SocketKeepalive implements AutoCloseable {
     static final String TAG = "SocketKeepalive";
 
-    /** @hide */
+    /**
+     * No errors.
+     * @hide
+     */
+    @SystemApi
     public static final int SUCCESS = 0;
 
     /** @hide */
