@@ -510,28 +510,31 @@ public final class Settings {
             "android.settings.WIFI_IP_SETTINGS";
 
     /**
-     * Activity Action: Show setting page to process an Easy Connect (Wi-Fi DPP) QR code and start
+     * Activity Action: Show setting page to process a Wi-Fi Easy Connect (aka DPP) URI and start
      * configuration. This intent should be used when you want to use this device to take on the
-     * configurator role for an IoT/other device. When provided with a valid DPP URI string Settings
-     * will open a wifi selection screen for the user to indicate which network they would like to
-     * configure the device specified in the DPP URI string for and carry them through the rest of
-     * the flow for provisioning the device.
+     * configurator role for an IoT/other device. When provided with a valid DPP URI
+     * string, Settings will open a Wi-Fi selection screen for the user to indicate which network
+     * they would like to configure the device specified in the DPP URI string and
+     * carry them through the rest of the flow for provisioning the device.
      * <p>
-     * In some cases, a matching Activity may not exist, so ensure you safeguard against this by
-     * checking WifiManager.isEasyConnectSupported();
+     * In some cases, a matching Activity may not exist, so ensure to safeguard against this by
+     * checking {@link WifiManager#isEasyConnectSupported()}.
      * <p>
      * Input: The Intent's data URI specifies bootstrapping information for authenticating and
-     * provisioning the peer, with the "DPP" scheme.
+     * provisioning the peer, and uses a "DPP" scheme. The URI should be attached to the intent
+     * using {@link Intent#setData(Uri)}. The calling app can obtain a DPP URI in any
+     * way, e.g. by scanning a QR code or other out-of-band methods.
      * <p>
-     * Output: After {@code startActivityForResult}, the callback {@code onActivityResult} will have
-     * resultCode {@link android.app.Activity#RESULT_OK} if Wi-Fi Easy Connect configuration succeeded
-     * and the user tapped 'Done' button, or {@link android.app.Activity#RESULT_CANCELED} if operation
-     * failed and user tapped 'Cancel'. In case the operation has failed, a status code from {@link
-     * android.net.wifi.EasyConnectStatusCallback.EasyConnectFailureStatusCode} will be returned as
-     * Extra {@link #EXTRA_EASY_CONNECT_ERROR_CODE}. Easy Connect R2 Enrollees report additional
-     * details about the error they encountered, which will be provided in the {@link
-     * #EXTRA_EASY_CONNECT_ATTEMPTED_SSID}, {@link #EXTRA_EASY_CONNECT_CHANNEL_LIST}, and {@link
-     * #EXTRA_EASY_CONNECT_BAND_LIST}.
+     * Output: After calling {@link android.app.Activity#startActivityForResult}, the callback
+     * {@code onActivityResult} will have resultCode {@link android.app.Activity#RESULT_OK} if
+     * the Wi-Fi Easy Connect configuration succeeded and the user tapped the 'Done' button, or
+     * {@link android.app.Activity#RESULT_CANCELED} if the operation failed and user tapped the
+     * 'Cancel' button. In case the operation has failed, a status code from
+     * {@link android.net.wifi.EasyConnectStatusCallback} {@code EASY_CONNECT_EVENT_FAILURE_*} will
+     * be returned as an Extra {@link #EXTRA_EASY_CONNECT_ERROR_CODE}. Easy Connect R2
+     * Enrollees report additional details about the error they encountered, which will be
+     * provided in the {@link #EXTRA_EASY_CONNECT_ATTEMPTED_SSID},
+     * {@link #EXTRA_EASY_CONNECT_CHANNEL_LIST}, and {@link #EXTRA_EASY_CONNECT_BAND_LIST}.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROCESS_WIFI_EASY_CONNECT_URI =
@@ -540,12 +543,15 @@ public final class Settings {
     /**
      * Activity Extra: The Easy Connect operation error code
      * <p>
-     * An extra returned on the result intent received when using the {@link
-     * #ACTION_PROCESS_WIFI_EASY_CONNECT_URI} intent to launch the Easy Connect Operation. This
-     * extra contains the error code of the operation - one of
-     * {@link android.net.wifi.EasyConnectStatusCallback.EasyConnectFailureStatusCode}.
-     * If there is no error, i.e. if the operation returns {@link android.app.Activity#RESULT_OK},
+     * An extra returned on the result intent received when using the
+     * {@link #ACTION_PROCESS_WIFI_EASY_CONNECT_URI} intent to launch the Easy Connect Operation.
+     * This extra contains the integer error code of the operation - one of
+     * {@link android.net.wifi.EasyConnectStatusCallback} {@code EASY_CONNECT_EVENT_FAILURE_*}. If
+     * there is no error, i.e. if the operation returns {@link android.app.Activity#RESULT_OK},
      * then this extra is not attached to the result intent.
+     * <p>
+     * Use the {@link Intent#hasExtra(String)} to determine whether the extra is attached and
+     * {@link Intent#getIntExtra(String, int)} to obtain the error code data.
      */
     public static final String EXTRA_EASY_CONNECT_ERROR_CODE =
             "android.provider.extra.EASY_CONNECT_ERROR_CODE";
@@ -557,11 +563,13 @@ public final class Settings {
      * #ACTION_PROCESS_WIFI_EASY_CONNECT_URI} intent to launch the Easy Connect Operation. This
      * extra contains the SSID of the Access Point that the remote Enrollee tried to connect to.
      * This value is populated only by remote R2 devices, and only for the following error codes:
-     * {@link android.net.wifi.EasyConnectStatusCallback.EasyConnectFailureStatusCode#EASY_CONNECT_EVENT_FAILURE_CANNOT_FIND_NETWORK}
-     * {@link android.net.wifi.EasyConnectStatusCallback.EasyConnectFailureStatusCode#EASY_CONNECT_EVENT_FAILURE_ENROLLEE_AUTHENTICATION}.
+     * {@link android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_CANNOT_FIND_NETWORK}
+     * {@link android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_ENROLLEE_AUTHENTICATION}.
      * Therefore, always check if this extra is available using {@link Intent#hasExtra(String)}. If
      * there is no error, i.e. if the operation returns {@link android.app.Activity#RESULT_OK}, then
      * this extra is not attached to the result intent.
+     * <p>
+     * Use the {@link Intent#getStringExtra(String)} to obtain the SSID.
      */
     public static final String EXTRA_EASY_CONNECT_ATTEMPTED_SSID =
             "android.provider.extra.EASY_CONNECT_ATTEMPTED_SSID";
@@ -571,13 +579,15 @@ public final class Settings {
      * <p>
      * An extra returned on the result intent received when using the {@link
      * #ACTION_PROCESS_WIFI_EASY_CONNECT_URI} intent to launch the Easy Connect Operation. This
-     * extra contains the list channels the Enrollee used to scan for a network. This value is
+     * extra contains the channel list that the Enrollee scanned for a network. This value is
      * populated only by remote R2 devices, and only for the following error code: {@link
-     * android.net.wifi.EasyConnectStatusCallback.EasyConnectFailureStatusCode#EASY_CONNECT_EVENT_FAILURE_CANNOT_FIND_NETWORK}.
+     * android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_CANNOT_FIND_NETWORK}.
      * Therefore, always check if this extra is available using {@link Intent#hasExtra(String)}. If
      * there is no error, i.e. if the operation returns {@link android.app.Activity#RESULT_OK}, then
      * this extra is not attached to the result intent. The list is JSON formatted, as an array
      * (Wi-Fi global operating classes) of arrays (Wi-Fi channels).
+     * <p>
+     * Use the {@link Intent#getStringExtra(String)} to obtain the list.
      */
     public static final String EXTRA_EASY_CONNECT_CHANNEL_LIST =
             "android.provider.extra.EASY_CONNECT_CHANNEL_LIST";
@@ -588,14 +598,16 @@ public final class Settings {
      * An extra returned on the result intent received when using the {@link
      * #ACTION_PROCESS_WIFI_EASY_CONNECT_URI} intent to launch the Easy Connect Operation. This
      * extra contains the bands the Enrollee supports, expressed as the Global Operating Class,
-     * see Table E-4 in IEEE Std 802.11-2016 -Global operating classes. This value is populated only
+     * see Table E-4 in IEEE Std 802.11-2016 Global operating classes. This value is populated only
      * by remote R2 devices, and only for the following error codes: {@link
-     * android.net.wifi.EasyConnectStatusCallback.EasyConnectFailureStatusCode#EASY_CONNECT_EVENT_FAILURE_CANNOT_FIND_NETWORK}
-     * {@link android.net.wifi.EasyConnectStatusCallback.EasyConnectFailureStatusCode#EASY_CONNECT_EVENT_FAILURE_ENROLLEE_AUTHENTICATION}
-     * {@link android.net.wifi.EasyConnectStatusCallback.EasyConnectFailureStatusCode#EASY_CONNECT_EVENT_FAILURE_ENROLLEE_REJECTED_CONFIGURATION}.
+     * android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_CANNOT_FIND_NETWORK}
+     * {@link android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_ENROLLEE_AUTHENTICATION}
+     * {@link android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_ENROLLEE_REJECTED_CONFIGURATION}.
      * Therefore, always check if this extra is available using {@link Intent#hasExtra(String)}. If
      * there is no error, i.e. if the operation returns {@link android.app.Activity#RESULT_OK}, then
      * this extra is not attached to the result intent.
+     * <p>
+     * Use the {@link Intent#getIntArrayExtra(String)} to obtain the list.
      */
     public static final String EXTRA_EASY_CONNECT_BAND_LIST =
             "android.provider.extra.EASY_CONNECT_BAND_LIST";
