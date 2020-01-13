@@ -23,9 +23,7 @@ import android.app.AlarmManager;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
-import android.content.Intent;
 import android.os.TimestampedValue;
-import android.telephony.TelephonyManager;
 import android.util.LocalLog;
 import android.util.Slog;
 
@@ -534,17 +532,6 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             mLastAutoSystemClockTimeSet = newTime;
         } else {
             mLastAutoSystemClockTimeSet = null;
-        }
-
-        // Historically, Android has sent a TelephonyManager.ACTION_NETWORK_SET_TIME broadcast only
-        // when setting the time using NITZ.
-        if (origin == ORIGIN_PHONE) {
-            // Send a broadcast that telephony code used to send after setting the clock.
-            // TODO Remove this broadcast as soon as there are no remaining listeners.
-            Intent intent = new Intent(TelephonyManager.ACTION_NETWORK_SET_TIME);
-            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-            intent.putExtra("time", newSystemClockMillis);
-            mCallback.sendStickyBroadcast(intent);
         }
     }
 
