@@ -464,7 +464,8 @@ java_library {
         "framework-minus-apex",
         "updatable_media_stubs",
         "framework-sdkextensions-stubs-systemapi",
-        // TODO(jiyong): add more stubs for APEXes here
+        // TODO(b/147200698): should be the stub of framework-tethering
+        "framework-tethering",
     ],
     sdk_version: "core_platform",
     apex_available: ["//apex_available:platform"],
