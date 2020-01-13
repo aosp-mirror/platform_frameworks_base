@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony.cdma.sms;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.telephony.Rlog;
 import android.telephony.SmsCbCmasInfo;
@@ -30,8 +31,6 @@ import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.uicc.IccUtils;
 import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.BitwiseOutputStream;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

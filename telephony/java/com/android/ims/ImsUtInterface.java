@@ -16,12 +16,11 @@
 
 package com.android.ims;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsSsInfo;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 /**
  * Provides APIs for the supplementary service settings using IMS (Ut interface).
