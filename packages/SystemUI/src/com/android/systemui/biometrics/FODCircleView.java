@@ -27,7 +27,6 @@ import android.graphics.Point;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.view.Display;
@@ -75,9 +74,6 @@ public class FODCircleView extends ImageView implements ConfigurationListener {
     private boolean mIsCircleShowing;
 
     private Handler mHandler;
-
-    private PowerManager mPowerManager;
-    private PowerManager.WakeLock mWakeLock;
 
     private Timer mBurnInProtectionTimer;
 
@@ -162,10 +158,6 @@ public class FODCircleView extends ImageView implements ConfigurationListener {
         mPaintFingerprint.setColor(res.getColor(R.color.config_fodColor));
 
         mWindowManager = context.getSystemService(WindowManager.class);
-
-        mPowerManager = context.getSystemService(PowerManager.class);
-
-        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "FODCircleView");
 
         mDisplayManager = context.getSystemService(DisplayManager.class);
 
@@ -337,7 +329,6 @@ public class FODCircleView extends ImageView implements ConfigurationListener {
 
     private void updateAlpha() {
         if (mIsCircleShowing) {
-            if (mIsDreaming) mWakeLock.acquire(300);
             setAlpha(1.0f);
         } else {
             setAlpha(mIsDreaming ? (mIsPulsing ? 1.0f : 0.8f) : 1.0f);
