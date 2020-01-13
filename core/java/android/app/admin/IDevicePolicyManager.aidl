@@ -24,6 +24,7 @@ import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.PasswordMetrics;
+import android.app.admin.FactoryResetProtectionPolicy;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -103,6 +104,9 @@ interface IDevicePolicyManager {
     void lockNow(int flags, boolean parent);
 
     void wipeDataWithReason(int flags, String wipeReasonForUser, boolean parent);
+
+    void setFactoryResetProtectionPolicy(in ComponentName who, in FactoryResetProtectionPolicy policy);
+    FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(in ComponentName who);
 
     ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList);
     ComponentName getGlobalProxyAdmin(int userHandle);

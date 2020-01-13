@@ -68,6 +68,7 @@ import android.view.IWindowManager;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -117,6 +118,7 @@ public class MockSystemServices {
     public final TimeDetector timeDetector;
     public final TimeZoneDetector timeZoneDetector;
     public final KeyChain.KeyChainConnection keyChainConnection;
+    public final PersistentDataBlockManagerInternal persistentDataBlockManagerInternal;
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
     public final BuildMock buildMock = new BuildMock();
@@ -160,6 +162,7 @@ public class MockSystemServices {
         timeDetector = mock(TimeDetector.class);
         timeZoneDetector = mock(TimeZoneDetector.class);
         keyChainConnection = mock(KeyChain.KeyChainConnection.class, RETURNS_DEEP_STUBS);
+        persistentDataBlockManagerInternal = mock(PersistentDataBlockManagerInternal.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(realContext.getPackageManager());
