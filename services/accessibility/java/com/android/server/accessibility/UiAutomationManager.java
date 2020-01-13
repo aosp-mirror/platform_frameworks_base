@@ -297,6 +297,11 @@ class UiAutomationManager {
         }
 
         @Override
+        public boolean switchToInputMethod(String imeId) {
+            return false;
+        }
+
+        @Override
         public boolean isAccessibilityButtonAvailable() {
             return false;
         }

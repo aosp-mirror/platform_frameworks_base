@@ -1547,6 +1547,34 @@ public abstract class AccessibilityService extends Service {
             void onShowModeChanged(@NonNull SoftKeyboardController controller,
                     @SoftKeyboardShowMode int showMode);
         }
+
+        /**
+         * Switches the current IME for the user for whom the service is enabled. The change will
+         * persist until the current IME is explicitly changed again, and may persist beyond the
+         * life cycle of the requesting service.
+         *
+         * @param imeId The ID of the input method to make current. This IME must be installed and
+         *              enabled.
+         * @return {@code true} if the current input method was successfully switched to the input
+         *         method by {@code imeId},
+         *         {@code false} if the input method specified is not installed, not enabled, or
+         *         otherwise not available to become the current IME
+         *
+         * @see android.view.inputmethod.InputMethodInfo#getId()
+         */
+        public boolean switchToInputMethod(@NonNull String imeId) {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance().getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.switchToInputMethod(imeId);
+                } catch (RemoteException re) {
+                    throw new RuntimeException(re);
+                }
+            }
+            return false;
+        }
     }
 
     /**
