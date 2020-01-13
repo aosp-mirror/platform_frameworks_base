@@ -18,6 +18,8 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+// TODO: Use public SurfaceTexture APIs once available and include public NDK header file instead.
+#include <surfacetexture/surface_texture_platform.h>
 #include "AutoBackendTextureRelease.h"
 #include "Matrix.h"
 #include "Properties.h"
@@ -34,6 +36,7 @@ namespace uirenderer {
 DeferredLayerUpdater::DeferredLayerUpdater(RenderState& renderState)
         : mRenderState(renderState)
         , mBlend(false)
+        , mSurfaceTexture(nullptr, [](ASurfaceTexture*) {})
         , mTransform(nullptr)
         , mGLContextAttached(false)
         , mUpdateTexImage(false)
