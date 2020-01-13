@@ -280,7 +280,6 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                             .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED,
                             WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN,
                             "");
-                    mContext.getSystemService(PowerManager.class).reboot("Rollback staged install");
                 } else if (sessionInfo.isStagedSessionFailed()
                         && markStagedSessionHandled(rollbackId)) {
                     logEvent(moduleMetadataPackage,
@@ -291,6 +290,11 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                 }
             }
         }
+
+        // Wait for all pending staged sessions to get handled before rebooting.
+        if (isPendingStagedSessionsEmpty()) {
+            mContext.getSystemService(PowerManager.class).reboot("Rollback staged install");
+        }
     }
 
     /**
@@ -300,6 +304,16 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     private boolean markStagedSessionHandled(int rollbackId) {
         synchronized (mPendingStagedRollbackIds) {
             return mPendingStagedRollbackIds.remove(rollbackId);
+        }
+    }
+
+    /**
+     * Returns {@code true} if all pending staged rollback sessions were marked as handled,
+     * {@code false} if there is any left.
+     */
+    private boolean isPendingStagedSessionsEmpty() {
+        synchronized (mPendingStagedRollbackIds) {
+            return mPendingStagedRollbackIds.isEmpty();
         }
     }
 
@@ -414,6 +428,9 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                             reasonToLog, failedPackageToLog);
                 }
             } else {
+                if (rollback.isStaged()) {
+                    markStagedSessionHandled(rollback.getRollbackId());
+                }
                 logEvent(logPackage,
                         StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
                         reasonToLog, failedPackageToLog);
@@ -430,6 +447,16 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         Slog.i(TAG, "Rolling back all available rollbacks");
         RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
         List<RollbackInfo> rollbacks = rollbackManager.getAvailableRollbacks();
+
+        // Add all rollback ids to mPendingStagedRollbackIds, so that we do not reboot before all
+        // pending staged rollbacks are handled.
+        synchronized (mPendingStagedRollbackIds) {
+            for (RollbackInfo rollback : rollbacks) {
+                if (rollback.isStaged()) {
+                    mPendingStagedRollbackIds.add(rollback.getRollbackId());
+                }
+            }
+        }
 
         for (RollbackInfo rollback : rollbacks) {
             VersionedPackage sample = rollback.getPackages().get(0).getVersionRolledBackFrom();

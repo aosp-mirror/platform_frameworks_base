@@ -17,6 +17,7 @@
 package com.android.tests.rollback.host;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.testng.Assert.assertThrows;
 
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
@@ -103,6 +104,9 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
     @Test
     public void testNativeWatchdogTriggersRollbackForAll() throws Exception {
+        // This test requires committing multiple staged rollbacks
+        assumeTrue(isCheckpointSupported());
+
         // Install a package with rollback enabled.
         runPhase("testNativeWatchdogTriggersRollbackForAll_Phase1");
         getDevice().reboot();
@@ -232,5 +236,14 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     private String getNetworkStackPath() throws Exception {
         // Find the NetworkStack path (can be NetworkStack.apk or NetworkStackNext.apk)
         return getDevice().executeShellCommand("ls /system/priv-app/NetworkStack*/*.apk");
+    }
+
+    private boolean isCheckpointSupported() throws Exception {
+        try {
+            runPhase("isCheckpointSupported");
+            return true;
+        } catch (AssertionError ignore) {
+            return false;
+        }
     }
 }
