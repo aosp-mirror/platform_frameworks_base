@@ -57,7 +57,7 @@ public class StatusBarSwitch extends SwitchPreference implements Tunable {
         if (!StatusBarIconController.ICON_BLACKLIST.equals(key)) {
             return;
         }
-        mBlacklist = StatusBarIconController.getIconBlacklist(newValue);
+        mBlacklist = StatusBarIconController.getIconBlacklist(getContext(), newValue);
         setChecked(!mBlacklist.contains(getKey()));
     }
 

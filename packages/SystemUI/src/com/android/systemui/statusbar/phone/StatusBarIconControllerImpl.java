@@ -111,7 +111,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
             return;
         }
         mIconBlacklist.clear();
-        mIconBlacklist.addAll(StatusBarIconController.getIconBlacklist(newValue));
+        mIconBlacklist.addAll(StatusBarIconController.getIconBlacklist(mContext, newValue));
         ArrayList<Slot> currentSlots = getSlots();
         ArrayMap<Slot, List<StatusBarIconHolder>> slotsToReAdd = new ArrayMap<>();
 

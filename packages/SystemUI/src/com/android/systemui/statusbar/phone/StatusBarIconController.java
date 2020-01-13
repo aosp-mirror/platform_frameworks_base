@@ -76,12 +76,12 @@ public interface StatusBarIconController {
 
     public static final String ICON_BLACKLIST = "icon_blacklist";
 
-    public static ArraySet<String> getIconBlacklist(String blackListStr) {
+    /** Reads the default blacklist from config value unless blacklistStr is provided. */
+    static ArraySet<String> getIconBlacklist(Context context, String blackListStr) {
         ArraySet<String> ret = new ArraySet<>();
-        if (blackListStr == null) {
-            blackListStr = "rotate,headset";
-        }
-        String[] blacklist = blackListStr.split(",");
+        String[] blacklist = blackListStr == null
+            ? context.getResources().getStringArray(R.array.config_statusBarIconBlackList)
+            : blackListStr.split(",");
         for (String slot : blacklist) {
             if (!TextUtils.isEmpty(slot)) {
                 ret.add(slot);
