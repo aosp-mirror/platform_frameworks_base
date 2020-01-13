@@ -159,9 +159,13 @@ public class VoiceInteractionManagerService extends SystemService {
         }
     }
 
+    private boolean isSupported(UserInfo user) {
+        return user.isFull();
+    }
+
     @Override
-    public boolean isSupported(UserInfo userInfo) {
-        return userInfo.isFull();
+    public boolean isSupportedUser(TargetUser user) {
+        return isSupported(user.getUserInfo());
     }
 
     @Override
