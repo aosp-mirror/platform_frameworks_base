@@ -13,4 +13,8 @@ java_library {
         "framework-minus-apex",
         "services.core",
     ],
+    apex_available: [
+        "com.android.os.statsd",
+        "test_com.android.os.statsd",
+    ],
 }
