@@ -104,7 +104,8 @@ public final class CellIdentityGsm extends CellIdentity {
     }
 
     /** @hide */
-    public CellIdentityGsm sanitizeLocationInfo() {
+    @Override
+    public @NonNull CellIdentityGsm sanitizeLocationInfo() {
         return new CellIdentityGsm(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 CellInfo.UNAVAILABLE, mMccStr, mMncStr, mAlphaLong, mAlphaShort);
     }

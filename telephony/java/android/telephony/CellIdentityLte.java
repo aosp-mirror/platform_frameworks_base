@@ -121,7 +121,8 @@ public final class CellIdentityLte extends CellIdentity {
     }
 
     /** @hide */
-    public CellIdentityLte sanitizeLocationInfo() {
+    @Override
+    public @NonNull CellIdentityLte sanitizeLocationInfo() {
         return new CellIdentityLte(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 mMccStr, mMncStr, mAlphaLong, mAlphaShort);

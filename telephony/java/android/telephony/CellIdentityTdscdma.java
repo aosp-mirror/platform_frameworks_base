@@ -97,7 +97,8 @@ public final class CellIdentityTdscdma extends CellIdentity {
     }
 
     /** @hide */
-    public CellIdentityTdscdma sanitizeLocationInfo() {
+    @Override
+    public @NonNull CellIdentityTdscdma sanitizeLocationInfo() {
         return new CellIdentityTdscdma(mMccStr, mMncStr, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort);
     }
