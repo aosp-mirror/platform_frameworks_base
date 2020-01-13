@@ -46,6 +46,8 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -77,7 +79,9 @@ public class PackageUserState {
     public ArraySet<String> disabledComponents;
     public ArraySet<String> enabledComponents;
 
-    public String[] overlayPaths;
+    private String[] overlayPaths;
+    private ArrayMap<String, String[]> sharedLibraryOverlayPaths; // Lib name to overlay paths
+    private String[] cachedOverlayPaths;
 
     @UnsupportedAppUsage
     public PackageUserState() {
@@ -112,7 +116,31 @@ public class PackageUserState {
         enabledComponents = ArrayUtils.cloneOrNull(o.enabledComponents);
         overlayPaths =
             o.overlayPaths == null ? null : Arrays.copyOf(o.overlayPaths, o.overlayPaths.length);
+        if (o.sharedLibraryOverlayPaths != null) {
+            sharedLibraryOverlayPaths = new ArrayMap<>(o.sharedLibraryOverlayPaths);
+        }
         harmfulAppWarning = o.harmfulAppWarning;
+    }
+
+    public String[] getOverlayPaths() {
+        return overlayPaths;
+    }
+
+    public void setOverlayPaths(String[] paths) {
+        overlayPaths = paths;
+        cachedOverlayPaths = null;
+    }
+
+    public Map<String, String[]> getSharedLibraryOverlayPaths() {
+        return sharedLibraryOverlayPaths;
+    }
+
+    public void setSharedLibraryOverlayPaths(String library, String[] paths) {
+        if (sharedLibraryOverlayPaths == null) {
+            sharedLibraryOverlayPaths = new ArrayMap<>();
+        }
+        sharedLibraryOverlayPaths.put(library, paths);
+        cachedOverlayPaths = null;
     }
 
     /**
@@ -233,6 +261,38 @@ public class PackageUserState {
         }
 
         return isComponentEnabled;
+    }
+
+    public String[] getAllOverlayPaths() {
+        if (overlayPaths == null && sharedLibraryOverlayPaths == null) {
+            return null;
+        }
+
+        if (cachedOverlayPaths != null) {
+            return cachedOverlayPaths;
+        }
+
+        final LinkedHashSet<String> paths = new LinkedHashSet<>();
+        if (overlayPaths != null) {
+            final int N = overlayPaths.length;
+            for (int i = 0; i < N; i++) {
+                paths.add(overlayPaths[i]);
+            }
+        }
+
+        if (sharedLibraryOverlayPaths != null) {
+            for (String[] libOverlayPaths : sharedLibraryOverlayPaths.values()) {
+                if (libOverlayPaths != null) {
+                    final int N = libOverlayPaths.length;
+                    for (int i = 0; i < N; i++) {
+                        paths.add(libOverlayPaths[i]);
+                    }
+                }
+            }
+        }
+
+        cachedOverlayPaths = paths.toArray(new String[0]);
+        return cachedOverlayPaths;
     }
 
     @Override

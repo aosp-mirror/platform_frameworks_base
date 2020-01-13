@@ -685,7 +685,7 @@ final class OverlayManagerServiceImpl {
         // Static RROs targeting to "android", ie framework-res.apk, are handled by native layers.
         if (targetPackage != null && overlayPackage != null
                 && !("android".equals(targetPackageName)
-                        && overlayPackage.isStaticOverlayPackage())) {
+                    && overlayPackage.isStaticOverlayPackage())) {
             mIdmapManager.createIdmap(targetPackage, overlayPackage, userId);
         }
 
@@ -703,9 +703,9 @@ final class OverlayManagerServiceImpl {
         if (currentState != newState) {
             if (DEBUG) {
                 Slog.d(TAG, String.format("%s:%d: %s -> %s",
-                            overlayPackageName, userId,
-                            OverlayInfo.stateToString(currentState),
-                            OverlayInfo.stateToString(newState)));
+                        overlayPackageName, userId,
+                        OverlayInfo.stateToString(currentState),
+                        OverlayInfo.stateToString(newState)));
             }
             modified |= mSettings.setState(overlayPackageName, userId, newState);
         }

@@ -7803,7 +7803,7 @@ public class PackageParser {
             ai.category = FallbackCategoryProvider.getFallbackCategory(ai.packageName);
         }
         ai.seInfoUser = SELinuxUtil.assignSeinfoUser(state);
-        ai.resourceDirs = state.overlayPaths;
+        ai.resourceDirs = state.getAllOverlayPaths();
         ai.icon = (sUseRoundIcon && ai.roundIconRes != 0) ? ai.roundIconRes : ai.iconRes;
     }
 

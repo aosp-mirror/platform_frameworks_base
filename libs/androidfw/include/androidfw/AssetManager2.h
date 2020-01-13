@@ -27,6 +27,7 @@
 #include "androidfw/ApkAssets.h"
 #include "androidfw/Asset.h"
 #include "androidfw/AssetManager.h"
+#include "androidfw/DynamicLibManager.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/Util.h"
 
@@ -94,6 +95,7 @@ class AssetManager2 {
   };
 
   AssetManager2();
+  explicit AssetManager2(DynamicLibManager* dynamic_lib_manager);
 
   // Sets/resets the underlying ApkAssets for this AssetManager. The ApkAssets
   // are not owned by the AssetManager, and must have a longer lifetime.
@@ -371,6 +373,8 @@ class AssetManager2 {
   // Retrieve the assigned package id of the package if loaded into this AssetManager
   uint8_t GetAssignedPackageId(const LoadedPackage* package) const;
 
+  DynamicLibManager* GetDynamicLibManager() const;
+
   // The ordered list of ApkAssets to search. These are not owned by the AssetManager, and must
   // have a longer lifetime.
   std::vector<const ApkAssets*> apk_assets_;
@@ -388,6 +392,9 @@ class AssetManager2 {
   // The current configuration set for this AssetManager. When this changes, cached resources
   // may need to be purged.
   ResTable_config configuration_;
+
+  // Component responsible for assigning package ids to shared libraries.
+  std::variant<std::unique_ptr<DynamicLibManager>, DynamicLibManager*> dynamic_lib_manager_;
 
   // Cached set of bags. These are cached because they can inherit keys from parent bags,
   // which involves some calculation.

@@ -41,6 +41,7 @@ import com.android.internal.util.Preconditions;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -312,12 +313,21 @@ public abstract class PackageSettingBase extends SettingBase {
     }
 
     void setOverlayPaths(List<String> overlayPaths, int userId) {
-        modifyUserState(userId).overlayPaths = overlayPaths == null ? null :
-            overlayPaths.toArray(new String[overlayPaths.size()]);
+        modifyUserState(userId).setOverlayPaths(overlayPaths == null ? null :
+            overlayPaths.toArray(new String[overlayPaths.size()]));
     }
 
     String[] getOverlayPaths(int userId) {
-        return readUserState(userId).overlayPaths;
+        return readUserState(userId).getOverlayPaths();
+    }
+
+    void setOverlayPathsForLibrary(String libName, List<String> overlayPaths, int userId) {
+        modifyUserState(userId).setSharedLibraryOverlayPaths(libName,
+                overlayPaths == null ? null : overlayPaths.toArray(new String[0]));
+    }
+
+    Map<String, String[]> getOverlayPathsForLibrary(int userId) {
+        return readUserState(userId).getSharedLibraryOverlayPaths();
     }
 
     /** Only use for testing. Do NOT use in production code. */
