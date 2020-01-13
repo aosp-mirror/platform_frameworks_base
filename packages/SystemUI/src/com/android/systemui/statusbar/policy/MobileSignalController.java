@@ -703,8 +703,8 @@ public class MobileSignalController extends SignalController<
         @Override
         public void onServiceStateChanged(ServiceState state) {
             if (DEBUG) {
-                Log.d(mTag, "onServiceStateChanged voiceState=" + state.getVoiceRegState()
-                        + " dataState=" + state.getDataRegState());
+                Log.d(mTag, "onServiceStateChanged voiceState=" + state.getState()
+                        + " dataState=" + state.getDataRegistrationState());
             }
             mServiceState = state;
             if (mServiceState != null) {
