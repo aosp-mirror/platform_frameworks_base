@@ -19,7 +19,7 @@ package android.net.wifi;
 import android.annotation.IntRange;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkUtils;
 import android.os.Build;

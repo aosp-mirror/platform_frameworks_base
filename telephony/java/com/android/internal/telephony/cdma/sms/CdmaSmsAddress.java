@@ -16,13 +16,12 @@
 
 package com.android.internal.telephony.cdma.sms;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.SmsAddress;
 import com.android.internal.util.HexDump;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 public class CdmaSmsAddress extends SmsAddress {
 

@@ -20,7 +20,7 @@ import static android.telephony.TelephonyManager.PHONE_TYPE_CDMA;
 
 import android.annotation.Nullable;
 import android.annotation.StringDef;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.text.TextUtils;

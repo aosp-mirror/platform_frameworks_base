@@ -16,12 +16,11 @@
 
 package com.android.internal.telephony.gsm;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.telephony.PhoneNumberUtils;
 
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsAddress;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.text.ParseException;
 
