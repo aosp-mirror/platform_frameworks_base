@@ -16,12 +16,11 @@
 
 package android.util;
 
-import org.xmlpull.v1.XmlPullParser;
-
-import android.annotation.UnsupportedAppUsage;
-import android.util.AttributeSet;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParser;
 
 /**
  * Provides an implementation of AttributeSet on top of an XmlPullParser.
