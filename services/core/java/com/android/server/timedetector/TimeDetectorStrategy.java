@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
-import android.content.Intent;
 import android.os.TimestampedValue;
 
 import java.io.PrintWriter;
@@ -73,9 +72,6 @@ public interface TimeDetectorStrategy {
 
         /** Release the wake lock acquired by a call to {@link #acquireWakeLock()}. */
         void releaseWakeLock();
-
-        /** Send the supplied intent as a stick broadcast. */
-        void sendStickyBroadcast(@NonNull Intent intent);
     }
 
     /** Initialize the strategy. */

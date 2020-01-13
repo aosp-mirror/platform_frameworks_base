@@ -20,11 +20,9 @@ import android.annotation.NonNull;
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 
@@ -110,11 +108,6 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
     public void releaseWakeLock() {
         checkWakeLockHeld();
         mWakeLock.release();
-    }
-
-    @Override
-    public void sendStickyBroadcast(@NonNull Intent intent) {
-        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void checkWakeLockHeld() {
