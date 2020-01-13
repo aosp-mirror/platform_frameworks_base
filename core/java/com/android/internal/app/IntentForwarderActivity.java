@@ -20,12 +20,12 @@ import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 
 import android.annotation.Nullable;
 import android.annotation.StringRes;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;

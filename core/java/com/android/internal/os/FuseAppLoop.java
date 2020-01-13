@@ -18,17 +18,19 @@ package com.android.internal.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
-import android.os.ProxyFileDescriptorCallback;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.ProxyFileDescriptorCallback;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.util.Log;
 import android.util.SparseArray;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
