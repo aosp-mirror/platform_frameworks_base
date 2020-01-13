@@ -826,6 +826,10 @@ public final class ViewRootImpl implements ViewParent,
                 if (mWindowAttributes.packageName == null) {
                     mWindowAttributes.packageName = mBasePackageName;
                 }
+                if (WindowManagerGlobal.USE_BLAST_ADAPTER) {
+                    mWindowAttributes.privateFlags |=
+                        WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
+                }
                 attrs = mWindowAttributes;
                 setTag();
 
@@ -1308,7 +1312,7 @@ public final class ViewRootImpl implements ViewParent,
             mWindowAttributes.privateFlags |= compatibleWindowFlag;
 
             if (WindowManagerGlobal.USE_BLAST_ADAPTER) {
-                mWindowAttributes.privateFlags =
+                mWindowAttributes.privateFlags |=
                     WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
             }
 
