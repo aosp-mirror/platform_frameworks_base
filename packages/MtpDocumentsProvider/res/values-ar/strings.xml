@@ -21,5 +21,5 @@
     <string name="root_name" msgid="5819495383921089536">"<xliff:g id="DEVICE_MODEL">%1$s</xliff:g> <xliff:g id="STORAGE_NAME">%2$s</xliff:g>"</string>
     <string name="accessing_notification_title" msgid="3030133609230917944">"جارٍ الوصول إلى الملفات من <xliff:g id="DEVICE_MODEL">%1$s</xliff:g>"</string>
     <string name="error_busy_device" msgid="3997316850357386589">"الجهاز الآخر مشغول، ولا يمكنك نقل الملفات إلا بعد أن يصبح متاحًا."</string>
-    <string name="error_locked_device" msgid="7557872102188356147">"لم يتم العثور على ملفات، وربما يكون الجهاز الآخر في وضع القفل. إذا كان الأمر كذلك، فعليك إلغاء قفله وإعادة المحاولة."</string>
+    <string name="error_locked_device" msgid="7557872102188356147">"لم يتم العثور على ملفات، وربما يكون الجهاز الآخر في وضع القفل. إذا كان الأمر كذلك، فعليك فتح قفله وإعادة المحاولة."</string>
 </resources>

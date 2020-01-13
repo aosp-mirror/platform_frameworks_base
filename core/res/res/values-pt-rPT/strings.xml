@@ -1798,7 +1798,7 @@
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Tente novamente mais tarde"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualização de ecrã inteiro"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para sair, deslize rapidamente para baixo a partir da parte superior."</string>
-    <string name="immersive_cling_positive" msgid="7047498036346489883">"Compreendi"</string>
+    <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="done_label" msgid="7283767013231718521">"Concluído"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Controlo de deslize circular das horas"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Controlo de deslize circular dos minutos"</string>

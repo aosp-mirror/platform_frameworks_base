@@ -283,9 +283,9 @@
     <string name="permgrouplab_location" msgid="1858277002233964394">"位置資訊"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"存取此裝置的位置"</string>
     <string name="permgrouprequest_location" msgid="5261379525646615507">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;存取此裝置的位置資訊嗎？"</string>
-    <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"只有在您使用此應用程式時，應用程式才能存取位置資訊"</string>
+    <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"此應用程式目前只有您在使用時才能存取位置資訊"</string>
     <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"要允許&lt;b&gt;「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;/b&gt;&lt;b&gt;長期&lt;/b&gt;存取此裝置的位置資訊嗎？"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"只有在您使用此應用程式時，應用程式才能存取位置資訊"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"此應用程式目前只有您在使用時才能存取位置資訊"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"日曆"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"存取您的日曆"</string>
     <string name="permgrouprequest_calendar" msgid="2680538977344557840">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;存取您的日曆嗎？"</string>
