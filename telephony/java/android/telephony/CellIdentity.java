@@ -191,6 +191,7 @@ public abstract class CellIdentity implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
     public abstract @NonNull CellIdentity sanitizeLocationInfo();
 
     @Override
