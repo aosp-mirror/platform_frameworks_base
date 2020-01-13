@@ -695,11 +695,26 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerPowerProfile() {
-        // No op.
+        int tagId = StatsLog.POWER_PROFILE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                /* PullAtomMetadata */ null,
+                (atomTag, data) -> pullPowerProfile(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullPowerProfile() {
-        // No op.
+    private int pullPowerProfile(int atomTag, List<StatsEvent> pulledData) {
+        PowerProfile powerProfile = new PowerProfile(mContext);
+        ProtoOutputStream proto = new ProtoOutputStream();
+        powerProfile.dumpDebug(proto);
+        proto.flush();
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeByteArray(proto.getBytes())
+                .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerProcessCpuTime() {
