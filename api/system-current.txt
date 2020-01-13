@@ -4712,6 +4712,37 @@ package android.media.tv.tuner {
 
 }
 
+package android.media.tv.tuner.dvr {
+
+  public class DvrSettings {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.dvr.DvrSettings.Builder builder(@NonNull android.content.Context);
+    method public int getDataFormat();
+    method public long getHighThreshold();
+    method public long getLowThreshold();
+    method public long getPacketSize();
+    method public int getStatusMask();
+    method public int getType();
+    field public static final int DATA_FORMAT_ES = 2; // 0x2
+    field public static final int DATA_FORMAT_PES = 1; // 0x1
+    field public static final int DATA_FORMAT_SHV_TLV = 3; // 0x3
+    field public static final int DATA_FORMAT_TS = 0; // 0x0
+    field public static final int TYPE_PLAYBACK = 1; // 0x1
+    field public static final int TYPE_RECORD = 0; // 0x0
+  }
+
+  public static final class DvrSettings.Builder {
+    ctor public DvrSettings.Builder();
+    method @NonNull public android.media.tv.tuner.dvr.DvrSettings build();
+    method @NonNull public android.media.tv.tuner.dvr.DvrSettings.Builder setDataFormat(int);
+    method @NonNull public android.media.tv.tuner.dvr.DvrSettings.Builder setHighThreshold(long);
+    method @NonNull public android.media.tv.tuner.dvr.DvrSettings.Builder setLowThreshold(long);
+    method @NonNull public android.media.tv.tuner.dvr.DvrSettings.Builder setPacketSize(long);
+    method @NonNull public android.media.tv.tuner.dvr.DvrSettings.Builder setStatusMask(int);
+    method @NonNull public android.media.tv.tuner.dvr.DvrSettings.Builder setType(int);
+  }
+
+}
+
 package android.media.tv.tuner.filter {
 
   public class Filter implements java.lang.AutoCloseable {

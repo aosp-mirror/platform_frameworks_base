@@ -20,6 +20,7 @@ import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerUtils;
@@ -33,6 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@SystemApi
 public class DvrSettings {
 
     /** @hide */
@@ -74,19 +76,22 @@ public class DvrSettings {
     public static final int TYPE_PLAYBACK = Constants.DvrType.PLAYBACK;
 
 
-
+    @FilterStatus
     private final int mStatusMask;
+    @BytesLong
     private final long mLowThreshold;
+    @BytesLong
     private final long mHighThreshold;
+    @BytesLong
     private final long mPacketSize;
-
     @DataFormat
     private final int mDataFormat;
     @Type
     private final int mType;
 
-    private DvrSettings(int statusMask, long lowThreshold, long highThreshold, long packetSize,
-            @DataFormat int dataFormat, @Type int type) {
+    private DvrSettings(@FilterStatus int statusMask, @BytesLong long lowThreshold,
+            @BytesLong long highThreshold, @BytesLong long packetSize, @DataFormat int dataFormat,
+            @Type int type) {
         mStatusMask = statusMask;
         mLowThreshold = lowThreshold;
         mHighThreshold = highThreshold;
@@ -96,13 +101,61 @@ public class DvrSettings {
     }
 
     /**
+     * Gets status mask.
+     */
+    @FilterStatus
+    public int getStatusMask() {
+        return mStatusMask;
+    }
+
+    /**
+     * Gets low threshold in bytes.
+     */
+    @BytesLong
+    public long getLowThreshold() {
+        return mLowThreshold;
+    }
+
+    /**
+     * Sets high threshold in bytes.
+     */
+    @BytesLong
+    public long getHighThreshold() {
+        return mHighThreshold;
+    }
+
+    /**
+     * Gets packet size in bytes.
+     */
+    @BytesLong
+    public long getPacketSize() {
+        return mPacketSize;
+    }
+
+    /**
+     * Gets data format.
+     */
+    @DataFormat
+    public int getDataFormat() {
+        return mDataFormat;
+    }
+
+    /**
+     * Gets settings type.
+     */
+    @Type
+    public int getType() {
+        return mType;
+    }
+
+    /**
      * Creates a builder for {@link DvrSettings}.
      *
      * @param context the context of the caller.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder builder(Context context) {
+    public static Builder builder(@NonNull Context context) {
         TunerUtils.checkTunerPermission(context);
         return new Builder();
     }
