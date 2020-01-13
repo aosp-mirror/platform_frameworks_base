@@ -744,23 +744,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         return null;
     }
 
-    private void pullKernelWakelock(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        final KernelWakelockStats wakelockStats =
-                mKernelWakelockReader.readKernelWakelockStats(mTmpWakelockStats);
-        for (Map.Entry<String, KernelWakelockStats.Entry> ent : wakelockStats.entrySet()) {
-            String name = ent.getKey();
-            KernelWakelockStats.Entry kws = ent.getValue();
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeString(name);
-            e.writeInt(kws.mCount);
-            e.writeInt(kws.mVersion);
-            e.writeLong(kws.mTotalTime);
-            pulledData.add(e);
-        }
-    }
-
     private void pullWifiActivityInfo(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2033,11 +2016,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
         switch (tagId) {
-
-            case StatsLog.KERNEL_WAKELOCK: {
-                pullKernelWakelock(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
 
             case StatsLog.WIFI_ACTIVITY_INFO: {
                 pullWifiActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);

@@ -622,12 +622,35 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
+    private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
+    private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
+
     private void registerKernelWakelock() {
-        // No op.
+        int tagId = StatsLog.KERNEL_WAKELOCK;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                /* PullAtomMetadata */ null,
+                (atomTag, data) -> pullKernelWakelock(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullKernelWakelock() {
-        // No op.
+    private int pullKernelWakelock(int atomTag, List<StatsEvent> pulledData) {
+        final KernelWakelockStats wakelockStats =
+                mKernelWakelockReader.readKernelWakelockStats(mTmpWakelockStats);
+        for (Map.Entry<String, KernelWakelockStats.Entry> ent : wakelockStats.entrySet()) {
+            String name = ent.getKey();
+            KernelWakelockStats.Entry kws = ent.getValue();
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeString(name)
+                    .writeInt(kws.mCount)
+                    .writeInt(kws.mVersion)
+                    .writeLong(kws.mTotalTime)
+                    .build();
+            pulledData.add(e);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
