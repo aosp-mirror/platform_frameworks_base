@@ -72,7 +72,7 @@ private:
 
     int32_t mDefaultState = kStateUnknown;
 
-    int32_t mResetState;
+    int32_t mResetState = kStateUnknown;
 
     // Maps primary key to state value info
     std::unordered_map<HashableDimensionKey, StateValueInfo> mStateMap;

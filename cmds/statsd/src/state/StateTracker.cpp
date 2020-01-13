@@ -28,10 +28,14 @@ namespace statsd {
 StateTracker::StateTracker(const int32_t atomId, const util::StateAtomFieldOptions& stateAtomInfo)
     : mAtomId(atomId), mStateField(getSimpleMatcher(atomId, stateAtomInfo.exclusiveField)) {
     // create matcher for each primary field
-    // TODO(tsaichristine): b/142108433 handle when primary field is first uid in chain
-    for (const auto& primary : stateAtomInfo.primaryFields) {
-        Matcher matcher = getSimpleMatcher(atomId, primary);
-        mPrimaryFields.push_back(matcher);
+    for (const auto& primaryField : stateAtomInfo.primaryFields) {
+        if (primaryField == util::FIRST_UID_IN_CHAIN) {
+            Matcher matcher = getFirstUidMatcher(atomId);
+            mPrimaryFields.push_back(matcher);
+        } else {
+            Matcher matcher = getSimpleMatcher(atomId, primaryField);
+            mPrimaryFields.push_back(matcher);
+        }
     }
 
     // TODO(tsaichristine): b/142108433 set default state, reset state, and nesting

@@ -291,6 +291,15 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
     }
 
     if (field->options().GetExtension(os::statsd::state_field_option).option() ==
+        os::statsd::StateField::PRIMARY_FIELD_FIRST_UID) {
+        if (javaType != JAVA_TYPE_ATTRIBUTION_CHAIN) {
+            errorCount++;
+        } else {
+            atomDecl->primaryFields.push_back(FIRST_UID_IN_CHAIN_ID);
+        }
+    }
+
+    if (field->options().GetExtension(os::statsd::state_field_option).option() ==
         os::statsd::StateField::EXCLUSIVE) {
         if (javaType == JAVA_TYPE_UNKNOWN ||
             javaType == JAVA_TYPE_ATTRIBUTION_CHAIN ||

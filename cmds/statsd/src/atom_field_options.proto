@@ -30,6 +30,8 @@ enum StateField {
     PRIMARY = 1;
     // The field that represents the state. It's an exclusive state.
     EXCLUSIVE = 2;
+
+    PRIMARY_FIELD_FIRST_UID = 3;
 }
 
 // Used to annotate an atom that reprsents a state change. A state change atom must have exactly ONE

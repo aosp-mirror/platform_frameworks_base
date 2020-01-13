@@ -76,6 +76,23 @@ std::shared_ptr<LogEvent> buildUidProcessEvent(int uid, int state) {
     return event;
 }
 
+// State with first uid in attribution chain as primary field - WakelockStateChanged
+std::shared_ptr<LogEvent> buildPartialWakelockEvent(int uid, const std::string& tag, bool acquire) {
+    std::vector<AttributionNodeInternal> chain;
+    chain.push_back(AttributionNodeInternal());
+    AttributionNodeInternal& attr = chain.back();
+    attr.set_uid(uid);
+
+    std::shared_ptr<LogEvent> event =
+            std::make_shared<LogEvent>(android::util::WAKELOCK_STATE_CHANGED, 1000 /* timestamp */);
+    event->write(chain);
+    event->write((int32_t)1);  // PARTIAL_WAKE_LOCK
+    event->write(tag);
+    event->write(acquire ? 1 : 0);
+    event->init();
+    return event;
+}
+
 // State with multiple primary fields - OverlayStateChanged
 std::shared_ptr<LogEvent> buildOverlayEvent(int uid, const std::string& packageName, int state) {
     std::shared_ptr<LogEvent> event =
@@ -133,6 +150,39 @@ void getOverlayKey(int uid, string packageName, HashableDimensionKey* key) {
 
     key->addValue(FieldValue(field1, value1));
     key->addValue(FieldValue(field2, value2));
+}
+
+void getPartialWakelockKey(int uid, const std::string& tag, HashableDimensionKey* key) {
+    int pos1[] = {1, 1, 1};
+    int pos3[] = {2, 0, 0};
+    int pos4[] = {3, 0, 0};
+
+    Field field1(10 /* atom id */, pos1, 2 /* depth */);
+
+    Field field3(10 /* atom id */, pos3, 0 /* depth */);
+    Field field4(10 /* atom id */, pos4, 0 /* depth */);
+
+    Value value1((int32_t)uid);
+    Value value3((int32_t)1 /*partial*/);
+    Value value4(tag);
+
+    key->addValue(FieldValue(field1, value1));
+    key->addValue(FieldValue(field3, value3));
+    key->addValue(FieldValue(field4, value4));
+}
+
+void getPartialWakelockKey(int uid, HashableDimensionKey* key) {
+    int pos1[] = {1, 1, 1};
+    int pos3[] = {2, 0, 0};
+
+    Field field1(10 /* atom id */, pos1, 2 /* depth */);
+    Field field3(10 /* atom id */, pos3, 0 /* depth */);
+
+    Value value1((int32_t)uid);
+    Value value3((int32_t)1 /*partial*/);
+
+    key->addValue(FieldValue(field1, value1));
+    key->addValue(FieldValue(field3, value3));
 }
 // END: get primary key functions
 
@@ -247,7 +297,8 @@ TEST(StateTrackerTest, TestStateChangeNoPrimaryFields) {
 
     // check StateTracker was updated by querying for state
     HashableDimensionKey queryKey = DEFAULT_DIMENSION_KEY;
-    EXPECT_EQ(2, getStateInt(mgr, android::util::SCREEN_STATE_CHANGED, queryKey));
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+              getStateInt(mgr, android::util::SCREEN_STATE_CHANGED, queryKey));
 }
 
 /**
@@ -272,7 +323,46 @@ TEST(StateTrackerTest, TestStateChangeOnePrimaryField) {
     // check StateTracker was updated by querying for state
     HashableDimensionKey queryKey;
     getUidProcessKey(1000 /* uid */, &queryKey);
-    EXPECT_EQ(1002, getStateInt(mgr, android::util::UID_PROCESS_STATE_CHANGED, queryKey));
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_TOP,
+              getStateInt(mgr, android::util::UID_PROCESS_STATE_CHANGED, queryKey));
+}
+
+TEST(StateTrackerTest, TestStateChangePrimaryFieldAttrChain) {
+    sp<TestStateListener> listener1 = new TestStateListener();
+    StateManager mgr;
+    mgr.registerListener(android::util::WAKELOCK_STATE_CHANGED, listener1);
+
+    // Log event.
+    std::shared_ptr<LogEvent> event =
+            buildPartialWakelockEvent(1001 /* uid */, "tag1", false /* acquire */);
+    mgr.onLogEvent(*event);
+
+    EXPECT_EQ(1, mgr.getStateTrackersCount());
+    EXPECT_EQ(1, mgr.getListenersCount(android::util::WAKELOCK_STATE_CHANGED));
+
+    // Check listener was updated.
+    EXPECT_EQ(1, listener1->updates.size());
+    EXPECT_EQ(3, listener1->updates[0].mKey.getValues().size());
+    EXPECT_EQ(1001, listener1->updates[0].mKey.getValues()[0].mValue.int_value);
+    EXPECT_EQ(1, listener1->updates[0].mKey.getValues()[1].mValue.int_value);
+    EXPECT_EQ("tag1", listener1->updates[0].mKey.getValues()[2].mValue.str_value);
+    EXPECT_EQ(WakelockStateChanged::RELEASE, listener1->updates[0].mState);
+
+    // Check StateTracker was updated by querying for state.
+    HashableDimensionKey queryKey;
+    getPartialWakelockKey(1001 /* uid */, "tag1", &queryKey);
+    EXPECT_EQ(WakelockStateChanged::RELEASE,
+              getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey));
+
+    // No state stored for this query key.
+    HashableDimensionKey queryKey2;
+    getPartialWakelockKey(1002 /* uid */, "tag1", &queryKey2);
+    EXPECT_EQ(-1, getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey2));
+
+    // Partial query fails.
+    HashableDimensionKey queryKey3;
+    getPartialWakelockKey(1001 /* uid */, &queryKey3);
+    EXPECT_EQ(-1, getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey3));
 }
 
 /**
@@ -297,7 +387,8 @@ TEST(StateTrackerTest, TestStateChangeMultiplePrimaryFields) {
     // check StateTracker was updated by querying for state
     HashableDimensionKey queryKey;
     getOverlayKey(1000 /* uid */, "package1", &queryKey);
-    EXPECT_EQ(1, getStateInt(mgr, android::util::OVERLAY_STATE_CHANGED, queryKey));
+    EXPECT_EQ(OverlayStateChanged::ENTERED,
+              getStateInt(mgr, android::util::OVERLAY_STATE_CHANGED, queryKey));
 }
 
 /**
@@ -326,10 +417,12 @@ TEST(StateTrackerTest, TestStateQuery) {
     sp<TestStateListener> listener1 = new TestStateListener();
     sp<TestStateListener> listener2 = new TestStateListener();
     sp<TestStateListener> listener3 = new TestStateListener();
+    sp<TestStateListener> listener4 = new TestStateListener();
     StateManager mgr;
     mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener1);
     mgr.registerListener(android::util::UID_PROCESS_STATE_CHANGED, listener2);
     mgr.registerListener(android::util::OVERLAY_STATE_CHANGED, listener3);
+    mgr.registerListener(android::util::WAKELOCK_STATE_CHANGED, listener4);
 
     std::shared_ptr<LogEvent> event1 = buildUidProcessEvent(
             1000,
@@ -346,8 +439,12 @@ TEST(StateTrackerTest, TestStateQuery) {
             android::app::ProcessStateEnum::PROCESS_STATE_TOP);  //  state value: 1002
     std::shared_ptr<LogEvent> event5 =
             buildScreenEvent(android::view::DisplayStateEnum::DISPLAY_STATE_ON);
-    std::shared_ptr<LogEvent> event6 = buildOverlayEvent(1000, "package1", 1);
-    std::shared_ptr<LogEvent> event7 = buildOverlayEvent(1000, "package2", 2);
+    std::shared_ptr<LogEvent> event6 =
+            buildOverlayEvent(1000, "package1", OverlayStateChanged::ENTERED);
+    std::shared_ptr<LogEvent> event7 =
+            buildOverlayEvent(1000, "package2", OverlayStateChanged::EXITED);
+    std::shared_ptr<LogEvent> event8 = buildPartialWakelockEvent(1005, "tag1", true);
+    std::shared_ptr<LogEvent> event9 = buildPartialWakelockEvent(1005, "tag2", false);
 
     mgr.onLogEvent(*event1);
     mgr.onLogEvent(*event2);
@@ -356,11 +453,14 @@ TEST(StateTrackerTest, TestStateQuery) {
     mgr.onLogEvent(*event5);
     mgr.onLogEvent(*event6);
     mgr.onLogEvent(*event7);
+    mgr.onLogEvent(*event8);
+    mgr.onLogEvent(*event9);
 
     // Query for UidProcessState of uid 1001
     HashableDimensionKey queryKey1;
     getUidProcessKey(1001, &queryKey1);
-    EXPECT_EQ(1003, getStateInt(mgr, android::util::UID_PROCESS_STATE_CHANGED, queryKey1));
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_FOREGROUND_SERVICE,
+              getStateInt(mgr, android::util::UID_PROCESS_STATE_CHANGED, queryKey1));
 
     // Query for UidProcessState of uid 1004 - not in state map
     HashableDimensionKey queryKey2;
@@ -370,15 +470,30 @@ TEST(StateTrackerTest, TestStateQuery) {
 
     // Query for UidProcessState of uid 1001 - after change in state
     mgr.onLogEvent(*event4);
-    EXPECT_EQ(1002, getStateInt(mgr, android::util::UID_PROCESS_STATE_CHANGED, queryKey1));
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_TOP,
+              getStateInt(mgr, android::util::UID_PROCESS_STATE_CHANGED, queryKey1));
 
     // Query for ScreenState
-    EXPECT_EQ(2, getStateInt(mgr, android::util::SCREEN_STATE_CHANGED, DEFAULT_DIMENSION_KEY));
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+              getStateInt(mgr, android::util::SCREEN_STATE_CHANGED, DEFAULT_DIMENSION_KEY));
 
     // Query for OverlayState of uid 1000, package name "package2"
     HashableDimensionKey queryKey3;
     getOverlayKey(1000, "package2", &queryKey3);
-    EXPECT_EQ(2, getStateInt(mgr, android::util::OVERLAY_STATE_CHANGED, queryKey3));
+    EXPECT_EQ(OverlayStateChanged::EXITED,
+              getStateInt(mgr, android::util::OVERLAY_STATE_CHANGED, queryKey3));
+
+    // Query for WakelockState of uid 1005, tag 2
+    HashableDimensionKey queryKey4;
+    getPartialWakelockKey(1005, "tag2", &queryKey4);
+    EXPECT_EQ(WakelockStateChanged::RELEASE,
+              getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey4));
+
+    // Query for WakelockState of uid 1005, tag 1
+    HashableDimensionKey queryKey5;
+    getPartialWakelockKey(1005, "tag1", &queryKey5);
+    EXPECT_EQ(WakelockStateChanged::ACQUIRE,
+              getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey5));
 }
 
 }  // namespace statsd

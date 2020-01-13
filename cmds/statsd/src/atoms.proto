@@ -908,14 +908,16 @@ message CameraStateChanged {
  *   TODO
  */
 message WakelockStateChanged {
-    repeated AttributionNode attribution_node = 1;
+    repeated AttributionNode attribution_node = 1
+            [(state_field_option).option = PRIMARY_FIELD_FIRST_UID];
 
     // The type (level) of the wakelock; e.g. a partial wakelock or a full wakelock.
     // From frameworks/base/core/proto/android/os/enums.proto.
-    optional android.os.WakeLockLevelEnum type = 2;
+    optional android.os.WakeLockLevelEnum type = 2 [(state_field_option).option = PRIMARY];
+    ;
 
     // The wakelock tag (Called tag in the Java API, sometimes name elsewhere).
-    optional string tag = 3;
+    optional string tag = 3 [(state_field_option).option = PRIMARY];
 
     enum State {
         RELEASE = 0;
@@ -923,7 +925,7 @@ message WakelockStateChanged {
         CHANGE_RELEASE = 2;
         CHANGE_ACQUIRE = 3;
     }
-    optional State state = 4;
+    optional State state = 4 [(state_field_option).option = EXCLUSIVE];
 }
 
 /**
