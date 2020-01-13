@@ -288,6 +288,7 @@
     <!-- Dimensions related to screenshots -->
 
     <!-- The padding on the global screenshot background image -->
+    <dimen name="global_screenshot_legacy_bg_padding">20dp</dimen>
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
     <dimen name="screenshot_action_container_corner_radius">10dp</dimen>
     <dimen name="screenshot_action_container_padding">20dp</dimen>
