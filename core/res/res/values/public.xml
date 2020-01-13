@@ -3030,6 +3030,8 @@
       <public name="config_defaultCallRedirection" />
       <!-- @hide @SystemApi -->
       <public name="config_defaultCallScreening" />
+      <!-- @hide @SystemApi @TestApi -->
+      <public name="config_systemGallery" />
     </public-group>
 
     <public-group type="bool" first-id="0x01110005">
