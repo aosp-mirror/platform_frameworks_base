@@ -49,6 +49,9 @@
         <item>"bt-pan"</item>
     </string-array>
 
+    <!-- Use the old dnsmasq DHCP server for tethering instead of the framework implementation. -->
+    <bool translatable="false" name="config_tether_enable_legacy_dhcp_server">false</bool>
+
     <!-- Dhcp range (min, max) to use for tethering purposes -->
     <string-array translatable="false" name="config_tether_dhcp_range">
     </string-array>

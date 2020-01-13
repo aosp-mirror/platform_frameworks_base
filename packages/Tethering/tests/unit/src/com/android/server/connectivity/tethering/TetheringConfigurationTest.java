@@ -21,40 +21,44 @@ import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
 import static android.net.ConnectivityManager.TYPE_WIFI;
-import static android.provider.Settings.Global.TETHER_ENABLE_LEGACY_DHCP_SERVER;
+import static android.provider.DeviceConfig.NAMESPACE_CONNECTIVITY;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.internal.R.array.config_mobile_hotspot_provision_app;
 import static com.android.internal.R.array.config_tether_bluetooth_regexs;
 import static com.android.internal.R.array.config_tether_dhcp_range;
 import static com.android.internal.R.array.config_tether_upstream_types;
 import static com.android.internal.R.array.config_tether_usb_regexs;
 import static com.android.internal.R.array.config_tether_wifi_regexs;
+import static com.android.networkstack.tethering.R.bool.config_tether_enable_legacy_dhcp_server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.util.SharedLog;
-import android.provider.Settings;
+import android.provider.DeviceConfig;
 import android.telephony.TelephonyManager;
-import android.test.mock.MockContentResolver;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
-import com.android.internal.util.test.FakeSettingsProvider;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -69,9 +73,10 @@ public class TetheringConfigurationTest {
     @Mock private TelephonyManager mTelephonyManager;
     @Mock private Resources mResources;
     @Mock private Resources mResourcesForSubId;
-    private MockContentResolver mContentResolver;
     private Context mMockContext;
     private boolean mHasTelephonyManager;
+    private boolean mEnableLegacyDhcpServer;
+    private MockitoSession mMockingSession;
 
     private class MockTetheringConfiguration extends TetheringConfiguration {
         MockTetheringConfiguration(Context ctx, SharedLog log, int id) {
@@ -101,16 +106,20 @@ public class TetheringConfigurationTest {
             }
             return super.getSystemService(name);
         }
-
-        @Override
-        public ContentResolver getContentResolver() {
-            return mContentResolver;
-        }
     }
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        // TODO: use a dependencies class instead of mock statics.
+        mMockingSession = mockitoSession()
+                .initMocks(this)
+                .mockStatic(DeviceConfig.class)
+                .strictness(Strictness.WARN)
+                .startMocking();
+        doReturn(false).when(
+                () -> DeviceConfig.getBoolean(eq(NAMESPACE_CONNECTIVITY),
+                eq(TetheringConfiguration.TETHER_ENABLE_LEGACY_DHCP_SERVER), anyBoolean()));
+
         when(mResources.getStringArray(config_tether_dhcp_range)).thenReturn(new String[0]);
         when(mResources.getStringArray(config_tether_usb_regexs)).thenReturn(new String[0]);
         when(mResources.getStringArray(config_tether_wifi_regexs))
@@ -119,10 +128,15 @@ public class TetheringConfigurationTest {
         when(mResources.getIntArray(config_tether_upstream_types)).thenReturn(new int[0]);
         when(mResources.getStringArray(config_mobile_hotspot_provision_app))
                 .thenReturn(new String[0]);
-        mContentResolver = new MockContentResolver();
-        mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
+        when(mResources.getBoolean(config_tether_enable_legacy_dhcp_server)).thenReturn(false);
         mHasTelephonyManager = true;
         mMockContext = new MockContext(mContext);
+        mEnableLegacyDhcpServer = false;
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mMockingSession.finishMocking();
     }
 
     private TetheringConfiguration getTetheringConfiguration(int... legacyTetherUpstreamTypes) {
@@ -268,19 +282,35 @@ public class TetheringConfigurationTest {
 
     @Test
     public void testNewDhcpServerDisabled() {
-        Settings.Global.putInt(mContentResolver, TETHER_ENABLE_LEGACY_DHCP_SERVER, 1);
+        when(mResources.getBoolean(config_tether_enable_legacy_dhcp_server)).thenReturn(true);
+        doReturn(false).when(
+                () -> DeviceConfig.getBoolean(eq(NAMESPACE_CONNECTIVITY),
+                eq(TetheringConfiguration.TETHER_ENABLE_LEGACY_DHCP_SERVER), anyBoolean()));
 
-        final TetheringConfiguration cfg = new TetheringConfiguration(
-                mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
-        assertTrue(cfg.enableLegacyDhcpServer);
+        final TetheringConfiguration enableByRes =
+                new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
+        assertTrue(enableByRes.enableLegacyDhcpServer);
+
+        when(mResources.getBoolean(config_tether_enable_legacy_dhcp_server)).thenReturn(false);
+        doReturn(true).when(
+                () -> DeviceConfig.getBoolean(eq(NAMESPACE_CONNECTIVITY),
+                eq(TetheringConfiguration.TETHER_ENABLE_LEGACY_DHCP_SERVER), anyBoolean()));
+
+        final TetheringConfiguration enableByDevConfig =
+                new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
+        assertTrue(enableByDevConfig.enableLegacyDhcpServer);
     }
 
     @Test
     public void testNewDhcpServerEnabled() {
-        Settings.Global.putInt(mContentResolver, TETHER_ENABLE_LEGACY_DHCP_SERVER, 0);
+        when(mResources.getBoolean(config_tether_enable_legacy_dhcp_server)).thenReturn(false);
+        doReturn(false).when(
+                () -> DeviceConfig.getBoolean(eq(NAMESPACE_CONNECTIVITY),
+                eq(TetheringConfiguration.TETHER_ENABLE_LEGACY_DHCP_SERVER), anyBoolean()));
 
-        final TetheringConfiguration cfg = new TetheringConfiguration(
-                mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
+        final TetheringConfiguration cfg =
+                new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
+
         assertFalse(cfg.enableLegacyDhcpServer);
     }
 
