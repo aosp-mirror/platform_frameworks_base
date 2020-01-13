@@ -107,7 +107,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.State;
@@ -663,19 +662,19 @@ public class Tethering {
 
         if (usbTethered) {
             if (wifiTethered || bluetoothTethered) {
-                showTetheredNotification(SystemMessage.NOTE_TETHER_GENERAL);
+                showTetheredNotification(R.drawable.stat_sys_tether_general);
             } else {
-                showTetheredNotification(SystemMessage.NOTE_TETHER_USB);
+                showTetheredNotification(R.drawable.stat_sys_tether_usb);
             }
         } else if (wifiTethered) {
             if (bluetoothTethered) {
-                showTetheredNotification(SystemMessage.NOTE_TETHER_GENERAL);
+                showTetheredNotification(R.drawable.stat_sys_tether_general);
             } else {
                 /* We now have a status bar icon for WifiTethering, so drop the notification */
                 clearTetheredNotification();
             }
         } else if (bluetoothTethered) {
-            showTetheredNotification(SystemMessage.NOTE_TETHER_BLUETOOTH);
+            showTetheredNotification(R.drawable.stat_sys_tether_bluetooth);
         } else {
             clearTetheredNotification();
         }
@@ -688,7 +687,8 @@ public class Tethering {
     @VisibleForTesting
     protected void showTetheredNotification(int id, boolean tetheringOn) {
         NotificationManager notificationManager =
-                (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                (NotificationManager) mContext.createContextAsUser(UserHandle.ALL, 0)
+                        .getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager == null) {
             return;
         }
@@ -698,26 +698,11 @@ public class Tethering {
                 NotificationManager.IMPORTANCE_LOW);
         notificationManager.createNotificationChannel(channel);
 
-        int icon = 0;
-        switch(id) {
-            case SystemMessage.NOTE_TETHER_USB:
-                icon = R.drawable.stat_sys_tether_usb;
-                break;
-            case SystemMessage.NOTE_TETHER_BLUETOOTH:
-                icon = R.drawable.stat_sys_tether_bluetooth;
-                break;
-            case SystemMessage.NOTE_TETHER_GENERAL:
-            default:
-                icon = R.drawable.stat_sys_tether_general;
-                break;
-        }
-
         if (mLastNotificationId != 0) {
-            if (mLastNotificationId == icon) {
+            if (mLastNotificationId == id) {
                 return;
             }
-            notificationManager.cancelAsUser(null, mLastNotificationId,
-                    UserHandle.ALL);
+            notificationManager.cancel(null, mLastNotificationId);
             mLastNotificationId = 0;
         }
 
@@ -725,8 +710,8 @@ public class Tethering {
         intent.setClassName("com.android.settings", "com.android.settings.TetherSettings");
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
-        PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0, intent, 0,
-                null, UserHandle.CURRENT);
+        PendingIntent pi = PendingIntent.getActivity(
+                mContext.createContextAsUser(UserHandle.CURRENT, 0), 0, intent, 0, null);
 
         Resources r = mContext.getResources();
         final CharSequence title;
@@ -749,23 +734,23 @@ public class Tethering {
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
                     .setCategory(Notification.CATEGORY_STATUS);
         }
-        mTetheredNotificationBuilder.setSmallIcon(icon)
+        mTetheredNotificationBuilder.setSmallIcon(id)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setContentIntent(pi);
         mLastNotificationId = id;
 
-        notificationManager.notifyAsUser(null, mLastNotificationId,
-                mTetheredNotificationBuilder.buildInto(new Notification()), UserHandle.ALL);
+        notificationManager.notify(null, mLastNotificationId,
+                mTetheredNotificationBuilder.buildInto(new Notification()));
     }
 
     @VisibleForTesting
     protected void clearTetheredNotification() {
         NotificationManager notificationManager =
-                (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                (NotificationManager) mContext.createContextAsUser(UserHandle.ALL, 0)
+                        .getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null && mLastNotificationId != 0) {
-            notificationManager.cancelAsUser(null, mLastNotificationId,
-                    UserHandle.ALL);
+            notificationManager.cancel(null, mLastNotificationId);
             mLastNotificationId = 0;
         }
     }
