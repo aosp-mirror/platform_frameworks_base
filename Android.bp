@@ -348,7 +348,6 @@ java_library {
         "android.hardware.vibrator-V1.1-java",
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.vibrator-V1.3-java",
-        "android.hardware.wifi-V1.0-java-constants",
         "devicepolicyprotosnano",
 
         "com.android.sysprop.apex",
@@ -506,7 +505,10 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-all-sources"],
     installable: false,
-    static_libs: ["exoplayer2-core"],
+    static_libs: [
+        "exoplayer2-core",
+        "android.hardware.wifi-V1.0-java-constants",
+     ],
     apex_available: ["//apex_available:platform"],
 }
 
@@ -604,17 +606,22 @@ gensrcs {
 filegroup {
     name: "framework-annotations",
     srcs: [
+        "core/java/android/annotation/CallbackExecutor.java",
+        "core/java/android/annotation/CheckResult.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
         "core/java/android/annotation/NonNull.java",
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/RequiresPermission.java",
         "core/java/android/annotation/SdkConstant.java",
+        "core/java/android/annotation/StringDef.java",
         "core/java/android/annotation/SystemApi.java",
+        "core/java/android/annotation/SystemService.java",
         "core/java/android/annotation/TestApi.java",
         "core/java/android/annotation/UnsupportedAppUsage.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
         "core/java/com/android/internal/annotations/VisibleForTesting.java",
+        "core/java/com/android/internal/annotations/Immutable.java",
     ],
 }
 
@@ -1148,13 +1155,36 @@ filegroup {
     ],
 }
 
+// utility classes statically linked into framework-wifi and dynamically linked
+// into wifi-service
+java_library {
+    name: "framework-wifi-util-lib",
+    sdk_version: "core_current",
+    srcs: [
+        "core/java/android/content/pm/BaseParceledListSlice.java",
+        "core/java/android/content/pm/ParceledListSlice.java",
+        "core/java/android/net/shared/Inet4AddressUtils.java",
+        "core/java/android/os/HandlerExecutor.java",
+        "core/java/com/android/internal/util/AsyncChannel.java",
+        "core/java/com/android/internal/util/AsyncService.java",
+        "core/java/com/android/internal/util/Protocol.java",
+        "core/java/com/android/internal/util/Preconditions.java",
+        "telephony/java/android/telephony/Annotation.java",
+    ],
+    libs: [
+        "framework-annotations-lib",
+        "unsupportedappusage",
+        "android_system_stubs_current",
+    ],
+    visibility: ["//frameworks/base/wifi"],
+}
+
+// utility classes statically linked into wifi-service
 filegroup {
     name: "framework-wifi-service-shared-srcs",
     srcs: [
-        ":framework-annotations",
         "core/java/android/net/InterfaceConfiguration.java",
         "core/java/android/os/BasicShellCommandHandler.java",
-        "core/java/android/os/HandlerExecutor.java",
         "core/java/android/util/BackupUtils.java",
         "core/java/android/util/LocalLog.java",
         "core/java/android/util/Rational.java",
@@ -1162,7 +1192,6 @@ filegroup {
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IState.java",
         "core/java/com/android/internal/util/MessageUtils.java",
-        "core/java/com/android/internal/util/Preconditions.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
