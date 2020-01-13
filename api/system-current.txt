@@ -4567,6 +4567,10 @@ package android.net {
     field public final android.net.RssiCurve rssiCurve;
   }
 
+  public abstract class SocketKeepalive implements java.lang.AutoCloseable {
+    field public static final int SUCCESS = 0; // 0x0
+  }
+
   public final class StaticIpConfiguration implements android.os.Parcelable {
     ctor public StaticIpConfiguration();
     ctor public StaticIpConfiguration(@Nullable android.net.StaticIpConfiguration);
