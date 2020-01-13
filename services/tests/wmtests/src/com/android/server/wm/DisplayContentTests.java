@@ -995,6 +995,35 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testApplyTopFixedRotationTransform() {
+        mWm.mIsFixedRotationTransformEnabled = true;
+        final Configuration config90 = new Configuration();
+        mDisplayContent.getDisplayRotation().setRotation(ROTATION_90);
+        mDisplayContent.computeScreenConfiguration(config90);
+        mDisplayContent.onRequestedOverrideConfigurationChanged(config90);
+
+        final Configuration config = new Configuration();
+        mDisplayContent.getDisplayRotation().setRotation(Surface.ROTATION_0);
+        mDisplayContent.computeScreenConfiguration(config);
+        mDisplayContent.onRequestedOverrideConfigurationChanged(config);
+
+        final ActivityRecord app = mAppWindow.mActivityRecord;
+        mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_OPEN,
+                false /* alwaysKeepCurrent */);
+        mDisplayContent.mOpeningApps.add(app);
+        app.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+        assertTrue(app.isFixedRotationTransforming());
+        assertEquals(config.orientation, mDisplayContent.getConfiguration().orientation);
+        assertEquals(config90.orientation, app.getConfiguration().orientation);
+
+        mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app.token);
+
+        assertFalse(app.hasFixedRotationTransform());
+        assertEquals(config90.orientation, mDisplayContent.getConfiguration().orientation);
+    }
+
+    @Test
     public void testRemoteRotation() {
         DisplayContent dc = createNewDisplay();
 

@@ -484,9 +484,11 @@ public class DisplayRotation {
             prepareNormalRotationAnimation();
         }
 
-        // The display is frozen now, give a remote handler (system ui) some time to reposition
-        // things.
-        startRemoteRotation(oldRotation, mRotation);
+        // TODO(b/147469351): Remove the restriction.
+        if (mDisplayContent.mFixedRotationLaunchingApp == null) {
+            // Give a remote handler (system ui) some time to reposition things.
+            startRemoteRotation(oldRotation, mRotation);
+        }
 
         return true;
     }
@@ -557,7 +559,15 @@ public class DisplayRotation {
     @VisibleForTesting
     boolean shouldRotateSeamlessly(int oldRotation, int newRotation, boolean forceUpdate) {
         final WindowState w = mDisplayPolicy.getTopFullscreenOpaqueWindow();
-        if (w == null || w != mDisplayContent.mCurrentFocus) {
+        if (w == null) {
+            return false;
+        }
+        // Display doesn't need to be frozen because application has been started in correct
+        // rotation already, so the rest of the windows can use seamless rotation.
+        if (w.mToken.hasFixedRotationTransform()) {
+            return true;
+        }
+        if (w != mDisplayContent.mCurrentFocus) {
             return false;
         }
         // We only enable seamless rotation if the top window has requested it and is in the

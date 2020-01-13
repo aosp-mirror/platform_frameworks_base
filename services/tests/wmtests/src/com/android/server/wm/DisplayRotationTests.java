@@ -638,7 +638,7 @@ public class DisplayRotationTests {
         mBuilder.build();
 
         final WindowState win = mock(WindowState.class);
-        win.mActivityRecord = mock(ActivityRecord.class);
+        win.mToken = win.mActivityRecord = mock(ActivityRecord.class);
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams();
         attrs.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 
