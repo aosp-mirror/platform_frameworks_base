@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
@@ -2970,7 +2971,7 @@ class PackageManagerShellCommand extends ShellCommand {
             // 1. Single file from stdin.
             if (args.isEmpty() || STDIN_PATH.equals(args.get(0))) {
                 String name = "base." + (isApex ? "apex" : "apk");
-                session.addFile(name, sessionSizeBytes, STDIN_PATH_BYTES);
+                session.addFile(LOCATION_DATA_APP, name, sessionSizeBytes, STDIN_PATH_BYTES, null);
                 return 0;
             }
 
@@ -2994,7 +2995,7 @@ class PackageManagerShellCommand extends ShellCommand {
                         return 1;
                     }
 
-                    session.addFile(name, sizeBytes, STDIN_PATH_BYTES);
+                    session.addFile(LOCATION_DATA_APP, name, sizeBytes, STDIN_PATH_BYTES, null);
                     continue;
                 }
 
@@ -3004,7 +3005,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 String name = new File(inPath).getName();
                 byte[] metadata = inPath.getBytes(StandardCharsets.UTF_8);
 
-                session.addFile(name, -1, metadata);
+                session.addFile(LOCATION_DATA_APP, name, -1, metadata, null);
             }
             return 0;
         } finally {
