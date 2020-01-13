@@ -105,8 +105,7 @@ public class RuleBinaryParser implements RuleParser {
             bitTrackedInputStream.setCursorToByteLocation(range.getStartIndex());
 
             // Read the rules until we reach the end index.
-            while (bitTrackedInputStream.hasNext()
-                    && bitTrackedInputStream.getReadBitsCount() < range.getEndIndex()) {
+            while (bitTrackedInputStream.canReadMoreRules(range.getEndIndex())) {
                 if (bitTrackedInputStream.getNext(SIGNAL_BIT) == 1) {
                     parsedRules.add(parseRule(bitTrackedInputStream));
                 }

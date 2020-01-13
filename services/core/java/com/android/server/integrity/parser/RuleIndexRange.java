@@ -23,28 +23,28 @@ import android.annotation.Nullable;
  * RuleIndexingController}.
  */
 public class RuleIndexRange {
-    private static int sStartIndex;
-    private static int sEndIndex;
+    private int mStartIndex;
+    private int mEndIndex;
 
     /** Constructor with start and end indexes. */
     public RuleIndexRange(int startIndex, int endIndex) {
-        this.sStartIndex = startIndex;
-        this.sEndIndex = endIndex;
+        this.mStartIndex = startIndex;
+        this.mEndIndex = endIndex;
     }
 
     /** Returns the startIndex. */
     public int getStartIndex() {
-        return sStartIndex;
+        return mStartIndex;
     }
 
     /** Returns the end index. */
     public int getEndIndex() {
-        return sEndIndex;
+        return mEndIndex;
     }
 
     @Override
     public boolean equals(@Nullable Object object) {
-        return sStartIndex == ((RuleIndexRange) object).getStartIndex()
-                && sEndIndex == ((RuleIndexRange) object).getEndIndex();
+        return mStartIndex == ((RuleIndexRange) object).getStartIndex()
+                && mEndIndex == ((RuleIndexRange) object).getEndIndex();
     }
 }

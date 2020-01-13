@@ -135,15 +135,14 @@ public class RuleBinarySerializerTest {
                 .isEqualTo(expectedRuleOutputStream.toByteArray());
 
         ByteArrayOutputStream expectedIndexingOutputStream = new ByteArrayOutputStream();
+        String serializedIndexingBytes =
+                SERIALIZED_START_INDEXING_KEY
+                        + getBits(DEFAULT_FORMAT_VERSION_BYTES.length, /* numOfBits= */ 32)
+                        + SERIALIZED_END_INDEXING_KEY
+                        + getBits(DEFAULT_FORMAT_VERSION_BYTES.length, /* numOfBits= */32);
         byte[] expectedIndexingBytes =
-                getBytes(
-                        SERIALIZED_START_INDEXING_KEY
-                                + getBits(DEFAULT_FORMAT_VERSION_BYTES.length, /* numOfBits= */ 32)
-                                + SERIALIZED_END_INDEXING_KEY
-                                + getBits(DEFAULT_FORMAT_VERSION_BYTES.length, /* numOfBits= */
-                                32));
-        expectedIndexingOutputStream.write(expectedIndexingBytes);
-        expectedIndexingOutputStream.write(expectedIndexingBytes);
+                getBytes(serializedIndexingBytes + serializedIndexingBytes
+                        + serializedIndexingBytes + getBits(1, 1));
         expectedIndexingOutputStream.write(expectedIndexingBytes);
         assertThat(indexingOutputStream.toByteArray())
                 .isEqualTo(expectedIndexingOutputStream.toByteArray());
@@ -197,15 +196,16 @@ public class RuleBinarySerializerTest {
                         + getBits(DEFAULT_FORMAT_VERSION_BYTES.length, /* numOfBits= */ 32)
                         + SERIALIZED_END_INDEXING_KEY
                         + getBits(DEFAULT_FORMAT_VERSION_BYTES.length, /* numOfBits= */ 32);
-        expectedIndexingOutputStream.write(getBytes(expectedIndexingBitsForIndexed));
-        expectedIndexingOutputStream.write(getBytes(expectedIndexingBitsForIndexed));
         String expectedIndexingBitsForUnindexed =
                 SERIALIZED_START_INDEXING_KEY
                         + getBits(DEFAULT_FORMAT_VERSION_BYTES.length, /* numOfBits= */ 32)
                         + SERIALIZED_END_INDEXING_KEY
-                        + getBits(DEFAULT_FORMAT_VERSION_BYTES.length + getBytes(
-                        expectedBits).length, /* numOfBits= */ 32);
-        expectedIndexingOutputStream.write(getBytes(expectedIndexingBitsForUnindexed));
+                        + getBits(DEFAULT_FORMAT_VERSION_BYTES.length
+                        + getBytes(expectedBits).length, /* numOfBits= */ 32);
+        expectedIndexingOutputStream.write(getBytes(
+                expectedIndexingBitsForIndexed + expectedIndexingBitsForIndexed
+                        + expectedIndexingBitsForUnindexed + getBits(1, 1)));
+
         assertThat(indexingOutputStream.toByteArray())
                 .isEqualTo(expectedIndexingOutputStream.toByteArray());
     }
@@ -564,7 +564,6 @@ public class RuleBinarySerializerTest {
         expectedIndexingBytesForPackageNameIndexed +=
                 SERIALIZED_END_INDEXING_KEY
                         + getBits(totalBytesWritten, /* numOfBits= */ 32);
-        expectedIndexingOutputStream.write(getBytes(expectedIndexingBytesForPackageNameIndexed));
 
         String expectedIndexingBytesForAppCertificateIndexed =
                 SERIALIZED_START_INDEXING_KEY
@@ -588,7 +587,6 @@ public class RuleBinarySerializerTest {
         expectedIndexingBytesForAppCertificateIndexed +=
                 SERIALIZED_END_INDEXING_KEY
                         + getBits(totalBytesWritten, /* numOfBits= */ 32);
-        expectedIndexingOutputStream.write(getBytes(expectedIndexingBytesForAppCertificateIndexed));
 
         String expectedIndexingBytesForUnindexed =
                 SERIALIZED_START_INDEXING_KEY
@@ -603,8 +601,11 @@ public class RuleBinarySerializerTest {
         expectedIndexingBytesForUnindexed +=
                 SERIALIZED_END_INDEXING_KEY
                         + getBits(totalBytesWritten, /* numOfBits= */ 32);
-        expectedIndexingOutputStream.write(getBytes(expectedIndexingBytesForUnindexed));
-
+        expectedIndexingOutputStream.write(
+                getBytes(expectedIndexingBytesForPackageNameIndexed
+                        + expectedIndexingBytesForAppCertificateIndexed
+                        + expectedIndexingBytesForUnindexed
+                        + getBits(1, 1)));
 
         assertThat(ruleOutputStream.toByteArray())
                 .isEqualTo(expectedOrderedRuleOutputStream.toByteArray());

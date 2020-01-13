@@ -121,6 +121,26 @@ public class BitTrackedInputStreamTest {
     }
 
     @Test
+    public void testBitTrackedInputStream_canReadMoreRules() throws IOException {
+        String packageName = "com.test.app";
+        byte[] testInput =
+                getBytes(
+                        IS_NOT_HASHED
+                                + getBits(packageName.length(), VALUE_SIZE_BITS)
+                                + getValueBits(packageName));
+
+        BitTrackedInputStream bitTrackedInputStream = new BitTrackedInputStream(testInput);
+        assertThat(bitTrackedInputStream.canReadMoreRules(2)).isTrue();
+
+        // Read until the string parameter.
+        String stringValue = BinaryFileOperations.getStringValue(bitTrackedInputStream);
+
+        // Verify that the read bytes are counted.
+        assertThat(stringValue).isEqualTo(packageName);
+        assertThat(bitTrackedInputStream.canReadMoreRules(2)).isFalse();
+    }
+
+    @Test
     public void testBitTrackedInputStream_moveCursorForwardFailsIfAlreadyRead() throws IOException {
         String packageName = "com.test.app";
         byte[] testInput =

@@ -56,7 +56,7 @@ public class RuleIndexingController {
      * read and evaluated.
      */
     public List<RuleIndexRange> identifyRulesToEvaluate(AppInstallMetadata appInstallMetadata) {
-        ArrayList<RuleIndexRange> indexRanges = new ArrayList();
+        List<RuleIndexRange> indexRanges = new ArrayList<>();
 
         // Add the range for package name indexes rules.
         indexRanges.add(
@@ -102,7 +102,7 @@ public class RuleIndexingController {
                         .collect(Collectors.toCollection(TreeSet::new));
 
         String minIndex = keyTreeSet.floor(searchedKey);
-        String maxIndex = keyTreeSet.ceiling(searchedKey);
+        String maxIndex = keyTreeSet.higher(searchedKey);
 
         return new RuleIndexRange(
                 indexMap.get(minIndex == null ? START_INDEXING_KEY : minIndex),

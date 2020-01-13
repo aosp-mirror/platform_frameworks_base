@@ -185,7 +185,7 @@ public class IntegrityFileManagerTest {
         List<Rule> rulesFetched = mIntegrityFileManager.readRules(appInstallMetadata);
 
         // Verify that we do not load all the rules and we have the necessary rules to evaluate.
-        assertThat(rulesFetched.size()).isEqualTo(170);
+        assertThat(rulesFetched.size()).isEqualTo(270);
         assertThat(rulesFetched)
                 .containsAllOf(
                         getPackageNameIndexedRule(installedPackageName),
