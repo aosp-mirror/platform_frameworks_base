@@ -182,7 +182,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * This avoids firing the global alert too often on devices with high transfer speeds and
      * high quota.
      */
-    private static final int PERFORM_POLL_DELAY_MS = 1000;
+    private static final int DEFAULT_PERFORM_POLL_DELAY_MS = 1000;
 
     private static final String TAG_NETSTATS_ERROR = "netstats_error";
 
@@ -226,6 +226,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      */
     public interface NetworkStatsSettings {
         public long getPollInterval();
+        public long getPollDelay();
         public boolean getSampleEnabled();
         public boolean getAugmentEnabled();
 
@@ -1116,7 +1117,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 // such a call pending; UID stats are handled during normal polling interval.
                 if (!mHandler.hasMessages(MSG_PERFORM_POLL_REGISTER_ALERT)) {
                     mHandler.sendEmptyMessageDelayed(MSG_PERFORM_POLL_REGISTER_ALERT,
-                            PERFORM_POLL_DELAY_MS);
+                            mSettings.getPollDelay());
                 }
             }
         }
@@ -1993,6 +1994,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         @Override
         public long getPollInterval() {
             return getGlobalLong(NETSTATS_POLL_INTERVAL, 30 * MINUTE_IN_MILLIS);
+        }
+        @Override
+        public long getPollDelay() {
+            return DEFAULT_PERFORM_POLL_DELAY_MS;
         }
         @Override
         public long getGlobalAlertBytes(long def) {
