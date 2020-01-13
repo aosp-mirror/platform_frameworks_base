@@ -5737,7 +5737,7 @@ public class Editor {
         private boolean mIsDraggingCursor;
 
         public void onTouchEvent(MotionEvent event) {
-            if (getSelectionController().isCursorBeingModified()) {
+            if (hasSelectionController() && getSelectionController().isCursorBeingModified()) {
                 return;
             }
             switch (event.getActionMasked()) {
