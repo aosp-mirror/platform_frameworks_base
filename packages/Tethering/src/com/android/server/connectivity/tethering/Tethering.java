@@ -50,6 +50,7 @@ import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANG
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
@@ -107,7 +108,6 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.State;
@@ -692,6 +692,12 @@ public class Tethering {
         if (notificationManager == null) {
             return;
         }
+        final NotificationChannel channel = new NotificationChannel(
+                "TETHERING_STATUS",
+                mContext.getResources().getString(R.string.notification_channel_tethering_status),
+                NotificationManager.IMPORTANCE_LOW);
+        notificationManager.createNotificationChannel(channel);
+
         int icon = 0;
         switch(id) {
             case SystemMessage.NOTE_TETHER_USB:
@@ -735,12 +741,11 @@ public class Tethering {
         }
 
         if (mTetheredNotificationBuilder == null) {
-            mTetheredNotificationBuilder = new Notification.Builder(mContext,
-                    SystemNotificationChannels.NETWORK_STATUS);
+            mTetheredNotificationBuilder = new Notification.Builder(mContext, channel.getId());
             mTetheredNotificationBuilder.setWhen(0)
                     .setOngoing(true)
                     .setColor(mContext.getColor(
-                            com.android.internal.R.color.system_notification_accent_color))
+                            android.R.color.system_notification_accent_color))
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
                     .setCategory(Notification.CATEGORY_STATUS);
         }
