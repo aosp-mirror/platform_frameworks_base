@@ -30,24 +30,24 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Describes a route session that is made when a media route is selected.
+ * Describes a routing session which is created when a media route is selected.
  * @hide
  */
-public final class RouteSessionInfo implements Parcelable {
+public final class RoutingSessionInfo implements Parcelable {
     @NonNull
-    public static final Creator<RouteSessionInfo> CREATOR =
-            new Creator<RouteSessionInfo>() {
+    public static final Creator<RoutingSessionInfo> CREATOR =
+            new Creator<RoutingSessionInfo>() {
                 @Override
-                public RouteSessionInfo createFromParcel(Parcel in) {
-                    return new RouteSessionInfo(in);
+                public RoutingSessionInfo createFromParcel(Parcel in) {
+                    return new RoutingSessionInfo(in);
                 }
                 @Override
-                public RouteSessionInfo[] newArray(int size) {
-                    return new RouteSessionInfo[size];
+                public RoutingSessionInfo[] newArray(int size) {
+                    return new RoutingSessionInfo[size];
                 }
             };
 
-    public static final String TAG = "RouteSessionInfo";
+    private static final String TAG = "RoutingSessionInfo";
 
     final String mId;
     final String mClientPackageName;
@@ -61,7 +61,7 @@ public final class RouteSessionInfo implements Parcelable {
     @Nullable
     final Bundle mControlHints;
 
-    RouteSessionInfo(@NonNull Builder builder) {
+    RoutingSessionInfo(@NonNull Builder builder) {
         Objects.requireNonNull(builder, "builder must not be null.");
 
         mId = builder.mId;
@@ -82,7 +82,7 @@ public final class RouteSessionInfo implements Parcelable {
         mControlHints = builder.mControlHints;
     }
 
-    RouteSessionInfo(@NonNull Parcel src) {
+    RoutingSessionInfo(@NonNull Parcel src) {
         Objects.requireNonNull(src, "src must not be null.");
 
         mId = ensureString(src.readString());
@@ -228,11 +228,11 @@ public final class RouteSessionInfo implements Parcelable {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof RouteSessionInfo)) {
+        if (!(obj instanceof RoutingSessionInfo)) {
             return false;
         }
 
-        RouteSessionInfo other = (RouteSessionInfo) obj;
+        RoutingSessionInfo other = (RoutingSessionInfo) obj;
         return Objects.equals(mId, other.mId)
                 && Objects.equals(mClientPackageName, other.mClientPackageName)
                 && Objects.equals(mRouteFeature, other.mRouteFeature)
@@ -252,7 +252,7 @@ public final class RouteSessionInfo implements Parcelable {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder()
-                .append("RouteSessionInfo{ ")
+                .append("RoutingSessionInfo{ ")
                 .append("sessionId=").append(mId)
                 .append(", routeFeature=").append(mRouteFeature)
                 .append(", selectedRoutes={")
@@ -290,7 +290,7 @@ public final class RouteSessionInfo implements Parcelable {
     }
 
     /**
-     * Builder class for {@link RouteSessionInfo}.
+     * Builder class for {@link RoutingSessionInfo}.
      */
     public static final class Builder {
         final String mId;
@@ -304,10 +304,10 @@ public final class RouteSessionInfo implements Parcelable {
         Bundle mControlHints;
 
         /**
-         * Constructor for builder to create {@link RouteSessionInfo}.
+         * Constructor for builder to create {@link RoutingSessionInfo}.
          * <p>
          * In order to ensure ID uniqueness in {@link MediaRouter2} side, the value of
-         * {@link RouteSessionInfo#getId()} can be different from what was set in
+         * {@link RoutingSessionInfo#getId()} can be different from what was set in
          * {@link MediaRoute2ProviderService}.
          * </p>
          *
@@ -337,12 +337,12 @@ public final class RouteSessionInfo implements Parcelable {
         }
 
         /**
-         * Constructor for builder to create {@link RouteSessionInfo} with
-         * existing {@link RouteSessionInfo} instance.
+         * Constructor for builder to create {@link RoutingSessionInfo} with
+         * existing {@link RoutingSessionInfo} instance.
          *
          * @param sessionInfo the existing instance to copy data from.
          */
-        public Builder(@NonNull RouteSessionInfo sessionInfo) {
+        public Builder(@NonNull RoutingSessionInfo sessionInfo) {
             Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
             mId = sessionInfo.mId;
@@ -514,16 +514,16 @@ public final class RouteSessionInfo implements Parcelable {
         }
 
         /**
-         * Builds a route session info.
+         * Builds a routing session info.
          *
          * @throws IllegalArgumentException if no selected routes are added.
          */
         @NonNull
-        public RouteSessionInfo build() {
+        public RoutingSessionInfo build() {
             if (mSelectedRoutes.isEmpty()) {
                 throw new IllegalArgumentException("selectedRoutes must not be empty");
             }
-            return new RouteSessionInfo(this);
+            return new RoutingSessionInfo(this);
         }
     }
 }

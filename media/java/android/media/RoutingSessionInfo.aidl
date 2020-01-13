@@ -16,4 +16,4 @@
 
 package android.media;
 
-parcelable RouteSessionInfo;
+parcelable RoutingSessionInfo;

@@ -228,7 +228,7 @@ public class MediaRouterManagerTest {
         addRouterCallback(new MediaRouter2.RouteCallback());
         addSessionCallback(new SessionCallback() {
             @Override
-            public void onSessionCreated(MediaRouter2.RouteSessionController controller) {
+            public void onSessionCreated(MediaRouter2.RoutingController controller) {
                 if (createRouteMap(controller.getSelectedRoutes()).containsKey(ROUTE_ID1)) {
                     latch.countDown();
                 }
