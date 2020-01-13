@@ -72,7 +72,7 @@
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"スクリーンショットを保存中..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"スクリーンショットを保存しています..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"スクリーンショットを保存しました"</string>
-    <string name="screenshot_saved_text" msgid="7778833104901642442">"タップするとスクリーンショットが表示されます"</string>
+    <string name="screenshot_saved_text" msgid="7778833104901642442">"タップしてスクリーンショットを表示します"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"スクリーンショット保存エラー"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"スクリーンショットを撮り直してください"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"空き容量が足りないため、スクリーンショットを保存できません"</string>
@@ -377,7 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> に ON"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> まで"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ダークテーマ"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"ダークテーマ\nバッテリー セーバー"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"バッテリー セーバー"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"日の入りに ON"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"日の出まで"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>

@@ -694,6 +694,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mFalsingManager = Dependency.get(FalsingManager.class);
+        mWallpaperSupported =
+                mContext.getSystemService(WallpaperManager.class).isWallpaperSupported();
 
         // Connect in to the status bar manager service
         mCommandQueue = getComponent(CommandQueue.class);
@@ -707,9 +709,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         createAndAddWindows(result);
-
-        mWallpaperSupported =
-                mContext.getSystemService(WallpaperManager.class).isWallpaperSupported();
 
         if (mWallpaperSupported) {
             // Make sure we always have the most current wallpaper info.

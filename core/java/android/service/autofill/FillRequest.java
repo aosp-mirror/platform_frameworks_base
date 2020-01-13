@@ -71,12 +71,21 @@ public final class FillRequest implements Parcelable {
      */
     public static final int FLAG_COMPATIBILITY_MODE_REQUEST = 0x2;
 
+    /**
+     * Indicates the request came from a password field.
+     *
+     * (TODO: b/141703197) Temporary fix for augmented autofill showing passwords.
+     *
+     * @hide
+     */
+    public static final @RequestFlags int FLAG_PASSWORD_INPUT_TYPE = 0x4;
+
     /** @hide */
     public static final int INVALID_REQUEST_ID = Integer.MIN_VALUE;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
-            FLAG_MANUAL_REQUEST, FLAG_COMPATIBILITY_MODE_REQUEST
+            FLAG_MANUAL_REQUEST, FLAG_COMPATIBILITY_MODE_REQUEST, FLAG_PASSWORD_INPUT_TYPE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface RequestFlags{}
@@ -100,7 +109,7 @@ public final class FillRequest implements Parcelable {
             @Nullable Bundle clientState, @RequestFlags int flags) {
         mId = id;
         mFlags = Preconditions.checkFlagsArgument(flags,
-                FLAG_MANUAL_REQUEST | FLAG_COMPATIBILITY_MODE_REQUEST);
+                FLAG_MANUAL_REQUEST | FLAG_COMPATIBILITY_MODE_REQUEST | FLAG_PASSWORD_INPUT_TYPE);
         mContexts = Preconditions.checkCollectionElementsNotNull(contexts, "contexts");
         mClientState = clientState;
     }

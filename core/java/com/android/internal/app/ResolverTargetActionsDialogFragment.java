@@ -84,7 +84,7 @@ public class ResolverTargetActionsDialogFragment extends DialogFragment
                 }
 
                 // Force the chooser to requery and resort things
-                getActivity().recreate();
+                ((ChooserActivity) getActivity()).handlePackagesChanged();
                 break;
             case APP_INFO_INDEX:
                 Intent in = new Intent().setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)

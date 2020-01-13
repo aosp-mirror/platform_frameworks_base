@@ -1035,47 +1035,26 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readContacts">read your contacts</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readContacts" product="tablet">Allows the app to read
-      data about your contacts stored on your tablet, including the frequency
-      with which you\'ve called, emailed, or communicated in other ways with
-      specific individuals. This permission allows apps to save your contact
-      data, and malicious apps may share contact data without your
-      knowledge.</string>
+    <string name="permdesc_readContacts" product="tablet">Allows the app to read data about your contacts stored on your tablet.
+      This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readContacts" product="tv">Allows the app to read
-      data about your contacts stored on your TV, including the frequency
-      with which you\'ve called, emailed, or communicated in other ways with
-      specific individuals. This permission allows apps to save your contact
-      data, and malicious apps may share contact data without your
-      knowledge.</string>
+    <string name="permdesc_readContacts" product="tv">Allows the app to read data about your contacts stored on your TV.
+      This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readContacts" product="default">Allows the app to
-      read data about your contacts stored on your phone, including the
-      frequency with which you\'ve called, emailed, or communicated in other ways
-      with specific individuals. This permission allows apps to save your
-      contact data, and malicious apps may share contact data without your
-      knowledge.</string>
+    <string name="permdesc_readContacts" product="default">Allows the app to read data about your contacts stored on your phone.
+      This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_writeContacts">modify your contacts</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeContacts" product="tablet">Allows the app to
-      modify the data about your contacts stored on your tablet, including the
-      frequency with which you\'ve called, emailed, or communicated in other ways
-      with specific contacts. This permission allows apps to delete contact
-      data.</string>
+    <string name="permdesc_writeContacts" product="tablet">Allows the app to modify the data about your contacts stored on your tablet.
+      This permission allows apps to delete contact data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeContacts" product="tv">Allows the app to
-      modify the data about your contacts stored on your TV, including the
-      frequency with which you\'ve called, emailed, or communicated in other ways
-      with specific contacts. This permission allows apps to delete contact
-      data.</string>
+    <string name="permdesc_writeContacts" product="tv">Allows the app to modify the data about your contacts stored on your TV.
+      This permission allows apps to delete contact data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeContacts" product="default">Allows the app to
-    modify the data about your contacts stored on your phone, including the
-    frequency with which you\'ve called, emailed, or communicated in other ways
-    with specific contacts. This permission allows apps to delete contact
-    data.</string>
+    <string name="permdesc_writeContacts" product="default">Allows the app to modify the data about your contacts stored on your phone.
+      This permission allows apps to delete contact data.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCallLog">read call log</string>

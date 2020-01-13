@@ -381,7 +381,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Vklop ob <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Temna tema"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"Temna tema\nVarčevanje z energijo akumul."</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Varč. z ener. bater."</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Ob sončnem zahodu"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Do sončnega vzhoda"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
@@ -541,7 +541,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Nastavitve zvoka"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Razširi"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Strni"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Samod. napisi predstavnosti"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Sam. podnapisi predstavnosti"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Zapiranje namiga za podnapise"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Prekrivni podnapisi"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"omogoči"</string>

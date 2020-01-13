@@ -54,12 +54,12 @@
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Dokončuje sa registrácia…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"Registráciu sa nepodarilo dokončiť. Klepnutím to skúste znova."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Registrácia je dokončená. Pripája sa…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"Veľmi nízka"</string>
-    <string name="speed_label_slow" msgid="6069917670665664161">"Nízka"</string>
+    <string name="speed_label_very_slow" msgid="8526005255731597666">"Veľmi pomalá"</string>
+    <string name="speed_label_slow" msgid="6069917670665664161">"Pomalá"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"OK"</string>
     <string name="speed_label_medium" msgid="9078405312828606976">"Stredná"</string>
-    <string name="speed_label_fast" msgid="2677719134596044051">"Vysoká"</string>
-    <string name="speed_label_very_fast" msgid="8215718029533182439">"Veľmi vysoká"</string>
+    <string name="speed_label_fast" msgid="2677719134596044051">"Rýchla"</string>
+    <string name="speed_label_very_fast" msgid="8215718029533182439">"Veľmi rýchla"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Odpojený"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Prebieha odpájanie..."</string>

@@ -2790,6 +2790,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     public void setMasterMute(boolean mute, int flags, String callingPackage, int userId) {
+        enforceModifyAudioRoutingPermission();
         setMasterMuteInternal(mute, flags, callingPackage, Binder.getCallingUid(),
                 userId);
     }

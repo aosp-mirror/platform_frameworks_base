@@ -314,7 +314,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"ਸੁਣਨ ਦੇ ਸਾਧਨ"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ਚਾਲੂ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"ਚਮਕ"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ਆਟੋ-ਰੋਟੇਟ"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ਸਵੈ-ਘੁੰਮਾਓ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ਸਕ੍ਰੀਨ ਨੂੰ ਆਪਣੇ ਆਪ ਘੁੰਮਾਓ"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> ਮੋਡ"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"ਰੋਟੇਸ਼ਨ  ਲਾਕ  ਕੀਤੀ"</string>
@@ -377,7 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> ਵਜੇ ਚਾਲੂ"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> ਤੱਕ"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ਗੂੜ੍ਹਾ ਥੀਮ"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"ਗੂੜ੍ਹਾ ਥੀਮ\nਬੈਟਰੀ ਸੇਵਰ"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"ਬੈਟਰੀ ਸੇਵਰ"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"ਸੂਰਜ ਛਿਪਣ \'ਤੇ ਚਾਲੂ"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"ਸੂਰਜ ਚੜ੍ਹਨ ਤੱਕ"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
@@ -463,7 +463,7 @@
     <string name="media_projection_remember_text" msgid="6896767327140422951">"ਦੁਬਾਰਾ ਨਾ ਦਿਖਾਓ"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ਸਭ ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
-    <string name="notification_section_header_gentle" msgid="3044910806569985386">"ਖਾਮੋਸ਼ ਸੂਚਨਾਵਾਂ"</string>
+    <string name="notification_section_header_gentle" msgid="3044910806569985386">"ਸ਼ਾਂਤ ਸੂਚਨਾਵਾਂ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ਸਾਰੀਆਂ ਖਾਮੋਸ਼ ਸੂਚਨਾਵਾਂ ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਵੱਲੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਰੋਕਿਆ ਗਿਆ"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ਹੁਣ ਚਾਲੂ ਕਰੋ"</string>

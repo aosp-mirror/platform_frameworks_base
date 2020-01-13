@@ -348,7 +348,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTO"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Invertir colores"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Modo de corrección de color"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Más opciones"</string>
+    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Más ajustes"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Listo"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Conectado"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Conectado (<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería)"</string>
@@ -377,12 +377,12 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Hora: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Hasta las <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Tema oscuro"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"Tema oscuro\nAhorro de batería"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Ahorro de batería"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Al anochecer"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Hasta el amanecer"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
-    <string name="quick_settings_nfc_off" msgid="3465000058515424663">"La conexión NFC está inhabilitada"</string>
-    <string name="quick_settings_nfc_on" msgid="1004976611203202230">"La conexión NFC está habilitada"</string>
+    <string name="quick_settings_nfc_off" msgid="3465000058515424663">"El NFC está desactivado"</string>
+    <string name="quick_settings_nfc_on" msgid="1004976611203202230">"El NFC está activado"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Desliza el dedo hacia arriba para cambiar de aplicación"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arrastra hacia la derecha para cambiar rápidamente de aplicación"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Mostrar u ocultar aplicaciones recientes"</string>

@@ -390,7 +390,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Ойролцоогоор <xliff:g id="TIME">%1$s</xliff:g> хүртэл барих ёстой (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Ойролцоогоор <xliff:g id="TIME">%1$s</xliff:g> хүртэл барих ёстой"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> хүртэл"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"<xliff:g id="TIME">%1$s</xliff:g>-с хойш батарейны ажиллах хугацааг сунгах"</string>
+    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"<xliff:g id="TIME">%1$s</xliff:g>-с хойш батарейн ажиллах хугацааг сунгах"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-с бага хугацаа үлдсэн"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-с бага хугацаа үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-с их хугацаа үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

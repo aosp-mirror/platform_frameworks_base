@@ -264,6 +264,7 @@ public class SettingsBackupTest {
                     Settings.Global.ERROR_LOGCAT_PREFIX,
                     Settings.Global.EUICC_PROVISIONED,
                     Settings.Global.EUICC_SUPPORTED_COUNTRIES,
+                    Settings.Global.EUICC_UNSUPPORTED_COUNTRIES,
                     Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
                     Settings.Global.EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS,
                     Settings.Global.FANCY_IME_ANIMATIONS,
@@ -732,6 +733,7 @@ public class SettingsBackupTest {
                  Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE,
                  Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE,
                  Settings.Secure.TAP_GESTURE,
+                 Settings.Secure.NEARBY_SHARING_COMPONENT, // not user configurable
                  Settings.Secure.FACE_UNLOCK_RE_ENROLL);
 
     @Test

@@ -190,7 +190,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Dati mobili attivati"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Dati mobili disattivati"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"Non impostato per l\'utilizzo dei dati"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"Off"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"OFF"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Tethering Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Modalità aereo."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN attiva."</string>
@@ -377,8 +377,8 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Dalle <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Fino alle <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Tema scuro"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"Tema scuro\nRisparmio energetico"</string>
-    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Attivata al tramonto"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Risparmio energetico"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Attivato al tramonto"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Fino all\'alba"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC non attiva"</string>
@@ -633,7 +633,7 @@
     <string name="do_not_silence_block" msgid="4361847809775811849">"Non silenziare e non bloccare"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controlli di gestione delle notifiche"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"On"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Off"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"OFF"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"I controlli di gestione delle notifiche ti consentono di impostare un livello di importanza compreso tra 0 e 5 per le notifiche di un\'app. \n\n"<b>"Livello 5"</b>" \n- Mostra in cima all\'elenco di notifiche \n- Consenti l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 4"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 3"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n\n"<b>"Livello 2"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n\n"<b>"Livello 1"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n- Nascondi da schermata di blocco e barra di stato \n- Mostra in fondo all\'elenco di notifiche \n\n"<b>"Livello 0"</b>" \n- Blocca tutte le notifiche dell\'app"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Notifiche"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Non vedrai più queste notifiche"</string>
@@ -754,7 +754,7 @@
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Risparmio dati attivo"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Risparmio dati disattivato"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"On"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Off"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"OFF"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Barra di navigazione"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Layout"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Tipo di pulsante extra sinistra"</string>

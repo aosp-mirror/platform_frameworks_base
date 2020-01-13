@@ -314,7 +314,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Alat Bantu Dengar"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Mengaktifkan…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Kecerahan"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotasi otomatis"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotasi Otomatis"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Putar layar otomatis"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"Mode <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Rotasi terkunci"</string>
@@ -362,7 +362,7 @@
       <item quantity="one">%d perangkat</item>
     </plurals>
     <string name="quick_settings_notifications_label" msgid="3379631363952582758">"Notifikasi"</string>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lampu senter"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lampu Senter"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Data seluler"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Penggunaan kuota"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="1136599216568805644">"Data tersisa"</string>
@@ -377,7 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Aktif pada <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Hingga <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Tema gelap"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"Tema gelap\nPenghemat baterai"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Penghemat Baterai"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Aktif saat malam"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Sampai pagi"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>

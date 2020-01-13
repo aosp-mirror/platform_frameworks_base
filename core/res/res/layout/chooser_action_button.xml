@@ -25,4 +25,6 @@
     android:singleLine="true"
     android:clickable="true"
     android:background="@drawable/chooser_action_button_bg"
+    android:drawableTint="?android:attr/colorControlNormal"
+    android:drawableTintMode="src_in"
     />

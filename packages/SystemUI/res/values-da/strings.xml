@@ -39,7 +39,7 @@
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Aktivér batterisparefunktion"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Indstillinger"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Automatisk skærmrotation"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Roter skærm automatisk"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"LYDLØS"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"Notifikationer"</string>
@@ -377,7 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Tænd kl. <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Indtil <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Mørkt tema"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"Mørkt tema\nBatterisparefunktion"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Batterisparefunktion"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Til ved solnedgang"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Indtil solopgang"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
@@ -706,7 +706,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Venstre"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Højre"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Midtertast"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulatortast"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab-tast"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Mellemrumstast"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Tilbagetast"</string>

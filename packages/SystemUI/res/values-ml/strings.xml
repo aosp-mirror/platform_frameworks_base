@@ -303,7 +303,7 @@
     <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"മുൻഗണന മാത്രം"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"അലാറങ്ങൾ മാത്രം"</string>
     <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"പൂർണ്ണ നിശബ്‌ദത"</string>
-    <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ബ്ലൂടൂത്ത്"</string>
+    <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"ബ്ലൂടൂത്ത് (<xliff:g id="NUMBER">%d</xliff:g> ഉപകരണങ്ങൾ)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"ബ്ലൂടൂത്ത് ഓഫുചെയ്യുക"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ജോടിയാക്കിയ ഉപകരണങ്ങളൊന്നും ലഭ്യമല്ല"</string>
@@ -314,7 +314,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"ശ്രവണ സഹായികൾ"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ഓണാക്കുന്നു…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"തെളിച്ചം"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"സ്‌ക്രീൻ സ്വയമേവ തിരിയുക"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"സ്‌ക്രീൻ സ്വയമേവ തിരിയൽ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"സ്‌ക്രീൻ സ്വയമേവ തിരിക്കുക"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> മോഡ്"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"റൊട്ടേഷൻ ലോക്കുചെയ്‌തു"</string>
@@ -377,7 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>-ന്"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> വരെ"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ഡാർക്ക് തീം"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"ഇരുണ്ട തീം\nബാറ്ററി ലാഭിക്കൽ"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"ബാറ്ററി ലാഭിക്കൽ"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"സൂര്യാസ്‌തമയത്തിന്"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"സൂര്യോദയം വരെ"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
@@ -563,7 +563,7 @@
     <string name="stream_music" msgid="2188224742361847580">"മീഡിയ"</string>
     <string name="stream_alarm" msgid="16058075093011694">"അലാറം"</string>
     <string name="stream_notification" msgid="7930294049046243939">"അറിയിപ്പ്"</string>
-    <string name="stream_bluetooth_sco" msgid="6234562365528664331">"ബ്ലൂടൂത്ത്"</string>
+    <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"ഡ്യുവൽ മൾട്ടി റ്റോൺ ഫ്രീക്വൻസി"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"ഉപയോഗസഹായി"</string>
     <string name="ring_toggle_title" msgid="5973120187287633224">"കോളുകൾ"</string>

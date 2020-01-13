@@ -136,17 +136,16 @@ class UserUsageStatsService {
         }
 
         // During system reboot, add a DEVICE_SHUTDOWN event to the end of event list, the timestamp
-        // is last time UsageStatsDatabase is persisted to disk.
+        // is last time UsageStatsDatabase is persisted to disk or the last event's time whichever
+        // is higher (because the file system timestamp is round down to integral seconds).
         // Also add a DEVICE_STARTUP event with current system timestamp.
         final IntervalStats currentDailyStats = mCurrentStats[INTERVAL_DAILY];
         if (currentDailyStats != null) {
-            // File system timestamp only has precision of 1 second, add 1000ms to make up
-            // for the loss of round up.
-            final Event shutdownEvent =
-                    new Event(DEVICE_SHUTDOWN, currentDailyStats.lastTimeSaved + 1000);
+            final Event shutdownEvent = new Event(DEVICE_SHUTDOWN,
+                    Math.max(currentDailyStats.lastTimeSaved, currentDailyStats.endTime));
             shutdownEvent.mPackage = Event.DEVICE_EVENT_PACKAGE_NAME;
             currentDailyStats.addEvent(shutdownEvent);
-            final Event startupEvent = new Event(DEVICE_STARTUP, currentTimeMillis);
+            final Event startupEvent = new Event(DEVICE_STARTUP, System.currentTimeMillis());
             startupEvent.mPackage = Event.DEVICE_EVENT_PACKAGE_NAME;
             currentDailyStats.addEvent(startupEvent);
         }
