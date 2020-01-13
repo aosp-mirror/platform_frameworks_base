@@ -169,7 +169,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         for (MediaRoute2Info route : mBluetoothRoutes) {
             builder.addRoute(route);
         }
-        setProviderState(builder.build(), Collections.emptyList());
+        setProviderState(builder.build());
         mHandler.post(() -> notifyProviderState());
     }
 
@@ -212,6 +212,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         for (MediaRoute2Info route : mBluetoothRoutes) {
             builder.addRoute(route);
         }
-        setAndNotifyProviderState(builder.build(), Collections.emptyList());
+        setAndNotifyProviderState(builder.build());
     }
 }

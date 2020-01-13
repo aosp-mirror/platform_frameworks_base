@@ -17,7 +17,6 @@
 package com.android.server.media;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -37,8 +36,6 @@ import android.util.Slog;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -270,35 +267,69 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     private void onProviderStateUpdated(Connection connection,
-            MediaRoute2ProviderInfo providerInfo, List<RoutingSessionInfo> sessionInfos) {
+            MediaRoute2ProviderInfo providerInfo) {
         if (mActiveConnection != connection) {
             return;
         }
         if (DEBUG) {
             Slog.d(TAG, this + ": State changed ");
         }
-        setAndNotifyProviderState(providerInfo, sessionInfos);
+        setAndNotifyProviderState(providerInfo);
     }
 
-    private void onSessionCreated(Connection connection, @Nullable RoutingSessionInfo sessionInfo,
+    private void onSessionCreated(Connection connection, RoutingSessionInfo sessionInfo,
             long requestId) {
         if (mActiveConnection != connection) {
             return;
         }
-        if (sessionInfo != null) {
-            sessionInfo = new RoutingSessionInfo.Builder(sessionInfo)
-                    .setProviderId(getUniqueId())
-                    .build();
+
+        if (sessionInfo == null) {
+            Slog.w(TAG, "onSessionCreated: Ignoring null sessionInfo sent from " + mComponentName);
+            return;
         }
+
+        sessionInfo = new RoutingSessionInfo.Builder(sessionInfo)
+                .setProviderId(getUniqueId())
+                .build();
+
+        boolean duplicateSessionAlreadyExists = false;
+        synchronized (mLock) {
+            for (int i = 0; i < mSessionInfos.size(); i++) {
+                if (mSessionInfos.get(i).getId().equals(sessionInfo.getId())) {
+                    duplicateSessionAlreadyExists = true;
+                    break;
+                }
+            }
+            mSessionInfos.add(sessionInfo);
+        }
+
+        if (duplicateSessionAlreadyExists) {
+            Slog.w(TAG, "onSessionCreated: Duplicate session already exists. Ignoring.");
+            return;
+        }
+
         mCallback.onSessionCreated(this, sessionInfo, requestId);
     }
 
-    private void onSessionInfoChanged(Connection connection, RoutingSessionInfo sessionInfo) {
+    private void onSessionCreationFailed(Connection connection, long requestId) {
+        if (mActiveConnection != connection) {
+            return;
+        }
+
+        if (requestId == MediaRoute2ProviderService.REQUEST_ID_UNKNOWN) {
+            Slog.w(TAG, "onSessionCreationFailed: Ignoring requestId REQUEST_ID_UNKNOWN");
+            return;
+        }
+
+        mCallback.onSessionCreationFailed(this, requestId);
+    }
+
+    private void onSessionUpdated(Connection connection, RoutingSessionInfo sessionInfo) {
         if (mActiveConnection != connection) {
             return;
         }
         if (sessionInfo == null) {
-            Slog.w(TAG, "onSessionInfoChanged: Ignoring null sessionInfo sent from "
+            Slog.w(TAG, "onSessionUpdated: Ignoring null sessionInfo sent from "
                     + mComponentName);
             return;
         }
@@ -307,7 +338,55 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
                 .setProviderId(getUniqueId())
                 .build();
 
-        mCallback.onSessionInfoChanged(this, sessionInfo);
+        boolean found = false;
+        synchronized (mLock) {
+            for (int i = 0; i < mSessionInfos.size(); i++) {
+                if (mSessionInfos.get(i).getId().equals(sessionInfo.getId())) {
+                    mSessionInfos.set(i, sessionInfo);
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        if (!found) {
+            Slog.w(TAG, "onSessionUpdated: Matching session info not found");
+            return;
+        }
+
+        mCallback.onSessionUpdated(this, sessionInfo);
+    }
+
+    private void onSessionReleased(Connection connection, RoutingSessionInfo sessionInfo) {
+        if (mActiveConnection != connection) {
+            return;
+        }
+        if (sessionInfo == null) {
+            Slog.w(TAG, "onSessionReleased: Ignoring null sessionInfo sent from " + mComponentName);
+            return;
+        }
+
+        sessionInfo = new RoutingSessionInfo.Builder(sessionInfo)
+                .setProviderId(getUniqueId())
+                .build();
+
+        boolean found = false;
+        synchronized (mLock) {
+            for (int i = 0; i < mSessionInfos.size(); i++) {
+                if (mSessionInfos.get(i).getId().equals(sessionInfo.getId())) {
+                    mSessionInfos.remove(i);
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        if (!found) {
+            Slog.w(TAG, "onSessionReleased: Matching session info not found");
+            return;
+        }
+
+        mCallback.onSessionReleased(this, sessionInfo);
     }
 
     private void disconnect() {
@@ -315,7 +394,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             mConnectionReady = false;
             mActiveConnection.dispose();
             mActiveConnection = null;
-            setAndNotifyProviderState(null, Collections.emptyList());
+            setAndNotifyProviderState(null);
         }
     }
 
@@ -421,19 +500,24 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             mHandler.post(() -> onConnectionDied(Connection.this));
         }
 
-        void postProviderStateUpdated(MediaRoute2ProviderInfo providerInfo,
-                List<RoutingSessionInfo> sessionInfos) {
-            mHandler.post(() -> onProviderStateUpdated(Connection.this,
-                    providerInfo, sessionInfos));
+        void postProviderStateUpdated(MediaRoute2ProviderInfo providerInfo) {
+            mHandler.post(() -> onProviderStateUpdated(Connection.this, providerInfo));
         }
 
-        void postSessionCreated(@Nullable RoutingSessionInfo sessionInfo, long requestId) {
-            mHandler.post(() -> onSessionCreated(Connection.this, sessionInfo,
-                    requestId));
+        void postSessionCreated(RoutingSessionInfo sessionInfo, long requestId) {
+            mHandler.post(() -> onSessionCreated(Connection.this, sessionInfo, requestId));
         }
 
-        void postSessionInfoChanged(RoutingSessionInfo sessionInfo) {
-            mHandler.post(() -> onSessionInfoChanged(Connection.this, sessionInfo));
+        void postSessionCreationFailed(long requestId) {
+            mHandler.post(() -> onSessionCreationFailed(Connection.this, requestId));
+        }
+
+        void postSessionUpdated(RoutingSessionInfo sessionInfo) {
+            mHandler.post(() -> onSessionUpdated(Connection.this, sessionInfo));
+        }
+
+        void postSessionReleased(RoutingSessionInfo sessionInfo) {
+            mHandler.post(() -> onSessionReleased(Connection.this, sessionInfo));
         }
     }
 
@@ -449,16 +533,15 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         }
 
         @Override
-        public void updateState(MediaRoute2ProviderInfo providerInfo,
-                List<RoutingSessionInfo> sessionInfos) {
+        public void updateState(MediaRoute2ProviderInfo providerInfo) {
             Connection connection = mConnectionRef.get();
             if (connection != null) {
-                connection.postProviderStateUpdated(providerInfo, sessionInfos);
+                connection.postProviderStateUpdated(providerInfo);
             }
         }
 
         @Override
-        public void notifySessionCreated(@Nullable RoutingSessionInfo sessionInfo, long requestId) {
+        public void notifySessionCreated(RoutingSessionInfo sessionInfo, long requestId) {
             Connection connection = mConnectionRef.get();
             if (connection != null) {
                 connection.postSessionCreated(sessionInfo, requestId);
@@ -466,10 +549,26 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         }
 
         @Override
-        public void notifySessionInfoChanged(RoutingSessionInfo sessionInfo) {
+        public void notifySessionCreationFailed(long requestId) {
             Connection connection = mConnectionRef.get();
             if (connection != null) {
-                connection.postSessionInfoChanged(sessionInfo);
+                connection.postSessionCreationFailed(requestId);
+            }
+        }
+
+        @Override
+        public void notifySessionUpdated(RoutingSessionInfo sessionInfo) {
+            Connection connection = mConnectionRef.get();
+            if (connection != null) {
+                connection.postSessionUpdated(sessionInfo);
+            }
+        }
+
+        @Override
+        public void notifySessionReleased(RoutingSessionInfo sessionInfo) {
+            Connection connection = mConnectionRef.get();
+            if (connection != null) {
+                connection.postSessionReleased(sessionInfo);
             }
         }
     }
