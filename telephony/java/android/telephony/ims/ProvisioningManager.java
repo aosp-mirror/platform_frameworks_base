@@ -35,6 +35,7 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.ims.aidl.IImsConfigCallback;
 import android.telephony.ims.feature.MmTelFeature;
+import android.telephony.ims.feature.RcsFeature;
 import android.telephony.ims.stub.ImsConfigImplBase;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 
@@ -384,6 +385,54 @@ public class ProvisioningManager {
             @ImsRegistrationImplBase.ImsRegistrationTech int tech) {
         try {
             return getITelephony().getImsProvisioningStatusForCapability(mSubId, capability, tech);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Get the provisioning status for the IMS RCS capability specified.
+     *
+     * If provisioning is not required for the queried
+     * {@link RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag} this method will always return
+     * {@code true}.
+     *
+     * @see CarrierConfigManager#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL
+     * @return true if the device is provisioned for the capability or does not require
+     * provisioning, false if the capability does require provisioning and has not been
+     * provisioned yet.
+     */
+    @WorkerThread
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean getRcsProvisioningStatusForCapability(
+            @RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability) {
+        try {
+            return getITelephony().getRcsProvisioningStatusForCapability(mSubId, capability);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Set the provisioning status for the IMS RCS capability using the specified subscription.
+     *
+     * Provisioning may or may not be required, depending on the carrier configuration. If
+     * provisioning is not required for the carrier associated with this subscription or the device
+     * does not support the capability/technology combination specified, this operation will be a
+     * no-op.
+     *
+     * @see CarrierConfigManager#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL
+     * @param isProvisioned true if the device is provisioned for the RCS capability specified,
+     *                      false otherwise.
+     */
+    @WorkerThread
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public void setRcsProvisioningStatusForCapability(
+            @RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability,
+            boolean isProvisioned) {
+        try {
+            getITelephony().setRcsProvisioningStatusForCapability(mSubId, capability,
+                    isProvisioned);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
