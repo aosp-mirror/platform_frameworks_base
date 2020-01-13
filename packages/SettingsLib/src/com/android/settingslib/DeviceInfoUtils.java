@@ -16,8 +16,6 @@
 
 package com.android.settingslib;
 
-import static android.content.Context.TELEPHONY_SERVICE;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -172,36 +170,38 @@ public class DeviceInfoUtils {
         }
     }
 
-    public static String getFormattedPhoneNumber(Context context, SubscriptionInfo subscriptionInfo) {
+    /**
+     * Format a phone number.
+     * @param subscriptionInfo {@link SubscriptionInfo} subscription information.
+     * @return Returns formatted phone number.
+     */
+    public static String getFormattedPhoneNumber(Context context,
+            SubscriptionInfo subscriptionInfo) {
         String formattedNumber = null;
         if (subscriptionInfo != null) {
-            final TelephonyManager telephonyManager =
-                    (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
-            final String rawNumber =
-                    telephonyManager.getLine1Number(subscriptionInfo.getSubscriptionId());
+            final TelephonyManager telephonyManager = context.getSystemService(
+                    TelephonyManager.class);
+            final String rawNumber = telephonyManager.createForSubscriptionId(
+                    subscriptionInfo.getSubscriptionId()).getLine1Number();
             if (!TextUtils.isEmpty(rawNumber)) {
                 formattedNumber = PhoneNumberUtils.formatNumber(rawNumber);
             }
-
         }
         return formattedNumber;
     }
 
     public static String getFormattedPhoneNumbers(Context context,
-            List<SubscriptionInfo> subscriptionInfo) {
+            List<SubscriptionInfo> subscriptionInfoList) {
         StringBuilder sb = new StringBuilder();
-        if (subscriptionInfo != null) {
-            final TelephonyManager telephonyManager =
-                    (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
-            final int count = subscriptionInfo.size();
-            for (int i = 0; i < count; i++) {
-                final String rawNumber = telephonyManager.getLine1Number(
-                        subscriptionInfo.get(i).getSubscriptionId());
+        if (subscriptionInfoList != null) {
+            final TelephonyManager telephonyManager = context.getSystemService(
+                    TelephonyManager.class);
+            final int count = subscriptionInfoList.size();
+            for (SubscriptionInfo subscriptionInfo : subscriptionInfoList) {
+                final String rawNumber = telephonyManager.createForSubscriptionId(
+                        subscriptionInfo.getSubscriptionId()).getLine1Number();
                 if (!TextUtils.isEmpty(rawNumber)) {
-                    sb.append(PhoneNumberUtils.formatNumber(rawNumber));
-                    if (i < count - 1) {
-                        sb.append("\n");
-                    }
+                    sb.append(PhoneNumberUtils.formatNumber(rawNumber)).append("\n");
                 }
             }
         }
