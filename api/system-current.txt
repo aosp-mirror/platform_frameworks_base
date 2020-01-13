@@ -4665,6 +4665,15 @@ package android.media.tv.tuner {
     method public int getVideoFilterCount();
   }
 
+  public class Descrambler implements java.lang.AutoCloseable {
+    method public int addPid(int, int, @Nullable android.media.tv.tuner.filter.Filter);
+    method public void close();
+    method public int removePid(int, int, @Nullable android.media.tv.tuner.filter.Filter);
+    method public int setKeyToken(@Nullable byte[]);
+    field public static final int PID_TYPE_MMTP = 2; // 0x2
+    field public static final int PID_TYPE_T = 1; // 0x1
+  }
+
   public class Lnb implements java.lang.AutoCloseable {
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void close();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int sendDiseqcMessage(@NonNull byte[]);
