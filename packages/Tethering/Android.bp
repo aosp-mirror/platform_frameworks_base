@@ -122,4 +122,5 @@ android_app {
     use_embedded_native_libs: true,
     // The permission configuration *must* be included to ensure security of the device
     required: ["NetworkPermissionConfig"],
+    apex_available: ["com.android.tethering"],
 }
