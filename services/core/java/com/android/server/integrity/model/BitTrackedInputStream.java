@@ -27,30 +27,37 @@ import java.io.InputStream;
  */
 public class BitTrackedInputStream extends BitInputStream {
 
-    private static int sReadBitsCount;
+    private int mReadBitsCount;
 
     /** Constructor with byte array. */
     public BitTrackedInputStream(byte[] inputStream) {
         super(inputStream);
-        sReadBitsCount = 0;
+        mReadBitsCount = 0;
     }
 
     /** Constructor with input stream. */
     public BitTrackedInputStream(InputStream inputStream) {
         super(inputStream);
-        sReadBitsCount = 0;
+        mReadBitsCount = 0;
     }
 
     /** Obtains an integer value of the next {@code numOfBits}. */
     @Override
     public int getNext(int numOfBits) throws IOException {
-        sReadBitsCount += numOfBits;
+        mReadBitsCount += numOfBits;
         return super.getNext(numOfBits);
     }
 
     /** Returns the current cursor position showing the number of bits that are read. */
     public int getReadBitsCount() {
-        return sReadBitsCount;
+        return mReadBitsCount;
+    }
+
+    /**
+     * Returns true if we can read more rules by checking whether the end index is not reached yet.
+     */
+    public boolean canReadMoreRules(int endIndexBytes) {
+        return mReadBitsCount < endIndexBytes * 8;
     }
 
     /**
@@ -59,11 +66,11 @@ public class BitTrackedInputStream extends BitInputStream {
      * Note that the integer parameter specifies the location in bytes -- not bits.
      */
     public void setCursorToByteLocation(int byteLocation) throws IOException {
-        int bitCountToRead = byteLocation * 8 - sReadBitsCount;
+        int bitCountToRead = byteLocation * 8 - mReadBitsCount;
         if (bitCountToRead < 0) {
             throw new IllegalStateException("The byte position is already read.");
         }
         super.getNext(bitCountToRead);
-        sReadBitsCount = byteLocation * 8;
+        mReadBitsCount = byteLocation * 8;
     }
 }

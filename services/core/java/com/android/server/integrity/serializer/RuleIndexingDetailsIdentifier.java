@@ -30,12 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 
 /** A helper class for identifying the indexing type and key of a given rule. */
 class RuleIndexingDetailsIdentifier {
-
-    private static final String DEFAULT_RULE_KEY = "N/A";
 
     /**
      * Splits a given rule list into three indexing categories. Each rule category is returned as a
@@ -43,17 +40,17 @@ class RuleIndexingDetailsIdentifier {
      * PACKAGE_NAME_INDEXED rules, app certificate for APP_CERTIFICATE_INDEXED rules and N/A for
      * NOT_INDEXED rules.
      */
-    public static Map<Integer, TreeMap<String, List<Rule>>> splitRulesIntoIndexBuckets(
+    public static Map<Integer, Map<String, List<Rule>>> splitRulesIntoIndexBuckets(
             List<Rule> rules) {
         if (rules == null) {
             throw new IllegalArgumentException(
                     "Index buckets cannot be created for null rule list.");
         }
 
-        Map<Integer, TreeMap<String, List<Rule>>> typeOrganizedRuleMap = new HashMap();
-        typeOrganizedRuleMap.put(NOT_INDEXED, new TreeMap());
-        typeOrganizedRuleMap.put(PACKAGE_NAME_INDEXED, new TreeMap());
-        typeOrganizedRuleMap.put(APP_CERTIFICATE_INDEXED, new TreeMap());
+        Map<Integer, Map<String, List<Rule>>> typeOrganizedRuleMap = new HashMap();
+        typeOrganizedRuleMap.put(NOT_INDEXED, new HashMap());
+        typeOrganizedRuleMap.put(PACKAGE_NAME_INDEXED, new HashMap<>());
+        typeOrganizedRuleMap.put(APP_CERTIFICATE_INDEXED, new HashMap<>());
 
         // Split the rules into the appropriate indexed pattern. The Tree Maps help us to keep the
         // entries sorted by their index key.
@@ -66,21 +63,14 @@ class RuleIndexingDetailsIdentifier {
                         String.format("Malformed rule identified. [%s]", rule.toString()));
             }
 
-            String ruleKey =
-                    indexingDetails.getIndexType() != NOT_INDEXED
-                            ? indexingDetails.getRuleKey()
-                            : DEFAULT_RULE_KEY;
+            int ruleIndexType = indexingDetails.getIndexType();
+            String ruleKey = indexingDetails.getRuleKey();
 
-            if (!typeOrganizedRuleMap.get(indexingDetails.getIndexType()).containsKey(ruleKey)) {
-                typeOrganizedRuleMap
-                        .get(indexingDetails.getIndexType())
-                        .put(ruleKey, new ArrayList());
+            if (!typeOrganizedRuleMap.get(ruleIndexType).containsKey(ruleKey)) {
+                typeOrganizedRuleMap.get(ruleIndexType).put(ruleKey, new ArrayList());
             }
 
-            typeOrganizedRuleMap
-                    .get(indexingDetails.getIndexType())
-                    .get(ruleKey)
-                    .add(rule);
+            typeOrganizedRuleMap.get(ruleIndexType).get(ruleKey).add(rule);
         }
 
         return typeOrganizedRuleMap;
