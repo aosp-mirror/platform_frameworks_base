@@ -18,8 +18,8 @@ package android.bluetooth.le;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.bluetooth.BluetoothUuid;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.ParcelUuid;
 import android.util.ArrayMap;
 import android.util.Log;
