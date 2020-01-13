@@ -18,8 +18,10 @@ package com.android.server.net;
 
 import static com.android.server.net.NetworkPolicyManagerService.isUidNetworkingBlockedInternal;
 
+import android.annotation.NonNull;
 import android.net.Network;
 import android.net.NetworkTemplate;
+import android.net.netstats.provider.AbstractNetworkStatsProvider;
 import android.telephony.SubscriptionPlan;
 
 import java.util.Set;
@@ -126,4 +128,12 @@ public abstract class NetworkPolicyManagerInternal {
      */
     public abstract void setMeteredRestrictedPackagesAsync(
             Set<String> packageNames, int userId);
+
+    /**
+     *  Notifies that any of the {@link AbstractNetworkStatsProvider} has reached its quota
+     *  which was set through {@link AbstractNetworkStatsProvider#setLimit(String, long)}.
+     *
+     * @param tag the human readable identifier of the custom network stats provider.
+     */
+    public abstract void onStatsProviderLimitReached(@NonNull String tag);
 }

@@ -16,9 +16,10 @@
 
 package android.app.usage;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.usage.NetworkStats.Bucket;
@@ -29,6 +30,9 @@ import android.net.DataUsageRequest;
 import android.net.INetworkStatsService;
 import android.net.NetworkIdentity;
 import android.net.NetworkTemplate;
+import android.net.netstats.provider.AbstractNetworkStatsProvider;
+import android.net.netstats.provider.NetworkStatsProviderCallback;
+import android.net.netstats.provider.NetworkStatsProviderWrapper;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
@@ -41,6 +45,8 @@ import android.util.DataUnit;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Objects;
 
 /**
  * Provides access to network usage history and statistics. Usage data is collected in
@@ -418,7 +424,7 @@ public class NetworkStatsManager {
     /** @hide */
     public void registerUsageCallback(NetworkTemplate template, int networkType,
             long thresholdBytes, UsageCallback callback, @Nullable Handler handler) {
-        checkNotNull(callback, "UsageCallback cannot be null");
+        Objects.requireNonNull(callback, "UsageCallback cannot be null");
 
         final Looper looper;
         if (handler == null) {
@@ -517,6 +523,34 @@ public class NetworkStatsManager {
          * @hide used for internal bookkeeping
          */
         private DataUsageRequest request;
+    }
+
+    /**
+     * Registers a custom provider of {@link android.net.NetworkStats} to combine the network
+     * statistics that cannot be seen by the kernel to system. To unregister, invoke
+     * {@link NetworkStatsProviderCallback#unregister()}.
+     *
+     * @param tag a human readable identifier of the custom network stats provider.
+     * @param provider a custom implementation of {@link AbstractNetworkStatsProvider} that needs to
+     *                 be registered to the system.
+     * @return a {@link NetworkStatsProviderCallback}, which can be used to report events to the
+     *         system.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    @NonNull public NetworkStatsProviderCallback registerNetworkStatsProvider(
+            @NonNull String tag,
+            @NonNull AbstractNetworkStatsProvider provider) {
+        try {
+            final NetworkStatsProviderWrapper wrapper = new NetworkStatsProviderWrapper(provider);
+            return new NetworkStatsProviderCallback(
+                    mService.registerNetworkStatsProvider(tag, wrapper));
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        // Unreachable code, but compiler doesn't know about it.
+        return null;
     }
 
     private static NetworkTemplate createTemplate(int networkType, String subscriberId) {

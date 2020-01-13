@@ -80,6 +80,7 @@ import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
+import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -102,6 +103,7 @@ import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings.Config;
 import com.android.testutils.HandlerUtilsKt;
+import com.android.testutils.TestableNetworkStatsProvider;
 
 import libcore.io.IoUtils;
 
@@ -1001,6 +1003,88 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         mService.unregisterUsageRequest(unknownRequest);
     }
 
+    @Test
+    public void testStatsProviderUpdateStats() throws Exception {
+        // Pretend that network comes online.
+        expectDefaultSettings();
+        final NetworkState[] states = new NetworkState[]{buildWifiState(true /* isMetered */)};
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+
+        // Register custom provider and retrieve callback.
+        final TestableNetworkStatsProvider provider = new TestableNetworkStatsProvider();
+        final INetworkStatsProviderCallback cb =
+                mService.registerNetworkStatsProvider("TEST", provider);
+        assertNotNull(cb);
+
+        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states), new VpnInfo[0]);
+
+        // Verifies that one requestStatsUpdate will be called during iface update.
+        provider.expectStatsUpdate(0 /* unused */);
+
+        // Create some initial traffic and report to the service.
+        incrementCurrentTime(HOUR_IN_MILLIS);
+        final NetworkStats expectedStats = new NetworkStats(0L, 1)
+                .addValues(new NetworkStats.Entry(TEST_IFACE, UID_RED, SET_DEFAULT,
+                        TAG_NONE, METERED_YES, ROAMING_NO, DEFAULT_NETWORK_YES,
+                        128L, 2L, 128L, 2L, 1L))
+                .addValues(new NetworkStats.Entry(TEST_IFACE, UID_RED, SET_DEFAULT,
+                        0xF00D, METERED_YES, ROAMING_NO, DEFAULT_NETWORK_YES,
+                        64L, 1L, 64L, 1L, 1L));
+        cb.onStatsUpdated(0 /* unused */, expectedStats, expectedStats);
+
+        // Make another empty mutable stats object. This is necessary since the new NetworkStats
+        // object will be used to compare with the old one in NetworkStatsRecoder, two of them
+        // cannot be the same object.
+        expectNetworkStatsUidDetail(buildEmptyStats());
+
+        forcePollAndWaitForIdle();
+
+        // Verifies that one requestStatsUpdate and setAlert will be called during polling.
+        provider.expectStatsUpdate(0 /* unused */);
+        provider.expectSetAlert(MB_IN_BYTES);
+
+        // Verifies that service recorded history, does not verify uid tag part.
+        assertUidTotal(sTemplateWifi, UID_RED, 128L, 2L, 128L, 2L, 1);
+
+        // Verifies that onStatsUpdated updates the stats accordingly.
+        final NetworkStats stats = mSession.getSummaryForAllUid(
+                sTemplateWifi, Long.MIN_VALUE, Long.MAX_VALUE, true);
+        assertEquals(2, stats.size());
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 128L, 2L, 128L, 2L, 1L);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, METERED_YES, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 64L, 1L, 64L, 1L, 1L);
+
+        // Verifies that unregister the callback will remove the provider from service.
+        cb.unregister();
+        forcePollAndWaitForIdle();
+        provider.assertNoCallback();
+    }
+
+    @Test
+    public void testStatsProviderSetAlert() throws Exception {
+        // Pretend that network comes online.
+        expectDefaultSettings();
+        NetworkState[] states = new NetworkState[]{buildWifiState(true /* isMetered */)};
+        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states), new VpnInfo[0]);
+
+        // Register custom provider and retrieve callback.
+        final TestableNetworkStatsProvider provider = new TestableNetworkStatsProvider();
+        final INetworkStatsProviderCallback cb =
+                mService.registerNetworkStatsProvider("TEST", provider);
+        assertNotNull(cb);
+
+        // Simulates alert quota of the provider has been reached.
+        cb.onAlertReached();
+        HandlerUtilsKt.waitForIdle(mHandler, WAIT_TIMEOUT);
+
+        // Verifies that polling is triggered by alert reached.
+        provider.expectStatsUpdate(0 /* unused */);
+        // Verifies that global alert will be re-armed.
+        provider.expectSetAlert(MB_IN_BYTES);
+    }
+
     private static File getBaseDir(File statsDir) {
         File baseDir = new File(statsDir, "netstats");
         baseDir.mkdirs();
@@ -1102,6 +1186,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     private void expectSettings(long persistBytes, long bucketDuration, long deleteAge)
             throws Exception {
         when(mSettings.getPollInterval()).thenReturn(HOUR_IN_MILLIS);
+        when(mSettings.getPollDelay()).thenReturn(0L);
         when(mSettings.getSampleEnabled()).thenReturn(true);
 
         final Config config = new Config(bucketDuration, deleteAge, deleteAge);
