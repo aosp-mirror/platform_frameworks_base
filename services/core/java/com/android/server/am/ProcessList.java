@@ -1562,8 +1562,7 @@ public final class ProcessList {
                     throw e.rethrowAsRuntimeException();
                 }
                 int numGids = 3;
-                if (mountExternal == Zygote.MOUNT_EXTERNAL_INSTALLER
-                        || mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+                if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
                     numGids++;
                 }
                 /*
