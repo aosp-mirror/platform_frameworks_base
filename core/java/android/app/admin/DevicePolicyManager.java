@@ -6850,21 +6850,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
-     * Privileged apps can use this method to find out if the device was provisioned as
+     * Apps can use this method to find out if the device was provisioned as
      * organization-owend device with a managed profile.
      *
      * This, together with checking whether the device has a device owner (by calling
-     * {@link #isDeviceManaged()}), could be used to learn whether the device is owned by an
+     * {@link #isDeviceOwnerApp}), could be used to learn whether the device is owned by an
      * organization or an individual:
-     * If this method returns true OR {@link #isDeviceManaged()} returns true, then
-     * the device is owned by an organization. Otherwise, it's owned by an individual.
+     * If this method returns true OR {@link #isDeviceOwnerApp} returns true (for any package),
+     * then the device is owned by an organization. Otherwise, it's owned by an individual.
      *
      * @return {@code true} if the device was provisioned as organization-owned device,
      * {@code false} otherwise.
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean isOrganizationOwnedDeviceWithManagedProfile() {
         throwIfParentInstance("isOrganizationOwnedDeviceWithManagedProfile");
         if (mService != null) {
