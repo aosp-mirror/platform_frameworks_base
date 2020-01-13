@@ -57,7 +57,6 @@ import com.android.server.backup.utils.RandomAccessFileUtils;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
@@ -523,7 +522,6 @@ public class BackupManagerServiceTest {
      * Test that {@link BackupManagerService#dump()} dumps system user information before non-system
      * user information.
      */
-
     @Test
     public void testDump_systemUserFirst() {
         String[] args = new String[0];
@@ -539,16 +537,31 @@ public class BackupManagerServiceTest {
     }
 
     @Test
-    @Ignore("b/147012496")
-    public void testGetUserForAncestralSerialNumber() {
+    public void testGetUserForAncestralSerialNumber_forSystemUser() {
         BackupManagerServiceTestable.sBackupDisabled = false;
         BackupManagerService backupManagerService =
                 new BackupManagerServiceTestable(mContextMock, mUserServices);
+        when(mUserManagerMock.getProfileIds(UserHandle.getCallingUserId(), false))
+                .thenReturn(new int[] {UserHandle.USER_SYSTEM, NON_USER_SYSTEM});
         when(mUserBackupManagerService.getAncestralSerialNumber()).thenReturn(11L);
 
         UserHandle user = backupManagerService.getUserForAncestralSerialNumber(11L);
 
-        assertThat(user).isEqualTo(UserHandle.of(1));
+        assertThat(user).isEqualTo(UserHandle.of(UserHandle.USER_SYSTEM));
+    }
+
+    @Test
+    public void testGetUserForAncestralSerialNumber_forNonSystemUser() {
+        BackupManagerServiceTestable.sBackupDisabled = false;
+        BackupManagerService backupManagerService =
+                new BackupManagerServiceTestable(mContextMock, mUserServices);
+        when(mUserManagerMock.getProfileIds(UserHandle.getCallingUserId(), false))
+                .thenReturn(new int[] {UserHandle.USER_SYSTEM, NON_USER_SYSTEM});
+        when(mNonSystemUserBackupManagerService.getAncestralSerialNumber()).thenReturn(11L);
+
+        UserHandle user = backupManagerService.getUserForAncestralSerialNumber(11L);
+
+        assertThat(user).isEqualTo(UserHandle.of(NON_USER_SYSTEM));
     }
 
     @Test
