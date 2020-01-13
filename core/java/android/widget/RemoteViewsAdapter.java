@@ -19,11 +19,11 @@ package android.widget;
 import static android.widget.RemoteViews.EXTRA_REMOTEADAPTER_APPWIDGET_ID;
 import static android.widget.RemoteViews.EXTRA_REMOTEADAPTER_ON_LIGHT_BACKGROUND;
 
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.app.IServiceConnection;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;

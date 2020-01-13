@@ -16,28 +16,17 @@
 
 package com.android.internal.app;
 
-import com.android.internal.R;
-import com.android.internal.view.ActionBarPolicy;
-import com.android.internal.view.menu.MenuBuilder;
-import com.android.internal.view.menu.MenuPopupHelper;
-import com.android.internal.view.menu.SubMenuBuilder;
-import com.android.internal.widget.ActionBarContainer;
-import com.android.internal.widget.ActionBarContextView;
-import com.android.internal.widget.ActionBarOverlayLayout;
-import com.android.internal.widget.DecorToolbar;
-import com.android.internal.widget.ScrollingTabContainerView;
-
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.FragmentTransaction;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -57,6 +46,17 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.widget.SpinnerAdapter;
 import android.widget.Toolbar;
+
+import com.android.internal.R;
+import com.android.internal.view.ActionBarPolicy;
+import com.android.internal.view.menu.MenuBuilder;
+import com.android.internal.view.menu.MenuPopupHelper;
+import com.android.internal.view.menu.SubMenuBuilder;
+import com.android.internal.widget.ActionBarContainer;
+import com.android.internal.widget.ActionBarContextView;
+import com.android.internal.widget.ActionBarOverlayLayout;
+import com.android.internal.widget.DecorToolbar;
+import com.android.internal.widget.ScrollingTabContainerView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

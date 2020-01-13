@@ -16,9 +16,9 @@
 
 package com.android.internal.policy;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.KeyguardManager;
 import android.app.SearchManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -33,7 +33,6 @@ import android.view.FallbackEventHandler;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.View;
-import com.android.internal.policy.PhoneWindow;
 
 /**
  * @hide
