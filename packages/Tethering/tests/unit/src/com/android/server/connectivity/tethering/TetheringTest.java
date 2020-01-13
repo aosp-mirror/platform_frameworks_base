@@ -224,6 +224,11 @@ public class TetheringTest {
             if (TelephonyManager.class.equals(serviceClass)) return Context.TELEPHONY_SERVICE;
             return super.getSystemServiceName(serviceClass);
         }
+
+        @Override
+        public Context createContextAsUser(UserHandle user, int flags) {
+            return mContext;
+        }
     }
 
     public class MockIpServerDependencies extends IpServer.Dependencies {
@@ -432,6 +437,7 @@ public class TetheringTest {
                 .thenReturn(true);
 
         mServiceContext = new TestContext(mContext);
+        when(mContext.getSystemService(Context.NOTIFICATION_SERVICE)).thenReturn(null);
         mContentResolver = new MockContentResolver(mServiceContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         Settings.Global.putInt(mContentResolver, TETHER_ENABLE_LEGACY_DHCP_SERVER, 0);

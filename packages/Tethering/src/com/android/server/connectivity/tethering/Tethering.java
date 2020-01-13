@@ -688,7 +688,8 @@ public class Tethering {
     @VisibleForTesting
     protected void showTetheredNotification(int id, boolean tetheringOn) {
         NotificationManager notificationManager =
-                (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                (NotificationManager) mContext.createContextAsUser(UserHandle.ALL, 0)
+                        .getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager == null) {
             return;
         }
@@ -716,8 +717,7 @@ public class Tethering {
             if (mLastNotificationId == icon) {
                 return;
             }
-            notificationManager.cancelAsUser(null, mLastNotificationId,
-                    UserHandle.ALL);
+            notificationManager.cancel(null, mLastNotificationId);
             mLastNotificationId = 0;
         }
 
@@ -725,8 +725,8 @@ public class Tethering {
         intent.setClassName("com.android.settings", "com.android.settings.TetherSettings");
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
-        PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0, intent, 0,
-                null, UserHandle.CURRENT);
+        PendingIntent pi = PendingIntent.getActivity(
+                mContext.createContextAsUser(UserHandle.CURRENT, 0), 0, intent, 0, null);
 
         Resources r = mContext.getResources();
         final CharSequence title;
@@ -755,17 +755,17 @@ public class Tethering {
                 .setContentIntent(pi);
         mLastNotificationId = id;
 
-        notificationManager.notifyAsUser(null, mLastNotificationId,
-                mTetheredNotificationBuilder.buildInto(new Notification()), UserHandle.ALL);
+        notificationManager.notify(null, mLastNotificationId,
+                mTetheredNotificationBuilder.buildInto(new Notification()));
     }
 
     @VisibleForTesting
     protected void clearTetheredNotification() {
         NotificationManager notificationManager =
-                (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                (NotificationManager) mContext.createContextAsUser(UserHandle.ALL, 0)
+                        .getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null && mLastNotificationId != 0) {
-            notificationManager.cancelAsUser(null, mLastNotificationId,
-                    UserHandle.ALL);
+            notificationManager.cancel(null, mLastNotificationId);
             mLastNotificationId = 0;
         }
     }
