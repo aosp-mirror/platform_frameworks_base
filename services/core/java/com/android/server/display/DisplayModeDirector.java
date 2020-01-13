@@ -76,7 +76,7 @@ public class DisplayModeDirector {
     private static final int GLOBAL_ID = -1;
 
     // The tolerance within which we consider something approximately equals.
-    private static final float EPSILON = 0.001f;
+    private static final float EPSILON = 0.01f;
 
     private final Object mLock = new Object();
     private final Context mContext;
