@@ -58,7 +58,7 @@ public abstract class NetworkAgent extends Handler {
     private static final long BW_REFRESH_MIN_WIN_MS = 500;
     private boolean mPollLceScheduled = false;
     private AtomicBoolean mPollLcePending = new AtomicBoolean(false);
-    public final int mFactorySerialNumber;
+    public final int mProviderId;
 
     private static final int BASE = Protocol.BASE_NETWORK_AGENT;
 
@@ -219,25 +219,25 @@ public abstract class NetworkAgent extends Handler {
     // the entire tree.
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
-        this(looper, context, logTag, ni, nc, lp, score, null, NetworkFactory.SerialNumber.NONE);
+        this(looper, context, logTag, ni, nc, lp, score, null, NetworkProvider.ID_NONE);
     }
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score, NetworkMisc misc) {
-        this(looper, context, logTag, ni, nc, lp, score, misc, NetworkFactory.SerialNumber.NONE);
+        this(looper, context, logTag, ni, nc, lp, score, misc, NetworkProvider.ID_NONE);
     }
 
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
-            NetworkCapabilities nc, LinkProperties lp, int score, int factorySerialNumber) {
-        this(looper, context, logTag, ni, nc, lp, score, null, factorySerialNumber);
+            NetworkCapabilities nc, LinkProperties lp, int score, int providerId) {
+        this(looper, context, logTag, ni, nc, lp, score, null, providerId);
     }
 
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score, NetworkMisc misc,
-            int factorySerialNumber) {
+            int providerId) {
         super(looper);
         LOG_TAG = logTag;
         mContext = context;
-        mFactorySerialNumber = factorySerialNumber;
+        mProviderId = providerId;
         if (ni == null || nc == null || lp == null) {
             throw new IllegalArgumentException();
         }
@@ -246,8 +246,7 @@ public abstract class NetworkAgent extends Handler {
         ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
         netId = cm.registerNetworkAgent(new Messenger(this), new NetworkInfo(ni),
-                new LinkProperties(lp), new NetworkCapabilities(nc), score, misc,
-                factorySerialNumber);
+                new LinkProperties(lp), new NetworkCapabilities(nc), score, misc, providerId);
     }
 
     @Override
