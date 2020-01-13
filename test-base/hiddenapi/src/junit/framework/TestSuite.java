@@ -16,7 +16,7 @@
 
 package junit.framework;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.lang.reflect.Method;
 

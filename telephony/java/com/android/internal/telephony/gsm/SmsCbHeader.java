@@ -16,12 +16,11 @@
 
 package com.android.internal.telephony.gsm;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.telephony.SmsCbCmasInfo;
 import android.telephony.SmsCbEtwsInfo;
 
 import com.android.internal.telephony.SmsConstants;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.util.Arrays;
 import java.util.Locale;
