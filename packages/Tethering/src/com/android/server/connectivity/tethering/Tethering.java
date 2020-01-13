@@ -107,7 +107,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.State;
@@ -663,19 +662,19 @@ public class Tethering {
 
         if (usbTethered) {
             if (wifiTethered || bluetoothTethered) {
-                showTetheredNotification(SystemMessage.NOTE_TETHER_GENERAL);
+                showTetheredNotification(R.drawable.stat_sys_tether_general);
             } else {
-                showTetheredNotification(SystemMessage.NOTE_TETHER_USB);
+                showTetheredNotification(R.drawable.stat_sys_tether_usb);
             }
         } else if (wifiTethered) {
             if (bluetoothTethered) {
-                showTetheredNotification(SystemMessage.NOTE_TETHER_GENERAL);
+                showTetheredNotification(R.drawable.stat_sys_tether_general);
             } else {
                 /* We now have a status bar icon for WifiTethering, so drop the notification */
                 clearTetheredNotification();
             }
         } else if (bluetoothTethered) {
-            showTetheredNotification(SystemMessage.NOTE_TETHER_BLUETOOTH);
+            showTetheredNotification(R.drawable.stat_sys_tether_bluetooth);
         } else {
             clearTetheredNotification();
         }
@@ -699,22 +698,8 @@ public class Tethering {
                 NotificationManager.IMPORTANCE_LOW);
         notificationManager.createNotificationChannel(channel);
 
-        int icon = 0;
-        switch(id) {
-            case SystemMessage.NOTE_TETHER_USB:
-                icon = R.drawable.stat_sys_tether_usb;
-                break;
-            case SystemMessage.NOTE_TETHER_BLUETOOTH:
-                icon = R.drawable.stat_sys_tether_bluetooth;
-                break;
-            case SystemMessage.NOTE_TETHER_GENERAL:
-            default:
-                icon = R.drawable.stat_sys_tether_general;
-                break;
-        }
-
         if (mLastNotificationId != 0) {
-            if (mLastNotificationId == icon) {
+            if (mLastNotificationId == id) {
                 return;
             }
             notificationManager.cancel(null, mLastNotificationId);
@@ -749,7 +734,7 @@ public class Tethering {
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
                     .setCategory(Notification.CATEGORY_STATUS);
         }
-        mTetheredNotificationBuilder.setSmallIcon(icon)
+        mTetheredNotificationBuilder.setSmallIcon(id)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setContentIntent(pi);
