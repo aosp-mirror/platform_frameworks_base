@@ -3622,14 +3622,26 @@ public class ConnectivityManager {
     /**
      * Helper function to request a network with a particular legacy type.
      *
-     * This is temporarily public @hide so it can be called by system code that uses the
-     * NetworkRequest API to request networks but relies on CONNECTIVITY_ACTION broadcasts for
-     * instead network notifications.
+     * @deprecated This is temporarily public for tethering to backwards compatibility that uses
+     * the NetworkRequest API to request networks with legacy type and relies on
+     * CONNECTIVITY_ACTION broadcasts instead of NetworkCallbacks. New caller should use
+     * {@link #requestNetwork(NetworkRequest, NetworkCallback, Handler)} instead.
      *
      * TODO: update said system code to rely on NetworkCallbacks and make this method private.
+
+     * @param request {@link NetworkRequest} describing this request.
+     * @param networkCallback The {@link NetworkCallback} to be utilized for this request. Note
+     *                        the callback must not be shared - it uniquely specifies this request.
+     * @param timeoutMs The time in milliseconds to attempt looking for a suitable network
+     *                  before {@link NetworkCallback#onUnavailable()} is called. The timeout must
+     *                  be a positive value (i.e. >0).
+     * @param legacyType to specify the network type(#TYPE_*).
+     * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
      *
      * @hide
      */
+    @SystemApi
+    @Deprecated
     public void requestNetwork(@NonNull NetworkRequest request,
             @NonNull NetworkCallback networkCallback, int timeoutMs, int legacyType,
             @NonNull Handler handler) {
