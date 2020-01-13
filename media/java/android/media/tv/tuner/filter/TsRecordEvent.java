@@ -16,8 +16,6 @@
 
 package android.media.tv.tuner.filter;
 
-import android.media.tv.tuner.Tuner.Filter;
-
 
 /**
  * Filter event sent from {@link Filter} objects for TS record data.

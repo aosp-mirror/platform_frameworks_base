@@ -17,13 +17,14 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
-import android.media.tv.tuner.TunerConstants.FilterStatus;
+import android.annotation.SystemApi;
 
 /**
  * Callback interface for receiving information from the corresponding filters.
  *
  * @hide
  */
+@SystemApi
 public interface FilterCallback {
     /**
      * Invoked when there are filter events.
@@ -38,5 +39,5 @@ public interface FilterCallback {
      * @param filter the corresponding filter whose status is changed.
      * @param status the new status of the filter.
      */
-    void onFilterStatusChanged(@NonNull Filter filter, @FilterStatus int status);
+    void onFilterStatusChanged(@NonNull Filter filter, @Filter.Status int status);
 }

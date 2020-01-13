@@ -4691,6 +4691,7 @@ package android.media.tv.tuner {
     ctor public Tuner(@NonNull android.content.Context);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void clearOnTuneEventListener();
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.Tuner.Descrambler openDescrambler();
+    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.filter.Filter openFilter(int, int, long, @Nullable java.util.concurrent.Executor, @Nullable android.media.tv.tuner.filter.FilterCallback);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void setOnTuneEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.OnTuneEventListener);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int stopTune();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int tune(@NonNull android.media.tv.tuner.frontend.FrontendSettings);
@@ -4699,19 +4700,7 @@ package android.media.tv.tuner {
   public class Tuner.Descrambler {
   }
 
-  public class Tuner.Filter {
-  }
-
-  public static interface Tuner.FilterCallback {
-    method public void onFilterEvent(@NonNull android.media.tv.tuner.Tuner.Filter, @NonNull android.media.tv.tuner.filter.FilterEvent[]);
-    method public void onFilterStatusChanged(@NonNull android.media.tv.tuner.Tuner.Filter, int);
-  }
-
   public final class TunerConstants {
-    field public static final int FILTER_STATUS_DATA_READY = 1; // 0x1
-    field public static final int FILTER_STATUS_HIGH_WATER = 4; // 0x4
-    field public static final int FILTER_STATUS_LOW_WATER = 2; // 0x2
-    field public static final int FILTER_STATUS_OVERFLOW = 8; // 0x8
     field public static final int RESULT_INVALID_ARGUMENT = 4; // 0x4
     field public static final int RESULT_INVALID_STATE = 3; // 0x3
     field public static final int RESULT_NOT_INITIALIZED = 2; // 0x2
@@ -4725,12 +4714,49 @@ package android.media.tv.tuner {
 
 package android.media.tv.tuner.filter {
 
+  public class Filter implements java.lang.AutoCloseable {
+    method public void close();
+    method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
+    method public int flush();
+    method public int getId();
+    method public int read(@NonNull byte[], long, long);
+    method public int setDataSource(@Nullable android.media.tv.tuner.filter.Filter);
+    method public int start();
+    method public int stop();
+    field public static final int STATUS_DATA_READY = 1; // 0x1
+    field public static final int STATUS_HIGH_WATER = 4; // 0x4
+    field public static final int STATUS_LOW_WATER = 2; // 0x2
+    field public static final int STATUS_OVERFLOW = 8; // 0x8
+    field public static final int SUBTYPE_AUDIO = 3; // 0x3
+    field public static final int SUBTYPE_DOWNLOAD = 5; // 0x5
+    field public static final int SUBTYPE_IP = 13; // 0xd
+    field public static final int SUBTYPE_IP_PAYLOAD = 12; // 0xc
+    field public static final int SUBTYPE_MMTP = 10; // 0xa
+    field public static final int SUBTYPE_NTP = 11; // 0xb
+    field public static final int SUBTYPE_PAYLOAD_THROUGH = 14; // 0xe
+    field public static final int SUBTYPE_PCR = 8; // 0x8
+    field public static final int SUBTYPE_PES = 2; // 0x2
+    field public static final int SUBTYPE_PTP = 16; // 0x10
+    field public static final int SUBTYPE_RECORD = 6; // 0x6
+    field public static final int SUBTYPE_SECTION = 1; // 0x1
+    field public static final int SUBTYPE_TEMI = 9; // 0x9
+    field public static final int SUBTYPE_TLV = 15; // 0xf
+    field public static final int SUBTYPE_TS = 7; // 0x7
+    field public static final int SUBTYPE_UNDEFINED = 0; // 0x0
+    field public static final int SUBTYPE_VIDEO = 4; // 0x4
+    field public static final int TYPE_ALP = 16; // 0x10
+    field public static final int TYPE_IP = 4; // 0x4
+    field public static final int TYPE_MMTP = 2; // 0x2
+    field public static final int TYPE_TLV = 8; // 0x8
+    field public static final int TYPE_TS = 1; // 0x1
+  }
+
+  public interface FilterCallback {
+    method public void onFilterEvent(@NonNull android.media.tv.tuner.filter.Filter, @NonNull android.media.tv.tuner.filter.FilterEvent[]);
+    method public void onFilterStatusChanged(@NonNull android.media.tv.tuner.filter.Filter, int);
+  }
+
   public abstract class FilterConfiguration {
-    field public static final int FILTER_TYPE_ALP = 16; // 0x10
-    field public static final int FILTER_TYPE_IP = 4; // 0x4
-    field public static final int FILTER_TYPE_MMTP = 2; // 0x2
-    field public static final int FILTER_TYPE_TLV = 8; // 0x8
-    field public static final int FILTER_TYPE_TS = 1; // 0x1
   }
 
   public abstract class FilterEvent {

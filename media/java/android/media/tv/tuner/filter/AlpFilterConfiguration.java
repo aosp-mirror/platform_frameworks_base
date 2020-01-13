@@ -65,7 +65,7 @@ public class AlpFilterConfiguration extends FilterConfiguration {
 
     @Override
     public int getType() {
-        return FilterConfiguration.FILTER_TYPE_ALP;
+        return Filter.TYPE_ALP;
     }
 
     /**

@@ -18,7 +18,6 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.BytesLong;
 import android.annotation.Nullable;
-import android.media.tv.tuner.Tuner.Filter;
 
 /**
  * Filter event sent from {@link Filter} objects with media type.

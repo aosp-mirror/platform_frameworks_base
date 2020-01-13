@@ -20,8 +20,8 @@ import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
-import android.media.tv.tuner.Tuner.FilterCallback;
 import android.media.tv.tuner.TunerConstants.Result;
 
 import java.lang.annotation.Retention;
@@ -34,6 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@SystemApi
 public class Filter implements AutoCloseable {
     /** @hide */
     @IntDef(prefix = "TYPE_",
@@ -72,89 +73,105 @@ public class Filter implements AutoCloseable {
     public @interface Subtype {}
     /**
      * Filter subtype undefined.
-     * @hide
      */
     public static final int SUBTYPE_UNDEFINED = 0;
     /**
      * Section filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_SECTION = 1;
     /**
      * PES filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_PES = 2;
     /**
      * Audio filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_AUDIO = 3;
     /**
      * Video filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_VIDEO = 4;
     /**
      * Download filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_DOWNLOAD = 5;
     /**
      * Record filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_RECORD = 6;
     /**
      * TS filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_TS = 7;
     /**
      * PCR filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_PCR = 8;
     /**
      * TEMI filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_TEMI = 9;
     /**
      * MMTP filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_MMTP = 10;
     /**
      * NTP filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_NTP = 11;
     /**
      * Payload filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_IP_PAYLOAD = 12;
     /**
      * IP filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_IP = 13;
     /**
      * Payload through filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_PAYLOAD_THROUGH = 14;
     /**
      * TLV filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_TLV = 15;
     /**
      * PTP filter subtype.
-     * @hide
      */
     public static final int SUBTYPE_PTP = 16;
+
+
+
+    /** @hide */
+    @IntDef(flag = true, prefix = "STATUS_", value = {STATUS_DATA_READY, STATUS_LOW_WATER,
+            STATUS_HIGH_WATER, STATUS_OVERFLOW})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Status {}
+
+    /**
+     * The status of a filter that the data in the filter buffer is ready to be read.
+     */
+    public static final int STATUS_DATA_READY = Constants.DemuxFilterStatus.DATA_READY;
+    /**
+     * The status of a filter that the amount of available data in the filter buffer is at low
+     * level.
+     *
+     * The value is set to 25 percent of the buffer size by default. It can be changed when
+     * configuring the filter.
+     */
+    public static final int STATUS_LOW_WATER = Constants.DemuxFilterStatus.LOW_WATER;
+    /**
+     * The status of a filter that the amount of available data in the filter buffer is at high
+     * level.
+     * The value is set to 75 percent of the buffer size by default. It can be changed when
+     * configuring the filter.
+     */
+    public static final int STATUS_HIGH_WATER = Constants.DemuxFilterStatus.HIGH_WATER;
+    /**
+     * The status of a filter that the filter buffer is full and newly filtered data is being
+     * discarded.
+     */
+    public static final int STATUS_OVERFLOW = Constants.DemuxFilterStatus.OVERFLOW;
 
 
     private long mNativeContext;
@@ -171,11 +188,21 @@ public class Filter implements AutoCloseable {
     private native int nativeRead(byte[] buffer, long offset, long size);
     private native int nativeClose();
 
+    // Called by JNI
     private Filter(int id) {
         mId = id;
     }
 
     private void onFilterStatus(int status) {
+    }
+
+    /** @hide */
+    public void setCallback(FilterCallback cb) {
+        mCallback = cb;
+    }
+    /** @hide */
+    public FilterCallback getCallback() {
+        return mCallback;
     }
 
     /**
@@ -241,7 +268,10 @@ public class Filter implements AutoCloseable {
     }
 
     /**
-     * Flushes the filter. Data in filter buffer is cleared.
+     * Flushes the filter.
+     *
+     * <p>The data which is already produced by filter but not consumed yet will
+     * be cleared.
      *
      * @return result status of the operation.
      */
@@ -251,7 +281,7 @@ public class Filter implements AutoCloseable {
     }
 
     /**
-     * Copies filtered data from filter buffer to the given byte array.
+     * Copies filtered data from filter output to the given byte array.
      *
      * @param buffer the buffer to store the filtered data.
      * @param offset the index of the first byte in {@code buffer} to write.

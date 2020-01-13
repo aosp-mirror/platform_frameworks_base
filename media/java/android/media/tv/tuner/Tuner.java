@@ -23,14 +23,14 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.media.tv.tuner.TunerConstants.FilterStatus;
 import android.media.tv.tuner.TunerConstants.Result;
 import android.media.tv.tuner.dvr.Dvr;
 import android.media.tv.tuner.dvr.DvrCallback;
 import android.media.tv.tuner.dvr.DvrSettings;
+import android.media.tv.tuner.filter.Filter;
 import android.media.tv.tuner.filter.Filter.Subtype;
 import android.media.tv.tuner.filter.Filter.Type;
-import android.media.tv.tuner.filter.FilterEvent;
+import android.media.tv.tuner.filter.FilterCallback;
 import android.media.tv.tuner.filter.TimeFilter;
 import android.media.tv.tuner.frontend.FrontendInfo;
 import android.media.tv.tuner.frontend.FrontendSettings;
@@ -172,28 +172,6 @@ public final class Tuner implements AutoCloseable  {
 
 
     /**
-     * Callback interface for receiving information from the corresponding filters.
-     * TODO: remove
-     */
-    public interface FilterCallback {
-        /**
-         * Invoked when there are filter events.
-         *
-         * @param filter the corresponding filter which sent the events.
-         * @param events the filter events sent from the filter.
-         */
-        void onFilterEvent(@NonNull Filter filter, @NonNull FilterEvent[] events);
-        /**
-         * Invoked when filter status changed.
-         *
-         * @param filter the corresponding filter whose status is changed.
-         * @param status the new status of the filter.
-         */
-        void onFilterStatusChanged(@NonNull Filter filter, @FilterStatus int status);
-    }
-
-
-    /**
      * Listener for resource lost.
      *
      * @hide
@@ -228,8 +206,8 @@ public final class Tuner implements AutoCloseable  {
             switch (msg.what) {
                 case MSG_ON_FILTER_STATUS: {
                     Filter filter = (Filter) msg.obj;
-                    if (filter.mCallback != null) {
-                        filter.mCallback.onFilterStatusChanged(filter, msg.arg1);
+                    if (filter.getCallback() != null) {
+                        filter.getCallback().onFilterStatusChanged(filter, msg.arg1);
                     }
                     break;
                 }
@@ -549,17 +527,6 @@ public final class Tuner implements AutoCloseable  {
     }
 
     /**
-     * Tuner data filter.
-     *
-     * <p> This class is used to filter wanted data according to the filter's configuration.
-     * TODO: remove
-     */
-    public class Filter {
-        FilterCallback mCallback;
-        private Filter() {}
-    }
-
-    /**
      * Opens a filter object based on the given types and buffer size.
      *
      * @param mainType the main type of the filter.
@@ -570,8 +537,6 @@ public final class Tuner implements AutoCloseable  {
      * executor is used if it's {@code null}.
      * @param cb the callback to receive notifications from filter.
      * @return the opened filter. {@code null} if the operation failed.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Nullable
@@ -582,7 +547,7 @@ public final class Tuner implements AutoCloseable  {
         Filter filter = nativeOpenFilter(
                 mainType, TunerUtils.getFilterSubtype(mainType, subType), bufferSize);
         if (filter != null) {
-            filter.mCallback = cb;
+            filter.setCallback(cb);
             if (mHandler == null) {
                 mHandler = createEventHandler();
             }

@@ -17,7 +17,6 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.SystemApi;
-import android.media.tv.tuner.Tuner.Filter;
 
 /**
  * Filter event sent from {@link Filter} objects with section type.

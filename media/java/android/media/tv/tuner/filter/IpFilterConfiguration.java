@@ -45,7 +45,7 @@ public class IpFilterConfiguration extends FilterConfiguration {
 
     @Override
     public int getType() {
-        return FilterConfiguration.FILTER_TYPE_IP;
+        return Filter.TYPE_IP;
     }
 
     /**

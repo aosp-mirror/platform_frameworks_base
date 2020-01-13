@@ -40,7 +40,7 @@ public class TlvFilterConfiguration extends FilterConfiguration {
 
     @Override
     public int getType() {
-        return FilterConfiguration.FILTER_TYPE_TLV;
+        return Filter.TYPE_TLV;
     }
 
     /**
