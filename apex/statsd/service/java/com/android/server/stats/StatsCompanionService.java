@@ -910,33 +910,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullBluetoothActivityInfo(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        BluetoothActivityEnergyInfo info = fetchBluetoothData();
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-        e.writeLong(info.getTimeStamp());
-        e.writeInt(info.getBluetoothStackState());
-        e.writeLong(info.getControllerTxTimeMillis());
-        e.writeLong(info.getControllerRxTimeMillis());
-        e.writeLong(info.getControllerIdleTimeMillis());
-        e.writeLong(info.getControllerEnergyUsed());
-        pulledData.add(e);
-    }
-
-    private synchronized BluetoothActivityEnergyInfo fetchBluetoothData() {
-        final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter != null) {
-            SynchronousResultReceiver bluetoothReceiver = new SynchronousResultReceiver(
-                    "bluetooth");
-            adapter.requestControllerActivityEnergyInfo(bluetoothReceiver);
-            return awaitControllerInfo(bluetoothReceiver);
-        } else {
-            Slog.e(TAG, "Failed to get bluetooth adapter!");
-            return null;
-        }
-    }
-
     private void pullSystemElapsedRealtime(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2187,11 +2160,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.MODEM_ACTIVITY_INFO: {
                 pullModemActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.BLUETOOTH_ACTIVITY_INFO: {
-                pullBluetoothActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

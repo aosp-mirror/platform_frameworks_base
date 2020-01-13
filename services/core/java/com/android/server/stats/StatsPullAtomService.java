@@ -675,11 +675,31 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerBluetoothActivityInfo() {
-        // No op.
+        int tagId = StatsLog.BLUETOOTH_ACTIVITY_INFO;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                /* metadata */ null,
+                (atomTag, data) -> pullBluetoothActivityInfo(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullBluetoothActivityInfo() {
-        // No op.
+    private int pullBluetoothActivityInfo(int atomTag, List<StatsEvent> pulledData) {
+        BluetoothActivityEnergyInfo info = fetchBluetoothData();
+        if (info == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeLong(info.getTimeStamp())
+                .writeInt(info.getBluetoothStackState())
+                .writeLong(info.getControllerTxTimeMillis())
+                .writeLong(info.getControllerRxTimeMillis())
+                .writeLong(info.getControllerIdleTimeMillis())
+                .writeLong(info.getControllerEnergyUsed())
+                .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerSystemElapsedRealtime() {

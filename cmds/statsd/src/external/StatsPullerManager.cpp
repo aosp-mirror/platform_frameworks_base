@@ -111,10 +111,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::MODEM_ACTIVITY_INFO},
          {.puller = new StatsCompanionServicePuller(android::util::MODEM_ACTIVITY_INFO)}},
 
-        // bluetooth_activity_info
-        {{.atomTag = android::util::BLUETOOTH_ACTIVITY_INFO},
-         {.puller = new StatsCompanionServicePuller(android::util::BLUETOOTH_ACTIVITY_INFO)}},
-
         // system_elapsed_realtime
         {{.atomTag = android::util::SYSTEM_ELAPSED_REALTIME},
          {.coolDownNs = NS_PER_SEC,
