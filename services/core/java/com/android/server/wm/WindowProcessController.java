@@ -178,7 +178,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private long mLastActivityFinishTime;
 
     // Last configuration that was reported to the process.
-    private final Configuration mLastReportedConfiguration;
+    private final Configuration mLastReportedConfiguration = new Configuration();
     // Configuration that is waiting to be dispatched to the process.
     private Configuration mPendingConfiguration;
     private final Configuration mNewOverrideConfig = new Configuration();
@@ -192,7 +192,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Whether our process is currently running a {@link IRemoteAnimationRunner} */
     private boolean mRunningRemoteAnimation;
 
-    public WindowProcessController(ActivityTaskManagerService atm, ApplicationInfo info,
+    public WindowProcessController(@NonNull ActivityTaskManagerService atm, ApplicationInfo info,
             String name, int uid, int userId, Object owner, WindowProcessListener listener) {
         mInfo = info;
         mName = name;
@@ -201,11 +201,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mOwner = owner;
         mListener = listener;
         mAtm = atm;
-        mLastReportedConfiguration = new Configuration();
         mDisplayId = INVALID_DISPLAY;
-        if (atm != null) {
-            onConfigurationChanged(atm.getGlobalConfiguration());
-        }
+        onConfigurationChanged(atm.getGlobalConfiguration());
     }
 
     public void setPid(int pid) {
@@ -220,6 +217,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     public void setThread(IApplicationThread thread) {
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             mThread = thread;
+            // In general this is called from attaching application, so the last configuration
+            // has been sent to client by {@link android.app.IApplicationThread#bindApplication}.
+            // If this process is system server, it is fine because system is booting and a new
+            // configuration will update when display is ready.
+            setLastReportedConfiguration(getConfiguration());
         }
     }
 
@@ -1060,7 +1062,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mNewOverrideConfig.setTo(mergedOverrideConfig);
         mNewOverrideConfig.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
         super.onRequestedOverrideConfigurationChanged(mNewOverrideConfig);
-        updateConfiguration();
     }
 
     private void updateConfiguration() {
