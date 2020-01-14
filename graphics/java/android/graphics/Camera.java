@@ -16,7 +16,7 @@
 
 package android.graphics;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * A camera instance can be used to compute 3D transformations and

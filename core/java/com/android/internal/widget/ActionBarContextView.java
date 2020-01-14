@@ -15,13 +15,7 @@
  */
 package com.android.internal.widget;
 
-import com.android.internal.R;
-
-import android.widget.ActionMenuPresenter;
-import android.widget.ActionMenuView;
-import com.android.internal.view.menu.MenuBuilder;
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -32,8 +26,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.ActionMenuPresenter;
+import android.widget.ActionMenuView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.android.internal.R;
+import com.android.internal.view.menu.MenuBuilder;
 
 /**
  * @hide

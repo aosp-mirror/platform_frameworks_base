@@ -15,26 +15,25 @@
  */
 package com.android.internal.widget;
 
-import com.android.internal.R;
-
-import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
-import android.view.MotionEvent;
-import android.widget.ActionMenuPresenter;
-import android.widget.ActionMenuView;
-
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.ActionMenuPresenter;
+import android.widget.ActionMenuView;
+
+import com.android.internal.R;
 
 public abstract class AbsActionBarView extends ViewGroup {
     private static final TimeInterpolator sAlphaInterpolator = new DecelerateInterpolator();

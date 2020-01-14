@@ -16,7 +16,7 @@
 
 package com.android.internal.widget;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.method.KeyListener;

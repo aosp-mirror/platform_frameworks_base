@@ -16,13 +16,12 @@
 
 package com.android.internal.view.menu;
 
-import com.android.internal.view.menu.MenuBuilder.ItemInvoker;
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.text.Layout;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -30,7 +29,8 @@ import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewDebug;
 import android.widget.TextView;
-import android.text.Layout;
+
+import com.android.internal.view.menu.MenuBuilder.ItemInvoker;
 
 /**
  * The item view for each item in the {@link IconMenuView}.
