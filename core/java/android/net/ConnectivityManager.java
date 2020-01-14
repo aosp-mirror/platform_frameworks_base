@@ -3169,10 +3169,10 @@ public class ConnectivityManager {
     /**
      * @hide
      * Register a NetworkAgent with ConnectivityService.
-     * @return NetID corresponding to NetworkAgent.
+     * @return Network corresponding to NetworkAgent.
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
-    public int registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
+    public Network registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkAgentConfig config) {
         return registerNetworkAgent(messenger, ni, lp, nc, score, config, NetworkProvider.ID_NONE);
     }
@@ -3180,10 +3180,10 @@ public class ConnectivityManager {
     /**
      * @hide
      * Register a NetworkAgent with ConnectivityService.
-     * @return NetID corresponding to NetworkAgent.
+     * @return Network corresponding to NetworkAgent.
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
-    public int registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
+    public Network registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkAgentConfig config, int providerId) {
         try {
             return mService.registerNetworkAgent(messenger, ni, lp, nc, score, config, providerId);
