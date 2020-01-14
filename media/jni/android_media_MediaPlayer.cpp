@@ -1453,6 +1453,7 @@ extern int register_android_media_MediaProfiles(JNIEnv *env);
 extern int register_android_mtp_MtpDatabase(JNIEnv *env);
 extern int register_android_mtp_MtpDevice(JNIEnv *env);
 extern int register_android_mtp_MtpServer(JNIEnv *env);
+extern int register_android_media_MediaTranscodeManager(JNIEnv *env);
 
 jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 {
@@ -1562,6 +1563,11 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 
     if (register_android_media_MediaHTTPConnection(env) < 0) {
         ALOGE("ERROR: MediaHTTPConnection native registration failed");
+        goto bail;
+    }
+
+    if (register_android_media_MediaTranscodeManager(env) < 0) {
+        ALOGE("ERROR: MediaTranscodeManager native registration failed");
         goto bail;
     }
 
