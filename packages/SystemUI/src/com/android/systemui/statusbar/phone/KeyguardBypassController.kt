@@ -38,11 +38,20 @@ open class KeyguardBypassController : Dumpable {
     private val mKeyguardStateController: KeyguardStateController
     private val statusBarStateController: StatusBarStateController
     private var hasFaceFeature: Boolean
+    private var pendingUnlock: PendingUnlock? = null
 
     /**
+     * Pending unlock info:
+     *
      * The pending unlock type which is set if the bypass was blocked when it happened.
+     *
+     * Whether the pending unlock type is strong biometric or non-strong biometric
+     * (i.e. weak or convenience).
      */
-    private var pendingUnlockType: BiometricSourceType? = null
+    private data class PendingUnlock(
+        val pendingUnlockType: BiometricSourceType,
+        val isStrongBiometric: Boolean
+    )
 
     lateinit var unlockController: BiometricUnlockController
     var isPulseExpanding = false
@@ -86,7 +95,7 @@ open class KeyguardBypassController : Dumpable {
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
             override fun onStateChanged(newState: Int) {
                 if (newState != StatusBarState.KEYGUARD) {
-                    pendingUnlockType = null
+                    pendingUnlock = null
                 }
             }
         })
@@ -101,7 +110,7 @@ open class KeyguardBypassController : Dumpable {
         lockscreenUserManager.addUserChangedListener(
                 object : NotificationLockscreenUserManager.UserChangedListener {
                     override fun onUserChanged(userId: Int) {
-                        pendingUnlockType = null
+                        pendingUnlock = null
                     }
                 })
     }
@@ -111,11 +120,14 @@ open class KeyguardBypassController : Dumpable {
      *
      * @return false if we can not wake and unlock right now
      */
-    fun onBiometricAuthenticated(biometricSourceType: BiometricSourceType): Boolean {
+    fun onBiometricAuthenticated(
+        biometricSourceType: BiometricSourceType,
+        isStrongBiometric: Boolean
+    ): Boolean {
         if (bypassEnabled) {
             val can = canBypass()
             if (!can && (isPulseExpanding || qSExpanded)) {
-                pendingUnlockType = biometricSourceType
+                pendingUnlock = PendingUnlock(biometricSourceType, isStrongBiometric)
             }
             return can
         }
@@ -123,10 +135,12 @@ open class KeyguardBypassController : Dumpable {
     }
 
     fun maybePerformPendingUnlock() {
-        if (pendingUnlockType != null) {
-            if (onBiometricAuthenticated(pendingUnlockType!!)) {
-                unlockController.startWakeAndUnlock(pendingUnlockType)
-                pendingUnlockType = null
+        if (pendingUnlock != null) {
+            if (onBiometricAuthenticated(pendingUnlock!!.pendingUnlockType,
+                            pendingUnlock!!.isStrongBiometric)) {
+                unlockController.startWakeAndUnlock(pendingUnlock!!.pendingUnlockType,
+                        pendingUnlock!!.isStrongBiometric)
+                pendingUnlock = null
             }
         }
     }
@@ -162,12 +176,17 @@ open class KeyguardBypassController : Dumpable {
     }
 
     fun onStartedGoingToSleep() {
-        pendingUnlockType = null
+        pendingUnlock = null
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.println("KeyguardBypassController:")
-        pw.println("  pendingUnlockType: $pendingUnlockType")
+        if (pendingUnlock != null) {
+            pw.println("  mPendingUnlock.pendingUnlockType: ${pendingUnlock!!.pendingUnlockType}")
+            pw.println("  mPendingUnlock.isStrongBiometric: ${pendingUnlock!!.isStrongBiometric}")
+        } else {
+            pw.println("  mPendingUnlock: $pendingUnlock")
+        }
         pw.println("  bypassEnabled: $bypassEnabled")
         pw.println("  canBypass: ${canBypass()}")
         pw.println("  bouncerShowing: $bouncerShowing")

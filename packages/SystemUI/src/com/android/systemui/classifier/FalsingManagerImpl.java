@@ -130,7 +130,8 @@ public class FalsingManagerImpl implements FalsingManager {
             new KeyguardUpdateMonitorCallback() {
                 @Override
                 public void onBiometricAuthenticated(int userId,
-                        BiometricSourceType biometricSourceType) {
+                        BiometricSourceType biometricSourceType,
+                        boolean isStrongBiometric) {
                     if (userId == KeyguardUpdateMonitor.getCurrentUser()
                             && biometricSourceType == BiometricSourceType.FACE) {
                         mJustUnlockedWithFace = true;

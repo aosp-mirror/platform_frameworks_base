@@ -17,6 +17,7 @@
 package com.android.server.locksettings;
 
 import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
+import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.READ_CONTACTS;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -178,6 +179,7 @@ import javax.crypto.spec.GCMParameterSpec;
 public class LockSettingsService extends ILockSettings.Stub {
     private static final String TAG = "LockSettingsService";
     private static final String PERMISSION = ACCESS_KEYGUARD_SECURE_STORAGE;
+    private static final String BIOMETRIC_PERMISSION = MANAGE_BIOMETRIC;
     private static final boolean DEBUG = false;
 
     private static final int PROFILE_KEY_IV_SIZE = 12;
@@ -1048,6 +1050,10 @@ public class LockSettingsService extends ILockSettings.Stub {
                         + requestedKey + " for user " + userId);
             }
         }
+    }
+
+    private final void checkBiometricPermission() {
+        mContext.enforceCallingOrSelfPermission(BIOMETRIC_PERMISSION, "LockSettingsBiometric");
     }
 
     @Override
@@ -2304,6 +2310,18 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
+    public void reportSuccessfulBiometricUnlock(boolean isStrongBiometric, int userId) {
+        checkBiometricPermission();
+        mStrongAuth.reportSuccessfulBiometricUnlock(isStrongBiometric, userId);
+    }
+
+    @Override
+    public void scheduleNonStrongBiometricIdleTimeout(int userId) {
+        checkBiometricPermission();
+        mStrongAuth.scheduleNonStrongBiometricIdleTimeout(userId);
+    }
+
+    @Override
     public void userPresent(int userId) {
         checkWritePermission(userId);
         mStrongAuth.reportUnlock(userId);
@@ -3189,6 +3207,12 @@ public class LockSettingsService extends ILockSettings.Stub {
         pw.println("Storage:");
         pw.increaseIndent();
         mStorage.dump(pw);
+        pw.println();
+        pw.decreaseIndent();
+
+        pw.println("StrongAuth:");
+        pw.increaseIndent();
+        mStrongAuth.dump(pw);
         pw.println();
         pw.decreaseIndent();
     }

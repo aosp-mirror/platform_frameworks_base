@@ -22,6 +22,7 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BA
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
@@ -537,7 +538,8 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         @Override
-        public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType) {
+        public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
+                boolean isStrongBiometric) {
             if (mLockPatternUtils.isSecure(userId)) {
                 mLockPatternUtils.getDevicePolicyManager().reportSuccessfulBiometricAttempt(
                         userId);
@@ -673,6 +675,9 @@ public class KeyguardViewMediator extends SystemUI {
                 return KeyguardSecurityView.PROMPT_REASON_AFTER_LOCKOUT;
             } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE) != 0) {
                 return KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE;
+            } else if (any && (strongAuth
+                    & STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT;
             }
             return KeyguardSecurityView.PROMPT_REASON_NONE;
         }
@@ -1839,6 +1844,13 @@ public class KeyguardViewMediator extends SystemUI {
             mShowKeyguardWakeLock.release();
         }
         mKeyguardDisplayManager.show();
+
+        // schedule 4hr idle timeout after which non-strong biometrics (i.e. weak or convenience
+        // biometric) can't be used to unlock device until unlocking with strong biometric or
+        // primary auth (i.e. PIN/pattern/password)
+        mLockPatternUtils.scheduleNonStrongBiometricIdleTimeout(
+                KeyguardUpdateMonitor.getCurrentUser());
+
         Trace.endSection();
     }
 
