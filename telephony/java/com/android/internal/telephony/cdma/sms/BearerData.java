@@ -18,7 +18,7 @@ package com.android.internal.telephony.cdma.sms;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
-import android.telephony.Rlog;
+import com.android.telephony.Rlog;
 import android.telephony.SmsCbCmasInfo;
 import android.telephony.cdma.CdmaSmsCbProgramData;
 import android.telephony.cdma.CdmaSmsCbProgramResults;
