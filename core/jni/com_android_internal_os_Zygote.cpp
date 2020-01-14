@@ -1156,6 +1156,36 @@ static void isolateAppDataPerPackage(int userId, std::string_view package_name,
   createAndMountAppData(package_name, ce_data_path, mirrorCePath, actualCePath, fail_fn);
 }
 
+// Relabel directory
+static void relabelDir(const char* path, security_context_t context, fail_fn_t fail_fn) {
+  if (setfilecon(path, context) != 0) {
+    fail_fn(CREATE_ERROR("Failed to setfilecon %s %s", path, strerror(errno)));
+  }
+}
+
+// Relabel all directories under a path non-recursively.
+static void relabelAllDirs(const char* path, security_context_t context, fail_fn_t fail_fn) {
+  DIR* dir = opendir(path);
+  if (dir == nullptr) {
+    fail_fn(CREATE_ERROR("Failed to opendir %s", path));
+  }
+  struct dirent* ent;
+  while ((ent = readdir(dir))) {
+    if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) continue;
+    auto filePath = StringPrintf("%s/%s", path, ent->d_name);
+    if (ent->d_type == DT_DIR) {
+      relabelDir(filePath.c_str(), context, fail_fn);
+    } else if (ent->d_type == DT_LNK) {
+      if (lsetfilecon(filePath.c_str(), context) != 0) {
+        fail_fn(CREATE_ERROR("Failed to lsetfilecon %s %s", filePath.c_str(), strerror(errno)));
+      }
+    } else {
+      fail_fn(CREATE_ERROR("Unexpected type: %d %s", ent->d_type, filePath.c_str()));
+    }
+  }
+  closedir(dir);
+}
+
 /**
  * Make other apps data directory not visible in CE, DE storage.
  *
@@ -1215,10 +1245,36 @@ static void isolateAppData(JNIEnv* env, jobjectArray pkg_data_info_list,
   snprintf(internalDePath, PATH_MAX, "/data/user_de");
   snprintf(externalPrivateMountPath, PATH_MAX, "/mnt/expand");
 
+  security_context_t dataDataContext = nullptr;
+  if (getfilecon(internalDePath, &dataDataContext) < 0) {
+    fail_fn(CREATE_ERROR("Unable to getfilecon on %s %s", internalDePath,
+        strerror(errno)));
+  }
+
   MountAppDataTmpFs(internalLegacyCePath, fail_fn);
   MountAppDataTmpFs(internalCePath, fail_fn);
   MountAppDataTmpFs(internalDePath, fail_fn);
-  MountAppDataTmpFs(externalPrivateMountPath, fail_fn);
+
+  // Mount tmpfs on all external vols DE and CE storage
+  DIR* dir = opendir(externalPrivateMountPath);
+  if (dir == nullptr) {
+    fail_fn(CREATE_ERROR("Failed to opendir %s", externalPrivateMountPath));
+  }
+  struct dirent* ent;
+  while ((ent = readdir(dir))) {
+    if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) continue;
+    if (ent->d_type != DT_DIR) {
+      fail_fn(CREATE_ERROR("Unexpected type: %d %s", ent->d_type, ent->d_name));
+    }
+    auto volPath = StringPrintf("%s/%s", externalPrivateMountPath, ent->d_name);
+    auto cePath = StringPrintf("%s/user", volPath.c_str());
+    auto dePath = StringPrintf("%s/user_de", volPath.c_str());
+    MountAppDataTmpFs(cePath.c_str(), fail_fn);
+    MountAppDataTmpFs(dePath.c_str(), fail_fn);
+  }
+  closedir(dir);
+
+  bool legacySymlinkCreated = false;
 
   for (int i = 0; i < size; i += 3) {
     jstring package_str = (jstring) (env->GetObjectArrayElement(pkg_data_info_list, i));
@@ -1266,7 +1322,14 @@ static void isolateAppData(JNIEnv* env, jobjectArray pkg_data_info_list,
       // If it's user 0, create a symlink /data/user/0 -> /data/data,
       // otherwise create /data/user/$USER
       if (userId == 0) {
-        symlink(internalLegacyCePath, internalCeUserPath);
+        if (!legacySymlinkCreated) {
+          legacySymlinkCreated = true;
+          int result = symlink(internalLegacyCePath, internalCeUserPath);
+          if (result != 0) {
+             fail_fn(CREATE_ERROR("Failed to create symlink %s %s", internalCeUserPath,
+              strerror(errno)));
+          }
+        }
         actualCePath = internalLegacyCePath;
       } else {
         PrepareDirIfNotPresent(internalCeUserPath, DEFAULT_DATA_DIR_PERMISSION,
@@ -1280,6 +1343,43 @@ static void isolateAppData(JNIEnv* env, jobjectArray pkg_data_info_list,
     isolateAppDataPerPackage(userId, packageName, volUuid, ceDataInode,
         actualCePath, actualDePath, fail_fn);
   }
+  // We set the label AFTER everything is done, as we are applying
+  // the file operations on tmpfs. If we set the label when we mount
+  // tmpfs, SELinux will not happy as we are changing system_data_files.
+  // Relabel dir under /data/user, including /data/user/0
+  relabelAllDirs(internalCePath, dataDataContext, fail_fn);
+
+  // Relabel /data/user
+  relabelDir(internalCePath, dataDataContext, fail_fn);
+
+  // Relabel /data/data
+  relabelDir(internalLegacyCePath, dataDataContext, fail_fn);
+
+  // Relabel dir under /data/user_de
+  relabelAllDirs(internalDePath, dataDataContext, fail_fn);
+
+  // Relabel /data/user_de
+  relabelDir(internalDePath, dataDataContext, fail_fn);
+
+  // Relabel CE and DE dirs under /mnt/expand
+  dir = opendir(externalPrivateMountPath);
+  if (dir == nullptr) {
+    fail_fn(CREATE_ERROR("Failed to opendir %s", externalPrivateMountPath));
+  }
+  while ((ent = readdir(dir))) {
+    if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) continue;
+    auto volPath = StringPrintf("%s/%s", externalPrivateMountPath, ent->d_name);
+    auto cePath = StringPrintf("%s/user", volPath.c_str());
+    auto dePath = StringPrintf("%s/user_de", volPath.c_str());
+
+    relabelAllDirs(cePath.c_str(), dataDataContext, fail_fn);
+    relabelDir(cePath.c_str(), dataDataContext, fail_fn);
+    relabelAllDirs(dePath.c_str(), dataDataContext, fail_fn);
+    relabelDir(dePath.c_str(), dataDataContext, fail_fn);
+  }
+  closedir(dir);
+
+  freecon(dataDataContext);
 }
 
 // Utility routine to specialize a zygote child process.
