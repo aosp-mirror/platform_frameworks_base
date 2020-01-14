@@ -16,7 +16,7 @@
 
 package com.android.server;
 
-import static android.net.NetworkScoreManager.CACHE_FILTER_NONE;
+import static android.net.NetworkScoreManager.SCORE_FILTER_NONE;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -306,7 +306,7 @@ public class NetworkScoreServiceTest {
         bindToScorer(true /*callerIsScorer*/);
 
         mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI,
-                mNetworkScoreCache, CACHE_FILTER_NONE);
+                mNetworkScoreCache, SCORE_FILTER_NONE);
 
         mNetworkScoreService.updateScores(new ScoredNetwork[]{SCORED_NETWORK});
 
@@ -321,9 +321,9 @@ public class NetworkScoreServiceTest {
         bindToScorer(true /*callerIsScorer*/);
 
         mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI,
-                mNetworkScoreCache, CACHE_FILTER_NONE);
+                mNetworkScoreCache, SCORE_FILTER_NONE);
         mNetworkScoreService.registerNetworkScoreCache(
-                NetworkKey.TYPE_WIFI, mNetworkScoreCache2, CACHE_FILTER_NONE);
+                NetworkKey.TYPE_WIFI, mNetworkScoreCache2, SCORE_FILTER_NONE);
 
         // updateScores should update both caches
         mNetworkScoreService.updateScores(new ScoredNetwork[]{SCORED_NETWORK});
@@ -378,7 +378,7 @@ public class NetworkScoreServiceTest {
         bindToScorer(true /*callerIsScorer*/);
 
         mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache,
-                CACHE_FILTER_NONE);
+                SCORE_FILTER_NONE);
         mNetworkScoreService.clearScores();
 
         verify(mNetworkScoreCache).clearScores();
@@ -392,7 +392,7 @@ public class NetworkScoreServiceTest {
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
 
         mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache,
-                CACHE_FILTER_NONE);
+                SCORE_FILTER_NONE);
         mNetworkScoreService.clearScores();
 
         verify(mNetworkScoreCache).clearScores();
@@ -472,7 +472,7 @@ public class NetworkScoreServiceTest {
 
         try {
             mNetworkScoreService.registerNetworkScoreCache(
-                NetworkKey.TYPE_WIFI, mNetworkScoreCache, CACHE_FILTER_NONE);
+                    NetworkKey.TYPE_WIFI, mNetworkScoreCache, SCORE_FILTER_NONE);
             fail("SecurityException expected");
         } catch (SecurityException e) {
             // expected
@@ -615,7 +615,7 @@ public class NetworkScoreServiceTest {
                 new ArrayList<>(scoredNetworkList),
                 NetworkKey.TYPE_WIFI, mCurrentNetworkFilter, mScanResultsFilter);
 
-        consumer.accept(mNetworkScoreCache, NetworkScoreManager.CACHE_FILTER_NONE);
+        consumer.accept(mNetworkScoreCache, NetworkScoreManager.SCORE_FILTER_NONE);
 
         verify(mNetworkScoreCache).updateScores(scoredNetworkList);
         verifyZeroInteractions(mCurrentNetworkFilter, mScanResultsFilter);
@@ -656,7 +656,7 @@ public class NetworkScoreServiceTest {
                 Collections.emptyList(),
                 NetworkKey.TYPE_WIFI, mCurrentNetworkFilter, mScanResultsFilter);
 
-        consumer.accept(mNetworkScoreCache, NetworkScoreManager.CACHE_FILTER_NONE);
+        consumer.accept(mNetworkScoreCache, NetworkScoreManager.SCORE_FILTER_NONE);
 
         verifyZeroInteractions(mNetworkScoreCache, mCurrentNetworkFilter, mScanResultsFilter);
     }
@@ -673,7 +673,7 @@ public class NetworkScoreServiceTest {
         List<ScoredNetwork> filteredList = new ArrayList<>(scoredNetworkList);
         filteredList.remove(SCORED_NETWORK);
         when(mCurrentNetworkFilter.apply(scoredNetworkList)).thenReturn(filteredList);
-        consumer.accept(mNetworkScoreCache, NetworkScoreManager.CACHE_FILTER_CURRENT_NETWORK);
+        consumer.accept(mNetworkScoreCache, NetworkScoreManager.SCORE_FILTER_CURRENT_NETWORK);
 
         verify(mNetworkScoreCache).updateScores(filteredList);
         verifyZeroInteractions(mScanResultsFilter);
@@ -691,7 +691,7 @@ public class NetworkScoreServiceTest {
         List<ScoredNetwork> filteredList = new ArrayList<>(scoredNetworkList);
         filteredList.remove(SCORED_NETWORK);
         when(mScanResultsFilter.apply(scoredNetworkList)).thenReturn(filteredList);
-        consumer.accept(mNetworkScoreCache, NetworkScoreManager.CACHE_FILTER_SCAN_RESULTS);
+        consumer.accept(mNetworkScoreCache, NetworkScoreManager.SCORE_FILTER_SCAN_RESULTS);
 
         verify(mNetworkScoreCache).updateScores(filteredList);
         verifyZeroInteractions(mCurrentNetworkFilter);
