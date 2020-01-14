@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
+import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -74,6 +75,28 @@ public final class ContentSuggestionsManager {
             @UserIdInt int userId, @Nullable IContentSuggestionsManager service) {
         mService = service;
         mUser = userId;
+    }
+
+    /**
+     * Hints to the system that a new context image using the provided bitmap should be sent to
+     * the system content suggestions service.
+     *
+     * @param bitmap the new context image
+     * @param imageContextRequestExtras sent with request to provide implementation specific
+     *                                  extra information.
+     */
+    public void provideContextImage(
+            @NonNull Bitmap bitmap, @NonNull Bundle imageContextRequestExtras) {
+        if (mService == null) {
+            Log.e(TAG, "provideContextImage called, but no ContentSuggestionsManager configured");
+            return;
+        }
+
+        try {
+            mService.provideContextBitmap(mUser, bitmap, imageContextRequestExtras);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
