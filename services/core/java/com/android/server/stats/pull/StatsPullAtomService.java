@@ -1944,12 +1944,44 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
+    private final Object mCpuTrackerLock = new Object();
+    @GuardedBy("mCpuTrackerLock")
+    private ProcessCpuTracker mProcessCpuTracker;
+
     private void registerProcessCpuTime() {
-        // No op.
+        int tagId = StatsLog.PROCESS_CPU_TIME;
+        // Min cool-down is 5 sec, inline with what ActivityManagerService uses.
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setCoolDownNs(5 * NS_PER_SEC)
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullProcessCpuTime(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullProcessCpuTime() {
-        // No op.
+    private int pullProcessCpuTime(int atomTag, List<StatsEvent> pulledData) {
+        synchronized (mCpuTrackerLock) {
+            if (mProcessCpuTracker == null) {
+                mProcessCpuTracker = new ProcessCpuTracker(false);
+                mProcessCpuTracker.init();
+            }
+            mProcessCpuTracker.update();
+            for (int i = 0; i < mProcessCpuTracker.countStats(); i++) {
+                ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
+                StatsEvent e = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeInt(st.uid)
+                        .writeString(st.name)
+                        .writeLong(st.base_utime)
+                        .writeLong(st.base_stime)
+                        .build();
+                pulledData.add(e);
+            }
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     @Nullable

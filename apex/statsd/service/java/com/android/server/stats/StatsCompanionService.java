@@ -806,27 +806,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullProcessCpuTime(int tagId, long elapsedNanos, final long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        synchronized (this) {
-            if (mProcessCpuTracker == null) {
-                mProcessCpuTracker = new ProcessCpuTracker(false);
-                mProcessCpuTracker.init();
-            }
-            mProcessCpuTracker.update();
-            for (int i = 0; i < mProcessCpuTracker.countStats(); i++) {
-                ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
-                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
-                        wallClockNanos);
-                e.writeInt(st.uid);
-                e.writeString(st.name);
-                e.writeLong(st.base_utime);
-                e.writeLong(st.base_stime);
-                pulledData.add(e);
-            }
-        }
-    }
-
     private void pullDebugElapsedClock(int tagId,
             long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
         final long elapsedMillis = SystemClock.elapsedRealtime();
@@ -1136,11 +1115,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             case StatsLog.PROC_STATS_PKG_PROC: {
                 pullProcessStats(ProcessStats.REPORT_PKG_PROC_STATS, tagId, elapsedNanos,
                         wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.PROCESS_CPU_TIME: {
-                pullProcessCpuTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 
