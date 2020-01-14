@@ -29,6 +29,7 @@ java_defaults {
         "netlink-client",
         "networkstack-aidl-interfaces-unstable-java",
         "android.hardware.tetheroffload.control-V1.0-java",
+        "net-utils-framework-common",
     ],
     libs: [
         "framework-tethering",
