@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -1635,14 +1636,16 @@ public final class SmsManager {
      * operation is performed on the correct subscription.
      * </p>
      *
-     * @param messageIndex is the record index of the message on ICC
-     * @return true for success
+     * @param messageIndex This is the same index used to access a message
+     * from {@link #getMessagesFromIcc()}.
+     * @return true for success, false if the operation fails. Failure can be due to IPC failure,
+     * RIL/modem error which results in SMS failed to be deleted on SIM
      *
      * {@hide}
      */
-    @UnsupportedAppUsage
-    public boolean
-    deleteMessageFromIcc(int messageIndex) {
+    @SystemApi
+    @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
+    public boolean deleteMessageFromIcc(int messageIndex) {
         boolean success = false;
 
         try {
@@ -1684,6 +1687,7 @@ public final class SmsManager {
      * {@hide}
      */
     @UnsupportedAppUsage
+    @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
     public boolean updateMessageOnIcc(int messageIndex, int newStatus, byte[] pdu) {
         boolean success = false;
 
@@ -1716,7 +1720,21 @@ public final class SmsManager {
      * operation is performed on the correct subscription.
      * </p>
      *
+     * @return <code>List</code> of <code>SmsMessage</code> objects
+     *
+     * {@hide}
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
+    public @NonNull List<SmsMessage> getMessagesFromIcc() {
+        return getAllMessagesFromIcc();
+    }
+
+    /**
      * @return <code>ArrayList</code> of <code>SmsMessage</code> objects
+     *
+     * This is similar to {@link #getMessagesFromIcc} except that it will return ArrayList.
+     * Suggested to use {@link #getMessagesFromIcc} instead.
      *
      * {@hide}
      */
