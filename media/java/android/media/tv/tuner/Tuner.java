@@ -130,29 +130,10 @@ public final class Tuner implements AutoCloseable  {
 
     private static native DemuxCapabilities nativeGetDemuxCapabilities();
 
-    /**
-     * LNB Callback.
-     *
-     * @hide
-     */
-    public interface LnbCallback {
-        /**
-         * Invoked when there is a LNB event.
-         */
-        void onEvent(int lnbEventType);
-
-        /**
-         * Invoked when there is a new DiSEqC message.
-         *
-         * @param diseqcMessage a byte array of data for DiSEqC (Digital Satellite
-         * Equipment Control) message which is specified by EUTELSAT Bus Functional
-         * Specification Version 4.2.
-         */
-        void onDiseqcMessage(byte[] diseqcMessage);
-    }
 
     /**
      * Callback interface for receiving information from the corresponding filters.
+     * TODO: remove
      */
     public interface FilterCallback {
         /**
@@ -169,22 +150,6 @@ public final class Tuner implements AutoCloseable  {
          * @param status the new status of the filter.
          */
         void onFilterStatusChanged(@NonNull Filter filter, @FilterStatus int status);
-    }
-
-    /**
-     * DVR Callback.
-     *
-     * @hide
-     */
-    public interface DvrCallback {
-        /**
-         * Invoked when record status changed.
-         */
-        void onRecordStatus(int status);
-        /**
-         * Invoked when playback status changed.
-         */
-        void onPlaybackStatus(int status);
     }
 
     @Nullable
