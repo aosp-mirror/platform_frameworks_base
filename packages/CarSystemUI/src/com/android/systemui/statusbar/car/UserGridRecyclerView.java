@@ -43,6 +43,9 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -53,7 +56,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.util.UserIcons;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -337,7 +339,7 @@ public class UserGridRecyclerView extends RecyclerView {
                     .setPositiveButton(android.R.string.ok, null)
                     .create();
             // Sets window flags for the SysUI dialog
-            SystemUIDialog.applyFlags(maxUsersDialog);
+            applyCarSysUIDialogFlags(maxUsersDialog);
             maxUsersDialog.show();
         }
 
@@ -356,8 +358,17 @@ public class UserGridRecyclerView extends RecyclerView {
                     .setOnCancelListener(this)
                     .create();
             // Sets window flags for the SysUI dialog
-            SystemUIDialog.applyFlags(addUserDialog);
+            applyCarSysUIDialogFlags(addUserDialog);
             addUserDialog.show();
+        }
+
+        private void applyCarSysUIDialogFlags(AlertDialog dialog) {
+            final Window window = dialog.getWindow();
+            window.setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
+            window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                    | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+            window.setFitWindowInsetsTypes(
+                    window.getFitWindowInsetsTypes() & ~WindowInsets.Type.statusBars());
         }
 
         private void notifyUserSelected(UserRecord userRecord) {
