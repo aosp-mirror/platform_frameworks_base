@@ -7633,6 +7633,18 @@ public class TelephonyManager {
             RILConstants.NETWORK_MODE_NR_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA;
 
     /**
+     * The default preferred network mode constant.
+     *
+     * <p> This constant is used in case of nothing is set in
+     * TelephonyProperties#default_network().
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int DEFAULT_PREFERRED_NETWORK_MODE =
+            RILConstants.DEFAULT_PREFERRED_NETWORK_MODE;
+
+    /**
      * Get the preferred network type.
      * Used for device configuration by some CDMA operators.
      *
