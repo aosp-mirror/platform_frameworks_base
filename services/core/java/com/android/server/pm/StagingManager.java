@@ -342,12 +342,12 @@ public class StagingManager {
     }
 
     /**
+     * Perform snapshot and restore as required both for APEXes themselves and for apks in APEX.
      * Apks inside apex are not installed using apk-install flow. They are scanned from the system
      * directory directly by PackageManager, as such, RollbackManager need to handle their data
      * separately here.
      */
-    private void snapshotAndRestoreApkInApexUserData(PackageInstallerSession session) {
-        // We want to process apks inside apex. So current session needs to contain apex.
+    private void snapshotAndRestoreForApexSession(PackageInstallerSession session) {
         if (!sessionContainsApex(session)) {
             return;
         }
@@ -380,19 +380,37 @@ public class StagingManager {
             apexSessions.add(session);
         }
 
-        // For each apex, process the apks inside it
+        final UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
+        final int[] allUsers = um.getUserIds();
+        IRollbackManager rm = IRollbackManager.Stub.asInterface(
+                ServiceManager.getService(Context.ROLLBACK_SERVICE));
+
         for (PackageInstallerSession apexSession : apexSessions) {
-            List<String> apksInApex = mApexManager.getApksInApex(apexSession.getPackageName());
+            String packageName = apexSession.getPackageName();
+            // Perform any snapshots or restores for the APEX itself
+            snapshotAndRestoreApexUserData(packageName, allUsers, rm);
+
+            // Process the apks inside the APEX
+            List<String> apksInApex = mApexManager.getApksInApex(packageName);
             for (String apk: apksInApex) {
-                snapshotAndRestoreApkInApexUserData(apk);
+                snapshotAndRestoreApkInApexUserData(apk, allUsers, rm);
             }
         }
     }
 
-    private void snapshotAndRestoreApkInApexUserData(String packageName) {
-        IRollbackManager rm = IRollbackManager.Stub.asInterface(
-                    ServiceManager.getService(Context.ROLLBACK_SERVICE));
+    private void snapshotAndRestoreApexUserData(
+            String packageName, int[] allUsers, IRollbackManager rm) {
+        try {
+            // appId, ceDataInode, and seInfo are not needed for APEXes
+            rm.snapshotAndRestoreUserData(packageName, allUsers, 0, 0,
+                    null, 0 /*token*/);
+        } catch (RemoteException re) {
+            Slog.e(TAG, "Error snapshotting/restoring user data: " + re);
+        }
+    }
 
+    private void snapshotAndRestoreApkInApexUserData(
+            String packageName, int[] allUsers, IRollbackManager rm) {
         PackageManagerInternal mPmi = LocalServices.getService(PackageManagerInternal.class);
         AndroidPackage pkg = mPmi.getPackage(packageName);
         if (pkg == null) {
@@ -401,13 +419,11 @@ public class StagingManager {
             return;
         }
         final String seInfo = pkg.getSeInfo();
-        final UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
-        final int[] allUsers = um.getUserIds();
 
         int appId = -1;
         long ceDataInode = -1;
         final PackageSetting ps = (PackageSetting) mPmi.getPackageSetting(packageName);
-        if (ps != null && rm != null) {
+        if (ps != null) {
             appId = ps.appId;
             ceDataInode = ps.getCeDataInode(UserHandle.USER_SYSTEM);
             // NOTE: We ignore the user specified in the InstallParam because we know this is
@@ -496,7 +512,7 @@ public class StagingManager {
                 abortCheckpoint();
                 return;
             }
-            snapshotAndRestoreApkInApexUserData(session);
+            snapshotAndRestoreForApexSession(session);
             Slog.i(TAG, "APEX packages in session " + session.sessionId
                     + " were successfully activated. Proceeding with APK packages, if any");
         }
