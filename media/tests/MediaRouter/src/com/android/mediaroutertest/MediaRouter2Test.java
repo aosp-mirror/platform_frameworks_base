@@ -16,17 +16,13 @@
 
 package com.android.mediaroutertest;
 
-import static android.media.MediaRoute2Info.CONNECTION_STATE_CONNECTED;
 import static android.media.MediaRoute2Info.CONNECTION_STATE_CONNECTING;
 import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_SPEAKER;
-import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_TV;
-import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
 import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE;
 
 import static com.android.mediaroutertest.MediaRouterManagerTest.FEATURES_ALL;
 import static com.android.mediaroutertest.MediaRouterManagerTest.FEATURES_SPECIAL;
 import static com.android.mediaroutertest.MediaRouterManagerTest.FEATURE_SAMPLE;
-import static com.android.mediaroutertest.MediaRouterManagerTest.FEATURE_SPECIAL;
 import static com.android.mediaroutertest.MediaRouterManagerTest.ROUTE_ID1;
 import static com.android.mediaroutertest.MediaRouterManagerTest.ROUTE_ID2;
 import static com.android.mediaroutertest.MediaRouterManagerTest.ROUTE_ID3_SESSION_CREATION_FAILED;
@@ -132,57 +128,6 @@ public class MediaRouter2Test {
     }
 
     @Test
-    public void testRouteInfoInequality() {
-        MediaRoute2Info route = new MediaRoute2Info.Builder("id", "name")
-                .setDescription("description")
-                .setClientPackageName("com.android.mediaroutertest")
-                .setConnectionState(CONNECTION_STATE_CONNECTING)
-                .setIconUri(new Uri.Builder().path("icon").build())
-                .addFeature(FEATURE_SAMPLE)
-                .setVolume(5)
-                .setVolumeMax(20)
-                .setVolumeHandling(PLAYBACK_VOLUME_VARIABLE)
-                .setDeviceType(DEVICE_TYPE_REMOTE_SPEAKER)
-                .build();
-
-        MediaRoute2Info routeDescription = new MediaRoute2Info.Builder(route)
-                .setDescription("another description").build();
-        assertNotEquals(route, routeDescription);
-
-        MediaRoute2Info routeConnectionState = new MediaRoute2Info.Builder(route)
-                .setConnectionState(CONNECTION_STATE_CONNECTED).build();
-        assertNotEquals(route, routeConnectionState);
-
-        MediaRoute2Info routeIcon = new MediaRoute2Info.Builder(route)
-                .setIconUri(new Uri.Builder().path("new icon").build()).build();
-        assertNotEquals(route, routeIcon);
-
-        MediaRoute2Info routeClient = new MediaRoute2Info.Builder(route)
-                .setClientPackageName("another.client.package").build();
-        assertNotEquals(route, routeClient);
-
-        MediaRoute2Info routeType = new MediaRoute2Info.Builder(route)
-                .addFeature(FEATURE_SPECIAL).build();
-        assertNotEquals(route, routeType);
-
-        MediaRoute2Info routeVolume = new MediaRoute2Info.Builder(route)
-                .setVolume(10).build();
-        assertNotEquals(route, routeVolume);
-
-        MediaRoute2Info routeVolumeMax = new MediaRoute2Info.Builder(route)
-                .setVolumeMax(30).build();
-        assertNotEquals(route, routeVolumeMax);
-
-        MediaRoute2Info routeVolumeHandling = new MediaRoute2Info.Builder(route)
-                .setVolumeHandling(PLAYBACK_VOLUME_FIXED).build();
-        assertNotEquals(route, routeVolumeHandling);
-
-        MediaRoute2Info routeDeviceType = new MediaRoute2Info.Builder(route)
-                .setVolume(DEVICE_TYPE_REMOTE_TV).build();
-        assertNotEquals(route, routeDeviceType);
-    }
-
-    @Test
     public void testControlVolumeWithRouter() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutes(FEATURES_ALL);
 
@@ -228,8 +173,10 @@ public class MediaRouter2Test {
 
     @Test
     public void testRequestCreateSessionWithInvalidArguments() {
-        MediaRoute2Info route = new MediaRoute2Info.Builder("id", "name").build();
         String routeFeature = "routeFeature";
+        MediaRoute2Info route = new MediaRoute2Info.Builder("id", "name")
+                .addFeature(routeFeature)
+                .build();
 
         // Tests null route
         assertThrows(NullPointerException.class,
