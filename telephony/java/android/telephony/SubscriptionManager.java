@@ -16,8 +16,6 @@
 
 package android.telephony;
 
-import com.android.telephony.Rlog;
-
 import static android.net.NetworkPolicyManager.OVERRIDE_CONGESTED;
 import static android.net.NetworkPolicyManager.OVERRIDE_UNMETERED;
 
@@ -67,6 +65,7 @@ import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.util.HandlerExecutor;
 import com.android.internal.util.Preconditions;
+import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -2240,10 +2239,9 @@ public class SubscriptionManager {
     @UnsupportedAppUsage
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId, int subId) {
         if (VDBG) logd("putPhoneIdAndSubIdExtra: phoneId=" + phoneId + " subId=" + subId);
-        intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
-        intent.putExtra(EXTRA_SUBSCRIPTION_INDEX, subId);
         intent.putExtra(EXTRA_SLOT_INDEX, phoneId);
         intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
+        putSubscriptionIdExtra(intent, subId);
     }
 
     /**
@@ -3488,5 +3486,20 @@ public class SubscriptionManager {
         } catch (RemoteException ex) {
         }
         return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+    }
+
+    /**
+     * Helper method that puts a subscription id on an intent with the constants:
+     * PhoneConstant.SUBSCRIPTION_KEY and SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX.
+     * Both constants are used to support backwards compatibility.  Once we know we got all places,
+     * we can remove PhoneConstants.SUBSCRIPTION_KEY.
+     * @param intent Intent to put sub id on.
+     * @param subId SubscriptionId to put on intent.
+     *
+     * @hide
+     */
+    public static void putSubscriptionIdExtra(Intent intent, int subId) {
+        intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
+        intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
     }
 }
