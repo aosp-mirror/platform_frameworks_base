@@ -193,20 +193,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
          {.additiveFields = {7, 9, 11, 13, 15, 17, 19, 21},
           .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_THREAD_FREQ)}},
 
-        // DeviceCalculatedPowerUse.
-        {{.atomTag = android::util::DEVICE_CALCULATED_POWER_USE},
-         {.puller = new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_USE)}},
-
-        // DeviceCalculatedPowerBlameUid.
-        {{.atomTag = android::util::DEVICE_CALCULATED_POWER_BLAME_UID},
-         {.puller = new StatsCompanionServicePuller(
-                  android::util::DEVICE_CALCULATED_POWER_BLAME_UID)}},
-
-        // DeviceCalculatedPowerBlameOther.
-        {{.atomTag = android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER},
-         {.puller = new StatsCompanionServicePuller(
-                  android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER)}},
-
         // DebugElapsedClock.
         {{.atomTag = android::util::DEBUG_ELAPSED_CLOCK},
          {.additiveFields = {1, 2, 3, 4},
