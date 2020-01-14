@@ -16,7 +16,8 @@
 
 package android.graphics;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
+
 import com.android.internal.util.VirtualRefBasePtr;
 
 /**
