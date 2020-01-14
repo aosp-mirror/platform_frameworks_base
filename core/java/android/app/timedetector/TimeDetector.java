@@ -18,6 +18,7 @@ package android.app.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.RemoteException;
@@ -29,8 +30,11 @@ import android.util.Log;
 
 /**
  * The interface through which system components can send signals to the TimeDetectorService.
+ *
+ * <p>This class is marked non-final for mockito.
  * @hide
  */
+@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 @SystemService(Context.TIME_DETECTOR_SERVICE)
 public class TimeDetector {
     private static final String TAG = "timedetector.TimeDetector";
@@ -38,6 +42,7 @@ public class TimeDetector {
 
     private final ITimeDetectorService mITimeDetectorService;
 
+    /** @hide */
     public TimeDetector() throws ServiceNotFoundException {
         mITimeDetectorService = ITimeDetectorService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.TIME_DETECTOR_SERVICE));
@@ -62,6 +67,8 @@ public class TimeDetector {
 
     /**
      * Suggests the user's manually entered current time to the detector.
+     *
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE)
     public void suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion) {
@@ -77,6 +84,8 @@ public class TimeDetector {
 
     /**
      * A shared utility method to create a {@link ManualTimeSuggestion}.
+     *
+     * @hide
      */
     public static ManualTimeSuggestion createManualTimeSuggestion(long when, String why) {
         TimestampedValue<Long> utcTime =
@@ -88,6 +97,8 @@ public class TimeDetector {
 
     /**
      * Suggests the time according to a network time source like NTP.
+     *
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.SET_TIME)
     public void suggestNetworkTime(NetworkTimeSuggestion timeSuggestion) {
