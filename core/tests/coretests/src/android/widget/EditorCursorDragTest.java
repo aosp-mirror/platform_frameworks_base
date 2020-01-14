@@ -67,6 +67,7 @@ public class EditorCursorDragTest {
         mOriginalFlagValue = Editor.FLAG_ENABLE_CURSOR_DRAG;
         Editor.FLAG_ENABLE_CURSOR_DRAG = true;
     }
+
     @After
     public void after() throws Throwable {
         Editor.FLAG_ENABLE_CURSOR_DRAG = mOriginalFlagValue;
@@ -354,6 +355,23 @@ public class EditorCursorDragTest {
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event5));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
+    }
+
+    @Test // Reproduces b/147366705
+    public void testCursorDrag_nonSelectableTextView() throws Throwable {
+        String text = "Hello world!";
+        TextView tv = mActivity.findViewById(R.id.nonselectable_textview);
+        tv.setText(text);
+        Editor editor = tv.getEditorForTesting();
+
+        // Simulate a tap. No error should be thrown.
+        long event1Time = 1001;
+        MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event1));
+
+        // Swipe left to right. No error should be thrown.
+        onView(withId(R.id.nonselectable_textview)).perform(
+                dragOnText(text.indexOf("llo"), text.indexOf("!")));
     }
 
     private static MotionEvent downEvent(long downTime, long eventTime, float x, float y) {
