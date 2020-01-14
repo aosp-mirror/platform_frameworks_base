@@ -3617,14 +3617,29 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 enforceSettingsPermission();
             }
 
-            // getNetworkAgentInfoForNetwork is thread-safe
-            final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(mNetwork);
-            if (nai == null) return;
-
-            // nai.networkMonitor() is thread-safe
-            final NetworkMonitorManager nm = nai.networkMonitor();
+            final NetworkMonitorManager nm = getNetworkMonitorManager(mNetwork);
             if (nm == null) return;
             nm.notifyCaptivePortalAppFinished(response);
+        }
+
+        @Override
+        public void appRequest(final int request) {
+            final NetworkMonitorManager nm = getNetworkMonitorManager(mNetwork);
+            if (nm == null) return;
+
+            if (request == CaptivePortal.APP_REQUEST_REEVALUATION_REQUIRED) {
+                nm.forceReevaluation(Binder.getCallingUid());
+            }
+        }
+
+        @Nullable
+        private NetworkMonitorManager getNetworkMonitorManager(final Network network) {
+            // getNetworkAgentInfoForNetwork is thread-safe
+            final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+            if (nai == null) return null;
+
+            // nai.networkMonitor() is thread-safe
+            return nai.networkMonitor();
         }
 
         @Override
