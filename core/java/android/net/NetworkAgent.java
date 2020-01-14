@@ -33,6 +33,7 @@ import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -53,6 +54,12 @@ public abstract class NetworkAgent {
     @NonNull
     public final Network network;
 
+    // Whether this NetworkAgent is using the legacy (never unhidden) API. The difference is
+    // that the legacy API uses NetworkInfo to convey the state, while the current API is
+    // exposing methods to manage it and generate it internally instead.
+    // TODO : remove this as soon as all agents have been converted.
+    private final boolean mIsLegacy;
+
     private final Handler mHandler;
     private volatile AsyncChannel mAsyncChannel;
     private final String LOG_TAG;
@@ -64,6 +71,10 @@ public abstract class NetworkAgent {
     private static final long BW_REFRESH_MIN_WIN_MS = 500;
     private boolean mBandwidthUpdateScheduled = false;
     private AtomicBoolean mBandwidthUpdatePending = new AtomicBoolean(false);
+    // Not used by legacy agents. Non-legacy agents use this to convert the NetworkAgent system API
+    // into the internal API of ConnectivityService.
+    @NonNull
+    private NetworkInfo mNetworkInfo;
 
     /**
      * The ID of the {@link NetworkProvider} that created this object, or
@@ -284,7 +295,7 @@ public abstract class NetworkAgent {
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score, NetworkAgentConfig config,
             int providerId) {
-        this(looper, context, logTag, nc, lp, score, config, providerId, ni);
+        this(looper, context, logTag, nc, lp, score, config, providerId, ni, true /* legacy */);
     }
 
     private static NetworkInfo getLegacyNetworkInfo(final NetworkAgentConfig config) {
@@ -310,15 +321,17 @@ public abstract class NetworkAgent {
             @NonNull NetworkAgentConfig config, @Nullable NetworkProvider provider) {
         this(looper, context, logTag, nc, lp, score, config,
                 provider == null ? NetworkProvider.ID_NONE : provider.getProviderId(),
-                getLegacyNetworkInfo(config));
+                getLegacyNetworkInfo(config), false /* legacy */);
     }
 
     private NetworkAgent(Looper looper, Context context, String logTag, NetworkCapabilities nc,
             LinkProperties lp, int score, NetworkAgentConfig config, int providerId,
-            NetworkInfo ni) {
+            NetworkInfo ni, boolean legacy) {
         mHandler = new NetworkAgentHandler(looper);
         LOG_TAG = logTag;
         mContext = context;
+        mIsLegacy = legacy;
+        mNetworkInfo = new NetworkInfo(ni);
         this.providerId = providerId;
         if (ni == null || nc == null || lp == null) {
             throw new IllegalArgumentException();
@@ -483,7 +496,78 @@ public abstract class NetworkAgent {
      * @param linkProperties the new LinkProperties.
      */
     public void sendLinkProperties(@NonNull LinkProperties linkProperties) {
+        Objects.requireNonNull(linkProperties);
         queueOrSendMessage(EVENT_NETWORK_PROPERTIES_CHANGED, new LinkProperties(linkProperties));
+    }
+
+    /**
+     * Inform ConnectivityService that this agent has now connected.
+     */
+    public void setConnected() {
+        if (mIsLegacy) {
+            throw new UnsupportedOperationException(
+                    "Legacy agents can't call setConnected.");
+        }
+        mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, null, null);
+        queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, mNetworkInfo);
+    }
+
+    /**
+     * Unregister this network agent.
+     *
+     * This signals the network has disconnected and ends its lifecycle. After this is called,
+     * the network is torn down and this agent can no longer be used.
+     */
+    public void unregister() {
+        if (mIsLegacy) {
+            throw new UnsupportedOperationException(
+                    "Legacy agents can't call unregister.");
+        }
+        mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED, null, null);
+        queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, mNetworkInfo);
+    }
+
+    /**
+     * Change the legacy subtype of this network agent.
+     *
+     * This is only for backward compatibility and should not be used by non-legacy network agents,
+     * or agents that did not use to set a subtype. As such, only TYPE_MOBILE type agents can use
+     * this and others will be thrown an exception if they try.
+     *
+     * @deprecated this is for backward compatibility only.
+     * @param legacySubtype the legacy subtype.
+     */
+    @Deprecated
+    public void setLegacySubtype(final int legacySubtype, @NonNull final String legacySubtypeName) {
+        if (mIsLegacy) {
+            throw new UnsupportedOperationException("Legacy agents can't call setLegacySubtype.");
+        }
+        mNetworkInfo.setSubtype(legacySubtype, legacySubtypeName);
+        queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, mNetworkInfo);
+    }
+
+    /**
+     * Set the ExtraInfo of this network agent.
+     *
+     * This sets the ExtraInfo field inside the NetworkInfo returned by legacy public API and the
+     * broadcasts about the corresponding Network.
+     * This is only for backward compatibility and should not be used by non-legacy network agents,
+     * who will be thrown an exception if they try. The extra info should only be :
+     * <ul>
+     *   <li>For cellular agents, the APN name.</li>
+     *   <li>For ethernet agents, the interface name.</li>
+     * </ul>
+     *
+     * @deprecated this is for backward compatibility only.
+     * @param extraInfo the ExtraInfo.
+     */
+    @Deprecated
+    public void setLegacyExtraInfo(@Nullable final String extraInfo) {
+        if (mIsLegacy) {
+            throw new UnsupportedOperationException("Legacy agents can't call setLegacyExtraInfo.");
+        }
+        mNetworkInfo.setExtraInfo(extraInfo);
+        queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, mNetworkInfo);
     }
 
     /**
@@ -492,6 +576,9 @@ public abstract class NetworkAgent {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void sendNetworkInfo(NetworkInfo networkInfo) {
+        if (!mIsLegacy) {
+            throw new UnsupportedOperationException("Only legacy agents can call sendNetworkInfo.");
+        }
         queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, new NetworkInfo(networkInfo));
     }
 
@@ -500,6 +587,7 @@ public abstract class NetworkAgent {
      * @param networkCapabilities the new NetworkCapabilities.
      */
     public void sendNetworkCapabilities(@NonNull NetworkCapabilities networkCapabilities) {
+        Objects.requireNonNull(networkCapabilities);
         mBandwidthUpdatePending.set(false);
         mLastBwRefreshTime = System.currentTimeMillis();
         queueOrSendMessage(EVENT_NETWORK_CAPABILITIES_CHANGED,
