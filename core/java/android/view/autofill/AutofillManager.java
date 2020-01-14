@@ -230,6 +230,7 @@ public final class AutofillManager {
     /** @hide */ public static final int ACTION_VIEW_ENTERED =  2;
     /** @hide */ public static final int ACTION_VIEW_EXITED = 3;
     /** @hide */ public static final int ACTION_VALUE_CHANGED = 4;
+    /** @hide */ public static final int ACTION_RESPONSE_EXPIRED = 5;
 
     /** @hide */ public static final int NO_LOGGING = 0;
     /** @hide */ public static final int FLAG_ADD_CLIENT_ENABLED = 0x1;
@@ -776,11 +777,19 @@ public final class AutofillManager {
      *
      * @see AutofillClient#autofillClientIsVisibleForAutofill()
      *
+     * @param isExpiredResponse The response has expired or not
+     *
      * {@hide}
      */
-    public void onInvisibleForAutofill() {
+    public void onInvisibleForAutofill(boolean isExpiredResponse) {
         synchronized (mLock) {
             mOnInvisibleCalled = true;
+
+            if (isExpiredResponse) {
+                // Notify service the response has expired.
+                updateSessionLocked(/* id= */ null, /* bounds= */ null, /* value= */ null,
+                        ACTION_RESPONSE_EXPIRED, /* flags= */ 0);
+            }
         }
     }
 
