@@ -31,6 +31,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -75,6 +76,7 @@ public class DataUsageUtilsTest {
     }
 
     @Test
+    @Ignore
     public void getMobileTemplate_infoNull_returnMobileAll() {
         when(mSubscriptionManager.isActiveSubId(SUB_ID)).thenReturn(false);
 
@@ -84,6 +86,7 @@ public class DataUsageUtilsTest {
     }
 
     @Test
+    @Ignore
     public void getMobileTemplate_groupUuidNull_returnMobileAll() {
         when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(mInfo1);
         when(mInfo1.getGroupUuid()).thenReturn(null);
@@ -96,6 +99,7 @@ public class DataUsageUtilsTest {
     }
 
     @Test
+    @Ignore
     public void getMobileTemplate_groupUuidExist_returnMobileMerged() {
         when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(mInfo1);
         when(mInfo1.getGroupUuid()).thenReturn(mParcelUuid);
