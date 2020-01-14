@@ -367,6 +367,8 @@ final class CompatConfig {
         CompatConfig config = new CompatConfig(androidBuildClassifier, context);
         config.initConfigFromLib(Environment.buildPath(
                 Environment.getRootDirectory(), "etc", "compatconfig"));
+        config.initConfigFromLib(Environment.buildPath(
+                Environment.getRootDirectory(), "system_ext", "etc", "compatconfig"));
         return config;
     }
 
