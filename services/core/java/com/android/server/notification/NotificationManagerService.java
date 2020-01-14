@@ -1175,6 +1175,34 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void onBubbleNotificationSuppressionChanged(String key, boolean isSuppressed) {
+            synchronized (mNotificationLock) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r != null) {
+                    Notification.BubbleMetadata data = r.getNotification().getBubbleMetadata();
+                    if (data == null) {
+                        // No data, do nothing
+                        return;
+                    }
+                    boolean currentlySuppressed = data.isNotificationSuppressed();
+                    if (currentlySuppressed == isSuppressed) {
+                        // No changes, do nothing
+                        return;
+                    }
+                    int flags = data.getFlags();
+                    if (isSuppressed) {
+                        flags |= Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+                    } else {
+                        flags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+                    }
+                    data.setFlags(flags);
+                    mHandler.post(new EnqueueNotificationRunnable(r.getUser().getIdentifier(), r,
+                            true /* isAppForeground */));
+                }
+            }
+        }
+
+        @Override
         /**
          * Grant permission to read the specified URI to the package specified in the
          * NotificationRecord associated with the given key. The callingUid represents the UID of

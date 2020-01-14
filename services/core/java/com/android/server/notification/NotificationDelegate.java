@@ -48,7 +48,15 @@ public interface NotificationDelegate {
             int notificationLocation);
     void onNotificationDirectReplied(String key);
     void onNotificationSettingsViewed(String key);
+    /**
+     * Called when the state of {@link Notification#FLAG_BUBBLE} is changed.
+     */
     void onNotificationBubbleChanged(String key, boolean isBubble);
+    /**
+     * Called when the state of {@link Notification.BubbleMetadata#FLAG_SUPPRESS_NOTIFICATION}
+     * changes.
+     */
+    void onBubbleNotificationSuppressionChanged(String key, boolean isSuppressed);
 
     /**
      * Grant permission to read the specified URI to the package associated with the

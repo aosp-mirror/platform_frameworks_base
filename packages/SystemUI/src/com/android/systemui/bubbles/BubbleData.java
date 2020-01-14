@@ -134,6 +134,9 @@ public class BubbleData {
     @Nullable
     private Listener mListener;
 
+    @Nullable
+    private BubbleController.NotificationSuppressionChangedListener mSuppressionListener;
+
     /**
      * We track groups with summaries that aren't visibly displayed but still kept around because
      * the bubble(s) associated with the summary still exist.
@@ -156,6 +159,11 @@ public class BubbleData {
         mStateChange = new Update(mBubbles, mOverflowBubbles);
         mMaxBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_rendered);
         mMaxOverflowBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_overflow);
+    }
+
+    public void setSuppressionChangedListener(
+            BubbleController.NotificationSuppressionChangedListener listener) {
+        mSuppressionListener = listener;
     }
 
     public boolean hasBubbles() {
@@ -219,7 +227,7 @@ public class BubbleData {
                     return b;
                 }
             }
-            bubble = new Bubble(entry);
+            bubble = new Bubble(entry, mSuppressionListener);
             mPendingBubbles.add(bubble);
         } else {
             bubble.setEntry(entry);
@@ -258,11 +266,13 @@ public class BubbleData {
         } else if (mSelectedBubble == null) {
             setSelectedBubbleInternal(bubble);
         }
-        boolean isBubbleExpandedAndSelected = mExpanded && mSelectedBubble == bubble;
-        bubble.setShowInShade(!isBubbleExpandedAndSelected && showInShade);
-        bubble.setShowDot(!isBubbleExpandedAndSelected /* show */, true /* animate */);
-        dispatchPendingChanges();
 
+        boolean isBubbleExpandedAndSelected = mExpanded && mSelectedBubble == bubble;
+        boolean suppress = isBubbleExpandedAndSelected || !showInShade || !bubble.showInShade();
+        bubble.setSuppressNotification(suppress);
+        bubble.setShowDot(!isBubbleExpandedAndSelected /* show */, true /* animate */);
+
+        dispatchPendingChanges();
     }
 
     public void notificationEntryRemoved(NotificationEntry entry, @DismissReason int reason) {
