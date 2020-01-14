@@ -25,11 +25,12 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.app.ActivityThread;
 import android.app.PendingIntent;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.database.CursorWindow;
 import android.net.Uri;
 import android.os.Build;
@@ -387,7 +388,7 @@ public final class SmsManager {
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
         sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
-                true /* persistMessage*/, ActivityThread.currentPackageName());
+                true /* persistMessage*/, null);
     }
 
     /**
@@ -597,7 +598,7 @@ public final class SmsManager {
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
         sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
-                false /* persistMessage */, ActivityThread.currentPackageName());
+                false /* persistMessage */, null);
     }
 
     private void sendTextMessageInternal(
@@ -640,7 +641,7 @@ public final class SmsManager {
                         ISms iSms = getISmsServiceOrThrow();
                         if (iSms != null) {
                             iSms.sendTextForSubscriberWithOptions(subId,
-                                    ActivityThread.currentPackageName(), destinationAddress,
+                                    null, destinationAddress,
                                     scAddress,
                                     text, sentIntent, deliveryIntent, persistMessage, finalPriority,
                                     expectMore, finalValidity);
@@ -662,7 +663,7 @@ public final class SmsManager {
                 ISms iSms = getISmsServiceOrThrow();
                 if (iSms != null) {
                     iSms.sendTextForSubscriberWithOptions(getSubscriptionId(),
-                            ActivityThread.currentPackageName(), destinationAddress,
+                            null, destinationAddress,
                             scAddress,
                             text, sentIntent, deliveryIntent, persistMessage, finalPriority,
                             expectMore, finalValidity);
@@ -884,7 +885,7 @@ public final class SmsManager {
             String destinationAddress, String scAddress, ArrayList<String> parts,
             ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents) {
         sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
-                deliveryIntents, true /* persistMessage*/, ActivityThread.currentPackageName());
+                deliveryIntents, true /* persistMessage*/, null);
     }
 
     /**
@@ -901,8 +902,9 @@ public final class SmsManager {
      * subscription.
      * </p>
      *
-     * @param packageName serves as the default package name if
-     * {@link ActivityThread#currentPackageName()} is null.
+     * @param packageName serves as the default package name if the package name that is
+     *        associated with the user id is null.
+     *
      * @hide
      */
     @SystemApi
@@ -912,9 +914,7 @@ public final class SmsManager {
             @NonNull List<String> parts, @Nullable List<PendingIntent> sentIntents,
             @Nullable List<PendingIntent> deliveryIntents, @NonNull String packageName) {
         sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
-                deliveryIntents, true /* persistMessage*/,
-                ActivityThread.currentPackageName() == null
-                        ? packageName : ActivityThread.currentPackageName());
+                deliveryIntents, true /* persistMessage*/, packageName);
     }
 
     private void sendMultipartTextMessageInternal(
@@ -1015,7 +1015,7 @@ public final class SmsManager {
             String destinationAddress, String scAddress, List<String> parts,
             List<PendingIntent> sentIntents, List<PendingIntent> deliveryIntents) {
         sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
-                deliveryIntents, false /* persistMessage*/, ActivityThread.currentPackageName());
+                deliveryIntents, false /* persistMessage*/, null);
     }
 
     /**
@@ -1177,7 +1177,7 @@ public final class SmsManager {
                             ISms iSms = getISmsServiceOrThrow();
                             if (iSms != null) {
                                 iSms.sendMultipartTextForSubscriberWithOptions(subId,
-                                        ActivityThread.currentPackageName(), destinationAddress,
+                                        null, destinationAddress,
                                         scAddress, parts, sentIntents, deliveryIntents,
                                         persistMessage, finalPriority, expectMore, finalValidity);
                             }
@@ -1199,7 +1199,7 @@ public final class SmsManager {
                     ISms iSms = getISmsServiceOrThrow();
                     if (iSms != null) {
                         iSms.sendMultipartTextForSubscriberWithOptions(getSubscriptionId(),
-                                ActivityThread.currentPackageName(), destinationAddress,
+                                null, destinationAddress,
                                 scAddress, parts, sentIntents, deliveryIntents,
                                 persistMessage, finalPriority, expectMore, finalValidity);
                     }
@@ -1330,7 +1330,7 @@ public final class SmsManager {
             public void onSuccess(int subId) {
                 try {
                     ISms iSms = getISmsServiceOrThrow();
-                    iSms.sendDataForSubscriber(subId, ActivityThread.currentPackageName(),
+                    iSms.sendDataForSubscriber(subId, null,
                             destinationAddress, scAddress, destinationPort & 0xFFFF, data,
                             sentIntent, deliveryIntent);
                 } catch (RemoteException e) {
@@ -1456,7 +1456,6 @@ public final class SmsManager {
     private void resolveSubscriptionForOperation(SubscriptionResolverResult resolverResult) {
         int subId = getSubscriptionId();
         boolean isSmsSimPickActivityNeeded = false;
-        final Context context = ActivityThread.currentApplication().getApplicationContext();
         try {
             ISms iSms = getISmsService();
             if (iSms != null) {
@@ -1478,14 +1477,14 @@ public final class SmsManager {
             return;
         }
         // We need to ask the user pick an appropriate subid for the operation.
-        Log.d(TAG, "resolveSubscriptionForOperation isSmsSimPickActivityNeeded is true for package "
-                + context.getPackageName());
+        Log.d(TAG, "resolveSubscriptionForOperation isSmsSimPickActivityNeeded is true for calling"
+                + " package. ");
         try {
             // Create the SMS pick activity and call back once the activity is complete. Can't do
             // it here because we do not have access to the activity context that is performing this
             // operation.
             // Requires that the calling process has the SEND_SMS permission.
-            getITelephony().enqueueSmsPickResult(context.getOpPackageName(),
+            getITelephony().enqueueSmsPickResult(null,
                     new IIntegerConsumer.Stub() {
                         @Override
                         public void accept(int subId) {
@@ -1503,6 +1502,13 @@ public final class SmsManager {
         }
     }
 
+    /**
+     * To check the SDK version for SmsManager.sendResolverResult method.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.P)
+    private static final long GET_TARGET_SDK_VERSION_CODE_CHANGE = 145147528L;
+
     private void sendResolverResult(SubscriptionResolverResult resolverResult, int subId,
             boolean pickActivityShown) {
         if (SubscriptionManager.isValidSubscriptionId(subId)) {
@@ -1510,7 +1516,8 @@ public final class SmsManager {
             return;
         }
 
-        if (getTargetSdkVersion() <= Build.VERSION_CODES.P && !pickActivityShown) {
+        if (!Compatibility.isChangeEnabled(GET_TARGET_SDK_VERSION_CODE_CHANGE)
+                && !pickActivityShown) {
             // Do not fail, return a success with an INVALID subid for apps targeting P or below
             // that tried to perform an operation and the SMS disambiguation dialog was never shown,
             // as these applications may not have been written to handle the failure case properly.
@@ -1521,19 +1528,6 @@ public final class SmsManager {
             // dialog was shown and the user clicked out of it.
             resolverResult.onFailure();
         }
-    }
-
-    private static int getTargetSdkVersion() {
-        final Context context = ActivityThread.currentApplication().getApplicationContext();
-        int targetSdk;
-        try {
-            targetSdk = context.getPackageManager().getApplicationInfo(
-                    context.getOpPackageName(), 0).targetSdkVersion;
-        } catch (PackageManager.NameNotFoundException e) {
-            // Default to old behavior if we can not find this.
-            targetSdk = -1;
-        }
-        return targetSdk;
     }
 
     private static ITelephony getITelephony() {
@@ -1621,7 +1615,7 @@ public final class SmsManager {
             ISms iSms = getISmsService();
             if (iSms != null) {
                 success = iSms.copyMessageToIccEfForSubscriber(getSubscriptionId(),
-                        ActivityThread.currentPackageName(),
+                        null,
                         status, pdu, smsc);
             }
         } catch (RemoteException ex) {
@@ -1662,7 +1656,7 @@ public final class SmsManager {
             ISms iSms = getISmsService();
             if (iSms != null) {
                 success = iSms.updateMessageOnIccEfForSubscriber(getSubscriptionId(),
-                        ActivityThread.currentPackageName(),
+                        null,
                         messageIndex, STATUS_ON_ICC_FREE, null /* pdu */);
             }
         } catch (RemoteException ex) {
@@ -1705,7 +1699,7 @@ public final class SmsManager {
             ISms iSms = getISmsService();
             if (iSms != null) {
                 success = iSms.updateMessageOnIccEfForSubscriber(getSubscriptionId(),
-                        ActivityThread.currentPackageName(),
+                        null,
                         messageIndex, newStatus, pdu);
             }
         } catch (RemoteException ex) {
@@ -1757,7 +1751,7 @@ public final class SmsManager {
             if (iSms != null) {
                 records = iSms.getAllMessagesFromIccEfForSubscriber(
                         getSubscriptionId(),
-                        ActivityThread.currentPackageName());
+                        null);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2581,7 +2575,7 @@ public final class SmsManager {
         try {
             ISms iccSms = getISmsServiceOrThrow();
             return iccSms.createAppSpecificSmsToken(getSubscriptionId(),
-                    ActivityThread.currentPackageName(), intent);
+                    null, intent);
 
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
@@ -2701,7 +2695,7 @@ public final class SmsManager {
         try {
             ISms iccSms = getISmsServiceOrThrow();
             return iccSms.createAppSpecificSmsTokenWithPackageInfo(getSubscriptionId(),
-                    ActivityThread.currentPackageName(), prefixes, intent);
+                    null, prefixes, intent);
 
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
@@ -2792,7 +2786,7 @@ public final class SmsManager {
             ISms iccISms = getISmsServiceOrThrow();
             if (iccISms != null) {
                 return iccISms.checkSmsShortCodeDestination(getSubscriptionId(),
-                        ActivityThread.currentPackageName(), null, destAddress, countryIso);
+                        null, null, destAddress, countryIso);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "checkSmsShortCodeDestination() RemoteException", e);
@@ -2828,7 +2822,7 @@ public final class SmsManager {
             ISms iSms = getISmsService();
             if (iSms != null) {
                 smsc = iSms.getSmscAddressFromIccEfForSubscriber(
-                        getSubscriptionId(), ActivityThread.currentPackageName());
+                        getSubscriptionId(), null);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2862,7 +2856,7 @@ public final class SmsManager {
             ISms iSms = getISmsService();
             if (iSms != null) {
                 return iSms.setSmscAddressOnIccEfForSubscriber(
-                        smsc, getSubscriptionId(), ActivityThread.currentPackageName());
+                        smsc, getSubscriptionId(), null);
             }
         } catch (RemoteException ex) {
             // ignore it

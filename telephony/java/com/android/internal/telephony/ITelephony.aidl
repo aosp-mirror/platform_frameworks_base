@@ -2087,6 +2087,11 @@ interface ITelephony {
     int getRadioHalVersion();
 
     /**
+     * Get the current calling package name.
+     */
+    String getCurrentPackageName();
+
+    /**
      * Returns true if the specified type of application (e.g. {@link #APPTYPE_CSIM} is present
      * on the UICC card.
      * @hide

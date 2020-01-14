@@ -37,7 +37,6 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
-import android.app.ActivityThread;
 import android.app.PendingIntent;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
@@ -382,8 +381,17 @@ public class TelephonyManager {
         // effort and get the context from the current activity thread.
         if (mContext != null) {
             return mContext.getOpPackageName();
+        } else {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) return null;
+            try {
+                return telephony.getCurrentPackageName();
+            } catch (RemoteException ex) {
+                return null;
+            } catch (NullPointerException ex) {
+                return null;
+            }
         }
-        return ActivityThread.currentOpPackageName();
     }
 
     private String getFeatureId() {
