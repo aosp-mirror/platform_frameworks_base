@@ -61,22 +61,7 @@ public class DvrSettings {
     public static final int DATA_FORMAT_SHV_TLV = Constants.DataFormat.SHV_TLV;
 
 
-    /** @hide */
-    @IntDef(prefix = "TYPE_", value = {TYPE_RECORD, TYPE_PLAYBACK})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Type {}
-
-    /**
-     * DVR for recording.
-     */
-    public static final int TYPE_RECORD = Constants.DvrType.RECORD;
-    /**
-     * DVR for playback of recorded programs.
-     */
-    public static final int TYPE_PLAYBACK = Constants.DvrType.PLAYBACK;
-
-
-    @FilterStatus
+    @Filter.Status
     private final int mStatusMask;
     @BytesLong
     private final long mLowThreshold;
@@ -86,24 +71,20 @@ public class DvrSettings {
     private final long mPacketSize;
     @DataFormat
     private final int mDataFormat;
-    @Type
-    private final int mType;
 
-    private DvrSettings(@FilterStatus int statusMask, @BytesLong long lowThreshold,
-            @BytesLong long highThreshold, @BytesLong long packetSize, @DataFormat int dataFormat,
-            @Type int type) {
+    private DvrSettings(@Filter.Status int statusMask, @BytesLong long lowThreshold,
+            @BytesLong long highThreshold, @BytesLong long packetSize, @DataFormat int dataFormat) {
         mStatusMask = statusMask;
         mLowThreshold = lowThreshold;
         mHighThreshold = highThreshold;
         mPacketSize = packetSize;
         mDataFormat = dataFormat;
-        mType = type;
     }
 
     /**
      * Gets status mask.
      */
-    @FilterStatus
+    @Filter.Status
     public int getStatusMask() {
         return mStatusMask;
     }
@@ -141,14 +122,6 @@ public class DvrSettings {
     }
 
     /**
-     * Gets settings type.
-     */
-    @Type
-    public int getType() {
-        return mType;
-    }
-
-    /**
      * Creates a builder for {@link DvrSettings}.
      *
      * @param context the context of the caller.
@@ -170,8 +143,6 @@ public class DvrSettings {
         private long mPacketSize;
         @DataFormat
         private int mDataFormat;
-        @Type
-        private int mType;
 
         /**
          * Sets status mask.
@@ -219,21 +190,12 @@ public class DvrSettings {
         }
 
         /**
-         * Sets settings type.
-         */
-        @NonNull
-        public Builder setType(@Type int type) {
-            this.mType = type;
-            return this;
-        }
-
-        /**
          * Builds a {@link DvrSettings} object.
          */
         @NonNull
         public DvrSettings build() {
             return new DvrSettings(
-                    mStatusMask, mLowThreshold, mHighThreshold, mPacketSize, mDataFormat, mType);
+                    mStatusMask, mLowThreshold, mHighThreshold, mPacketSize, mDataFormat);
         }
     }
 }
