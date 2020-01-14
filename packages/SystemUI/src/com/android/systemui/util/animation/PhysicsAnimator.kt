@@ -367,8 +367,17 @@ class PhysicsAnimator<T> private constructor (val target: T) {
      * animation is explicitly canceled, use [addEndListener]. End listeners have an allEnded param,
      * which indicates that all relevant animations have ended.
      */
-    fun withEndActions(vararg endActions: EndAction): PhysicsAnimator<T> {
-        this.endActions.addAll(endActions)
+    fun withEndActions(vararg endActions: EndAction?): PhysicsAnimator<T> {
+        this.endActions.addAll(endActions.filterNotNull())
+        return this
+    }
+
+    /**
+     * Helper overload so that callers from Java can use Runnables or method references as end
+     * actions without having to explicitly return Unit.
+     */
+    fun withEndActions(vararg endActions: Runnable?): PhysicsAnimator<T> {
+        this.endActions.addAll(endActions.filterNotNull().map { it::run })
         return this
     }
 
