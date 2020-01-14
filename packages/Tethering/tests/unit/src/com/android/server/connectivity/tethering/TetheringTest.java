@@ -501,13 +501,15 @@ public class TetheringTest {
         p2pInfo.groupFormed = isGroupFormed;
         p2pInfo.isGroupOwner = isGroupOwner;
 
-        WifiP2pGroup group = new WifiP2pGroup();
-        group.setIsGroupOwner(isGroupOwner);
-        group.setInterface(ifname);
+        WifiP2pGroup group = mock(WifiP2pGroup.class);
+        when(group.isGroupOwner()).thenReturn(isGroupOwner);
+        when(group.getInterface()).thenReturn(ifname);
 
-        final Intent intent = new Intent(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        intent.putExtra(WifiP2pManager.EXTRA_WIFI_P2P_INFO, p2pInfo);
-        intent.putExtra(WifiP2pManager.EXTRA_WIFI_P2P_GROUP, group);
+        final Intent intent = mock(Intent.class);
+        when(intent.getAction()).thenReturn(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        when(intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_INFO)).thenReturn(p2pInfo);
+        when(intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_GROUP)).thenReturn(group);
+
         mServiceContext.sendBroadcastAsUserMultiplePermissions(intent, UserHandle.ALL,
                 P2P_RECEIVER_PERMISSIONS_FOR_BROADCAST);
     }

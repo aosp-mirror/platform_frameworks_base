@@ -5918,6 +5918,7 @@ package android.net.wifi {
   }
 
   public class ScanResult implements android.os.Parcelable {
+    ctor public ScanResult();
     field public static final int CIPHER_CCMP = 3; // 0x3
     field public static final int CIPHER_GCMP_256 = 4; // 0x4
     field public static final int CIPHER_NONE = 0; // 0x0
@@ -6034,6 +6035,7 @@ package android.net.wifi {
     method @Deprecated public static boolean isMetered(@Nullable android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiInfo);
     method @Deprecated public boolean isNoInternetAccessExpected();
     method @Deprecated public void setIpConfiguration(@Nullable android.net.IpConfiguration);
+    method @Deprecated public void setNetworkSelectionStatus(@NonNull android.net.wifi.WifiConfiguration.NetworkSelectionStatus);
     method @Deprecated public void setProxy(@NonNull android.net.IpConfiguration.ProxySettings, @NonNull android.net.ProxyInfo);
     field @Deprecated public static final int AP_BAND_2GHZ = 0; // 0x0
     field @Deprecated public static final int AP_BAND_5GHZ = 1; // 0x1
@@ -6078,6 +6080,7 @@ package android.net.wifi {
     method @Deprecated public boolean getHasEverConnected();
     method @Deprecated @Nullable public static String getNetworkDisableReasonString(int);
     method @Deprecated public int getNetworkSelectionDisableReason();
+    method @Deprecated public int getNetworkSelectionStatus();
     method @Deprecated @NonNull public String getNetworkStatusString();
     method @Deprecated public boolean isNetworkEnabled();
     method @Deprecated public boolean isNetworkPermanentlyDisabled();
@@ -6092,6 +6095,16 @@ package android.net.wifi {
     field @Deprecated public static final int DISABLED_NO_INTERNET_TEMPORARY = 4; // 0x4
     field @Deprecated public static final int NETWORK_SELECTION_DISABLED_MAX = 10; // 0xa
     field @Deprecated public static final int NETWORK_SELECTION_ENABLE = 0; // 0x0
+    field @Deprecated public static final int NETWORK_SELECTION_ENABLED = 0; // 0x0
+    field @Deprecated public static final int NETWORK_SELECTION_PERMANENTLY_DISABLED = 2; // 0x2
+    field @Deprecated public static final int NETWORK_SELECTION_TEMPORARY_DISABLED = 1; // 0x1
+  }
+
+  @Deprecated public static final class WifiConfiguration.NetworkSelectionStatus.Builder {
+    ctor @Deprecated public WifiConfiguration.NetworkSelectionStatus.Builder();
+    method @Deprecated @NonNull public android.net.wifi.WifiConfiguration.NetworkSelectionStatus build();
+    method @Deprecated @NonNull public android.net.wifi.WifiConfiguration.NetworkSelectionStatus.Builder setNetworkSelectionDisableReason(int);
+    method @Deprecated @NonNull public android.net.wifi.WifiConfiguration.NetworkSelectionStatus.Builder setNetworkSelectionStatus(int);
   }
 
   @Deprecated public static class WifiConfiguration.RecentFailure {
@@ -6134,6 +6147,15 @@ package android.net.wifi {
     method @Nullable public static String removeDoubleQuotes(@Nullable String);
     field public static final String DEFAULT_MAC_ADDRESS = "02:00:00:00:00:00";
     field public static final int INVALID_RSSI = -127; // 0xffffff81
+  }
+
+  public static final class WifiInfo.Builder {
+    ctor public WifiInfo.Builder();
+    method @NonNull public android.net.wifi.WifiInfo build();
+    method @NonNull public android.net.wifi.WifiInfo.Builder setBssid(@NonNull String);
+    method @NonNull public android.net.wifi.WifiInfo.Builder setNetworkId(int);
+    method @NonNull public android.net.wifi.WifiInfo.Builder setRssi(int);
+    method @NonNull public android.net.wifi.WifiInfo.Builder setSsid(@NonNull byte[]);
   }
 
   public class WifiManager {

@@ -23,6 +23,8 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -793,10 +795,19 @@ public class ScanResult implements Parcelable {
         }
     }
 
-    /** empty scan result
+    /**
+     * Construct an empty scan result.
      *
-     * {@hide}
-     * */
+     * Test code has a need to construct a ScanResult in a specific state.
+     * (Note that mocking using Mockito does not work if the object needs to be parceled and
+     * unparceled.)
+     * Export a @SystemApi default constructor to allow tests to construct an empty ScanResult
+     * object. The test can then directly set the fields it cares about.
+     *
+     * @hide
+     */
+    @SystemApi
+    @VisibleForTesting
     public ScanResult() {
     }
 

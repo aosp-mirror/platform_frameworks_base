@@ -1,4 +1,4 @@
-// Copyright (C) 2015 The Android Open Source Project
+// Copyright (C) 2020 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,32 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Make test APK
+// ============================================================
+
 android_test {
-    name: "SettingsLibTests",
-    defaults: [
-        "SettingsLibDefaults",
-        "framework-wifi-test-defaults"
-    ],
+    name: "FrameworksWifiApiTests",
 
-    certificate: "platform",
+    defaults: ["framework-wifi-test-defaults"],
 
-    srcs: ["src/**/*.java"],
+    srcs: ["**/*.java"],
 
-    libs: [
-        "android.test.runner",
-        "telephony-common",
-        "android.test.base",
-    ],
-
-    platform_apis: true,
-    test_suites: ["device-tests"],
+    jacoco: {
+        include_filter: ["android.net.wifi.*"],
+        // TODO(b/147521214) need to exclude test classes
+        exclude_filter: [],
+    },
 
     static_libs: [
         "androidx.test.rules",
-        "androidx.test.espresso.core",
+        "core-test-rules",
+        "guava",
         "mockito-target-minus-junit4",
+        "net-tests-utils",
+        "frameworks-base-testutils",
         "truth-prebuilt",
     ],
 
-    dxflags: ["--multi-dex"],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+    ],
+
+    test_suites: [
+        "device-tests",
+        "mts",
+    ],
 }
