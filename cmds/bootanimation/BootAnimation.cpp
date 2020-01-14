@@ -1113,7 +1113,7 @@ void BootAnimation::handleViewport(nsecs_t timestep) {
         SurfaceComposerClient::Transaction t;
         t.setPosition(mFlingerSurfaceControl, 0, -mTargetInset)
                 .setCrop(mFlingerSurfaceControl, Rect(0, mTargetInset, mWidth, mHeight));
-        t.setDisplayProjection(mDisplayToken, 0 /* orientation */, layerStackRect, displayRect);
+        t.setDisplayProjection(mDisplayToken, ui::ROTATION_0, layerStackRect, displayRect);
         t.apply();
 
         mTargetInset = mCurrentInset = 0;

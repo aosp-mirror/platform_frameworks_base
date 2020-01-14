@@ -263,7 +263,8 @@ static jobject nativeScreenshot(JNIEnv* env, jclass clazz,
     status_t res = ScreenshotClient::capture(displayToken, dataspace,
             ui::PixelFormat::RGBA_8888,
             sourceCrop, width, height,
-            useIdentityTransform, rotation, captureSecureLayers, &buffer, capturedSecureLayers);
+            useIdentityTransform, ui::toRotation(rotation),
+            captureSecureLayers, &buffer, capturedSecureLayers);
     if (res != NO_ERROR) {
         return NULL;
     }
@@ -724,7 +725,8 @@ static void nativeSetDisplayProjection(JNIEnv* env, jclass clazz,
 
     {
         auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-        transaction->setDisplayProjection(token, orientation, layerStackRect, displayRect);
+        transaction->setDisplayProjection(token, static_cast<ui::Rotation>(orientation),
+                                          layerStackRect, displayRect);
     }
 }
 
