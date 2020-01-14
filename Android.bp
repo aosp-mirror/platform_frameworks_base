@@ -269,6 +269,7 @@ filegroup {
         ":framework-sdkextensions-sources",
         ":framework-tethering-srcs",
         ":updatable-media-srcs",
+        ":ike-srcs",
     ]
 }
 
@@ -431,6 +432,7 @@ java_library {
     name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
+    libs: ["ike-stubs"],
     installable: true,
     javac_shard_size: 150,
     required: [
@@ -467,6 +469,7 @@ java_library {
         "framework-sdkextensions-stubs-systemapi",
         // TODO(b/147200698): should be the stub of framework-tethering
         "framework-tethering",
+        "ike-stubs",
     ],
     sdk_version: "core_platform",
     apex_available: ["//apex_available:platform"],
