@@ -4507,6 +4507,10 @@ package android.net {
     method public abstract void onRequestScores(android.net.NetworkKey[]);
   }
 
+  public class NetworkRequest implements android.os.Parcelable {
+    method public boolean satisfiedBy(@Nullable android.net.NetworkCapabilities);
+  }
+
   public static class NetworkRequest.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP) public android.net.NetworkRequest.Builder setSignalStrength(int);
   }
