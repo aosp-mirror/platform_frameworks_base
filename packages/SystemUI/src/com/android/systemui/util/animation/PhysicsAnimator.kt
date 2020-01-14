@@ -416,8 +416,10 @@ class PhysicsAnimator<T> private constructor (val target: T) {
                         max = max(currentValue, this.max)
                     }
 
-                    // Apply the configuration and start the animation.
+                    // Apply the configuration and start the animation. Since flings can't be
+                    // redirected while in motion, cancel it first.
                     getFlingAnimation(animatedProperty)
+                            .also { it.cancel() }
                             .also { flingConfig.applyToAnimation(it) }
                             .start()
                 }
