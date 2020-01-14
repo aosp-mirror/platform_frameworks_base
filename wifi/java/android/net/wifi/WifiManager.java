@@ -2602,6 +2602,8 @@ public class WifiManager {
      * the same permissions as {@link #getScanResults}. If such access is not allowed,
      * {@link WifiInfo#getSSID} will return {@link #UNKNOWN_SSID} and
      * {@link WifiInfo#getBSSID} will return {@code "02:00:00:00:00:00"}.
+     * {@link WifiInfo#getPasspointFqdn()} will return null.
+     * {@link WifiInfo#getPasspointProviderFriendlyName()} will return null.
      *
      * @return the Wi-Fi information, contained in {@link WifiInfo}.
      */
