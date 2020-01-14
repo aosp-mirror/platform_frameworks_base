@@ -134,6 +134,59 @@ public final class MediaRoute2Info implements Parcelable {
      */
     public static final int DEVICE_TYPE_BLUETOOTH = 3;
 
+    /**
+     * Media feature: Live audio.
+     * <p>
+     * A route that supports live audio routing will allow the media audio stream
+     * to be sent to supported destinations.  This can include internal speakers or
+     * audio jacks on the device itself, A2DP devices, and more.
+     * </p><p>
+     * When a live audio route is selected, audio routing is transparent to the application.
+     * All audio played on the media stream will be routed to the selected destination.
+     * </p><p>
+     * Refer to the class documentation for details about live audio routes.
+     * </p>
+     */
+    public static final String FEATURE_LIVE_AUDIO = "android.media.intent.category.LIVE_AUDIO";
+
+    /**
+     * Media feature: Live video.
+     * <p>
+     * A route that supports live video routing will allow a mirrored version
+     * of the device's primary display or a customized
+     * {@link android.app.Presentation Presentation} to be sent to supported
+     * destinations.
+     * </p><p>
+     * When a live video route is selected, audio and video routing is transparent
+     * to the application.  By default, audio and video is routed to the selected
+     * destination.  For certain live video routes, the application may also use a
+     * {@link android.app.Presentation Presentation} to replace the mirrored view
+     * on the external display with different content.
+     * </p><p>
+     * Refer to the class documentation for details about live video routes.
+     * </p>
+     *
+     * @see android.app.Presentation
+     */
+    public static final String FEATURE_LIVE_VIDEO = "android.media.intent.category.LIVE_VIDEO";
+
+    /**
+     * Media feature: Remote playback.
+     * <p>
+     * A route that supports remote playback routing will allow an application to send
+     * requests to play content remotely to supported destinations.
+     * </p><p>
+     * Remote playback routes destinations operate independently of the local device.
+     * When a remote playback route is selected, the application can control the content
+     * playing on the destination using {@link MediaRouter2.RoutingController#getControlHints()}.
+     * The application may also receive status updates from the route regarding remote playback.
+     * </p><p>
+     * Refer to the class documentation for details about remote playback routes.
+     * </p>
+     */
+    public static final String FEATURE_REMOTE_PLAYBACK =
+            "android.media.intent.category.REMOTE_PLAYBACK";
+
     final String mId;
     final CharSequence mName;
     final List<String> mFeatures;
@@ -260,9 +313,8 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
-     * Gets the package name of the client that uses the route.
-     * Returns null if no clients use this route.
-     * @hide
+     * Gets the package name of the app using the route.
+     * Returns null if no apps are using this route.
      */
     @Nullable
     public String getClientPackageName() {

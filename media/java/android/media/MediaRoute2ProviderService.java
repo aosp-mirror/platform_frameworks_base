@@ -18,6 +18,7 @@ package android.media;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Service;
@@ -64,7 +65,6 @@ public abstract class MediaRoute2ProviderService extends Service {
      * request.
      *
      * @see #notifySessionCreated(RoutingSessionInfo, long)
-     * @hide
      */
     public static final long REQUEST_ID_UNKNOWN = 0;
 
@@ -82,8 +82,14 @@ public abstract class MediaRoute2ProviderService extends Service {
         mHandler = new Handler(Looper.getMainLooper());
     }
 
+    /**
+     * If overriding this method, call through to the super method for any unknown actions.
+     * <p>
+     * {@inheritDoc}
+     */
+    @CallSuper
     @Override
-    @NonNull
+    @Nullable
     public IBinder onBind(@NonNull Intent intent) {
         //TODO: Allow binding from media router service only?
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
@@ -110,7 +116,6 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param routeId the id of the route
      * @param volume the target volume
-     * @hide
      */
     public abstract void onSetVolume(@NonNull String routeId, int volume);
 
@@ -119,7 +124,6 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param routeId id of the route
      * @param delta the delta to add to the current volume
-     * @hide
      */
     public abstract void onUpdateVolume(@NonNull String routeId, int delta);
 
@@ -129,7 +133,6 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param sessionId id of the session
      * @return information of the session with the given id.
      *         null if the session is released or ID is not valid.
-     * @hide
      */
     @Nullable
     public final RoutingSessionInfo getSessionInfo(@NonNull String sessionId) {
@@ -143,7 +146,6 @@ public abstract class MediaRoute2ProviderService extends Service {
 
     /**
      * Gets the list of {@link RoutingSessionInfo session info} that the provider service maintains.
-     * @hide
      */
     @NonNull
     public final List<RoutingSessionInfo> getAllSessionInfo() {
@@ -163,7 +165,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param requestId id of the previous request to create this session provided in
      *                  {@link #onCreateSession(String, String, long, Bundle)}
      * @see #onCreateSession(String, String, long, Bundle)
-     * @hide
+     * @see #getSessionInfo(String)
      */
     public final void notifySessionCreated(@NonNull RoutingSessionInfo sessionInfo,
             long requestId) {
@@ -197,7 +199,6 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param requestId id of the previous request to create the session provided in
      *                  {@link #onCreateSession(String, String, long, Bundle)}.
      * @see #onCreateSession(String, String, long, Bundle)
-     * @hide
      */
     public final void notifySessionCreationFailed(long requestId) {
         if (mClient == null) {
@@ -213,8 +214,6 @@ public abstract class MediaRoute2ProviderService extends Service {
     /**
      * Notifies the existing session is updated. For example, when
      * {@link RoutingSessionInfo#getSelectedRoutes() selected routes} are changed.
-     *
-     * @hide
      */
     public final void notifySessionUpdated(@NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
@@ -244,7 +243,6 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param sessionId id of the released session.
      * @see #onReleaseSession(String)
-     * @hide
      */
     public final void notifySessionReleased(@NonNull String sessionId) {
         if (TextUtils.isEmpty(sessionId)) {
@@ -296,7 +294,6 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @see RoutingSessionInfo.Builder#Builder(String, String)
      * @see RoutingSessionInfo.Builder#addSelectedRoute(String)
      * @see RoutingSessionInfo.Builder#setControlHints(Bundle)
-     * @hide
      */
     public abstract void onCreateSession(@NonNull String packageName, @NonNull String routeId,
             long requestId, @Nullable Bundle sessionHints);
@@ -314,7 +311,6 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param sessionId id of the session being released.
      * @see #notifySessionReleased(String)
      * @see #getSessionInfo(String)
-     * @hide
      */
     public abstract void onReleaseSession(@NonNull String sessionId);
 
@@ -326,7 +322,6 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param sessionId id of the session
      * @param routeId id of the route
-     * @hide
      */
     public abstract void onSelectRoute(@NonNull String sessionId, @NonNull String routeId);
 
@@ -338,7 +333,6 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param sessionId id of the session
      * @param routeId id of the route
-     * @hide
      */
     public abstract void onDeselectRoute(@NonNull String sessionId, @NonNull String routeId);
 
@@ -350,7 +344,6 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param sessionId id of the session
      * @param routeId id of the route
-     * @hide
      */
     public abstract void onTransferToRoute(@NonNull String sessionId, @NonNull String routeId);
 
@@ -370,9 +363,8 @@ public abstract class MediaRoute2ProviderService extends Service {
      * </p>
      *
      * @param preference the new discovery preference
-     *
-     * TODO: This method needs tests.
      */
+    // TODO: This method needs tests.
     public void onDiscoveryPreferenceChanged(@NonNull RouteDiscoveryPreference preference) {}
 
     /**

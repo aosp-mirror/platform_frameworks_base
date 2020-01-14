@@ -43,12 +43,11 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2;
-import android.media.MediaRouter2.OnCreateSessionListener;
+import android.media.MediaRouter2.OnGetControllerHintsListener;
 import android.media.MediaRouter2.RouteCallback;
 import android.media.MediaRouter2.RoutingController;
-import android.media.MediaRouter2.SessionCallback;
+import android.media.MediaRouter2.RoutingControllerCallback;
 import android.media.RouteDiscoveryPreference;
-import android.media.RoutingSessionInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -156,33 +155,34 @@ public class MediaRouter2Test {
     }
 
     @Test
-    public void testRegisterSessionCallbackWithInvalidArguments() {
+    public void testRegisterControllerCallbackWithInvalidArguments() {
         Executor executor = mExecutor;
-        SessionCallback callback = new SessionCallback();
+        RoutingControllerCallback callback = new RoutingControllerCallback();
 
         // Tests null executor
         assertThrows(NullPointerException.class,
-                () -> mRouter2.registerSessionCallback(null, callback));
+                () -> mRouter2.registerControllerCallback(null, callback));
 
         // Tests null callback
         assertThrows(NullPointerException.class,
-                () -> mRouter2.registerSessionCallback(executor, null));
+                () -> mRouter2.registerControllerCallback(executor, null));
     }
 
     @Test
-    public void testUnregisterSessionCallbackWithNullCallback() {
+    public void testUnregisterControllerCallbackWithNullCallback() {
         // Tests null callback
         assertThrows(NullPointerException.class,
-                () -> mRouter2.unregisterSessionCallback(null));
+                () -> mRouter2.unregisterControllerCallback(null));
     }
 
     @Test
-    public void testRequestCreateSessionWithNullRoute() {
-        assertThrows(NullPointerException.class, () -> mRouter2.requestCreateSession(null));
+    public void testRequestCreateControllerWithNullRoute() {
+        assertThrows(NullPointerException.class,
+                () -> mRouter2.requestCreateController(null));
     }
 
     @Test
-    public void testRequestCreateSessionSuccess() throws Exception {
+    public void testRequestCreateControllerSuccess() throws Exception {
         final List<String> sampleRouteFeature = new ArrayList<>();
         sampleRouteFeature.add(FEATURE_SAMPLE);
 
@@ -195,9 +195,9 @@ public class MediaRouter2Test {
         final List<RoutingController> controllers = new ArrayList<>();
 
         // Create session with this route
-        SessionCallback sessionCallback = new SessionCallback() {
+        RoutingControllerCallback controllerCallback = new RoutingControllerCallback() {
             @Override
-            public void onSessionCreated(RoutingController controller) {
+            public void onControllerCreated(RoutingController controller) {
                 assertNotNull(controller);
                 assertTrue(createRouteMap(controller.getSelectedRoutes()).containsKey(ROUTE_ID1));
                 controllers.add(controller);
@@ -205,7 +205,7 @@ public class MediaRouter2Test {
             }
 
             @Override
-            public void onSessionCreationFailed(MediaRoute2Info requestedRoute) {
+            public void onControllerCreationFailed(MediaRoute2Info requestedRoute) {
                 failureLatch.countDown();
             }
         };
@@ -215,8 +215,8 @@ public class MediaRouter2Test {
         mRouter2.registerRouteCallback(mExecutor, routeCallback, RouteDiscoveryPreference.EMPTY);
 
         try {
-            mRouter2.registerSessionCallback(mExecutor, sessionCallback);
-            mRouter2.requestCreateSession(route);
+            mRouter2.registerControllerCallback(mExecutor, controllerCallback);
+            mRouter2.requestCreateController(route);
             assertTrue(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
             // onSessionCreationFailed should not be called.
@@ -224,12 +224,12 @@ public class MediaRouter2Test {
         } finally {
             releaseControllers(controllers);
             mRouter2.unregisterRouteCallback(routeCallback);
-            mRouter2.unregisterSessionCallback(sessionCallback);
+            mRouter2.unregisterControllerCallback(controllerCallback);
         }
     }
 
     @Test
-    public void testRequestCreateSessionFailure() throws Exception {
+    public void testRequestCreateControllerFailure() throws Exception {
         final List<String> sampleRouteType = new ArrayList<>();
         sampleRouteType.add(FEATURE_SAMPLE);
 
@@ -242,15 +242,15 @@ public class MediaRouter2Test {
         final List<RoutingController> controllers = new ArrayList<>();
 
         // Create session with this route
-        SessionCallback sessionCallback = new SessionCallback() {
+        RoutingControllerCallback controllerCallback = new RoutingControllerCallback() {
             @Override
-            public void onSessionCreated(RoutingController controller) {
+            public void onControllerCreated(RoutingController controller) {
                 controllers.add(controller);
                 successLatch.countDown();
             }
 
             @Override
-            public void onSessionCreationFailed(MediaRoute2Info requestedRoute) {
+            public void onControllerCreationFailed(MediaRoute2Info requestedRoute) {
                 assertEquals(route, requestedRoute);
                 failureLatch.countDown();
             }
@@ -261,8 +261,8 @@ public class MediaRouter2Test {
         mRouter2.registerRouteCallback(mExecutor, routeCallback, RouteDiscoveryPreference.EMPTY);
 
         try {
-            mRouter2.registerSessionCallback(mExecutor, sessionCallback);
-            mRouter2.requestCreateSession(route);
+            mRouter2.registerControllerCallback(mExecutor, controllerCallback);
+            mRouter2.requestCreateController(route);
             assertTrue(failureLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
             // onSessionCreated should not be called.
@@ -270,12 +270,12 @@ public class MediaRouter2Test {
         } finally {
             releaseControllers(controllers);
             mRouter2.unregisterRouteCallback(routeCallback);
-            mRouter2.unregisterSessionCallback(sessionCallback);
+            mRouter2.unregisterControllerCallback(controllerCallback);
         }
     }
 
     @Test
-    public void testRequestCreateSessionMultipleSessions() throws Exception {
+    public void testRequestCreateControllerMultipleSessions() throws Exception {
         final List<String> sampleRouteType = new ArrayList<>();
         sampleRouteType.add(FEATURE_SAMPLE);
 
@@ -284,15 +284,15 @@ public class MediaRouter2Test {
         final List<RoutingController> createdControllers = new ArrayList<>();
 
         // Create session with this route
-        SessionCallback sessionCallback = new SessionCallback() {
+        RoutingControllerCallback controllerCallback = new RoutingControllerCallback() {
             @Override
-            public void onSessionCreated(RoutingController controller) {
+            public void onControllerCreated(RoutingController controller) {
                 createdControllers.add(controller);
                 successLatch.countDown();
             }
 
             @Override
-            public void onSessionCreationFailed(MediaRoute2Info requestedRoute) {
+            public void onControllerCreationFailed(MediaRoute2Info requestedRoute) {
                 failureLatch.countDown();
             }
         };
@@ -308,9 +308,9 @@ public class MediaRouter2Test {
         mRouter2.registerRouteCallback(mExecutor, routeCallback, RouteDiscoveryPreference.EMPTY);
 
         try {
-            mRouter2.registerSessionCallback(mExecutor, sessionCallback);
-            mRouter2.requestCreateSession(route1);
-            mRouter2.requestCreateSession(route2);
+            mRouter2.registerControllerCallback(mExecutor, controllerCallback);
+            mRouter2.requestCreateController(route1);
+            mRouter2.requestCreateController(route2);
             assertTrue(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
             // onSessionCreationFailed should not be called.
@@ -321,19 +321,19 @@ public class MediaRouter2Test {
             RoutingController controller1 = createdControllers.get(0);
             RoutingController controller2 = createdControllers.get(1);
 
-            assertNotEquals(controller1.getSessionId(), controller2.getSessionId());
+            assertNotEquals(controller1.getId(), controller2.getId());
             assertTrue(createRouteMap(controller1.getSelectedRoutes()).containsKey(ROUTE_ID1));
             assertTrue(createRouteMap(controller2.getSelectedRoutes()).containsKey(ROUTE_ID2));
 
         } finally {
             releaseControllers(createdControllers);
             mRouter2.unregisterRouteCallback(routeCallback);
-            mRouter2.unregisterSessionCallback(sessionCallback);
+            mRouter2.unregisterControllerCallback(controllerCallback);
         }
     }
 
     @Test
-    public void testSetOnCreateSessionListener() throws Exception {
+    public void testSetOnGetControllerHintsListener() throws Exception {
         final List<String> sampleRouteFeature = new ArrayList<>();
         sampleRouteFeature.add(FEATURE_SAMPLE);
 
@@ -343,9 +343,9 @@ public class MediaRouter2Test {
 
         final Bundle createSessionHints = new Bundle();
         createSessionHints.putString(TEST_KEY, TEST_VALUE);
-        final OnCreateSessionListener listener = new OnCreateSessionListener() {
+        final OnGetControllerHintsListener listener = new OnGetControllerHintsListener() {
             @Override
-            public Bundle onCreateSession(MediaRoute2Info route) {
+            public Bundle onGetControllerHints(MediaRoute2Info route) {
                 return createSessionHints;
             }
         };
@@ -355,9 +355,9 @@ public class MediaRouter2Test {
         final List<RoutingController> controllers = new ArrayList<>();
 
         // Create session with this route
-        SessionCallback sessionCallback = new SessionCallback() {
+        RoutingControllerCallback controllerCallback = new RoutingControllerCallback() {
             @Override
-            public void onSessionCreated(RoutingController controller) {
+            public void onControllerCreated(RoutingController controller) {
                 assertNotNull(controller);
                 assertTrue(createRouteMap(controller.getSelectedRoutes()).containsKey(ROUTE_ID1));
 
@@ -373,7 +373,7 @@ public class MediaRouter2Test {
             }
 
             @Override
-            public void onSessionCreationFailed(MediaRoute2Info requestedRoute) {
+            public void onControllerCreationFailed(MediaRoute2Info requestedRoute) {
                 failureLatch.countDown();
             }
         };
@@ -383,12 +383,12 @@ public class MediaRouter2Test {
         mRouter2.registerRouteCallback(mExecutor, routeCallback, RouteDiscoveryPreference.EMPTY);
 
         try {
-            mRouter2.registerSessionCallback(mExecutor, sessionCallback);
+            mRouter2.registerControllerCallback(mExecutor, controllerCallback);
 
             // The SampleMediaRoute2ProviderService supposed to set control hints
             // with the given creationSessionHints.
-            mRouter2.setOnCreateSessionListener(listener);
-            mRouter2.requestCreateSession(route);
+            mRouter2.setOnGetControllerHintsListener(listener);
+            mRouter2.requestCreateController(route);
             assertTrue(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
             // onSessionCreationFailed should not be called.
@@ -396,12 +396,12 @@ public class MediaRouter2Test {
         } finally {
             releaseControllers(controllers);
             mRouter2.unregisterRouteCallback(routeCallback);
-            mRouter2.unregisterSessionCallback(sessionCallback);
+            mRouter2.unregisterControllerCallback(controllerCallback);
         }
     }
 
     @Test
-    public void testSessionCallbackIsNotCalledAfterUnregistered() throws Exception {
+    public void testRoutingControllerCallbackIsNotCalledAfterUnregistered() throws Exception {
         final List<String> sampleRouteType = new ArrayList<>();
         sampleRouteType.add(FEATURE_SAMPLE);
 
@@ -414,15 +414,15 @@ public class MediaRouter2Test {
         final List<RoutingController> controllers = new ArrayList<>();
 
         // Create session with this route
-        SessionCallback sessionCallback = new SessionCallback() {
+        RoutingControllerCallback controllerCallback = new RoutingControllerCallback() {
             @Override
-            public void onSessionCreated(RoutingController controller) {
+            public void onControllerCreated(RoutingController controller) {
                 controllers.add(controller);
                 successLatch.countDown();
             }
 
             @Override
-            public void onSessionCreationFailed(MediaRoute2Info requestedRoute) {
+            public void onControllerCreationFailed(MediaRoute2Info requestedRoute) {
                 failureLatch.countDown();
             }
         };
@@ -432,11 +432,11 @@ public class MediaRouter2Test {
         mRouter2.registerRouteCallback(mExecutor, routeCallback, RouteDiscoveryPreference.EMPTY);
 
         try {
-            mRouter2.registerSessionCallback(mExecutor, sessionCallback);
-            mRouter2.requestCreateSession(route);
+            mRouter2.registerControllerCallback(mExecutor, controllerCallback);
+            mRouter2.requestCreateController(route);
 
             // Unregisters session callback
-            mRouter2.unregisterSessionCallback(sessionCallback);
+            mRouter2.unregisterControllerCallback(controllerCallback);
 
             // No session callback methods should be called.
             assertFalse(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
@@ -444,7 +444,7 @@ public class MediaRouter2Test {
         } finally {
             releaseControllers(controllers);
             mRouter2.unregisterRouteCallback(routeCallback);
-            mRouter2.unregisterSessionCallback(sessionCallback);
+            mRouter2.unregisterControllerCallback(controllerCallback);
         }
     }
 
@@ -458,59 +458,49 @@ public class MediaRouter2Test {
         MediaRoute2Info routeToCreateSessionWith = routes.get(ROUTE_ID1);
         assertNotNull(routeToCreateSessionWith);
 
-        final CountDownLatch onSessionCreatedLatch = new CountDownLatch(1);
-        final CountDownLatch onSessionInfoChangedLatchForSelect = new CountDownLatch(1);
-        final CountDownLatch onSessionInfoChangedLatchForDeselect = new CountDownLatch(1);
+        final CountDownLatch onControllerCreatedLatch = new CountDownLatch(1);
+        final CountDownLatch onControllerUpdatedLatchForSelect = new CountDownLatch(1);
+        final CountDownLatch onControllerUpdatedLatchForDeselect = new CountDownLatch(1);
         final List<RoutingController> controllers = new ArrayList<>();
 
         // Create session with ROUTE_ID1
-        SessionCallback sessionCallback = new SessionCallback() {
+        RoutingControllerCallback controllerCallback = new RoutingControllerCallback() {
             @Override
-            public void onSessionCreated(RoutingController controller) {
+            public void onControllerCreated(RoutingController controller) {
                 assertNotNull(controller);
                 assertTrue(getRouteIds(controller.getSelectedRoutes()).contains(ROUTE_ID1));
                 controllers.add(controller);
-                onSessionCreatedLatch.countDown();
+                onControllerCreatedLatch.countDown();
             }
 
             @Override
-            public void onSessionInfoChanged(RoutingController controller,
-                    RoutingSessionInfo oldInfo, RoutingSessionInfo newInfo) {
-                if (onSessionCreatedLatch.getCount() != 0
+            public void onControllerUpdated(RoutingController controller) {
+                if (onControllerCreatedLatch.getCount() != 0
                         || !TextUtils.equals(
-                                controllers.get(0).getSessionId(), controller.getSessionId())) {
+                                controllers.get(0).getId(), controller.getId())) {
                     return;
                 }
 
-                if (onSessionInfoChangedLatchForSelect.getCount() != 0) {
-                    // Check oldInfo
-                    assertEquals(controller.getSessionId(), oldInfo.getId());
-                    assertEquals(1, oldInfo.getSelectedRoutes().size());
-                    assertTrue(oldInfo.getSelectedRoutes().contains(ROUTE_ID1));
-                    assertTrue(oldInfo.getSelectableRoutes().contains(
-                            ROUTE_ID4_TO_SELECT_AND_DESELECT));
+                if (onControllerUpdatedLatchForSelect.getCount() != 0) {
+                    assertEquals(2, controller.getSelectedRoutes().size());
+                    assertTrue(getRouteIds(controller.getSelectedRoutes())
+                            .contains(ROUTE_ID1));
+                    assertTrue(getRouteIds(controller.getSelectedRoutes())
+                            .contains(ROUTE_ID4_TO_SELECT_AND_DESELECT));
+                    assertFalse(getRouteIds(controller.getSelectableRoutes())
+                            .contains(ROUTE_ID4_TO_SELECT_AND_DESELECT));
 
-                    // Check newInfo
-                    assertEquals(controller.getSessionId(), newInfo.getId());
-                    assertEquals(2, newInfo.getSelectedRoutes().size());
-                    assertTrue(newInfo.getSelectedRoutes().contains(ROUTE_ID1));
-                    assertTrue(newInfo.getSelectedRoutes().contains(
-                            ROUTE_ID4_TO_SELECT_AND_DESELECT));
-                    assertFalse(newInfo.getSelectableRoutes().contains(
-                            ROUTE_ID4_TO_SELECT_AND_DESELECT));
-
-                    onSessionInfoChangedLatchForSelect.countDown();
+                    onControllerUpdatedLatchForSelect.countDown();
                 } else {
-                    // Check newInfo
-                    assertEquals(controller.getSessionId(), newInfo.getId());
-                    assertEquals(1, newInfo.getSelectedRoutes().size());
-                    assertTrue(newInfo.getSelectedRoutes().contains(ROUTE_ID1));
-                    assertFalse(newInfo.getSelectedRoutes().contains(
-                            ROUTE_ID4_TO_SELECT_AND_DESELECT));
-                    assertTrue(newInfo.getSelectableRoutes().contains(
-                            ROUTE_ID4_TO_SELECT_AND_DESELECT));
+                    assertEquals(1, controller.getSelectedRoutes().size());
+                    assertTrue(getRouteIds(controller.getSelectedRoutes())
+                            .contains(ROUTE_ID1));
+                    assertFalse(getRouteIds(controller.getSelectedRoutes())
+                            .contains(ROUTE_ID4_TO_SELECT_AND_DESELECT));
+                    assertTrue(getRouteIds(controller.getSelectableRoutes())
+                            .contains(ROUTE_ID4_TO_SELECT_AND_DESELECT));
 
-                    onSessionInfoChangedLatchForDeselect.countDown();
+                    onControllerUpdatedLatchForDeselect.countDown();
                 }
             }
         };
@@ -520,9 +510,9 @@ public class MediaRouter2Test {
         mRouter2.registerRouteCallback(mExecutor, routeCallback, RouteDiscoveryPreference.EMPTY);
 
         try {
-            mRouter2.registerSessionCallback(mExecutor, sessionCallback);
-            mRouter2.requestCreateSession(routeToCreateSessionWith);
-            assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+            mRouter2.registerControllerCallback(mExecutor, controllerCallback);
+            mRouter2.requestCreateController(routeToCreateSessionWith);
+            assertTrue(onControllerCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
             assertEquals(1, controllers.size());
             RoutingController controller = controllers.get(0);
@@ -535,15 +525,15 @@ public class MediaRouter2Test {
             assertNotNull(routeToSelectAndDeselect);
 
             controller.selectRoute(routeToSelectAndDeselect);
-            assertTrue(onSessionInfoChangedLatchForSelect.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+            assertTrue(onControllerUpdatedLatchForSelect.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
             controller.deselectRoute(routeToSelectAndDeselect);
-            assertTrue(onSessionInfoChangedLatchForDeselect.await(
+            assertTrue(onControllerUpdatedLatchForDeselect.await(
                     TIMEOUT_MS, TimeUnit.MILLISECONDS));
         } finally {
             releaseControllers(controllers);
             mRouter2.unregisterRouteCallback(routeCallback);
-            mRouter2.unregisterSessionCallback(sessionCallback);
+            mRouter2.unregisterControllerCallback(controllerCallback);
         }
     }
 
@@ -556,43 +546,35 @@ public class MediaRouter2Test {
         MediaRoute2Info routeToCreateSessionWith = routes.get(ROUTE_ID1);
         assertNotNull(routeToCreateSessionWith);
 
-        final CountDownLatch onSessionCreatedLatch = new CountDownLatch(1);
-        final CountDownLatch onSessionInfoChangedLatch = new CountDownLatch(1);
+        final CountDownLatch onControllerCreatedLatch = new CountDownLatch(1);
+        final CountDownLatch onControllerUpdatedLatch = new CountDownLatch(1);
         final List<RoutingController> controllers = new ArrayList<>();
 
         // Create session with ROUTE_ID1
-        SessionCallback sessionCallback = new SessionCallback() {
+        RoutingControllerCallback controllerCallback = new RoutingControllerCallback() {
             @Override
-            public void onSessionCreated(RoutingController controller) {
+            public void onControllerCreated(RoutingController controller) {
                 assertNotNull(controller);
                 assertTrue(getRouteIds(controller.getSelectedRoutes()).contains(ROUTE_ID1));
                 controllers.add(controller);
-                onSessionCreatedLatch.countDown();
+                onControllerCreatedLatch.countDown();
             }
 
             @Override
-            public void onSessionInfoChanged(RoutingController controller,
-                    RoutingSessionInfo oldInfo, RoutingSessionInfo newInfo) {
-                if (onSessionCreatedLatch.getCount() != 0
+            public void onControllerUpdated(RoutingController controller) {
+                if (onControllerCreatedLatch.getCount() != 0
                         || !TextUtils.equals(
-                                controllers.get(0).getSessionId(), controller.getSessionId())) {
+                                controllers.get(0).getId(), controller.getId())) {
                     return;
                 }
+                assertEquals(1, controller.getSelectedRoutes().size());
+                assertFalse(getRouteIds(controller.getSelectedRoutes()).contains(ROUTE_ID1));
+                assertTrue(getRouteIds(controller.getSelectedRoutes())
+                        .contains(ROUTE_ID5_TO_TRANSFER_TO));
+                assertFalse(getRouteIds(controller.getTransferrableRoutes())
+                        .contains(ROUTE_ID5_TO_TRANSFER_TO));
 
-                // Check oldInfo
-                assertEquals(controller.getSessionId(), oldInfo.getId());
-                assertEquals(1, oldInfo.getSelectedRoutes().size());
-                assertTrue(oldInfo.getSelectedRoutes().contains(ROUTE_ID1));
-                assertTrue(oldInfo.getTransferrableRoutes().contains(ROUTE_ID5_TO_TRANSFER_TO));
-
-                // Check newInfo
-                assertEquals(controller.getSessionId(), newInfo.getId());
-                assertEquals(1, newInfo.getSelectedRoutes().size());
-                assertFalse(newInfo.getSelectedRoutes().contains(ROUTE_ID1));
-                assertTrue(newInfo.getSelectedRoutes().contains(ROUTE_ID5_TO_TRANSFER_TO));
-                assertFalse(newInfo.getTransferrableRoutes().contains(ROUTE_ID5_TO_TRANSFER_TO));
-
-                onSessionInfoChangedLatch.countDown();
+                onControllerUpdatedLatch.countDown();
             }
         };
 
@@ -601,9 +583,9 @@ public class MediaRouter2Test {
         mRouter2.registerRouteCallback(mExecutor, routeCallback, RouteDiscoveryPreference.EMPTY);
 
         try {
-            mRouter2.registerSessionCallback(mExecutor, sessionCallback);
-            mRouter2.requestCreateSession(routeToCreateSessionWith);
-            assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+            mRouter2.registerControllerCallback(mExecutor, controllerCallback);
+            mRouter2.requestCreateController(routeToCreateSessionWith);
+            assertTrue(onControllerCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
             assertEquals(1, controllers.size());
             RoutingController controller = controllers.get(0);
@@ -615,18 +597,18 @@ public class MediaRouter2Test {
             assertNotNull(routeToTransferTo);
 
             controller.transferToRoute(routeToTransferTo);
-            assertTrue(onSessionInfoChangedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+            assertTrue(onControllerUpdatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
         } finally {
             releaseControllers(controllers);
             mRouter2.unregisterRouteCallback(routeCallback);
-            mRouter2.unregisterSessionCallback(sessionCallback);
+            mRouter2.unregisterControllerCallback(controllerCallback);
         }
     }
 
-    // TODO: Add tests for onSessionReleased() call.
+    // TODO: Add tests for onSessionReleased() when provider releases the session.
 
     @Test
-    public void testRoutingControllerReleaseShouldIgnoreTransferTo() throws Exception {
+    public void testRoutingControllerRelease() throws Exception {
         final List<String> sampleRouteType = new ArrayList<>();
         sampleRouteType.add(FEATURE_SAMPLE);
 
@@ -634,29 +616,37 @@ public class MediaRouter2Test {
         MediaRoute2Info routeToCreateSessionWith = routes.get(ROUTE_ID1);
         assertNotNull(routeToCreateSessionWith);
 
-        final CountDownLatch onSessionCreatedLatch = new CountDownLatch(1);
-        final CountDownLatch onSessionInfoChangedLatch = new CountDownLatch(1);
+        final CountDownLatch onControllerCreatedLatch = new CountDownLatch(1);
+        final CountDownLatch onControllerUpdatedLatch = new CountDownLatch(1);
+        final CountDownLatch onControllerReleasedLatch = new CountDownLatch(1);
         final List<RoutingController> controllers = new ArrayList<>();
 
         // Create session with ROUTE_ID1
-        SessionCallback sessionCallback = new SessionCallback() {
+        RoutingControllerCallback controllerCallback = new RoutingControllerCallback() {
             @Override
-            public void onSessionCreated(RoutingController controller) {
+            public void onControllerCreated(RoutingController controller) {
                 assertNotNull(controller);
                 assertTrue(getRouteIds(controller.getSelectedRoutes()).contains(ROUTE_ID1));
                 controllers.add(controller);
-                onSessionCreatedLatch.countDown();
+                onControllerCreatedLatch.countDown();
             }
 
             @Override
-            public void onSessionInfoChanged(RoutingController controller,
-                    RoutingSessionInfo oldInfo, RoutingSessionInfo newInfo) {
-                if (onSessionCreatedLatch.getCount() != 0
-                        || !TextUtils.equals(
-                                controllers.get(0).getSessionId(), controller.getSessionId())) {
+            public void onControllerUpdated(RoutingController controller) {
+                if (onControllerCreatedLatch.getCount() != 0
+                        || !TextUtils.equals(controllers.get(0).getId(), controller.getId())) {
                     return;
                 }
-                onSessionInfoChangedLatch.countDown();
+                onControllerUpdatedLatch.countDown();
+            }
+
+            @Override
+            public void onControllerReleased(RoutingController controller) {
+                if (onControllerCreatedLatch.getCount() != 0
+                        || !TextUtils.equals(controllers.get(0).getId(), controller.getId())) {
+                    return;
+                }
+                onControllerReleasedLatch.countDown();
             }
         };
 
@@ -665,9 +655,9 @@ public class MediaRouter2Test {
         mRouter2.registerRouteCallback(mExecutor, routeCallback, RouteDiscoveryPreference.EMPTY);
 
         try {
-            mRouter2.registerSessionCallback(mExecutor, sessionCallback);
-            mRouter2.requestCreateSession(routeToCreateSessionWith);
-            assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+            mRouter2.registerControllerCallback(mExecutor, controllerCallback);
+            mRouter2.requestCreateController(routeToCreateSessionWith);
+            assertTrue(onControllerCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
             assertEquals(1, controllers.size());
             RoutingController controller = controllers.get(0);
@@ -684,20 +674,23 @@ public class MediaRouter2Test {
             // This call should be ignored.
             // The onSessionInfoChanged() shouldn't be called.
             controller.transferToRoute(routeToTransferTo);
-            assertFalse(onSessionInfoChangedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+            assertFalse(onControllerUpdatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
+            // onControllerReleased should be called.
+            assertTrue(onControllerReleasedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
         } finally {
             releaseControllers(controllers);
             mRouter2.unregisterRouteCallback(routeCallback);
-            mRouter2.unregisterSessionCallback(sessionCallback);
+            mRouter2.unregisterControllerCallback(controllerCallback);
         }
     }
 
     // TODO: Consider adding tests with bluetooth connection/disconnection.
     @Test
-    public void testGetDefaultController() {
-        final RoutingController defaultController = mRouter2.getDefaultController();
-        assertNotNull(defaultController);
-        assertFalse(defaultController.isReleased());
+    public void testGetSystemController() {
+        final RoutingController systemController = mRouter2.getSystemController();
+        assertNotNull(systemController);
+        assertFalse(systemController.isReleased());
     }
 
     // Helper for getting routes easily

@@ -31,7 +31,6 @@ import java.util.Objects;
 
 /**
  * Describes a routing session which is created when a media route is selected.
- * @hide
  */
 public final class RoutingSessionInfo implements Parcelable {
     @NonNull
