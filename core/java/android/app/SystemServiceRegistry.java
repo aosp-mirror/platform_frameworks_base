@@ -341,6 +341,14 @@ final class SystemServiceRegistry {
             }
         });
 
+        registerService(Context.NETWORK_STACK_SERVICE, IBinder.class,
+                new StaticServiceFetcher<IBinder>() {
+                    @Override
+                    public IBinder createService() {
+                        return ServiceManager.getService(Context.NETWORK_STACK_SERVICE);
+                    }
+                });
+
         registerService(Context.TETHERING_SERVICE, TetheringManager.class,
                 new CachedServiceFetcher<TetheringManager>() {
             @Override
