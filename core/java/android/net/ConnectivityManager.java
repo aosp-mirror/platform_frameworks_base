@@ -517,7 +517,7 @@ public class ConnectivityManager {
      * The absence of a connection type.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 130143562)
+    @SystemApi
     public static final int TYPE_NONE        = -1;
 
     /**
