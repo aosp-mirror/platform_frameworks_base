@@ -338,9 +338,8 @@ class InstantAppRegistry {
     }
 
     @GuardedBy("mService.mLock")
-    public void onPackageUninstalledLPw(@NonNull AndroidPackage pkg,
+    public void onPackageUninstalledLPw(@NonNull AndroidPackage pkg, @Nullable PackageSetting ps,
             @NonNull int[] userIds) {
-        PackageSetting ps = mService.getPackageSetting(pkg.getPackageName());
         if (ps == null) {
             return;
         }
