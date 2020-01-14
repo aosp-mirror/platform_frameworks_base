@@ -459,8 +459,10 @@ public class LocationManagerService extends ILocationManager.Stub {
             Log.d(TAG, "[u" + userId + "] location enabled = " + isLocationEnabledForUser(userId));
         }
 
-        Intent intent = new Intent(LocationManager.MODE_CHANGED_ACTION);
-        intent.putExtra(LocationManager.EXTRA_LOCATION_ENABLED, isLocationEnabledForUser(userId));
+        Intent intent = new Intent(LocationManager.MODE_CHANGED_ACTION)
+                .putExtra(LocationManager.EXTRA_LOCATION_ENABLED, isLocationEnabledForUser(userId))
+                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
 
         for (LocationProviderManager manager : mProviderManagers) {
@@ -929,9 +931,11 @@ public class LocationManagerService extends ILocationManager.Stub {
                 // update LOCATION_PROVIDERS_ALLOWED for best effort backwards compatibility
                 mSettingsStore.setLocationProviderAllowed(mName, useable, userId);
 
-                Intent intent = new Intent(LocationManager.PROVIDERS_CHANGED_ACTION);
-                intent.putExtra(LocationManager.EXTRA_PROVIDER_NAME, mName);
-                intent.putExtra(LocationManager.EXTRA_PROVIDER_ENABLED, useable);
+                Intent intent = new Intent(LocationManager.PROVIDERS_CHANGED_ACTION)
+                        .putExtra(LocationManager.EXTRA_PROVIDER_NAME, mName)
+                        .putExtra(LocationManager.EXTRA_PROVIDER_ENABLED, useable)
+                        .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                 mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
             }
 
