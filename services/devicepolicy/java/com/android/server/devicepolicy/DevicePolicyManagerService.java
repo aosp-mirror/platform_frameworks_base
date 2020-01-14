@@ -8336,13 +8336,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 throw new IllegalArgumentException("Not active admin: " + who);
             }
 
-            UserInfo parentUser = mUserManager.getProfileParent(userHandle);
+            final int parentUserId = getProfileParentId(userHandle);
             // When trying to set a profile owner on a new user, it may be that this user is
             // a profile - but it may not be a managed profile if there's a restriction on the
             // parent to add managed profiles (e.g. if the device has a device owner).
-            if (parentUser != null && mUserManager.hasUserRestriction(
+            if (parentUserId != userHandle && mUserManager.hasUserRestriction(
                     UserManager.DISALLOW_ADD_MANAGED_PROFILE,
-                    UserHandle.of(parentUser.id))) {
+                    UserHandle.of(parentUserId))) {
                 Slog.i(LOG_TAG, "Cannot set profile owner because of restriction.");
                 return false;
             }
