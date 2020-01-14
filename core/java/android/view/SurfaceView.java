@@ -407,7 +407,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             }
                             t.setAlpha(mSurfaceControl, alpha);
                             if (!useBLAST) {
-                                t.deferTransactionUntilSurface(mSurfaceControl, parent, frame);
+                                t.deferTransactionUntil(mSurfaceControl,
+                                        viewRoot.getRenderSurfaceControl(), frame);
                             }
                         }
                         // It's possible that mSurfaceControl is released in the UI thread before
@@ -1110,7 +1111,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         if (frameNumber > 0 && !WindowManagerGlobal.USE_BLAST_ADAPTER) {
             final ViewRootImpl viewRoot = getViewRootImpl();
 
-            t.deferTransactionUntilSurface(surface, viewRoot.mSurface,
+            t.deferTransactionUntil(surface, viewRoot.getRenderSurfaceControl(),
                     frameNumber);
         }
 
@@ -1205,8 +1206,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
             if (frameNumber > 0 && viewRoot !=  null && !useBLAST) {
                 if (viewRoot.mSurface.isValid()) {
-                    mRtTransaction.deferTransactionUntilSurface(mSurfaceControl, viewRoot.mSurface,
-                            frameNumber);
+                    mRtTransaction.deferTransactionUntil(mSurfaceControl,
+                            viewRoot.getRenderSurfaceControl(), frameNumber);
                 }
             }
             t.hide(mSurfaceControl);

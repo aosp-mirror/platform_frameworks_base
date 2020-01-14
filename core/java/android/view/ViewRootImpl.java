@@ -1699,8 +1699,8 @@ public final class ViewRootImpl implements ViewParent,
     private void updateBoundsLayer() {
         if (mBoundsLayer != null) {
             setBoundsLayerCrop();
-            mTransaction.deferTransactionUntilSurface(mBoundsLayer,
-                    mSurface, mSurface.getNextFrameNumber())
+            mTransaction.deferTransactionUntil(mBoundsLayer,
+                    getRenderSurfaceControl(), mSurface.getNextFrameNumber())
                     .apply();
         }
     }
@@ -9464,5 +9464,13 @@ public final class ViewRootImpl implements ViewParent,
 
     SurfaceControl.Transaction getBLASTSyncTransaction() {
         return mRtBLASTSyncTransaction;
+    }
+
+    SurfaceControl getRenderSurfaceControl() {
+        if (WindowManagerGlobal.USE_BLAST_ADAPTER) {
+            return mBlastSurfaceControl;
+        } else {
+            return mSurfaceControl;
+        }
     }
 }
