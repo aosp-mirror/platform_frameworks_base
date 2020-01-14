@@ -4623,6 +4623,10 @@ package android.net {
     method public void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
     method public void sendNetworkScore(int);
     method public void sendSocketKeepaliveEvent(int, int);
+    method public void setConnected();
+    method @Deprecated public void setLegacyExtraInfo(@Nullable String);
+    method @Deprecated public void setLegacySubtype(int, @NonNull String);
+    method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
     field public static final int VALIDATION_STATUS_VALID = 1; // 0x1
     field @NonNull public final android.net.Network network;
