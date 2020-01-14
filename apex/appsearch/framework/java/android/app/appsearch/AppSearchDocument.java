@@ -17,33 +17,33 @@
 package android.app.appsearch;
 
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.DurationMillisLong;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Bundle;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.Preconditions;
 
 import com.google.android.icing.proto.DocumentProto;
 import com.google.android.icing.proto.PropertyProto;
+import com.google.android.icing.protobuf.ByteString;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
  * Represents a document unit.
  *
  * <p>Documents are constructed via {@link AppSearchDocument.Builder}.
- *
  * @hide
  */
-// TODO(b/143789408) set TTL for document in mProtoBuilder
-// TODO(b/144518768) add visibility field if the stakeholders are comfortable with a no-op
-//  opt-in for this release.
 public class AppSearchDocument {
     private static final String TAG = "AppSearchDocument";
 
@@ -66,20 +66,21 @@ public class AppSearchDocument {
     @NonNull
     private final DocumentProto mProto;
 
-    /** Contains all properties in {@link #mProto} to support get properties via keys. */
+    /** Contains all properties in {@link #mProto} to support getting properties via keys. */
     @NonNull
-    private final Bundle mPropertyBundle;
+    private final Map<String, Object> mProperties;
 
     /**
      * Create a new {@link AppSearchDocument}.
      * @param proto Contains {@link AppSearchDocument} basic information (uri, schemaType etc) and
      *               properties ordered by keys.
-     * @param propertyBundle Contains all properties in {@link #mProto} to support get
-     *                        properties via keys.
+     * @param propertiesMap Contains all properties in {@link #mProto} to support get properties
+     *                      via keys.
      */
-    private AppSearchDocument(@NonNull DocumentProto proto, @NonNull Bundle propertyBundle) {
-        this.mProto = proto;
-        this.mPropertyBundle = propertyBundle;
+    private AppSearchDocument(@NonNull DocumentProto proto,
+            @NonNull Map<String, Object> propertiesMap) {
+        mProto = proto;
+        mProperties = propertiesMap;
     }
 
     /**
@@ -88,12 +89,12 @@ public class AppSearchDocument {
      * <p>This method should be only used by constructor of a subclass.
      */
     protected AppSearchDocument(@NonNull AppSearchDocument document) {
-        this(document.mProto, document.mPropertyBundle);
+        this(document.mProto, document.mProperties);
     }
 
     /** @hide */
     AppSearchDocument(@NonNull DocumentProto documentProto) {
-        this(documentProto, new Bundle());
+        this(documentProto, new ArrayMap<>());
         for (int i = 0; i < documentProto.getPropertiesCount(); i++) {
             PropertyProto property = documentProto.getProperties(i);
             String name = property.getName();
@@ -102,38 +103,38 @@ public class AppSearchDocument {
                 for (int j = 0; j < values.length; j++) {
                     values[j] = property.getStringValues(j);
                 }
-                mPropertyBundle.putStringArray(name, values);
+                mProperties.put(name, values);
             } else if (property.getInt64ValuesCount() > 0) {
                 long[] values = new long[property.getInt64ValuesCount()];
                 for (int j = 0; j < values.length; j++) {
                     values[j] = property.getInt64Values(j);
                 }
-                mPropertyBundle.putLongArray(property.getName(), values);
+                mProperties.put(property.getName(), values);
             } else if (property.getDoubleValuesCount() > 0) {
                 double[] values = new double[property.getDoubleValuesCount()];
                 for (int j = 0; j < values.length; j++) {
                     values[j] = property.getDoubleValues(j);
                 }
-                mPropertyBundle.putDoubleArray(property.getName(), values);
+                mProperties.put(property.getName(), values);
             } else if (property.getBooleanValuesCount() > 0) {
                 boolean[] values = new boolean[property.getBooleanValuesCount()];
                 for (int j = 0; j < values.length; j++) {
                     values[j] = property.getBooleanValues(j);
                 }
-                mPropertyBundle.putBooleanArray(property.getName(), values);
+                mProperties.put(property.getName(), values);
             } else if (property.getBytesValuesCount() > 0) {
                 byte[][] values = new byte[property.getBytesValuesCount()][];
                 for (int j = 0; j < values.length; j++) {
                     values[j] = property.getBytesValues(j).toByteArray();
                 }
-                mPropertyBundle.putObject(name, values);
+                mProperties.put(name, values);
             } else if (property.getDocumentValuesCount() > 0) {
                 AppSearchDocument[] values =
                         new AppSearchDocument[property.getDocumentValuesCount()];
                 for (int j = 0; j < values.length; j++) {
                     values[j] = new AppSearchDocument(property.getDocumentValues(j));
                 }
-                mPropertyBundle.putObject(name, values);
+                mProperties.put(name, values);
             } else {
                 throw new IllegalStateException("Unknown type of value: " + name);
             }
@@ -184,6 +185,19 @@ public class AppSearchDocument {
     }
 
     /**
+     * Returns the TTL (Time To Live) of the {@link AppSearchDocument}, in milliseconds.
+     *
+     * <p>The default value is 0, which means the document is permanent and won't be auto-deleted
+     *    until the app is uninstalled.
+     *
+     * @hide
+     */
+    @DurationMillisLong
+    public long getTtlMillis() {
+        return mProto.getTtlMs();
+    }
+
+    /**
      * Returns the score of the {@link AppSearchDocument}.
      *
      * <p>The score is a query-independent measure of the document's quality, relative to other
@@ -202,7 +216,7 @@ public class AppSearchDocument {
      *
      * @param key The key to look for.
      * @return The first {@link String} associated with the given key or {@code null} if there
-     *     is no such key or the value is of a different type.
+     *         is no such key or the value is of a different type.
      * @hide
      */
     @Nullable
@@ -220,7 +234,7 @@ public class AppSearchDocument {
      *
      * @param key The key to look for.
      * @return The first {@link Long} associated with the given key or {@code null} if there
-     *     is no such key or the value is of a different type.
+     *         is no such key or the value is of a different type.
      * @hide
      */
     @Nullable
@@ -238,7 +252,7 @@ public class AppSearchDocument {
      *
      * @param key The key to look for.
      * @return The first {@link Double} associated with the given key or {@code null} if there
-     *     is no such key or the value is of a different type.
+     *         is no such key or the value is of a different type.
      * @hide
      */
     @Nullable
@@ -257,7 +271,7 @@ public class AppSearchDocument {
      *
      * @param key The key to look for.
      * @return The first {@link Boolean} associated with the given key or {@code null} if there
-     *     is no such key or the value is of a different type.
+     *         is no such key or the value is of a different type.
      * @hide
      */
     @Nullable
@@ -267,6 +281,23 @@ public class AppSearchDocument {
             return null;
         }
         warnIfSinglePropertyTooLong("Boolean", key, propertyArray.length);
+        return propertyArray[0];
+    }
+
+    /**
+     * Retrieve a {@code byte[]} value by key.
+     *
+     * @param key The key to look for.
+     * @return The first {@code byte[]} associated with the given key or {@code null} if there
+     *         is no such key or the value is of a different type.
+     */
+    @Nullable
+    public byte[] getPropertyBytes(@NonNull String key) {
+        byte[][] propertyArray = getPropertyBytesArray(key);
+        if (ArrayUtils.isEmpty(propertyArray)) {
+            return null;
+        }
+        warnIfSinglePropertyTooLong("ByteArray", key, propertyArray.length);
         return propertyArray[0];
     }
 
@@ -286,7 +317,7 @@ public class AppSearchDocument {
      *
      * @param key The key to look for.
      * @return The {@code String[]} associated with the given key, or {@code null} if no value
-     *     is set or the value is of a different type.
+     *         is set or the value is of a different type.
      * @hide
      */
     @Nullable
@@ -299,7 +330,7 @@ public class AppSearchDocument {
      *
      * @param key The key to look for.
      * @return The {@code long[]} associated with the given key, or {@code null} if no value is
-     *     set or the value is of a different type.
+     *         set or the value is of a different type.
      * @hide
      */
     @Nullable
@@ -312,7 +343,7 @@ public class AppSearchDocument {
      *
      * @param key The key to look for.
      * @return The {@code double[]} associated with the given key, or {@code null} if no value
-     *     is set or the value is of a different type.
+     *         is set or the value is of a different type.
      * @hide
      */
     @Nullable
@@ -325,7 +356,7 @@ public class AppSearchDocument {
      *
      * @param key The key to look for.
      * @return The {@code boolean[]} associated with the given key, or {@code null} if no value
-     *     is set or the value is of a different type.
+     *         is set or the value is of a different type.
      * @hide
      */
     @Nullable
@@ -334,12 +365,24 @@ public class AppSearchDocument {
     }
 
     /**
+     * Retrieve a {@code byte[][]} property by key.
+     *
+     * @param key The key to look for.
+     * @return The {@code byte[][]} associated with the given key, or {@code null} if no value
+     *         is set or the value is of a different type.
+     */
+    @Nullable
+    public byte[][] getPropertyBytesArray(@NonNull String key) {
+        return getAndCastPropertyArray(key, byte[][].class);
+    }
+
+    /**
      * Gets a repeated property of the given key, and casts it to the given class type, which
      * must be an array class type.
      */
     @Nullable
     private <T> T getAndCastPropertyArray(@NonNull String key, @NonNull Class<T> tClass) {
-        Object value = mPropertyBundle.get(key);
+        Object value = mProperties.get(key);
         if (value == null) {
             return null;
         }
@@ -354,7 +397,7 @@ public class AppSearchDocument {
     @Override
     public boolean equals(@Nullable Object other) {
         // Check only proto's equality is sufficient here since all properties in
-        // mPropertyBundle are ordered by keys and stored in proto.
+        // mProperties are ordered by keys and stored in proto.
         if (this == other) {
             return true;
         }
@@ -367,8 +410,8 @@ public class AppSearchDocument {
 
     @Override
     public int hashCode() {
-        // Hash only proto is sufficient here since all properties in mPropertyBundle are
-        // ordered by keys and stored in proto.
+        // Hash only proto is sufficient here since all properties in mProperties are ordered by
+        // keys and stored in proto.
         return mProto.hashCode();
     }
 
@@ -385,7 +428,7 @@ public class AppSearchDocument {
      */
     public static class Builder<BuilderType extends Builder> {
 
-        private final Bundle mPropertyBundle = new Bundle();
+        private final Map<String, Object> mProperties = new ArrayMap<>();
         private final DocumentProto.Builder mProtoBuilder = DocumentProto.newBuilder();
         private final BuilderType mBuilderTypeInstance;
 
@@ -419,7 +462,7 @@ public class AppSearchDocument {
         @NonNull
         public BuilderType setScore(@IntRange(from = 0, to = Integer.MAX_VALUE) int score) {
             if (score < 0) {
-                throw new IllegalArgumentException("Document score cannot be negative");
+                throw new IllegalArgumentException("Document score cannot be negative.");
             }
             mProtoBuilder.setScore(score);
             return mBuilderTypeInstance;
@@ -439,6 +482,23 @@ public class AppSearchDocument {
         }
 
         /**
+         * Set the TTL (Time To Live) of the {@link AppSearchDocument}, in milliseconds.
+         *
+         * <p>After this many milliseconds since the {@link #setCreationTimestampMillis(long)}
+         * creation timestamp}, the document is deleted.
+         *
+         * @param ttlMillis A non-negative duration in milliseconds.
+         * @throws IllegalArgumentException If the provided value is negative.
+         */
+        @NonNull
+        public BuilderType setTtlMillis(@DurationMillisLong long ttlMillis) {
+            Preconditions.checkArgumentNonNegative(
+                    ttlMillis, "Document ttlMillis cannot be negative.");
+            mProtoBuilder.setTtlMs(ttlMillis);
+            return mBuilderTypeInstance;
+        }
+
+        /**
          * Sets one or multiple {@code String} values for a property, replacing its previous
          * values.
          *
@@ -448,7 +508,7 @@ public class AppSearchDocument {
          */
         @NonNull
         public BuilderType setProperty(@NonNull String key, @NonNull String... values) {
-            putInBundle(mPropertyBundle, key, values);
+            putInPropertyMap(key, values);
             return mBuilderTypeInstance;
         }
 
@@ -457,12 +517,11 @@ public class AppSearchDocument {
          * values.
          *
          * @param key The key associated with the {@code values}.
-         * @param values The {@code boolean} values of the schema.org property.
-         * @hide
+         * @param values The {@code boolean} values of the property.
          */
         @NonNull
         public BuilderType setProperty(@NonNull String key, @NonNull boolean... values) {
-            putInBundle(mPropertyBundle, key, values);
+            putInPropertyMap(key, values);
             return mBuilderTypeInstance;
         }
 
@@ -471,12 +530,11 @@ public class AppSearchDocument {
          * values.
          *
          * @param key The key associated with the {@code values}.
-         * @param values The {@code long} values of the schema.org property.
-         * @hide
+         * @param values The {@code long} values of the property.
          */
         @NonNull
         public BuilderType setProperty(@NonNull String key, @NonNull long... values) {
-            putInBundle(mPropertyBundle, key, values);
+            putInPropertyMap(key, values);
             return mBuilderTypeInstance;
         }
 
@@ -485,17 +543,27 @@ public class AppSearchDocument {
          * values.
          *
          * @param key The key associated with the {@code values}.
-         * @param values The {@code double} values of the schema.org property.
-         * @hide
+         * @param values The {@code double} values of the property.
          */
         @NonNull
         public BuilderType setProperty(@NonNull String key, @NonNull double... values) {
-            putInBundle(mPropertyBundle, key, values);
+            putInPropertyMap(key, values);
             return mBuilderTypeInstance;
         }
 
-        private static void putInBundle(
-                @NonNull Bundle bundle, @NonNull String key, @NonNull String... values)
+        /**
+         * Sets one or multiple {@code byte[]} for a property, replacing its previous values.
+         *
+         * @param key The key associated with the {@code values}.
+         * @param values The {@code byte[]} of the property.
+         */
+        @NonNull
+        public BuilderType setProperty(@NonNull String key, @NonNull byte[]... values) {
+            putInPropertyMap(key, values);
+            return mBuilderTypeInstance;
+        }
+
+        private void putInPropertyMap(@NonNull String key, @NonNull String[] values)
                 throws IllegalArgumentException {
             Objects.requireNonNull(key);
             Objects.requireNonNull(values);
@@ -509,32 +577,37 @@ public class AppSearchDocument {
                             + MAX_STRING_LENGTH + ".");
                 }
             }
-            bundle.putStringArray(key, values);
+            mProperties.put(key, values);
         }
 
-        private static void putInBundle(
-                @NonNull Bundle bundle, @NonNull String key, @NonNull boolean... values) {
+        private void putInPropertyMap(@NonNull String key, @NonNull boolean[] values) {
             Objects.requireNonNull(key);
             Objects.requireNonNull(values);
             validateRepeatedPropertyLength(key, values.length);
-            bundle.putBooleanArray(key, values);
+            mProperties.put(key, values);
         }
 
-        private static void putInBundle(
-                @NonNull Bundle bundle, @NonNull String key, @NonNull double... values) {
+        private void putInPropertyMap(@NonNull String key, @NonNull double[] values) {
             Objects.requireNonNull(key);
             Objects.requireNonNull(values);
             validateRepeatedPropertyLength(key, values.length);
-            bundle.putDoubleArray(key, values);
+            mProperties.put(key, values);
         }
 
-        private static void putInBundle(
-                @NonNull Bundle bundle, @NonNull String key, @NonNull long... values) {
+        private void putInPropertyMap(@NonNull String key, @NonNull long[] values) {
             Objects.requireNonNull(key);
             Objects.requireNonNull(values);
             validateRepeatedPropertyLength(key, values.length);
-            bundle.putLongArray(key, values);
+            mProperties.put(key, values);
         }
+
+        private void putInPropertyMap(@NonNull String key, @NonNull byte[][] values) {
+            Objects.requireNonNull(key);
+            Objects.requireNonNull(values);
+            validateRepeatedPropertyLength(key, values.length);
+            mProperties.put(key, values);
+        }
+
 
         private static void validateRepeatedPropertyLength(@NonNull String key, int length) {
             if (length == 0) {
@@ -552,14 +625,15 @@ public class AppSearchDocument {
          * @hide
          */
         public AppSearchDocument build() {
-            // Build proto by sorting the keys in propertyBundle to exclude the influence of
+            // Build proto by sorting the keys in mProperties to exclude the influence of
             // order. Therefore documents will generate same proto as long as the contents are
             // same. Note that the order of repeated fields is still preserved.
-            ArrayList<String> keys = new ArrayList<>(mPropertyBundle.keySet());
+            ArrayList<String> keys = new ArrayList<>(mProperties.keySet());
             Collections.sort(keys);
-            for (String key : keys) {
-                Object values = mPropertyBundle.get(key);
-                PropertyProto.Builder propertyProto = PropertyProto.newBuilder().setName(key);
+            for (int i = 0; i < keys.size(); i++) {
+                String name = keys.get(i);
+                Object values = mProperties.get(name);
+                PropertyProto.Builder propertyProto = PropertyProto.newBuilder().setName(name);
                 if (values instanceof boolean[]) {
                     for (boolean value : (boolean[]) values) {
                         propertyProto.addBooleanValues(value);
@@ -576,14 +650,18 @@ public class AppSearchDocument {
                     for (String value : (String[]) values) {
                         propertyProto.addStringValues(value);
                     }
+                } else if (values instanceof byte[][]) {
+                    for (byte[] value : (byte[][]) values) {
+                        propertyProto.addBytesValues(ByteString.copyFrom(value));
+                    }
                 } else {
                     throw new IllegalStateException(
-                            "Property \"" + key + "\" has unsupported value type \""
+                            "Property \"" + name + "\" has unsupported value type \""
                                     + values.getClass().getSimpleName() + "\"");
                 }
                 mProtoBuilder.addProperties(propertyProto);
             }
-            return new AppSearchDocument(mProtoBuilder.build(), mPropertyBundle);
+            return new AppSearchDocument(mProtoBuilder.build(), mProperties);
         }
     }
 }

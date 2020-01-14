@@ -34,6 +34,10 @@ import org.junit.Test;
  */
 @SmallTest
 public class CustomerDocumentTest {
+
+    private static byte[] sByteArray1 = new byte[]{(byte) 1, (byte) 2, (byte) 3};
+    private static byte[] sByteArray2 = new byte[]{(byte) 4, (byte) 5, (byte) 6};
+
     @Test
     public void testBuildCustomerDocument() {
         CustomerDocument customerDocument = new CustomerDocument.Builder("uri1")
@@ -43,6 +47,7 @@ public class CustomerDocumentTest {
                 .setProperty("doubleKey1", 1.0, 2.0, 3.0)
                 .setProperty("booleanKey1", true, false, true)
                 .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
+                .setProperty("byteKey1", sByteArray1, sByteArray2)
                 .build();
 
         assertThat(customerDocument.getUri()).isEqualTo("uri1");
@@ -57,6 +62,8 @@ public class CustomerDocumentTest {
                 .containsExactly(true, false, true);
         assertThat(customerDocument.getPropertyStringArray("stringKey1")).asList()
                 .containsExactly("test-value1", "test-value2", "test-value3");
+        assertThat(customerDocument.getPropertyBytesArray("byteKey1")).asList()
+                .containsExactly(sByteArray1, sByteArray2);
     }
 
     /**
