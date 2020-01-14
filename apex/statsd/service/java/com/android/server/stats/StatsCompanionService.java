@@ -776,17 +776,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         });
     }
 
-    private void pullKernelUidCpuActiveTime(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        mCpuUidActiveTimeReader.readAbsolute((uid, cpuActiveTimesMs) -> {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(uid);
-            e.writeLong((long) cpuActiveTimesMs);
-            pulledData.add(e);
-        });
-    }
-
     private void pullWifiActivityInfo(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2082,11 +2071,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.CPU_CLUSTER_TIME: {
                 pullKernelUidCpuClusterTime(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.CPU_ACTIVE_TIME: {
-                pullKernelUidCpuActiveTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

@@ -72,13 +72,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::ON_DEVICE_POWER_MEASUREMENT},
          {.puller = new PowerStatsPuller()}},
 
-        // cpu_active_time
-        // the throttling is 3sec, handled in
-        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        {{.atomTag = android::util::CPU_ACTIVE_TIME},
-         {.additiveFields = {2},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_ACTIVE_TIME)}},
-
         // cpu_cluster_time
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
