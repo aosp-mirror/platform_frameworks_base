@@ -7763,6 +7763,8 @@ package android.provider {
     field public static final int COLUMN_INDEX_XML_RES_INTENT_TARGET_PACKAGE = 5; // 0x5
     field public static final int COLUMN_INDEX_XML_RES_RANK = 0; // 0x0
     field public static final int COLUMN_INDEX_XML_RES_RESID = 1; // 0x1
+    field public static final String DYNAMIC_INDEXABLES_RAW = "dynamic_indexables_raw";
+    field public static final String DYNAMIC_INDEXABLES_RAW_PATH = "settings/dynamic_indexables_raw";
     field public static final String INDEXABLES_RAW = "indexables_raw";
     field public static final String[] INDEXABLES_RAW_COLUMNS;
     field public static final String INDEXABLES_RAW_PATH = "settings/indexables_raw";
@@ -7820,6 +7822,7 @@ package android.provider {
     method public String getType(android.net.Uri);
     method public final android.net.Uri insert(android.net.Uri, android.content.ContentValues);
     method public android.database.Cursor query(android.net.Uri, String[], String, String[], String);
+    method @Nullable public android.database.Cursor queryDynamicRawData(@Nullable String[]);
     method public abstract android.database.Cursor queryNonIndexableKeys(String[]);
     method public abstract android.database.Cursor queryRawData(String[]);
     method @Nullable public android.database.Cursor querySliceUriPairs();
