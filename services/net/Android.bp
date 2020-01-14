@@ -16,6 +16,7 @@ java_library_static {
         "netd_aidl_interface-unstable-java",
         "netlink-client",
         "networkstack-client",
+        "net-utils-services-common",
     ],
 }
 
