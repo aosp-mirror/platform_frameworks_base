@@ -449,6 +449,7 @@ public class AppsFilter {
             }
             final PackageSetting callingPkgSetting;
             final ArraySet<PackageSetting> callingSharedPkgSettings;
+            Trace.beginSection("callingSetting instanceof");
             if (callingSetting instanceof PackageSetting) {
                 callingPkgSetting = (PackageSetting) callingSetting;
                 callingSharedPkgSettings = null;
@@ -456,6 +457,7 @@ public class AppsFilter {
                 callingPkgSetting = null;
                 callingSharedPkgSettings = ((SharedUserSetting) callingSetting).packages;
             }
+            Trace.endSection();
 
             if (callingPkgSetting != null) {
                 if (!mFeatureConfig.packageIsEnabled(callingPkgSetting.pkg)) {
@@ -485,6 +487,7 @@ public class AppsFilter {
                 return true;
             }
             final String targetName = targetPkg.getPackageName();
+            Trace.beginSection("getAppId");
             final int callingAppId;
             if (callingPkgSetting != null) {
                 callingAppId = callingPkgSetting.appId;
@@ -492,6 +495,7 @@ public class AppsFilter {
                 callingAppId = callingSharedPkgSettings.valueAt(0).appId; // all should be the same
             }
             final int targetAppId = targetPkgSetting.appId;
+            Trace.endSection();
             if (callingAppId == targetAppId) {
                 if (DEBUG_LOGGING) {
                     log(callingSetting, targetPkgSetting, "same app id");
@@ -499,38 +503,64 @@ public class AppsFilter {
                 return false;
             }
 
-            if (callingSetting.getPermissionsState().hasPermission(
-                    Manifest.permission.QUERY_ALL_PACKAGES, UserHandle.getUserId(callingUid))) {
-                if (DEBUG_LOGGING) {
-                    log(callingSetting, targetPkgSetting, "has query-all permission");
+            try {
+                Trace.beginSection("hasPermission");
+                if (callingSetting.getPermissionsState().hasPermission(
+                        Manifest.permission.QUERY_ALL_PACKAGES, UserHandle.getUserId(callingUid))) {
+                    if (DEBUG_LOGGING) {
+                        log(callingSetting, targetPkgSetting, "has query-all permission");
+                    }
+                    return false;
                 }
-                return false;
+            } finally {
+                Trace.endSection();
             }
-            if (mForceQueryable.contains(targetAppId)) {
-                if (DEBUG_LOGGING) {
-                    log(callingSetting, targetPkgSetting, "force queryable");
+            try {
+                Trace.beginSection("mForceQueryable");
+                if (mForceQueryable.contains(targetAppId)) {
+                    if (DEBUG_LOGGING) {
+                        log(callingSetting, targetPkgSetting, "force queryable");
+                    }
+                    return false;
                 }
-                return false;
+            } finally {
+                Trace.endSection();
             }
-            if (mQueriesViaPackage.contains(callingAppId, targetAppId)) {
-                // the calling package has explicitly declared the target package; allow
-                if (DEBUG_LOGGING) {
-                    log(callingSetting, targetPkgSetting, "queries package");
+            try {
+                Trace.beginSection("mQueriesViaPackage");
+                if (mQueriesViaPackage.contains(callingAppId, targetAppId)) {
+                    // the calling package has explicitly declared the target package; allow
+                    if (DEBUG_LOGGING) {
+                        log(callingSetting, targetPkgSetting, "queries package");
+                    }
+                    return false;
                 }
-                return false;
-            } else if (mQueriesViaIntent.contains(callingAppId, targetAppId)) {
-                if (DEBUG_LOGGING) {
-                    log(callingSetting, targetPkgSetting, "queries intent");
+            } finally {
+                Trace.endSection();
+            }
+            try {
+                Trace.beginSection("mQueriesViaIntent");
+                if (mQueriesViaIntent.contains(callingAppId, targetAppId)) {
+                    if (DEBUG_LOGGING) {
+                        log(callingSetting, targetPkgSetting, "queries intent");
+                    }
+                    return false;
                 }
-                return false;
+            } finally {
+                Trace.endSection();
             }
 
-            final int targetUid = UserHandle.getUid(userId, targetAppId);
-            if (mImplicitlyQueryable.contains(callingUid, targetUid)) {
-                if (DEBUG_LOGGING) {
-                    log(callingSetting, targetPkgSetting, "implicitly queryable for user");
+            try {
+                Trace.beginSection("mImplicitlyQueryable");
+                final int targetUid = UserHandle.getUid(userId, targetAppId);
+                if (mImplicitlyQueryable.contains(callingUid, targetUid)) {
+                    if (DEBUG_LOGGING) {
+                        log(callingSetting, targetPkgSetting, "implicitly queryable for user");
+                    }
+                    return false;
                 }
-                return false;
+            } finally {
+                Trace.endSection();
             }
             if (callingPkgSetting != null) {
                 if (callingPkgInstruments(callingPkgSetting, targetPkgSetting, targetName)) {
@@ -576,17 +606,22 @@ public class AppsFilter {
     private static boolean callingPkgInstruments(PackageSetting callingPkgSetting,
             PackageSetting targetPkgSetting,
             String targetName) {
-        final List<ComponentParseUtils.ParsedInstrumentation> inst =
-                callingPkgSetting.pkg.getInstrumentations();
-        for (int i = ArrayUtils.size(inst) - 1; i >= 0; i--) {
-            if (Objects.equals(inst.get(i).getTargetPackage(), targetName)) {
-                if (DEBUG_LOGGING) {
-                    log(callingPkgSetting, targetPkgSetting, "instrumentation");
+        try {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "callingPkgInstruments");
+            final List<ComponentParseUtils.ParsedInstrumentation> inst =
+                    callingPkgSetting.pkg.getInstrumentations();
+            for (int i = ArrayUtils.size(inst) - 1; i >= 0; i--) {
+                if (Objects.equals(inst.get(i).getTargetPackage(), targetName)) {
+                    if (DEBUG_LOGGING) {
+                        log(callingPkgSetting, targetPkgSetting, "instrumentation");
+                    }
+                    return true;
                 }
-                return true;
             }
+            return false;
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
-        return false;
     }
 
     private static void log(SettingBase callingPkgSetting, PackageSetting targetPkgSetting,
