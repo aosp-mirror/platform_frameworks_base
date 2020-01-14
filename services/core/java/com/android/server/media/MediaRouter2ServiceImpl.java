@@ -22,7 +22,6 @@ import static android.media.MediaRouter2Utils.getProviderId;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +30,7 @@ import android.media.IMediaRouter2Client;
 import android.media.IMediaRouter2Manager;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
+import android.media.MediaRoute2ProviderService;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Binder;
@@ -876,13 +876,19 @@ class MediaRouter2ServiceImpl {
 
         @Override
         public void onSessionCreated(@NonNull MediaRoute2Provider provider,
-                @Nullable RoutingSessionInfo sessionInfo, long requestId) {
+                @NonNull RoutingSessionInfo sessionInfo, long requestId) {
             sendMessage(PooledLambda.obtainMessage(UserHandler::onSessionCreatedOnHandler,
                     this, provider, sessionInfo, requestId));
         }
 
         @Override
-        public void onSessionInfoChanged(@NonNull MediaRoute2Provider provider,
+        public void onSessionCreationFailed(@NonNull MediaRoute2Provider provider, long requestId) {
+            sendMessage(PooledLambda.obtainMessage(UserHandler::onSessionCreationFailedOnHandler,
+                    this, provider, requestId));
+        }
+
+        @Override
+        public void onSessionUpdated(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo) {
             sendMessage(PooledLambda.obtainMessage(UserHandler::onSessionInfoChangedOnHandler,
                     this, provider, sessionInfo));
@@ -1132,7 +1138,14 @@ class MediaRouter2ServiceImpl {
         }
 
         private void onSessionCreatedOnHandler(@NonNull MediaRoute2Provider provider,
-                @Nullable RoutingSessionInfo sessionInfo, long requestId) {
+                @NonNull RoutingSessionInfo sessionInfo, long requestId) {
+
+            if (requestId == MediaRoute2ProviderService.REQUEST_ID_UNKNOWN) {
+                // The session is created without any matching request.
+                // TODO: Tell managers for the session creation
+                return;
+            }
+
             SessionCreationRequest matchingRequest = null;
 
             for (SessionCreationRequest request : mSessionCreationRequests) {
@@ -1180,6 +1193,30 @@ class MediaRouter2ServiceImpl {
                     sessionInfo, toClientRequestId(requestId));
             mSessionToClientMap.put(sessionInfo.getId(), client2Record);
             // TODO: Tell managers for the session creation
+        }
+
+        private void onSessionCreationFailedOnHandler(@NonNull MediaRoute2Provider provider,
+                long requestId) {
+            SessionCreationRequest matchingRequest = null;
+
+            for (SessionCreationRequest request : mSessionCreationRequests) {
+                if (request.mRequestId == requestId
+                        && TextUtils.equals(
+                                request.mRoute.getProviderId(), provider.getUniqueId())) {
+                    matchingRequest = request;
+                    break;
+                }
+            }
+
+            if (matchingRequest == null) {
+                Slog.w(TAG, "Ignoring session creation failed result for unknown request. "
+                        + "requestId=" + requestId);
+                return;
+            }
+
+            mSessionCreationRequests.remove(matchingRequest);
+            notifySessionCreationFailed(matchingRequest.mClientRecord,
+                    toClientRequestId(requestId));
         }
 
         private void onSessionInfoChangedOnHandler(@NonNull MediaRoute2Provider provider,

@@ -58,6 +58,16 @@ public abstract class MediaRoute2ProviderService extends Service {
 
     public static final String SERVICE_INTERFACE = "android.media.MediaRoute2ProviderService";
 
+    /**
+     * The request ID to pass {@link #notifySessionCreated(RoutingSessionInfo, long)}
+     * when {@link MediaRoute2ProviderService} created a session although there was no creation
+     * request.
+     *
+     * @see #notifySessionCreated(RoutingSessionInfo, long)
+     * @hide
+     */
+    public static final long REQUEST_ID_UNKNOWN = 0;
+
     private final Handler mHandler;
     private final Object mSessionLock = new Object();
     private final AtomicBoolean mStatePublishScheduled = new AtomicBoolean(false);
@@ -118,7 +128,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param sessionId id of the session
      * @return information of the session with the given id.
-     *         null if the session is destroyed or id is not valid.
+     *         null if the session is released or ID is not valid.
      * @hide
      */
     @Nullable
@@ -143,90 +153,39 @@ public abstract class MediaRoute2ProviderService extends Service {
     }
 
     /**
-     * Updates the information of a session.
-     * If the session is destroyed or not created before, it will be ignored.
-     * Call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify clients of
-     * session info changes.
-     *
-     * @param sessionInfo new session information
-     * @see #notifySessionCreated(RoutingSessionInfo, long)
-     * @hide
-     */
-    public final void updateSessionInfo(@NonNull RoutingSessionInfo sessionInfo) {
-        Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
-        String sessionId = sessionInfo.getId();
-
-        synchronized (mSessionLock) {
-            if (mSessionInfo.containsKey(sessionId)) {
-                mSessionInfo.put(sessionId, sessionInfo);
-                schedulePublishState();
-            } else {
-                Log.w(TAG, "Ignoring unknown session info.");
-                return;
-            }
-        }
-    }
-
-    /**
-     * Notifies the session is changed.
-     *
-     * TODO: This method is temporary, only created for tests. Remove when the alternative is ready.
-     * @hide
-     */
-    public final void notifySessionInfoChanged(@NonNull RoutingSessionInfo sessionInfo) {
-        Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
-
-        String sessionId = sessionInfo.getId();
-        synchronized (mSessionLock) {
-            if (mSessionInfo.containsKey(sessionId)) {
-                mSessionInfo.put(sessionId, sessionInfo);
-            } else {
-                Log.w(TAG, "Ignoring unknown session info.");
-                return;
-            }
-        }
-
-        if (mClient == null) {
-            return;
-        }
-        try {
-            mClient.notifySessionInfoChanged(sessionInfo);
-        } catch (RemoteException ex) {
-            Log.w(TAG, "Failed to notify session info changed.");
-        }
-    }
-
-    /**
-     * Notifies clients of that the session is created and ready for use. If the session can be
-     * controlled, pass a {@link Bundle} that contains how to control it.
+     * Notifies clients of that the session is created and ready for use.
+     * <p>
+     * If this session is created without any creation request, use {@link #REQUEST_ID_UNKNOWN}
+     * as the request ID.
      *
      * @param sessionInfo information of the new session.
-     *                    The {@link RoutingSessionInfo#getId() id} of the session must be
-     *                    unique. Pass {@code null} to reject the request or inform clients that
-     *                    session creation is failed.
-     * @param requestId id of the previous request to create this session
+     *                    The {@link RoutingSessionInfo#getId() id} of the session must be unique.
+     * @param requestId id of the previous request to create this session provided in
+     *                  {@link #onCreateSession(String, String, String, long)}
+     * @see #onCreateSession(String, String, String, long)
      * @hide
      */
-    // TODO: fail reason?
-    // TODO: Maybe better to create notifySessionCreationFailed?
-    public final void notifySessionCreated(@Nullable RoutingSessionInfo sessionInfo,
+    public final void notifySessionCreated(@NonNull RoutingSessionInfo sessionInfo,
             long requestId) {
-        if (sessionInfo != null) {
-            String sessionId = sessionInfo.getId();
-            synchronized (mSessionLock) {
-                if (mSessionInfo.containsKey(sessionId)) {
-                    Log.w(TAG, "Ignoring duplicate session id.");
-                    return;
-                }
-                mSessionInfo.put(sessionInfo.getId(), sessionInfo);
+        Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
+
+        String sessionId = sessionInfo.getId();
+        synchronized (mSessionLock) {
+            if (mSessionInfo.containsKey(sessionId)) {
+                Log.w(TAG, "Ignoring duplicate session id.");
+                return;
             }
-            schedulePublishState();
+            mSessionInfo.put(sessionInfo.getId(), sessionInfo);
         }
+        schedulePublishState();
 
         if (mClient == null) {
             return;
         }
         try {
+            // TODO: Calling binder calls in multiple thread may cause timing issue.
+            //       Consider to change implementations to avoid the problems.
+            //       For example, post binder calls, always send all sessions at once, etc.
             mClient.notifySessionCreated(sessionInfo, requestId);
         } catch (RemoteException ex) {
             Log.w(TAG, "Failed to notify session created.");
@@ -234,70 +193,138 @@ public abstract class MediaRoute2ProviderService extends Service {
     }
 
     /**
-     * Releases a session with the given id.
-     * {@link #onDestroySession} is called if the session is released.
+     * Notifies clients of that the session could not be created.
      *
-     * @param sessionId id of the session to be released
-     * @see #onDestroySession(String, RoutingSessionInfo)
+     * @param requestId id of the previous request to create the session provided in
+     *                  {@link #onCreateSession(String, String, String, long)}.
+     * @see #onCreateSession(String, String, String, long)
      * @hide
      */
-    public final void releaseSession(@NonNull String sessionId) {
-        if (TextUtils.isEmpty(sessionId)) {
-            throw new IllegalArgumentException("sessionId must not be empty");
+    public final void notifySessionCreationFailed(long requestId) {
+        if (mClient == null) {
+            return;
         }
-        //TODO: notify media router service of release.
-        RoutingSessionInfo sessionInfo;
-        synchronized (mSessionLock) {
-            sessionInfo = mSessionInfo.remove(sessionId);
-        }
-        if (sessionInfo != null) {
-            mHandler.sendMessage(obtainMessage(
-                    MediaRoute2ProviderService::onDestroySession, this, sessionId, sessionInfo));
-            schedulePublishState();
+        try {
+            mClient.notifySessionCreationFailed(requestId);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Failed to notify session creation failed.");
         }
     }
 
     /**
-     * Called when a session should be created.
+     * Notifies the existing session is updated. For example, when
+     * {@link RoutingSessionInfo#getSelectedRoutes() selected routes} are changed.
+     *
+     * @hide
+     */
+    public final void notifySessionUpdated(@NonNull RoutingSessionInfo sessionInfo) {
+        Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
+
+        String sessionId = sessionInfo.getId();
+        synchronized (mSessionLock) {
+            if (mSessionInfo.containsKey(sessionId)) {
+                mSessionInfo.put(sessionId, sessionInfo);
+            } else {
+                Log.w(TAG, "Ignoring unknown session info.");
+                return;
+            }
+        }
+
+        if (mClient == null) {
+            return;
+        }
+        try {
+            mClient.notifySessionUpdated(sessionInfo);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Failed to notify session info changed.");
+        }
+    }
+
+    /**
+     * Notifies that the session is released.
+     *
+     * @param sessionId id of the released session.
+     * @see #onReleaseSession(String)
+     * @hide
+     */
+    public final void notifySessionReleased(@NonNull String sessionId) {
+        if (TextUtils.isEmpty(sessionId)) {
+            throw new IllegalArgumentException("sessionId must not be empty");
+        }
+        RoutingSessionInfo sessionInfo;
+        synchronized (mSessionLock) {
+            sessionInfo = mSessionInfo.remove(sessionId);
+        }
+
+        if (sessionInfo == null) {
+            Log.w(TAG, "Ignoring unknown session info.");
+            return;
+        }
+
+        if (mClient == null) {
+            return;
+        }
+        try {
+            mClient.notifySessionReleased(sessionInfo);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Failed to notify session info changed.");
+        }
+    }
+
+    /**
+     * Called when the service receives a request to create a session.
+     * <p>
      * You should create and maintain your own session and notifies the client of
      * session info. Call {@link #notifySessionCreated(RoutingSessionInfo, long)}
      * with the given {@code requestId} to notify the information of a new session.
-     * If you can't create the session or want to reject the request, pass {@code null}
-     * as session info in {@link #notifySessionCreated(RoutingSessionInfo, long)}
-     * with the given {@code requestId}.
+     * The created session must have the same route feature and must include the given route
+     * specified by {@code routeId}.
+     * <p>
+     * If the session can be controlled, you can optionally pass the control hints to
+     * {@link RoutingSessionInfo.Builder#setControlHints(Bundle)}. Control hints is a
+     * {@link Bundle} which contains how to control the session.
+     * <p>
+     * If you can't create the session or want to reject the request, call
+     * {@link #notifySessionCreationFailed(long)} with the given {@code requestId}.
      *
      * @param packageName the package name of the application that selected the route
      * @param routeId the id of the route initially being connected
      * @param routeFeature the route feature of the new session
      * @param requestId the id of this session creation request
+     *
+     * @see RoutingSessionInfo.Builder#Builder(String, String, String)
+     * @see RoutingSessionInfo.Builder#addSelectedRoute(String)
+     * @see RoutingSessionInfo.Builder#setControlHints(Bundle)
      * @hide
      */
     public abstract void onCreateSession(@NonNull String packageName, @NonNull String routeId,
             @NonNull String routeFeature, long requestId);
 
     /**
-     * Called when a session is about to be destroyed.
-     * You can clean up your session here. This can happen by the
-     * client or provider itself.
+     * Called when the session should be released. A client of the session or system can request
+     * a session to be released.
+     * <p>
+     * After releasing the session, call {@link #notifySessionReleased(String)}
+     * with the ID of the released session.
      *
-     * @param sessionId id of the session being destroyed.
-     * @param lastSessionInfo information of the session being destroyed.
-     * @see #releaseSession(String)
+     * Note: Calling {@link #notifySessionReleased(String)} will <em>NOT</em> trigger
+     * this method to be called.
+     *
+     * @param sessionId id of the session being released.
+     * @see #notifySessionReleased(String)
+     * @see #getSessionInfo(String)
      * @hide
      */
-    public abstract void onDestroySession(@NonNull String sessionId,
-            @NonNull RoutingSessionInfo lastSessionInfo);
+    public abstract void onReleaseSession(@NonNull String sessionId);
 
     //TODO: make a way to reject the request
     /**
      * Called when a client requests selecting a route for the session.
-     * After the route is selected, call {@link #updateSessionInfo(RoutingSessionInfo)} to update
-     * session info and call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify
-     * clients of updated session info.
+     * After the route is selected, call {@link #notifySessionUpdated(RoutingSessionInfo)}
+     * to update session info.
      *
      * @param sessionId id of the session
      * @param routeId id of the route
-     * @see #updateSessionInfo(RoutingSessionInfo)
      * @hide
      */
     public abstract void onSelectRoute(@NonNull String sessionId, @NonNull String routeId);
@@ -305,9 +332,8 @@ public abstract class MediaRoute2ProviderService extends Service {
     //TODO: make a way to reject the request
     /**
      * Called when a client requests deselecting a route from the session.
-     * After the route is deselected, call {@link #updateSessionInfo(RoutingSessionInfo)} to update
-     * session info and call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify
-     * clients of updated session info.
+     * After the route is deselected, call {@link #notifySessionUpdated(RoutingSessionInfo)}
+     * to update session info.
      *
      * @param sessionId id of the session
      * @param routeId id of the route
@@ -318,9 +344,8 @@ public abstract class MediaRoute2ProviderService extends Service {
     //TODO: make a way to reject the request
     /**
      * Called when a client requests transferring a session to a route.
-     * After the transfer is finished, call {@link #updateSessionInfo(RoutingSessionInfo)} to update
-     * session info and call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify
-     * clients of updated session info.
+     * After the transfer is finished, call {@link #notifySessionUpdated(RoutingSessionInfo)}
+     * to update session info.
      *
      * @param sessionId id of the session
      * @param routeId id of the route
@@ -344,6 +369,8 @@ public abstract class MediaRoute2ProviderService extends Service {
      * </p>
      *
      * @param preference the new discovery preference
+     *
+     * TODO: This method needs tests.
      */
     public void onDiscoveryPreferenceChanged(@NonNull RouteDiscoveryPreference preference) {}
 
@@ -383,7 +410,7 @@ public abstract class MediaRoute2ProviderService extends Service {
             sessionInfos = new ArrayList<>(mSessionInfo.values());
         }
         try {
-            mClient.updateState(mProviderInfo, sessionInfos);
+            mClient.updateState(mProviderInfo);
         } catch (RemoteException ex) {
             Log.w(TAG, "Failed to send onProviderInfoUpdated");
         }
@@ -415,6 +442,7 @@ public abstract class MediaRoute2ProviderService extends Service {
                     MediaRoute2ProviderService.this, packageName, routeId, routeFeature,
                     requestId));
         }
+
         @Override
         public void releaseSession(@NonNull String sessionId) {
             if (!checkCallerisSystem()) {
@@ -424,7 +452,7 @@ public abstract class MediaRoute2ProviderService extends Service {
                 Log.w(TAG, "releaseSession: Ignoring empty sessionId from system service.");
                 return;
             }
-            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::releaseSession,
+            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onReleaseSession,
                     MediaRoute2ProviderService.this, sessionId));
         }
 
