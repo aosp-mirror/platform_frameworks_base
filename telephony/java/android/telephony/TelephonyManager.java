@@ -4911,7 +4911,9 @@ public class TelephonyManager {
      *      not present or not loaded
      * @hide
      */
-    @UnsupportedAppUsage
+    @Nullable
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String[] getIsimImpu() {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
