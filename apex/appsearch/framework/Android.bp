@@ -30,9 +30,28 @@ java_library {
   libs: [
     "framework-minus-apex",  // TODO(b/146218515) should be framework-system-stubs
   ],
-  visibility: ["//frameworks/base/apex/appsearch:__subpackages__"],
+  visibility: [
+      "//frameworks/base/apex/appsearch:__subpackages__",
+      // TODO(b/146218515) remove this when framework is built with the stub of appsearch
+      "//frameworks/base",
+  ],
   apex_available: ["com.android.appsearch"],
 }
+
+metalava_appsearch_docs_args =
+    "--hide-package com.android.server " +
+    "--error UnhiddenSystemApi " +
+    "--hide RequiresPermission " +
+    "--hide MissingPermission " +
+    "--hide BroadcastBehavior " +
+    "--hide HiddenSuperclass " +
+    "--hide DeprecationMismatch " +
+    "--hide UnavailableSymbol " +
+    "--hide SdkConstant " +
+    "--hide HiddenTypeParameter " +
+    "--hide Todo --hide Typo " +
+    "--hide HiddenTypedefConstant " +
+    "--show-annotation android.annotation.SystemApi "
 
 droidstubs {
     name: "framework-appsearch-stubs-srcs",
@@ -43,8 +62,9 @@ droidstubs {
     aidl: {
         include_dirs: ["frameworks/base/core/java"],
     },
-    defaults: ["framework-module-stubs-defaults-systemapi"],
-    sdk_version: "system_current",
+    args: metalava_appsearch_docs_args,
+    sdk_version: "core_current",
+    libs: ["android_system_stubs_current"],
 }
 
 java_library {
@@ -55,6 +75,7 @@ java_library {
             "java",
         ],
     },
-    sdk_version: "system_current",
+    sdk_version: "core_current",
+    libs: ["android_system_stubs_current"],
     installable: false,
 }
