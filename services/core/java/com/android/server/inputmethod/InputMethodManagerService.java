@@ -111,6 +111,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionInspector;
@@ -142,6 +143,7 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
+import com.android.internal.view.IInlineSuggestionsResponseCallback;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
 import com.android.internal.view.IInputMethodClient;
@@ -1790,20 +1792,59 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("mMethodMap")
-    private void onCreateInlineSuggestionsRequestLocked(ComponentName componentName,
-            AutofillId autofillId, IInlineSuggestionsRequestCallback callback) {
-
+    private void onCreateInlineSuggestionsRequestLocked(@UserIdInt int userId,
+            ComponentName componentName, AutofillId autofillId,
+            IInlineSuggestionsRequestCallback callback) {
         final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
         try {
-            if (imi != null && imi.isInlineSuggestionsEnabled() && mCurMethod != null) {
+            if (userId == mSettings.getCurrentUserId() && imi != null
+                    && imi.isInlineSuggestionsEnabled() && mCurMethod != null) {
                 executeOrSendMessage(mCurMethod,
                         mCaller.obtainMessageOOOO(MSG_INLINE_SUGGESTIONS_REQUEST, mCurMethod,
-                                componentName, autofillId, callback));
+                                componentName, autofillId,
+                                new InlineSuggestionsRequestCallbackDecorator(callback,
+                                        imi.getPackageName())));
             } else {
                 callback.onInlineSuggestionsUnsupported();
             }
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException calling onCreateInlineSuggestionsRequest(): " + e);
+        }
+    }
+
+    /**
+     * The decorator which validates the host package name in the
+     * {@link InlineSuggestionsRequest} argument to make sure it matches the IME package name.
+     */
+    private static final class InlineSuggestionsRequestCallbackDecorator
+            extends IInlineSuggestionsRequestCallback.Stub {
+        @NonNull
+        private final IInlineSuggestionsRequestCallback mCallback;
+        @NonNull
+        private final String mImePackageName;
+
+        InlineSuggestionsRequestCallbackDecorator(
+                @NonNull IInlineSuggestionsRequestCallback callback,
+                @NonNull String imePackageName) {
+            mCallback = callback;
+            mImePackageName = imePackageName;
+        }
+
+        @Override
+        public void onInlineSuggestionsUnsupported() throws RemoteException {
+            mCallback.onInlineSuggestionsUnsupported();
+        }
+
+        @Override
+        public void onInlineSuggestionsRequest(InlineSuggestionsRequest request,
+                IInlineSuggestionsResponseCallback callback) throws RemoteException {
+            if (!mImePackageName.equals(request.getHostPackageName())) {
+                throw new SecurityException(
+                        "Host package name in the provide request=[" + request.getHostPackageName()
+                                + "] doesn't match the IME package name=[" + mImePackageName
+                                + "].");
+            }
+            mCallback.onInlineSuggestionsRequest(request, callback);
         }
     }
 
@@ -4471,10 +4512,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private void onCreateInlineSuggestionsRequest(ComponentName componentName,
-            AutofillId autofillId, IInlineSuggestionsRequestCallback callback) {
+    private void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
+            ComponentName componentName, AutofillId autofillId,
+            IInlineSuggestionsRequestCallback callback) {
         synchronized (mMethodMap) {
-            onCreateInlineSuggestionsRequestLocked(componentName, autofillId, callback);
+            onCreateInlineSuggestionsRequestLocked(userId, componentName, autofillId, callback);
         }
     }
 
@@ -4542,9 +4584,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void onCreateInlineSuggestionsRequest(ComponentName componentName,
+        public void onCreateInlineSuggestionsRequest(int userId, ComponentName componentName,
                 AutofillId autofillId, IInlineSuggestionsRequestCallback cb) {
-            mService.onCreateInlineSuggestionsRequest(componentName, autofillId, cb);
+            mService.onCreateInlineSuggestionsRequest(userId, componentName, autofillId, cb);
         }
 
         @Override

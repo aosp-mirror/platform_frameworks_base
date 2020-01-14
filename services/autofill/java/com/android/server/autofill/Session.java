@@ -162,6 +162,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /** uid the session is for */
     public final int uid;
 
+    /** user id the session is for */
+    public final int userId;
+
     /** ID of the task associated with this session's activity */
     public final int taskId;
 
@@ -613,7 +616,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             int newState, int flags) {
         if (isInlineSuggestionsEnabled()) {
             mInlineSuggestionsRequestCallback = new InlineSuggestionsRequestCallbackImpl();
-            mInputMethodManagerInternal.onCreateInlineSuggestionsRequest(
+            mInputMethodManagerInternal.onCreateInlineSuggestionsRequest(userId,
                     mComponentName, mCurrentViewId, mInlineSuggestionsRequestCallback);
         }
 
@@ -759,6 +762,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mFlags = flags;
         this.taskId = taskId;
         this.uid = uid;
+        this.userId = userId;
         mStartTime = SystemClock.elapsedRealtime();
         mService = service;
         mLock = lock;

@@ -191,8 +191,9 @@ public final class MultiClientInputMethodManagerService {
                         }
 
                         @Override
-                        public void onCreateInlineSuggestionsRequest(ComponentName componentName,
-                                AutofillId autofillId, IInlineSuggestionsRequestCallback cb) {
+                        public void onCreateInlineSuggestionsRequest(int userId,
+                                ComponentName componentName, AutofillId autofillId,
+                                IInlineSuggestionsRequestCallback cb) {
                             try {
                                 //TODO(b/137800469): support multi client IMEs.
                                 cb.onInlineSuggestionsUnsupported();
