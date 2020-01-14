@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import com.android.telephony.Rlog;
+
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.os.Parcel;
