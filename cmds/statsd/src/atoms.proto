@@ -4119,10 +4119,10 @@ message BootTimeEventErrorCode {
         // as UMOUNT_STAT_* from init/reboot.cpp.
         // Logged from f/b/services/.../BootReceiver.java.
         SHUTDOWN_UMOUNT_STAT = 2;
-        // Reprepsents fie system mounting error code for the current boot. Error codes defined
-        // as combination of FsStatFlags from system/core/fs_mgr/fs_mgr.cpp.
+        // Reprepsents fie system mounting error code of /data partition for the current boot.
+        // Error codes defined as combination of FsStatFlags from system/core/fs_mgr/fs_mgr.cpp.
         // Logged from f/b/services/.../BootReceiver.java.
-        FS_MGR_FS_STAT = 3;
+        FS_MGR_FS_STAT_DATA_PARTITION = 3;
     }
 
     // Type of the event.
