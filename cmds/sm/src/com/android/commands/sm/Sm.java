@@ -103,6 +103,10 @@ public final class Sm {
             runSetVirtualDisk();
         } else if ("set-isolated-storage".equals(op)) {
             runIsolatedStorage();
+        } else if ("start-checkpoint".equals(op)) {
+            runStartCheckpoint();
+        } else if ("supports-checkpoint".equals(op)) {
+            runSupportsCheckpoint();
         } else {
             throw new IllegalArgumentException();
         }
@@ -313,6 +317,27 @@ public final class Sm {
         }
     }
 
+    private void runStartCheckpoint() throws RemoteException {
+        final String numRetriesString = nextArg();
+        if (numRetriesString == null) {
+            throw new IllegalArgumentException("Expected <num-retries>");
+        }
+        int numRetries;
+        try {
+            numRetries = Integer.parseInt(numRetriesString);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("<num-retries> must be a positive integer");
+        }
+        if (numRetries <= 0) {
+            throw new IllegalArgumentException("<num-retries> must be a positive integer");
+        }
+        mSm.startCheckpoint(numRetries);
+    }
+
+    private void runSupportsCheckpoint() throws RemoteException {
+        System.out.println(mSm.supportsCheckpoint());
+    }
+
     private String nextArg() {
         if (mNextArg >= mArgs.length) {
             return null;
@@ -343,6 +368,10 @@ public final class Sm {
         System.err.println("       sm set-emulate-fbe [true|false]");
         System.err.println("");
         System.err.println("       sm set-isolated-storage [on|off|default]");
+        System.err.println("");
+        System.err.println("       sm start-checkpoint <num-retries>");
+        System.err.println("");
+        System.err.println("       sm supports-checkpoint");
         System.err.println("");
         return 1;
     }
