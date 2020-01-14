@@ -100,7 +100,7 @@
 
     <!-- If the mobile hotspot feature requires provisioning, a package name and class name
          can be provided to launch a supported application that provisions the devices.
-         EntitlementManager will send an inent to Settings with the specified package name and
+         EntitlementManager will send an intent to Settings with the specified package name and
          class name in extras to launch provision app.
          TODO: note what extras here.
 
