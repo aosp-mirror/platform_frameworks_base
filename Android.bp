@@ -226,6 +226,7 @@ filegroup {
         ":framework-wifi-non-updatable-sources",
         ":PacProcessor-aidl-sources",
         ":ProxyHandler-aidl-sources",
+        ":net-utils-framework-common-srcs",
 
         // AIDL from frameworks/base/native/
         ":platform-compat-native-aidl",
