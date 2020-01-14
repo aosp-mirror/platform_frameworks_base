@@ -989,12 +989,29 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
+    private static final long NS_PER_SEC = 1000000000;
+
     private void registerSystemElapsedRealtime() {
-        // No op.
+        int tagId = StatsLog.SYSTEM_ELAPSED_REALTIME;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setCoolDownNs(NS_PER_SEC)
+                .setTimeoutNs(NS_PER_SEC / 2)
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullSystemElapsedRealtime(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullSystemElapsedRealtime() {
-        // No op.
+    private int pullSystemElapsedRealtime(int atomTag, List<StatsEvent> pulledData) {
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeLong(SystemClock.elapsedRealtime())
+                .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerSystemUptime() {

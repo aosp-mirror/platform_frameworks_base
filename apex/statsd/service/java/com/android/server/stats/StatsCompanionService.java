@@ -714,14 +714,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullSystemElapsedRealtime(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-        e.writeLong(SystemClock.elapsedRealtime());
-        pulledData.add(e);
-    }
-
     // read high watermark for section
     private long readProcStatsHighWaterMark(int section) {
         try {
@@ -1157,11 +1149,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
         switch (tagId) {
-
-            case StatsLog.SYSTEM_ELAPSED_REALTIME: {
-                pullSystemElapsedRealtime(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
 
             case StatsLog.PROC_STATS: {
                 pullProcessStats(ProcessStats.REPORT_ALL, tagId, elapsedNanos, wallClockNanos, ret);

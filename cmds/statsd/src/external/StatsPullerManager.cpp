@@ -68,13 +68,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::ON_DEVICE_POWER_MEASUREMENT},
          {.puller = new PowerStatsPuller()}},
 
-        // system_elapsed_realtime
-        {{.atomTag = android::util::SYSTEM_ELAPSED_REALTIME},
-         {.coolDownNs = NS_PER_SEC,
-          .puller = new StatsCompanionServicePuller(android::util::SYSTEM_ELAPSED_REALTIME),
-          .pullTimeoutNs = NS_PER_SEC / 2,
-         }},
-
         // remaining_battery_capacity
         {{.atomTag = android::util::REMAINING_BATTERY_CAPACITY},
          {.puller = new ResourceHealthManagerPuller(android::util::REMAINING_BATTERY_CAPACITY)}},
