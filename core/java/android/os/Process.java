@@ -20,14 +20,20 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
+import android.system.StructPollfd;
 import android.util.Pair;
 import android.webkit.WebViewZygote;
 
 import dalvik.system.VMRuntime;
 
+import libcore.io.IoUtils;
+
+import java.io.FileDescriptor;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Tools for managing OS processes.
@@ -486,6 +492,15 @@ public class Process {
 
     private static long sStartElapsedRealtime;
     private static long sStartUptimeMillis;
+
+    private static final int PIDFD_UNKNOWN = 0;
+    private static final int PIDFD_SUPPORTED = 1;
+    private static final int PIDFD_UNSUPPORTED = 2;
+
+    /**
+     * Whether or not the underlying OS supports pidfd
+     */
+    private static int sPidFdSupported = PIDFD_UNKNOWN;
 
     /**
      * State associated with the zygote process.
@@ -1189,4 +1204,90 @@ public class Process {
         }
 
     }
+
+    /**
+     * Wait for the death of the given process.
+     *
+     * @param pid The process ID to be waited on
+     * @param timeout The maximum time to wait in milliseconds, or -1 to wait forever
+     * @hide
+     */
+    public static void waitForProcessDeath(int pid, int timeout)
+            throws InterruptedException, TimeoutException {
+        FileDescriptor pidfd = null;
+        if (sPidFdSupported == PIDFD_UNKNOWN) {
+            int fd = -1;
+            try {
+                fd = nativePidFdOpen(pid, 0);
+                sPidFdSupported = PIDFD_SUPPORTED;
+            } catch (ErrnoException e) {
+                sPidFdSupported = e.errno != OsConstants.ENOSYS
+                    ? PIDFD_SUPPORTED : PIDFD_UNSUPPORTED;
+            } finally {
+                if (fd >= 0) {
+                    pidfd = new FileDescriptor();
+                    pidfd.setInt$(fd);
+                }
+            }
+        }
+        boolean fallback = sPidFdSupported == PIDFD_UNSUPPORTED;
+        if (!fallback) {
+            try {
+                if (pidfd == null) {
+                    int fd = nativePidFdOpen(pid, 0);
+                    if (fd >= 0) {
+                        pidfd = new FileDescriptor();
+                        pidfd.setInt$(fd);
+                    } else {
+                        fallback = true;
+                    }
+                }
+                if (pidfd != null) {
+                    StructPollfd[] fds = new StructPollfd[] {
+                        new StructPollfd()
+                    };
+                    fds[0].fd = pidfd;
+                    fds[0].events = (short) OsConstants.POLLIN;
+                    fds[0].revents = 0;
+                    fds[0].userData = null;
+                    int res = Os.poll(fds, timeout);
+                    if (res > 0) {
+                        return;
+                    } else if (res == 0) {
+                        throw new TimeoutException();
+                    } else {
+                        // We should get an ErrnoException now
+                    }
+                }
+            } catch (ErrnoException e) {
+                if (e.errno == OsConstants.EINTR) {
+                    throw new InterruptedException();
+                }
+                fallback = true;
+            } finally {
+                if (pidfd != null) {
+                    IoUtils.closeQuietly(pidfd);
+                }
+            }
+        }
+        if (fallback) {
+            boolean infinity = timeout < 0;
+            long now = System.currentTimeMillis();
+            final long end = now + timeout;
+            while (infinity || now < end) {
+                try {
+                    Os.kill(pid, 0);
+                } catch (ErrnoException e) {
+                    if (e.errno == OsConstants.ESRCH) {
+                        return;
+                    }
+                }
+                Thread.sleep(1);
+                now = System.currentTimeMillis();
+            }
+        }
+        throw new TimeoutException();
+    }
+
+    private static native int nativePidFdOpen(int pid, int flags) throws ErrnoException;
 }

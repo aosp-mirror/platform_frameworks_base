@@ -91,9 +91,7 @@ import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.provider.DeviceConfig;
-import android.system.ErrnoException;
 import android.system.Os;
-import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.EventLog;
@@ -327,12 +325,7 @@ public final class ProcessList {
     /**
      * How long between a process kill and we actually receive its death recipient
      */
-    private static final long PROC_KILL_TIMEOUT = 2000; // 2 seconds;
-
-    /**
-     * How long between polls to check if the given process is dead or not.
-     */
-    private static final long PROC_DEATH_POLL_INTERVAL = 100;
+    private static final int PROC_KILL_TIMEOUT = 2000; // 2 seconds;
 
     ActivityManagerService mService = null;
 
@@ -2169,28 +2162,6 @@ public final class ProcessList {
     }
 
     /**
-     * A lite version of checking if a process is alive or not, by using kill(2) with signal 0.
-     *
-     * <p>
-     * Note that, zombie processes are stil "alive" in this case, use the {@link
-     * ActivityManagerService#isProcessAliveLocked} if zombie processes need to be excluded.
-     * </p>
-     */
-    @GuardedBy("mService")
-    private boolean isProcessAliveLiteLocked(ProcessRecord app) {
-        // If somehow the pid is invalid, let's think it's dead.
-        if (app.pid <= 0) {
-            return false;
-        }
-        try {
-            Os.kill(app.pid, 0);
-        } catch (ErrnoException e) {
-            return e.errno != OsConstants.ESRCH;
-        }
-        return true;
-    }
-
-    /**
      * Kill (if asked to) and wait for the given process died if necessary
      * @param app - The process record to kill
      * @param doKill - Kill the given process record
@@ -2214,20 +2185,9 @@ public final class ProcessList {
 
         // wait for the death
         if (wait) {
-            boolean isAlive = true;
-            // ideally we should use pidfd_open(2) but it's available on kernel 5.3 or later
-
-            final long timeout = SystemClock.uptimeMillis() + PROC_KILL_TIMEOUT;
-            isAlive = isProcessAliveLiteLocked(app);
-            while (timeout > SystemClock.uptimeMillis() && isAlive) {
-                try {
-                    Thread.sleep(PROC_DEATH_POLL_INTERVAL);
-                } catch (InterruptedException e) {
-                }
-                isAlive = isProcessAliveLiteLocked(app);
-            }
-
-            if (isAlive) {
+            try {
+                Process.waitForProcessDeath(app.pid, PROC_KILL_TIMEOUT);
+            } catch (Exception e) {
                 // Maybe the process goes into zombie, use an expensive API to check again.
                 if (mService.isProcessAliveLocked(app)) {
                     Slog.w(TAG, String.format(formatString,
