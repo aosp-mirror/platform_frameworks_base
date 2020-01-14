@@ -60,27 +60,6 @@ const int64_t NO_ALARM_UPDATE = INT64_MAX;
 
 std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
 
-        // wifi_bytes_transfer_by_fg_bg
-        {{.atomTag = android::util::WIFI_BYTES_TRANSFER_BY_FG_BG},
-         {.additiveFields = {3, 4, 5, 6},
-          .puller = new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER_BY_FG_BG)}},
-
-        // mobile_bytes_transfer
-        {{.atomTag = android::util::MOBILE_BYTES_TRANSFER},
-         {.additiveFields = {2, 3, 4, 5},
-          .puller = new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER)}},
-
-        // mobile_bytes_transfer_by_fg_bg
-        {{.atomTag = android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG},
-         {.additiveFields = {3, 4, 5, 6},
-          .puller =
-                  new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG)}},
-
-        // bluetooth_bytes_transfer
-        {{.atomTag = android::util::BLUETOOTH_BYTES_TRANSFER},
-         {.additiveFields = {2, 3},
-          .puller = new StatsCompanionServicePuller(android::util::BLUETOOTH_BYTES_TRANSFER)}},
-
         // kernel_wakelock
         {{.atomTag = android::util::KERNEL_WAKELOCK},
          {.puller = new StatsCompanionServicePuller(android::util::KERNEL_WAKELOCK)}},
@@ -131,10 +110,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // modem_activity_info
         {{.atomTag = android::util::MODEM_ACTIVITY_INFO},
          {.puller = new StatsCompanionServicePuller(android::util::MODEM_ACTIVITY_INFO)}},
-
-        // bluetooth_activity_info
-        {{.atomTag = android::util::BLUETOOTH_ACTIVITY_INFO},
-         {.puller = new StatsCompanionServicePuller(android::util::BLUETOOTH_ACTIVITY_INFO)}},
 
         // system_elapsed_realtime
         {{.atomTag = android::util::SYSTEM_ELAPSED_REALTIME},
