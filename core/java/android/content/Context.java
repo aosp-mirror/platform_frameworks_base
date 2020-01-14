@@ -3953,10 +3953,12 @@ public abstract class Context {
 
     /**
      * Use with {@link android.os.ServiceManager.getService()} to retrieve a
-     * {@link NetworkStackClient} IBinder for communicating with the network stack
+     * {@link INetworkStackConnector} IBinder for communicating with the network stack
      * @hide
      * @see NetworkStackClient
      */
+    @SystemApi
+    @TestApi
     public static final String NETWORK_STACK_SERVICE = "network_stack";
 
     /**
