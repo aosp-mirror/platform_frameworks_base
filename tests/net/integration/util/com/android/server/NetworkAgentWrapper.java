@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
@@ -74,6 +75,7 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
         final String typeName = ConnectivityManager.getNetworkTypeName(type);
         mNetworkInfo = new NetworkInfo(type, 0, typeName, "Mock");
         mNetworkCapabilities = new NetworkCapabilities();
+        mNetworkCapabilities.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
         mNetworkCapabilities.addTransportType(transport);
         switch (transport) {
             case TRANSPORT_ETHERNET:
@@ -206,13 +208,11 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
     }
 
     public void suspend() {
-        mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.SUSPENDED, null, null);
-        mNetworkAgent.sendNetworkInfo(mNetworkInfo);
+        removeCapability(NET_CAPABILITY_NOT_SUSPENDED);
     }
 
     public void resume() {
-        mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, null, null);
-        mNetworkAgent.sendNetworkInfo(mNetworkInfo);
+        addCapability(NET_CAPABILITY_NOT_SUSPENDED);
     }
 
     public void disconnect() {
