@@ -634,6 +634,8 @@ public class StatsPullAtomService extends SystemService {
     // Disables throttler on CPU time readers.
     private KernelCpuUidUserSysTimeReader mCpuUidUserSysTimeReader =
             new KernelCpuUidUserSysTimeReader(false);
+    private KernelCpuUidFreqTimeReader mCpuUidFreqTimeReader =
+            new KernelCpuUidFreqTimeReader(false);
 
     private void registerCpuTimePerFreq() {
         int tagId = StatsLog.CPU_TIME_PER_FREQ;
@@ -694,11 +696,35 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerCpuTimePerUidFreq() {
-        // No op.
+        // the throttling is 3sec, handled in
+        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
+        int tagId = StatsLog.CPU_TIME_PER_UID_FREQ;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {4})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullCpuTimeperUidFreq(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullCpuTimeperUidFreq() {
-        // No op.
+    private int pullCpuTimeperUidFreq(int atomTag, List<StatsEvent> pulledData) {
+        mCpuUidFreqTimeReader.readAbsolute((uid, cpuFreqTimeMs) -> {
+            for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
+                if (cpuFreqTimeMs[freqIndex] != 0) {
+                    StatsEvent e = StatsEvent.newBuilder()
+                            .setAtomId(atomTag)
+                            .writeInt(uid)
+                            .writeInt(freqIndex)
+                            .writeLong(cpuFreqTimeMs[freqIndex])
+                            .build();
+                    pulledData.add(e);
+                }
+            }
+        });
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerCpuActiveTime() {
