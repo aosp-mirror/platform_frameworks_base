@@ -211,6 +211,7 @@ public class StatsPullAtomService extends SystemService {
     public void onStart() {
         mStatsManager = (StatsManager) mContext.getSystemService(Context.STATS_MANAGER);
         mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        mTelephony = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
 
         // Used to initialize the CPU Frequency atom.
         PowerProfile powerProfile = new PowerProfile(mContext);
@@ -823,6 +824,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private WifiManager mWifiManager;
+    private TelephonyManager mTelephony;
 
     private int pullWifiActivityInfo(int atomTag, List<StatsEvent> pulledData) {
         long token = Binder.clearCallingIdentity();
@@ -867,11 +869,41 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerModemActivityInfo() {
-        // No op.
+        int tagId = StatsLog.MODEM_ACTIVITY_INFO;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullModemActivityInfo(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullModemActivityInfo() {
-        // No op.
+    private int pullModemActivityInfo(int atomTag, List<StatsEvent> pulledData) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            SynchronousResultReceiver modemReceiver = new SynchronousResultReceiver("telephony");
+            mTelephony.requestModemActivityInfo(modemReceiver);
+            final ModemActivityInfo modemInfo = awaitControllerInfo(modemReceiver);
+            if (modemInfo == null) {
+                return StatsManager.PULL_SKIP;
+            }
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeLong(modemInfo.getTimestamp())
+                    .writeLong(modemInfo.getSleepTimeMillis())
+                    .writeLong(modemInfo.getIdleTimeMillis())
+                    .writeLong(modemInfo.getTransmitPowerInfo().get(0).getTimeInMillis())
+                    .writeLong(modemInfo.getTransmitPowerInfo().get(1).getTimeInMillis())
+                    .writeLong(modemInfo.getTransmitPowerInfo().get(2).getTimeInMillis())
+                    .writeLong(modemInfo.getTransmitPowerInfo().get(3).getTimeInMillis())
+                    .writeLong(modemInfo.getTransmitPowerInfo().get(4).getTimeInMillis())
+                    .writeLong(modemInfo.getReceiveTimeMillis())
+                    .build();
+            pulledData.add(e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerBluetoothActivityInfo() {

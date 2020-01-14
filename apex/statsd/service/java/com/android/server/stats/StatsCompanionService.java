@@ -714,63 +714,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    /**
-     * Helper method to extract the Parcelable controller info from a
-     * SynchronousResultReceiver.
-     */
-    private static <T extends Parcelable> T awaitControllerInfo(
-            @Nullable SynchronousResultReceiver receiver) {
-        if (receiver == null) {
-            return null;
-        }
-
-        try {
-            final SynchronousResultReceiver.Result result =
-                    receiver.awaitResult(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS);
-            if (result.bundle != null) {
-                // This is the final destination for the Bundle.
-                result.bundle.setDefusable(true);
-
-                final T data = result.bundle.getParcelable(
-                        RESULT_RECEIVER_CONTROLLER_KEY);
-                if (data != null) {
-                    return data;
-                }
-            }
-            Slog.e(TAG, "no controller energy info supplied for " + receiver.getName());
-        } catch (TimeoutException e) {
-            Slog.w(TAG, "timeout reading " + receiver.getName() + " stats");
-        }
-        return null;
-    }
-
-    private void pullModemActivityInfo(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long token = Binder.clearCallingIdentity();
-        synchronized (this) {
-            if (mTelephony == null) {
-                mTelephony = mContext.getSystemService(TelephonyManager.class);
-            }
-        }
-        if (mTelephony != null) {
-            SynchronousResultReceiver modemReceiver = new SynchronousResultReceiver("telephony");
-            mTelephony.requestModemActivityInfo(modemReceiver);
-            final ModemActivityInfo modemInfo = awaitControllerInfo(modemReceiver);
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeLong(modemInfo.getTimestamp());
-            e.writeLong(modemInfo.getSleepTimeMillis());
-            e.writeLong(modemInfo.getIdleTimeMillis());
-            e.writeLong(modemInfo.getTransmitPowerInfo().get(0).getTimeInMillis());
-            e.writeLong(modemInfo.getTransmitPowerInfo().get(1).getTimeInMillis());
-            e.writeLong(modemInfo.getTransmitPowerInfo().get(2).getTimeInMillis());
-            e.writeLong(modemInfo.getTransmitPowerInfo().get(3).getTimeInMillis());
-            e.writeLong(modemInfo.getTransmitPowerInfo().get(4).getTimeInMillis());
-            e.writeLong(modemInfo.getReceiveTimeMillis());
-            pulledData.add(e);
-        }
-    }
-
     private void pullSystemElapsedRealtime(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -1961,11 +1904,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
         switch (tagId) {
-
-            case StatsLog.MODEM_ACTIVITY_INFO: {
-                pullModemActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
 
             case StatsLog.SYSTEM_ELAPSED_REALTIME: {
                 pullSystemElapsedRealtime(tagId, elapsedNanos, wallClockNanos, ret);
