@@ -47,6 +47,10 @@ public class PresPublishTriggerType implements Parcelable {
     public static final int UCE_PRES_PUBLISH_TRIGGER_MOVE_TO_IWLAN = 8;
     /** Trigger is unknown. */
     public static final int UCE_PRES_PUBLISH_TRIGGER_UNKNOWN = 9;
+    /** Move to 5G NR with VoPS disabled. */
+    public static final int UCE_PRES_PUBLISH_TRIGGER_MOVE_TO_NR5G_VOPS_DISABLED = 10;
+    /** Move to 5G NR with VoPS enabled. */
+    public static final int UCE_PRES_PUBLISH_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED = 11;
 
 
 
