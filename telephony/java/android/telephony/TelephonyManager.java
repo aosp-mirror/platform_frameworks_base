@@ -113,8 +113,6 @@ import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.SmsApplication;
 import com.android.telephony.Rlog;
 
-import dalvik.system.VMRuntime;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -5417,6 +5415,13 @@ public class TelephonyManager {
     public static final int DATA_DISCONNECTING = 4;
 
     /**
+     * To check the SDK version for {@link TelephonyManager#getDataState}.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    private static final long GET_DATA_STATE_CODE_CHANGE = 147600208L;
+
+    /**
      * Returns a constant indicating the current data connection state
      * (cellular).
      *
@@ -5434,7 +5439,7 @@ public class TelephonyManager {
             int state = telephony.getDataStateForSubId(
                     getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
             if (state == TelephonyManager.DATA_DISCONNECTING
-                    && VMRuntime.getRuntime().getTargetSdkVersion() < Build.VERSION_CODES.R) {
+                    && !Compatibility.isChangeEnabled(GET_DATA_STATE_CODE_CHANGE)) {
                 return TelephonyManager.DATA_CONNECTED;
             }
 
@@ -5496,6 +5501,13 @@ public class TelephonyManager {
     //
 
     /**
+     * To check the SDK version for {@link TelephonyManager#listen}.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    private static final long LISTEN_CODE_CHANGE = 147600208L;
+
+    /**
      * Registers a listener object to receive notification of changes
      * in specified telephony states.
      * <p>
@@ -5534,7 +5546,7 @@ public class TelephonyManager {
                 // subId from PhoneStateListener is deprecated Q on forward, use the subId from
                 // TelephonyManager instance. keep using subId from PhoneStateListener for pre-Q.
                 int subId = mSubId;
-                if (VMRuntime.getRuntime().getTargetSdkVersion() >= Build.VERSION_CODES.Q) {
+                if (Compatibility.isChangeEnabled(LISTEN_CODE_CHANGE)) {
                     // since mSubId in PhoneStateListener is deprecated from Q on forward, this is
                     // the only place to set mSubId and its for "informational" only.
                     //  TODO: remove this once we completely get rid of mSubId in PhoneStateListener
