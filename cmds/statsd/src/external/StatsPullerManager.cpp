@@ -68,10 +68,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::ON_DEVICE_POWER_MEASUREMENT},
          {.puller = new PowerStatsPuller()}},
 
-        // wifi_activity_energy_info
-        {{.atomTag = android::util::WIFI_ACTIVITY_INFO},
-         {.puller = new StatsCompanionServicePuller(android::util::WIFI_ACTIVITY_INFO)}},
-
         // modem_activity_info
         {{.atomTag = android::util::MODEM_ACTIVITY_INFO},
          {.puller = new StatsCompanionServicePuller(android::util::MODEM_ACTIVITY_INFO)}},

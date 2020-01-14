@@ -744,54 +744,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         return null;
     }
 
-    private void pullWifiActivityInfo(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        WifiManager wifiManager;
-        synchronized (this) {
-            if (mWifiManager == null) {
-                mWifiManager = mContext.getSystemService(WifiManager.class);
-            }
-            wifiManager = mWifiManager;
-        }
-        if (wifiManager == null) {
-            return;
-        }
-        long token = Binder.clearCallingIdentity();
-        try {
-            SynchronousResultReceiver wifiReceiver = new SynchronousResultReceiver("wifi");
-            wifiManager.getWifiActivityEnergyInfoAsync(
-                    new Executor() {
-                        @Override
-                        public void execute(Runnable runnable) {
-                            // run the listener on the binder thread, if it was run on the main
-                            // thread it would deadlock since we would be waiting on ourselves
-                            runnable.run();
-                        }
-                    },
-                    info -> {
-                        Bundle bundle = new Bundle();
-                        bundle.putParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, info);
-                        wifiReceiver.send(0, bundle);
-                    }
-            );
-            final WifiActivityEnergyInfo wifiInfo = awaitControllerInfo(wifiReceiver);
-            if (wifiInfo == null) {
-                return;
-            }
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeLong(wifiInfo.getTimeSinceBootMillis());
-            e.writeInt(wifiInfo.getStackState());
-            e.writeLong(wifiInfo.getControllerTxDurationMillis());
-            e.writeLong(wifiInfo.getControllerRxDurationMillis());
-            e.writeLong(wifiInfo.getControllerIdleDurationMillis());
-            e.writeLong(wifiInfo.getControllerEnergyUsedMicroJoules());
-            pulledData.add(e);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
     private void pullModemActivityInfo(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2009,11 +1961,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
         switch (tagId) {
-
-            case StatsLog.WIFI_ACTIVITY_INFO: {
-                pullWifiActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
 
             case StatsLog.MODEM_ACTIVITY_INFO: {
                 pullModemActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);

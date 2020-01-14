@@ -210,6 +210,7 @@ public class StatsPullAtomService extends SystemService {
     @Override
     public void onStart() {
         mStatsManager = (StatsManager) mContext.getSystemService(Context.STATS_MANAGER);
+        mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
 
         // Used to initialize the CPU Frequency atom.
         PowerProfile powerProfile = new PowerProfile(mContext);
@@ -812,11 +813,57 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerWifiActivityInfo() {
-        // No op.
+        int tagId = StatsLog.WIFI_ACTIVITY_INFO;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullWifiActivityInfo(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullWifiActivityInfo() {
-        // No op.
+    private WifiManager mWifiManager;
+
+    private int pullWifiActivityInfo(int atomTag, List<StatsEvent> pulledData) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            SynchronousResultReceiver wifiReceiver = new SynchronousResultReceiver("wifi");
+            mWifiManager.getWifiActivityEnergyInfoAsync(
+                    new Executor() {
+                        @Override
+                        public void execute(Runnable runnable) {
+                            // run the listener on the binder thread, if it was run on the main
+                            // thread it would deadlock since we would be waiting on ourselves
+                            runnable.run();
+                        }
+                    },
+                    info -> {
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, info);
+                        wifiReceiver.send(0, bundle);
+                    }
+            );
+            final WifiActivityEnergyInfo wifiInfo = awaitControllerInfo(wifiReceiver);
+            if (wifiInfo == null) {
+                return StatsManager.PULL_SKIP;
+            }
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeLong(wifiInfo.getTimeSinceBootMillis())
+                    .writeInt(wifiInfo.getStackState())
+                    .writeLong(wifiInfo.getControllerTxDurationMillis())
+                    .writeLong(wifiInfo.getControllerRxDurationMillis())
+                    .writeLong(wifiInfo.getControllerIdleDurationMillis())
+                    .writeLong(wifiInfo.getControllerEnergyUsedMicroJoules())
+                    .build();
+            pulledData.add(e);
+        } catch (RuntimeException e) {
+            Slog.e(TAG, "failed to getWifiActivityEnergyInfoAsync", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerModemActivityInfo() {
