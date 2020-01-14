@@ -24,7 +24,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.tuner.TunerConstants.FilterStatus;
-import android.media.tv.tuner.TunerConstants.FrontendScanType;
 import android.media.tv.tuner.TunerConstants.Result;
 import android.media.tv.tuner.dvr.Dvr;
 import android.media.tv.tuner.dvr.DvrCallback;
@@ -281,17 +280,26 @@ public final class Tuner implements AutoCloseable  {
     }
 
     /**
-     * Scan channels.
+     * Scan for channels.
+     *
+     * <p>Details for channels found are returned via {@link ScanCallback}.
      *
      * @param settings A {@link FrontendSettings} to configure the frontend.
      * @param scanType The scan type.
-     *
+     * @throws SecurityException     if the caller does not have appropriate permissions.
+     * @throws IllegalStateException if {@code scan} is called again before {@link #stopScan()} is
+     *                               called.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
-    public int scan(@NonNull FrontendSettings settings, @FrontendScanType int scanType,
+    public int scan(@NonNull FrontendSettings settings, @ScanCallback.ScanType int scanType,
             @NonNull @CallbackExecutor Executor executor, @NonNull ScanCallback scanCallback) {
         TunerUtils.checkTunerPermission(mContext);
+        if (mScanCallback != null || mScanCallbackExecutor != null) {
+            throw new IllegalStateException(
+                    "Scan already in progress.  stopScan must be called before a new scan can be "
+                            + "started.");
+        }
         mScanCallback = scanCallback;
         mScanCallbackExecutor = executor;
         return nativeScan(settings.getType(), settings, scanType);
@@ -306,6 +314,7 @@ public final class Tuner implements AutoCloseable  {
      * <p>
      * If the method completes successfully, the frontend stopped previous scanning.
      *
+     * @throws SecurityException if the caller does not have appropriate permissions.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
