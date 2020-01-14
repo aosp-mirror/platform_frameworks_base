@@ -598,6 +598,11 @@ public final class AudioAttributes implements Parcelable {
         private boolean mMuteHapticChannels = true;
         private HashSet<String> mTags = new HashSet<String>();
         private Bundle mBundle;
+        private int mPrivacySensitive = PRIVACY_SENSITIVE_DEFAULT;
+
+        private static final int PRIVACY_SENSITIVE_DEFAULT = -1;
+        private static final int PRIVACY_SENSITIVE_DISABLED = 0;
+        private static final int PRIVACY_SENSITIVE_ENABLED = 1;
 
         /**
          * Constructs a new Builder with the defaults.
@@ -638,11 +643,20 @@ public final class AudioAttributes implements Parcelable {
             if (mMuteHapticChannels) {
                 aa.mFlags |= FLAG_MUTE_HAPTIC;
             }
-            // capturing for camcorder of communication is private by default to
-            // reflect legacy behavior
-            if (aa.mSource == MediaRecorder.AudioSource.VOICE_COMMUNICATION
-                    || aa.mSource == MediaRecorder.AudioSource.CAMCORDER) {
+
+            if (mPrivacySensitive == PRIVACY_SENSITIVE_DEFAULT) {
+                // capturing for camcorder or communication is private by default to
+                // reflect legacy behavior
+                if (mSource == MediaRecorder.AudioSource.VOICE_COMMUNICATION
+                        || mSource == MediaRecorder.AudioSource.CAMCORDER) {
+                    aa.mFlags |= FLAG_CAPTURE_PRIVATE;
+                } else {
+                    aa.mFlags &= ~FLAG_CAPTURE_PRIVATE;
+                }
+            } else if (mPrivacySensitive == PRIVACY_SENSITIVE_ENABLED) {
                 aa.mFlags |= FLAG_CAPTURE_PRIVATE;
+            } else {
+                aa.mFlags &= ~FLAG_CAPTURE_PRIVATE;
             }
             aa.mTags = (HashSet<String>) mTags.clone();
             aa.mFormattedTags = TextUtils.join(";", mTags);
@@ -965,6 +979,20 @@ public final class AudioAttributes implements Parcelable {
          */
         public @NonNull Builder setHapticChannelsMuted(boolean muted) {
             mMuteHapticChannels = muted;
+            return this;
+        }
+
+        /**
+         * @hide
+         * Indicates if an AudioRecord build with this AudioAttributes is privacy sensitive or not.
+         * See {@link AudioRecord.Builder#setPrivacySensitive(boolean)}.
+         * @param privacySensitive True if capture must be marked as privacy sensitive,
+         * false otherwise.
+         * @return the same Builder instance.
+         */
+        public @NonNull Builder setPrivacySensitive(boolean privacySensitive) {
+            mPrivacySensitive =
+                privacySensitive ? PRIVACY_SENSITIVE_ENABLED : PRIVACY_SENSITIVE_DISABLED;
             return this;
         }
     };

@@ -315,7 +315,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      * @hide
      * Class constructor with {@link AudioAttributes} and {@link AudioFormat}.
      * @param attributes a non-null {@link AudioAttributes} instance. Use
-     *     {@link AudioAttributes.Builder#setAudioSource(int)} for configuring the audio
+     *     {@link AudioAttributes.Builder#setCapturePreset(int)} for configuring the audio
      *     source for this instance.
      * @param format a non-null {@link AudioFormat} instance describing the format of the data
      *     that will be recorded through this AudioRecord. See {@link AudioFormat.Builder} for
@@ -754,17 +754,10 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
                             "Cannot request private capture with source: " + source);
                 }
 
-                int flags = mAttributes.getAllFlags();
-                if (mPrivacySensitive == PRIVACY_SENSITIVE_DISABLED) {
-                    flags &= ~AudioAttributes.FLAG_CAPTURE_PRIVATE;
-                } else if (mPrivacySensitive == PRIVACY_SENSITIVE_ENABLED) {
-                    flags |= AudioAttributes.FLAG_CAPTURE_PRIVATE;
-                }
-                if (flags != mAttributes.getAllFlags()) {
-                    mAttributes = new AudioAttributes.Builder(mAttributes)
-                            .replaceFlags(flags)
-                            .build();
-                }
+                mAttributes = new AudioAttributes.Builder(mAttributes)
+                        .setInternalCapturePreset(source)
+                        .setPrivacySensitive(mPrivacySensitive == PRIVACY_SENSITIVE_ENABLED)
+                        .build();
             }
 
             try {
