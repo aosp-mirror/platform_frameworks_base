@@ -57,7 +57,7 @@ public class MediaRouter2 {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final Object sRouterLock = new Object();
 
-    @GuardedBy("sLock")
+    @GuardedBy("sRouterLock")
     private static MediaRouter2 sInstance;
 
     private final Context mContext;
@@ -73,23 +73,23 @@ public class MediaRouter2 {
             new CopyOnWriteArrayList<>();
 
     private final String mPackageName;
-    @GuardedBy("sLock")
+    @GuardedBy("sRouterLock")
     final Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
 
-    @GuardedBy("sLock")
+    @GuardedBy("sRouterLock")
     private RouteDiscoveryPreference mDiscoveryPreference = RouteDiscoveryPreference.EMPTY;
 
     // TODO: Make MediaRouter2 is always connected to the MediaRouterService.
-    @GuardedBy("sLock")
+    @GuardedBy("sRouterLock")
     Client2 mClient;
 
-    @GuardedBy("sLock")
+    @GuardedBy("sRouterLock")
     private Map<String, RoutingController> mRoutingControllers = new ArrayMap<>();
 
     private AtomicInteger mSessionCreationRequestCnt = new AtomicInteger(1);
 
     final Handler mHandler;
-    @GuardedBy("sLock")
+    @GuardedBy("sRouterLock")
     private boolean mShouldUpdateRoutes;
     private volatile List<MediaRoute2Info> mFilteredRoutes = Collections.emptyList();
 
@@ -728,16 +728,15 @@ public class MediaRouter2 {
      * For example, selecting/deselcting/transferring routes to session can be done through this
      * class. Instances are created by {@link MediaRouter2}.
      *
-     * TODO: Need to add toString()
      * @hide
      */
     public final class RoutingController {
         private final Object mControllerLock = new Object();
 
-        @GuardedBy("mLock")
+        @GuardedBy("mControllerLock")
         private RoutingSessionInfo mSessionInfo;
 
-        @GuardedBy("mLock")
+        @GuardedBy("mControllerLock")
         private volatile boolean mIsReleased;
 
         RoutingController(@NonNull RoutingSessionInfo sessionInfo) {
@@ -996,6 +995,38 @@ public class MediaRouter2 {
                     Log.e(TAG, "Unable to notify of controller release", ex);
                 }
             }
+        }
+
+        @Override
+        public String toString() {
+            // To prevent logging spam, we only print the ID of each route.
+            List<String> selectedRoutes = getSelectedRoutes().stream()
+                    .map(MediaRoute2Info::getId).collect(Collectors.toList());
+            List<String> selectableRoutes = getSelectableRoutes().stream()
+                    .map(MediaRoute2Info::getId).collect(Collectors.toList());
+            List<String> deselectableRoutes = getDeselectableRoutes().stream()
+                    .map(MediaRoute2Info::getId).collect(Collectors.toList());
+            List<String> transferrableRoutes = getTransferrableRoutes().stream()
+                    .map(MediaRoute2Info::getId).collect(Collectors.toList());
+
+            StringBuilder result = new StringBuilder()
+                    .append("RoutingController{ ")
+                    .append("sessionId=").append(getSessionId())
+                    .append(", routeFeature=").append(getRouteFeature())
+                    .append(", selectedRoutes={")
+                    .append(selectedRoutes)
+                    .append("}")
+                    .append(", selectableRoutes={")
+                    .append(selectableRoutes)
+                    .append("}")
+                    .append(", deselectableRoutes={")
+                    .append(deselectableRoutes)
+                    .append("}")
+                    .append(", transferrableRoutes={")
+                    .append(transferrableRoutes)
+                    .append("}")
+                    .append(" }");
+            return result.toString();
         }
 
         /**
