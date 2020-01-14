@@ -5855,9 +5855,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         newNc.setPrivateDnsBroken(nai.networkCapabilities.isPrivateDnsBroken());
 
-        // TODO : remove this once all factories are updated to send NOT_SUSPENDED
+        // TODO : remove this once all factories are updated to send NOT_SUSPENDED and NOT_ROAMING
         if (!newNc.hasTransport(TRANSPORT_CELLULAR)) {
             newNc.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
+            newNc.addCapability(NET_CAPABILITY_NOT_ROAMING);
         }
 
         return newNc;
@@ -5906,7 +5907,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             processListenRequests(nai);
             final boolean prevSuspended = !prevNc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
             final boolean suspended = !newNc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
-            if (prevSuspended != suspended) {
+            final boolean prevRoaming = !prevNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+            final boolean roaming = !newNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+            if (prevSuspended != suspended || prevRoaming != roaming) {
                 // TODO (b/73132094) : remove this call once the few users of onSuspended and
                 // onResumed have been removed.
                 notifyNetworkCallbacks(nai, suspended ? ConnectivityManager.CALLBACK_SUSPENDED
@@ -6622,7 +6625,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @NonNull
     private NetworkInfo mixInInfo(@NonNull final NetworkAgentInfo nai, @NonNull NetworkInfo info) {
         final NetworkInfo newInfo = new NetworkInfo(info);
-        // The suspended bit is managed in NetworkCapabilities.
+        // The suspended and roaming bits are managed in NetworkCapabilities.
         final boolean suspended =
                 !nai.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
         if (suspended && info.getDetailedState() == NetworkInfo.DetailedState.CONNECTED) {
@@ -6635,6 +6638,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             newInfo.setDetailedState(NetworkInfo.DetailedState.SUSPENDED, info.getReason(),
                     info.getExtraInfo());
         }
+        newInfo.setRoaming(!nai.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         return newInfo;
     }
 
