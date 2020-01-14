@@ -4593,6 +4593,7 @@ package android.net {
   }
 
   public abstract class NetworkAgent {
+    ctor public NetworkAgent(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, int, @NonNull android.net.NetworkAgentConfig, @Nullable android.net.NetworkProvider);
     method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
     method public void onAutomaticReconnectDisabled();
     method public void onBandwidthUpdateRequested();
@@ -4615,6 +4616,8 @@ package android.net {
 
   public final class NetworkAgentConfig implements android.os.Parcelable {
     method public int describeContents();
+    method public int getLegacyType();
+    method @NonNull public String getLegacyTypeName();
     method @Nullable public String getSubscriberId();
     method public boolean isNat64DetectionEnabled();
     method public boolean isProvisioningNotificationEnabled();
@@ -4627,6 +4630,8 @@ package android.net {
     method @NonNull public android.net.NetworkAgentConfig build();
     method @NonNull public android.net.NetworkAgentConfig.Builder disableNat64Detection();
     method @NonNull public android.net.NetworkAgentConfig.Builder disableProvisioningNotification();
+    method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyType(int);
+    method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyTypeName(@NonNull String);
     method @NonNull public android.net.NetworkAgentConfig.Builder setSubscriberId(@Nullable String);
   }
 
