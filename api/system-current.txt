@@ -4489,6 +4489,9 @@ package android.net {
     field @Deprecated public static final String EXTRA_NETWORKS_TO_SCORE = "networksToScore";
     field public static final String EXTRA_NEW_SCORER = "newScorer";
     field @Deprecated public static final String EXTRA_PACKAGE_NAME = "packageName";
+    field public static final int SCORE_FILTER_CURRENT_NETWORK = 1; // 0x1
+    field public static final int SCORE_FILTER_NONE = 0; // 0x0
+    field public static final int SCORE_FILTER_SCAN_RESULTS = 2; // 0x2
   }
 
   public static interface NetworkScoreManager.NetworkScoreCallback {
