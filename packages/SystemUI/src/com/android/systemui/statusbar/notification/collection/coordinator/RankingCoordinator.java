@@ -17,9 +17,8 @@
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 
 import javax.inject.Inject;
@@ -43,10 +42,10 @@ public class RankingCoordinator implements Coordinator {
     }
 
     @Override
-    public void attach(NotifCollection notifCollection, NotifListBuilder notifListBuilder) {
+    public void attach(NotifPipeline pipeline) {
         mStatusBarStateController.addCallback(mStatusBarStateCallback);
 
-        notifListBuilder.addPreGroupFilter(mNotifFilter);
+        pipeline.addPreGroupFilter(mNotifFilter);
     }
 
     /**

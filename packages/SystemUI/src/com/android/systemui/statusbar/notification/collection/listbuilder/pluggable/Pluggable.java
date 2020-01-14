@@ -18,10 +18,10 @@ package com.android.systemui.statusbar.notification.collection.listbuilder.plugg
 
 import android.annotation.Nullable;
 
-import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 
 /**
- * Generic superclass for chunks of code that can plug into the {@link NotifListBuilder}.
+ * Generic superclass for chunks of code that can plug into the {@link NotifPipeline}.
  *
  * A pluggable is fundamentally three things:
  * 1. A name (for debugging purposes)

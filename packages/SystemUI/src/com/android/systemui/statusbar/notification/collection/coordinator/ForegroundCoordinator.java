@@ -25,12 +25,11 @@ import android.util.ArraySet;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.notification.collection.NotifCollection;
-import com.android.systemui.statusbar.notification.collection.NotifCollectionListener;
-import com.android.systemui.statusbar.notification.collection.NotifLifetimeExtender;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +56,7 @@ public class ForegroundCoordinator implements Coordinator {
     private final AppOpsController mAppOpsController;
     private final Handler mMainHandler;
 
-    private NotifCollection mNotifCollection;
+    private NotifPipeline mNotifPipeline;
 
     @Inject
     public ForegroundCoordinator(
@@ -70,20 +69,20 @@ public class ForegroundCoordinator implements Coordinator {
     }
 
     @Override
-    public void attach(NotifCollection notifCollection, NotifListBuilder notifListBuilder) {
-        mNotifCollection = notifCollection;
+    public void attach(NotifPipeline pipeline) {
+        mNotifPipeline = pipeline;
 
         // extend the lifetime of foreground notification services to show for at least 5 seconds
-        mNotifCollection.addNotificationLifetimeExtender(mForegroundLifetimeExtender);
+        mNotifPipeline.addNotificationLifetimeExtender(mForegroundLifetimeExtender);
 
         // listen for new notifications to add appOps
-        mNotifCollection.addCollectionListener(mNotifCollectionListener);
+        mNotifPipeline.addCollectionListener(mNotifCollectionListener);
 
         // when appOps change, update any relevant notifications to update appOps for
         mAppOpsController.addCallback(ForegroundServiceController.APP_OPS, this::onAppOpsChanged);
 
         // filter out foreground service notifications that aren't necessary anymore
-        notifListBuilder.addPreGroupFilter(mNotifFilter);
+        mNotifPipeline.addPreGroupFilter(mNotifFilter);
     }
 
     /**
@@ -230,7 +229,7 @@ public class ForegroundCoordinator implements Coordinator {
     }
 
     private NotificationEntry findNotificationEntryWithKey(String key) {
-        for (NotificationEntry entry : mNotifCollection.getNotifs()) {
+        for (NotificationEntry entry : mNotifPipeline.getActiveNotifs()) {
             if (entry.getKey().equals(key)) {
                 return entry;
             }

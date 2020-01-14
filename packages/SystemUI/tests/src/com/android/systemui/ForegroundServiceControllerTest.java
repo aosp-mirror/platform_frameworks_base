@@ -48,7 +48,7 @@ import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 
@@ -71,7 +71,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private AppOpsController mAppOpsController;
     @Mock private Handler mMainHandler;
-    @Mock private NotifCollection mNotifCollection;
+    @Mock private NotifPipeline mNotifPipeline;
 
     @Before
     public void setUp() throws Exception {
@@ -81,7 +81,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mFsc = new ForegroundServiceController(mEntryManager, mAppOpsController, mMainHandler);
         mListener = new ForegroundServiceNotificationListener(
-                mContext, mFsc, mEntryManager, mNotifCollection);
+                mContext, mFsc, mEntryManager, mNotifPipeline);
         ArgumentCaptor<NotificationEntryListener> entryListenerCaptor =
                 ArgumentCaptor.forClass(NotificationEntryListener.class);
         verify(mEntryManager).addNotificationEntryListener(

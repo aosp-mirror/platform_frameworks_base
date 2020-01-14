@@ -25,6 +25,9 @@ import android.service.notification.StatusBarNotification;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.statusbar.notification.InflationException;
+import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
+import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 
@@ -107,7 +110,7 @@ public class NotifInflaterImpl implements NotifInflater {
                                 DISMISS_SENTIMENT_NEUTRAL,
                                 NotificationVisibility.obtain(entry.getKey(),
                                         entry.getRanking().getRank(),
-                                        mNotifCollection.getNotifs().size(),
+                                        mNotifCollection.getActiveNotifs().size(),
                                         true,
                                         NotificationLogger.getNotificationLocation(entry))
                         ));

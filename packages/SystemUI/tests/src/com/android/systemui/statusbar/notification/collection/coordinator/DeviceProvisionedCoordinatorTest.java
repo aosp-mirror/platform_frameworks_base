@@ -36,7 +36,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.RankingBuilder;
-import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
@@ -65,7 +65,7 @@ public class DeviceProvisionedCoordinatorTest extends SysuiTestCase {
     @Mock private ActivityManagerInternal mActivityMangerInternal;
     @Mock private IPackageManager mIPackageManager;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
-    @Mock private NotifListBuilderImpl mNotifListBuilder;
+    @Mock private NotifPipeline mNotifPipeline;
     private Notification mNotification;
     private NotificationEntry mEntry;
     private DeviceProvisionedCoordinator mDeviceProvisionedCoordinator;
@@ -84,8 +84,8 @@ public class DeviceProvisionedCoordinatorTest extends SysuiTestCase {
                 .build();
 
         ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
-        mDeviceProvisionedCoordinator.attach(null, mNotifListBuilder);
-        verify(mNotifListBuilder, times(1)).addPreGroupFilter(filterCaptor.capture());
+        mDeviceProvisionedCoordinator.attach(mNotifPipeline);
+        verify(mNotifPipeline, times(1)).addPreGroupFilter(filterCaptor.capture());
         mDeviceProvisionedFilter = filterCaptor.getValue();
     }
 

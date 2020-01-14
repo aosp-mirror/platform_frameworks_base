@@ -36,12 +36,11 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.appops.AppOpsController;
-import com.android.systemui.statusbar.notification.collection.NotifCollection;
-import com.android.systemui.statusbar.notification.collection.NotifLifetimeExtender;
-import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,8 +58,7 @@ public class ForegroundCoordinatorTest extends SysuiTestCase {
     @Mock private Handler mMainHandler;
     @Mock private ForegroundServiceController mForegroundServiceController;
     @Mock private AppOpsController mAppOpsController;
-    @Mock private NotifListBuilderImpl mNotifListBuilder;
-    @Mock private NotifCollection mNotifCollection;
+    @Mock private NotifPipeline mNotifPipeline;
 
     private NotificationEntry mEntry;
     private Notification mNotification;
@@ -84,9 +82,9 @@ public class ForegroundCoordinatorTest extends SysuiTestCase {
         ArgumentCaptor<NotifLifetimeExtender> lifetimeExtenderCaptor =
                 ArgumentCaptor.forClass(NotifLifetimeExtender.class);
 
-        mForegroundCoordinator.attach(mNotifCollection, mNotifListBuilder);
-        verify(mNotifListBuilder, times(1)).addPreGroupFilter(filterCaptor.capture());
-        verify(mNotifCollection, times(1)).addNotificationLifetimeExtender(
+        mForegroundCoordinator.attach(mNotifPipeline);
+        verify(mNotifPipeline, times(1)).addPreGroupFilter(filterCaptor.capture());
+        verify(mNotifPipeline, times(1)).addNotificationLifetimeExtender(
                 lifetimeExtenderCaptor.capture());
 
         mForegroundFilter = filterCaptor.getValue();
