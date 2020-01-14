@@ -761,21 +761,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullKernelUidCpuClusterTime(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        mCpuUidClusterTimeReader.readAbsolute((uid, cpuClusterTimesMs) -> {
-            for (int i = 0; i < cpuClusterTimesMs.length; i++) {
-                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
-                        wallClockNanos);
-                e.writeInt(uid);
-                e.writeInt(i);
-                e.writeLong(cpuClusterTimesMs[i]);
-                pulledData.add(e);
-            }
-        });
-    }
-
     private void pullWifiActivityInfo(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2066,11 +2051,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.KERNEL_WAKELOCK: {
                 pullKernelWakelock(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.CPU_CLUSTER_TIME: {
-                pullKernelUidCpuClusterTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

@@ -638,6 +638,8 @@ public class StatsPullAtomService extends SystemService {
             new KernelCpuUidFreqTimeReader(false);
     private KernelCpuUidActiveTimeReader mCpuUidActiveTimeReader =
             new KernelCpuUidActiveTimeReader(false);
+    private KernelCpuUidClusterTimeReader mCpuUidClusterTimeReader =
+            new KernelCpuUidClusterTimeReader(false);
 
     private void registerCpuTimePerFreq() {
         int tagId = StatsLog.CPU_TIME_PER_FREQ;
@@ -757,11 +759,33 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerCpuClusterTime() {
-        // No op.
+        // the throttling is 3sec, handled in
+        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
+        int tagId = StatsLog.CPU_CLUSTER_TIME;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {3})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullCpuClusterTime(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private int pullCpuClusterTime() {
-        return 0;
+    private int pullCpuClusterTime(int atomTag, List<StatsEvent> pulledData) {
+        mCpuUidClusterTimeReader.readAbsolute((uid, cpuClusterTimesMs) -> {
+            for (int i = 0; i < cpuClusterTimesMs.length; i++) {
+                StatsEvent e = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeInt(uid)
+                        .writeInt(i)
+                        .writeLong(cpuClusterTimesMs[i])
+                        .build();
+                pulledData.add(e);
+            }
+        });
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerWifiActivityInfo() {
