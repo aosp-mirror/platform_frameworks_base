@@ -19,6 +19,7 @@ package android.telephony.ims;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,6 +36,7 @@ import java.util.Map;
  * Contains the User Capability Exchange capabilities corresponding to a contact's URI.
  * @hide
  */
+@SystemApi
 public final class RcsContactUceCapability implements Parcelable {
 
     /** Supports 1-to-1 chat */
@@ -135,7 +137,7 @@ public final class RcsContactUceCapability implements Parcelable {
          * @param type The capability to map to a service URI that is different from the contact's
          *         URI.
          */
-        public Builder add(@CapabilityFlag int type, @NonNull Uri serviceUri) {
+        public @NonNull Builder add(@CapabilityFlag int type, @NonNull Uri serviceUri) {
             mCapabilities.mCapabilities |= type;
             // Put each of these capabilities into the map separately.
             for (int shift = 0; shift < Integer.SIZE; shift++) {
@@ -157,7 +159,7 @@ public final class RcsContactUceCapability implements Parcelable {
          * Add a UCE capability flag that this contact supports.
          * @param type the capability that the contact supports.
          */
-        public Builder add(@CapabilityFlag int type) {
+        public @NonNull Builder add(@CapabilityFlag int type) {
             mCapabilities.mCapabilities |= type;
             return this;
         }
@@ -167,7 +169,7 @@ public final class RcsContactUceCapability implements Parcelable {
          * @param extension A string containing a carrier specific service tag that is an extension
          *         of the {@link CapabilityFlag}s that are defined here.
          */
-        public Builder add(@NonNull String extension) {
+        public @NonNull Builder add(@NonNull String extension) {
             mCapabilities.mExtensionTags.add(extension);
             return this;
         }
@@ -175,7 +177,7 @@ public final class RcsContactUceCapability implements Parcelable {
         /**
          * @return the constructed instance.
          */
-        public RcsContactUceCapability build() {
+        public @NonNull RcsContactUceCapability build() {
             return mCapabilities;
         }
     }
@@ -205,7 +207,7 @@ public final class RcsContactUceCapability implements Parcelable {
         }
     }
 
-    public static final Creator<RcsContactUceCapability> CREATOR =
+    public static final @NonNull Creator<RcsContactUceCapability> CREATOR =
             new Creator<RcsContactUceCapability>() {
         @Override
         public RcsContactUceCapability createFromParcel(Parcel in) {
@@ -219,7 +221,7 @@ public final class RcsContactUceCapability implements Parcelable {
     };
 
     @Override
-    public void writeToParcel(Parcel out, int flags) {
+    public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeParcelable(mContactUri, 0);
         out.writeInt(mCapabilities);
         out.writeStringList(mExtensionTags);
