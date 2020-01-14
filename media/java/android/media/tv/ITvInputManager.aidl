@@ -60,6 +60,7 @@ interface ITvInputManager {
     void createSession(in ITvInputClient client, in String inputId, boolean isRecordingSession,
             int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
+    int getClientPid(in String sessionId);
 
     void setMainSession(in IBinder sessionToken, int userId);
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);

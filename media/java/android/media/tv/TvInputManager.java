@@ -266,6 +266,15 @@ public final class TvInputManager {
     public static final int INPUT_STATE_DISCONNECTED = 2;
 
     /**
+     * An unknown state of the client pid gets from the TvInputManager. Client gets this value when
+     * query through {@link getClientPid(String sessionId)} fails.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int UNKNOWN_CLIENT_PID = -1;
+
+    /**
      * Broadcast intent action when the user blocked content ratings change. For use with the
      * {@link #isRatingBlocked}.
      */
@@ -1484,6 +1493,21 @@ public final class TvInputManager {
     }
 
     /**
+     * Get a the client pid when creating the session with the session id provided.
+     *
+     * @param sessionId a String of session id that is used to query the client pid.
+     * @return the client pid when created the session. Returns {@link #UNKNOWN_CLIENT_PID}
+     *         if the call fails.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
+    public int getClientPid(@NonNull String sessionId) {
+        return getClientPidInternal(sessionId);
+    };
+
+    /**
      * Creates a recording {@link Session} for a given TV input.
      *
      * <p>The number of sessions that can be created at the same time is limited by the capability
@@ -1514,6 +1538,17 @@ public final class TvInputManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    private int getClientPidInternal(String sessionId) {
+        Preconditions.checkNotNull(sessionId);
+        int clientPid = UNKNOWN_CLIENT_PID;
+        try {
+            clientPid = mService.getClientPid(sessionId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return clientPid;
     }
 
     /**

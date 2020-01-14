@@ -124,7 +124,7 @@ public abstract class TvInputService extends Service {
 
             @Override
             public void createSession(InputChannel channel, ITvInputSessionCallback cb,
-                    String inputId) {
+                    String inputId, String sessionId) {
                 if (channel == null) {
                     Log.w(TAG, "Creating session without input channel");
                 }
@@ -135,17 +135,20 @@ public abstract class TvInputService extends Service {
                 args.arg1 = channel;
                 args.arg2 = cb;
                 args.arg3 = inputId;
+                args.arg4 = sessionId;
                 mServiceHandler.obtainMessage(ServiceHandler.DO_CREATE_SESSION, args).sendToTarget();
             }
 
             @Override
-            public void createRecordingSession(ITvInputSessionCallback cb, String inputId) {
+            public void createRecordingSession(ITvInputSessionCallback cb, String inputId,
+                    String sessionId) {
                 if (cb == null) {
                     return;
                 }
                 SomeArgs args = SomeArgs.obtain();
                 args.arg1 = cb;
                 args.arg2 = inputId;
+                args.arg3 = sessionId;
                 mServiceHandler.obtainMessage(ServiceHandler.DO_CREATE_RECORDING_SESSION, args)
                         .sendToTarget();
             }
@@ -205,6 +208,37 @@ public abstract class TvInputService extends Service {
     @Nullable
     public RecordingSession onCreateRecordingSession(String inputId) {
         return null;
+    }
+
+    /**
+     * Returns a concrete implementation of {@link Session}.
+     *
+     * <p>For any apps that needs sessionId to request tuner resources from TunerResourceManager,
+     * it needs to override this method to get the sessionId passed. When no overriding, this method
+     * calls {@link #onCreateSession(String)} defaultly.
+     *
+     * @param inputId The ID of the TV input associated with the session.
+     * @param sessionId the unique sessionId created by TIF when session is created.
+     */
+    @Nullable
+    public Session onCreateSession(@NonNull String inputId, @NonNull String sessionId) {
+        return onCreateSession(inputId);
+    }
+
+    /**
+     * Returns a concrete implementation of {@link RecordingSession}.
+     *
+     * <p>For any apps that needs sessionId to request tuner resources from TunerResourceManager,
+     * it needs to override this method to get the sessionId passed. When no overriding, this method
+     * calls {@link #onCreateRecordingSession(String)} defaultly.
+     *
+     * @param inputId The ID of the TV input associated with the recording session.
+     * @param sessionId the unique sessionId created by TIF when session is created.
+     */
+    @Nullable
+    public RecordingSession onCreateRecordingSession(
+            @NonNull String inputId, @NonNull String sessionId) {
+        return onCreateRecordingSession(inputId);
     }
 
     /**
@@ -2032,8 +2066,9 @@ public abstract class TvInputService extends Service {
                     InputChannel channel = (InputChannel) args.arg1;
                     ITvInputSessionCallback cb = (ITvInputSessionCallback) args.arg2;
                     String inputId = (String) args.arg3;
+                    String sessionId = (String) args.arg4;
                     args.recycle();
-                    Session sessionImpl = onCreateSession(inputId);
+                    Session sessionImpl = onCreateSession(inputId, sessionId);
                     if (sessionImpl == null) {
                         try {
                             // Failed to create a session.
@@ -2103,8 +2138,10 @@ public abstract class TvInputService extends Service {
                     SomeArgs args = (SomeArgs) msg.obj;
                     ITvInputSessionCallback cb = (ITvInputSessionCallback) args.arg1;
                     String inputId = (String) args.arg2;
+                    String sessionId = (String) args.arg3;
                     args.recycle();
-                    RecordingSession recordingSessionImpl = onCreateRecordingSession(inputId);
+                    RecordingSession recordingSessionImpl =
+                            onCreateRecordingSession(inputId, sessionId);
                     if (recordingSessionImpl == null) {
                         try {
                             // Failed to create a recording session.
