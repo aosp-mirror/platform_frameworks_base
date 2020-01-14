@@ -15,6 +15,8 @@
  */
 package android.telephony;
 
+import com.android.telephony.Rlog;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;

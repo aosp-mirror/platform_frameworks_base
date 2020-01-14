@@ -24,10 +24,10 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.RemoteException;
 import android.provider.Settings;
+import android.util.Log;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -77,7 +77,7 @@ public final class CarrierAppUtils {
             IPackageManager packageManager, TelephonyManager telephonyManager,
             ContentResolver contentResolver, int userId) {
         if (DEBUG) {
-            Slog.d(TAG, "disableCarrierAppsUntilPrivileged");
+            Log.d(TAG, "disableCarrierAppsUntilPrivileged");
         }
         SystemConfig config = SystemConfig.getInstance();
         ArraySet<String> systemCarrierAppsDisabledUntilUsed =
@@ -103,7 +103,7 @@ public final class CarrierAppUtils {
     public static synchronized void disableCarrierAppsUntilPrivileged(String callingPackage,
             IPackageManager packageManager, ContentResolver contentResolver, int userId) {
         if (DEBUG) {
-            Slog.d(TAG, "disableCarrierAppsUntilPrivileged");
+            Log.d(TAG, "disableCarrierAppsUntilPrivileged");
         }
         SystemConfig config = SystemConfig.getInstance();
         ArraySet<String> systemCarrierAppsDisabledUntilUsed =
@@ -174,7 +174,7 @@ public final class CarrierAppUtils {
                             || ai.enabledSetting
                             == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
                             || (ai.flags & ApplicationInfo.FLAG_INSTALLED) == 0)) {
-                        Slog.i(TAG, "Update state(" + packageName + "): ENABLED for user "
+                        Log.i(TAG, "Update state(" + packageName + "): ENABLED for user "
                                 + userId);
                         packageManager.setSystemAppInstallState(
                                 packageName,
@@ -197,7 +197,7 @@ public final class CarrierAppUtils {
                                     == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
                                     || (associatedApp.flags
                                     & ApplicationInfo.FLAG_INSTALLED) == 0) {
-                                Slog.i(TAG, "Update associated state(" + associatedApp.packageName
+                                Log.i(TAG, "Update associated state(" + associatedApp.packageName
                                         + "): ENABLED for user " + userId);
                                 packageManager.setSystemAppInstallState(
                                         associatedApp.packageName,
@@ -222,7 +222,7 @@ public final class CarrierAppUtils {
                             && ai.enabledSetting
                             == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                             && (ai.flags & ApplicationInfo.FLAG_INSTALLED) != 0) {
-                        Slog.i(TAG, "Update state(" + packageName
+                        Log.i(TAG, "Update state(" + packageName
                                 + "): DISABLED_UNTIL_USED for user " + userId);
                         packageManager.setSystemAppInstallState(
                                 packageName,
@@ -240,7 +240,7 @@ public final class CarrierAppUtils {
                                         == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                                         && (associatedApp.flags
                                         & ApplicationInfo.FLAG_INSTALLED) != 0) {
-                                    Slog.i(TAG,
+                                    Log.i(TAG,
                                             "Update associated state(" + associatedApp.packageName
                                                     + "): DISABLED_UNTIL_USED for user " + userId);
                                     packageManager.setSystemAppInstallState(
@@ -268,7 +268,7 @@ public final class CarrierAppUtils {
                 packageManager.grantDefaultPermissionsToEnabledCarrierApps(packageNames, userId);
             }
         } catch (RemoteException e) {
-            Slog.w(TAG, "Could not reach PackageManager", e);
+            Log.w(TAG, "Could not reach PackageManager", e);
         }
     }
 
@@ -390,7 +390,7 @@ public final class CarrierAppUtils {
                 return ai;
             }
         } catch (RemoteException e) {
-            Slog.w(TAG, "Could not reach PackageManager", e);
+            Log.w(TAG, "Could not reach PackageManager", e);
         }
         return null;
     }
