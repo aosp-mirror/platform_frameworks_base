@@ -39,6 +39,7 @@ import android.location.GnssClock;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
+import android.location.GnssRequest;
 import android.location.GnssSingleSatCorrection;
 import android.location.IBatchedLocationCallback;
 import android.location.IGnssMeasurementsListener;
@@ -563,7 +564,7 @@ public class GnssManagerServiceTest {
 
         assertThrows(SecurityException.class,
                 () -> mGnssManagerService.addGnssMeasurementsListener(
-                        mockGnssMeasurementsListener,
+                        new GnssRequest.Builder().build(), mockGnssMeasurementsListener,
                         "com.android.server", "abcd123", "TestGnssMeasurementsListener"));
 
         mTestGnssMeasurementsProvider.onMeasurementsAvailable(gnssMeasurementsEvent);
@@ -580,8 +581,11 @@ public class GnssManagerServiceTest {
 
         enableLocationPermissions();
 
-        assertThat(mGnssManagerService.addGnssMeasurementsListener(mockGnssMeasurementsListener,
-                "com.android.server", "abcd123", "TestGnssMeasurementsListener")).isEqualTo(true);
+        assertThat(mGnssManagerService.addGnssMeasurementsListener(
+                new GnssRequest.Builder().build(),
+                mockGnssMeasurementsListener,
+                "com.android.server", "abcd123",
+                "TestGnssMeasurementsListener")).isEqualTo(true);
 
         mTestGnssMeasurementsProvider.onMeasurementsAvailable(gnssMeasurementsEvent);
         verify(mockGnssMeasurementsListener, times(1)).onGnssMeasurementsReceived(
@@ -626,8 +630,10 @@ public class GnssManagerServiceTest {
 
         enableLocationPermissions();
 
-        mGnssManagerService.addGnssMeasurementsListener(mockGnssMeasurementsListener,
-                "com.android.server", "abcd123", "TestGnssMeasurementsListener");
+        mGnssManagerService.addGnssMeasurementsListener(new GnssRequest.Builder().build(),
+                mockGnssMeasurementsListener,
+                "com.android.server", "abcd123",
+                "TestGnssMeasurementsListener");
 
         disableLocationPermissions();
 
@@ -648,8 +654,10 @@ public class GnssManagerServiceTest {
 
         enableLocationPermissions();
 
-        mGnssManagerService.addGnssMeasurementsListener(mockGnssMeasurementsListener,
-                "com.android.server", "abcd123", "TestGnssMeasurementsListener");
+        mGnssManagerService.addGnssMeasurementsListener(new GnssRequest.Builder().build(),
+                mockGnssMeasurementsListener,
+                "com.android.server", "abcd123",
+                "TestGnssMeasurementsListener");
 
         disableLocationPermissions();
 

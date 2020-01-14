@@ -25,6 +25,7 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
+import android.location.GnssRequest;
 import android.location.IBatchedLocationCallback;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
@@ -96,15 +97,15 @@ public class GnssManagerService {
     private final IGpsGeofenceHardware mGpsGeofenceProxy;
 
     @GuardedBy("mGnssMeasurementsListeners")
-    private final ArrayMap<IBinder, LinkedListener<IGnssMeasurementsListener>>
+    private final ArrayMap<IBinder, LinkedListener<GnssRequest, IGnssMeasurementsListener>>
             mGnssMeasurementsListeners = new ArrayMap<>();
 
     @GuardedBy("mGnssNavigationMessageListeners")
-    private final ArrayMap<IBinder, LinkedListener<IGnssNavigationMessageListener>>
+    private final ArrayMap<IBinder, LinkedListener<Void, IGnssNavigationMessageListener>>
             mGnssNavigationMessageListeners = new ArrayMap<>();
 
     @GuardedBy("mGnssStatusListeners")
-    private final ArrayMap<IBinder, LinkedListener<IGnssStatusListener>>
+    private final ArrayMap<IBinder, LinkedListener<Void, IGnssStatusListener>>
             mGnssStatusListeners = new ArrayMap<>();
 
     @GuardedBy("this")
@@ -118,7 +119,8 @@ public class GnssManagerService {
     @Nullable private IBatchedLocationCallback mGnssBatchingCallback;
 
     @GuardedBy("mGnssBatchingLock")
-    @Nullable private LinkedListener<IBatchedLocationCallback> mGnssBatchingDeathCallback;
+    @Nullable
+    private LinkedListener<Void, IBatchedLocationCallback> mGnssBatchingDeathCallback;
 
     @GuardedBy("mGnssBatchingLock")
     private boolean mGnssBatchingInProgress = false;
@@ -272,6 +274,7 @@ public class GnssManagerService {
             mGnssBatchingCallback = callback;
             mGnssBatchingDeathCallback =
                     new LinkedListener<>(
+                            /* request= */ null,
                             callback,
                             "BatchedLocationCallback",
                             callerIdentity,
@@ -356,36 +359,39 @@ public class GnssManagerService {
         }
     }
 
-    private <TListener extends IInterface> void updateListenersOnForegroundChangedLocked(
-            Map<IBinder, ? extends LinkedListenerBase> gnssDataListeners,
-            RemoteListenerHelper<TListener> gnssDataProvider,
+    private <TRequest, TListener extends IInterface> void updateListenersOnForegroundChangedLocked(
+            Map<IBinder, LinkedListener<TRequest, TListener>> gnssDataListeners,
+            RemoteListenerHelper<TRequest, TListener> gnssDataProvider,
             Function<IBinder, TListener> mapBinderToListener,
             int uid,
             boolean foreground) {
-        for (Map.Entry<IBinder, ? extends LinkedListenerBase> entry :
+        for (Map.Entry<IBinder, LinkedListener<TRequest, TListener>> entry :
                 gnssDataListeners.entrySet()) {
-            LinkedListenerBase linkedListener = entry.getValue();
+            LinkedListener<TRequest, TListener> linkedListener = entry.getValue();
             CallerIdentity callerIdentity = linkedListener.getCallerIdentity();
+            TRequest request = linkedListener.getRequest();
             if (callerIdentity.mUid != uid) {
                 continue;
             }
 
             TListener listener = mapBinderToListener.apply(entry.getKey());
             if (foreground || isThrottlingExempt(callerIdentity)) {
-                gnssDataProvider.addListener(listener, callerIdentity);
+                gnssDataProvider.addListener(request, listener, callerIdentity);
             } else {
                 gnssDataProvider.removeListener(listener);
             }
         }
     }
 
-    private <TListener extends IInterface> boolean addGnssDataListenerLocked(
+    private <TListener extends IInterface, TRequest> boolean addGnssDataListenerLocked(
+            @Nullable TRequest request,
             TListener listener,
             String packageName,
             @Nullable String featureId,
             @NonNull String listenerIdentifier,
-            RemoteListenerHelper<TListener> gnssDataProvider,
-            ArrayMap<IBinder, LinkedListener<TListener>> gnssDataListeners,
+            RemoteListenerHelper<TRequest, TListener> gnssDataProvider,
+            ArrayMap<IBinder,
+                    LinkedListener<TRequest, TListener>> gnssDataListeners,
             Consumer<TListener> binderDeathCallback) {
         mContext.enforceCallingPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
@@ -395,7 +401,7 @@ public class GnssManagerService {
 
         CallerIdentity callerIdentity = new CallerIdentity(Binder.getCallingUid(),
                 Binder.getCallingPid(), packageName, featureId, listenerIdentifier);
-        LinkedListener<TListener> linkedListener = new LinkedListener<>(listener,
+        LinkedListener<TRequest, TListener> linkedListener = new LinkedListener<>(request, listener,
                 listenerIdentifier, callerIdentity, binderDeathCallback);
         IBinder binder = listener.asBinder();
         if (!linkedListener.linkToListenerDeathNotificationLocked(binder)) {
@@ -419,15 +425,15 @@ public class GnssManagerService {
         }
         if (mAppForegroundHelper.isAppForeground(callerIdentity.mUid)
                 || isThrottlingExempt(callerIdentity)) {
-            gnssDataProvider.addListener(listener, callerIdentity);
+            gnssDataProvider.addListener(request, listener, callerIdentity);
         }
         return true;
     }
 
-    private <TListener extends IInterface> void removeGnssDataListenerLocked(
+    private <TRequest, TListener extends IInterface> void removeGnssDataListenerLocked(
             TListener listener,
-            RemoteListenerHelper<TListener> gnssDataProvider,
-            ArrayMap<IBinder, LinkedListener<TListener>> gnssDataListeners) {
+            RemoteListenerHelper<TRequest, TListener> gnssDataProvider,
+            ArrayMap<IBinder, LinkedListener<TRequest, TListener>> gnssDataListeners) {
         if (gnssDataProvider == null) {
             Log.e(
                     TAG,
@@ -437,7 +443,7 @@ public class GnssManagerService {
         }
 
         IBinder binder = listener.asBinder();
-        LinkedListener<TListener> linkedListener =
+        LinkedListener<TRequest, TListener> linkedListener =
                 gnssDataListeners.remove(binder);
         if (linkedListener == null) {
             return;
@@ -467,6 +473,7 @@ public class GnssManagerService {
             @Nullable String featureId) {
         synchronized (mGnssStatusListeners) {
             return addGnssDataListenerLocked(
+                    /* request= */ null,
                     listener,
                     packageName,
                     featureId,
@@ -489,11 +496,17 @@ public class GnssManagerService {
     /**
      * Adds a GNSS measurements listener.
      */
-    public boolean addGnssMeasurementsListener(
-            IGnssMeasurementsListener listener, String packageName, @Nullable String featureId,
+    public boolean addGnssMeasurementsListener(@Nullable GnssRequest request,
+            IGnssMeasurementsListener listener, String packageName,
+            @Nullable String featureId,
             @NonNull String listenerIdentifier) {
+        if (request != null && request.isFullTracking()) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.LOCATION_HARDWARE,
+                    null);
+        }
         synchronized (mGnssMeasurementsListeners) {
             return addGnssDataListenerLocked(
+                    request,
                     listener,
                     packageName,
                     featureId,
@@ -538,6 +551,7 @@ public class GnssManagerService {
             @Nullable String featureId, @NonNull String listenerIdentifier) {
         synchronized (mGnssNavigationMessageListeners) {
             return addGnssDataListenerLocked(
+                    /* request= */ null,
                     listener,
                     packageName,
                     featureId,

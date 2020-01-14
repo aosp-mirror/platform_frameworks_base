@@ -43,6 +43,7 @@ import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
 import android.location.GnssMeasurementCorrections;
+import android.location.GnssRequest;
 import android.location.IBatchedLocationCallback;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
@@ -2287,12 +2288,14 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public boolean addGnssMeasurementsListener(IGnssMeasurementsListener listener,
-            String packageName, String featureId, String listenerIdentifier) {
+    public boolean addGnssMeasurementsListener(@Nullable GnssRequest request,
+            IGnssMeasurementsListener listener,
+            String packageName, String featureId,
+            String listenerIdentifier) {
         Objects.requireNonNull(listenerIdentifier);
 
         return mGnssManagerService != null && mGnssManagerService.addGnssMeasurementsListener(
-                listener, packageName, featureId, listenerIdentifier);
+                request, listener, packageName, featureId, listenerIdentifier);
     }
 
     @Override
