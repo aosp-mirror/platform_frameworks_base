@@ -210,6 +210,18 @@ public class StatsPullAtomService extends SystemService {
     @Override
     public void onStart() {
         mStatsManager = (StatsManager) mContext.getSystemService(Context.STATS_MANAGER);
+
+        // Used to initialize the CPU Frequency atom.
+        PowerProfile powerProfile = new PowerProfile(mContext);
+        final int numClusters = powerProfile.getNumCpuClusters();
+        mKernelCpuSpeedReaders = new KernelCpuSpeedReader[numClusters];
+        int firstCpuOfCluster = 0;
+        for (int i = 0; i < numClusters; i++) {
+            final int numSpeedSteps = powerProfile.getNumSpeedStepsInCpuCluster(i);
+            mKernelCpuSpeedReaders[i] = new KernelCpuSpeedReader(firstCpuOfCluster,
+                    numSpeedSteps);
+            firstCpuOfCluster += powerProfile.getNumCoresInCpuCluster(i);
+        }
     }
 
     @Override
@@ -618,12 +630,37 @@ public class StatsPullAtomService extends SystemService {
         // No op.
     }
 
+    private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
+
     private void registerCpuTimePerFreq() {
-        // No op.
+        int tagId = StatsLog.CPU_TIME_PER_FREQ;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {3})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullCpuTimePerFreq(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullCpuTimePerFreq() {
-        // No op.
+    private int pullCpuTimePerFreq(int atomTag, List<StatsEvent> pulledData) {
+        for (int cluster = 0; cluster < mKernelCpuSpeedReaders.length; cluster++) {
+            long[] clusterTimeMs = mKernelCpuSpeedReaders[cluster].readAbsolute();
+            if (clusterTimeMs != null) {
+                for (int speed = clusterTimeMs.length - 1; speed >= 0; --speed) {
+                    StatsEvent e = StatsEvent.newBuilder()
+                            .setAtomId(atomTag)
+                            .writeInt(cluster)
+                            .writeInt(speed)
+                            .writeLong(clusterTimeMs[speed])
+                            .build();
+                    pulledData.add(e);
+                }
+            }
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerCpuTimePerUid() {

@@ -72,11 +72,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::ON_DEVICE_POWER_MEASUREMENT},
          {.puller = new PowerStatsPuller()}},
 
-        // cpu_time_per_freq
-        {{.atomTag = android::util::CPU_TIME_PER_FREQ},
-         {.additiveFields = {3},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_FREQ)}},
-
         // cpu_time_per_uid
         {{.atomTag = android::util::CPU_TIME_PER_UID},
          {.additiveFields = {2, 3},
