@@ -49,6 +49,12 @@ namespace android {
 
 static jmethodID sMethodIdOnComplete;
 
+static struct {
+    jfieldID id;
+    jfieldID scale;
+    jfieldID delay;
+} gPrimitiveClassInfo;
+
 static_assert(static_cast<uint8_t>(V1_0::EffectStrength::LIGHT) ==
                 static_cast<uint8_t>(aidl::EffectStrength::LIGHT));
 static_assert(static_cast<uint8_t>(V1_0::EffectStrength::MEDIUM) ==
@@ -333,6 +339,21 @@ static void vibratorSetExternalControl(JNIEnv*, jclass, jboolean enabled) {
     }
 }
 
+static jintArray vibratorGetSupportedEffects(JNIEnv *env, jclass) {
+    if (auto hal = getHal<aidl::IVibrator>()) {
+        std::vector<aidl::Effect> supportedEffects;
+        if (!hal->call(&aidl::IVibrator::getSupportedEffects, &supportedEffects).isOk()) {
+            return nullptr;
+        }
+        jintArray arr = env->NewIntArray(supportedEffects.size());
+        env->SetIntArrayRegion(arr, 0, supportedEffects.size(),
+                reinterpret_cast<jint*>(supportedEffects.data()));
+        return arr;
+    } else {
+        return nullptr;
+    }
+}
+
 static jlong vibratorPerformEffect(JNIEnv* env, jclass, jlong effect, jlong strength,
                                    jobject vibration) {
     if (auto hal = getHal<aidl::IVibrator>()) {
@@ -398,6 +419,37 @@ static jlong vibratorPerformEffect(JNIEnv* env, jclass, jlong effect, jlong stre
     return -1;
 }
 
+static aidl::CompositeEffect effectFromJavaPrimitive(JNIEnv* env, jobject primitive) {
+    aidl::CompositeEffect effect;
+    effect.primitive = static_cast<aidl::CompositePrimitive>(
+            env->GetIntField(primitive, gPrimitiveClassInfo.id));
+    effect.scale = static_cast<float>(env->GetFloatField(primitive, gPrimitiveClassInfo.scale));
+    effect.delayMs = static_cast<int>(env->GetIntField(primitive, gPrimitiveClassInfo.delay));
+    return effect;
+}
+
+static void vibratorPerformComposedEffect(JNIEnv* env, jclass, jobjectArray composition,
+                                   jobject vibration) {
+    auto hal = getHal<aidl::IVibrator>();
+    if (!hal) {
+        return;
+    }
+    size_t size = env->GetArrayLength(composition);
+    std::vector<aidl::CompositeEffect> effects;
+    for (size_t i = 0; i < size; i++) {
+        jobject element = env->GetObjectArrayElement(composition, i);
+        effects.push_back(effectFromJavaPrimitive(env, element));
+    }
+    sp<AidlVibratorCallback> effectCallback = new AidlVibratorCallback(env, vibration);
+
+    auto status = hal->call(&aidl::IVibrator::compose, effects, effectCallback);
+    if (!status.isOk()) {
+        if (status.exceptionCode() != binder::Status::EX_UNSUPPORTED_OPERATION) {
+            ALOGE("Failed to play haptic effect composition");
+        }
+    }
+}
+
 static jlong vibratorGetCapabilities(JNIEnv*, jclass) {
     if (auto hal = getHal<aidl::IVibrator>()) {
         int32_t cap = 0;
@@ -433,7 +485,12 @@ static const JNINativeMethod method_table[] = {
     { "vibratorSupportsAmplitudeControl", "()Z", (void*)vibratorSupportsAmplitudeControl},
     { "vibratorSetAmplitude", "(I)V", (void*)vibratorSetAmplitude},
     { "vibratorPerformEffect", "(JJLcom/android/server/VibratorService$Vibration;)J",
-        (void*)vibratorPerformEffect},
+            (void*)vibratorPerformEffect},
+    { "vibratorPerformComposedEffect",
+            "([Landroid/os/VibrationEffect$Composition$PrimitiveEffect;Lcom/android/server/VibratorService$Vibration;)V",
+            (void*)vibratorPerformComposedEffect},
+    { "vibratorGetSupportedEffects", "()[I",
+            (void*)vibratorGetSupportedEffects},
     { "vibratorSupportsExternalControl", "()Z", (void*)vibratorSupportsExternalControl},
     { "vibratorSetExternalControl", "(Z)V", (void*)vibratorSetExternalControl},
     { "vibratorGetCapabilities", "()J", (void*)vibratorGetCapabilities},
@@ -441,11 +498,15 @@ static const JNINativeMethod method_table[] = {
     { "vibratorAlwaysOnDisable", "(J)V", (void*)vibratorAlwaysOnDisable},
 };
 
-int register_android_server_VibratorService(JNIEnv *env)
-{
+int register_android_server_VibratorService(JNIEnv *env) {
     sMethodIdOnComplete = GetMethodIDOrDie(env,
             FindClassOrDie(env, "com/android/server/VibratorService$Vibration"),
             "onComplete", "()V");
+    jclass primitiveClass = FindClassOrDie(env,
+            "android/os/VibrationEffect$Composition$PrimitiveEffect");
+    gPrimitiveClassInfo.id = GetFieldIDOrDie(env, primitiveClass, "id", "I");
+    gPrimitiveClassInfo.scale = GetFieldIDOrDie(env, primitiveClass, "scale", "F");
+    gPrimitiveClassInfo.delay = GetFieldIDOrDie(env, primitiveClass, "delay", "I");
     return jniRegisterNativeMethods(env, "com/android/server/VibratorService",
             method_table, NELEM(method_table));
 }
