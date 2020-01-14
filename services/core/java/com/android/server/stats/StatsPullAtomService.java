@@ -631,6 +631,9 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
+    // Disables throttler on CPU time readers.
+    private KernelCpuUidUserSysTimeReader mCpuUidUserSysTimeReader =
+            new KernelCpuUidUserSysTimeReader(false);
 
     private void registerCpuTimePerFreq() {
         int tagId = StatsLog.CPU_TIME_PER_FREQ;
@@ -664,11 +667,30 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerCpuTimePerUid() {
-        // No op.
+        int tagId = StatsLog.CPU_TIME_PER_UID;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {2, 3})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullCpuTimePerUid(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullCpuTimePerUid() {
-        // No op.
+    private int pullCpuTimePerUid(int atomTag, List<StatsEvent> pulledData) {
+        mCpuUidUserSysTimeReader.readAbsolute((uid, timesUs) -> {
+            long userTimeUs = timesUs[0], systemTimeUs = timesUs[1];
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(uid)
+                    .writeLong(userTimeUs)
+                    .writeLong(systemTimeUs)
+                    .build();
+            pulledData.add(e);
+        });
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerCpuTimePerUidFreq() {

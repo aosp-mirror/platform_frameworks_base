@@ -761,19 +761,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullKernelUidCpuTime(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        mCpuUidUserSysTimeReader.readAbsolute((uid, timesUs) -> {
-            long userTimeUs = timesUs[0], systemTimeUs = timesUs[1];
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(uid);
-            e.writeLong(userTimeUs);
-            e.writeLong(systemTimeUs);
-            pulledData.add(e);
-        });
-    }
-
     private void pullKernelUidCpuFreqTime(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2107,11 +2094,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.KERNEL_WAKELOCK: {
                 pullKernelWakelock(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.CPU_TIME_PER_UID: {
-                pullKernelUidCpuTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 
