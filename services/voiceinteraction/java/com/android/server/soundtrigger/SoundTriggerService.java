@@ -1495,6 +1495,9 @@ public class SoundTriggerService extends SystemService {
             // log
             sEventLogger.dump(pw);
 
+            // enrolled models
+            mDbHelper.dump(pw);
+
             // stats
             mSoundModelStatTracker.dump(pw);
         }
