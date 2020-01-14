@@ -121,8 +121,10 @@ framework_docs_only_args = " -android -manifest $(location core/res/AndroidManif
 
 doc_defaults {
     name: "framework-docs-default",
-    libs: framework_docs_only_libs +
-        ["stub-annotations"],
+    libs: framework_docs_only_libs + [
+        "stub-annotations",
+        "unsupportedappusage",
+    ],
     html_dirs: [
         "docs/html",
     ],
