@@ -64,7 +64,6 @@ import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.systemui.R;
@@ -529,9 +528,10 @@ public class GlobalScreenshot {
         mActionsView.removeAllViews();
 
         for (Notification.Action action : actions) {
-            TextView actionChip = (TextView) inflater.inflate(
+            ScreenshotActionChip actionChip = (ScreenshotActionChip) inflater.inflate(
                     R.layout.global_screenshot_action_chip, mActionsView, false);
             actionChip.setText(action.title);
+            actionChip.setIcon(action.getIcon(), true);
             actionChip.setOnClickListener(v -> {
                 try {
                     action.actionIntent.send();
@@ -545,11 +545,11 @@ public class GlobalScreenshot {
         }
 
         if (DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI, SCREENSHOT_SCROLLING_ENABLED, false)) {
-            TextView scrollChip = (TextView) inflater.inflate(
+            ScreenshotActionChip scrollChip = (ScreenshotActionChip) inflater.inflate(
                     R.layout.global_screenshot_action_chip, mActionsView, false);
             Toast scrollNotImplemented = Toast.makeText(
                     mContext, "Not implemented", Toast.LENGTH_SHORT);
-            scrollChip.setText("Scroll"); // TODO (mkephart): add resource and translate
+            scrollChip.setText("Extend"); // TODO (mkephart): add resource and translate
             scrollChip.setOnClickListener(v -> scrollNotImplemented.show());
             mActionsView.addView(scrollChip);
         }

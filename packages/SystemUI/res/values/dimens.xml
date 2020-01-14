@@ -291,12 +291,17 @@
     <dimen name="global_screenshot_legacy_bg_padding">20dp</dimen>
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
     <dimen name="screenshot_action_container_corner_radius">10dp</dimen>
-    <dimen name="screenshot_action_container_padding">20dp</dimen>
+    <dimen name="screenshot_action_container_padding">10dp</dimen>
     <!-- Radius of the chip background on global screenshot actions -->
     <dimen name="screenshot_button_corner_radius">20dp</dimen>
-    <dimen name="screenshot_action_chip_margin_horizontal">10dp</dimen>
+    <dimen name="screenshot_action_chip_margin_horizontal">4dp</dimen>
     <dimen name="screenshot_action_chip_padding_vertical">10dp</dimen>
-    <dimen name="screenshot_action_chip_padding_horizontal">15dp</dimen>
+    <dimen name="screenshot_action_chip_icon_size">20dp</dimen>
+    <dimen name="screenshot_action_chip_padding_start">4dp</dimen>
+    <!-- Padding between icon and text -->
+    <dimen name="screenshot_action_chip_padding_middle">8dp</dimen>
+    <dimen name="screenshot_action_chip_padding_end">12dp</dimen>
+    <dimen name="screenshot_action_chip_text_size">14sp</dimen>
 
 
     <!-- The width of the view containing navigation buttons -->
