@@ -130,7 +130,8 @@ class NtpTimeHelper {
 
         // force refresh NTP cache when outdated
         boolean refreshSuccess = true;
-        if (mNtpTime.getCacheAge() >= NTP_INTERVAL) {
+        NtpTrustedTime.TimeResult ntpResult = mNtpTime.getCachedTimeResult();
+        if (ntpResult == null || ntpResult.getAgeMillis() >= NTP_INTERVAL) {
             // Blocking network operation.
             refreshSuccess = mNtpTime.forceRefresh();
         }
@@ -140,17 +141,17 @@ class NtpTimeHelper {
 
             // only update when NTP time is fresh
             // If refreshSuccess is false, cacheAge does not drop down.
-            if (mNtpTime.getCacheAge() < NTP_INTERVAL) {
-                long time = mNtpTime.getCachedNtpTime();
-                long timeReference = mNtpTime.getCachedNtpTimeReference();
-                long certainty = mNtpTime.getCacheCertainty();
+            ntpResult = mNtpTime.getCachedTimeResult();
+            if (ntpResult != null && ntpResult.getAgeMillis() < NTP_INTERVAL) {
+                long time = ntpResult.getTimeMillis();
+                long timeReference = ntpResult.getElapsedRealtimeMillis();
+                long certainty = ntpResult.getCertaintyMillis();
 
                 if (DEBUG) {
                     long now = System.currentTimeMillis();
                     Log.d(TAG, "NTP server returned: "
-                            + time + " (" + new Date(time)
-                            + ") reference: " + timeReference
-                            + " certainty: " + certainty
+                            + time + " (" + new Date(time) + ")"
+                            + " ntpResult: " + ntpResult
                             + " system time offset: " + (time - now));
                 }
 

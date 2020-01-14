@@ -35,10 +35,10 @@ import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkAgent;
+import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
-import android.net.NetworkFactory;
 import android.net.NetworkInfo;
-import android.net.NetworkMisc;
+import android.net.NetworkProvider;
 import android.net.NetworkSpecifier;
 import android.net.SocketKeepalive;
 import android.net.UidRange;
@@ -114,7 +114,7 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
         public InstrumentedNetworkAgent(NetworkAgentWrapper wrapper, LinkProperties lp) {
             super(wrapper.mHandlerThread.getLooper(), wrapper.mContext, wrapper.mLogTag,
                     wrapper.mNetworkInfo, wrapper.mNetworkCapabilities, lp, wrapper.mScore,
-                    new NetworkMisc(), NetworkFactory.SerialNumber.NONE);
+                    new NetworkAgentConfig(), NetworkProvider.ID_NONE);
             mWrapper = wrapper;
         }
 

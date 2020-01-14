@@ -482,19 +482,6 @@ public class ResourcesManager {
             }
         }
 
-        if (key.mOverlayDirs != null) {
-            for (final String idmapPath : key.mOverlayDirs) {
-                try {
-                    builder.addApkAssets(loadApkAssets(idmapPath, false /*sharedLib*/,
-                            true /*overlay*/));
-                } catch (IOException e) {
-                    Log.w(TAG, "failed to add overlay path " + idmapPath);
-
-                    // continue.
-                }
-            }
-        }
-
         if (key.mLibDirs != null) {
             for (final String libDir : key.mLibDirs) {
                 if (libDir.endsWith(".apk")) {
@@ -509,6 +496,19 @@ public class ResourcesManager {
 
                         // continue.
                     }
+                }
+            }
+        }
+
+        if (key.mOverlayDirs != null) {
+            for (final String idmapPath : key.mOverlayDirs) {
+                try {
+                    builder.addApkAssets(loadApkAssets(idmapPath, false /*sharedLib*/,
+                            true /*overlay*/));
+                } catch (IOException e) {
+                    Log.w(TAG, "failed to add overlay path " + idmapPath);
+
+                    // continue.
                 }
             }
         }

@@ -176,7 +176,7 @@ public class MediaRouter2Manager {
     }
 
     @NonNull
-    public List<RouteSessionInfo> getActiveSessions() {
+    public List<RoutingSessionInfo> getActiveSessions() {
         Client client;
         synchronized (sLock) {
             client = mClient;

@@ -124,6 +124,10 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public void setSoftKeyboardCallbackEnabled(boolean enabled) {}
 
+    public boolean switchToInputMethod(String imeId) {
+        return false;
+    }
+
     public boolean isAccessibilityButtonAvailable() {
         return false;
     }

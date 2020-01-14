@@ -345,8 +345,8 @@ public class AlarmManagerServiceTest {
     }
 
     /**
-     * Lowers quotas to make testing feasible.
-     * Careful while calling as this will replace any existing settings for the calling test.
+     * Lowers quotas to make testing feasible. Careful while calling as this will replace any
+     * existing settings for the calling test.
      */
     private void setTestableQuotas() {
         final StringBuilder constantsBuilder = new StringBuilder();
@@ -979,6 +979,25 @@ public class AlarmManagerServiceTest {
         ami.remove(pi);
         assertAndHandleMessageSync(REMOVE_FOR_CANCELED);
         assertEquals(0, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
+    }
+
+    @Test
+    public void alarmCountOnListenerBinderDied() {
+        final int numAlarms = 10;
+        final IAlarmListener[] listeners = new IAlarmListener[numAlarms];
+        for (int i = 0; i < numAlarms; i++) {
+            listeners[i] = new IAlarmListener.Stub() {
+                @Override
+                public void doAlarm(IAlarmCompleteListener callback) throws RemoteException {
+                }
+            };
+            setTestAlarmWithListener(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + i, listeners[i]);
+        }
+        assertEquals(numAlarms, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
+        for (int i = 0; i < numAlarms; i++) {
+            mService.mListenerDeathRecipient.binderDied(listeners[i].asBinder());
+            assertEquals(numAlarms - i - 1, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
+        }
     }
 
     @After

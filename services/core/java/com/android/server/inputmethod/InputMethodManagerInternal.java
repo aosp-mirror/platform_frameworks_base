@@ -72,6 +72,18 @@ public abstract class InputMethodManagerInternal {
             AutofillId autofillId, IInlineSuggestionsRequestCallback cb);
 
     /**
+     * Force switch to the enabled input method by {@code imeId} for current user. If the input
+     * method with {@code imeId} is not enabled or not installed, do nothing.
+     *
+     * @param imeId  The input method ID to be switched to.
+     * @param userId The user ID to be queried.
+     * @return {@code true} if the current input method was successfully switched to the input
+     * method by {@code imeId}; {@code false} the input method with {@code imeId} is not available
+     * to be switched.
+     */
+    public abstract boolean switchToInputMethod(String imeId, @UserIdInt int userId);
+
+    /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
@@ -97,6 +109,11 @@ public abstract class InputMethodManagerInternal {
                 @Override
                 public void onCreateInlineSuggestionsRequest(ComponentName componentName,
                         AutofillId autofillId, IInlineSuggestionsRequestCallback cb) {
+                }
+
+                @Override
+                public boolean switchToInputMethod(String imeId, int userId) {
+                    return false;
                 }
             };
 

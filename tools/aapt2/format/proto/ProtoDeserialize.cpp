@@ -634,6 +634,7 @@ static bool DeserializeReferenceFromPb(const pb::Reference& pb_ref, Reference* o
                                        std::string* out_error) {
   out_ref->reference_type = DeserializeReferenceTypeFromPb(pb_ref.type());
   out_ref->private_reference = pb_ref.private_();
+  out_ref->is_dynamic = pb_ref.is_dynamic().value();
 
   if (pb_ref.id() != 0) {
     out_ref->id = ResourceId(pb_ref.id());

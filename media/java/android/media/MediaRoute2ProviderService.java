@@ -66,7 +66,7 @@ public abstract class MediaRoute2ProviderService extends Service {
     private MediaRoute2ProviderInfo mProviderInfo;
 
     @GuardedBy("mSessionLock")
-    private ArrayMap<String, RouteSessionInfo> mSessionInfo = new ArrayMap<>();
+    private ArrayMap<String, RoutingSessionInfo> mSessionInfo = new ArrayMap<>();
 
     public MediaRoute2ProviderService() {
         mHandler = new Handler(Looper.getMainLooper());
@@ -122,7 +122,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @hide
      */
     @Nullable
-    public final RouteSessionInfo getSessionInfo(@NonNull String sessionId) {
+    public final RoutingSessionInfo getSessionInfo(@NonNull String sessionId) {
         if (TextUtils.isEmpty(sessionId)) {
             throw new IllegalArgumentException("sessionId must not be empty");
         }
@@ -132,11 +132,11 @@ public abstract class MediaRoute2ProviderService extends Service {
     }
 
     /**
-     * Gets the list of {@link RouteSessionInfo session info} that the provider service maintains.
+     * Gets the list of {@link RoutingSessionInfo session info} that the provider service maintains.
      * @hide
      */
     @NonNull
-    public final List<RouteSessionInfo> getAllSessionInfo() {
+    public final List<RoutingSessionInfo> getAllSessionInfo() {
         synchronized (mSessionLock) {
             return new ArrayList<>(mSessionInfo.values());
         }
@@ -149,10 +149,10 @@ public abstract class MediaRoute2ProviderService extends Service {
      * session info changes.
      *
      * @param sessionInfo new session information
-     * @see #notifySessionCreated(RouteSessionInfo, long)
+     * @see #notifySessionCreated(RoutingSessionInfo, long)
      * @hide
      */
-    public final void updateSessionInfo(@NonNull RouteSessionInfo sessionInfo) {
+    public final void updateSessionInfo(@NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
         String sessionId = sessionInfo.getId();
 
@@ -173,7 +173,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * TODO: This method is temporary, only created for tests. Remove when the alternative is ready.
      * @hide
      */
-    public final void notifySessionInfoChanged(@NonNull RouteSessionInfo sessionInfo) {
+    public final void notifySessionInfoChanged(@NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
         String sessionId = sessionInfo.getId();
@@ -201,7 +201,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * controlled, pass a {@link Bundle} that contains how to control it.
      *
      * @param sessionInfo information of the new session.
-     *                    The {@link RouteSessionInfo#getId() id} of the session must be
+     *                    The {@link RoutingSessionInfo#getId() id} of the session must be
      *                    unique. Pass {@code null} to reject the request or inform clients that
      *                    session creation is failed.
      * @param requestId id of the previous request to create this session
@@ -209,7 +209,8 @@ public abstract class MediaRoute2ProviderService extends Service {
      */
     // TODO: fail reason?
     // TODO: Maybe better to create notifySessionCreationFailed?
-    public final void notifySessionCreated(@Nullable RouteSessionInfo sessionInfo, long requestId) {
+    public final void notifySessionCreated(@Nullable RoutingSessionInfo sessionInfo,
+            long requestId) {
         if (sessionInfo != null) {
             String sessionId = sessionInfo.getId();
             synchronized (mSessionLock) {
@@ -237,7 +238,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * {@link #onDestroySession} is called if the session is released.
      *
      * @param sessionId id of the session to be released
-     * @see #onDestroySession(String, RouteSessionInfo)
+     * @see #onDestroySession(String, RoutingSessionInfo)
      * @hide
      */
     public final void releaseSession(@NonNull String sessionId) {
@@ -245,7 +246,7 @@ public abstract class MediaRoute2ProviderService extends Service {
             throw new IllegalArgumentException("sessionId must not be empty");
         }
         //TODO: notify media router service of release.
-        RouteSessionInfo sessionInfo;
+        RoutingSessionInfo sessionInfo;
         synchronized (mSessionLock) {
             sessionInfo = mSessionInfo.remove(sessionId);
         }
@@ -259,10 +260,10 @@ public abstract class MediaRoute2ProviderService extends Service {
     /**
      * Called when a session should be created.
      * You should create and maintain your own session and notifies the client of
-     * session info. Call {@link #notifySessionCreated(RouteSessionInfo, long)}
+     * session info. Call {@link #notifySessionCreated(RoutingSessionInfo, long)}
      * with the given {@code requestId} to notify the information of a new session.
      * If you can't create the session or want to reject the request, pass {@code null}
-     * as session info in {@link #notifySessionCreated(RouteSessionInfo, long)}
+     * as session info in {@link #notifySessionCreated(RoutingSessionInfo, long)}
      * with the given {@code requestId}.
      *
      * @param packageName the package name of the application that selected the route
@@ -285,18 +286,18 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @hide
      */
     public abstract void onDestroySession(@NonNull String sessionId,
-            @NonNull RouteSessionInfo lastSessionInfo);
+            @NonNull RoutingSessionInfo lastSessionInfo);
 
     //TODO: make a way to reject the request
     /**
      * Called when a client requests selecting a route for the session.
-     * After the route is selected, call {@link #updateSessionInfo(RouteSessionInfo)} to update
+     * After the route is selected, call {@link #updateSessionInfo(RoutingSessionInfo)} to update
      * session info and call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify
      * clients of updated session info.
      *
      * @param sessionId id of the session
      * @param routeId id of the route
-     * @see #updateSessionInfo(RouteSessionInfo)
+     * @see #updateSessionInfo(RoutingSessionInfo)
      * @hide
      */
     public abstract void onSelectRoute(@NonNull String sessionId, @NonNull String routeId);
@@ -304,7 +305,7 @@ public abstract class MediaRoute2ProviderService extends Service {
     //TODO: make a way to reject the request
     /**
      * Called when a client requests deselecting a route from the session.
-     * After the route is deselected, call {@link #updateSessionInfo(RouteSessionInfo)} to update
+     * After the route is deselected, call {@link #updateSessionInfo(RoutingSessionInfo)} to update
      * session info and call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify
      * clients of updated session info.
      *
@@ -317,7 +318,7 @@ public abstract class MediaRoute2ProviderService extends Service {
     //TODO: make a way to reject the request
     /**
      * Called when a client requests transferring a session to a route.
-     * After the transfer is finished, call {@link #updateSessionInfo(RouteSessionInfo)} to update
+     * After the transfer is finished, call {@link #updateSessionInfo(RoutingSessionInfo)} to update
      * session info and call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify
      * clients of updated session info.
      *
@@ -377,7 +378,7 @@ public abstract class MediaRoute2ProviderService extends Service {
             return;
         }
 
-        List<RouteSessionInfo> sessionInfos;
+        List<RoutingSessionInfo> sessionInfos;
         synchronized (mSessionLock) {
             sessionInfos = new ArrayList<>(mSessionInfo.values());
         }

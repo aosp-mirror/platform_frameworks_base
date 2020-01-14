@@ -116,7 +116,8 @@ public class Nat464Xlat extends BaseNetworkObserver {
                 && !lp.hasIpv4Address();
 
         // If the network tells us it doesn't use clat, respect that.
-        final boolean skip464xlat = (nai.netMisc() != null) && nai.netMisc().skip464xlat;
+        final boolean skip464xlat = (nai.netAgentConfig() != null)
+                && nai.netAgentConfig().skip464xlat;
 
         return supported && connected && isIpv6OnlyNetwork && !skip464xlat;
     }

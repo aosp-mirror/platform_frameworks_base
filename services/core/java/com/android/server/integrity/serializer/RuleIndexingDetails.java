@@ -28,6 +28,8 @@ class RuleIndexingDetails {
     static final int PACKAGE_NAME_INDEXED = 1;
     static final int APP_CERTIFICATE_INDEXED = 2;
 
+    static final String DEFAULT_RULE_KEY = "N/A";
+
     /** Represents which indexed file the rule should be located. */
     @IntDef(
             value = {
@@ -45,7 +47,7 @@ class RuleIndexingDetails {
     /** Constructor without a ruleKey for {@code NOT_INDEXED}. */
     RuleIndexingDetails(@IndexType int indexType) {
         this.mIndexType = indexType;
-        this.mRuleKey = null;
+        this.mRuleKey = DEFAULT_RULE_KEY;
     }
 
     /** Constructor with a ruleKey for indexed rules. */

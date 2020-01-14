@@ -35,8 +35,9 @@ import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_STATE;
 import static android.net.wifi.WifiManager.IFACE_IP_MODE_LOCAL_ONLY;
 import static android.net.wifi.WifiManager.IFACE_IP_MODE_TETHERED;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLED;
-import static android.provider.Settings.Global.TETHER_ENABLE_LEGACY_DHCP_SERVER;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+
+import static com.android.networkstack.tethering.R.bool.config_tether_enable_legacy_dhcp_server;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -224,6 +225,11 @@ public class TetheringTest {
             if (TelephonyManager.class.equals(serviceClass)) return Context.TELEPHONY_SERVICE;
             return super.getSystemServiceName(serviceClass);
         }
+
+        @Override
+        public Context createContextAsUser(UserHandle user, int flags) {
+            return mContext;
+        }
     }
 
     public class MockIpServerDependencies extends IpServer.Dependencies {
@@ -262,6 +268,11 @@ public class TetheringTest {
     private class MockTetheringConfiguration extends TetheringConfiguration {
         MockTetheringConfiguration(Context ctx, SharedLog log, int id) {
             super(ctx, log, id);
+        }
+
+        @Override
+        protected boolean getDeviceConfigBoolean(final String name) {
+            return false;
         }
 
         @Override
@@ -423,6 +434,7 @@ public class TetheringTest {
                 .thenReturn(new int[0]);
         when(mResources.getBoolean(com.android.internal.R.bool.config_tether_upstream_automatic))
                 .thenReturn(false);
+        when(mResources.getBoolean(config_tether_enable_legacy_dhcp_server)).thenReturn(false);
         when(mNetd.interfaceGetList())
                 .thenReturn(new String[] {
                         TEST_MOBILE_IFNAME, TEST_WLAN_IFNAME, TEST_USB_IFNAME, TEST_P2P_IFNAME});
@@ -432,9 +444,9 @@ public class TetheringTest {
                 .thenReturn(true);
 
         mServiceContext = new TestContext(mContext);
+        when(mContext.getSystemService(Context.NOTIFICATION_SERVICE)).thenReturn(null);
         mContentResolver = new MockContentResolver(mServiceContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
-        Settings.Global.putInt(mContentResolver, TETHER_ENABLE_LEGACY_DHCP_SERVER, 0);
         mIntents = new Vector<>();
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -686,7 +698,7 @@ public class TetheringTest {
 
     @Test
     public void workingMobileUsbTethering_IPv4LegacyDhcp() {
-        Settings.Global.putInt(mContentResolver, TETHER_ENABLE_LEGACY_DHCP_SERVER, 1);
+        when(mResources.getBoolean(config_tether_enable_legacy_dhcp_server)).thenReturn(true);
         sendConfigurationChanged();
         final UpstreamNetworkState upstreamState = buildMobileIPv4UpstreamState();
         runUsbTethering(upstreamState);

@@ -36,6 +36,8 @@ using google::protobuf::FieldDescriptor;
 
 const int PULL_ATOM_START_ID = 10000;
 
+const int FIRST_UID_IN_CHAIN_ID = 0;
+
 /**
  * The types for atom parameters.
  */

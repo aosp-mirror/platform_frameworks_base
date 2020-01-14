@@ -30,12 +30,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Provides routes for local playbacks such as phone speaker, wired headset, or Bluetooth speakers.
@@ -55,6 +55,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private final IAudioService mAudioService;
     private final Handler mHandler;
     private final Context mContext;
+    private final BluetoothRouteProvider mBtRouteProvider;
 
     private static ComponentName sComponentName = new ComponentName(
             SystemMediaRoute2Provider.class.getPackageName$(),
@@ -62,7 +63,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
     //TODO: Clean up these when audio manager support multiple bt devices
     MediaRoute2Info mDefaultRoute;
-    MediaRoute2Info mBluetoothA2dpRoute;
+    @NonNull List<MediaRoute2Info> mBluetoothRoutes = Collections.EMPTY_LIST;
     final AudioRoutesInfo mCurAudioRoutesInfo = new AudioRoutesInfo();
 
     final IAudioRoutesObserver.Stub mAudioRoutesObserver = new IAudioRoutesObserver.Stub() {
@@ -87,6 +88,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         mAudioService = IAudioService.Stub.asInterface(
                 ServiceManager.getService(Context.AUDIO_SERVICE));
 
+        mBtRouteProvider = BluetoothRouteProvider.getInstance(context, (routes) -> {
+            mBluetoothRoutes = routes;
+            publishRoutes();
+        });
         initializeRoutes();
     }
 
@@ -157,7 +162,15 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             updateAudioRoutes(newAudioRoutes);
         }
 
-        publishRoutes();
+        mBluetoothRoutes = mBtRouteProvider.getBluetoothRoutes();
+
+        MediaRoute2ProviderInfo.Builder builder = new MediaRoute2ProviderInfo.Builder();
+        builder.addRoute(mDefaultRoute);
+        for (MediaRoute2Info route : mBluetoothRoutes) {
+            builder.addRoute(route);
+        }
+        setProviderState(builder.build(), Collections.emptyList());
+        mHandler.post(() -> notifyProviderState());
     }
 
     void updateAudioRoutes(AudioRoutesInfo newRoutes) {
@@ -185,21 +198,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 .addFeature(TYPE_LIVE_VIDEO)
                 .build();
 
-        if (!TextUtils.equals(newRoutes.bluetoothName, mCurAudioRoutesInfo.bluetoothName)) {
-            mCurAudioRoutesInfo.bluetoothName = newRoutes.bluetoothName;
-            if (mCurAudioRoutesInfo.bluetoothName != null) {
-                //TODO: mark as bluetooth once MediaRoute2Info has device type
-                mBluetoothA2dpRoute = new MediaRoute2Info.Builder(BLUETOOTH_ROUTE_ID,
-                        mCurAudioRoutesInfo.bluetoothName)
-                        .setDescription(mContext.getResources().getText(
-                                R.string.bluetooth_a2dp_audio_route_name).toString())
-                        .addFeature(TYPE_LIVE_AUDIO)
-                        .build();
-            } else {
-                mBluetoothA2dpRoute = null;
-            }
-        }
-
         publishRoutes();
     }
 
@@ -207,15 +205,13 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
      * The first route should be the currently selected system route.
      * For example, if there are two system routes (BT and device speaker),
      * BT will be the first route in the list.
-     *
-     * TODO: Support multiple BT devices
      */
     void publishRoutes() {
         MediaRoute2ProviderInfo.Builder builder = new MediaRoute2ProviderInfo.Builder();
-        if (mBluetoothA2dpRoute != null) {
-            builder.addRoute(mBluetoothA2dpRoute);
-        }
         builder.addRoute(mDefaultRoute);
+        for (MediaRoute2Info route : mBluetoothRoutes) {
+            builder.addRoute(route);
+        }
         setAndNotifyProviderState(builder.build(), Collections.emptyList());
     }
 }

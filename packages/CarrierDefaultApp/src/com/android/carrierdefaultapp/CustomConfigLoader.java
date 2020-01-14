@@ -19,10 +19,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class CustomConfigLoader {
      * @param intent passing signal for config match
      * @return a list of carrier action for the given signal based on the carrier config.
      *
-     *  Example: input intent TelephonyIntent.ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED
+     *  Example: input intent TelephonyManager.ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED
      *  This intent allows fined-grained matching based on both intent type & extra values:
      *  apnType and errorCode.
      *  apnType read from passing intent is "default" and errorCode is 0x26 for example and
@@ -78,25 +78,25 @@ public class CustomConfigLoader {
             String arg1 = null;
             String arg2 = null;
             switch (intent.getAction()) {
-                case TelephonyIntents.ACTION_CARRIER_SIGNAL_REDIRECTED:
+                case TelephonyManager.ACTION_CARRIER_SIGNAL_REDIRECTED:
                     configs = b.getStringArray(CarrierConfigManager
                             .KEY_CARRIER_DEFAULT_ACTIONS_ON_REDIRECTION_STRING_ARRAY);
                     break;
-                case TelephonyIntents.ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED:
+                case TelephonyManager.ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED:
                     configs = b.getStringArray(CarrierConfigManager
                             .KEY_CARRIER_DEFAULT_ACTIONS_ON_DCFAILURE_STRING_ARRAY);
-                    arg1 = intent.getStringExtra(TelephonyIntents.EXTRA_APN_TYPE_KEY);
-                    arg2 = intent.getStringExtra(TelephonyIntents.EXTRA_ERROR_CODE_KEY);
+                    arg1 = intent.getStringExtra(TelephonyManager.EXTRA_APN_TYPE);
+                    arg2 = intent.getStringExtra(TelephonyManager.EXTRA_ERROR_CODE);
                     break;
-                case TelephonyIntents.ACTION_CARRIER_SIGNAL_RESET:
+                case TelephonyManager.ACTION_CARRIER_SIGNAL_RESET:
                     configs = b.getStringArray(CarrierConfigManager
                             .KEY_CARRIER_DEFAULT_ACTIONS_ON_RESET);
                     break;
-                case TelephonyIntents.ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE:
+                case TelephonyManager.ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE:
                     configs = b.getStringArray(CarrierConfigManager
                             .KEY_CARRIER_DEFAULT_ACTIONS_ON_DEFAULT_NETWORK_AVAILABLE);
-                    arg1 = String.valueOf(intent.getBooleanExtra(TelephonyIntents
-                            .EXTRA_DEFAULT_NETWORK_AVAILABLE_KEY, false));
+                    arg1 = String.valueOf(intent.getBooleanExtra(TelephonyManager
+                            .EXTRA_DEFAULT_NETWORK_AVAILABLE, false));
                     break;
                 default:
                     Log.e(TAG, "load carrier config failure with un-configured key: "

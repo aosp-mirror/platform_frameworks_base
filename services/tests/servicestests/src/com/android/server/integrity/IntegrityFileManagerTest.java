@@ -16,14 +16,7 @@
 
 package com.android.server.integrity;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
-import static org.junit.Assert.assertThat;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.content.integrity.AppInstallMetadata;
 import android.content.integrity.AtomicFormula;
@@ -33,26 +26,26 @@ import android.content.integrity.CompoundFormula;
 import android.content.integrity.Rule;
 import android.util.Slog;
 
-import androidx.test.runner.AndroidJUnit4;
-
-import com.android.server.integrity.parser.RuleXmlParser;
-import com.android.server.integrity.serializer.RuleXmlSerializer;
+import com.android.server.integrity.parser.RuleBinaryParser;
+import com.android.server.integrity.serializer.RuleBinarySerializer;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 /** Unit test for {@link IntegrityFileManager} */
-@RunWith(AndroidJUnit4.class)
+@RunWith(JUnit4.class)
 public class IntegrityFileManagerTest {
     private static final String TAG = "IntegrityFileManagerTest";
 
@@ -72,7 +65,7 @@ public class IntegrityFileManagerTest {
         // Use Xml Parser/Serializer to help with debugging since we can just print the file.
         mIntegrityFileManager =
                 new IntegrityFileManager(
-                        new RuleXmlParser(), new RuleXmlSerializer(), mTmpDir);
+                        new RuleBinaryParser(), new RuleBinarySerializer(), mTmpDir);
         Files.walk(mTmpDir.toPath())
                 .forEach(
                         path -> {
@@ -97,12 +90,19 @@ public class IntegrityFileManagerTest {
 
     @Test
     public void testGetMetadata() throws Exception {
-        assertNull(mIntegrityFileManager.readMetadata());
+        assertThat(mIntegrityFileManager.readMetadata()).isNull();
         mIntegrityFileManager.writeRules(VERSION, RULE_PROVIDER, Collections.EMPTY_LIST);
 
-        assertNotNull(mIntegrityFileManager.readMetadata());
-        assertEquals(VERSION, mIntegrityFileManager.readMetadata().getVersion());
-        assertEquals(RULE_PROVIDER, mIntegrityFileManager.readMetadata().getRuleProvider());
+        assertThat(mIntegrityFileManager.readMetadata()).isNotNull();
+        assertThat(mIntegrityFileManager.readMetadata().getVersion()).isEqualTo(VERSION);
+        assertThat(mIntegrityFileManager.readMetadata().getRuleProvider()).isEqualTo(RULE_PROVIDER);
+    }
+
+    @Test
+    public void testIsInitialized() throws Exception {
+        assertThat(mIntegrityFileManager.initialized()).isFalse();
+        mIntegrityFileManager.writeRules(VERSION, RULE_PROVIDER, Collections.EMPTY_LIST);
+        assertThat(mIntegrityFileManager.initialized()).isTrue();
     }
 
     @Test
@@ -110,20 +110,8 @@ public class IntegrityFileManagerTest {
         String packageName = "package";
         String packageCert = "cert";
         int version = 123;
-        Rule packageNameRule =
-                new Rule(
-                        new StringAtomicFormula(
-                                AtomicFormula.PACKAGE_NAME,
-                                packageName,
-                                /* isHashedValue= */ false),
-                        Rule.DENY);
-        Rule packageCertRule =
-                new Rule(
-                        new StringAtomicFormula(
-                                AtomicFormula.APP_CERTIFICATE,
-                                packageCert,
-                                /* isHashedValue= */ false),
-                        Rule.DENY);
+        Rule packageNameRule = getPackageNameIndexedRule(packageName);
+        Rule packageCertRule = getAppCertificateIndexedRule(packageCert);
         Rule versionCodeRule =
                 new Rule(
                         new IntAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.LE, version),
@@ -142,9 +130,7 @@ public class IntegrityFileManagerTest {
                                                 AtomicFormula.LE,
                                                 version))),
                         Rule.DENY);
-        // We will test the specifics of indexing in other classes. Here, we just require that all
-        // rules that are related to the given AppInstallMetadata are returned and do not assert
-        // anything on other rules.
+
         List<Rule> rules =
                 Arrays.asList(packageNameRule, packageCertRule, versionCodeRule, randomRule);
         mIntegrityFileManager.writeRules(VERSION, RULE_PROVIDER, rules);
@@ -159,17 +145,77 @@ public class IntegrityFileManagerTest {
                 .build();
         List<Rule> rulesFetched = mIntegrityFileManager.readRules(appInstallMetadata);
 
-        assertThat(rulesFetched, hasItems(
-                equalTo(packageNameRule),
-                equalTo(packageCertRule),
-                equalTo(versionCodeRule)
-        ));
+        assertThat(rulesFetched)
+                .containsExactly(packageNameRule, packageCertRule, versionCodeRule, randomRule);
     }
 
     @Test
-    public void testIsInitialized() throws Exception {
-        assertFalse(mIntegrityFileManager.initialized());
-        mIntegrityFileManager.writeRules(VERSION, RULE_PROVIDER, Collections.EMPTY_LIST);
-        assertTrue(mIntegrityFileManager.initialized());
+    public void testGetRules_indexedForManyRules() throws Exception {
+        String packageName = "package";
+        String installerName = "installer";
+        String appCertificate = "cert";
+
+        // Create a rule set with 2500 package name indexed, 2500 app certificate indexed and
+        // 500 unindexed rules.
+        List<Rule> rules = new ArrayList<>();
+
+        for (int i = 0; i < 2500; i++) {
+            rules.add(getPackageNameIndexedRule(String.format("%s%04d", packageName, i)));
+            rules.add(getAppCertificateIndexedRule(String.format("%s%04d", appCertificate, i)));
+        }
+
+        for (int i = 0; i < 70; i++) {
+            rules.add(getInstallerCertificateRule(String.format("%s%04d", installerName, i)));
+        }
+
+        // Write the rules and get them indexed.
+        mIntegrityFileManager.writeRules(VERSION, RULE_PROVIDER, rules);
+
+        // Read the rules for a specific rule.
+        String installedPackageName = String.format("%s%04d", packageName, 264);
+        String installedAppCertificate = String.format("%s%04d", appCertificate, 1264);
+        AppInstallMetadata appInstallMetadata = new AppInstallMetadata.Builder()
+                .setPackageName(installedPackageName)
+                .setAppCertificate(installedAppCertificate)
+                .setVersionCode(250)
+                .setInstallerName("abc")
+                .setInstallerCertificate("abc")
+                .setIsPreInstalled(true)
+                .build();
+        List<Rule> rulesFetched = mIntegrityFileManager.readRules(appInstallMetadata);
+
+        // Verify that we do not load all the rules and we have the necessary rules to evaluate.
+        assertThat(rulesFetched.size()).isEqualTo(270);
+        assertThat(rulesFetched)
+                .containsAllOf(
+                        getPackageNameIndexedRule(installedPackageName),
+                        getAppCertificateIndexedRule(installedAppCertificate));
+    }
+
+    private Rule getPackageNameIndexedRule(String packageName) {
+        return new Rule(
+                new StringAtomicFormula(
+                        AtomicFormula.PACKAGE_NAME,
+                        packageName,
+                        /* isHashedValue= */ false),
+                Rule.DENY);
+    }
+
+    private Rule getAppCertificateIndexedRule(String appCertificate) {
+        return new Rule(
+                new StringAtomicFormula(
+                        AtomicFormula.APP_CERTIFICATE,
+                        appCertificate,
+                        /* isHashedValue= */ false),
+                Rule.DENY);
+    }
+
+    private Rule getInstallerCertificateRule(String installerCert) {
+        return new Rule(
+                new StringAtomicFormula(
+                        AtomicFormula.INSTALLER_NAME,
+                        installerCert,
+                        /* isHashedValue= */ false),
+                Rule.DENY);
     }
 }

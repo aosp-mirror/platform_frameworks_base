@@ -37,6 +37,36 @@ stubs_defaults {
 
 stubs_defaults {
     name: "framework-module-stubs-defaults-systemapi",
-    args: mainline_stubs_args + " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\) ",
+    args: mainline_stubs_args +
+    " --show-annotation android.annotation.SystemApi\\(" +
+    "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS," +
+    "process=android.annotation.SystemApi.Process.ALL\\) ",
+    installable: false,
+}
+
+stubs_defaults {
+    name: "framework-module-stubs-defaults-module_apps_api",
+    args: mainline_stubs_args +
+    " --show-annotation android.annotation.SystemApi\\(" +
+    "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS," +
+    "process=android.annotation.SystemApi.Process.ALL\\) " +
+    " --show-annotation android.annotation.SystemApi\\(" +
+    "client=android.annotation.SystemApi.Client.MODULE_APPS," +
+    "process=android.annotation.SystemApi.Process.ALL\\) ",
+    installable: false,
+}
+
+stubs_defaults {
+    name: "framework-module-stubs-defaults-module_libs_api",
+    args: mainline_stubs_args +
+    " --show-annotation android.annotation.SystemApi\\(" +
+    "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS," +
+    "process=android.annotation.SystemApi.Process.ALL\\) " +
+    " --show-annotation android.annotation.SystemApi\\(" +
+    "client=android.annotation.SystemApi.Client.MODULE_APPS," +
+    "process=android.annotation.SystemApi.Process.ALL\\) " +
+    " --show-annotation android.annotation.SystemApi\\(" +
+    "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES," +
+    "process=android.annotation.SystemApi.Process.ALL\\) ",
     installable: false,
 }

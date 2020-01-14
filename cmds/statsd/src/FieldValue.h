@@ -261,6 +261,11 @@ inline Matcher getSimpleMatcher(int32_t tag, size_t field) {
     return Matcher(Field(tag, getSimpleField(field)), 0xff7f0000);
 }
 
+inline Matcher getFirstUidMatcher(int32_t atomId) {
+    int32_t pos[] = {1, 1, 1};
+    return Matcher(Field(atomId, pos, 2), 0xff7f7f7f);
+}
+
 /**
  * A wrapper for a union type to contain multiple types of values.
  *

@@ -43,11 +43,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @hide
  */
-public abstract class NetworkAgent extends Handler {
+public abstract class NetworkAgent {
     // Guaranteed to be valid (not NETID_UNSET), otherwise registerNetworkAgent() would have thrown
     // an exception.
     public final int netId;
 
+    private final Handler mHandler;
     private volatile AsyncChannel mAsyncChannel;
     private final String LOG_TAG;
     private static final boolean DBG = true;
@@ -58,7 +59,7 @@ public abstract class NetworkAgent extends Handler {
     private static final long BW_REFRESH_MIN_WIN_MS = 500;
     private boolean mPollLceScheduled = false;
     private AtomicBoolean mPollLcePending = new AtomicBoolean(false);
-    public final int mFactorySerialNumber;
+    public final int mProviderId;
 
     private static final int BASE = Protocol.BASE_NETWORK_AGENT;
 
@@ -219,25 +220,25 @@ public abstract class NetworkAgent extends Handler {
     // the entire tree.
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
-        this(looper, context, logTag, ni, nc, lp, score, null, NetworkFactory.SerialNumber.NONE);
+        this(looper, context, logTag, ni, nc, lp, score, null, NetworkProvider.ID_NONE);
     }
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
-            NetworkCapabilities nc, LinkProperties lp, int score, NetworkMisc misc) {
-        this(looper, context, logTag, ni, nc, lp, score, misc, NetworkFactory.SerialNumber.NONE);
-    }
-
-    public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
-            NetworkCapabilities nc, LinkProperties lp, int score, int factorySerialNumber) {
-        this(looper, context, logTag, ni, nc, lp, score, null, factorySerialNumber);
+            NetworkCapabilities nc, LinkProperties lp, int score, NetworkAgentConfig config) {
+        this(looper, context, logTag, ni, nc, lp, score, config, NetworkProvider.ID_NONE);
     }
 
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
-            NetworkCapabilities nc, LinkProperties lp, int score, NetworkMisc misc,
-            int factorySerialNumber) {
-        super(looper);
+            NetworkCapabilities nc, LinkProperties lp, int score, int providerId) {
+        this(looper, context, logTag, ni, nc, lp, score, null, providerId);
+    }
+
+    public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
+            NetworkCapabilities nc, LinkProperties lp, int score, NetworkAgentConfig config,
+            int providerId) {
+        mHandler = new NetworkAgentHandler(looper);
         LOG_TAG = logTag;
         mContext = context;
-        mFactorySerialNumber = factorySerialNumber;
+        mProviderId = providerId;
         if (ni == null || nc == null || lp == null) {
             throw new IllegalArgumentException();
         }
@@ -245,117 +246,124 @@ public abstract class NetworkAgent extends Handler {
         if (VDBG) log("Registering NetworkAgent");
         ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
-        netId = cm.registerNetworkAgent(new Messenger(this), new NetworkInfo(ni),
-                new LinkProperties(lp), new NetworkCapabilities(nc), score, misc,
-                factorySerialNumber);
+        netId = cm.registerNetworkAgent(new Messenger(mHandler), new NetworkInfo(ni),
+                new LinkProperties(lp), new NetworkCapabilities(nc), score, config,
+                providerId);
     }
 
-    @Override
-    public void handleMessage(Message msg) {
-        switch (msg.what) {
-            case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION: {
-                if (mAsyncChannel != null) {
-                    log("Received new connection while already connected!");
-                } else {
-                    if (VDBG) log("NetworkAgent fully connected");
-                    AsyncChannel ac = new AsyncChannel();
-                    ac.connected(null, this, msg.replyTo);
-                    ac.replyToMessage(msg, AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED,
-                            AsyncChannel.STATUS_SUCCESSFUL);
-                    synchronized (mPreConnectedQueue) {
-                        mAsyncChannel = ac;
-                        for (Message m : mPreConnectedQueue) {
-                            ac.sendMessage(m);
-                        }
-                        mPreConnectedQueue.clear();
-                    }
-                }
-                break;
-            }
-            case AsyncChannel.CMD_CHANNEL_DISCONNECT: {
-                if (VDBG) log("CMD_CHANNEL_DISCONNECT");
-                if (mAsyncChannel != null) mAsyncChannel.disconnect();
-                break;
-            }
-            case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
-                if (DBG) log("NetworkAgent channel lost");
-                // let the client know CS is done with us.
-                unwanted();
-                synchronized (mPreConnectedQueue) {
-                    mAsyncChannel = null;
-                }
-                break;
-            }
-            case CMD_SUSPECT_BAD: {
-                log("Unhandled Message " + msg);
-                break;
-            }
-            case CMD_REQUEST_BANDWIDTH_UPDATE: {
-                long currentTimeMs = System.currentTimeMillis();
-                if (VDBG) {
-                    log("CMD_REQUEST_BANDWIDTH_UPDATE request received.");
-                }
-                if (currentTimeMs >= (mLastBwRefreshTime + BW_REFRESH_MIN_WIN_MS)) {
-                    mPollLceScheduled = false;
-                    if (mPollLcePending.getAndSet(true) == false) {
-                        pollLceData();
-                    }
-                } else {
-                    // deliver the request at a later time rather than discard it completely.
-                    if (!mPollLceScheduled) {
-                        long waitTime = mLastBwRefreshTime + BW_REFRESH_MIN_WIN_MS -
-                                currentTimeMs + 1;
-                        mPollLceScheduled = sendEmptyMessageDelayed(
-                                CMD_REQUEST_BANDWIDTH_UPDATE, waitTime);
-                    }
-                }
-                break;
-            }
-            case CMD_REPORT_NETWORK_STATUS: {
-                String redirectUrl = ((Bundle)msg.obj).getString(REDIRECT_URL_KEY);
-                if (VDBG) {
-                    log("CMD_REPORT_NETWORK_STATUS(" +
-                            (msg.arg1 == VALID_NETWORK ? "VALID, " : "INVALID, ") + redirectUrl);
-                }
-                networkStatus(msg.arg1, redirectUrl);
-                break;
-            }
-            case CMD_SAVE_ACCEPT_UNVALIDATED: {
-                saveAcceptUnvalidated(msg.arg1 != 0);
-                break;
-            }
-            case CMD_START_SOCKET_KEEPALIVE: {
-                startSocketKeepalive(msg);
-                break;
-            }
-            case CMD_STOP_SOCKET_KEEPALIVE: {
-                stopSocketKeepalive(msg);
-                break;
-            }
+    private class NetworkAgentHandler extends Handler {
+        NetworkAgentHandler(Looper looper) {
+            super(looper);
+        }
 
-            case CMD_SET_SIGNAL_STRENGTH_THRESHOLDS: {
-                ArrayList<Integer> thresholds =
-                        ((Bundle) msg.obj).getIntegerArrayList("thresholds");
-                // TODO: Change signal strength thresholds API to use an ArrayList<Integer>
-                // rather than convert to int[].
-                int[] intThresholds = new int[(thresholds != null) ? thresholds.size() : 0];
-                for (int i = 0; i < intThresholds.length; i++) {
-                    intThresholds[i] = thresholds.get(i);
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION: {
+                    if (mAsyncChannel != null) {
+                        log("Received new connection while already connected!");
+                    } else {
+                        if (VDBG) log("NetworkAgent fully connected");
+                        AsyncChannel ac = new AsyncChannel();
+                        ac.connected(null, this, msg.replyTo);
+                        ac.replyToMessage(msg, AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED,
+                                AsyncChannel.STATUS_SUCCESSFUL);
+                        synchronized (mPreConnectedQueue) {
+                            mAsyncChannel = ac;
+                            for (Message m : mPreConnectedQueue) {
+                                ac.sendMessage(m);
+                            }
+                            mPreConnectedQueue.clear();
+                        }
+                    }
+                    break;
                 }
-                setSignalStrengthThresholds(intThresholds);
-                break;
-            }
-            case CMD_PREVENT_AUTOMATIC_RECONNECT: {
-                preventAutomaticReconnect();
-                break;
-            }
-            case CMD_ADD_KEEPALIVE_PACKET_FILTER: {
-                addKeepalivePacketFilter(msg);
-                break;
-            }
-            case CMD_REMOVE_KEEPALIVE_PACKET_FILTER: {
-                removeKeepalivePacketFilter(msg);
-                break;
+                case AsyncChannel.CMD_CHANNEL_DISCONNECT: {
+                    if (VDBG) log("CMD_CHANNEL_DISCONNECT");
+                    if (mAsyncChannel != null) mAsyncChannel.disconnect();
+                    break;
+                }
+                case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
+                    if (DBG) log("NetworkAgent channel lost");
+                    // let the client know CS is done with us.
+                    unwanted();
+                    synchronized (mPreConnectedQueue) {
+                        mAsyncChannel = null;
+                    }
+                    break;
+                }
+                case CMD_SUSPECT_BAD: {
+                    log("Unhandled Message " + msg);
+                    break;
+                }
+                case CMD_REQUEST_BANDWIDTH_UPDATE: {
+                    long currentTimeMs = System.currentTimeMillis();
+                    if (VDBG) {
+                        log("CMD_REQUEST_BANDWIDTH_UPDATE request received.");
+                    }
+                    if (currentTimeMs >= (mLastBwRefreshTime + BW_REFRESH_MIN_WIN_MS)) {
+                        mPollLceScheduled = false;
+                        if (!mPollLcePending.getAndSet(true)) {
+                            pollLceData();
+                        }
+                    } else {
+                        // deliver the request at a later time rather than discard it completely.
+                        if (!mPollLceScheduled) {
+                            long waitTime = mLastBwRefreshTime + BW_REFRESH_MIN_WIN_MS
+                                    - currentTimeMs + 1;
+                            mPollLceScheduled = sendEmptyMessageDelayed(
+                                    CMD_REQUEST_BANDWIDTH_UPDATE, waitTime);
+                        }
+                    }
+                    break;
+                }
+                case CMD_REPORT_NETWORK_STATUS: {
+                    String redirectUrl = ((Bundle) msg.obj).getString(REDIRECT_URL_KEY);
+                    if (VDBG) {
+                        log("CMD_REPORT_NETWORK_STATUS("
+                                + (msg.arg1 == VALID_NETWORK ? "VALID, " : "INVALID, ")
+                                + redirectUrl);
+                    }
+                    networkStatus(msg.arg1, redirectUrl);
+                    break;
+                }
+                case CMD_SAVE_ACCEPT_UNVALIDATED: {
+                    saveAcceptUnvalidated(msg.arg1 != 0);
+                    break;
+                }
+                case CMD_START_SOCKET_KEEPALIVE: {
+                    startSocketKeepalive(msg);
+                    break;
+                }
+                case CMD_STOP_SOCKET_KEEPALIVE: {
+                    stopSocketKeepalive(msg);
+                    break;
+                }
+
+                case CMD_SET_SIGNAL_STRENGTH_THRESHOLDS: {
+                    ArrayList<Integer> thresholds =
+                            ((Bundle) msg.obj).getIntegerArrayList("thresholds");
+                    // TODO: Change signal strength thresholds API to use an ArrayList<Integer>
+                    // rather than convert to int[].
+                    int[] intThresholds = new int[(thresholds != null) ? thresholds.size() : 0];
+                    for (int i = 0; i < intThresholds.length; i++) {
+                        intThresholds[i] = thresholds.get(i);
+                    }
+                    setSignalStrengthThresholds(intThresholds);
+                    break;
+                }
+                case CMD_PREVENT_AUTOMATIC_RECONNECT: {
+                    preventAutomaticReconnect();
+                    break;
+                }
+                case CMD_ADD_KEEPALIVE_PACKET_FILTER: {
+                    addKeepalivePacketFilter(msg);
+                    break;
+                }
+                case CMD_REMOVE_KEEPALIVE_PACKET_FILTER: {
+                    removeKeepalivePacketFilter(msg);
+                    break;
+                }
             }
         }
     }

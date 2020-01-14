@@ -51,6 +51,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 
 import java.io.File;
@@ -220,6 +221,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         IAudioService getIAudioService() {
             return services.iaudioService;
+        }
+
+        @Override
+        PersistentDataBlockManagerInternal getPersistentDataBlockManagerInternal() {
+            return services.persistentDataBlockManagerInternal;
         }
 
         @Override

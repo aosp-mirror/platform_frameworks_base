@@ -41,9 +41,11 @@ import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedInstrumentation;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
+import android.util.ArraySet;
 
 import com.android.internal.util.ArrayUtils;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /** @hide */
@@ -545,7 +547,7 @@ public class PackageInfoUtils {
             ai.category = FallbackCategoryProvider.getFallbackCategory(ai.packageName);
         }
         ai.seInfoUser = SELinuxUtil.assignSeinfoUser(state);
-        ai.resourceDirs = state.overlayPaths;
+        ai.resourceDirs = state.getAllOverlayPaths();
         ai.icon = (PackageParser.sUseRoundIcon && ai.roundIconRes != 0)
                 ? ai.roundIconRes : ai.iconRes;
     }

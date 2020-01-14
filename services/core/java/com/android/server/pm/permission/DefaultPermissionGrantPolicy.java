@@ -592,12 +592,6 @@ public final class DefaultPermissionGrantPolicy {
                 getDefaultSystemHandlerActivityPackageForCategory(Intent.CATEGORY_APP_MAPS, userId),
                 userId, ALWAYS_LOCATION_PERMISSIONS);
 
-        // Gallery
-        grantPermissionsToSystemPackage(
-                getDefaultSystemHandlerActivityPackageForCategory(
-                        Intent.CATEGORY_APP_GALLERY, userId),
-                userId, STORAGE_PERMISSIONS);
-
         // Email
         grantPermissionsToSystemPackage(
                 getDefaultSystemHandlerActivityPackageForCategory(

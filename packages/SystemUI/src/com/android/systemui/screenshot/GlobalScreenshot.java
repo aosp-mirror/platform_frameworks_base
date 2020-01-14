@@ -20,7 +20,7 @@ import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
-import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_CORNER_FLOW;
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_SCROLLING_ENABLED;
 import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_SCREENSHOT;
 
 import android.animation.Animator;
@@ -246,20 +246,13 @@ public class GlobalScreenshot {
             mSaveInBgTask.cancel(false);
         }
 
-        if (!DeviceConfig.getBoolean(
-                NAMESPACE_SYSTEMUI, SCREENSHOT_CORNER_FLOW, false)) {
-            mNotificationsController.reset();
-            mNotificationsController.setImage(mScreenBitmap);
-            mNotificationsController.showSavingScreenshotNotification();
-        }
         mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data).execute();
     }
 
     /**
      * Takes a screenshot of the current display and shows an animation.
      */
-    private void takeScreenshot(Consumer<Uri> finisher, boolean statusBarVisible,
-            boolean navBarVisible, Rect crop) {
+    private void takeScreenshot(Consumer<Uri> finisher, Rect crop) {
         int rot = mDisplay.getRotation();
         int width = crop.width();
         int height = crop.height();
@@ -278,21 +271,20 @@ public class GlobalScreenshot {
         mScreenBitmap.prepareToDraw();
 
         // Start the post-screenshot animation
-        startAnimation(finisher, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels,
-                statusBarVisible, navBarVisible);
+        startAnimation(finisher, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels);
     }
 
-    void takeScreenshot(Consumer<Uri> finisher, boolean statusBarVisible, boolean navBarVisible) {
+    void takeScreenshot(Consumer<Uri> finisher) {
         mDisplay.getRealMetrics(mDisplayMetrics);
-        takeScreenshot(finisher, statusBarVisible, navBarVisible,
+        takeScreenshot(
+                finisher,
                 new Rect(0, 0, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
     }
 
     /**
      * Displays a screenshot selector
      */
-    void takeScreenshotPartial(final Consumer<Uri> finisher, final boolean statusBarVisible,
-            final boolean navBarVisible) {
+    void takeScreenshotPartial(final Consumer<Uri> finisher) {
         mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
         mScreenshotSelectorView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -312,8 +304,7 @@ public class GlobalScreenshot {
                         if (rect != null) {
                             if (rect.width() != 0 && rect.height() != 0) {
                                 // Need mScreenshotLayout to handle it after the view disappears
-                                mScreenshotLayout.post(() -> takeScreenshot(
-                                        finisher, statusBarVisible, navBarVisible, rect));
+                                mScreenshotLayout.post(() -> takeScreenshot(finisher, rect));
                             }
                         }
 
@@ -364,8 +355,7 @@ public class GlobalScreenshot {
     /**
      * Starts the animation after taking the screenshot
      */
-    private void startAnimation(final Consumer<Uri> finisher, int w, int h,
-            boolean statusBarVisible, boolean navBarVisible) {
+    private void startAnimation(final Consumer<Uri> finisher, int w, int h) {
         // If power save is on, show a toast so there is some visual indication that a screenshot
         // has been taken.
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -385,50 +375,30 @@ public class GlobalScreenshot {
             mScreenshotAnimation.removeAllListeners();
         }
 
-        boolean useCornerFlow =
-                DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI, SCREENSHOT_CORNER_FLOW, false);
         mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
         ValueAnimator screenshotDropInAnim = createScreenshotDropInAnimation();
-        ValueAnimator screenshotFadeOutAnim = useCornerFlow
-                ? createScreenshotToCornerAnimation(w, h)
-                : createScreenshotDropOutAnimation(w, h, statusBarVisible, navBarVisible);
+        ValueAnimator screenshotFadeOutAnim = createScreenshotToCornerAnimation(w, h);
         mScreenshotAnimation = new AnimatorSet();
         mScreenshotAnimation.playSequentially(screenshotDropInAnim, screenshotFadeOutAnim);
         mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 // Save the screenshot once we have a bit of time now
-                if (!useCornerFlow) {
-                    saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
-                        @Override
-                        void onActionsReady(Uri uri, List<Notification.Action> actions) {
-                            if (uri == null) {
-                                mNotificationsController.notifyScreenshotError(
-                                        R.string.screenshot_failed_to_capture_text);
-                            } else {
-                                mNotificationsController
-                                        .showScreenshotActionsNotification(uri, actions);
-                            }
+                saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
+                    @Override
+                    void onActionsReady(Uri uri, List<Notification.Action> actions) {
+                        if (uri == null) {
+                            mNotificationsController.notifyScreenshotError(
+                                    R.string.screenshot_failed_to_capture_text);
+                        } else {
+                            mScreenshotHandler.post(() ->
+                                    createScreenshotActionsShadeAnimation(actions).start());
                         }
-                    });
-                    clearScreenshot();
-                } else {
-                    saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
-                        @Override
-                        void onActionsReady(Uri uri, List<Notification.Action> actions) {
-                            if (uri == null) {
-                                mNotificationsController.notifyScreenshotError(
-                                        R.string.screenshot_failed_to_capture_text);
-                            } else {
-                                mScreenshotHandler.post(() ->
-                                        createScreenshotActionsShadeAnimation(actions).start());
-                            }
-                        }
-                    });
-                    mScreenshotHandler.sendMessageDelayed(
-                            mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),
-                            SCREENSHOT_CORNER_TIMEOUT_MILLIS);
-                }
+                    }
+                });
+                mScreenshotHandler.sendMessageDelayed(
+                        mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),
+                        SCREENSHOT_CORNER_TIMEOUT_MILLIS);
             }
         });
         mScreenshotHandler.post(() -> {
@@ -492,7 +462,7 @@ public class GlobalScreenshot {
             }
 
             @Override
-            public void onAnimationEnd(android.animation.Animator animation) {
+            public void onAnimationEnd(Animator animation) {
                 mScreenshotFlash.setVisibility(View.GONE);
             }
         });
@@ -510,81 +480,6 @@ public class GlobalScreenshot {
                 mScreenshotFlash.setAlpha(flashAlphaInterpolator.getInterpolation(t));
             }
         });
-        return anim;
-    }
-
-    private ValueAnimator createScreenshotDropOutAnimation(int w, int h, boolean statusBarVisible,
-            boolean navBarVisible) {
-        ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-        anim.setStartDelay(SCREENSHOT_DROP_OUT_DELAY);
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mBackgroundView.setVisibility(View.GONE);
-                mScreenshotView.setVisibility(View.GONE);
-                mScreenshotView.setLayerType(View.LAYER_TYPE_NONE, null);
-            }
-        });
-
-        if (!statusBarVisible || !navBarVisible) {
-            // There is no status bar/nav bar, so just fade the screenshot away in place
-            anim.setDuration(SCREENSHOT_FAST_DROP_OUT_DURATION);
-            anim.addUpdateListener(new AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    float t = (Float) animation.getAnimatedValue();
-                    float scaleT = (SCREENSHOT_DROP_IN_MIN_SCALE + mBgPaddingScale)
-                            - t * (SCREENSHOT_DROP_IN_MIN_SCALE
-                            - SCREENSHOT_FAST_DROP_OUT_MIN_SCALE);
-                    mBackgroundView.setAlpha((1f - t) * BACKGROUND_ALPHA);
-                    mScreenshotView.setAlpha(1f - t);
-                    mScreenshotView.setScaleX(scaleT);
-                    mScreenshotView.setScaleY(scaleT);
-                }
-            });
-        } else {
-            // In the case where there is a status bar, animate to the origin of the bar (top-left)
-            final float scaleDurationPct = (float) SCREENSHOT_DROP_OUT_SCALE_DURATION
-                    / SCREENSHOT_DROP_OUT_DURATION;
-            final Interpolator scaleInterpolator = new Interpolator() {
-                @Override
-                public float getInterpolation(float x) {
-                    if (x < scaleDurationPct) {
-                        // Decelerate, and scale the input accordingly
-                        return (float) (1f - Math.pow(1f - (x / scaleDurationPct), 2f));
-                    }
-                    return 1f;
-                }
-            };
-
-            // Determine the bounds of how to scale
-            float halfScreenWidth = (w - 2f * mBgPadding) / 2f;
-            float halfScreenHeight = (h - 2f * mBgPadding) / 2f;
-            final float offsetPct = SCREENSHOT_DROP_OUT_MIN_SCALE_OFFSET;
-            final PointF finalPos = new PointF(
-                    -halfScreenWidth
-                            + (SCREENSHOT_DROP_OUT_MIN_SCALE + offsetPct) * halfScreenWidth,
-                    -halfScreenHeight
-                            + (SCREENSHOT_DROP_OUT_MIN_SCALE + offsetPct) * halfScreenHeight);
-
-            // Animate the screenshot to the status bar
-            anim.setDuration(SCREENSHOT_DROP_OUT_DURATION);
-            anim.addUpdateListener(new AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    float t = (Float) animation.getAnimatedValue();
-                    float scaleT = (SCREENSHOT_DROP_IN_MIN_SCALE + mBgPaddingScale)
-                            - scaleInterpolator.getInterpolation(t)
-                            * (SCREENSHOT_DROP_IN_MIN_SCALE - SCREENSHOT_DROP_OUT_MIN_SCALE);
-                    mBackgroundView.setAlpha((1f - t) * BACKGROUND_ALPHA);
-                    mScreenshotView.setAlpha(1f - scaleInterpolator.getInterpolation(t));
-                    mScreenshotView.setScaleX(scaleT);
-                    mScreenshotView.setScaleY(scaleT);
-                    mScreenshotView.setTranslationX(t * finalPos.x);
-                    mScreenshotView.setTranslationY(t * finalPos.y);
-                }
-            });
-        }
         return anim;
     }
 
@@ -648,13 +543,16 @@ public class GlobalScreenshot {
             });
             mActionsView.addView(actionChip);
         }
-        TextView scrollChip = (TextView) inflater.inflate(
-                R.layout.global_screenshot_action_chip, mActionsView, false);
-        Toast scrollNotImplemented = Toast.makeText(
-                mContext, "Not implemented", Toast.LENGTH_SHORT);
-        scrollChip.setText("Scroll"); // TODO (mkephart): add resource and translate
-        scrollChip.setOnClickListener(v -> scrollNotImplemented.show());
-        mActionsView.addView(scrollChip);
+
+        if (DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI, SCREENSHOT_SCROLLING_ENABLED, false)) {
+            TextView scrollChip = (TextView) inflater.inflate(
+                    R.layout.global_screenshot_action_chip, mActionsView, false);
+            Toast scrollNotImplemented = Toast.makeText(
+                    mContext, "Not implemented", Toast.LENGTH_SHORT);
+            scrollChip.setText("Scroll"); // TODO (mkephart): add resource and translate
+            scrollChip.setOnClickListener(v -> scrollNotImplemented.show());
+            mActionsView.addView(scrollChip);
+        }
 
         ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
         mActionsView.setY(mDisplayMetrics.heightPixels);
@@ -776,8 +674,7 @@ public class GlobalScreenshot {
             String actionType = intent.getStringExtra(EXTRA_ACTION_TYPE);
             Slog.d(TAG, "Executing smart action [" + actionType + "]:" + actionIntent);
             ActivityOptions opts = ActivityOptions.makeBasic();
-            context.startActivityAsUser(actionIntent, opts.toBundle(),
-                    UserHandle.CURRENT);
+            context.startActivityAsUser(actionIntent, opts.toBundle(), UserHandle.CURRENT);
 
             ScreenshotSmartActions.notifyScreenshotAction(
                     context, intent.getStringExtra(EXTRA_ID), actionType, true);

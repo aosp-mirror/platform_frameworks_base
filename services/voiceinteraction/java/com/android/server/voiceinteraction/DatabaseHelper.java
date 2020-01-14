@@ -27,6 +27,7 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +44,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     static final boolean DBG = false;
 
     private static final String NAME = "sound_model.db";
-    private static final int VERSION = 6;
+    private static final int VERSION = 7;
 
     public static interface SoundModelContract {
         public static final String TABLE = "sound_model";
@@ -56,6 +57,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public static final String KEY_LOCALE = "locale";
         public static final String KEY_HINT_TEXT = "hint_text";
         public static final String KEY_USERS = "users";
+        public static final String KEY_MODEL_VERSION = "model_version";
     }
 
     // Table Create Statement
@@ -70,6 +72,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + SoundModelContract.KEY_LOCALE + " TEXT,"
             + SoundModelContract.KEY_HINT_TEXT + " TEXT,"
             + SoundModelContract.KEY_USERS + " TEXT,"
+            + SoundModelContract.KEY_MODEL_VERSION + " INTEGER,"
             + "PRIMARY KEY (" + SoundModelContract.KEY_KEYPHRASE_ID + ","
                               + SoundModelContract.KEY_LOCALE + ","
                               + SoundModelContract.KEY_USERS + ")"
@@ -138,6 +141,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             oldVersion++;
         }
+        if (oldVersion == 6) {
+            // In version 7, a model version number was added.
+            Slog.d(TAG, "Adding model version column");
+            db.execSQL("ALTER TABLE " + SoundModelContract.TABLE + " ADD COLUMN "
+                    + SoundModelContract.KEY_MODEL_VERSION + " INTEGER DEFAULT -1");
+            oldVersion++;
+        }
     }
 
     /**
@@ -155,6 +165,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             values.put(SoundModelContract.KEY_TYPE, SoundTrigger.SoundModel.TYPE_KEYPHRASE);
             values.put(SoundModelContract.KEY_DATA, soundModel.data);
+            values.put(SoundModelContract.KEY_MODEL_VERSION, soundModel.version);
 
             if (soundModel.keyphrases != null && soundModel.keyphrases.length == 1) {
                 values.put(SoundModelContract.KEY_KEYPHRASE_ID, soundModel.keyphrases[0].id);
@@ -250,6 +261,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                                 c.getColumnIndex(SoundModelContract.KEY_LOCALE));
                         String text = c.getString(
                                 c.getColumnIndex(SoundModelContract.KEY_HINT_TEXT));
+                        int version = c.getInt(
+                                c.getColumnIndex(SoundModelContract.KEY_MODEL_VERSION));
 
                         // Only add keyphrases meant for the current user.
                         if (users == null) {
@@ -282,7 +295,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             vendorUuid = UUID.fromString(vendorUuidString);
                         }
                         KeyphraseSoundModel model = new KeyphraseSoundModel(
-                                UUID.fromString(modelUuid), vendorUuid, data, keyphrases);
+                                UUID.fromString(modelUuid), vendorUuid, data, keyphrases, version);
                         if (DBG) {
                             Slog.d(TAG, "Found SoundModel for the given keyphrase/locale/user: "
                                     + model);
@@ -325,6 +338,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return users;
     }
 
+    /**
+     * SoundModelRecord is no longer used, and it should only be used on database migration.
+     * This class does not need to be modified when modifying the database scheme.
+     */
     private static class SoundModelRecord {
         public final String modelUuid;
         public final String vendorUuid;
@@ -411,6 +428,50 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return a.equals(b);
           }
           return a == b;
+        }
+    }
+
+    public void dump(PrintWriter pw) {
+        synchronized(this) {
+            String selectQuery = "SELECT  * FROM " + SoundModelContract.TABLE;
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.rawQuery(selectQuery, null);
+            try {
+                pw.println("  Enrolled KeyphraseSoundModels:");
+                if (c.moveToFirst()) {
+                    String[] columnNames = c.getColumnNames();
+                    do {
+                        for (String name : columnNames) {
+                            int colNameIndex = c.getColumnIndex(name);
+                            int type = c.getType(colNameIndex);
+                            switch (type) {
+                                case Cursor.FIELD_TYPE_STRING:
+                                    pw.printf("    %s: %s\n", name,
+                                            c.getString(colNameIndex));
+                                    break;
+                                case Cursor.FIELD_TYPE_BLOB:
+                                    pw.printf("    %s: data blob\n", name);
+                                    break;
+                                case Cursor.FIELD_TYPE_INTEGER:
+                                    pw.printf("    %s: %d\n", name,
+                                            c.getInt(colNameIndex));
+                                    break;
+                                case Cursor.FIELD_TYPE_FLOAT:
+                                    pw.printf("    %s: %f\n", name,
+                                            c.getFloat(colNameIndex));
+                                    break;
+                                case Cursor.FIELD_TYPE_NULL:
+                                    pw.printf("    %s: null\n", name);
+                                    break;
+                            }
+                        }
+                        pw.println();
+                    } while (c.moveToNext());
+                }
+            } finally {
+                c.close();
+                db.close();
+            }
         }
     }
 }

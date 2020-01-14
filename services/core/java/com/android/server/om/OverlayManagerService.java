@@ -83,6 +83,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -925,7 +926,7 @@ public final class OverlayManagerService extends SystemService {
     /**
      * Updates the target packages' set of enabled overlays in PackageManager.
      */
-    private void updateOverlayPaths(int userId, List<String> targetPackageNames) {
+    private ArrayList<String> updateOverlayPaths(int userId, List<String> targetPackageNames) {
         try {
             traceBegin(TRACE_TAG_RRO, "OMS#updateOverlayPaths " + targetPackageNames);
             if (DEBUG) {
@@ -955,6 +956,7 @@ public final class OverlayManagerService extends SystemService {
                 }
             }
 
+            final HashSet<String> updatedPackages = new HashSet<>();
             final int n = targetPackageNames.size();
             for (int i = 0; i < n; i++) {
                 final String targetPackageName = targetPackageNames.get(i);
@@ -965,11 +967,13 @@ public final class OverlayManagerService extends SystemService {
                 }
 
                 if (!pm.setEnabledOverlayPackages(
-                        userId, targetPackageName, pendingChanges.get(targetPackageName))) {
+                        userId, targetPackageName, pendingChanges.get(targetPackageName),
+                        updatedPackages)) {
                     Slog.e(TAG, String.format("Failed to change enabled overlays for %s user %d",
                             targetPackageName, userId));
                 }
             }
+            return new ArrayList<>(updatedPackages);
         } finally {
             traceEnd(TRACE_TAG_RRO);
         }
@@ -980,10 +984,10 @@ public final class OverlayManagerService extends SystemService {
     }
 
     private void updateAssets(final int userId, List<String> targetPackageNames) {
-        updateOverlayPaths(userId, targetPackageNames);
         final IActivityManager am = ActivityManager.getService();
         try {
-            am.scheduleApplicationInfoChanged(targetPackageNames, userId);
+            final ArrayList<String> updatedPaths = updateOverlayPaths(userId, targetPackageNames);
+            am.scheduleApplicationInfoChanged(updatedPaths, userId);
         } catch (RemoteException e) {
             // Intentionally left empty.
         }

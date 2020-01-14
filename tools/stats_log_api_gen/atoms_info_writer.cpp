@@ -25,6 +25,8 @@ namespace android {
 namespace stats_log_api_gen {
 
 static void write_atoms_info_header_body(FILE* out, const Atoms& atoms) {
+    fprintf(out, "static int FIRST_UID_IN_CHAIN = 0;\n");
+
     fprintf(out, "struct StateAtomFieldOptions {\n");
     fprintf(out, "  std::vector<int> primaryFields;\n");
     fprintf(out, "  int exclusiveField;\n");

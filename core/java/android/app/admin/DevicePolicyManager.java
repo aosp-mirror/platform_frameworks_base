@@ -1411,6 +1411,16 @@ public class DevicePolicyManager {
             = "android.app.action.DEVICE_OWNER_CHANGED";
 
     /**
+     * Broadcast action: sent when the factory reset protection (FRP) policy is changed.
+     *
+     * @see #setFactoryResetProtectionPolicy
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_RESET_PROTECTION_POLICY_CHANGED =
+            "android.app.action.RESET_PROTECTION_POLICY_CHANGED";
+
+    /**
      * The ComponentName of the administrator component.
      *
      * @see #ACTION_ADD_DEVICE_ADMIN
@@ -4326,6 +4336,60 @@ public class DevicePolicyManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * Callable by device owner or profile owner of an organization-owned device, to set a
+     * factory reset protection (FRP) policy. When a new policy is set, the system
+     * notifies the FRP management agent of a policy change by broadcasting
+     * {@code ACTION_RESET_PROTECTION_POLICY_CHANGED}.
+     *
+     * @param admin  Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param policy the new FRP policy, or {@code null} to clear the current policy.
+     * @throws SecurityException if {@code admin} is not a device owner or a profile owner of
+     *                           an organization-owned device.
+     * @throws UnsupportedOperationException if factory reset protection is not
+     *                           supported on the device.
+     */
+    public void setFactoryResetProtectionPolicy(@NonNull ComponentName admin,
+            @Nullable FactoryResetProtectionPolicy policy) {
+        throwIfParentInstance("setFactoryResetProtectionPolicy");
+        if (mService != null) {
+            try {
+                mService.setFactoryResetProtectionPolicy(admin, policy);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Callable by device owner or profile owner of an organization-owned device, to retrieve
+     * the current factory reset protection (FRP) policy set previously by
+     * {@link #setFactoryResetProtectionPolicy}.
+     * <p>
+     * This method can also be called by the FRP management agent on device, in which case,
+     * it can pass {@code null} as the ComponentName.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with or
+     *              {@code null} if called by the FRP management agent on device.
+     * @return The current FRP policy object or {@code null} if no policy is set.
+     * @throws SecurityException if {@code admin} is not a device owner, a profile owner of
+     *                           an organization-owned device or the FRP management agent.
+     * @throws UnsupportedOperationException if factory reset protection is not
+     *                           supported on the device.
+     */
+    public @Nullable FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(
+            @Nullable ComponentName admin) {
+        throwIfParentInstance("getFactoryResetProtectionPolicy");
+        if (mService != null) {
+            try {
+                return mService.getFactoryResetProtectionPolicy(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
     }
 
     /**

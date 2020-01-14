@@ -672,6 +672,12 @@ public class CarrierConfigManager {
             "carrier_promote_wfc_on_call_fail_bool";
 
     /**
+     * Flag specifying whether provisioning is required for RCS.
+     */
+    public static final String KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL =
+            "carrier_rcs_provisioning_required_bool";
+
+    /**
      * Flag specifying whether provisioning is required for VoLTE, Video Telephony, and WiFi
      * Calling.
      */
@@ -848,9 +854,12 @@ public class CarrierConfigManager {
             "carrier_force_disable_etws_cmas_test_bool";
 
     /**
-     * The default flag specifying whether "Turn on Notifications" option will be always shown in
-     * Settings->More->Emergency broadcasts menu regardless developer options is turned on or not.
+     * The default flag specifying whether "Allow alerts" option will be always shown in
+     * emergency alerts settings regardless developer options is turned on or not.
+     *
+     * @deprecated The allow alerts option is always shown now. No longer need a config for that.
      */
+    @Deprecated
     public static final String KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL =
             "always_show_emergency_alert_onoff_bool";
 
@@ -1627,8 +1636,8 @@ public class CarrierConfigManager {
      * Defines carrier-specific actions which act upon
      * com.android.internal.telephony.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED
      * and configured signal args:
-     * {@link com.android.internal.telephony.TelephonyIntents#EXTRA_APN_TYPE_KEY apnType},
-     * {@link com.android.internal.telephony.TelephonyIntents#EXTRA_ERROR_CODE_KEY errorCode}
+     * {@link TelephonyManager#EXTRA_APN_TYPE apnType},
+     * {@link TelephonyManager#EXTRA_ERROR_CODE errorCode}
      * used for customization of the default carrier app
      * Format:
      * {
@@ -3497,6 +3506,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT, 2);
         sDefaults.putInt(KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT, 2);
         sDefaults.putBoolean(KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL, false);

@@ -55,7 +55,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -376,6 +375,33 @@ abstract class ApexManager {
             }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
         }
 
+        private void populatePackageNameToApexModuleNameIfNeeded() {
+            synchronized (mLock) {
+                if (mPackageNameToApexModuleName != null) {
+                    return;
+                }
+                try {
+                    mPackageNameToApexModuleName = new ArrayMap<>();
+                    final ApexInfo[] allPkgs = mApexService.getAllPackages();
+                    for (int i = 0; i < allPkgs.length; i++) {
+                        ApexInfo ai = allPkgs[i];
+                        PackageParser.PackageLite pkgLite;
+                        try {
+                            File apexFile = new File(ai.modulePath);
+                            pkgLite = PackageParser.parsePackageLite(apexFile, 0);
+                        } catch (PackageParser.PackageParserException pe) {
+                            throw new IllegalStateException("Unable to parse: "
+                                    + ai.modulePath, pe);
+                        }
+                        mPackageNameToApexModuleName.put(pkgLite.packageName, ai.moduleName);
+                    }
+                } catch (RemoteException re) {
+                    Slog.e(TAG, "Unable to retrieve packages from apexservice: ", re);
+                    throw new RuntimeException(re);
+                }
+            }
+        }
+
         private void populateAllPackagesCacheIfNeeded() {
             synchronized (mLock) {
                 if (mAllPackagesCache != null) {
@@ -383,7 +409,6 @@ abstract class ApexManager {
                 }
                 try {
                     mAllPackagesCache = new ArrayList<>();
-                    mPackageNameToApexModuleName = new HashMap<>();
                     HashSet<String> activePackagesSet = new HashSet<>();
                     HashSet<String> factoryPackagesSet = new HashSet<>();
                     final ApexInfo[] allPkgs = mApexService.getAllPackages();
@@ -409,7 +434,6 @@ abstract class ApexManager {
                         final PackageInfo packageInfo =
                                 PackageParser.generatePackageInfo(pkg, ai, flags);
                         mAllPackagesCache.add(packageInfo);
-                        mPackageNameToApexModuleName.put(packageInfo.packageName, ai.moduleName);
                         if (ai.isActive) {
                             if (activePackagesSet.contains(packageInfo.packageName)) {
                                 throw new IllegalStateException(
@@ -612,8 +636,7 @@ abstract class ApexManager {
 
         @Override
         List<String> getApksInApex(String apexPackageName) {
-            // TODO(b/142712057): Avoid calling populateAllPackagesCacheIfNeeded during boot.
-            populateAllPackagesCacheIfNeeded();
+            populatePackageNameToApexModuleNameIfNeeded();
             synchronized (mLock) {
                 String moduleName = mPackageNameToApexModuleName.get(apexPackageName);
                 if (moduleName == null) {

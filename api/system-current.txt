@@ -190,6 +190,7 @@ package android {
     field public static final String REVIEW_ACCESSIBILITY_SERVICES = "android.permission.REVIEW_ACCESSIBILITY_SERVICES";
     field public static final String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
+    field public static final String SECURE_ELEMENT_PRIVILEGED = "android.permission.SECURE_ELEMENT_PRIVILEGED";
     field public static final String SEND_DEVICE_CUSTOMIZATION_READY = "android.permission.SEND_DEVICE_CUSTOMIZATION_READY";
     field public static final String SEND_SHOW_SUSPENDED_APP_DETAILS = "android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS";
     field public static final String SEND_SMS_NO_CONFIRMATION = "android.permission.SEND_SMS_NO_CONFIRMATION";
@@ -210,6 +211,7 @@ package android {
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
     field public static final String SYSTEM_CAMERA = "android.permission.SYSTEM_CAMERA";
     field public static final String TETHER_PRIVILEGED = "android.permission.TETHER_PRIVILEGED";
+    field public static final String TUNER_RESOURCE_ACCESS = "android.permission.TUNER_RESOURCE_ACCESS";
     field public static final String TV_INPUT_HARDWARE = "android.permission.TV_INPUT_HARDWARE";
     field public static final String TV_VIRTUAL_REMOTE_CONTROLLER = "android.permission.TV_VIRTUAL_REMOTE_CONTROLLER";
     field public static final String UNLIMITED_SHORTCUTS_API_CALLS = "android.permission.UNLIMITED_SHORTCUTS_API_CALLS";
@@ -282,6 +284,7 @@ package android {
     field public static final int config_helpIntentNameKey = 17039390; // 0x104001e
     field public static final int config_helpPackageNameKey = 17039387; // 0x104001b
     field public static final int config_helpPackageNameValue = 17039388; // 0x104001c
+    field public static final int config_systemGallery = 17039402; // 0x104002a
   }
 
   public static final class R.style {
@@ -814,6 +817,7 @@ package android.app.admin {
     field public static final String ACTION_PROVISION_FINALIZATION = "android.app.action.PROVISION_FINALIZATION";
     field public static final String ACTION_PROVISION_FINANCED_DEVICE = "android.app.action.PROVISION_FINANCED_DEVICE";
     field public static final String ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE = "android.app.action.PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE";
+    field public static final String ACTION_RESET_PROTECTION_POLICY_CHANGED = "android.app.action.RESET_PROTECTION_POLICY_CHANGED";
     field public static final String ACTION_SET_PROFILE_OWNER = "android.app.action.SET_PROFILE_OWNER";
     field public static final String ACTION_STATE_USER_SETUP_COMPLETE = "android.app.action.STATE_USER_SETUP_COMPLETE";
     field public static final String EXTRA_PROFILE_OWNER_NAME = "android.app.extra.PROFILE_OWNER_NAME";
@@ -1328,6 +1332,10 @@ package android.app.usage {
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract java.util.List<android.app.usage.CacheQuotaHint> onComputeCacheQuotaHints(java.util.List<android.app.usage.CacheQuotaHint>);
     field public static final String SERVICE_INTERFACE = "android.app.usage.CacheQuotaService";
+  }
+
+  public class NetworkStatsManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.net.netstats.provider.NetworkStatsProviderCallback registerNetworkStatsProvider(@NonNull String, @NonNull android.net.netstats.provider.AbstractNetworkStatsProvider);
   }
 
   public static final class UsageEvents.Event {
@@ -2408,7 +2416,7 @@ package android.hardware.biometrics {
 package android.hardware.camera2 {
 
   public abstract class CameraDevice implements java.lang.AutoCloseable {
-    method public abstract void createCustomCaptureSession(android.hardware.camera2.params.InputConfiguration, @NonNull java.util.List<android.hardware.camera2.params.OutputConfiguration>, int, @NonNull android.hardware.camera2.CameraCaptureSession.StateCallback, @Nullable android.os.Handler) throws android.hardware.camera2.CameraAccessException;
+    method @Deprecated public abstract void createCustomCaptureSession(android.hardware.camera2.params.InputConfiguration, @NonNull java.util.List<android.hardware.camera2.params.OutputConfiguration>, int, @NonNull android.hardware.camera2.CameraCaptureSession.StateCallback, @Nullable android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     field public static final int SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED = 1; // 0x1
     field public static final int SESSION_OPERATION_MODE_NORMAL = 0; // 0x0
     field public static final int SESSION_OPERATION_MODE_VENDOR_START = 32768; // 0x8000
@@ -4397,10 +4405,12 @@ package android.media.soundtrigger {
   }
 
   public static class SoundTriggerManager.Model {
-    method public static android.media.soundtrigger.SoundTriggerManager.Model create(java.util.UUID, java.util.UUID, byte[]);
-    method public byte[] getModelData();
-    method public java.util.UUID getModelUuid();
-    method public java.util.UUID getVendorUuid();
+    method @NonNull public static android.media.soundtrigger.SoundTriggerManager.Model create(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], int);
+    method @NonNull public static android.media.soundtrigger.SoundTriggerManager.Model create(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[]);
+    method @Nullable public byte[] getModelData();
+    method @NonNull public java.util.UUID getModelUuid();
+    method @NonNull public java.util.UUID getVendorUuid();
+    method public int getVersion();
   }
 
 }
@@ -4530,6 +4540,7 @@ package android.media.tv {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void addBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public boolean captureFrame(String, android.view.Surface, android.media.tv.TvStreamConfig);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public java.util.List<android.media.tv.TvStreamConfig> getAvailableTvStreamConfigList(String);
+    method @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS) public int getClientPid(@NonNull String);
     method @NonNull @RequiresPermission("android.permission.DVB_DEVICE") public java.util.List<android.media.tv.DvbDeviceInfo> getDvbDeviceList();
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public java.util.List<android.media.tv.TvInputHardwareInfo> getHardwareList();
     method @RequiresPermission(android.Manifest.permission.READ_CONTENT_RATING_SYSTEMS) public java.util.List<android.media.tv.TvContentRatingSystemInfo> getTvContentRatingSystemList();
@@ -4541,6 +4552,7 @@ package android.media.tv {
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public void releaseTvInputHardware(int, android.media.tv.TvInputManager.Hardware);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void removeBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void setParentalControlsEnabled(boolean);
+    field public static final int UNKNOWN_CLIENT_PID = -1; // 0xffffffff
   }
 
   public static final class TvInputManager.Hardware {
@@ -4617,6 +4629,28 @@ package android.media.tv.tuner {
     method public abstract int getType();
   }
 
+  public class Lnb implements java.lang.AutoCloseable {
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void close();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int sendDiseqcMessage(@NonNull byte[]);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setSatellitePosition(int);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setTone(int);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setVoltage(int);
+    field public static final int POSITION_A = 1; // 0x1
+    field public static final int POSITION_B = 2; // 0x2
+    field public static final int POSITION_UNDEFINED = 0; // 0x0
+    field public static final int TONE_CONTINUOUS = 1; // 0x1
+    field public static final int TONE_NONE = 0; // 0x0
+    field public static final int VOLTAGE_11V = 2; // 0x2
+    field public static final int VOLTAGE_12V = 3; // 0x3
+    field public static final int VOLTAGE_13V = 4; // 0x4
+    field public static final int VOLTAGE_14V = 5; // 0x5
+    field public static final int VOLTAGE_15V = 6; // 0x6
+    field public static final int VOLTAGE_18V = 7; // 0x7
+    field public static final int VOLTAGE_19V = 8; // 0x8
+    field public static final int VOLTAGE_5V = 1; // 0x1
+    field public static final int VOLTAGE_NONE = 0; // 0x0
+  }
+
   public final class Tuner implements java.lang.AutoCloseable {
     ctor public Tuner(@NonNull android.content.Context);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.Tuner.Descrambler openDescrambler();
@@ -4639,6 +4673,13 @@ package android.media.tv.tuner {
     field public static final int FILTER_STATUS_HIGH_WATER = 4; // 0x4
     field public static final int FILTER_STATUS_LOW_WATER = 2; // 0x2
     field public static final int FILTER_STATUS_OVERFLOW = 8; // 0x8
+    field public static final int RESULT_INVALID_ARGUMENT = 4; // 0x4
+    field public static final int RESULT_INVALID_STATE = 3; // 0x3
+    field public static final int RESULT_NOT_INITIALIZED = 2; // 0x2
+    field public static final int RESULT_OUT_OF_MEMORY = 5; // 0x5
+    field public static final int RESULT_SUCCESS = 0; // 0x0
+    field public static final int RESULT_UNAVAILABLE = 1; // 0x1
+    field public static final int RESULT_UNKNOWN_ERROR = 6; // 0x6
   }
 
 }
@@ -8075,7 +8116,6 @@ package android.provider {
     field @NonNull public static final String ENABLE_CMAS_PRESIDENTIAL_PREF = "enable_cmas_presidential_alerts";
     field @NonNull public static final String ENABLE_CMAS_SEVERE_THREAT_PREF = "enable_cmas_severe_threat_alerts";
     field @NonNull public static final String ENABLE_EMERGENCY_PERF = "enable_emergency_alerts";
-    field @NonNull public static final String ENABLE_FULL_VOLUME_PREF = "use_full_volume";
     field @NonNull public static final String ENABLE_PUBLIC_SAFETY_PREF = "enable_public_safety_messages";
     field @NonNull public static final String ENABLE_STATE_LOCAL_TEST_PREF = "enable_state_local_test_alerts";
     field @NonNull public static final String ENABLE_TEST_ALERT_PREF = "enable_test_alerts";
@@ -9311,6 +9351,7 @@ package android.telephony {
 
   public final class CallQuality implements android.os.Parcelable {
     ctor public CallQuality(int, int, int, int, int, int, int, int, int, int, int);
+    ctor public CallQuality(int, int, int, int, int, int, int, int, int, int, int, boolean, boolean, boolean);
     method public int describeContents();
     method public int getAverageRelativeJitter();
     method public int getAverageRoundTripTime();
@@ -9323,6 +9364,9 @@ package android.telephony {
     method public int getNumRtpPacketsTransmitted();
     method public int getNumRtpPacketsTransmittedLost();
     method public int getUplinkCallQualityLevel();
+    method public boolean isIncomingSilenceDetected();
+    method public boolean isOutgoingSilenceDetected();
+    method public boolean isRtpInactivityDetected();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CALL_QUALITY_BAD = 4; // 0x4
     field public static final int CALL_QUALITY_EXCELLENT = 0; // 0x0
@@ -10327,6 +10371,10 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void sendMultipartTextMessageWithoutPersisting(String, String, java.util.List<java.lang.String>, java.util.List<android.app.PendingIntent>, java.util.List<android.app.PendingIntent>);
   }
 
+  public class SmsMessage {
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static byte[] getSubmitPduEncodedMessage(boolean, @NonNull String, @NonNull String, int, int, int, int, int, int);
+  }
+
   public class SubscriptionInfo implements android.os.Parcelable {
     method public boolean areUiccApplicationsEnabled();
     method @Nullable public java.util.List<android.telephony.UiccAccessRule> getAccessRules();
@@ -10519,12 +10567,16 @@ package android.telephony {
     method public void updateServiceLocation();
     method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void updateTestOtaEmergencyNumberDbFilePath(@NonNull String);
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final String ACTION_ANOMALY_REPORTED = "android.telephony.action.ANOMALY_REPORTED";
+    field public static final String ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE = "com.android.internal.telephony.CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE";
+    field public static final String ACTION_CARRIER_SIGNAL_PCO_VALUE = "com.android.internal.telephony.CARRIER_SIGNAL_PCO_VALUE";
+    field public static final String ACTION_CARRIER_SIGNAL_REDIRECTED = "com.android.internal.telephony.CARRIER_SIGNAL_REDIRECTED";
+    field public static final String ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED = "com.android.internal.telephony.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED";
+    field public static final String ACTION_CARRIER_SIGNAL_RESET = "com.android.internal.telephony.CARRIER_SIGNAL_RESET";
     field public static final String ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED = "android.intent.action.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED";
     field public static final String ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED = "android.intent.action.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED";
     field public static final String ACTION_EMERGENCY_ASSISTANCE = "android.telephony.action.EMERGENCY_ASSISTANCE";
     field public static final String ACTION_EMERGENCY_CALLBACK_MODE_CHANGED = "android.intent.action.EMERGENCY_CALLBACK_MODE_CHANGED";
     field public static final String ACTION_EMERGENCY_CALL_STATE_CHANGED = "android.intent.action.EMERGENCY_CALL_STATE_CHANGED";
-    field public static final String ACTION_NETWORK_SET_TIME = "android.telephony.action.NETWORK_SET_TIME";
     field public static final String ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE = "com.android.omadm.service.CONFIGURATION_UPDATE";
     field public static final String ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS = "android.telephony.action.SHOW_NOTICE_ECM_BLOCK_OTHERS";
     field public static final String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
@@ -10536,6 +10588,15 @@ package android.telephony {
     field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
     field public static final String EXTRA_ANOMALY_DESCRIPTION = "android.telephony.extra.ANOMALY_DESCRIPTION";
     field public static final String EXTRA_ANOMALY_ID = "android.telephony.extra.ANOMALY_ID";
+    field @Deprecated public static final String EXTRA_APN_PROTOCOL = "apnProto";
+    field public static final String EXTRA_APN_PROTOCOL_INT = "apnProtoInt";
+    field @Deprecated public static final String EXTRA_APN_TYPE = "apnType";
+    field public static final String EXTRA_APN_TYPE_INT = "apnTypeInt";
+    field public static final String EXTRA_DEFAULT_NETWORK_AVAILABLE = "defaultNetworkAvailable";
+    field public static final String EXTRA_ERROR_CODE = "errorCode";
+    field public static final String EXTRA_PCO_ID = "pcoId";
+    field public static final String EXTRA_PCO_VALUE = "pcoValue";
+    field public static final String EXTRA_REDIRECTION_URL = "redirectionUrl";
     field public static final String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
     field public static final String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL = "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
     field public static final String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
@@ -11435,10 +11496,12 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public int getProvisioningIntValue(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean getProvisioningStatusForCapability(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public String getProvisioningStringValue(int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean getRcsProvisioningStatusForCapability(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerProvisioningChangedCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ProvisioningManager.Callback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningIntValue(int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setProvisioningStatusForCapability(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningStringValue(int, @NonNull String);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setRcsProvisioningStatusForCapability(int, boolean);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterProvisioningChangedCallback(@NonNull android.telephony.ims.ProvisioningManager.Callback);
     field public static final int KEY_EAB_PROVISIONING_STATUS = 25; // 0x19
     field public static final int KEY_RCS_AVAILABILITY_CACHE_EXPIRATION_SEC = 19; // 0x13

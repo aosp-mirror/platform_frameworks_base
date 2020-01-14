@@ -1,0 +1,40 @@
+rule android.net.InterfaceConfigurationParcel* @0
+rule android.net.InterfaceConfiguration* com.android.server.x.wifi.net.InterfaceConfiguration@1
+
+# We don't jar-jar the entire package because, we still use some classes (like
+# AsyncChannel in com.android.internal.util) from these packages which are not
+# inside our jar (currently in framework.jar, but will be in wifisdk.jar in the future).
+rule com.android.internal.util.FastXmlSerializer* com.android.server.x.wifi.util.FastXmlSerializer@1
+rule com.android.internal.util.HexDump* com.android.server.x.wifi.util.HexDump@1
+rule com.android.internal.util.IState* com.android.server.x.wifi.util.IState@1
+rule com.android.internal.util.MessageUtils* com.android.server.x.wifi.util.MessageUtils@1
+rule com.android.internal.util.State* com.android.server.x.wifi.util.State@1
+rule com.android.internal.util.StateMachine* com.android.server.x.wifi.util.StateMachine@1
+rule com.android.internal.util.WakeupMessage* com.android.server.x.wifi.util.WakeupMessage@1
+
+rule android.util.BackupUtils* com.android.server.x.wifi.util.BackupUtils@1
+rule android.util.LocalLog* com.android.server.x.wifi.util.LocalLog@1
+rule android.util.Rational* com.android.server.x.wifi.util.Rational@1
+
+rule android.os.BasicShellCommandHandler* com.android.server.x.wifi.os.BasicShellCommandHandler@1
+
+# Use our statically linked bouncy castle library
+rule org.bouncycastle.** com.android.server.x.wifi.bouncycastle.@1
+# Use our statically linked protobuf library
+rule com.google.protobuf.** com.android.server.x.wifi.protobuf.@1
+# use statically linked SystemMessageProto
+rule com.android.internal.messages.SystemMessageProto* com.android.server.x.wifi.messages.SystemMessageProto@1
+# Use our statically linked PlatformProperties library
+rule android.sysprop.** com.android.server.x.wifi.sysprop.@1
+
+
+# used by both framework-wifi and wifi-service
+rule android.content.pm.BaseParceledListSlice* android.x.net.wifi.util.BaseParceledListSlice@1
+rule android.content.pm.ParceledListSlice* android.x.net.wifi.util.ParceledListSlice@1
+rule android.net.shared.Inet4AddressUtils* android.x.net.wifi.util.Inet4AddressUtils@1
+rule android.os.HandlerExecutor* android.x.net.wifi.util.HandlerExecutor@1
+rule android.telephony.Annotation* android.x.net.wifi.util.TelephonyAnnotation@1
+rule com.android.internal.util.AsyncChannel* android.x.net.wifi.util.AsyncChannel@1
+rule com.android.internal.util.AsyncService* android.x.net.wifi.util.AsyncService@1
+rule com.android.internal.util.Preconditions* android.x.net.wifi.util.Preconditions@1
+rule com.android.internal.util.Protocol* android.x.net.wifi.util.Protocol@1

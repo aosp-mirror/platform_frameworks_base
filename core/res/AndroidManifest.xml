@@ -445,6 +445,7 @@
 
     <protected-broadcast android:name="android.internal.policy.action.BURN_IN_PROTECTION" />
     <protected-broadcast android:name="android.app.action.SYSTEM_UPDATE_POLICY_CHANGED" />
+    <protected-broadcast android:name="android.app.action.RESET_PROTECTION_POLICY_CHANGED" />
     <protected-broadcast android:name="android.app.action.DEVICE_OWNER_CHANGED" />
     <protected-broadcast android:name="android.app.action.MANAGED_USER_CREATED" />
 
@@ -639,10 +640,6 @@
     <protected-broadcast android:name="android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL" />
 
     <protected-broadcast android:name="android.intent.action.DEVICE_CUSTOMIZATION_READY" />
-
-    <!-- NETWORK_SET_TIME moved from com.android.phone to system server. It should ultimately be
-         removed. -->
-    <protected-broadcast android:name="android.telephony.action.NETWORK_SET_TIME" />
 
     <!-- For tether entitlement recheck-->
     <protected-broadcast
@@ -1790,6 +1787,11 @@
         android:description="@string/permdesc_preferredPaymentInfo"
         android:label="@string/permlab_preferredPaymentInfo"
         android:protectionLevel="normal" />
+
+    <!-- @SystemApi Allows an internal user to use privileged SecureElement APIs.
+         @hide -->
+    <permission android:name="android.permission.SECURE_ELEMENT_PRIVILEGED"
+        android:protectionLevel="signature|privileged" />
 
     <!-- @deprecated This permission used to allow too broad access to sensitive methods and all its
          uses have been replaced by a more appropriate permission. Most uses have been replaced with
@@ -3382,6 +3384,14 @@
          <p>Not for use by third-party applications.
          @hide -->
     <permission android:name="android.permission.NOTIFY_TV_INPUTS"
+         android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows an application to interact with tuner resources through
+         Tuner Resource Manager.
+         <p>Protection level: signature|privileged
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.TUNER_RESOURCE_ACCESS"
          android:protectionLevel="signature|privileged" />
 
     <!-- Must be required by a {@link android.media.routing.MediaRouteService}

@@ -25,6 +25,7 @@
 
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
+#include "androidfw/DynamicLibManager.h"
 #include "androidfw/ResourceUtils.h"
 #include "androidfw/Util.h"
 #include "utils/ByteOrder.h"
@@ -66,7 +67,12 @@ struct FindEntryResult {
   StringPoolRef entry_string_ref;
 };
 
-AssetManager2::AssetManager2() {
+AssetManager2::AssetManager2() : dynamic_lib_manager_(std::make_unique<DynamicLibManager>()) {
+  memset(&configuration_, 0, sizeof(configuration_));
+}
+
+AssetManager2::AssetManager2(DynamicLibManager* dynamic_lib_manager)
+    : dynamic_lib_manager_(dynamic_lib_manager) {
   memset(&configuration_, 0, sizeof(configuration_));
 }
 
@@ -85,24 +91,44 @@ void AssetManager2::BuildDynamicRefTable() {
   package_groups_.clear();
   package_ids_.fill(0xff);
 
-  // A mapping from apk assets path to the runtime package id of its first loaded package.
+  // Overlay resources are not directly referenced by an application so their resource ids
+  // can change throughout the application's lifetime. Assign overlay package ids last.
+  std::vector<const ApkAssets*> sorted_apk_assets(apk_assets_);
+  std::stable_partition(sorted_apk_assets.begin(), sorted_apk_assets.end(), [](const ApkAssets* a) {
+    return !a->IsOverlay();
+  });
+
   std::unordered_map<std::string, uint8_t> apk_assets_package_ids;
+  std::unordered_map<std::string, uint8_t> package_name_package_ids;
 
-  // 0x01 is reserved for the android package.
-  int next_package_id = 0x02;
-  const size_t apk_assets_count = apk_assets_.size();
-  for (size_t i = 0; i < apk_assets_count; i++) {
-    const ApkAssets* apk_assets = apk_assets_[i];
-    const LoadedArsc* loaded_arsc = apk_assets->GetLoadedArsc();
-
-    for (const std::unique_ptr<const LoadedPackage>& package : loaded_arsc->GetPackages()) {
-      // Get the package ID or assign one if a shared library.
-      int package_id;
-      if (package->IsDynamic()) {
-        package_id = next_package_id++;
-      } else {
-        package_id = package->GetPackageId();
+  // Assign stable package ids to application packages.
+  uint8_t next_available_package_id = 0U;
+  for (const auto& apk_assets : sorted_apk_assets) {
+    for (const auto& package : apk_assets->GetLoadedArsc()->GetPackages()) {
+      uint8_t package_id = package->GetPackageId();
+      if (package->IsOverlay()) {
+        package_id = GetDynamicLibManager()->FindUnassignedId(next_available_package_id);
+        next_available_package_id = package_id + 1;
+      } else if (package->IsDynamic()) {
+        package_id = GetDynamicLibManager()->GetAssignedId(package->GetPackageName());
       }
+
+      // Map the path of the apk assets to the package id of its first loaded package.
+      apk_assets_package_ids[apk_assets->GetPath()] = package_id;
+
+      // Map the package name of the package to the first loaded package with that package id.
+      package_name_package_ids[package->GetPackageName()] = package_id;
+    }
+  }
+
+  const int apk_assets_count = apk_assets_.size();
+  for (int i = 0; i < apk_assets_count; i++) {
+    const auto& apk_assets = apk_assets_[i];
+    for (const auto& package : apk_assets->GetLoadedArsc()->GetPackages()) {
+      const auto package_id_entry = package_name_package_ids.find(package->GetPackageName());
+      CHECK(package_id_entry != package_name_package_ids.end())
+          << "no package id assgined to package " << package->GetPackageName();
+      const uint8_t package_id = package_id_entry->second;
 
       // Add the mapping for package ID to index if not present.
       uint8_t idx = package_ids_[package_id];
@@ -115,7 +141,10 @@ void AssetManager2::BuildDynamicRefTable() {
           // to take effect.
           const auto& loaded_idmap = apk_assets->GetLoadedIdmap();
           auto target_package_iter = apk_assets_package_ids.find(loaded_idmap->TargetApkPath());
-          if (target_package_iter != apk_assets_package_ids.end()) {
+          if (target_package_iter == apk_assets_package_ids.end()) {
+             LOG(INFO) << "failed to find target package for overlay "
+                       << loaded_idmap->OverlayApkPath();
+          } else {
             const uint8_t target_package_id = target_package_iter->second;
             const uint8_t target_idx = package_ids_[target_package_id];
             CHECK(target_idx != 0xff) << "overlay added to apk_assets_package_ids but does not"
@@ -123,7 +152,7 @@ void AssetManager2::BuildDynamicRefTable() {
 
             PackageGroup& target_package_group = package_groups_[target_idx];
 
-            // Create a special dynamic reference table for the overlay to rewite references to
+            // Create a special dynamic reference table for the overlay to rewrite references to
             // overlay resources as references to the target resources they overlay.
             auto overlay_table = std::make_shared<OverlayDynamicRefTable>(
                 loaded_idmap->GetOverlayDynamicRefTable(target_package_id));
@@ -153,8 +182,6 @@ void AssetManager2::BuildDynamicRefTable() {
         package_group->dynamic_ref_table->mEntries.replaceValueFor(
             package_name, static_cast<uint8_t>(entry.package_id));
       }
-
-      apk_assets_package_ids.insert(std::make_pair(apk_assets->GetPath(), package_id));
     }
   }
 
@@ -567,7 +594,7 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
       if (resource_resolution_logging_enabled_) {
         last_resolution_.steps.push_back(
             Resolution::Step{Resolution::Step::Type::OVERLAID, overlay_result.config.toString(),
-                             &package_group.packages_[0].loaded_package_->GetPackageName()});
+                             overlay_result.package_name});
       }
     }
   }
@@ -1277,6 +1304,16 @@ uint8_t AssetManager2::GetAssignedPackageId(const LoadedPackage* package) const 
     }
   }
   return 0;
+}
+
+DynamicLibManager* AssetManager2::GetDynamicLibManager() const {
+  auto dynamic_lib_manager =
+      std::get_if<std::unique_ptr<DynamicLibManager>>(&dynamic_lib_manager_);
+  if (dynamic_lib_manager) {
+    return (*dynamic_lib_manager).get();
+  } else {
+    return *std::get_if<DynamicLibManager*>(&dynamic_lib_manager_);
+  }
 }
 
 std::unique_ptr<Theme> AssetManager2::NewTheme() {

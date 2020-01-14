@@ -895,7 +895,7 @@ class Linker {
           // android:versionCode from the framework AndroidManifest.xml.
           ExtractCompileSdkVersions(asset_source->GetAssetManager());
         }
-      } else if (asset_source->IsPackageDynamic(entry.first)) {
+      } else if (asset_source->IsPackageDynamic(entry.first, entry.second)) {
         final_table_.included_packages_[entry.first] = entry.second;
       }
     }

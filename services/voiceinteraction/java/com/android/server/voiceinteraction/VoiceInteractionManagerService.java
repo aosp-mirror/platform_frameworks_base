@@ -159,9 +159,13 @@ public class VoiceInteractionManagerService extends SystemService {
         }
     }
 
+    private boolean isSupported(UserInfo user) {
+        return user.isFull();
+    }
+
     @Override
-    public boolean isSupported(UserInfo userInfo) {
-        return userInfo.isFull();
+    public boolean isSupportedUser(TargetUser user) {
+        return isSupported(user.getUserInfo());
     }
 
     @Override
@@ -1343,6 +1347,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 pw.println("  mCurUserUnlocked: " + mCurUserUnlocked);
                 pw.println("  mCurUserSupported: " + mCurUserSupported);
                 dumpSupportedUsers(pw, "  ");
+                mDbHelper.dump(pw);
                 if (mImpl == null) {
                     pw.println("  (No active implementation)");
                     return;

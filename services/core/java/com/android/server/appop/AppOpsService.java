@@ -1759,8 +1759,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 ? opNames.toArray(new String[opNames.size()]) : null;
 
         // Must not hold the appops lock
-        mHistoricalRegistry.getHistoricalOps(uid, packageName, featureId, opNamesArray, filter,
-                beginTimeMillis, endTimeMillis, flags, callback);
+        mHandler.post(PooledLambda.obtainRunnable(HistoricalRegistry::getHistoricalOps,
+                mHistoricalRegistry, uid, packageName, featureId, opNamesArray, filter,
+                beginTimeMillis, endTimeMillis, flags, callback).recycleOnUse());
     }
 
     @Override
@@ -1778,8 +1779,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 ? opNames.toArray(new String[opNames.size()]) : null;
 
         // Must not hold the appops lock
-        mHistoricalRegistry.getHistoricalOpsFromDiskRaw(uid, packageName, featureId, opNamesArray,
-                filter, beginTimeMillis, endTimeMillis, flags, callback);
+        mHandler.post(PooledLambda.obtainRunnable(HistoricalRegistry::getHistoricalOpsFromDiskRaw,
+                mHistoricalRegistry, uid, packageName, featureId, opNamesArray,
+                filter, beginTimeMillis, endTimeMillis, flags, callback).recycleOnUse());
     }
 
     @Override

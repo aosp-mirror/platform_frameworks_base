@@ -303,16 +303,20 @@ public class SoundTrigger {
         @NonNull
         public final UUID vendorUuid;
 
+        /** vendor specific version number of the model */
+        public final int version;
+
         /** Opaque data. For use by vendor implementation and enrollment application */
         @UnsupportedAppUsage
         @NonNull
         public final byte[] data;
 
         public SoundModel(@NonNull UUID uuid, @Nullable UUID vendorUuid, int type,
-                @Nullable byte[] data) {
+                @Nullable byte[] data, int version) {
             this.uuid = requireNonNull(uuid);
             this.vendorUuid = vendorUuid != null ? vendorUuid : new UUID(0, 0);
             this.type = type;
+            this.version = version;
             this.data = data != null ? data : new byte[0];
         }
 
@@ -320,6 +324,7 @@ public class SoundTrigger {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
+            result = prime * result + version;
             result = prime * result + Arrays.hashCode(data);
             result = prime * result + type;
             result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
@@ -349,6 +354,8 @@ public class SoundTrigger {
             } else if (!vendorUuid.equals(other.vendorUuid))
                 return false;
             if (!Arrays.equals(data, other.data))
+                return false;
+            if (version != other.version)
                 return false;
             return true;
         }
@@ -499,12 +506,17 @@ public class SoundTrigger {
         @NonNull
         public final Keyphrase[] keyphrases; // keyword phrases in model
 
-        @UnsupportedAppUsage
         public KeyphraseSoundModel(
                 @NonNull UUID uuid, @NonNull UUID vendorUuid, @Nullable byte[] data,
-                @Nullable Keyphrase[] keyphrases) {
-            super(uuid, vendorUuid, TYPE_KEYPHRASE, data);
+                @Nullable Keyphrase[] keyphrases, int version) {
+            super(uuid, vendorUuid, TYPE_KEYPHRASE, data, version);
             this.keyphrases = keyphrases != null ? keyphrases : new Keyphrase[0];
+        }
+
+        @UnsupportedAppUsage
+        public KeyphraseSoundModel(@NonNull UUID uuid, @NonNull UUID vendorUuid,
+                @Nullable byte[] data, @Nullable Keyphrase[] keyphrases) {
+            this(uuid, vendorUuid, data, keyphrases, -1);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<KeyphraseSoundModel> CREATOR
@@ -525,9 +537,10 @@ public class SoundTrigger {
             if (length >= 0) {
                 vendorUuid = UUID.fromString(in.readString());
             }
+            int version = in.readInt();
             byte[] data = in.readBlob();
             Keyphrase[] keyphrases = in.createTypedArray(Keyphrase.CREATOR);
-            return new KeyphraseSoundModel(uuid, vendorUuid, data, keyphrases);
+            return new KeyphraseSoundModel(uuid, vendorUuid, data, keyphrases, version);
         }
 
         @Override
@@ -546,13 +559,16 @@ public class SoundTrigger {
             }
             dest.writeBlob(data);
             dest.writeTypedArray(keyphrases, flags);
+            dest.writeInt(version);
         }
 
         @Override
         public String toString() {
             return "KeyphraseSoundModel [keyphrases=" + Arrays.toString(keyphrases)
                     + ", uuid=" + uuid + ", vendorUuid=" + vendorUuid
-                    + ", type=" + type + ", data=" + (data == null ? 0 : data.length) + "]";
+                    + ", type=" + type
+                    + ", data=" + (data == null ? 0 : data.length)
+                    + ", version=" + version + "]";
         }
 
         @Override
@@ -598,10 +614,15 @@ public class SoundTrigger {
             }
         };
 
+        public GenericSoundModel(@NonNull UUID uuid, @NonNull UUID vendorUuid,
+                @Nullable byte[] data, int version) {
+            super(uuid, vendorUuid, TYPE_GENERIC_SOUND, data, version);
+        }
+
         @UnsupportedAppUsage
         public GenericSoundModel(@NonNull UUID uuid, @NonNull UUID vendorUuid,
                 @Nullable byte[] data) {
-            super(uuid, vendorUuid, TYPE_GENERIC_SOUND, data);
+            this(uuid, vendorUuid, data, -1);
         }
 
         @Override
@@ -617,7 +638,8 @@ public class SoundTrigger {
                 vendorUuid = UUID.fromString(in.readString());
             }
             byte[] data = in.readBlob();
-            return new GenericSoundModel(uuid, vendorUuid, data);
+            int version = in.readInt();
+            return new GenericSoundModel(uuid, vendorUuid, data, version);
         }
 
         @Override
@@ -630,12 +652,15 @@ public class SoundTrigger {
                 dest.writeString(vendorUuid.toString());
             }
             dest.writeBlob(data);
+            dest.writeInt(version);
         }
 
         @Override
         public String toString() {
             return "GenericSoundModel [uuid=" + uuid + ", vendorUuid=" + vendorUuid
-                    + ", type=" + type + ", data=" + (data == null ? 0 : data.length) + "]";
+                    + ", type=" + type
+                    + ", data=" + (data == null ? 0 : data.length)
+                    + ", version=" + version + "]";
         }
     }
 

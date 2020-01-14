@@ -804,6 +804,11 @@ public class AbstractAccessibilityServiceConnectionTest {
         }
 
         @Override
+        public boolean switchToInputMethod(String imeId) {
+            return false;
+        }
+
+        @Override
         public boolean isAccessibilityButtonAvailable() throws RemoteException {
             return false;
         }

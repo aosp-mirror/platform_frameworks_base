@@ -129,6 +129,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DeviceStateCache;
+import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.NetworkEvent;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.PasswordPolicy;
@@ -268,6 +269,7 @@ import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.PasswordValidationError;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
+import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
@@ -1006,6 +1008,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         private static final String TAG_CROSS_PROFILE_CALENDAR_PACKAGES_NULL =
                 "cross-profile-calendar-packages-null";
         private static final String TAG_CROSS_PROFILE_PACKAGES = "cross-profile-packages";
+        private static final String TAG_FACTORY_RESET_PROTECTION_POLICY =
+                "factory_reset_protection_policy";
 
         DeviceAdminInfo info;
 
@@ -1015,6 +1019,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         @NonNull
         PasswordPolicy mPasswordPolicy = new PasswordPolicy();
+
+        @Nullable
+        FactoryResetProtectionPolicy mFactoryResetProtectionPolicy = null;
 
         static final long DEF_MAXIMUM_TIME_TO_UNLOCK = 0;
         long maximumTimeToUnlock = DEF_MAXIMUM_TIME_TO_UNLOCK;
@@ -1351,6 +1358,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         mCrossProfileCalendarPackages);
             }
             writePackageListToXml(out, TAG_CROSS_PROFILE_PACKAGES, mCrossProfilePackages);
+            if (mFactoryResetProtectionPolicy != null) {
+                out.startTag(null, TAG_FACTORY_RESET_PROTECTION_POLICY);
+                mFactoryResetProtectionPolicy.writeToXml(out);
+                out.endTag(null, TAG_FACTORY_RESET_PROTECTION_POLICY);
+            }
         }
 
         void writeTextToXml(XmlSerializer out, String tag, String text) throws IOException {
@@ -1584,6 +1596,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     mCrossProfileCalendarPackages = null;
                 } else if (TAG_CROSS_PROFILE_PACKAGES.equals(tag)) {
                     mCrossProfilePackages = readPackageList(parser, tag);
+                } else if (TAG_FACTORY_RESET_PROTECTION_POLICY.equals(tag)) {
+                    mFactoryResetProtectionPolicy = FactoryResetProtectionPolicy.readFromXml(
+                                parser);
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -2034,6 +2049,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         IAudioService getIAudioService() {
             return IAudioService.Stub.asInterface(ServiceManager.getService(Context.AUDIO_SERVICE));
+        }
+
+        PersistentDataBlockManagerInternal getPersistentDataBlockManagerInternal() {
+            return LocalServices.getService(PersistentDataBlockManagerInternal.class);
         }
 
         LockSettingsInternal getLockSettingsInternal() {
@@ -6736,6 +6755,67 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public void setFactoryResetProtectionPolicy(ComponentName who,
+            @Nullable FactoryResetProtectionPolicy policy) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+
+        final int frpManagementAgentUid = getFrpManagementAgentUidOrThrow();
+        final int userId = mInjector.userHandleGetCallingUserId();
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(
+                    who, DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER);
+            admin.mFactoryResetProtectionPolicy = policy;
+            saveSettingsLocked(userId);
+        }
+
+        mInjector.binderWithCleanCallingIdentity(() -> mContext.sendBroadcastAsUser(
+                new Intent(DevicePolicyManager.ACTION_RESET_PROTECTION_POLICY_CHANGED),
+                UserHandle.getUserHandleForUid(frpManagementAgentUid)));
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_FACTORY_RESET_PROTECTION)
+                .setAdmin(who)
+                .write();
+    }
+
+    @Override
+    public FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(
+            @Nullable ComponentName who) {
+        if (!mHasFeature) {
+            return null;
+        }
+
+        final int frpManagementAgentUid = getFrpManagementAgentUidOrThrow();
+        ActiveAdmin admin;
+        synchronized (getLockObject()) {
+            if (who == null) {
+                if ((frpManagementAgentUid != mInjector.binderGetCallingUid())) {
+                    throw new SecurityException(
+                            "Must be called by the FRP management agent on device");
+                }
+                admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                        UserHandle.getUserId(frpManagementAgentUid));
+            } else {
+                admin = getActiveAdminForCallerLocked(
+                        who, DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER);
+            }
+        }
+        return admin != null ? admin.mFactoryResetProtectionPolicy : null;
+    }
+
+    private int getFrpManagementAgentUidOrThrow() {
+        PersistentDataBlockManagerInternal pdb = mInjector.getPersistentDataBlockManagerInternal();
+        if ((pdb == null) || (pdb.getAllowedUid() == -1)) {
+            throw new UnsupportedOperationException(
+                    "The persistent data block service is not supported on this device");
+        }
+        return pdb.getAllowedUid();
+    }
+
+    @Override
     public void getRemoveWarning(ComponentName comp, final RemoteCallback result, int userHandle) {
         if (!mHasFeature) {
             return;
@@ -8129,6 +8209,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Slog.wtf(LOG_TAG, "Active admin for device owner not found. component=" + component);
         return null;
+    }
+
+    ActiveAdmin getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(int userId) {
+        ActiveAdmin admin = getDeviceOwnerAdminLocked();
+        if (admin == null) {
+            admin = getProfileOwnerOfOrganizationOwnedDeviceLocked(userId);
+        }
+        return admin;
     }
 
     @Override

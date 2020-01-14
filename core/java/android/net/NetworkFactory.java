@@ -91,7 +91,7 @@ public class NetworkFactory extends Handler {
      *            with the same NetworkRequest but an updated score.
      *            Also, network conditions may change for this bearer
      *            allowing for a better score in the future.
-     * msg.arg2 = the serial number of the factory currently responsible for the
+     * msg.arg2 = the ID of the NetworkProvider currently responsible for the
      *            NetworkAgent handling this request, or NetworkProvider.ID_NONE if none.
      */
     public static final int CMD_REQUEST_NETWORK = BASE;
@@ -156,8 +156,8 @@ public class NetworkFactory extends Handler {
         mProvider = new NetworkProvider(mContext, NetworkFactory.this.getLooper(), LOG_TAG) {
             @Override
             public void onNetworkRequested(@NonNull NetworkRequest request, int score,
-                    int servingFactoryProviderId) {
-                handleAddRequest((NetworkRequest) request, score, servingFactoryProviderId);
+                    int servingProviderId) {
+                handleAddRequest((NetworkRequest) request, score, servingProviderId);
             }
 
             @Override
@@ -228,8 +228,6 @@ public class NetworkFactory extends Handler {
      *
      * @param request the request to handle.
      * @param score the score of the NetworkAgent currently satisfying this request.
-     * @param servingProviderId the serial number of the NetworkFactory that
-     *         created the NetworkAgent currently satisfying this request.
      */
     // TODO : remove this method. It is a stopgap measure to help sheperding a number
     // of dependent changes that would conflict throughout the automerger graph. Having this
@@ -237,7 +235,7 @@ public class NetworkFactory extends Handler {
     // the entire tree.
     @VisibleForTesting
     protected void handleAddRequest(NetworkRequest request, int score) {
-        handleAddRequest(request, score, SerialNumber.NONE);
+        handleAddRequest(request, score, NetworkProvider.ID_NONE);
     }
 
     /**
@@ -246,24 +244,23 @@ public class NetworkFactory extends Handler {
      *
      * @param request the request to handle.
      * @param score the score of the NetworkAgent currently satisfying this request.
-     * @param servingProviderId the serial number of the NetworkFactory that
-     *         created the NetworkAgent currently satisfying this request.
+     * @param servingProviderId the ID of the NetworkProvider that created the NetworkAgent
+     *        currently satisfying this request.
      */
     @VisibleForTesting
-    protected void handleAddRequest(NetworkRequest request, int score,
-            int servingProviderId) {
+    protected void handleAddRequest(NetworkRequest request, int score, int servingProviderId) {
         NetworkRequestInfo n = mNetworkRequests.get(request.requestId);
         if (n == null) {
             if (DBG) {
                 log("got request " + request + " with score " + score
-                        + " and serial " + servingProviderId);
+                        + " and providerId " + servingProviderId);
             }
             n = new NetworkRequestInfo(request, score, servingProviderId);
             mNetworkRequests.put(n.request.requestId, n);
         } else {
             if (VDBG) {
                 log("new score " + score + " for exisiting request " + request
-                        + " with serial " + servingProviderId);
+                        + " and providerId " + servingProviderId);
             }
             n.score = score;
             n.providerId = servingProviderId;

@@ -48,10 +48,10 @@ import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2;
 import android.media.MediaRouter2.RouteCallback;
-import android.media.MediaRouter2.RouteSessionController;
+import android.media.MediaRouter2.RoutingController;
 import android.media.MediaRouter2.SessionCallback;
 import android.media.RouteDiscoveryPreference;
-import android.media.RouteSessionInfo;
+import android.media.RoutingSessionInfo;
 import android.net.Uri;
 import android.os.Parcel;
 import android.support.test.InstrumentationRegistry;
@@ -253,12 +253,12 @@ public class MediaRouter2Test {
 
         final CountDownLatch successLatch = new CountDownLatch(1);
         final CountDownLatch failureLatch = new CountDownLatch(1);
-        final List<RouteSessionController> controllers = new ArrayList<>();
+        final List<RoutingController> controllers = new ArrayList<>();
 
         // Create session with this route
         SessionCallback sessionCallback = new SessionCallback() {
             @Override
-            public void onSessionCreated(RouteSessionController controller) {
+            public void onSessionCreated(RoutingController controller) {
                 assertNotNull(controller);
                 assertTrue(createRouteMap(controller.getSelectedRoutes()).containsKey(ROUTE_ID1));
                 assertTrue(TextUtils.equals(FEATURE_SAMPLE, controller.getRouteFeature()));
@@ -302,12 +302,12 @@ public class MediaRouter2Test {
 
         final CountDownLatch successLatch = new CountDownLatch(1);
         final CountDownLatch failureLatch = new CountDownLatch(1);
-        final List<RouteSessionController> controllers = new ArrayList<>();
+        final List<RoutingController> controllers = new ArrayList<>();
 
         // Create session with this route
         SessionCallback sessionCallback = new SessionCallback() {
             @Override
-            public void onSessionCreated(RouteSessionController controller) {
+            public void onSessionCreated(RoutingController controller) {
                 controllers.add(controller);
                 successLatch.countDown();
             }
@@ -346,12 +346,12 @@ public class MediaRouter2Test {
 
         final CountDownLatch successLatch = new CountDownLatch(2);
         final CountDownLatch failureLatch = new CountDownLatch(1);
-        final List<RouteSessionController> createdControllers = new ArrayList<>();
+        final List<RoutingController> createdControllers = new ArrayList<>();
 
         // Create session with this route
         SessionCallback sessionCallback = new SessionCallback() {
             @Override
-            public void onSessionCreated(RouteSessionController controller) {
+            public void onSessionCreated(RoutingController controller) {
                 createdControllers.add(controller);
                 successLatch.countDown();
             }
@@ -384,8 +384,8 @@ public class MediaRouter2Test {
 
             // Created controllers should have proper info
             assertEquals(2, createdControllers.size());
-            RouteSessionController controller1 = createdControllers.get(0);
-            RouteSessionController controller2 = createdControllers.get(1);
+            RoutingController controller1 = createdControllers.get(0);
+            RoutingController controller2 = createdControllers.get(1);
 
             assertNotEquals(controller1.getSessionId(), controller2.getSessionId());
             assertTrue(createRouteMap(controller1.getSelectedRoutes()).containsKey(ROUTE_ID1));
@@ -411,12 +411,12 @@ public class MediaRouter2Test {
 
         final CountDownLatch successLatch = new CountDownLatch(1);
         final CountDownLatch failureLatch = new CountDownLatch(1);
-        final List<RouteSessionController> controllers = new ArrayList<>();
+        final List<RoutingController> controllers = new ArrayList<>();
 
         // Create session with this route
         SessionCallback sessionCallback = new SessionCallback() {
             @Override
-            public void onSessionCreated(RouteSessionController controller) {
+            public void onSessionCreated(RoutingController controller) {
                 controllers.add(controller);
                 successLatch.countDown();
             }
@@ -451,7 +451,7 @@ public class MediaRouter2Test {
 
     // TODO: Add tests for illegal inputs if needed (e.g. selecting already selected route)
     @Test
-    public void testRouteSessionControllerSelectAndDeselectRoute() throws Exception {
+    public void testRoutingControllerSelectAndDeselectRoute() throws Exception {
         final List<String> sampleRouteType = new ArrayList<>();
         sampleRouteType.add(FEATURE_SAMPLE);
 
@@ -462,12 +462,12 @@ public class MediaRouter2Test {
         final CountDownLatch onSessionCreatedLatch = new CountDownLatch(1);
         final CountDownLatch onSessionInfoChangedLatchForSelect = new CountDownLatch(1);
         final CountDownLatch onSessionInfoChangedLatchForDeselect = new CountDownLatch(1);
-        final List<RouteSessionController> controllers = new ArrayList<>();
+        final List<RoutingController> controllers = new ArrayList<>();
 
         // Create session with ROUTE_ID1
         SessionCallback sessionCallback = new SessionCallback() {
             @Override
-            public void onSessionCreated(RouteSessionController controller) {
+            public void onSessionCreated(RoutingController controller) {
                 assertNotNull(controller);
                 assertTrue(getRouteIds(controller.getSelectedRoutes()).contains(ROUTE_ID1));
                 assertTrue(TextUtils.equals(FEATURE_SAMPLE, controller.getRouteFeature()));
@@ -476,8 +476,8 @@ public class MediaRouter2Test {
             }
 
             @Override
-            public void onSessionInfoChanged(RouteSessionController controller,
-                    RouteSessionInfo oldInfo, RouteSessionInfo newInfo) {
+            public void onSessionInfoChanged(RoutingController controller,
+                    RoutingSessionInfo oldInfo, RoutingSessionInfo newInfo) {
                 if (onSessionCreatedLatch.getCount() != 0
                         || !TextUtils.equals(
                                 controllers.get(0).getSessionId(), controller.getSessionId())) {
@@ -527,7 +527,7 @@ public class MediaRouter2Test {
             assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
             assertEquals(1, controllers.size());
-            RouteSessionController controller = controllers.get(0);
+            RoutingController controller = controllers.get(0);
             assertTrue(getRouteIds(controller.getSelectableRoutes())
                     .contains(ROUTE_ID4_TO_SELECT_AND_DESELECT));
 
@@ -550,7 +550,7 @@ public class MediaRouter2Test {
     }
 
     @Test
-    public void testRouteSessionControllerTransferToRoute() throws Exception {
+    public void testRoutingControllerTransferToRoute() throws Exception {
         final List<String> sampleRouteType = new ArrayList<>();
         sampleRouteType.add(FEATURE_SAMPLE);
 
@@ -560,12 +560,12 @@ public class MediaRouter2Test {
 
         final CountDownLatch onSessionCreatedLatch = new CountDownLatch(1);
         final CountDownLatch onSessionInfoChangedLatch = new CountDownLatch(1);
-        final List<RouteSessionController> controllers = new ArrayList<>();
+        final List<RoutingController> controllers = new ArrayList<>();
 
         // Create session with ROUTE_ID1
         SessionCallback sessionCallback = new SessionCallback() {
             @Override
-            public void onSessionCreated(RouteSessionController controller) {
+            public void onSessionCreated(RoutingController controller) {
                 assertNotNull(controller);
                 assertTrue(getRouteIds(controller.getSelectedRoutes()).contains(ROUTE_ID1));
                 assertTrue(TextUtils.equals(FEATURE_SAMPLE, controller.getRouteFeature()));
@@ -574,8 +574,8 @@ public class MediaRouter2Test {
             }
 
             @Override
-            public void onSessionInfoChanged(RouteSessionController controller,
-                    RouteSessionInfo oldInfo, RouteSessionInfo newInfo) {
+            public void onSessionInfoChanged(RoutingController controller,
+                    RoutingSessionInfo oldInfo, RoutingSessionInfo newInfo) {
                 if (onSessionCreatedLatch.getCount() != 0
                         || !TextUtils.equals(
                                 controllers.get(0).getSessionId(), controller.getSessionId())) {
@@ -609,7 +609,7 @@ public class MediaRouter2Test {
             assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
             assertEquals(1, controllers.size());
-            RouteSessionController controller = controllers.get(0);
+            RoutingController controller = controllers.get(0);
             assertTrue(getRouteIds(controller.getTransferrableRoutes())
                     .contains(ROUTE_ID5_TO_TRANSFER_TO));
 
@@ -629,7 +629,7 @@ public class MediaRouter2Test {
     // TODO: Add tests for onSessionReleased() call.
 
     @Test
-    public void testRouteSessionControllerReleaseShouldIgnoreTransferTo() throws Exception {
+    public void testRoutingControllerReleaseShouldIgnoreTransferTo() throws Exception {
         final List<String> sampleRouteType = new ArrayList<>();
         sampleRouteType.add(FEATURE_SAMPLE);
 
@@ -639,12 +639,12 @@ public class MediaRouter2Test {
 
         final CountDownLatch onSessionCreatedLatch = new CountDownLatch(1);
         final CountDownLatch onSessionInfoChangedLatch = new CountDownLatch(1);
-        final List<RouteSessionController> controllers = new ArrayList<>();
+        final List<RoutingController> controllers = new ArrayList<>();
 
         // Create session with ROUTE_ID1
         SessionCallback sessionCallback = new SessionCallback() {
             @Override
-            public void onSessionCreated(RouteSessionController controller) {
+            public void onSessionCreated(RoutingController controller) {
                 assertNotNull(controller);
                 assertTrue(getRouteIds(controller.getSelectedRoutes()).contains(ROUTE_ID1));
                 assertTrue(TextUtils.equals(FEATURE_SAMPLE, controller.getRouteFeature()));
@@ -653,8 +653,8 @@ public class MediaRouter2Test {
             }
 
             @Override
-            public void onSessionInfoChanged(RouteSessionController controller,
-                    RouteSessionInfo oldInfo, RouteSessionInfo newInfo) {
+            public void onSessionInfoChanged(RoutingController controller,
+                    RoutingSessionInfo oldInfo, RoutingSessionInfo newInfo) {
                 if (onSessionCreatedLatch.getCount() != 0
                         || !TextUtils.equals(
                                 controllers.get(0).getSessionId(), controller.getSessionId())) {
@@ -674,7 +674,7 @@ public class MediaRouter2Test {
             assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
             assertEquals(1, controllers.size());
-            RouteSessionController controller = controllers.get(0);
+            RoutingController controller = controllers.get(0);
             assertTrue(getRouteIds(controller.getTransferrableRoutes())
                     .contains(ROUTE_ID5_TO_TRANSFER_TO));
 
@@ -732,8 +732,8 @@ public class MediaRouter2Test {
         }
     }
 
-    static void releaseControllers(@NonNull List<RouteSessionController> controllers) {
-        for (RouteSessionController controller : controllers) {
+    static void releaseControllers(@NonNull List<RoutingController> controllers) {
+        for (RoutingController controller : controllers) {
             controller.release();
         }
     }

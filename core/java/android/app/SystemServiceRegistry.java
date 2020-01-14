@@ -170,6 +170,7 @@ import android.service.persistentdata.IPersistentDataBlockService;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.service.vr.IVrManager;
 import android.telecom.TelecomManager;
+import android.telephony.MmsManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyRegistryManager;
 import android.util.ArrayMap;
@@ -630,6 +631,13 @@ public final class SystemServiceRegistry {
             public TelecomManager createService(ContextImpl ctx) {
                 return new TelecomManager(ctx.getOuterContext());
             }});
+
+        registerService(Context.MMS_SERVICE, MmsManager.class,
+                new CachedServiceFetcher<MmsManager>() {
+                    @Override
+                    public MmsManager createService(ContextImpl ctx) {
+                        return new MmsManager(ctx.getOuterContext());
+                    }});
 
         registerService(Context.UI_MODE_SERVICE, UiModeManager.class,
                 new CachedServiceFetcher<UiModeManager>() {

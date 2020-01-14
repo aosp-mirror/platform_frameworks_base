@@ -16,9 +16,12 @@
 
 package android.media.tv.tuner;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.media.tv.tuner.Tuner.Filter;
-import android.media.tv.tuner.TunerConstants.DemuxPidType;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * This class is used to interact with descramblers.
@@ -26,9 +29,25 @@ import android.media.tv.tuner.TunerConstants.DemuxPidType;
  * <p> Descrambler is a hardware component used to descramble data.
  *
  * <p> This class controls the TIS interaction with Tuner HAL.
+ *
  * @hide
  */
 public class Descrambler implements AutoCloseable {
+    /** @hide */
+    @IntDef(prefix = "PID_TYPE_", value = {PID_TYPE_T, PID_TYPE_MMPT})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PidType {}
+
+    /**
+     * Packet ID is used to specify packets in transport stream.
+     */
+    public static final int PID_TYPE_T = 1;
+    /**
+     * Packet ID is used to specify packets in MMTP.
+     */
+    public static final int PID_TYPE_MMPT = 2;
+
+
     private long mNativeContext;
 
     private native int nativeAddPid(int pidType, int pid, Filter filter);
@@ -52,10 +71,8 @@ public class Descrambler implements AutoCloseable {
      * @param pid the PID of packets to start to be descrambled.
      * @param filter an optional filter instance to identify upper stream.
      * @return result status of the operation.
-     *
-     * @hide
      */
-    public int addPid(@DemuxPidType int pidType, int pid, @Nullable Filter filter) {
+    public int addPid(@PidType int pidType, int pid, @Nullable Filter filter) {
         return nativeAddPid(pidType, pid, filter);
     }
 
@@ -68,10 +85,8 @@ public class Descrambler implements AutoCloseable {
      * @param pid the PID of packets to stop to be descrambled.
      * @param filter an optional filter instance to identify upper stream.
      * @return result status of the operation.
-     *
-     * @hide
      */
-    public int removePid(@DemuxPidType int pidType, int pid, @Nullable Filter filter) {
+    public int removePid(@PidType int pidType, int pid, @Nullable Filter filter) {
         return nativeRemovePid(pidType, pid, filter);
     }
 
@@ -83,17 +98,13 @@ public class Descrambler implements AutoCloseable {
      *
      * @param keyToken the token to be used to link the key slot.
      * @return result status of the operation.
-     *
-     * @hide
      */
-    public int setKeyToken(byte[] keyToken) {
+    public int setKeyToken(@Nullable byte[] keyToken) {
         return nativeSetKeyToken(keyToken);
     }
 
     /**
      * Release the descrambler instance.
-     *
-     * @hide
      */
     @Override
     public void close() {

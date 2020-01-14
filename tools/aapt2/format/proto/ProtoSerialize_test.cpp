@@ -608,4 +608,41 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   ASSERT_FALSE(search_result.value().entry->overlayable_item);
 }
 
+TEST(ProtoSerializeTest, SerializeAndDeserializeDynamicReference) {
+  Reference ref(ResourceId(0x00010001));
+  ref.is_dynamic = true;
+
+  pb::Item pb_item;
+  SerializeItemToPb(ref, &pb_item);
+
+  ASSERT_TRUE(pb_item.has_ref());
+  EXPECT_EQ(pb_item.ref().id(), ref.id.value().id);
+  EXPECT_TRUE(pb_item.ref().is_dynamic().value());
+
+  std::unique_ptr<Item> item = DeserializeItemFromPb(pb_item, android::ResStringPool(),
+                                                     android::ConfigDescription(), nullptr,
+                                                     nullptr, nullptr);
+  Reference* actual_ref = ValueCast<Reference>(item.get());
+  EXPECT_EQ(actual_ref->id.value().id, ref.id.value().id);
+  EXPECT_TRUE(actual_ref->is_dynamic);
+}
+
+TEST(ProtoSerializeTest, SerializeAndDeserializeNonDynamicReference) {
+  Reference ref(ResourceId(0x00010001));
+
+  pb::Item pb_item;
+  SerializeItemToPb(ref, &pb_item);
+
+  ASSERT_TRUE(pb_item.has_ref());
+  EXPECT_EQ(pb_item.ref().id(), ref.id.value().id);
+  EXPECT_FALSE(pb_item.ref().has_is_dynamic());
+
+  std::unique_ptr<Item> item = DeserializeItemFromPb(pb_item, android::ResStringPool(),
+                                                     android::ConfigDescription(), nullptr,
+                                                     nullptr, nullptr);
+  Reference* actual_ref = ValueCast<Reference>(item.get());
+  EXPECT_EQ(actual_ref->id.value().id, ref.id.value().id);
+  EXPECT_FALSE(actual_ref->is_dynamic);
+}
+
 }  // namespace aapt
