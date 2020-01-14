@@ -4314,6 +4314,7 @@ package android.net {
     field public static final int TETHER_ERROR_ENTITLEMENT_UNKONWN = 13; // 0xd
     field public static final int TETHER_ERROR_NO_ERROR = 0; // 0x0
     field public static final int TETHER_ERROR_PROVISION_FAILED = 11; // 0xb
+    field public static final int TYPE_NONE = -1; // 0xffffffff
   }
 
   public abstract static class ConnectivityManager.OnStartTetheringCallback {
