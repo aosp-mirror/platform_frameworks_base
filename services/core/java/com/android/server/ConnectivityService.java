@@ -5510,20 +5510,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return nri.request.requestId == mDefaultRequest.requestId;
     }
 
-    // TODO : remove this method. It's a stopgap measure to help sheperding a number of dependent
-    // changes that would conflict throughout the automerger graph. Having this method temporarily
-    // helps with the process of going through with all these dependent changes across the entire
-    // tree.
-    /**
-     * Register a new agent. {@see #registerNetworkAgent} below.
-     */
-    public Network registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
-            LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
-            int currentScore, NetworkAgentConfig networkAgentConfig) {
-        return registerNetworkAgent(messenger, networkInfo, linkProperties, networkCapabilities,
-                currentScore, networkAgentConfig, NetworkProvider.ID_NONE);
-    }
-
     /**
      * Register a new agent with ConnectivityService to handle a network.
      *
@@ -5542,7 +5528,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     public Network registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
-            int currentScore, NetworkAgentConfig networkAgentConfig, int providerId) {
+            NetworkScore currentScore, NetworkAgentConfig networkAgentConfig, int providerId) {
         enforceNetworkFactoryPermission();
 
         LinkProperties lp = new LinkProperties(linkProperties);
@@ -5550,12 +5536,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // TODO: Instead of passing mDefaultRequest, provide an API to determine whether a Network
         // satisfies mDefaultRequest.
         final NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
-        final NetworkScore ns = new NetworkScore();
-        ns.putIntExtension(NetworkScore.LEGACY_SCORE, currentScore);
         final NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(),
                 new Network(mNetIdManager.reserveNetId()), new NetworkInfo(networkInfo), lp, nc,
-                ns, mContext, mTrackerHandler, new NetworkAgentConfig(networkAgentConfig), this,
-                mNetd, mDnsResolver, mNMS, providerId);
+                currentScore, mContext, mTrackerHandler, new NetworkAgentConfig(networkAgentConfig),
+                this, mNetd, mDnsResolver, mNMS, providerId);
         // Make sure the network capabilities reflect what the agent info says.
         nai.getAndSetNetworkCapabilities(mixInCapabilities(nai, nc));
         final String extraInfo = networkInfo.getExtraInfo();
