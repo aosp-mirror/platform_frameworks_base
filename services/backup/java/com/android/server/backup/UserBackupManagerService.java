@@ -2538,7 +2538,6 @@ public class UserBackupManagerService {
                 KeyValueBackupJob.schedule(mUserId, mContext, mConstants);
             } else {
                 if (DEBUG) Slog.v(TAG, "Scheduling immediate backup pass");
-                synchronized (mQueueLock) {
                     // Fire the intent that kicks off the whole shebang...
                     try {
                         mRunBackupIntent.send();
@@ -2546,10 +2545,8 @@ public class UserBackupManagerService {
                         // should never happen
                         Slog.e(TAG, "run-backup intent cancelled!");
                     }
-
                     // ...and cancel any pending scheduled job, because we've just superseded it
                     KeyValueBackupJob.cancel(mUserId, mContext);
-                }
             }
         } finally {
             Binder.restoreCallingIdentity(oldId);
