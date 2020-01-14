@@ -26,7 +26,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -62,11 +61,13 @@ public final class RuleXmlParser implements RuleParser {
     }
 
     @Override
-    public List<Rule> parse(InputStream inputStream, List<RuleIndexRange> indexRanges)
+    public List<Rule> parse(RandomAccessObject randomAccessObject, List<RuleIndexRange> indexRanges)
             throws RuleParseException {
         try {
             XmlPullParser xmlPullParser = Xml.newPullParser();
-            xmlPullParser.setInput(inputStream, StandardCharsets.UTF_8.name());
+            xmlPullParser.setInput(
+                    new RandomAccessInputStream(randomAccessObject),
+                    StandardCharsets.UTF_8.name());
             return parseRules(xmlPullParser);
         } catch (Exception e) {
             throw new RuleParseException(e.getMessage(), e);

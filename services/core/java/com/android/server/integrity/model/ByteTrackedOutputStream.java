@@ -27,8 +27,6 @@ import java.io.OutputStream;
  */
 public class ByteTrackedOutputStream extends OutputStream {
 
-    private static final int INT_BYTES = 4;
-
     private int mWrittenBytesCount;
     private final OutputStream mOutputStream;
 
@@ -39,7 +37,7 @@ public class ByteTrackedOutputStream extends OutputStream {
 
     @Override
     public void write(int b) throws IOException {
-        mWrittenBytesCount += INT_BYTES;
+        mWrittenBytesCount++;
         mOutputStream.write(b);
     }
 
@@ -49,8 +47,7 @@ public class ByteTrackedOutputStream extends OutputStream {
      */
     @Override
     public void write(byte[] bytes) throws IOException {
-        mWrittenBytesCount += bytes.length;
-        mOutputStream.write(bytes);
+        write(bytes, 0, bytes.length);
     }
 
     @Override
