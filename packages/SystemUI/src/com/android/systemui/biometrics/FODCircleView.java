@@ -77,6 +77,8 @@ public class FODCircleView extends ImageView implements ConfigurationListener {
     private boolean mIsShowing;
     private boolean mIsCircleShowing;
 
+    private float mCurrentDimAmount = 0.0f;
+
     private Handler mHandler;
 
     private PowerManager mPowerManager;
@@ -207,6 +209,16 @@ public class FODCircleView extends ImageView implements ConfigurationListener {
         mPowerManager = context.getSystemService(PowerManager.class);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 FODCircleView.class.getSimpleName());
+
+        getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            float drawingDimAmount = mParams.dimAmount;
+            if (mCurrentDimAmount == 0.0f && drawingDimAmount > 0.0f) {
+                dispatchPress();
+                mCurrentDimAmount = drawingDimAmount;
+            } else if (mCurrentDimAmount > 0.0f && drawingDimAmount == 0.0f) {
+                mCurrentDimAmount = drawingDimAmount;
+            }
+        });
     }
 
     @Override
