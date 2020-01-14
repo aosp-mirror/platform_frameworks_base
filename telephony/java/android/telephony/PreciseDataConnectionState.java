@@ -20,6 +20,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.LinkProperties;
 import android.os.Build;
@@ -30,8 +33,6 @@ import android.telephony.Annotation.DataFailureCause;
 import android.telephony.Annotation.DataState;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.data.ApnSetting;
-
-import dalvik.system.VMRuntime;
 
 import java.util.Objects;
 
@@ -134,6 +135,13 @@ public final class PreciseDataConnectionState implements Parcelable {
     }
 
     /**
+     * To check the SDK version for {@link PreciseDataConnectionState#getDataConnectionState}.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    private static final long GET_DATA_CONNECTION_STATE_CODE_CHANGE = 147600208L;
+
+    /**
      * Returns the state of data connection that supported the apn types returned by
      * {@link #getDataConnectionApnTypeBitMask()}
      *
@@ -144,7 +152,7 @@ public final class PreciseDataConnectionState implements Parcelable {
     @SystemApi
     public @DataState int getDataConnectionState() {
         if (mState == TelephonyManager.DATA_DISCONNECTING
-                && VMRuntime.getRuntime().getTargetSdkVersion() < Build.VERSION_CODES.R) {
+                && !Compatibility.isChangeEnabled(GET_DATA_CONNECTION_STATE_CODE_CHANGE)) {
             return TelephonyManager.DATA_CONNECTED;
         }
 
