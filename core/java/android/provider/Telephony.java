@@ -4093,7 +4093,6 @@ public final class Telephony {
          *     <li>{@link #ENABLE_CMAS_PRESIDENTIAL_PREF}</li>
          *     <li>{@link #ENABLE_ALERT_VIBRATION_PREF}</li>
          *     <li>{@link #ENABLE_EMERGENCY_PERF}</li>
-         *     <li>{@link #ENABLE_FULL_VOLUME_PREF}</li>
          *     <li>{@link #ENABLE_CMAS_IN_SECOND_LANGUAGE_PREF}</li>
          * </ul>
          * @hide
@@ -4155,10 +4154,6 @@ public final class Telephony {
             /** Preference to enable emergency alert */
             public static final @NonNull String ENABLE_EMERGENCY_PERF =
                     "enable_emergency_alerts";
-
-            /** Preference to enable volume for alerts */
-            public static final @NonNull String ENABLE_FULL_VOLUME_PREF =
-                    "use_full_volume";
 
             /** Preference to enable receive alerts in second language */
             public static final @NonNull String ENABLE_CMAS_IN_SECOND_LANGUAGE_PREF =
