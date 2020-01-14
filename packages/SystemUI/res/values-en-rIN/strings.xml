@@ -509,7 +509,7 @@
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> uses <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> to manage your device."</string>
     <string name="monitoring_description_do_body" msgid="7700878065625769970">"Your admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
-    <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Find out more"</string>
+    <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Learn more"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"You\'re connected to <xliff:g id="VPN_APP">%1$s</xliff:g>, which can monitor your network activity, including emails, apps and websites."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Open VPN settings"</string>
