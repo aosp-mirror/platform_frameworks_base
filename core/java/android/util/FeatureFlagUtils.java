@@ -42,6 +42,8 @@ public class FeatureFlagUtils {
     public static final String DYNAMIC_SYSTEM = "settings_dynamic_system";
     public static final String SETTINGS_WIFITRACKER2 = "settings_wifitracker2";
     public static final String SETTINGS_FUSE_FLAG = "settings_fuse";
+    public static final String NOTIF_CONVO_BYPASS_SHORTCUT_REQ =
+            "settings_notif_convo_bypass_shortcut_req";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -60,6 +62,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_work_profile", "true");
         DEFAULT_FLAGS.put("settings_controller_loading_enhancement", "false");
         DEFAULT_FLAGS.put("settings_conditionals", "false");
+        DEFAULT_FLAGS.put(NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "false");
     }
 
     /**
