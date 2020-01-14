@@ -13,29 +13,32 @@
 // limitations under the License.
 
 filegroup {
-  name: "framework-appsearch-sources",
-  srcs: [
-    "java/**/*.java",
-    "java/**/*.aidl",
-  ],
-  path: "java",
+    name: "framework-appsearch-sources",
+    srcs: [
+        "java/**/*.java",
+        "java/**/*.aidl",
+    ],
+    path: "java",
 }
 
 java_library {
-  name: "framework-appsearch",
-  installable: true,
-  sdk_version: "core_platform", // TODO(b/146218515) should be core_current
-  srcs: [":framework-appsearch-sources"],
-  hostdex: true, // for hiddenapi check
-  libs: [
-    "framework-minus-apex",  // TODO(b/146218515) should be framework-system-stubs
-  ],
-  visibility: [
-      "//frameworks/base/apex/appsearch:__subpackages__",
-      // TODO(b/146218515) remove this when framework is built with the stub of appsearch
-      "//frameworks/base",
-  ],
-  apex_available: ["com.android.appsearch"],
+    name: "framework-appsearch",
+    installable: true,
+    sdk_version: "core_platform", // TODO(b/146218515) should be core_current
+    srcs: [":framework-appsearch-sources"],
+    hostdex: true, // for hiddenapi check
+    libs: [
+        "framework-minus-apex",  // TODO(b/146218515) should be framework-system-stubs
+    ],
+    static_libs: [
+        "icing-java-proto-lite",
+    ],
+    visibility: [
+        "//frameworks/base/apex/appsearch:__subpackages__",
+        // TODO(b/146218515) remove this when framework is built with the stub of appsearch
+        "//frameworks/base",
+    ],
+    apex_available: ["com.android.appsearch"],
 }
 
 metalava_appsearch_docs_args =
