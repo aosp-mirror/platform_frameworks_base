@@ -1502,21 +1502,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullPowerProfile(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        PowerProfile powerProfile = new PowerProfile(mContext);
-        Objects.requireNonNull(powerProfile);
-
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
-                wallClockNanos);
-        ProtoOutputStream proto = new ProtoOutputStream();
-        powerProfile.dumpDebug(proto);
-        proto.flush();
-        e.writeStorage(proto.getBytes());
-        pulledData.add(e);
-    }
-
     private void pullBuildInformation(int tagId,
             long elapsedNanos, long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
         StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
@@ -2258,11 +2243,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.DISK_IO: {
                 pullDiskIo(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.POWER_PROFILE: {
-                pullPowerProfile(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

@@ -224,10 +224,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           .coolDownNs = 3 * NS_PER_SEC,
           .puller = new StatsCompanionServicePuller(android::util::DISK_IO)}},
 
-        // PowerProfile constants for power model calculations.
-        {{.atomTag = android::util::POWER_PROFILE},
-         {.puller = new StatsCompanionServicePuller(android::util::POWER_PROFILE)}},
-
         // Process cpu stats. Min cool-down is 5 sec, inline with what AcitivityManagerService uses.
         {{.atomTag = android::util::PROCESS_CPU_TIME},
          {.coolDownNs = 5 * NS_PER_SEC /* min cool-down in seconds*/,
