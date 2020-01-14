@@ -56,7 +56,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
@@ -94,15 +93,12 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.ims.internal.IImsServiceFeatureCallback;
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.IOns;
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ISetOpportunisticDataCallback;
-import com.android.internal.telephony.ISms;
-import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
@@ -303,21 +299,6 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     private SubscriptionManager mSubscriptionManager;
     private TelephonyScanManager mTelephonyScanManager;
-
-    /** Cached service handles, cleared by resetServiceHandles() at death */
-    private static final Object sCacheLock = new Object();
-
-    /** @hide */
-    private static boolean sServiceHandleCacheEnabled = true;
-
-    @GuardedBy("sCacheLock")
-    private static IPhoneSubInfo sIPhoneSubInfo;
-    @GuardedBy("sCacheLock")
-    private static ISub sISub;
-    @GuardedBy("sCacheLock")
-    private static ISms sISms;
-    @GuardedBy("sCacheLock")
-    private static final DeathRecipient sServiceDeath = new DeathRecipient();
 
     /** Enum indicating multisim variants
      *  DSDS - Dual SIM Dual Standby
@@ -1702,7 +1683,7 @@ public class TelephonyManager {
     public String getDeviceId(int slotIndex) {
         // FIXME this assumes phoneId == slotIndex
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             return info.getDeviceIdForPhone(slotIndex, mContext.getOpPackageName(),
@@ -1956,7 +1937,7 @@ public class TelephonyManager {
 
     private String getNaiBySubscriberId(int subId) {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             String nai = info.getNaiForSubscriber(subId, mContext.getOpPackageName(),
@@ -3645,7 +3626,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String getSimSerialNumber(int subId) {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             return info.getIccSerialNumberForSubscriber(subId, mContext.getOpPackageName(),
@@ -3919,7 +3900,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getSubscriberId(int subId) {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             return info.getSubscriberIdForSubscriber(subId, mContext.getOpPackageName(),
@@ -3955,7 +3936,7 @@ public class TelephonyManager {
     @Nullable
     public ImsiEncryptionInfo getCarrierInfoForImsiEncryption(@KeyType int keyType) {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null) {
                 Rlog.e(TAG,"IMSI error: Subscriber Info is null");
                 return null;
@@ -3998,7 +3979,7 @@ public class TelephonyManager {
     @SystemApi
     public void resetCarrierKeysForImsiEncryption() {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null) {
                 Rlog.e(TAG, "IMSI error: Subscriber Info is null");
                 if (!isSystemProcess()) {
@@ -4063,7 +4044,7 @@ public class TelephonyManager {
      */
     public void setCarrierInfoForImsiEncryption(ImsiEncryptionInfo imsiEncryptionInfo) {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null) return;
             info.setCarrierInfoForImsiEncryption(mSubId, mContext.getOpPackageName(),
                     imsiEncryptionInfo);
@@ -4087,7 +4068,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getGroupIdLevel1() {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             return info.getGroupIdLevel1ForSubscriber(getSubId(), mContext.getOpPackageName(),
@@ -4111,7 +4092,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String getGroupIdLevel1(int subId) {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             return info.getGroupIdLevel1ForSubscriber(subId, mContext.getOpPackageName(),
@@ -4174,7 +4155,7 @@ public class TelephonyManager {
             return number;
         }
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             return info.getLine1NumberForSubscriber(subId, mContext.getOpPackageName(),
@@ -4265,7 +4246,7 @@ public class TelephonyManager {
             return alphaTag;
         }
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             return info.getLine1AlphaTagForSubscriber(subId, getOpPackageName(),
@@ -4353,7 +4334,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getMsisdn(int subId) {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             return info.getMsisdnForSubscriber(subId, getOpPackageName(), getFeatureId());
@@ -4387,7 +4368,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String getVoiceMailNumber(int subId) {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             return info.getVoiceMailNumberForSubscriber(subId, getOpPackageName(),
@@ -4986,7 +4967,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String getVoiceMailAlphaTag(int subId) {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             return info.getVoiceMailAlphaTagForSubscriber(subId, getOpPackageName(),
@@ -5034,7 +5015,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String getIsimImpi() {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             //get the Isim Impi based on subId
@@ -5061,7 +5042,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getIsimDomain() {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             //get the Isim Domain based on subId
@@ -5083,7 +5064,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String[] getIsimImpu() {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             //get the Isim Impu based on subId
@@ -5094,6 +5075,19 @@ public class TelephonyManager {
             // This could happen before phone restarts due to crashing
             return null;
         }
+    }
+
+   /**
+    * @hide
+    */
+    @UnsupportedAppUsage
+    private IPhoneSubInfo getSubscriberInfo() {
+        // get it each time because that process crashes a lot
+        return IPhoneSubInfo.Stub.asInterface(
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getPhoneSubServiceRegisterer()
+                        .get());
     }
 
     /**
@@ -6787,7 +6781,7 @@ public class TelephonyManager {
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getIsimIst() {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             //get the Isim Ist based on subId
@@ -6809,7 +6803,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String[] getIsimPcscf() {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             //get the Isim Pcscf based on subId
@@ -6890,7 +6884,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String getIccAuthentication(int subId, int appType, int authType, String data) {
         try {
-            IPhoneSubInfo info = getSubscriberInfoService();
+            IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
             return info.getIccSimChallengeResponse(subId, appType, authType, data);
@@ -12145,151 +12139,5 @@ public class TelephonyManager {
             }
         }
         return false;
-    }
-
-    private static class DeathRecipient implements IBinder.DeathRecipient {
-        @Override
-        public void binderDied() {
-            resetServiceCache();
-        }
-    }
-
-   /**
-    * Reset everything in the service cache; if one handle died then they are
-    * all probably broken.
-    * @hide
-    */
-    private static void resetServiceCache() {
-        synchronized (sCacheLock) {
-            if (sISub != null) {
-                sISub.asBinder().unlinkToDeath(sServiceDeath, 0);
-                sISub = null;
-            }
-            if (sISms != null) {
-                sISms.asBinder().unlinkToDeath(sServiceDeath, 0);
-                sISms = null;
-            }
-            if (sIPhoneSubInfo != null) {
-                sIPhoneSubInfo.asBinder().unlinkToDeath(sServiceDeath, 0);
-                sIPhoneSubInfo = null;
-            }
-        }
-    }
-
-   /**
-    * @hide
-    */
-    static IPhoneSubInfo getSubscriberInfoService() {
-        if (!sServiceHandleCacheEnabled) {
-            return IPhoneSubInfo.Stub.asInterface(
-                TelephonyFrameworkInitializer
-                        .getTelephonyServiceManager()
-                        .getPhoneSubServiceRegisterer()
-                        .get());
-        }
-
-        if (sIPhoneSubInfo == null) {
-            IPhoneSubInfo temp = IPhoneSubInfo.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                        .getTelephonyServiceManager()
-                        .getPhoneSubServiceRegisterer()
-                        .get());
-            synchronized (sCacheLock) {
-                if (sIPhoneSubInfo == null && temp != null) {
-                    try {
-                        sIPhoneSubInfo = temp;
-                        sIPhoneSubInfo.asBinder().linkToDeath(sServiceDeath, 0);
-                    } catch (Exception e) {
-                        // something has gone horribly wrong
-                        sIPhoneSubInfo = null;
-                    }
-                }
-            }
-        }
-        return sIPhoneSubInfo;
-    }
-
-   /**
-    * @hide
-    */
-    static ISub getSubscriptionService() {
-        if (!sServiceHandleCacheEnabled) {
-            return ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
-        }
-
-        if (sISub == null) {
-            ISub temp = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
-            synchronized (sCacheLock) {
-                if (sISub == null && temp != null) {
-                    try {
-                        sISub = temp;
-                        sISub.asBinder().linkToDeath(sServiceDeath, 0);
-                    } catch (Exception e) {
-                        // something has gone horribly wrong
-                        sISub = null;
-                    }
-                }
-            }
-        }
-        return sISub;
-    }
-
-    /**
-    * @hide
-    */
-    static ISms getSmsService() {
-        if (!sServiceHandleCacheEnabled) {
-            return ISms.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSmsServiceRegisterer()
-                            .get());
-        }
-
-        if (sISms == null) {
-            ISms temp = ISms.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSmsServiceRegisterer()
-                            .get());
-            synchronized (sCacheLock) {
-                if (sISms == null && temp != null) {
-                    try {
-                        sISms = temp;
-                        sISms.asBinder().linkToDeath(sServiceDeath, 0);
-                    } catch (Exception e) {
-                        // something has gone horribly wrong
-                        sISms = null;
-                    }
-                }
-            }
-        }
-        return sISms;
-    }
-
-    /**
-     * Disables service handle caching for tests that utilize mock services.
-     * @hide
-     */
-    @VisibleForTesting
-    public static void disableServiceHandleCaching() {
-        sServiceHandleCacheEnabled = false;
-    }
-
-    /**
-     * Reenables service handle caching.
-     * @hide
-     */
-    @VisibleForTesting
-    public static void enableServiceHandleCaching() {
-        sServiceHandleCacheEnabled = true;
     }
 }
