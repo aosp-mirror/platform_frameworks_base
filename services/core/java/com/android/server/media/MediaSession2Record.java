@@ -77,7 +77,7 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
 
     @Override
     public int getUserId() {
-        return UserHandle.getUserId(mSessionToken.getUid());
+        return UserHandle.getUserHandleForUid(mSessionToken.getUid()).getIdentifier();
     }
 
     @Override

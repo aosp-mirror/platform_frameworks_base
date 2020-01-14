@@ -166,7 +166,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                     synchronized (mLock) {
                         FullUserRecord user = getFullUserRecordLocked(
-                                UserHandle.getUserId(config.getClientUid()));
+                                UserHandle.getUserHandleForUid(config.getClientUid())
+                                        .getIdentifier());
                         if (user != null) {
                             user.mPriorityStack.updateMediaButtonSessionIfNeeded();
                         }
@@ -472,8 +473,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         if (mContext
                 .checkPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid)
                 != PackageManager.PERMISSION_GRANTED
-                && !isEnabledNotificationListener(compName, UserHandle.getUserId(uid),
-                resolvedUserId)) {
+                && !isEnabledNotificationListener(compName,
+                UserHandle.getUserHandleForUid(uid).getIdentifier(), resolvedUserId)) {
             throw new SecurityException("Missing permission to control media.");
         }
     }

@@ -579,7 +579,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     void restoreRoute(int uid) {
         ClientRecord clientRecord = null;
         synchronized (mLock) {
-            UserRecord userRecord = mUserRecords.get(UserHandle.getUserId(uid));
+            UserRecord userRecord = mUserRecords.get(
+                    UserHandle.getUserHandleForUid(uid).getIdentifier());
             if (userRecord != null && userRecord.mClientRecords != null) {
                 for (ClientRecord cr : userRecord.mClientRecords) {
                     if (validatePackageName(uid, cr.mPackageName)) {
