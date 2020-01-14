@@ -76,7 +76,6 @@ import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
 import android.net.INetd;
-import android.net.INetworkPolicyManager;
 import android.net.ITetheringEventCallback;
 import android.net.InetAddresses;
 import android.net.InterfaceConfigurationParcel;
@@ -105,7 +104,6 @@ import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -158,9 +156,7 @@ public class TetheringTest {
 
     @Mock private ApplicationInfo mApplicationInfo;
     @Mock private Context mContext;
-    @Mock private INetworkManagementService mNMService;
     @Mock private NetworkStatsManager mStatsManager;
-    @Mock private INetworkPolicyManager mPolicyManager;
     @Mock private OffloadHardwareInterface mOffloadHardwareInterface;
     @Mock private Resources mResources;
     @Mock private TelephonyManager mTelephonyManager;
@@ -341,11 +337,6 @@ public class TetheringTest {
         public TetheringConfiguration generateTetheringConfiguration(Context ctx, SharedLog log,
                 int subId) {
             return new MockTetheringConfiguration(ctx, log, subId);
-        }
-
-        @Override
-        public INetworkManagementService getINetworkManagementService() {
-            return mNMService;
         }
 
         @Override

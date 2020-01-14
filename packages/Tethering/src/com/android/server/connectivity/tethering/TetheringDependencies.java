@@ -24,9 +24,7 @@ import android.net.ip.IpServer;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.Looper;
-import android.os.ServiceManager;
 
 import com.android.internal.util.StateMachine;
 
@@ -93,16 +91,6 @@ public abstract class TetheringDependencies {
     public TetheringConfiguration generateTetheringConfiguration(Context ctx, SharedLog log,
             int subId) {
         return new TetheringConfiguration(ctx, log, subId);
-    }
-
-    /**
-     * Get a reference to INetworkManagementService to registerTetheringStatsProvider from
-     * OffloadController. Note: This should be removed soon by Usage refactor work in R
-     * development cycle.
-     */
-    public INetworkManagementService getINetworkManagementService() {
-        return INetworkManagementService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
     }
 
     /**
