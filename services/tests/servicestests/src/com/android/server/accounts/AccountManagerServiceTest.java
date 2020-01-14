@@ -212,7 +212,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         String[] list = new String[]{AccountManagerServiceTestFixtures.CALLER_PACKAGE};
         when(mMockPackageManager.getPackagesForUid(anyInt())).thenReturn(list);
-        Account[] accounts = mAms.getAccounts(null, mContext.getOpPackageName());
+        Account[] accounts = mAms.getAccountsAsUser(null,
+                UserHandle.getCallingUserId(), mContext.getOpPackageName());
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(6, accounts.length);
         assertEquals(a11, accounts[0]);
@@ -222,8 +223,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertEquals(a22, accounts[4]);
         assertEquals(a32, accounts[5]);
 
-        accounts = mAms.getAccounts(AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
-                mContext.getOpPackageName());
+        accounts = mAms.getAccountsAsUser(AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+                UserHandle.getCallingUserId(), mContext.getOpPackageName());
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(3, accounts.length);
         assertEquals(a11, accounts[0]);
@@ -232,8 +233,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         mAms.removeAccountInternal(a21);
 
-        accounts = mAms.getAccounts(AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
-                mContext.getOpPackageName());
+        accounts = mAms.getAccountsAsUser(AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+                UserHandle.getCallingUserId(), mContext.getOpPackageName());
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(2, accounts.length);
         assertEquals(a11, accounts[0]);
@@ -373,7 +374,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         unlockSystemUser();
         String[] list = new String[]{AccountManagerServiceTestFixtures.CALLER_PACKAGE};
         when(mMockPackageManager.getPackagesForUid(anyInt())).thenReturn(list);
-        Account[] accounts = mAms.getAccounts(null, mContext.getOpPackageName());
+        Account[] accounts = mAms.getAccountsAsUser(null, UserHandle.getCallingUserId(),
+                mContext.getOpPackageName());
         assertEquals("1 account should be migrated", 1, accounts.length);
         assertEquals(PreNTestDatabaseHelper.ACCOUNT_NAME, accounts[0].name);
         assertEquals(PreNTestDatabaseHelper.ACCOUNT_PASSWORD, mAms.getPassword(accounts[0]));
@@ -2980,7 +2982,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                     Log.d(TAG, logPrefix + " getAccounts started");
                     long ti = System.currentTimeMillis();
                     try {
-                        Account[] accounts = mAms.getAccounts(null, mContext.getOpPackageName());
+                        Account[] accounts = mAms.getAccountsAsUser(null,
+                                UserHandle.getCallingUserId(), mContext.getOpPackageName());
                         if (accounts == null || accounts.length != 1
                                 || !AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1.equals(
                                 accounts[0].type)) {
@@ -3051,7 +3054,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                     Log.d(TAG, logPrefix + " getAccounts started");
                     long ti = System.currentTimeMillis();
                     try {
-                        Account[] accounts = mAms.getAccounts(null, mContext.getOpPackageName());
+                        Account[] accounts = mAms.getAccountsAsUser(null,
+                                UserHandle.getCallingUserId(), mContext.getOpPackageName());
                         if (accounts == null || accounts.length != 1
                                 || !AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1.equals(
                                 accounts[0].type)) {
