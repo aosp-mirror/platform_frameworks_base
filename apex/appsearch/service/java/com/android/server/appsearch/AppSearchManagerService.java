@@ -18,7 +18,10 @@ package com.android.server.appsearch;
 import android.app.appsearch.IAppSearchManager;
 import android.content.Context;
 
+import com.android.internal.infra.AndroidFuture;
 import com.android.server.SystemService;
+
+import com.google.android.icing.proto.SchemaProto;
 
 /**
  * TODO(b/142567528): add comments when implement this class
@@ -35,5 +38,14 @@ public class AppSearchManagerService extends SystemService {
     }
 
     private class Stub extends IAppSearchManager.Stub {
+        @Override
+        public void setSchema(byte[] schemaBytes, AndroidFuture callback) {
+            try {
+                SchemaProto schema = SchemaProto.parseFrom(schemaBytes);
+                throw new UnsupportedOperationException("setSchema not yet implemented: " + schema);
+            } catch (Throwable t) {
+                callback.completeExceptionally(t);
+            }
+        }
     }
 }

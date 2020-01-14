@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 package android.app.appsearch;
+
+import com.android.internal.infra.AndroidFuture;
+
 /** {@hide} */
 interface IAppSearchManager {
+    /**
+     * Sets the schema.
+     *
+     * @param schemaProto serialized SchemaProto
+     * @param callback {@link AndroidFuture}&lt;{@link Void}&gt;. Will be completed with
+     *     {@code null} upon successful completion of the setSchema call, or completed exceptionally
+     *     if setSchema fails.
+     */
+    void setSchema(in byte[] schemaProto, in AndroidFuture callback);
 }

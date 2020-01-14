@@ -509,7 +509,8 @@ java_library {
     static_libs: [
         "exoplayer2-core",
         "android.hardware.wifi-V1.0-java-constants",
-     ],
+    ],
+    libs: ["icing-java-proto-lite"],
     apex_available: ["//apex_available:platform"],
 }
 

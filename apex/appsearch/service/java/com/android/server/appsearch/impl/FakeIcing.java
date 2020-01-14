@@ -36,8 +36,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>
  * Currently, only queries by single exact term are supported. There is no support for persistence,
  * namespaces, i18n tokenization, or schema.
- *
- * @hide
  */
 public class FakeIcing {
     private final AtomicInteger mNextDocId = new AtomicInteger();
