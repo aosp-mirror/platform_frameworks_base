@@ -396,7 +396,13 @@ GetterSetterNames: android.location.GnssClock#setElapsedRealtimeUncertaintyNanos
 GetterSetterNames: android.location.GnssClock#setFullBiasNanos(long):
     
 GetterSetterNames: android.location.GnssClock#setLeapSecond(int):
-    
+
+GetterSetterNames: android.location.GnssClock#setReferenceConstellationTypeForIsb(int):
+
+GetterSetterNames: android.location.GnssClock#setReferenceCarrierFrequencyHzForIsb(double):
+
+GetterSetterNames: android.location.GnssClock#setReferenceCodeTypeForIsb(String):
+
 GetterSetterNames: android.location.GnssClock#setTimeUncertaintyNanos(double):
     
 GetterSetterNames: android.location.GnssMeasurement#setBasebandCn0DbHz(double):
@@ -404,7 +410,15 @@ GetterSetterNames: android.location.GnssMeasurement#setBasebandCn0DbHz(double):
 GetterSetterNames: android.location.GnssMeasurement#setCarrierFrequencyHz(float):
     
 GetterSetterNames: android.location.GnssMeasurement#setCodeType(String):
-    
+
+GetterSetterNames: android.location.GnssMeasurement#setReceiverInterSignalBiasNanos(double):
+
+GetterSetterNames: android.location.GnssMeasurement#setReceiverInterSignalBiasUncertaintyNanos(double):
+
+GetterSetterNames: android.location.GnssMeasurement#setSatelliteInterSignalBiasNanos(double):
+
+GetterSetterNames: android.location.GnssMeasurement#setSatelliteInterSignalBiasUncertaintyNanos(double):
+
 GetterSetterNames: android.location.GnssMeasurement#setSnrInDb(double):
     
 GetterSetterNames: android.location.LocationRequest#isLocationSettingsIgnored():

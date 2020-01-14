@@ -16,11 +16,21 @@
 
 package android.location;
 
+import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_AUTOMATIC_GAIN_CONTROL;
+import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_CARRIER_CYCLES;
+import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_CARRIER_FREQUENCY;
+import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_CARRIER_PHASE;
+import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_CARRIER_PHASE_UNCERTAINTY;
+import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_RECEIVER_ISB;
+import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_RECEIVER_ISB_UNCERTAINTY;
+import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_SATELLITE_ISB;
+import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_SATELLITE_ISB_UNCERTAINTY;
+import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_SNR;
+
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
-import android.hardware.gnss.V1_0.IGnssMeasurementCallback.GnssMeasurementFlags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -53,19 +63,14 @@ public final class GnssMeasurement implements Parcelable {
     private double mSnrInDb;
     private double mAutomaticGainControlLevelInDb;
     @NonNull private String mCodeType;
+    private double mReceiverInterSignalBiasNanos;
+    private double mReceiverInterSignalBiasUncertaintyNanos;
+    private double mSatelliteInterSignalBiasNanos;
+    private double mSatelliteInterSignalBiasUncertaintyNanos;
 
     // The following enumerations must be in sync with the values declared in GNSS HAL.
 
     private static final int HAS_NO_FLAGS = 0;
-    private static final int HAS_SNR = GnssMeasurementFlags.HAS_SNR;
-    private static final int HAS_CARRIER_FREQUENCY = GnssMeasurementFlags.HAS_CARRIER_FREQUENCY;
-    private static final int HAS_CARRIER_CYCLES = GnssMeasurementFlags.HAS_CARRIER_CYCLES;
-    private static final int HAS_CARRIER_PHASE = GnssMeasurementFlags.HAS_CARRIER_PHASE;
-    private static final int HAS_CARRIER_PHASE_UNCERTAINTY =
-            GnssMeasurementFlags.HAS_CARRIER_PHASE_UNCERTAINTY;
-    private static final int HAS_AUTOMATIC_GAIN_CONTROL =
-            GnssMeasurementFlags.HAS_AUTOMATIC_GAIN_CONTROL;
-
     private static final int HAS_CODE_TYPE = (1 << 14);
     private static final int HAS_BASEBAND_CN0 = (1 << 15);
 
@@ -263,6 +268,12 @@ public final class GnssMeasurement implements Parcelable {
         mSnrInDb = measurement.mSnrInDb;
         mAutomaticGainControlLevelInDb = measurement.mAutomaticGainControlLevelInDb;
         mCodeType = measurement.mCodeType;
+        mReceiverInterSignalBiasNanos = measurement.mReceiverInterSignalBiasNanos;
+        mReceiverInterSignalBiasUncertaintyNanos =
+                measurement.mReceiverInterSignalBiasUncertaintyNanos;
+        mSatelliteInterSignalBiasNanos = measurement.mSatelliteInterSignalBiasNanos;
+        mSatelliteInterSignalBiasUncertaintyNanos =
+                measurement.mSatelliteInterSignalBiasUncertaintyNanos;
     }
 
     /**
@@ -835,7 +846,6 @@ public final class GnssMeasurement implements Parcelable {
     @TestApi
     public void resetBasebandCn0DbHz() {
         resetFlag(HAS_BASEBAND_CN0);
-        mBasebandCn0DbHz = Double.NaN;
     }
 
     /**
@@ -1166,7 +1176,6 @@ public final class GnssMeasurement implements Parcelable {
     @Deprecated
     public void resetCarrierPhase() {
         resetFlag(HAS_CARRIER_PHASE);
-        mCarrierPhase = Double.NaN;
     }
 
     /**
@@ -1221,7 +1230,6 @@ public final class GnssMeasurement implements Parcelable {
     @Deprecated
     public void resetCarrierPhaseUncertainty() {
         resetFlag(HAS_CARRIER_PHASE_UNCERTAINTY);
-        mCarrierPhaseUncertainty = Double.NaN;
     }
 
     /**
@@ -1292,7 +1300,6 @@ public final class GnssMeasurement implements Parcelable {
     @TestApi
     public void resetSnrInDb() {
         resetFlag(HAS_SNR);
-        mSnrInDb = Double.NaN;
     }
 
     /**
@@ -1340,7 +1347,6 @@ public final class GnssMeasurement implements Parcelable {
     @TestApi
     public void resetAutomaticGainControlLevel() {
         resetFlag(HAS_AUTOMATIC_GAIN_CONTROL);
-        mAutomaticGainControlLevelInDb = Double.NaN;
     }
 
     /**
@@ -1425,7 +1431,200 @@ public final class GnssMeasurement implements Parcelable {
         mCodeType = "UNKNOWN";
     }
 
-    public static final @android.annotation.NonNull Creator<GnssMeasurement> CREATOR = new Creator<GnssMeasurement>() {
+    /**
+     * Returns {@code true} if {@link #getReceiverInterSignalBiasNanos()} is available,
+     * {@code false} otherwise.
+     */
+    public boolean hasReceiverInterSignalBiasNanos() {
+        return isFlagSet(HAS_RECEIVER_ISB);
+    }
+
+    /**
+     * Gets the GNSS measurement's receiver inter-signal bias in nanoseconds with sub-nanosecond
+     * accuracy.
+     *
+     * <p>This value is the estimated receiver-side inter-system (different from the
+     * constellation in {@link GnssClock#getReferenceConstellationTypeForIsb()} bias and
+     * inter-frequency (different from the carrier frequency in
+     * {@link GnssClock#getReferenceCarrierFrequencyHzForIsb()}) bias. The reported receiver
+     * inter-signal bias must include signal delays caused by:
+     *
+     * <ul>
+     * <li>Receiver inter-constellation bias</li>
+     * <li>Receiver inter-frequency bias</li>
+     * <li>Receiver inter-code bias</li>
+     * </ul>
+     *
+     * <p>The value does not include the inter-frequency Ionospheric bias.
+     *
+     * <p>The value is only available if {@link #hasReceiverInterSignalBiasNanos()} is {@code true}.
+     */
+    public double getReceiverInterSignalBiasNanos() {
+        return mReceiverInterSignalBiasNanos;
+    }
+
+    /**
+     * Sets the GNSS measurement's receiver inter-signal bias in nanoseconds.
+     *
+     * @hide
+     */
+    @TestApi
+    public void setReceiverInterSignalBiasNanos(double receiverInterSignalBiasNanos) {
+        setFlag(HAS_RECEIVER_ISB);
+        mReceiverInterSignalBiasNanos = receiverInterSignalBiasNanos;
+    }
+
+    /**
+     * Resets the GNSS measurement's receiver inter-signal bias in nanoseconds.
+     *
+     * @hide
+     */
+    @TestApi
+    public void resetReceiverInterSignalBiasNanos() {
+        resetFlag(HAS_RECEIVER_ISB);
+    }
+
+    /**
+     * Returns {@code true} if {@link #getReceiverInterSignalBiasUncertaintyNanos()} is available,
+     * {@code false} otherwise.
+     */
+    public boolean hasReceiverInterSignalBiasUncertaintyNanos() {
+        return isFlagSet(HAS_RECEIVER_ISB_UNCERTAINTY);
+    }
+
+    /**
+     * Gets the GNSS measurement's receiver inter-signal bias uncertainty (1 sigma) in
+     * nanoseconds with sub-nanosecond accuracy.
+     *
+     * <p>The value is only available if {@link #hasReceiverInterSignalBiasUncertaintyNanos()} is
+     * {@code true}.
+     */
+    @FloatRange(from = 0.0)
+    public double getReceiverInterSignalBiasUncertaintyNanos() {
+        return mReceiverInterSignalBiasUncertaintyNanos;
+    }
+
+    /**
+     * Sets the GNSS measurement's receiver inter-signal bias uncertainty (1 sigma) in nanoseconds.
+     *
+     * @hide
+     */
+    @TestApi
+    public void setReceiverInterSignalBiasUncertaintyNanos(@FloatRange(from = 0.0)
+            double receiverInterSignalBiasUncertaintyNanos) {
+        setFlag(HAS_RECEIVER_ISB_UNCERTAINTY);
+        mReceiverInterSignalBiasUncertaintyNanos = receiverInterSignalBiasUncertaintyNanos;
+    }
+
+    /**
+     * Resets the GNSS measurement's receiver inter-signal bias uncertainty (1 sigma) in
+     * nanoseconds.
+     *
+     * @hide
+     */
+    @TestApi
+    public void resetReceiverInterSignalBiasUncertaintyNanos() {
+        resetFlag(HAS_RECEIVER_ISB_UNCERTAINTY);
+    }
+
+    /**
+     * Returns {@code true} if {@link #getSatelliteInterSignalBiasNanos()} is available,
+     * {@code false} otherwise.
+     */
+    public boolean hasSatelliteInterSignalBiasNanos() {
+        return isFlagSet(HAS_SATELLITE_ISB);
+    }
+
+    /**
+     * Gets the GNSS measurement's satellite inter-signal bias in nanoseconds with sub-nanosecond
+     * accuracy.
+     *
+     * <p>This value is the satellite-and-control-segment-side inter-system (different from the
+     * constellation in {@link GnssClock#getReferenceConstellationTypeForIsb()}) bias and
+     * inter-frequency (different from the carrier frequency in
+     * {@link GnssClock#getReferenceCarrierFrequencyHzForIsb()}) bias, including:
+     *
+     * <ul>
+     * <li>Master clock bias (e.g., GPS-GAL Time Offset (GGTO), GPT-UTC Time Offset (TauGps),
+     * BDS-GLO Time Offset (BGTO))</li>
+     * <li>Group delay (e.g., Total Group Delay (TGD))</li>
+     * <li>Satellite inter-signal bias, which includes satellite inter-frequency bias (GLO only),
+     * and satellite inter-code bias (e.g., Differential Code Bias (DCB)).</li>
+     * </ul>
+     *
+     * <p>The value is only available if {@link #hasSatelliteInterSignalBiasNanos()} is {@code
+     * true}.
+     */
+    public double getSatelliteInterSignalBiasNanos() {
+        return mSatelliteInterSignalBiasNanos;
+    }
+
+    /**
+     * Sets the GNSS measurement's satellite inter-signal bias in nanoseconds.
+     *
+     * @hide
+     */
+    @TestApi
+    public void setSatelliteInterSignalBiasNanos(double satelliteInterSignalBiasNanos) {
+        setFlag(HAS_SATELLITE_ISB);
+        mSatelliteInterSignalBiasNanos = satelliteInterSignalBiasNanos;
+    }
+
+    /**
+     * Resets the GNSS measurement's satellite inter-signal bias in nanoseconds.
+     *
+     * @hide
+     */
+    @TestApi
+    public void resetSatelliteInterSignalBiasNanos() {
+        resetFlag(HAS_SATELLITE_ISB);
+    }
+
+    /**
+     * Returns {@code true} if {@link #getSatelliteInterSignalBiasUncertaintyNanos()} is available,
+     * {@code false} otherwise.
+     */
+    public boolean hasSatelliteInterSignalBiasUncertaintyNanos() {
+        return isFlagSet(HAS_SATELLITE_ISB_UNCERTAINTY);
+    }
+
+    /**
+     * Gets the GNSS measurement's satellite inter-signal bias uncertainty (1 sigma) in
+     * nanoseconds with sub-nanosecond accuracy.
+     *
+     * <p>The value is only available if {@link #hasSatelliteInterSignalBiasUncertaintyNanos()} is
+     * {@code true}.
+     */
+    @FloatRange(from = 0.0)
+    public double getSatelliteInterSignalBiasUncertaintyNanos() {
+        return mSatelliteInterSignalBiasUncertaintyNanos;
+    }
+
+    /**
+     * Sets the GNSS measurement's satellite inter-signal bias uncertainty (1 sigma) in nanoseconds.
+     *
+     * @hide
+     */
+    @TestApi
+    public void setSatelliteInterSignalBiasUncertaintyNanos(@FloatRange(from = 0.0)
+            double satelliteInterSignalBiasUncertaintyNanos) {
+        setFlag(HAS_SATELLITE_ISB_UNCERTAINTY);
+        mSatelliteInterSignalBiasUncertaintyNanos = satelliteInterSignalBiasUncertaintyNanos;
+    }
+
+    /**
+     * Resets the GNSS measurement's satellite inter-signal bias uncertainty (1 sigma) in
+     * nanoseconds.
+     *
+     * @hide
+     */
+    @TestApi
+    public void resetSatelliteInterSignalBiasUncertaintyNanos() {
+        resetFlag(HAS_SATELLITE_ISB_UNCERTAINTY);
+    }
+
+
+    public static final @NonNull Creator<GnssMeasurement> CREATOR = new Creator<GnssMeasurement>() {
         @Override
         public GnssMeasurement createFromParcel(Parcel parcel) {
             GnssMeasurement gnssMeasurement = new GnssMeasurement();
@@ -1452,6 +1651,10 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mAutomaticGainControlLevelInDb = parcel.readDouble();
             gnssMeasurement.mCodeType = parcel.readString();
             gnssMeasurement.mBasebandCn0DbHz = parcel.readDouble();
+            gnssMeasurement.mReceiverInterSignalBiasNanos = parcel.readDouble();
+            gnssMeasurement.mReceiverInterSignalBiasUncertaintyNanos = parcel.readDouble();
+            gnssMeasurement.mSatelliteInterSignalBiasNanos = parcel.readDouble();
+            gnssMeasurement.mSatelliteInterSignalBiasUncertaintyNanos = parcel.readDouble();
 
             return gnssMeasurement;
         }
@@ -1486,6 +1689,10 @@ public final class GnssMeasurement implements Parcelable {
         parcel.writeDouble(mAutomaticGainControlLevelInDb);
         parcel.writeString(mCodeType);
         parcel.writeDouble(mBasebandCn0DbHz);
+        parcel.writeDouble(mReceiverInterSignalBiasNanos);
+        parcel.writeDouble(mReceiverInterSignalBiasUncertaintyNanos);
+        parcel.writeDouble(mSatelliteInterSignalBiasNanos);
+        parcel.writeDouble(mSatelliteInterSignalBiasUncertaintyNanos);
     }
 
     @Override
@@ -1514,8 +1721,9 @@ public final class GnssMeasurement implements Parcelable {
 
         builder.append(String.format(format, "Cn0DbHz", mCn0DbHz));
 
-        builder.append(String.format(format, "BasebandCn0DbHz",
-                hasBasebandCn0DbHz() ? mBasebandCn0DbHz : null));
+        if (hasBasebandCn0DbHz()) {
+            builder.append(String.format(format, "BasebandCn0DbHz", mBasebandCn0DbHz));
+        }
 
         builder.append(String.format(
                 formatWithUncertainty,
@@ -1536,37 +1744,57 @@ public final class GnssMeasurement implements Parcelable {
                 "AccumulatedDeltaRangeUncertaintyMeters",
                 mAccumulatedDeltaRangeUncertaintyMeters));
 
-        builder.append(String.format(
-                format,
-                "CarrierFrequencyHz",
-                hasCarrierFrequencyHz() ? mCarrierFrequencyHz : null));
+        if (hasCarrierFrequencyHz()) {
+            builder.append(String.format(format, "CarrierFrequencyHz", mCarrierFrequencyHz));
+        }
 
-        builder.append(String.format(
-                format,
-                "CarrierCycles",
-                hasCarrierCycles() ? mCarrierCycles : null));
+        if (hasCarrierCycles()) {
+            builder.append(String.format(format, "CarrierCycles", mCarrierCycles));
+        }
 
-        builder.append(String.format(
-                formatWithUncertainty,
-                "CarrierPhase",
-                hasCarrierPhase() ? mCarrierPhase : null,
-                "CarrierPhaseUncertainty",
-                hasCarrierPhaseUncertainty() ? mCarrierPhaseUncertainty : null));
+        if (hasCarrierPhase() || hasCarrierPhaseUncertainty()) {
+            builder.append(String.format(
+                    formatWithUncertainty,
+                    "CarrierPhase",
+                    hasCarrierPhase() ? mCarrierPhase : null,
+                    "CarrierPhaseUncertainty",
+                    hasCarrierPhaseUncertainty() ? mCarrierPhaseUncertainty : null));
+        }
 
         builder.append(String.format(format, "MultipathIndicator", getMultipathIndicatorString()));
 
-        builder.append(String.format(
-                format,
-                "SnrInDb",
-                hasSnrInDb() ? mSnrInDb : null));
-        builder.append(String.format(
-                format,
-                "AgcLevelDb",
-                hasAutomaticGainControlLevelDb() ? mAutomaticGainControlLevelInDb : null));
-        builder.append(String.format(
-                format,
-                "CodeType",
-                hasCodeType() ? mCodeType : null));
+        if (hasSnrInDb()) {
+            builder.append(String.format(format, "SnrInDb", mSnrInDb));
+        }
+
+        if (hasAutomaticGainControlLevelDb()) {
+            builder.append(String.format(format, "AgcLevelDb", mAutomaticGainControlLevelInDb));
+        }
+
+        if (hasCodeType()) {
+            builder.append(String.format(format, "CodeType", mCodeType));
+        }
+
+        if (hasReceiverInterSignalBiasNanos() || hasReceiverInterSignalBiasUncertaintyNanos()) {
+            builder.append(String.format(
+                    formatWithUncertainty,
+                    "ReceiverInterSignalBiasNs",
+                    hasReceiverInterSignalBiasNanos() ? mReceiverInterSignalBiasNanos : null,
+                    "ReceiverInterSignalBiasUncertaintyNs",
+                    hasReceiverInterSignalBiasUncertaintyNanos()
+                            ? mReceiverInterSignalBiasUncertaintyNanos : null));
+        }
+
+        if (hasSatelliteInterSignalBiasNanos() || hasSatelliteInterSignalBiasUncertaintyNanos()) {
+            builder.append(String.format(
+                    formatWithUncertainty,
+                    "SatelliteInterSignalBiasNs",
+                    hasSatelliteInterSignalBiasNanos() ? mSatelliteInterSignalBiasNanos : null,
+                    "SatelliteInterSignalBiasUncertaintyNs",
+                    hasSatelliteInterSignalBiasUncertaintyNanos()
+                            ? mSatelliteInterSignalBiasUncertaintyNanos
+                            : null));
+        }
 
         return builder.toString();
     }
@@ -1593,6 +1821,10 @@ public final class GnssMeasurement implements Parcelable {
         resetAutomaticGainControlLevel();
         resetCodeType();
         resetBasebandCn0DbHz();
+        resetReceiverInterSignalBiasNanos();
+        resetReceiverInterSignalBiasUncertaintyNanos();
+        resetSatelliteInterSignalBiasNanos();
+        resetSatelliteInterSignalBiasUncertaintyNanos();
     }
 
     private void setFlag(int flag) {
