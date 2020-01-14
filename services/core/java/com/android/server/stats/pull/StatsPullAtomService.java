@@ -1881,12 +1881,44 @@ public class StatsPullAtomService extends SystemService {
         // No op.
     }
 
+    private StoragedUidIoStatsReader mStoragedUidIoStatsReader =
+            new StoragedUidIoStatsReader();
+
     private void registerDiskIO() {
-        // No op.
+        int tagId = StatsLog.DISK_IO;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {2, 3, 4, 5, 6, 7, 8, 9, 10, 11})
+                .setCoolDownNs(3 * NS_PER_SEC)
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullDiskIO(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullDiskIO() {
-        // No op.
+    private int pullDiskIO(int atomTag, List<StatsEvent> pulledData) {
+        mStoragedUidIoStatsReader.readAbsolute((uid, fgCharsRead, fgCharsWrite, fgBytesRead,
+                fgBytesWrite, bgCharsRead, bgCharsWrite, bgBytesRead, bgBytesWrite,
+                fgFsync, bgFsync) -> {
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(uid)
+                    .writeLong(fgCharsRead)
+                    .writeLong(fgCharsWrite)
+                    .writeLong(fgBytesRead)
+                    .writeLong(fgBytesWrite)
+                    .writeLong(bgCharsRead)
+                    .writeLong(bgCharsWrite)
+                    .writeLong(bgBytesRead)
+                    .writeLong(bgBytesWrite)
+                    .writeLong(fgFsync)
+                    .writeLong(bgFsync)
+                    .build();
+            pulledData.add(e);
+        });
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerPowerProfile() {

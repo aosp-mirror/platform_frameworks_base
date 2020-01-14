@@ -806,28 +806,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullDiskIo(int tagId, long elapsedNanos, final long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        mStoragedUidIoStatsReader.readAbsolute((uid, fgCharsRead, fgCharsWrite, fgBytesRead,
-                fgBytesWrite, bgCharsRead, bgCharsWrite, bgBytesRead, bgBytesWrite,
-                fgFsync, bgFsync) -> {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
-                    wallClockNanos);
-            e.writeInt(uid);
-            e.writeLong(fgCharsRead);
-            e.writeLong(fgCharsWrite);
-            e.writeLong(fgBytesRead);
-            e.writeLong(fgBytesWrite);
-            e.writeLong(bgCharsRead);
-            e.writeLong(bgCharsWrite);
-            e.writeLong(bgBytesRead);
-            e.writeLong(bgBytesWrite);
-            e.writeLong(fgFsync);
-            e.writeLong(bgFsync);
-            pulledData.add(e);
-        });
-    }
-
     private void pullProcessCpuTime(int tagId, long elapsedNanos, final long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         synchronized (this) {
@@ -1158,11 +1136,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             case StatsLog.PROC_STATS_PKG_PROC: {
                 pullProcessStats(ProcessStats.REPORT_PKG_PROC_STATS, tagId, elapsedNanos,
                         wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.DISK_IO: {
-                pullDiskIo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 
