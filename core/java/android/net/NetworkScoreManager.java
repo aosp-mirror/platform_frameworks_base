@@ -403,7 +403,7 @@ public class NetworkScoreManager {
      * @throws SecurityException if the caller does not hold the
      *         {@link permission#REQUEST_NETWORK_SCORES} permission.
      * @throws IllegalArgumentException if a score cache is already registered for this type.
-     * @deprecated equivalent to registering for cache updates with CACHE_FILTER_NONE.
+     * @deprecated equivalent to registering for cache updates with {@link #SCORE_FILTER_NONE}.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.REQUEST_NETWORK_SCORES)
