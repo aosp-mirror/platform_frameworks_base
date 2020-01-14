@@ -470,4 +470,7 @@ interface IDevicePolicyManager {
 
     void setCommonCriteriaModeEnabled(in ComponentName admin, boolean enabled);
     boolean isCommonCriteriaModeEnabled(in ComponentName admin);
+
+    int getPersonalAppsSuspendedReasons(in ComponentName admin);
+    void setPersonalAppsSuspended(in ComponentName admin, boolean suspended);
 }

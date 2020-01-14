@@ -1209,6 +1209,8 @@
   <java-symbol type="string" name="device_ownership_relinquished" />
   <java-symbol type="string" name="network_logging_notification_title" />
   <java-symbol type="string" name="network_logging_notification_text" />
+  <java-symbol type="string" name="personal_apps_suspended_notification_title" />
+  <java-symbol type="string" name="personal_apps_suspended_notification_text" />
   <java-symbol type="string" name="factory_reset_warning" />
   <java-symbol type="string" name="factory_reset_message" />
   <java-symbol type="string" name="lockscreen_transport_play_description" />
@@ -3818,6 +3820,9 @@
   <java-symbol type="dimen" name="waterfall_display_top_edge_size" />
   <java-symbol type="dimen" name="waterfall_display_right_edge_size" />
   <java-symbol type="dimen" name="waterfall_display_bottom_edge_size" />
+
+  <!-- For device policy -->
+  <java-symbol type="array" name="config_packagesExemptFromSuspension" />
 
   <!-- Accessibility take screenshot -->
   <java-symbol type="string" name="capability_desc_canTakeScreenshot" />

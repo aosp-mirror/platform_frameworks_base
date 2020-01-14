@@ -2391,6 +2391,28 @@ public class DevicePolicyManager {
             "android.app.action.BIND_SECONDARY_LOCKSCREEN_SERVICE";
 
     /**
+     * Return value for {@link #getPersonalAppsSuspendedReasons} when personal apps are not
+     * suspended.
+     */
+    public static final int PERSONAL_APPS_NOT_SUSPENDED = 0;
+
+    /**
+     * Flag for {@link #getPersonalAppsSuspendedReasons} return value. Set when personal
+     * apps are suspended by an admin explicitly via {@link #setPersonalAppsSuspended}.
+     */
+    public static final int PERSONAL_APPS_SUSPENDED_EXPLICITLY = 1 << 0;
+
+    /**
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "PERSONAL_APPS_" }, value = {
+            PERSONAL_APPS_NOT_SUSPENDED,
+            PERSONAL_APPS_SUSPENDED_EXPLICITLY
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PersonalAppSuspensionReason {}
+
+    /**
      * Return true if the given administrator component is currently active (enabled) in the system.
      *
      * @param admin The administrator component to check for.
@@ -4564,6 +4586,18 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_START_ENCRYPTION
             = "android.app.action.START_ENCRYPTION";
+
+    /**
+     * Activity action: launch the DPC to check policy compliance. This intent is launched when
+     * the user taps on the notification about personal apps suspension. When handling this intent
+     * the DPC must check if personal apps should still be suspended and either unsuspend them or
+     * instruct the user on how to resolve the noncompliance causing the suspension.
+     *
+     * @see #setPersonalAppsSuspended
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CHECK_POLICY_COMPLIANCE =
+            "android.app.action.CHECK_POLICY_COMPLIANCE";
 
     /**
      * Broadcast action: notify managed provisioning that new managed user is created.
@@ -11649,5 +11683,49 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Called by profile owner of an organization-owned managed profile to check whether
+     * personal apps are suspended.
+     *
+     * @return a bitmask of reasons for personal apps suspension or
+     *     {@link #PERSONAL_APPS_NOT_SUSPENDED} if apps are not suspended.
+     * @see #setPersonalAppsSuspended
+     */
+    public @PersonalAppSuspensionReason int getPersonalAppsSuspendedReasons(
+            @NonNull ComponentName admin) {
+        throwIfParentInstance("getPersonalAppsSuspendedReasons");
+        if (mService != null) {
+            try {
+                return mService.getPersonalAppsSuspendedReasons(admin);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Called by a profile owner of an organization-owned managed profile to suspend personal
+     * apps on the device. When personal apps are suspended the device can only be used for calls.
+     *
+     * <p>When personal apps are suspended, an ongoing notification about that is shown to the user.
+     * When the user taps the notification, system invokes {@link #ACTION_CHECK_POLICY_COMPLIANCE}
+     * in the profile owner package. Profile owner implementation that uses personal apps suspension
+     * must handle this intent.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with
+     * @param suspended Whether personal apps should be suspended.
+     */
+    public void setPersonalAppsSuspended(@NonNull ComponentName admin, boolean suspended) {
+        throwIfParentInstance("setPersonalAppsSuspended");
+        if (mService != null) {
+            try {
+                mService.setPersonalAppsSuspended(admin, suspended);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
     }
 }

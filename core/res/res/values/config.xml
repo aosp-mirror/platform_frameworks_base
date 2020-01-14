@@ -4326,6 +4326,13 @@
          generation). -->
     <bool name="config_customBugreport">false</bool>
 
+    <!-- Names of packages that should not be suspended when personal use is blocked by policy. -->
+    <string-array name="config_packagesExemptFromSuspension" translatable="false">
+        <!-- Add packages here, example: -->
+        <!-- <item>com.android.settings</item> -->
+    </string-array>
+
+
     <!-- Class name of the custom country detector to be used. -->
     <string name="config_customCountryDetector" translatable="false">com.android.server.location.ComprehensiveCountryDetector</string>
 
