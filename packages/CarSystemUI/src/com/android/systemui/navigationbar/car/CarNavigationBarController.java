@@ -71,6 +71,30 @@ public class CarNavigationBarController {
         mShowRight = mContext.getResources().getBoolean(R.bool.config_enableRightNavigationBar);
     }
 
+    /**
+     * Hides all navigation bars.
+     */
+    public void hideBars() {
+        if (mTopView != null) {
+            mTopView.setVisibility(View.GONE);
+        }
+        setBottomWindowVisibility(View.GONE);
+        setLeftWindowVisibility(View.GONE);
+        setRightWindowVisibility(View.GONE);
+    }
+
+    /**
+     * Shows all navigation bars.
+     */
+    public void showBars() {
+        if (mTopView != null) {
+            mTopView.setVisibility(View.VISIBLE);
+        }
+        setBottomWindowVisibility(View.VISIBLE);
+        setLeftWindowVisibility(View.VISIBLE);
+        setRightWindowVisibility(View.VISIBLE);
+    }
+
     /** Connect to hvac service. */
     public void connectToHvac() {
         mHvacControllerLazy.get().connectToCarService();
