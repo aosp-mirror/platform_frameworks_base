@@ -1038,10 +1038,10 @@ public class SmsMessage {
     }
 
     /**
-     * {@hide}
      * Returns the recipient address(receiver) of this SMS message in String form or null if
      * unavailable.
      */
+    @Nullable
     public String getRecipientAddress() {
         return mWrappedSmsMessage.getRecipientAddress();
     }
