@@ -53,7 +53,7 @@
     <string name="uninstall_application_title" msgid="4045420072401428123">"Odstrani aplikacijo"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"Odstrani posodobitev"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> je del te aplikacije:"</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"Ali želite odstraniti to aplikacijo?"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Ali želite odmestiti to aplikacijo?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Ali želite odstraniti aplikacijo za "<b>"vse"</b>" uporabnike? Aplikacija in njeni podatki bodo odstranjeni iz "<b>"vseh"</b>" uporabnikov v napravi."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Ali želite to aplikacijo odstraniti za uporabnika <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Želite to aplikacijo nadomestiti s tovarniško različico? Odstranjeni bodo vsi podatki."</string>
@@ -62,11 +62,11 @@
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Odstranitve v teku"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Neuspele odstranitve"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Odstranjevanje …"</string>
-    <string name="uninstalling_app" msgid="8866082646836981397">"Odstranjevanje aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> …"</string>
+    <string name="uninstalling_app" msgid="8866082646836981397">"Odmeščanje aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> …"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Odstranitev je končana."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Aplikacija <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> je bila odstranjena"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Odstranitev ni uspela."</string>
-    <string name="uninstall_failed_app" msgid="5506028705017601412">"Odstranjevanje aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ni uspelo."</string>
+    <string name="uninstall_failed_app" msgid="5506028705017601412">"Odmeščanje aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ni uspelo."</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Aktivne skrbniške aplikacije naprave ni mogoče odstraniti"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Aktivne skrbniške aplikacije za uporabnika <xliff:g id="USERNAME">%1$s</xliff:g> ni mogoče odstraniti"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Aplikacija je obvezna za nekatere uporabnike/profile in je odstranjena za druge."</string>

@@ -107,7 +107,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"الكاميرا"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"الهاتف"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"المساعد الصوتي"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"إلغاء القفل"</string>
+    <string name="accessibility_unlock_button" msgid="122785427241471085">"فتح القفل"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"في انتظار بصمة الإصبع"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"فتح القفل بدون استخدام بصمة إصبعك"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"مسح الوجه"</string>
@@ -536,10 +536,10 @@
     <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"أنت متصل بـ <xliff:g id="APPLICATION">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطتك الشخصية على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
     <string name="monitoring_description_app_work" msgid="3713084153786663662">"يخضع الملف الشخصي للعمل لإدارة <xliff:g id="ORGANIZATION">%1$s</xliff:g>. تم ربط الملف الشخصي بـ <xliff:g id="APPLICATION">%2$s</xliff:g>، الذي يمكنه مراقبة أنشطة شبكتك، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب.\n\nيمكنك الاتصال بالمشرف للحصول على مزيد من المعلومات."</string>
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"يخضع الملف الشخصي للعمل لإدارة <xliff:g id="ORGANIZATION">%1$s</xliff:g>. تم ربط هذا الملف الشخصي بـ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>، الذي يمكنه مراقبة أنشطة شبكتك، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب.\n\nتم ربطك بـ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>، الذي يمكنه مراقبة أنشطة شبكتك الشخصية."</string>
-    <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"‏إلغاء القفل باستمرار بواسطة TrustAgent"</string>
-    <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"سيظل الجهاز مقفلاً إلى أن يتم إلغاء قفله يدويًا"</string>
+    <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"‏فتح القفل باستمرار بواسطة TrustAgent"</string>
+    <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"سيظل الجهاز مقفلاً إلى أن يتم فتح قفله يدويًا"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"الحصول على الإشعارات بشكل أسرع"</string>
-    <string name="hidden_notifications_text" msgid="5899627470450792578">"الاطّلاع عليها قبل إلغاء القفل"</string>
+    <string name="hidden_notifications_text" msgid="5899627470450792578">"الاطّلاع عليها قبل فتح القفل"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"لا، شكرًا"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"إعداد"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

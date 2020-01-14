@@ -667,13 +667,13 @@
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"للسماح للمالك ببدء استخدام الإذن لأحد التطبيقات. ولن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"تعيين قواعد كلمة المرور"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"للتحكم في الطول والأحرف المسموح بها في كلمات المرور وأرقام التعريف الشخصي في قفل الشاشة."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"مراقبة محاولات إلغاء قفل الشاشة"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"لمراقبة عدد مرات كتابة كلمات المرور غير الصحيحة عند إلغاء تأمين الشاشة وتأمين الجهاز اللوحي أو مسح جميع بياناته في حالة كتابة الكثير من كلمات المرور غير الصحيحة."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="1880525102716729482">"مراقبة عدد كلمات المرور غير الصحيحة التي تتم كتابتها عند إلغاء قفل الشاشة، وقفل التلفزيون أو محو جميع بيانات التلفزيون إذا تمت كتابة عدد كبير من كلمات المرور غير الصحيحة."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء تأمين الشاشة، وتأمين الهاتف ومحو جميع بياناته إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء تأمين الشاشة، وتأمين الجهاز اللوحي ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="1253625325967736219">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء تأمين الشاشة، وتأمين التلفزيون ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء تأمين الشاشة، وتأمين الهاتف ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"مراقبة محاولات فتح قفل الشاشة"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"لمراقبة عدد مرات كتابة كلمات المرور غير الصحيحة عند فتح قفل الشاشة وتأمين الجهاز اللوحي أو مسح جميع بياناته في حالة كتابة الكثير من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin" product="TV" msgid="1880525102716729482">"مراقبة عدد كلمات المرور غير الصحيحة التي تتم كتابتها عند فتح قفل الشاشة، وقفل التلفزيون أو محو جميع بيانات التلفزيون إذا تمت كتابة عدد كبير من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين الهاتف ومحو جميع بياناته إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين الجهاز اللوحي ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="1253625325967736219">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين التلفزيون ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين الهاتف ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"تغيير قفل الشاشة"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"إمكانية تغيير قفل الشاشة"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"قفل الشاشة"</string>
@@ -830,7 +830,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"صحيح!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"أعد المحاولة"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"أعد المحاولة"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"إلغاء قفل جميع الميزات والبيانات"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"فتح قفل جميع الميزات والبيانات"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"تم تجاوز الحد الأقصى لعدد محاولات تأمين الجهاز بالوجه"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"‏ليست هناك شريحة SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"‏ليس هناك شريحة SIM في الجهاز اللوحي."</string>
@@ -852,22 +852,22 @@
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"‏شريحة SIM مؤمّنة بكود PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"راجع دليل المستخدم أو اتصل بخدمة العملاء."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"‏شريحة SIM مؤمّنة."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"‏جارٍ إلغاء تأمين شريحة SIM…"</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"‏جارٍ فتح قفل شريحة SIM…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"لقد رسمت نقش فتح القفل بطريقة غير صحيحة <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة.\n\nيُرجى إعادة المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"لقد كتبت كلمة المرور <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة بشكل غير صحيح. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"‏لقد كتبت رمز PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة بشكل غير صحيح. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"‏لقد رسمت نقش فتح القفل بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات تسجيل الدخول إلى Google.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="8418060136796780268">"‏لديك <xliff:g id="NUMBER_0">%1$d</xliff:g> من محاولات رسم نقش إلغاء القفل غير الصحيحة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، سيُطلب منك إلغاء قفل التلفزيون من خلال تسجيل الدخول إلى Google.\n\n يمكنك إعادة التجربة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="8418060136796780268">"‏لديك <xliff:g id="NUMBER_0">%1$d</xliff:g> من محاولات رسم نقش فتح القفل غير الصحيحة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، سيُطلب منك فتح قفل التلفزيون من خلال تسجيل الدخول إلى Google.\n\n يمكنك إعادة التجربة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"‏لقد رسمت نقش فتح القفل بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام معلومات تسجيل الدخول إلى Google.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"لقد حاولت إلغاء تأمين الجهاز اللوحي <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الجهاز اللوحي إلى الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2736747741914666082">"لديك <xliff:g id="NUMBER_0">%1$d</xliff:g> من محاولات إلغاء قفل التلفزيون غير الصحيحة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة ضبط التلفزيون على الإعدادات الأساسية وستفقد جميع بيانات المستخدم."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"لقد حاولت إلغاء تأمين الهاتف <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الهاتف إلى الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"لقد حاولت إلغاء تأمين الجهاز اللوحي <xliff:g id="NUMBER">%d</xliff:g> من المرات بشكل غير صحيح. سيتم الآن إعادة تعيين الجهاز اللوحي إلى الإعدادات الأساسية."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2373955520011165432">"لديك <xliff:g id="NUMBER">%d</xliff:g> من محاولات إلغاء قفل التلفزيون غير الصحيحة. ستتم الآن إعادة ضبط التلفزيون على الإعدادات الأساسية."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"لقد حاولت إلغاء تأمين الهاتف <xliff:g id="NUMBER">%d</xliff:g> من المرات بشكل غير صحيح. سيتم الآن إعادة تعيين الهاتف إلى الإعدادات الأساسية."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"لقد حاولت فتح قفل الجهاز اللوحي <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الجهاز اللوحي إلى الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2736747741914666082">"لديك <xliff:g id="NUMBER_0">%1$d</xliff:g> من محاولات فتح قفل التلفزيون غير الصحيحة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة ضبط التلفزيون على الإعدادات الأساسية وستفقد جميع بيانات المستخدم."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"لقد حاولت فتح قفل الهاتف <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الهاتف إلى الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"لقد حاولت فتح قفل الجهاز اللوحي <xliff:g id="NUMBER">%d</xliff:g> من المرات بشكل غير صحيح. سيتم الآن إعادة تعيين الجهاز اللوحي إلى الإعدادات الأساسية."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2373955520011165432">"لديك <xliff:g id="NUMBER">%d</xliff:g> من محاولات فتح قفل التلفزيون غير الصحيحة. ستتم الآن إعادة ضبط التلفزيون على الإعدادات الأساسية."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"لقد حاولت فتح قفل الهاتف <xliff:g id="NUMBER">%d</xliff:g> من المرات بشكل غير صحيح. سيتم الآن إعادة تعيين الهاتف إلى الإعدادات الأساسية."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"حاول مرة أخرى خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"هل نسيت النمط؟"</string>
-    <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"إلغاء تأمين الحساب"</string>
+    <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"فتح قفل الحساب"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"محاولات النقش كثيرة جدًا"</string>
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"‏لإلغاء التأمين، سجّل الدخول بحسابك في Google."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"اسم المستخدم (البريد إلكتروني)"</string>
@@ -876,7 +876,7 @@
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"اسم المستخدم غير صحيح أو كلمة المرور غير صحيحة."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"‏هل نسيت اسم المستخدم أو كلمة المرور؟\nانتقل إلى "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"جارٍ التحقق..."</string>
-    <string name="lockscreen_unlock_label" msgid="4648257878373307582">"إلغاء تأمين"</string>
+    <string name="lockscreen_unlock_label" msgid="4648257878373307582">"فتح قفل"</string>
     <string name="lockscreen_sound_on_label" msgid="1660281470535492430">"تشغيل الصوت"</string>
     <string name="lockscreen_sound_off_label" msgid="2331496559245450053">"الصوت متوقف"</string>
     <string name="lockscreen_access_pattern_start" msgid="3778502525702613399">"بدأ النمط"</string>
@@ -888,8 +888,8 @@
     <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"‏%1$s. الأداة %2$d من %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"إضافة أداة."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"فارغة"</string>
-    <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"تم توسيع منطقة إلغاء القفل."</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"تم تصغير منطقة إلغاء القفل."</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"تم توسيع منطقة فتح القفل."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"تم تصغير منطقة فتح القفل."</string>
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"أداة <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"محدد المستخدم"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"الحالة"</string>
@@ -898,14 +898,14 @@
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"بدأت إعادة ترتيب الأدوات."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"انتهت إعادة ترتيب الأدوات."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"تم حذف أداة <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
-    <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"توسيع منطقة إلغاء القفل."</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"إلغاء القفل باستخدام التمرير."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"إلغاء القفل باستخدام النقش."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"توسيع منطقة فتح القفل."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"فتح القفل باستخدام التمرير."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"فتح القفل باستخدام النقش."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"تأمين الجهاز بالوجه."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"‏إلغاء القفل باستخدام رمز PIN."</string>
-    <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"‏إلغاء قفل رقم التعريف الشخصي لشريحة SIM."</string>
-    <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"‏إلغاء قفل مفتاح PUK لشريحة SIM."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="6130186108581153265">"إلغاء القفل باستخدام كلمة المرور."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"‏فتح القفل باستخدام رمز PIN."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"‏فتح قفل رقم التعريف الشخصي لشريحة SIM."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"‏فتح قفل مفتاح PUK لشريحة SIM."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="6130186108581153265">"فتح القفل باستخدام كلمة المرور."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="1419570880512350689">"منطقة النقش."</string>
     <string name="keyguard_accessibility_slide_area" msgid="4331399051142520176">"منطقة التمرير."</string>
     <string name="password_keyboard_label_symbol_key" msgid="2716255580853511949">"?123"</string>
@@ -1463,7 +1463,7 @@
     <string name="taking_remote_bugreport_notification_title" msgid="1582531382166919850">"جارٍ الحصول على تقرير الخطأ…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="6708897723753334999">"هل تريد مشاركة تقرير الخطأ؟"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="3077385149217638550">"جارٍ مشاركة تقرير الخطأ…"</string>
-    <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"طلب المشرف الحصول على تقرير خطأ للمساعدة في تحرِّي مشكلة هذا الجهاز وإصلاحها؛ ويمكن أن تتم مشاركة التطبيقات والبيانات."</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"طلب المشرف الحصول على تقرير خطأ للمساعدة في تحديد مشكلة هذا الجهاز وحلّها؛ ويمكن أن تتم مشاركة التطبيقات والبيانات."</string>
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"مشاركة"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"رفض"</string>
     <string name="select_input_method" msgid="3971267998568587025">"اختيار أسلوب الإدخال"</string>
@@ -1736,7 +1736,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"‏شريحة SIM غير مفعّلة الآن. أدخل رمز PUK للمتابعة. اتصل بمشغل شبكة الجوال للاطلاع على التفاصيل."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"‏إدخال رمز رمز PIN المراد"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"‏تأكيد رمز رمز PIN المراد"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"‏جارٍ إلغاء تأمين شريحة SIM…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"‏جارٍ فتح قفل شريحة SIM…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"‏رمز PIN غير صحيح."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"اكتب  رقم التعريف الشخصي المكون من ٤ إلى ٨ أرقام."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"‏يجب أن يتكون رمز PUK من ۸ أرقام."</string>
@@ -1753,14 +1753,14 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"‏لقد كتبت رمز PIN بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"لقد كتبت كلمة المرور بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"لقد رسمت نقش فتح القفل بطريقة غير صحيحة <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"لقد حاولت إلغاء تأمين الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الجهاز اللوحي على الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7525614240870652051">"لديك <xliff:g id="NUMBER_0">%1$d</xliff:g> من محاولات إلغاء قفل التلفزيون غير الصحيحة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة ضبط التلفزيون على الإعدادات الأساسية وستفقد جميع بيانات المستخدم."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"لقد حاولت إلغاء تأمين الهاتف بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الهاتف على الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"لقد حاولت إلغاء تأمين الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الجهاز اللوحي على الإعدادات الأساسية."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5213981402777341134">"لديك <xliff:g id="NUMBER">%d</xliff:g> من محاولات إلغاء قفل التلفزيون غير الصحيحة. ستتم الآن إعادة ضبط التلفزيون على الإعدادات الأساسية."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"لقد حاولت إلغاء تأمين الهاتف بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الهاتف على الإعدادات الأساسية."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"لقد حاولت فتح قفل الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الجهاز اللوحي على الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7525614240870652051">"لديك <xliff:g id="NUMBER_0">%1$d</xliff:g> من محاولات فتح قفل التلفزيون غير الصحيحة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة ضبط التلفزيون على الإعدادات الأساسية وستفقد جميع بيانات المستخدم."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"لقد حاولت فتح قفل الهاتف بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الهاتف على الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"لقد حاولت فتح قفل الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الجهاز اللوحي على الإعدادات الأساسية."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5213981402777341134">"لديك <xliff:g id="NUMBER">%d</xliff:g> من محاولات فتح قفل التلفزيون غير الصحيحة. ستتم الآن إعادة ضبط التلفزيون على الإعدادات الأساسية."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"لقد حاولت فتح قفل الهاتف بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الهاتف على الإعدادات الأساسية."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"لقد رسمت نقش فتح القفل بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستطالَب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات حساب بريد إلكتروني.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="8057874855853116724">"لقد رسمت نقش إلغاء القفل بشكل غير صحيح عدد <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة، سيُطلب منك إلغاء قفل التلفزيون باستخدام حساب بريد إلكتروني.\n\n يمكنك إعادة التجربة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="8057874855853116724">"لقد رسمت نقش فتح القفل بشكل غير صحيح عدد <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة، سيُطلب منك فتح قفل التلفزيون باستخدام حساب بريد إلكتروني.\n\n يمكنك إعادة التجربة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"لقد رسمت نقش فتح القفل بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"إزالة"</string>
