@@ -127,7 +127,7 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.connectDevice(device);
 
-        verify(cachedDevice).connect(true);
+        verify(cachedDevice).connect();
     }
 
     @Test
