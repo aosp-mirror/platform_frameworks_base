@@ -27,10 +27,4 @@ public interface FrontendCallback {
      * Invoked when there is a frontend event.
      */
     void onEvent(int frontendEventType);
-
-    /**
-     * Invoked when there is a scan message.
-     * @param msg
-     */
-    void onScanMessage(ScanMessage msg);
 }
