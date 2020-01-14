@@ -44,20 +44,20 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.DropboxLogTags;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 /**
  * Performs a number of miscellaneous, non-system-critical actions
@@ -424,7 +424,23 @@ public class BootReceiver extends BroadcastReceiver {
         for (String propPostfix : MOUNT_DURATION_PROPS_POSTFIX) {
             int duration = SystemProperties.getInt("ro.boottime.init.mount_all." + propPostfix, 0);
             if (duration != 0) {
-                MetricsLogger.histogram(null, "boot_mount_all_duration_" + propPostfix, duration);
+                int eventType;
+                switch (propPostfix) {
+                    case "early":
+                        eventType = StatsLog.BOOT_TIME_EVENT_DURATION__EVENT__MOUNT_EARLY_DURATION;
+                        break;
+                    case "default":
+                        eventType =
+                                StatsLog.BOOT_TIME_EVENT_DURATION__EVENT__MOUNT_DEFAULT_DURATION;
+                        break;
+                    case "late":
+                        eventType = StatsLog.BOOT_TIME_EVENT_DURATION__EVENT__MOUNT_LATE_DURATION;
+                        break;
+                    default:
+                        continue;
+                }
+                StatsLog.write(StatsLog.BOOT_TIME_EVENT_DURATION_REPORTED, eventType,
+                        duration);
             }
         }
     }
@@ -555,16 +571,19 @@ public class BootReceiver extends BroadcastReceiver {
         Pattern pattern = Pattern.compile(LAST_SHUTDOWN_TIME_PATTERN, Pattern.MULTILINE);
         Matcher matcher = pattern.matcher(lines);
         if (matcher.find()) {
-            MetricsLogger.histogram(null, "boot_fs_shutdown_duration",
+            StatsLog.write(StatsLog.BOOT_TIME_EVENT_DURATION_REPORTED,
+                    StatsLog.BOOT_TIME_EVENT_DURATION__EVENT__SHUTDOWN_DURATION,
                     Integer.parseInt(matcher.group(1)));
-            MetricsLogger.histogram(null, "boot_fs_shutdown_umount_stat",
+            StatsLog.write(StatsLog.BOOT_TIME_EVENT_ERROR_CODE_REPORTED,
+                    StatsLog.BOOT_TIME_EVENT_ERROR_CODE__EVENT__SHUTDOWN_UMOUNT_STAT,
                     Integer.parseInt(matcher.group(2)));
             Slog.i(TAG, "boot_fs_shutdown," + matcher.group(1) + "," + matcher.group(2));
         } else { // not found
             // This can happen when a device has too much kernel log after file system unmount
             // ,exceeding maxReadSize. And having that much kernel logging can affect overall
             // performance as well. So it is better to fix the kernel to reduce the amount of log.
-            MetricsLogger.histogram(null, "boot_fs_shutdown_umount_stat",
+            StatsLog.write(StatsLog.BOOT_TIME_EVENT_ERROR_CODE_REPORTED,
+                    StatsLog.BOOT_TIME_EVENT_ERROR_CODE__EVENT__SHUTDOWN_UMOUNT_STAT,
                     UMOUNT_STATUS_NOT_AVAILABLE);
             Slog.w(TAG, "boot_fs_shutdown, string not found");
         }
@@ -674,7 +693,11 @@ public class BootReceiver extends BroadcastReceiver {
             return;
         }
         stat = fixFsckFsStat(partition, stat, lines, startLineNumber, endLineNumber);
-        MetricsLogger.histogram(null, "boot_fs_stat_" + partition, stat);
+        if ("userdata".equals(partition) || "data".equals(partition)) {
+            StatsLog.write(StatsLog.BOOT_TIME_EVENT_ERROR_CODE_REPORTED,
+                    StatsLog.BOOT_TIME_EVENT_ERROR_CODE__EVENT__FS_MGR_FS_STAT_DATA_PARTITION,
+                    stat);
+        }
         Slog.i(TAG, "fs_stat, partition:" + partition + " stat:0x" + Integer.toHexString(stat));
     }
 
