@@ -17,5 +17,5 @@
 
 <resources>
     <public type="dimen" name="app_icon_size" id="0x01050000" />
-    <dimen name="app_icon_size">564716dp</dimen>
+    <dimen name="app_icon_size">100dp</dimen>
 </resources>

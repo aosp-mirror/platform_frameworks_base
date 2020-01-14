@@ -22,13 +22,7 @@
         <option name="cleanup-apks" value="true" />
         <!-- The following value cannot be multi-line as whitespace is parsed by the installer -->
         <option name="split-apk-file-names"
-            value="FrameworksResourceLoaderTests.apk,FrameworksResourceLoaderTestsSplitOne.apk,FrameworksResourceLoaderTestsSplitTwo.apk" />
-        <option name="test-file-name" value="FrameworksResourceLoaderTestsOverlay.apk" />
-    </target_preparer>
-
-    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
-        <option name="run-command"
-            value="cmd overlay disable android.content.res.loader.test.overlay" />
+            value="FrameworksResourceLoaderTests.apk,FrameworksResourceLoaderTestsSplitOne.apk,FrameworksResourceLoaderTestsSplitTwo.apk,FrameworksResourceLoaderTestsSplitThree.apk,FrameworksResourceLoaderTestsSplitFour.apk" />
     </target_preparer>
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">

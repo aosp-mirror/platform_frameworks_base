@@ -26,10 +26,6 @@ import org.mockito.stubbing.Answer
 import org.xmlpull.v1.XmlPullParser
 import java.io.File
 
-// Enforce use of [android.util.Pair] instead of Kotlin's so it matches the ResourceLoader APIs
-typealias Pair<F, S> = android.util.Pair<F, S>
-infix fun <A, B> A.to(that: B): Pair<A, B> = Pair.create(this, that)!!
-
 object Utils {
     val ANSWER_THROWS = Answer<Any> {
         when (val name = it.method.name) {

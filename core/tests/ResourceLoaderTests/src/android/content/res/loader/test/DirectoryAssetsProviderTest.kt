@@ -16,8 +16,9 @@
 
 package android.content.res.loader.test
 
-import android.content.res.loader.DirectoryResourceLoader
-import android.content.res.loader.ResourceLoader
+import android.content.res.loader.AssetsProvider
+import android.content.res.loader.DirectoryAssetsProvider
+import android.content.res.loader.ResourcesLoader
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
@@ -29,18 +30,21 @@ import org.junit.Test
 import org.junit.rules.TestName
 import java.io.File
 
-class DirectoryResourceLoaderTest : ResourceLoaderTestBase() {
+class DirectoryAssetsProviderTest : ResourceLoaderTestBase() {
 
     @get:Rule
     val testName = TestName()
 
     private lateinit var testDir: File
-    private lateinit var loader: ResourceLoader
+    private lateinit var assetsProvider: AssetsProvider
+    private lateinit var loader: ResourcesLoader
 
     @Before
     fun setUpTestDir() {
-        testDir = context.filesDir.resolve("DirectoryResourceLoaderTest_${testName.methodName}")
-        loader = DirectoryResourceLoader(testDir)
+        testDir = context.filesDir.resolve("DirectoryAssetsProvider_${testName.methodName}")
+        assetsProvider = DirectoryAssetsProvider(testDir)
+        loader = ResourcesLoader()
+        resources.addLoader(loader)
     }
 
     @After
@@ -51,29 +55,29 @@ class DirectoryResourceLoaderTest : ResourceLoaderTestBase() {
     @Test
     fun loadDrawableXml() {
         "nonAssetDrawableOne" writeTo "res/drawable-nodpi-v4/non_asset_drawable.xml"
-        val provider = openArsc("nonAssetDrawableOne")
+        val provider = openArsc("nonAssetDrawableOne", assetsProvider)
 
         fun getValue() = (resources.getDrawable(R.drawable.non_asset_drawable) as ColorDrawable)
                 .color
 
         assertThat(getValue()).isEqualTo(Color.parseColor("#B2D2F2"))
 
-        addLoader(loader to provider)
+        loader.addProvider(provider)
 
-        assertThat(getValue()).isEqualTo(Color.parseColor("#A3C3E3"))
+        assertThat(getValue()).isEqualTo(Color.parseColor("#000001"))
     }
 
     @Test
     fun loadDrawableBitmap() {
         "nonAssetBitmapGreen" writeTo "res/drawable-nodpi-v4/non_asset_bitmap.png"
-        val provider = openArsc("nonAssetBitmapGreen")
+        val provider = openArsc("nonAssetBitmapGreen", assetsProvider)
 
         fun getValue() = (resources.getDrawable(R.drawable.non_asset_bitmap) as BitmapDrawable)
                 .bitmap.getColor(0, 0).toArgb()
 
-        assertThat(getValue()).isEqualTo(Color.RED)
+        assertThat(getValue()).isEqualTo(Color.MAGENTA)
 
-        addLoader(loader to provider)
+        loader.addProvider(provider)
 
         assertThat(getValue()).isEqualTo(Color.GREEN)
     }
@@ -81,13 +85,13 @@ class DirectoryResourceLoaderTest : ResourceLoaderTestBase() {
     @Test
     fun loadXml() {
         "layoutOne" writeTo "res/layout/layout.xml"
-        val provider = openArsc("layoutOne")
+        val provider = openArsc("layoutOne", assetsProvider)
 
         fun getValue() = resources.getLayout(R.layout.layout).advanceToRoot().name
 
-        assertThat(getValue()).isEqualTo("FrameLayout")
+        assertThat(getValue()).isEqualTo("MysteryLayout")
 
-        addLoader(loader to provider)
+        loader.addProvider(provider)
 
         assertThat(getValue()).isEqualTo("RelativeLayout")
     }

@@ -68,9 +68,13 @@ mkdir -p "$genDir"/temp/res/layout
 
 compileAndLink stringOne BOTH AndroidManifestFramework.xml res/values/string_one.xml
 compileAndLink stringTwo BOTH AndroidManifestFramework.xml res/values/string_two.xml
+compileAndLink stringThree BOTH AndroidManifestFramework.xml res/values/string_three.xml
+compileAndLink stringFour BOTH AndroidManifestFramework.xml res/values/string_four.xml
 
 compileAndLink dimenOne BOTH AndroidManifestFramework.xml res/values/dimen_one.xml
 compileAndLink dimenTwo BOTH AndroidManifestFramework.xml res/values/dimen_two.xml
+compileAndLink dimenThree BOTH AndroidManifestFramework.xml res/values/dimen_three.xml
+compileAndLink dimenFour BOTH AndroidManifestFramework.xml res/values/dimen_four.xml
 
 compileAndLink drawableMdpiWithoutFile BOTH_WITHOUT_FILE AndroidManifestFramework.xml res/values/drawable_one.xml res/drawable-mdpi/ic_delete.png
 compileAndLink drawableMdpiWithFile APK AndroidManifestFramework.xml res/values/drawable_one.xml res/drawable-mdpi/ic_delete.png
@@ -86,6 +90,14 @@ cp -f "$inDir"/res/layout/layout_two.xml "$genDir"/temp/res/layout/layout.xml
 compileAndLink layoutTwo ARSC AndroidManifestApp.xml "$genDir"/temp/res/layout/layout.xml res/values/layout_id.xml
 cp -f "$genDir"/out/layoutTwo/unzip/res/layout/layout.xml "$genDir"/output/raw/layoutTwo.xml
 
+cp -f "$inDir"/res/layout/layout_three.xml "$genDir"/temp/res/layout/layout.xml
+compileAndLink layoutThree ARSC AndroidManifestApp.xml "$genDir"/temp/res/layout/layout.xml res/values/layout_id.xml
+cp -f "$genDir"/out/layoutThree/unzip/res/layout/layout.xml "$genDir"/output/raw/layoutThree.xml
+
+cp -f "$inDir"/res/layout/layout_four.xml "$genDir"/temp/res/layout/layout.xml
+compileAndLink layoutFour ARSC AndroidManifestApp.xml "$genDir"/temp/res/layout/layout.xml res/values/layout_id.xml
+cp -f "$genDir"/out/layoutFour/unzip/res/layout/layout.xml "$genDir"/output/raw/layoutFour.xml
+
 drawableNoDpi="/res/drawable-nodpi"
 inDirDrawableNoDpi="$inDir$drawableNoDpi"
 
@@ -97,6 +109,18 @@ cp -f "$inDirDrawableNoDpi"/nonAssetDrawableTwo.xml "$genDir"/temp/res/drawable-
 compileAndLink nonAssetDrawableTwo ARSC AndroidManifestApp.xml "$genDir"/temp/res/drawable-nodpi/non_asset_drawable.xml res/values/non_asset_drawable_id.xml
 cp -f "$genDir"/out/nonAssetDrawableTwo/unzip/res/drawable-nodpi-v4/non_asset_drawable.xml "$genDir"/output/raw/nonAssetDrawableTwo.xml
 
+cp -f "$inDirDrawableNoDpi"/nonAssetDrawableThree.xml "$genDir"/temp/res/drawable-nodpi/non_asset_drawable.xml
+compileAndLink nonAssetDrawableThree ARSC AndroidManifestApp.xml "$genDir"/temp/res/drawable-nodpi/non_asset_drawable.xml res/values/non_asset_drawable_id.xml
+cp -f "$genDir"/out/nonAssetDrawableThree/unzip/res/drawable-nodpi-v4/non_asset_drawable.xml "$genDir"/output/raw/nonAssetDrawableThree.xml
+
+cp -f "$inDirDrawableNoDpi"/nonAssetDrawableFour.xml "$genDir"/temp/res/drawable-nodpi/non_asset_drawable.xml
+compileAndLink nonAssetDrawableFour ARSC AndroidManifestApp.xml "$genDir"/temp/res/drawable-nodpi/non_asset_drawable.xml res/values/non_asset_drawable_id.xml
+cp -f "$genDir"/out/nonAssetDrawableFour/unzip/res/drawable-nodpi-v4/non_asset_drawable.xml "$genDir"/output/raw/nonAssetDrawableFour.xml
+
+cp -f "$inDirDrawableNoDpi"/nonAssetBitmapRed.png "$genDir"/temp/res/drawable-nodpi/non_asset_bitmap.png
+compileAndLink nonAssetBitmapRed BOTH AndroidManifestApp.xml "$genDir"/temp/res/drawable-nodpi/non_asset_bitmap.png res/values/non_asset_bitmap_id.xml
+cp -f "$genDir"/out/nonAssetBitmapRed/unzip/res/drawable-nodpi-v4/non_asset_bitmap.png "$genDir"/output/raw/nonAssetBitmapRed.png
+
 cp -f "$inDirDrawableNoDpi"/nonAssetBitmapGreen.png "$genDir"/temp/res/drawable-nodpi/non_asset_bitmap.png
 compileAndLink nonAssetBitmapGreen BOTH AndroidManifestApp.xml "$genDir"/temp/res/drawable-nodpi/non_asset_bitmap.png res/values/non_asset_bitmap_id.xml
 cp -f "$genDir"/out/nonAssetBitmapGreen/unzip/res/drawable-nodpi-v4/non_asset_bitmap.png "$genDir"/output/raw/nonAssetBitmapGreen.png
@@ -104,5 +128,9 @@ cp -f "$genDir"/out/nonAssetBitmapGreen/unzip/res/drawable-nodpi-v4/non_asset_bi
 cp -f "$inDirDrawableNoDpi"/nonAssetBitmapBlue.png "$genDir"/temp/res/drawable-nodpi/non_asset_bitmap.png
 compileAndLink nonAssetBitmapBlue ARSC AndroidManifestApp.xml "$genDir"/temp/res/drawable-nodpi/non_asset_bitmap.png res/values/non_asset_bitmap_id.xml
 cp -f "$genDir"/out/nonAssetBitmapBlue/unzip/res/drawable-nodpi-v4/non_asset_bitmap.png "$genDir"/output/raw/nonAssetBitmapBlue.png
+
+cp -f "$inDirDrawableNoDpi"/nonAssetBitmapWhite.png "$genDir"/temp/res/drawable-nodpi/non_asset_bitmap.png
+compileAndLink nonAssetBitmapWhite ARSC AndroidManifestApp.xml "$genDir"/temp/res/drawable-nodpi/non_asset_bitmap.png res/values/non_asset_bitmap_id.xml
+cp -f "$genDir"/out/nonAssetBitmapWhite/unzip/res/drawable-nodpi-v4/non_asset_bitmap.png "$genDir"/output/raw/nonAssetBitmapWhite.png
 
 $soong_zip -o "$genDir"/out.zip -C "$genDir"/output/ -D "$genDir"/output/
