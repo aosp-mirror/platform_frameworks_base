@@ -4952,6 +4952,13 @@ package android.net {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.MatchAllNetworkSpecifier> CREATOR;
   }
 
+  public final class NattKeepalivePacketData extends android.net.KeepalivePacketData implements android.os.Parcelable {
+    ctor public NattKeepalivePacketData(@NonNull java.net.InetAddress, int, @NonNull java.net.InetAddress, int, @NonNull byte[]) throws android.net.InvalidPacketException;
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.NattKeepalivePacketData> CREATOR;
+  }
+
   public class Network implements android.os.Parcelable {
     ctor public Network(@NonNull android.net.Network);
     method @NonNull public android.net.Network getPrivateDnsBypassingCopy();
