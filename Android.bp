@@ -409,6 +409,7 @@ filegroup {
 filegroup {
     name: "libincident_aidl",
     srcs: [
+        "core/java/android/os/IIncidentDumpCallback.aidl",
         "core/java/android/os/IIncidentManager.aidl",
         "core/java/android/os/IIncidentReportStatusListener.aidl",
     ],

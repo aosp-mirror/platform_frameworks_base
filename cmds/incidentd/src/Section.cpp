@@ -267,7 +267,7 @@ static void* worker_thread_func(void* cookie) {
     signal(SIGPIPE, sigpipe_handler);
 
     WorkerThreadData* data = (WorkerThreadData*)cookie;
-    status_t err = data->section->BlockingCall(data->pipe.writeFd().get());
+    status_t err = data->section->BlockingCall(data->pipe.writeFd());
 
     {
         unique_lock<mutex> lock(data->lock);
@@ -458,7 +458,7 @@ DumpsysSection::DumpsysSection(int id, const char* service, ...)
 
 DumpsysSection::~DumpsysSection() {}
 
-status_t DumpsysSection::BlockingCall(int pipeWriteFd) const {
+status_t DumpsysSection::BlockingCall(unique_fd& pipeWriteFd) const {
     // checkService won't wait for the service to show up like getService will.
     sp<IBinder> service = defaultServiceManager()->checkService(mService);
 
@@ -467,7 +467,7 @@ status_t DumpsysSection::BlockingCall(int pipeWriteFd) const {
         return NAME_NOT_FOUND;
     }
 
-    service->dump(pipeWriteFd, mArgs);
+    service->dump(pipeWriteFd.get(), mArgs);
 
     return NO_ERROR;
 }
@@ -526,7 +526,7 @@ static inline int32_t get4LE(uint8_t const* src) {
     return src[0] | (src[1] << 8) | (src[2] << 16) | (src[3] << 24);
 }
 
-status_t LogSection::BlockingCall(int pipeWriteFd) const {
+status_t LogSection::BlockingCall(unique_fd& pipeWriteFd) const {
     // Open log buffer and getting logs since last retrieved time if any.
     unique_ptr<logger_list, void (*)(logger_list*)> loggers(
             gLastLogsRetrieved.find(mLogID) == gLastLogsRetrieved.end()
@@ -643,7 +643,7 @@ status_t LogSection::BlockingCall(int pipeWriteFd) const {
         }
     }
     gLastLogsRetrieved[mLogID] = lastTimestamp;
-    if (!proto.flush(pipeWriteFd) && errno == EPIPE) {
+    if (!proto.flush(pipeWriteFd.get()) && errno == EPIPE) {
         ALOGE("[%s] wrote to a broken pipe\n", this->name.string());
         return EPIPE;
     }
@@ -660,7 +660,7 @@ TombstoneSection::TombstoneSection(int id, const char* type, const int64_t timeo
 
 TombstoneSection::~TombstoneSection() {}
 
-status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
+status_t TombstoneSection::BlockingCall(unique_fd& pipeWriteFd) const {
     std::unique_ptr<DIR, decltype(&closedir)> proc(opendir("/proc"), closedir);
     if (proc.get() == nullptr) {
         ALOGE("opendir /proc failed: %s\n", strerror(errno));
@@ -768,7 +768,7 @@ status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
         dumpPipe.readFd().reset();
     }
 
-    if (!proto.flush(pipeWriteFd) && errno == EPIPE) {
+    if (!proto.flush(pipeWriteFd.get()) && errno == EPIPE) {
         ALOGE("[%s] wrote to a broken pipe\n", this->name.string());
         if (err != NO_ERROR) {
             return EPIPE;
@@ -776,6 +776,22 @@ status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
     }
 
     return err;
+}
+
+// ================================================================================
+BringYourOwnSection::BringYourOwnSection(int id, const char* customName, const uid_t callingUid,
+        const sp<IIncidentDumpCallback>& callback)
+    : WorkerThreadSection(id, REMOTE_CALL_TIMEOUT_MS), uid(callingUid), mCallback(callback) {
+    name = "registered ";
+    name += customName;
+}
+
+BringYourOwnSection::~BringYourOwnSection() {}
+
+status_t BringYourOwnSection::BlockingCall(unique_fd& pipeWriteFd) const {
+    android::os::ParcelFileDescriptor pfd(std::move(pipeWriteFd));
+    mCallback->onDumpSection(pfd);
+    return NO_ERROR;
 }
 
 }  // namespace incidentd
