@@ -16,15 +16,92 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.content.Context;
+import android.media.tv.tuner.TunerUtils;
+import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
+
 /**
  * Table information for Section Filter.
  * @hide
  */
 public class SectionSettingsWithTableInfo extends SectionSettings {
-    private int mTableId;
-    private int mVersion;
+    private final int mTableId;
+    private final int mVersion;
 
-    private SectionSettingsWithTableInfo(int mainType) {
+    private SectionSettingsWithTableInfo(int mainType, int tableId, int version) {
         super(mainType);
+        mTableId = tableId;
+        mVersion = version;
     }
+
+    /**
+     * Gets table ID.
+     */
+    public int getTableId() {
+        return mTableId;
+    }
+    /**
+     * Gets version.
+     */
+    public int getVersion() {
+        return mVersion;
+    }
+
+    /**
+     * Creates a builder for {@link SectionSettingsWithTableInfo}.
+     *
+     * @param context the context of the caller.
+     * @param mainType the filter main type.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @NonNull
+    public static Builder builder(@NonNull Context context, @FilterType int mainType) {
+        TunerUtils.checkTunerPermission(context);
+        return new Builder(mainType);
+    }
+
+    /**
+     * Builder for {@link SectionSettingsWithTableInfo}.
+     */
+    public static class Builder extends Settings.Builder<Builder> {
+        private int mTableId;
+        private int mVersion;
+
+        private Builder(int mainType) {
+            super(mainType);
+        }
+
+        /**
+         * Sets table ID.
+         */
+        @NonNull
+        public Builder setTableId(int tableId) {
+            mTableId = tableId;
+            return this;
+        }
+        /**
+         * Sets version.
+         */
+        @NonNull
+        public Builder setVersion(int version) {
+            mVersion = version;
+            return this;
+        }
+
+        /**
+         * Builds a {@link SectionSettingsWithTableInfo} object.
+         */
+        @NonNull
+        public SectionSettingsWithTableInfo build() {
+            return new SectionSettingsWithTableInfo(mMainType, mTableId, mVersion);
+        }
+
+        @Override
+        Builder self() {
+            return this;
+        }
+    }
+
 }
