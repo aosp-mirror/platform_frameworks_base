@@ -23,18 +23,6 @@ import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
 import static android.provider.DeviceConfig.NAMESPACE_CONNECTIVITY;
 
-import static com.android.internal.R.array.config_mobile_hotspot_provision_app;
-import static com.android.internal.R.array.config_tether_bluetooth_regexs;
-import static com.android.internal.R.array.config_tether_dhcp_range;
-import static com.android.internal.R.array.config_tether_upstream_types;
-import static com.android.internal.R.array.config_tether_usb_regexs;
-import static com.android.internal.R.array.config_tether_wifi_p2p_regexs;
-import static com.android.internal.R.array.config_tether_wifi_regexs;
-import static com.android.internal.R.bool.config_tether_upstream_automatic;
-import static com.android.internal.R.integer.config_mobile_hotspot_provision_check_period;
-import static com.android.internal.R.string.config_mobile_hotspot_provision_app_no_ui;
-import static com.android.networkstack.tethering.R.bool.config_tether_enable_legacy_dhcp_server;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.TetheringConfigurationParcel;
@@ -45,6 +33,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.networkstack.tethering.R;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -113,27 +102,30 @@ public class TetheringConfiguration {
         activeDataSubId = id;
         Resources res = getResources(ctx, activeDataSubId);
 
-        tetherableUsbRegexs = getResourceStringArray(res, config_tether_usb_regexs);
+        tetherableUsbRegexs = getResourceStringArray(res, R.array.config_tether_usb_regexs);
         // TODO: Evaluate deleting this altogether now that Wi-Fi always passes
         // us an interface name. Careful consideration needs to be given to
         // implications for Settings and for provisioning checks.
-        tetherableWifiRegexs = getResourceStringArray(res, config_tether_wifi_regexs);
-        tetherableWifiP2pRegexs = getResourceStringArray(res, config_tether_wifi_p2p_regexs);
-        tetherableBluetoothRegexs = getResourceStringArray(res, config_tether_bluetooth_regexs);
+        tetherableWifiRegexs = getResourceStringArray(res, R.array.config_tether_wifi_regexs);
+        tetherableWifiP2pRegexs = getResourceStringArray(
+                res, R.array.config_tether_wifi_p2p_regexs);
+        tetherableBluetoothRegexs = getResourceStringArray(
+                res, R.array.config_tether_bluetooth_regexs);
 
         isDunRequired = checkDunRequired(ctx);
 
-        chooseUpstreamAutomatically = getResourceBoolean(res, config_tether_upstream_automatic);
+        chooseUpstreamAutomatically = getResourceBoolean(
+                res, R.bool.config_tether_upstream_automatic);
         preferredUpstreamIfaceTypes = getUpstreamIfaceTypes(res, isDunRequired);
 
         legacyDhcpRanges = getLegacyDhcpRanges(res);
         defaultIPv4DNS = copy(DEFAULT_IPV4_DNS);
         enableLegacyDhcpServer = getEnableLegacyDhcpServer(res);
 
-        provisioningApp = getResourceStringArray(res, config_mobile_hotspot_provision_app);
+        provisioningApp = getResourceStringArray(res, R.array.config_mobile_hotspot_provision_app);
         provisioningAppNoUi = getProvisioningAppNoUi(res);
         provisioningCheckPeriod = getResourceInteger(res,
-                config_mobile_hotspot_provision_check_period,
+                R.integer.config_mobile_hotspot_provision_check_period,
                 0 /* No periodic re-check */);
 
         configLog.log(toString());
@@ -248,7 +240,7 @@ public class TetheringConfiguration {
     }
 
     private static Collection<Integer> getUpstreamIfaceTypes(Resources res, boolean dunRequired) {
-        final int[] ifaceTypes = res.getIntArray(config_tether_upstream_types);
+        final int[] ifaceTypes = res.getIntArray(R.array.config_tether_upstream_types);
         final ArrayList<Integer> upstreamIfaceTypes = new ArrayList<>(ifaceTypes.length);
         for (int i : ifaceTypes) {
             switch (i) {
@@ -298,7 +290,7 @@ public class TetheringConfiguration {
     }
 
     private static String[] getLegacyDhcpRanges(Resources res) {
-        final String[] fromResource = getResourceStringArray(res, config_tether_dhcp_range);
+        final String[] fromResource = getResourceStringArray(res, R.array.config_tether_dhcp_range);
         if ((fromResource.length > 0) && (fromResource.length % 2 == 0)) {
             return fromResource;
         }
@@ -307,7 +299,7 @@ public class TetheringConfiguration {
 
     private static String getProvisioningAppNoUi(Resources res) {
         try {
-            return res.getString(config_mobile_hotspot_provision_app_no_ui);
+            return res.getString(R.string.config_mobile_hotspot_provision_app_no_ui);
         } catch (Resources.NotFoundException e) {
             return "";
         }
@@ -339,7 +331,7 @@ public class TetheringConfiguration {
     }
 
     private boolean getEnableLegacyDhcpServer(final Resources res) {
-        return getResourceBoolean(res, config_tether_enable_legacy_dhcp_server)
+        return getResourceBoolean(res, R.bool.config_tether_enable_legacy_dhcp_server)
                 || getDeviceConfigBoolean(TETHER_ENABLE_LEGACY_DHCP_SERVER);
     }
 
