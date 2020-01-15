@@ -31,6 +31,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSI
 import static com.android.server.backup.internal.BackupHandler.MSG_RETRY_CLEAR;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_ADB_BACKUP;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_ADB_RESTORE;
+import static com.android.server.backup.internal.BackupHandler.MSG_RUN_BACKUP;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_CLEAR;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
 import static com.android.server.backup.internal.BackupHandler.MSG_SCHEDULE_BACKUP_PACKAGE;
@@ -111,7 +112,6 @@ import com.android.server.backup.internal.ClearDataObserver;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.internal.Operation;
 import com.android.server.backup.internal.PerformInitializeTask;
-import com.android.server.backup.internal.RunBackupReceiver;
 import com.android.server.backup.internal.RunInitializeReceiver;
 import com.android.server.backup.internal.SetupObserver;
 import com.android.server.backup.keyvalue.BackupRequest;
@@ -257,7 +257,6 @@ public class UserBackupManagerService {
     // Retry interval for clear/init when the transport is unavailable
     private static final long TRANSPORT_RETRY_INTERVAL = 1 * AlarmManager.INTERVAL_HOUR;
 
-    public static final String RUN_BACKUP_ACTION = "android.app.backup.intent.RUN";
     public static final String RUN_INITIALIZE_ACTION = "android.app.backup.intent.INIT";
     private static final String BACKUP_FINISHED_ACTION = "android.intent.action.BACKUP_FINISHED";
     private static final String BACKUP_FINISHED_PACKAGE_EXTRA = "packageName";
@@ -319,7 +318,6 @@ public class UserBackupManagerService {
     private boolean mSetupComplete;
     private boolean mAutoRestore;
 
-    private final PendingIntent mRunBackupIntent;
     private final PendingIntent mRunInitIntent;
 
     private final ArraySet<String> mPendingInits = new ArraySet<>();  // transport names
@@ -417,7 +415,6 @@ public class UserBackupManagerService {
     @Nullable private File mAncestralSerialNumberFile;
 
     private final ContentObserver mSetupObserver;
-    private final BroadcastReceiver mRunBackupReceiver;
     private final BroadcastReceiver mRunInitReceiver;
 
     /**
@@ -566,19 +563,9 @@ public class UserBackupManagerService {
         mDataDir = Objects.requireNonNull(dataDir, "dataDir cannot be null");
         mBackupPasswordManager = new BackupPasswordManager(mContext, mBaseStateDir, mRng);
 
-        // Receivers for scheduled backups and transport initialization operations.
-        mRunBackupReceiver = new RunBackupReceiver(this);
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(RUN_BACKUP_ACTION);
-        context.registerReceiverAsUser(
-                mRunBackupReceiver,
-                UserHandle.of(userId),
-                filter,
-                android.Manifest.permission.BACKUP,
-                /* scheduler */ null);
-
+        // Receiver for transport initialization.
         mRunInitReceiver = new RunInitializeReceiver(this);
-        filter = new IntentFilter();
+        IntentFilter filter = new IntentFilter();
         filter.addAction(RUN_INITIALIZE_ACTION);
         context.registerReceiverAsUser(
                 mRunInitReceiver,
@@ -586,16 +573,6 @@ public class UserBackupManagerService {
                 filter,
                 android.Manifest.permission.BACKUP,
                 /* scheduler */ null);
-
-        Intent backupIntent = new Intent(RUN_BACKUP_ACTION);
-        backupIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mRunBackupIntent =
-                PendingIntent.getBroadcastAsUser(
-                        context,
-                        /* requestCode */ 0,
-                        backupIntent,
-                        /* flags */ 0,
-                        UserHandle.of(userId));
 
         Intent initIntent = new Intent(RUN_INITIALIZE_ACTION);
         initIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
@@ -659,7 +636,6 @@ public class UserBackupManagerService {
         mAgentTimeoutParameters.stop();
         mConstants.stop();
         mContext.getContentResolver().unregisterContentObserver(mSetupObserver);
-        mContext.unregisterReceiver(mRunBackupReceiver);
         mContext.unregisterReceiver(mRunInitReceiver);
         mContext.unregisterReceiver(mPackageTrackingReceiver);
         mBackupHandler.stop();
@@ -2538,15 +2514,38 @@ public class UserBackupManagerService {
                 KeyValueBackupJob.schedule(mUserId, mContext, mConstants);
             } else {
                 if (DEBUG) Slog.v(TAG, "Scheduling immediate backup pass");
-                    // Fire the intent that kicks off the whole shebang...
-                    try {
-                        mRunBackupIntent.send();
-                    } catch (PendingIntent.CanceledException e) {
-                        // should never happen
-                        Slog.e(TAG, "run-backup intent cancelled!");
+
+                synchronized (getQueueLock()) {
+                    if (getPendingInits().size() > 0) {
+                        // If there are pending init operations, we process those and then settle
+                        // into the usual periodic backup schedule.
+                        if (MORE_DEBUG) {
+                            Slog.v(TAG, "Init pending at scheduled backup");
+                        }
+                        try {
+                            getAlarmManager().cancel(mRunInitIntent);
+                            mRunInitIntent.send();
+                        } catch (PendingIntent.CanceledException ce) {
+                            Slog.w(TAG, "Run init intent cancelled");
+                        }
+                        return;
                     }
-                    // ...and cancel any pending scheduled job, because we've just superseded it
-                    KeyValueBackupJob.cancel(mUserId, mContext);
+                }
+
+                // Don't run backups if we're disabled or not yet set up.
+                if (!isEnabled() || !isSetupComplete()) {
+                    Slog.w(
+                            TAG,
+                            "Backup pass but enabled="  + isEnabled()
+                                    + " setupComplete=" + isSetupComplete());
+                    return;
+                }
+
+                // Fire the msg that kicks off the whole shebang...
+                Message message = mBackupHandler.obtainMessage(MSG_RUN_BACKUP);
+                mBackupHandler.sendMessage(message);
+                // ...and cancel any pending scheduled job, because we've just superseded it
+                KeyValueBackupJob.cancel(mUserId, mContext);
             }
         } finally {
             Binder.restoreCallingIdentity(oldId);
