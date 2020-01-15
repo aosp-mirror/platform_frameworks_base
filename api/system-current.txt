@@ -5194,6 +5194,10 @@ package android.net {
     field @NonNull public final String specifier;
   }
 
+  public final class TelephonyNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
+    method public boolean satisfiedBy(android.net.NetworkSpecifier);
+  }
+
   public class TrafficStats {
     method public static void setThreadStatsTagApp();
     method public static void setThreadStatsTagBackup();

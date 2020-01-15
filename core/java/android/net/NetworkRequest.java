@@ -300,22 +300,34 @@ public class NetworkRequest implements Parcelable {
          * this without a single transport set will generate an exception, as will
          * subsequently adding or removing transports after this is set.
          * </p>
-         * The interpretation of this {@code String} is bearer specific and bearers that use
-         * it should document their particulars.  For example, Bluetooth may use some sort of
-         * device id while WiFi could used ssid and/or bssid.  Cellular may use carrier spn.
+         * If the {@code networkSpecifier} is provided, it shall be interpreted as follows:
+         * <ul>
+         * <li>If the specifier can be parsed as an integer, it will be treated as a
+         * {@link android.net TelephonyNetworkSpecifier}, and the provided integer will be
+         * interpreted as a SubscriptionId.
+         * <li>If the value is an ethernet interface name, it will be treated as such.
+         * <li>For all other cases, the behavior is undefined.
+         * </ul>
          *
-         * @param networkSpecifier An {@code String} of opaque format used to specify the bearer
-         *                         specific network specifier where the bearer has a choice of
-         *                         networks.
+         * @param networkSpecifier A {@code String} of either a SubscriptionId in cellular
+         *                         network request or an ethernet interface name in ethernet
+         *                         network request.
+         *
+         * @deprecated Use {@link #setNetworkSpecifier(NetworkSpecifier)} instead.
          */
+        @Deprecated
         public Builder setNetworkSpecifier(String networkSpecifier) {
-            /*
-             * A StringNetworkSpecifier does not accept null or empty ("") strings. When network
-             * specifiers were strings a null string and an empty string were considered equivalent.
-             * Hence no meaning is attached to a null or empty ("") string.
-             */
-            return setNetworkSpecifier(TextUtils.isEmpty(networkSpecifier) ? null
-                    : new StringNetworkSpecifier(networkSpecifier));
+            try {
+                int subId = Integer.parseInt(networkSpecifier);
+                return setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
+                        .setSubscriptionId(subId).build());
+            } catch (NumberFormatException nfe) {
+                // A StringNetworkSpecifier does not accept null or empty ("") strings. When network
+                // specifiers were strings a null string and an empty string were considered
+                // equivalent. Hence no meaning is attached to a null or empty ("") string.
+                return setNetworkSpecifier(TextUtils.isEmpty(networkSpecifier) ? null
+                        : new StringNetworkSpecifier(networkSpecifier));
+            }
         }
 
         /**
