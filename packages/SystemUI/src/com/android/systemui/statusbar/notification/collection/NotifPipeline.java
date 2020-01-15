@@ -22,7 +22,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.SectionsProvider;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 
@@ -48,7 +48,7 @@ import javax.inject.Singleton;
  *   GroupEntry. These groups are then transformed in order to remove children or completely split
  *   them apart. To participate, see {@link #addPromoter}.
  * - Sorted: All top-level notifications are sorted. To participate, see
- *   {@link #setSectionsProvider} and {@link #setComparators}
+ *   {@link #setSections} and {@link #setComparators}
  *
  * The exact order of all hooks is as follows:
  *  0. Collection listeners are fired ({@link #addCollectionListener}).
@@ -58,7 +58,7 @@ import javax.inject.Singleton;
  *  3. OnBeforeTransformGroupListeners are fired ({@link #addOnBeforeTransformGroupsListener})
  *  4. NotifPromoters are called on each notification with a parent ({@link #addPromoter})
  *  5. OnBeforeSortListeners are fired ({@link #addOnBeforeSortListener})
- *  6. SectionsProvider is called on each top-level entry in the list ({@link #setSectionsProvider})
+ *  6. Top-level entries are assigned sections by NotifSections ({@link #setSections})
  *  7. Top-level entries within the same section are sorted by NotifComparators
  *     ({@link #setComparators})
  *  8. Pre-render filters are fired on each notification ({@link #addPreRenderFilter})
@@ -142,14 +142,13 @@ public class NotifPipeline {
     }
 
     /**
-     * Assigns sections to each top-level entry, where a section is simply an integer. Sections are
-     * the primary metric by which top-level entries are sorted; NotifComparators are only consulted
-     * when two entries are in the same section. The pipeline doesn't assign any particular meaning
-     * to section IDs -- from it's perspective they're just numbers and it sorts them by a simple
-     * numerical comparison.
+     * Sections that are used to sort top-level entries.  If two entries have the same section,
+     * NotifComparators are consulted. Sections from this list are called in order for each
+     * notification passed through the pipeline. The first NotifSection to return true for
+     * {@link NotifSection#isInSection(ListEntry)} sets the entry as part of its Section.
      */
-    public void setSectionsProvider(SectionsProvider provider) {
-        mShadeListBuilder.setSectionsProvider(provider);
+    public void setSections(List<NotifSection> sections) {
+        mShadeListBuilder.setSections(sections);
     }
 
     /**

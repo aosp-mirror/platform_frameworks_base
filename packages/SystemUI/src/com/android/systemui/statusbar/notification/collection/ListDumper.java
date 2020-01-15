@@ -99,6 +99,13 @@ public class ListDumper {
                     .append(")");
         }
 
+        if (entry.mNotifSection != null) {
+            sb.append(" sectionIndex=")
+                    .append(entry.getSection())
+                    .append(" sectionName=")
+                    .append(entry.mNotifSection.getName());
+        }
+
         if (includeRecordKeeping) {
             NotificationEntry notifEntry = entry.getRepresentativeEntry();
             StringBuilder rksb = new StringBuilder();

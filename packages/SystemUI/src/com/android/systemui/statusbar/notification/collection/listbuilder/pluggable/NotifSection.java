@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@
 package com.android.systemui.statusbar.notification.collection.listbuilder.pluggable;
 
 import com.android.systemui.statusbar.notification.collection.ListEntry;
+import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
 
 /**
- * Interface for sorting notifications into "sections", such as a heads-upping section, people
- * section, alerting section, silent section, etc.
+ * Pluggable for participating in notif sectioning. See {@link ShadeListBuilder#setSections}.
  */
-public abstract class SectionsProvider extends Pluggable<SectionsProvider> {
-
-    protected SectionsProvider(String name) {
+public abstract class NotifSection extends Pluggable<NotifSection> {
+    protected NotifSection(String name) {
         super(name);
     }
 
     /**
-     * Returns the section that this entry belongs to. A section can be any non-negative integer.
-     * When entries are sorted, they are first sorted by section and then by any remainining
-     * comparators.
+     * If returns true, this notification is considered within this section.
+     * Sectioning is performed on each top level notification each time the pipeline is run.
+     * However, this doesn't necessarily mean that your section will get called on each top-level
+     * notification. The first section to return true determines the section of the notification.
      */
-    public abstract int getSection(ListEntry entry);
+    public abstract boolean isInSection(ListEntry entry);
 }

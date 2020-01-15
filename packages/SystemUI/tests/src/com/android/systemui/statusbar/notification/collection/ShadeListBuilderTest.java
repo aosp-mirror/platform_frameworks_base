@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection;
 import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpTree;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -47,7 +48,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.SectionsProvider;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.util.Assert;
@@ -450,6 +451,29 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPreRenderNotifsFilteredBreakupGroups() {
+        final String filterTag = "FILTER_ME";
+        // GIVEN a NotifFilter that filters out notifications with a tag
+        NotifFilter filter1 = spy(new NotifFilterWithTag(filterTag));
+        mListBuilder.addPreRenderFilter(filter1);
+
+        // WHEN the pipeline is kicked off on a list of notifs
+        addGroupChildWithTag(0, PACKAGE_2, GROUP_1, filterTag);
+        addGroupChild(1, PACKAGE_2, GROUP_1);
+        addGroupSummary(2, PACKAGE_2, GROUP_1);
+        dispatchBuild();
+
+        // THEN the final list doesn't contain any filtered-out notifs
+        // and groups that are too small are broken up
+        verifyBuiltList(
+                notif(1)
+        );
+
+        // THEN each filtered notif records the filter that did it
+        assertEquals(filter1, mEntrySet.get(0).mExcludingFilter);
+    }
+
+    @Test
     public void testNotifFiltersCanBePreempted() {
         // GIVEN two notif filters
         NotifFilter filter1 = spy(new PackageFilter(PACKAGE_2));
@@ -552,12 +576,17 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNotifsAreSectioned() {
-        // GIVEN a filter that removes all PACKAGE_4 notifs and a SectionsProvider that divides
+    public void testNotifSections() {
+        // GIVEN a filter that removes all PACKAGE_4 notifs and sections that divide
         // notifs based on package name
         mListBuilder.addPreGroupFilter(new PackageFilter(PACKAGE_4));
-        final SectionsProvider sectionsProvider = spy(new PackageSectioner());
-        mListBuilder.setSectionsProvider(sectionsProvider);
+        final NotifSection pkg1Section = spy(new PackageSection(PACKAGE_1));
+        final NotifSection pkg2Section = spy(new PackageSection(PACKAGE_2));
+        // NOTE: no package 3 section explicitly added, so notifs with package 3 will get set by
+        // ShadeListBuilder's sDefaultSection which will demote it to the last section
+        final NotifSection pkg4Section = spy(new PackageSection(PACKAGE_4));
+        final NotifSection pkg5Section = spy(new PackageSection(PACKAGE_5));
+        mListBuilder.setSections(Arrays.asList(pkg1Section, pkg2Section, pkg4Section, pkg5Section));
 
         // WHEN we build a list with different packages
         addNotif(0, PACKAGE_4);
@@ -584,19 +613,93 @@ public class ShadeListBuilderTest extends SysuiTestCase {
                         child(6)
                 ),
                 notif(8),
-                notif(3),
-                notif(9)
+                notif(9),
+                notif(3)
         );
 
-        // THEN the sections provider is called on all top level elements (but no children and no
-        // entries that were filtered out)
-        verify(sectionsProvider).getSection(mEntrySet.get(1));
-        verify(sectionsProvider).getSection(mEntrySet.get(2));
-        verify(sectionsProvider).getSection(mEntrySet.get(3));
-        verify(sectionsProvider).getSection(mEntrySet.get(7));
-        verify(sectionsProvider).getSection(mEntrySet.get(8));
-        verify(sectionsProvider).getSection(mEntrySet.get(9));
-        verify(sectionsProvider).getSection(mBuiltList.get(3));
+        // THEN the first section (pkg1Section) is called on all top level elements (but
+        // no children and no entries that were filtered out)
+        verify(pkg1Section).isInSection(mEntrySet.get(1));
+        verify(pkg1Section).isInSection(mEntrySet.get(2));
+        verify(pkg1Section).isInSection(mEntrySet.get(3));
+        verify(pkg1Section).isInSection(mEntrySet.get(7));
+        verify(pkg1Section).isInSection(mEntrySet.get(8));
+        verify(pkg1Section).isInSection(mEntrySet.get(9));
+        verify(pkg1Section).isInSection(mBuiltList.get(3));
+
+        verify(pkg1Section, never()).isInSection(mEntrySet.get(0));
+        verify(pkg1Section, never()).isInSection(mEntrySet.get(4));
+        verify(pkg1Section, never()).isInSection(mEntrySet.get(5));
+        verify(pkg1Section, never()).isInSection(mEntrySet.get(6));
+        verify(pkg1Section, never()).isInSection(mEntrySet.get(10));
+
+        // THEN the last section (pkg5Section) is not called on any of the entries that were
+        // filtered or already in a section
+        verify(pkg5Section, never()).isInSection(mEntrySet.get(0));
+        verify(pkg5Section, never()).isInSection(mEntrySet.get(1));
+        verify(pkg5Section, never()).isInSection(mEntrySet.get(2));
+        verify(pkg5Section, never()).isInSection(mEntrySet.get(4));
+        verify(pkg5Section, never()).isInSection(mEntrySet.get(5));
+        verify(pkg5Section, never()).isInSection(mEntrySet.get(6));
+        verify(pkg5Section, never()).isInSection(mEntrySet.get(7));
+        verify(pkg5Section, never()).isInSection(mEntrySet.get(8));
+        verify(pkg5Section, never()).isInSection(mEntrySet.get(10));
+
+        verify(pkg5Section).isInSection(mEntrySet.get(3));
+        verify(pkg5Section).isInSection(mEntrySet.get(9));
+
+        // THEN the correct section is assigned for entries in pkg1Section
+        assertEquals(pkg1Section, mEntrySet.get(2).mNotifSection);
+        assertEquals(0, mEntrySet.get(2).getSection());
+        assertEquals(pkg1Section, mEntrySet.get(7).mNotifSection);
+        assertEquals(0, mEntrySet.get(7).getSection());
+
+        // THEN the correct section is assigned for entries in pkg2Section
+        assertEquals(pkg2Section, mEntrySet.get(1).mNotifSection);
+        assertEquals(1, mEntrySet.get(1).getSection());
+        assertEquals(pkg2Section, mEntrySet.get(8).mNotifSection);
+        assertEquals(1, mEntrySet.get(8).getSection());
+        assertEquals(pkg2Section, mBuiltList.get(3).mNotifSection);
+        assertEquals(1, mBuiltList.get(3).getSection());
+
+        // THEN no section was assigned to entries in pkg4Section (since they were filtered)
+        assertEquals(null, mEntrySet.get(0).mNotifSection);
+        assertEquals(-1, mEntrySet.get(0).getSection());
+        assertEquals(null, mEntrySet.get(10).mNotifSection);
+        assertEquals(-1, mEntrySet.get(10).getSection());
+
+
+        // THEN the correct section is assigned for entries in pkg5Section
+        assertEquals(pkg5Section, mEntrySet.get(9).mNotifSection);
+        assertEquals(3, mEntrySet.get(9).getSection());
+
+        // THEN the children entries are assigned the same section as its parent
+        assertEquals(mBuiltList.get(3).mNotifSection, child(5).entry.mNotifSection);
+        assertEquals(mBuiltList.get(3).getSection(), child(5).entry.getSection());
+        assertEquals(mBuiltList.get(3).mNotifSection, child(6).entry.mNotifSection);
+        assertEquals(mBuiltList.get(3).getSection(), child(6).entry.getSection());
+    }
+
+    @Test
+    public void testNotifUsesDefaultSection() {
+        // GIVEN a Section for Package2
+        final NotifSection pkg2Section = spy(new PackageSection(PACKAGE_2));
+        mListBuilder.setSections(Arrays.asList(pkg2Section));
+
+        // WHEN we build a list with pkg1 and pkg2 packages
+        addNotif(0, PACKAGE_1);
+        addNotif(1, PACKAGE_2);
+        dispatchBuild();
+
+        // THEN the list is sorted according to section
+        verifyBuiltList(
+                notif(1),
+                notif(0)
+        );
+
+        // THEN the entry that didn't have an explicit section gets assigned the DefaultSection
+        assertEquals(1, notif(0).entry.getSection());
+        assertNotNull(notif(0).entry.mNotifSection);
     }
 
     @Test
@@ -631,7 +734,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // GIVEN a bunch of registered listeners and pluggables
         NotifFilter preGroupFilter = spy(new PackageFilter(PACKAGE_1));
         NotifPromoter promoter = spy(new IdPromoter(3));
-        PackageSectioner sectioner = spy(new PackageSectioner());
+        NotifSection section = spy(new PackageSection(PACKAGE_1));
         NotifComparator comparator = spy(new HypeComparator(PACKAGE_4));
         NotifFilter preRenderFilter = spy(new PackageFilter(PACKAGE_5));
         mListBuilder.addPreGroupFilter(preGroupFilter);
@@ -639,7 +742,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addPromoter(promoter);
         mListBuilder.addOnBeforeSortListener(mOnBeforeSortListener);
         mListBuilder.setComparators(Collections.singletonList(comparator));
-        mListBuilder.setSectionsProvider(sectioner);
+        mListBuilder.setSections(Arrays.asList(section));
         mListBuilder.addOnBeforeRenderListListener(mOnBeforeRenderListListener);
         mListBuilder.addPreRenderFilter(preRenderFilter);
 
@@ -659,7 +762,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
                 mOnBeforeTransformGroupsListener,
                 promoter,
                 mOnBeforeSortListener,
-                sectioner,
+                section,
                 comparator,
                 preRenderFilter,
                 mOnBeforeRenderListListener,
@@ -672,7 +775,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         inOrder.verify(promoter, atLeastOnce())
                 .shouldPromoteToTopLevel(any(NotificationEntry.class));
         inOrder.verify(mOnBeforeSortListener).onBeforeSort(anyList());
-        inOrder.verify(sectioner, atLeastOnce()).getSection(any(ListEntry.class));
+        inOrder.verify(section, atLeastOnce()).isInSection(any(ListEntry.class));
         inOrder.verify(comparator, atLeastOnce())
                 .compare(any(ListEntry.class), any(ListEntry.class));
         inOrder.verify(preRenderFilter, atLeastOnce())
@@ -686,12 +789,12 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // GIVEN a variety of pluggables
         NotifFilter packageFilter = new PackageFilter(PACKAGE_1);
         NotifPromoter idPromoter = new IdPromoter(4);
-        SectionsProvider sectionsProvider = new PackageSectioner();
+        NotifSection section = new PackageSection(PACKAGE_1);
         NotifComparator hypeComparator = new HypeComparator(PACKAGE_2);
 
         mListBuilder.addPreGroupFilter(packageFilter);
         mListBuilder.addPromoter(idPromoter);
-        mListBuilder.setSectionsProvider(sectionsProvider);
+        mListBuilder.setSections(Arrays.asList(section));
         mListBuilder.setComparators(Collections.singletonList(hypeComparator));
 
         // GIVEN a set of random notifs
@@ -711,7 +814,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
-        sectionsProvider.invalidateList();
+        section.invalidateList();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
@@ -984,9 +1087,10 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         return builder;
     }
 
-    /** Same behavior as {@link #addNotif(int, String)}. */
-    private NotificationEntryBuilder addGroupChild(int index, String packageId, String groupId) {
+    private NotificationEntryBuilder addGroupChildWithTag(int index, String packageId,
+            String groupId, String tag) {
         final NotificationEntryBuilder builder = new NotificationEntryBuilder()
+                .setTag(tag)
                 .setPkg(packageId)
                 .setId(nextId(packageId))
                 .setRank(nextRank());
@@ -999,6 +1103,11 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         assertEquals(mEntrySet.size() + mPendingSet.size(), index);
         mPendingSet.add(builder);
         return builder;
+    }
+
+    /** Same behavior as {@link #addNotif(int, String)}. */
+    private NotificationEntryBuilder addGroupChild(int index, String packageId, String groupId) {
+        return addGroupChildWithTag(index, packageId, groupId, null);
     }
 
     private int nextId(String packageName) {
@@ -1169,6 +1278,21 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         }
     }
 
+    /** Filters out notifications with a particular tag */
+    private static class NotifFilterWithTag extends NotifFilter {
+        private final String mTag;
+
+        NotifFilterWithTag(String tag) {
+            super("NotifFilterWithTag_" + tag);
+            mTag = tag;
+        }
+
+        @Override
+        public boolean shouldFilterOut(NotificationEntry entry, long now) {
+            return Objects.equals(entry.getSbn().getTag(), mTag);
+        }
+    }
+
     /** Promotes notifs with particular IDs */
     private static class IdPromoter extends NotifPromoter {
         private final List<Integer> mIds;
@@ -1205,25 +1329,18 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         }
     }
 
-    /** Sorts notifs into sections based on their package name */
-    private static class PackageSectioner extends SectionsProvider {
+    /** Represents a section for the passed pkg */
+    private static class PackageSection extends NotifSection {
+        private final String mPackage;
 
-        PackageSectioner() {
-            super("PackageSectioner");
+        PackageSection(String pkg) {
+            super("PackageSection_" + pkg);
+            mPackage = pkg;
         }
 
         @Override
-        public int getSection(ListEntry entry) {
-            switch (entry.getRepresentativeEntry().getSbn().getPackageName()) {
-                case PACKAGE_1:
-                    return 1;
-                case PACKAGE_2:
-                    return 2;
-                case PACKAGE_3:
-                    return 3;
-                default:
-                    return 4;
-            }
+        public boolean isInSection(ListEntry entry) {
+            return entry.getRepresentativeEntry().getSbn().getPackageName().equals(mPackage);
         }
     }
 

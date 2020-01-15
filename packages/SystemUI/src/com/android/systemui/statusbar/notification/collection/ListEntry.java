@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.collection;
 
 import android.annotation.Nullable;
 
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+
 /**
  * Abstract superclass for top-level entries, i.e. things that can appear in the final notification
  * list shown to users. In practice, this means either GroupEntries or NotificationEntries.
@@ -27,7 +29,9 @@ public abstract class ListEntry {
 
     @Nullable private GroupEntry mParent;
     @Nullable private GroupEntry mPreviousParent;
-    private int mSection;
+    @Nullable NotifSection mNotifSection;
+
+    private int mSection = -1;
     int mFirstAddedIteration = -1;
 
     ListEntry(String key) {
