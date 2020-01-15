@@ -372,7 +372,6 @@ public class WifiConfiguration implements Parcelable {
      * ECDHE_ECDSA
      * ECDHE_RSA
      * </pre>
-     * @hide
      */
     public static class SuiteBCipher {
         private SuiteBCipher() { }
