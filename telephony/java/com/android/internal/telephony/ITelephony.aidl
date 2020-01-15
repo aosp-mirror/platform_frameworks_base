@@ -2132,4 +2132,9 @@ interface ITelephony {
      * Command line command to enable or disable handling of CEP data for test purposes.
      */
     oneway void setCepEnabled(boolean isCepEnabled);
+
+    /**
+     * Notify Rcs auto config received.
+     */
+    void notifyRcsAutoConfigurationReceived(int subId, in byte[] config, boolean isCompressed);
 }
