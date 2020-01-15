@@ -31,7 +31,7 @@ ImageDecoder::ImageDecoder(std::unique_ptr<SkAndroidCodec> codec, sk_sp<SkPngChu
     , mDecodeSize(mTargetSize)
     , mOutColorType(mCodec->computeOutputColorType(kN32_SkColorType))
     , mUnpremultipliedRequired(false)
-    , mOutColorSpace(mCodec->getInfo().refColorSpace())
+    , mOutColorSpace(mCodec->computeOutputColorSpace(mOutColorType, nullptr))
     , mSampleSize(1)
 {
 }
@@ -111,7 +111,6 @@ bool ImageDecoder::setOutColorType(SkColorType colorType) {
             if (!gray()) {
                 return false;
             }
-            mOutColorSpace = nullptr;
             break;
         case kN32_SkColorType:
             break;
@@ -137,9 +136,15 @@ void ImageDecoder::setOutColorSpace(sk_sp<SkColorSpace> colorSpace) {
     mOutColorSpace = std::move(colorSpace);
 }
 
+sk_sp<SkColorSpace> ImageDecoder::getOutputColorSpace() const {
+    // kGray_8 is used for ALPHA_8, which ignores the color space.
+    return mOutColorType == kGray_8_SkColorType ? nullptr : mOutColorSpace;
+}
+
+
 SkImageInfo ImageDecoder::getOutputInfo() const {
     SkISize size = mCropRect ? mCropRect->size() : mTargetSize;
-    return SkImageInfo::Make(size, mOutColorType, getOutAlphaType(), mOutColorSpace);
+    return SkImageInfo::Make(size, mOutColorType, getOutAlphaType(), getOutputColorSpace());
 }
 
 bool ImageDecoder::opaque() const {
@@ -154,7 +159,7 @@ SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
     void* decodePixels = pixels;
     size_t decodeRowBytes = rowBytes;
     auto decodeInfo = SkImageInfo::Make(mDecodeSize, mOutColorType, getOutAlphaType(),
-                                        mOutColorSpace);
+                                        getOutputColorSpace());
     // Used if we need a temporary before scaling or subsetting.
     // FIXME: Use scanline decoding on only a couple lines to save memory. b/70709380.
     SkBitmap tmp;
