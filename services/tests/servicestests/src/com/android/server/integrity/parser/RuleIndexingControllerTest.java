@@ -115,8 +115,7 @@ public class RuleIndexingControllerTest {
                                 + getKeyValueString(START_INDEXING_KEY, 500)
                                 + getKeyValueString(END_INDEXING_KEY, 900)
                                 + getKeyValueString(START_INDEXING_KEY, 900)
-                                + getKeyValueString(END_INDEXING_KEY, 945)
-                                + getBits(1, 1));
+                                + getKeyValueString(END_INDEXING_KEY, 945));
         ByteBuffer rule = ByteBuffer.allocate(stringBytes.length);
         rule.put(stringBytes);
         InputStream inputStream = new ByteArrayInputStream(rule.array());
@@ -153,8 +152,7 @@ public class RuleIndexingControllerTest {
                                 + getKeyValueString("888", 800)
                                 + getKeyValueString(END_INDEXING_KEY, 900)
                                 + getKeyValueString(START_INDEXING_KEY, 900)
-                                + getKeyValueString(END_INDEXING_KEY, 945)
-                                + getBits(1, 1));
+                                + getKeyValueString(END_INDEXING_KEY, 945));
         ByteBuffer rule = ByteBuffer.allocate(stringBytes.length);
         rule.put(stringBytes);
         return new ByteArrayInputStream(rule.array());

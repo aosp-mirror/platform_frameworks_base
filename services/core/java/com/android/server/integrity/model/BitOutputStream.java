@@ -16,17 +16,25 @@
 
 package com.android.server.integrity.model;
 
-import java.util.BitSet;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
 
 /** A wrapper class for writing a stream of bits. */
 public class BitOutputStream {
 
-    private BitSet mBitSet;
-    private int mIndex;
+    private static final int BUFFER_SIZE = 4 * 1024;
+    private static final int BYTE_BITS = 8;
 
-    public BitOutputStream() {
-        mBitSet = new BitSet();
-        mIndex = 0;
+    private int mNextBitIndex;
+
+    private final OutputStream mOutputStream;
+    private final byte[] mBuffer;
+
+    public BitOutputStream(OutputStream outputStream) {
+        mBuffer = new byte[BUFFER_SIZE];
+        mNextBitIndex = 0;
+        mOutputStream = outputStream;
     }
 
     /**
@@ -35,15 +43,17 @@ public class BitOutputStream {
      * @param numOfBits The number of bits used to represent the value.
      * @param value The value to convert to bits.
      */
-    public void setNext(int numOfBits, int value) {
+    public void setNext(int numOfBits, int value) throws IOException {
         if (numOfBits <= 0) {
             return;
         }
-        int offset = 1 << (numOfBits - 1);
+
+        // optional: we can do some clever size checking to "OR" an entire segment of bits instead
+        // of setting bits one by one, but it is probably not worth it.
+        int nextBitMask = 1 << (numOfBits - 1);
         while (numOfBits-- > 0) {
-            mBitSet.set(mIndex, (value & offset) != 0);
-            offset >>>= 1;
-            mIndex++;
+            setNext((value & nextBitMask) != 0);
+            nextBitMask >>>= 1;
         }
     }
 
@@ -52,35 +62,43 @@ public class BitOutputStream {
      *
      * @param value The value to set the bit to.
      */
-    public void setNext(boolean value) {
-        mBitSet.set(mIndex, value);
-        mIndex++;
+    public void setNext(boolean value) throws IOException {
+        int byteToWrite = mNextBitIndex / BYTE_BITS;
+        if (byteToWrite == BUFFER_SIZE) {
+            mOutputStream.write(mBuffer);
+            reset();
+            byteToWrite = 0;
+        }
+        if (value) {
+            mBuffer[byteToWrite] |= 1 << (BYTE_BITS - 1 - (mNextBitIndex % BYTE_BITS));
+        }
+        mNextBitIndex++;
     }
 
     /** Set the next bit in the stream to true. */
-    public void setNext() {
+    public void setNext() throws IOException {
         setNext(/* value= */ true);
     }
 
-    /** Convert BitSet in big-endian to ByteArray in big-endian. */
-    public byte[] toByteArray() {
-        int bitSetSize = mBitSet.length();
-        int numOfBytes = bitSetSize / 8;
-        if (bitSetSize % 8 != 0) {
-            numOfBytes++;
+    /**
+     * Flush the data written to the underlying {@link java.io.OutputStream}. Any unfinished bytes
+     * will be padded with 0.
+     */
+    public void flush() throws IOException {
+        int endByte = mNextBitIndex / BYTE_BITS;
+        if (mNextBitIndex % BYTE_BITS != 0) {
+            // If next bit is not the first bit of a byte, then mNextBitIndex / BYTE_BITS would be
+            // the byte that includes already written bits. We need to increment it so this byte
+            // gets written.
+            endByte++;
         }
-        byte[] bytes = new byte[numOfBytes];
-        for (int i = 0; i < mBitSet.length(); i++) {
-            if (mBitSet.get(i)) {
-                bytes[i / 8] |= 1 << (7 - (i % 8));
-            }
-        }
-        return bytes;
+        mOutputStream.write(mBuffer, 0, endByte);
+        reset();
     }
 
-    /** Clear the stream. */
-    public void clear() {
-        mBitSet.clear();
-        mIndex = 0;
+    /** Reset this output stream to start state. */
+    private void reset() {
+        mNextBitIndex = 0;
+        Arrays.fill(mBuffer, (byte) 0);
     }
 }

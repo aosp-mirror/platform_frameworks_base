@@ -53,17 +53,17 @@ public class ByteTrackedOutputStreamTest {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ByteTrackedOutputStream byteTrackedOutputStream = new ByteTrackedOutputStream(outputStream);
 
-        BitOutputStream bitOutputStream = new BitOutputStream();
+        BitOutputStream bitOutputStream = new BitOutputStream(byteTrackedOutputStream);
         bitOutputStream.setNext(/* numOfBits= */5, /* value= */1);
-        byteTrackedOutputStream.write(bitOutputStream.toByteArray());
+        bitOutputStream.flush();
 
         // Even though we wrote 5 bits, this will complete to 1 byte.
         assertThat(byteTrackedOutputStream.getWrittenBytesCount()).isEqualTo(1);
 
         // Add a bit less than 2 bytes (10 bits).
-        bitOutputStream.clear();
         bitOutputStream.setNext(/* numOfBits= */10, /* value= */1);
-        byteTrackedOutputStream.write(bitOutputStream.toByteArray());
+        bitOutputStream.flush();
+        assertThat(byteTrackedOutputStream.getWrittenBytesCount()).isEqualTo(3);
 
         assertThat(outputStream.toByteArray().length).isEqualTo(3);
     }
