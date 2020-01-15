@@ -6293,7 +6293,7 @@ public class AudioService extends IAudioService.Stub
                 return false;
             }
             boolean suppress = false;
-            if (resolvedStream == DEFAULT_VOL_STREAM_NO_PLAYBACK && mController != null) {
+            if (resolvedStream != AudioSystem.STREAM_MUSIC && mController != null) {
                 final long now = SystemClock.uptimeMillis();
                 if ((flags & AudioManager.FLAG_SHOW_UI) != 0 && !mVisible) {
                     // ui will become visible
