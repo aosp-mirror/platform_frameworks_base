@@ -237,7 +237,7 @@ class ProcessRecord implements WindowProcessListener {
     long lastTopTime;           // The last time the process was in the TOP state or greater.
     boolean reportLowMemory;    // Set to true when waiting to report low mem
     boolean empty;              // Is this an empty background process?
-    boolean cached;             // Is this a cached process?
+    private boolean mCached;    // Is this a cached process?
     String adjType;             // Debugging: primary thing impacting oom_adj.
     int adjTypeCode;            // Debugging: adj code to report to app.
     Object adjSource;           // Debugging: option dependent object.
@@ -410,7 +410,7 @@ class ProcessRecord implements WindowProcessListener {
                 pw.println();
         pw.print(prefix); pw.print("procStateMemTracker: ");
         procStateMemTracker.dumpLine(pw);
-        pw.print(prefix); pw.print("cached="); pw.print(cached);
+        pw.print(prefix); pw.print("cached="); pw.print(mCached);
                 pw.print(" empty="); pw.println(empty);
         if (serviceb) {
             pw.print(prefix); pw.print("serviceb="); pw.print(serviceb);
@@ -687,6 +687,14 @@ class ProcessRecord implements WindowProcessListener {
                 holder.state = null;
             }
         }
+    }
+
+    void setCached(boolean cached) {
+        mCached = cached;
+    }
+
+    boolean isCached() {
+        return mCached;
     }
 
     boolean hasActivities() {
