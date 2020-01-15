@@ -17,6 +17,7 @@
 package com.android.internal.app;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
 import android.app.usage.UsageStatsManager;
@@ -29,6 +30,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.Size;
 
@@ -49,6 +51,19 @@ public class ChooserWrapperActivity extends ChooserActivity {
 
     ChooserListAdapter getAdapter() {
         return mChooserMultiProfilePagerAdapter.getActiveListAdapter();
+    }
+
+    ChooserListAdapter getPersonalListAdapter() {
+        return ((ChooserGridAdapter) mMultiProfilePagerAdapter.getAdapterForIndex(0))
+                .getListAdapter();
+    }
+
+    ChooserListAdapter getWorkListAdapter() {
+        if (mMultiProfilePagerAdapter.getInactiveListAdapter() == null) {
+            return null;
+        }
+        return ((ChooserGridAdapter) mMultiProfilePagerAdapter.getAdapterForIndex(1))
+                .getListAdapter();
     }
 
     boolean getIsSelected() { return mIsSuccessfullySelected; }
@@ -79,7 +94,12 @@ public class ChooserWrapperActivity extends ChooserActivity {
 
     @Override
     protected ResolverListController createListController(UserHandle userHandle) {
-        return sOverrides.resolverListController;
+        if (userHandle == UserHandle.SYSTEM) {
+            when(sOverrides.resolverListController.getUserHandle()).thenReturn(UserHandle.SYSTEM);
+            return sOverrides.resolverListController;
+        }
+        when(sOverrides.workResolverListController.getUserHandle()).thenReturn(userHandle);
+        return sOverrides.workResolverListController;
     }
 
     @Override
@@ -144,6 +164,15 @@ public class ChooserWrapperActivity extends ChooserActivity {
                 resolveInfoPresentationGetter);
     }
 
+    @Override
+    protected UserHandle getWorkProfileUserHandle() {
+        return sOverrides.workProfileUserHandle;
+    }
+
+    protected UserHandle getCurrentUserHandle() {
+        return mMultiProfilePagerAdapter.getCurrentUserHandle();
+    }
+
     /**
      * We cannot directly mock the activity created since instrumentation creates it.
      * <p>
@@ -154,6 +183,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
         public Function<PackageManager, PackageManager> createPackageManager;
         public Function<TargetInfo, Boolean> onSafelyStartCallback;
         public ResolverListController resolverListController;
+        public ResolverListController workResolverListController;
         public Boolean isVoiceInteraction;
         public boolean isImageType;
         public Cursor resolverCursor;
@@ -162,6 +192,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
         public MetricsLogger metricsLogger;
         public int alternateProfileSetting;
         public Resources resources;
+        public UserHandle workProfileUserHandle;
 
         public void reset() {
             onSafelyStartCallback = null;
@@ -172,9 +203,11 @@ public class ChooserWrapperActivity extends ChooserActivity {
             resolverCursor = null;
             resolverForceException = false;
             resolverListController = mock(ResolverListController.class);
+            workResolverListController = mock(ResolverListController.class);
             metricsLogger = mock(MetricsLogger.class);
             alternateProfileSetting = 0;
             resources = null;
+            workProfileUserHandle = null;
         }
     }
 }

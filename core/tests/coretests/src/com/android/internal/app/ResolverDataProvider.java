@@ -46,6 +46,12 @@ class ResolverDataProvider {
                 createResolverIntent(i), createResolveInfo(i, USER_SOMEONE_ELSE));
     }
 
+    static ResolverActivity.ResolvedComponentInfo createResolvedComponentInfoWithOtherId(int i,
+            int userId) {
+        return new ResolverActivity.ResolvedComponentInfo(createComponentName(i),
+                createResolverIntent(i), createResolveInfo(i, userId));
+    }
+
     static ComponentName createComponentName(int i) {
         final String name = "component" + i;
         return new ComponentName("foo.bar." + name, name);
