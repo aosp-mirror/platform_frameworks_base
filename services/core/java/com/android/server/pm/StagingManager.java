@@ -49,6 +49,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelableException;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -570,18 +571,17 @@ public class StagingManager {
         } else {
             params.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
         }
-        int apkSessionId = mPi.createSession(
-                params, originalSession.getInstallerPackageName(),
-                0 /* UserHandle.SYSTEM */);
-        PackageInstallerSession apkSession = mPi.getSession(apkSessionId);
-
         try {
+            int apkSessionId = mPi.createSession(
+                    params, originalSession.getInstallerPackageName(),
+                    0 /* UserHandle.SYSTEM */);
+            PackageInstallerSession apkSession = mPi.getSession(apkSessionId);
             apkSession.open();
             for (String apkFilePath : apkFilePaths) {
                 File apkFile = new File(apkFilePath);
                 ParcelFileDescriptor pfd = ParcelFileDescriptor.open(apkFile,
                         ParcelFileDescriptor.MODE_READ_ONLY);
-                long sizeBytes = pfd.getStatSize();
+                long sizeBytes = (pfd == null) ? -1 : pfd.getStatSize();
                 if (sizeBytes < 0) {
                     Slog.e(TAG, "Unable to get size of: " + apkFilePath);
                     throw new PackageManagerException(errorCode,
@@ -589,11 +589,11 @@ public class StagingManager {
                 }
                 apkSession.write(apkFile.getName(), 0, sizeBytes, pfd);
             }
-        } catch (IOException e) {
+            return apkSession;
+        } catch (IOException | ParcelableException e) {
             Slog.e(TAG, "Failure to install APK staged session " + originalSession.sessionId, e);
-            throw new PackageManagerException(errorCode, "Failed to write APK session", e);
+            throw new PackageManagerException(errorCode, "Failed to create/write APK session", e);
         }
-        return apkSession;
     }
 
     /**
