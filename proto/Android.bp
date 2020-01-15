@@ -32,3 +32,8 @@ filegroup {
     name: "system-messages-proto-src",
     srcs: ["src/system_messages.proto"],
 }
+
+filegroup {
+    name: "ipconnectivity-proto-src",
+    srcs: ["src/ipconnectivity.proto"],
+}
