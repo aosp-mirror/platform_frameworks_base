@@ -1624,7 +1624,8 @@ public class ServiceState implements Parcelable {
      * @return Current data network type
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @SystemApi
+    @TestApi
     public @NetworkType int getDataNetworkType() {
         final NetworkRegistrationInfo iwlanRegInfo = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
