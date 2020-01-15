@@ -57,9 +57,6 @@ interface INetworkPolicyManager {
     @UnsupportedAppUsage
     boolean getRestrictBackground();
 
-    /** Callback used to change internal state on tethering */
-    void onTetheringChanged(String iface, boolean tethering);
-
     /** Gets the restrict background status based on the caller's UID:
         1 - disabled
         2 - whitelisted
