@@ -10685,6 +10685,7 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
      *
      * @param enabled control enable or disable carrier data.
+     * @see #resetAllCarrierActions()
      * @hide
      */
     @SystemApi
@@ -10711,6 +10712,7 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
      *
      * @param enabled control enable or disable radio.
+     * @see #resetAllCarrierActions()
      * @hide
      */
     @SystemApi
@@ -10737,6 +10739,7 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
      *
      * @param report control start/stop reporting network status.
+     * @see #resetAllCarrierActions()
      * @hide
      */
     @SystemApi
