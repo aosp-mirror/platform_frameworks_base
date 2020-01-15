@@ -50,8 +50,12 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
+import android.util.Size;
+import android.util.TypedValue;
 import android.view.TouchDelegate;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.util.CollectionUtils;
@@ -634,6 +638,25 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH =
             "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH";
 
+    /**
+     * Key used to request extra data for accessibility scanning tool's purposes.
+     * The key requests that a {@link AccessibilityNodeInfo.ExtraRenderingInfo} be added to this
+     * info. This request is made with {@link #refreshWithExtraData(String, Bundle)} without
+     * argument.
+     * <p>
+     * The data can be retrieved from the {@link ExtraRenderingInfo} returned by
+     * {@link #getExtraRenderingInfo()} using {@link ExtraRenderingInfo#getLayoutParams},
+     * {@link ExtraRenderingInfo#getTextSizeInPx()} and
+     * {@link ExtraRenderingInfo#getTextSizeUnit()}. For layout params, it is supported by both
+     * {@link TextView} and {@link ViewGroup}. For text size and unit, it is only supported by
+     * {@link TextView}.
+     *
+     * @see #refreshWithExtraData(String, Bundle)
+     */
+
+    public static final String EXTRA_DATA_RENDERING_INFO_KEY =
+            "android.view.accessibility.extra.DATA_RENDERING_INFO_KEY";
+
     /** @hide */
     public static final String EXTRA_DATA_REQUESTED_KEY =
             "android.view.accessibility.AccessibilityNodeInfo.extra_data_requested";
@@ -803,6 +826,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CollectionItemInfo mCollectionItemInfo;
 
     private TouchDelegateInfo mTouchDelegateInfo;
+
+    private ExtraRenderingInfo mExtraRenderingInfo;
 
     private IBinder mLeashedChild;
     private IBinder mLeashedParent;
@@ -991,6 +1016,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param extraDataKey The extra data requested. Data that must be requested
      *                     with this mechanism is generally expensive to retrieve, so should only be
      *                     requested when needed. See
+     *                     {@link #EXTRA_DATA_RENDERING_INFO_KEY},
      *                     {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY} and
      *                     {@link #getAvailableExtraData()}.
      * @param args A bundle of arguments for the request. These depend on the particular request.
@@ -1547,6 +1573,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * {@link #refreshWithExtraData(String, Bundle)}.
      *
      * @return An unmodifiable list of keys corresponding to extra data that can be requested.
+     * @see #EXTRA_DATA_RENDERING_INFO_KEY
      * @see #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
      */
     public List<String> getAvailableExtraData() {
@@ -2372,6 +2399,32 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void setRangeInfo(RangeInfo rangeInfo) {
         enforceNotSealed();
         mRangeInfo = rangeInfo;
+    }
+
+    /**
+     * Gets the conformance info if the node is meant to be refreshed with extra data.
+     *
+     * @return The conformance info.
+     */
+    @Nullable
+    public ExtraRenderingInfo getExtraRenderingInfo() {
+        return mExtraRenderingInfo;
+    }
+
+    /**
+     * Sets the conformance info if the node is meant to be refreshed with extra data.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param extraRenderingInfo The conformance info.
+     * @hide
+     */
+    public void setExtraRenderingInfo(@NonNull ExtraRenderingInfo extraRenderingInfo) {
+        enforceNotSealed();
+        mExtraRenderingInfo = extraRenderingInfo;
     }
 
     /**
@@ -3695,6 +3748,10 @@ public class AccessibilityNodeInfo implements Parcelable {
             nonDefaultFields |= bitAt(fieldIndex);
         }
         fieldIndex++;
+        if (!Objects.equals(mExtraRenderingInfo, DEFAULT.mExtraRenderingInfo)) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
+        fieldIndex++;
         if (mLeashedChild != DEFAULT.mLeashedChild) {
             nonDefaultFields |= bitAt(fieldIndex);
         }
@@ -3833,6 +3890,12 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            parcel.writeValue(mExtraRenderingInfo.getLayoutParams());
+            parcel.writeFloat(mExtraRenderingInfo.getTextSizeInPx());
+            parcel.writeInt(mExtraRenderingInfo.getTextSizeUnit());
+        }
+
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
             parcel.writeStrongBinder(mLeashedChild);
         }
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
@@ -3941,6 +4004,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (mCollectionItemInfo != null) mCollectionItemInfo.recycle();
         mCollectionItemInfo =  (other.mCollectionItemInfo != null)
                 ? CollectionItemInfo.obtain(other.mCollectionItemInfo) : null;
+        if (mExtraRenderingInfo != null) mExtraRenderingInfo.recycle();
+        mExtraRenderingInfo = (other.mExtraRenderingInfo != null)
+                ? ExtraRenderingInfo.obtain(other.mExtraRenderingInfo) : null;
     }
 
     private void initCopyInfos(AccessibilityNodeInfo other) {
@@ -3955,6 +4021,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         mCollectionItemInfo = (cii == null)  ? null
                 : new CollectionItemInfo(cii.mRowIndex, cii.mRowSpan, cii.mColumnIndex,
                                          cii.mColumnSpan, cii.mHeading, cii.mSelected);
+        ExtraRenderingInfo ti = other.mExtraRenderingInfo;
+        mExtraRenderingInfo = (ti == null) ? null
+                : new ExtraRenderingInfo(ti);
     }
 
     /**
@@ -4080,6 +4149,14 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             mTouchDelegateInfo = TouchDelegateInfo.CREATOR.createFromParcel(parcel);
+        }
+
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            if (mExtraRenderingInfo != null) mExtraRenderingInfo.recycle();
+            mExtraRenderingInfo = ExtraRenderingInfo.obtain();
+            mExtraRenderingInfo.mLayoutParams = (Size) parcel.readValue(null);
+            mExtraRenderingInfo.mTextSizeInPx = parcel.readFloat();
+            mExtraRenderingInfo.mTextSizeUnit = parcel.readInt();
         }
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
@@ -5676,6 +5753,134 @@ public class AccessibilityNodeInfo implements Parcelable {
                 return new TouchDelegateInfo[size];
             }
         };
+    }
+
+    /**
+     * Class with information of a view useful to evaluate accessibility needs. Developers can
+     * refresh the node with the key {@link #EXTRA_DATA_RENDERING_INFO_KEY} to fetch the text size
+     * and unit if it is {@link TextView} and the height and the width of layout params from
+     * {@link ViewGroup} or {@link TextView}.
+     *
+     * @see #EXTRA_DATA_RENDERING_INFO_KEY
+     * @see #refreshWithExtraData(String, Bundle)
+     */
+    public static final class ExtraRenderingInfo {
+        private static final int UNDEFINED_VALUE = -1;
+        private static final int MAX_POOL_SIZE = 20;
+        private static final SynchronizedPool<ExtraRenderingInfo> sPool =
+                new SynchronizedPool<>(MAX_POOL_SIZE);
+
+        private Size mLayoutParams;
+        private float mTextSizeInPx = UNDEFINED_VALUE;
+        private int mTextSizeUnit = UNDEFINED_VALUE;
+
+        /**
+         * Obtains a pooled instance.
+         * @hide
+         */
+        @NonNull
+        public static ExtraRenderingInfo obtain() {
+            final ExtraRenderingInfo info = sPool.acquire();
+            if (info == null) {
+                return new ExtraRenderingInfo(null);
+            }
+            return info;
+        }
+
+        /** Obtains a pooled instance that is a clone of another one. */
+        private static ExtraRenderingInfo obtain(ExtraRenderingInfo other) {
+            ExtraRenderingInfo extraRenderingInfo = ExtraRenderingInfo.obtain();
+            extraRenderingInfo.mLayoutParams = other.mLayoutParams;
+            extraRenderingInfo.mTextSizeInPx = other.mTextSizeInPx;
+            extraRenderingInfo.mTextSizeUnit = other.mTextSizeUnit;
+            return extraRenderingInfo;
+        }
+
+        /**
+         * Creates a new conformance info of a view, and this new instance is initialized from
+         * the given <code>other</code>.
+         *
+         * @param other The instance to clone.
+         */
+        private ExtraRenderingInfo(@Nullable ExtraRenderingInfo other) {
+            if (other != null) {
+                mLayoutParams = other.mLayoutParams;
+                mTextSizeInPx = other.mTextSizeInPx;
+                mTextSizeUnit = other.mTextSizeUnit;
+            }
+        }
+
+        /**
+         * @return a {@link Size} stores layout height and layout width of the view,
+         *         or null otherwise.
+         */
+        public @Nullable Size getLayoutParams() {
+            return mLayoutParams;
+        }
+
+        /**
+         * Sets layout width and layout height of the view.
+         *
+         * @param width The layout width.
+         * @param height The layout height.
+         * @hide
+         */
+        public void setLayoutParams(int width, int height) {
+            mLayoutParams = new Size(width, height);
+        }
+
+        /**
+         * @return the text size of a {@code TextView}, or -1 otherwise.
+         */
+        public float getTextSizeInPx() {
+            return mTextSizeInPx;
+        }
+
+        /**
+         * Sets text size of the view.
+         *
+         * @param textSizeInPx The text size in pixels.
+         * @hide
+         */
+        public void setTextSizeInPx(float textSizeInPx) {
+            mTextSizeInPx = textSizeInPx;
+        }
+
+        /**
+         * @return the text size unit which type is {@link TypedValue#TYPE_DIMENSION} of a
+         *         {@code TextView}, or -1 otherwise.
+         *
+         * @see TypedValue#TYPE_DIMENSION
+         */
+        public int getTextSizeUnit() {
+            return mTextSizeUnit;
+        }
+
+        /**
+         * Sets text size unit of the view.
+         *
+         * @param textSizeUnit The text size unit.
+         * @hide
+         */
+        public void setTextSizeUnit(int textSizeUnit) {
+            mTextSizeUnit = textSizeUnit;
+        }
+
+        /**
+         * Recycles this instance.
+         *
+         * <p>In most situations object pooling is not beneficial, and recycling is not necessary.
+         */
+        void recycle() {
+            clear();
+            sPool.release(this);
+        }
+
+        private void clear() {
+            mLayoutParams = null;
+            mTextSizeInPx = UNDEFINED_VALUE;
+            mTextSizeUnit = UNDEFINED_VALUE;
+        }
     }
 
     /**

@@ -3692,6 +3692,31 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
             childrenForAccessibility.clear();
         }
+        info.setAvailableExtraData(Collections.singletonList(
+                AccessibilityNodeInfo.EXTRA_DATA_RENDERING_INFO_KEY));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param info The info to which to add the extra data. Never {@code null}.
+     * @param extraDataKey A key specifying the type of extra data to add to the info. The
+     *                     extra data should be added to the {@link Bundle} returned by
+     *                     the info's {@link AccessibilityNodeInfo#getExtras} method. Never
+     *                     {@code null}.
+     * @param arguments A {@link Bundle} holding any arguments relevant for this request. May be
+     *                  {@code null} if the service provided no arguments.
+     *
+     */
+    @Override
+    public void addExtraDataToAccessibilityNodeInfo(@NonNull AccessibilityNodeInfo info,
+            @NonNull String extraDataKey, @Nullable Bundle arguments) {
+        if (extraDataKey.equals(AccessibilityNodeInfo.EXTRA_DATA_RENDERING_INFO_KEY)) {
+            final AccessibilityNodeInfo.ExtraRenderingInfo extraRenderingInfo =
+                    AccessibilityNodeInfo.ExtraRenderingInfo.obtain();
+            extraRenderingInfo.setLayoutParams(getLayoutParams().width, getLayoutParams().height);
+            info.setExtraRenderingInfo(extraRenderingInfo);
+        }
     }
 
     @Override
