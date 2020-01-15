@@ -39,10 +39,10 @@ import android.view.IWindowSessionCallback;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.SurfaceControlViewHost;
 import android.view.WindowlessWindowManager;
 
 import com.android.internal.os.IResultReceiver;
@@ -238,11 +238,13 @@ public class SystemWindows {
                 long frameNumber, Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
                 Rect outVisibleInsets, Rect outStableInsets,
                 DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
-                SurfaceControl outSurfaceControl, InsetsState outInsetsState) {
+                SurfaceControl outSurfaceControl, InsetsState outInsetsState,
+                Point outSurfaceSize) {
             int res = super.relayout(window, seq, attrs, requestedWidth, requestedHeight,
                     viewVisibility, flags, frameNumber, outFrame, outOverscanInsets,
                     outContentInsets, outVisibleInsets, outStableInsets,
-                    cutout, mergedConfiguration, outSurfaceControl, outInsetsState);
+                    cutout, mergedConfiguration, outSurfaceControl, outInsetsState,
+                    outSurfaceSize);
             if (res != 0) {
                 return res;
             }

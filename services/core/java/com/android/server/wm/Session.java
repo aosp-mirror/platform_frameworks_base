@@ -31,6 +31,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
 import android.content.ClipData;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
@@ -189,7 +190,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             Rect outFrame, Rect outContentInsets, Rect outVisibleInsets,
             Rect outStableInsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
-            SurfaceControl outSurfaceControl, InsetsState outInsetsState) {
+            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
+            Point outSurfaceSize) {
         if (false) Slog.d(TAG_WM, ">>>>>> ENTERED relayout from "
                 + Binder.getCallingPid());
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
@@ -197,7 +199,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 requestedWidth, requestedHeight, viewFlags, flags, frameNumber,
                 outFrame, outContentInsets, outVisibleInsets,
                 outStableInsets, outBackdropFrame, cutout,
-                mergedConfiguration, outSurfaceControl, outInsetsState);
+                mergedConfiguration, outSurfaceControl, outInsetsState, outSurfaceSize);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         if (false) Slog.d(TAG_WM, "<<<<<< EXITING relayout to "
                 + Binder.getCallingPid());

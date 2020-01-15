@@ -2037,7 +2037,8 @@ public class WindowManagerService extends IWindowManager.Stub
             long frameNumber, Rect outFrame, Rect outContentInsets,
             Rect outVisibleInsets, Rect outStableInsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper outCutout, MergedConfiguration mergedConfiguration,
-            SurfaceControl outSurfaceControl, InsetsState outInsetsState) {
+            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
+            Point outSurfaceSize) {
         int result = 0;
         boolean configChanged;
         final int pid = Binder.getCallingPid();
@@ -2359,6 +2360,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.sendNewConfiguration();
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             }
+            if (winAnimator.mSurfaceController != null) {
+                outSurfaceSize.set(winAnimator.mSurfaceController.getWidth(),
+                                         winAnimator.mSurfaceController.getHeight());
+            }
         }
 
         Binder.restoreCallingIdentity(origId);
@@ -2412,8 +2417,8 @@ public class WindowManagerService extends IWindowManager.Stub
         return focusMayChange;
     }
 
-    private int createSurfaceControl(SurfaceControl outSurfaceControl, int result, WindowState win,
-            WindowStateAnimator winAnimator) {
+    private int createSurfaceControl(SurfaceControl outSurfaceControl,
+            int result, WindowState win, WindowStateAnimator winAnimator) {
         if (!win.mHasSurface) {
             result |= RELAYOUT_RES_SURFACE_CHANGED;
         }
