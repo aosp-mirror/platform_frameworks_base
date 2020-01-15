@@ -2453,6 +2453,13 @@ public class UserManager {
      * by {@link #createUser(String, String, int)} or {@link #createGuest(Context, String)}), it
      * takes less time.
      *
+     * <p>This method completes the majority of work necessary for user creation: it
+     * creates user data, CE and DE encryption keys, app data directories, initializes the user and
+     * grants default permissions. When pre-created users become "real" users, only then are
+     * components notified of new user creation by firing user creation broadcasts.
+     *
+     * <p>All pre-created users are removed during system upgrade.
+     *
      * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
      * @param userType the type of user, such as {@link UserManager#USER_TYPE_FULL_GUEST}.
@@ -2464,6 +2471,7 @@ public class UserManager {
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public @Nullable UserInfo preCreateUser(@NonNull String userType) {
         try {
             return mService.preCreateUser(userType);
