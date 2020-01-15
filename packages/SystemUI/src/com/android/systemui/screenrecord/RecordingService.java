@@ -53,10 +53,14 @@ import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.inject.Inject;
+
 /**
  * A service which records the device screen and optionally microphone input.
  */
 public class RecordingService extends Service {
+    public static final int REQUEST_CODE = 2;
+
     private static final int NOTIFICATION_ID = 1;
     private static final String TAG = "RecordingService";
     private static final String CHANNEL_ID = "screen_record";
@@ -65,7 +69,6 @@ public class RecordingService extends Service {
     private static final String EXTRA_PATH = "extra_path";
     private static final String EXTRA_USE_AUDIO = "extra_useAudio";
     private static final String EXTRA_SHOW_TAPS = "extra_showTaps";
-    private static final int REQUEST_CODE = 2;
 
     private static final String ACTION_START = "com.android.systemui.screenrecord.START";
     private static final String ACTION_STOP = "com.android.systemui.screenrecord.STOP";
@@ -81,6 +84,7 @@ public class RecordingService extends Service {
     private static final int AUDIO_BIT_RATE = 16;
     private static final int AUDIO_SAMPLE_RATE = 44100;
 
+    private final RecordingController mController;
     private MediaProjectionManager mMediaProjectionManager;
     private MediaProjection mMediaProjection;
     private Surface mInputSurface;
@@ -91,6 +95,11 @@ public class RecordingService extends Service {
     private boolean mUseAudio;
     private boolean mShowTaps;
     private File mTempFile;
+
+    @Inject
+    public RecordingService(RecordingController controller) {
+        mController = controller;
+    }
 
     /**
      * Get an intent to start the recording service.
@@ -272,6 +281,7 @@ public class RecordingService extends Service {
                     null);
 
             mMediaRecorder.start();
+            mController.updateState(true);
         } catch (IOException e) {
             Log.e(TAG, "Error starting screen recording: " + e.getMessage());
             e.printStackTrace();
@@ -285,7 +295,7 @@ public class RecordingService extends Service {
         NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
                 getString(R.string.screenrecord_name),
-                NotificationManager.IMPORTANCE_HIGH);
+                NotificationManager.IMPORTANCE_LOW);
         channel.setDescription(getString(R.string.screenrecord_channel_description));
         channel.enableVibration(true);
         NotificationManager notificationManager =
@@ -399,6 +409,7 @@ public class RecordingService extends Service {
         mInputSurface.release();
         mVirtualDisplay.release();
         stopSelf();
+        mController.updateState(false);
     }
 
     private void saveRecording(NotificationManager notificationManager) {
@@ -439,7 +450,12 @@ public class RecordingService extends Service {
                 Settings.System.SHOW_TOUCHES, value);
     }
 
-    private static Intent getStopIntent(Context context) {
+    /**
+     * Get an intent to stop the recording service.
+     * @param context Context from the requesting activity
+     * @return
+     */
+    public static Intent getStopIntent(Context context) {
         return new Intent(context, RecordingService.class).setAction(ACTION_STOP);
     }
 
