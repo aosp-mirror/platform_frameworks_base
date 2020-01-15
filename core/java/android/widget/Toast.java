@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -42,8 +44,12 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A toast is a view containing a quick little message for the user.  The toast class
@@ -262,6 +268,29 @@ public class Toast {
     }
 
     /**
+     * Adds a callback to be notified when the toast is shown or hidden.
+     *
+     * Note that if the toast is blocked for some reason you won't get a call back.
+     *
+     * @see #removeCallback(Callback)
+     */
+    public void addCallback(@NonNull Callback callback) {
+        checkNotNull(callback);
+        synchronized (mTN.mCallbacks) {
+            mTN.mCallbacks.add(callback);
+        }
+    }
+
+    /**
+     * Removes a callback previously added with {@link #addCallback(Callback)}.
+     */
+    public void removeCallback(@NonNull Callback callback) {
+        synchronized (mTN.mCallbacks) {
+            mTN.mCallbacks.remove(callback);
+        }
+    }
+
+    /**
      * Gets the LayoutParams for the Toast window.
      * @hide
      */
@@ -389,6 +418,9 @@ public class Toast {
 
         String mPackageName;
 
+        @GuardedBy("mCallbacks")
+        private final List<Callback> mCallbacks = new ArrayList<>();
+
         static final long SHORT_DURATION_TIMEOUT = 4000;
         static final long LONG_DURATION_TIMEOUT = 7000;
 
@@ -447,6 +479,12 @@ public class Toast {
                     }
                 }
             };
+        }
+
+        private List<Callback> getCallbacks() {
+            synchronized (mCallbacks) {
+                return new ArrayList<>(mCallbacks);
+            }
         }
 
         /**
@@ -522,6 +560,9 @@ public class Toast {
                 try {
                     mWM.addView(mView, mParams);
                     trySendAccessibilityEvent();
+                    for (Callback callback : getCallbacks()) {
+                        callback.onToastShown();
+                    }
                 } catch (WindowManager.BadTokenException e) {
                     /* ignore */
                 }
@@ -564,8 +605,30 @@ public class Toast {
                 } catch (RemoteException e) {
                 }
 
+                for (Callback callback : getCallbacks()) {
+                    callback.onToastHidden();
+                }
                 mView = null;
             }
         }
+    }
+
+    /**
+     * Callback object to be called when the toast is shown or hidden.
+     *
+     * Callback methods will be called on the looper thread provided on construction.
+     *
+     * @see #addCallback(Callback)
+     */
+    public abstract static class Callback {
+        /**
+         * Called when the toast is displayed on the screen.
+         */
+        public void onToastShown() {}
+
+        /**
+         * Called when the toast is hidden.
+         */
+        public void onToastHidden() {}
     }
 }
