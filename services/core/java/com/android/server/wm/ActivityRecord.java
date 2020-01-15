@@ -2137,8 +2137,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 (intent == null || (intent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0);
     }
 
+    @Override
     boolean isFocusable() {
-        return mRootWindowContainer.isFocusable(this, isAlwaysFocusable());
+        return super.isFocusable()
+                && (getWindowConfiguration().canReceiveKeys() || isAlwaysFocusable());
     }
 
     boolean isResizeable() {
@@ -2489,7 +2491,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // We are finishing the top focused activity and its stack has nothing to be focused so
             // the next focusable stack should be focused.
             if (mayAdjustTop
-                    && (stack.topRunningActivity() == null || !stack.isFocusable())) {
+                    && (stack.topRunningActivity() == null || !stack.isTopActivityFocusable())) {
                 if (shouldAdjustGlobalFocus) {
                     // Move the entire hierarchy to top with updating global top resumed activity
                     // and focused application if needed.

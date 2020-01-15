@@ -1860,14 +1860,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return null;
     }
 
-    boolean isFocusable(ConfigurationContainer container, boolean alwaysFocusable) {
-        if (container.inSplitScreenPrimaryWindowingMode() && mIsDockMinimized) {
-            return false;
-        }
-
-        return container.getWindowConfiguration().canReceiveKeys() || alwaysFocusable;
-    }
-
     boolean isTopDisplayFocusedStack(ActivityStack stack) {
         return stack != null && stack == getTopDisplayFocusedStack();
     }
