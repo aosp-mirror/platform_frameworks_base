@@ -12721,4 +12721,22 @@ public class TelephonyManager {
         }
         return 0;
     }
+
+    /**
+     * Called when userActivity is signalled in the power manager.
+     * This should only be called from system Uid.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void notifyUserActivity() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.userActivity();
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

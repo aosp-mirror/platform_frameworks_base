@@ -226,12 +226,4 @@ public class TelephonyServiceManager {
     public ServiceRegisterer getIccPhoneBookServiceRegisterer() {
         return new ServiceRegisterer("simphonebook");
     }
-
-    /**
-     * Returns {@link ServiceRegisterer} for the window service.
-     */
-    @NonNull
-    public ServiceRegisterer getWindowServiceRegisterer() {
-        return new ServiceRegisterer(Context.WINDOW_SERVICE);
-    }
 }
