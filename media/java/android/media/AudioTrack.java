@@ -213,6 +213,36 @@ public class AudioTrack extends PlayerBase
 
     private final static String TAG = "android.media.AudioTrack";
 
+    /** @hide */
+    @IntDef({
+        ENCAPSULATION_MODE_NONE,
+        ENCAPSULATION_MODE_ELEMENTARY_STREAM,
+        ENCAPSULATION_MODE_HANDLE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EncapsulationMode {}
+
+    // Important: The ENCAPSULATION_MODE values must be kept in sync with native header files.
+    /**
+     * This mode indicates no metadata encapsulation,
+     * which is the default mode for sending audio data
+     * through {@code AudioTrack}.
+     */
+    public static final int ENCAPSULATION_MODE_NONE = 0;
+    /**
+     * This mode indicates metadata encapsulation with an elementary stream payload.
+     * Both compressed and PCM format is allowed.
+     *
+     * TODO(b/147778408) Link: See the Android developers guide for more information.
+     */
+    public static final int ENCAPSULATION_MODE_ELEMENTARY_STREAM = 1;
+    /**
+     * This mode indicates metadata encapsulation with a handle payload.
+     * The handle is a 64 bit long, provided by the Tuner API.
+     *
+     * TODO(b/147778408) Link: Fill in Tuner API to obtain the handle.
+     */
+    public static final int ENCAPSULATION_MODE_HANDLE = 2;
 
     /** @hide */
     @IntDef({
@@ -592,11 +622,13 @@ public class AudioTrack extends PlayerBase
     public AudioTrack(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
             int mode, int sessionId)
                     throws IllegalArgumentException {
-        this(attributes, format, bufferSizeInBytes, mode, sessionId, false /*offload*/);
+        this(attributes, format, bufferSizeInBytes, mode, sessionId, false /*offload*/,
+                ENCAPSULATION_MODE_NONE, null /* tunerConfiguration */);
     }
 
     private AudioTrack(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
-            int mode, int sessionId, boolean offload)
+            int mode, int sessionId, boolean offload, int encapsulationMode,
+            @Nullable TunerConfiguration tunerConfiguration)
                     throws IllegalArgumentException {
         super(attributes, AudioPlaybackConfiguration.PLAYER_TYPE_JAM_AUDIOTRACK);
         // mState already == STATE_UNINITIALIZED
@@ -663,7 +695,7 @@ public class AudioTrack extends PlayerBase
         int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
                 sampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
                 mNativeBufferSizeInBytes, mDataLoadMode, session, 0 /*nativeTrackInJavaObj*/,
-                offload);
+                offload, encapsulationMode, tunerConfiguration);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing AudioTrack.");
             return; // with mState == STATE_UNINITIALIZED
@@ -671,6 +703,8 @@ public class AudioTrack extends PlayerBase
 
         mSampleRate = sampleRate[0];
         mSessionId = session[0];
+
+        // TODO: consider caching encapsulationMode and tunerConfiguration in the Java object.
 
         if ((mAttributes.getFlags() & AudioAttributes.FLAG_HW_AV_SYNC) != 0) {
             int frameSizeInBytes;
@@ -745,7 +779,9 @@ public class AudioTrack extends PlayerBase
                     0 /*mDataLoadMode - NA*/,
                     session,
                     nativeTrackInJavaObj,
-                    false /*offload*/);
+                    false /*offload*/,
+                    ENCAPSULATION_MODE_NONE,
+                    null /* tunerConfiguration */);
             if (initResult != SUCCESS) {
                 loge("Error code "+initResult+" when initializing AudioTrack.");
                 return; // with mState == STATE_UNINITIALIZED
@@ -754,6 +790,99 @@ public class AudioTrack extends PlayerBase
             mSessionId = session[0];
 
             mState = STATE_INITIALIZED;
+        }
+    }
+
+    /**
+     * TunerConfiguration is used to convey tuner information
+     * from the android.media.tv.Tuner API to AudioTrack construction.
+     *
+     * Use the Builder to construct the TunerConfiguration object,
+     * which is then used by the {@link AudioTrack.Builder} to create an AudioTrack.
+     */
+    public static class TunerConfiguration {
+        private final int mContentId;
+        private final int mSyncId;
+
+        private TunerConfiguration(int contentId, int syncId) {
+            mContentId = contentId;
+            mSyncId = syncId;
+        }
+
+        /**
+         * Returns the contentId.
+         */
+        public int getContentId() {
+            return mContentId;
+        }
+
+        /**
+         * Returns the syncId.
+         */
+        public int getSyncId() {
+            return mSyncId;
+        }
+
+        /**
+         * Builder class for {@link AudioTrack.TunerConfiguration} objects.
+         */
+        public static class Builder {
+            private int mContentId;
+            private int mSyncId;
+
+            /**
+             * Sets the contentId from the Tuner filter.
+             *
+             * @param contentId selects the audio stream to use.
+             *     See android.media.tv.tuner.filter.Filter#getId().
+             *     This is always a positive number.
+             *     TODO(b/147778408) Link to tuner filter doc when unhidden.
+             * @return the same Builder instance.
+             */
+            public @NonNull Builder setContentId(@IntRange(from = 1) int contentId) {
+                if (contentId < 1) {
+                    throw new IllegalArgumentException(
+                            "contentId " + contentId + " must be positive");
+                }
+                mContentId = contentId;
+                return this;
+            }
+
+            /**
+             * Sets the syncId from the Tuner filter.
+             *
+             * @param syncId selects the clock to use for synchronization
+             *     of audio with other streams such as video.
+             *     See android.media.tv.tuner.Tuner#getAvSyncHwId().
+             *     This is always a positive number.
+             *     TODO(b/147778408) Link to tuner filter doc when unhidden.
+             * @return the same Builder instance.
+             */
+            public @NonNull Builder setSyncId(@IntRange(from = 1) int syncId) {
+                if (syncId < 1) {
+                    throw new IllegalArgumentException("syncId " + syncId + " must be positive");
+                }
+                mSyncId = syncId;
+                return this;
+            }
+
+            /**
+             * Builds a {@link AudioTrack.TunerConfiguration} instance initialized with
+             * the parameters set on this {@code Builder}.
+             *
+             * @return a new successfully initialized {@link AudioTrack.TunerConfiguration}.
+             * @throws UnsupportedOperationException if the parameters set on the
+             *     {@code Builder} are incompatible.
+             */
+            public @NonNull TunerConfiguration build() {
+                if (mContentId < 1 || mSyncId < 1) {
+                    throw new UnsupportedOperationException(
+                            "contentId " + mContentId
+                            + " syncId " + mSyncId
+                            + " must be set");
+                }
+                return new TunerConfiguration(mContentId, mSyncId);
+            }
         }
     }
 
@@ -799,10 +928,12 @@ public class AudioTrack extends PlayerBase
         private AudioAttributes mAttributes;
         private AudioFormat mFormat;
         private int mBufferSizeInBytes;
+        private int mEncapsulationMode = ENCAPSULATION_MODE_NONE;
         private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
         private int mMode = MODE_STREAM;
         private int mPerformanceMode = PERFORMANCE_MODE_NONE;
         private boolean mOffload = false;
+        private TunerConfiguration mTunerConfiguration;
 
         /**
          * Constructs a new Builder with the default values as described above.
@@ -865,6 +996,34 @@ public class AudioTrack extends PlayerBase
                 throw new IllegalArgumentException("Invalid buffer size " + bufferSizeInBytes);
             }
             mBufferSizeInBytes = bufferSizeInBytes;
+            return this;
+        }
+
+        /**
+         * Sets the encapsulation mode.
+         *
+         * Encapsulation mode allows metadata to be sent together with
+         * the audio data payload in a {@code ByteBuffer}.
+         * The data format is specified in the Android developers site.
+         *
+         * TODO(b/147778408) Link to doc page.
+         *
+         * @param encapsulationMode one of {@link AudioTrack#ENCAPSULATION_MODE_NONE},
+         *        {@link AudioTrack#ENCAPSULATION_MODE_ELEMENTARY_STREAM},
+         *        {@link AudioTrack#ENCAPSULATION_MODE_HANDLE}.
+         * @return the same Builder instance.
+         */
+        public @NonNull Builder setEncapsulationMode(@EncapsulationMode int encapsulationMode) {
+            switch (encapsulationMode) {
+                case ENCAPSULATION_MODE_NONE:
+                case ENCAPSULATION_MODE_ELEMENTARY_STREAM:
+                case ENCAPSULATION_MODE_HANDLE:
+                    mEncapsulationMode = encapsulationMode;
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Invalid encapsulation mode " + encapsulationMode);
+            }
             return this;
         }
 
@@ -949,6 +1108,25 @@ public class AudioTrack extends PlayerBase
         }
 
         /**
+         * Sets the tuner configuration for the {@code AudioTrack}.
+         *
+         * The {@link AudioTrack.TunerConfiguration} consists of parameters obtained from
+         * the Android TV tuner API which indicate the audio content stream id and the
+         * synchronization id for the {@code AudioTrack}.
+         *
+         * @param tunerConfiguration obtained by {@link AudioTrack.TunerConfiguration.Builder}.
+         * @return the same Builder instance.
+         */
+        public @NonNull Builder setTunerConfiguration(
+                @NonNull TunerConfiguration tunerConfiguration) {
+            if (tunerConfiguration == null) {
+                throw new IllegalArgumentException("tunerConfiguration is null");
+            }
+            mTunerConfiguration = tunerConfiguration;
+            return this;
+        }
+
+        /**
          * Builds an {@link AudioTrack} instance initialized with all the parameters set
          * on this <code>Builder</code>.
          * @return a new successfully initialized {@link AudioTrack} instance.
@@ -1003,6 +1181,8 @@ public class AudioTrack extends PlayerBase
                 }
             }
 
+            // TODO: Check mEncapsulationMode compatibility with MODE_STATIC, etc?
+
             try {
                 // If the buffer size is not specified in streaming mode,
                 // use a single frame for the buffer size and let the
@@ -1012,7 +1192,8 @@ public class AudioTrack extends PlayerBase
                             * mFormat.getBytesPerSample(mFormat.getEncoding());
                 }
                 final AudioTrack track = new AudioTrack(
-                        mAttributes, mFormat, mBufferSizeInBytes, mMode, mSessionId, mOffload);
+                        mAttributes, mFormat, mBufferSizeInBytes, mMode, mSessionId, mOffload,
+                        mEncapsulationMode, mTunerConfiguration);
                 if (track.getState() == STATE_UNINITIALIZED) {
                     // release is not necessary
                     throw new UnsupportedOperationException("Cannot create AudioTrack");
@@ -3595,7 +3776,7 @@ public class AudioTrack extends PlayerBase
             Object /*AudioAttributes*/ attributes,
             int[] sampleRate, int channelMask, int channelIndexMask, int audioFormat,
             int buffSizeInBytes, int mode, int[] sessionId, long nativeAudioTrack,
-            boolean offload);
+            boolean offload, int encapsulationMode, Object tunerConfiguration);
 
     private native final void native_finalize();
 
