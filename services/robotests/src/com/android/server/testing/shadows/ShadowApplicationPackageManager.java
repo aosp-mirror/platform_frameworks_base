@@ -19,7 +19,10 @@ package com.android.server.testing.shadows;
 import static android.content.pm.PackageManager.NameNotFoundException;
 
 import android.app.ApplicationPackageManager;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.content.pm.ResolveInfo;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 
 import org.robolectric.annotation.Implements;
@@ -98,6 +101,13 @@ public class ShadowApplicationPackageManager
             throw new NameNotFoundException(packageName);
         }
         return sPackageUids.get(packageName);
+    }
+
+    @Override
+    protected List<ResolveInfo> queryBroadcastReceiversAsUser(
+            Intent intent, int flags, UserHandle userHandle) {
+        // Currently does not handle multi-user.
+        return queryBroadcastReceivers(intent, flags);
     }
 
     /** Clear package state. */
