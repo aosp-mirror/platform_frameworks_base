@@ -163,27 +163,26 @@ public class NetworkScoreManager {
     public static final String EXTRA_NEW_SCORER = "newScorer";
 
     /** @hide */
-    @IntDef({CACHE_FILTER_NONE, CACHE_FILTER_CURRENT_NETWORK, CACHE_FILTER_SCAN_RESULTS})
+    @IntDef({SCORE_FILTER_NONE, SCORE_FILTER_CURRENT_NETWORK, SCORE_FILTER_SCAN_RESULTS})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface CacheUpdateFilter {}
+    public @interface ScoreUpdateFilter {}
 
     /**
-     * Do not filter updates sent to the cache.
-     * @hide
+     * Do not filter updates sent to the {@link NetworkScoreCallback}].
      */
-    public static final int CACHE_FILTER_NONE = 0;
+    public static final int SCORE_FILTER_NONE = 0;
 
     /**
-     * Only send cache updates when the network matches the connected network.
-     * @hide
+     * Only send updates to the {@link NetworkScoreCallback} when the network matches the connected
+     * network.
      */
-    public static final int CACHE_FILTER_CURRENT_NETWORK = 1;
+    public static final int SCORE_FILTER_CURRENT_NETWORK = 1;
 
     /**
-     * Only send cache updates when the network is part of the current scan result set.
-     * @hide
+     * Only send updates to the {@link NetworkScoreCallback} when the network is part of the
+     * current scan result set.
      */
-    public static final int CACHE_FILTER_SCAN_RESULTS = 2;
+    public static final int SCORE_FILTER_SCAN_RESULTS = 2;
 
     /** @hide */
     @IntDef({RECOMMENDATIONS_ENABLED_FORCED_OFF, RECOMMENDATIONS_ENABLED_OFF,
@@ -404,13 +403,13 @@ public class NetworkScoreManager {
      * @throws SecurityException if the caller does not hold the
      *         {@link permission#REQUEST_NETWORK_SCORES} permission.
      * @throws IllegalArgumentException if a score cache is already registered for this type.
-     * @deprecated equivalent to registering for cache updates with CACHE_FILTER_NONE.
+     * @deprecated equivalent to registering for cache updates with {@link #SCORE_FILTER_NONE}.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.REQUEST_NETWORK_SCORES)
     @Deprecated // migrate to registerNetworkScoreCache(int, INetworkScoreCache, int)
     public void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache) {
-        registerNetworkScoreCache(networkType, scoreCache, CACHE_FILTER_NONE);
+        registerNetworkScoreCache(networkType, scoreCache, SCORE_FILTER_NONE);
     }
 
     /**
@@ -418,7 +417,7 @@ public class NetworkScoreManager {
      *
      * @param networkType the type of network this cache can handle. See {@link NetworkKey#type}
      * @param scoreCache implementation of {@link INetworkScoreCache} to store the scores
-     * @param filterType the {@link CacheUpdateFilter} to apply
+     * @param filterType the {@link ScoreUpdateFilter} to apply
      * @throws SecurityException if the caller does not hold the
      *         {@link permission#REQUEST_NETWORK_SCORES} permission.
      * @throws IllegalArgumentException if a score cache is already registered for this type.
@@ -426,7 +425,7 @@ public class NetworkScoreManager {
      */
     @RequiresPermission(android.Manifest.permission.REQUEST_NETWORK_SCORES)
     public void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache,
-            @CacheUpdateFilter int filterType) {
+            @ScoreUpdateFilter int filterType) {
         try {
             mService.registerNetworkScoreCache(networkType, scoreCache, filterType);
         } catch (RemoteException e) {
@@ -510,7 +509,7 @@ public class NetworkScoreManager {
      * Register a network score callback.
      *
      * @param networkType the type of network this cache can handle. See {@link NetworkKey#type}
-     * @param filterType the {@link CacheUpdateFilter} to apply
+     * @param filterType the {@link ScoreUpdateFilter} to apply
      * @param callback implementation of {@link NetworkScoreCallback} that will be invoked when the
      *                 scores change.
      * @param executor The executor on which to execute the callbacks.
@@ -522,7 +521,7 @@ public class NetworkScoreManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.REQUEST_NETWORK_SCORES)
     public void registerNetworkScoreCallback(@NetworkKey.NetworkType int networkType,
-            @CacheUpdateFilter int filterType,
+            @ScoreUpdateFilter int filterType,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull NetworkScoreCallback callback) throws SecurityException {
         if (callback == null || executor == null) {
