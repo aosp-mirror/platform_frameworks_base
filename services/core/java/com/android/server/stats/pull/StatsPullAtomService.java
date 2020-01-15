@@ -1004,27 +1004,207 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerProcessMemoryState() {
-        // No op.
+        int tagId = StatsLog.PROCESS_MEMORY_STATE;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {4, 5, 6, 7, 8})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullProcessMemoryState(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullProcessMemoryState() {
-        // No op.
+    private int pullProcessMemoryState(int atomTag, List<StatsEvent> pulledData) {
+        List<ProcessMemoryState> processMemoryStates =
+                LocalServices.getService(ActivityManagerInternal.class)
+                        .getMemoryStateForProcesses();
+        for (ProcessMemoryState processMemoryState : processMemoryStates) {
+            final MemoryStat memoryStat = readMemoryStatFromFilesystem(processMemoryState.uid,
+                    processMemoryState.pid);
+            if (memoryStat == null) {
+                continue;
+            }
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(processMemoryState.uid)
+                    .writeString(processMemoryState.processName)
+                    .writeInt(processMemoryState.oomScore)
+                    .writeLong(memoryStat.pgfault)
+                    .writeLong(memoryStat.pgmajfault)
+                    .writeLong(memoryStat.rssInBytes)
+                    .writeLong(memoryStat.cacheInBytes)
+                    .writeLong(memoryStat.swapInBytes)
+                    .writeLong(-1)  // unused
+                    .writeLong(-1)  // unused
+                    .writeInt(-1)  // unused
+                    .build();
+            pulledData.add(e);
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    /**
+     * Which native processes to snapshot memory for.
+     *
+     * <p>Processes are matched by their cmdline in procfs. Example: cat /proc/pid/cmdline returns
+     * /system/bin/statsd for the stats daemon.
+     */
+    private static final Set<String> MEMORY_INTERESTING_NATIVE_PROCESSES = Sets.newHashSet(
+            "/system/bin/statsd",  // Stats daemon.
+            "/system/bin/surfaceflinger",
+            "/system/bin/apexd",  // APEX daemon.
+            "/system/bin/audioserver",
+            "/system/bin/cameraserver",
+            "/system/bin/drmserver",
+            "/system/bin/healthd",
+            "/system/bin/incidentd",
+            "/system/bin/installd",
+            "/system/bin/lmkd",  // Low memory killer daemon.
+            "/system/bin/logd",
+            "media.codec",
+            "media.extractor",
+            "media.metrics",
+            "/system/bin/mediadrmserver",
+            "/system/bin/mediaserver",
+            "/system/bin/performanced",
+            "/system/bin/tombstoned",
+            "/system/bin/traced",  // Perfetto.
+            "/system/bin/traced_probes",  // Perfetto.
+            "webview_zygote",
+            "zygote",
+            "zygote64");
+
+    /**
+     * Lowest available uid for apps.
+     *
+     * <p>Used to quickly discard memory snapshots of the zygote forks from native process
+     * measurements.
+     */
+    private static final int MIN_APP_UID = 10_000;
+
+    private static boolean isAppUid(int uid) {
+        return uid >= MIN_APP_UID;
     }
 
     private void registerProcessMemoryHighWaterMark() {
-        // No op.
+        int tagId = StatsLog.PROCESS_MEMORY_HIGH_WATER_MARK;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullProcessMemoryHighWaterMark(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullProcessMemoryHighWaterMark() {
-        // No op.
+    private int pullProcessMemoryHighWaterMark(int atomTag, List<StatsEvent> pulledData) {
+        List<ProcessMemoryState> managedProcessList =
+                LocalServices.getService(ActivityManagerInternal.class)
+                        .getMemoryStateForProcesses();
+        for (ProcessMemoryState managedProcess : managedProcessList) {
+            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(managedProcess.pid);
+            if (snapshot == null) {
+                continue;
+            }
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(managedProcess.uid)
+                    .writeString(managedProcess.processName)
+                    // RSS high-water mark in bytes.
+                    .writeLong(snapshot.rssHighWaterMarkInKilobytes * 1024L)
+                    .writeInt(snapshot.rssHighWaterMarkInKilobytes)
+                    .build();
+            pulledData.add(e);
+        }
+        forEachPid((pid, cmdLine) -> {
+            if (!MEMORY_INTERESTING_NATIVE_PROCESSES.contains(cmdLine)) {
+                return;
+            }
+            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(pid);
+            if (snapshot == null) {
+                return;
+            }
+            // Sometimes we get here a process that is not included in the whitelist. It comes
+            // from forking the zygote for an app. We can ignore that sample because this process
+            // is collected by ProcessMemoryState.
+            if (isAppUid(snapshot.uid)) {
+                return;
+            }
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(snapshot.uid)
+                    .writeString(cmdLine)
+                    // RSS high-water mark in bytes.
+                    .writeLong(snapshot.rssHighWaterMarkInKilobytes * 1024L)
+                    .writeInt(snapshot.rssHighWaterMarkInKilobytes)
+                    .build();
+            pulledData.add(e);
+        });
+        // Invoke rss_hwm_reset binary to reset RSS HWM counters for all processes.
+        SystemProperties.set("sys.rss_hwm_reset.on", "1");
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerProcessMemorySnapshot() {
-        // No op.
+        int tagId = StatsLog.PROCESS_MEMORY_SNAPSHOT;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullProcessMemorySnapshot(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullProcessMemorySnapshot() {
-        // No op.
+    private int pullProcessMemorySnapshot(int atomTag, List<StatsEvent> pulledData) {
+        List<ProcessMemoryState> managedProcessList =
+                LocalServices.getService(ActivityManagerInternal.class)
+                        .getMemoryStateForProcesses();
+        for (ProcessMemoryState managedProcess : managedProcessList) {
+            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(managedProcess.pid);
+            if (snapshot == null) {
+                continue;
+            }
+            StatsEvent e = StatsEvent.newBuilder()
+                    .writeInt(managedProcess.uid)
+                    .writeString(managedProcess.processName)
+                    .writeInt(managedProcess.pid)
+                    .writeInt(managedProcess.oomScore)
+                    .writeInt(snapshot.rssInKilobytes)
+                    .writeInt(snapshot.anonRssInKilobytes)
+                    .writeInt(snapshot.swapInKilobytes)
+                    .writeInt(snapshot.anonRssInKilobytes + snapshot.swapInKilobytes)
+                    .build();
+            pulledData.add(e);
+        }
+        forEachPid((pid, cmdLine) -> {
+            if (!MEMORY_INTERESTING_NATIVE_PROCESSES.contains(cmdLine)) {
+                return;
+            }
+            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(pid);
+            if (snapshot == null) {
+                return;
+            }
+            // Sometimes we get here a process that is not included in the whitelist. It comes
+            // from forking the zygote for an app. We can ignore that sample because this process
+            // is collected by ProcessMemoryState.
+            if (isAppUid(snapshot.uid)) {
+                return;
+            }
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(snapshot.uid)
+                    .writeString(cmdLine)
+                    .writeInt(pid)
+                    .writeInt(-1001)  // Placeholder for native processes, OOM_SCORE_ADJ_MIN - 1.
+                    .writeInt(snapshot.rssInKilobytes)
+                    .writeInt(snapshot.anonRssInKilobytes)
+                    .writeInt(snapshot.swapInKilobytes)
+                    .writeInt(snapshot.anonRssInKilobytes + snapshot.swapInKilobytes)
+                    .build();
+            pulledData.add(e);
+        });
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerSystemIonHeapSize() {

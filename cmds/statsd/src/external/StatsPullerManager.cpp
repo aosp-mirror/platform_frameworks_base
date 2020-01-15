@@ -95,20 +95,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
 
-        // process_memory_state
-        {{.atomTag = android::util::PROCESS_MEMORY_STATE},
-         {.additiveFields = {4, 5, 6, 7, 8},
-          .puller = new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}},
-
-        // process_memory_high_water_mark
-        {{.atomTag = android::util::PROCESS_MEMORY_HIGH_WATER_MARK},
-         {.puller =
-                  new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_HIGH_WATER_MARK)}},
-
-        // process_memory_snapshot
-        {{.atomTag = android::util::PROCESS_MEMORY_SNAPSHOT},
-         {.puller = new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_SNAPSHOT)}},
-
         // system_ion_heap_size
         {{.atomTag = android::util::SYSTEM_ION_HEAP_SIZE},
          {.puller = new StatsCompanionServicePuller(android::util::SYSTEM_ION_HEAP_SIZE)}},
