@@ -1730,6 +1730,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     public void reset() {
         mShowingPublicInitialized = false;
+        unDismiss();
+        resetTranslation();
         onHeightReset();
         requestLayout();
     }
