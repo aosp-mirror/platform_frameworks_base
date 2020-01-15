@@ -16,9 +16,9 @@
 
 package android.location;
 
-import android.annotation.TestApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -39,7 +39,8 @@ public final class GnssNavigationMessage implements Parcelable {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({TYPE_UNKNOWN, TYPE_GPS_L1CA, TYPE_GPS_L2CNAV, TYPE_GPS_L5CNAV, TYPE_GPS_CNAV2,
-        TYPE_GLO_L1CA, TYPE_BDS_D1, TYPE_BDS_D2, TYPE_GAL_I, TYPE_GAL_F})
+            TYPE_SBS, TYPE_GLO_L1CA, TYPE_QZS_L1CA, TYPE_BDS_D1, TYPE_BDS_D2, TYPE_BDS_CNAV1,
+            TYPE_BDS_CNAV2, TYPE_GAL_I, TYPE_GAL_F, TYPE_IRN_L5CA})
     public @interface GnssNavigationMessageType {}
 
     // The following enumerations must be in sync with the values declared in gps.h
@@ -54,16 +55,26 @@ public final class GnssNavigationMessage implements Parcelable {
     public static final int TYPE_GPS_L5CNAV = 0x0103;
     /** GPS CNAV-2 message contained in the structure. */
     public static final int TYPE_GPS_CNAV2 = 0x0104;
+    /** SBAS message contained in the structure. */
+    public static final int TYPE_SBS = 0x0201;
     /** Glonass L1 CA message contained in the structure. */
     public static final int TYPE_GLO_L1CA = 0x0301;
+    /** QZSS L1 C/A message contained in the structure. */
+    public static final int TYPE_QZS_L1CA = 0x0401;
     /** Beidou D1 message contained in the structure. */
     public static final int TYPE_BDS_D1 = 0x0501;
     /** Beidou D2 message contained in the structure. */
     public static final int TYPE_BDS_D2 = 0x0502;
+    /** Beidou CNAV1 message contained in the structure. */
+    public static final int TYPE_BDS_CNAV1 = 0x0503;
+    /** Beidou CNAV2 message contained in the structure. */
+    public static final int TYPE_BDS_CNAV2 = 0x0504;
     /** Galileo I/NAV message contained in the structure. */
     public static final int TYPE_GAL_I = 0x0601;
     /** Galileo F/NAV message contained in the structure. */
     public static final int TYPE_GAL_F = 0x0602;
+    /** IRNSS L5 C/A message contained in the structure. */
+    public static final int TYPE_IRN_L5CA = 0x0701;
 
     /**
      * The Navigation Message Status is 'unknown'.
@@ -199,16 +210,26 @@ public final class GnssNavigationMessage implements Parcelable {
                 return "GPS L5-CNAV";
             case TYPE_GPS_CNAV2:
                 return "GPS CNAV2";
+            case TYPE_SBS:
+                return "SBS";
             case TYPE_GLO_L1CA:
                 return "Glonass L1 C/A";
+            case TYPE_QZS_L1CA:
+                return "QZSS L1 C/A";
             case TYPE_BDS_D1:
                 return "Beidou D1";
             case TYPE_BDS_D2:
                 return "Beidou D2";
+            case TYPE_BDS_CNAV1:
+                return "Beidou CNAV1";
+            case TYPE_BDS_CNAV2:
+                return "Beidou CNAV2";
             case TYPE_GAL_I:
                 return "Galileo I";
             case TYPE_GAL_F:
                 return "Galileo F";
+            case TYPE_IRN_L5CA:
+                return "IRNSS L5 C/A";
             default:
                 return "<Invalid:" + mType + ">";
         }
