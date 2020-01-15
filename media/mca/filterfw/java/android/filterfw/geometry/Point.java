@@ -17,8 +17,7 @@
 
 package android.filterfw.geometry;
 
-import android.annotation.UnsupportedAppUsage;
-import java.lang.Math;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * @hide

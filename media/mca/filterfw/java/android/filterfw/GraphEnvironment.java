@@ -17,11 +17,11 @@
 
 package android.filterfw;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.filterfw.core.AsyncRunner;
-import android.filterfw.core.FilterGraph;
 import android.filterfw.core.FilterContext;
+import android.filterfw.core.FilterGraph;
 import android.filterfw.core.FrameManager;
 import android.filterfw.core.GraphRunner;
 import android.filterfw.core.RoundRobinScheduler;
