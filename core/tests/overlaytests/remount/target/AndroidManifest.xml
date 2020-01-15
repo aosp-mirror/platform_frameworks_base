@@ -23,8 +23,4 @@
         <uses-library android:name="com.android.overlaytest.remounted.shared_library"
                       android:required="true" />
     </application>
-
-    <instrumentation android:name="com.android.overlaytest.remounted.target.ResourceRetrievalRunner"
-                     android:targetPackage="com.android.overlaytest.remounted.target"
-                     android:label="Remounted system RRO tests" />
 </manifest>

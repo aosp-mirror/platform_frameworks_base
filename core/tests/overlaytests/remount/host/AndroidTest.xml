@@ -19,9 +19,6 @@
     <option name="test-tag" value="OverlayRemountedTest" />
 
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer"/>
-    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
-        <option name="run-command" value="remount" />
-    </target_preparer>
 
     <test class="com.android.tradefed.testtype.HostTest">
         <option name="jar" value="OverlayRemountedTest.jar" />
