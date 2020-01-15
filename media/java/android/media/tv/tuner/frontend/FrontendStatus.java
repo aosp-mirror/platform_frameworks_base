@@ -18,8 +18,6 @@ package android.media.tv.tuner.frontend;
 
 import android.media.tv.tuner.Lnb;
 import android.media.tv.tuner.TunerConstants;
-import android.media.tv.tuner.TunerConstants.FrontendDvbcSpectralInversion;
-import android.media.tv.tuner.TunerConstants.FrontendDvbtHierarchy;
 import android.media.tv.tuner.TunerConstants.FrontendInnerFec;
 import android.media.tv.tuner.TunerConstants.FrontendModulation;
 import android.media.tv.tuner.TunerConstants.FrontendStatusType;
@@ -120,7 +118,7 @@ public class FrontendStatus {
         return (int) mValue;
     }
     /** Spectral Inversion for DVBC. */
-    @FrontendDvbcSpectralInversion
+    @DvbcFrontendSettings.SpectralInversion
     public int getSpectralInversion() {
         if (mType != TunerConstants.FRONTEND_STATUS_TYPE_SPECTRAL) {
             throw new IllegalStateException();
@@ -206,7 +204,7 @@ public class FrontendStatus {
         return (int) mValue;
     }
     /** Hierarchy Type for DVBT. */
-    @FrontendDvbtHierarchy
+    @DvbtFrontendSettings.Hierarchy
     public int getHierarchy() {
         if (mType != TunerConstants.FRONTEND_STATUS_TYPE_HIERARCHY) {
             throw new IllegalStateException();

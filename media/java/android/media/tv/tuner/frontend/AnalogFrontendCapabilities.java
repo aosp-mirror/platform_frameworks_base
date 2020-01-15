@@ -31,10 +31,14 @@ public class AnalogFrontendCapabilities extends FrontendCapabilities {
     /**
      * Gets type capability.
      */
+    @AnalogFrontendSettings.SignalType
     public int getTypeCapability() {
         return mTypeCap;
     }
-    /** Gets SIF standard capability. */
+    /**
+     * Gets SIF standard capability.
+     */
+    @AnalogFrontendSettings.SifStandard
     public int getSifStandardCapability() {
         return mSifStandardCap;
     }

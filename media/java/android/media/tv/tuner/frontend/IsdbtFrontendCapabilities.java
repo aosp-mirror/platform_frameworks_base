@@ -17,18 +17,18 @@
 package android.media.tv.tuner.frontend;
 
 /**
- * ISDBC Capabilities.
+ * ISDBT Capabilities.
  * @hide
  */
-public class IsdbcFrontendCapabilities extends FrontendCapabilities {
+public class IsdbtFrontendCapabilities extends FrontendCapabilities {
     private final int mModeCap;
     private final int mBandwidthCap;
     private final int mModulationCap;
     private final int mCoderateCap;
     private final int mGuardIntervalCap;
 
-    IsdbcFrontendCapabilities(int modeCap, int bandwidthCap, int modulationCap, int coderateCap,
-            int guardIntervalCap) {
+    private IsdbtFrontendCapabilities(int modeCap, int bandwidthCap, int modulationCap,
+            int coderateCap, int guardIntervalCap) {
         mModeCap = modeCap;
         mBandwidthCap = bandwidthCap;
         mModulationCap = modulationCap;
@@ -36,23 +36,38 @@ public class IsdbcFrontendCapabilities extends FrontendCapabilities {
         mGuardIntervalCap = guardIntervalCap;
     }
 
-    /** Gets mode capability. */
+    /**
+     * Gets mode capability.
+     */
+    @IsdbtFrontendSettings.Mode
     public int getModeCapability() {
         return mModeCap;
     }
-    /** Gets bandwidth capability. */
+    /**
+     * Gets bandwidth capability.
+     */
+    @IsdbtFrontendSettings.Bandwidth
     public int getBandwidthCapability() {
         return mBandwidthCap;
     }
-    /** Gets modulation capability. */
+    /**
+     * Gets modulation capability.
+     */
+    @IsdbtFrontendSettings.Modulation
     public int getModulationCapability() {
         return mModulationCap;
     }
-    /** Gets code rate capability. */
+    /**
+     * Gets code rate capability.
+     */
+    @DvbtFrontendSettings.Coderate
     public int getCodeRateCapability() {
         return mCoderateCap;
     }
-    /** Gets guard interval capability. */
+    /**
+     * Gets guard interval capability.
+     */
+    @DvbtFrontendSettings.GuardInterval
     public int getGuardIntervalCapability() {
         return mGuardIntervalCap;
     }

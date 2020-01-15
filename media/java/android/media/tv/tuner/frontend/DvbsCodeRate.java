@@ -16,13 +16,118 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.content.Context;
+import android.media.tv.tuner.TunerConstants.FrontendInnerFec;
+import android.media.tv.tuner.TunerUtils;
+
 /**
  * Code rate for DVBS.
  * @hide
  */
 public class DvbsCodeRate {
-    public long fec;
-    public boolean isLinear;
-    public boolean isShortFrames;
-    public int bitsPer1000Symbol;
+    private final long mFec;
+    private final boolean mIsLinear;
+    private final boolean mIsShortFrames;
+    private final int mBitsPer1000Symbol;
+
+    private DvbsCodeRate(long fec, boolean isLinear, boolean isShortFrames, int bitsPer1000Symbol) {
+        mFec = fec;
+        mIsLinear = isLinear;
+        mIsShortFrames = isShortFrames;
+        mBitsPer1000Symbol = bitsPer1000Symbol;
+    }
+
+    /**
+     * Gets inner FEC.
+     */
+    @FrontendInnerFec
+    public long getFec() {
+        return mFec;
+    }
+    /**
+     * Checks whether it's linear.
+     */
+    public boolean isLinear() {
+        return mIsLinear;
+    }
+    /**
+     * Checks whether short frame enabled.
+     */
+    public boolean isShortFrameEnabled() {
+        return mIsShortFrames;
+    }
+    /**
+     * Gets bits number in 1000 symbols. 0 by default.
+     */
+    public int getBitsPer1000Symbol() {
+        return mBitsPer1000Symbol;
+    }
+
+    /**
+     * Creates a builder for {@link DvbsCodeRate}.
+     *
+     * @param context the context of the caller.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @NonNull
+    public static Builder builder(@NonNull Context context) {
+        TunerUtils.checkTunerPermission(context);
+        return new Builder();
+    }
+
+    /**
+     * Builder for {@link DvbsCodeRate}.
+     */
+    public static class Builder {
+        private long mFec;
+        private boolean mIsLinear;
+        private boolean mIsShortFrames;
+        private int mBitsPer1000Symbol;
+
+        private Builder() {
+        }
+
+        /**
+         * Sets inner FEC.
+         */
+        @NonNull
+        public Builder setFec(@FrontendInnerFec long fec) {
+            mFec = fec;
+            return this;
+        }
+        /**
+         * Sets whether it's linear.
+         */
+        @NonNull
+        public Builder setLinear(boolean isLinear) {
+            mIsLinear = isLinear;
+            return this;
+        }
+        /**
+         * Sets whether short frame enabled.
+         */
+        @NonNull
+        public Builder setShortFrameEnabled(boolean isShortFrames) {
+            mIsShortFrames = isShortFrames;
+            return this;
+        }
+        /**
+         * Sets bits number in 1000 symbols.
+         */
+        @NonNull
+        public Builder setBitsPer1000Symbol(int bitsPer1000Symbol) {
+            mBitsPer1000Symbol = bitsPer1000Symbol;
+            return this;
+        }
+
+        /**
+         * Builds a {@link DvbsCodeRate} object.
+         */
+        @NonNull
+        public DvbsCodeRate build() {
+            return new DvbsCodeRate(mFec, mIsLinear, mIsShortFrames, mBitsPer1000Symbol);
+        }
+    }
 }

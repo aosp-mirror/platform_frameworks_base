@@ -16,8 +16,6 @@
 
 package android.media.tv.tuner.frontend;
 
-import android.media.tv.tuner.TunerConstants;
-
 /**
  * Scan callback.
  *
@@ -49,10 +47,10 @@ public interface ScanCallback {
     void onInputStreamIds(int[] inputStreamIds);
 
     /** Locked signal standard. */
-    void onDvbsStandard(@TunerConstants.FrontendDvbsStandard int dvbsStandandard);
+    void onDvbsStandard(@DvbsFrontendSettings.Standard int dvbsStandandard);
 
     /** Locked signal standard. */
-    void onDvbtStandard(@TunerConstants.FrontendDvbtStandard int dvbtStandard);
+    void onDvbtStandard(@DvbtFrontendSettings.Standard int dvbtStandard);
 
     /** PLP status in a tuned frequency band for ATSC3 frontend. */
     void onAtsc3PlpInfos(Atsc3PlpInfo[] atsc3PlpInfos);

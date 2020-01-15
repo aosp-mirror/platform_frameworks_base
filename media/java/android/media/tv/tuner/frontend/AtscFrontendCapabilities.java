@@ -23,10 +23,14 @@ package android.media.tv.tuner.frontend;
 public class AtscFrontendCapabilities extends FrontendCapabilities {
     private final int mModulationCap;
 
-    AtscFrontendCapabilities(int modulationCap) {
+    private AtscFrontendCapabilities(int modulationCap) {
         mModulationCap = modulationCap;
     }
-    /** Gets modulation capability. */
+
+    /**
+     * Gets modulation capability.
+     */
+    @AtscFrontendSettings.Modulation
     public int getModulationCapability() {
         return mModulationCap;
     }
