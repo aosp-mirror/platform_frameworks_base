@@ -18,9 +18,9 @@ package com.android.server.integrity.model;
 
 /**  A helper class containing special indexing file constants. */
 public final class IndexingFileConstants {
-    // The parsing time seems acceptable for this block size based on the tests in
-    // go/ic-rule-file-format.
-    public static final int INDEXING_BLOCK_SIZE = 100;
+    // We empirically experimented with different block sizes and identified that 250 is in the
+    // optimal range of efficient computation.
+    public static final int INDEXING_BLOCK_SIZE = 250;
 
     public static final String START_INDEXING_KEY = "START_KEY";
     public static final String END_INDEXING_KEY = "END_KEY";
