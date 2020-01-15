@@ -1,5 +1,6 @@
 rule android.net.InterfaceConfigurationParcel* @0
 rule android.net.InterfaceConfiguration* com.android.server.x.wifi.net.InterfaceConfiguration@1
+rule android.net.util.** com.android.server.x.wifi.net.util.@1
 
 # We don't jar-jar the entire package because, we still use some classes (like
 # AsyncChannel in com.android.internal.util) from these packages which are not
