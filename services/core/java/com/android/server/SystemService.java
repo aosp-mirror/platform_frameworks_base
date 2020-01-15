@@ -21,6 +21,9 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_DEFAULT;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.annotation.SystemApi.Client;
+import android.annotation.SystemApi.Process;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.content.Context;
@@ -62,7 +65,7 @@ import java.util.List;
  *
  * {@hide}
  */
-//@SystemApi(client = Client.MODULE_LIBRARIES, process = Process.SYSTEM_SERVER)
+@SystemApi(client = Client.MODULE_LIBRARIES, process = Process.SYSTEM_SERVER)
 public abstract class SystemService {
 
     /** @hide */
@@ -129,7 +132,7 @@ public abstract class SystemService {
      * Class representing user in question in the lifecycle callbacks.
      * @hide
      */
-    //@SystemApi(client = Client.MODULE_LIBRARIES, process = Process.SYSTEM_SERVER)
+    @SystemApi(client = Client.MODULE_LIBRARIES, process = Process.SYSTEM_SERVER)
     public static final class TargetUser {
         @NonNull
         private final UserInfo mUserInfo;

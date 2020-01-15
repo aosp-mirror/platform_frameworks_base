@@ -1,1 +1,31 @@
 // Signature format: 2.0
+package com.android.server {
+
+  public abstract class SystemService {
+    ctor public SystemService(@NonNull android.content.Context);
+    method @NonNull public final android.content.Context getContext();
+    method public boolean isSupportedUser(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onBootPhase(int);
+    method public void onCleanupUser(@NonNull com.android.server.SystemService.TargetUser);
+    method public abstract void onStart();
+    method public void onStartUser(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onStopUser(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onSwitchUser(@Nullable com.android.server.SystemService.TargetUser, @NonNull com.android.server.SystemService.TargetUser);
+    method public void onUnlockUser(@NonNull com.android.server.SystemService.TargetUser);
+    method protected final void publishBinderService(@NonNull String, @NonNull android.os.IBinder);
+    method protected final void publishBinderService(@NonNull String, @NonNull android.os.IBinder, boolean);
+    field public static final int PHASE_ACTIVITY_MANAGER_READY = 550; // 0x226
+    field public static final int PHASE_BOOT_COMPLETED = 1000; // 0x3e8
+    field public static final int PHASE_DEVICE_SPECIFIC_SERVICES_READY = 520; // 0x208
+    field public static final int PHASE_LOCK_SETTINGS_READY = 480; // 0x1e0
+    field public static final int PHASE_SYSTEM_SERVICES_READY = 500; // 0x1f4
+    field public static final int PHASE_THIRD_PARTY_APPS_CAN_START = 600; // 0x258
+    field public static final int PHASE_WAIT_FOR_DEFAULT_DISPLAY = 100; // 0x64
+  }
+
+  public static final class SystemService.TargetUser {
+    method @NonNull public android.os.UserHandle getUserHandle();
+  }
+
+}
+
