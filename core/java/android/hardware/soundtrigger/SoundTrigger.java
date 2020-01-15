@@ -34,6 +34,7 @@ import android.content.Context;
 import android.media.AudioFormat;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
+import android.media.soundtrigger_middleware.Status;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -41,6 +42,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -1676,6 +1678,45 @@ public class SoundTrigger {
     }
 
     /**
+     * Translate an exception thrown from interaction with the underlying service to an error code.
+     * Throws a runtime exception for unexpected conditions.
+     * @param e The caught exception.
+     * @return The error code.
+     *
+     * @hide
+     */
+    static int handleException(Exception e) {
+        Log.w(TAG, "Exception caught", e);
+        if (e instanceof RemoteException) {
+            return STATUS_DEAD_OBJECT;
+        }
+        if (e instanceof ServiceSpecificException) {
+            switch (((ServiceSpecificException) e).errorCode) {
+                case Status.OPERATION_NOT_SUPPORTED:
+                    return STATUS_INVALID_OPERATION;
+                case Status.TEMPORARY_PERMISSION_DENIED:
+                    return STATUS_PERMISSION_DENIED;
+                case Status.DEAD_OBJECT:
+                    return STATUS_DEAD_OBJECT;
+            }
+            return STATUS_ERROR;
+        }
+        if (e instanceof SecurityException) {
+            return STATUS_PERMISSION_DENIED;
+        }
+        if (e instanceof IllegalStateException) {
+            return STATUS_INVALID_OPERATION;
+        }
+        if (e instanceof IllegalArgumentException || e instanceof NullPointerException) {
+            return STATUS_BAD_VALUE;
+        }
+        // This is not one of the conditions represented by our error code, escalate to a
+        // RuntimeException.
+        Log.e(TAG, "Escalating unexpected exception: ", e);
+        throw new RuntimeException(e);
+    }
+
+    /**
      * Returns a list of descriptors for all hardware modules loaded.
      * @param modules A ModuleProperties array where the list will be returned.
      * @return - {@link #STATUS_OK} in case of success
@@ -1697,9 +1738,8 @@ public class SoundTrigger {
                 modules.add(ConversionUtil.aidl2apiModuleDescriptor(desc));
             }
             return STATUS_OK;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Exception caught", e);
-            return STATUS_DEAD_OBJECT;
+        } catch (Exception e) {
+            return handleException(e);
         }
     }
 

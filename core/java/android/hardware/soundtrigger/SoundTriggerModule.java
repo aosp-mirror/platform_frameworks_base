@@ -78,7 +78,7 @@ public class SoundTriggerModule {
                 mService = null;
             }
         } catch (Exception e) {
-            handleException(e);
+            SoundTrigger.handleException(e);
         }
     }
 
@@ -115,7 +115,7 @@ public class SoundTriggerModule {
             }
             return SoundTrigger.STATUS_BAD_VALUE;
         } catch (Exception e) {
-            return handleException(e);
+            return SoundTrigger.handleException(e);
         }
     }
 
@@ -137,7 +137,7 @@ public class SoundTriggerModule {
             mService.unloadModel(soundModelHandle);
             return SoundTrigger.STATUS_OK;
         } catch (Exception e) {
-            return handleException(e);
+            return SoundTrigger.handleException(e);
         }
     }
 
@@ -166,7 +166,7 @@ public class SoundTriggerModule {
                     ConversionUtil.api2aidlRecognitionConfig(config));
             return SoundTrigger.STATUS_OK;
         } catch (Exception e) {
-            return handleException(e);
+            return SoundTrigger.handleException(e);
         }
     }
 
@@ -189,7 +189,7 @@ public class SoundTriggerModule {
             mService.stopRecognition(soundModelHandle);
             return SoundTrigger.STATUS_OK;
         } catch (Exception e) {
-            return handleException(e);
+            return SoundTrigger.handleException(e);
         }
     }
 
@@ -214,7 +214,7 @@ public class SoundTriggerModule {
             mService.forceRecognitionEvent(soundModelHandle);
             return SoundTrigger.STATUS_OK;
         } catch (Exception e) {
-            return handleException(e);
+            return SoundTrigger.handleException(e);
         }
     }
 
@@ -242,7 +242,7 @@ public class SoundTriggerModule {
                     ConversionUtil.api2aidlModelParameter(modelParam), value);
             return SoundTrigger.STATUS_OK;
         } catch (Exception e) {
-            return handleException(e);
+            return SoundTrigger.handleException(e);
         }
     }
 
@@ -294,23 +294,6 @@ public class SoundTriggerModule {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    private int handleException(Exception e) {
-        Log.e(TAG, "", e);
-        if (e instanceof NullPointerException) {
-            return SoundTrigger.STATUS_NO_INIT;
-        }
-        if (e instanceof RemoteException) {
-            return SoundTrigger.STATUS_DEAD_OBJECT;
-        }
-        if (e instanceof IllegalArgumentException) {
-            return SoundTrigger.STATUS_BAD_VALUE;
-        }
-        if (e instanceof IllegalStateException) {
-            return SoundTrigger.STATUS_INVALID_OPERATION;
-        }
-        return SoundTrigger.STATUS_ERROR;
     }
 
     private class EventHandlerDelegate extends ISoundTriggerCallback.Stub implements
