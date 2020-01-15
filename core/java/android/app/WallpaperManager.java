@@ -543,6 +543,13 @@ public class WallpaperManager {
         mCmProxy = new ColorManagementProxy(context);
     }
 
+    // no-op constructor called just by DisabledWallpaperManager
+    /*package*/ WallpaperManager() {
+        mContext = null;
+        mCmProxy = null;
+        mWcgEnabled = false;
+    }
+
     /**
      * Retrieve a WallpaperManager associated with the given Context.
      */

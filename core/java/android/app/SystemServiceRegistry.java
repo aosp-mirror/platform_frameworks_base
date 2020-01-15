@@ -54,6 +54,7 @@ import android.content.integrity.AppIntegrityManager;
 import android.content.integrity.IAppIntegrityManager;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayManager;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.CrossProfileApps;
 import android.content.pm.DataLoaderManager;
 import android.content.pm.ICrossProfileApps;
@@ -693,20 +694,20 @@ public final class SystemServiceRegistry {
                     throws ServiceNotFoundException {
                 final IBinder b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
                 if (b == null) {
-                    // There are 2 reason service can be null:
-                    // 1.Device doesn't support it - that's fine
-                    // 2.App is running on instant mode - should fail
-                    final boolean enabled = Resources.getSystem()
-                            .getBoolean(com.android.internal.R.bool.config_enableWallpaperService);
-                    if (!enabled) {
-                        // Life moves on...
-                        return DisabledWallpaperManager.getInstance();
-                    }
-                    if (ctx.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
+                    ApplicationInfo appInfo = ctx.getApplicationInfo();
+                    if (appInfo.targetSdkVersion >= Build.VERSION_CODES.P
+                            && appInfo.isInstantApp()) {
                         // Instant app
                         throw new ServiceNotFoundException(Context.WALLPAPER_SERVICE);
                     }
+                    final boolean enabled = Resources.getSystem()
+                            .getBoolean(com.android.internal.R.bool.config_enableWallpaperService);
+                    if (!enabled) {
+                        // Device doesn't support wallpaper, return a limited manager
+                        return DisabledWallpaperManager.getInstance();
+                    }
                     // Bad state - WallpaperManager methods will throw exception
+                    Log.e(TAG, "No wallpaper service");
                 }
                 IWallpaperManager service = IWallpaperManager.Stub.asInterface(b);
                 return new WallpaperManager(service, ctx.getOuterContext(),
