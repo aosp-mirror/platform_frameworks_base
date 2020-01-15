@@ -23,12 +23,14 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.Manifest;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.os.ParcelFileDescriptor;
+import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -185,12 +187,6 @@ public class StagedRollbackTest {
      */
     @Test
     public void testNativeWatchdogTriggersRollback_Phase1() throws Exception {
-        // When multiple staged sessions are installed on a device which doesn't support checkpoint,
-        // only the 1st one will prevail. We have to check no other rollbacks available to ensure
-        // TestApp.A is always the 1st and the only one to commit so rollback can work as intended.
-        // If there are leftover rollbacks from previous tests, this assertion will fail.
-        assertThat(RollbackUtils.getRollbackManager().getAvailableRollbacks()).isEmpty();
-
         Uninstall.packages(TestApp.A);
         Install.single(TestApp.A1).commit();
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
@@ -218,6 +214,64 @@ public class StagedRollbackTest {
         RollbackManager rm = RollbackUtils.getRollbackManager();
         assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
                 TestApp.A)).isNotNull();
+    }
+
+    /**
+     * Stage install an apk with rollback that will be later triggered by unattributable crash.
+     */
+    @Test
+    public void testNativeWatchdogTriggersRollbackForAll_Phase1() throws Exception {
+        Uninstall.packages(TestApp.A);
+        Install.single(TestApp.A1).commit();
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+
+        Install.single(TestApp.A2).setEnableRollback().setStaged().commit();
+    }
+
+    /**
+     * Verify the rollback is available and then install another package with rollback.
+     */
+    @Test
+    public void testNativeWatchdogTriggersRollbackForAll_Phase2() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
+                TestApp.A)).isNotNull();
+
+        // Install another package with rollback
+        Uninstall.packages(TestApp.B);
+        Install.single(TestApp.B1).commit();
+        assertThat(InstallUtils.getInstalledVersion(TestApp.B)).isEqualTo(1);
+
+        Install.single(TestApp.B2).setEnableRollback().setStaged().commit();
+    }
+
+    /**
+     * Verify the rollbacks are available.
+     */
+    @Test
+    public void testNativeWatchdogTriggersRollbackForAll_Phase3() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+        assertThat(InstallUtils.getInstalledVersion(TestApp.B)).isEqualTo(2);
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
+                TestApp.A)).isNotNull();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
+                TestApp.B)).isNotNull();
+    }
+
+    /**
+     * Verify the rollbacks are committed after crashing.
+     */
+    @Test
+    public void testNativeWatchdogTriggersRollbackForAll_Phase4() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+        assertThat(InstallUtils.getInstalledVersion(TestApp.B)).isEqualTo(1);
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
+                TestApp.A)).isNotNull();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
+                TestApp.B)).isNotNull();
     }
 
     @Test
@@ -438,6 +492,7 @@ public class StagedRollbackTest {
         RollbackManager rm = RollbackUtils.getRollbackManager();
         rm.getAvailableRollbacks().stream().flatMap(info -> info.getPackages().stream())
                 .map(info -> info.getPackageName()).forEach(rm::expireRollbackForPackage);
+        assertThat(RollbackUtils.getRollbackManager().getAvailableRollbacks()).isEmpty();
     }
 
     private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
@@ -497,5 +552,12 @@ public class StagedRollbackTest {
         ParcelFileDescriptor pfd = InstrumentationRegistry.getInstrumentation().getUiAutomation()
                 .executeShellCommand(cmd);
         IoUtils.closeQuietly(pfd);
+    }
+
+    @Test
+    public void isCheckpointSupported() {
+        Context context = InstrumentationRegistry.getInstrumentation().getContext();
+        StorageManager sm = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+        assertThat(sm.isCheckpointSupported()).isTrue();
     }
 }
