@@ -303,6 +303,7 @@ java_defaults {
             "sax/java",
             "telecomm/java",
             "telephony/java",
+            "wifi/java",
         ],
     },
 
