@@ -511,11 +511,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     @AnyThread
     void onBootCompleted() {
-        getHandler().post(() -> updateRollbackLifetimeDurationInMillis());
-        // Also posts to handler thread
-        scheduleExpiration(0);
-
         getHandler().post(() -> {
+            updateRollbackLifetimeDurationInMillis();
+            runExpiration();
+
             // Check to see if any rollback-enabled staged sessions or staged
             // rollback sessions been applied.
             List<Rollback> enabling = new ArrayList<>();
