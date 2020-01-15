@@ -45,7 +45,6 @@ import com.android.server.EventLogTags;
 import com.android.server.power.BatterySaverStateMachineProto;
 
 import java.io.PrintWriter;
-import java.text.NumberFormat;
 
 /**
  * Decides when to enable / disable battery saver.
@@ -796,8 +795,7 @@ public class BatterySaverStateMachine {
 
             manager.notifyAsUser(TAG, DYNAMIC_MODE_NOTIFICATION_ID,
                     buildNotification(DYNAMIC_MODE_NOTIF_CHANNEL_ID,
-                            mContext.getResources().getString(
-                                    R.string.dynamic_mode_notification_title),
+                            R.string.dynamic_mode_notification_title,
                             R.string.dynamic_mode_notification_summary,
                             Intent.ACTION_POWER_USAGE_SUMMARY),
                     UserHandle.ALL);
@@ -813,13 +811,10 @@ public class BatterySaverStateMachine {
             ensureNotificationChannelExists(manager, BATTERY_SAVER_NOTIF_CHANNEL_ID,
                     R.string.battery_saver_notification_channel_name);
 
-            final String percentage = NumberFormat.getPercentInstance()
-                    .format((double) mBatteryLevel / 100.0);
             manager.notifyAsUser(TAG, STICKY_AUTO_DISABLED_NOTIFICATION_ID,
                     buildNotification(BATTERY_SAVER_NOTIF_CHANNEL_ID,
-                            mContext.getResources().getString(
-                                    R.string.battery_saver_charged_notification_title, percentage),
-                            R.string.battery_saver_off_notification_summary,
+                            R.string.battery_saver_off_notification_title,
+                            R.string.battery_saver_charged_notification_summary,
                             Settings.ACTION_BATTERY_SAVER_SETTINGS),
                     UserHandle.ALL);
         });
@@ -834,13 +829,14 @@ public class BatterySaverStateMachine {
         manager.createNotificationChannel(channel);
     }
 
-    private Notification buildNotification(@NonNull String channelId, @NonNull String title,
+    private Notification buildNotification(@NonNull String channelId, @StringRes int titleId,
             @StringRes int summaryId, @NonNull String intentAction) {
         Resources res = mContext.getResources();
         Intent intent = new Intent(intentAction);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent batterySaverIntent = PendingIntent.getActivity(
                 mContext, 0 /* requestCode */, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        final String title = res.getString(titleId);
         final String summary = res.getString(summaryId);
 
         return new Notification.Builder(mContext, channelId)
