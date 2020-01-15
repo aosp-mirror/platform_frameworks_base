@@ -49,7 +49,6 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.TrafficStatsConstants;
 
@@ -207,7 +206,7 @@ public class CaptivePortalLoginActivity extends Activity {
         if (TextUtils.isEmpty(url)) url = mCm.getCaptivePortalServerUrl();
         final CarrierConfigManager configManager = getApplicationContext()
                 .getSystemService(CarrierConfigManager.class);
-        final int subId = getIntent().getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
+        final int subId = getIntent().getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
                 SubscriptionManager.getDefaultVoiceSubscriptionId());
         final String[] portalURLs = configManager.getConfigForSubId(subId).getStringArray(
                 CarrierConfigManager.KEY_CARRIER_DEFAULT_REDIRECTION_URL_STRING_ARRAY);
