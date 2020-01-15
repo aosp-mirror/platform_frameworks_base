@@ -661,6 +661,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         return Collections.unmodifiableList(mProfiles);
     }
 
+    public List<LocalBluetoothProfile> getProfileListCopy() {
+        return new ArrayList<>(mProfiles);
+    }
+
     public List<LocalBluetoothProfile> getConnectableProfiles() {
         List<LocalBluetoothProfile> connectableProfiles =
                 new ArrayList<LocalBluetoothProfile>();
