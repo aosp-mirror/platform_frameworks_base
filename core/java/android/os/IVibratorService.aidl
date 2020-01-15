@@ -24,7 +24,7 @@ interface IVibratorService
 {
     boolean hasVibrator();
     boolean hasAmplitudeControl();
-    boolean setAlwaysOnEffect(int id, in VibrationEffect effect,
+    boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId, in VibrationEffect effect,
             in VibrationAttributes attributes);
     void vibrate(int uid, String opPkg, in VibrationEffect effect,
             in VibrationAttributes attributes, String reason, IBinder token);
