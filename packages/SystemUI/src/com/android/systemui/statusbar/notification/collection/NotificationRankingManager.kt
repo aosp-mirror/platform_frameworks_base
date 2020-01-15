@@ -176,12 +176,14 @@ open class NotificationRankingManager @Inject constructor(
                     }
                     entry.ranking = newRanking
 
-                    val oldSbn = entry.sbn.cloneLight()
                     val newOverrideGroupKey = newRanking.overrideGroupKey
-                    if (!Objects.equals(oldSbn.overrideGroupKey, newOverrideGroupKey)) {
+                    if (!Objects.equals(entry.sbn.overrideGroupKey, newOverrideGroupKey)) {
+                        val oldGroupKey = entry.sbn.groupKey
+                        val oldIsGroup = entry.sbn.isGroup
+                        val oldIsGroupSummary = entry.sbn.notification.isGroupSummary
                         entry.sbn.overrideGroupKey = newOverrideGroupKey
-                        // TODO: notify group manager here?
-                        groupManager.onEntryUpdated(entry, oldSbn)
+                        groupManager.onEntryUpdated(entry, oldGroupKey, oldIsGroup,
+                                oldIsGroupSummary)
                     }
                 }
             }
