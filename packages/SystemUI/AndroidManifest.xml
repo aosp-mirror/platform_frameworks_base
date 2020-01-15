@@ -637,6 +637,23 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".controls.management.ControlsProviderSelectorActivity"
+                  android:label="Controls Providers"
+                  android:theme="@style/Theme.SystemUI"
+                  android:exported="true"
+                  android:excludeFromRecents="true"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:visibleToInstantApps="true">
+        </activity>
+
+        <activity android:name=".controls.management.ControlsFavoritingActivity"
+                  android:parentActivityName=".controls.management.ControlsProviderSelectorActivity"
+                  android:theme="@style/Theme.SystemUI"
+                  android:excludeFromRecents="true"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:visibleToInstantApps="true">
+        </activity>
+
         <!-- Doze with notifications, run in main sysui process for every user  -->
         <service
             android:name=".doze.DozeService"
