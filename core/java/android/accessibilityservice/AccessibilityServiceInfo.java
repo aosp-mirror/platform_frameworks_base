@@ -86,6 +86,7 @@ import java.util.List;
  * @attr ref android.R.styleable#AccessibilityService_settingsActivity
  * @attr ref android.R.styleable#AccessibilityService_nonInteractiveUiTimeout
  * @attr ref android.R.styleable#AccessibilityService_interactiveUiTimeout
+ * @attr ref android.R.styleable#AccessibilityService_canTakeScreenshot
  * @see AccessibilityService
  * @see android.view.accessibility.AccessibilityEvent
  * @see android.view.accessibility.AccessibilityManager
@@ -135,6 +136,12 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see android.R.styleable#AccessibilityService_canRequestFingerprintGestures
      */
     public static final int CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES = 0x00000040;
+
+    /**
+     * Capability: This accessibility service can take screenshot.
+     * @see android.R.styleable#AccessibilityService_canTakeScreenshot
+     */
+    public static final int CAPABILITY_CAN_TAKE_SCREENSHOT = 0x00000080;
 
     private static SparseArray<CapabilityInfo> sAvailableCapabilityInfos;
 
@@ -625,6 +632,10 @@ public class AccessibilityServiceInfo implements Parcelable {
                     .AccessibilityService_canRequestFingerprintGestures, false)) {
                 mCapabilities |= CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES;
             }
+            if (asAttributes.getBoolean(com.android.internal.R.styleable
+                    .AccessibilityService_canTakeScreenshot, false)) {
+                mCapabilities |= CAPABILITY_CAN_TAKE_SCREENSHOT;
+            }
             TypedValue peekedValue = asAttributes.peekValue(
                     com.android.internal.R.styleable.AccessibilityService_description);
             if (peekedValue != null) {
@@ -794,6 +805,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS
      * @see #CAPABILITY_CAN_CONTROL_MAGNIFICATION
      * @see #CAPABILITY_CAN_PERFORM_GESTURES
+     * @see #CAPABILITY_CAN_TAKE_SCREENSHOT
      */
     public int getCapabilities() {
         return mCapabilities;
@@ -810,6 +822,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS
      * @see #CAPABILITY_CAN_CONTROL_MAGNIFICATION
      * @see #CAPABILITY_CAN_PERFORM_GESTURES
+     * @see #CAPABILITY_CAN_TAKE_SCREENSHOT
      *
      * @hide
      */
@@ -1253,6 +1266,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "CAPABILITY_CAN_PERFORM_GESTURES";
             case CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES:
                 return "CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES";
+            case CAPABILITY_CAN_TAKE_SCREENSHOT:
+                return "CAPABILITY_CAN_TAKE_SCREENSHOT";
             default:
                 return "UNKNOWN";
         }
@@ -1314,6 +1329,10 @@ public class AccessibilityServiceInfo implements Parcelable {
                     new CapabilityInfo(CAPABILITY_CAN_PERFORM_GESTURES,
                             R.string.capability_title_canPerformGestures,
                             R.string.capability_desc_canPerformGestures));
+            sAvailableCapabilityInfos.put(CAPABILITY_CAN_TAKE_SCREENSHOT,
+                    new CapabilityInfo(CAPABILITY_CAN_TAKE_SCREENSHOT,
+                            R.string.capability_title_canTakeScreenshot,
+                            R.string.capability_desc_canTakeScreenshot));
             if ((context == null) || fingerprintAvailable(context)) {
                 sAvailableCapabilityInfos.put(CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES,
                         new CapabilityInfo(CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES,

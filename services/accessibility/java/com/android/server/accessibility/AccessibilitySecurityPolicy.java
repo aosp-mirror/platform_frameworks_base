@@ -326,6 +326,19 @@ public class AccessibilitySecurityPolicy {
     }
 
     /**
+     * Checks if a service can take screenshot.
+     *
+     * @param service The service requesting access
+     *
+     * @return Whether ot not the service may take screenshot
+     */
+    public boolean canTakeScreenshotLocked(
+            @NonNull AbstractAccessibilityServiceConnection service) {
+        return (service.getCapabilities()
+                & AccessibilityServiceInfo.CAPABILITY_CAN_TAKE_SCREENSHOT) != 0;
+    }
+
+    /**
      * Returns the parent userId of the profile according to the specified userId.
      *
      * @param userId The userId to check

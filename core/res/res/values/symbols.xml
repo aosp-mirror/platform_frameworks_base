@@ -3811,4 +3811,9 @@
   <java-symbol type="dimen" name="waterfall_display_top_edge_size" />
   <java-symbol type="dimen" name="waterfall_display_right_edge_size" />
   <java-symbol type="dimen" name="waterfall_display_bottom_edge_size" />
+
+  <!-- Accessibility take screenshot -->
+  <java-symbol type="string" name="capability_desc_canTakeScreenshot" />
+  <java-symbol type="string" name="capability_title_canTakeScreenshot" />
+
 </resources>

@@ -794,6 +794,11 @@
     <string name="capability_desc_canCaptureFingerprintGestures">Can capture gestures performed on
         the device\'s fingerprint sensor.</string>
 
+    <!-- Title for the capability of an accessibility service to take screenshot. [CHAR LIMIT=32] -->
+    <string name="capability_title_canTakeScreenshot">Take screenshot</string>
+    <!-- Description for the capability of an accessibility service to take screenshot. [CHAR LIMIT=NONE] -->
+    <string name="capability_desc_canTakeScreenshot">Can take a screenshot of the display.</string>
+
     <!--  Permissions -->
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
