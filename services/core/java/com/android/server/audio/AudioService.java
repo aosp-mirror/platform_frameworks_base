@@ -2193,8 +2193,8 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void enforceModifyAudioRoutingPermission() {
-        if (mContext.checkCallingPermission(
-                    android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MODIFY_AUDIO_ROUTING)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Missing MODIFY_AUDIO_ROUTING permission");
         }
