@@ -126,12 +126,12 @@
     </xs:complexType>
     <xs:complexType name="privapp-permissions">
         <xs:sequence>
-            <xs:element name="permission" maxOccurs="unbounded">
+            <xs:element name="permission" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
                     <xs:attribute name="name" type="xs:string"/>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="deny-permission" maxOccurs="unbounded">
+            <xs:element name="deny-permission" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
                     <xs:attribute name="name" type="xs:string"/>
                 </xs:complexType>
@@ -141,12 +141,12 @@
     </xs:complexType>
     <xs:complexType name="oem-permissions">
         <xs:sequence>
-            <xs:element name="permission" maxOccurs="unbounded">
+            <xs:element name="permission" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
                     <xs:attribute name="name" type="xs:string"/>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="deny-permission" maxOccurs="unbounded">
+            <xs:element name="deny-permission" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
                     <xs:attribute name="name" type="xs:string"/>
                 </xs:complexType>
