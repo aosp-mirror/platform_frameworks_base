@@ -40,7 +40,7 @@ public class DataUsageUtils {
         final NetworkTemplate mobileAll = NetworkTemplate.buildTemplateMobileAll(
                 telephonyManager.getSubscriberId(subId));
 
-        if (!subscriptionManager.isActiveSubId(subId)) {
+        if (!subscriptionManager.isActiveSubscriptionId(subId)) {
             Log.i(TAG, "Subscription is not active: " + subId);
             return mobileAll;
         }

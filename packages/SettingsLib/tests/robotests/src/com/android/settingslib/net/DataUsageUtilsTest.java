@@ -71,12 +71,12 @@ public class DataUsageUtilsTest {
         when(mTelephonyManager.getSubscriberId(SUB_ID)).thenReturn(SUBSCRIBER_ID);
         when(mTelephonyManager.getSubscriberId(SUB_ID_2)).thenReturn(SUBSCRIBER_ID_2);
         when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
-        when(mSubscriptionManager.isActiveSubId(anyInt())).thenReturn(true);
+        when(mSubscriptionManager.isActiveSubscriptionId(anyInt())).thenReturn(true);
     }
 
     @Test
     public void getMobileTemplate_infoNull_returnMobileAll() {
-        when(mSubscriptionManager.isActiveSubId(SUB_ID)).thenReturn(false);
+        when(mSubscriptionManager.isActiveSubscriptionId(SUB_ID)).thenReturn(false);
 
         final NetworkTemplate networkTemplate = DataUsageUtils.getMobileTemplate(mContext, SUB_ID);
         assertThat(networkTemplate.matchesSubscriberId(SUBSCRIBER_ID)).isTrue();
