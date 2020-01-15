@@ -187,6 +187,11 @@ public class BaseWifiService extends IWifiManager.Stub {
     }
 
     @Override
+    public void setMacRandomizationSettingPasspointEnabled(String fqdn, boolean enable) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean startScan(String packageName, String featureId) {
         throw new UnsupportedOperationException();
     }

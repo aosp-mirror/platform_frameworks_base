@@ -4232,6 +4232,24 @@ public class WifiManager {
     }
 
     /**
+     * Configure MAC randomization setting for a Passpoint profile.
+     * MAC randomization is enabled by default.
+     *
+     * @param fqdn the FQDN (fully qualified domain name) of the passpoint profile.
+     * @param enable true to enable MAC randomization, false to disable MAC randomization.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void setMacRandomizationSettingPasspointEnabled(@NonNull String fqdn, boolean enable) {
+        try {
+            mService.setMacRandomizationSettingPasspointEnabled(fqdn, enable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Disable an ephemeral network.
      *
      * @param ssid in the format of WifiConfiguration's SSID.

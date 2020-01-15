@@ -1706,6 +1706,17 @@ public class WifiManagerTest {
         verify(mWifiService).allowAutojoinPasspoint(fqdn, true);
     }
 
+    /**
+     * Test behavior of
+     * {@link WifiManager#setMacRandomizationSettingPasspointEnabled(String, boolean)}
+     */
+    @Test
+    public void testSetMacRandomizationSettingPasspointEnabled() throws Exception {
+        final String fqdn = "FullyQualifiedDomainName";
+        mWifiManager.setMacRandomizationSettingPasspointEnabled(fqdn, true);
+        verify(mWifiService).setMacRandomizationSettingPasspointEnabled(fqdn, true);
+    }
+
 
     /**
      * Test behavior of {@link WifiManager#disconnect()}
