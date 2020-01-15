@@ -16,21 +16,84 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.content.Context;
 import android.media.tv.tuner.TunerConstants;
 import android.media.tv.tuner.TunerUtils;
+import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
 
 /**
  * Filter Settings for a Video and Audio.
+ *
  * @hide
  */
 public class AvSettings extends Settings {
-    private boolean mIsPassthrough;
+    private final boolean mIsPassthrough;
 
-    private AvSettings(int mainType, boolean isAudio) {
+    private AvSettings(int mainType, boolean isAudio, boolean isPassthrough) {
         super(TunerUtils.getFilterSubtype(
                 mainType,
                 isAudio
                         ? TunerConstants.FILTER_SUBTYPE_AUDIO
                         : TunerConstants.FILTER_SUBTYPE_VIDEO));
+        mIsPassthrough = isPassthrough;
+    }
+
+    /**
+     * Checks whether it's passthrough.
+     */
+    public boolean isPassthrough() {
+        return mIsPassthrough;
+    }
+
+    /**
+     * Creates a builder for {@link AvSettings}.
+     *
+     * @param context the context of the caller.
+     * @param mainType the filter main type.
+     * @param isAudio {@code true} if it's audio settings; {@code false} if it's video settings.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @NonNull
+    public static Builder builder(
+            @NonNull Context context, @FilterType int mainType, boolean isAudio) {
+        TunerUtils.checkTunerPermission(context);
+        return new Builder(mainType, isAudio);
+    }
+
+    /**
+     * Builder for {@link AvSettings}.
+     */
+    public static class Builder extends Settings.Builder<Builder> {
+        private final boolean mIsAudio;
+        private boolean mIsPassthrough;
+
+        private Builder(int mainType, boolean isAudio) {
+            super(mainType);
+            mIsAudio = isAudio;
+        }
+
+        /**
+         * Sets whether it's passthrough.
+         */
+        @NonNull
+        public Builder setPassthrough(boolean isPassthrough) {
+            mIsPassthrough = isPassthrough;
+            return this;
+        }
+
+        /**
+         * Builds a {@link AvSettings} object.
+         */
+        @NonNull
+        public AvSettings build() {
+            return new AvSettings(mMainType, mIsAudio, mIsPassthrough);
+        }
+
+        @Override
+        Builder self() {
+            return this;
+        }
     }
 }
