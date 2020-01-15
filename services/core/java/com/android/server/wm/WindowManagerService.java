@@ -4602,13 +4602,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     if (newFocus != null) {
                         ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "Gaining focus: %s", newFocus);
-                        newFocus.reportFocusChangedSerialized(true, mInTouchMode);
+                        newFocus.reportFocusChangedSerialized(true);
                         notifyFocusChanged();
                     }
 
                     if (lastFocus != null) {
                         ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "Losing focus: %s", lastFocus);
-                        lastFocus.reportFocusChangedSerialized(false, mInTouchMode);
+                        lastFocus.reportFocusChangedSerialized(false);
                     }
                     break;
                 }
@@ -4626,7 +4626,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     for (int i = 0; i < N; i++) {
                         ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "Losing delayed focus: %s",
                                 losers.get(i));
-                        losers.get(i).reportFocusChangedSerialized(false, mInTouchMode);
+                        losers.get(i).reportFocusChangedSerialized(false);
                     }
                     break;
                 }
