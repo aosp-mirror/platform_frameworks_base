@@ -123,10 +123,10 @@ message Atom {
         AppStartOccurred app_start_occurred = 48;
         AppStartCanceled app_start_canceled = 49;
         AppStartFullyDrawn app_start_fully_drawn = 50;
-        LmkKillOccurred lmk_kill_occurred = 51;
+        LmkKillOccurred lmk_kill_occurred = 51 [(log_from_module) = "lmkd"];
         PictureInPictureStateChanged picture_in_picture_state_changed = 52;
         WifiMulticastLockStateChanged wifi_multicast_lock_state_changed = 53;
-        LmkStateChanged lmk_state_changed = 54;
+        LmkStateChanged lmk_state_changed = 54 [(log_from_module) = "lmkd"];
         AppStartMemoryStateCaptured app_start_memory_state_captured = 55;
         ShutdownSequenceReported shutdown_sequence_reported = 56;
         BootSequenceReported boot_sequence_reported = 57;
