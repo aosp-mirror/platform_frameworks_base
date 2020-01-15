@@ -3841,21 +3841,20 @@ public class TelephonyManager {
     }
 
     /**
-     * Return if the current radio is LTE on CDMA. This is a tri-state return value as for a period
-     * of time the mode may be unknown.
+     * Return if the current radio has global mode enabled, meaning it supports
+     * both 3GPP and 3GPP2 radio technologies at the same time.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
-     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
-     * @return {@link PhoneConstants#LTE_ON_CDMA_UNKNOWN}, {@link PhoneConstants#LTE_ON_CDMA_FALSE}
-     * or {@link PhoneConstants#LTE_ON_CDMA_TRUE}
-     *
+     * @return {@code true} if global mode is enabled
+     *         {@code false} if global mode is not enabled or unknown
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    @UnsupportedAppUsage
-    public int getLteOnCdmaMode() {
-        return getLteOnCdmaMode(getSubId());
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isGlobalModeEnabled() {
+        return getLteOnCdmaMode(getSubId()) == PhoneConstants.LTE_ON_CDMA_TRUE;
     }
 
     /**
@@ -3868,7 +3867,7 @@ public class TelephonyManager {
      * or {@link PhoneConstants#LTE_ON_CDMA_TRUE}
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @UnsupportedAppUsage
     public int getLteOnCdmaMode(int subId) {
         try {
