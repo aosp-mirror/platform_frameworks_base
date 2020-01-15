@@ -72,6 +72,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.service.dreams.DreamManagerInternal;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
+import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -109,6 +110,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * The power manager service is responsible for coordinating power management
@@ -564,6 +566,9 @@ public final class PowerManagerService extends SystemService
     // Transition to Doze is in progress.  We have transitioned to WAKEFULNESS_DOZING,
     // but the DreamService has not yet been told to start (it's an async process).
     private boolean mDozeStartInProgress;
+
+    // Set of all tokens suppressing ambient display.
+    private final Set<String> mAmbientDisplaySuppressionTokens = new ArraySet<>();
 
     private final class ForegroundProfileObserver extends SynchronousUserSwitchObserver {
         @Override
@@ -3357,6 +3362,26 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    private void suppressAmbientDisplayInternal(String token, boolean suppress) {
+        if (DEBUG_SPEW) {
+            Slog.d(TAG, "Suppress ambient display for token " + token + ": " + suppress);
+        }
+
+        if (suppress) {
+            mAmbientDisplaySuppressionTokens.add(token);
+        } else {
+            mAmbientDisplaySuppressionTokens.remove(token);
+        }
+
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.SUPPRESS_DOZE,
+                Math.min(mAmbientDisplaySuppressionTokens.size(), 1));
+    }
+
+    private String createAmbientDisplayToken(String token, int callingUid) {
+        return callingUid + "_" + token;
+    }
+
     private void boostScreenBrightnessInternal(long eventTime, int uid) {
         synchronized (mLock) {
             if (!mSystemReady || mWakefulness == WAKEFULNESS_ASLEEP
@@ -5001,6 +5026,61 @@ public final class PowerManagerService extends SystemService
             final long ident = Binder.clearCallingIdentity();
             try {
                 setDozeAfterScreenOffInternal(on);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isAmbientDisplayAvailable() {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_DREAM_STATE, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return mAmbientDisplayConfiguration.ambientDisplayAvailable();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void suppressAmbientDisplay(@NonNull String token, boolean suppress) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.WRITE_DREAM_STATE, null);
+
+            final int uid = Binder.getCallingUid();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                suppressAmbientDisplayInternal(createAmbientDisplayToken(token, uid), suppress);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isAmbientDisplaySuppressedForToken(@NonNull String token) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_DREAM_STATE, null);
+
+            final int uid = Binder.getCallingUid();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return mAmbientDisplaySuppressionTokens.contains(
+                        createAmbientDisplayToken(token, uid));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isAmbientDisplaySuppressed() {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_DREAM_STATE, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return mAmbientDisplaySuppressionTokens.size() > 0;
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
