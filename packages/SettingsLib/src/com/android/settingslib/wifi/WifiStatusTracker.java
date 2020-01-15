@@ -90,7 +90,7 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
     public void setListening(boolean listening) {
         if (listening) {
             mNetworkScoreManager.registerNetworkScoreCache(NetworkKey.TYPE_WIFI,
-                    mWifiNetworkScoreCache, NetworkScoreManager.CACHE_FILTER_CURRENT_NETWORK);
+                    mWifiNetworkScoreCache, NetworkScoreManager.SCORE_FILTER_CURRENT_NETWORK);
             mWifiNetworkScoreCache.registerListener(mCacheListener);
             mConnectivityManager.registerNetworkCallback(
                     mNetworkRequest, mNetworkCallback, mHandler);
