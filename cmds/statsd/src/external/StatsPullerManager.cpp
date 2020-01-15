@@ -72,37 +72,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::ON_DEVICE_POWER_MEASUREMENT},
          {.puller = new PowerStatsPuller()}},
 
-        // cpu_time_per_freq
-        {{.atomTag = android::util::CPU_TIME_PER_FREQ},
-         {.additiveFields = {3},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_FREQ)}},
-
-        // cpu_time_per_uid
-        {{.atomTag = android::util::CPU_TIME_PER_UID},
-         {.additiveFields = {2, 3},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID)}},
-
-        // cpu_time_per_uid_freq
-        // the throttling is 3sec, handled in
-        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        {{.atomTag = android::util::CPU_TIME_PER_UID_FREQ},
-         {.additiveFields = {4},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID_FREQ)}},
-
-        // cpu_active_time
-        // the throttling is 3sec, handled in
-        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        {{.atomTag = android::util::CPU_ACTIVE_TIME},
-         {.additiveFields = {2},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_ACTIVE_TIME)}},
-
-        // cpu_cluster_time
-        // the throttling is 3sec, handled in
-        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        {{.atomTag = android::util::CPU_CLUSTER_TIME},
-         {.additiveFields = {3},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_CLUSTER_TIME)}},
-
         // wifi_activity_energy_info
         {{.atomTag = android::util::WIFI_ACTIVITY_INFO},
          {.puller = new StatsCompanionServicePuller(android::util::WIFI_ACTIVITY_INFO)}},

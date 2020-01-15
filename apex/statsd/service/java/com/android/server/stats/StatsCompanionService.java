@@ -761,80 +761,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullCpuTimePerFreq(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        for (int cluster = 0; cluster < mKernelCpuSpeedReaders.length; cluster++) {
-            long[] clusterTimeMs = mKernelCpuSpeedReaders[cluster].readAbsolute();
-            if (clusterTimeMs != null) {
-                for (int speed = clusterTimeMs.length - 1; speed >= 0; --speed) {
-                    StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
-                            wallClockNanos);
-                    e.writeInt(cluster);
-                    e.writeInt(speed);
-                    e.writeLong(clusterTimeMs[speed]);
-                    pulledData.add(e);
-                }
-            }
-        }
-    }
-
-    private void pullKernelUidCpuTime(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        mCpuUidUserSysTimeReader.readAbsolute((uid, timesUs) -> {
-            long userTimeUs = timesUs[0], systemTimeUs = timesUs[1];
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(uid);
-            e.writeLong(userTimeUs);
-            e.writeLong(systemTimeUs);
-            pulledData.add(e);
-        });
-    }
-
-    private void pullKernelUidCpuFreqTime(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        mCpuUidFreqTimeReader.readAbsolute((uid, cpuFreqTimeMs) -> {
-            for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
-                if (cpuFreqTimeMs[freqIndex] != 0) {
-                    StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
-                            wallClockNanos);
-                    e.writeInt(uid);
-                    e.writeInt(freqIndex);
-                    e.writeLong(cpuFreqTimeMs[freqIndex]);
-                    pulledData.add(e);
-                }
-            }
-        });
-    }
-
-    private void pullKernelUidCpuClusterTime(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        mCpuUidClusterTimeReader.readAbsolute((uid, cpuClusterTimesMs) -> {
-            for (int i = 0; i < cpuClusterTimesMs.length; i++) {
-                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
-                        wallClockNanos);
-                e.writeInt(uid);
-                e.writeInt(i);
-                e.writeLong(cpuClusterTimesMs[i]);
-                pulledData.add(e);
-            }
-        });
-    }
-
-    private void pullKernelUidCpuActiveTime(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        mCpuUidActiveTimeReader.readAbsolute((uid, cpuActiveTimesMs) -> {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(uid);
-            e.writeLong((long) cpuActiveTimesMs);
-            pulledData.add(e);
-        });
-    }
-
     private void pullWifiActivityInfo(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2110,31 +2036,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.KERNEL_WAKELOCK: {
                 pullKernelWakelock(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.CPU_TIME_PER_FREQ: {
-                pullCpuTimePerFreq(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.CPU_TIME_PER_UID: {
-                pullKernelUidCpuTime(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.CPU_TIME_PER_UID_FREQ: {
-                pullKernelUidCpuFreqTime(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.CPU_CLUSTER_TIME: {
-                pullKernelUidCpuClusterTime(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.CPU_ACTIVE_TIME: {
-                pullKernelUidCpuActiveTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 
