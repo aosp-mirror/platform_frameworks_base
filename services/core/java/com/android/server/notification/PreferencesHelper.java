@@ -858,12 +858,13 @@ public class PreferencesHelper implements RankingConfig {
     public NotificationChannel getNotificationChannel(String pkg, int uid, String channelId,
             boolean includeDeleted) {
         Objects.requireNonNull(pkg);
-        return getNotificationChannel(pkg, uid, channelId, null, includeDeleted);
+        return getConversationNotificationChannel(pkg, uid, channelId, null, true, includeDeleted);
     }
 
     @Override
-    public NotificationChannel getNotificationChannel(String pkg, int uid, String channelId,
-            String conversationId, boolean includeDeleted) {
+    public NotificationChannel getConversationNotificationChannel(String pkg, int uid,
+            String channelId, String conversationId, boolean returnParentIfNoConversationChannel,
+            boolean includeDeleted) {
         Preconditions.checkNotNull(pkg);
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
@@ -873,16 +874,19 @@ public class PreferencesHelper implements RankingConfig {
             if (channelId == null) {
                 channelId = NotificationChannel.DEFAULT_CHANNEL_ID;
             }
-            if (conversationId == null) {
+            NotificationChannel channel = null;
+            if (conversationId != null) {
+                // look for an automatically created conversation specific channel
+                channel = findConversationChannel(r, channelId, conversationId, includeDeleted);
+            }
+            if (channel == null && returnParentIfNoConversationChannel) {
+                // look for it just based on its id
                 final NotificationChannel nc = r.channels.get(channelId);
                 if (nc != null && (includeDeleted || !nc.isDeleted())) {
                     return nc;
                 }
-            } else {
-                // look for an automatically created conversation specific channel
-                return findConversationChannel(r, channelId, conversationId, includeDeleted);
             }
-            return null;
+            return channel;
         }
     }
 

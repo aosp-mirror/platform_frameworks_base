@@ -64,7 +64,8 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
 
         NotificationChannel updatedChannel =
                 new NotificationChannel("a", "", IMPORTANCE_HIGH);
-        when(mConfig.getNotificationChannel(any(), anyInt(), eq("a"), eq(null), eq(false)))
+        when(mConfig.getConversationNotificationChannel(
+                any(), anyInt(), eq("a"), eq(null), eq(true), eq(false)))
                 .thenReturn(updatedChannel);
 
         assertNull(extractor.process(r));

@@ -4026,6 +4026,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    public void setNotificationSnoozed(StatusBarNotification sbn, int hoursToSnooze) {
+        mNotificationListener.snoozeNotification(sbn.getKey(),
+                hoursToSnooze * 60 * 60 * 1000);
+    }
+
     @Override
     public void toggleSplitScreen() {
         toggleSplitScreenMode(-1 /* metricsDockAction */, -1 /* metricsUndockAction */);

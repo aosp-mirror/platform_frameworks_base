@@ -46,6 +46,8 @@ public interface NotificationSwipeActionHelper {
      */
     public void snooze(StatusBarNotification sbn, SnoozeOption snoozeOption);
 
+    public void snooze(StatusBarNotification sbn, int hours);
+
     public float getMinDismissVelocity();
 
     public boolean isDismissGesture(MotionEvent ev);

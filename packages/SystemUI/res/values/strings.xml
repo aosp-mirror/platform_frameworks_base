@@ -1791,6 +1791,29 @@
     <string name="notification_done">Done</string>
     <!-- Notification: inline controls: undo block button -->
     <string name="inline_undo">Undo</string>
+    <!-- Notification: Conversation: control panel, label for button that demotes notification from conversation to normal notification -->
+    <string name="demote">Mark this notification as not a conversation</string>
+
+    <!-- [CHAR LIMIT=100] Mark this conversation as a favorite -->
+    <string name="notification_conversation_favorite">Favorite</string>
+
+    <!-- [CHAR LIMIT=100] Unmark this conversation as a favorite -->
+    <string name="notification_conversation_unfavorite">Unfavorite</string>
+
+    <!-- [CHAR LIMIT=100] Mute this conversation -->
+    <string name="notification_conversation_mute">Mute</string>
+
+    <!-- [CHAR LIMIT=100] Umute this conversation -->
+    <string name="notification_conversation_unmute">Unmute</string>
+
+    <!-- [CHAR LIMIT=100] Show notification as bubble -->
+    <string name="notification_conversation_bubble">Show as bubble</string>
+
+    <!-- [CHAR LIMIT=100] Turn off bubbles for notification -->
+    <string name="notification_conversation_unbubble">Turn off bubbles</string>
+
+    <!-- [CHAR LIMIT=100] Add this conversation to home screen -->
+    <string name="notification_conversation_home_screen">Add to home screen</string>
 
     <!-- Notification: Menu row: Content description for menu items. [CHAR LIMIT=NONE] -->
     <string name="notification_menu_accessibility"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> <xliff:g id="menu_description" example="notification controls">%2$s</xliff:g></string>

@@ -31,6 +31,7 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.Preconditions;
@@ -71,7 +72,7 @@ public final class NotificationChannel implements Parcelable {
      * Conversation id to use for apps that aren't providing them yet.
      * @hide
      */
-    public static final String PLACEHOLDER_CONVERSATION_ID = "placeholder_id";
+    public static final String PLACEHOLDER_CONVERSATION_ID = ":placeholder_id";
 
     /**
      * The maximum length for text fields in a NotificationChannel. Fields will be truncated at this
@@ -826,8 +827,8 @@ public final class NotificationChannel implements Parcelable {
         setBlockableSystem(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
         setAllowBubbles(safeBool(parser, ATT_ALLOW_BUBBLE, DEFAULT_ALLOW_BUBBLE));
         setOriginalImportance(safeInt(parser, ATT_ORIG_IMP, DEFAULT_IMPORTANCE));
-        setConversationId(parser.getAttributeValue(ATT_PARENT_CHANNEL, null),
-                parser.getAttributeValue(ATT_CONVERSATION_ID, null));
+        setConversationId(parser.getAttributeValue(null, ATT_PARENT_CHANNEL),
+                parser.getAttributeValue(null, ATT_CONVERSATION_ID));
     }
 
     @Nullable
@@ -1175,7 +1176,7 @@ public final class NotificationChannel implements Parcelable {
                 + ", mImportanceLockedDefaultApp=" + mImportanceLockedDefaultApp
                 + ", mOriginalImp=" + mOriginalImportance
                 + ", mParent=" + mParentId
-                + ", mConversationId" + mConversationId;
+                + ", mConversationId=" + mConversationId;
     }
 
     /** @hide */

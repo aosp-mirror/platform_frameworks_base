@@ -855,7 +855,8 @@ public class NotificationManager {
         INotificationManager service = getService();
         try {
             return service.getConversationNotificationChannel(mContext.getOpPackageName(),
-                    mContext.getUserId(), mContext.getPackageName(), channelId, conversationId);
+                    mContext.getUserId(), mContext.getPackageName(), channelId, true,
+                    conversationId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

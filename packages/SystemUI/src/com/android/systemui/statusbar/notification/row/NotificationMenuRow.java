@@ -83,7 +83,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private OnMenuEventListener mMenuListener;
     private boolean mDismissRtl;
     private boolean mIsForeground;
-    private final boolean mIsUsingBidirectionalSwipe;
 
     private ValueAnimator mFadeAnimator;
     private boolean mAnimating;
@@ -116,19 +115,11 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private boolean mIsUserTouching;
 
     public NotificationMenuRow(Context context) {
-        //TODO: (b/131242807) not using bidirectional swipe for now
-        this(context, false);
-    }
-
-    // Only needed for testing until we want to turn bidirectional swipe back on
-    @VisibleForTesting
-    NotificationMenuRow(Context context, boolean isUsingBidirectionalSwipe) {
         mContext = context;
         mShouldShowMenu = context.getResources().getBoolean(R.bool.config_showNotificationGear);
         mHandler = new Handler(Looper.getMainLooper());
         mLeftMenuItems = new ArrayList<>();
         mRightMenuItems = new ArrayList<>();
-        mIsUsingBidirectionalSwipe = isUsingBidirectionalSwipe;
     }
 
     @Override
@@ -269,24 +260,18 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             mSnoozeItem = createSnoozeItem(mContext);
         }
         mAppOpsItem = createAppOpsItem(mContext);
-        if (mIsUsingBidirectionalSwipe) {
-            mInfoItem = createInfoItem(mContext,
-                    mParent.getEntry().getBucket() == NotificationSectionsManager.BUCKET_SILENT);
+        if (mParent.getEntry().getBucket() == NotificationSectionsManager.BUCKET_PEOPLE) {
+            mInfoItem = createConversationItem(mContext);
         } else {
             mInfoItem = createInfoItem(mContext);
         }
 
-        if (!mIsUsingBidirectionalSwipe) {
-            if (!isForeground && showSnooze) {
-                mRightMenuItems.add(mSnoozeItem);
-            }
-            mRightMenuItems.add(mInfoItem);
-            mRightMenuItems.add(mAppOpsItem);
-            mLeftMenuItems.addAll(mRightMenuItems);
-        } else {
-            ArrayList<MenuItem> menuItems = mDismissRtl ? mLeftMenuItems : mRightMenuItems;
-            menuItems.add(mInfoItem);
+        if (!isForeground && showSnooze) {
+            mRightMenuItems.add(mSnoozeItem);
         }
+        mRightMenuItems.add(mInfoItem);
+        mRightMenuItems.add(mAppOpsItem);
+        mLeftMenuItems.addAll(mRightMenuItems);
 
         populateMenuViews();
         if (resetState) {
@@ -633,12 +618,12 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
 
     @Override
     public boolean shouldShowGutsOnSnapOpen() {
-        return mIsUsingBidirectionalSwipe;
+        return false;
     }
 
     @Override
     public MenuItem menuItemToExposeOnSnap() {
-        return mIsUsingBidirectionalSwipe ? mInfoItem : null;
+        return null;
     }
 
     @Override
@@ -664,6 +649,16 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         return snooze;
     }
 
+    static NotificationMenuItem createConversationItem(Context context) {
+        Resources res = context.getResources();
+        String infoDescription = res.getString(R.string.notification_menu_gear_description);
+        NotificationConversationInfo infoContent =
+                (NotificationConversationInfo) LayoutInflater.from(context).inflate(
+                        R.layout.notification_conversation_info, null, false);
+        return new NotificationMenuItem(context, infoDescription, infoContent,
+                R.drawable.ic_settings);
+    }
+
     static NotificationMenuItem createInfoItem(Context context) {
         Resources res = context.getResources();
         String infoDescription = res.getString(R.string.notification_menu_gear_description);
@@ -671,17 +666,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
                 R.layout.notification_info, null, false);
         return new NotificationMenuItem(context, infoDescription, infoContent,
                 R.drawable.ic_settings);
-    }
-
-    static NotificationMenuItem createInfoItem(Context context, boolean isCurrentlySilent) {
-        Resources res = context.getResources();
-        String infoDescription = res.getString(R.string.notification_menu_gear_description);
-        NotificationInfo infoContent = (NotificationInfo) LayoutInflater.from(context).inflate(
-                R.layout.notification_info, null, false);
-        int iconResId = isCurrentlySilent
-                ? R.drawable.ic_notifications_silence
-                : R.drawable.ic_notifications_alert;
-        return new NotificationMenuItem(context, infoDescription, infoContent, iconResId);
     }
 
     static MenuItem createAppOpsItem(Context context) {
