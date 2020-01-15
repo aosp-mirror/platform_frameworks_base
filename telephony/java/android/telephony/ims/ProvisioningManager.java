@@ -597,19 +597,25 @@ public class ProvisioningManager {
     /**
      * Notify the framework that an RCS autoconfiguration XML file has been received for
      * provisioning.
+     * <p>
+     * Requires Permission: Manifest.permission.MODIFY_PHONE_STATE or that the calling app has
+     * carrier privileges (see {@link #hasCarrierPrivileges}).
      * @param config The XML file to be read. ASCII/UTF8 encoded text if not compressed.
      * @param isCompressed The XML file is compressed in gzip format and must be decompressed
      *         before being read.
-     * @hide
+     *
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void notifyRcsAutoConfigurationReceived(@NonNull byte[] config, boolean isCompressed) {
         if (config == null) {
             throw new IllegalArgumentException("Must include a non-null config XML file.");
         }
-        // TODO: Connect to ImsConfigImplBase.
-        throw new UnsupportedOperationException("notifyRcsAutoConfigurationReceived is not"
-                + "supported");
+        try {
+            getITelephony().notifyRcsAutoConfigurationReceived(mSubId, config, isCompressed);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+
     }
 
     private static boolean isImsAvailableOnDevice() {

@@ -17,6 +17,7 @@
 package android.telephony.ims.stub;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
@@ -200,6 +201,12 @@ public class ImsConfigImplBase {
             }
         }
 
+        @Override
+        public void notifyRcsAutoConfigurationReceived(byte[] config, boolean isCompressed)
+                throws RemoteException {
+            getImsConfigImpl().notifyRcsAutoConfigurationReceived(config, isCompressed);
+        }
+
         private void notifyImsConfigChanged(int item, int value) throws RemoteException {
             getImsConfigImpl().notifyConfigChanged(item, value);
         }
@@ -358,9 +365,9 @@ public class ImsConfigImplBase {
      * @param config The XML file to be read, if not compressed, it should be in ASCII/UTF8 format.
      * @param isCompressed The XML file is compressed in gzip format and must be decompressed
      *         before being read.
-     * @hide
+     *
      */
-    public void notifyRcsAutoConfigurationReceived(byte[] config, boolean isCompressed) {
+    public void notifyRcsAutoConfigurationReceived(@NonNull byte[] config, boolean isCompressed) {
     }
 
     /**
