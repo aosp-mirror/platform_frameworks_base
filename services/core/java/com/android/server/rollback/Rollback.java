@@ -353,7 +353,7 @@ class Rollback {
      */
     boolean enableForPackageInApex(String packageName, long installedVersion,
             int rollbackDataPolicy) {
-        // TODO(b/142712057): Extract the new version number of apk-in-apex
+        // TODO(b/147666157): Extract the new version number of apk-in-apex
         // The new version for the apk-in-apex is set to 0 for now. If the package is then further
         // updated via non-staged install flow, then RollbackManagerServiceImpl#onPackageReplaced()
         // will be called and this rollback will be deleted. Other ways of package update have not

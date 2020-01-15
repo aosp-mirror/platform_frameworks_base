@@ -226,6 +226,34 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runPhase("testRollbackApexWithApk_Phase3");
     }
 
+    /**
+     * Tests that RollbackPackageHealthObserver is observing apk-in-apex.
+     */
+    @Test
+    public void testRollbackApexWithApkCrashing() throws Exception {
+        getDevice().uninstallPackage("com.android.cts.install.lib.testapp.A");
+        CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
+        final String fileName = APK_IN_APEX_TESTAPEX_NAME + "_v1.apex";
+        final File apex = buildHelper.getTestFile(fileName);
+        if (!getDevice().isAdbRoot()) {
+            getDevice().enableAdbRoot();
+        }
+        getDevice().remountSystemWritable();
+        assertTrue(getDevice().pushFile(apex, "/system/apex/" + fileName));
+        getDevice().reboot();
+
+        // Install an apex with apk that crashes
+        runPhase("testRollbackApexWithApkCrashing_Phase1");
+        getDevice().reboot();
+        // Verify apex was installed and then crash the apk
+        runPhase("testRollbackApexWithApkCrashing_Phase2");
+        // Wait for crash to trigger rollback
+        assertTrue(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(5)));
+        getDevice().waitForDeviceAvailable();
+        // Verify rollback occurred due to crash of apk-in-apex
+        runPhase("testRollbackApexWithApkCrashing_Phase3");
+    }
+
     private void crashProcess(String processName, int numberOfCrashes) throws Exception {
         String pid = "";
         String lastPid = "invalid";
