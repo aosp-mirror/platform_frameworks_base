@@ -319,6 +319,16 @@ public class ExternalStorageProvider extends FileSystemProvider {
                 return false;
             }
 
+            // Allow all directories on USB, including the root.
+            try {
+                RootInfo rootInfo = getRootFromDocId(docId);
+                if ((rootInfo.flags & Root.FLAG_REMOVABLE_USB) == Root.FLAG_REMOVABLE_USB) {
+                    return false;
+                }
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "Failed to determine rootInfo for docId");
+            }
+
             final String path = getPathFromDocId(docId);
 
             // Block the root of the storage
