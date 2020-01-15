@@ -741,8 +741,7 @@ public class Tethering {
                 .setContentIntent(pi);
         mLastNotificationId = id;
 
-        notificationManager.notify(null, mLastNotificationId,
-                mTetheredNotificationBuilder.buildInto(new Notification()));
+        notificationManager.notify(null, mLastNotificationId, mTetheredNotificationBuilder.build());
     }
 
     @VisibleForTesting
