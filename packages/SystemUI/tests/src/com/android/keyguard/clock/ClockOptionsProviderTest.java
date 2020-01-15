@@ -117,12 +117,12 @@ public final class ClockOptionsProviderTest extends SysuiTestCase {
     public void testQuery_listOptions() {
         mClocks.add(ClockInfo.builder()
                 .setName("name_a")
-                .setTitle("title_a")
+                .setTitle(() -> "title_a")
                 .setId("id_a")
                 .build());
         mClocks.add(ClockInfo.builder()
                 .setName("name_b")
-                .setTitle("title_b")
+                .setTitle(() -> "title_b")
                 .setId("id_b")
                 .build());
         Cursor cursor = mProvider.query(mListOptionsUri, null, null, null);
