@@ -18,39 +18,36 @@ package com.android.internal.app;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.internal.widget.ViewPager;
 
 /**
- * A {@link ViewPager} which wraps around its first child's height.
+ * A {@link ViewPager} which wraps around its first child's height and has swiping disabled.
  * <p>Normally {@link ViewPager} instances expand their height to cover all remaining space in
  * the layout.
- * <p>This class is used for the intent resolver picker's tabbed view to maintain
- * consistency with the previous behavior.
+ * <p>This class is used for the intent resolver and share sheet's tabbed view.
  */
-public class WrapHeightViewPager extends ViewPager {
+public class ResolverViewPager extends ViewPager {
 
-    public WrapHeightViewPager(Context context) {
+    public ResolverViewPager(Context context) {
         super(context);
     }
 
-    public WrapHeightViewPager(Context context, AttributeSet attrs) {
+    public ResolverViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public WrapHeightViewPager(Context context, AttributeSet attrs, int defStyleAttr) {
+    public ResolverViewPager(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
-    public WrapHeightViewPager(Context context, AttributeSet attrs,
+    public ResolverViewPager(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    // TODO(arangelov): When we have multiple pages, the height should wrap to the currently
-    // displayed page. Investigate whether onMeasure is called when changing a page, and instead
-    // of getChildAt(0), use the currently displayed one.
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -67,5 +64,15 @@ public class WrapHeightViewPager extends ViewPager {
         }
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        return false;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return false;
     }
 }

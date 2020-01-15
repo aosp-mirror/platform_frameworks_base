@@ -16,6 +16,7 @@
 
 package com.android.internal.app;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -81,7 +82,8 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     }
 
     @Override
-    ResolverListAdapter getAdapterForIndex(int pageIndex) {
+    @VisibleForTesting
+    public ResolverListAdapter getAdapterForIndex(int pageIndex) {
         return mItems[pageIndex].resolverListAdapter;
     }
 
@@ -106,8 +108,17 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     }
 
     @Override
-    ListView getCurrentAdapterView() {
+    ListView getActiveAdapterView() {
         return getListViewForIndex(getCurrentPage());
+    }
+
+    @Override
+    @Nullable
+    ViewGroup getInactiveAdapterView() {
+        if (getCount() == 1) {
+            return null;
+        }
+        return getListViewForIndex(1 - getCurrentPage());
     }
 
     class ResolverProfileDescriptor extends ProfileDescriptor {
