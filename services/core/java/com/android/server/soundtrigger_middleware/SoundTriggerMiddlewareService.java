@@ -113,9 +113,9 @@ import java.util.Set;
 public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareService.Stub {
     static private final String TAG = "SoundTriggerMiddlewareService";
 
-    final ISoundTriggerMiddlewareService mDelegate;
-    final Context mContext;
-    Set<Integer> mModuleHandles;
+    private final ISoundTriggerMiddlewareService mDelegate;
+    private final Context mContext;
+    private Set<Integer> mModuleHandles;
 
     /**
      * Constructor for internal use only. Could be exposed for testing purposes in the future.
@@ -280,7 +280,7 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
         }
 
         /** Activity state. */
-        public Activity activityState = Activity.LOADED;
+        Activity activityState = Activity.LOADED;
 
         /**
          * A map of known parameter support. A missing key means we don't know yet whether the
@@ -294,7 +294,7 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
          *
          * @param modelParam The parameter key.
          */
-        public void checkSupported(int modelParam) {
+        void checkSupported(int modelParam) {
             if (!parameterSupport.containsKey(modelParam)) {
                 throw new IllegalStateException("Parameter has not been checked for support.");
             }
@@ -311,7 +311,7 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
          * @param modelParam The parameter key.
          * @param value      The value.
          */
-        public void checkSupported(int modelParam, int value) {
+        void checkSupported(int modelParam, int value) {
             if (!parameterSupport.containsKey(modelParam)) {
                 throw new IllegalStateException("Parameter has not been checked for support.");
             }
@@ -329,7 +329,7 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
          * @param modelParam The parameter key.
          * @param range      The parameter value range, or null if not supported.
          */
-        public void updateParameterSupport(int modelParam, @Nullable ModelParameterRange range) {
+        void updateParameterSupport(int modelParam, @Nullable ModelParameterRange range) {
             parameterSupport.put(modelParam, range);
         }
     }
@@ -338,27 +338,26 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
      * Entry-point to this module: exposes the module as a {@link SystemService}.
      */
     public static final class Lifecycle extends SystemService {
-        private SoundTriggerMiddlewareService mService;
-
         public Lifecycle(Context context) {
             super(context);
         }
 
         @Override
         public void onStart() {
-            ISoundTriggerHw[] services;
-            try {
-                services = new ISoundTriggerHw[]{ISoundTriggerHw.getService(true)};
-                Log.d(TAG, "Connected to default ISoundTriggerHw");
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to connect to default ISoundTriggerHw", e);
-                services = new ISoundTriggerHw[0];
-            }
+            HalFactory[] factories = new HalFactory[]{() -> {
+                try {
+                    Log.d(TAG, "Connecting to default ISoundTriggerHw");
+                    return ISoundTriggerHw.getService(true);
+                } catch (RemoteException e) {
+                    throw e.rethrowAsRuntimeException();
+                }
+            }};
 
-            mService = new SoundTriggerMiddlewareService(
-                    new SoundTriggerMiddlewareImpl(services, new AudioSessionProviderImpl()),
-                    getContext());
-            publishBinderService(Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE, mService);
+            publishBinderService(Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE,
+                    new SoundTriggerMiddlewareService(
+                            new SoundTriggerMiddlewareImpl(factories,
+                                    new AudioSessionProviderImpl()),
+                            getContext()));
         }
     }
 
@@ -370,7 +369,7 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
             DeathRecipient {
         private final ISoundTriggerCallback mCallback;
         private ISoundTriggerModule mDelegate;
-        private Map<Integer, ModelState> mLoadedModels = new HashMap<>();
+        private @NonNull Map<Integer, ModelState> mLoadedModels = new HashMap<>();
 
         ModuleService(@NonNull ISoundTriggerCallback callback) {
             mCallback = callback;
@@ -680,7 +679,7 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
                 } catch (RemoteException e) {
                     // Dead client will be handled by binderDied() - no need to handle here.
                     // In any case, client callbacks are considered best effort.
-                    Log.e(TAG, "Client callback execption.", e);
+                    Log.e(TAG, "Client callback exception.", e);
                 }
             }
         }
@@ -696,20 +695,33 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
                 } catch (RemoteException e) {
                     // Dead client will be handled by binderDied() - no need to handle here.
                     // In any case, client callbacks are considered best effort.
-                    Log.e(TAG, "Client callback execption.", e);
+                    Log.e(TAG, "Client callback exception.", e);
                 }
             }
         }
 
         @Override
-        public void onRecognitionAvailabilityChange(boolean available) throws RemoteException {
+        public void onRecognitionAvailabilityChange(boolean available) {
             synchronized (this) {
                 try {
                     mCallback.onRecognitionAvailabilityChange(available);
                 } catch (RemoteException e) {
                     // Dead client will be handled by binderDied() - no need to handle here.
                     // In any case, client callbacks are considered best effort.
-                    Log.e(TAG, "Client callback execption.", e);
+                    Log.e(TAG, "Client callback exception.", e);
+                }
+            }
+        }
+
+        @Override
+        public void onModuleDied() {
+            synchronized (this) {
+                try {
+                    mCallback.onModuleDied();
+                } catch (RemoteException e) {
+                    // Dead client will be handled by binderDied() - no need to handle here.
+                    // In any case, client callbacks are considered best effort.
+                    Log.e(TAG, "Client callback exception.", e);
                 }
             }
         }
