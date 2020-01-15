@@ -1534,7 +1534,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mAppPredictionServicePackage;
     final @Nullable String mIncidentReportApproverPackage;
     final @Nullable String[] mTelephonyPackages;
-    final @NonNull String mServicesSystemSharedLibraryPackageName;
+    final @NonNull String mServicesExtensionPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
@@ -3303,9 +3303,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 } else {
                     mIntentFilterVerifier = null;
                 }
-                mServicesSystemSharedLibraryPackageName = getRequiredSharedLibraryLPr(
-                        PackageManager.SYSTEM_SHARED_LIBRARY_SERVICES,
-                        SharedLibraryInfo.VERSION_UNDEFINED);
+                mServicesExtensionPackageName = getRequiredServicesExtensionPackageLPr();
                 mSharedSystemSharedLibraryPackageName = getRequiredSharedLibraryLPr(
                         PackageManager.SYSTEM_SHARED_LIBRARY_SHARED,
                         SharedLibraryInfo.VERSION_UNDEFINED);
@@ -3315,7 +3313,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mRequiredUninstallerPackage = null;
                 mIntentFilterVerifierComponent = null;
                 mIntentFilterVerifier = null;
-                mServicesSystemSharedLibraryPackageName = null;
+                mServicesExtensionPackageName = null;
                 mSharedSystemSharedLibraryPackageName = null;
             }
             // PermissionController hosts default permission granting and role management, so it's a
@@ -3743,6 +3741,19 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             return packageName;
         }
+    }
+
+    @NonNull
+    private String getRequiredServicesExtensionPackageLPr() {
+        String servicesExtensionPackage =
+                ensureSystemPackageName(
+                        mContext.getString(R.string.config_servicesExtensionPackage));
+        if (TextUtils.isEmpty(servicesExtensionPackage)) {
+            throw new RuntimeException(
+                    "Required services extension package is missing, check "
+                            + "config_servicesExtensionPackage.");
+        }
+        return servicesExtensionPackage;
     }
 
     private @NonNull String getRequiredInstallerLPr() {
@@ -5467,7 +5478,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public @NonNull String getServicesSystemSharedLibraryPackageName() {
         // allow instant applications
         synchronized (mLock) {
-            return mServicesSystemSharedLibraryPackageName;
+            return mServicesExtensionPackageName;
         }
     }
 

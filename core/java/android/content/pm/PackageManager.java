@@ -3379,6 +3379,10 @@ public abstract class PackageManager {
      * etc. This library is versioned and backwards compatible. Clients
      * should check its version via {@link android.ext.services.Version
      * #getVersionCode()} and avoid calling APIs added in later versions.
+     * <p>
+     * This shared library no longer exists since Android R.
+     *
+     * @see #getServicesSystemSharedLibraryPackageName()
      *
      * @hide
      */
@@ -4733,6 +4737,9 @@ public abstract class PackageManager {
 
     /**
      * Get the name of the package hosting the services shared library.
+     * <p>
+     * Note that this package is no longer a shared library since Android R. It is now a package
+     * that hosts for a bunch of updatable services that the system binds to.
      *
      * @return The library host package.
      *
