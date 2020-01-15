@@ -168,6 +168,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.MissingResourceException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -2311,11 +2312,30 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerTimeZoneDataInfo() {
-        // No op.
+        int tagId = StatsLog.TIME_ZONE_DATA_INFO;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullTimeZoneDataInfo(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullTimeZoneDataInfo() {
-        // No op.
+    private int pullTimeZoneDataInfo(int atomTag, List<StatsEvent> pulledData) {
+        String tzDbVersion = "Unknown";
+        try {
+            tzDbVersion = android.icu.util.TimeZone.getTZDataVersion();
+        } catch (MissingResourceException e) {
+            Slog.e(TAG, "Getting tzdb version failed: ", e);
+            return StatsManager.PULL_SKIP;
+        }
+
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeString(tzDbVersion)
+                .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerExternalStorageInfo() {

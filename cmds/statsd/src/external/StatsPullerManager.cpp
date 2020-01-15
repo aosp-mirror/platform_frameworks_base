@@ -113,10 +113,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // TrainInfo.
         {{.atomTag = android::util::TRAIN_INFO}, {.puller = new TrainInfoPuller()}},
 
-        // TimeZoneDataInfo.
-        {{.atomTag = android::util::TIME_ZONE_DATA_INFO},
-         {.puller = new StatsCompanionServicePuller(android::util::TIME_ZONE_DATA_INFO)}},
-
         // ExternalStorageInfo
         {{.atomTag = android::util::EXTERNAL_STORAGE_INFO},
          {.puller = new StatsCompanionServicePuller(android::util::EXTERNAL_STORAGE_INFO)}},
