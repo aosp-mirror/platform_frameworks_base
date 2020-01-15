@@ -9102,11 +9102,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void enforceAcrossUsersPermissions() {
-        if (isCallerWithSystemUid() || mInjector.binderGetCallingUid() == Process.ROOT_UID) {
+        final int callingUid = mInjector.binderGetCallingUid();
+        final int callingPid = mInjector.binderGetCallingPid();
+        final String packageName = mContext.getPackageName();
+
+        if (isCallerWithSystemUid() || callingUid == Process.ROOT_UID) {
             return;
         }
-        if (mContext.checkCallingPermission(permission.INTERACT_ACROSS_PROFILES)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (PermissionChecker.checkPermissionForPreflight(
+                mContext, permission.INTERACT_ACROSS_PROFILES, callingPid, callingUid,
+                packageName) == PermissionChecker.PERMISSION_GRANTED) {
             return;
         }
         if (mContext.checkCallingPermission(permission.INTERACT_ACROSS_USERS)
