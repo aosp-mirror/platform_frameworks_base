@@ -1,11 +1,11 @@
-/**
- * Copyright (c) 2016, The Android Open Source Project
+/*
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package android.view;
-
-import android.graphics.Rect;
+package com.android.systemui.shared.recents;
 
 /**
- * An interface to the PinnedStackController to update it of state changes, and to query
- * information based on the current state.
- *
- * @hide
+ * Listener interface that Launcher attaches to SystemUI to get
+ * pinned stack animation callbacks.
  */
-interface IPinnedStackController {
+oneway interface IPinnedStackAnimationListener {
     /**
-     * @return what WM considers to be the current device rotation.
+     * Notifies the pinned stack animation is started.
      */
-    int getDisplayRotation();
+    void onPinnedStackAnimationStarted();
 }
