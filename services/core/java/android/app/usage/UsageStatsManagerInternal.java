@@ -23,8 +23,6 @@ import android.content.res.Configuration;
 import android.os.UserHandle;
 import android.os.UserManager;
 
-import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
-
 import java.util.List;
 import java.util.Set;
 
@@ -196,6 +194,12 @@ public abstract class UsageStatsManagerInternal {
      */
     public abstract List<UsageStats> queryUsageStatsForUser(@UserIdInt int userId, int interval,
             long beginTime, long endTime, boolean obfuscateInstantApps);
+
+    /**
+     * Returns the events for the user in the given time period.
+     */
+    public abstract UsageEvents queryEventsForUser(@UserIdInt int userId, long beginTime,
+            long endTime, boolean shouldObfuscateInstantApps);
 
     /**
      * Used to persist the last time a job was run for this app, in order to make decisions later

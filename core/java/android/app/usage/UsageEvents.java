@@ -451,21 +451,7 @@ public final class UsageEvents implements Parcelable {
 
         /** @hide */
         public Event(Event orig) {
-            mPackage = orig.mPackage;
-            mClass = orig.mClass;
-            mInstanceId = orig.mInstanceId;
-            mTaskRootPackage = orig.mTaskRootPackage;
-            mTaskRootClass = orig.mTaskRootClass;
-            mTimeStamp = orig.mTimeStamp;
-            mEventType = orig.mEventType;
-            mConfiguration = orig.mConfiguration;
-            mShortcutId = orig.mShortcutId;
-            mAction = orig.mAction;
-            mContentType = orig.mContentType;
-            mContentAnnotations = orig.mContentAnnotations;
-            mFlags = orig.mFlags;
-            mBucketAndReason = orig.mBucketAndReason;
-            mNotificationChannelId = orig.mNotificationChannelId;
+            copyFrom(orig);
         }
 
         /**
@@ -622,6 +608,24 @@ public final class UsageEvents implements Parcelable {
             // which instant apps can't use anyway, so there's no need to hide them.
             return ret;
         }
+
+        private void copyFrom(Event orig) {
+            mPackage = orig.mPackage;
+            mClass = orig.mClass;
+            mInstanceId = orig.mInstanceId;
+            mTaskRootPackage = orig.mTaskRootPackage;
+            mTaskRootClass = orig.mTaskRootClass;
+            mTimeStamp = orig.mTimeStamp;
+            mEventType = orig.mEventType;
+            mConfiguration = orig.mConfiguration;
+            mShortcutId = orig.mShortcutId;
+            mAction = orig.mAction;
+            mContentType = orig.mContentType;
+            mContentAnnotations = orig.mContentAnnotations;
+            mFlags = orig.mFlags;
+            mBucketAndReason = orig.mBucketAndReason;
+            mNotificationChannelId = orig.mNotificationChannelId;
+        }
     }
 
     // Only used when creating the resulting events. Not used for reading/unparceling.
@@ -725,10 +729,14 @@ public final class UsageEvents implements Parcelable {
             return false;
         }
 
-        readEventFromParcel(mParcel, eventOut);
+        if (mParcel != null) {
+            readEventFromParcel(mParcel, eventOut);
+        } else {
+            eventOut.copyFrom(mEventsToWrite.get(mIndex));
+        }
 
         mIndex++;
-        if (mIndex >= mEventCount) {
+        if (mIndex >= mEventCount && mParcel != null) {
             mParcel.recycle();
             mParcel = null;
         }
