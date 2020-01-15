@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "AppCompactor"
+#define LOG_TAG "CachedAppOptimizer"
 //#define LOG_NDEBUG 0
 
 #include <dirent.h>
@@ -42,7 +42,7 @@ namespace android {
 // or potentially some mainline modules. The only process that should definitely
 // not be compacted is system_server, since compacting system_server around the
 // time of BOOT_COMPLETE could result in perceptible issues.
-static void com_android_server_am_AppCompactor_compactSystem(JNIEnv *, jobject) {
+static void com_android_server_am_CachedAppOptimizer_compactSystem(JNIEnv *, jobject) {
     std::unique_ptr<DIR, decltype(&closedir)> proc(opendir("/proc"), closedir);
     struct dirent* current;
     while ((current = readdir(proc.get()))) {
@@ -76,12 +76,12 @@ static void com_android_server_am_AppCompactor_compactSystem(JNIEnv *, jobject) 
 
 static const JNINativeMethod sMethods[] = {
     /* name, signature, funcPtr */
-    {"compactSystem", "()V", (void*)com_android_server_am_AppCompactor_compactSystem},
+    {"compactSystem", "()V", (void*)com_android_server_am_CachedAppOptimizer_compactSystem},
 };
 
-int register_android_server_am_AppCompactor(JNIEnv* env)
+int register_android_server_am_CachedAppOptimizer(JNIEnv* env)
 {
-    return jniRegisterNativeMethods(env, "com/android/server/am/AppCompactor",
+    return jniRegisterNativeMethods(env, "com/android/server/am/CachedAppOptimizer",
                                     sMethods, NELEM(sMethods));
 }
 

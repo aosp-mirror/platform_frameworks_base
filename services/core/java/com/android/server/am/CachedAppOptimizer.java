@@ -51,7 +51,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-public final class AppCompactor {
+public final class CachedAppOptimizer {
 
     // Flags stored in the DeviceConfig API.
     @VisibleForTesting static final String KEY_USE_COMPACTION = "use_compaction";
@@ -122,7 +122,7 @@ public final class AppCompactor {
      * that will wipe out the cpuset assignment for system_server threads.
      * Accordingly, this is in the AMS constructor.
      */
-    final ServiceThread mCompactionThread;
+    final ServiceThread mCachedAppOptimizerThread;
 
     private final ArrayList<ProcessRecord> mPendingCompactionProcesses =
             new ArrayList<ProcessRecord>();
@@ -214,15 +214,15 @@ public final class AppCompactor {
     private int mPersistentCompactionCount;
     private int mBfgsCompactionCount;
 
-    public AppCompactor(ActivityManagerService am) {
+    public CachedAppOptimizer(ActivityManagerService am) {
         mAm = am;
-        mCompactionThread = new ServiceThread("CompactionThread",
+        mCachedAppOptimizerThread = new ServiceThread("CachedAppOptimizerThread",
                 THREAD_PRIORITY_FOREGROUND, true);
         mProcStateThrottle = new HashSet<>();
     }
 
     @VisibleForTesting
-    AppCompactor(ActivityManagerService am, PropertyChangedCallbackForTest callback) {
+    CachedAppOptimizer(ActivityManagerService am, PropertyChangedCallbackForTest callback) {
         this(am);
         mTestCallback = callback;
     }
@@ -243,7 +243,7 @@ public final class AppCompactor {
             updateFullDeltaRssThrottle();
             updateProcStateThrottle();
         }
-        Process.setThreadGroupAndCpuset(mCompactionThread.getThreadId(),
+        Process.setThreadGroupAndCpuset(mCachedAppOptimizerThread.getThreadId(),
                 Process.THREAD_GROUP_SYSTEM);
     }
 
@@ -258,7 +258,7 @@ public final class AppCompactor {
 
     @GuardedBy("mAm")
     void dump(PrintWriter pw) {
-        pw.println("AppCompactor settings");
+        pw.println("CachedAppOptimizer settings");
         synchronized (mPhenotypeFlagLock) {
             pw.println("  " + KEY_USE_COMPACTION + "=" + mUseCompaction);
             pw.println("  " + KEY_COMPACT_ACTION_1 + "=" + mCompactActionSome);
@@ -300,7 +300,7 @@ public final class AppCompactor {
         app.reqCompactAction = COMPACT_PROCESS_SOME;
         mPendingCompactionProcesses.add(app);
         mCompactionHandler.sendMessage(
-            mCompactionHandler.obtainMessage(
+                mCompactionHandler.obtainMessage(
                 COMPACT_PROCESS_MSG, app.setAdj, app.setProcState));
     }
 
@@ -309,7 +309,7 @@ public final class AppCompactor {
         app.reqCompactAction = COMPACT_PROCESS_FULL;
         mPendingCompactionProcesses.add(app);
         mCompactionHandler.sendMessage(
-            mCompactionHandler.obtainMessage(
+                mCompactionHandler.obtainMessage(
                 COMPACT_PROCESS_MSG, app.setAdj, app.setProcState));
 
     }
@@ -362,8 +362,8 @@ public final class AppCompactor {
     private void updateUseCompaction() {
         mUseCompaction = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_USE_COMPACTION, DEFAULT_USE_COMPACTION);
-        if (mUseCompaction && !mCompactionThread.isAlive()) {
-            mCompactionThread.start();
+        if (mUseCompaction && !mCachedAppOptimizerThread.isAlive()) {
+            mCachedAppOptimizerThread.start();
             mCompactionHandler = new MemCompactionHandler();
         }
     }
@@ -521,7 +521,7 @@ public final class AppCompactor {
 
     private final class MemCompactionHandler extends Handler {
         private MemCompactionHandler() {
-            super(mCompactionThread.getLooper());
+            super(mCachedAppOptimizerThread.getLooper());
         }
 
         @Override
