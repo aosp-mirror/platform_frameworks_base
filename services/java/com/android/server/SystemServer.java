@@ -213,6 +213,8 @@ public final class SystemServer {
             "com.android.server.print.PrintManagerService";
     private static final String COMPANION_DEVICE_MANAGER_SERVICE_CLASS =
             "com.android.server.companion.CompanionDeviceManagerService";
+    private static final String STATS_COMPANION_APEX_PATH =
+            "/apex/com.android.os.statsd/javalib/service-statsd.jar";
     private static final String STATS_COMPANION_LIFECYCLE_CLASS =
             "com.android.server.stats.StatsCompanion$Lifecycle";
     private static final String STATS_PULL_ATOM_SERVICE_CLASS =
@@ -1980,7 +1982,8 @@ public final class SystemServer {
 
         // Statsd helper
         t.traceBegin("StartStatsCompanion");
-        mSystemServiceManager.startService(STATS_COMPANION_LIFECYCLE_CLASS);
+        mSystemServiceManager.startServiceFromJar(
+                STATS_COMPANION_LIFECYCLE_CLASS, STATS_COMPANION_APEX_PATH);
         t.traceEnd();
 
         // Statsd pulled atoms
