@@ -24,6 +24,7 @@ import static android.net.TetheringManager.TETHER_ERROR_UNSUPPORTED;
 import static android.net.dhcp.IDhcpServer.STATUS_UNKNOWN_ERROR;
 
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.net.IIntResultListener;
@@ -375,6 +376,11 @@ public class TetheringService extends Service {
                         return null;
                     }
                     return INetworkStackConnector.Stub.asInterface(connector);
+                }
+
+                @Override
+                public BluetoothAdapter getBluetoothAdapter() {
+                    return BluetoothAdapter.getDefaultAdapter();
                 }
             };
         }

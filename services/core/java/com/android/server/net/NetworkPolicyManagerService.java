@@ -2877,17 +2877,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
-    public void onTetheringChanged(String iface, boolean tethering) {
-        // No need to enforce permission because setRestrictBackground() will do it.
-        synchronized (mUidRulesFirstLock) {
-            if (mRestrictBackground && tethering) {
-                Log.d(TAG, "Tethering on (" + iface +"); disable Data Saver");
-                setRestrictBackground(false);
-            }
-        }
-    }
-
-    @Override
     public void setRestrictBackground(boolean restrictBackground) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "setRestrictBackground");
         try {
