@@ -4389,6 +4389,18 @@ public abstract class PackageManager {
     public abstract boolean shouldShowRequestPermissionRationale(@NonNull String permName);
 
     /**
+     * Gets the string that is displayed on the button which corresponds to granting background
+     * location in settings. The intended use for this is to help apps instruct users how to
+     * grant a background permission by providing the string that users will see.
+     *
+     * @return the string shown on the button for granting background location
+     */
+    @NonNull
+    public CharSequence getBackgroundPermissionButtonLabel() {
+        return "";
+    }
+
+    /**
      * Returns an {@link android.content.Intent} suitable for passing to
      * {@link android.app.Activity#startActivityForResult(android.content.Intent, int)}
      * which prompts the user to grant permissions to this application.

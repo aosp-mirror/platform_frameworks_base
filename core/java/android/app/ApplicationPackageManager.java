@@ -133,6 +133,10 @@ public class ApplicationPackageManager extends PackageManager {
     // Default flags to use with PackageManager when no flags are given.
     private final static int sDefaultFlags = PackageManager.GET_SHARED_LIBRARY_FILES;
 
+    // Name of the resource which provides background permission button string
+    public static final String APP_PERMISSION_BUTTON_ALLOW_ALWAYS =
+            "app_permission_button_allow_always";
+
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
@@ -804,6 +808,26 @@ public class ApplicationPackageManager extends PackageManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @Override
+    public CharSequence getBackgroundPermissionButtonLabel() {
+        try {
+
+            String permissionController = getPermissionControllerPackageName();
+            Context context =
+                    mContext.createPackageContext(permissionController, 0);
+
+            int textId = context.getResources().getIdentifier(APP_PERMISSION_BUTTON_ALLOW_ALWAYS,
+                    "string", "com.android.permissioncontroller");
+//                    permissionController); STOPSHIP b/147434671
+            if (textId != 0) {
+                return context.getText(textId);
+            }
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Permission controller not found.", e);
+        }
+        return "";
     }
 
     @Override
