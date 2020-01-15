@@ -2218,11 +2218,61 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerRoleHolder() {
-        // No op.
+        int tagId = StatsLog.ROLE_HOLDER;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullRoleHolder(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullRoleHolder() {
-        // No op.
+    // Add a RoleHolder atom for each package that holds a role.
+    private int pullRoleHolder(int atomTag, List<StatsEvent> pulledData) {
+        long callingToken = Binder.clearCallingIdentity();
+        try {
+            PackageManager pm = mContext.getPackageManager();
+            RoleManagerInternal rmi = LocalServices.getService(RoleManagerInternal.class);
+
+            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+
+            int numUsers = users.size();
+            for (int userNum = 0; userNum < numUsers; userNum++) {
+                int userId = users.get(userNum).getUserHandle().getIdentifier();
+
+                ArrayMap<String, ArraySet<String>> roles = rmi.getRolesAndHolders(userId);
+
+                int numRoles = roles.size();
+                for (int roleNum = 0; roleNum < numRoles; roleNum++) {
+                    String roleName = roles.keyAt(roleNum);
+                    ArraySet<String> holders = roles.valueAt(roleNum);
+
+                    int numHolders = holders.size();
+                    for (int holderNum = 0; holderNum < numHolders; holderNum++) {
+                        String holderName = holders.valueAt(holderNum);
+
+                        PackageInfo pkg;
+                        try {
+                            pkg = pm.getPackageInfoAsUser(holderName, 0, userId);
+                        } catch (PackageManager.NameNotFoundException e) {
+                            Slog.w(TAG, "Role holder " + holderName + " not found");
+                            return StatsManager.PULL_SKIP;
+                        }
+
+                        StatsEvent e = StatsEvent.newBuilder()
+                                .setAtomId(atomTag)
+                                .writeInt(pkg.applicationInfo.uid)
+                                .writeString(holderName)
+                                .writeString(roleName)
+                                .build();
+                        pulledData.add(e);
+                    }
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerDangerousPermissionState() {

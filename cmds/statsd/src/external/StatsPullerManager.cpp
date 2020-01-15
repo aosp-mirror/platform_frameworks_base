@@ -106,10 +106,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
          {.additiveFields = {1, 2, 3, 4},
           .puller = new StatsCompanionServicePuller(android::util::DEBUG_FAILING_ELAPSED_CLOCK)}},
 
-        // RoleHolder.
-        {{.atomTag = android::util::ROLE_HOLDER},
-         {.puller = new StatsCompanionServicePuller(android::util::ROLE_HOLDER)}},
-
         // TrainInfo.
         {{.atomTag = android::util::TRAIN_INFO}, {.puller = new TrainInfoPuller()}},
 

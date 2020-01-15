@@ -856,60 +856,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    /**
-     * Add a RoleHolder atom for each package that holds a role.
-     *
-     * @param elapsedNanos the time since boot
-     * @param wallClockNanos the time on the clock
-     * @param pulledData the data sink to write to
-     */
-    private void pullRoleHolders(long elapsedNanos, final long wallClockNanos,
-            @NonNull List<StatsLogEventWrapper> pulledData) {
-        long callingToken = Binder.clearCallingIdentity();
-        try {
-            PackageManager pm = mContext.getPackageManager();
-            RoleManagerInternal rmi = LocalServices.getService(RoleManagerInternal.class);
-
-            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
-
-            int numUsers = users.size();
-            for (int userNum = 0; userNum < numUsers; userNum++) {
-                int userId = users.get(userNum).getUserHandle().getIdentifier();
-
-                ArrayMap<String, ArraySet<String>> roles = rmi.getRolesAndHolders(
-                        userId);
-
-                int numRoles = roles.size();
-                for (int roleNum = 0; roleNum < numRoles; roleNum++) {
-                    String roleName = roles.keyAt(roleNum);
-                    ArraySet<String> holders = roles.valueAt(roleNum);
-
-                    int numHolders = holders.size();
-                    for (int holderNum = 0; holderNum < numHolders; holderNum++) {
-                        String holderName = holders.valueAt(holderNum);
-
-                        PackageInfo pkg;
-                        try {
-                            pkg = pm.getPackageInfoAsUser(holderName, 0, userId);
-                        } catch (PackageManager.NameNotFoundException e) {
-                            Log.w(TAG, "Role holder " + holderName + " not found");
-                            return;
-                        }
-
-                        StatsLogEventWrapper e = new StatsLogEventWrapper(StatsLog.ROLE_HOLDER,
-                                elapsedNanos, wallClockNanos);
-                        e.writeInt(pkg.applicationInfo.uid);
-                        e.writeString(holderName);
-                        e.writeString(roleName);
-                        pulledData.add(e);
-                    }
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(callingToken);
-        }
-    }
-
     private void pullExternalStorageInfo(int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         StorageManager storageManager = mContext.getSystemService(StorageManager.class);
@@ -1052,11 +998,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.DEBUG_FAILING_ELAPSED_CLOCK: {
                 pullDebugFailingElapsedClock(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.ROLE_HOLDER: {
-                pullRoleHolders(elapsedNanos, wallClockNanos, ret);
                 break;
             }
 
