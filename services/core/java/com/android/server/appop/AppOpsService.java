@@ -16,7 +16,9 @@
 
 package com.android.server.appop;
 
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 import static android.app.AppOpsManager.FILTER_BY_FEATURE_ID;
 import static android.app.AppOpsManager.FILTER_BY_OP_NAMES;
 import static android.app.AppOpsManager.FILTER_BY_PACKAGE_NAME;
@@ -467,6 +469,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                         case AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION:
                             return ((capability & PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0)
                                 ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED;
+                        case OP_CAMERA:
+                            return ((capability & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0)
+                                    ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED;
+                        case OP_RECORD_AUDIO:
+                            return ((capability & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0)
+                                    ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED;
                         default:
                             return AppOpsManager.MODE_ALLOWED;
                     }

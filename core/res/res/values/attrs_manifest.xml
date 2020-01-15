@@ -1520,6 +1520,22 @@
         <!-- Managing a media projection session, e.g, for screen recording or taking
              screenshots.-->
         <flag name="mediaProjection" value="0x20" />
+        <!-- Use the camera device or record video.
+
+            <p>For apps with <code>targetSdkVersion</code> {@link android.os.Build.VERSION_CODES#R}
+            and above, a foreground service will not be able to access the camera if this type is
+            not specified in the manifest and in
+            {@link android.app.Service#startForeground(int, android.app.Notification, int)}.
+            -->
+        <flag name="camera" value="0x40" />
+        <!--Use the microphone device or record audio.
+
+            <p>For apps with <code>targetSdkVersion</code> {@link android.os.Build.VERSION_CODES#R}
+            and above, a foreground service will not be able to access the microphone if this type
+            is not specified in the manifest and in
+            {@link android.app.Service#startForeground(int, android.app.Notification, int)}.
+            -->
+        <flag name="microphone" value="0x80" />
     </attr>
 
 

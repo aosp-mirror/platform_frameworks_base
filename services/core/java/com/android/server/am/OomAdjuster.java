@@ -17,7 +17,9 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
@@ -33,6 +35,9 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
 import static android.os.Process.SCHED_OTHER;
 import static android.os.Process.THREAD_GROUP_BACKGROUND;
 import static android.os.Process.THREAD_GROUP_DEFAULT;
@@ -1220,10 +1225,6 @@ public final class OomAdjuster {
             }
         }
 
-        if (app.hasLocationForegroundServices()) {
-            capability |= PROCESS_CAPABILITY_FOREGROUND_LOCATION;
-        }
-
         if (adj > ProcessList.PERCEPTIBLE_APP_ADJ
                 || procState > PROCESS_STATE_FOREGROUND_SERVICE) {
             if (app.hasForegroundServices()) {
@@ -1387,6 +1388,7 @@ public final class OomAdjuster {
             }
         }
 
+        int capabilityFromFGS = 0; // capability from foreground service.
         for (int is = app.services.size() - 1;
                 is >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
                         || schedGroup == ProcessList.SCHED_GROUP_BACKGROUND
@@ -1432,6 +1434,24 @@ public final class OomAdjuster {
                     if (adj > ProcessList.SERVICE_ADJ) {
                         app.adjType = "cch-started-services";
                     }
+                }
+            }
+
+            if (s.isForeground) {
+                final int fgsType = s.foregroundServiceType;
+                capabilityFromFGS |=
+                        (fgsType & FOREGROUND_SERVICE_TYPE_LOCATION)
+                                != 0 ? PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
+                if (s.appInfo.targetSdkVersion < Build.VERSION_CODES.R) {
+                    capabilityFromFGS |= PROCESS_CAPABILITY_FOREGROUND_CAMERA
+                            | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+                } else {
+                    capabilityFromFGS |=
+                            (fgsType & FOREGROUND_SERVICE_TYPE_CAMERA)
+                                    != 0 ? PROCESS_CAPABILITY_FOREGROUND_CAMERA : 0;
+                    capabilityFromFGS |=
+                            (fgsType & FOREGROUND_SERVICE_TYPE_MICROPHONE)
+                                    != 0 ? PROCESS_CAPABILITY_FOREGROUND_MICROPHONE : 0;
                 }
             }
 
@@ -1895,6 +1915,10 @@ public final class OomAdjuster {
             }
         }
 
+        // apply capability from FGS.
+        if (app.hasForegroundServices()) {
+            capability |= capabilityFromFGS;
+        }
         // TOP process has all capabilities.
         if (procState <= PROCESS_STATE_TOP) {
             capability = PROCESS_CAPABILITY_ALL;
