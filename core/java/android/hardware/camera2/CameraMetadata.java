@@ -851,14 +851,20 @@ public abstract class CameraMetadata<TKey> {
      * <p>The camera device is a logical camera backed by two or more physical cameras.</p>
      * <p>In API level 28, the physical cameras must also be exposed to the application via
      * {@link android.hardware.camera2.CameraManager#getCameraIdList }.</p>
-     * <p>Starting from API level 29, some or all physical cameras may not be independently
-     * exposed to the application, in which case the physical camera IDs will not be
-     * available in {@link android.hardware.camera2.CameraManager#getCameraIdList }. But the
+     * <p>Starting from API level 29:</p>
+     * <ul>
+     * <li>Some or all physical cameras may not be independently exposed to the application,
+     * in which case the physical camera IDs will not be available in
+     * {@link android.hardware.camera2.CameraManager#getCameraIdList }. But the
      * application can still query the physical cameras' characteristics by calling
-     * {@link android.hardware.camera2.CameraManager#getCameraCharacteristics }. Additionally,
-     * if a physical camera is hidden from camera ID list, the mandatory stream combinations
-     * for that physical camera must be supported through the logical camera using physical
-     * streams.</p>
+     * {@link android.hardware.camera2.CameraManager#getCameraCharacteristics }.</li>
+     * <li>If a physical camera is hidden from camera ID list, the mandatory stream
+     * combinations for that physical camera must be supported through the logical camera
+     * using physical streams. One exception is that in API level 30, a physical camera
+     * may become unavailable via
+     * {@link CameraManager.AvailabilityCallback#onPhysicalCameraUnavailable }
+     * callback.</li>
+     * </ul>
      * <p>Combinations of logical and physical streams, or physical streams from different
      * physical cameras are not guaranteed. However, if the camera device supports
      * {@link CameraDevice#isSessionConfigurationSupported },

@@ -718,6 +718,52 @@ public final class CameraManager {
         public void onCameraAccessPrioritiesChanged() {
             // default empty implementation
         }
+
+        /**
+         * A physical camera has become available for use again.
+         *
+         * <p>By default, all of the physical cameras of a logical multi-camera are
+         * available, so {@link #onPhysicalCameraAvailable} is not called for any of the physical
+         * cameras of a logical multi-camera, when {@link #onCameraAvailable} for the logical
+         * multi-camera is invoked. However, if some specific physical cameras are unavailable
+         * to begin with, {@link #onPhysicalCameraUnavailable} may be invoked after
+         * {@link #onCameraAvailable}.</p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param cameraId The unique identifier of the logical multi-camera.
+         * @param physicalCameraId The unique identifier of the physical camera.
+         *
+         * @see #onCameraAvailable
+         * @see #onPhysicalCameraUnavailable
+         */
+        public void onPhysicalCameraAvailable(@NonNull String cameraId,
+                @NonNull String physicalCameraId) {
+            // default empty implementation
+        }
+
+        /**
+         * A previously-available physical camera has become unavailable for use.
+         *
+         * <p>By default, all of the physical cameras of a logical multi-camera are
+         * available, so {@link #onPhysicalCameraAvailable} is not called for any of the physical
+         * cameras of a logical multi-camera, when {@link #onCameraAvailable} for the logical
+         * multi-camera is invoked. If some specific physical cameras are unavailable
+         * to begin with, {@link #onPhysicalCameraUnavailable} may be invoked after
+         * {@link #onCameraAvailable}.</p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param cameraId The unique identifier of the logical multi-camera.
+         * @param physicalCameraId The unique identifier of the physical camera.
+         *
+         * @see #onCameraAvailable
+         * @see #onPhysicalCameraAvailable
+         */
+        public void onPhysicalCameraUnavailable(@NonNull String cameraId,
+                @NonNull String physicalCameraId) {
+            // default empty implementation
+        }
     }
 
     /**
@@ -914,6 +960,9 @@ public final class CameraManager {
         private final ScheduledExecutorService mScheduler = Executors.newScheduledThreadPool(1);
         // Camera ID -> Status map
         private final ArrayMap<String, Integer> mDeviceStatus = new ArrayMap<String, Integer>();
+        // Camera ID -> (physical camera ID -> Status map)
+        private final ArrayMap<String, ArrayList<String>> mUnavailablePhysicalDevices =
+                new ArrayMap<String, ArrayList<String>>();
 
         // Registered availablility callbacks and their executors
         private final ArrayMap<AvailabilityCallback, Executor> mCallbackMap =
@@ -1003,6 +1052,14 @@ public final class CameraManager {
                 CameraStatus[] cameraStatuses = cameraService.addListener(this);
                 for (CameraStatus c : cameraStatuses) {
                     onStatusChangedLocked(c.status, c.cameraId);
+
+                    if (c.unavailablePhysicalCameras != null) {
+                        for (String unavailPhysicalCamera : c.unavailablePhysicalCameras) {
+                            onPhysicalCameraStatusChangedLocked(
+                                    ICameraServiceListener.STATUS_NOT_PRESENT,
+                                    c.cameraId, unavailPhysicalCamera);
+                        }
+                    }
                 }
                 mCameraService = cameraService;
             } catch(ServiceSpecificException e) {
@@ -1084,6 +1141,10 @@ public final class CameraManager {
             ICameraServiceListener.Stub testListener = new ICameraServiceListener.Stub() {
                 @Override
                 public void onStatusChanged(int status, String id) throws RemoteException {
+                }
+                @Override
+                public void onPhysicalCameraStatusChanged(int status,
+                        String id, String physicalId) throws RemoteException {
                 }
                 @Override
                 public void onTorchStatusChanged(int status, String id) throws RemoteException {
@@ -1236,7 +1297,7 @@ public final class CameraManager {
         }
 
         private void postSingleUpdate(final AvailabilityCallback callback, final Executor executor,
-                final String id, final int status) {
+                final String id, final String physicalId, final int status) {
             if (isAvailable(status)) {
                 final long ident = Binder.clearCallingIdentity();
                 try {
@@ -1244,7 +1305,11 @@ public final class CameraManager {
                         new Runnable() {
                             @Override
                             public void run() {
-                                callback.onCameraAvailable(id);
+                                if (physicalId == null) {
+                                    callback.onCameraAvailable(id);
+                                } else {
+                                    callback.onPhysicalCameraAvailable(id, physicalId);
+                                }
                             }
                         });
                 } finally {
@@ -1257,7 +1322,11 @@ public final class CameraManager {
                         new Runnable() {
                             @Override
                             public void run() {
-                                callback.onCameraUnavailable(id);
+                                if (physicalId == null) {
+                                    callback.onCameraUnavailable(id);
+                                } else {
+                                    callback.onPhysicalCameraUnavailable(id, physicalId);
+                                }
                             }
                         });
                 } finally {
@@ -1304,7 +1373,16 @@ public final class CameraManager {
             for (int i = 0; i < mDeviceStatus.size(); i++) {
                 String id = mDeviceStatus.keyAt(i);
                 Integer status = mDeviceStatus.valueAt(i);
-                postSingleUpdate(callback, executor, id, status);
+                postSingleUpdate(callback, executor, id, null /*physicalId*/, status);
+
+                // Send the NOT_PRESENT state for unavailable physical cameras
+                if (isAvailable(status) && mUnavailablePhysicalDevices.containsKey(id)) {
+                    ArrayList<String> unavailableIds = mUnavailablePhysicalDevices.get(id);
+                    for (String unavailableId : unavailableIds) {
+                        postSingleUpdate(callback, executor, id, unavailableId,
+                                ICameraServiceListener.STATUS_NOT_PRESENT);
+                    }
+                }
             }
         }
 
@@ -1323,8 +1401,12 @@ public final class CameraManager {
             Integer oldStatus;
             if (status == ICameraServiceListener.STATUS_NOT_PRESENT) {
                 oldStatus = mDeviceStatus.remove(id);
+                mUnavailablePhysicalDevices.remove(id);
             } else {
                 oldStatus = mDeviceStatus.put(id, status);
+                if (oldStatus == null) {
+                    mUnavailablePhysicalDevices.put(id, new ArrayList<String>());
+                }
             }
 
             if (oldStatus != null && oldStatus == status) {
@@ -1366,9 +1448,61 @@ public final class CameraManager {
                 Executor executor = mCallbackMap.valueAt(i);
                 final AvailabilityCallback callback = mCallbackMap.keyAt(i);
 
-                postSingleUpdate(callback, executor, id, status);
+                postSingleUpdate(callback, executor, id, null /*physicalId*/, status);
             }
         } // onStatusChangedLocked
+
+        private void onPhysicalCameraStatusChangedLocked(int status,
+                String id, String physicalId) {
+            if (DEBUG) {
+                Log.v(TAG,
+                        String.format("Camera id %s physical camera id %s has status "
+                        + "changed to 0x%x", id, physicalId, status));
+            }
+
+            if (!validStatus(status)) {
+                Log.e(TAG, String.format(
+                        "Ignoring invalid device %s physical device %s status 0x%x", id,
+                        physicalId, status));
+                return;
+            }
+
+            //TODO: Do we need to treat this as error?
+            if (!mDeviceStatus.containsKey(id) || !isAvailable(mDeviceStatus.get(id))
+                    || !mUnavailablePhysicalDevices.containsKey(id)) {
+                Log.e(TAG, String.format("Camera %s is not available. Ignore physical camera "
+                        + "status change", id));
+                return;
+            }
+
+            ArrayList<String> unavailablePhysicalDevices = mUnavailablePhysicalDevices.get(id);
+            if (!isAvailable(status)
+                    && !unavailablePhysicalDevices.contains(physicalId)) {
+                unavailablePhysicalDevices.add(physicalId);
+            } else if (isAvailable(status)
+                    && unavailablePhysicalDevices.contains(physicalId)) {
+                unavailablePhysicalDevices.remove(physicalId);
+            } else {
+                if (DEBUG) {
+                    Log.v(TAG,
+                            String.format(
+                                "Physical camera device status was previously available (%b), "
+                                + " and is now again available (%b)"
+                                + "so no new client visible update will be sent",
+                                !unavailablePhysicalDevices.contains(physicalId),
+                                isAvailable(status)));
+                }
+                return;
+            }
+
+            final int callbackCount = mCallbackMap.size();
+            for (int i = 0; i < callbackCount; i++) {
+                Executor executor = mCallbackMap.valueAt(i);
+                final AvailabilityCallback callback = mCallbackMap.keyAt(i);
+
+                postSingleUpdate(callback, executor, id, physicalId, status);
+            }
+        } // onPhysicalCameraStatusChangedLocked
 
         private void updateTorchCallbackLocked(TorchCallback callback, Executor executor) {
             for (int i = 0; i < mTorchStatus.size(); i++) {
@@ -1474,6 +1608,14 @@ public final class CameraManager {
         public void onStatusChanged(int status, String cameraId) throws RemoteException {
             synchronized(mLock) {
                 onStatusChangedLocked(status, cameraId);
+            }
+        }
+
+        @Override
+        public void onPhysicalCameraStatusChanged(int status, String cameraId,
+                String physicalCameraId) throws RemoteException {
+            synchronized (mLock) {
+                onPhysicalCameraStatusChangedLocked(status, cameraId, physicalCameraId);
             }
         }
 
