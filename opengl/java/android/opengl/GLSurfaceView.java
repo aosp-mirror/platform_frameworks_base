@@ -16,7 +16,7 @@
 
 package android.opengl;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Trace;
 import android.util.AttributeSet;

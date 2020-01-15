@@ -16,7 +16,7 @@
 
 package android.mtp;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.storage.StorageVolume;
 import android.provider.MediaStore;
 
