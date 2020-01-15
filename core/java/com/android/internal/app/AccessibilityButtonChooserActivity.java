@@ -325,11 +325,11 @@ public class AccessibilityButtonChooserActivity extends Activity {
         return false;
     }
 
-    private void disableWhiteListingService(String componentId) {
+    private void setWhiteListingServiceEnabled(String componentId, int settingsValue) {
         for (int i = 0; i < WHITE_LISTING_FEATURES.length; i++) {
             if (WHITE_LISTING_FEATURES[i][COMPONENT_ID].equals(componentId)) {
                 Settings.Secure.putInt(getContentResolver(),
-                        WHITE_LISTING_FEATURES[i][SETTINGS_KEY], /* settingsValueOn */ 1);
+                        WHITE_LISTING_FEATURES[i][SETTINGS_KEY], settingsValue);
                 return;
             }
         }
@@ -339,7 +339,8 @@ public class AccessibilityButtonChooserActivity extends Activity {
         final String componentId = componentName.flattenToString();
 
         if (isWhiteListingService(componentId)) {
-            disableWhiteListingService(componentName.flattenToString());
+            setWhiteListingServiceEnabled(componentName.flattenToString(),
+                    /* settingsValueOff */ 0);
         } else {
             setAccessibilityServiceState(this, componentName, /* enabled= */ false);
         }
@@ -545,11 +546,63 @@ public class AccessibilityButtonChooserActivity extends Activity {
     }
 
     private void onTargetSelected(AdapterView<?> parent, View view, int position, long id) {
-        Settings.Secure.putString(getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
-                mTargets.get(position).getId());
-        // TODO(b/146969684): notify accessibility button clicked.
+        final AccessibilityButtonTarget target = mTargets.get(position);
+        switch (target.getFragmentType()) {
+            case AccessibilityServiceFragmentType.LEGACY:
+                onLegacyTargetSelected(target);
+                break;
+            case AccessibilityServiceFragmentType.INVISIBLE:
+                onInvisibleTargetSelected(target);
+                break;
+            case AccessibilityServiceFragmentType.INTUITIVE:
+                onIntuitiveTargetSelected(target);
+                break;
+            case AccessibilityServiceFragmentType.BOUNCE:
+                // Do nothing
+                break;
+            default:
+                throw new IllegalStateException("Unexpected fragment type");
+        }
+
         mAlertDialog.dismiss();
+    }
+
+    private void onLegacyTargetSelected(AccessibilityButtonTarget target) {
+        if (mShortcutType == ACCESSIBILITY_BUTTON) {
+            final AccessibilityManager ams = (AccessibilityManager) getSystemService(
+                    Context.ACCESSIBILITY_SERVICE);
+            ams.notifyAccessibilityButtonClicked(getDisplayId(), target.getId());
+        } else if (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
+            switchServiceState(target);
+        } else {
+            throw new IllegalArgumentException("Unsupported shortcut type:" + mShortcutType);
+        }
+    }
+
+    private void onInvisibleTargetSelected(AccessibilityButtonTarget target) {
+        final AccessibilityManager ams = (AccessibilityManager) getSystemService(
+                Context.ACCESSIBILITY_SERVICE);
+        ams.notifyAccessibilityButtonClicked(getDisplayId(), target.getId());
+    }
+
+    private void onIntuitiveTargetSelected(AccessibilityButtonTarget target) {
+        switchServiceState(target);
+    }
+
+    private void switchServiceState(AccessibilityButtonTarget target) {
+        final ComponentName componentName =
+                ComponentName.unflattenFromString(target.getId());
+        final String componentId = componentName.flattenToString();
+
+        if (isWhiteListingService(componentId)) {
+            setWhiteListingServiceEnabled(componentId,
+                    isWhiteListingServiceEnabled(this, target)
+                            ? /* settingsValueOff */ 0
+                            : /* settingsValueOn */ 1);
+        } else {
+            setAccessibilityServiceState(this, componentName,
+                    /* enabled= */!isAccessibilityServiceEnabled(this, target));
+        }
     }
 
     private void onTargetDeleted(AdapterView<?> parent, View view, int position, long id) {
