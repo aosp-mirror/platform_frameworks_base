@@ -20,6 +20,7 @@ import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -825,6 +826,31 @@ public final class AccessibilityInteractionClient
             }
             mInstanceLock.notifyAll();
         }
+    }
+
+    /**
+     * Takes the screenshot of the specified display and returns it by bitmap format.
+     *
+     * @param connectionId The id of a connection for interacting with the system.
+     * @param displayId The logic display id, use {@link Display#DEFAULT_DISPLAY} for
+     *                  default display.
+     * @return The screenshot bitmap on success, null otherwise.
+     */
+    public Bitmap takeScreenshot(int connectionId, int displayId) {
+        Bitmap screenShot = null;
+        try {
+            IAccessibilityServiceConnection connection = getConnection(connectionId);
+            if (connection != null) {
+                screenShot = connection.takeScreenshot(displayId);
+            } else {
+                if (DEBUG) {
+                    Log.w(LOG_TAG, "No connection for connection id: " + connectionId);
+                }
+            }
+        } catch (RemoteException re) {
+            Log.w(LOG_TAG, "Error while calling remote takeScreenshot", re);
+        }
+        return screenShot;
     }
 
     /**

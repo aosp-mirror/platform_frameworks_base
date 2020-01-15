@@ -36,8 +36,12 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Bitmap;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -54,6 +58,7 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowInfo;
 import android.view.accessibility.AccessibilityCache;
@@ -90,6 +95,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     private static final String LOG_TAG = "AbstractAccessibilityServiceConnection";
     private static final int WAIT_WINDOWS_TIMEOUT_MILLIS = 5000;
 
+    protected static final String TAKE_SCREENSHOT = "takeScreenshot";
     protected final Context mContext;
     protected final SystemSupport mSystemSupport;
     protected final WindowManagerInternal mWindowManagerService;
@@ -932,6 +938,54 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     @Override
     public void setSoftKeyboardCallbackEnabled(boolean enabled) {
         mInvocationHandler.setSoftKeyboardCallbackEnabled(enabled);
+    }
+
+    @Nullable
+    @Override
+    public Bitmap takeScreenshot(int displayId) {
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return null;
+            }
+
+            if (!mSecurityPolicy.canTakeScreenshotLocked(this)) {
+                return null;
+            }
+        }
+
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            return null;
+        }
+
+        final Display display = DisplayManagerGlobal.getInstance()
+                .getRealDisplay(displayId);
+        if (display == null) {
+            return null;
+        }
+        final Point displaySize = new Point();
+        display.getRealSize(displaySize);
+
+        final int rotation = display.getRotation();
+        Bitmap screenShot = null;
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final Rect crop = new Rect(0, 0, displaySize.x, displaySize.y);
+            // TODO (b/145893483): calling new API with the display as a parameter
+            // when surface control supported.
+            screenShot = SurfaceControl.screenshot(crop, displaySize.x, displaySize.y,
+                    rotation);
+            if (screenShot != null) {
+                // Optimization for telling the bitmap that all of the pixels are known to be
+                // opaque (false). This is meant as a drawing hint, as in some cases a bitmap
+                // that is known to be opaque can take a faster drawing case than one that may
+                // have non-opaque per-pixel alpha values.
+                screenShot.setHasAlpha(false);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return screenShot;
     }
 
     @Override

@@ -346,6 +346,14 @@ public class AccessibilitySecurityPolicyTest {
     }
 
     @Test
+    public void canTakeScreenshot_hasCapability_returnTrue() {
+        when(mMockA11yServiceConnection.getCapabilities())
+                .thenReturn(AccessibilityServiceInfo.CAPABILITY_CAN_TAKE_SCREENSHOT);
+
+        assertTrue(mA11ySecurityPolicy.canTakeScreenshotLocked(mMockA11yServiceConnection));
+    }
+
+    @Test
     public void resolveProfileParent_userIdIsCurrentUser_returnCurrentUser() {
         final int currentUserId = 10;
         final int userId = currentUserId;

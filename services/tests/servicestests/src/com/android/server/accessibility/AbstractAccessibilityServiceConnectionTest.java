@@ -75,6 +75,7 @@ import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.view.Display;
@@ -693,6 +694,18 @@ public class AbstractAccessibilityServiceConnectionTest {
         assertThat(result, is(false));
     }
 
+    @Test
+    public void takeScreenshot_returnNull() {
+        // no canTakeScreenshot, should return null.
+        when(mMockSecurityPolicy.canTakeScreenshotLocked(mServiceConnection)).thenReturn(false);
+        assertThat(mServiceConnection.takeScreenshot(Display.DEFAULT_DISPLAY), is(nullValue()));
+
+        // no checkAccessibilityAccess, should return null.
+        when(mMockSecurityPolicy.canTakeScreenshotLocked(mServiceConnection)).thenReturn(true);
+        when(mMockSecurityPolicy.checkAccessibilityAccess(mServiceConnection)).thenReturn(false);
+        assertThat(mServiceConnection.takeScreenshot(Display.DEFAULT_DISPLAY), is(nullValue()));
+    }
+
     private void updateServiceInfo(AccessibilityServiceInfo serviceInfo, int eventType,
             int feedbackType, int flags, String[] packageNames, int notificationTimeout) {
         serviceInfo.eventTypes = eventType;
@@ -832,5 +845,8 @@ public class AbstractAccessibilityServiceConnectionTest {
 
         @Override
         public void onFingerprintGesture(int gesture) {}
+
+        @Override
+        public void takeScreenshotWithCallback(int displayId, RemoteCallback callback) {}
     }
 }

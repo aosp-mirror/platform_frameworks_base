@@ -39,7 +39,6 @@ interface IUiAutomationConnection {
     boolean injectInputEvent(in InputEvent event, boolean sync);
     void syncInputTransactions();
     boolean setRotation(int rotation);
-    Bitmap takeScreenshot(in Rect crop, int rotation);
     boolean clearWindowContentFrameStats(int windowId);
     WindowContentFrameStats getWindowContentFrameStats(int windowId);
     void clearWindowAnimationFrameStats();

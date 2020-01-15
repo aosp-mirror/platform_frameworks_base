@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest;
@@ -25,16 +27,20 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Bitmap;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.view.Display;
 
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -418,5 +424,16 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 }
             }
         }
+    }
+
+    @Override
+    public void takeScreenshotWithCallback(int displayId, RemoteCallback callback) {
+        mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
+            final Bitmap screenshot = super.takeScreenshot(displayId);
+            // Send back the result.
+            final Bundle payload = new Bundle();
+            payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT, screenshot);
+            callback.sendResult(payload);
+        }, null).recycleOnUse());
     }
 }
