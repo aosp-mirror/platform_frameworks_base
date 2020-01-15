@@ -66,12 +66,12 @@ interface IAccessibilityManager {
     // Used by UiAutomation
     IBinder getWindowToken(int windowId, int userId);
 
-    void notifyAccessibilityButtonClicked(int displayId);
+    void notifyAccessibilityButtonClicked(int displayId, String targetName);
 
     void notifyAccessibilityButtonVisibilityChanged(boolean available);
 
     // Requires Manifest.permission.MANAGE_ACCESSIBILITY
-    void performAccessibilityShortcut();
+    void performAccessibilityShortcut(String targetName);
 
     // Requires Manifest.permission.MANAGE_ACCESSIBILITY
     List<String> getAccessibilityShortcutTargets(int shortcutType);

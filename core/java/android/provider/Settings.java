@@ -6420,6 +6420,15 @@ public final class Settings {
                 "accessibility_button_target_component";
 
         /**
+         * The system class name of magnification controller which is a target to be toggled via
+         * accessibility shortcut or accessibility button.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER =
+                "com.android.server.accessibility.MagnificationController";
+
+        /**
          * If touch exploration is enabled.
          */
         public static final String TOUCH_EXPLORATION_ENABLED = "touch_exploration_enabled";

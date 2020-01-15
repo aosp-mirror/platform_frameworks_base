@@ -313,48 +313,16 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
     }
 
-    // TODO(a11y shortcut): Refactoring the logic here, after the new Settings shortcut Ui merged.
     public boolean isAccessibilityButtonAvailableLocked(AccessibilityUserState userState) {
         // If the service does not request the accessibility button, it isn't available
         if (!mRequestAccessibilityButton) {
             return false;
         }
-
         // If the accessibility button isn't currently shown, it cannot be available to services
         if (!mSystemSupport.isAccessibilityButtonShown()) {
             return false;
         }
-
-        // If magnification is on and assigned to the accessibility button, services cannot be
-        if (userState.isNavBarMagnificationEnabledLocked()
-                && userState.isNavBarMagnificationAssignedToAccessibilityButtonLocked()) {
-            return false;
-        }
-
-        int requestingServices = 0;
-        for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
-            final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
-            if (service.mRequestAccessibilityButton) {
-                requestingServices++;
-            }
-        }
-
-        if (requestingServices == 1) {
-            // If only a single service is requesting, it must be this service, and the
-            // accessibility button is available to it
-            return true;
-        } else {
-            // With more than one active service, we derive the target from the user's settings
-            if (userState.getServiceAssignedToAccessibilityButtonLocked() == null) {
-                // If the user has not made an assignment, we treat the button as available to
-                // all services until the user interacts with the button to make an assignment
-                return true;
-            } else {
-                // If an assignment was made, it defines availability
-                return mComponentName.equals(
-                        userState.getServiceAssignedToAccessibilityButtonLocked());
-            }
-        }
+        return true;
     }
 
     @Override

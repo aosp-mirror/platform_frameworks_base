@@ -157,7 +157,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private int mNavigationIconHints = 0;
     private @TransitionMode int mNavigationBarMode;
     private AccessibilityManager mAccessibilityManager;
-    private MagnificationContentObserver mMagnificationObserver;
     private ContentResolver mContentResolver;
     private boolean mAssistantAvailable;
 
@@ -303,11 +302,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mWindowManager = getContext().getSystemService(WindowManager.class);
         mAccessibilityManager = getContext().getSystemService(AccessibilityManager.class);
         mContentResolver = getContext().getContentResolver();
-        mMagnificationObserver = new MagnificationContentObserver(
-                getContext().getMainThreadHandler());
-        mContentResolver.registerContentObserver(Settings.Secure.getUriFor(
-                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED), false,
-                mMagnificationObserver, UserHandle.USER_ALL);
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSISTANT),
                 false /* notifyForDescendants */, mAssistContentObserver, UserHandle.USER_ALL);
@@ -329,7 +323,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         super.onDestroy();
         mNavigationModeController.removeListener(this);
         mAccessibilityManagerWrapper.removeCallback(mAccessibilityListener);
-        mContentResolver.unregisterContentObserver(mMagnificationObserver);
         mContentResolver.unregisterContentObserver(mAssistContentObserver);
     }
 
@@ -969,28 +962,18 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
      * @param outFeedbackEnabled if non-null, sets it to true if accessibility feedback is enabled.
      */
     public int getA11yButtonState(@Nullable boolean[] outFeedbackEnabled) {
-        int requestingServices = 0;
-        try {
-            if (Settings.Secure.getIntForUser(mContentResolver,
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
-                    UserHandle.USER_CURRENT) == 1) {
-                requestingServices++;
-            }
-        } catch (Settings.SettingNotFoundException e) {
-        }
-
         boolean feedbackEnabled = false;
         // AccessibilityManagerService resolves services for the current user since the local
         // AccessibilityManager is created from a Context with the INTERACT_ACROSS_USERS permission
         final List<AccessibilityServiceInfo> services =
                 mAccessibilityManager.getEnabledAccessibilityServiceList(
                         AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+        final List<String> a11yButtonTargets =
+                mAccessibilityManager.getAccessibilityShortcutTargets(
+                        AccessibilityManager.ACCESSIBILITY_BUTTON);
+        final int requestingServices = a11yButtonTargets.size();
         for (int i = services.size() - 1; i >= 0; --i) {
             AccessibilityServiceInfo info = services.get(i);
-            if ((info.flags & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0) {
-                requestingServices++;
-            }
-
             if (info.feedbackType != 0 && info.feedbackType !=
                     AccessibilityServiceInfo.FEEDBACK_GENERIC) {
                 feedbackEnabled = true;
@@ -1113,18 +1096,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
     private final AccessibilityServicesStateChangeListener mAccessibilityListener =
             this::updateAccessibilityServicesState;
-
-    private class MagnificationContentObserver extends ContentObserver {
-
-        public MagnificationContentObserver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            NavigationBarFragment.this.updateAccessibilityServicesState(mAccessibilityManager);
-        }
-    }
 
     private final Consumer<Integer> mRotationWatcher = rotation -> {
         if (mNavigationBarView != null

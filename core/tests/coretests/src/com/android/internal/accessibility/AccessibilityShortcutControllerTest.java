@@ -348,7 +348,7 @@ public class AccessibilityShortcutControllerTest {
         verify(mAlertDialog).show();
         verify(mAccessibilityManagerService, atLeastOnce()).getInstalledAccessibilityServiceList(
                 anyInt());
-        verify(mAccessibilityManagerService, times(0)).performAccessibilityShortcut();
+        verify(mAccessibilityManagerService, times(0)).performAccessibilityShortcut(null);
         verify(mFrameworkObjectProvider, times(0)).getTextToSpeech(any(), any());
     }
 
@@ -365,7 +365,7 @@ public class AccessibilityShortcutControllerTest {
         assertEquals(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
                 mLayoutParams.privateFlags
                         & WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS);
-        verify(mAccessibilityManagerService, times(1)).performAccessibilityShortcut();
+        verify(mAccessibilityManagerService, times(1)).performAccessibilityShortcut(null);
     }
 
     @Test
@@ -433,7 +433,7 @@ public class AccessibilityShortcutControllerTest {
 
         verifyZeroInteractions(mAlertDialogBuilder, mAlertDialog);
         verify(mToast).show();
-        verify(mAccessibilityManagerService).performAccessibilityShortcut();
+        verify(mAccessibilityManagerService).performAccessibilityShortcut(null);
     }
 
     @Test
@@ -459,7 +459,7 @@ public class AccessibilityShortcutControllerTest {
         when(mServiceInfo.loadSummary(any())).thenReturn(null);
         Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 1);
         getController().performAccessibilityShortcut();
-        verify(mAccessibilityManagerService).performAccessibilityShortcut();
+        verify(mAccessibilityManagerService).performAccessibilityShortcut(null);
     }
 
     @Test
@@ -471,7 +471,7 @@ public class AccessibilityShortcutControllerTest {
         getController().performAccessibilityShortcut();
 
         verifyZeroInteractions(mToast);
-        verify(mAccessibilityManagerService).performAccessibilityShortcut();
+        verify(mAccessibilityManagerService).performAccessibilityShortcut(null);
     }
 
     @Test
@@ -485,7 +485,7 @@ public class AccessibilityShortcutControllerTest {
         getController().performAccessibilityShortcut();
 
         verifyZeroInteractions(mToast);
-        verify(mAccessibilityManagerService).performAccessibilityShortcut();
+        verify(mAccessibilityManagerService).performAccessibilityShortcut(null);
     }
 
     @Test
