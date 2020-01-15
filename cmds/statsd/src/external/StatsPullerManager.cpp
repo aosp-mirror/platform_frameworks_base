@@ -60,10 +60,6 @@ const int64_t NO_ALARM_UPDATE = INT64_MAX;
 
 std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
 
-        // kernel_wakelock
-        {{.atomTag = android::util::KERNEL_WAKELOCK},
-         {.puller = new StatsCompanionServicePuller(android::util::KERNEL_WAKELOCK)}},
-
         // subsystem_sleep_state
         {{.atomTag = android::util::SUBSYSTEM_SLEEP_STATE},
          {.puller = new SubsystemSleepStatePuller()}},
