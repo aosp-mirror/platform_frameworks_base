@@ -408,7 +408,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         CountDownLatch latch = new CountDownLatch(1);
         getHandler().post(() -> {
-            updateRollbackLifetimeDurationInMillis();
             synchronized (mLock) {
                 mRollbacks.clear();
                 mRollbacks.addAll(mRollbackStore.loadRollbacks());
