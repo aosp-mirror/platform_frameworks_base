@@ -21,12 +21,10 @@ import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.app.backup.RestoreSet;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Pair;
 import android.util.Slog;
@@ -40,7 +38,6 @@ import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.PerformAdbBackupTask;
-import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
 import com.android.server.backup.keyvalue.BackupRequest;
 import com.android.server.backup.keyvalue.KeyValueBackupTask;
 import com.android.server.backup.params.AdbBackupParams;
@@ -73,10 +70,7 @@ public class BackupHandler extends Handler {
     public static final int MSG_RESTORE_SESSION_TIMEOUT = 8;
     public static final int MSG_FULL_CONFIRMATION_TIMEOUT = 9;
     public static final int MSG_RUN_ADB_RESTORE = 10;
-    public static final int MSG_RETRY_INIT = 11;
     public static final int MSG_RETRY_CLEAR = 12;
-    public static final int MSG_WIDGET_BROADCAST = 13;
-    public static final int MSG_RUN_FULL_TRANSPORT_BACKUP = 14;
     public static final int MSG_REQUEST_BACKUP = 15;
     public static final int MSG_SCHEDULE_BACKUP_PACKAGE = 16;
     public static final int MSG_BACKUP_OPERATION_TIMEOUT = 17;
@@ -279,12 +273,6 @@ public class BackupHandler extends Handler {
                 break;
             }
 
-            case MSG_RUN_FULL_TRANSPORT_BACKUP: {
-                PerformFullTransportBackupTask task = (PerformFullTransportBackupTask) msg.obj;
-                (new Thread(task, "transport-backup")).start();
-                break;
-            }
-
             case MSG_RUN_RESTORE: {
                 RestoreParams params = (RestoreParams) msg.obj;
                 Slog.d(TAG, "MSG_RUN_RESTORE observer=" + params.observer);
@@ -442,12 +430,6 @@ public class BackupHandler extends Handler {
                         Slog.d(TAG, "couldn't find params for token " + msg.arg1);
                     }
                 }
-                break;
-            }
-
-            case MSG_WIDGET_BROADCAST: {
-                final Intent intent = (Intent) msg.obj;
-                backupManagerService.getContext().sendBroadcastAsUser(intent, UserHandle.SYSTEM);
                 break;
             }
 

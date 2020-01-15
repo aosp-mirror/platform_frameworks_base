@@ -59,7 +59,6 @@ import android.telecom.TelecomManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
@@ -444,7 +443,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                                 mKeyguardManager.isDeviceLocked())
                         : null;
 
-        ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, panelViewController);
+        ActionsDialog dialog = new ActionsDialog(
+                mContext, mAdapter, panelViewController, isControlsEnabled(mContext));
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
         dialog.setKeyguardShowing(mKeyguardShowing);
 
@@ -518,7 +518,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public boolean shouldBeSeparated() {
-            return shouldUseSeparatedView();
+            return !isControlsEnabled(mContext);
         }
 
         @Override
@@ -1154,6 +1154,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         protected int getActionLayoutId(Context context) {
+            if (isControlsEnabled(context)) {
+                return com.android.systemui.R.layout.global_actions_grid_item_v2;
+            }
             return com.android.systemui.R.layout.global_actions_grid_item;
         }
 
@@ -1415,8 +1418,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             } else if (TelephonyManager.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED.equals(action)) {
                 // Airplane mode can be changed after ECM exits if airplane toggle button
                 // is pressed during ECM mode
-                if (!(intent.getBooleanExtra("PHONE_IN_ECM_STATE", false)) &&
-                        mIsWaitingForEcmExit) {
+                if (!(intent.getBooleanExtra(TelephonyManager.EXTRA_PHONE_IN_ECM_STATE, false))
+                        && mIsWaitingForEcmExit) {
                     mIsWaitingForEcmExit = false;
                     changeAirplaneModeSystemSetting(true);
                 }
@@ -1526,15 +1529,18 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private ResetOrientationData mResetOrientationData;
         private boolean mHadTopUi;
         private final StatusBarWindowController mStatusBarWindowController;
+        private boolean mControlsEnabled;
 
         ActionsDialog(Context context, MyAdapter adapter,
-                GlobalActionsPanelPlugin.PanelViewController plugin) {
+                GlobalActionsPanelPlugin.PanelViewController plugin,
+                boolean controlsEnabled) {
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
             mContext = context;
             mAdapter = adapter;
             mColorExtractor = Dependency.get(SysuiColorExtractor.class);
             mStatusBarService = Dependency.get(IStatusBarService.class);
             mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
+            mControlsEnabled = controlsEnabled;
 
             // Window initialization
             Window window = getWindow();
@@ -1651,6 +1657,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         private int getGlobalActionsLayoutId(Context context) {
+            if (mControlsEnabled) {
+                return com.android.systemui.R.layout.global_actions_grid_v2;
+            }
+
             int rotation = RotationUtils.getRotation(context);
             boolean useGridLayout = isForceGridEnabled(context)
                     || (shouldUsePanel() && rotation == RotationUtils.ROTATION_NONE);
@@ -1853,5 +1863,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      */
     private static boolean shouldUseSeparatedView() {
         return true;
+    }
+
+    private static boolean isControlsEnabled(Context context) {
+        return Settings.Secure.getInt(
+                context.getContentResolver(), "systemui.controls_available", 0) == 1;
     }
 }

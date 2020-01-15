@@ -23,9 +23,8 @@ import android.content.pm.PackageManager;
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 
-import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
@@ -52,10 +51,10 @@ public class DeviceProvisionedCoordinator implements Coordinator {
     }
 
     @Override
-    public void attach(NotifCollection notifCollection, NotifListBuilder notifListBuilder) {
+    public void attach(NotifPipeline pipeline) {
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
 
-        notifListBuilder.addPreGroupFilter(mNotifFilter);
+        pipeline.addPreGroupFilter(mNotifFilter);
     }
 
     private final NotifFilter mNotifFilter = new NotifFilter(TAG) {

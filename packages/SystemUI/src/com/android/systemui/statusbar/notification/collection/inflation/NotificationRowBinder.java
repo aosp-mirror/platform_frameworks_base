@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.collection;
+package com.android.systemui.statusbar.notification.collection.inflation;
 
 import android.annotation.Nullable;
 
 import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
  * Used by the {@link NotificationEntryManager}. When notifications are added or updated, the binder

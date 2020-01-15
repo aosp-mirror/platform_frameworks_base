@@ -719,9 +719,14 @@ public class AudioPolicy {
                     if (track == null) {
                         break;
                     }
-                    // TODO: add synchronous versions
-                    track.stop();
-                    track.flush();
+                    try {
+                        // TODO: add synchronous versions
+                        track.stop();
+                        track.flush();
+                    } catch (IllegalStateException e) {
+                        // ignore exception, AudioTrack could have already been stopped or
+                        // released by the user of the AudioPolicy
+                    }
                 }
             }
             if (mCaptors != null) {
@@ -730,8 +735,13 @@ public class AudioPolicy {
                     if (record == null) {
                         break;
                     }
-                    // TODO: if needed: implement an invalidate method
-                    record.stop();
+                    try {
+                        // TODO: if needed: implement an invalidate method
+                        record.stop();
+                    } catch (IllegalStateException e) {
+                        // ignore exception, AudioRecord could have already been stopped or
+                        // released by the user of the AudioPolicy
+                    }
                 }
             }
         }

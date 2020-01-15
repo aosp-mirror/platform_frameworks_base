@@ -281,6 +281,42 @@ public final class SmsManager {
      */
     public static final int SMS_MESSAGE_PERIOD_NOT_SPECIFIED = -1;
 
+    /** @hide */
+    @IntDef(prefix = { "PREMIUM_SMS_CONSENT" }, value = {
+        SmsManager.PREMIUM_SMS_CONSENT_UNKNOWN,
+        SmsManager.PREMIUM_SMS_CONSENT_ASK_USER,
+        SmsManager.PREMIUM_SMS_CONSENT_NEVER_ALLOW,
+        SmsManager.PREMIUM_SMS_CONSENT_ALWAYS_ALLOW
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PremiumSmsConsent {}
+
+    /** Premium SMS Consent for the package is unknown. This indicates that the user
+     *  has not set a permission for this package, because this package has never tried
+     *  to send a premium SMS.
+     * @hide
+     */
+    @SystemApi
+    public static final int PREMIUM_SMS_CONSENT_UNKNOWN = 0;
+
+    /** Default premium SMS Consent (ask user for each premium SMS sent).
+     * @hide
+     */
+    @SystemApi
+    public static final int PREMIUM_SMS_CONSENT_ASK_USER = 1;
+
+    /** Premium SMS Consent when the owner has denied the app from sending premium SMS.
+     * @hide
+     */
+    @SystemApi
+    public static final int PREMIUM_SMS_CONSENT_NEVER_ALLOW = 2;
+
+    /** Premium SMS Consent when the owner has allowed the app to send premium SMS.
+     * @hide
+     */
+    @SystemApi
+    public static final int PREMIUM_SMS_CONSENT_ALWAYS_ALLOW = 3;
+
     // result of asking the user for a subscription to perform an operation.
     private interface SubscriptionResolverResult {
         void onSuccess(int subId);
@@ -744,7 +780,11 @@ public final class SmsManager {
                     "Invalid pdu format. format must be either 3gpp or 3gpp2");
         }
         try {
-            ISms iSms = TelephonyManager.getSmsService();
+            ISms iSms = ISms.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getSmsServiceRegisterer()
+                            .get());
             if (iSms != null) {
                 iSms.injectSmsPduForSubscriber(
                         getSubscriptionId(), pdu, format, receivedIntent);
@@ -1567,7 +1607,7 @@ public final class SmsManager {
      * the service does not exist.
      */
     private static ISms getISmsServiceOrThrow() {
-        ISms iSms = TelephonyManager.getSmsService();
+        ISms iSms = getISmsService();
         if (iSms == null) {
             throw new UnsupportedOperationException("Sms is not supported");
         }
@@ -1575,7 +1615,11 @@ public final class SmsManager {
     }
 
     private static ISms getISmsService() {
-        return TelephonyManager.getSmsService();
+        return ISms.Stub.asInterface(
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getSmsServiceRegisterer()
+                        .get());
     }
 
     /**
@@ -2009,7 +2053,11 @@ public final class SmsManager {
     public boolean isSMSPromptEnabled() {
         ISms iSms = null;
         try {
-            iSms = TelephonyManager.getSmsService();
+            iSms = ISms.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getSmsServiceRegisterer()
+                            .get());
             return iSms.isSMSPromptEnabled();
         } catch (RemoteException ex) {
             return false;
@@ -2856,5 +2904,54 @@ public final class SmsManager {
             // ignore it
         }
         return false;
+    }
+
+    /**
+     * Gets the premium SMS permission for the specified package. If the package has never
+     * been seen before, the default {@link SmsManager#PREMIUM_SMS_PERMISSION_ASK_USER}
+     * will be returned.
+     * @param packageName the name of the package to query permission
+     * @return one of {@link SmsManager#PREMIUM_SMS_CONSENT_UNKNOWN},
+     *  {@link SmsManager#PREMIUM_SMS_CONSENT_ASK_USER},
+     *  {@link SmsManager#PREMIUM_SMS_CONSENT_NEVER_ALLOW}, or
+     *  {@link SmsManager#PREMIUM_SMS_CONSENT_ALWAYS_ALLOW}
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @PremiumSmsConsent int getPremiumSmsConsent(@NonNull String packageName) {
+        int permission = 0;
+        try {
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                permission = iSms.getPremiumSmsPermission(packageName);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "getPremiumSmsPermission() RemoteException", e);
+        }
+        return permission;
+    }
+
+    /**
+     * Sets the premium SMS permission for the specified package and save the value asynchronously
+     * to persistent storage.
+     * @param packageName the name of the package to set permission
+     * @param permission one of {@link SmsManager#PREMIUM_SMS_CONSENT_ASK_USER},
+     *  {@link SmsManager#PREMIUM_SMS_CONSENT_NEVER_ALLOW}, or
+     *  {@link SmsManager#PREMIUM_SMS_CONSENT_ALWAYS_ALLOW}
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setPremiumSmsConsent(
+            @NonNull String packageName, @PremiumSmsConsent int permission) {
+        try {
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                iSms.setPremiumSmsPermission(packageName, permission);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "setPremiumSmsPermission() RemoteException", e);
+        }
     }
 }

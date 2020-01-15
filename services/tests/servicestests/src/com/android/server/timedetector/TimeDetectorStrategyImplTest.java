@@ -651,7 +651,6 @@ public class TimeDetectorStrategyImplTest {
 
         @Override
         public long systemClockMillis() {
-            assertWakeLockAcquired();
             return mSystemClockMillis;
         }
 

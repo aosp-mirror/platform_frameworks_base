@@ -9,6 +9,7 @@ java_library {
     ],
 
     libs: [
+        "app-compat-annotations",
         "framework",
         "services.core",
     ],

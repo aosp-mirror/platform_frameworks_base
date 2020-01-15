@@ -199,8 +199,8 @@ import com.android.systemui.statusbar.notification.NotificationListController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
-import com.android.systemui.statusbar.notification.collection.init.NewNotifPipeline;
+import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.collection.init.NotifPipelineInitializer;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -364,7 +364,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final BypassHeadsUpNotifier mBypassHeadsUpNotifier;
-    private final Lazy<NewNotifPipeline> mNewNotifPipeline;
+    private final Lazy<NotifPipelineInitializer> mNewNotifPipeline;
     private final FalsingManager mFalsingManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final ConfigurationController mConfigurationController;
@@ -625,7 +625,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             HeadsUpManagerPhone headsUpManagerPhone,
             DynamicPrivacyController dynamicPrivacyController,
             BypassHeadsUpNotifier bypassHeadsUpNotifier,
-            Lazy<NewNotifPipeline> newNotifPipeline,
+            Lazy<NotifPipelineInitializer> newNotifPipeline,
             FalsingManager falsingManager,
             BroadcastDispatcher broadcastDispatcher,
             RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,

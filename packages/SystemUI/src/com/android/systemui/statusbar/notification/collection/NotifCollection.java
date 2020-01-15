@@ -47,9 +47,13 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.statusbar.notification.collection.notifcollection.CoalescedEvent;
-import com.android.systemui.statusbar.notification.collection.notifcollection.GroupCoalescer;
-import com.android.systemui.statusbar.notification.collection.notifcollection.GroupCoalescer.BatchableNotificationHandler;
+import com.android.systemui.statusbar.notification.collection.coalescer.CoalescedEvent;
+import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
+import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer.BatchableNotificationHandler;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
+import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.util.Assert;
 
 import java.lang.annotation.Retention;
@@ -123,36 +127,25 @@ public class NotifCollection {
      * Sets the class responsible for converting the collection into the list of currently-visible
      * notifications.
      */
-    public void setBuildListener(CollectionReadyForBuildListener buildListener) {
+    void setBuildListener(CollectionReadyForBuildListener buildListener) {
         Assert.isMainThread();
         mBuildListener = buildListener;
     }
 
-    /**
-     * Returns the list of "active" notifications, i.e. the notifications that are currently posted
-     * to the phone. In general, this tracks closely to the list maintained by NotificationManager,
-     * but it can diverge slightly due to lifetime extenders.
-     *
-     * The returned list is read-only, unsorted, unfiltered, and ungrouped.
-     */
-    public Collection<NotificationEntry> getNotifs() {
+    /** @see NotifPipeline#getActiveNotifs() */
+    Collection<NotificationEntry> getActiveNotifs() {
         Assert.isMainThread();
         return mReadOnlyNotificationSet;
     }
 
-    /**
-     * Registers a listener to be informed when notifications are added, removed or updated.
-     */
-    public void addCollectionListener(NotifCollectionListener listener) {
+    /** @see NotifPipeline#addCollectionListener(NotifCollectionListener) */
+    void addCollectionListener(NotifCollectionListener listener) {
         Assert.isMainThread();
         mNotifCollectionListeners.add(listener);
     }
 
-    /**
-     * Registers a lifetime extender. Lifetime extenders can cause notifications that have been
-     * dismissed or retracted to be temporarily retained in the collection.
-     */
-    public void addNotificationLifetimeExtender(NotifLifetimeExtender extender) {
+    /** @see NotifPipeline#addNotificationLifetimeExtender(NotifLifetimeExtender) */
+    void addNotificationLifetimeExtender(NotifLifetimeExtender extender) {
         Assert.isMainThread();
         checkForReentrantCall();
         if (mLifetimeExtenders.contains(extender)) {
@@ -165,7 +158,7 @@ public class NotifCollection {
     /**
      * Dismiss a notification on behalf of the user.
      */
-    public void dismissNotification(
+    void dismissNotification(
             NotificationEntry entry,
             @CancellationReason int reason,
             @NonNull DismissedByUserStats stats) {
@@ -446,7 +439,7 @@ public class NotifCollection {
             REASON_TIMEOUT,
     })
     @Retention(RetentionPolicy.SOURCE)
-    @interface CancellationReason {}
+    public @interface CancellationReason {}
 
     public static final int REASON_UNKNOWN = 0;
 }

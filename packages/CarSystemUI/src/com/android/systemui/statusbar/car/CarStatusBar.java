@@ -67,6 +67,7 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarDeviceProvisionedListener;
 import com.android.systemui.car.CarServiceProvider;
+import com.android.systemui.car.SystemUIPrimaryWindowController;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -106,8 +107,8 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
-import com.android.systemui.statusbar.notification.collection.init.NewNotifPipeline;
+import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.collection.init.NotifPipelineInitializer;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -168,6 +169,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     // acceleration rate for the fling animation
     private static final float FLING_SPEED_UP_FACTOR = 0.6f;
 
+    private final UserSwitcherController mUserSwitcherController;
     private final ScrimController mScrimController;
     private final LockscreenLockIconController mLockscreenLockIconController;
 
@@ -177,17 +179,16 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private float mBackgroundAlphaDiff;
     private float mInitialBackgroundAlpha;
 
-    private final Lazy<FullscreenUserSwitcher> mFullscreenUserSwitcherLazy;
-    private FullscreenUserSwitcher mFullscreenUserSwitcher;
-
     private CarBatteryController mCarBatteryController;
     private BatteryMeterView mBatteryMeterView;
     private Drawable mNotificationPanelBackground;
 
     private final Object mQueueLock = new Object();
+    private final SystemUIPrimaryWindowController mSystemUIPrimaryWindowController;
     private final CarNavigationBarController mCarNavigationBarController;
     private final FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
     private final Lazy<PowerManagerHelper> mPowerManagerHelperLazy;
+    private final FullscreenUserSwitcher mFullscreenUserSwitcher;
     private final ShadeController mShadeController;
     private final CarServiceProvider mCarServiceProvider;
     private final CarDeviceProvisionedController mCarDeviceProvisionedController;
@@ -268,7 +269,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             HeadsUpManagerPhone headsUpManagerPhone,
             DynamicPrivacyController dynamicPrivacyController,
             BypassHeadsUpNotifier bypassHeadsUpNotifier,
-            Lazy<NewNotifPipeline> newNotifPipeline,
+            Lazy<NotifPipelineInitializer> notifPipelineInitializer,
             FalsingManager falsingManager,
             BroadcastDispatcher broadcastDispatcher,
             RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
@@ -338,7 +339,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             /* Car Settings injected components. */
             CarServiceProvider carServiceProvider,
             Lazy<PowerManagerHelper> powerManagerHelperLazy,
-            Lazy<FullscreenUserSwitcher> fullscreenUserSwitcherLazy,
+            FullscreenUserSwitcher fullscreenUserSwitcher,
+            SystemUIPrimaryWindowController systemUIPrimaryWindowController,
             CarNavigationBarController carNavigationBarController,
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder) {
         super(
@@ -355,7 +357,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 headsUpManagerPhone,
                 dynamicPrivacyController,
                 bypassHeadsUpNotifier,
-                newNotifPipeline,
+                notifPipelineInitializer,
                 falsingManager,
                 broadcastDispatcher,
                 remoteInputQuickSettingsDisabler,
@@ -422,6 +424,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 userInfoControllerImpl,
                 notificationRowBinder,
                 dismissCallbackRegistry);
+        mUserSwitcherController = userSwitcherController;
         mScrimController = scrimController;
         mLockscreenLockIconController = lockscreenLockIconController;
         mCarDeviceProvisionedController =
@@ -429,7 +432,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mShadeController = shadeController;
         mCarServiceProvider = carServiceProvider;
         mPowerManagerHelperLazy = powerManagerHelperLazy;
-        mFullscreenUserSwitcherLazy = fullscreenUserSwitcherLazy;
+        mFullscreenUserSwitcher = fullscreenUserSwitcher;
+        mSystemUIPrimaryWindowController = systemUIPrimaryWindowController;
         mCarNavigationBarController = carNavigationBarController;
         mFlingAnimationUtilsBuilder = flingAnimationUtilsBuilder;
     }
@@ -443,6 +447,13 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         // created.
         mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
         mScreenLifecycle.addObserver(mScreenObserver);
+
+        // TODO: Remove the setup of user switcher from Car Status Bar.
+        mSystemUIPrimaryWindowController.attach();
+        mFullscreenUserSwitcher.setStatusBar(this);
+        mFullscreenUserSwitcher.setContainer(
+                mSystemUIPrimaryWindowController.getBaseLayout().findViewById(
+                        R.id.fullscreen_user_switcher_stub));
 
         // Notification bar related setup.
         mInitialBackgroundAlpha = (float) mContext.getResources().getInteger(
@@ -508,16 +519,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                                 .isCurrentUserSetupInProgress();
                     }
                 });
-    }
-
-    /**
-     * Allows for showing or hiding just the navigation bars. This is indented to be used when
-     * the full screen user selector is shown.
-     */
-    void setNavBarVisibility(@View.Visibility int visibility) {
-        mCarNavigationBarController.setBottomWindowVisibility(visibility);
-        mCarNavigationBarController.setLeftWindowVisibility(visibility);
-        mCarNavigationBarController.setRightWindowVisibility(visibility);
     }
 
     @Override
@@ -924,9 +925,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     + " scroll " + mStackScroller.getScrollX()
                     + "," + mStackScroller.getScrollY());
         }
-
-        pw.print("  mFullscreenUserSwitcher=");
-        pw.println(mFullscreenUserSwitcher);
         pw.print("  mCarBatteryController=");
         pw.println(mCarBatteryController);
         pw.print("  mBatteryMeterView=");
@@ -972,14 +970,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     @Override
     protected void createUserSwitcher() {
-        UserSwitcherController userSwitcherController =
-                Dependency.get(UserSwitcherController.class);
-        if (userSwitcherController.useFullscreenUserSwitcher()) {
-            mFullscreenUserSwitcher = mFullscreenUserSwitcherLazy.get();
-            mFullscreenUserSwitcher.setStatusBar(this);
-            mFullscreenUserSwitcher.setContainer(
-                    mStatusBarWindow.findViewById(R.id.fullscreen_user_switcher_stub));
-        } else {
+        if (!mUserSwitcherController.useFullscreenUserSwitcher()) {
             super.createUserSwitcher();
         }
     }
@@ -996,22 +987,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         super.onStateChanged(newState);
 
         if (newState != StatusBarState.FULLSCREEN_USER_SWITCHER) {
-            hideUserSwitcher();
+            mFullscreenUserSwitcher.hide();
         } else {
             dismissKeyguardWhenUserSwitcherNotDisplayed();
-        }
-    }
-
-    /** Makes the full screen user switcher visible, if applicable. */
-    public void showUserSwitcher() {
-        if (mFullscreenUserSwitcher != null && mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
-            mFullscreenUserSwitcher.show(); // Makes the switcher visible.
-        }
-    }
-
-    private void hideUserSwitcher() {
-        if (mFullscreenUserSwitcher != null) {
-            mFullscreenUserSwitcher.hide();
         }
     }
 
@@ -1024,7 +1002,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     // We automatically dismiss keyguard unless user switcher is being shown on the keyguard.
     private void dismissKeyguardWhenUserSwitcherNotDisplayed() {
-        if (mFullscreenUserSwitcher == null) {
+        if (!mUserSwitcherController.useFullscreenUserSwitcher()) {
             return; // Not using the full screen user switcher.
         }
 

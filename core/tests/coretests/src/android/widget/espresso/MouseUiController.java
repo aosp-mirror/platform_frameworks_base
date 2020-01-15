@@ -70,6 +70,8 @@ public final class MouseUiController implements UiController {
         event.setSource(InputDevice.SOURCE_MOUSE);
         if (event.getActionMasked() != MotionEvent.ACTION_UP) {
             event.setButtonState(mButton);
+        } else {
+            event.setButtonState(0);
         }
         return mUiController.injectMotionEvent(event);
     }

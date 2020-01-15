@@ -17,7 +17,7 @@
 package com.android.server.usage;
 
 import static android.app.usage.UsageStatsManager.REASON_MAIN_DEFAULT;
-import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_USER;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_MASK;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_PREDICTED;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
@@ -441,7 +441,7 @@ public class AppIdleHistory {
                 elapsedRealtime, true);
         if (idle) {
             appUsageHistory.currentBucket = STANDBY_BUCKET_RARE;
-            appUsageHistory.bucketingReason = REASON_MAIN_FORCED;
+            appUsageHistory.bucketingReason = REASON_MAIN_FORCED_BY_USER;
         } else {
             appUsageHistory.currentBucket = STANDBY_BUCKET_ACTIVE;
             // This is to pretend that the app was just used, don't freeze the state anymore.

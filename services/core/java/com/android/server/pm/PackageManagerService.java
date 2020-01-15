@@ -17502,7 +17502,8 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mLock) {
                 if (res) {
                     if (pkg != null) {
-                        mInstantAppRegistry.onPackageUninstalledLPw(pkg, info.removedUsers);
+                        mInstantAppRegistry.onPackageUninstalledLPw(pkg, uninstalledPs,
+                                info.removedUsers);
                     }
                     updateSequenceNumberLP(uninstalledPs, info.removedUsers);
                     updateInstantAppInstallerLocked(packageName);

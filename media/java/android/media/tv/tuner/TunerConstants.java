@@ -1015,10 +1015,13 @@ public final class TunerConstants {
             Constants.FrontendAtsc3DemodOutputFormat.BASEBAND_PACKET;
 
     /** @hide */
-    @IntDef({FRONTEND_DVBS_STANDARD_AUTO, FRONTEND_DVBS_STANDARD_S, FRONTEND_DVBS_STANDARD_S2,
-            FRONTEND_DVBS_STANDARD_S2X})
+    @IntDef(prefix = "FRONTEND_DVBS_STANDARD",
+            value = {FRONTEND_DVBS_STANDARD_AUTO, FRONTEND_DVBS_STANDARD_S,
+                    FRONTEND_DVBS_STANDARD_S2,
+                    FRONTEND_DVBS_STANDARD_S2X})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendDvbsStandard {}
+    public @interface FrontendDvbsStandard {
+    }
     /** @hide */
     public static final int FRONTEND_DVBS_STANDARD_AUTO = Constants.FrontendDvbsStandard.AUTO;
     /** @hide */
@@ -1208,6 +1211,20 @@ public final class TunerConstants {
     /** @hide */
     public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_19_256 =
             Constants.FrontendDvbtGuardInterval.INTERVAL_19_256;
+
+    /** @hide */
+    @IntDef(prefix = "FRONTEND_DVBT_STANDARD",
+            value = {FRONTEND_DVBT_STANDARD_AUTO, FRONTEND_DVBT_STANDARD_T,
+                    FRONTEND_DVBT_STANDARD_T2}
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FrontendDvbtStandard {}
+    /** @hide */
+    public static final int FRONTEND_DVBT_STANDARD_AUTO = Constants.FrontendDvbtStandard.AUTO;
+    /** @hide */
+    public static final int FRONTEND_DVBT_STANDARD_T = Constants.FrontendDvbtStandard.T;
+    /** @hide */
+    public static final int FRONTEND_DVBT_STANDARD_T2 = Constants.FrontendDvbtStandard.T2;
 
     /** @hide */
     @IntDef({FRONTEND_ISDBS_CODERATE_UNDEFINED, FRONTEND_ISDBS_CODERATE_AUTO,

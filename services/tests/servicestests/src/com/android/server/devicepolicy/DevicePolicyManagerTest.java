@@ -34,6 +34,7 @@ import static com.android.server.testutils.TestUtils.assertExpectException;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
@@ -273,6 +274,29 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
             return appRestrictions.get(Pair.create(pkg, user));
         }).when(getServices().userManager).getApplicationRestrictions(
+                anyString(), any(UserHandle.class));
+
+        // Emulate UserManager.setUserRestriction/getUserRestrictions
+        final Map<UserHandle, Bundle> userRestrictions = new HashMap<>();
+
+        doAnswer((Answer<Void>) invocation -> {
+            String key = (String) invocation.getArguments()[0];
+            boolean value = (Boolean) invocation.getArguments()[1];
+            UserHandle user = (UserHandle) invocation.getArguments()[2];
+            Bundle userBundle = userRestrictions.getOrDefault(user, new Bundle());
+            userBundle.putBoolean(key, value);
+
+            userRestrictions.put(user, userBundle);
+            return null;
+        }).when(getServices().userManager).setUserRestriction(
+                anyString(), anyBoolean(), any(UserHandle.class));
+
+        doAnswer((Answer<Boolean>) invocation -> {
+            String key = (String) invocation.getArguments()[0];
+            UserHandle user = (UserHandle) invocation.getArguments()[1];
+            Bundle userBundle = userRestrictions.getOrDefault(user, new Bundle());
+            return userBundle.getBoolean(key);
+        }).when(getServices().userManager).hasUserRestriction(
                 anyString(), any(UserHandle.class));
 
         // Add the first secondary user.
@@ -822,10 +846,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         final int MANAGED_PROFILE_ADMIN_UID =
                 UserHandle.getUid(MANAGED_PROFILE_USER_ID, DpmMockContext.SYSTEM_UID);
 
-        // Setup device owner.
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         mContext.packageName = admin1.getPackageName();
-        setupDeviceOwner();
 
         // Add a managed profile belonging to the system user.
         addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
@@ -833,16 +855,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Change the parent user's password.
         dpm.reportPasswordChanged(UserHandle.USER_SYSTEM);
 
-        // Both the device owner and the managed profile owner should receive this broadcast.
+        // The managed profile owner should receive this broadcast.
         final Intent intent = new Intent(DeviceAdminReceiver.ACTION_PASSWORD_CHANGED);
         intent.setComponent(admin1);
         intent.putExtra(Intent.EXTRA_USER, UserHandle.of(UserHandle.USER_SYSTEM));
 
-        verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
-                MockUtils.checkIntent(intent),
-                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM),
-                eq(null),
-                any(Bundle.class));
         verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntent(intent),
                 MockUtils.checkUserHandle(MANAGED_PROFILE_USER_ID),
@@ -864,12 +881,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         final int MANAGED_PROFILE_ADMIN_UID =
                 UserHandle.getUid(MANAGED_PROFILE_USER_ID, DpmMockContext.SYSTEM_UID);
 
-        // Setup device owner.
+        // Configure system as having separate profile challenge.
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         mContext.packageName = admin1.getPackageName();
         doReturn(true).when(getServices().lockPatternUtils)
                 .isSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID);
-        setupDeviceOwner();
 
         // Add a managed profile belonging to the system user.
         addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
@@ -953,6 +969,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Verify internal calls.
         verify(getServices().iactivityManager, times(1)).updateDeviceOwner(
                 eq(admin1.getPackageName()));
+
+        verify(getServices().userManager, times(1)).setUserRestriction(
+                eq(UserManager.DISALLOW_ADD_MANAGED_PROFILE),
+                eq(true), eq(UserHandle.SYSTEM));
 
         verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED),
@@ -2005,12 +2025,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         assertNoDeviceOwnerRestrictions();
 
-        // Initialize DPMS again and check that the user restriction wasn't enabled again.
         reset(getServices().userManagerInternal);
-        initializeDpms();
-        assertTrue(dpm.isDeviceOwnerApp(admin1.getPackageName()));
-        assertNotNull(dpms.getDeviceOwnerAdminLocked());
 
+        // Ensure the DISALLOW_REMOVE_MANAGED_PROFILES restriction doesn't show up as a
+        // restriction to the device owner.
+        dpm.addUserRestriction(admin1, UserManager.DISALLOW_REMOVE_MANAGED_PROFILE);
         assertNoDeviceOwnerRestrictions();
     }
 
@@ -3106,7 +3125,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setup_nonSplitUser_withDo_primaryUser();
         final int MANAGED_PROFILE_USER_ID = 18;
         final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 1308);
-        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
         when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
                 false /* we can't remove a managed profile */)).thenReturn(false);
         when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
@@ -3158,41 +3176,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE, false);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_FINANCED_DEVICE, false);
 
-        // COMP mode is allowed.
+        // COMP mode NOT is allowed.
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_OK);
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true);
+                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
 
-        // And other DPCs can also provision a managed profile (DO + BYOD case).
+        // And other DPCs can NOT provision a managed profile.
         assertCheckProvisioningPreCondition(
                 DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
                 DpmMockContext.ANOTHER_PACKAGE_NAME,
-                DevicePolicyManager.CODE_OK);
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true,
-                DpmMockContext.ANOTHER_PACKAGE_NAME, DpmMockContext.ANOTHER_UID);
-    }
-
-    public void testProvisioning_nonSplitUser_withDo_primaryUser_restrictedByDo() throws Exception {
-        setup_nonSplitUser_withDo_primaryUser();
-        mContext.packageName = admin1.getPackageName();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
-        // The DO should be allowed to initiate provisioning if it set the restriction itself, but
-        // other packages should be forbidden.
-        when(getServices().userManager.hasUserRestriction(
-                eq(UserManager.DISALLOW_ADD_MANAGED_PROFILE),
-                eq(UserHandle.getUserHandleForUid(mContext.binder.callingUid))))
-                .thenReturn(true);
-        when(getServices().userManager.getUserRestrictionSource(
-                eq(UserManager.DISALLOW_ADD_MANAGED_PROFILE),
-                eq(UserHandle.getUserHandleForUid(mContext.binder.callingUid))))
-                .thenReturn(UserManager.RESTRICTION_SOURCE_DEVICE_OWNER);
-        assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_OK);
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true);
-        assertCheckProvisioningPreCondition(
-                DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DpmMockContext.ANOTHER_PACKAGE_NAME,
-                DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED);
+                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false,
                 DpmMockContext.ANOTHER_PACKAGE_NAME, DpmMockContext.ANOTHER_UID);
     }
@@ -3213,31 +3206,46 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 eq(UserHandle.getUserHandleForUid(mContext.binder.callingUid))))
                 .thenReturn(UserManager.RESTRICTION_SOURCE_SYSTEM);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED);
+                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
 
         assertCheckProvisioningPreCondition(
                 DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
                 DpmMockContext.ANOTHER_PACKAGE_NAME,
-                DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED);
+                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false,
                 DpmMockContext.ANOTHER_PACKAGE_NAME, DpmMockContext.ANOTHER_UID);
     }
 
-    public void testCheckProvisioningPreCondition_nonSplitUser_comp() throws Exception {
+    public void testCheckCannotSetProfileOwnerWithDeviceOwner() throws Exception {
+        setup_nonSplitUser_withDo_primaryUser();
+        final int managedProfileUserId = 18;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 1308);
+
+        final int userId = UserHandle.getUserId(managedProfileAdminUid);
+        getServices().addUser(userId, 0, UserManager.USER_TYPE_PROFILE_MANAGED,
+                UserHandle.USER_SYSTEM);
+        mContext.callerPermissions.addAll(OWNER_SETUP_PERMISSIONS);
+        setUpPackageManagerForFakeAdmin(admin1, managedProfileAdminUid, admin1);
+        dpm.setActiveAdmin(admin1, false, userId);
+        assertFalse(dpm.setProfileOwner(admin1, null, userId));
+        mContext.callerPermissions.removeAll(OWNER_SETUP_PERMISSIONS);
+    }
+
+    public void testCheckProvisioningPreCondition_nonSplitUser_attemptingComp() throws Exception {
         setup_nonSplitUser_withDo_primaryUser_ManagedProfile();
         mContext.packageName = admin1.getPackageName();
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         // We can delete the managed profile to create a new one, so provisioning is allowed.
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_OK);
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true);
+                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
         assertCheckProvisioningPreCondition(
                 DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
                 DpmMockContext.ANOTHER_PACKAGE_NAME,
-                DevicePolicyManager.CODE_OK);
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true,
+                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false,
                 DpmMockContext.ANOTHER_PACKAGE_NAME, DpmMockContext.ANOTHER_UID);
     }
 
@@ -3265,8 +3273,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // But the device owner can still do it because it has set the restriction itself.
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_OK);
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true);
+                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
     }
 
     private void setup_splitUser_firstBoot_systemUser() throws Exception {
@@ -3475,6 +3483,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().ipackageManager.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS, 0))
                 .thenReturn(true);
         when(getServices().userManagerForMock.isSplitSystemUser()).thenReturn(true);
+        when(getServices().userManager.getProfileParent(DpmMockContext.CALLER_USER_HANDLE))
+            .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
         when(getServices().userManager.canAddMoreManagedProfiles(DpmMockContext.CALLER_USER_HANDLE,
                 true)).thenReturn(true);
         setUserSetupCompleteForUser(false, DpmMockContext.CALLER_USER_HANDLE);
@@ -3487,7 +3497,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setup_provisionManagedProfileWithDeviceOwner_primaryUser();
         setUpPackageManagerForAdmin(admin1, mContext.binder.callingUid);
         mContext.packageName = admin1.getPackageName();
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
     }
 
     public void testCheckProvisioningPreCondition_provisionManagedProfileWithDeviceOwner_primaryUser()
@@ -3495,9 +3505,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setup_provisionManagedProfileWithDeviceOwner_primaryUser();
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
-        // COMP mode is allowed.
+        // COMP mode is NOT allowed.
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_OK);
+                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
     }
 
     private void setup_provisionManagedProfileCantRemoveUser_primaryUser() throws Exception {
@@ -4014,11 +4024,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         List<UserHandle> targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
         MoreAsserts.assertEmpty(targetUsers);
 
-        // Setup a managed profile managed by the same admin.
-        final int MANAGED_PROFILE_USER_ID = 15;
-        final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 20456);
-        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
-
         // Add a secondary user, it should never talk with.
         final int ANOTHER_USER_ID = 36;
         getServices().addUser(ANOTHER_USER_ID, 0, UserManager.USER_TYPE_FULL_SECONDARY);
@@ -4028,29 +4033,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
         MoreAsserts.assertEmpty(targetUsers);
 
-        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
-        targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
-        MoreAsserts.assertEmpty(targetUsers);
-
         // Setting affiliation ids
         final Set<String> userAffiliationIds = Collections.singleton("some.affiliation-id");
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         dpm.setAffiliationIds(admin1, userAffiliationIds);
-
-        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
-        dpm.setAffiliationIds(admin1, userAffiliationIds);
-
-        // Calling from device owner admin, the result list should just contain the managed
-        // profile user id.
-        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
-        targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
-        MoreAsserts.assertContentsInAnyOrder(targetUsers, UserHandle.of(MANAGED_PROFILE_USER_ID));
-
-        // Calling from managed profile admin, the result list should just contain the system
-        // user id.
-        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
-        targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
-        MoreAsserts.assertContentsInAnyOrder(targetUsers, UserHandle.SYSTEM);
 
         // Changing affiliation ids in one
         dpm.setAffiliationIds(admin1, Collections.singleton("some-different-affiliation-id"));
@@ -4062,38 +4048,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
-        MoreAsserts.assertEmpty(targetUsers);
-    }
-
-    public void testGetBindDeviceAdminTargetUsers_differentPackage() throws Exception {
-        // Setup a device owner.
-        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
-        setupDeviceOwner();
-
-        // Set up a managed profile managed by different package.
-        final int MANAGED_PROFILE_USER_ID = 15;
-        final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 20456);
-        final ComponentName adminDifferentPackage =
-                new ComponentName("another.package", "whatever.class");
-        addManagedProfile(adminDifferentPackage, MANAGED_PROFILE_ADMIN_UID, admin2);
-
-        // Setting affiliation ids
-        final Set<String> userAffiliationIds = Collections.singleton("some-affiliation-id");
-        dpm.setAffiliationIds(admin1, userAffiliationIds);
-
-        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
-        dpm.setAffiliationIds(adminDifferentPackage, userAffiliationIds);
-
-        // Calling from device owner admin, we should get zero bind device admin target users as
-        // their packages are different.
-        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
-        List<UserHandle> targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
-        MoreAsserts.assertEmpty(targetUsers);
-
-        // Calling from managed profile admin, we should still get zero target users for the same
-        // reason.
-        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
-        targetUsers = dpm.getBindDeviceAdminTargetUsers(adminDifferentPackage);
         MoreAsserts.assertEmpty(targetUsers);
     }
 
@@ -4131,79 +4085,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertFalse(dpm.isLockTaskPermitted("doPackage1"));
         assertExpectException(SecurityException.class, /* messageRegex =*/ null,
                 () -> dpm.setLockTaskFeatures(who, flags));
-    }
-
-    public void testLockTaskPolicyAllowedForAffiliatedUsers() throws Exception {
-        // Setup a device owner.
-        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
-        setupDeviceOwner();
-        // Lock task policy is updated when loading user data.
-        verifyLockTaskState(UserHandle.USER_SYSTEM);
-
-        // Set up a managed profile managed by different package (package name shouldn't matter)
-        final int MANAGED_PROFILE_USER_ID = 15;
-        final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 20456);
-        final ComponentName adminDifferentPackage =
-                new ComponentName("another.package", "whatever.class");
-        addManagedProfile(adminDifferentPackage, MANAGED_PROFILE_ADMIN_UID, admin2);
-        verifyLockTaskState(MANAGED_PROFILE_USER_ID);
-
-        // Setup a PO on the secondary user
-        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
-        setAsProfileOwner(admin3);
-        verifyLockTaskState(DpmMockContext.CALLER_USER_HANDLE);
-
-        // The DO can still set lock task packages
-        final String[] doPackages = {"doPackage1", "doPackage2"};
-        final int flags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
-                | DevicePolicyManager.LOCK_TASK_FEATURE_HOME
-                | DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
-        verifyCanSetLockTask(DpmMockContext.CALLER_SYSTEM_USER_UID, UserHandle.USER_SYSTEM, admin1, doPackages, flags);
-
-        final String[] secondaryPoPackages = {"secondaryPoPackage1", "secondaryPoPackage2"};
-        final int secondaryPoFlags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
-                | DevicePolicyManager.LOCK_TASK_FEATURE_HOME
-                | DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
-        verifyCanNotSetLockTask(DpmMockContext.CALLER_UID, admin3, secondaryPoPackages, secondaryPoFlags);
-
-        // Managed profile is unaffiliated - shouldn't be able to setLockTaskPackages.
-        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
-        final String[] poPackages = {"poPackage1", "poPackage2"};
-        final int poFlags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
-                | DevicePolicyManager.LOCK_TASK_FEATURE_HOME
-                | DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
-        verifyCanNotSetLockTask(MANAGED_PROFILE_ADMIN_UID, adminDifferentPackage, poPackages, poFlags);
-
-        // Setting same affiliation ids
-        final Set<String> userAffiliationIds = Collections.singleton("some-affiliation-id");
-        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
-        dpm.setAffiliationIds(admin1, userAffiliationIds);
-
-        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
-        dpm.setAffiliationIds(adminDifferentPackage, userAffiliationIds);
-
-        // Now the managed profile can set lock task packages.
-        dpm.setLockTaskPackages(adminDifferentPackage, poPackages);
-        MoreAsserts.assertEquals(poPackages, dpm.getLockTaskPackages(adminDifferentPackage));
-        assertTrue(dpm.isLockTaskPermitted("poPackage1"));
-        assertFalse(dpm.isLockTaskPermitted("doPackage2"));
-        // And it can set lock task features.
-        dpm.setLockTaskFeatures(adminDifferentPackage, poFlags);
-        verifyLockTaskState(MANAGED_PROFILE_USER_ID, poPackages, poFlags);
-
-        // Unaffiliate the profile, lock task mode no longer available on the profile.
-        dpm.setAffiliationIds(adminDifferentPackage, Collections.emptySet());
-        assertFalse(dpm.isLockTaskPermitted("poPackage1"));
-        // Lock task packages cleared when loading user data and when the user becomes unaffiliated.
-        verify(getServices().iactivityManager, times(2)).updateLockTaskPackages(
-                MANAGED_PROFILE_USER_ID, new String[0]);
-        verify(getServices().iactivityTaskManager, times(2)).updateLockTaskFeatures(
-                MANAGED_PROFILE_USER_ID, DevicePolicyManager.LOCK_TASK_FEATURE_NONE);
-
-        // Verify that lock task packages were not cleared for the DO
-        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
-        assertTrue(dpm.isLockTaskPermitted("doPackage1"));
-
     }
 
     public void testLockTaskPolicyForProfileOwner() throws Exception {

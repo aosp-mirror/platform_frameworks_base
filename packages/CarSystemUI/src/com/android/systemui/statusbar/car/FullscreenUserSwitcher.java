@@ -38,6 +38,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 import com.android.systemui.car.CarServiceProvider;
+import com.android.systemui.car.SystemUIPrimaryWindowController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.car.CarTrustAgentUnlockDialogHelper.OnHideListener;
 import com.android.systemui.statusbar.car.UserGridRecyclerView.UserRecord;
@@ -56,9 +57,10 @@ public class FullscreenUserSwitcher {
     private final UserManager mUserManager;
     private final CarServiceProvider mCarServiceProvider;
     private final CarTrustAgentUnlockDialogHelper mUnlockDialogHelper;
+    private final SystemUIPrimaryWindowController mSystemUIPrimaryWindowController;
+    private CarStatusBar mCarStatusBar;
     private final int mShortAnimDuration;
 
-    private CarStatusBar mStatusBar;
     private View mParent;
     private UserGridRecyclerView mUserGridView;
     private CarTrustAgentEnrollmentManager mEnrollmentManager;
@@ -81,23 +83,35 @@ public class FullscreenUserSwitcher {
             @Main Resources resources,
             UserManager userManager,
             CarServiceProvider carServiceProvider,
-            CarTrustAgentUnlockDialogHelper carTrustAgentUnlockDialogHelper) {
+            CarTrustAgentUnlockDialogHelper carTrustAgentUnlockDialogHelper,
+            SystemUIPrimaryWindowController systemUIPrimaryWindowController) {
         mContext = context;
         mResources = resources;
         mUserManager = userManager;
         mCarServiceProvider = carServiceProvider;
         mUnlockDialogHelper = carTrustAgentUnlockDialogHelper;
+        mSystemUIPrimaryWindowController = systemUIPrimaryWindowController;
 
         mShortAnimDuration = mResources.getInteger(android.R.integer.config_shortAnimTime);
     }
 
-    /** Sets the status bar which controls the keyguard. */
+    /** Sets the status bar which gives an entry point to dismiss the keyguard. */
+    // TODO: Remove this in favor of a keyguard controller.
     public void setStatusBar(CarStatusBar statusBar) {
-        mStatusBar = statusBar;
+        mCarStatusBar = statusBar;
+    }
+
+    /** Returns {@code true} if the user switcher already has a parent view. */
+    public boolean isAttached() {
+        return mParent != null;
     }
 
     /** Sets the {@link ViewStub} to show the user switcher. */
     public void setContainer(ViewStub containerStub) {
+        if (isAttached()) {
+            return;
+        }
+
         mParent = containerStub.inflate();
 
         View container = mParent.findViewById(R.id.container);
@@ -148,20 +162,31 @@ public class FullscreenUserSwitcher {
      * Makes user grid visible.
      */
     public void show() {
+        if (!isAttached()) {
+            return;
+        }
         mParent.setVisibility(View.VISIBLE);
+        mSystemUIPrimaryWindowController.setWindowExpanded(true);
     }
 
     /**
      * Hides the user grid.
      */
     public void hide() {
+        if (!isAttached()) {
+            return;
+        }
         mParent.setVisibility(View.INVISIBLE);
+        mSystemUIPrimaryWindowController.setWindowExpanded(false);
     }
 
     /**
      * @return {@code true} if user grid is visible, {@code false} otherwise.
      */
     public boolean isVisible() {
+        if (!isAttached()) {
+            return false;
+        }
         return mParent.getVisibility() == View.VISIBLE;
     }
 
@@ -196,7 +221,7 @@ public class FullscreenUserSwitcher {
         }
         if (mSelectedUser.mType == UserRecord.FOREGROUND_USER) {
             hide();
-            mStatusBar.dismissKeyguard();
+            mCarStatusBar.dismissKeyguard();
             return;
         }
         // Switching is about to happen, since it takes time, fade out the switcher gradually.

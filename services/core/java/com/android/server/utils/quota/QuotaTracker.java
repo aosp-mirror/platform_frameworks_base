@@ -172,6 +172,16 @@ abstract class QuotaTracker {
 
     // Exposed API to users.
 
+    /** Remove all saved events from the tracker. */
+    public void clear() {
+        synchronized (mLock) {
+            mInQuotaAlarmListener.clearLocked();
+            mFreeQuota.clear();
+
+            dropEverythingLocked();
+        }
+    }
+
     /**
      * @return true if the UPTC is within quota, false otherwise.
      * @throws IllegalStateException if given categorizer returns a Category that's not recognized.
@@ -245,10 +255,7 @@ abstract class QuotaTracker {
             mIsEnabled = enable;
 
             if (!mIsEnabled) {
-                mInQuotaAlarmListener.clearLocked();
-                mFreeQuota.clear();
-
-                dropEverythingLocked();
+                clear();
             }
         }
     }

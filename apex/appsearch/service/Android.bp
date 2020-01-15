@@ -12,18 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 java_library {
-  name: "service-appsearch",
-  installable: true,
-  srcs: [
-    "java/**/*.java",
-  ],
-  libs: [
-    "framework",
-    "services.core",
-    "framework-appsearch",
-  ],
-  static_libs: [
-    "icing-java-proto-lite",
-  ],
-  apex_available: [ "com.android.appsearch" ],
+    name: "service-appsearch",
+    installable: true,
+    srcs: ["java/**/*.java"],
+    libs: [
+        "framework",
+        "framework-appsearch",
+        "services.core",
+    ],
+    static_libs: ["icing-java-proto-lite"],
+    apex_available: ["com.android.appsearch"],
 }

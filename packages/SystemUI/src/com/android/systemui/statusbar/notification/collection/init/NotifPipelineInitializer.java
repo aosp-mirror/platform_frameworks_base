@@ -24,10 +24,11 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
-import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
-import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
+import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
+import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
 import com.android.systemui.statusbar.notification.collection.coordinator.NotifCoordinators;
-import com.android.systemui.statusbar.notification.collection.notifcollection.GroupCoalescer;
+import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -39,10 +40,11 @@ import javax.inject.Singleton;
  * Initialization code for the new notification pipeline.
  */
 @Singleton
-public class NewNotifPipeline implements Dumpable {
+public class NotifPipelineInitializer implements Dumpable {
+    private final NotifPipeline mPipelineWrapper;
     private final GroupCoalescer mGroupCoalescer;
     private final NotifCollection mNotifCollection;
-    private final NotifListBuilderImpl mNotifPipeline;
+    private final ShadeListBuilder mListBuilder;
     private final NotifCoordinators mNotifPluggableCoordinators;
     private final NotifInflaterImpl mNotifInflater;
     private final DumpController mDumpController;
@@ -51,17 +53,19 @@ public class NewNotifPipeline implements Dumpable {
     private final FakePipelineConsumer mFakePipelineConsumer = new FakePipelineConsumer();
 
     @Inject
-    public NewNotifPipeline(
+    public NotifPipelineInitializer(
+            NotifPipeline pipelineWrapper,
             GroupCoalescer groupCoalescer,
             NotifCollection notifCollection,
-            NotifListBuilderImpl notifPipeline,
+            ShadeListBuilder listBuilder,
             NotifCoordinators notifCoordinators,
             NotifInflaterImpl notifInflater,
             DumpController dumpController,
             FeatureFlags featureFlags) {
+        mPipelineWrapper = pipelineWrapper;
         mGroupCoalescer = groupCoalescer;
         mNotifCollection = notifCollection;
-        mNotifPipeline = notifPipeline;
+        mListBuilder = listBuilder;
         mNotifPluggableCoordinators = notifCoordinators;
         mDumpController = dumpController;
         mNotifInflater = notifInflater;
@@ -81,11 +85,11 @@ public class NewNotifPipeline implements Dumpable {
         }
 
         // Wire up coordinators
-        mFakePipelineConsumer.attach(mNotifPipeline);
-        mNotifPluggableCoordinators.attach(mNotifCollection, mNotifPipeline);
+        mNotifPluggableCoordinators.attach(mPipelineWrapper);
 
         // Wire up pipeline
-        mNotifPipeline.attach(mNotifCollection);
+        mFakePipelineConsumer.attach(mListBuilder);
+        mListBuilder.attach(mNotifCollection);
         mNotifCollection.attach(mGroupCoalescer);
         mGroupCoalescer.attach(notificationService);
 
@@ -99,5 +103,5 @@ public class NewNotifPipeline implements Dumpable {
         mGroupCoalescer.dump(fd, pw, args);
     }
 
-    private static final String TAG = "NewNotifPipeline";
+    private static final String TAG = "NotifPipeline";
 }

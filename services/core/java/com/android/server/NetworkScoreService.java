@@ -523,7 +523,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
         @Override
         public void accept(INetworkScoreCache networkScoreCache, Object cookie) {
-            int filterType = NetworkScoreManager.CACHE_FILTER_NONE;
+            int filterType = NetworkScoreManager.SCORE_FILTER_NONE;
             if (cookie instanceof Integer) {
                 filterType = (Integer) cookie;
             }
@@ -547,17 +547,17 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         private List<ScoredNetwork> filterScores(List<ScoredNetwork> scoredNetworkList,
                 int filterType) {
             switch (filterType) {
-                case NetworkScoreManager.CACHE_FILTER_NONE:
+                case NetworkScoreManager.SCORE_FILTER_NONE:
                     return scoredNetworkList;
 
-                case NetworkScoreManager.CACHE_FILTER_CURRENT_NETWORK:
+                case NetworkScoreManager.SCORE_FILTER_CURRENT_NETWORK:
                     if (mCurrentNetworkFilter == null) {
                         mCurrentNetworkFilter =
                                 new CurrentNetworkScoreCacheFilter(new WifiInfoSupplier(mContext));
                     }
                     return mCurrentNetworkFilter.apply(scoredNetworkList);
 
-                case NetworkScoreManager.CACHE_FILTER_SCAN_RESULTS:
+                case NetworkScoreManager.SCORE_FILTER_SCAN_RESULTS:
                     if (mScanResultsFilter == null) {
                         mScanResultsFilter = new ScanResultsScoreCacheFilter(
                                 new ScanResultsSupplier(mContext));

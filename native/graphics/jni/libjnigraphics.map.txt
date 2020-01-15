@@ -18,6 +18,7 @@ LIBJNIGRAPHICS {
     AImageDecoderHeaderInfo_isAnimated;
     AImageDecoderHeaderInfo_getAndroidBitmapFormat;
     AndroidBitmap_getInfo;
+    AndroidBitmap_getDataSpace;
     AndroidBitmap_lockPixels;
     AndroidBitmap_unlockPixels;
   local:

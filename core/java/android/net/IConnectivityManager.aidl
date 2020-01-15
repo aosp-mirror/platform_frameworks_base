@@ -152,7 +152,7 @@ interface IConnectivityManager
 
     void declareNetworkRequestUnfulfillable(in NetworkRequest request);
 
-    int registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
+    Network registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
             in NetworkCapabilities nc, int score, in NetworkAgentConfig config,
             in int factorySerialNumber);
 

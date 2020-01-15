@@ -17,6 +17,8 @@
 package android.view.inputmethod;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.os.Parcelable;
 import android.view.inline.InlinePresentationSpec;
 
@@ -49,6 +51,21 @@ public final class InlineSuggestionsRequest implements Parcelable {
      */
     private final @NonNull List<InlinePresentationSpec> mPresentationSpecs;
 
+    /**
+     * The package name of the app that requests for the inline suggestions and will host the
+     * embedded suggestion views. The app does not have to set the value for the field because
+     * it'll be set by the system for safety reasons.
+     */
+    private @NonNull String mHostPackageName;
+
+    /**
+     * @hide
+     * @see {@link #mHostPackageName}.
+     */
+    public void setHostPackageName(@NonNull String hostPackageName) {
+        mHostPackageName = hostPackageName;
+    }
+
     private void onConstructed() {
         Preconditions.checkState(mMaxSuggestionCount >= mPresentationSpecs.size());
     }
@@ -57,9 +74,15 @@ public final class InlineSuggestionsRequest implements Parcelable {
         return SUGGESTION_COUNT_UNLIMITED;
     }
 
+    private static String defaultHostPackageName() {
+        return ActivityThread.currentPackageName();
+    }
+
     /** @hide */
     abstract static class BaseBuilder {
         abstract Builder setPresentationSpecs(@NonNull List<InlinePresentationSpec> value);
+
+        abstract Builder setHostPackageName(@Nullable String value);
     }
 
 
@@ -80,11 +103,15 @@ public final class InlineSuggestionsRequest implements Parcelable {
     @DataClass.Generated.Member
     /* package-private */ InlineSuggestionsRequest(
             int maxSuggestionCount,
-            @NonNull List<InlinePresentationSpec> presentationSpecs) {
+            @NonNull List<InlinePresentationSpec> presentationSpecs,
+            @NonNull String hostPackageName) {
         this.mMaxSuggestionCount = maxSuggestionCount;
         this.mPresentationSpecs = presentationSpecs;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mPresentationSpecs);
+        this.mHostPackageName = hostPackageName;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mHostPackageName);
 
         onConstructed();
     }
@@ -108,6 +135,16 @@ public final class InlineSuggestionsRequest implements Parcelable {
         return mPresentationSpecs;
     }
 
+    /**
+     * The package name of the app that requests for the inline suggestions and will host the
+     * embedded suggestion views. The app does not have to set the value for the field because
+     * it'll be set by the system for safety reasons.
+     */
+    @DataClass.Generated.Member
+    public @NonNull String getHostPackageName() {
+        return mHostPackageName;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -116,13 +153,14 @@ public final class InlineSuggestionsRequest implements Parcelable {
 
         return "InlineSuggestionsRequest { " +
                 "maxSuggestionCount = " + mMaxSuggestionCount + ", " +
-                "presentationSpecs = " + mPresentationSpecs +
+                "presentationSpecs = " + mPresentationSpecs + ", " +
+                "hostPackageName = " + mHostPackageName +
         " }";
     }
 
     @Override
     @DataClass.Generated.Member
-    public boolean equals(@android.annotation.Nullable Object o) {
+    public boolean equals(@Nullable Object o) {
         // You can override field equality logic by defining either of the methods like:
         // boolean fieldNameEquals(InlineSuggestionsRequest other) { ... }
         // boolean fieldNameEquals(FieldType otherValue) { ... }
@@ -134,7 +172,8 @@ public final class InlineSuggestionsRequest implements Parcelable {
         //noinspection PointlessBooleanExpression
         return true
                 && mMaxSuggestionCount == that.mMaxSuggestionCount
-                && java.util.Objects.equals(mPresentationSpecs, that.mPresentationSpecs);
+                && java.util.Objects.equals(mPresentationSpecs, that.mPresentationSpecs)
+                && java.util.Objects.equals(mHostPackageName, that.mHostPackageName);
     }
 
     @Override
@@ -146,6 +185,7 @@ public final class InlineSuggestionsRequest implements Parcelable {
         int _hash = 1;
         _hash = 31 * _hash + mMaxSuggestionCount;
         _hash = 31 * _hash + java.util.Objects.hashCode(mPresentationSpecs);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mHostPackageName);
         return _hash;
     }
 
@@ -157,6 +197,7 @@ public final class InlineSuggestionsRequest implements Parcelable {
 
         dest.writeInt(mMaxSuggestionCount);
         dest.writeParcelableList(mPresentationSpecs, flags);
+        dest.writeString(mHostPackageName);
     }
 
     @Override
@@ -173,11 +214,15 @@ public final class InlineSuggestionsRequest implements Parcelable {
         int maxSuggestionCount = in.readInt();
         List<InlinePresentationSpec> presentationSpecs = new ArrayList<>();
         in.readParcelableList(presentationSpecs, InlinePresentationSpec.class.getClassLoader());
+        String hostPackageName = in.readString();
 
         this.mMaxSuggestionCount = maxSuggestionCount;
         this.mPresentationSpecs = presentationSpecs;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mPresentationSpecs);
+        this.mHostPackageName = hostPackageName;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mHostPackageName);
 
         onConstructed();
     }
@@ -205,6 +250,7 @@ public final class InlineSuggestionsRequest implements Parcelable {
 
         private int mMaxSuggestionCount;
         private @NonNull List<InlinePresentationSpec> mPresentationSpecs;
+        private @NonNull String mHostPackageName;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -260,22 +306,40 @@ public final class InlineSuggestionsRequest implements Parcelable {
             return this;
         }
 
+        /**
+         * The package name of the app that requests for the inline suggestions and will host the
+         * embedded suggestion views. The app does not have to set the value for the field because
+         * it'll be set by the system for safety reasons.
+         */
+        @DataClass.Generated.Member
+        @Override
+        @NonNull Builder setHostPackageName(@NonNull String value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x4;
+            mHostPackageName = value;
+            return this;
+        }
+
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull InlineSuggestionsRequest build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x4; // Mark builder used
+            mBuilderFieldsSet |= 0x8; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x1) == 0) {
                 mMaxSuggestionCount = defaultMaxSuggestionCount();
             }
+            if ((mBuilderFieldsSet & 0x4) == 0) {
+                mHostPackageName = defaultHostPackageName();
+            }
             InlineSuggestionsRequest o = new InlineSuggestionsRequest(
                     mMaxSuggestionCount,
-                    mPresentationSpecs);
+                    mPresentationSpecs,
+                    mHostPackageName);
             return o;
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x4) != 0) {
+            if ((mBuilderFieldsSet & 0x8) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
@@ -283,10 +347,10 @@ public final class InlineSuggestionsRequest implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1576637222199L,
+            time = 1578948035951L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/view/inputmethod/InlineSuggestionsRequest.java",
-            inputSignatures = "public static final  int SUGGESTION_COUNT_UNLIMITED\nprivate final  int mMaxSuggestionCount\nprivate final @android.annotation.NonNull java.util.List<android.view.inline.InlinePresentationSpec> mPresentationSpecs\nprivate  void onConstructed()\nprivate static  int defaultMaxSuggestionCount()\nclass InlineSuggestionsRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setPresentationSpecs(java.util.List<android.view.inline.InlinePresentationSpec>)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "public static final  int SUGGESTION_COUNT_UNLIMITED\nprivate final  int mMaxSuggestionCount\nprivate final @android.annotation.NonNull java.util.List<android.view.inline.InlinePresentationSpec> mPresentationSpecs\nprivate @android.annotation.NonNull java.lang.String mHostPackageName\npublic  void setHostPackageName(java.lang.String)\nprivate  void onConstructed()\nprivate static  int defaultMaxSuggestionCount()\nprivate static  java.lang.String defaultHostPackageName()\nclass InlineSuggestionsRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setPresentationSpecs(java.util.List<android.view.inline.InlinePresentationSpec>)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setHostPackageName(java.lang.String)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 

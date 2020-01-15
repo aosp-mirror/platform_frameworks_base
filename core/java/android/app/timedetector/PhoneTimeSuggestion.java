@@ -18,6 +18,7 @@ package android.app.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.TimestampedValue;
@@ -28,17 +29,23 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A time signal from a telephony source. The value can be {@code null} to indicate that the
- * telephony source has entered an "un-opinionated" state and any previously sent suggestions are
- * being withdrawn. When not {@code null}, the value consists of the number of milliseconds elapsed
- * since 1/1/1970 00:00:00 UTC and the time according to the elapsed realtime clock when that number
- * was established. The elapsed realtime clock is considered accurate but volatile, so time signals
- * must not be persisted across device resets.
+ * A time suggestion from an identified telephony source. e.g. from NITZ information from a specific
+ * radio.
+ *
+ * <p>The time value can be {@code null} to indicate that the telephony source has entered an
+ * "un-opinionated" state and any previous suggestions from the source are being withdrawn. When not
+ * {@code null}, the value consists of the number of milliseconds elapsed since 1/1/1970 00:00:00
+ * UTC and the time according to the elapsed realtime clock when that number was established. The
+ * elapsed realtime clock is considered accurate but volatile, so time suggestions must not be
+ * persisted across device resets.
  *
  * @hide
  */
+@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class PhoneTimeSuggestion implements Parcelable {
 
+    /** @hide */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final @NonNull Parcelable.Creator<PhoneTimeSuggestion> CREATOR =
             new Parcelable.Creator<PhoneTimeSuggestion>() {
                 public PhoneTimeSuggestion createFromParcel(Parcel in) {
@@ -85,15 +92,27 @@ public final class PhoneTimeSuggestion implements Parcelable {
         dest.writeList(mDebugInfo);
     }
 
+    /**
+     * Returns an identifier for the source of this suggestion. When a device has several "phones",
+     * i.e. sim slots or equivalent, it is used to identify which one.
+     */
     public int getPhoneId() {
         return mPhoneId;
     }
 
+    /**
+     * Returns the suggestion. {@code null} means that the caller is no longer sure what time it
+     * is.
+     */
     @Nullable
     public TimestampedValue<Long> getUtcTime() {
         return mUtcTime;
     }
 
+    /**
+     * Returns debug metadata for the suggestion. The information is present in {@link #toString()}
+     * but is not considered for {@link #equals(Object)} and {@link #hashCode()}.
+     */
     @NonNull
     public List<String> getDebugInfo() {
         return mDebugInfo == null
@@ -105,7 +124,7 @@ public final class PhoneTimeSuggestion implements Parcelable {
      * information is present in {@link #toString()} but is not considered for
      * {@link #equals(Object)} and {@link #hashCode()}.
      */
-    public void addDebugInfo(String debugInfo) {
+    public void addDebugInfo(@NonNull String debugInfo) {
         if (mDebugInfo == null) {
             mDebugInfo = new ArrayList<>();
         }
@@ -156,16 +175,19 @@ public final class PhoneTimeSuggestion implements Parcelable {
      *
      * @hide
      */
-    public static class Builder {
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final class Builder {
         private final int mPhoneId;
-        private TimestampedValue<Long> mUtcTime;
-        private List<String> mDebugInfo;
+        @Nullable private TimestampedValue<Long> mUtcTime;
+        @Nullable private List<String> mDebugInfo;
 
+        /** Creates a builder with the specified {@code phoneId}. */
         public Builder(int phoneId) {
             mPhoneId = phoneId;
         }
 
         /** Returns the builder for call chaining. */
+        @NonNull
         public Builder setUtcTime(@Nullable TimestampedValue<Long> utcTime) {
             if (utcTime != null) {
                 // utcTime can be null, but the value it holds cannot.
@@ -177,6 +199,7 @@ public final class PhoneTimeSuggestion implements Parcelable {
         }
 
         /** Returns the builder for call chaining. */
+        @NonNull
         public Builder addDebugInfo(@NonNull String debugInfo) {
             if (mDebugInfo == null) {
                 mDebugInfo = new ArrayList<>();
@@ -186,6 +209,7 @@ public final class PhoneTimeSuggestion implements Parcelable {
         }
 
         /** Returns the {@link PhoneTimeSuggestion}. */
+        @NonNull
         public PhoneTimeSuggestion build() {
             return new PhoneTimeSuggestion(this);
         }

@@ -41,7 +41,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
-import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
@@ -68,7 +68,7 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private HighPriorityProvider mHighPriorityProvider;
-    @Mock private NotifListBuilderImpl mNotifListBuilder;
+    @Mock private NotifPipeline mNotifPipeline;
 
     private NotificationEntry mEntry;
     private KeyguardCoordinator mKeyguardCoordinator;
@@ -87,8 +87,8 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
                 .build();
 
         ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
-        mKeyguardCoordinator.attach(null, mNotifListBuilder);
-        verify(mNotifListBuilder, times(1)).addPreRenderFilter(filterCaptor.capture());
+        mKeyguardCoordinator.attach(mNotifPipeline);
+        verify(mNotifPipeline, times(1)).addPreRenderFilter(filterCaptor.capture());
         mKeyguardFilter = filterCaptor.getValue();
     }
 

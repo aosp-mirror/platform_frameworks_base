@@ -961,6 +961,13 @@ public class PhysicsAnimationLayout extends FrameLayout {
             if (view != null) {
                 final SpringAnimation animation =
                         (SpringAnimation) view.getTag(getTagIdForProperty(property));
+
+                // If the animation is null, the view was probably removed from the layout before
+                // the animation started.
+                if (animation == null) {
+                    return;
+                }
+
                 if (afterCallbacks != null) {
                     animation.addEndListener(new OneTimeEndListener() {
                         @Override

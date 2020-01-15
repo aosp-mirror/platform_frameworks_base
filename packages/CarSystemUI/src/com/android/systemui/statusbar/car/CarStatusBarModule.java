@@ -31,6 +31,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.car.CarServiceProvider;
+import com.android.systemui.car.SystemUIPrimaryWindowController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -66,8 +67,8 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
-import com.android.systemui.statusbar.notification.collection.init.NewNotifPipeline;
+import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.collection.init.NotifPipelineInitializer;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -138,7 +139,7 @@ public class CarStatusBarModule {
             HeadsUpManagerPhone headsUpManagerPhone,
             DynamicPrivacyController dynamicPrivacyController,
             BypassHeadsUpNotifier bypassHeadsUpNotifier,
-            Lazy<NewNotifPipeline> newNotifPipeline,
+            Lazy<NotifPipelineInitializer> notifPipelineInitializer,
             FalsingManager falsingManager,
             BroadcastDispatcher broadcastDispatcher,
             RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
@@ -207,7 +208,8 @@ public class CarStatusBarModule {
             DismissCallbackRegistry dismissCallbackRegistry,
             CarServiceProvider carServiceProvider,
             Lazy<PowerManagerHelper> powerManagerHelperLazy,
-            Lazy<FullscreenUserSwitcher> fullscreenUserSwitcherLazy,
+            FullscreenUserSwitcher fullscreenUserSwitcher,
+            SystemUIPrimaryWindowController systemUIPrimaryWindowController,
             CarNavigationBarController carNavigationBarController,
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder) {
         return new CarStatusBar(
@@ -224,7 +226,7 @@ public class CarStatusBarModule {
                 headsUpManagerPhone,
                 dynamicPrivacyController,
                 bypassHeadsUpNotifier,
-                newNotifPipeline,
+                notifPipelineInitializer,
                 falsingManager,
                 broadcastDispatcher,
                 remoteInputQuickSettingsDisabler,
@@ -292,7 +294,8 @@ public class CarStatusBarModule {
                 dismissCallbackRegistry,
                 carServiceProvider,
                 powerManagerHelperLazy,
-                fullscreenUserSwitcherLazy,
+                fullscreenUserSwitcher,
+                systemUIPrimaryWindowController,
                 carNavigationBarController,
                 flingAnimationUtilsBuilder);
     }

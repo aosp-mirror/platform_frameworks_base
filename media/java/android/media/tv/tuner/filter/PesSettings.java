@@ -17,6 +17,9 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
+import android.content.Context;
 import android.media.tv.tuner.TunerConstants;
 import android.media.tv.tuner.TunerUtils;
 import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
@@ -26,6 +29,7 @@ import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
  *
  * @hide
  */
+@SystemApi
 public class PesSettings extends Settings {
     private final int mStreamId;
     private final boolean mIsRaw;
@@ -37,12 +41,32 @@ public class PesSettings extends Settings {
     }
 
     /**
+     * Gets stream ID.
+     */
+    public int getStreamId() {
+        return mStreamId;
+    }
+
+    /**
+     * Returns whether the data is raw.
+     *
+     * @return {@code true} if the data is raw. Filter sends onFilterStatus callback
+     * instead of onFilterEvent for raw data. {@code false} otherwise.
+     */
+    public boolean isRaw() {
+        return mIsRaw;
+    }
+
+    /**
      * Creates a builder for {@link PesSettings}.
      *
      * @param mainType the filter main type of the settings.
+     * @param context the context of the caller.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder newBuilder(@FilterType int mainType) {
+    public static Builder builder(@NonNull Context context, @FilterType int mainType) {
+        TunerUtils.checkTunerPermission(context);
         return new Builder(mainType);
     }
 
@@ -70,13 +94,13 @@ public class PesSettings extends Settings {
         }
 
         /**
-         * Sets whether it's raw.
+         * Sets whether the data is raw.
          *
          * @param isRaw {@code true} if the data is raw. Filter sends onFilterStatus callback
          * instead of onFilterEvent for raw data. {@code false} otherwise.
          */
         @NonNull
-        public Builder setIsRaw(boolean isRaw) {
+        public Builder setRaw(boolean isRaw) {
             mIsRaw = isRaw;
             return this;
         }

@@ -32,8 +32,8 @@ import "frameworks/base/core/proto/android/server/appstatetracker.proto";
 import "frameworks/base/core/proto/android/server/job/enums.proto";
 import "frameworks/base/core/proto/android/server/statlogger.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/util/quotatracker.proto";
 
-// Next tag: 21
 message JobSchedulerServiceDumpProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -160,10 +160,13 @@ message JobSchedulerServiceDumpProto {
     optional JobConcurrencyManagerProto concurrency_manager = 20;
 
     optional JobStorePersistStatsProto persist_stats = 21;
+
+    optional .android.util.quota.CountQuotaTrackerProto quota_tracker = 22;
+
+    // Next tag: 23
 }
 
 // A com.android.server.job.JobSchedulerService.Constants object.
-// Next tag: 29
 message ConstantsProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -246,6 +249,14 @@ message ConstantsProto {
     // Whether to use heartbeats or rolling window for quota management. True
     // will use heartbeats, false will use a rolling window.
     reserved 23; // use_heartbeats
+    // Whether to enable quota limits on APIs.
+    optional bool enable_api_quotas = 31;
+    // The maximum number of schedule() calls an app can make in a set amount of time.
+    optional int32 api_quota_schedule_count = 32;
+    // The time window that {@link #API_QUOTA_SCHEDULE_COUNT} should be evaluated over.
+    optional int64 api_quota_schedule_window_ms = 33;
+    // Whether or not to throw an exception when an app hits its schedule quota limit.
+    optional bool api_quota_schedule_throw_exception = 34;
 
     message QuotaController {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -331,7 +342,7 @@ message ConstantsProto {
     // In this time after screen turns on, we increase job concurrency.
     optional int32 screen_off_job_concurrency_increase_delay_ms = 28;
 
-    // Next tag: 31
+    // Next tag: 35
 }
 
 // Next tag: 4
@@ -651,8 +662,7 @@ message StateControllerProto {
             optional bool is_active = 2;
             // The time this timer last became active. Only valid if is_active is true.
             optional int64 start_time_elapsed = 3;
-            // How many background jobs are currently running. Valid only if the device is_active
-            // is true.
+            // How many background jobs are currently running. Valid only if is_active is true.
             optional int32 bg_job_count = 4;
             // All of the jobs that the Timer is currently tracking.
             repeated JobStatusShortInfoProto running_jobs = 5;

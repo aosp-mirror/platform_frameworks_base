@@ -163,7 +163,6 @@ public final class UsageStatsManager {
     /**
      * The app spent sufficient time in the old bucket without any substantial event so it reached
      * the timeout threshold to have its bucket lowered.
-     *
      * @hide
      */
     public static final int REASON_MAIN_TIMEOUT =   0x0200;
@@ -173,15 +172,25 @@ public final class UsageStatsManager {
      */
     public static final int REASON_MAIN_USAGE =     0x0300;
     /**
-     * Forced by a core UID.
+     * Forced by the user/developer, either explicitly or implicitly through some action. If user
+     * action was not involved and this is purely due to the system,
+     * {@link #REASON_MAIN_FORCED_BY_SYSTEM} should be used instead.
      * @hide
      */
-    public static final int REASON_MAIN_FORCED =    0x0400;
+    public static final int REASON_MAIN_FORCED_BY_USER = 0x0400;
     /**
-     * Set by a privileged system app.
+     * Set by a privileged system app. This may be overridden by
+     * {@link #REASON_MAIN_FORCED_BY_SYSTEM} or user action.
      * @hide
      */
     public static final int REASON_MAIN_PREDICTED = 0x0500;
+    /**
+     * Forced by the system, independent of user action. If user action is involved,
+     * {@link #REASON_MAIN_FORCED_BY_USER} should be used instead. When this is used, only
+     * {@link #REASON_MAIN_FORCED_BY_SYSTEM} or user action can change the bucket.
+     * @hide
+     */
+    public static final int REASON_MAIN_FORCED_BY_SYSTEM = 0x0600;
 
     /** @hide */
     public static final int REASON_SUB_MASK = 0x00FF;
@@ -1016,7 +1025,10 @@ public final class UsageStatsManager {
             case REASON_MAIN_DEFAULT:
                 sb.append("d");
                 break;
-            case REASON_MAIN_FORCED:
+            case REASON_MAIN_FORCED_BY_SYSTEM:
+                sb.append("s");
+                break;
+            case REASON_MAIN_FORCED_BY_USER:
                 sb.append("f");
                 break;
             case REASON_MAIN_PREDICTED:

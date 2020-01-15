@@ -18,6 +18,7 @@ package android.app.timezonedetector;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.RemoteException;
@@ -28,8 +29,10 @@ import android.util.Log;
 /**
  * The interface through which system components can send signals to the TimeZoneDetectorService.
  *
+ * <p>This class is non-final for mockito.
  * @hide
  */
+@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 @SystemService(Context.TIME_ZONE_DETECTOR_SERVICE)
 public class TimeZoneDetector {
     private static final String TAG = "timezonedetector.TimeZoneDetector";
@@ -37,6 +40,7 @@ public class TimeZoneDetector {
 
     private final ITimeZoneDetectorService mITimeZoneDetectorService;
 
+    /** @hide */
     public TimeZoneDetector() throws ServiceNotFoundException {
         mITimeZoneDetectorService = ITimeZoneDetectorService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.TIME_ZONE_DETECTOR_SERVICE));
@@ -46,7 +50,10 @@ public class TimeZoneDetector {
      * Suggests the current time zone, determined using telephony signals, to the detector. The
      * detector may ignore the signal based on system settings, whether better information is
      * available, and so on.
+     *
+     * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE)
     public void suggestPhoneTimeZone(@NonNull PhoneTimeZoneSuggestion timeZoneSuggestion) {
         if (DEBUG) {
@@ -62,6 +69,8 @@ public class TimeZoneDetector {
     /**
      * Suggests the current time zone, determined for the user's manually information, to the
      * detector. The detector may ignore the signal based on system settings.
+     *
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE)
     public void suggestManualTimeZone(@NonNull ManualTimeZoneSuggestion timeZoneSuggestion) {
@@ -77,6 +86,8 @@ public class TimeZoneDetector {
 
     /**
      * A shared utility method to create a {@link ManualTimeZoneSuggestion}.
+     *
+     * @hide
      */
     public static ManualTimeZoneSuggestion createManualTimeZoneSuggestion(String tzId, String why) {
         ManualTimeZoneSuggestion suggestion = new ManualTimeZoneSuggestion(tzId);

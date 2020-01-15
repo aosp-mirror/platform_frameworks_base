@@ -18,6 +18,7 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
 
 import java.lang.annotation.Retention;
@@ -28,6 +29,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@SystemApi
 public abstract class FilterConfiguration {
 
     /** @hide */
@@ -57,7 +59,7 @@ public abstract class FilterConfiguration {
     public static final int FILTER_TYPE_ALP = Constants.DemuxFilterMainType.ALP;
 
     @Nullable
-    private final Settings mSettings;
+    /* package */ final Settings mSettings;
 
     /* package */ FilterConfiguration(Settings settings) {
         mSettings = settings;

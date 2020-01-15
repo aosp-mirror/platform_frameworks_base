@@ -23,7 +23,8 @@ import static android.app.usage.UsageEvents.Event.SLICE_PINNED_PRIV;
 import static android.app.usage.UsageEvents.Event.SYSTEM_INTERACTION;
 import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_DEFAULT;
-import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_SYSTEM;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_USER;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_PREDICTED;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
@@ -501,12 +502,18 @@ public class AppStandbyControllerTests {
         // Can force to NEVER
         mInjector.mElapsedRealtime = HOUR_MS;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_NEVER,
-                REASON_MAIN_FORCED);
+                REASON_MAIN_FORCED_BY_USER);
         assertEquals(STANDBY_BUCKET_NEVER, getStandbyBucket(mController, PACKAGE_1));
 
-        // Prediction can't override FORCED reason
+        // Prediction can't override FORCED reasons
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_PREDICTED);
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
-                REASON_MAIN_FORCED);
+                REASON_MAIN_FORCED_BY_USER);
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
                 REASON_MAIN_PREDICTED);
         assertEquals(STANDBY_BUCKET_FREQUENT, getStandbyBucket(mController, PACKAGE_1));
@@ -631,7 +638,7 @@ public class AppStandbyControllerTests {
         mInjector.mElapsedRealtime = 1 * RARE_THRESHOLD + 100;
         // Make sure app is in NEVER bucket
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_NEVER,
-                REASON_MAIN_FORCED);
+                REASON_MAIN_FORCED_BY_USER);
         mController.checkIdleStates(USER_ID);
         assertBucket(STANDBY_BUCKET_NEVER);
 

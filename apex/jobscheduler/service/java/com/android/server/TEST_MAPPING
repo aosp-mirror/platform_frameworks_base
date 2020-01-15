@@ -1,0 +1,22 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksMockingServicesTests",
+      "file_patterns": [
+        "DeviceIdleController\\.java"
+      ],
+      "options": [
+        {"include-filter": "com.android.server.DeviceIdleControllerTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "FrameworksMockingServicesTests",
+      "options": [
+        {"include-filter": "com.android.server"}
+      ]
+    }
+  ]
+}

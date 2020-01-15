@@ -714,60 +714,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void addNetworkStats(
-            int tag, List<StatsLogEventWrapper> ret, NetworkStats stats, boolean withFGBG) {
-        int size = stats.size();
-        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
-        long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
-        NetworkStats.Entry entry = new NetworkStats.Entry(); // For recycling
-        for (int j = 0; j < size; j++) {
-            stats.getValues(j, entry);
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tag, elapsedNanos, wallClockNanos);
-            e.writeInt(entry.uid);
-            if (withFGBG) {
-                e.writeInt(entry.set);
-            }
-            e.writeLong(entry.rxBytes);
-            e.writeLong(entry.rxPackets);
-            e.writeLong(entry.txBytes);
-            e.writeLong(entry.txPackets);
-            ret.add(e);
-        }
-    }
-
-    /**
-     * Allows rollups per UID but keeping the set (foreground/background) slicing.
-     * Adapted from groupedByUid in frameworks/base/core/java/android/net/NetworkStats.java
-     */
-    private NetworkStats rollupNetworkStatsByFGBG(NetworkStats stats) {
-        final NetworkStats ret = new NetworkStats(stats.getElapsedRealtime(), 1);
-
-        final NetworkStats.Entry entry = new NetworkStats.Entry();
-        entry.iface = NetworkStats.IFACE_ALL;
-        entry.tag = NetworkStats.TAG_NONE;
-        entry.metered = NetworkStats.METERED_ALL;
-        entry.roaming = NetworkStats.ROAMING_ALL;
-
-        int size = stats.size();
-        NetworkStats.Entry recycle = new NetworkStats.Entry(); // Used for retrieving values
-        for (int i = 0; i < size; i++) {
-            stats.getValues(i, recycle);
-
-            // Skip specific tags, since already counted in TAG_NONE
-            if (recycle.tag != NetworkStats.TAG_NONE) continue;
-
-            entry.set = recycle.set; // Allows slicing by background/foreground
-            entry.uid = recycle.uid;
-            entry.rxBytes = recycle.rxBytes;
-            entry.rxPackets = recycle.rxPackets;
-            entry.txBytes = recycle.txBytes;
-            entry.txPackets = recycle.txPackets;
-            // Operations purposefully omitted since we don't use them for statsd.
-            ret.combineValues(entry);
-        }
-        return ret;
-    }
-
     /**
      * Helper method to extract the Parcelable controller info from a
      * SynchronousResultReceiver.
@@ -812,94 +758,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeInt(kws.mVersion);
             e.writeLong(kws.mTotalTime);
             pulledData.add(e);
-        }
-    }
-
-    private void pullWifiBytesTransferByFgBg(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long token = Binder.clearCallingIdentity();
-        try {
-            BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
-            String[] ifaces = bs.getWifiIfaces();
-            if (ifaces.length == 0) {
-                return;
-            }
-            if (mNetworkStatsService == null) {
-                Slog.e(TAG, "NetworkStats Service is not available!");
-                return;
-            }
-            NetworkStats stats = rollupNetworkStatsByFGBG(
-                    mNetworkStatsService.getDetailedUidStats(ifaces));
-            addNetworkStats(tagId, pulledData, stats, true);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Pulling netstats for wifi bytes w/ fg/bg has error", e);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    private void pullMobileBytesTransfer(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long token = Binder.clearCallingIdentity();
-        try {
-            BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
-            String[] ifaces = bs.getMobileIfaces();
-            if (ifaces.length == 0) {
-                return;
-            }
-            if (mNetworkStatsService == null) {
-                Slog.e(TAG, "NetworkStats Service is not available!");
-                return;
-            }
-            // Combine all the metrics per Uid into one record.
-            NetworkStats stats = mNetworkStatsService.getDetailedUidStats(ifaces).groupedByUid();
-            addNetworkStats(tagId, pulledData, stats, false);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Pulling netstats for mobile bytes has error", e);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    private void pullBluetoothBytesTransfer(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        BluetoothActivityEnergyInfo info = fetchBluetoothData();
-        if (info.getUidTraffic() != null) {
-            for (UidTraffic traffic : info.getUidTraffic()) {
-                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
-                        wallClockNanos);
-                e.writeInt(traffic.getUid());
-                e.writeLong(traffic.getRxBytes());
-                e.writeLong(traffic.getTxBytes());
-                pulledData.add(e);
-            }
-        }
-    }
-
-    private void pullMobileBytesTransferByFgBg(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long token = Binder.clearCallingIdentity();
-        try {
-            BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
-            String[] ifaces = bs.getMobileIfaces();
-            if (ifaces.length == 0) {
-                return;
-            }
-            if (mNetworkStatsService == null) {
-                Slog.e(TAG, "NetworkStats Service is not available!");
-                return;
-            }
-            NetworkStats stats = rollupNetworkStatsByFGBG(
-                    mNetworkStatsService.getDetailedUidStats(ifaces));
-            addNetworkStats(tagId, pulledData, stats, true);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Pulling netstats for mobile bytes w/ fg/bg has error", e);
-        } finally {
-            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -1049,33 +907,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(modemInfo.getTransmitPowerInfo().get(4).getTimeInMillis());
             e.writeLong(modemInfo.getReceiveTimeMillis());
             pulledData.add(e);
-        }
-    }
-
-    private void pullBluetoothActivityInfo(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        BluetoothActivityEnergyInfo info = fetchBluetoothData();
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-        e.writeLong(info.getTimeStamp());
-        e.writeInt(info.getBluetoothStackState());
-        e.writeLong(info.getControllerTxTimeMillis());
-        e.writeLong(info.getControllerRxTimeMillis());
-        e.writeLong(info.getControllerIdleTimeMillis());
-        e.writeLong(info.getControllerEnergyUsed());
-        pulledData.add(e);
-    }
-
-    private synchronized BluetoothActivityEnergyInfo fetchBluetoothData() {
-        final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter != null) {
-            SynchronousResultReceiver bluetoothReceiver = new SynchronousResultReceiver(
-                    "bluetooth");
-            adapter.requestControllerActivityEnergyInfo(bluetoothReceiver);
-            return awaitControllerInfo(bluetoothReceiver);
-        } else {
-            Slog.e(TAG, "Failed to get bluetooth adapter!");
-            return null;
         }
     }
 
@@ -1669,21 +1500,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 data = newData;
             }
         }
-    }
-
-    private void pullPowerProfile(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        PowerProfile powerProfile = new PowerProfile(mContext);
-        Objects.requireNonNull(powerProfile);
-
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
-                wallClockNanos);
-        ProtoOutputStream proto = new ProtoOutputStream();
-        powerProfile.dumpDebug(proto);
-        proto.flush();
-        e.writeStorage(proto.getBytes());
-        pulledData.add(e);
     }
 
     private void pullBuildInformation(int tagId,
@@ -2291,26 +2107,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
         switch (tagId) {
-            
-            case StatsLog.MOBILE_BYTES_TRANSFER: {
-                pullMobileBytesTransfer(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG: {
-                pullWifiBytesTransferByFgBg(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG: {
-                pullMobileBytesTransferByFgBg(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.BLUETOOTH_BYTES_TRANSFER: {
-                pullBluetoothBytesTransfer(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
 
             case StatsLog.KERNEL_WAKELOCK: {
                 pullKernelWakelock(tagId, elapsedNanos, wallClockNanos, ret);
@@ -2349,11 +2145,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.MODEM_ACTIVITY_INFO: {
                 pullModemActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.BLUETOOTH_ACTIVITY_INFO: {
-                pullBluetoothActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 
@@ -2452,11 +2243,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.DISK_IO: {
                 pullDiskIo(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.POWER_PROFILE: {
-                pullPowerProfile(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

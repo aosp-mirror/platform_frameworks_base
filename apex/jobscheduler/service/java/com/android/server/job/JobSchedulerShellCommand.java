@@ -66,6 +66,8 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                     return getJobState(pw);
                 case "heartbeat":
                     return doHeartbeat(pw);
+                case "reset-schedule-quota":
+                    return resetScheduleQuota(pw);
                 case "trigger-dock-state":
                     return triggerDockState(pw);
                 default:
@@ -342,6 +344,18 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
 
         pw.println("Heartbeat command is no longer supported");
         return -1;
+    }
+
+    private int resetScheduleQuota(PrintWriter pw) throws Exception {
+        checkPermission("reset schedule quota");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInternal.resetScheduleQuota();
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        return 0;
     }
 
     private int triggerDockState(PrintWriter pw) throws Exception {

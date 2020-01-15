@@ -88,13 +88,11 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
 
     @Override
     public long elapsedRealtimeMillis() {
-        checkWakeLockHeld();
         return SystemClock.elapsedRealtime();
     }
 
     @Override
     public long systemClockMillis() {
-        checkWakeLockHeld();
         return System.currentTimeMillis();
     }
 

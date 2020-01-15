@@ -61,10 +61,10 @@ public interface TimeDetectorStrategy {
         /** Acquire a suitable wake lock. Must be followed by {@link #releaseWakeLock()} */
         void acquireWakeLock();
 
-        /** Returns the elapsedRealtimeMillis clock value. The WakeLock must be held. */
+        /** Returns the elapsedRealtimeMillis clock value. */
         long elapsedRealtimeMillis();
 
-        /** Returns the system clock value. The WakeLock must be held. */
+        /** Returns the system clock value. */
         long systemClockMillis();
 
         /** Sets the device system clock. The WakeLock must be held. */

@@ -23,18 +23,22 @@ import android.content.Intent;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.RoutingSessionInfo;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 abstract class MediaRoute2Provider {
     final ComponentName mComponentName;
     final String mUniqueId;
+    final Object mLock = new Object();
 
     Callback mCallback;
     private volatile MediaRoute2ProviderInfo mProviderInfo;
-    private volatile List<RoutingSessionInfo> mSessionInfos = Collections.emptyList();
+
+    @GuardedBy("mLock")
+    final List<RoutingSessionInfo> mSessionInfos = new ArrayList<>();
 
     MediaRoute2Provider(@NonNull ComponentName componentName) {
         mComponentName = Objects.requireNonNull(componentName, "Component name must not be null.");
@@ -69,11 +73,12 @@ abstract class MediaRoute2Provider {
 
     @NonNull
     public List<RoutingSessionInfo> getSessionInfos() {
-        return mSessionInfos;
+        synchronized (mLock) {
+            return mSessionInfos;
+        }
     }
 
-    void setProviderState(MediaRoute2ProviderInfo providerInfo,
-            List<RoutingSessionInfo> sessionInfos) {
+    void setProviderState(MediaRoute2ProviderInfo providerInfo) {
         if (providerInfo == null) {
             mProviderInfo = null;
         } else {
@@ -81,14 +86,6 @@ abstract class MediaRoute2Provider {
                     .setUniqueId(mUniqueId)
                     .build();
         }
-        List<RoutingSessionInfo> sessionInfoWithProviderId = new ArrayList<RoutingSessionInfo>();
-        for (RoutingSessionInfo sessionInfo : sessionInfos) {
-            sessionInfoWithProviderId.add(
-                    new RoutingSessionInfo.Builder(sessionInfo)
-                            .setProviderId(mUniqueId)
-                            .build());
-        }
-        mSessionInfos = sessionInfoWithProviderId;
     }
 
     void notifyProviderState() {
@@ -97,9 +94,8 @@ abstract class MediaRoute2Provider {
         }
     }
 
-    void setAndNotifyProviderState(MediaRoute2ProviderInfo providerInfo,
-            List<RoutingSessionInfo> sessionInfos) {
-        setProviderState(providerInfo, sessionInfos);
+    void setAndNotifyProviderState(MediaRoute2ProviderInfo providerInfo) {
+        setProviderState(providerInfo);
         notifyProviderState();
     }
 
@@ -112,10 +108,9 @@ abstract class MediaRoute2Provider {
         void onProviderStateChanged(@Nullable MediaRoute2Provider provider);
         void onSessionCreated(@NonNull MediaRoute2Provider provider,
                 @Nullable RoutingSessionInfo sessionInfo, long requestId);
-        // TODO: Remove this when MediaRouter2ServiceImpl notifies clients of session changes.
-        void onSessionInfoChanged(@NonNull MediaRoute2Provider provider,
+        void onSessionCreationFailed(@NonNull MediaRoute2Provider provider, long requestId);
+        void onSessionUpdated(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo);
-        // TODO: Call this when service actually notifies of session release.
         void onSessionReleased(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo);
     }

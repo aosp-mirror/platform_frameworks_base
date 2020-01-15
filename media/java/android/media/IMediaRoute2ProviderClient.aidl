@@ -25,8 +25,10 @@ import android.os.Bundle;
  * @hide
  */
 oneway interface IMediaRoute2ProviderClient {
-    void updateState(in MediaRoute2ProviderInfo providerInfo,
-            in List<RoutingSessionInfo> sessionInfos);
-    void notifySessionCreated(in @nullable RoutingSessionInfo sessionInfo, long requestId);
-    void notifySessionInfoChanged(in RoutingSessionInfo sessionInfo);
+    // TODO: Change it to updateRoutes?
+    void updateState(in MediaRoute2ProviderInfo providerInfo);
+    void notifySessionCreated(in RoutingSessionInfo sessionInfo, long requestId);
+    void notifySessionCreationFailed(long requestId);
+    void notifySessionUpdated(in RoutingSessionInfo sessionInfo);
+    void notifySessionReleased(in RoutingSessionInfo sessionInfo);
 }

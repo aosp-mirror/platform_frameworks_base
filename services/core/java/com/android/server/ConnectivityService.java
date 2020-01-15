@@ -3617,14 +3617,29 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 enforceSettingsPermission();
             }
 
-            // getNetworkAgentInfoForNetwork is thread-safe
-            final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(mNetwork);
-            if (nai == null) return;
-
-            // nai.networkMonitor() is thread-safe
-            final NetworkMonitorManager nm = nai.networkMonitor();
+            final NetworkMonitorManager nm = getNetworkMonitorManager(mNetwork);
             if (nm == null) return;
             nm.notifyCaptivePortalAppFinished(response);
+        }
+
+        @Override
+        public void appRequest(final int request) {
+            final NetworkMonitorManager nm = getNetworkMonitorManager(mNetwork);
+            if (nm == null) return;
+
+            if (request == CaptivePortal.APP_REQUEST_REEVALUATION_REQUIRED) {
+                nm.forceReevaluation(Binder.getCallingUid());
+            }
+        }
+
+        @Nullable
+        private NetworkMonitorManager getNetworkMonitorManager(final Network network) {
+            // getNetworkAgentInfoForNetwork is thread-safe
+            final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+            if (nai == null) return null;
+
+            // nai.networkMonitor() is thread-safe
+            return nai.networkMonitor();
         }
 
         @Override
@@ -5490,7 +5505,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // changes that would conflict throughout the automerger graph. Having this method temporarily
     // helps with the process of going through with all these dependent changes across the entire
     // tree.
-    public int registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
+    /**
+     * Register a new agent. {@see #registerNetworkAgent} below.
+     */
+    public Network registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
             int currentScore, NetworkAgentConfig networkAgentConfig) {
         return registerNetworkAgent(messenger, networkInfo, linkProperties, networkCapabilities,
@@ -5511,8 +5529,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
      *         {@link NetworkAgentInfo#getCurrentScore}.
      * @param networkAgentConfig metadata about the network. This is never updated.
      * @param providerId the ID of the provider owning this NetworkAgent.
+     * @return the network created for this agent.
      */
-    public int registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
+    public Network registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
             int currentScore, NetworkAgentConfig networkAgentConfig, int providerId) {
         enforceNetworkFactoryPermission();
@@ -5545,7 +5564,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // If the network disconnects or sends any other event before that, messages are deferred by
         // NetworkAgent until nai.asyncChannel.connect(), which will be called when finalizing the
         // registration.
-        return nai.network.netId;
+        return nai.network;
     }
 
     private void handleRegisterNetworkAgent(NetworkAgentInfo nai, INetworkMonitor networkMonitor) {

@@ -186,6 +186,12 @@ public class StatsPullAtomService extends SystemService {
     private static final String TAG = "StatsPullAtomService";
     private static final boolean DEBUG = true;
 
+    private static final String RESULT_RECEIVER_CONTROLLER_KEY = "controller_activity";
+    /**
+     * How long to wait on an individual subsystem to return its stats.
+     */
+    private static final long EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS = 2000;
+
     private final Object mNetworkStatsLock = new Object();
     @GuardedBy("mNetworkStatsLock")
     private INetworkStatsService mNetworkStatsService;
@@ -327,11 +333,12 @@ public class StatsPullAtomService extends SystemService {
     }
     private void registerWifiBytesTransfer() {
         int tagId = StatsLog.WIFI_BYTES_TRANSFER;
-        PullAtomMetadata metaData = PullAtomMetadata.newBuilder()
-                .setAdditiveFields(new int[] {2, 3, 4, 5}).build();
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {2, 3, 4, 5})
+                .build();
         mStatsManager.registerPullAtomCallback(
                 tagId,
-                metaData,
+                metadata,
                 (atomTag, data) -> pullWifiBytesTransfer(atomTag, data),
                 Executors.newSingleThreadExecutor()
         );
@@ -356,6 +363,7 @@ public class StatsPullAtomService extends SystemService {
             addNetworkStats(atomTag, pulledData, stats, false);
         } catch (RemoteException e) {
             Slog.e(TAG, "Pulling netstats for wifi bytes has error", e);
+            return StatsManager.PULL_SKIP;
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -382,36 +390,224 @@ public class StatsPullAtomService extends SystemService {
         }
     }
 
-    private void registerWifiBytesTransferBackground() {
-        // No op.
+    /**
+     * Allows rollups per UID but keeping the set (foreground/background) slicing.
+     * Adapted from groupedByUid in frameworks/base/core/java/android/net/NetworkStats.java
+     */
+    private NetworkStats rollupNetworkStatsByFGBG(NetworkStats stats) {
+        final NetworkStats ret = new NetworkStats(stats.getElapsedRealtime(), 1);
+
+        final NetworkStats.Entry entry = new NetworkStats.Entry();
+        entry.iface = NetworkStats.IFACE_ALL;
+        entry.tag = NetworkStats.TAG_NONE;
+        entry.metered = NetworkStats.METERED_ALL;
+        entry.roaming = NetworkStats.ROAMING_ALL;
+
+        int size = stats.size();
+        NetworkStats.Entry recycle = new NetworkStats.Entry(); // Used for retrieving values
+        for (int i = 0; i < size; i++) {
+            stats.getValues(i, recycle);
+
+            // Skip specific tags, since already counted in TAG_NONE
+            if (recycle.tag != NetworkStats.TAG_NONE) continue;
+
+            entry.set = recycle.set; // Allows slicing by background/foreground
+            entry.uid = recycle.uid;
+            entry.rxBytes = recycle.rxBytes;
+            entry.rxPackets = recycle.rxPackets;
+            entry.txBytes = recycle.txBytes;
+            entry.txPackets = recycle.txPackets;
+            // Operations purposefully omitted since we don't use them for statsd.
+            ret.combineValues(entry);
+        }
+        return ret;
     }
 
-    private void pullWifiBytesTransferBackground() {
-        // No op.
+    private void registerWifiBytesTransferBackground() {
+        int tagId = StatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {3, 4, 5, 6})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullWifiBytesTransferBackground(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
+    }
+
+    private int pullWifiBytesTransferBackground(int atomTag, List<StatsEvent> pulledData) {
+        INetworkStatsService networkStatsService = getINetworkStatsService();
+        if (networkStatsService == null) {
+            Slog.e(TAG, "NetworkStats Service is not available!");
+            return StatsManager.PULL_SKIP;
+        }
+        long token = Binder.clearCallingIdentity();
+        try {
+            BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
+            String[] ifaces = bs.getWifiIfaces();
+            if (ifaces.length == 0) {
+                return StatsManager.PULL_SKIP;
+            }
+            NetworkStats stats = rollupNetworkStatsByFGBG(
+                    networkStatsService.getDetailedUidStats(ifaces));
+            addNetworkStats(atomTag, pulledData, stats, true);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Pulling netstats for wifi bytes w/ fg/bg has error", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerMobileBytesTransfer() {
-        // No op.
+        int tagId = StatsLog.MOBILE_BYTES_TRANSFER;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {2, 3, 4, 5})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullMobileBytesTransfer(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullMobileBytesTransfer() {
-        // No op.
+    private int pullMobileBytesTransfer(int atomTag, List<StatsEvent> pulledData) {
+        INetworkStatsService networkStatsService = getINetworkStatsService();
+        if (networkStatsService == null) {
+            Slog.e(TAG, "NetworkStats Service is not available!");
+            return StatsManager.PULL_SKIP;
+        }
+        long token = Binder.clearCallingIdentity();
+        try {
+            BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
+            String[] ifaces = bs.getMobileIfaces();
+            if (ifaces.length == 0) {
+                return StatsManager.PULL_SKIP;
+            }
+            // Combine all the metrics per Uid into one record.
+            NetworkStats stats = networkStatsService.getDetailedUidStats(ifaces).groupedByUid();
+            addNetworkStats(atomTag, pulledData, stats, false);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Pulling netstats for mobile bytes has error", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerMobileBytesTransferBackground() {
-        // No op.
+        int tagId = StatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {3, 4, 5, 6})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullMobileBytesTransferBackground(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullMobileBytesTransferBackground() {
-        // No op.
+    private int pullMobileBytesTransferBackground(int atomTag, List<StatsEvent> pulledData) {
+        INetworkStatsService networkStatsService = getINetworkStatsService();
+        if (networkStatsService == null) {
+            Slog.e(TAG, "NetworkStats Service is not available!");
+            return StatsManager.PULL_SKIP;
+        }
+        long token = Binder.clearCallingIdentity();
+        try {
+            BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
+            String[] ifaces = bs.getMobileIfaces();
+            if (ifaces.length == 0) {
+                return StatsManager.PULL_SKIP;
+            }
+            NetworkStats stats = rollupNetworkStatsByFGBG(
+                    networkStatsService.getDetailedUidStats(ifaces));
+            addNetworkStats(atomTag, pulledData, stats, true);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Pulling netstats for mobile bytes w/ fg/bg has error", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerBluetoothBytesTransfer() {
-        // No op.
+        int tagId = StatsLog.BLUETOOTH_BYTES_TRANSFER;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {2, 3})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullBluetoothBytesTransfer(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullBluetoothBytesTransfer() {
-        // No op.
+    /**
+     * Helper method to extract the Parcelable controller info from a
+     * SynchronousResultReceiver.
+     */
+    private static <T extends Parcelable> T awaitControllerInfo(
+            @Nullable SynchronousResultReceiver receiver) {
+        if (receiver == null) {
+            return null;
+        }
+
+        try {
+            final SynchronousResultReceiver.Result result =
+                    receiver.awaitResult(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS);
+            if (result.bundle != null) {
+                // This is the final destination for the Bundle.
+                result.bundle.setDefusable(true);
+
+                final T data = result.bundle.getParcelable(RESULT_RECEIVER_CONTROLLER_KEY);
+                if (data != null) {
+                    return data;
+                }
+            }
+            Slog.e(TAG, "no controller energy info supplied for " + receiver.getName());
+        } catch (TimeoutException e) {
+            Slog.w(TAG, "timeout reading " + receiver.getName() + " stats");
+        }
+        return null;
+    }
+
+    private synchronized BluetoothActivityEnergyInfo fetchBluetoothData() {
+        // TODO: Investigate whether the synchronized keyword is needed.
+        final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter != null) {
+            SynchronousResultReceiver bluetoothReceiver = new SynchronousResultReceiver(
+                    "bluetooth");
+            adapter.requestControllerActivityEnergyInfo(bluetoothReceiver);
+            return awaitControllerInfo(bluetoothReceiver);
+        } else {
+            Slog.e(TAG, "Failed to get bluetooth adapter!");
+            return null;
+        }
+    }
+
+    private int pullBluetoothBytesTransfer(int atomTag, List<StatsEvent> pulledData) {
+        BluetoothActivityEnergyInfo info = fetchBluetoothData();
+        if (info == null || info.getUidTraffic() == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        for (UidTraffic traffic : info.getUidTraffic()) {
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(traffic.getUid())
+                    .writeLong(traffic.getRxBytes())
+                    .writeLong(traffic.getTxBytes())
+                    .build();
+            pulledData.add(e);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerKernelWakelock() {
@@ -479,11 +675,31 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerBluetoothActivityInfo() {
-        // No op.
+        int tagId = StatsLog.BLUETOOTH_ACTIVITY_INFO;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                /* metadata */ null,
+                (atomTag, data) -> pullBluetoothActivityInfo(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullBluetoothActivityInfo() {
-        // No op.
+    private int pullBluetoothActivityInfo(int atomTag, List<StatsEvent> pulledData) {
+        BluetoothActivityEnergyInfo info = fetchBluetoothData();
+        if (info == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeLong(info.getTimeStamp())
+                .writeInt(info.getBluetoothStackState())
+                .writeLong(info.getControllerTxTimeMillis())
+                .writeLong(info.getControllerRxTimeMillis())
+                .writeLong(info.getControllerIdleTimeMillis())
+                .writeLong(info.getControllerEnergyUsed())
+                .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerSystemElapsedRealtime() {
@@ -695,11 +911,26 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerPowerProfile() {
-        // No op.
+        int tagId = StatsLog.POWER_PROFILE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                /* PullAtomMetadata */ null,
+                (atomTag, data) -> pullPowerProfile(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
     }
 
-    private void pullPowerProfile() {
-        // No op.
+    private int pullPowerProfile(int atomTag, List<StatsEvent> pulledData) {
+        PowerProfile powerProfile = new PowerProfile(mContext);
+        ProtoOutputStream proto = new ProtoOutputStream();
+        powerProfile.dumpDebug(proto);
+        proto.flush();
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeByteArray(proto.getBytes())
+                .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerProcessCpuTime() {
