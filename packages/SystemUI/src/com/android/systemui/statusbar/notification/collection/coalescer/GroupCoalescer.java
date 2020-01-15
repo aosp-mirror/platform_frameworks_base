@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.coalescer;
 
+import static com.android.systemui.statusbar.notification.logging.NotifEvent.BATCH_MAX_TIMEOUT;
 import static com.android.systemui.statusbar.notification.logging.NotifEvent.COALESCED_EVENT;
 import static com.android.systemui.statusbar.notification.logging.NotifEvent.EARLY_BATCH_EMIT;
 import static com.android.systemui.statusbar.notification.logging.NotifEvent.EMIT_EVENT_BATCH;
@@ -71,7 +72,8 @@ public class GroupCoalescer implements Dumpable {
     private final DelayableExecutor mMainExecutor;
     private final SystemClock mClock;
     private final NotifLog mLog;
-    private final long mGroupLingerDuration;
+    private final long mMinGroupLingerDuration;
+    private final long mMaxGroupLingerDuration;
 
     private BatchableNotificationHandler mHandler;
 
@@ -82,22 +84,28 @@ public class GroupCoalescer implements Dumpable {
     public GroupCoalescer(
             @Main DelayableExecutor mainExecutor,
             SystemClock clock, NotifLog log) {
-        this(mainExecutor, clock, log, GROUP_LINGER_DURATION);
+        this(mainExecutor, clock, log, MIN_GROUP_LINGER_DURATION, MAX_GROUP_LINGER_DURATION);
     }
 
     /**
-     * @param groupLingerDuration How long, in ms, that notifications that are members of a group
-     *                            are delayed within the GroupCoalescer before being posted
+     * @param minGroupLingerDuration How long, in ms, to wait for another notification from the same
+     *                               group to arrive before emitting all pending events for that
+     *                               group. Each subsequent arrival of a group member resets the
+     *                               timer for that group.
+     * @param maxGroupLingerDuration The maximum time, in ms, that a group can linger in the
+     *                               coalescer before it's force-emitted.
      */
     GroupCoalescer(
             @Main DelayableExecutor mainExecutor,
             SystemClock clock,
             NotifLog log,
-            long groupLingerDuration) {
+            long minGroupLingerDuration,
+            long maxGroupLingerDuration) {
         mMainExecutor = mainExecutor;
         mClock = clock;
         mLog = log;
-        mGroupLingerDuration = groupLingerDuration;
+        mMinGroupLingerDuration = minGroupLingerDuration;
+        mMaxGroupLingerDuration = maxGroupLingerDuration;
     }
 
     /**
@@ -115,7 +123,7 @@ public class GroupCoalescer implements Dumpable {
     private final NotificationHandler mListener = new NotificationHandler() {
         @Override
         public void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
-            maybeEmitBatch(sbn.getKey());
+            maybeEmitBatch(sbn);
             applyRanking(rankingMap);
 
             final boolean shouldCoalesce = handleNotificationPosted(sbn, rankingMap);
@@ -130,7 +138,7 @@ public class GroupCoalescer implements Dumpable {
 
         @Override
         public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap) {
-            maybeEmitBatch(sbn.getKey());
+            maybeEmitBatch(sbn);
             applyRanking(rankingMap);
             mHandler.onNotificationRemoved(sbn, rankingMap);
         }
@@ -140,7 +148,7 @@ public class GroupCoalescer implements Dumpable {
                 StatusBarNotification sbn,
                 RankingMap rankingMap,
                 int reason) {
-            maybeEmitBatch(sbn.getKey());
+            maybeEmitBatch(sbn);
             applyRanking(rankingMap);
             mHandler.onNotificationRemoved(sbn, rankingMap, reason);
         }
@@ -152,13 +160,20 @@ public class GroupCoalescer implements Dumpable {
         }
     };
 
-    private void maybeEmitBatch(String memberKey) {
-        CoalescedEvent event = mCoalescedEvents.get(memberKey);
+    private void maybeEmitBatch(StatusBarNotification sbn) {
+        final CoalescedEvent event = mCoalescedEvents.get(sbn.getKey());
+        final EventBatch batch = mBatches.get(sbn.getGroupKey());
         if (event != null) {
             mLog.log(EARLY_BATCH_EMIT,
                     String.format("Modification of %s triggered early emit of batched group %s",
-                            memberKey, requireNonNull(event.getBatch()).mGroupKey));
+                            sbn.getKey(), requireNonNull(event.getBatch()).mGroupKey));
             emitBatch(requireNonNull(event.getBatch()));
+        } else if (batch != null
+                && mClock.uptimeMillis() - batch.mCreatedTimestamp >= mMaxGroupLingerDuration) {
+            mLog.log(BATCH_MAX_TIMEOUT,
+                    String.format("Modification of %s triggered timeout emit of batched group %s",
+                            sbn.getKey(), batch.mGroupKey));
+            emitBatch(batch);
         }
     }
 
@@ -175,7 +190,8 @@ public class GroupCoalescer implements Dumpable {
         }
 
         if (sbn.isGroup()) {
-            EventBatch batch = startBatchingGroup(sbn.getGroupKey());
+            final EventBatch batch = getOrBuildBatch(sbn.getGroupKey());
+
             CoalescedEvent event =
                     new CoalescedEvent(
                             sbn.getKey(),
@@ -183,10 +199,10 @@ public class GroupCoalescer implements Dumpable {
                             sbn,
                             requireRanking(rankingMap, sbn.getKey()),
                             batch);
+            mCoalescedEvents.put(event.getKey(), event);
 
             batch.mMembers.add(event);
-
-            mCoalescedEvents.put(event.getKey(), event);
+            resetShortTimeout(batch);
 
             return true;
         } else {
@@ -194,26 +210,38 @@ public class GroupCoalescer implements Dumpable {
         }
     }
 
-    private EventBatch startBatchingGroup(final String groupKey) {
+    private EventBatch getOrBuildBatch(final String groupKey) {
         EventBatch batch = mBatches.get(groupKey);
         if (batch == null) {
-            final EventBatch newBatch = new EventBatch(mClock.uptimeMillis(), groupKey);
-            mBatches.put(groupKey, newBatch);
-            mMainExecutor.executeDelayed(() -> emitBatch(newBatch), mGroupLingerDuration);
-
-            batch = newBatch;
+            batch = new EventBatch(mClock.uptimeMillis(), groupKey);
+            mBatches.put(groupKey, batch);
         }
         return batch;
     }
 
+    private void resetShortTimeout(EventBatch batch) {
+        if (batch.mCancelShortTimeout != null) {
+            batch.mCancelShortTimeout.run();
+        }
+        batch.mCancelShortTimeout =
+                mMainExecutor.executeDelayed(
+                        () -> {
+                            batch.mCancelShortTimeout = null;
+                            emitBatch(batch);
+                        },
+                        mMinGroupLingerDuration);
+    }
+
     private void emitBatch(EventBatch batch) {
         if (batch != mBatches.get(batch.mGroupKey)) {
-            // If we emit a batch early, we don't want to emit it a second time when its timeout
-            // expires.
-            return;
+            throw new IllegalStateException("Cannot emit out-of-date batch " + batch.mGroupKey);
         }
         if (batch.mMembers.isEmpty()) {
             throw new IllegalStateException("Batch " + batch.mGroupKey + " cannot be empty");
+        }
+        if (batch.mCancelShortTimeout != null) {
+            batch.mCancelShortTimeout.run();
+            batch.mCancelShortTimeout = null;
         }
 
         mBatches.remove(batch.mGroupKey);
@@ -299,5 +327,6 @@ public class GroupCoalescer implements Dumpable {
         void onNotificationBatchPosted(List<CoalescedEvent> events);
     }
 
-    private static final int GROUP_LINGER_DURATION = 500;
+    private static final int MIN_GROUP_LINGER_DURATION = 50;
+    private static final int MAX_GROUP_LINGER_DURATION = 500;
 }

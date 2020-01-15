@@ -155,7 +155,8 @@ public class NotifEvent extends RichEvent {
                     // GroupCoalescer labels:
                     "CoalescedEvent",
                     "EarlyBatchEmit",
-                    "EmitEventBatch"
+                    "EmitEventBatch",
+                    "BatchMaxTimeout"
             };
 
     private static final int TOTAL_EVENT_LABELS = EVENT_LABELS.length;
@@ -204,5 +205,6 @@ public class NotifEvent extends RichEvent {
     public static final int COALESCED_EVENT = COALESCER_EVENT_START_INDEX;
     public static final int EARLY_BATCH_EMIT = COALESCER_EVENT_START_INDEX + 1;
     public static final int EMIT_EVENT_BATCH = COALESCER_EVENT_START_INDEX + 2;
+    public static final int BATCH_MAX_TIMEOUT = COALESCER_EVENT_START_INDEX + 3;
     private static final int TOTAL_COALESCER_EVENT_TYPES = 3;
 }
