@@ -22,9 +22,11 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.MotionEvent;
 
+import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
+
 /**
  * Temporary callbacks into SystemUI.
- * Next id = 22
+ * Next id = 25
  */
 interface ISystemUiProxy {
 
@@ -121,11 +123,21 @@ interface ISystemUiProxy {
     /**
      * Handle the provided image as if it was a screenshot.
      */
-     void handleImageAsScreenshot(in Bitmap screenImage, in Rect locationInScreen,
+    void handleImageAsScreenshot(in Bitmap screenImage, in Rect locationInScreen,
               in Insets visibleInsets, int taskId) = 21;
 
     /**
      * Sets the split-screen divider minimized state
      */
     void setSplitScreenMinimized(boolean minimized) = 22;
+
+    /*
+     * Notifies that the swipe-to-home (recents animation) is finished.
+     */
+    void notifySwipeToHomeFinished() = 23;
+
+    /**
+     * Sets listener to get pinned stack animation callbacks.
+     */
+    void setPinnedStackAnimationListener(IPinnedStackAnimationListener listener) = 24;
 }

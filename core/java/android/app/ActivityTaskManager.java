@@ -362,25 +362,6 @@ public class ActivityTaskManager {
     }
 
     /**
-     * Resize the input stack id to the given bounds with animate setting.
-     * @param stackId Id of the stack to resize.
-     * @param bounds Bounds to resize the stack to or {@code null} for fullscreen.
-     * @param animate Whether we should play an animation for resizing stack.
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public void resizePinnedStack(int stackId, Rect bounds, boolean animate) {
-        try {
-            if (animate) {
-                getService().animateResizePinnedStack(stackId, bounds, -1 /* animationDuration */);
-            } else {
-                getService().resizePinnedStack(bounds, null /* tempPinnedTaskBounds */);
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Resize task to given bounds.
      * @param taskId Id of task to resize.
      * @param bounds Bounds to resize task.

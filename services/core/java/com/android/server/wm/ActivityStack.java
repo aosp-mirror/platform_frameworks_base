@@ -98,10 +98,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.H.FIRST_ACTIVITY_STACK_MSG;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
-import static com.android.server.wm.BoundsAnimationController.FADE_IN;
-import static com.android.server.wm.BoundsAnimationController.NO_PIP_MODE_CHANGED_CALLBACKS;
-import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_END;
-import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_START;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.TaskProto.ACTIVITIES;
 import static com.android.server.wm.TaskProto.ACTIVITY_TYPE;
@@ -202,7 +198,7 @@ import java.util.function.Consumer;
 /**
  * State and management of a single stack of activities.
  */
-class ActivityStack extends Task implements BoundsAnimationTarget {
+class ActivityStack extends Task {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStack" : TAG_ATM;
     static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_APP = TAG + POSTFIX_APP;
@@ -327,11 +323,8 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     // Set when an animation has been requested but has not yet started from the UI thread. This is
     // cleared when the animation actually starts.
     private boolean mBoundsAnimatingRequested = false;
-    private boolean mBoundsAnimatingToFullscreen = false;
-    private boolean mCancelCurrentBoundsAnimation = false;
     private Rect mBoundsAnimationTarget = new Rect();
     private Rect mBoundsAnimationSourceHintBounds = new Rect();
-    private @BoundsAnimationController.AnimationType int mAnimationType;
 
     Rect mPreAnimationBounds = new Rect();
 
@@ -790,17 +783,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
                 false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,
                 false /* creating */);
-        if (windowingMode == WINDOWING_MODE_PINNED) {
-            // This stack will be visible before SystemUI requests PiP animation to start, and if
-            // the selected animation type is fade in, this stack will be close first. If the
-            // animation does not start early, user may see this full screen window appear again
-            // after the closing transition finish, which could cause screen to flicker.
-            // Check if animation should start here in advance.
-            final BoundsAnimationController controller = getDisplay().mBoundsAnimationController;
-            if (controller.isAnimationTypeFadeIn()) {
-                setPinnedStackAlpha(0f);
-            }
-        }
     }
 
     /**
@@ -904,6 +886,9 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             final ConfigurationContainer parent = getParent();
             likelyResolvedMode = parent != null ? parent.getWindowingMode()
                     : WINDOWING_MODE_FULLSCREEN;
+        }
+        if (currentMode == WINDOWING_MODE_PINNED) {
+            mAtmService.getTaskChangeNotificationController().notifyActivityUnpinned();
         }
         if (sendNonResizeableNotification && likelyResolvedMode != WINDOWING_MODE_FULLSCREEN
                 && topActivity != null && !topActivity.noDisplay
@@ -3480,91 +3465,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         }
     }
 
-    void animateResizePinnedStack(Rect toBounds, Rect sourceHintBounds, int animationDuration,
-            boolean fromFullscreen) {
-        if (!inPinnedWindowingMode()) return;
-
-        /**
-         * TODO(b/146594635): Remove all PIP animation code from WM once SysUI handles animation.
-         * If this PIP Task is controlled by a TaskOrganizer, the animation occurs entirely
-         * on the TaskOrganizer side, so we just hand over the leash without doing any animation.
-         * We have to be careful to not schedule the enter-pip callback as the TaskOrganizer
-         * needs to have flexibility to schedule that at an appropriate point in the animation.
-         */
-        if (isControlledByTaskOrganizer()) return;
-        if (toBounds == null /* toFullscreen */) {
-            final Configuration parentConfig = getParent().getConfiguration();
-            final ActivityRecord top = topRunningNonOverlayTaskActivity();
-            if (top != null && !top.isConfigurationCompatible(parentConfig)) {
-                // The final orientation of this activity will change after moving to full screen.
-                // Start freezing screen here to prevent showing a temporary full screen window.
-                top.startFreezingScreenLocked(CONFIG_SCREEN_LAYOUT);
-                dismissPip();
-                return;
-            }
-        }
-
-        // Get the from-bounds
-        final Rect fromBounds = new Rect();
-        getBounds(fromBounds);
-
-        // Get non-null fullscreen to-bounds for animating if the bounds are null
-        @BoundsAnimationController.SchedulePipModeChangedState int schedulePipModeChangedState =
-                NO_PIP_MODE_CHANGED_CALLBACKS;
-        final boolean toFullscreen = toBounds == null;
-        if (toFullscreen) {
-            if (fromFullscreen) {
-                throw new IllegalArgumentException("Should not defer scheduling PiP mode"
-                        + " change on animation to fullscreen.");
-            }
-            schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_START;
-
-            mWmService.getStackBounds(
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mTmpToBounds);
-            if (!mTmpToBounds.isEmpty()) {
-                // If there is a fullscreen bounds, use that
-                toBounds = new Rect(mTmpToBounds);
-            } else {
-                // Otherwise, use the display bounds
-                toBounds = new Rect();
-                getDisplayContent().getBounds(toBounds);
-            }
-        } else if (fromFullscreen) {
-            schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_END;
-        }
-
-        setAnimationFinalBounds(sourceHintBounds, toBounds, toFullscreen);
-
-        final Rect finalToBounds = toBounds;
-        final @BoundsAnimationController.SchedulePipModeChangedState int
-                finalSchedulePipModeChangedState = schedulePipModeChangedState;
-        final DisplayContent displayContent = getDisplayContent();
-        @BoundsAnimationController.AnimationType int intendedAnimationType =
-                displayContent.mBoundsAnimationController.getAnimationType();
-        if (intendedAnimationType == FADE_IN) {
-            if (fromFullscreen) {
-                setPinnedStackAlpha(0f);
-            }
-            if (toBounds.width() == fromBounds.width()
-                    && toBounds.height() == fromBounds.height()) {
-                intendedAnimationType = BoundsAnimationController.BOUNDS;
-            } else if (!fromFullscreen && !toBounds.equals(fromBounds)) {
-                // intendedAnimationType may have been reset at the end of RecentsAnimation,
-                // force it to BOUNDS type if we know for certain we're animating to
-                // a different bounds, especially for expand and collapse of PiP window.
-                intendedAnimationType = BoundsAnimationController.BOUNDS;
-            }
-        }
-
-        final @BoundsAnimationController.AnimationType int animationType = intendedAnimationType;
-        mCancelCurrentBoundsAnimation = false;
-        displayContent.mBoundsAnimationController.getHandler().post(() -> {
-            displayContent.mBoundsAnimationController.animateBounds(this, fromBounds,
-                    finalToBounds, animationDuration, finalSchedulePipModeChangedState,
-                    fromFullscreen, toFullscreen, animationType);
-        });
-    }
-
     void dismissPip() {
         if (!isActivityTypeStandardOrUndefined()) {
             throw new IllegalArgumentException(
@@ -3591,21 +3491,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             MetricsLoggerWrapper.logPictureInPictureFullScreen(mAtmService.mContext,
                     task.effectiveUid, task.realActivity.flattenToString());
         });
-    }
-
-    private void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds,
-            boolean forceUpdate) {
-        // It is guaranteed that the activities requiring the update will be in the pinned stack at
-        // this point (either reparented before the animation into PiP, or before reparenting after
-        // the animation out of PiP)
-        if (!isAttached()) {
-            return;
-        }
-        final PooledConsumer c = PooledLambda.obtainConsumer(
-                ActivityStackSupervisor::updatePictureInPictureMode, mStackSupervisor,
-                PooledLambda.__(Task.class), targetStackBounds, forceUpdate);
-        forAllLeafTasks(c, true /* traverseTopToBottom */);
-        c.recycle();
     }
 
     void prepareFreezingTaskBounds() {
@@ -3704,34 +3589,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     }
 
     /**
-     * Sets the bounds animation target bounds ahead of an animation.  This can't currently be done
-     * in onAnimationStart() since that is started on the UiThread.
-     */
-    private void setAnimationFinalBounds(Rect sourceHintBounds, Rect destBounds,
-            boolean toFullscreen) {
-        if (mAnimationType == BoundsAnimationController.BOUNDS) {
-            mBoundsAnimatingRequested = true;
-        }
-        mBoundsAnimatingToFullscreen = toFullscreen;
-        if (destBounds != null) {
-            mBoundsAnimationTarget.set(destBounds);
-        } else {
-            mBoundsAnimationTarget.setEmpty();
-        }
-        if (sourceHintBounds != null) {
-            mBoundsAnimationSourceHintBounds.set(sourceHintBounds);
-        } else if (!mBoundsAnimating) {
-            // If the bounds are already animating, we don't want to reset the source hint. This is
-            // because the source hint is sent when starting the animation from the client that
-            // requested to enter pip. Other requests can adjust the pip bounds during an animation,
-            // but could accidentally reset the source hint bounds.
-            mBoundsAnimationSourceHintBounds.setEmpty();
-        }
-
-        mPreAnimationBounds.set(getRawBounds());
-    }
-
-    /**
      * @return the final bounds for the bounds animation.
      */
     void getFinalAnimationBounds(Rect outBounds) {
@@ -3760,30 +3617,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     /** Bounds of the stack with other system factors taken into consideration. */
     void getDimBounds(Rect out) {
         getBounds(out);
-    }
-
-    /**
-     * Reset the current animation running on {@link #mBoundsAnimationTarget}.
-     *
-     * @param destinationBounds the final destination bounds
-     */
-    void resetCurrentBoundsAnimation(Rect destinationBounds) {
-        boolean animating = (mBoundsAnimatingRequested || mBoundsAnimating)
-                && !mBoundsAnimationTarget.isEmpty();
-
-        // The final boundary is updated while there is an existing boundary animation. Let's
-        // cancel this animation to prevent the obsolete animation overwritten updated bounds.
-        if (animating && !destinationBounds.equals(mBoundsAnimationTarget)) {
-            final BoundsAnimationController controller =
-                    getDisplayContent().mBoundsAnimationController;
-            controller.getHandler().post(() -> controller.cancel(this));
-        }
-        // Once we've set the bounds based on the rotation of the old bounds in the new
-        // orientation, clear the animation target bounds since they are obsolete, and
-        // cancel any currently running animations
-        mBoundsAnimationTarget.setEmpty();
-        mBoundsAnimationSourceHintBounds.setEmpty();
-        mCancelCurrentBoundsAnimation = true;
     }
 
     /**
@@ -4590,110 +4423,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         return task != null;
     }
 
-    public boolean setPinnedStackSize(Rect displayedBounds, Rect configBounds) {
-        // Hold the lock since this is called from the BoundsAnimator running on the UiThread
-        synchronized (mWmService.mGlobalLock) {
-            if (mCancelCurrentBoundsAnimation) {
-                return false;
-            }
-            mStackSupervisor.resizePinnedStack(displayedBounds, configBounds);
-        }
-
-        return true;
-    }
-
-    void onAllWindowsDrawn() {
-        if (!mBoundsAnimating && !mBoundsAnimatingRequested) {
-            return;
-        }
-
-        getDisplayContent().mBoundsAnimationController.onAllWindowsDrawn();
-    }
-
-    @Override  // AnimatesBounds
-    public boolean onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate,
-            @BoundsAnimationController.AnimationType int animationType) {
-        // Hold the lock since this is called from the BoundsAnimator running on the UiThread
-        synchronized (mWmService.mGlobalLock) {
-            if (!isAttached()) {
-                // Don't run the animation if the stack is already detached
-                return false;
-            }
-
-            if (animationType == BoundsAnimationController.BOUNDS) {
-                mBoundsAnimatingRequested = false;
-                mBoundsAnimating = true;
-            }
-            mAnimationType = animationType;
-
-            // If we are changing UI mode, as in the PiP to fullscreen
-            // transition, then we need to wait for the window to draw.
-            if (schedulePipModeChangedCallback) {
-                forAllWindows((w) -> {
-                    w.mWinAnimator.resetDrawState();
-                }, false /* traverseTopToBottom */);
-            }
-        }
-
-        if (inPinnedWindowingMode()) {
-            try {
-                mWmService.mActivityTaskManager.notifyPinnedStackAnimationStarted();
-            } catch (RemoteException e) {
-                // I don't believe you...
-            }
-
-            if ((schedulePipModeChangedCallback || animationType == FADE_IN)) {
-                // We need to schedule the PiP mode change before the animation up. It is possible
-                // in this case for the animation down to not have been completed, so always
-                // force-schedule and update to the client to ensure that it is notified that it
-                // is no longer in picture-in-picture mode
-                updatePictureInPictureModeForPinnedStackAnimation(null, forceUpdate);
-            }
-        }
-        return true;
-    }
-
-    @Override  // AnimatesBounds
-    public void onAnimationEnd(boolean schedulePipModeChangedCallback, Rect finalStackSize,
-            boolean moveToFullscreen) {
-        synchronized (mWmService.mGlobalLock) {
-            if (inPinnedWindowingMode()) {
-                // Update to the final bounds if requested. This is done here instead of in the
-                // bounds animator to allow us to coordinate this after we notify the PiP mode
-                // changed
-
-                if (schedulePipModeChangedCallback) {
-                    // We need to schedule the PiP mode change after the animation down, so use the
-                    // final bounds
-                    updatePictureInPictureModeForPinnedStackAnimation(mBoundsAnimationTarget,
-                            false /* forceUpdate */);
-                }
-
-                if (mAnimationType == BoundsAnimationController.FADE_IN) {
-                    setPinnedStackAlpha(1f);
-                    mWmService.mAtmService.notifyPinnedStackAnimationEnded();
-                    return;
-                }
-
-                if (finalStackSize != null && !mCancelCurrentBoundsAnimation) {
-                    setPinnedStackSize(finalStackSize, null);
-                } else {
-                    // We have been canceled, so the final stack size is null, still run the
-                    // animation-end logic
-                    onPipAnimationEndResize();
-                }
-
-                mWmService.mAtmService.notifyPinnedStackAnimationEnded();
-                if (moveToFullscreen) {
-                    ((ActivityStack) this).dismissPip();
-                }
-            } else {
-                // No PiP animation, just run the normal animation-end logic
-                onPipAnimationEndResize();
-            }
-        }
-    }
-
     /**
      * Sets the current picture-in-picture aspect ratio.
      */
@@ -4741,42 +4470,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         getDisplayContent().getPinnedStackController().setActions(actions);
     }
 
-    /** Called immediately prior to resizing the tasks at the end of the pinned stack animation. */
-    void onPipAnimationEndResize() {
-        mBoundsAnimating = false;
-        forAllLeafTasks(Task::clearPreserveNonFloatingState, false /* traverseTopToBottom */);
-        mWmService.requestTraversal();
-    }
-
-    @Override
-    public boolean shouldDeferStartOnMoveToFullscreen() {
-        synchronized (mWmService.mGlobalLock) {
-            if (!isAttached()) {
-                // Unnecessary to pause the animation because the stack is detached.
-                return false;
-            }
-
-            // Workaround for the recents animation -- normally we need to wait for the new activity
-            // to show before starting the PiP animation, but because we start and show the home
-            // activity early for the recents animation prior to the PiP animation starting, there
-            // is no subsequent all-drawn signal. In this case, we can skip the pause when the home
-            // stack is already visible and drawn.
-            final ActivityStack homeStack = mDisplayContent.getRootHomeTask();
-            if (homeStack == null) {
-                return true;
-            }
-            final Task homeTask = homeStack.getTopMostTask();
-            if (homeTask == null) {
-                return true;
-            }
-            final ActivityRecord homeApp = homeTask.getTopVisibleActivity();
-            if (!homeTask.isVisible() || homeApp == null) {
-                return true;
-            }
-            return !homeApp.allDrawn;
-        }
-    }
-
     /**
      * @return True if we are currently animating the pinned stack from fullscreen to non-fullscreen
      *         bounds and we have a deferred PiP mode changed callback set with the animation.
@@ -4796,25 +4489,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     public boolean isForceScaled() {
         return mBoundsAnimating;
-    }
-
-    public boolean isAnimatingBounds() {
-        return mBoundsAnimating;
-    }
-
-    public boolean lastAnimatingBoundsWasToFullscreen() {
-        return mBoundsAnimatingToFullscreen;
-    }
-
-    public boolean isAnimatingBoundsToFullscreen() {
-        return isAnimatingBounds() && lastAnimatingBoundsWasToFullscreen();
-    }
-
-    public boolean pinnedStackResizeDisallowed() {
-        if (mBoundsAnimating && mCancelCurrentBoundsAnimation) {
-            return true;
-        }
-        return false;
     }
 
     /** Returns true if a removal action is still being deferred. */
@@ -4841,21 +4515,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 || activityType == ACTIVITY_TYPE_HOME
                 || activityType == ACTIVITY_TYPE_RECENTS
                 || activityType == ACTIVITY_TYPE_ASSISTANT;
-    }
-
-    @Override
-    public boolean setPinnedStackAlpha(float alpha) {
-        // Hold the lock since this is called from the BoundsAnimator running on the UiThread
-        synchronized (mWmService.mGlobalLock) {
-            final SurfaceControl sc = getSurfaceControl();
-            if (sc == null || !sc.isValid()) {
-                // If the stack is already removed, don't bother updating any stack animation
-                return false;
-            }
-            getPendingTransaction().setAlpha(sc, mCancelCurrentBoundsAnimation ? 1 : alpha);
-            scheduleAnimation();
-            return !mCancelCurrentBoundsAnimation;
-        }
     }
 
     public DisplayInfo getDisplayInfo() {

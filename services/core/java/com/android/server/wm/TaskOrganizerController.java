@@ -306,7 +306,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
         task.fillTaskInfo(mTmpTaskInfo);
         boolean changed = lastInfo == null
                 || mTmpTaskInfo.topActivityType != lastInfo.topActivityType
-                || mTmpTaskInfo.isResizable() != lastInfo.isResizable();
+                || mTmpTaskInfo.isResizable() != lastInfo.isResizable()
+                || mTmpTaskInfo.pictureInPictureParams != lastInfo.pictureInPictureParams;
         if (!(changed || force)) {
             return;
         }

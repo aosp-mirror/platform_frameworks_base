@@ -1102,12 +1102,8 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertSecurityException(expectCallable,
                 () -> mService.moveTopActivityToPinnedStack(INVALID_STACK_ID, new Rect()));
         assertSecurityException(expectCallable,
-                () -> mService.animateResizePinnedStack(INVALID_STACK_ID, new Rect(), -1));
-        assertSecurityException(expectCallable,
                 () -> mService.resizeDockedStack(new Rect(), new Rect(), new Rect(), new Rect(),
                         new Rect()));
-        assertSecurityException(expectCallable,
-                () -> mService.resizePinnedStack(new Rect(), new Rect()));
         assertSecurityException(expectCallable, () -> mService.getAllStackInfos());
         assertSecurityException(expectCallable,
                 () -> mService.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED));

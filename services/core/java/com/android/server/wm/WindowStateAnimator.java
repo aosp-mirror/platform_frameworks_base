@@ -902,15 +902,9 @@ class WindowStateAnimator {
             boolean allowStretching = false;
             task.getStack().getFinalAnimationSourceHintBounds(mTmpSourceBounds);
             // If we don't have source bounds, we can attempt to use the content insets
-            // in the following scenario:
-            //    1. We have content insets.
-            //    2. We are not transitioning to full screen
-            // We have to be careful to check "lastAnimatingBoundsWasToFullscreen" rather than
-            // the mBoundsAnimating state, as we may have already left it and only be here
-            // because of the force-scale until resize state.
+            // if we have content insets.
             if (mTmpSourceBounds.isEmpty() && (mWin.mLastRelayoutContentInsets.width() > 0
-                    || mWin.mLastRelayoutContentInsets.height() > 0)
-                        && !task.getStack().lastAnimatingBoundsWasToFullscreen()) {
+                    || mWin.mLastRelayoutContentInsets.height() > 0)) {
                 mTmpSourceBounds.set(task.getStack().mPreAnimationBounds);
                 mTmpSourceBounds.inset(mWin.mLastRelayoutContentInsets);
                 allowStretching = true;

@@ -22,7 +22,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.StackInfo;
-import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.Context;
 import android.graphics.Point;
@@ -39,7 +38,9 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.os.SomeArgs;
+import com.android.systemui.pip.PipAnimationController;
 import com.android.systemui.pip.PipSnapAlgorithm;
+import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.util.FloatingContentCoordinator;
@@ -65,8 +66,6 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
     /** Friction to use for PIP when it moves via physics fling animations. */
     private static final float DEFAULT_FRICTION = 2f;
 
-    // The fraction of the stack width that the user has to drag offscreen to minimize the PiP
-    private static final float MINIMIZE_OFFSCREEN_FRACTION = 0.3f;
     // The fraction of the stack height that the user has to drag offscreen to dismiss the PiP
     private static final float DISMISS_OFFSCREEN_FRACTION = 0.3f;
 
@@ -74,10 +73,10 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
     private static final int MSG_RESIZE_ANIMATE = 2;
     private static final int MSG_OFFSET_ANIMATE = 3;
 
-    private Context mContext;
-    private IActivityManager mActivityManager;
-    private IActivityTaskManager mActivityTaskManager;
-    private Handler mHandler;
+    private final Context mContext;
+    private final IActivityTaskManager mActivityTaskManager;
+    private final PipTaskOrganizer mPipTaskOrganizer;
+    private final Handler mHandler;
 
     private PipMenuActivityController mMenuController;
     private PipSnapAlgorithm mSnapAlgorithm;
@@ -139,14 +138,14 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
                 new PhysicsAnimator.SpringConfig(
                         SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
 
-    public PipMotionHelper(Context context, IActivityManager activityManager,
-            IActivityTaskManager activityTaskManager, PipMenuActivityController menuController,
+    public PipMotionHelper(Context context, IActivityTaskManager activityTaskManager,
+            PipTaskOrganizer pipTaskOrganizer, PipMenuActivityController menuController,
             PipSnapAlgorithm snapAlgorithm, FlingAnimationUtils flingAnimationUtils,
             FloatingContentCoordinator floatingContentCoordinator) {
         mContext = context;
         mHandler = new Handler(ForegroundThread.get().getLooper(), this);
-        mActivityManager = activityManager;
         mActivityTaskManager = activityTaskManager;
+        mPipTaskOrganizer = pipTaskOrganizer;
         mMenuController = menuController;
         mSnapAlgorithm = snapAlgorithm;
         mFlingAnimationUtils = flingAnimationUtils;
@@ -285,35 +284,6 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
     }
 
     /**
-     * @return the closest minimized PiP bounds.
-     */
-    Rect getClosestMinimizedBounds(Rect stackBounds) {
-        Point displaySize = new Point();
-        mContext.getDisplay().getRealSize(displaySize);
-        Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(mMovementBounds, stackBounds);
-        mSnapAlgorithm.applyMinimizedOffset(toBounds, mMovementBounds, displaySize, mStableInsets);
-        return toBounds;
-    }
-
-    /**
-     * @return whether the PiP at the current bounds should be minimized.
-     */
-    boolean shouldMinimizePip() {
-        Point displaySize = new Point();
-        mContext.getDisplay().getRealSize(displaySize);
-        if (mBounds.left < 0) {
-            float offscreenFraction = (float) -mBounds.left / mBounds.width();
-            return offscreenFraction >= MINIMIZE_OFFSCREEN_FRACTION;
-        } else if (mBounds.right > displaySize.x) {
-            float offscreenFraction = (float) (mBounds.right - displaySize.x) /
-                    mBounds.width();
-            return offscreenFraction >= MINIMIZE_OFFSCREEN_FRACTION;
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * @return whether the PiP at the current bounds should be dismissed.
      */
     boolean shouldDismissPip() {
@@ -325,25 +295,6 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
             return offscreenFraction >= DISMISS_OFFSCREEN_FRACTION;
         }
         return false;
-    }
-
-    /**
-     * Animates the PiP to the minimized state, slightly offscreen.
-     */
-    void animateToClosestMinimizedState(@Nullable Runnable updateAction) {
-        final Rect toBounds = getClosestMinimizedBounds(mBounds);
-
-        mAnimatedBounds.set(mBounds);
-        mAnimatedBoundsPhysicsAnimator
-                .spring(FloatProperties.RECT_X, toBounds.left, mSpringConfig)
-                .spring(FloatProperties.RECT_Y, toBounds.top, mSpringConfig);
-
-        if (updateAction != null) {
-            mAnimatedBoundsPhysicsAnimator.addUpdateListener(
-                    (target, values) -> updateAction.run());
-        }
-
-        startBoundsAnimation();
     }
 
     /**
@@ -436,18 +387,13 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
      * Animates the PiP from the expanded state to the normal state after the menu is hidden.
      */
     void animateToUnexpandedState(Rect normalBounds, float savedSnapFraction,
-            Rect normalMovementBounds, Rect currentMovementBounds, boolean minimized,
-            boolean immediate) {
+            Rect normalMovementBounds, Rect currentMovementBounds, boolean immediate) {
         if (savedSnapFraction < 0f) {
             // If there are no saved snap fractions, then just use the current bounds
             savedSnapFraction = mSnapAlgorithm.getSnapFraction(new Rect(mBounds),
                     currentMovementBounds);
         }
         mSnapAlgorithm.applySnapFraction(normalBounds, normalMovementBounds, savedSnapFraction);
-
-        if (minimized) {
-            normalBounds = getClosestMinimizedBounds(normalBounds);
-        }
 
         if (immediate) {
             movePip(normalBounds);
@@ -503,6 +449,7 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
         cancelAnimations();
 
         mAnimatedBoundsPhysicsAnimator
+                .withEndActions(() ->  mPipTaskOrganizer.onMotionMovementEnd(mAnimatedBounds))
                 .addUpdateListener(mResizePipVsyncUpdateListener)
                 .start();
     }
@@ -594,13 +541,6 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
     }
 
     /**
-     * @return the distance between points {@param p1} and {@param p2}.
-     */
-    private float distanceBetweenRectOffsets(Rect r1, Rect r2) {
-        return PointF.length(r1.left - r2.left, r1.top - r2.top);
-    }
-
-    /**
      * Handles messages to be processed on the background thread.
      */
     public boolean handleMessage(Message msg) {
@@ -608,13 +548,8 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
             case MSG_RESIZE_IMMEDIATE: {
                 SomeArgs args = (SomeArgs) msg.obj;
                 Rect toBounds = (Rect) args.arg1;
-                try {
-                    mActivityTaskManager.resizePinnedStack(
-                            toBounds, null /* tempPinnedTaskBounds */);
-                    mBounds.set(toBounds);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Could not resize pinned stack to bounds: " + toBounds, e);
-                }
+                mPipTaskOrganizer.resizePinnedStack(toBounds, PipAnimationController.DURATION_NONE);
+                mBounds.set(toBounds);
                 return true;
             }
 
@@ -631,8 +566,7 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
                         return true;
                     }
 
-                    mActivityTaskManager.animateResizePinnedStack(stackInfo.stackId, toBounds,
-                            duration);
+                    mPipTaskOrganizer.resizePinnedStack(toBounds, duration);
                     mBounds.set(toBounds);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Could not animate resize pinned stack to bounds: " + toBounds, e);
@@ -654,8 +588,8 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
                         return true;
                     }
 
-                    mActivityTaskManager.offsetPinnedStackBounds(stackInfo.stackId, originalBounds,
-                            0/* xOffset */, offset, duration);
+                    mPipTaskOrganizer.offsetPinnedStack(originalBounds,
+                            0 /* xOffset */, offset, duration);
                     Rect toBounds = new Rect(originalBounds);
                     toBounds.offset(0, offset);
                     mBounds.set(toBounds);

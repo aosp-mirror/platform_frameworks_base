@@ -53,11 +53,9 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
     }
 
     @Override
-    public void onMovementBoundsChanged(Rect animatingBounds, boolean fromImeAdjustment,
-            boolean fromShelfAdjustment) {
+    public void onMovementBoundsChanged(Rect animatingBounds, boolean fromImeAdjustment) {
         for (PinnedStackListener listener : mListeners) {
-            listener.onMovementBoundsChanged(animatingBounds, fromImeAdjustment,
-                    fromShelfAdjustment);
+            listener.onMovementBoundsChanged(animatingBounds, fromImeAdjustment);
         }
     }
 
@@ -65,13 +63,6 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
     public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
         for (PinnedStackListener listener : mListeners) {
             listener.onImeVisibilityChanged(imeVisible, imeHeight);
-        }
-    }
-
-    @Override
-    public void onMinimizedStateChanged(boolean isMinimized) {
-        for (PinnedStackListener listener : mListeners) {
-            listener.onMinimizedStateChanged(isMinimized);
         }
     }
 
@@ -117,13 +108,6 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
         }
     }
 
-    @Override
-    public void onPrepareAnimation(Rect sourceRectHint, float aspectRatio, Rect bounds) {
-        for (PinnedStackListener listener : mListeners) {
-            listener.onPrepareAnimation(sourceRectHint, aspectRatio, bounds);
-        }
-    }
-
     /**
      * A counterpart of {@link IPinnedStackListener} with empty implementations.
      * Subclasses can ignore those methods they do not intend to take action upon.
@@ -131,12 +115,9 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
     public static class PinnedStackListener {
         public void onListenerRegistered(IPinnedStackController controller) {}
 
-        public void onMovementBoundsChanged(Rect animatingBounds, boolean fromImeAdjustment,
-                boolean fromShelfAdjustment) {}
+        public void onMovementBoundsChanged(Rect animatingBounds, boolean fromImeAdjustment) {}
 
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {}
-
-        public void onMinimizedStateChanged(boolean isMinimized) {}
 
         public void onActionsChanged(ParceledListSlice actions) {}
 
@@ -149,7 +130,5 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
         public void onConfigurationChanged() {}
 
         public void onAspectRatioChanged(float aspectRatio) {}
-
-        public void onPrepareAnimation(Rect sourceRectHint, float aspectRatio, Rect bounds) {}
     }
 }

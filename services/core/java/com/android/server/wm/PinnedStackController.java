@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -52,7 +50,7 @@ import java.util.List;
  * 1) When first entering PiP: the controller returns the valid bounds given, taking aspect ratio
  *    and IME state into account.
  * 2) When rotating the device: the controller calculates the new bounds in the new orientation,
- *    taking the minimized and IME state into account. In this case, we currently ignore the
+ *    taking the IME state into account. In this case, we currently ignore the
  *    SystemUI adjustments (ie. expanded for menu, interaction, etc).
  *
  * Other changes in the system, including adjustment of IME, configuration change, and more are
@@ -72,8 +70,6 @@ class PinnedStackController {
 
     private final PinnedStackControllerCallback mCallbacks = new PinnedStackControllerCallback();
 
-    // States that affect how the PIP can be manipulated
-    private boolean mIsMinimized;
     private boolean mIsImeShowing;
     private int mImeHeight;
 
@@ -83,9 +79,6 @@ class PinnedStackController {
 
     // Used to calculate stack bounds across rotations
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
-
-    // The size and position information that describes where the pinned stack will go by default.
-    private float mDefaultAspectRatio;
 
     // The aspect ratio bounds of the PIP.
     private float mMinAspectRatio;
@@ -98,41 +91,10 @@ class PinnedStackController {
      * The callback object passed to listeners for them to notify the controller of state changes.
      */
     private class PinnedStackControllerCallback extends IPinnedStackController.Stub {
-
-        @Override
-        public void setIsMinimized(final boolean isMinimized) {
-            mHandler.post(() -> {
-                mIsMinimized = isMinimized;
-            });
-        }
-
         @Override
         public int getDisplayRotation() {
             synchronized (mService.mGlobalLock) {
                 return mDisplayInfo.rotation;
-            }
-        }
-
-        @Override
-        public void startAnimation(Rect destinationBounds, Rect sourceRectHint,
-                int animationDuration) {
-            synchronized (mService.mGlobalLock) {
-                final ActivityStack pinnedStack = mDisplayContent.getRootPinnedTask();
-                pinnedStack.animateResizePinnedStack(destinationBounds,
-                        sourceRectHint, animationDuration, true /* fromFullscreen */);
-            }
-        }
-
-        @Override
-        public void resetBoundsAnimation(Rect bounds) {
-            synchronized (mService.mGlobalLock) {
-                if (mDisplayContent.hasPinnedTask()) {
-                    final ActivityStack pinnedStack = mDisplayContent.getTopStackInWindowingMode(
-                            WINDOWING_MODE_PINNED);
-                    if (pinnedStack != null) {
-                        pinnedStack.resetCurrentBoundsAnimation(bounds);
-                    }
-                }
             }
         }
     }
@@ -157,10 +119,6 @@ class PinnedStackController {
         mDisplayContent = displayContent;
         mDisplayInfo.copyFrom(mDisplayContent.getDisplayInfo());
         reloadResources();
-        // Initialize the aspect ratio to the default aspect ratio.  Don't do this in reload
-        // resources as it would clobber mAspectRatio when entering PiP from fullscreen which
-        // triggers a configuration change and the resources to be reloaded.
-        mAspectRatio = mDefaultAspectRatio;
     }
 
     void onConfigurationChanged() {
@@ -172,8 +130,6 @@ class PinnedStackController {
      */
     private void reloadResources() {
         final Resources res = mService.mContext.getResources();
-        mDefaultAspectRatio = res.getFloat(
-                com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio);
         mDisplayContent.getDisplay().getRealMetrics(mTmpMetrics);
         mMinAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
@@ -191,12 +147,8 @@ class PinnedStackController {
             mPinnedStackListener = listener;
             notifyDisplayInfoChanged(mDisplayInfo);
             notifyImeVisibilityChanged(mIsImeShowing, mImeHeight);
-            // The movement bounds notification needs to be sent before the minimized state, since
-            // SystemUI may use the bounds to restore the minimized position
-            notifyMovementBoundsChanged(false /* fromImeAdjustment */,
-                    false /* fromShelfAdjustment */);
+            notifyMovementBoundsChanged(false /* fromImeAdjustment */);
             notifyActionsChanged(mActions);
-            notifyMinimizeChanged(mIsMinimized);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
@@ -247,8 +199,7 @@ class PinnedStackController {
     void onDisplayInfoChanged(DisplayInfo displayInfo) {
         synchronized (mService.mGlobalLock) {
             setDisplayInfo(displayInfo);
-            notifyMovementBoundsChanged(false /* fromImeAdjustment */,
-                    false /* fromShelfAdjustment */);
+            notifyMovementBoundsChanged(false /* fromImeAdjustment */);
         }
     }
 
@@ -269,7 +220,7 @@ class PinnedStackController {
         mIsImeShowing = imeShowing;
         mImeHeight = imeHeight;
         notifyImeVisibilityChanged(imeShowing, imeHeight);
-        notifyMovementBoundsChanged(true /* fromImeAdjustment */, false /* fromShelfAdjustment */);
+        notifyMovementBoundsChanged(true /* fromImeAdjustment */);
     }
 
     /**
@@ -279,10 +230,7 @@ class PinnedStackController {
         if (Float.compare(mAspectRatio, aspectRatio) != 0) {
             mAspectRatio = aspectRatio;
             notifyAspectRatioChanged(aspectRatio);
-            notifyMovementBoundsChanged(false /* fromImeAdjustment */,
-                    false /* fromShelfAdjustment */);
-            notifyPrepareAnimation(null /* sourceHintRect */, aspectRatio,
-                    null /* stackBounds */);
+            notifyMovementBoundsChanged(false /* fromImeAdjustment */);
         }
     }
 
@@ -302,10 +250,6 @@ class PinnedStackController {
             mActions.addAll(actions);
         }
         notifyActionsChanged(mActions);
-    }
-
-    void prepareAnimation(Rect sourceRectHint, float aspectRatio, Rect stackBounds) {
-        notifyPrepareAnimation(sourceRectHint, aspectRatio, stackBounds);
     }
 
     /**
@@ -331,19 +275,6 @@ class PinnedStackController {
     }
 
     /**
-     * Notifies listeners that the PIP minimized state has changed.
-     */
-    private void notifyMinimizeChanged(boolean isMinimized) {
-        if (mPinnedStackListener != null) {
-            try {
-                mPinnedStackListener.onMinimizedStateChanged(isMinimized);
-            } catch (RemoteException e) {
-                Slog.e(TAG_WM, "Error delivering minimize changed event.", e);
-            }
-        }
-    }
-
-    /**
      * Notifies listeners that the PIP actions have changed.
      */
     private void notifyActionsChanged(List<RemoteAction> actions) {
@@ -359,8 +290,7 @@ class PinnedStackController {
     /**
      * Notifies listeners that the PIP movement bounds have changed.
      */
-    private void notifyMovementBoundsChanged(boolean fromImeAdjustment,
-            boolean fromShelfAdjustment) {
+    private void notifyMovementBoundsChanged(boolean fromImeAdjustment) {
         synchronized (mService.mGlobalLock) {
             if (mPinnedStackListener == null) {
                 return;
@@ -371,8 +301,7 @@ class PinnedStackController {
                 if (pinnedStack != null) {
                     pinnedStack.getAnimationOrCurrentBounds(animatingBounds);
                 }
-                mPinnedStackListener.onMovementBoundsChanged(animatingBounds,
-                        fromImeAdjustment, fromShelfAdjustment);
+                mPinnedStackListener.onMovementBoundsChanged(animatingBounds, fromImeAdjustment);
             } catch (RemoteException e) {
                 Slog.e(TAG_WM, "Error delivering actions changed event.", e);
             }
@@ -391,24 +320,10 @@ class PinnedStackController {
         }
     }
 
-    /**
-     * Notifies listeners that the PIP animation is about to happen.
-     */
-    private void notifyPrepareAnimation(Rect sourceRectHint, float aspectRatio, Rect stackBounds) {
-        if (mPinnedStackListener == null) return;
-        try {
-            mPinnedStackListener.onPrepareAnimation(sourceRectHint, aspectRatio, stackBounds);
-        } catch (RemoteException e) {
-            Slog.e(TAG_WM, "Error delivering prepare animation event.", e);
-        }
-    }
-
     void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "PinnedStackController");
-        pw.println(prefix + "  mDefaultAspectRatio=" + mDefaultAspectRatio);
         pw.println(prefix + "  mIsImeShowing=" + mIsImeShowing);
         pw.println(prefix + "  mImeHeight=" + mImeHeight);
-        pw.println(prefix + "  mIsMinimized=" + mIsMinimized);
         pw.println(prefix + "  mAspectRatio=" + mAspectRatio);
         pw.println(prefix + "  mMinAspectRatio=" + mMinAspectRatio);
         pw.println(prefix + "  mMaxAspectRatio=" + mMaxAspectRatio);

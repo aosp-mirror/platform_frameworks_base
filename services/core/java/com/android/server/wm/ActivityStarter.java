@@ -97,7 +97,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -2409,7 +2408,6 @@ class ActivityStarter {
                 mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
                 mVoiceInteractor, toTop, mStartActivity, mSourceRecord, mOptions);
         addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask - mReuseTask");
-        updateBounds(mStartActivity.getTask(), mLaunchParams.mBounds);
 
         if (DEBUG_TASKS) {
             Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
@@ -2430,21 +2428,6 @@ class ActivityStarter {
         activity.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
                 mStartActivity.launchedFromPackage);
         mIntentDelivered = true;
-    }
-
-    @VisibleForTesting
-    void updateBounds(Task task, Rect bounds) {
-        if (bounds.isEmpty()) {
-            return;
-        }
-
-        final Task rootTask = task.getRootTask();
-        if (rootTask != null && rootTask.inPinnedWindowingMode()) {
-            mService.animateResizePinnedStack(rootTask.mTaskId, bounds, -1);
-        } else {
-            // TODO: I don't believe it is possible to reach this else condition anymore...
-            task.setBounds(bounds);
-        }
     }
 
     private void addOrReparentStartingActivity(Task parent, String reason) {

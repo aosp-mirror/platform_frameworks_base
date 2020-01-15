@@ -63,14 +63,9 @@ public class PipSnapAlgorithm {
 
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
-    private final int mMinimizedVisibleSize;
-    private boolean mIsMinimized;
-
     public PipSnapAlgorithm(Context context) {
         Resources res = context.getResources();
         mContext = context;
-        mMinimizedVisibleSize = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.pip_minimized_visible_size);
         mDefaultSizePercent = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureDefaultSizePercent);
         mMaxAspectRatioForMinSize = res.getFloat(
@@ -89,13 +84,6 @@ public class PipSnapAlgorithm {
         mOrientation = res.getConfiguration().orientation;
         mSnapMode = res.getInteger(com.android.internal.R.integer.config_pictureInPictureSnapMode);
         calculateSnapTargets();
-    }
-
-    /**
-     * Sets the PIP's minimized state.
-     */
-    public void setMinimized(boolean isMinimized) {
-        mIsMinimized = isMinimized;
     }
 
     /**
@@ -232,20 +220,6 @@ public class PipSnapAlgorithm {
             newBounds.offsetTo(snapTarget.x, snapTarget.y);
         }
         return newBounds;
-    }
-
-    /**
-     * Applies the offset to the {@param stackBounds} to adjust it to a minimized state.
-     */
-    public void applyMinimizedOffset(Rect stackBounds, Rect movementBounds, Point displaySize,
-            Rect stableInsets) {
-        if (stackBounds.left <= movementBounds.centerX()) {
-            stackBounds.offsetTo(stableInsets.left + mMinimizedVisibleSize - stackBounds.width(),
-                    stackBounds.top);
-        } else {
-            stackBounds.offsetTo(displaySize.x - stableInsets.right - mMinimizedVisibleSize,
-                    stackBounds.top);
-        }
     }
 
     /**
@@ -402,16 +376,11 @@ public class PipSnapAlgorithm {
      * the new bounds out to {@param boundsOut}.
      */
     private void snapRectToClosestEdge(Rect stackBounds, Rect movementBounds, Rect boundsOut) {
-        // If the stackBounds are minimized, then it should only be snapped back horizontally
         final int boundedLeft = Math.max(movementBounds.left, Math.min(movementBounds.right,
                 stackBounds.left));
         final int boundedTop = Math.max(movementBounds.top, Math.min(movementBounds.bottom,
                 stackBounds.top));
         boundsOut.set(stackBounds);
-        if (mIsMinimized) {
-            boundsOut.offsetTo(boundedLeft, boundedTop);
-            return;
-        }
 
         // Otherwise, just find the closest edge
         final int fromLeft = Math.abs(stackBounds.left - movementBounds.left);
@@ -479,7 +448,5 @@ public class PipSnapAlgorithm {
         pw.println(prefix + PipSnapAlgorithm.class.getSimpleName());
         pw.println(innerPrefix + "mSnapMode=" + mSnapMode);
         pw.println(innerPrefix + "mOrientation=" + mOrientation);
-        pw.println(innerPrefix + "mMinimizedVisibleSize=" + mMinimizedVisibleSize);
-        pw.println(innerPrefix + "mIsMinimized=" + mIsMinimized);
     }
 }

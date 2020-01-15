@@ -333,7 +333,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         assertTrue(mController.isAnimatingTask(activity.getTask()));
 
         // Assume activity transition should animate when no
-        // IRecentsAnimationController#setCancelWithDeferredScreenshot called.
+        // IRecentsAnimationController#setDeferCancelUntilNextTransition called.
         assertFalse(mController.shouldDeferCancelWithScreenshot());
         assertTrue(activity.shouldAnimate(TRANSIT_ACTIVITY_CLOSE));
     }

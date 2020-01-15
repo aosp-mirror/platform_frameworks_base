@@ -128,18 +128,6 @@ public class TaskStackChangeListeners extends TaskStackListener {
     }
 
     @Override
-    public void onPinnedStackAnimationStarted() throws RemoteException {
-        mHandler.removeMessages(H.ON_PINNED_STACK_ANIMATION_STARTED);
-        mHandler.sendEmptyMessage(H.ON_PINNED_STACK_ANIMATION_STARTED);
-    }
-
-    @Override
-    public void onPinnedStackAnimationEnded() throws RemoteException {
-        mHandler.removeMessages(H.ON_PINNED_STACK_ANIMATION_ENDED);
-        mHandler.sendEmptyMessage(H.ON_PINNED_STACK_ANIMATION_ENDED);
-    }
-
-    @Override
     public void onActivityForcedResizable(String packageName, int taskId, int reason)
             throws RemoteException {
         mHandler.obtainMessage(H.ON_ACTIVITY_FORCED_RESIZABLE, taskId, reason, packageName)
@@ -249,11 +237,9 @@ public class TaskStackChangeListeners extends TaskStackListener {
         private static final int ON_TASK_SNAPSHOT_CHANGED = 2;
         private static final int ON_ACTIVITY_PINNED = 3;
         private static final int ON_PINNED_ACTIVITY_RESTART_ATTEMPT = 4;
-        private static final int ON_PINNED_STACK_ANIMATION_ENDED = 5;
         private static final int ON_ACTIVITY_FORCED_RESIZABLE = 6;
         private static final int ON_ACTIVITY_DISMISSING_DOCKED_STACK = 7;
         private static final int ON_TASK_PROFILE_LOCKED = 8;
-        private static final int ON_PINNED_STACK_ANIMATION_STARTED = 9;
         private static final int ON_ACTIVITY_UNPINNED = 10;
         private static final int ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED = 11;
         private static final int ON_TASK_CREATED = 12;
@@ -314,18 +300,6 @@ public class TaskStackChangeListeners extends TaskStackListener {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onPinnedActivityRestartAttempt(
                                     msg.arg1 != 0);
-                        }
-                        break;
-                    }
-                    case ON_PINNED_STACK_ANIMATION_STARTED: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onPinnedStackAnimationStarted();
-                        }
-                        break;
-                    }
-                    case ON_PINNED_STACK_ANIMATION_ENDED: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onPinnedStackAnimationEnded();
                         }
                         break;
                     }
