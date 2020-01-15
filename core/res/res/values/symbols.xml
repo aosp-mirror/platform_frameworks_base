@@ -3214,6 +3214,8 @@
   <java-symbol type="string" name="edit_accessibility_shortcut_menu_button" />
   <java-symbol type="string" name="cancel_accessibility_shortcut_menu_button" />
 
+  <java-symbol type="drawable" name="ic_accessibility_color_inversion" />
+  <java-symbol type="drawable" name="ic_accessibility_color_correction" />
   <java-symbol type="drawable" name="ic_accessibility_magnification" />
 
   <java-symbol type="drawable" name="ic_delete_item" />
