@@ -1,1 +1,81 @@
 // Signature format: 2.0
+package android.app.timedetector {
+
+  public final class PhoneTimeSuggestion implements android.os.Parcelable {
+    method public void addDebugInfo(@NonNull String);
+    method public void addDebugInfo(@NonNull java.util.List<java.lang.String>);
+    method public int describeContents();
+    method @NonNull public java.util.List<java.lang.String> getDebugInfo();
+    method public int getPhoneId();
+    method @Nullable public android.os.TimestampedValue<java.lang.Long> getUtcTime();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.timedetector.PhoneTimeSuggestion> CREATOR;
+  }
+
+  public static final class PhoneTimeSuggestion.Builder {
+    ctor public PhoneTimeSuggestion.Builder(int);
+    method @NonNull public android.app.timedetector.PhoneTimeSuggestion.Builder addDebugInfo(@NonNull String);
+    method @NonNull public android.app.timedetector.PhoneTimeSuggestion build();
+    method @NonNull public android.app.timedetector.PhoneTimeSuggestion.Builder setUtcTime(@Nullable android.os.TimestampedValue<java.lang.Long>);
+  }
+
+  public class TimeDetector {
+    method @RequiresPermission("android.permission.SUGGEST_PHONE_TIME_AND_ZONE") public void suggestPhoneTime(@NonNull android.app.timedetector.PhoneTimeSuggestion);
+  }
+
+}
+
+package android.app.timezonedetector {
+
+  public final class PhoneTimeZoneSuggestion implements android.os.Parcelable {
+    method public void addDebugInfo(@NonNull String);
+    method public void addDebugInfo(@NonNull java.util.List<java.lang.String>);
+    method @NonNull public static android.app.timezonedetector.PhoneTimeZoneSuggestion createEmptySuggestion(int, @NonNull String);
+    method public int describeContents();
+    method @NonNull public java.util.List<java.lang.String> getDebugInfo();
+    method public int getMatchType();
+    method public int getPhoneId();
+    method public int getQuality();
+    method @Nullable public String getZoneId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.timezonedetector.PhoneTimeZoneSuggestion> CREATOR;
+    field public static final int MATCH_TYPE_EMULATOR_ZONE_ID = 4; // 0x4
+    field public static final int MATCH_TYPE_NA = 0; // 0x0
+    field public static final int MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET = 3; // 0x3
+    field public static final int MATCH_TYPE_NETWORK_COUNTRY_ONLY = 2; // 0x2
+    field public static final int MATCH_TYPE_TEST_NETWORK_OFFSET_ONLY = 5; // 0x5
+    field public static final int QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS = 3; // 0x3
+    field public static final int QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET = 2; // 0x2
+    field public static final int QUALITY_NA = 0; // 0x0
+    field public static final int QUALITY_SINGLE_ZONE = 1; // 0x1
+  }
+
+  public static final class PhoneTimeZoneSuggestion.Builder {
+    ctor public PhoneTimeZoneSuggestion.Builder(int);
+    method @NonNull public android.app.timezonedetector.PhoneTimeZoneSuggestion.Builder addDebugInfo(@NonNull String);
+    method @NonNull public android.app.timezonedetector.PhoneTimeZoneSuggestion build();
+    method @NonNull public android.app.timezonedetector.PhoneTimeZoneSuggestion.Builder setMatchType(int);
+    method @NonNull public android.app.timezonedetector.PhoneTimeZoneSuggestion.Builder setQuality(int);
+    method @NonNull public android.app.timezonedetector.PhoneTimeZoneSuggestion.Builder setZoneId(@Nullable String);
+  }
+
+  public class TimeZoneDetector {
+    method @RequiresPermission("android.permission.SUGGEST_PHONE_TIME_AND_ZONE") public void suggestPhoneTimeZone(@NonNull android.app.timezonedetector.PhoneTimeZoneSuggestion);
+  }
+
+}
+
+package android.os {
+
+  public final class TimestampedValue<T> implements android.os.Parcelable {
+    ctor public TimestampedValue(long, @Nullable T);
+    method public int describeContents();
+    method public long getReferenceTimeMillis();
+    method @Nullable public T getValue();
+    method public static long referenceTimeDifference(@NonNull android.os.TimestampedValue<?>, @NonNull android.os.TimestampedValue<?>);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.TimestampedValue<?>> CREATOR;
+  }
+
+}
+
