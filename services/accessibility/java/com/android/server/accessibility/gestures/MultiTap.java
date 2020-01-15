@@ -82,7 +82,7 @@ class MultiTap extends GestureMatcher {
             mCurrentTaps++;
             if (mCurrentTaps == mTargetTaps) {
                 // Done.
-                completeAfterTapTimeout(event, rawEvent, policyFlags);
+                completeGesture(event, rawEvent, policyFlags);
                 return;
             }
             // Needs more taps.
