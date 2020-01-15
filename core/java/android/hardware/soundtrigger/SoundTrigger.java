@@ -519,9 +519,9 @@ public class SoundTrigger {
                 dest.writeInt(vendorUuid.toString().length());
                 dest.writeString(vendorUuid.toString());
             }
+            dest.writeInt(version);
             dest.writeBlob(data);
             dest.writeTypedArray(keyphrases, flags);
-            dest.writeInt(version);
         }
 
         @Override
