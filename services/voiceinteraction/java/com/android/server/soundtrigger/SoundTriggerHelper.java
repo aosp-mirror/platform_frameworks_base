@@ -756,7 +756,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
 
-        model.setStopped();
+        if (event.status != SoundTrigger.RECOGNITION_STATUS_GET_STATE_RESPONSE) {
+            model.setStopped();
+        }
 
         try {
             callback.onGenericSoundTriggerDetected((GenericRecognitionEvent) event);
@@ -900,7 +902,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
 
-        modelData.setStopped();
+        if (event.status != SoundTrigger.RECOGNITION_STATUS_GET_STATE_RESPONSE) {
+            modelData.setStopped();
+        }
 
         try {
             modelData.getCallback().onKeyphraseDetected((KeyphraseRecognitionEvent) event);
