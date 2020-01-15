@@ -221,7 +221,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 inputMethod.revokeSession((InputMethodSession)msg.obj);
                 return;
             case DO_SHOW_SOFT_INPUT:
-                inputMethod.showSoftInput(msg.arg1, (ResultReceiver)msg.obj);
+                SomeArgs args = (SomeArgs)msg.obj;
+                inputMethod.showSoftInputWithToken(
+                        msg.arg1, (ResultReceiver) args.arg2, (IBinder) args.arg1);
                 return;
             case DO_HIDE_SOFT_INPUT:
                 inputMethod.hideSoftInput(msg.arg1, (ResultReceiver)msg.obj);
@@ -230,10 +232,11 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 inputMethod.changeInputMethodSubtype((InputMethodSubtype)msg.obj);
                 return;
             case DO_CREATE_INLINE_SUGGESTIONS_REQUEST:
-                SomeArgs args = (SomeArgs) msg.obj;
+                args = (SomeArgs) msg.obj;
                 inputMethod.onCreateInlineSuggestionsRequest((ComponentName) args.arg1,
                         (AutofillId) args.arg2, (IInlineSuggestionsRequestCallback) args.arg3);
                 return;
+
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -371,9 +374,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void showSoftInput(int flags, ResultReceiver resultReceiver) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIO(DO_SHOW_SOFT_INPUT,
-                flags, resultReceiver));
+    public void showSoftInput(IBinder showInputToken, int flags, ResultReceiver resultReceiver) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(DO_SHOW_SOFT_INPUT,
+                flags, showInputToken, resultReceiver));
     }
 
     @BinderThread

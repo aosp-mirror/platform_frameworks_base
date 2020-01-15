@@ -41,7 +41,7 @@ interface IInputMethodManager {
             boolean allowsImplicitlySelectedSubtypes);
     InputMethodSubtype getLastInputMethodSubtype();
 
-    boolean showSoftInput(in IInputMethodClient client, int flags,
+    boolean showSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
             in ResultReceiver resultReceiver);
     boolean hideSoftInput(in IInputMethodClient client, int flags,
             in ResultReceiver resultReceiver);
