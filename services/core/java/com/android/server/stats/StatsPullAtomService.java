@@ -1120,11 +1120,30 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerBuildInformation() {
-        // No op.
+        int tagId = StatsLog.BUILD_INFORMATION;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullBuildInformation(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullBuildInformation() {
-        // No op.
+    private int pullBuildInformation(int atomTag, List<StatsEvent> pulledData) {
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeString(Build.FINGERPRINT)
+                .writeString(Build.BRAND)
+                .writeString(Build.PRODUCT)
+                .writeString(Build.DEVICE)
+                .writeString(Build.VERSION.RELEASE)
+                .writeString(Build.ID)
+                .writeString(Build.VERSION.INCREMENTAL)
+                .writeString(Build.TYPE)
+                .writeString(Build.TAGS)
+                .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerRoleHolder() {
