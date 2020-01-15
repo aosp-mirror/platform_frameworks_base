@@ -27,8 +27,6 @@ import static android.net.TetheringManager.TETHER_ERROR_ENTITLEMENT_UNKONWN;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
 import static android.net.TetheringManager.TETHER_ERROR_PROVISION_FAILED;
 
-import static com.android.internal.R.string.config_wifi_tether_enable;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -36,7 +34,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.net.util.SharedLog;
 import android.os.Bundle;
 import android.os.Handler;
@@ -54,6 +51,7 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.StateMachine;
+import com.android.networkstack.tethering.R;
 
 import java.io.PrintWriter;
 
@@ -75,9 +73,7 @@ public class EntitlementManager {
             "com.android.server.connectivity.tethering.PROVISIONING_RECHECK_ALARM";
     private static final String EXTRA_SUBID = "subId";
 
-    // {@link ComponentName} of the Service used to run tether provisioning.
-    private static final ComponentName TETHER_SERVICE = ComponentName.unflattenFromString(
-            Resources.getSystem().getString(config_wifi_tether_enable));
+    private final ComponentName mSilentProvisioningService;
     private static final int MS_PER_HOUR = 60 * 60 * 1000;
     private static final int EVENT_START_PROVISIONING = 0;
     private static final int EVENT_STOP_PROVISIONING = 1;
@@ -122,6 +118,8 @@ public class EntitlementManager {
         mHandler = new EntitlementHandler(masterHandler.getLooper());
         mContext.registerReceiver(mReceiver, new IntentFilter(ACTION_PROVISIONING_ALARM),
                 null, mHandler);
+        mSilentProvisioningService = ComponentName.unflattenFromString(
+                mContext.getResources().getString(R.string.config_wifi_tether_enable));
     }
 
     public void setOnUiEntitlementFailedListener(final OnUiEntitlementFailedListener listener) {
@@ -377,7 +375,7 @@ public class EntitlementManager {
         intent.putExtra(EXTRA_RUN_PROVISION, true);
         intent.putExtra(EXTRA_PROVISION_CALLBACK, receiver);
         intent.putExtra(EXTRA_SUBID, subId);
-        intent.setComponent(TETHER_SERVICE);
+        intent.setComponent(mSilentProvisioningService);
         // Only admin user can change tethering and SilentTetherProvisioning don't need to
         // show UI, it is fine to always start setting's background service as system user.
         mContext.startService(intent);

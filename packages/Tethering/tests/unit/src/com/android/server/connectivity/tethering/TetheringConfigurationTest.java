@@ -26,13 +26,6 @@ import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
-import static com.android.internal.R.array.config_mobile_hotspot_provision_app;
-import static com.android.internal.R.array.config_tether_bluetooth_regexs;
-import static com.android.internal.R.array.config_tether_dhcp_range;
-import static com.android.internal.R.array.config_tether_upstream_types;
-import static com.android.internal.R.array.config_tether_usb_regexs;
-import static com.android.internal.R.array.config_tether_wifi_regexs;
-import static com.android.networkstack.tethering.R.bool.config_tether_enable_legacy_dhcp_server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -51,6 +44,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
+import com.android.networkstack.tethering.R;
 
 import org.junit.After;
 import org.junit.Before;
@@ -120,15 +114,18 @@ public class TetheringConfigurationTest {
                 () -> DeviceConfig.getBoolean(eq(NAMESPACE_CONNECTIVITY),
                 eq(TetheringConfiguration.TETHER_ENABLE_LEGACY_DHCP_SERVER), anyBoolean()));
 
-        when(mResources.getStringArray(config_tether_dhcp_range)).thenReturn(new String[0]);
-        when(mResources.getStringArray(config_tether_usb_regexs)).thenReturn(new String[0]);
-        when(mResources.getStringArray(config_tether_wifi_regexs))
+        when(mResources.getStringArray(R.array.config_tether_dhcp_range)).thenReturn(
+                new String[0]);
+        when(mResources.getStringArray(R.array.config_tether_usb_regexs)).thenReturn(new String[0]);
+        when(mResources.getStringArray(R.array.config_tether_wifi_regexs))
                 .thenReturn(new String[]{ "test_wlan\\d" });
-        when(mResources.getStringArray(config_tether_bluetooth_regexs)).thenReturn(new String[0]);
-        when(mResources.getIntArray(config_tether_upstream_types)).thenReturn(new int[0]);
-        when(mResources.getStringArray(config_mobile_hotspot_provision_app))
+        when(mResources.getStringArray(R.array.config_tether_bluetooth_regexs)).thenReturn(
+                new String[0]);
+        when(mResources.getIntArray(R.array.config_tether_upstream_types)).thenReturn(new int[0]);
+        when(mResources.getStringArray(R.array.config_mobile_hotspot_provision_app))
                 .thenReturn(new String[0]);
-        when(mResources.getBoolean(config_tether_enable_legacy_dhcp_server)).thenReturn(false);
+        when(mResources.getBoolean(R.bool.config_tether_enable_legacy_dhcp_server)).thenReturn(
+                false);
         mHasTelephonyManager = true;
         mMockContext = new MockContext(mContext);
         mEnableLegacyDhcpServer = false;
@@ -140,7 +137,7 @@ public class TetheringConfigurationTest {
     }
 
     private TetheringConfiguration getTetheringConfiguration(int... legacyTetherUpstreamTypes) {
-        when(mResources.getIntArray(config_tether_upstream_types)).thenReturn(
+        when(mResources.getIntArray(R.array.config_tether_upstream_types)).thenReturn(
                 legacyTetherUpstreamTypes);
         return new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
     }
@@ -224,7 +221,7 @@ public class TetheringConfigurationTest {
 
     @Test
     public void testNoDefinedUpstreamTypesAddsEthernet() {
-        when(mResources.getIntArray(config_tether_upstream_types)).thenReturn(new int[]{});
+        when(mResources.getIntArray(R.array.config_tether_upstream_types)).thenReturn(new int[]{});
         when(mTelephonyManager.isTetheringApnRequired()).thenReturn(false);
 
         final TetheringConfiguration cfg = new TetheringConfiguration(
@@ -246,7 +243,7 @@ public class TetheringConfigurationTest {
 
     @Test
     public void testDefinedUpstreamTypesSansEthernetAddsEthernet() {
-        when(mResources.getIntArray(config_tether_upstream_types)).thenReturn(
+        when(mResources.getIntArray(R.array.config_tether_upstream_types)).thenReturn(
                 new int[]{TYPE_WIFI, TYPE_MOBILE_HIPRI});
         when(mTelephonyManager.isTetheringApnRequired()).thenReturn(false);
 
@@ -264,7 +261,7 @@ public class TetheringConfigurationTest {
 
     @Test
     public void testDefinedUpstreamTypesWithEthernetDoesNotAddEthernet() {
-        when(mResources.getIntArray(config_tether_upstream_types))
+        when(mResources.getIntArray(R.array.config_tether_upstream_types))
                 .thenReturn(new int[]{TYPE_WIFI, TYPE_ETHERNET, TYPE_MOBILE_HIPRI});
         when(mTelephonyManager.isTetheringApnRequired()).thenReturn(false);
 
@@ -282,7 +279,8 @@ public class TetheringConfigurationTest {
 
     @Test
     public void testNewDhcpServerDisabled() {
-        when(mResources.getBoolean(config_tether_enable_legacy_dhcp_server)).thenReturn(true);
+        when(mResources.getBoolean(R.bool.config_tether_enable_legacy_dhcp_server)).thenReturn(
+                true);
         doReturn(false).when(
                 () -> DeviceConfig.getBoolean(eq(NAMESPACE_CONNECTIVITY),
                 eq(TetheringConfiguration.TETHER_ENABLE_LEGACY_DHCP_SERVER), anyBoolean()));
@@ -291,7 +289,8 @@ public class TetheringConfigurationTest {
                 new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
         assertTrue(enableByRes.enableLegacyDhcpServer);
 
-        when(mResources.getBoolean(config_tether_enable_legacy_dhcp_server)).thenReturn(false);
+        when(mResources.getBoolean(R.bool.config_tether_enable_legacy_dhcp_server)).thenReturn(
+                false);
         doReturn(true).when(
                 () -> DeviceConfig.getBoolean(eq(NAMESPACE_CONNECTIVITY),
                 eq(TetheringConfiguration.TETHER_ENABLE_LEGACY_DHCP_SERVER), anyBoolean()));
@@ -303,7 +302,8 @@ public class TetheringConfigurationTest {
 
     @Test
     public void testNewDhcpServerEnabled() {
-        when(mResources.getBoolean(config_tether_enable_legacy_dhcp_server)).thenReturn(false);
+        when(mResources.getBoolean(R.bool.config_tether_enable_legacy_dhcp_server)).thenReturn(
+                false);
         doReturn(false).when(
                 () -> DeviceConfig.getBoolean(eq(NAMESPACE_CONNECTIVITY),
                 eq(TetheringConfiguration.TETHER_ENABLE_LEGACY_DHCP_SERVER), anyBoolean()));
@@ -329,16 +329,17 @@ public class TetheringConfigurationTest {
 
     private void setUpResourceForSubId() {
         when(mResourcesForSubId.getStringArray(
-                config_tether_dhcp_range)).thenReturn(new String[0]);
+                R.array.config_tether_dhcp_range)).thenReturn(new String[0]);
         when(mResourcesForSubId.getStringArray(
-                config_tether_usb_regexs)).thenReturn(new String[0]);
+                R.array.config_tether_usb_regexs)).thenReturn(new String[0]);
         when(mResourcesForSubId.getStringArray(
-                config_tether_wifi_regexs)).thenReturn(new String[]{ "test_wlan\\d" });
+                R.array.config_tether_wifi_regexs)).thenReturn(new String[]{ "test_wlan\\d" });
         when(mResourcesForSubId.getStringArray(
-                config_tether_bluetooth_regexs)).thenReturn(new String[0]);
-        when(mResourcesForSubId.getIntArray(config_tether_upstream_types)).thenReturn(new int[0]);
+                R.array.config_tether_bluetooth_regexs)).thenReturn(new String[0]);
+        when(mResourcesForSubId.getIntArray(R.array.config_tether_upstream_types)).thenReturn(
+                new int[0]);
         when(mResourcesForSubId.getStringArray(
-                config_mobile_hotspot_provision_app)).thenReturn(PROVISIONING_APP_NAME);
+                R.array.config_mobile_hotspot_provision_app)).thenReturn(PROVISIONING_APP_NAME);
     }
 
 }
