@@ -10,6 +10,14 @@
           "include-filter": "com.android.server.appsearch"
         }
       ]
+    },
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+           "include-filter": "android.app.appsearch"
+        }
+      ]
     }
   ]
 }
