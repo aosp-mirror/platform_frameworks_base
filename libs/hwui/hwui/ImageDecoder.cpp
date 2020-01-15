@@ -30,11 +30,17 @@ ImageDecoder::ImageDecoder(std::unique_ptr<SkAndroidCodec> codec, sk_sp<SkPngChu
     , mTargetSize(mCodec->getInfo().dimensions())
     , mDecodeSize(mTargetSize)
     , mOutColorType(mCodec->computeOutputColorType(kN32_SkColorType))
-    , mOutAlphaType(mCodec->getInfo().isOpaque() ?
-                    kOpaque_SkAlphaType : kPremul_SkAlphaType)
+    , mUnpremultipliedRequired(false)
     , mOutColorSpace(mCodec->getInfo().refColorSpace())
     , mSampleSize(1)
 {
+}
+
+SkAlphaType ImageDecoder::getOutAlphaType() const {
+    // While an SkBitmap may want to use kOpaque_SkAlphaType for a performance
+    // optimization, this class just outputs raw pixels. Using either
+    // premultiplication choice has no effect on decoding an opaque encoded image.
+    return mUnpremultipliedRequired ? kUnpremul_SkAlphaType : kPremul_SkAlphaType;
 }
 
 bool ImageDecoder::setTargetSize(int width, int height) {
@@ -42,7 +48,7 @@ bool ImageDecoder::setTargetSize(int width, int height) {
         return false;
     }
 
-    auto info = SkImageInfo::Make(width, height, mOutColorType, mOutAlphaType);
+    auto info = SkImageInfo::Make(width, height, mOutColorType, getOutAlphaType());
     size_t rowBytes = info.minRowBytes();
     if (rowBytes == 0) {
         // This would have overflowed.
@@ -63,7 +69,7 @@ bool ImageDecoder::setTargetSize(int width, int height) {
     SkISize targetSize = { width, height }, decodeSize = targetSize;
     int sampleSize = mCodec->computeSampleSize(&decodeSize);
 
-    if (decodeSize != targetSize && mOutAlphaType == kUnpremul_SkAlphaType
+    if (decodeSize != targetSize && mUnpremultipliedRequired
             && !mCodec->getInfo().isOpaque()) {
         return false;
     }
@@ -119,29 +125,11 @@ bool ImageDecoder::setOutColorType(SkColorType colorType) {
     return true;
 }
 
-bool ImageDecoder::setOutAlphaType(SkAlphaType alpha) {
-    switch (alpha) {
-        case kOpaque_SkAlphaType:
-            return opaque();
-        case kPremul_SkAlphaType:
-            if (opaque()) {
-                // Opaque can be treated as premul.
-                return true;
-            }
-            break;
-        case kUnpremul_SkAlphaType:
-            if (opaque()) {
-                // Opaque can be treated as unpremul.
-                return true;
-            }
-            if (mDecodeSize != mTargetSize) {
-                return false;
-            }
-            break;
-        default:
-            return false;
+bool ImageDecoder::setUnpremultipliedRequired(bool required) {
+    if (required && !opaque() && mDecodeSize != mTargetSize) {
+        return false;
     }
-    mOutAlphaType = alpha;
+    mUnpremultipliedRequired = required;
     return true;
 }
 
@@ -151,11 +139,11 @@ void ImageDecoder::setOutColorSpace(sk_sp<SkColorSpace> colorSpace) {
 
 SkImageInfo ImageDecoder::getOutputInfo() const {
     SkISize size = mCropRect ? mCropRect->size() : mTargetSize;
-    return SkImageInfo::Make(size, mOutColorType, mOutAlphaType, mOutColorSpace);
+    return SkImageInfo::Make(size, mOutColorType, getOutAlphaType(), mOutColorSpace);
 }
 
 bool ImageDecoder::opaque() const {
-    return mOutAlphaType == kOpaque_SkAlphaType;
+    return mCodec->getInfo().alphaType() == kOpaque_SkAlphaType;
 }
 
 bool ImageDecoder::gray() const {
@@ -165,7 +153,8 @@ bool ImageDecoder::gray() const {
 SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
     void* decodePixels = pixels;
     size_t decodeRowBytes = rowBytes;
-    auto decodeInfo = SkImageInfo::Make(mDecodeSize, mOutColorType, mOutAlphaType, mOutColorSpace);
+    auto decodeInfo = SkImageInfo::Make(mDecodeSize, mOutColorType, getOutAlphaType(),
+                                        mOutColorSpace);
     // Used if we need a temporary before scaling or subsetting.
     // FIXME: Use scanline decoding on only a couple lines to save memory. b/70709380.
     SkBitmap tmp;
