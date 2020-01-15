@@ -22,6 +22,8 @@ import android.net.NetworkCapabilities;
 import android.net.RouteInfo;
 import android.net.util.InterfaceSet;
 
+import com.android.net.module.util.NetUtils;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -85,7 +87,7 @@ public final class TetheringInterfaceUtils {
 
     private static String getInterfaceForDestination(LinkProperties lp, InetAddress dst) {
         final RouteInfo ri = (lp != null)
-                ? RouteInfo.selectBestRoute(lp.getAllRoutes(), dst)
+                ? NetUtils.selectBestRoute(lp.getAllRoutes(), dst)
                 : null;
         return (ri != null) ? ri.getInterface() : null;
     }
