@@ -16,18 +16,116 @@
 
 package android.media.tv.tuner.filter;
 
-import java.util.List;
+import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.content.Context;
+import android.media.tv.tuner.TunerUtils;
+import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
 
 /**
- * Bits Settings for Section Filter.
+ * Bits Settings for Section Filters.
  * @hide
  */
 public class SectionSettingsWithSectionBits extends SectionSettings {
-    private List<Byte> mFilter;
-    private List<Byte> mMask;
-    private List<Byte> mMode;
+    private final byte[] mFilter;
+    private final byte[] mMask;
+    private final byte[] mMode;
 
-    private SectionSettingsWithSectionBits(int mainType) {
+
+    private SectionSettingsWithSectionBits(int mainType, byte[] filter, byte[] mask, byte[] mode) {
         super(mainType);
+        mFilter = filter;
+        mMask = mask;
+        mMode = mode;
+    }
+
+    /**
+     * Gets the bytes configured for Section Filter
+     */
+    public byte[] getFilterBytes() {
+        return mFilter;
+    }
+    /**
+     * Gets bit mask.
+     *
+     * <p>The bits in the bytes are used for filtering.
+     */
+    public byte[] getMask() {
+        return mMask;
+    }
+    /**
+     * Gets mode.
+     *
+     * <p>Do positive match at the bit position of the configured bytes when the bit at same
+     * position of the mode is 0.
+     * <p>Do negative match at the bit position of the configured bytes when the bit at same
+     * position of the mode is 1.
+     */
+    public byte[] getMode() {
+        return mMode;
+    }
+
+    /**
+     * Creates a builder for {@link SectionSettingsWithSectionBits}.
+     *
+     * @param context the context of the caller.
+     * @param mainType the filter main type.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @NonNull
+    public static Builder builder(@NonNull Context context, @FilterType int mainType) {
+        TunerUtils.checkTunerPermission(context);
+        return new Builder(mainType);
+    }
+
+    /**
+     * Builder for {@link SectionSettingsWithSectionBits}.
+     */
+    public static class Builder extends Settings.Builder<Builder> {
+        private byte[] mFilter;
+        private byte[] mMask;
+        private byte[] mMode;
+
+        private Builder(int mainType) {
+            super(mainType);
+        }
+
+        /**
+         * Sets filter bytes.
+         */
+        @NonNull
+        public Builder setFilter(byte[] filter) {
+            mFilter = filter;
+            return this;
+        }
+        /**
+         * Sets bit mask.
+         */
+        @NonNull
+        public Builder setMask(byte[] mask) {
+            mMask = mask;
+            return this;
+        }
+        /**
+         * Sets mode.
+         */
+        @NonNull
+        public Builder setMode(byte[] mode) {
+            mMode = mode;
+            return this;
+        }
+
+        /**
+         * Builds a {@link SectionSettingsWithSectionBits} object.
+         */
+        @NonNull
+        public SectionSettingsWithSectionBits build() {
+            return new SectionSettingsWithSectionBits(mMainType, mFilter, mMask, mMode);
+        }
+
+        @Override
+        Builder self() {
+            return this;
+        }
     }
 }
