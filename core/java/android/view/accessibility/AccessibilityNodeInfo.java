@@ -31,6 +31,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
@@ -110,10 +111,17 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int ROOT_ITEM_ID = Integer.MAX_VALUE - 1;
 
     /** @hide */
+    public static final int LEASHED_ITEM_ID = Integer.MAX_VALUE - 2;
+
+    /** @hide */
     public static final long UNDEFINED_NODE_ID = makeNodeId(UNDEFINED_ITEM_ID, UNDEFINED_ITEM_ID);
 
     /** @hide */
     public static final long ROOT_NODE_ID = makeNodeId(ROOT_ITEM_ID,
+            AccessibilityNodeProvider.HOST_VIEW_ID);
+
+    /** @hide */
+    public static final long LEASHED_NODE_ID = makeNodeId(LEASHED_ITEM_ID,
             AccessibilityNodeProvider.HOST_VIEW_ID);
 
     /** @hide */
@@ -788,6 +796,10 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private TouchDelegateInfo mTouchDelegateInfo;
 
+    private IBinder mLeashedChild;
+    private IBinder mLeashedParent;
+    private long mLeashedParentNodeId = UNDEFINED_NODE_ID;
+
     /**
      * Creates a new {@link AccessibilityNodeInfo}.
      */
@@ -1039,7 +1051,12 @@ public class AccessibilityNodeInfo implements Parcelable {
             return null;
         }
         final long childId = mChildNodeIds.get(index);
-        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        final AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        if (mLeashedChild != null && childId == LEASHED_NODE_ID) {
+            return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mLeashedChild,
+                    ROOT_NODE_ID, false, FLAG_PREFETCH_DESCENDANTS, null);
+        }
+
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mWindowId,
                 childId, false, FLAG_PREFETCH_DESCENDANTS, null);
     }
@@ -1059,6 +1076,43 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void addChild(View child) {
         addChildInternal(child, AccessibilityNodeProvider.HOST_VIEW_ID, true);
+    }
+
+    /**
+     * Adds a view root from leashed content as a child. This method is used to embedded another
+     * view hierarchy.
+     * <p>
+     * <strong>Note:</strong> Only one leashed child is permitted.
+     * </p>
+     * <p>
+     * <strong>Note:</strong> Cannot be called from an
+     * {@link android.accessibilityservice.AccessibilityService}.
+     * This class is made immutable before being delivered to an AccessibilityService.
+     * Note that a view cannot be made its own child.
+     * </p>
+     *
+     * @param token The token to which a view root is added.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     * @hide
+     */
+    @TestApi
+    public void addChild(@NonNull IBinder token) {
+        enforceNotSealed();
+        if (token == null) {
+            return;
+        }
+        if (mChildNodeIds == null) {
+            mChildNodeIds = new LongArray();
+        }
+
+        mLeashedChild = token;
+        // Checking uniqueness.
+        // Since only one leashed child is permitted, skip adding ID if the ID already exists.
+        if (mChildNodeIds.indexOf(LEASHED_NODE_ID) >= 0) {
+            return;
+        }
+        mChildNodeIds.add(LEASHED_NODE_ID);
     }
 
     /**
@@ -1087,6 +1141,38 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public boolean removeChild(View child) {
         return removeChild(child, AccessibilityNodeProvider.HOST_VIEW_ID);
+    }
+
+    /**
+     * Removes a leashed child. If the child was not previously added to the node,
+     * calling this method has no effect.
+     * <p>
+     * <strong>Note:</strong> Cannot be called from an
+     * {@link android.accessibilityservice.AccessibilityService}.
+     * This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param token The token of the leashed child
+     * @return true if the child was present
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     * @hide
+     */
+    public boolean removeChild(IBinder token) {
+        enforceNotSealed();
+        if (mChildNodeIds == null || mLeashedChild == null) {
+            return false;
+        }
+        if (!mLeashedChild.equals(token)) {
+            return false;
+        }
+        final int index = mChildNodeIds.indexOf(LEASHED_NODE_ID);
+        mLeashedChild = null;
+        if (index < 0) {
+            return false;
+        }
+        mChildNodeIds.remove(index);
+        return true;
     }
 
     /**
@@ -1668,6 +1754,9 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo getParent() {
         enforceSealed();
+        if (mLeashedParent != null && mLeashedParentNodeId != UNDEFINED_NODE_ID) {
+            return getNodeForAccessibilityId(mConnectionId, mLeashedParent, mLeashedParentNodeId);
+        }
         return getNodeForAccessibilityId(mConnectionId, mWindowId, mParentNodeId);
     }
 
@@ -3257,6 +3346,40 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Sets the token and node id of the leashed parent.
+     *
+     * @param token The token.
+     * @param viewId The accessibility view id.
+     * @hide
+     */
+    @TestApi
+    public void setLeashedParent(@Nullable IBinder token, int viewId) {
+        enforceNotSealed();
+        mLeashedParent = token;
+        mLeashedParentNodeId = makeNodeId(viewId, AccessibilityNodeProvider.HOST_VIEW_ID);
+    }
+
+    /**
+     * Gets the token of the leashed parent.
+     *
+     * @return The token.
+     * @hide
+     */
+    public @Nullable IBinder getLeashedParent() {
+        return mLeashedParent;
+    }
+
+    /**
+     * Gets the node id of the leashed parent.
+     *
+     * @return The accessibility node id.
+     * @hide
+     */
+    public long getLeashedParentNodeId() {
+        return mLeashedParentNodeId;
+    }
+
+    /**
      * Sets if this instance is sealed.
      *
      * @param sealed Whether is sealed.
@@ -3559,6 +3682,18 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (!Objects.equals(mTouchDelegateInfo, DEFAULT.mTouchDelegateInfo)) {
             nonDefaultFields |= bitAt(fieldIndex);
         }
+        fieldIndex++;
+        if (mLeashedChild != DEFAULT.mLeashedChild) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
+        fieldIndex++;
+        if (mLeashedParent != DEFAULT.mLeashedParent) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
+        fieldIndex++;
+        if (mLeashedParentNodeId != DEFAULT.mLeashedParentNodeId) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
         int totalFields = fieldIndex;
         parcel.writeLong(nonDefaultFields);
 
@@ -3685,6 +3820,16 @@ public class AccessibilityNodeInfo implements Parcelable {
             mTouchDelegateInfo.writeToParcel(parcel, flags);
         }
 
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            parcel.writeStrongBinder(mLeashedChild);
+        }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            parcel.writeStrongBinder(mLeashedParent);
+        }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            parcel.writeLong(mLeashedParentNodeId);
+        }
+
         if (DEBUG) {
             fieldIndex--;
             if (totalFields != fieldIndex) {
@@ -3768,6 +3913,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         final TouchDelegateInfo otherInfo = other.mTouchDelegateInfo;
         mTouchDelegateInfo = (otherInfo != null)
                 ? new TouchDelegateInfo(otherInfo.mTargetMap, true) : null;
+
+        mLeashedChild = other.mLeashedChild;
+        mLeashedParent = other.mLeashedParent;
+        mLeashedParentNodeId = other.mLeashedParentNodeId;
     }
 
     private void initPoolingInfos(AccessibilityNodeInfo other) {
@@ -3919,6 +4068,16 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             mTouchDelegateInfo = TouchDelegateInfo.CREATOR.createFromParcel(parcel);
+        }
+
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            mLeashedChild = parcel.readStrongBinder();
+        }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            mLeashedParent = parcel.readStrongBinder();
+        }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            mLeashedParentNodeId = parcel.readLong();
         }
 
         mSealed = sealed;
@@ -4197,6 +4356,19 @@ public class AccessibilityNodeInfo implements Parcelable {
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(connectionId,
                 windowId, accessibilityId, false, FLAG_PREFETCH_PREDECESSORS
+                        | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS, null);
+    }
+
+    private static AccessibilityNodeInfo getNodeForAccessibilityId(int connectionId,
+            IBinder leashToken, long accessibilityId) {
+        if (!((leashToken != null)
+                && (getAccessibilityViewId(accessibilityId) != UNDEFINED_ITEM_ID)
+                && (connectionId != UNDEFINED_CONNECTION_ID))) {
+            return null;
+        }
+        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        return client.findAccessibilityNodeInfoByAccessibilityId(connectionId,
+                leashToken, accessibilityId, false, FLAG_PREFETCH_PREDECESSORS
                         | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS, null);
     }
 

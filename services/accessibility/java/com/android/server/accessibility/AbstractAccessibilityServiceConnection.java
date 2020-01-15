@@ -1018,6 +1018,20 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    /**
+     * Gets windowId of given token.
+     *
+     * @param token The token
+     * @return window id
+     */
+    @Override
+    public int getWindowIdForLeashToken(@NonNull IBinder token) {
+        synchronized (mLock) {
+            // TODO: Add a method to lookup window ID by given leash token.
+            return -1;
+        }
+    }
+
     public void resetLocked() {
         mSystemSupport.getKeyEventDispatcher().flush(this);
         try {
