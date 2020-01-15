@@ -5741,10 +5741,10 @@ public class Editor {
                 return;
             }
             switch (event.getActionMasked()) {
-                case MotionEvent.ACTION_DOWN:
-                    mIsDraggingCursor = false;
-                    break;
                 case MotionEvent.ACTION_MOVE:
+                    if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+                        break;
+                    }
                     if (mIsDraggingCursor) {
                         performCursorDrag(event);
                     } else if (FLAG_ENABLE_CURSOR_DRAG
