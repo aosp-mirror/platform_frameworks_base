@@ -105,6 +105,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_ORIG_IMP = "orig_imp";
     private static final String ATT_PARENT_CHANNEL = "parent";
     private static final String ATT_CONVERSATION_ID = "conv_id";
+    private static final String ATT_DEMOTE = "dem";
     private static final String DELIMITER = ",";
 
     /**
@@ -194,6 +195,7 @@ public final class NotificationChannel implements Parcelable {
     private boolean mImportanceLockedDefaultApp;
     private String mParentId = null;
     private String mConversationId = null;
+    private boolean mDemoted = false;
 
     /**
      * Creates a notification channel.
@@ -260,6 +262,7 @@ public final class NotificationChannel implements Parcelable {
         mOriginalImportance = in.readInt();
         mParentId = in.readString();
         mConversationId = in.readString();
+        mDemoted = in.readBoolean();
     }
 
     @Override
@@ -317,6 +320,7 @@ public final class NotificationChannel implements Parcelable {
         dest.writeInt(mOriginalImportance);
         dest.writeString(mParentId);
         dest.writeString(mConversationId);
+        dest.writeBoolean(mDemoted);
     }
 
     /**
@@ -386,14 +390,14 @@ public final class NotificationChannel implements Parcelable {
         return input;
     }
 
-    // Modifiable by apps on channel creation.
-
     /**
      * @hide
      */
     public void setId(String id) {
         mId = id;
     }
+
+    // Modifiable by apps on channel creation.
 
     /**
      * Sets what group this channel belongs to.
@@ -767,6 +771,20 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public void setDemoted(boolean demoted) {
+        mDemoted = demoted;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isDemoted() {
+        return mDemoted;
+    }
+
+    /**
      * Returns whether the user has chosen the importance of this channel, either to affirm the
      * initial selection from the app, or changed it to be higher or lower.
      * @see #getImportance()
@@ -829,6 +847,7 @@ public final class NotificationChannel implements Parcelable {
         setOriginalImportance(safeInt(parser, ATT_ORIG_IMP, DEFAULT_IMPORTANCE));
         setConversationId(parser.getAttributeValue(null, ATT_PARENT_CHANNEL),
                 parser.getAttributeValue(null, ATT_CONVERSATION_ID));
+        setDemoted(safeBool(parser, ATT_DEMOTE, false));
     }
 
     @Nullable
@@ -958,6 +977,9 @@ public final class NotificationChannel implements Parcelable {
         }
         if (getConversationId() != null) {
             out.attribute(null, ATT_CONVERSATION_ID, getConversationId());
+        }
+        if (isDemoted()) {
+            out.attribute(null, ATT_DEMOTE, Boolean.toString(isDemoted()));
         }
 
         // mImportanceLockedDefaultApp and mImportanceLockedByOEM have a different source of
@@ -1118,7 +1140,8 @@ public final class NotificationChannel implements Parcelable {
                 && mImportanceLockedDefaultApp == that.mImportanceLockedDefaultApp
                 && mOriginalImportance == that.mOriginalImportance
                 && Objects.equals(getParentChannelId(), that.getParentChannelId())
-                && Objects.equals(getConversationId(), that.getConversationId());
+                && Objects.equals(getConversationId(), that.getConversationId())
+                && isDemoted() == that.isDemoted();
     }
 
     @Override
@@ -1129,7 +1152,7 @@ public final class NotificationChannel implements Parcelable {
                 isFgServiceShown(), mVibrationEnabled, mShowBadge, isDeleted(), getGroup(),
                 getAudioAttributes(), isBlockableSystem(), mAllowBubbles,
                 mImportanceLockedByOEM, mImportanceLockedDefaultApp, mOriginalImportance,
-                mParentId, mConversationId);
+                mParentId, mConversationId, mDemoted);
         result = 31 * result + Arrays.hashCode(mVibration);
         return result;
     }
@@ -1176,7 +1199,8 @@ public final class NotificationChannel implements Parcelable {
                 + ", mImportanceLockedDefaultApp=" + mImportanceLockedDefaultApp
                 + ", mOriginalImp=" + mOriginalImportance
                 + ", mParent=" + mParentId
-                + ", mConversationId=" + mConversationId;
+                + ", mConversationId=" + mConversationId
+                + ", mDemoted=" + mDemoted;
     }
 
     /** @hide */

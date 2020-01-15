@@ -227,6 +227,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(expected.getLightColor(), actual.getLightColor());
         assertEquals(expected.getParentChannelId(), actual.getParentChannelId());
         assertEquals(expected.getConversationId(), actual.getConversationId());
+        assertEquals(expected.isDemoted(), actual.isDemoted());
     }
 
     private void compareChannelsParentChild(NotificationChannel parent,
@@ -355,6 +356,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel2.setVibrationPattern(new long[]{100, 67, 145, 156});
         channel2.setLightColor(Color.BLUE);
         channel2.setConversationId("id1", "conversation");
+        channel2.setDemoted(true);
 
         mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncg, true);
         mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncg2, true);

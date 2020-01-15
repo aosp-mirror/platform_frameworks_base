@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection
 
 import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.NotificationManager.IMPORTANCE_LOW
@@ -81,6 +82,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setNotification(
                         Notification.Builder(mContext, "test")
                                 .build())
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
                 .setUser(mContext.getUser())
                 .setOverrideGroupKey("")
                 .build()
@@ -94,6 +96,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setNotification(
                         Notification.Builder(mContext, "test")
                                 .build())
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
                 .setUser(mContext.getUser())
                 .setOverrideGroupKey("")
                 .build()
@@ -116,6 +119,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setOpPkg("pkg")
                 .setTag("tag")
                 .setNotification(aN)
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
                 .setUser(mContext.getUser())
                 .setOverrideGroupKey("")
                 .build()
@@ -130,6 +134,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setOpPkg("pkg2")
                 .setTag("tag")
                 .setNotification(bN)
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
                 .setUser(mContext.getUser())
                 .setOverrideGroupKey("")
                 .build()
@@ -149,6 +154,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setTag("tag")
                 .setNotification(notif)
                 .setUser(mContext.user)
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
                 .setOverrideGroupKey("")
                 .build()
 
@@ -168,6 +174,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setTag("tag")
                 .setNotification(notif)
                 .setUser(mContext.user)
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
                 .setOverrideGroupKey("")
                 .build()
 

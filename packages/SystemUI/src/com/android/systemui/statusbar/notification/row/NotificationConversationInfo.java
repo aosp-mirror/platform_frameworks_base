@@ -25,6 +25,7 @@ import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
 
 import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_BUBBLE;
+import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_DEMOTE;
 import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_FAVORITE;
 import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_HOME;
 import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_MUTE;
@@ -61,6 +62,7 @@ import android.util.Slog;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -149,6 +151,11 @@ public class NotificationConversationInfo extends LinearLayout implements
     private OnClickListener mOnMuteClick = v -> {
       mSelectedAction = ACTION_MUTE;
       closeControls(v, true);
+    };
+
+    private OnClickListener mOnDemoteClick = v -> {
+        mSelectedAction = ACTION_DEMOTE;
+        closeControls(v, true);
     };
 
     public NotificationConversationInfo(Context context, AttributeSet attrs) {
@@ -295,6 +302,8 @@ public class NotificationConversationInfo extends LinearLayout implements
                     mContext.getDrawable(R.drawable.ic_notifications_alert), null, null, null);
         }
 
+        ImageButton demote = findViewById(R.id.demote);
+        demote.setOnClickListener(mOnDemoteClick);
     }
 
     private void bindHeader() {
@@ -609,7 +618,7 @@ public class NotificationConversationInfo extends LinearLayout implements
                         }
                         break;
                     case ACTION_DEMOTE:
-                        // TODO: when demotion status field exists on notificationchannel
+                        mChannelToUpdate.setDemoted(!mChannelToUpdate.isDemoted());
                         break;
 
                 }

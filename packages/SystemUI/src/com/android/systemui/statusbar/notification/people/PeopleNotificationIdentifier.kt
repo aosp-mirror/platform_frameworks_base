@@ -18,13 +18,14 @@ package com.android.systemui.statusbar.notification.people
 
 import android.app.Notification
 import android.content.Context
+import android.app.NotificationChannel
 import android.service.notification.StatusBarNotification
 import android.util.FeatureFlagUtils
 import javax.inject.Inject
 import javax.inject.Singleton
 
 interface PeopleNotificationIdentifier {
-    fun isPeopleNotification(sbn: StatusBarNotification): Boolean
+    fun isPeopleNotification(sbn: StatusBarNotification, channel: NotificationChannel): Boolean
 }
 
 @Singleton
@@ -33,12 +34,13 @@ class PeopleNotificationIdentifierImpl @Inject constructor(
     private val context: Context
 ) : PeopleNotificationIdentifier {
 
-    override fun isPeopleNotification(sbn: StatusBarNotification) =
-            (sbn.notification.notificationStyle == Notification.MessagingStyle::class.java &&
+    override fun isPeopleNotification(sbn: StatusBarNotification, channel: NotificationChannel) =
+            ((sbn.notification.notificationStyle == Notification.MessagingStyle::class.java &&
                     (sbn.notification.shortcutId != null ||
                             FeatureFlagUtils.isEnabled(
                                     context,
                                     FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ
                             ))) ||
-                    personExtractor.isPersonNotification(sbn)
+                    personExtractor.isPersonNotification(sbn)) &&
+                    !channel.isDemoted
 }
