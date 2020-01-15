@@ -138,7 +138,7 @@ public final class PreciseDataConnectionState implements Parcelable {
      * To check the SDK version for {@link PreciseDataConnectionState#getDataConnectionState}.
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long GET_DATA_CONNECTION_STATE_CODE_CHANGE = 147600208L;
 
     /**

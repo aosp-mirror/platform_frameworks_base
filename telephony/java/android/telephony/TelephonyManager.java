@@ -5449,7 +5449,7 @@ public class TelephonyManager {
      * To check the SDK version for {@link TelephonyManager#getDataState}.
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long GET_DATA_STATE_CODE_CHANGE = 147600208L;
 
     /**
@@ -5535,7 +5535,7 @@ public class TelephonyManager {
      * To check the SDK version for {@link TelephonyManager#listen}.
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.P)
     private static final long LISTEN_CODE_CHANGE = 147600208L;
 
     /**
