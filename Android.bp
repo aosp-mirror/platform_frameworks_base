@@ -637,6 +637,7 @@ filegroup {
     name: "framework-ike-shared-srcs",
     visibility: ["//frameworks/opt/net/ike"],
     srcs: [
+        "core/java/android/annotation/StringDef.java",
         "core/java/android/net/annotations/PolicyDirection.java",
         "core/java/com/android/internal/util/IState.java",
         "core/java/com/android/internal/util/State.java",
