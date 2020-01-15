@@ -2557,4 +2557,9 @@ enum PageId {
     // OS: R
     DND_PEOPLE = 1823;
 
+    // OPEN: Settings > Apps and notifications > App info > one of any app > Open by default
+    //       > Open supported links
+    // CATEGORY: SETTINGS
+    // OS: R
+    OPEN_SUPPORTED_LINKS = 1824;
 }
