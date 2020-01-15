@@ -2069,6 +2069,13 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
+        public UsageEvents queryEventsForUser(int userId, long beginTime, long endTime,
+                boolean shouldObfuscateInstantApps) {
+            return UsageStatsService.this.queryEvents(
+                    userId, beginTime, endTime, shouldObfuscateInstantApps);
+        }
+
+        @Override
         public void setLastJobRunTime(String packageName, int userId, long elapsedRealtime) {
             mAppStandby.setLastJobRunTime(packageName, userId, elapsedRealtime);
         }
