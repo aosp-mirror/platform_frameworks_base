@@ -225,13 +225,12 @@ AndroidBitmapFormat AImageDecoderHeaderInfo_getAndroidBitmapFormat(
 
 int AImageDecoderHeaderInfo_getAlphaFlags(const AImageDecoderHeaderInfo* info) {
     if (!info) {
-        // FIXME: Better invalid?
-        return -1;
+        return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
     switch (toDecoder(info)->mCodec->getInfo().alphaType()) {
         case kUnknown_SkAlphaType:
             LOG_ALWAYS_FATAL("Invalid alpha type");
-            return -1;
+            return ANDROID_IMAGE_DECODER_INTERNAL_ERROR;
         case kUnpremul_SkAlphaType:
             // fall through. premul is the default.
         case kPremul_SkAlphaType:
