@@ -127,6 +127,23 @@ std::shared_ptr<LogEvent> buildOverlayEventBadStateType(int uid, const std::stri
     event->init();
     return event;
 }
+
+std::shared_ptr<LogEvent> buildBleScanEvent(int uid, bool acquire, bool reset) {
+    std::vector<AttributionNodeInternal> chain;
+    chain.push_back(AttributionNodeInternal());
+    AttributionNodeInternal& attr = chain.back();
+    attr.set_uid(uid);
+
+    std::shared_ptr<LogEvent> event =
+            std::make_shared<LogEvent>(android::util::BLE_SCAN_STATE_CHANGED, 1000);
+    event->write(chain);
+    event->write(reset ? 2 : acquire ? 1 : 0);  // PARTIAL_WAKE_LOCK
+    event->write(0);                            // filtered
+    event->write(0);                            // first match
+    event->write(0);                            // opportunistic
+    event->init();
+    return event;
+}
 // END: build event functions.
 
 // START: get primary key functions
@@ -277,6 +294,80 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 }
 
 /**
+ * Test a binary state atom with nested counting.
+ *
+ * To go from an "ON" state to an "OFF" state with nested counting, we must see
+ * an equal number of "OFF" events as "ON" events.
+ * For example, ACQUIRE, ACQUIRE, RELEASE will still be in the ACQUIRE state.
+ * ACQUIRE, ACQUIRE, RELEASE, RELEASE will be in the RELEASE state.
+ */
+TEST(StateTrackerTest, TestStateChangeNested) {
+    sp<TestStateListener> listener = new TestStateListener();
+    StateManager mgr;
+    mgr.registerListener(android::util::WAKELOCK_STATE_CHANGED, listener);
+
+    std::shared_ptr<LogEvent> event1 =
+            buildPartialWakelockEvent(1000 /* uid */, "tag", true /*acquire*/);
+    mgr.onLogEvent(*event1);
+    EXPECT_EQ(1, listener->updates.size());
+    EXPECT_EQ(1000, listener->updates[0].mKey.getValues()[0].mValue.int_value);
+    EXPECT_EQ(1, listener->updates[0].mState);
+    listener->updates.clear();
+
+    std::shared_ptr<LogEvent> event2 =
+            buildPartialWakelockEvent(1000 /* uid */, "tag", true /*acquire*/);
+    mgr.onLogEvent(*event2);
+    EXPECT_EQ(0, listener->updates.size());
+
+    std::shared_ptr<LogEvent> event3 =
+            buildPartialWakelockEvent(1000 /* uid */, "tag", false /*release*/);
+    mgr.onLogEvent(*event3);
+    EXPECT_EQ(0, listener->updates.size());
+
+    std::shared_ptr<LogEvent> event4 =
+            buildPartialWakelockEvent(1000 /* uid */, "tag", false /*release*/);
+    mgr.onLogEvent(*event4);
+    EXPECT_EQ(1, listener->updates.size());
+    EXPECT_EQ(1000, listener->updates[0].mKey.getValues()[0].mValue.int_value);
+    EXPECT_EQ(0, listener->updates[0].mState);
+}
+
+/**
+ * Test a state atom with a reset state.
+ *
+ * If the reset state value is seen, every state in the map is set to the default
+ * state and every listener is notified.
+ */
+TEST(StateTrackerTest, TestStateChangeReset) {
+    sp<TestStateListener> listener = new TestStateListener();
+    StateManager mgr;
+    mgr.registerListener(android::util::BLE_SCAN_STATE_CHANGED, listener);
+
+    std::shared_ptr<LogEvent> event1 =
+            buildBleScanEvent(1000 /* uid */, true /*acquire*/, false /*reset*/);
+    mgr.onLogEvent(*event1);
+    EXPECT_EQ(1, listener->updates.size());
+    EXPECT_EQ(1000, listener->updates[0].mKey.getValues()[0].mValue.int_value);
+    EXPECT_EQ(BleScanStateChanged::ON, listener->updates[0].mState);
+    listener->updates.clear();
+
+    std::shared_ptr<LogEvent> event2 =
+            buildBleScanEvent(2000 /* uid */, true /*acquire*/, false /*reset*/);
+    mgr.onLogEvent(*event2);
+    EXPECT_EQ(1, listener->updates.size());
+    EXPECT_EQ(2000, listener->updates[0].mKey.getValues()[0].mValue.int_value);
+    EXPECT_EQ(BleScanStateChanged::ON, listener->updates[0].mState);
+    listener->updates.clear();
+
+    std::shared_ptr<LogEvent> event3 =
+            buildBleScanEvent(2000 /* uid */, false /*acquire*/, true /*reset*/);
+    mgr.onLogEvent(*event3);
+    EXPECT_EQ(2, listener->updates.size());
+    EXPECT_EQ(BleScanStateChanged::OFF, listener->updates[0].mState);
+    EXPECT_EQ(BleScanStateChanged::OFF, listener->updates[1].mState);
+}
+
+/**
  * Test StateManager's onLogEvent and StateListener's onStateChanged correctly
  * updates listener for states without primary keys.
  */
@@ -334,7 +425,7 @@ TEST(StateTrackerTest, TestStateChangePrimaryFieldAttrChain) {
 
     // Log event.
     std::shared_ptr<LogEvent> event =
-            buildPartialWakelockEvent(1001 /* uid */, "tag1", false /* acquire */);
+            buildPartialWakelockEvent(1001 /* uid */, "tag1", true /* acquire */);
     mgr.onLogEvent(*event);
 
     EXPECT_EQ(1, mgr.getStateTrackersCount());
@@ -346,23 +437,25 @@ TEST(StateTrackerTest, TestStateChangePrimaryFieldAttrChain) {
     EXPECT_EQ(1001, listener1->updates[0].mKey.getValues()[0].mValue.int_value);
     EXPECT_EQ(1, listener1->updates[0].mKey.getValues()[1].mValue.int_value);
     EXPECT_EQ("tag1", listener1->updates[0].mKey.getValues()[2].mValue.str_value);
-    EXPECT_EQ(WakelockStateChanged::RELEASE, listener1->updates[0].mState);
+    EXPECT_EQ(WakelockStateChanged::ACQUIRE, listener1->updates[0].mState);
 
     // Check StateTracker was updated by querying for state.
     HashableDimensionKey queryKey;
     getPartialWakelockKey(1001 /* uid */, "tag1", &queryKey);
-    EXPECT_EQ(WakelockStateChanged::RELEASE,
+    EXPECT_EQ(WakelockStateChanged::ACQUIRE,
               getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey));
 
     // No state stored for this query key.
     HashableDimensionKey queryKey2;
     getPartialWakelockKey(1002 /* uid */, "tag1", &queryKey2);
-    EXPECT_EQ(-1, getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey2));
+    EXPECT_EQ(WakelockStateChanged::RELEASE,
+              getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey2));
 
     // Partial query fails.
     HashableDimensionKey queryKey3;
     getPartialWakelockKey(1001 /* uid */, &queryKey3);
-    EXPECT_EQ(-1, getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey3));
+    EXPECT_EQ(WakelockStateChanged::RELEASE,
+              getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey3));
 }
 
 /**

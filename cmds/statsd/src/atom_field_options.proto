@@ -24,46 +24,75 @@ option java_outer_classname = "AtomFieldOptions";
 import "google/protobuf/descriptor.proto";
 
 enum StateField {
-    // Default value for fields that are not primary or exclusive state.
+    // Default value for fields that are not a primary or exclusive state field.
     STATE_FIELD_UNSET = 0;
     // Fields that represent the key that the state belongs to.
-    PRIMARY = 1;
+    // Used on simple proto fields. Do not use on attribution chains.
+    PRIMARY_FIELD = 1;
     // The field that represents the state. It's an exclusive state.
-    EXCLUSIVE = 2;
-
+    EXCLUSIVE_STATE = 2;
+    // Used on an attribution chain field to indicate that the first uid is the
+    // primary field.
     PRIMARY_FIELD_FIRST_UID = 3;
 }
 
-// Used to annotate an atom that reprsents a state change. A state change atom must have exactly ONE
-// exclusive state field, and any number of primary key fields.
-// For example,
-// message UidProcessStateChanged {
-//    optional int32 uid = 1 [(state_field_option).option = PRIMARY];
-//    optional android.app.ProcessStateEnum state = 2 [(state_field_option).option = EXCLUSIVE];
+// Used to annotate an atom that represents a state change. A state change atom must have exactly
+// ONE exclusive state field, and any number of primary key fields. For example, message
+// UidProcessStateChanged {
+//    optional int32 uid = 1 [(state_field_option).option = PRIMARY_FIELD];
+//    optional android.app.ProcessStateEnum state = 2 [(state_field_option).option =
+//    EXCLUSIVE_STATE];
 //  }
-// Each of this UidProcessStateChanged atom represents a state change for a specific uid.
+// Each UidProcessStateChanged atom event represents a state change for a specific uid.
 // A new state automatically overrides the previous state.
 //
-// If the atom has 2 or more primary fields, it means the combination of the primary fields are
-// the primary key.
+// If the atom has 2 or more primary fields, it means the combination of the
+// primary fields are the primary key.
 // For example:
 // message ThreadStateChanged {
-//    optional int32 pid = 1  [(state_field_option).option = PRIMARY];
-//    optional int32 tid = 2  [(state_field_option).option = PRIMARY];
-//    optional int32 state = 3 [(state_field_option).option = EXCLUSIVE];
+//    optional int32 pid = 1  [(state_field_option).option = PRIMARY_FIELD];
+//    optional int32 tid = 2  [(state_field_option).option = PRIMARY_FIELD];
+//    optional int32 state = 3 [(state_field_option).option = EXCLUSIVE_STATE];
 // }
 //
 // Sometimes, there is no primary key field, when the state is GLOBAL.
 // For example,
-//
 // message ScreenStateChanged {
-//    optional android.view.DisplayStateEnum state = 1 [(state_field_option).option = EXCLUSIVE];
+//    optional android.view.DisplayStateEnum state = 1 [(state_field_option).option =
+//    EXCLUSIVE_STATE];
 // }
 //
-// Only fields of primary types can be annotated. AttributionNode cannot be primary keys (and they
-// usually are not).
+// For state atoms with attribution chain, sometimes the primary key is the first uid in the chain.
+// For example:
+// message AudioStateChanged {
+//   repeated AttributionNode attribution_node = 1
+//       [(stateFieldOption).option = PRIMARY_KEY_FIRST_UID];
+//
+//    enum State {
+//      OFF = 0;
+//      ON = 1;
+//      // RESET indicates all audio stopped. Used when it (re)starts (e.g. after it crashes).
+//      RESET = 2;
+//    }
+//    optional State state = 2 [(stateFieldOption).option = EXCLUSIVE_STATE];
+// }
 message StateAtomFieldOption {
     optional StateField option = 1 [default = STATE_FIELD_UNSET];
+
+    // Note: We cannot annotate directly on the enums because many enums are imported from other
+    // proto files in the platform. proto-lite cc library does not support annotations unfortunately
+
+    // Knowing the default state value allows state trackers to remove entries that become the
+    // default state. If there is no default value specified, the default value is unknown, and all
+    // states will be tracked in memory.
+    optional int32 default_state_value = 2;
+
+    // A reset state signals all states go to default value. For example, BLE reset means all active
+    // BLE scans are to be turned off.
+    optional int32 reset_state_value = 3;
+
+    // If the state change needs to count nesting.
+    optional bool nested = 4 [default = true];
 }
 
 // Used to generate StatsLog.write APIs.

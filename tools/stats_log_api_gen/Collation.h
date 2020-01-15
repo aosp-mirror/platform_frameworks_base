@@ -88,6 +88,9 @@ struct AtomDecl {
 
     vector<int> primaryFields;
     int exclusiveField = 0;
+    int defaultState = INT_MAX;
+    int resetState = INT_MAX;
+    bool nested;
 
     int uidField = 0;
 
