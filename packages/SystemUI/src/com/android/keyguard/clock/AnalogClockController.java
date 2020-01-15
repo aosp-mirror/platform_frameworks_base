@@ -188,7 +188,7 @@ public class AnalogClockController implements ClockPlugin {
     public void onTimeTick() {
         mAnalogClock.onTimeChanged();
         mBigClockView.onTimeChanged();
-        mLockClock.refresh();
+        mLockClock.refreshTime();
     }
 
     @Override
