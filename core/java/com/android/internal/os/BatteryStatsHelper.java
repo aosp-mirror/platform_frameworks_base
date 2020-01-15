@@ -519,7 +519,11 @@ public class BatteryStatsHelper {
 
         processMiscUsage();
 
-        Collections.sort(mUsageList);
+        try {
+           Collections.sort(mUsageList);
+        } catch (Exception e) {
+          // nothing to do
+        }
 
         // At this point, we've sorted the list so we are guaranteed the max values are at the top.
         // We have only added real powers so far.
