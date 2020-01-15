@@ -15,8 +15,15 @@
  */
 package com.android.server.blob;
 
+import static android.app.blob.BlobStoreManager.COMMIT_RESULT_ERROR;
 import static android.app.blob.BlobStoreManager.COMMIT_RESULT_SUCCESS;
+import static android.app.blob.XmlTags.ATTR_VERSION;
+import static android.app.blob.XmlTags.TAG_BLOB;
+import static android.app.blob.XmlTags.TAG_BLOBS;
+import static android.app.blob.XmlTags.TAG_SESSION;
+import static android.app.blob.XmlTags.TAG_SESSIONS;
 
+import static com.android.server.blob.BlobStoreConfig.CURRENT_XML_VERSION;
 import static com.android.server.blob.BlobStoreConfig.TAG;
 import static com.android.server.blob.BlobStoreSession.STATE_ABANDONED;
 import static com.android.server.blob.BlobStoreSession.STATE_COMMITTED;
@@ -28,6 +35,7 @@ import android.annotation.CurrentTimeSecondsLong;
 import android.annotation.IdRes;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.blob.BlobHandle;
 import android.app.blob.IBlobStoreManager;
 import android.app.blob.IBlobStoreSession;
@@ -38,22 +46,40 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.RemoteCallback;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.AtomicFile;
 import android.util.ExceptionUtils;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
+import com.android.server.blob.BlobMetadata.Committer;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Service responsible for maintaining and facilitating access to data blobs published by apps.
@@ -98,6 +124,15 @@ public class BlobStoreManagerService extends SystemService {
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
     }
 
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+            synchronized (mBlobsLock) {
+                readBlobSessionsLocked();
+                readBlobsInfoLocked();
+            }
+        }
+    }
 
     @GuardedBy("mBlobsLock")
     private long generateNextSessionIdLocked() {
@@ -133,7 +168,7 @@ public class BlobStoreManagerService extends SystemService {
                     sessionId, blobHandle, callingUid, callingPackage,
                     mSessionStateChangeListener);
             getUserSessionsLocked(UserHandle.getUserId(callingUid)).put(sessionId, session);
-            // TODO: persist sessions data
+            writeBlobSessionsAsync();
             return sessionId;
         }
     }
@@ -160,7 +195,8 @@ public class BlobStoreManagerService extends SystemService {
                     callingUid, callingPackage);
             session.open();
             session.abandon();
-            // TODO: persist sessions data
+
+            writeBlobSessionsAsync();
         }
     }
 
@@ -194,7 +230,7 @@ public class BlobStoreManagerService extends SystemService {
             }
             blobMetadata.addLeasee(callingPackage, callingUid,
                     descriptionResId, leaseExpiryTimeMillis);
-            // TODO: persist blobs data
+            writeBlobsInfoAsync();
         }
     }
 
@@ -209,6 +245,7 @@ public class BlobStoreManagerService extends SystemService {
                         + "; callingUid=" + callingUid + ", callingPackage=" + callingPackage);
             }
             blobMetadata.removeLeasee(callingPackage, callingUid);
+            writeBlobsInfoAsync();
         }
     }
 
@@ -241,18 +278,25 @@ public class BlobStoreManagerService extends SystemService {
                     session.verifyBlobData();
                     break;
                 case STATE_VERIFIED_VALID:
-                    final ArrayMap<BlobHandle, BlobMetadata> userBlobs =
-                            getUserBlobsLocked(UserHandle.getUserId(session.ownerUid));
+                    final int userId = UserHandle.getUserId(session.ownerUid);
+                    final ArrayMap<BlobHandle, BlobMetadata> userBlobs = getUserBlobsLocked(userId);
                     BlobMetadata blob = userBlobs.get(session.blobHandle);
                     if (blob == null) {
                         blob = new BlobMetadata(mContext,
-                                session.sessionId, session.blobHandle);
+                                session.sessionId, session.blobHandle, userId);
                         userBlobs.put(session.blobHandle, blob);
                     }
-                    blob.addCommitter(session.ownerPackageName, session.ownerUid,
-                            session.getBlobAccessMode());
-                    // TODO: Persist blobs data.
-                    session.sendCommitCallbackResult(COMMIT_RESULT_SUCCESS);
+                    final Committer newCommitter = new Committer(session.ownerPackageName,
+                            session.ownerUid, session.getBlobAccessMode());
+                    final Committer existingCommitter = blob.getExistingCommitter(newCommitter);
+                    blob.addCommitter(newCommitter);
+                    try {
+                        writeBlobsInfoLocked();
+                        session.sendCommitCallbackResult(COMMIT_RESULT_SUCCESS);
+                    } catch (Exception e) {
+                        blob.addCommitter(existingCommitter);
+                        session.sendCommitCallbackResult(COMMIT_RESULT_ERROR);
+                    }
                     getUserSessionsLocked(UserHandle.getUserId(session.ownerUid))
                             .remove(session.sessionId);
                     break;
@@ -260,8 +304,205 @@ public class BlobStoreManagerService extends SystemService {
                     Slog.wtf(TAG, "Invalid session state: "
                             + stateToString(session.getState()));
             }
-            // TODO: Persist sessions data.
+            try {
+                writeBlobSessionsLocked();
+            } catch (Exception e) {
+                // already logged, ignore.
+            }
         }
+    }
+
+    @GuardedBy("mBlobsLock")
+    private void writeBlobSessionsLocked() throws Exception {
+        final AtomicFile sessionsIndexFile = prepareSessionsIndexFile();
+        if (sessionsIndexFile == null) {
+            Slog.wtf(TAG, "Error creating sessions index file");
+            return;
+        }
+        FileOutputStream fos = null;
+        try {
+            fos = sessionsIndexFile.startWrite(SystemClock.uptimeMillis());
+            final XmlSerializer out = new FastXmlSerializer();
+            out.setOutput(fos, StandardCharsets.UTF_8.name());
+            out.startDocument(null, true);
+            out.startTag(null, TAG_SESSIONS);
+            XmlUtils.writeIntAttribute(out, ATTR_VERSION, CURRENT_XML_VERSION);
+
+            for (int i = 0, userCount = mSessions.size(); i < userCount; ++i) {
+                final LongSparseArray<BlobStoreSession> userSessions =
+                        mSessions.valueAt(i);
+                for (int j = 0, sessionsCount = userSessions.size(); j < sessionsCount; ++j) {
+                    out.startTag(null, TAG_SESSION);
+                    userSessions.valueAt(j).writeToXml(out);
+                    out.endTag(null, TAG_SESSION);
+                }
+            }
+
+            out.endTag(null, TAG_SESSIONS);
+            out.endDocument();
+            sessionsIndexFile.finishWrite(fos);
+        } catch (Exception e) {
+            sessionsIndexFile.failWrite(fos);
+            Slog.wtf(TAG, "Error writing sessions data", e);
+            throw e;
+        }
+    }
+
+    @GuardedBy("mBlobsLock")
+    private void readBlobSessionsLocked() {
+        if (!BlobStoreConfig.getBlobStoreRootDir().exists()) {
+            return;
+        }
+
+        final AtomicFile sessionsIndexFile = prepareSessionsIndexFile();
+        if (sessionsIndexFile == null) {
+            Slog.wtf(TAG, "Error creating sessions index file");
+            return;
+        }
+
+        mSessions.clear();
+        try (FileInputStream fis = sessionsIndexFile.openRead()) {
+            final XmlPullParser in = Xml.newPullParser();
+            in.setInput(fis, StandardCharsets.UTF_8.name());
+            XmlUtils.beginDocument(in, TAG_SESSIONS);
+            while (true) {
+                XmlUtils.nextElement(in);
+                if (in.getEventType() == XmlPullParser.END_DOCUMENT) {
+                    break;
+                }
+
+                if (TAG_SESSION.equals(in.getName())) {
+                    final BlobStoreSession session = BlobStoreSession.createFromXml(
+                            in, mContext, mSessionStateChangeListener);
+                    if (session == null) {
+                        continue;
+                    }
+                    getUserSessionsLocked(UserHandle.getUserId(session.ownerUid)).put(
+                            session.sessionId, session);
+                    mCurrentMaxSessionId = Math.max(mCurrentMaxSessionId, session.sessionId);
+                }
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, "Error reading sessions data", e);
+        }
+    }
+
+    @GuardedBy("mBlobsLock")
+    private void writeBlobsInfoLocked() throws Exception {
+        final AtomicFile blobsIndexFile = prepareBlobsIndexFile();
+        if (blobsIndexFile == null) {
+            Slog.wtf(TAG, "Error creating blobs index file");
+            return;
+        }
+        FileOutputStream fos = null;
+        try {
+            fos = blobsIndexFile.startWrite(SystemClock.uptimeMillis());
+            final XmlSerializer out = new FastXmlSerializer();
+            out.setOutput(fos, StandardCharsets.UTF_8.name());
+            out.startDocument(null, true);
+            out.startTag(null, TAG_BLOBS);
+            XmlUtils.writeIntAttribute(out, ATTR_VERSION, CURRENT_XML_VERSION);
+
+            for (int i = 0, userCount = mBlobsMap.size(); i < userCount; ++i) {
+                final ArrayMap<BlobHandle, BlobMetadata> userBlobs = mBlobsMap.valueAt(i);
+                for (int j = 0, blobsCount = userBlobs.size(); j < blobsCount; ++j) {
+                    out.startTag(null, TAG_BLOB);
+                    userBlobs.valueAt(j).writeToXml(out);
+                    out.endTag(null, TAG_BLOB);
+                }
+            }
+
+            out.endTag(null, TAG_BLOBS);
+            out.endDocument();
+            blobsIndexFile.finishWrite(fos);
+        } catch (Exception e) {
+            blobsIndexFile.failWrite(fos);
+            Slog.wtf(TAG, "Error writing blobs data", e);
+            throw e;
+        }
+    }
+
+    @GuardedBy("mBlobsLock")
+    private void readBlobsInfoLocked() {
+        if (!BlobStoreConfig.getBlobStoreRootDir().exists()) {
+            return;
+        }
+
+        final AtomicFile blobsIndexFile = prepareBlobsIndexFile();
+        if (blobsIndexFile == null) {
+            Slog.wtf(TAG, "Error creating blobs index file");
+            return;
+        }
+
+        mBlobsMap.clear();
+        try (FileInputStream fis = blobsIndexFile.openRead()) {
+            final XmlPullParser in = Xml.newPullParser();
+            in.setInput(fis, StandardCharsets.UTF_8.name());
+            XmlUtils.beginDocument(in, TAG_BLOBS);
+            while (true) {
+                XmlUtils.nextElement(in);
+                if (in.getEventType() == XmlPullParser.END_DOCUMENT) {
+                    break;
+                }
+
+                if (TAG_BLOB.equals(in.getName())) {
+                    final BlobMetadata blobMetadata = BlobMetadata.createFromXml(mContext, in);
+                    getUserBlobsLocked(blobMetadata.userId).put(
+                            blobMetadata.blobHandle, blobMetadata);
+                    mCurrentMaxSessionId = Math.max(mCurrentMaxSessionId, blobMetadata.blobId);
+                }
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, "Error reading blobs data", e);
+        }
+    }
+
+    private void writeBlobsInfo() {
+        synchronized (mBlobsLock) {
+            try {
+                writeBlobsInfoLocked();
+            } catch (Exception e) {
+                // Already logged, ignore
+            }
+        }
+    }
+
+    private void writeBlobsInfoAsync() {
+        mHandler.post(PooledLambda.obtainRunnable(
+                BlobStoreManagerService::writeBlobsInfo,
+                BlobStoreManagerService.this).recycleOnUse());
+    }
+
+    private void writeBlobSessions() {
+        synchronized (mBlobsLock) {
+            try {
+                writeBlobSessionsLocked();
+            } catch (Exception e) {
+                // Already logged, ignore
+            }
+        }
+    }
+
+    private void writeBlobSessionsAsync() {
+        mHandler.post(PooledLambda.obtainRunnable(
+                BlobStoreManagerService::writeBlobSessions,
+                BlobStoreManagerService.this).recycleOnUse());
+    }
+
+    AtomicFile prepareSessionsIndexFile() {
+        final File file = BlobStoreConfig.prepareSessionIndexFile();
+        if (file == null) {
+            return null;
+        }
+        return new AtomicFile(file, "session_index" /* commitLogTag */);
+    }
+
+    AtomicFile prepareBlobsIndexFile() {
+        final File file = BlobStoreConfig.prepareBlobsIndexFile();
+        if (file == null) {
+            return null;
+        }
+        return new AtomicFile(file, "blobs_index" /* commitLogTag */);
     }
 
     private class Stub extends IBlobStoreManager.Stub {
@@ -341,6 +582,8 @@ public class BlobStoreManagerService extends SystemService {
                 @CurrentTimeSecondsLong long leaseTimeoutSecs, @NonNull String packageName) {
             Preconditions.checkNotNull(blobHandle, "blobHandle must not be null");
             Preconditions.checkNotNull(packageName, "packageName must not be null");
+            Preconditions.checkArgumentPositive(descriptionResId,
+                    "descriptionResId must be positive; value=" + descriptionResId);
 
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
@@ -359,6 +602,61 @@ public class BlobStoreManagerService extends SystemService {
             verifyCallingPackage(callingUid, packageName);
 
             releaseLeaseInternal(blobHandle, callingUid, packageName);
+        }
+
+        @Override
+        public void waitForIdle(@NonNull RemoteCallback remoteCallback) {
+            Preconditions.checkNotNull(remoteCallback, "remoteCallback must not be null");
+
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP,
+                    "Caller is not allowed to call this; caller=" + Binder.getCallingUid());
+            mHandler.post(PooledLambda.obtainRunnable(remoteCallback::sendResult, null)
+                    .recycleOnUse());
+        }
+
+        @Override
+        public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter writer,
+                @Nullable String[] args) {
+            // TODO: add proto-based version of this.
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
+
+            final IndentingPrintWriter fout = new IndentingPrintWriter(writer, "    ");
+            synchronized (mBlobsLock) {
+                for (int i = 0, userCount = mSessions.size(); i < userCount; ++i) {
+                    final int userId = mSessions.keyAt(i);
+                    final LongSparseArray<BlobStoreSession> userSessions = mSessions.valueAt(i);
+                    fout.println("List of sessions in user #"
+                            + userId + " (" + userSessions.size() + "):");
+                    fout.increaseIndent();
+                    for (int j = 0, sessionsCount = userSessions.size(); j < sessionsCount; ++j) {
+                        final long sessionId = userSessions.keyAt(j);
+                        final BlobStoreSession session = userSessions.valueAt(j);
+                        fout.println("Session #" + sessionId);
+                        fout.increaseIndent();
+                        session.dump(fout);
+                        fout.decreaseIndent();
+                    }
+                    fout.decreaseIndent();
+                }
+
+                fout.print("\n\n");
+
+                for (int i = 0, userCount = mBlobsMap.size(); i < userCount; ++i) {
+                    final int userId = mBlobsMap.keyAt(i);
+                    final ArrayMap<BlobHandle, BlobMetadata> userBlobs = mBlobsMap.valueAt(i);
+                    fout.println("List of blobs in user #"
+                            + userId + " (" + userBlobs.size() + "):");
+                    fout.increaseIndent();
+                    for (int j = 0, blobsCount = userBlobs.size(); j < blobsCount; ++j) {
+                        final BlobMetadata blobMetadata = userBlobs.valueAt(j);
+                        fout.println("Blob #" + blobMetadata.blobId);
+                        fout.increaseIndent();
+                        blobMetadata.dump(fout);
+                        fout.decreaseIndent();
+                    }
+                    fout.decreaseIndent();
+                }
+            }
         }
     }
 }

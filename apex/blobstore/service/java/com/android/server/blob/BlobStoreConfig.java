@@ -25,6 +25,8 @@ import java.io.File;
 class BlobStoreConfig {
     public static final String TAG = "BlobStore";
 
+    public static final int CURRENT_XML_VERSION = 1;
+
     @Nullable
     public static File prepareBlobFile(long sessionId) {
         final File blobsDir = prepareBlobsDir();
@@ -59,6 +61,24 @@ class BlobStoreConfig {
     @NonNull
     private static File getBlobsDir(File blobsRootDir) {
         return new File(blobsRootDir, "blobs");
+    }
+
+    @Nullable
+    public static File prepareSessionIndexFile() {
+        final File blobStoreRootDir = prepareBlobStoreRootDir();
+        if (blobStoreRootDir == null) {
+            return null;
+        }
+        return new File(blobStoreRootDir, "sessions_index.xml");
+    }
+
+    @Nullable
+    public static File prepareBlobsIndexFile() {
+        final File blobsStoreRootDir = prepareBlobStoreRootDir();
+        if (blobsStoreRootDir == null) {
+            return null;
+        }
+        return new File(blobsStoreRootDir, "blobs_index.xml");
     }
 
     @Nullable
