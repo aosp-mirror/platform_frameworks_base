@@ -29,6 +29,7 @@ import android.net.NetworkSpecifier;
 import android.net.ProxyInfo;
 import android.net.StaticIpConfiguration;
 import android.net.Uri;
+import android.net.util.MacAddressUtils;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1166,7 +1167,7 @@ public class WifiConfiguration implements Parcelable {
      * @return true if mac is good to use
      */
     public static boolean isValidMacAddressForRandomization(MacAddress mac) {
-        return mac != null && !mac.isMulticastAddress() && mac.isLocallyAssigned()
+        return mac != null && !MacAddressUtils.isMulticastAddress(mac) && mac.isLocallyAssigned()
                 && !MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS).equals(mac);
     }
 
