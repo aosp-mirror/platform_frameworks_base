@@ -923,6 +923,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         //----------------- Model management APIs --------------------------------//
+        // TODO: add check to only allow active voice interaction service or keyphrase enrollment
+        //       application to manage voice models
 
         @Override
         public KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId, String bcp47Locale) {

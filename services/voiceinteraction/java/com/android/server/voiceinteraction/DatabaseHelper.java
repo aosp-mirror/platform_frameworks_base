@@ -46,18 +46,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String NAME = "sound_model.db";
     private static final int VERSION = 7;
 
-    public static interface SoundModelContract {
-        public static final String TABLE = "sound_model";
-        public static final String KEY_MODEL_UUID = "model_uuid";
-        public static final String KEY_VENDOR_UUID = "vendor_uuid";
-        public static final String KEY_KEYPHRASE_ID = "keyphrase_id";
-        public static final String KEY_TYPE = "type";
-        public static final String KEY_DATA = "data";
-        public static final String KEY_RECOGNITION_MODES = "recognition_modes";
-        public static final String KEY_LOCALE = "locale";
-        public static final String KEY_HINT_TEXT = "hint_text";
-        public static final String KEY_USERS = "users";
-        public static final String KEY_MODEL_VERSION = "model_version";
+    /**
+     * Keyphrase sound model database columns
+     */
+    public interface SoundModelContract {
+        String TABLE = "sound_model";
+        String KEY_MODEL_UUID = "model_uuid";
+        String KEY_VENDOR_UUID = "vendor_uuid";
+        String KEY_KEYPHRASE_ID = "keyphrase_id";
+        String KEY_TYPE = "type";
+        String KEY_DATA = "data";
+        String KEY_RECOGNITION_MODES = "recognition_modes";
+        String KEY_LOCALE = "locale";
+        String KEY_HINT_TEXT = "hint_text";
+        String KEY_USERS = "users";
+        String KEY_MODEL_VERSION = "model_version";
     }
 
     // Table Create Statement
@@ -173,7 +176,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         soundModel.keyphrases[0].recognitionModes);
                 values.put(SoundModelContract.KEY_USERS,
                         getCommaSeparatedString(soundModel.keyphrases[0].users));
-                values.put(SoundModelContract.KEY_LOCALE, soundModel.keyphrases[0].locale);
+                values.put(SoundModelContract.KEY_LOCALE,
+                        soundModel.keyphrases[0].locale.toLanguageTag());
                 values.put(SoundModelContract.KEY_HINT_TEXT, soundModel.keyphrases[0].text);
                 try {
                     return db.insertWithOnConflict(SoundModelContract.TABLE, null, values,
@@ -257,8 +261,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                                 c.getColumnIndex(SoundModelContract.KEY_RECOGNITION_MODES));
                         int[] users = getArrayForCommaSeparatedString(
                                 c.getString(c.getColumnIndex(SoundModelContract.KEY_USERS)));
-                        String modelLocale = c.getString(
-                                c.getColumnIndex(SoundModelContract.KEY_LOCALE));
+                        Locale modelLocale = Locale.forLanguageTag(c.getString(
+                                c.getColumnIndex(SoundModelContract.KEY_LOCALE)));
                         String text = c.getString(
                                 c.getColumnIndex(SoundModelContract.KEY_HINT_TEXT));
                         int version = c.getInt(
@@ -431,8 +435,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    /**
+     * Dumps contents of database for dumpsys
+     */
     public void dump(PrintWriter pw) {
-        synchronized(this) {
+        synchronized (this) {
             String selectQuery = "SELECT  * FROM " + SoundModelContract.TABLE;
             SQLiteDatabase db = getReadableDatabase();
             Cursor c = db.rawQuery(selectQuery, null);

@@ -16,9 +16,6 @@
 
 package com.android.test.voiceenrollment;
 
-import java.util.Random;
-import java.util.UUID;
-
 import android.app.Activity;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
@@ -29,6 +26,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import java.util.Locale;
+import java.util.Random;
+import java.util.UUID;
+
+/**
+ * TODO: must be transitioned to a service.
+ */
 public class TestEnrollmentActivity extends Activity {
     private static final String TAG = "TestEnrollmentActivity";
     private static final boolean DBG = false;
@@ -56,7 +60,8 @@ public class TestEnrollmentActivity extends Activity {
      * Performs a fresh enrollment.
      */
     public void onEnrollButtonClicked(View v) {
-        Keyphrase kp = new Keyphrase(KEYPHRASE_ID, RECOGNITION_MODES, BCP47_LOCALE, TEXT,
+        Keyphrase kp = new Keyphrase(KEYPHRASE_ID, RECOGNITION_MODES,
+                Locale.forLanguageTag(BCP47_LOCALE), TEXT,
                 new int[] { UserManager.get(this).getUserHandle() /* current user */});
         UUID modelUuid = UUID.randomUUID();
         // Generate a fake model to push.

@@ -49,6 +49,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -148,6 +149,7 @@ public class SoundTrigger {
         public final int maxUsers;
 
         /** Supported recognition modes (bit field, RECOGNITION_MODE_VOICE_TRIGGER ...) */
+        @RecognitionModes
         public final int recognitionModes;
 
         /** Supports seamless transition to capture mode after recognition */
@@ -175,9 +177,9 @@ public class SoundTrigger {
 
         ModuleProperties(int id, @NonNull String implementor, @NonNull String description,
                 @NonNull String uuid, int version, @NonNull String supportedModelArch,
-                int maxSoundModels, int maxKeyphrases, int maxUsers, int recognitionModes,
-                boolean supportsCaptureTransition, int maxBufferMs,
-                boolean supportsConcurrentCapture, int powerConsumptionMw,
+                int maxSoundModels, int maxKeyphrases, int maxUsers,
+                @RecognitionModes int recognitionModes, boolean supportsCaptureTransition,
+                int maxBufferMs, boolean supportsConcurrentCapture, int powerConsumptionMw,
                 boolean returnsTriggerInEvent, int audioCapabilities) {
             this.id = id;
             this.implementor = requireNonNull(implementor);
@@ -271,16 +273,27 @@ public class SoundTrigger {
         }
     }
 
-    /*****************************************************************************
+    /**
      * A SoundModel describes the attributes and contains the binary data used by the hardware
      * implementation to detect a particular sound pattern.
      * A specialized version {@link KeyphraseSoundModel} is defined for key phrase
      * sound models.
-     *
-     * @hide
-     ****************************************************************************/
+     */
     public static class SoundModel {
-        /** Undefined sound model type */
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+                TYPE_GENERIC_SOUND,
+                TYPE_KEYPHRASE,
+                TYPE_UNKNOWN,
+        })
+        public @interface SoundModelType {}
+
+        /**
+         * Undefined sound model type
+         * @hide
+         */
         public static final int TYPE_UNKNOWN = -1;
 
         /** Keyphrase sound model */
@@ -293,15 +306,14 @@ public class SoundTrigger {
         public static final int TYPE_GENERIC_SOUND = 1;
 
         /** Unique sound model identifier */
-        @UnsupportedAppUsage
         @NonNull
         public final UUID uuid;
 
         /** Sound model type (e.g. TYPE_KEYPHRASE); */
+        @SoundModelType
         public final int type;
 
         /** Unique sound model vendor identifier */
-        @UnsupportedAppUsage
         @NonNull
         public final UUID vendorUuid;
 
@@ -309,11 +321,11 @@ public class SoundTrigger {
         public final int version;
 
         /** Opaque data. For use by vendor implementation and enrollment application */
-        @UnsupportedAppUsage
         @NonNull
         public final byte[] data;
 
-        public SoundModel(@NonNull UUID uuid, @Nullable UUID vendorUuid, int type,
+        /** @hide */
+        public SoundModel(@NonNull UUID uuid, @Nullable UUID vendorUuid, @SoundModelType int type,
                 @Nullable byte[] data, int version) {
             this.uuid = requireNonNull(uuid);
             this.vendorUuid = vendorUuid != null ? vendorUuid : new UUID(0, 0);
@@ -336,67 +348,90 @@ public class SoundTrigger {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (!(obj instanceof SoundModel))
+            }
+            if (!(obj instanceof SoundModel)) {
                 return false;
+            }
             SoundModel other = (SoundModel) obj;
-            if (type != other.type)
+            if (type != other.type) {
                 return false;
+            }
             if (uuid == null) {
-                if (other.uuid != null)
+                if (other.uuid != null) {
                     return false;
-            } else if (!uuid.equals(other.uuid))
+                }
+            } else if (!uuid.equals(other.uuid)) {
                 return false;
+            }
             if (vendorUuid == null) {
-                if (other.vendorUuid != null)
+                if (other.vendorUuid != null) {
                     return false;
-            } else if (!vendorUuid.equals(other.vendorUuid))
+                }
+            } else if (!vendorUuid.equals(other.vendorUuid)) {
                 return false;
-            if (!Arrays.equals(data, other.data))
+            }
+            if (!Arrays.equals(data, other.data)) {
                 return false;
-            if (version != other.version)
+            }
+            if (version != other.version) {
                 return false;
+            }
             return true;
         }
     }
 
-    /*****************************************************************************
+    /**
      * A Keyphrase describes a key phrase that can be detected by a
      * {@link KeyphraseSoundModel}
-     *
-     * @hide
-     ****************************************************************************/
-    public static class Keyphrase implements Parcelable {
+     */
+    public static final class Keyphrase implements Parcelable {
         /** Unique identifier for this keyphrase */
-        @UnsupportedAppUsage
         public final int id;
 
-        /** Recognition modes supported for this key phrase in the model */
-        @UnsupportedAppUsage
+        /**
+         * Recognition modes supported for this key phrase in the model
+         *
+         * @see #RECOGNITION_MODE_VOICE_TRIGGER
+         * @see #RECOGNITION_MODE_USER_IDENTIFICATION
+         * @see #RECOGNITION_MODE_USER_AUTHENTICATION
+         * @see #RECOGNITION_MODE_GENERIC
+         */
+        @RecognitionModes
         public final int recognitionModes;
 
-        /** Locale of the keyphrase. JAVA Locale string e.g en_US */
-        @UnsupportedAppUsage
+        /** Locale of the keyphrase. */
         @NonNull
-        public final String locale;
+        public final Locale locale;
 
         /** Key phrase text */
-        @UnsupportedAppUsage
         @NonNull
         public final String text;
 
-        /** Users this key phrase has been trained for. countains sound trigger specific user IDs
-         * derived from system user IDs {@link android.os.UserHandle#getIdentifier()}. */
-        @UnsupportedAppUsage
+        /**
+         * Users this key phrase has been trained for. countains sound trigger specific user IDs
+         * derived from system user IDs {@link android.os.UserHandle#getIdentifier()}.
+         */
         @NonNull
         public final int[] users;
 
-        @UnsupportedAppUsage
-        public Keyphrase(int id, int recognitionModes, @NonNull String locale, @NonNull String text,
-                @Nullable int[] users) {
+        /**
+         * Constructor for Keyphrase describes a key phrase that can be detected by a
+         * {@link KeyphraseSoundModel}
+         *
+         * @param id Unique keyphrase identifier for this keyphrase
+         * @param recognitionModes Bit field representation of recognition modes this keyphrase
+         *                         supports
+         * @param locale Locale of the keyphrase
+         * @param text Key phrase text
+         * @param users Users this key phrase has been trained for.
+         */
+        public Keyphrase(int id, @RecognitionModes int recognitionModes, @NonNull Locale locale,
+                @NonNull String text, @Nullable int[] users) {
             this.id = id;
             this.recognitionModes = recognitionModes;
             this.locale = requireNonNull(locale);
@@ -404,21 +439,27 @@ public class SoundTrigger {
             this.users = users != null ? users : new int[0];
         }
 
-        public static final @android.annotation.NonNull Parcelable.Creator<Keyphrase> CREATOR
-                = new Parcelable.Creator<Keyphrase>() {
-            public Keyphrase createFromParcel(Parcel in) {
-                return Keyphrase.fromParcel(in);
+        public static final @NonNull Parcelable.Creator<Keyphrase> CREATOR =
+                new Parcelable.Creator<Keyphrase>() {
+            @NonNull
+            public Keyphrase createFromParcel(@NonNull Parcel in) {
+                return Keyphrase.readFromParcel(in);
             }
 
+            @NonNull
             public Keyphrase[] newArray(int size) {
                 return new Keyphrase[size];
             }
         };
 
-        private static Keyphrase fromParcel(Parcel in) {
+        /**
+         * Read from Parcel to generate keyphrase
+         */
+        @NonNull
+        public static Keyphrase readFromParcel(@NonNull Parcel in) {
             int id = in.readInt();
             int recognitionModes = in.readInt();
-            String locale = in.readString();
+            Locale locale = Locale.forLanguageTag(in.readString());
             String text = in.readString();
             int[] users = null;
             int numUsers = in.readInt();
@@ -430,10 +471,10 @@ public class SoundTrigger {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(id);
             dest.writeInt(recognitionModes);
-            dest.writeString(locale);
+            dest.writeString(locale.toLanguageTag());
             dest.writeString(text);
             if (users != null) {
                 dest.writeInt(users.length);
@@ -443,6 +484,7 @@ public class SoundTrigger {
             }
         }
 
+        /** @hide */
         @Override
         public int describeContents() {
             return 0;
@@ -462,49 +504,57 @@ public class SoundTrigger {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             Keyphrase other = (Keyphrase) obj;
             if (text == null) {
-                if (other.text != null)
+                if (other.text != null) {
                     return false;
-            } else if (!text.equals(other.text))
+                }
+            } else if (!text.equals(other.text)) {
                 return false;
-            if (id != other.id)
+            }
+            if (id != other.id) {
                 return false;
+            }
             if (locale == null) {
-                if (other.locale != null)
+                if (other.locale != null) {
                     return false;
-            } else if (!locale.equals(other.locale))
+                }
+            } else if (!locale.equals(other.locale)) {
                 return false;
-            if (recognitionModes != other.recognitionModes)
+            }
+            if (recognitionModes != other.recognitionModes) {
                 return false;
-            if (!Arrays.equals(users, other.users))
+            }
+            if (!Arrays.equals(users, other.users)) {
                 return false;
+            }
             return true;
         }
 
         @Override
         public String toString() {
-            return "Keyphrase [id=" + id + ", recognitionModes=" + recognitionModes + ", locale="
-                    + locale + ", text=" + text + ", users=" + Arrays.toString(users) + "]";
+            return "Keyphrase [id=" + id + ", recognitionModes=" + recognitionModes
+                    + ", locale=" + locale.toLanguageTag() + ", text=" + text
+                    + ", users=" + Arrays.toString(users) + "]";
         }
     }
 
-    /*****************************************************************************
+    /**
      * A KeyphraseSoundModel is a specialized {@link SoundModel} for key phrases.
      * It contains data needed by the hardware to detect a certain number of key phrases
      * and the list of corresponding {@link Keyphrase} descriptors.
-     *
-     * @hide
-     ****************************************************************************/
-    public static class KeyphraseSoundModel extends SoundModel implements Parcelable {
+     */
+    public static final class KeyphraseSoundModel extends SoundModel implements Parcelable {
         /** Key phrases in this sound model */
-        @UnsupportedAppUsage
         @NonNull
         public final Keyphrase[] keyphrases; // keyword phrases in model
 
@@ -515,24 +565,29 @@ public class SoundTrigger {
             this.keyphrases = keyphrases != null ? keyphrases : new Keyphrase[0];
         }
 
-        @UnsupportedAppUsage
         public KeyphraseSoundModel(@NonNull UUID uuid, @NonNull UUID vendorUuid,
                 @Nullable byte[] data, @Nullable Keyphrase[] keyphrases) {
             this(uuid, vendorUuid, data, keyphrases, -1);
         }
 
-        public static final @android.annotation.NonNull Parcelable.Creator<KeyphraseSoundModel> CREATOR
-                = new Parcelable.Creator<KeyphraseSoundModel>() {
-            public KeyphraseSoundModel createFromParcel(Parcel in) {
-                return KeyphraseSoundModel.fromParcel(in);
+        public static final @NonNull Parcelable.Creator<KeyphraseSoundModel> CREATOR =
+                new Parcelable.Creator<KeyphraseSoundModel>() {
+            @NonNull
+            public KeyphraseSoundModel createFromParcel(@NonNull Parcel in) {
+                return KeyphraseSoundModel.readFromParcel(in);
             }
 
+            @NonNull
             public KeyphraseSoundModel[] newArray(int size) {
                 return new KeyphraseSoundModel[size];
             }
         };
 
-        private static KeyphraseSoundModel fromParcel(Parcel in) {
+        /**
+         * Read from Parcel to generate KeyphraseSoundModel
+         */
+        @NonNull
+        public static KeyphraseSoundModel readFromParcel(@NonNull Parcel in) {
             UUID uuid = UUID.fromString(in.readString());
             UUID vendorUuid = null;
             int length = in.readInt();
@@ -545,13 +600,14 @@ public class SoundTrigger {
             return new KeyphraseSoundModel(uuid, vendorUuid, data, keyphrases, version);
         }
 
+        /** @hide */
         @Override
         public int describeContents() {
             return 0;
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeString(uuid.toString());
             if (vendorUuid == null) {
                 dest.writeInt(-1);
@@ -583,15 +639,19 @@ public class SoundTrigger {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (!super.equals(obj))
+            }
+            if (!super.equals(obj)) {
                 return false;
-            if (!(obj instanceof KeyphraseSoundModel))
+            }
+            if (!(obj instanceof KeyphraseSoundModel)) {
                 return false;
+            }
             KeyphraseSoundModel other = (KeyphraseSoundModel) obj;
-            if (!Arrays.equals(keyphrases, other.keyphrases))
+            if (!Arrays.equals(keyphrases, other.keyphrases)) {
                 return false;
+            }
             return true;
         }
     }
@@ -760,31 +820,32 @@ public class SoundTrigger {
     }
 
     /**
-     *  Modes for key phrase recognition
+     * Modes for key phrase recognition
+     * @hide
      */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "RECOGNITION_MODE_" }, value = {
+            RECOGNITION_MODE_VOICE_TRIGGER,
+            RECOGNITION_MODE_USER_IDENTIFICATION,
+            RECOGNITION_MODE_USER_AUTHENTICATION,
+            RECOGNITION_MODE_GENERIC
+    })
+    public @interface RecognitionModes {}
 
     /**
-     * Simple recognition of the key phrase
-     *
-     * @hide
+     * Trigger on recognition of a key phrase
      */
     public static final int RECOGNITION_MODE_VOICE_TRIGGER = 0x1;
     /**
      * Trigger only if one user is identified
-     *
-     * @hide
      */
     public static final int RECOGNITION_MODE_USER_IDENTIFICATION = 0x2;
     /**
      * Trigger only if one user is authenticated
-     *
-     * @hide
      */
     public static final int RECOGNITION_MODE_USER_AUTHENTICATION = 0x4;
     /**
      * Generic (non-speech) recognition.
-     *
-     * @hide
      */
     public static final int RECOGNITION_MODE_GENERIC = 0x8;
 

@@ -85,34 +85,6 @@ public class AlwaysOnHotwordDetector {
      */
     private static final int STATE_NOT_READY = 0;
 
-    // Keyphrase management actions. Used in getManageIntent() ----//
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "MANAGE_ACTION_" }, value = {
-            MANAGE_ACTION_ENROLL,
-            MANAGE_ACTION_RE_ENROLL,
-            MANAGE_ACTION_UN_ENROLL
-    })
-    private @interface ManageActions {}
-
-    /**
-     * Indicates that we need to enroll.
-     *
-     * @hide
-     */
-    public static final int MANAGE_ACTION_ENROLL = 0;
-    /**
-     * Indicates that we need to re-enroll.
-     *
-     * @hide
-     */
-    public static final int MANAGE_ACTION_RE_ENROLL = 1;
-    /**
-     * Indicates that we need to un-enroll.
-     *
-     * @hide
-     */
-    public static final int MANAGE_ACTION_UN_ENROLL = 2;
-
     //-- Flags for startRecognition    ----//
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -679,7 +651,7 @@ public class AlwaysOnHotwordDetector {
     public Intent createEnrollIntent() {
         if (DBG) Slog.d(TAG, "createEnrollIntent");
         synchronized (mLock) {
-            return getManageIntentLocked(MANAGE_ACTION_ENROLL);
+            return getManageIntentLocked(KeyphraseEnrollmentInfo.MANAGE_ACTION_ENROLL);
         }
     }
 
@@ -700,7 +672,7 @@ public class AlwaysOnHotwordDetector {
     public Intent createUnEnrollIntent() {
         if (DBG) Slog.d(TAG, "createUnEnrollIntent");
         synchronized (mLock) {
-            return getManageIntentLocked(MANAGE_ACTION_UN_ENROLL);
+            return getManageIntentLocked(KeyphraseEnrollmentInfo.MANAGE_ACTION_UN_ENROLL);
         }
     }
 
@@ -721,11 +693,11 @@ public class AlwaysOnHotwordDetector {
     public Intent createReEnrollIntent() {
         if (DBG) Slog.d(TAG, "createReEnrollIntent");
         synchronized (mLock) {
-            return getManageIntentLocked(MANAGE_ACTION_RE_ENROLL);
+            return getManageIntentLocked(KeyphraseEnrollmentInfo.MANAGE_ACTION_RE_ENROLL);
         }
     }
 
-    private Intent getManageIntentLocked(int action) {
+    private Intent getManageIntentLocked(@KeyphraseEnrollmentInfo.ManageActions int action) {
         if (mAvailability == STATE_INVALID) {
             throw new IllegalStateException("getManageIntent called on an invalid detector");
         }
