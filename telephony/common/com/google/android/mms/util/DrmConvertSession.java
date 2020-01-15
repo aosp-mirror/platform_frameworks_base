@@ -16,13 +16,12 @@
  */
 package com.google.android.mms.util;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.drm.DrmConvertedStatus;
 import android.drm.DrmManagerClient;
 import android.provider.Downloads;
 import android.util.Log;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

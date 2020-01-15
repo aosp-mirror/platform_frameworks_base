@@ -20,13 +20,12 @@
 package com.google.android.gles_jni;
 
 import android.app.AppGlobals;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.os.Build;
 import android.os.UserHandle;
 import android.util.Log;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.nio.Buffer;
 
