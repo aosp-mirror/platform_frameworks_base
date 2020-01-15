@@ -29,6 +29,8 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.system.OsConstants;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 
 
@@ -89,6 +91,12 @@ public class OffloadHardwareInterface {
         public ForwardedStats() {
             rxBytes = 0;
             txBytes = 0;
+        }
+
+        @VisibleForTesting
+        public ForwardedStats(long rxBytes, long txBytes) {
+            this.rxBytes = rxBytes;
+            this.txBytes = txBytes;
         }
 
         /** Add Tx/Rx bytes. */

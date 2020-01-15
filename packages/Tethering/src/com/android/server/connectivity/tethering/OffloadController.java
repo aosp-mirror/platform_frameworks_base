@@ -16,35 +16,40 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
+import static android.net.NetworkStats.METERED_NO;
+import static android.net.NetworkStats.ROAMING_NO;
 import static android.net.NetworkStats.SET_DEFAULT;
-import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
-import static android.net.TrafficStats.UID_TETHERING;
+import static android.net.NetworkStats.UID_TETHERING;
 import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.usage.NetworkStatsManager;
 import android.content.ContentResolver;
-import android.net.ITetheringStatsProvider;
 import android.net.InetAddresses;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkStats;
+import android.net.NetworkStats.Entry;
 import android.net.RouteInfo;
 import android.net.netlink.ConntrackMessage;
 import android.net.netlink.NetlinkConstants;
 import android.net.netlink.NetlinkSocket;
+import android.net.netstats.provider.AbstractNetworkStatsProvider;
+import android.net.netstats.provider.NetworkStatsProviderCallback;
 import android.net.util.SharedLog;
 import android.os.Handler;
-import android.os.INetworkManagementService;
-import android.os.Looper;
-import android.os.RemoteException;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.text.TextUtils;
+import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.connectivity.tethering.OffloadHardwareInterface.ForwardedStats;
 
@@ -73,13 +78,19 @@ public class OffloadController {
     private static final String ANYIP = "0.0.0.0";
     private static final ForwardedStats EMPTY_STATS = new ForwardedStats();
 
+    @VisibleForTesting
+    enum StatsType {
+        STATS_PER_IFACE,
+        STATS_PER_UID,
+    }
+
     private enum UpdateType { IF_NEEDED, FORCE };
 
     private final Handler mHandler;
     private final OffloadHardwareInterface mHwInterface;
     private final ContentResolver mContentResolver;
-    private final INetworkManagementService mNms;
-    private final ITetheringStatsProvider mStatsProvider;
+    private final @NonNull OffloadTetheringStatsProvider mStatsProvider;
+    private final @Nullable NetworkStatsProviderCallback mStatsProviderCb;
     private final SharedLog mLog;
     private final HashMap<String, LinkProperties> mDownstreams;
     private boolean mConfigInitialized;
@@ -109,22 +120,23 @@ public class OffloadController {
     private int mNatUpdateNetlinkErrors;
 
     public OffloadController(Handler h, OffloadHardwareInterface hwi,
-            ContentResolver contentResolver, INetworkManagementService nms, SharedLog log) {
+            ContentResolver contentResolver, NetworkStatsManager nsm, SharedLog log) {
         mHandler = h;
         mHwInterface = hwi;
         mContentResolver = contentResolver;
-        mNms = nms;
         mStatsProvider = new OffloadTetheringStatsProvider();
         mLog = log.forSubComponent(TAG);
         mDownstreams = new HashMap<>();
         mExemptPrefixes = new HashSet<>();
         mLastLocalPrefixStrs = new HashSet<>();
-
+        NetworkStatsProviderCallback providerCallback = null;
         try {
-            mNms.registerTetheringStatsProvider(mStatsProvider, getClass().getSimpleName());
-        } catch (RemoteException e) {
-            mLog.e("Cannot register offload stats provider: " + e);
+            providerCallback = nsm.registerNetworkStatsProvider(
+                    getClass().getSimpleName(), mStatsProvider);
+        } catch (RuntimeException e) {
+            Log.wtf(TAG, "Cannot register offload stats provider: " + e);
         }
+        mStatsProviderCb = providerCallback;
     }
 
     /** Start hardware offload. */
@@ -173,7 +185,7 @@ public class OffloadController {
                         // and we need to synchronize stats and limits between
                         // software and hardware forwarding.
                         updateStatsForAllUpstreams();
-                        forceTetherStatsPoll();
+                        mStatsProvider.pushTetherStats();
                     }
 
                     @Override
@@ -186,7 +198,7 @@ public class OffloadController {
                         // limits set take into account any software tethering
                         // traffic that has been happening in the meantime.
                         updateStatsForAllUpstreams();
-                        forceTetherStatsPoll();
+                        mStatsProvider.pushTetherStats();
                         // [2] (Re)Push all state.
                         computeAndPushLocalPrefixes(UpdateType.FORCE);
                         pushAllDownstreamState();
@@ -204,14 +216,11 @@ public class OffloadController {
                         // the HAL queued the callback.
                         // TODO: rev the HAL so that it provides an interface name.
 
-                        // Fetch current stats, so that when our notification reaches
-                        // NetworkStatsService and triggers a poll, we will respond with
-                        // current data (which will be above the limit that was reached).
-                        // Note that if we just changed upstream, this is unnecessary but harmless.
-                        // The stats for the previous upstream were already updated on this thread
-                        // just after the upstream was changed, so they are also up-to-date.
                         updateStatsForCurrentUpstream();
-                        forceTetherStatsPoll();
+                        mStatsProvider.pushTetherStats();
+                        // Push stats to service does not cause the service react to it immediately.
+                        // Inform the service about limit reached.
+                        if (mStatsProviderCb != null) mStatsProviderCb.onLimitReached();
                     }
 
                     @Override
@@ -253,48 +262,79 @@ public class OffloadController {
         return mConfigInitialized && mControlInitialized;
     }
 
-    private class OffloadTetheringStatsProvider extends ITetheringStatsProvider.Stub {
-        @Override
-        public NetworkStats getTetherStats(int how) {
-            // getTetherStats() is the only function in OffloadController that can be called from
-            // a different thread. Do not attempt to update stats by querying the offload HAL
-            // synchronously from a different thread than our Handler thread. http://b/64771555.
-            Runnable updateStats = () -> {
-                updateStatsForCurrentUpstream();
-            };
-            if (Looper.myLooper() == mHandler.getLooper()) {
-                updateStats.run();
-            } else {
-                mHandler.post(updateStats);
-            }
+    @VisibleForTesting
+    class OffloadTetheringStatsProvider extends AbstractNetworkStatsProvider {
+        // These stats must only ever be touched on the handler thread.
+        @NonNull
+        private NetworkStats mIfaceStats = new NetworkStats(0L, 0);
+        @NonNull
+        private NetworkStats mUidStats = new NetworkStats(0L, 0);
 
-            NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
-            NetworkStats.Entry entry = new NetworkStats.Entry();
-            entry.set = SET_DEFAULT;
-            entry.tag = TAG_NONE;
-            entry.uid = (how == STATS_PER_UID) ? UID_TETHERING : UID_ALL;
+        @VisibleForTesting
+        @NonNull
+        NetworkStats getTetherStats(@NonNull StatsType how) {
+            NetworkStats stats = new NetworkStats(0L, 0);
+            final int uid = (how == StatsType.STATS_PER_UID) ? UID_TETHERING : UID_ALL;
 
-            for (Map.Entry<String, ForwardedStats> kv : mForwardedStats.entrySet()) {
-                ForwardedStats value = kv.getValue();
-                entry.iface = kv.getKey();
-                entry.rxBytes = value.rxBytes;
-                entry.txBytes = value.txBytes;
-                stats.addEntry(entry);
+            for (final Map.Entry<String, ForwardedStats> kv : mForwardedStats.entrySet()) {
+                final ForwardedStats value = kv.getValue();
+                final Entry entry = new Entry(kv.getKey(), uid, SET_DEFAULT, TAG_NONE, METERED_NO,
+                        ROAMING_NO, DEFAULT_NETWORK_NO, value.rxBytes, 0L, value.txBytes, 0L, 0L);
+                stats = stats.addValues(entry);
             }
 
             return stats;
         }
 
         @Override
-        public void setInterfaceQuota(String iface, long quotaBytes) {
+        public void setLimit(String iface, long quotaBytes) {
+            mLog.i("setLimit: " + iface + "," + quotaBytes);
+            // Listen for all iface is necessary since upstream might be changed after limit
+            // is set.
             mHandler.post(() -> {
-                if (quotaBytes == ITetheringStatsProvider.QUOTA_UNLIMITED) {
+                if (quotaBytes == QUOTA_UNLIMITED) {
                     mInterfaceQuotas.remove(iface);
                 } else {
                     mInterfaceQuotas.put(iface, quotaBytes);
                 }
                 maybeUpdateDataLimit(iface);
             });
+        }
+
+        /**
+         * Push stats to service, but does not cause a force polling. Note that this can only be
+         * called on the handler thread.
+         */
+        public void pushTetherStats() {
+            // TODO: remove the accumulated stats and report the diff from HAL directly.
+            if (null == mStatsProviderCb) return;
+            final NetworkStats ifaceDiff =
+                    getTetherStats(StatsType.STATS_PER_IFACE).subtract(mIfaceStats);
+            final NetworkStats uidDiff =
+                    getTetherStats(StatsType.STATS_PER_UID).subtract(mUidStats);
+            try {
+                mStatsProviderCb.onStatsUpdated(0 /* token */, ifaceDiff, uidDiff);
+                mIfaceStats = mIfaceStats.add(ifaceDiff);
+                mUidStats = mUidStats.add(uidDiff);
+            } catch (RuntimeException e) {
+                mLog.e("Cannot report network stats: ", e);
+            }
+        }
+
+        @Override
+        public void requestStatsUpdate(int token) {
+            mLog.i("requestStatsUpdate: " + token);
+            // Do not attempt to update stats by querying the offload HAL
+            // synchronously from a different thread than the Handler thread. http://b/64771555.
+            mHandler.post(() -> {
+                updateStatsForCurrentUpstream();
+                pushTetherStats();
+            });
+        }
+
+        @Override
+        public void setAlert(long quotaBytes) {
+            // TODO: Ask offload HAL to notify alert without stopping traffic.
         }
     }
 
@@ -350,14 +390,6 @@ public class OffloadController {
         // following interface types: [ "rmnet_data", "wlan", "eth", "rndis" ].
         for (Map.Entry<String, ForwardedStats> kv : mForwardedStats.entrySet()) {
             maybeUpdateStats(kv.getKey());
-        }
-    }
-
-    private void forceTetherStatsPoll() {
-        try {
-            mNms.tetherLimitReached(mStatsProvider);
-        } catch (RemoteException e) {
-            mLog.e("Cannot report data limit reached: " + e);
         }
     }
 
