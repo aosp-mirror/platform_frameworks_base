@@ -20,6 +20,8 @@ import static android.net.NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 
+import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
+
 import android.app.job.JobInfo;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
@@ -63,7 +65,7 @@ import java.util.function.Predicate;
  *
  * Test: atest com.android.server.job.controllers.ConnectivityControllerTest
  */
-public final class ConnectivityController extends StateController implements
+public final class ConnectivityController extends RestrictingController implements
         ConnectivityManager.OnNetworkActiveListener {
     private static final String TAG = "JobScheduler.Connectivity";
     private static final boolean DEBUG = JobSchedulerService.DEBUG
@@ -138,8 +140,22 @@ public final class ConnectivityController extends StateController implements
         }
     }
 
+    @Override
+    public void startTrackingRestrictedJobLocked(JobStatus jobStatus) {
+        // Don't need to start tracking the job. If the job needed network, it would already be
+        // tracked.
+        updateConstraintsSatisfied(jobStatus);
+    }
+
+    @Override
+    public void stopTrackingRestrictedJobLocked(JobStatus jobStatus) {
+        // Shouldn't stop tracking the job here. If the job was tracked, it still needs network,
+        // even after being unrestricted.
+        updateConstraintsSatisfied(jobStatus);
+    }
+
     /**
-     * Returns true if the job's requested network is available. This DOES NOT necesarilly mean
+     * Returns true if the job's requested network is available. This DOES NOT necessarily mean
      * that the UID has been granted access to the network.
      */
     public boolean isNetworkAvailable(JobStatus job) {
@@ -353,14 +369,24 @@ public final class ConnectivityController extends StateController implements
 
     private static boolean isStrictSatisfied(JobStatus jobStatus, Network network,
             NetworkCapabilities capabilities, Constants constants) {
-        return jobStatus.getJob().getRequiredNetwork().networkCapabilities
-                .satisfiedByNetworkCapabilities(capabilities);
+        final NetworkCapabilities required;
+        // A restricted job that's out of quota MUST use an unmetered network.
+        if (jobStatus.getEffectiveStandbyBucket() == RESTRICTED_INDEX
+                && !jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA)) {
+            required = new NetworkCapabilities(
+                    jobStatus.getJob().getRequiredNetwork().networkCapabilities)
+                    .addCapability(NET_CAPABILITY_NOT_METERED);
+        } else {
+            required = jobStatus.getJob().getRequiredNetwork().networkCapabilities;
+        }
+
+        return required.satisfiedByNetworkCapabilities(capabilities);
     }
 
     private static boolean isRelaxedSatisfied(JobStatus jobStatus, Network network,
             NetworkCapabilities capabilities, Constants constants) {
-        // Only consider doing this for prefetching jobs
-        if (!jobStatus.getJob().isPrefetch()) {
+        // Only consider doing this for unrestricted prefetching jobs
+        if (!jobStatus.getJob().isPrefetch() || jobStatus.getStandbyBucket() == RESTRICTED_INDEX) {
             return false;
         }
 
