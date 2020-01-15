@@ -80,6 +80,12 @@ public class ProximitySensor {
     }
 
     private Sensor findBrightnessSensor(Context context, SensorManager sensorManager) {
+        boolean brightnessSensorReportsProximity =
+                context.getResources().getBoolean(R.bool.doze_brightness_sensor_reports_proximity);
+        if (!brightnessSensorReportsProximity) {
+            return null;
+        }
+
         String sensorType = context.getString(R.string.doze_brightness_sensor_type);
         List<Sensor> sensorList = sensorManager.getSensorList(Sensor.TYPE_ALL);
         Sensor sensor = null;
