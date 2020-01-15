@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
-import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpList;
+import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpTree;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -37,6 +38,7 @@ import android.util.ArrayMap;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder.OnRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
@@ -100,7 +102,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
 
-        mListBuilder = new ShadeListBuilder(mSystemClock, mNotifLog);
+        mListBuilder = new ShadeListBuilder(mSystemClock, mNotifLog, mock(DumpController.class));
         mListBuilder.setOnRenderListListener(mOnRenderListListener);
 
         mListBuilder.attach(mNotifCollection);
@@ -1081,7 +1083,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
             }
         } catch (AssertionError err) {
             throw new AssertionError(
-                    "List under test failed verification:\n" + dumpList(mBuiltList), err);
+                    "List under test failed verification:\n" + dumpTree(mBuiltList,
+                            true, ""), err);
         }
     }
 
