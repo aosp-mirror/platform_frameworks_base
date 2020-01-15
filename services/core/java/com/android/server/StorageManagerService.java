@@ -44,6 +44,7 @@ import static com.android.internal.util.XmlUtils.readStringAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
+import static com.android.server.storage.StorageUserConnection.REMOTE_TIMEOUT_SECONDS;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -1985,16 +1986,28 @@ class StorageManagerService extends IStorageManager.Stub
             Slog.i(TAG, "Mounting volume " + vol);
             mVold.mount(vol.id, vol.mountFlags, vol.mountUserId, new IVoldMountCallback.Stub() {
                     @Override
-                    public boolean onVolumeChecking(FileDescriptor deviceFd, String path,
+                    public boolean onVolumeChecking(FileDescriptor fd, String path,
                             String internalPath) {
                         vol.path = path;
                         vol.internalPath = internalPath;
+                        ParcelFileDescriptor pfd = new ParcelFileDescriptor(fd);
                         try {
-                            mStorageSessionController.onVolumeMount(deviceFd, vol);
+                            mStorageSessionController.onVolumeMount(pfd, vol);
                             return true;
                         } catch (ExternalStorageServiceException e) {
-                            Slog.i(TAG, "Failed to mount volume " + vol, e);
+                            Slog.e(TAG, "Failed to mount volume " + vol, e);
+
+                            Slog.i(TAG, "Scheduling reset in one minute");
+                            mHandler.removeMessages(H_RESET);
+                            mHandler.sendMessageDelayed(mHandler.obtainMessage(H_RESET),
+                                    TimeUnit.SECONDS.toMillis(REMOTE_TIMEOUT_SECONDS * 2));
                             return false;
+                        } finally {
+                            try {
+                                pfd.close();
+                            } catch (Exception e) {
+                                Slog.e(TAG, "Failed to close FUSE device fd", e);
+                            }
                         }
                     }
                 });
