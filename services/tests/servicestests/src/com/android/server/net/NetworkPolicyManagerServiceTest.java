@@ -1729,9 +1729,11 @@ public class NetworkPolicyManagerServiceTest {
                 .getService(NetworkPolicyManagerInternal.class);
         npmi.onStatsProviderLimitReached("TEST");
 
-        // Verifies that the limit reached leads to a force update.
+        // Verifies that the limit reached leads to a force update and new limit should be set.
         postMsgAndWaitForCompletion();
         verify(mStatsService).forceUpdate();
+        postMsgAndWaitForCompletion();
+        verify(mStatsService).setStatsProviderLimit(TEST_IFACE, 10000L - 4999L - 1999L);
     }
 
     /**
