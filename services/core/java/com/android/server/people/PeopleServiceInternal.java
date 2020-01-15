@@ -16,9 +16,25 @@
 
 package com.android.server.people;
 
+import android.annotation.NonNull;
 import android.service.appprediction.IPredictionService;
 
 /**
  * @hide Only for use within the system server.
  */
-public abstract class PeopleServiceInternal extends IPredictionService.Stub {}
+public abstract class PeopleServiceInternal extends IPredictionService.Stub {
+
+    /**
+     * The number conversation infos will be dynamic, based on the currently installed apps on the
+     * device. All of which should be combined into a single blob to be backed up.
+     */
+    public abstract byte[] backupConversationInfos(@NonNull int userId);
+
+    /**
+     * Multiple conversation infos may exist in the restore payload, child classes are required to
+     * manage the restoration based on how individual conversation infos were originally combined
+     * during backup.
+     */
+    public abstract void restoreConversationInfos(@NonNull int userId, @NonNull String key,
+            @NonNull byte[] payload);
+}

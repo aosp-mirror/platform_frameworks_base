@@ -137,5 +137,14 @@ public class PeopleService extends SystemService {
                 Slog.e(TAG, "Failed to calling callback" + e);
             }
         }
+
+        @Override
+        public byte[] backupConversationInfos(int userId) {
+            return new byte[0];
+        }
+
+        @Override
+        public void restoreConversationInfos(int userId, String key, byte[] payload) {
+        }
     }
 }
