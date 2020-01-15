@@ -455,6 +455,19 @@ public class NetworkRequest implements Parcelable {
     }
 
     /**
+     * Returns true iff. the capabilities requested in this NetworkRequest are satisfied by the
+     * provided {@link NetworkCapabilities}.
+     *
+     * @param nc Capabilities that should satisfy this NetworkRequest. null capabilities do not
+     *           satisfy any request.
+     * @hide
+     */
+    @SystemApi
+    public boolean satisfiedBy(@Nullable NetworkCapabilities nc) {
+        return networkCapabilities.satisfiedByNetworkCapabilities(nc);
+    }
+
+    /**
      * @see Builder#addTransportType(int)
      */
     public boolean hasTransport(@Transport int transportType) {
