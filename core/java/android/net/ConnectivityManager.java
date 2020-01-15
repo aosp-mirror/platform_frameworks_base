@@ -662,7 +662,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @SystemApi
     public static final int TYPE_WIFI_P2P    = 13;
 
     /**
