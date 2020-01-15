@@ -41,7 +41,9 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
+import android.hardware.soundtrigger.KeyphraseMetadata;
 import android.hardware.soundtrigger.ModelParams;
+import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
@@ -90,6 +92,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -1022,6 +1025,41 @@ public class VoiceInteractionManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(caller);
             }
+        }
+
+        @Nullable
+        public KeyphraseMetadata getEnrolledKeyphraseMetadata(IVoiceInteractionService service,
+                String keyphrase, String bcp47Locale) {
+            synchronized (this) {
+                enforceIsCurrentVoiceInteractionService(service);
+            }
+
+            if (bcp47Locale == null) {
+                throw new IllegalArgumentException("Illegal argument(s) in isEnrolledForKeyphrase");
+            }
+
+            final int callingUid = UserHandle.getCallingUserId();
+            final long caller = Binder.clearCallingIdentity();
+            try {
+                KeyphraseSoundModel model =
+                        mDbHelper.getKeyphraseSoundModel(keyphrase, callingUid, bcp47Locale);
+                if (model == null) {
+                    return null;
+                }
+
+                for (SoundTrigger.Keyphrase phrase : model.keyphrases) {
+                    if (keyphrase.equals(phrase.text)) {
+                        ArraySet<Locale> locales = new ArraySet<>();
+                        locales.add(phrase.locale);
+                        return new KeyphraseMetadata(phrase.id, phrase.text, locales,
+                                phrase.recognitionModes);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(caller);
+            }
+
+            return null;
         }
 
         @Override

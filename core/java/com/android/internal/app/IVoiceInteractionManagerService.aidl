@@ -26,6 +26,7 @@ import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
+import android.hardware.soundtrigger.KeyphraseMetadata;
 import android.hardware.soundtrigger.ModelParams;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.service.voice.IVoiceInteractionService;
@@ -72,8 +73,8 @@ interface IVoiceInteractionManagerService {
      */
     SoundTrigger.ModuleProperties getDspModuleProperties(in IVoiceInteractionService service);
     /**
-     * Indicates if there's a keyphrase sound model available for the given keyphrase ID.
-     * This performs the check for the current user.
+     * Indicates if there's a keyphrase sound model available for the given keyphrase ID and the
+     * user ID of the caller.
      *
      * @param service The current VoiceInteractionService.
      * @param keyphraseId The unique identifier for the keyphrase.
@@ -81,6 +82,18 @@ interface IVoiceInteractionManagerService {
      */
     boolean isEnrolledForKeyphrase(IVoiceInteractionService service, int keyphraseId,
             String bcp47Locale);
+    /**
+     * Generates KeyphraseMetadata for an enrolled sound model based on keyphrase string, locale,
+     * and the user ID of the caller.
+     *
+     * @param service The current VoiceInteractionService
+     * @param keyphrase Keyphrase text associated with the enrolled model
+     * @param bcp47Locale The BCP47 language tag for the keyphrase's locale.
+     * @return The metadata for the enrolled voice model bassed on the passed in parameters. Null if
+     *         no matching voice model exists.
+     */
+    KeyphraseMetadata getEnrolledKeyphraseMetadata(IVoiceInteractionService service,
+            String keyphrase, String bcp47Locale);
     /**
      * Starts a recognition for the given keyphrase.
      */

@@ -29,7 +29,6 @@ import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.ConfidenceLevel;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionEvent;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
-import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.media.AudioFormat;
@@ -67,7 +66,12 @@ public class AlwaysOnHotwordDetector {
     /**
      * Indicates that recognition for the given keyphrase is not supported.
      * No further interaction should be performed with the detector that returns this availability.
+     *
+     * @deprecated This is no longer a valid state. Enrollment can occur outside of
+     * {@link KeyphraseEnrollmentInfo} through another privileged application. We can no longer
+     * determine ahead of time if the keyphrase and locale are unsupported by the system.
      */
+    @Deprecated
     public static final int STATE_KEYPHRASE_UNSUPPORTED = -1;
     /**
      * Indicates that the given keyphrase is not enrolled.
@@ -220,7 +224,8 @@ public class AlwaysOnHotwordDetector {
      * The metadata of the Keyphrase, derived from the enrollment application.
      * This may be null if this keyphrase isn't supported by the enrollment application.
      */
-    private final KeyphraseMetadata mKeyphraseMetadata;
+    @Nullable
+    private KeyphraseMetadata mKeyphraseMetadata;
     private final KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
     private final IVoiceInteractionService mVoiceInteractionService;
     private final IVoiceInteractionManagerService mModelManagementService;
@@ -420,7 +425,6 @@ public class AlwaysOnHotwordDetector {
         mText = text;
         mLocale = locale;
         mKeyphraseEnrollmentInfo = keyphraseEnrollmentInfo;
-        mKeyphraseMetadata = mKeyphraseEnrollmentInfo.getKeyphraseMetadata(text, locale);
         mExternalCallback = callback;
         mHandler = new MyHandler();
         mInternalCallback = new SoundTriggerListener(mHandler);
@@ -456,8 +460,7 @@ public class AlwaysOnHotwordDetector {
         }
 
         // This method only makes sense if we can actually support a recognition.
-        if (mAvailability != STATE_KEYPHRASE_ENROLLED
-                && mAvailability != STATE_KEYPHRASE_UNENROLLED) {
+        if (mAvailability != STATE_KEYPHRASE_ENROLLED || mKeyphraseMetadata == null) {
             throw new UnsupportedOperationException(
                     "Getting supported recognition modes for the keyphrase is not supported");
         }
@@ -733,8 +736,7 @@ public class AlwaysOnHotwordDetector {
     void onSoundModelsChanged() {
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID
-                    || mAvailability == STATE_HARDWARE_UNAVAILABLE
-                    || mAvailability == STATE_KEYPHRASE_UNSUPPORTED) {
+                    || mAvailability == STATE_HARDWARE_UNAVAILABLE) {
                 Slog.w(TAG, "Received onSoundModelsChanged for an unsupported keyphrase/config");
                 return;
             }
@@ -744,7 +746,9 @@ public class AlwaysOnHotwordDetector {
             // or was deleted.
             // The availability change callback should ensure that the client starts recognition
             // again if needed.
-            stopRecognitionLocked();
+            if (mAvailability == STATE_KEYPHRASE_ENROLLED) {
+                stopRecognitionLocked();
+            }
 
             // Execute a refresh availability task - which should then notify of a change.
             new RefreshAvailabiltyTask().execute();
@@ -927,20 +931,17 @@ public class AlwaysOnHotwordDetector {
         @Override
         public Void doInBackground(Void... params) {
             int availability = internalGetInitialAvailability();
-            boolean enrolled = false;
-            // Fetch the sound model if the availability is one of the supported ones.
-            if (availability == STATE_NOT_READY
-                    || availability == STATE_KEYPHRASE_UNENROLLED
-                    || availability == STATE_KEYPHRASE_ENROLLED) {
-                enrolled = internalGetIsEnrolled(mKeyphraseMetadata.id, mLocale);
-                if (!enrolled) {
-                    availability = STATE_KEYPHRASE_UNENROLLED;
-                } else {
-                    availability = STATE_KEYPHRASE_ENROLLED;
-                }
-            }
 
             synchronized (mLock) {
+                if (availability == STATE_NOT_READY) {
+                    internalUpdateEnrolledKeyphraseMetadata();
+                    if (mKeyphraseMetadata != null) {
+                        availability = STATE_KEYPHRASE_ENROLLED;
+                    } else {
+                        availability = STATE_KEYPHRASE_UNENROLLED;
+                    }
+                }
+
                 if (DBG) {
                     Slog.d(TAG, "Hotword availability changed from " + mAvailability
                             + " -> " + availability);
@@ -969,28 +970,22 @@ public class AlwaysOnHotwordDetector {
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException in getDspProperties!", e);
             }
+
             // No DSP available
             if (dspModuleProperties == null) {
                 return STATE_HARDWARE_UNAVAILABLE;
             }
-            // No enrollment application supports this keyphrase/locale
-            if (mKeyphraseMetadata == null) {
-                return STATE_KEYPHRASE_UNSUPPORTED;
-            }
+
             return STATE_NOT_READY;
         }
 
-        /**
-         * @return The corresponding {@link KeyphraseSoundModel} or null if none is found.
-         */
-        private boolean internalGetIsEnrolled(int keyphraseId, Locale locale) {
+        private void internalUpdateEnrolledKeyphraseMetadata() {
             try {
-                return mModelManagementService.isEnrolledForKeyphrase(
-                        mVoiceInteractionService, keyphraseId, locale.toLanguageTag());
+                mKeyphraseMetadata = mModelManagementService.getEnrolledKeyphraseMetadata(
+                        mVoiceInteractionService, mText, mLocale.toLanguageTag());
             } catch (RemoteException e) {
-                Slog.w(TAG, "RemoteException in listRegisteredKeyphraseSoundModels!", e);
+                Slog.w(TAG, "RemoteException in internalUpdateEnrolledKeyphraseMetadata", e);
             }
-            return false;
         }
     }
 
