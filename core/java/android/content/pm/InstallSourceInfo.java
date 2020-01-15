@@ -29,32 +29,39 @@ public final class InstallSourceInfo implements Parcelable {
 
     @Nullable private final String mInitiatingPackageName;
 
+    @Nullable private final SigningInfo mInitiatingPackageSigningInfo;
+
     @Nullable private final String mOriginatingPackageName;
 
     @Nullable private final String mInstallingPackageName;
 
     /** @hide */
     public InstallSourceInfo(@Nullable String initiatingPackageName,
+            @Nullable SigningInfo initiatingPackageSigningInfo,
             @Nullable String originatingPackageName, @Nullable String installingPackageName) {
-        this.mInitiatingPackageName = initiatingPackageName;
-        this.mOriginatingPackageName = originatingPackageName;
-        this.mInstallingPackageName = installingPackageName;
+        mInitiatingPackageName = initiatingPackageName;
+        mInitiatingPackageSigningInfo = initiatingPackageSigningInfo;
+        mOriginatingPackageName = originatingPackageName;
+        mInstallingPackageName = installingPackageName;
     }
 
     @Override
     public int describeContents() {
-        return 0;
+        return mInitiatingPackageSigningInfo == null
+                ? 0 : mInitiatingPackageSigningInfo.describeContents();
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mInitiatingPackageName);
+        dest.writeParcelable(mInitiatingPackageSigningInfo, flags);
         dest.writeString(mOriginatingPackageName);
         dest.writeString(mInstallingPackageName);
     }
 
     private InstallSourceInfo(Parcel source) {
         mInitiatingPackageName = source.readString();
+        mInitiatingPackageSigningInfo = source.readParcelable(SigningInfo.class.getClassLoader());
         mOriginatingPackageName = source.readString();
         mInstallingPackageName = source.readString();
     }
@@ -63,6 +70,14 @@ public final class InstallSourceInfo implements Parcelable {
     @Nullable
     public String getInitiatingPackageName() {
         return mInitiatingPackageName;
+    }
+
+    /**
+     * Information about the signing certificates used to sign the initiating package, if available.
+     */
+    @Nullable
+    public SigningInfo getInitiatingPackageSigningInfo() {
+        return mInitiatingPackageSigningInfo;
     }
 
     /**
