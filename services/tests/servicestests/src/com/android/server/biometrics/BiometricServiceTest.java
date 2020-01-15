@@ -411,7 +411,8 @@ public class BiometricServiceTest {
         // HAT sent to keystore
         verify(mBiometricService.mKeyStore).addAuthToken(any(byte[].class));
         // Send onAuthenticated to client
-        verify(mReceiver1).onAuthenticationSucceeded();
+        verify(mReceiver1).onAuthenticationSucceeded(
+                BiometricPrompt.AUTHENTICATION_RESULT_TYPE_BIOMETRIC);
         // Current session becomes null
         assertNull(mBiometricService.mCurrentAuthSession);
     }
@@ -461,7 +462,8 @@ public class BiometricServiceTest {
                 BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED);
         waitForIdle();
         verify(mBiometricService.mKeyStore).addAuthToken(any(byte[].class));
-        verify(mReceiver1).onAuthenticationSucceeded();
+        verify(mReceiver1).onAuthenticationSucceeded(
+                BiometricPrompt.AUTHENTICATION_RESULT_TYPE_BIOMETRIC);
     }
 
     @Test

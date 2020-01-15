@@ -223,4 +223,22 @@ public class UtilsTest {
                     Utils.biometricConstantsToBiometricManager(testCases[i][0]));
         }
     }
+
+    @Test
+    public void testGetAuthenticationTypeForResult_getsCorrectType() {
+        assertEquals(Utils.getAuthenticationTypeForResult(
+                BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED),
+                BiometricPrompt.AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL);
+        assertEquals(Utils.getAuthenticationTypeForResult(
+                BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED),
+                BiometricPrompt.AUTHENTICATION_RESULT_TYPE_BIOMETRIC);
+        assertEquals(Utils.getAuthenticationTypeForResult(
+                BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED),
+                BiometricPrompt.AUTHENTICATION_RESULT_TYPE_BIOMETRIC);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetAuthResultType_throwsForInvalidReason() {
+        Utils.getAuthenticationTypeForResult(BiometricPrompt.DISMISSED_REASON_NEGATIVE);
+    }
 }

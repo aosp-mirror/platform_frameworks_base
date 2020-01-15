@@ -20,8 +20,8 @@ package android.hardware.biometrics;
  * @hide
  */
 oneway interface IBiometricServiceReceiver {
-    // Notify BiometricPrompt that authentication was successful
-    void onAuthenticationSucceeded();
+    // Notify BiometricPrompt that authentication was successful.
+    void onAuthenticationSucceeded(int authenticationType);
     // Noties that authentication failed.
     void onAuthenticationFailed();
     // Notify BiometricPrompt that an error has occurred.
