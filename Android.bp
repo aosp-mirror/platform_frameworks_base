@@ -268,6 +268,7 @@ filegroup {
         ":framework-tethering-srcs",
         ":updatable-media-srcs",
         ":framework-mediaprovider-sources",
+        ":framework-permission-sources",
         ":framework-wifi-updatable-sources",
         ":ike-srcs",
     ]
@@ -440,6 +441,7 @@ java_library {
         "framework-appsearch-stubs",
         // TODO(b/146167933): Use framework-statsd-stubs
         "framework-statsd",
+        "framework-permission-stubs",
         "framework-wifi-stubs",
         "ike-stubs",
     ],
@@ -465,6 +467,7 @@ java_library {
         "//frameworks/base/apex/appsearch/framework",
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
+        "//frameworks/base/apex/permission/framework",
         "//frameworks/base/apex/statsd/service",
         "//frameworks/base/wifi",
         "//frameworks/opt/net/wifi/service",
@@ -489,6 +492,7 @@ java_library {
         "updatable_media_stubs",
         "framework_mediaprovider_stubs",
         "framework-appsearch", // TODO(b/146218515): should be framework-appsearch-stubs
+        "framework-permission-stubs",
         "framework-sdkextensions-stubs-systemapi",
         // TODO(b/146167933): Use framework-statsd-stubs instead.
         "framework-statsd",

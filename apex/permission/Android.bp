@@ -22,6 +22,10 @@ apex_defaults {
     name: "com.android.permission-defaults",
     key: "com.android.permission.key",
     certificate: ":com.android.permission.certificate",
+    java_libs: [
+        "framework-permission",
+        "service-permission",
+    ],
     apps: ["PermissionController"],
 }
 
