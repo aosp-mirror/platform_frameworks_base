@@ -154,6 +154,7 @@ import com.android.internal.view.InputBindResult;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.inputmethod.InputMethodManagerInternal.InputMethodListListener;
 import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 import com.android.server.inputmethod.InputMethodUtils.InputMethodSettings;
 import com.android.server.statusbar.StatusBarManagerService;
@@ -172,6 +173,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.WeakHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -214,6 +216,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
 
     static final int MSG_SYSTEM_UNLOCK_USER = 5000;
+    static final int MSG_DISPATCH_ON_INPUT_METHOD_LIST_UPDATED = 5010;
 
     static final int MSG_INLINE_SUGGESTIONS_REQUEST = 6000;
 
@@ -687,6 +690,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
     private final IPackageManager mIPackageManager;
     private final String mSlotIme;
+
+    /**
+     * Registered {@link InputMethodListListeners}.
+     * This variable can be accessed from both of MainThread and BinderThread.
+     */
+    private final CopyOnWriteArrayList<InputMethodListListener> mInputMethodListListeners =
+            new CopyOnWriteArrayList<>();
 
     /**
      * Internal state snapshot when {@link #MSG_START_INPUT} message is about to be posted to the
@@ -3946,10 +3956,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_HARD_KEYBOARD_SWITCH_CHANGED:
                 mHardKeyboardListener.handleHardKeyboardStatusChange(msg.arg1 == 1);
                 return true;
-            case MSG_SYSTEM_UNLOCK_USER:
+            case MSG_SYSTEM_UNLOCK_USER: {
                 final int userId = msg.arg1;
                 onUnlockUser(userId);
                 return true;
+            }
+            case MSG_DISPATCH_ON_INPUT_METHOD_LIST_UPDATED: {
+                final int userId = msg.arg1;
+                final List<InputMethodInfo> imes = (List<InputMethodInfo>) msg.obj;
+                mInputMethodListListeners.forEach(
+                        listener -> listener.onInputMethodListUpdated(imes, userId));
+                return true;
+            }
 
             // ---------------------------------------------------------------
             case MSG_INLINE_SUGGESTIONS_REQUEST:
@@ -4142,6 +4160,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // TODO: Make sure that mSwitchingController and mSettings are sharing the
         // the same enabled IMEs list.
         mSwitchingController.resetCircularListLocked(mContext);
+
+        // Notify InputMethodListListeners of the new installed InputMethods.
+        final List<InputMethodInfo> inputMethodList = new ArrayList<>(mMethodList);
+        mHandler.obtainMessage(MSG_DISPATCH_ON_INPUT_METHOD_LIST_UPDATED,
+                mSettings.getCurrentUserId(), 0 /* unused */, inputMethodList).sendToTarget();
     }
 
     // ----------------------------------------------------------------------
@@ -4605,6 +4628,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public boolean switchToInputMethod(String imeId, int userId) {
             return mService.switchToInputMethod(imeId, userId);
+        }
+
+        @Override
+        public void registerInputMethodListListener(InputMethodListListener listener) {
+            mService.mInputMethodListListeners.addIfAbsent(listener);
         }
     }
 
