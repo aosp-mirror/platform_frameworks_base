@@ -42,7 +42,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -363,7 +362,7 @@ public class TetheringService extends Service {
                     IBinder connector;
                     try {
                         final long before = System.currentTimeMillis();
-                        while ((connector = ServiceManager.getService(
+                        while ((connector = (IBinder) mContext.getSystemService(
                                 Context.NETWORK_STACK_SERVICE)) == null) {
                             if (System.currentTimeMillis() - before > NETWORKSTACK_TIMEOUT_MS) {
                                 Log.wtf(TAG, "Timeout, fail to get INetworkStackConnector");

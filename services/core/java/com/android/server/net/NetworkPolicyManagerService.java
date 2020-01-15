@@ -4547,7 +4547,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 case MSG_STATS_PROVIDER_LIMIT_REACHED: {
                     mNetworkStats.forceUpdate();
+
                     synchronized (mNetworkPoliciesSecondLock) {
+                        // Some providers might hit the limit reached event prior to others. Thus,
+                        // re-calculate and update interface quota for every provider is needed.
+                        updateNetworkRulesNL();
                         updateNetworkEnabledNL();
                         updateNotificationsNL();
                     }
@@ -4555,16 +4559,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 case MSG_LIMIT_REACHED: {
                     final String iface = (String) msg.obj;
+                    synchronized (mNetworkPoliciesSecondLock) {
+                        // fast return if not needed.
+                        if (!mMeteredIfaces.contains(iface)) {
+                            return true;
+                        }
+                    }
+
+                    // force stats update to make sure the service have the numbers that caused
+                    // alert to trigger.
+                    mNetworkStats.forceUpdate();
 
                     synchronized (mNetworkPoliciesSecondLock) {
-                        if (mMeteredIfaces.contains(iface)) {
-                            // force stats update to make sure we have
-                            // numbers that caused alert to trigger.
-                            mNetworkStats.forceUpdate();
-
-                            updateNetworkEnabledNL();
-                            updateNotificationsNL();
-                        }
+                        updateNetworkRulesNL();
+                        updateNetworkEnabledNL();
+                        updateNotificationsNL();
                     }
                     return true;
                 }
