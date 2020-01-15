@@ -15,6 +15,9 @@
  */
 package com.android.systemui.statusbar.policy;
 
+import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN;
+import static android.telephony.NetworkRegistrationInfo.DOMAIN_PS;
+
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
@@ -708,7 +711,11 @@ public class MobileSignalController extends SignalController<
             }
             mServiceState = state;
             if (mServiceState != null) {
-                updateDataNetType(mServiceState.getDataNetworkType());
+                NetworkRegistrationInfo regInfo = mServiceState.getNetworkRegistrationInfo(
+                        DOMAIN_PS, TRANSPORT_TYPE_WWAN);
+                if (regInfo != null) {
+                    updateDataNetType(regInfo.getAccessNetworkTechnology());
+                }
             }
             updateTelephony();
         }
