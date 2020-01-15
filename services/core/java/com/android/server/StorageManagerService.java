@@ -2855,8 +2855,10 @@ class StorageManagerService extends IStorageManager.Stub
      */
     @Override
     public void startCheckpoint(int numTries) throws RemoteException {
-        // Only the system process is permitted to start checkpoints
-        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
+        // Only the root, system_server and shell processes are permitted to start checkpoints
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID
+                && callingUid != Process.SHELL_UID) {
             throw new SecurityException("no permission to start filesystem checkpoint");
         }
 
