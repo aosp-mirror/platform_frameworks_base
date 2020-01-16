@@ -3383,6 +3383,7 @@ package android.telephony {
   public class TelephonyRegistryManager {
     method public void addOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener, @NonNull java.util.concurrent.Executor);
     method public void addOnSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnSubscriptionsChangedListener, @NonNull java.util.concurrent.Executor);
+    method public void listenForSubscriber(int, @NonNull String, @NonNull String, @NonNull android.telephony.PhoneStateListener, int, boolean);
     method public void notifyActiveDataSubIdChanged(int);
     method public void notifyBarringInfoChanged(int, int, @NonNull android.telephony.BarringInfo);
     method public void notifyCallForwardingChanged(int, boolean);
@@ -3399,6 +3400,8 @@ package android.telephony {
     method public void notifyEmergencyNumberList(int, int);
     method public void notifyImsDisconnectCause(int, @NonNull android.telephony.ims.ImsReasonInfo);
     method public void notifyMessageWaitingChanged(int, int, boolean);
+    method public void notifyOutgoingEmergencyCall(int, int, @NonNull android.telephony.emergency.EmergencyNumber);
+    method public void notifyOutgoingEmergencySms(int, int, @NonNull android.telephony.emergency.EmergencyNumber);
     method public void notifyPhoneCapabilityChanged(@NonNull android.telephony.PhoneCapability);
     method public void notifyPreciseCallState(int, int, int, int, int);
     method public void notifyPreciseDataConnectionFailed(int, int, int, @Nullable String, int);

@@ -36,6 +36,7 @@ import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.Annotation.SrvccState;
 import android.telephony.data.ApnSetting;
+import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
 import android.util.Log;
 
@@ -198,6 +199,25 @@ public class TelephonyRegistryManager {
     }
 
     /**
+     * Listen for incoming subscriptions
+     * @param subId Subscription ID
+     * @param pkg Package name
+     * @param featureId Feature ID
+     * @param listener Listener providing callback
+     * @param events Events
+     * @param notifyNow Whether to notify instantly
+     */
+    public void listenForSubscriber(int subId, @NonNull String pkg, @NonNull String featureId,
+            @NonNull PhoneStateListener listener, int events, boolean notifyNow) {
+        try {
+            sRegistry.listenForSubscriber(
+                    subId, pkg, featureId, listener.callback, events, notifyNow);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Informs the system of an intentional upcoming carrier network change by a carrier app.
      * This call only used to allow the system to provide alternative UI while telephony is
      * performing an action that may result in intentional, temporary network lack of connectivity.
@@ -252,6 +272,32 @@ public class TelephonyRegistryManager {
             @Nullable String incomingNumber) {
         try {
             sRegistry.notifyCallStateForAllSubs(state, incomingNumber);
+        } catch (RemoteException ex) {
+            // system server crash
+        }
+    }
+
+    /**
+     * Notify {@link SubscriptionInfo} change.
+     * @hide
+     */
+    @SystemApi
+    public void notifySubscriptionInfoChanged() {
+        try {
+            sRegistry.notifySubscriptionInfoChanged();
+        } catch (RemoteException ex) {
+            // system server crash
+        }
+    }
+
+    /**
+     * Notify opportunistic {@link SubscriptionInfo} change.
+     * @hide
+     */
+    @SystemApi
+    public void notifyOpportunisticSubscriptionInfoChanged() {
+        try {
+            sRegistry.notifyOpportunisticSubscriptionInfoChanged();
         } catch (RemoteException ex) {
             // system server crash
         }
@@ -388,6 +434,36 @@ public class TelephonyRegistryManager {
     public void notifyEmergencyNumberList(int subId, int slotIndex) {
         try {
             sRegistry.notifyEmergencyNumberList(slotIndex, subId);
+        } catch (RemoteException ex) {
+            // system process is dead
+        }
+    }
+
+    /**
+     * Notify outgoing emergency call.
+     * @param phoneId Sender phone ID.
+     * @param subId Sender subscription ID.
+     * @param emergencyNumber Emergency number.
+     */
+    public void notifyOutgoingEmergencyCall(int phoneId, int subId,
+            @NonNull EmergencyNumber emergencyNumber) {
+        try {
+            sRegistry.notifyOutgoingEmergencyCall(phoneId, subId, emergencyNumber);
+        } catch (RemoteException ex) {
+            // system process is dead
+        }
+    }
+
+    /**
+     * Notify outgoing emergency SMS.
+     * @param phoneId Sender phone ID.
+     * @param subId Sender subscription ID.
+     * @param emergencyNumber Emergency number.
+     */
+    public void notifyOutgoingEmergencySms(int phoneId, int subId,
+            @NonNull EmergencyNumber emergencyNumber) {
+        try {
+            sRegistry.notifyOutgoingEmergencySms(phoneId, subId, emergencyNumber);
         } catch (RemoteException ex) {
             // system process is dead
         }

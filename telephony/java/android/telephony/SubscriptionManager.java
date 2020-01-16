@@ -54,6 +54,7 @@ import android.os.Looper;
 import android.os.ParcelUuid;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Telephony.SimInfo;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsMmTelManager;
@@ -976,10 +977,7 @@ public class SubscriptionManager {
     private INetworkPolicyManager getINetworkPolicyManager() {
         if (mNetworkPolicy == null) {
             mNetworkPolicy = INetworkPolicyManager.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getNetworkPolicyServiceRegisterer()
-                            .get());
+                    ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
         }
         return mNetworkPolicy;
     }
