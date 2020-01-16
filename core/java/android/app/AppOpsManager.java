@@ -4342,6 +4342,9 @@ public class AppOpsManager {
                     mHistoricalUidOps.removeAt(i);
                 } else {
                     uidOp.filter(packageName, featureId, opNames, filter, scaleFactor);
+                    if (uidOp.getPackageCount() == 0) {
+                        mHistoricalUidOps.removeAt(i);
+                    }
                 }
             }
         }
@@ -4681,6 +4684,9 @@ public class AppOpsManager {
                     mHistoricalPackageOps.removeAt(i);
                 } else {
                     packageOps.filter(featureId, opNames, filter, fractionToRemove);
+                    if (packageOps.getFeatureCount() == 0) {
+                        mHistoricalPackageOps.removeAt(i);
+                    }
                 }
             }
         }
@@ -4930,6 +4936,9 @@ public class AppOpsManager {
                     mHistoricalFeatureOps.removeAt(i);
                 } else {
                     featureOps.filter(opNames, filter, fractionToRemove);
+                    if (featureOps.getOpCount() == 0) {
+                        mHistoricalFeatureOps.removeAt(i);
+                    }
                 }
             }
         }
