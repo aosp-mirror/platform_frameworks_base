@@ -37,6 +37,12 @@ public class CustomerDocumentTest {
 
     private static byte[] sByteArray1 = new byte[]{(byte) 1, (byte) 2, (byte) 3};
     private static byte[] sByteArray2 = new byte[]{(byte) 4, (byte) 5, (byte) 6};
+    private static AppSearchDocument sDocumentProperties1 = new AppSearchDocument
+            .Builder("sDocumentProperties1", "sDocumentPropertiesSchemaType1")
+            .build();
+    private static AppSearchDocument sDocumentProperties2 = new AppSearchDocument
+            .Builder("sDocumentProperties2", "sDocumentPropertiesSchemaType2")
+            .build();
 
     @Test
     public void testBuildCustomerDocument() {
@@ -48,6 +54,7 @@ public class CustomerDocumentTest {
                 .setProperty("booleanKey1", true, false, true)
                 .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
                 .setProperty("byteKey1", sByteArray1, sByteArray2)
+                .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
                 .build();
 
         assertThat(customerDocument.getUri()).isEqualTo("uri1");
@@ -64,6 +71,8 @@ public class CustomerDocumentTest {
                 .containsExactly("test-value1", "test-value2", "test-value3");
         assertThat(customerDocument.getPropertyBytesArray("byteKey1")).asList()
                 .containsExactly(sByteArray1, sByteArray2);
+        assertThat(customerDocument.getPropertyDocumentArray("documentKey1")).asList()
+                .containsExactly(sDocumentProperties1, sDocumentProperties2);
     }
 
     /**

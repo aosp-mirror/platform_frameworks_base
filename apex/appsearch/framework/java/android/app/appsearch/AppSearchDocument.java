@@ -301,6 +301,23 @@ public class AppSearchDocument {
         return propertyArray[0];
     }
 
+    /**
+     * Retrieve a {@link AppSearchDocument} value by key.
+     *
+     * @param key The key to look for.
+     * @return The first {@link AppSearchDocument} associated with the given key or {@code null} if
+     *         there is no such key or the value is of a different type.
+     */
+    @Nullable
+    public AppSearchDocument getPropertyDocument(@NonNull String key) {
+        AppSearchDocument[] propertyArray = getPropertyDocumentArray(key);
+        if (ArrayUtils.isEmpty(propertyArray)) {
+            return null;
+        }
+        warnIfSinglePropertyTooLong("Document", key, propertyArray.length);
+        return propertyArray[0];
+    }
+
     /** Prints a warning to logcat if the given propertyLength is greater than 1. */
     private static void warnIfSinglePropertyTooLong(
             @NonNull String propertyType, @NonNull String key, int propertyLength) {
@@ -374,6 +391,18 @@ public class AppSearchDocument {
     @Nullable
     public byte[][] getPropertyBytesArray(@NonNull String key) {
         return getAndCastPropertyArray(key, byte[][].class);
+    }
+
+    /**
+     * Retrieve a repeated {@link AppSearchDocument} property by key.
+     *
+     * @param key The key to look for.
+     * @return The {@link AppSearchDocument[]} associated with the given key, or {@code null} if no
+     *         value is set or the value is of a different type.
+     */
+    @Nullable
+    public AppSearchDocument[] getPropertyDocumentArray(@NonNull String key) {
+        return getAndCastPropertyArray(key, AppSearchDocument[].class);
     }
 
     /**
@@ -451,7 +480,7 @@ public class AppSearchDocument {
         }
 
         /**
-         * Set the score of the {@link AppSearchDocument}.
+         * Sets the score of the {@link AppSearchDocument}.
          *
          * <p>The score is a query-independent measure of the document's quality, relative to
          * other {@link AppSearchDocument}s of the same type.
@@ -563,6 +592,19 @@ public class AppSearchDocument {
             return mBuilderTypeInstance;
         }
 
+        /**
+         * Sets one or multiple {@link AppSearchDocument} values for a property, replacing its
+         * previous values.
+         *
+         * @param key The key associated with the {@code values}.
+         * @param values The {@link AppSearchDocument} values of the property.
+         */
+        @NonNull
+        public BuilderType setProperty(@NonNull String key, @NonNull AppSearchDocument... values) {
+            putInPropertyMap(key, values);
+            return mBuilderTypeInstance;
+        }
+
         private void putInPropertyMap(@NonNull String key, @NonNull String[] values)
                 throws IllegalArgumentException {
             Objects.requireNonNull(key);
@@ -608,6 +650,17 @@ public class AppSearchDocument {
             mProperties.put(key, values);
         }
 
+        private void putInPropertyMap(@NonNull String key, @NonNull AppSearchDocument[] values) {
+            Objects.requireNonNull(key);
+            Objects.requireNonNull(values);
+            for (int i = 0; i < values.length; i++) {
+                if (values[i] == null) {
+                    throw new IllegalArgumentException("The document at " + i + " is null.");
+                }
+            }
+            validateRepeatedPropertyLength(key, values.length);
+            mProperties.put(key, values);
+        }
 
         private static void validateRepeatedPropertyLength(@NonNull String key, int length) {
             if (length == 0) {
@@ -649,6 +702,10 @@ public class AppSearchDocument {
                 } else if (values instanceof String[]) {
                     for (String value : (String[]) values) {
                         propertyProto.addStringValues(value);
+                    }
+                } else if (values instanceof AppSearchDocument[]) {
+                    for (AppSearchDocument value : (AppSearchDocument[]) values) {
+                        propertyProto.addDocumentValues(value.getProto());
                     }
                 } else if (values instanceof byte[][]) {
                     for (byte[] value : (byte[][]) values) {

@@ -37,6 +37,12 @@ import java.util.List;
 public class AppSearchDocumentTest {
     private static final byte[] sByteArray1 = new byte[]{(byte) 1, (byte) 2, (byte) 3};
     private static final byte[] sByteArray2 = new byte[]{(byte) 4, (byte) 5, (byte) 6};
+    private static final AppSearchDocument sDocumentProperties1 = new AppSearchDocument
+            .Builder("sDocumentProperties1", "sDocumentPropertiesSchemaType1")
+            .build();
+    private static final AppSearchDocument sDocumentProperties2 = new AppSearchDocument
+            .Builder("sDocumentProperties2", "sDocumentPropertiesSchemaType2")
+            .build();
 
     @Test
     public void testDocumentEquals_Identical() {
@@ -48,6 +54,7 @@ public class AppSearchDocumentTest {
                 .setProperty("booleanKey1", true, false, true)
                 .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
                 .setProperty("byteKey1", sByteArray1, sByteArray2)
+                .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
                 .build();
         AppSearchDocument document2 = new AppSearchDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
@@ -57,6 +64,7 @@ public class AppSearchDocumentTest {
                 .setProperty("booleanKey1", true, false, true)
                 .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
                 .setProperty("byteKey1", sByteArray1, sByteArray2)
+                .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
                 .build();
         assertThat(document1).isEqualTo(document2);
         assertThat(document1.hashCode()).isEqualTo(document2.hashCode());
@@ -70,6 +78,7 @@ public class AppSearchDocumentTest {
                 .setProperty("byteKey1", sByteArray1, sByteArray2)
                 .setProperty("doubleKey1", 1.0, 2.0, 3.0)
                 .setProperty("booleanKey1", true, false, true)
+                .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
                 .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
                 .build();
 
@@ -77,6 +86,7 @@ public class AppSearchDocumentTest {
         AppSearchDocument document2 = new AppSearchDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("booleanKey1", true, false, true)
+                .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
                 .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
                 .setProperty("doubleKey1", 1.0, 2.0, 3.0)
                 .setProperty("byteKey1", sByteArray1, sByteArray2)
@@ -128,7 +138,9 @@ public class AppSearchDocumentTest {
                 .setProperty("doubleKey1", 1.0)
                 .setProperty("booleanKey1", true)
                 .setProperty("stringKey1", "test-value1")
-                .setProperty("byteKey1", sByteArray1).build();
+                .setProperty("byteKey1", sByteArray1)
+                .setProperty("documentKey1", sDocumentProperties1)
+                .build();
         assertThat(document.getUri()).isEqualTo("uri1");
         assertThat(document.getTtlMillis()).isEqualTo(1L);
         assertThat(document.getSchemaType()).isEqualTo("schemaType1");
@@ -140,6 +152,7 @@ public class AppSearchDocumentTest {
         assertThat(document.getPropertyString("stringKey1")).isEqualTo("test-value1");
         assertThat(document.getPropertyBytes("byteKey1"))
                 .asList().containsExactly((byte) 1, (byte) 2, (byte) 3);
+        assertThat(document.getPropertyDocument("documentKey1")).isEqualTo(sDocumentProperties1);
     }
 
     @Test
@@ -151,6 +164,7 @@ public class AppSearchDocumentTest {
                 .setProperty("booleanKey1", true, false, true)
                 .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
                 .setProperty("byteKey1", sByteArray1, sByteArray2)
+                .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
                 .build();
 
         assertThat(document.getUri()).isEqualTo("uri1");
@@ -164,6 +178,8 @@ public class AppSearchDocumentTest {
                 .containsExactly("test-value1", "test-value2", "test-value3");
         assertThat(document.getPropertyBytesArray("byteKey1")).asList()
                 .containsExactly(sByteArray1, sByteArray2);
+        assertThat(document.getPropertyDocumentArray("documentKey1")).asList()
+                .containsExactly(sDocumentProperties1, sDocumentProperties2);
     }
 
     @Test
@@ -211,6 +227,7 @@ public class AppSearchDocumentTest {
                 .setProperty("booleanKey1", true)
                 .setProperty("stringKey1", "test-value1")
                 .setProperty("byteKey1", sByteArray1)
+                .setProperty("documentKey1", sDocumentProperties1)
                 .build();
 
         // Create the Document proto. Need to sort the property order by key.
@@ -232,6 +249,9 @@ public class AppSearchDocumentTest {
         propertyProtoMap.put("byteKey1",
                 PropertyProto.newBuilder().setName("byteKey1").addBytesValues(
                         ByteString.copyFrom(sByteArray1)));
+        propertyProtoMap.put("documentKey1",
+                PropertyProto.newBuilder().setName("documentKey1")
+                        .addDocumentValues(sDocumentProperties1.getProto()));
         List<String> sortedKey = new ArrayList<>(propertyProtoMap.keySet());
         Collections.sort(sortedKey);
         for (String key : sortedKey) {
