@@ -3566,7 +3566,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putInt(KEY_CDMA_DTMF_TONE_DELAY_INT, 100);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_MAP_NON_NUMBER_TO_VOICEMAIL_BOOL, false);
-        sDefaults.putBoolean(KEY_IGNORE_RTT_MODE_SETTING_BOOL, true);
+        sDefaults.putBoolean(KEY_IGNORE_RTT_MODE_SETTING_BOOL, false);
         sDefaults.putInt(KEY_CDMA_3WAYCALL_FLASH_DELAY_INT , 0);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL, true);
