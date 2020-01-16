@@ -37,10 +37,10 @@ public class SparseSetArray<T> {
             mData.put(n, set);
         }
         if (set.contains(value)) {
-            return true;
+            return false;
         }
         set.add(value);
-        return false;
+        return true;
     }
 
     /**
