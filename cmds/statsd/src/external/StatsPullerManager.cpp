@@ -95,14 +95,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
 
-        // Disk Stats
-        {{.atomTag = android::util::DISK_STATS},
-         {.puller = new StatsCompanionServicePuller(android::util::DISK_STATS)}},
-
-        // Directory usage
-        {{.atomTag = android::util::DIRECTORY_USAGE},
-         {.puller = new StatsCompanionServicePuller(android::util::DIRECTORY_USAGE)}},
-
         // Size of app's code, data, and cache
         {{.atomTag = android::util::APP_SIZE},
          {.puller = new StatsCompanionServicePuller(android::util::APP_SIZE)}},

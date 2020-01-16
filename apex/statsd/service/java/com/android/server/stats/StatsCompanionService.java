@@ -722,86 +722,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullDiskStats(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        // Run a quick-and-dirty performance test: write 512 bytes
-        byte[] junk = new byte[512];
-        for (int i = 0; i < junk.length; i++) junk[i] = (byte) i;  // Write nonzero bytes
-
-        File tmp = new File(Environment.getDataDirectory(), "system/statsdperftest.tmp");
-        FileOutputStream fos = null;
-        IOException error = null;
-
-        long before = SystemClock.elapsedRealtime();
-        try {
-            fos = new FileOutputStream(tmp);
-            fos.write(junk);
-        } catch (IOException e) {
-            error = e;
-        } finally {
-            try {
-                if (fos != null) fos.close();
-            } catch (IOException e) {
-                // Do nothing.
-            }
-        }
-
-        long latency = SystemClock.elapsedRealtime() - before;
-        if (tmp.exists()) tmp.delete();
-
-        if (error != null) {
-            Slog.e(TAG, "Error performing diskstats latency test");
-            latency = -1;
-        }
-        // File based encryption.
-        boolean fileBased = StorageManager.isFileEncryptedNativeOnly();
-
-        //Recent disk write speed. Binder call to storaged.
-        int writeSpeed = -1;
-        try {
-            IBinder binder = ServiceManager.getService("storaged");
-            if (binder == null) {
-                Slog.e(TAG, "storaged not found");
-            }
-            IStoraged storaged = IStoraged.Stub.asInterface(binder);
-            writeSpeed = storaged.getRecentPerf();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "storaged not found");
-        }
-
-        // Add info pulledData.
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-        e.writeLong(latency);
-        e.writeBoolean(fileBased);
-        e.writeInt(writeSpeed);
-        pulledData.add(e);
-    }
-
-    private void pullDirectoryUsage(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        StatFs statFsData = new StatFs(Environment.getDataDirectory().getAbsolutePath());
-        StatFs statFsSystem = new StatFs(Environment.getRootDirectory().getAbsolutePath());
-        StatFs statFsCache = new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
-
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-        e.writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__DATA);
-        e.writeLong(statFsData.getAvailableBytes());
-        e.writeLong(statFsData.getTotalBytes());
-        pulledData.add(e);
-
-        e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-        e.writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__CACHE);
-        e.writeLong(statFsCache.getAvailableBytes());
-        e.writeLong(statFsCache.getTotalBytes());
-        pulledData.add(e);
-
-        e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-        e.writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__SYSTEM);
-        e.writeLong(statFsSystem.getAvailableBytes());
-        e.writeLong(statFsSystem.getTotalBytes());
-        pulledData.add(e);
-    }
-
     private void pullAppSize(int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         try {
@@ -1546,16 +1466,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.SYSTEM_ELAPSED_REALTIME: {
                 pullSystemElapsedRealtime(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.DISK_STATS: {
-                pullDiskStats(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.DIRECTORY_USAGE: {
-                pullDirectoryUsage(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

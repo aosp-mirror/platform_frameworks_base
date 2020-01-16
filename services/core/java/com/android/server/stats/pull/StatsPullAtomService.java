@@ -198,6 +198,9 @@ public class StatsPullAtomService extends SystemService {
     private final Object mThermalLock = new Object();
     @GuardedBy("mThermalLock")
     private IThermalService mThermalService;
+    private final Object mStoragedLock = new Object();
+    @GuardedBy("mStoragedLock")
+    private IStoraged mStorageService;
 
     private final Context mContext;
     private StatsManager mStatsManager;
@@ -346,6 +349,29 @@ public class StatsPullAtomService extends SystemService {
             return mThermalService;
         }
     }
+
+    private IStoraged getIStoragedService() {
+        synchronized (mStoragedLock) {
+            if (mStorageService == null) {
+                mStorageService = IStoraged.Stub.asInterface(
+                        ServiceManager.getService("storaged"));
+            }
+            if (mStorageService != null) {
+                try {
+                    mStorageService.asBinder().linkToDeath(() -> {
+                        synchronized (mStoragedLock) {
+                            mStorageService = null;
+                        }
+                    }, /* flags */ 0);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "linkToDeath with storagedService failed", e);
+                    mStorageService = null;
+                }
+            }
+        }
+        return mStorageService;
+    }
+
     private void registerWifiBytesTransfer() {
         int tagId = StatsLog.WIFI_BYTES_TRANSFER;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
@@ -1471,19 +1497,110 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerDiskStats() {
-        // No op.
+        int tagId = StatsLog.DISK_STATS;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullDiskStats(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullDiskStats() {
-        // No op.
+    private int pullDiskStats(int atomTag, List<StatsEvent> pulledData) {
+        // Run a quick-and-dirty performance test: write 512 bytes
+        byte[] junk = new byte[512];
+        for (int i = 0; i < junk.length; i++) junk[i] = (byte) i;  // Write nonzero bytes
+
+        File tmp = new File(Environment.getDataDirectory(), "system/statsdperftest.tmp");
+        FileOutputStream fos = null;
+        IOException error = null;
+
+        long before = SystemClock.elapsedRealtime();
+        try {
+            fos = new FileOutputStream(tmp);
+            fos.write(junk);
+        } catch (IOException e) {
+            error = e;
+        } finally {
+            try {
+                if (fos != null) fos.close();
+            } catch (IOException e) {
+                // Do nothing.
+            }
+        }
+
+        long latency = SystemClock.elapsedRealtime() - before;
+        if (tmp.exists()) tmp.delete();
+
+        if (error != null) {
+            Slog.e(TAG, "Error performing diskstats latency test");
+            latency = -1;
+        }
+        // File based encryption.
+        boolean fileBased = StorageManager.isFileEncryptedNativeOnly();
+
+        //Recent disk write speed. Binder call to storaged.
+        int writeSpeed = -1;
+        IStoraged storaged = getIStoragedService();
+        if (storaged == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        try {
+            writeSpeed = storaged.getRecentPerf();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "storaged not found");
+        }
+
+        // Add info pulledData.
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeLong(latency)
+                .writeBoolean(fileBased)
+                .writeInt(writeSpeed)
+                .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerDirectoryUsage() {
-        // No op.
+        int tagId = StatsLog.DIRECTORY_USAGE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullDirectoryUsage(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullDirectoryUsage() {
-        // No op.
+    private int pullDirectoryUsage(int atomTag, List<StatsEvent> pulledData) {
+        StatFs statFsData = new StatFs(Environment.getDataDirectory().getAbsolutePath());
+        StatFs statFsSystem = new StatFs(Environment.getRootDirectory().getAbsolutePath());
+        StatFs statFsCache = new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
+
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__DATA)
+                .writeLong(statFsData.getAvailableBytes())
+                .writeLong(statFsData.getTotalBytes())
+                .build();
+        pulledData.add(e);
+
+        e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__CACHE)
+                .writeLong(statFsCache.getAvailableBytes())
+                .writeLong(statFsCache.getTotalBytes())
+                .build();
+        pulledData.add(e);
+
+        e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__SYSTEM)
+                .writeLong(statFsSystem.getAvailableBytes())
+                .writeLong(statFsSystem.getTotalBytes())
+                .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerAppSize() {
