@@ -60,7 +60,8 @@ public class HighPriorityProviderTest extends SysuiTestCase {
         final NotificationEntry entry = new NotificationEntryBuilder()
                 .setImportance(IMPORTANCE_HIGH)
                 .build();
-        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn())).thenReturn(false);
+        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn(), entry.getChannel()))
+                .thenReturn(false);
 
         // THEN it has high priority
         assertTrue(mHighPriorityProvider.isHighPriority(entry));
@@ -75,7 +76,8 @@ public class HighPriorityProviderTest extends SysuiTestCase {
                 .setNotification(notification)
                 .setImportance(IMPORTANCE_LOW)
                 .build();
-        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn())).thenReturn(true);
+        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn(), entry.getChannel()))
+                .thenReturn(true);
 
         // THEN it has high priority
         assertTrue(mHighPriorityProvider.isHighPriority(entry));
@@ -90,7 +92,8 @@ public class HighPriorityProviderTest extends SysuiTestCase {
         final NotificationEntry entry = new NotificationEntryBuilder()
                 .setNotification(notification)
                 .build();
-        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn())).thenReturn(false);
+        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn(), entry.getChannel()))
+                .thenReturn(false);
 
         // THEN it has high priority
         assertTrue(mHighPriorityProvider.isHighPriority(entry));
@@ -106,7 +109,8 @@ public class HighPriorityProviderTest extends SysuiTestCase {
                 .setNotification(notification)
                 .setImportance(IMPORTANCE_LOW)
                 .build();
-        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn())).thenReturn(false);
+        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn(), entry.getChannel()))
+                .thenReturn(false);
 
         // THEN it has high priority
         assertTrue(mHighPriorityProvider.isHighPriority(entry));
@@ -122,7 +126,8 @@ public class HighPriorityProviderTest extends SysuiTestCase {
                 .setNotification(notification)
                 .setImportance(IMPORTANCE_MIN)
                 .build();
-        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn())).thenReturn(false);
+        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn(), entry.getChannel()))
+                .thenReturn(false);
 
         // THEN it does NOT have high priority
         assertFalse(mHighPriorityProvider.isHighPriority(entry));
@@ -144,7 +149,8 @@ public class HighPriorityProviderTest extends SysuiTestCase {
                 .setNotification(notification)
                 .setChannel(channel)
                 .build();
-        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn())).thenReturn(true);
+        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn(), entry.getChannel()))
+                .thenReturn(true);
 
         // THEN it does NOT have high priority
         assertFalse(mHighPriorityProvider.isHighPriority(entry));

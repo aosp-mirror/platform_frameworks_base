@@ -571,7 +571,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     }
 
     private NotificationEntry createNotification() {
-        Notification.Builder n = new Notification.Builder(mContext, "")
+        Notification.Builder n = new Notification.Builder(mContext, "id")
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle("Title")
                 .setContentText("Text");
@@ -582,6 +582,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 .setUid(TEST_UID)
                 .setId(mId++)
                 .setNotification(n.build())
+                .setChannel(new NotificationChannel("id", "", IMPORTANCE_DEFAULT))
                 .setUser(new UserHandle(ActivityManager.getCurrentUser()))
                 .build();
     }
@@ -616,7 +617,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Test
     public void testGetNotificationsForCurrentUser_shouldFilterNonCurrentUserNotifications() {
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
-        Notification.Builder n = new Notification.Builder(mContext, "")
+        Notification.Builder n = new Notification.Builder(mContext, "di")
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle("Title")
                 .setContentText("Text");
@@ -628,6 +629,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 .setId(mId++)
                 .setNotification(n.build())
                 .setUser(new UserHandle(ActivityManager.getCurrentUser()))
+                .setChannel(new NotificationChannel("id", "", IMPORTANCE_DEFAULT))
                 .build();
 
         mEntryManager.addActiveNotificationForTest(mEntry);

@@ -61,7 +61,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_WIFITRACKER2, "false");
         DEFAULT_FLAGS.put("settings_controller_loading_enhancement", "false");
         DEFAULT_FLAGS.put("settings_conditionals", "false");
-        DEFAULT_FLAGS.put(NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "false");
+        DEFAULT_FLAGS.put(NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "true");
     }
 
     /**
