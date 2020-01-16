@@ -19,6 +19,7 @@ package com.android.server.autofill;
 import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
+import static android.view.autofill.AutofillManager.ACTION_RESPONSE_EXPIRED;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.ACTION_VALUE_CHANGED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
@@ -268,6 +269,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     @GuardedBy("mLock")
     private final LocalLog mWtfHistory;
+
+    @GuardedBy("mLock")
+    private boolean mExpiredResponse;
 
     /**
      * Map of {@link MetricsEvent#AUTOFILL_REQUEST} metrics, keyed by fill request id.
@@ -690,6 +694,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private void requestNewFillResponseLocked(@NonNull ViewState viewState, int newState,
             int flags) {
+        mExpiredResponse = false;
         if (mForAugmentedAutofillOnly || mRemoteFillService == null) {
             if (sVerbose) {
                 Slog.v(TAG, "requestNewFillResponse(): triggering augmented autofill instead "
@@ -1306,6 +1311,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
         }
+
+        // The client becomes invisible for the authentication, the response is effective.
+        mExpiredResponse = false;
 
         final Parcelable result = data.getParcelable(AutofillManager.EXTRA_AUTHENTICATION_RESULT);
         final Bundle newClientState = data.getBundle(AutofillManager.EXTRA_CLIENT_STATE);
@@ -2322,16 +2330,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * @param id The id of the view that is entered.
      * @param viewState The view that is entered.
      * @param flags The flag that was passed by the AutofillManager.
+     *
+     * @return {@code true} if a new fill response is requested.
      */
     @GuardedBy("mLock")
-    private void requestNewFillResponseOnViewEnteredIfNecessaryLocked(@NonNull AutofillId id,
+    private boolean requestNewFillResponseOnViewEnteredIfNecessaryLocked(@NonNull AutofillId id,
             @NonNull ViewState viewState, int flags) {
         if ((flags & FLAG_MANUAL_REQUEST) != 0) {
             mForAugmentedAutofillOnly = false;
             if (sDebug) Slog.d(TAG, "Re-starting session on view " + id + " and flags " + flags);
             maybeRequestInlineSuggestionsRequestThenFillLocked(viewState,
                     ViewState.STATE_RESTARTED_SESSION, flags);
-            return;
+            return true;
         }
 
         // If it's not, then check if it it should start a partition.
@@ -2342,12 +2352,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             maybeRequestInlineSuggestionsRequestThenFillLocked(viewState,
                     ViewState.STATE_STARTED_PARTITION, flags);
+            return true;
         } else {
             if (sVerbose) {
                 Slog.v(TAG, "Not starting new partition for view " + id + ": "
                         + viewState.getStateAsString());
             }
         }
+        return false;
     }
 
     /**
@@ -2355,11 +2367,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      *
      * @param id The id of the view that is entered
      *
-     * @return {@code true} iff a new partition should be started
+     * @return {@code true} if a new partition should be started
      */
     @GuardedBy("mLock")
     private boolean shouldStartNewPartitionLocked(@NonNull AutofillId id) {
         if (mResponses == null) {
+            return true;
+        }
+
+        if (mExpiredResponse) {
+            if (sDebug) {
+                Slog.d(TAG, "Starting a new partition because the response has expired.");
+            }
             return true;
         }
 
@@ -2414,6 +2433,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + id + " destroyed");
             return;
         }
+        if (action == ACTION_RESPONSE_EXPIRED) {
+            mExpiredResponse = true;
+            if (sDebug) {
+                Slog.d(TAG, "Set the response has expired.");
+            }
+            return;
+        }
+
         id.setSessionId(this.id);
         if (sVerbose) {
             Slog.v(TAG, "updateLocked(" + this.id + "): id=" + id + ", action="
@@ -2577,7 +2604,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     return;
                 }
 
-                requestNewFillResponseOnViewEnteredIfNecessaryLocked(id, viewState, flags);
+                if (requestNewFillResponseOnViewEnteredIfNecessaryLocked(id, viewState, flags)) {
+                    return;
+                }
 
                 if (isSameViewEntered) {
                     return;
@@ -3678,6 +3707,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return "VIEW_EXITED";
             case ACTION_VALUE_CHANGED:
                 return "VALUE_CHANGED";
+            case ACTION_RESPONSE_EXPIRED:
+                return "RESPONSE_EXPIRED";
             default:
                 return "UNKNOWN_" + action;
         }
