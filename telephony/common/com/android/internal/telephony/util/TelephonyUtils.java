@@ -28,6 +28,8 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 
 import java.io.PrintWriter;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
@@ -136,5 +138,13 @@ public final class TelephonyUtils {
             ret.remove(key);
         }
         return ret;
+    }
+
+    /** Wait for latch to trigger */
+    public static void waitUntilReady(CountDownLatch latch, long timeoutMs) {
+        try {
+            latch.await(timeoutMs, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignored) {
+        }
     }
 }
