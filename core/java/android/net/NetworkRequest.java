@@ -380,6 +380,7 @@ public class NetworkRequest implements Parcelable {
         dest.writeInt(requestId);
         dest.writeString(type.name());
     }
+
     public static final @android.annotation.NonNull Creator<NetworkRequest> CREATOR =
         new Creator<NetworkRequest>() {
             public NetworkRequest createFromParcel(Parcel in) {
@@ -492,6 +493,31 @@ public class NetworkRequest implements Parcelable {
     @Nullable
     public NetworkSpecifier getNetworkSpecifier() {
         return networkCapabilities.getNetworkSpecifier();
+    }
+
+    /**
+     * @return the uid of the app making the request.
+     *
+     * Note: This could return {@link Process#INVALID_UID} if the {@link NetworkRequest} object was
+     * not obtained from {@link ConnectivityManager}.
+     * @hide
+     */
+    @SystemApi
+    public int getRequestorUid() {
+        return networkCapabilities.getRequestorUid();
+    }
+
+    /**
+     * @return the package name of the app making the request.
+     *
+     * Note: This could return {@code null} if the {@link NetworkRequest} object was not obtained
+     * from {@link ConnectivityManager}.
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public String getRequestorPackageName() {
+        return networkCapabilities.getRequestorPackageName();
     }
 
     public String toString() {
