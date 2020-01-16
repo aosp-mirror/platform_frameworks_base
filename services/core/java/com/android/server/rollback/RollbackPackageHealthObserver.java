@@ -28,6 +28,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
@@ -45,7 +46,6 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.StatsLog;
 
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.PackageWatchdog;
 import com.android.server.PackageWatchdog.FailureReasons;
@@ -74,6 +74,8 @@ import java.util.Set;
 public final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private static final String TAG = "RollbackPackageHealthObserver";
     private static final String NAME = "rollback-observer";
+
+    private static final String LOGGING_PARENT_KEY = "android.content.pm.LOGGING_PARENT";
 
     private final Context mContext;
     private final Handler mHandler;
@@ -162,13 +164,11 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
             int rollbackId = rollbackIterator.next();
             logRollbackStatusOnBoot(rollbackId, rollbackManager.getRecentlyCommittedRollbacks());
         }
-
     }
 
     private void logRollbackStatusOnBoot(int rollbackId,
             List<RollbackInfo> recentlyCommittedRollbacks) {
         PackageInstaller packageInstaller = mContext.getPackageManager().getPackageInstaller();
-        String moduleMetadataPackageName = getModuleMetadataPackageName();
 
         RollbackInfo rollback = null;
         for (RollbackInfo info : recentlyCommittedRollbacks) {
@@ -183,13 +183,26 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
             return;
         }
 
-        // Use the version of the metadata package that was installed before
-        // we rolled back for logging purposes.
-        VersionedPackage oldLogPackage = null;
+        // Identify the logging parent for this rollback. When all configurations are correct, each
+        // package in the rollback refers to the same logging parent, except for the logging parent
+        // itself. If a logging parent is missing for a package, we use the package itself for
+        // logging. This might result in over-logging, but we prefer this over no logging.
+        final Set<String> loggingPackageNames = new ArraySet<>();
         for (PackageRollbackInfo packageRollback : rollback.getPackages()) {
-            if (packageRollback.getPackageName().equals(moduleMetadataPackageName)) {
-                oldLogPackage = packageRollback.getVersionRolledBackFrom();
-                break;
+            final String loggingParentName = getLoggingParentName(packageRollback.getPackageName());
+            if (loggingParentName != null) {
+                loggingPackageNames.add(loggingParentName);
+            } else {
+                loggingPackageNames.add(packageRollback.getPackageName());
+            }
+        }
+
+        // Use the version of the logging parent that was installed before
+        // we rolled back for logging purposes.
+        final List<VersionedPackage> oldLoggingPackages = new ArrayList<>();
+        for (PackageRollbackInfo packageRollback : rollback.getPackages()) {
+            if (loggingPackageNames.contains(packageRollback.getPackageName())) {
+                oldLoggingPackages.add(packageRollback.getVersionRolledBackFrom());
             }
         }
 
@@ -199,16 +212,17 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
             Slog.e(TAG, "On boot completed, could not load session id " + sessionId);
             return;
         }
-        if (sessionInfo.isStagedSessionApplied()) {
-            logEvent(oldLogPackage,
-                    StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
-                    WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN, "");
-        } else if (sessionInfo.isStagedSessionReady()) {
-            // TODO: What do for staged session ready but not applied
-        } else {
-            logEvent(oldLogPackage,
-                    StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
-                    WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN, "");
+
+        for (VersionedPackage oldLoggingPackage : oldLoggingPackages) {
+            if (sessionInfo.isStagedSessionApplied()) {
+                logEvent(oldLoggingPackage,
+                        StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
+                        WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN, "");
+            } else if (sessionInfo.isStagedSessionFailed()) {
+                logEvent(oldLoggingPackage,
+                        StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
+                        WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN, "");
+            }
         }
     }
 
@@ -242,27 +256,17 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Nullable
-    private String getModuleMetadataPackageName() {
-        String packageName = mContext.getResources().getString(
-                R.string.config_defaultModuleMetadataProvider);
-        if (TextUtils.isEmpty(packageName)) {
-            return null;
-        }
-        return packageName;
-    }
-
-    @Nullable
-    private VersionedPackage getModuleMetadataPackage() {
-        String packageName = getModuleMetadataPackageName();
-        if (packageName == null) {
-            return null;
-        }
-
+    private String getLoggingParentName(String packageName) {
+        PackageManager packageManager = mContext.getPackageManager();
         try {
-            return new VersionedPackage(packageName, mContext.getPackageManager().getPackageInfo(
-                            packageName, 0 /* flags */).getLongVersionCode());
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.w(TAG, "Module metadata provider not found");
+            ApplicationInfo ai = packageManager.getApplicationInfo(packageName,
+                    PackageManager.GET_META_DATA);
+            if (ai.metaData == null) {
+                return null;
+            }
+            return ai.metaData.getString(LOGGING_PARENT_KEY);
+        } catch (Exception e) {
+            Slog.w(TAG, "Unable to discover logging parent package: " + packageName, e);
             return null;
         }
     }
@@ -346,7 +350,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
 
     private void saveStagedRollbackId(int stagedRollbackId) {
         try {
-            FileOutputStream fos = new FileOutputStream(mLastStagedRollbackIdsFile);
+            FileOutputStream fos = new FileOutputStream(
+                    mLastStagedRollbackIdsFile, /*append*/true);
             PrintWriter pw = new PrintWriter(fos);
             pw.append(",").append(String.valueOf(stagedRollbackId));
             pw.flush();
@@ -420,7 +425,6 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         }
     }
 
-
     /**
      * Returns true if the package name is the name of a module.
      */
@@ -450,10 +454,21 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         } else {
             failedPackageToLog = failedPackage.getPackageName();
         }
-        final VersionedPackage logPackage = isModule(failedPackage.getPackageName())
-                ? getModuleMetadataPackage()
-                : null;
+        VersionedPackage logPackageTemp = null;
+        if (isModule(failedPackage.getPackageName())) {
+            String logPackageName = getLoggingParentName(failedPackage.getPackageName());
+            if (logPackageName == null) {
+                logPackageName = failedPackage.getPackageName();
+            }
+            try {
+                logPackageTemp = new VersionedPackage(logPackageName, mContext.getPackageManager()
+                        .getPackageInfo(logPackageName, 0 /* flags */).getLongVersionCode());
+            } catch (PackageManager.NameNotFoundException e) {
+                logPackageTemp = null;
+            }
+        }
 
+        final VersionedPackage logPackage = logPackageTemp;
         logEvent(logPackage,
                 StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE,
                 reasonToLog, failedPackageToLog);
