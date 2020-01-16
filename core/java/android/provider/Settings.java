@@ -95,6 +95,7 @@ import java.util.Set;
  * The Settings provider contains global system-level device preferences.
  */
 public final class Settings {
+    private static final boolean DEFAULT_OVERRIDEABLE_BY_RESTORE = false;
 
     // Intent actions for Settings
 
@@ -2149,6 +2150,11 @@ public final class Settings {
      */
     public static final String CALL_METHOD_FLAGS_KEY = "_flags";
 
+    /**
+     * @hide - String argument extra to the fast-path call()-based requests
+     */
+    public static final String CALL_METHOD_OVERRIDEABLE_BY_RESTORE_KEY = "_overrideable_by_restore";
+
     /** @hide - Private call() method to write to 'system' table */
     public static final String CALL_METHOD_PUT_SYSTEM = "PUT_system";
 
@@ -2517,7 +2523,8 @@ public final class Settings {
         }
 
         public boolean putStringForUser(ContentResolver cr, String name, String value,
-                String tag, boolean makeDefault, final int userHandle) {
+                String tag, boolean makeDefault, final int userHandle,
+                boolean overrideableByRestore) {
             try {
                 Bundle arg = new Bundle();
                 arg.putString(Settings.NameValueTable.VALUE, value);
@@ -2527,6 +2534,9 @@ public final class Settings {
                 }
                 if (makeDefault) {
                     arg.putBoolean(CALL_METHOD_MAKE_DEFAULT_KEY, true);
+                }
+                if (overrideableByRestore) {
+                    arg.putBoolean(CALL_METHOD_OVERRIDEABLE_BY_RESTORE_KEY, true);
                 }
                 IContentProvider cp = mProviderHolder.getProvider(cr);
                 cp.call(cr.getPackageName(), cr.getFeatureId(),
@@ -3078,10 +3088,36 @@ public final class Settings {
             return putStringForUser(resolver, name, value, resolver.getUserId());
         }
 
+        /**
+         * Store a name/value pair into the database. Values written by this method will be
+         * overridden if a restore happens in the future.
+         *
+         * @param resolver to access the database with
+         * @param name to store
+         * @param value to associate with the name
+         *
+         * @return true if the value was set, false on database errors
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE)
+        @SystemApi
+        public static boolean putString(@NonNull ContentResolver resolver,
+                @NonNull String name, @Nullable String value, boolean overrideableByRestore) {
+            return putStringForUser(resolver, name, value, resolver.getUserId(),
+                   overrideableByRestore);
+        }
+
         /** @hide */
         @UnsupportedAppUsage
         public static boolean putStringForUser(ContentResolver resolver, String name, String value,
                 int userHandle) {
+            return putStringForUser(resolver, name, value, userHandle,
+                    DEFAULT_OVERRIDEABLE_BY_RESTORE);
+        }
+
+        private static boolean putStringForUser(ContentResolver resolver, String name, String value,
+                int userHandle, boolean overrideableByRestore) {
             if (MOVED_TO_SECURE.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
                         + " to android.provider.Settings.Secure, value is unchanged.");
@@ -3092,7 +3128,8 @@ public final class Settings {
                         + " to android.provider.Settings.Global, value is unchanged.");
                 return false;
             }
-            return sNameValueCache.putStringForUser(resolver, name, value, null, false, userHandle);
+            return sNameValueCache.putStringForUser(resolver, name, value, null, false, userHandle,
+                    overrideableByRestore);
         }
 
         /**
@@ -3416,7 +3453,7 @@ public final class Settings {
                     // need to store the adjusted configuration as the initial settings.
                     Settings.System.putStringForUser(
                             cr, SYSTEM_LOCALES, outConfig.getLocales().toLanguageTags(),
-                            userHandle);
+                            userHandle, DEFAULT_OVERRIDEABLE_BY_RESTORE);
                 }
             }
         }
@@ -3449,7 +3486,8 @@ public final class Settings {
                 int userHandle) {
             return Settings.System.putFloatForUser(cr, FONT_SCALE, config.fontScale, userHandle) &&
                     Settings.System.putStringForUser(
-                            cr, SYSTEM_LOCALES, config.getLocales().toLanguageTags(), userHandle);
+                            cr, SYSTEM_LOCALES, config.getLocales().toLanguageTags(), userHandle,
+                            DEFAULT_OVERRIDEABLE_BY_RESTORE);
         }
 
         /** @hide */
@@ -5251,6 +5289,24 @@ public final class Settings {
         }
 
         /**
+         * Store a name/value pair into the database. Values written by this method will be
+         * overridden if a restore happens in the future.
+         *
+         * @param resolver to access the database with
+         * @param name to store
+         * @param value to associate with the name
+         * @return true if the value was set, false on database errors
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE)
+        public static boolean putString(ContentResolver resolver, String name,
+                String value, boolean overrideableByRestore) {
+            return putStringForUser(resolver, name, value, /* tag */ null, /* makeDefault */ false,
+                    resolver.getUserId(), overrideableByRestore);
+        }
+
+        /**
          * Store a name/value pair into the database.
          * @param resolver to access the database with
          * @param name to store
@@ -5265,22 +5321,23 @@ public final class Settings {
         @UnsupportedAppUsage
         public static boolean putStringForUser(ContentResolver resolver, String name, String value,
                 int userHandle) {
-            return putStringForUser(resolver, name, value, null, false, userHandle);
+            return putStringForUser(resolver, name, value, null, false, userHandle,
+                    DEFAULT_OVERRIDEABLE_BY_RESTORE);
         }
 
         /** @hide */
         @UnsupportedAppUsage
         public static boolean putStringForUser(@NonNull ContentResolver resolver,
                 @NonNull String name, @Nullable String value, @Nullable String tag,
-                boolean makeDefault, @UserIdInt int userHandle) {
+                boolean makeDefault, @UserIdInt int userHandle, boolean overrideableByRestore) {
             if (MOVED_TO_GLOBAL.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Secure"
                         + " to android.provider.Settings.Global");
                 return Global.putStringForUser(resolver, name, value,
-                        tag, makeDefault, userHandle);
+                        tag, makeDefault, userHandle, DEFAULT_OVERRIDEABLE_BY_RESTORE);
             }
             return sNameValueCache.putStringForUser(resolver, name, value, tag,
-                    makeDefault, userHandle);
+                    makeDefault, userHandle, overrideableByRestore);
         }
 
         /**
@@ -5329,7 +5386,7 @@ public final class Settings {
                 @NonNull String name, @Nullable String value, @Nullable String tag,
                 boolean makeDefault) {
             return putStringForUser(resolver, name, value, tag, makeDefault,
-                    resolver.getUserId());
+                    resolver.getUserId(), DEFAULT_OVERRIDEABLE_BY_RESTORE);
         }
 
         /**
@@ -12940,7 +12997,29 @@ public final class Settings {
          */
         public static boolean putString(ContentResolver resolver,
                 String name, String value) {
-            return putStringForUser(resolver, name, value, null, false, resolver.getUserId());
+            return putStringForUser(resolver, name, value, null, false, resolver.getUserId(),
+                    DEFAULT_OVERRIDEABLE_BY_RESTORE);
+        }
+
+        /**
+         * Store a name/value pair into the database.
+         *
+         * @param resolver to access the database with
+         * @param name to store
+         * @param value to associate with the name
+         * @param tag to associated with the setting.
+         * @param makeDefault whether to make the value the default one.
+         * @param overrideableByRestore whether restore can override this value
+         * @return true if the value was set, false on database errors
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE)
+        public static boolean putString(@NonNull ContentResolver resolver,
+                @NonNull String name, @Nullable String value, @Nullable String tag,
+                boolean makeDefault, boolean overrideableByRestore) {
+            return putStringForUser(resolver, name, value, tag, makeDefault,
+                    resolver.getUserId(), overrideableByRestore);
         }
 
         /**
@@ -12989,7 +13068,7 @@ public final class Settings {
                 @NonNull String name, @Nullable String value, @Nullable String tag,
                 boolean makeDefault) {
             return putStringForUser(resolver, name, value, tag, makeDefault,
-                    resolver.getUserId());
+                    resolver.getUserId(), DEFAULT_OVERRIDEABLE_BY_RESTORE);
         }
 
         /**
@@ -13051,13 +13130,14 @@ public final class Settings {
         @UnsupportedAppUsage
         public static boolean putStringForUser(ContentResolver resolver,
                 String name, String value, int userHandle) {
-            return putStringForUser(resolver, name, value, null, false, userHandle);
+            return putStringForUser(resolver, name, value, null, false, userHandle,
+                    DEFAULT_OVERRIDEABLE_BY_RESTORE);
         }
 
         /** @hide */
         public static boolean putStringForUser(@NonNull ContentResolver resolver,
                 @NonNull String name, @Nullable String value, @Nullable String tag,
-                boolean makeDefault, @UserIdInt int userHandle) {
+                boolean makeDefault, @UserIdInt int userHandle, boolean overrideableByRestore) {
             if (LOCAL_LOGV) {
                 Log.v(TAG, "Global.putString(name=" + name + ", value=" + value
                         + " for " + userHandle);
@@ -13067,10 +13147,10 @@ public final class Settings {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Global"
                         + " to android.provider.Settings.Secure, value is unchanged.");
                 return Secure.putStringForUser(resolver, name, value, tag,
-                        makeDefault, userHandle);
+                        makeDefault, userHandle, overrideableByRestore);
             }
             return sNameValueCache.putStringForUser(resolver, name, value, tag,
-                    makeDefault, userHandle);
+                    makeDefault, userHandle, overrideableByRestore);
         }
 
         /**
@@ -13937,7 +14017,8 @@ public final class Settings {
         static boolean putString(@NonNull ContentResolver resolver, @NonNull String namespace,
                 @NonNull String name, @Nullable String value, boolean makeDefault) {
             return sNameValueCache.putStringForUser(resolver, createCompositeName(namespace, name),
-                    value, null, makeDefault, resolver.getUserId());
+                    value, null, makeDefault, resolver.getUserId(),
+                    DEFAULT_OVERRIDEABLE_BY_RESTORE);
         }
 
         /**

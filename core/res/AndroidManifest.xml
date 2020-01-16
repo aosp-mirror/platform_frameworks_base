@@ -3980,6 +3980,13 @@
     <permission android:name="android.permission.BACKUP"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to make modifications to device settings such that these
+         modifications will be overridden by settings restore..
+    <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE"
+                android:protectionLevel="signature|setup" />
+
     <!-- @SystemApi Allows application to manage
          {@link android.security.keystore.recovery.RecoveryController}.
          <p>Not for use by third-party applications.
