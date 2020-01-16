@@ -1312,6 +1312,13 @@ Status StatsService::unregisterPullAtomCallback(int32_t uid, int32_t atomTag) {
     return Status::ok();
 }
 
+Status StatsService::unregisterNativePullAtomCallback(int32_t atomTag) {
+    VLOG("StatsService::unregisterNativePullAtomCallback called.");
+    int32_t uid = IPCThreadState::self()->getCallingUid();
+    mPullerManager->UnregisterPullAtomCallback(uid, atomTag);
+    return Status::ok();
+}
+
 Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& trainNameIn,
                                                     const int64_t trainVersionCodeIn,
                                                     const int options,
