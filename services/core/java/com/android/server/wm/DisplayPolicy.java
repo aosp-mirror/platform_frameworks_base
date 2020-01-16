@@ -24,7 +24,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
-import static android.view.Display.TYPE_BUILT_IN;
+import static android.view.Display.TYPE_INTERNAL;
 import static android.view.InsetsState.ITYPE_BOTTOM_GESTURES;
 import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
@@ -2986,11 +2986,12 @@ public class DisplayPolicy {
 
     /**
      * Return corner radius in pixels that should be used on windows in order to cover the display.
-     * The radius is only valid for built-in displays since the one who configures window corner
-     * radius cannot know the corner radius of non-built-in display.
+     *
+     * The radius is only valid for internal displays, since the corner radius of external displays
+     * is not known at build time when window corners are configured.
      */
     float getWindowCornerRadius() {
-        return mDisplayContent.getDisplay().getType() == TYPE_BUILT_IN
+        return mDisplayContent.getDisplay().getType() == TYPE_INTERNAL
                 ? ScreenDecorationsUtils.getWindowCornerRadius(mContext.getResources()) : 0f;
     }
 

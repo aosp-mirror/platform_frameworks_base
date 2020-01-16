@@ -1285,12 +1285,15 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public static final class DisplayInfo {
+        public boolean isInternal;
         public float density;
         public boolean secure;
 
         @Override
         public String toString() {
-            return "DisplayInfo{density=" + density + ", secure=" + secure + "}";
+            return "DisplayInfo{isInternal=" + isInternal
+                    + ", density=" + density
+                    + ", secure=" + secure + "}";
         }
     }
 
