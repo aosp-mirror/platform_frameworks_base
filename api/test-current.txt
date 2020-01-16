@@ -73,6 +73,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
+    method @RequiresPermission("android.permission.MANAGE_USERS") public boolean switchUser(@NonNull android.os.UserHandle);
     field public static final int PROCESS_CAPABILITY_ALL = 1; // 0x1
     field public static final int PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1; // 0x1
     field public static final int PROCESS_CAPABILITY_NONE = 0; // 0x0
@@ -756,6 +757,7 @@ package android.content {
     method public int getUserId();
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
+    method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS") public void startActivityAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.os.UserHandle);
     field public static final String BLOB_STORE_SERVICE = "blob_store";
     field public static final String BUGREPORT_SERVICE = "bugreport";
     field public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";

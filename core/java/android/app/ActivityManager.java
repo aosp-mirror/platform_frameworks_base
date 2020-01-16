@@ -4064,6 +4064,7 @@ public class ActivityManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean switchUser(@NonNull UserHandle user) {
         if (user == null) {
