@@ -178,15 +178,16 @@ static void writeGpuHistogram(stats_event* event,
 }
 
 // graphicsStatsPullCallback is invoked by statsd service to pull GRAPHICS_STATS atom.
-static bool graphicsStatsPullCallback(int32_t atom_tag, pulled_stats_event_list* data,
-                                      const void* cookie) {
+static status_pull_atom_return_t graphicsStatsPullCallback(int32_t atom_tag,
+                                                           pulled_stats_event_list* data,
+                                                           void* cookie) {
     JNIEnv* env = getJNIEnv();
     if (!env) {
         return false;
     }
     if (gGraphicsStatsServiceObject == nullptr) {
         ALOGE("Failed to get graphicsstats service");
-        return false;
+        return STATS_PULL_SKIP;
     }
 
     for (bool lastFullDay : {true, false}) {
@@ -198,7 +199,7 @@ static bool graphicsStatsPullCallback(int32_t atom_tag, pulled_stats_event_list*
             env->ExceptionDescribe();
             env->ExceptionClear();
             ALOGE("Failed to invoke graphicsstats service");
-            return false;
+            return STATS_PULL_SKIP;
         }
         if (!jdata) {
             // null means data is not available for that day.
@@ -217,7 +218,7 @@ static bool graphicsStatsPullCallback(int32_t atom_tag, pulled_stats_event_list*
         if (!success) {
             ALOGW("Parse failed on GraphicsStatsPuller error='%s' dataSize='%d'",
                   serviceDump.InitializationErrorString().c_str(), dataSize);
-            return false;
+            return STATS_PULL_SKIP;
         }
 
         for (int stat_index = 0; stat_index < serviceDump.stats_size(); stat_index++) {
@@ -244,7 +245,7 @@ static bool graphicsStatsPullCallback(int32_t atom_tag, pulled_stats_event_list*
             stats_event_build(event);
         }
     }
-    return true;
+    return STATS_PULL_SUCCESS;
 }
 
 // Register a puller for GRAPHICS_STATS atom with the statsd service.
