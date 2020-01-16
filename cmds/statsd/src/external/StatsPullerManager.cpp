@@ -95,14 +95,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
 
-        // Size of app's code, data, and cache
-        {{.atomTag = android::util::APP_SIZE},
-         {.puller = new StatsCompanionServicePuller(android::util::APP_SIZE)}},
-
-        // Size of specific categories of files. Eg. Music.
-        {{.atomTag = android::util::CATEGORY_SIZE},
-         {.puller = new StatsCompanionServicePuller(android::util::CATEGORY_SIZE)}},
-
         // Number of fingerprints enrolled for each user.
         {{.atomTag = android::util::NUM_FINGERPRINTS_ENROLLED},
          {.puller = new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS_ENROLLED)}},

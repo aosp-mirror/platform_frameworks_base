@@ -1604,19 +1604,150 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerAppSize() {
-        // No op.
+        int tagId = StatsLog.APP_SIZE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullAppSize(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullAppSize() {
-        // No op.
+    private int pullAppSize(int atomTag, List<StatsEvent> pulledData) {
+        try {
+            String jsonStr = IoUtils.readFileAsString(DiskStatsLoggingService.DUMPSYS_CACHE_PATH);
+            JSONObject json = new JSONObject(jsonStr);
+            long cache_time = json.optLong(DiskStatsFileLogger.LAST_QUERY_TIMESTAMP_KEY, -1L);
+            JSONArray pkg_names = json.getJSONArray(DiskStatsFileLogger.PACKAGE_NAMES_KEY);
+            JSONArray app_sizes = json.getJSONArray(DiskStatsFileLogger.APP_SIZES_KEY);
+            JSONArray app_data_sizes = json.getJSONArray(DiskStatsFileLogger.APP_DATA_KEY);
+            JSONArray app_cache_sizes = json.getJSONArray(DiskStatsFileLogger.APP_CACHES_KEY);
+            // Sanity check: Ensure all 4 lists have the same length.
+            int length = pkg_names.length();
+            if (app_sizes.length() != length || app_data_sizes.length() != length
+                    || app_cache_sizes.length() != length) {
+                Slog.e(TAG, "formatting error in diskstats cache file!");
+                return StatsManager.PULL_SKIP;
+            }
+            for (int i = 0; i < length; i++) {
+                StatsEvent e = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeString(pkg_names.getString(i))
+                        .writeLong(app_sizes.optLong(i, /* fallback */ -1L))
+                        .writeLong(app_data_sizes.optLong(i, /* fallback */ -1L))
+                        .writeLong(app_cache_sizes.optLong(i, /* fallback */ -1L))
+                        .writeLong(cache_time)
+                        .build();
+                pulledData.add(e);
+            }
+        } catch (IOException | JSONException e) {
+            Slog.e(TAG, "exception reading diskstats cache file", e);
+            return StatsManager.PULL_SKIP;
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerCategorySize() {
-        // No op.
+        int tagId = StatsLog.CATEGORY_SIZE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullCategorySize(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullCategorySize() {
-        // No op.
+    private int pullCategorySize(int atomTag, List<StatsEvent> pulledData) {
+        try {
+            String jsonStr = IoUtils.readFileAsString(DiskStatsLoggingService.DUMPSYS_CACHE_PATH);
+            JSONObject json = new JSONObject(jsonStr);
+            long cacheTime = json.optLong(
+                    DiskStatsFileLogger.LAST_QUERY_TIMESTAMP_KEY, /* fallback */ -1L);
+
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_SIZE)
+                    .writeLong(json.optLong(
+                            DiskStatsFileLogger.APP_SIZE_AGG_KEY, /* fallback */ -1L))
+                    .writeLong(cacheTime)
+                    .build();
+            pulledData.add(e);
+
+            e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_DATA_SIZE)
+                    .writeLong(json.optLong(
+                            DiskStatsFileLogger.APP_DATA_SIZE_AGG_KEY, /* fallback */ -1L))
+                    .writeLong(cacheTime)
+                    .build();
+            pulledData.add(e);
+
+            e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_CACHE_SIZE)
+                    .writeLong(json.optLong(
+                            DiskStatsFileLogger.APP_CACHE_AGG_KEY, /* fallback */ -1L))
+                    .writeLong(cacheTime)
+                    .build();
+            pulledData.add(e);
+
+            e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__PHOTOS)
+                    .writeLong(json.optLong(
+                            DiskStatsFileLogger.PHOTOS_KEY, /* fallback */ -1L))
+                    .writeLong(cacheTime)
+                    .build();
+            pulledData.add(e);
+
+            e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__VIDEOS)
+                    .writeLong(
+                            json.optLong(DiskStatsFileLogger.VIDEOS_KEY, /* fallback */ -1L))
+                    .writeLong(cacheTime)
+                    .build();
+            pulledData.add(e);
+
+            e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__AUDIO)
+                    .writeLong(json.optLong(
+                            DiskStatsFileLogger.AUDIO_KEY, /* fallback */ -1L))
+                    .writeLong(cacheTime)
+                    .build();
+            pulledData.add(e);
+
+            e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__DOWNLOADS)
+                    .writeLong(
+                            json.optLong(DiskStatsFileLogger.DOWNLOADS_KEY, /* fallback */ -1L))
+                    .writeLong(cacheTime)
+                    .build();
+            pulledData.add(e);
+
+            e = StatsEvent.newBuilder()
+                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__SYSTEM)
+                    .writeLong(json.optLong(
+                            DiskStatsFileLogger.SYSTEM_KEY, /* fallback */ -1L))
+                    .writeLong(cacheTime)
+                    .build();
+            pulledData.add(e);
+
+            e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__OTHER)
+                    .writeLong(json.optLong(
+                            DiskStatsFileLogger.MISC_KEY, /* fallback */ -1L))
+                    .writeLong(cacheTime)
+                    .build();
+            pulledData.add(e);
+        } catch (IOException | JSONException e) {
+            Slog.e(TAG, "exception reading diskstats cache file", e);
+            return StatsManager.PULL_SKIP;
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerNumFingerprintsEnrolled() {

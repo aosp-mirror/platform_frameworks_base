@@ -722,103 +722,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullAppSize(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        try {
-            String jsonStr = IoUtils.readFileAsString(DiskStatsLoggingService.DUMPSYS_CACHE_PATH);
-            JSONObject json = new JSONObject(jsonStr);
-            long cache_time = json.optLong(DiskStatsFileLogger.LAST_QUERY_TIMESTAMP_KEY, -1L);
-            JSONArray pkg_names = json.getJSONArray(DiskStatsFileLogger.PACKAGE_NAMES_KEY);
-            JSONArray app_sizes = json.getJSONArray(DiskStatsFileLogger.APP_SIZES_KEY);
-            JSONArray app_data_sizes = json.getJSONArray(DiskStatsFileLogger.APP_DATA_KEY);
-            JSONArray app_cache_sizes = json.getJSONArray(DiskStatsFileLogger.APP_CACHES_KEY);
-            // Sanity check: Ensure all 4 lists have the same length.
-            int length = pkg_names.length();
-            if (app_sizes.length() != length || app_data_sizes.length() != length
-                    || app_cache_sizes.length() != length) {
-                Slog.e(TAG, "formatting error in diskstats cache file!");
-                return;
-            }
-            for (int i = 0; i < length; i++) {
-                StatsLogEventWrapper e =
-                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-                e.writeString(pkg_names.getString(i));
-                e.writeLong(app_sizes.optLong(i, -1L));
-                e.writeLong(app_data_sizes.optLong(i, -1L));
-                e.writeLong(app_cache_sizes.optLong(i, -1L));
-                e.writeLong(cache_time);
-                pulledData.add(e);
-            }
-        } catch (IOException | JSONException e) {
-            Slog.e(TAG, "exception reading diskstats cache file", e);
-        }
-    }
-
-    private void pullCategorySize(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        try {
-            String jsonStr = IoUtils.readFileAsString(DiskStatsLoggingService.DUMPSYS_CACHE_PATH);
-            JSONObject json = new JSONObject(jsonStr);
-            long cacheTime = json.optLong(DiskStatsFileLogger.LAST_QUERY_TIMESTAMP_KEY, -1L);
-
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_SIZE);
-            e.writeLong(json.optLong(DiskStatsFileLogger.APP_SIZE_AGG_KEY, -1L));
-            e.writeLong(cacheTime);
-            pulledData.add(e);
-
-            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_DATA_SIZE);
-            e.writeLong(json.optLong(DiskStatsFileLogger.APP_DATA_SIZE_AGG_KEY, -1L));
-            e.writeLong(cacheTime);
-            pulledData.add(e);
-
-            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_CACHE_SIZE);
-            e.writeLong(json.optLong(DiskStatsFileLogger.APP_CACHE_AGG_KEY, -1L));
-            e.writeLong(cacheTime);
-            pulledData.add(e);
-
-            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__PHOTOS);
-            e.writeLong(json.optLong(DiskStatsFileLogger.PHOTOS_KEY, -1L));
-            e.writeLong(cacheTime);
-            pulledData.add(e);
-
-            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__VIDEOS);
-            e.writeLong(json.optLong(DiskStatsFileLogger.VIDEOS_KEY, -1L));
-            e.writeLong(cacheTime);
-            pulledData.add(e);
-
-            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__AUDIO);
-            e.writeLong(json.optLong(DiskStatsFileLogger.AUDIO_KEY, -1L));
-            e.writeLong(cacheTime);
-            pulledData.add(e);
-
-            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__DOWNLOADS);
-            e.writeLong(json.optLong(DiskStatsFileLogger.DOWNLOADS_KEY, -1L));
-            e.writeLong(cacheTime);
-            pulledData.add(e);
-
-            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__SYSTEM);
-            e.writeLong(json.optLong(DiskStatsFileLogger.SYSTEM_KEY, -1L));
-            e.writeLong(cacheTime);
-            pulledData.add(e);
-
-            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__OTHER);
-            e.writeLong(json.optLong(DiskStatsFileLogger.MISC_KEY, -1L));
-            e.writeLong(cacheTime);
-            pulledData.add(e);
-        } catch (IOException | JSONException e) {
-            Slog.e(TAG, "exception reading diskstats cache file", e);
-        }
-    }
-
     private void pullNumBiometricsEnrolled(int modality, int tagId, long elapsedNanos,
             long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
         final PackageManager pm = mContext.getPackageManager();
@@ -1466,16 +1369,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.SYSTEM_ELAPSED_REALTIME: {
                 pullSystemElapsedRealtime(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.APP_SIZE: {
-                pullAppSize(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.CATEGORY_SIZE: {
-                pullCategorySize(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 
