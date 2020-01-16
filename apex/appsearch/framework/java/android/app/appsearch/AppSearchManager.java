@@ -18,6 +18,7 @@ package android.app.appsearch;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.SystemService;
+import android.app.appsearch.AppSearch.Document;
 import android.content.Context;
 import android.os.RemoteException;
 
@@ -25,6 +26,7 @@ import com.android.internal.infra.AndroidFuture;
 
 import com.google.android.icing.proto.SchemaProto;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -93,6 +95,36 @@ public class AppSearchManager {
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
+        future.whenCompleteAsync((noop, err) -> callback.accept(err), executor);
+    }
+
+    /**
+     * Index {@link Document} to AppSearch
+     *
+     * <p>You should not call this method directly; instead, use the {@code AppSearch#put()} API
+     * provided by JetPack.
+     *
+     * <p>The schema should be set via {@link #setSchema} method.
+     *
+     * @param documents {@link Document Documents} that need to be indexed.
+     * @param executor Executor on which to invoke the callback.
+     * @param callback Callback to receive errors resulting from setting the schema. If the
+     *                 operation succeeds, the callback will be invoked with {@code null}.
+     */
+    public void put(@NonNull List<Document> documents,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<? super Throwable> callback) {
+        AndroidFuture<Void> future = new AndroidFuture<>();
+        for (Document document : documents) {
+            // TODO(b/146386470) batching Document protos
+            try {
+                mService.put(document.getProto().toByteArray(), future);
+            } catch (RemoteException e) {
+                future.completeExceptionally(e);
+                break;
+            }
+        }
+        // TODO(b/147614371) Fix error report for multiple documents.
         future.whenCompleteAsync((noop, err) -> callback.accept(err), executor);
     }
 }
