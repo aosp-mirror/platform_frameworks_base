@@ -218,7 +218,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
             // Has to be in TestNetworkAgent to ensure all teardown codepaths properly clean up
             // resources, even for binder death or unwanted calls.
             synchronized (mTestNetworkTracker) {
-                mTestNetworkTracker.remove(network.netId);
+                mTestNetworkTracker.remove(getNetwork().netId);
             }
         }
     }
@@ -337,7 +337,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
                                             callingUid,
                                             binder);
 
-                            mTestNetworkTracker.put(agent.network.netId, agent);
+                            mTestNetworkTracker.put(agent.getNetwork().netId, agent);
                         }
                     } catch (SocketException e) {
                         throw new UncheckedIOException(e);
