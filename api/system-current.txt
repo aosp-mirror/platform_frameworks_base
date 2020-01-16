@@ -4593,7 +4593,9 @@ package android.net {
     method @Nullable public String getSSID();
     method @NonNull public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
-    method public void setAdministratorUids(@NonNull java.util.List<java.lang.Integer>);
+    method @NonNull public android.net.NetworkCapabilities setAdministratorUids(@NonNull java.util.List<java.lang.Integer>);
+    method @NonNull public android.net.NetworkCapabilities setRequestorPackageName(@NonNull String);
+    method @NonNull public android.net.NetworkCapabilities setRequestorUid(int);
     method @NonNull public android.net.NetworkCapabilities setSSID(@Nullable String);
     method @NonNull public android.net.NetworkCapabilities setTransportInfo(@NonNull android.net.TransportInfo);
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
@@ -4637,6 +4639,8 @@ package android.net {
   }
 
   public class NetworkRequest implements android.os.Parcelable {
+    method @Nullable public String getRequestorPackageName();
+    method public int getRequestorUid();
     method public boolean satisfiedBy(@Nullable android.net.NetworkCapabilities);
   }
 
@@ -4671,7 +4675,6 @@ package android.net {
   }
 
   public abstract class NetworkSpecifier {
-    method public void assertValidFromUid(int);
     method @Nullable public android.net.NetworkSpecifier redact();
     method public abstract boolean satisfiedBy(@Nullable android.net.NetworkSpecifier);
   }
