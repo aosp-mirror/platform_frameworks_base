@@ -27,10 +27,13 @@ import android.hardware.location.IContextHubClientCallback;
 import android.hardware.location.NanoAppMessage;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Calendar;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -43,6 +46,11 @@ import java.util.function.Consumer;
  */
 /* package */ class ContextHubClientManager {
     private static final String TAG = "ContextHubClientManager";
+
+    /*
+     * The DateFormat for printing RegistrationRecord.
+     */
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd HH:mm:ss.SSS");
 
     /*
      * The maximum host endpoint ID value that a client can be assigned.
@@ -123,24 +131,24 @@ import java.util.function.Consumer;
     private class RegistrationRecord {
         private final String mBroker;
         private final int mAction;
-        private final String mDate;
+        private final long mTimestamp;
 
         RegistrationRecord(String broker, @Action int action) {
             mBroker = broker;
             mAction = action;
-            Calendar instance = Calendar.getInstance();
-            mDate = String.format("%02d", instance.get(Calendar.MONTH) + 1) // Jan == 0
-                + "/" + String.format("%02d", instance.get(Calendar.DAY_OF_MONTH))
-                + " " + String.format("%02d", instance.get(Calendar.HOUR_OF_DAY))
-                + ":" + String.format("%02d", instance.get(Calendar.MINUTE))
-                + ":" + String.format("%02d", instance.get(Calendar.SECOND))
-                + "." + String.format("%03d", instance.get(Calendar.MILLISECOND));
+            mTimestamp = System.currentTimeMillis();
+        }
+
+        void dump(ProtoOutputStream proto) {
+            proto.write(ClientManagerProto.RegistrationRecord.TIMESTAMP_MS, mTimestamp);
+            proto.write(ClientManagerProto.RegistrationRecord.ACTION, mAction);
+            proto.write(ClientManagerProto.RegistrationRecord.BROKER, mBroker);
         }
 
         @Override
         public String toString() {
             String out = "";
-            out += mDate + " ";
+            out += DATE_FORMAT.format(new Date(mTimestamp)) + " ";
             out += mAction == ACTION_REGISTERED ? "+ " : "- ";
             out += mBroker;
             if (mAction == ACTION_CANCELLED) {
@@ -374,6 +382,28 @@ import java.util.function.Consumer;
         }
 
         return null;
+    }
+
+    /**
+     * Dump debugging info as ClientManagerProto
+     *
+     * If the output belongs to a sub message, the caller is responsible for wrapping this function
+     * between {@link ProtoOutputStream#start(long)} and {@link ProtoOutputStream#end(long)}.
+     *
+     * @param proto the ProtoOutputStream to write to
+     */
+    void dump(ProtoOutputStream proto) {
+        for (ContextHubClientBroker broker : mHostEndPointIdToClientMap.values()) {
+            long token = proto.start(ClientManagerProto.CLIENT_BROKERS);
+            broker.dump(proto);
+            proto.end(token);
+        }
+        Iterator<RegistrationRecord> it = mRegistrationRecordDeque.descendingIterator();
+        while (it.hasNext()) {
+            long token = proto.start(ClientManagerProto.REGISTRATION_RECORDS);
+            it.next().dump(proto);
+            proto.end(token);
+        }
     }
 
     @Override

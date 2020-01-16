@@ -33,6 +33,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -447,6 +448,28 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             mClientManager.unregisterClient(mHostEndPointId);
             mRegistered = false;
         }
+    }
+
+    /**
+     * Dump debugging info as ClientBrokerProto
+     *
+     * If the output belongs to a sub message, the caller is responsible for wrapping this function
+     * between {@link ProtoOutputStream#start(long)} and {@link ProtoOutputStream#end(long)}.
+     *
+     * @param proto the ProtoOutputStream to write to
+     */
+    void dump(ProtoOutputStream proto) {
+        proto.write(ClientBrokerProto.ENDPOINT_ID, getHostEndPointId());
+        proto.write(ClientBrokerProto.ATTACHED_CONTEXT_HUB_ID, getAttachedContextHubId());
+        proto.write(ClientBrokerProto.PACKAGE, mPackage);
+        if (mPendingIntentRequest.isValid()) {
+            proto.write(ClientBrokerProto.PENDING_INTENT_REQUEST_VALID, true);
+            proto.write(ClientBrokerProto.NANO_APP_ID, mPendingIntentRequest.getNanoAppId());
+        }
+        proto.write(ClientBrokerProto.HAS_PENDING_INTENT, mPendingIntentRequest.hasPendingIntent());
+        proto.write(ClientBrokerProto.PENDING_INTENT_CANCELLED, isPendingIntentCancelled());
+        proto.write(ClientBrokerProto.REGISTERED, mRegistered);
+
     }
 
     @Override
