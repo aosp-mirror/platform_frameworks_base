@@ -825,6 +825,18 @@ public class ZygoteInit {
         return result;
     }
 
+    /**
+     * This is the entry point for a Zygote process.  It creates the Zygote server, loads resources,
+     * and handles other tasks related to preparing the process for forking into applications.
+     *
+     * This process is started with a nice value of -20 (highest priority).  All paths that flow
+     * into new processes are required to either set the priority to the default value or terminate
+     * before executing any non-system code.  The native side of this occurs in SpecializeCommon,
+     * while the Java Language priority is changed in ZygoteInit.handleSystemServerProcess,
+     * ZygoteConnection.handleChildProc, and Zygote.usapMain.
+     *
+     * @param argv  Command line arguments used to specify the Zygote's configuration.
+     */
     @UnsupportedAppUsage
     public static void main(String argv[]) {
         ZygoteServer zygoteServer = null;
@@ -888,8 +900,6 @@ public class ZygoteInit {
                 EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_END,
                         SystemClock.uptimeMillis());
                 bootTimingsTraceLog.traceEnd(); // ZygotePreload
-            } else {
-                Zygote.resetNicePriority();
             }
 
             // Do an initial gc to clean up after startup
