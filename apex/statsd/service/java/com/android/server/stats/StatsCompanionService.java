@@ -1299,78 +1299,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private BatteryStatsHelper getBatteryStatsHelper() {
-        if (mBatteryStatsHelper == null) {
-            final long callingToken = Binder.clearCallingIdentity();
-            try {
-                // clearCallingIdentity required for BatteryStatsHelper.checkWifiOnly().
-                mBatteryStatsHelper = new BatteryStatsHelper(mContext, false);
-            } finally {
-                Binder.restoreCallingIdentity(callingToken);
-            }
-            mBatteryStatsHelper.create((Bundle) null);
-        }
-        long currentTime = SystemClock.elapsedRealtime();
-        if (currentTime - mBatteryStatsHelperTimestampMs >= MAX_BATTERY_STATS_HELPER_FREQUENCY_MS) {
-            // Load BatteryStats and do all the calculations.
-            mBatteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED, UserHandle.USER_ALL);
-            // Calculations are done so we don't need to save the raw BatteryStats data in RAM.
-            mBatteryStatsHelper.clearStats();
-            mBatteryStatsHelperTimestampMs = currentTime;
-        }
-        return mBatteryStatsHelper;
-    }
-
-    private long milliAmpHrsToNanoAmpSecs(double mAh) {
-        final long MILLI_AMP_HR_TO_NANO_AMP_SECS = 1_000_000L * 3600L;
-        return (long) (mAh * MILLI_AMP_HR_TO_NANO_AMP_SECS + 0.5);
-    }
-
-    private void pullDeviceCalculatedPowerUse(int tagId,
-            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
-        BatteryStatsHelper bsHelper = getBatteryStatsHelper();
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-        e.writeLong(milliAmpHrsToNanoAmpSecs(bsHelper.getComputedPower()));
-        pulledData.add(e);
-    }
-
-    private void pullDeviceCalculatedPowerBlameUid(int tagId,
-            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
-        final List<BatterySipper> sippers = getBatteryStatsHelper().getUsageList();
-        if (sippers == null) {
-            return;
-        }
-        for (BatterySipper bs : sippers) {
-            if (bs.drainType != bs.drainType.APP) {
-                continue;
-            }
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(bs.uidObj.getUid());
-            e.writeLong(milliAmpHrsToNanoAmpSecs(bs.totalPowerMah));
-            pulledData.add(e);
-        }
-    }
-
-    private void pullDeviceCalculatedPowerBlameOther(int tagId,
-            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
-        final List<BatterySipper> sippers = getBatteryStatsHelper().getUsageList();
-        if (sippers == null) {
-            return;
-        }
-        for (BatterySipper bs : sippers) {
-            if (bs.drainType == bs.drainType.APP) {
-                continue; // This is a separate atom; see pullDeviceCalculatedPowerBlameUid().
-            }
-            if (bs.drainType == bs.drainType.USER) {
-                continue; // This is not supported. We purposefully calculate over USER_ALL.
-            }
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(bs.drainType.ordinal());
-            e.writeLong(milliAmpHrsToNanoAmpSecs(bs.totalPowerMah));
-            pulledData.add(e);
-        }
-    }
-
     private void pullDiskIo(int tagId, long elapsedNanos, final long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         mStoragedUidIoStatsReader.readAbsolute((uid, fgCharsRead, fgCharsWrite, fgBytesRead,
@@ -1989,21 +1917,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.CPU_TIME_PER_THREAD_FREQ: {
                 pullCpuTimePerThreadFreq(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.DEVICE_CALCULATED_POWER_USE: {
-                pullDeviceCalculatedPowerUse(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.DEVICE_CALCULATED_POWER_BLAME_UID: {
-                pullDeviceCalculatedPowerBlameUid(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER: {
-                pullDeviceCalculatedPowerBlameOther(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

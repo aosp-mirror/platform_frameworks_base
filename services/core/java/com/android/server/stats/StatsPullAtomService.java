@@ -1214,28 +1214,119 @@ public class StatsPullAtomService extends SystemService {
         // No op.
     }
 
-    private void registerDeviceCalculatedPowerUse() {
-        // No op.
+    // TODO: move to top of file when all migrations are complete
+    private BatteryStatsHelper mBatteryStatsHelper = null;
+    private static final int MAX_BATTERY_STATS_HELPER_FREQUENCY_MS = 1000;
+    private long mBatteryStatsHelperTimestampMs = -MAX_BATTERY_STATS_HELPER_FREQUENCY_MS;
+    private static final long MILLI_AMP_HR_TO_NANO_AMP_SECS = 1_000_000L * 3600L;
+
+    private BatteryStatsHelper getBatteryStatsHelper() {
+        if (mBatteryStatsHelper == null) {
+            final long callingToken = Binder.clearCallingIdentity();
+            try {
+                // clearCallingIdentity required for BatteryStatsHelper.checkWifiOnly().
+                mBatteryStatsHelper = new BatteryStatsHelper(mContext, false);
+            } finally {
+                Binder.restoreCallingIdentity(callingToken);
+            }
+            mBatteryStatsHelper.create((Bundle) null);
+        }
+        long currentTime = SystemClock.elapsedRealtime();
+        if (currentTime - mBatteryStatsHelperTimestampMs >= MAX_BATTERY_STATS_HELPER_FREQUENCY_MS) {
+            // Load BatteryStats and do all the calculations.
+            mBatteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED, UserHandle.USER_ALL);
+            // Calculations are done so we don't need to save the raw BatteryStats data in RAM.
+            mBatteryStatsHelper.clearStats();
+            mBatteryStatsHelperTimestampMs = currentTime;
+        }
+        return mBatteryStatsHelper;
     }
 
-    private void pullDeviceCalculatedPowerUse() {
-        // No op.
+    private long milliAmpHrsToNanoAmpSecs(double mAh) {
+        return (long) (mAh * MILLI_AMP_HR_TO_NANO_AMP_SECS + 0.5);
+    }
+
+    private void registerDeviceCalculatedPowerUse() {
+        int tagId = StatsLog.DEVICE_CALCULATED_POWER_USE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullDeviceCalculatedPowerUse(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
+    }
+
+    private int pullDeviceCalculatedPowerUse(int atomTag, List<StatsEvent> pulledData) {
+        BatteryStatsHelper bsHelper = getBatteryStatsHelper();
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeLong(milliAmpHrsToNanoAmpSecs(bsHelper.getComputedPower()))
+                .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerDeviceCalculatedPowerBlameUid() {
-        // No op.
+        int tagId = StatsLog.DEVICE_CALCULATED_POWER_BLAME_UID;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullDeviceCalculatedPowerBlameUid(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullDeviceCalculatedPowerBlameUid() {
-        // No op.
+    private int pullDeviceCalculatedPowerBlameUid(int atomTag, List<StatsEvent> pulledData) {
+        final List<BatterySipper> sippers = getBatteryStatsHelper().getUsageList();
+        if (sippers == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        for (BatterySipper bs : sippers) {
+            if (bs.drainType != bs.drainType.APP) {
+                continue;
+            }
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(bs.uidObj.getUid())
+                    .writeLong(milliAmpHrsToNanoAmpSecs(bs.totalPowerMah))
+                    .build();
+            pulledData.add(e);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerDeviceCalculatedPowerBlameOther() {
-        // No op.
+        int tagId = StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullDeviceCalculatedPowerBlameOther(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullDeviceCalculatedPowerBlameOther() {
-        // No op.
+    private int pullDeviceCalculatedPowerBlameOther(int atomTag, List<StatsEvent> pulledData) {
+        final List<BatterySipper> sippers = getBatteryStatsHelper().getUsageList();
+        if (sippers == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        for (BatterySipper bs : sippers) {
+            if (bs.drainType == bs.drainType.APP) {
+                continue; // This is a separate atom; see pullDeviceCalculatedPowerBlameUid().
+            }
+            if (bs.drainType == bs.drainType.USER) {
+                continue; // This is not supported. We purposefully calculate over USER_ALL.
+            }
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(bs.drainType.ordinal())
+                    .writeLong(milliAmpHrsToNanoAmpSecs(bs.totalPowerMah))
+                    .build();
+            pulledData.add(e);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerDebugElapsedClock() {
