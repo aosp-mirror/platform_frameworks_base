@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.systemui.R;
 
+import javax.inject.Inject;
+
 /**
  * Activity for showing aged out bubbles.
  * Must be public to be accessible to androidx...AppComponentFactory
@@ -17,6 +19,12 @@ import com.android.systemui.R;
 public class BubbleOverflowActivity extends Activity {
     private RecyclerView mRecyclerView;
     private int mMaxBubbles;
+    private BubbleController mBubbleController;
+
+    @Inject
+    public BubbleOverflowActivity(BubbleController controller) {
+        mBubbleController = controller;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,6 +72,6 @@ public class BubbleOverflowActivity extends Activity {
     }
 
     public void onDestroy() {
-        super.onStop();
+        super.onDestroy();
     }
 }

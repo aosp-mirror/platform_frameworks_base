@@ -19,6 +19,7 @@ package com.android.systemui.dagger;
 import android.app.Activity;
 
 import com.android.systemui.ForegroundServicesDialog;
+import com.android.systemui.bubbles.BubbleOverflowActivity;
 import com.android.systemui.keyguard.WorkLockActivity;
 import com.android.systemui.screenrecord.ScreenRecordDialog;
 import com.android.systemui.settings.BrightnessDialog;
@@ -63,4 +64,10 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(ScreenRecordDialog.class)
     public abstract Activity bindScreenRecordDialog(ScreenRecordDialog activity);
+
+    /** Inject into BubbleOverflowActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(BubbleOverflowActivity.class)
+    public abstract Activity bindBubbleOverflowActivity(BubbleOverflowActivity activity);
 }
