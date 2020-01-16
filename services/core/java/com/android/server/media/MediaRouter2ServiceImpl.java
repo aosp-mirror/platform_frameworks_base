@@ -90,7 +90,7 @@ class MediaRouter2ServiceImpl {
     @NonNull
     public List<MediaRoute2Info> getSystemRoutes() {
         final int uid = Binder.getCallingUid();
-        final int userId = UserHandle.getUserId(uid);
+        final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -117,7 +117,7 @@ class MediaRouter2ServiceImpl {
 
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
-        final int userId = UserHandle.getUserId(uid);
+        final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
         final boolean trusted = mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
                 == PackageManager.PERMISSION_GRANTED;
@@ -152,7 +152,7 @@ class MediaRouter2ServiceImpl {
 
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
-        final int userId = UserHandle.getUserId(uid);
+        final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
 
         final long token = Binder.clearCallingIdentity();
         try {
