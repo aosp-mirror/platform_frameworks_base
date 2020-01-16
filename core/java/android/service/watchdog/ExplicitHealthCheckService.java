@@ -24,6 +24,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -48,7 +49,8 @@ import java.util.concurrent.TimeUnit;
  * <p>To extend this class, you must declare the service in your manifest file with the
  * {@link android.Manifest.permission#BIND_EXPLICIT_HEALTH_CHECK_SERVICE} permission,
  * and include an intent filter with the {@link #SERVICE_INTERFACE} action. In adddition,
- * your implementation must live in {@link PackageManger#SYSTEM_SHARED_LIBRARY_SERVICES}.
+ * your implementation must live in
+ * {@link PackageManager#getServicesSystemSharedLibraryPackageName()}.
  * For example:</p>
  * <pre>
  *     &lt;service android:name=".FooExplicitHealthCheckService"
