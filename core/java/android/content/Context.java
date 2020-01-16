@@ -30,6 +30,7 @@ import android.annotation.StringDef;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
@@ -3827,6 +3828,7 @@ public abstract class Context {
      */
     @SystemApi
     @TestApi
+    @SuppressLint("ServiceName")
     public static final String STATUS_BAR_SERVICE = "statusbar";
 
     /**
@@ -3921,6 +3923,7 @@ public abstract class Context {
     public static final String NETWORK_STATS_SERVICE = "netstats";
     /** {@hide} */
     @SystemApi
+    @SuppressLint("ServiceName")
     public static final String NETWORK_POLICY_SERVICE = "netpolicy";
     /** {@hide} */
     public static final String NETWORK_WATCHLIST_SERVICE = "network_watchlist";
@@ -4230,6 +4233,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     @TestApi
+    @SuppressLint("ServiceName")  // TODO: This should be renamed to CONTENT_CAPTURE_SERVICE
     public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
 
     /**
