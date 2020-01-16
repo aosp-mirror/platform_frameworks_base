@@ -43,6 +43,7 @@ import android.content.rollback.RollbackManager;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.os.SystemClock;
@@ -78,6 +79,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -134,6 +136,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     private final Context mContext;
     private final HandlerThread mHandlerThread;
+    private final Executor mExecutor;
     private final Installer mInstaller;
     private final RollbackPackageHealthObserver mPackageHealthObserver;
     private final AppDataRollbackHelper mAppDataRollbackHelper;
@@ -173,6 +176,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         mHandlerThread = new HandlerThread("RollbackManagerServiceHandler");
         mHandlerThread.start();
         Watchdog.getInstance().addThread(getHandler(), HANDLER_THREAD_TIMEOUT_DURATION_MILLIS);
+        mExecutor = new HandlerExecutor(getHandler());
 
         for (UserInfo userInfo : UserManager.get(mContext).getUsers(true)) {
             registerUserCallbacks(userInfo.getUserHandle());
@@ -409,7 +413,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         CountDownLatch latch = new CountDownLatch(1);
         getHandler().post(() -> {
-            updateRollbackLifetimeDurationInMillis();
             synchronized (mLock) {
                 mRollbacks.clear();
                 mRollbacks.addAll(mRollbackStore.loadRollbacks());
@@ -520,11 +523,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     @AnyThread
     void onBootCompleted() {
-        getHandler().post(() -> updateRollbackLifetimeDurationInMillis());
-        // Also posts to handler thread
-        scheduleExpiration(0);
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ROLLBACK_BOOT,
+                mExecutor, properties -> updateRollbackLifetimeDurationInMillis());
 
         getHandler().post(() -> {
+            updateRollbackLifetimeDurationInMillis();
+            runExpiration();
+
             // Check to see if any rollback-enabled staged sessions or staged
             // rollback sessions been applied.
             List<Rollback> enabling = new ArrayList<>();
