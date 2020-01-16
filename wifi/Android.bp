@@ -70,6 +70,7 @@ java_library {
         "framework-annotations-lib",
         "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
         "unsupportedappusage-annotation", // for dalvik.annotation.compat.UnsupportedAppUsage
+        "framework-telephony-stubs",
     ],
     srcs: [
         ":framework-wifi-updatable-sources",

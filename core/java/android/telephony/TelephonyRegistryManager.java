@@ -701,7 +701,7 @@ public class TelephonyRegistryManager {
      */
     public void notifyRegistrationFailed(int slotIndex, int subId,
             @NonNull CellIdentity cellIdentity, @NonNull String chosenPlmn,
-            @NetworkRegistrationInfo.Domain int domain, int causeCode, int additionalCauseCode) {
+            int domain, int causeCode, int additionalCauseCode) {
         try {
             sRegistry.notifyRegistrationFailed(slotIndex, subId, cellIdentity,
                     chosenPlmn, domain, causeCode, additionalCauseCode);
