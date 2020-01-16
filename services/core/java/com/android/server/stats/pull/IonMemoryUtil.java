@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.stats;
+package com.android.server.stats.pull;
 
 import android.os.FileUtils;
 import android.util.Slog;
@@ -30,8 +30,11 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Utility methods for reading ion memory stats. */
-final class IonMemoryUtil {
+/**
+ * Utility methods for reading ion memory stats.
+ * TODO: Consider making package private after puller migration
+ */
+public final class IonMemoryUtil {
     private static final String TAG = "IonMemoryUtil";
 
     /** Path to debugfs file for the system ion heap. */
@@ -50,7 +53,7 @@ final class IonMemoryUtil {
      * Returns value of the total size in bytes of the system ion heap from
      * /sys/kernel/debug/ion/heaps/system.
      */
-    static long readSystemIonHeapSizeFromDebugfs() {
+    public static long readSystemIonHeapSizeFromDebugfs() {
         return parseIonHeapSizeFromDebugfs(readFile(DEBUG_SYSTEM_ION_HEAP_FILE));
     }
 
@@ -78,7 +81,7 @@ final class IonMemoryUtil {
      * Returns values of allocation sizes in bytes on the system ion heap from
      * /sys/kernel/debug/ion/heaps/system.
      */
-    static List<IonAllocations> readProcessSystemIonHeapSizesFromDebugfs() {
+    public static List<IonAllocations> readProcessSystemIonHeapSizesFromDebugfs() {
         return parseProcessIonHeapSizesFromDebugfs(readFile(DEBUG_SYSTEM_ION_HEAP_FILE));
     }
 
@@ -130,7 +133,7 @@ final class IonMemoryUtil {
     }
 
     /** Summary information about process ion allocations. */
-    static final class IonAllocations {
+    public static final class IonAllocations {
         /** PID these allocations belong to. */
         public int pid;
         /** Size of all individual allocations added together. */

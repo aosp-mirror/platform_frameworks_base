@@ -24,11 +24,11 @@ import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
-import static com.android.server.stats.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
-import static com.android.server.stats.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
-import static com.android.server.stats.ProcfsMemoryUtil.forEachPid;
-import static com.android.server.stats.ProcfsMemoryUtil.readCmdlineFromProcfs;
-import static com.android.server.stats.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
+import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
+import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
+import static com.android.server.stats.pull.ProcfsMemoryUtil.forEachPid;
+import static com.android.server.stats.pull.ProcfsMemoryUtil.readCmdlineFromProcfs;
+import static com.android.server.stats.pull.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -135,8 +135,8 @@ import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.role.RoleManagerInternal;
-import com.android.server.stats.IonMemoryUtil.IonAllocations;
-import com.android.server.stats.ProcfsMemoryUtil.MemorySnapshot;
+import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
+import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
 
