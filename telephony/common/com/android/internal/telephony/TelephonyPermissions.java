@@ -558,35 +558,8 @@ public final class TelephonyPermissions {
         }
 
         if (DBG) {
-            Log.d(LOG_TAG, "No READ_PRIVILEGED_PHONE_STATE permission, "
+            Log.d(LOG_TAG, "No READ_PRIVILEDED_PHONE_STATE permission, "
                     + "check carrier privilege next.");
-        }
-
-        enforceCallingOrSelfCarrierPrivilege(context, subId, message);
-    }
-
-    /**
-     * Ensure the caller (or self, if not processing an IPC) has
-     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or
-     * {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} or carrier privileges.
-     *
-     * @throws SecurityException if the caller does not have the required permission/privileges
-     */
-    public static void enforeceCallingOrSelfReadPrecisePhoneStatePermissionOrCarrierPrivilege(
-            Context context, int subId, String message) {
-        if (context.checkCallingOrSelfPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-                == PERMISSION_GRANTED) {
-            return;
-        }
-
-        if (context.checkCallingOrSelfPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
-                == PERMISSION_GRANTED) {
-            return;
-        }
-
-        if (DBG) {
-            Log.d(LOG_TAG, "No READ_PRIVILEGED_PHONE_STATE nor READ_PRECISE_PHONE_STATE permission"
-                    + ", check carrier privilege next.");
         }
 
         enforceCallingOrSelfCarrierPrivilege(context, subId, message);
