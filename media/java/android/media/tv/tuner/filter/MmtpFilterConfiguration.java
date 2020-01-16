@@ -18,17 +18,20 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.tuner.TunerUtils;
 
 /**
  * Filter configuration for a MMTP filter.
+ *
  * @hide
  */
+@SystemApi
 public class MmtpFilterConfiguration extends FilterConfiguration {
     private final int mMmtpPid;
 
-    public MmtpFilterConfiguration(Settings settings, int mmtpPid) {
+    private MmtpFilterConfiguration(Settings settings, int mmtpPid) {
         super(settings);
         mMmtpPid = mmtpPid;
     }
@@ -39,11 +42,11 @@ public class MmtpFilterConfiguration extends FilterConfiguration {
     }
 
     /**
-     * Gets MMTP PID.
+     * Gets MMTP Packet ID.
      *
      * <p>Packet ID is used to specify packets in MMTP.
      */
-    public int getMmtpPid() {
+    public int getMmtpPacketId() {
         return mMmtpPid;
     }
 
@@ -69,10 +72,10 @@ public class MmtpFilterConfiguration extends FilterConfiguration {
         }
 
         /**
-         * Sets MMTP PID.
+         * Sets MMTP Packet ID.
          */
         @NonNull
-        public Builder setMmtpPid(int mmtpPid) {
+        public Builder setMmtpPacketId(int mmtpPid) {
             mMmtpPid = mmtpPid;
             return this;
         }

@@ -16,12 +16,15 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.SystemApi;
 import android.media.tv.tuner.TunerUtils;
 
 /**
  * Filter Settings for Section data according to ISO/IEC 13818-1.
+ *
  * @hide
  */
+@SystemApi
 public class SectionSettings extends Settings {
 
     SectionSettings(int mainType) {

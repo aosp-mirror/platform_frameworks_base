@@ -17,6 +17,7 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 
@@ -39,17 +40,14 @@ public abstract class FilterConfiguration {
 
     /**
      * IP v4 packet type.
-     * @hide
      */
     public static final int PACKET_TYPE_IPV4 = 0;
     /**
      * Compressed packet type.
-     * @hide
      */
     public static final int PACKET_TYPE_COMPRESSED = 2;
     /**
      * Signaling packet type.
-     * @hide
      */
     public static final int PACKET_TYPE_SIGNALING = 4;
 
@@ -63,12 +61,13 @@ public abstract class FilterConfiguration {
 
     /**
      * Gets filter configuration type.
-     * @hide
      */
     @Filter.Type
     public abstract int getType();
 
-    /** @hide */
+    /**
+     * Gets filter Settings.
+     */
     @Nullable
     public Settings getSettings() {
         return mSettings;
@@ -78,7 +77,6 @@ public abstract class FilterConfiguration {
      * Builder for {@link FilterConfiguration}.
      *
      * @param <T> The subclass to be built.
-     * @hide
      */
     public abstract static class Builder<T extends Builder<T>> {
         /* package */ Settings mSettings;
@@ -89,8 +87,8 @@ public abstract class FilterConfiguration {
         /**
          * Sets filter settings.
          */
-        @Nullable
-        public T setFrequency(Settings settings) {
+        @NonNull
+        public T setSettings(@Nullable Settings settings) {
             mSettings = settings;
             return self();
         }

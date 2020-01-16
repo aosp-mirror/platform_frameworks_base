@@ -18,13 +18,16 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.tuner.TunerUtils;
 
 /**
  * Table information for Section Filter.
+ *
  * @hide
  */
+@SystemApi
 public class SectionSettingsWithTableInfo extends SectionSettings {
     private final int mTableId;
     private final int mVersion;

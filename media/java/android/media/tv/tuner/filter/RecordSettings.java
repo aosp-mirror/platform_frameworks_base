@@ -19,6 +19,7 @@ package android.media.tv.tuner.filter;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerConstants;
@@ -30,8 +31,10 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * The Settings for the record in DVR.
+ *
  * @hide
  */
+@SystemApi
 public class RecordSettings extends Settings {
     /**
      * Indexes can be tagged through TS (Transport Stream) header.
@@ -51,74 +54,61 @@ public class RecordSettings extends Settings {
 
     /**
      * TS index FIRST_PACKET.
-     * @hide
      */
     public static final int TS_INDEX_FIRST_PACKET = Constants.DemuxTsIndex.FIRST_PACKET;
     /**
      * TS index PAYLOAD_UNIT_START_INDICATOR.
-     * @hide
      */
     public static final int TS_INDEX_PAYLOAD_UNIT_START_INDICATOR =
             Constants.DemuxTsIndex.PAYLOAD_UNIT_START_INDICATOR;
     /**
      * TS index CHANGE_TO_NOT_SCRAMBLED.
-     * @hide
      */
     public static final int TS_INDEX_CHANGE_TO_NOT_SCRAMBLED =
             Constants.DemuxTsIndex.CHANGE_TO_NOT_SCRAMBLED;
     /**
      * TS index CHANGE_TO_EVEN_SCRAMBLED.
-     * @hide
      */
     public static final int TS_INDEX_CHANGE_TO_EVEN_SCRAMBLED =
             Constants.DemuxTsIndex.CHANGE_TO_EVEN_SCRAMBLED;
     /**
      * TS index CHANGE_TO_ODD_SCRAMBLED.
-     * @hide
      */
     public static final int TS_INDEX_CHANGE_TO_ODD_SCRAMBLED =
             Constants.DemuxTsIndex.CHANGE_TO_ODD_SCRAMBLED;
     /**
      * TS index DISCONTINUITY_INDICATOR.
-     * @hide
      */
     public static final int TS_INDEX_DISCONTINUITY_INDICATOR =
             Constants.DemuxTsIndex.DISCONTINUITY_INDICATOR;
     /**
      * TS index RANDOM_ACCESS_INDICATOR.
-     * @hide
      */
     public static final int TS_INDEX_RANDOM_ACCESS_INDICATOR =
             Constants.DemuxTsIndex.RANDOM_ACCESS_INDICATOR;
     /**
      * TS index PRIORITY_INDICATOR.
-     * @hide
      */
     public static final int TS_INDEX_PRIORITY_INDICATOR = Constants.DemuxTsIndex.PRIORITY_INDICATOR;
     /**
      * TS index PCR_FLAG.
-     * @hide
      */
     public static final int TS_INDEX_PCR_FLAG = Constants.DemuxTsIndex.PCR_FLAG;
     /**
      * TS index OPCR_FLAG.
-     * @hide
      */
     public static final int TS_INDEX_OPCR_FLAG = Constants.DemuxTsIndex.OPCR_FLAG;
     /**
      * TS index SPLICING_POINT_FLAG.
-     * @hide
      */
     public static final int TS_INDEX_SPLICING_POINT_FLAG =
             Constants.DemuxTsIndex.SPLICING_POINT_FLAG;
     /**
      * TS index PRIVATE_DATA.
-     * @hide
      */
     public static final int TS_INDEX_PRIVATE_DATA = Constants.DemuxTsIndex.PRIVATE_DATA;
     /**
      * TS index ADAPTATION_EXTENSION_FLAG.
-     * @hide
      */
     public static final int TS_INDEX_ADAPTATION_EXTENSION_FLAG =
             Constants.DemuxTsIndex.ADAPTATION_EXTENSION_FLAG;
