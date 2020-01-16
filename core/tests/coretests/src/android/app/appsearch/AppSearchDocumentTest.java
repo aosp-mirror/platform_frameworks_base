@@ -20,8 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.assertThrows;
 
-import android.app.appsearch.AppSearch.Document;
-
 import androidx.test.filters.SmallTest;
 
 import com.google.android.icing.proto.DocumentProto;
@@ -39,14 +37,14 @@ public class AppSearchDocumentTest {
 
     @Test
     public void testDocumentEquals_Identical() {
-        Document document1 = Document.newBuilder("uri1", "schemaType1")
+        AppSearchDocument document1 = new AppSearchDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("longKey1", 1L, 2L, 3L)
                 .setProperty("doubleKey1", 1.0, 2.0, 3.0)
                 .setProperty("booleanKey1", true, false, true)
                 .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
                 .build();
-        Document document2 = Document.newBuilder("uri1", "schemaType1")
+        AppSearchDocument document2 = new AppSearchDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("longKey1", 1L, 2L, 3L)
                 .setProperty("doubleKey1", 1.0, 2.0, 3.0)
@@ -59,7 +57,7 @@ public class AppSearchDocumentTest {
 
     @Test
     public void testDocumentEquals_DifferentOrder() {
-        Document document1 = Document.newBuilder("uri1", "schemaType1")
+        AppSearchDocument document1 = new AppSearchDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("longKey1", 1L, 2L, 3L)
                 .setProperty("doubleKey1", 1.0, 2.0, 3.0)
@@ -68,7 +66,7 @@ public class AppSearchDocumentTest {
                 .build();
 
         // Create second document with same parameter but different order.
-        Document document2 = Document.newBuilder("uri1", "schemaType1")
+        AppSearchDocument document2 = new AppSearchDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("booleanKey1", true, false, true)
                 .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
@@ -81,13 +79,13 @@ public class AppSearchDocumentTest {
 
     @Test
     public void testDocumentEquals_Failure() {
-        Document document1 = Document.newBuilder("uri1", "schemaType1")
+        AppSearchDocument document1 = new AppSearchDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("longKey1", 1L, 2L, 3L)
                 .build();
 
         // Create second document with same order but different value.
-        Document document2 = Document.newBuilder("uri1", "schemaType1")
+        AppSearchDocument document2 = new AppSearchDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("longKey1", 1L, 2L, 4L) // Different
                 .build();
@@ -97,13 +95,13 @@ public class AppSearchDocumentTest {
 
     @Test
     public void testDocumentEquals_Failure_RepeatedFieldOrder() {
-        Document document1 = Document.newBuilder("uri1", "schemaType1")
+        AppSearchDocument document1 = new AppSearchDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("booleanKey1", true, false, true)
                 .build();
 
         // Create second document with same order but different value.
-        Document document2 = Document.newBuilder("uri1", "schemaType1")
+        AppSearchDocument document2 = new AppSearchDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("booleanKey1", true, true, false) // Different
                 .build();
@@ -113,7 +111,7 @@ public class AppSearchDocumentTest {
 
     @Test
     public void testDocumentGetSingleValue() {
-        Document document = Document.newBuilder("uri1", "schemaType1")
+        AppSearchDocument document = new AppSearchDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setScore(1)
                 .setProperty("longKey1", 1L)
@@ -132,7 +130,7 @@ public class AppSearchDocumentTest {
 
     @Test
     public void testDocumentGetArrayValues() {
-        Document document = Document.newBuilder("uri1", "schemaType1")
+        AppSearchDocument document = new AppSearchDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("longKey1", 1L, 2L, 3L)
                 .setProperty("doubleKey1", 1.0, 2.0, 3.0)
@@ -153,7 +151,7 @@ public class AppSearchDocumentTest {
 
     @Test
     public void testDocumentGetValues_DifferentTypes() {
-        Document document = Document.newBuilder("uri1", "schemaType1")
+        AppSearchDocument document = new AppSearchDocument.Builder("uri1", "schemaType1")
                 .setScore(1)
                 .setProperty("longKey1", 1L)
                 .setProperty("booleanKey1", true, false, true)
@@ -180,14 +178,14 @@ public class AppSearchDocumentTest {
 
     @Test
     public void testDocumentInvalid() {
-        Document.Builder builder = Document.newBuilder("uri1", "schemaType1");
+        AppSearchDocument.Builder builder = new AppSearchDocument.Builder("uri1", "schemaType1");
         assertThrows(
                 IllegalArgumentException.class, () -> builder.setProperty("test", new boolean[]{}));
     }
 
     @Test
     public void testDocumentProtoPopulation() {
-        Document document = Document.newBuilder("uri1", "schemaType1")
+        AppSearchDocument document = new AppSearchDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setScore(1)
                 .setProperty("longKey1", 1L)

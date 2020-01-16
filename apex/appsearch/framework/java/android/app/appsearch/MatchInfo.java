@@ -70,7 +70,7 @@ public final class MatchInfo {
 
     private final String mPropertyPath;
     private final SnippetMatchProto mSnippetMatch;
-    private final AppSearch.Document mDocument;
+    private final AppSearchDocument mDocument;
     /**
      * List of content with same property path in a document when there are multiple matches in
      * repeated sections.
@@ -79,7 +79,7 @@ public final class MatchInfo {
 
     /** @hide */
     public MatchInfo(@NonNull String propertyPath, @NonNull SnippetMatchProto snippetMatch,
-            @NonNull AppSearch.Document document) {
+            @NonNull AppSearchDocument document) {
         mPropertyPath = propertyPath;
         mSnippetMatch = snippetMatch;
         mDocument = document;

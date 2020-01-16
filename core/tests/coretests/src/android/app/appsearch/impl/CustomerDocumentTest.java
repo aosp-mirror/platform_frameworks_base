@@ -19,22 +19,24 @@ package android.app.appsearch.impl;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.annotation.NonNull;
-import android.app.appsearch.AppSearch.Document;
+import android.app.appsearch.AppSearchDocument;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
-/** Tests that {@link Document} and {@link Document.Builder} are extendable by developers.
+/**
+ * Tests that {@link AppSearchDocument} and {@link AppSearchDocument.Builder} are extendable by
+ * developers.
  *
- * <p>This class is intentionally in a different package than {@link Document} to make sure there
- * are no package-private methods required for external developers to add custom types.
+ * <p>This class is intentionally in a different package than {@link AppSearchDocument} to make sure
+ * there are no package-private methods required for external developers to add custom types.
  */
 @SmallTest
 public class CustomerDocumentTest {
     @Test
     public void testBuildCustomerDocument() {
-        CustomerDocument customerDocument = CustomerDocument.newBuilder("uri1")
+        CustomerDocument customerDocument = new CustomerDocument.Builder("uri1")
                 .setScore(1)
                 .setCreationTimestampMillis(0)
                 .setProperty("longKey1", 1L, 2L, 3L)
@@ -61,16 +63,12 @@ public class CustomerDocumentTest {
      * An example document type for test purposes, defined outside of
      * {@link android.app.appsearch.AppSearch} (the way an external developer would define it).
      */
-    private static class CustomerDocument extends Document {
-        private CustomerDocument(Document document) {
+    private static class CustomerDocument extends AppSearchDocument {
+        private CustomerDocument(AppSearchDocument document) {
             super(document);
         }
 
-        public static CustomerDocument.Builder newBuilder(String uri) {
-            return new CustomerDocument.Builder(uri);
-        }
-
-        public static class Builder extends Document.Builder<CustomerDocument.Builder> {
+        public static class Builder extends AppSearchDocument.Builder<CustomerDocument.Builder> {
             private Builder(@NonNull String uri) {
                 super(uri, "customerDocument");
             }

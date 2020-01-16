@@ -18,7 +18,6 @@ package android.app.appsearch;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.SystemService;
-import android.app.appsearch.AppSearch.Document;
 import android.content.Context;
 import android.os.RemoteException;
 
@@ -150,25 +149,26 @@ public class AppSearchManager {
     }
 
     /**
-     * Index {@link android.app.appsearch.AppSearch.Document Documents} into AppSearch.
+     * Index {@link AppSearchDocument Documents} into AppSearch.
      *
      * <p>You should not call this method directly; instead, use the
      * {@code AppSearch#putDocuments()} API provided by JetPack.
      *
-     * <p>Each {@link AppSearch.Document Document's} {@code schemaType} field must be set to the
+     * <p>Each {@link AppSearchDocument Document's} {@code schemaType} field must be set to the
      * name of a schema type previously registered via the {@link #setSchema} method.
      *
-     * @param documents {@link Document Documents} that need to be indexed.
+     * @param documents {@link AppSearchDocument Documents} that need to be indexed.
      * @return An {@link AppSearchBatchResult} mapping the document URIs to {@link Void} if they
      *     were successfully indexed, or a {@link Throwable} describing the failure if they could
      *     not be indexed.
      * @hide
      */
-    public AppSearchBatchResult<String, Void> putDocuments(@NonNull List<Document> documents) {
+    public AppSearchBatchResult<String, Void> putDocuments(
+            @NonNull List<AppSearchDocument> documents) {
         // TODO(b/146386470): Transmit these documents as a RemoteStream instead of sending them in
         // one big list.
         List<byte[]> documentsBytes = new ArrayList<>(documents.size());
-        for (Document document : documents) {
+        for (AppSearchDocument document : documents) {
             documentsBytes.add(document.getProto().toByteArray());
         }
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
