@@ -20,6 +20,10 @@ import static android.app.NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
+import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
+import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
+import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -46,6 +50,7 @@ import android.util.FeatureFlagUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.util.StatsEvent;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
@@ -79,6 +84,10 @@ public class PreferencesHelper implements RankingConfig {
 
     @VisibleForTesting
     static final int NOTIFICATION_CHANNEL_COUNT_LIMIT = 5000;
+
+    private static final int NOTIFICATION_PREFERENCES_PULL_LIMIT = 1000;
+    private static final int NOTIFICATION_CHANNEL_PULL_LIMIT = 2000;
+    private static final int NOTIFICATION_CHANNEL_GROUP_PULL_LIMIT = 1000;
 
     @VisibleForTesting
     static final String TAG_RANKING = "ranking";
@@ -1678,6 +1687,88 @@ public class PreferencesHelper implements RankingConfig {
                 }
 
                 proto.end(fToken);
+            }
+        }
+    }
+
+    /**
+     * Fills out {@link PackageNotificationPreferences} proto and wraps it in a {@link StatsEvent}.
+     */
+    public void pullPackagePreferencesStats(List<StatsEvent> events) {
+        synchronized (mPackagePreferences) {
+            for (int i = 0; i < mPackagePreferences.size(); i++) {
+                if (i > NOTIFICATION_PREFERENCES_PULL_LIMIT) {
+                    break;
+                }
+                StatsEvent.Builder event = StatsEvent.newBuilder()
+                        .setAtomId(PACKAGE_NOTIFICATION_PREFERENCES);
+                final PackagePreferences r = mPackagePreferences.valueAt(i);
+                event.writeInt(r.uid);
+                event.writeInt(r.importance);
+                event.writeInt(r.visibility);
+                event.writeInt(r.lockedAppFields);
+                events.add(event.build());
+            }
+        }
+    }
+
+    /**
+     * Fills out {@link PackageNotificationChannelPreferences} proto and wraps it in a
+     * {@link StatsEvent}.
+     */
+    public void pullPackageChannelPreferencesStats(List<StatsEvent> events) {
+        synchronized (mPackagePreferences) {
+            int totalChannelsPulled = 0;
+            for (int i = 0; i < mPackagePreferences.size(); i++) {
+                if (totalChannelsPulled > NOTIFICATION_CHANNEL_PULL_LIMIT) {
+                    break;
+                }
+                final PackagePreferences r = mPackagePreferences.valueAt(i);
+                for (NotificationChannel channel : r.channels.values()) {
+                    if (++totalChannelsPulled > NOTIFICATION_CHANNEL_PULL_LIMIT) {
+                        break;
+                    }
+                    StatsEvent.Builder event = StatsEvent.newBuilder()
+                            .setAtomId(PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES);
+                    event.writeInt(r.uid);
+                    event.writeString(channel.getId());
+                    event.writeString(channel.getName().toString());
+                    event.writeString(channel.getDescription());
+                    event.writeInt(channel.getImportance());
+                    event.writeInt(channel.getUserLockedFields());
+                    event.writeBoolean(channel.isDeleted());
+                    events.add(event.build());
+                }
+            }
+        }
+    }
+
+    /**
+     * Fills out {@link PackageNotificationChannelGroupPreferences} proto and wraps it in a
+     * {@link StatsEvent}.
+     */
+    public void pullPackageChannelGroupPreferencesStats(List<StatsEvent> events) {
+        synchronized (mPackagePreferences) {
+            int totalGroupsPulled = 0;
+            for (int i = 0; i < mPackagePreferences.size(); i++) {
+                if (totalGroupsPulled > NOTIFICATION_CHANNEL_GROUP_PULL_LIMIT) {
+                    break;
+                }
+                final PackagePreferences r = mPackagePreferences.valueAt(i);
+                for (NotificationChannelGroup groupChannel : r.groups.values()) {
+                    if (++totalGroupsPulled > NOTIFICATION_CHANNEL_GROUP_PULL_LIMIT) {
+                        break;
+                    }
+                    StatsEvent.Builder event = StatsEvent.newBuilder()
+                            .setAtomId(PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES);
+                    event.writeInt(r.uid);
+                    event.writeString(groupChannel.getId());
+                    event.writeString(groupChannel.getName().toString());
+                    event.writeString(groupChannel.getDescription());
+                    event.writeBoolean(groupChannel.isBlocked());
+                    event.writeInt(groupChannel.getUserLockedFields());
+                    events.add(event.build());
+                }
             }
         }
     }

@@ -32,7 +32,6 @@ import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CALLS;
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CONVERSATIONS;
-import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_MESSAGES;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
@@ -97,6 +96,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Person;
 import android.app.RemoteInput;
+import android.app.StatsManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
@@ -266,6 +266,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     UserManager mUm;
     @Mock
     NotificationHistoryManager mHistoryManager;
+    @Mock
+    StatsManager mStatsManager;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
@@ -439,7 +441,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
                 mGroupHelper, mAm, mAppUsageStats,
                 mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
-                mAppOpsManager, mUm, mHistoryManager);
+                mAppOpsManager, mUm, mHistoryManager, mStatsManager);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mService.setAudioManager(mAudioManager);

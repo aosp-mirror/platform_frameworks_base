@@ -395,7 +395,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10071
+    // Next: 10074
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -470,6 +470,12 @@ message Atom {
         GraphicsStats graphics_stats = 10068;
         RuntimeAppOpAccess runtime_app_op_access = 10069 [(module) = "framework"];
         IonHeapSize ion_heap_size = 10070 [(module) = "framework"];
+        PackageNotificationPreferences package_notification_preferences =
+                10071 [(module) = "framework"];
+        PackageNotificationChannelPreferences package_notification_channel_preferences =
+                10072 [(module) = "framework"];
+        PackageNotificationChannelGroupPreferences package_notification_channel_group_preferences =
+                10073 [(module) = "framework"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -5466,6 +5472,65 @@ message NotificationRemoteViewsProto {
  */
 message NotificationRemoteViews {
     optional NotificationRemoteViewsProto notification_remote_views = 1;
+}
+
+/**
+ * Atom that contains a list of a package's preferences, pulled from NotificationManagerService.java
+ */
+message PackageNotificationPreferences {
+    // Uid under which the package is installed.
+    optional int32 uid = 1;
+    // Notification importance, which specifies when and how a notification is displayed.
+    // Specified under core/java/android/app/NotificationManager.java.
+    optional int32 importance = 2;
+    // Lockscreen visibility as set by the user.
+    optional int32 visibility = 3;
+    // Bitfield mask indicating what fields were locked by the user (see LockableAppfields in
+    // PreferencesHelper.java)
+    optional int32 user_locked_fields = 4;
+}
+
+/**
+ * Atom that contains a list of a package's channel preferences, pulled from
+ * NotificationManagerService.java.
+ */
+message PackageNotificationChannelPreferences {
+    // Uid under which the package is installed.
+    optional int32 uid = 1;
+    // Channel's ID. Should always be available.
+    optional string channel_id = 2;
+    // Channel's name. Should always be available.
+    optional string channel_name = 3;
+    // Channel's description. Optionally set by the channel creator.
+    optional string description = 4;
+    // Notification importance, which specifies when and how a notification is displayed. Specified
+    // under core/java/android/app/NotificationManager.java.
+    optional int32 importance = 5;
+    // Bitmask representing which fields have been set by the user. See field bitmask descriptions
+    // at core/java/android/app/NotificationChannel.java
+    optional int32 user_locked_fields = 6;
+    // Indicates if the channel was deleted by the app.
+    optional bool is_deleted = 7;
+}
+
+/**
+ * Atom that contains a list of a package's channel group preferences, pulled from
+ * NotificationManagerService.java.
+ */
+message PackageNotificationChannelGroupPreferences {
+    // Uid under which the package is installed.
+    optional int32 uid = 1;
+    // Channel Group's ID. Should always be available.
+    optional string group_id = 2;
+    // Channel Group's name. Should always be available.
+    optional string group_name = 3;
+    // Channel Group's description. Optionally set by group creator.
+    optional string description = 4;
+    // Indicates if notifications from this channel group are blocked.
+    optional bool is_blocked = 5;
+    // Bitmask representing which fields have been set by the user. See field bitmask descriptions
+    // at core/java/android/app/NotificationChannelGroup.java
+    optional int32 user_locked_fields = 6;
 }
 
 message PowerProfileProto {
