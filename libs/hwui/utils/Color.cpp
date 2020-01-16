@@ -108,9 +108,25 @@ SkColorType PixelFormatToColorType(android::PixelFormat format) {
     }
 }
 
+// FIXME: Share with the version in android_bitmap.cpp?
+// Skia's SkNamedGamut::kDCIP3 is based on a white point of D65. This gamut
+// matches the white point used by ColorSpace.Named.DCIP3.
+static constexpr skcms_Matrix3x3 kDCIP3 = {{
+        {0.486143, 0.323835, 0.154234},
+        {0.226676, 0.710327, 0.0629966},
+        {0.000800549, 0.0432385, 0.78275},
+}};
+
 sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
     if (dataspace == HAL_DATASPACE_UNKNOWN) {
         return SkColorSpace::MakeSRGB();
+    }
+    if (dataspace == HAL_DATASPACE_DCI_P3) {
+        // This cannot be handled by the switch statements below because it
+        // needs to use the locally-defined kDCIP3 gamut, rather than the one in
+        // Skia (SkNamedGamut), which is used for other data spaces with
+        // HAL_DATASPACE_STANDARD_DCI_P3 (e.g. HAL_DATASPACE_DISPLAY_P3).
+        return SkColorSpace::MakeRGB({2.6f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, kDCIP3);
     }
 
     skcms_Matrix3x3 gamut;
@@ -152,10 +168,12 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
             return SkColorSpace::MakeRGB({2.6f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, gamut);
         case HAL_DATASPACE_TRANSFER_GAMMA2_8:
             return SkColorSpace::MakeRGB({2.8f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, gamut);
+        case HAL_DATASPACE_TRANSFER_ST2084:
+            return SkColorSpace::MakeRGB(SkNamedTransferFn::kPQ, gamut);
+        case HAL_DATASPACE_TRANSFER_SMPTE_170M:
+            return SkColorSpace::MakeRGB(SkNamedTransferFn::kRec2020, gamut);
         case HAL_DATASPACE_TRANSFER_UNSPECIFIED:
             return nullptr;
-        case HAL_DATASPACE_TRANSFER_SMPTE_170M:
-        case HAL_DATASPACE_TRANSFER_ST2084:
         case HAL_DATASPACE_TRANSFER_HLG:
         default:
             ALOGV("Unsupported Gamma: %d", dataspace);
