@@ -250,4 +250,9 @@ public class StubTransaction extends SurfaceControl.Transaction {
         return this;
     }
 
+    @Override
+    public SurfaceControl.Transaction setFrameRateSelectionPriority(SurfaceControl sc,
+            int priority) {
+        return this;
+    }
 }
