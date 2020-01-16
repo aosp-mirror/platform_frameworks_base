@@ -561,7 +561,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
                     flags |= Document.FLAG_SUPPORTS_MOVE;
 
                     if (shouldBlockFromTree(docId)) {
-                        flags |= Document.FLAG_DIR_BLOCKS_TREE;
+                        flags |= Document.FLAG_DIR_BLOCKS_OPEN_DOCUMENT_TREE;
                     }
 
                 } else {
