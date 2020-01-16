@@ -349,6 +349,46 @@ public abstract class AccessibilityService extends Service {
     public static final int GESTURE_3_FINGER_TRIPLE_TAP = 24;
 
     /**
+     * The user has performed a two-finger swipe up gesture on the touch screen.
+     */
+    public static final int GESTURE_2_FINGER_SWIPE_UP = 25;
+
+    /**
+     * The user has performed a two-finger swipe down gesture on the touch screen.
+     */
+    public static final int GESTURE_2_FINGER_SWIPE_DOWN = 26;
+
+    /**
+     * The user has performed a two-finger swipe left gesture on the touch screen.
+     */
+    public static final int GESTURE_2_FINGER_SWIPE_LEFT = 27;
+
+    /**
+     * The user has performed a two-finger swipe right gesture on the touch screen.
+     */
+    public static final int GESTURE_2_FINGER_SWIPE_RIGHT = 28;
+
+    /**
+     * The user has performed a three-finger swipe up gesture on the touch screen.
+     */
+    public static final int GESTURE_3_FINGER_SWIPE_UP = 29;
+
+    /**
+     * The user has performed a three-finger swipe down gesture on the touch screen.
+     */
+    public static final int GESTURE_3_FINGER_SWIPE_DOWN = 30;
+
+    /**
+     * The user has performed a three-finger swipe left gesture on the touch screen.
+     */
+    public static final int GESTURE_3_FINGER_SWIPE_LEFT = 31;
+
+    /**
+     * The user has performed a three-finger swipe right gesture on the touch screen.
+     */
+    public static final int GESTURE_3_FINGER_SWIPE_RIGHT = 32;
+
+    /**
      * The {@link Intent} that must be declared as handled by the service.
      */
     public static final String SERVICE_INTERFACE =
