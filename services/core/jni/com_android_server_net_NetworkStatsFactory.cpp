@@ -20,6 +20,7 @@
 #include <inttypes.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <vector>
 
 #include <jni.h>
 
