@@ -22,8 +22,7 @@ import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_NONE;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
-
-import static com.android.internal.telephony.PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
+import static android.telephony.TelephonyManager.MODEM_COUNT_DUAL_MODEM;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -57,7 +56,6 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.DemoMode;
@@ -547,7 +545,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mReceiverHandler.post(this::handleConfigurationChanged);
                 break;
             default:
-                int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
+                int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
                         SubscriptionManager.INVALID_SUBSCRIPTION_ID);
                 if (SubscriptionManager.isValidSubscriptionId(subId)) {
                     if (mMobileSignalControllers.indexOfKey(subId) >= 0) {
@@ -582,7 +580,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private void filterMobileSubscriptionInSameGroup(List<SubscriptionInfo> subscriptions) {
-        if (subscriptions.size() == MAX_PHONE_COUNT_DUAL_SIM) {
+        if (subscriptions.size() == MODEM_COUNT_DUAL_MODEM) {
             SubscriptionInfo info1 = subscriptions.get(0);
             SubscriptionInfo info2 = subscriptions.get(1);
             if (info1.getGroupUuid() != null && info1.getGroupUuid().equals(info2.getGroupUuid())) {
