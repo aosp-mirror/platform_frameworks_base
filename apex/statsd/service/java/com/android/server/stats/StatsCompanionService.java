@@ -722,50 +722,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullNumBiometricsEnrolled(int modality, int tagId, long elapsedNanos,
-            long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
-        final PackageManager pm = mContext.getPackageManager();
-        FingerprintManager fingerprintManager = null;
-        FaceManager faceManager = null;
-
-        if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
-            fingerprintManager = mContext.getSystemService(
-                    FingerprintManager.class);
-        }
-        if (pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
-            faceManager = mContext.getSystemService(FaceManager.class);
-        }
-
-        if (modality == BiometricsProtoEnums.MODALITY_FINGERPRINT && fingerprintManager == null) {
-            return;
-        }
-        if (modality == BiometricsProtoEnums.MODALITY_FACE && faceManager == null) {
-            return;
-        }
-        UserManager userManager = mContext.getSystemService(UserManager.class);
-        if (userManager == null) {
-            return;
-        }
-
-        final long token = Binder.clearCallingIdentity();
-        for (UserInfo user : userManager.getUsers()) {
-            final int userId = user.getUserHandle().getIdentifier();
-            int numEnrolled = 0;
-            if (modality == BiometricsProtoEnums.MODALITY_FINGERPRINT) {
-                numEnrolled = fingerprintManager.getEnrolledFingerprints(userId).size();
-            } else if (modality == BiometricsProtoEnums.MODALITY_FACE) {
-                numEnrolled = faceManager.getEnrolledFaces(userId).size();
-            } else {
-                return;
-            }
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(userId);
-            e.writeInt(numEnrolled);
-            pulledData.add(e);
-        }
-        Binder.restoreCallingIdentity(token);
-    }
-
     // read high watermark for section
     private long readProcStatsHighWaterMark(int section) {
         try {
@@ -1369,18 +1325,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.SYSTEM_ELAPSED_REALTIME: {
                 pullSystemElapsedRealtime(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.NUM_FINGERPRINTS_ENROLLED: {
-                pullNumBiometricsEnrolled(BiometricsProtoEnums.MODALITY_FINGERPRINT, tagId,
-                        elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.NUM_FACES_ENROLLED: {
-                pullNumBiometricsEnrolled(BiometricsProtoEnums.MODALITY_FACE, tagId, elapsedNanos,
-                        wallClockNanos, ret);
                 break;
             }
 

@@ -1751,19 +1751,73 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerNumFingerprintsEnrolled() {
-        // No op.
-    }
-
-    private void pullNumFingerprintsEnrolled() {
-        // No op.
+        int tagId = StatsLog.NUM_FINGERPRINTS_ENROLLED;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullNumBiometricsEnrolled(
+                        BiometricsProtoEnums.MODALITY_FINGERPRINT, atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
     private void registerNumFacesEnrolled() {
-        // No op.
+        int tagId = StatsLog.NUM_FACES_ENROLLED;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullNumBiometricsEnrolled(
+                        BiometricsProtoEnums.MODALITY_FACE, atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullNumFacesEnrolled() {
-        // No op.
+    private int pullNumBiometricsEnrolled(int modality, int atomTag, List<StatsEvent> pulledData) {
+        final PackageManager pm = mContext.getPackageManager();
+        FingerprintManager fingerprintManager = null;
+        FaceManager faceManager = null;
+
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            fingerprintManager = mContext.getSystemService(FingerprintManager.class);
+        }
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            faceManager = mContext.getSystemService(FaceManager.class);
+        }
+
+        if (modality == BiometricsProtoEnums.MODALITY_FINGERPRINT && fingerprintManager == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        if (modality == BiometricsProtoEnums.MODALITY_FACE && faceManager == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        if (userManager == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            for (UserInfo user : userManager.getUsers()) {
+                final int userId = user.getUserHandle().getIdentifier();
+                int numEnrolled = 0;
+                if (modality == BiometricsProtoEnums.MODALITY_FINGERPRINT) {
+                    numEnrolled = fingerprintManager.getEnrolledFingerprints(userId).size();
+                } else if (modality == BiometricsProtoEnums.MODALITY_FACE) {
+                    numEnrolled = faceManager.getEnrolledFaces(userId).size();
+                } else {
+                    return StatsManager.PULL_SKIP;
+                }
+                StatsEvent e = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeInt(userId)
+                        .writeInt(numEnrolled)
+                        .build();
+                pulledData.add(e);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerProcStats() {

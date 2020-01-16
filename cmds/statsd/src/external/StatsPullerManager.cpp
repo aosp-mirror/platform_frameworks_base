@@ -95,14 +95,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
 
-        // Number of fingerprints enrolled for each user.
-        {{.atomTag = android::util::NUM_FINGERPRINTS_ENROLLED},
-         {.puller = new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS_ENROLLED)}},
-
-        // Number of faces enrolled for each user.
-        {{.atomTag = android::util::NUM_FACES_ENROLLED},
-         {.puller = new StatsCompanionServicePuller(android::util::NUM_FACES_ENROLLED)}},
-
         // ProcStats.
         {{.atomTag = android::util::PROC_STATS},
          {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS)}},
