@@ -38,8 +38,10 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     private final ChooserProfileDescriptor[] mItems;
 
     ChooserMultiProfilePagerAdapter(Context context,
-            ChooserActivity.ChooserGridAdapter adapter) {
-        super(context, /* currentPage */ 0);
+            ChooserActivity.ChooserGridAdapter adapter,
+            UserHandle personalProfileUserHandle,
+            UserHandle workProfileUserHandle) {
+        super(context, /* currentPage */ 0, personalProfileUserHandle, workProfileUserHandle);
         mItems = new ChooserProfileDescriptor[] {
                 createProfileDescriptor(adapter)
         };
@@ -48,8 +50,11 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     ChooserMultiProfilePagerAdapter(Context context,
             ChooserActivity.ChooserGridAdapter personalAdapter,
             ChooserActivity.ChooserGridAdapter workAdapter,
-            @Profile int defaultProfile) {
-        super(context, /* currentPage */ defaultProfile);
+            @Profile int defaultProfile,
+            UserHandle personalProfileUserHandle,
+            UserHandle workProfileUserHandle) {
+        super(context, /* currentPage */ defaultProfile, personalProfileUserHandle,
+                workProfileUserHandle);
         mItems = new ChooserProfileDescriptor[] {
                 createProfileDescriptor(personalAdapter),
                 createProfileDescriptor(workAdapter)
@@ -128,6 +133,17 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
             return null;
         }
         return getAdapterForIndex(1 - getCurrentPage()).getListAdapter();
+    }
+
+    @Override
+    public ResolverListAdapter getPersonalListAdapter() {
+        return getAdapterForIndex(PROFILE_PERSONAL).getListAdapter();
+    }
+
+    @Override
+    @Nullable
+    public ResolverListAdapter getWorkListAdapter() {
+        return getAdapterForIndex(PROFILE_WORK).getListAdapter();
     }
 
     @Override

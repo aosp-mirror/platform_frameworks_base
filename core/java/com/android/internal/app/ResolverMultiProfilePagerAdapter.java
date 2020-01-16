@@ -36,8 +36,10 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     private final ResolverProfileDescriptor[] mItems;
 
     ResolverMultiProfilePagerAdapter(Context context,
-            ResolverListAdapter adapter) {
-        super(context, /* currentPage */ 0);
+            ResolverListAdapter adapter,
+            UserHandle personalProfileUserHandle,
+            UserHandle workProfileUserHandle) {
+        super(context, /* currentPage */ 0, personalProfileUserHandle, workProfileUserHandle);
         mItems = new ResolverProfileDescriptor[] {
                 createProfileDescriptor(adapter)
         };
@@ -46,8 +48,11 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     ResolverMultiProfilePagerAdapter(Context context,
             ResolverListAdapter personalAdapter,
             ResolverListAdapter workAdapter,
-            @Profile int defaultProfile) {
-        super(context, /* currentPage */ defaultProfile);
+            @Profile int defaultProfile,
+            UserHandle personalProfileUserHandle,
+            UserHandle workProfileUserHandle) {
+        super(context, /* currentPage */ defaultProfile, personalProfileUserHandle,
+                workProfileUserHandle);
         mItems = new ResolverProfileDescriptor[] {
                 createProfileDescriptor(personalAdapter),
                 createProfileDescriptor(workAdapter)
@@ -113,6 +118,17 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
             return null;
         }
         return getAdapterForIndex(1 - getCurrentPage());
+    }
+
+    @Override
+    public ResolverListAdapter getPersonalListAdapter() {
+        return getAdapterForIndex(PROFILE_PERSONAL);
+    }
+
+    @Override
+    @Nullable
+    public ResolverListAdapter getWorkListAdapter() {
+        return getAdapterForIndex(PROFILE_WORK);
     }
 
     @Override

@@ -777,7 +777,9 @@ public class ChooserActivity extends ResolverActivity implements
                 /* userHandle */ UserHandle.of(UserHandle.myUserId()));
         return new ChooserMultiProfilePagerAdapter(
                 /* context */ this,
-                adapter);
+                adapter,
+                getPersonalProfileUserHandle(),
+                /* workProfileUserHandle= */ null);
     }
 
     private ChooserMultiProfilePagerAdapter createChooserMultiProfilePagerAdapterForTwoProfiles(
@@ -804,7 +806,9 @@ public class ChooserActivity extends ResolverActivity implements
                 /* context */ this,
                 personalAdapter,
                 workAdapter,
-                /* defaultProfile */ getCurrentProfile());
+                /* defaultProfile */ getCurrentProfile(),
+                getPersonalProfileUserHandle(),
+                getWorkProfileUserHandle());
     }
 
     @Override
@@ -856,11 +860,11 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     @Override
-    protected PackageMonitor createPackageMonitor() {
+    protected PackageMonitor createPackageMonitor(ResolverListAdapter listAdapter) {
         return new PackageMonitor() {
             @Override
             public void onSomePackagesChanged() {
-                handlePackagesChanged();
+                handlePackagesChanged(listAdapter);
             }
         };
     }
@@ -869,9 +873,19 @@ public class ChooserActivity extends ResolverActivity implements
      * Update UI to reflect changes in data.
      */
     public void handlePackagesChanged() {
-        // TODO(arangelov): Dispatch this to all adapters when we have the helper methods
-        // in a follow-up CL
-        mChooserMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
+        handlePackagesChanged(/* listAdapter */ null);
+    }
+
+    /**
+     * Update UI to reflect changes in data.
+     * <p>If {@code listAdapter} is {@code null}, both profile list adapters are updated.
+     */
+    private void handlePackagesChanged(@Nullable ResolverListAdapter listAdapter) {
+        if (listAdapter == null) {
+            mChooserMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
+        } else {
+            listAdapter.handlePackagesChanged();
+        }
         updateProfileViewButton();
     }
 
@@ -2337,10 +2351,10 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     @Override // ResolverListCommunicator
-    public void onHandlePackagesChanged() {
+    public void onHandlePackagesChanged(ResolverListAdapter listAdapter) {
         mServicesRequested.clear();
         mChooserMultiProfilePagerAdapter.getActiveListAdapter().notifyDataSetChanged();
-        super.onHandlePackagesChanged();
+        super.onHandlePackagesChanged(listAdapter);
     }
 
     @Override // SelectableTargetInfoCommunicator

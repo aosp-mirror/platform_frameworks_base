@@ -18,7 +18,9 @@ package com.android.internal.app;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.ResolveInfo;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -27,6 +29,7 @@ import com.android.internal.widget.PagerAdapter;
 import com.android.internal.widget.ViewPager;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -46,11 +49,17 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     private int mCurrentPage;
     private OnProfileSelectedListener mOnProfileSelectedListener;
     private Set<Integer> mLoadedPages;
+    private final UserHandle mPersonalProfileUserHandle;
+    private final UserHandle mWorkProfileUserHandle;
 
-    AbstractMultiProfilePagerAdapter(Context context, int currentPage) {
+    AbstractMultiProfilePagerAdapter(Context context, int currentPage,
+            UserHandle personalProfileUserHandle,
+            UserHandle workProfileUserHandle) {
         mContext = Objects.requireNonNull(context);
         mCurrentPage = currentPage;
         mLoadedPages = new HashSet<>();
+        mPersonalProfileUserHandle = personalProfileUserHandle;
+        mWorkProfileUserHandle = workProfileUserHandle;
     }
 
     void setOnProfileSelectedListener(OnProfileSelectedListener listener) {
@@ -72,7 +81,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
             public void onPageSelected(int position) {
                 mCurrentPage = position;
                 if (!mLoadedPages.contains(position)) {
-                    getActiveListAdapter().rebuildList();
+                    rebuildActiveTab(true);
                     mLoadedPages.add(position);
                 }
                 if (mOnProfileSelectedListener != null) {
@@ -83,6 +92,13 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         viewPager.setAdapter(this);
         viewPager.setCurrentItem(mCurrentPage);
         mLoadedPages.add(mCurrentPage);
+    }
+
+    void clearInactiveProfileCache() {
+        if (mLoadedPages.size() == 1) {
+            return;
+        }
+        mLoadedPages.remove(1 - mCurrentPage);
     }
 
     @Override
@@ -187,11 +203,52 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     @VisibleForTesting
     public abstract @Nullable ResolverListAdapter getInactiveListAdapter();
 
+    public abstract ResolverListAdapter getPersonalListAdapter();
+
+    public abstract @Nullable ResolverListAdapter getWorkListAdapter();
+
     abstract Object getCurrentRootAdapter();
 
     abstract ViewGroup getActiveAdapterView();
 
     abstract @Nullable ViewGroup getInactiveAdapterView();
+
+    boolean rebuildActiveTab(boolean post) {
+        return rebuildTab(getActiveListAdapter(), post);
+    }
+
+    boolean rebuildInactiveTab(boolean post) {
+        if (getItemCount() == 1) {
+            return false;
+        }
+        return rebuildTab(getInactiveListAdapter(), post);
+    }
+
+    private boolean rebuildTab(ResolverListAdapter activeListAdapter, boolean doPostProcessing) {
+        UserHandle listUserHandle = activeListAdapter.getUserHandle();
+        if (UserHandle.myUserId() != listUserHandle.getIdentifier() &&
+                !hasAppsInOtherProfile(activeListAdapter)) {
+            // TODO(arangelov): Show empty state UX here
+            return false;
+        } else {
+            return activeListAdapter.rebuildList(doPostProcessing);
+        }
+    }
+
+    private boolean hasAppsInOtherProfile(ResolverListAdapter adapter) {
+        if (mWorkProfileUserHandle == null) {
+            return false;
+        }
+        List<ResolverActivity.ResolvedComponentInfo> resolversForIntent =
+                adapter.getResolversForUser(UserHandle.of(UserHandle.myUserId()));
+        for (ResolverActivity.ResolvedComponentInfo info : resolversForIntent) {
+            ResolveInfo resolveInfo = info.getResolveInfoAt(0);
+            if (resolveInfo.targetUserId != UserHandle.USER_CURRENT) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     protected class ProfileDescriptor {
         final ViewGroup rootView;

@@ -16,7 +16,9 @@
 
 package com.android.internal.app;
 
+import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.PermissionChecker.PID_UNKNOWN;
 
 import static com.android.internal.app.AbstractMultiProfilePagerAdapter.PROFILE_PERSONAL;
 import static com.android.internal.app.AbstractMultiProfilePagerAdapter.PROFILE_WORK;
@@ -36,6 +38,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -157,7 +160,7 @@ public class ResolverActivity extends Activity implements
     private static final String TAB_TAG_PERSONAL = "personal";
     private static final String TAB_TAG_WORK = "work";
 
-    private final PackageMonitor mPersonalPackageMonitor = createPackageMonitor();
+    private PackageMonitor mPersonalPackageMonitor;
     private PackageMonitor mWorkPackageMonitor;
 
     @VisibleForTesting
@@ -244,11 +247,11 @@ public class ResolverActivity extends Activity implements
         }
     }
 
-    protected PackageMonitor createPackageMonitor() {
+    protected PackageMonitor createPackageMonitor(ResolverListAdapter listAdapter) {
         return new PackageMonitor() {
             @Override
             public void onSomePackagesChanged() {
-                mMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
+                listAdapter.handlePackagesChanged();
                 updateProfileViewButton();
             }
 
@@ -328,14 +331,6 @@ public class ResolverActivity extends Activity implements
 
         mPm = getPackageManager();
 
-        mPersonalPackageMonitor.register(
-                this, getMainLooper(), getPersonalProfileUserHandle(), false);
-        if (hasWorkProfile()) {
-            mWorkPackageMonitor = createPackageMonitor();
-            mWorkPackageMonitor.register(this, getMainLooper(), getWorkProfileUserHandle(), false);
-        }
-
-        mRegistered = true;
         mReferrerPackage = getReferrerPackageName();
 
         // Add our initial intent as the first item, regardless of what else has already been added.
@@ -359,6 +354,18 @@ public class ResolverActivity extends Activity implements
         if (configureContentView()) {
             return;
         }
+
+        mPersonalPackageMonitor = createPackageMonitor(
+                mMultiProfilePagerAdapter.getPersonalListAdapter());
+        mPersonalPackageMonitor.register(
+                this, getMainLooper(), getPersonalProfileUserHandle(), false);
+        if (hasWorkProfile()) {
+            mWorkPackageMonitor = createPackageMonitor(
+                    mMultiProfilePagerAdapter.getWorkListAdapter());
+            mWorkPackageMonitor.register(this, getMainLooper(), getWorkProfileUserHandle(), false);
+        }
+
+        mRegistered = true;
 
         final ResolverDrawerLayout rdl = findViewById(R.id.contentPanel);
         if (rdl != null) {
@@ -426,7 +433,9 @@ public class ResolverActivity extends Activity implements
                 /* userHandle */ UserHandle.of(UserHandle.myUserId()));
         return new ResolverMultiProfilePagerAdapter(
                 /* context */ this,
-                adapter);
+                adapter,
+                getPersonalProfileUserHandle(),
+                /* workProfileUserHandle= */ null);
     }
 
     private ResolverMultiProfilePagerAdapter createResolverMultiProfilePagerAdapterForTwoProfiles(
@@ -445,20 +454,23 @@ public class ResolverActivity extends Activity implements
                         == getPersonalProfileUserHandle().getIdentifier()),
                 mUseLayoutForBrowsables,
                 /* userHandle */ getPersonalProfileUserHandle());
+        UserHandle workProfileUserHandle = getWorkProfileUserHandle();
         ResolverListAdapter workAdapter = createResolverListAdapter(
                 /* context */ this,
                 /* payloadIntents */ mIntents,
                 initialIntents,
                 rList,
                 (filterLastUsed && UserHandle.myUserId()
-                        == getWorkProfileUserHandle().getIdentifier()),
+                        == workProfileUserHandle.getIdentifier()),
                 mUseLayoutForBrowsables,
-                /* userHandle */ getWorkProfileUserHandle());
+                /* userHandle */ workProfileUserHandle);
         return new ResolverMultiProfilePagerAdapter(
                 /* context */ this,
                 personalAdapter,
                 workAdapter,
-                /* defaultProfile */ getCurrentProfile());
+                /* defaultProfile */ getCurrentProfile(),
+                getPersonalProfileUserHandle(),
+                getWorkProfileUserHandle());
     }
 
     protected @Profile int getCurrentProfile() {
@@ -715,7 +727,8 @@ public class ResolverActivity extends Activity implements
                     getPersonalProfileUserHandle(), false);
             if (hasWorkProfile()) {
                 if (mWorkPackageMonitor == null) {
-                    mWorkPackageMonitor = createPackageMonitor();
+                    mWorkPackageMonitor = createPackageMonitor(
+                            mMultiProfilePagerAdapter.getWorkListAdapter());
                 }
                 mWorkPackageMonitor.register(this, getMainLooper(),
                         getWorkProfileUserHandle(), false);
@@ -928,26 +941,21 @@ public class ResolverActivity extends Activity implements
     }
 
     @Override // ResolverListCommunicator
-    public void onPostListReady(ResolverListAdapter listAdapter) {
-        if (mMultiProfilePagerAdapter.getCurrentUserHandle().getIdentifier()
-                == UserHandle.myUserId()) {
-            setHeader();
+    public void onPostListReady(ResolverListAdapter listAdapter, boolean doPostProcessing) {
+        if (isAutolaunching() || maybeAutolaunchActivity()) {
+            return;
         }
-        resetButtonBar();
-        onListRebuilt(listAdapter);
+        if (doPostProcessing) {
+            if (mMultiProfilePagerAdapter.getCurrentUserHandle().getIdentifier()
+                    == UserHandle.myUserId()) {
+                setHeader();
+            }
+            resetButtonBar();
+            onListRebuilt(listAdapter);
+        }
     }
 
     protected void onListRebuilt(ResolverListAdapter listAdapter) {
-        int count = listAdapter.getUnfilteredCount();
-        if (count == 1 && listAdapter.getOtherProfile() == null) {
-            // Only one target, so we're a candidate to auto-launch!
-            final TargetInfo target = listAdapter.targetInfoForPosition(0, false);
-            if (shouldAutoLaunchSingleChoice(target)) {
-                safelyStartActivity(target);
-                finish();
-            }
-        }
-
         final ItemClickListener listener = new ItemClickListener();
         setupAdapterListView((ListView) mMultiProfilePagerAdapter.getActiveAdapterView(), listener);
     }
@@ -1147,6 +1155,11 @@ public class ResolverActivity extends Activity implements
     }
 
     private void safelyStartActivityInternal(TargetInfo cti) {
+        mPersonalPackageMonitor.unregister();
+        if (mWorkPackageMonitor != null) {
+            mWorkPackageMonitor.unregister();
+        }
+        mRegistered = false;
         // If needed, show that intent is forwarded
         // from managed profile to owner or other way around.
         if (mProfileSwitchMessageId != -1) {
@@ -1262,7 +1275,11 @@ public class ResolverActivity extends Activity implements
             throw new IllegalStateException("mMultiProfilePagerAdapter.getCurrentListAdapter() "
                     + "cannot be null.");
         }
-        boolean rebuildCompleted = mMultiProfilePagerAdapter.getActiveListAdapter().rebuildList();
+        boolean rebuildCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true);
+
+        // We partially rebuild the inactive adapter to determine if we should auto launch
+        mMultiProfilePagerAdapter.rebuildInactiveTab(false);
+
         if (useLayoutWithDefault()) {
             mLayoutId = R.layout.resolver_list_with_default;
         } else {
@@ -1289,28 +1306,12 @@ public class ResolverActivity extends Activity implements
      * @return <code>true</code> if the activity is finishing and creation should halt.
      */
     final boolean postRebuildListInternal(boolean rebuildCompleted) {
-
         int count = mMultiProfilePagerAdapter.getActiveListAdapter().getUnfilteredCount();
 
         // We only rebuild asynchronously when we have multiple elements to sort. In the case where
         // we're already done, we can check if we should auto-launch immediately.
-        if (rebuildCompleted) {
-            if (count == 1
-                    && mMultiProfilePagerAdapter.getActiveListAdapter().getOtherProfile() == null) {
-                // Only one target, so we're a candidate to auto-launch!
-                final TargetInfo target = mMultiProfilePagerAdapter.getActiveListAdapter()
-                        .targetInfoForPosition(0, false);
-                if (shouldAutoLaunchSingleChoice(target)) {
-                    safelyStartActivity(target);
-                    mPersonalPackageMonitor.unregister();
-                    if (mWorkPackageMonitor != null) {
-                        mWorkPackageMonitor.unregister();
-                    }
-                    mRegistered = false;
-                    finish();
-                    return true;
-                }
-            }
+        if (rebuildCompleted && maybeAutolaunchActivity()) {
+            return true;
         }
 
         setupViewVisibilities();
@@ -1320,6 +1321,129 @@ public class ResolverActivity extends Activity implements
         }
 
         return false;
+    }
+
+    private int isPermissionGranted(String permission, int uid) {
+        return ActivityManager.checkComponentPermission(permission, uid,
+                /* owningUid= */-1, /* exported= */ true);
+    }
+
+    /**
+     * @return {@code true} if a resolved target is autolaunched, otherwise {@code false}
+     */
+    private boolean maybeAutolaunchActivity() {
+        int numberOfProfiles = mMultiProfilePagerAdapter.getItemCount();
+        if (numberOfProfiles == 1 && maybeAutolaunchIfSingleTarget()) {
+            return true;
+        } else if (numberOfProfiles == 2 && maybeAutolaunchIfCrossProfileSupported()) {
+            // note that autolaunching when we have 2 profiles, 1 resolved target on the active
+            // tab and 0 resolved targets on the inactive tab, is already handled before launching
+            // ResolverActivity
+            return true;
+        }
+        return false;
+    }
+
+    private boolean maybeAutolaunchIfSingleTarget() {
+        int count = mMultiProfilePagerAdapter.getActiveListAdapter().getUnfilteredCount();
+        if (count != 1) {
+            return false;
+        }
+
+        // Only one target, so we're a candidate to auto-launch!
+        final TargetInfo target = mMultiProfilePagerAdapter.getActiveListAdapter()
+                .targetInfoForPosition(0, false);
+        if (shouldAutoLaunchSingleChoice(target)) {
+            safelyStartActivity(target);
+            finish();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * When we have a personal and a work profile, we auto launch in the following scenario:
+     * - There is 1 resolved target on each profile
+     * - That target is the same app on both profiles
+     * - The target app has permission to communicate cross profiles
+     * - The target app has declared it supports cross-profile communication via manifest metadata
+     */
+    private boolean maybeAutolaunchIfCrossProfileSupported() {
+        int count = mMultiProfilePagerAdapter.getActiveListAdapter().getUnfilteredCount();
+        if (count != 1) {
+            return false;
+        }
+        ResolverListAdapter inactiveListAdapter =
+                mMultiProfilePagerAdapter.getInactiveListAdapter();
+        if (inactiveListAdapter.getUnfilteredCount() != 1) {
+            return false;
+        }
+        TargetInfo activeProfileTarget = mMultiProfilePagerAdapter.getActiveListAdapter()
+                .targetInfoForPosition(0, false);
+        TargetInfo inactiveProfileTarget = inactiveListAdapter.targetInfoForPosition(0, false);
+        if (!Objects.equals(activeProfileTarget.getResolvedComponentName(),
+                inactiveProfileTarget.getResolvedComponentName())) {
+            return false;
+        }
+        if (!shouldAutoLaunchSingleChoice(activeProfileTarget)) {
+            return false;
+        }
+        String packageName = activeProfileTarget.getResolvedComponentName().getPackageName();
+        if (!canAppInteractCrossProfiles(packageName)) {
+            return false;
+        }
+
+        safelyStartActivity(activeProfileTarget);
+        finish();
+        return true;
+    }
+
+    /**
+     * Returns whether the package has the necessary permissions to interact across profiles on
+     * behalf of a given user.
+     *
+     * <p>This means meeting the following condition:
+     * <ul>
+     *     <li>The app's {@link ApplicationInfo#crossProfile} flag must be true, and at least
+     *     one of the following conditions must be fulfilled</li>
+     *     <li>{@code Manifest.permission.INTERACT_ACROSS_USERS_FULL} granted.</li>
+     *     <li>{@code Manifest.permission.INTERACT_ACROSS_USERS} granted.</li>
+     *     <li>{@code Manifest.permission.INTERACT_ACROSS_PROFILES} granted, or the corresponding
+     *     AppOps {@code android:interact_across_profiles} is set to "allow".</li>
+     * </ul>
+     *
+     */
+    private boolean canAppInteractCrossProfiles(String packageName) {
+        ApplicationInfo applicationInfo;
+        try {
+            applicationInfo = getPackageManager().getApplicationInfo(packageName, 0);
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Package " + packageName + " does not exist on current user.");
+            return false;
+        }
+        if (!applicationInfo.crossProfile) {
+            return false;
+        }
+
+        int packageUid = applicationInfo.uid;
+
+        if (isPermissionGranted(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                packageUid) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        if (isPermissionGranted(android.Manifest.permission.INTERACT_ACROSS_USERS, packageUid)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        if (PermissionChecker.checkPermissionForPreflight(this, INTERACT_ACROSS_PROFILES,
+                PID_UNKNOWN, packageUid, packageName) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isAutolaunching() {
+        return !mRegistered && isFinishing();
     }
 
     private void setupProfileTabs() {
@@ -1517,12 +1641,20 @@ public class ResolverActivity extends Activity implements
     }
 
     @Override // ResolverListCommunicator
-    public void onHandlePackagesChanged() {
-        ResolverListAdapter activeListAdapter = mMultiProfilePagerAdapter.getActiveListAdapter();
-        activeListAdapter.rebuildList();
-        if (activeListAdapter.getCount() == 0) {
-            // We no longer have any items...  just finish the activity.
-            finish();
+    public void onHandlePackagesChanged(ResolverListAdapter listAdapter) {
+        if (listAdapter == mMultiProfilePagerAdapter.getActiveListAdapter()) {
+            boolean listRebuilt = mMultiProfilePagerAdapter.rebuildActiveTab(true);
+            if (listRebuilt) {
+                ResolverListAdapter activeListAdapter =
+                        mMultiProfilePagerAdapter.getActiveListAdapter();
+                activeListAdapter.notifyDataSetChanged();
+                if (activeListAdapter.getCount() == 0) {
+                    // We no longer have any items...  just finish the activity.
+                    finish();
+                }
+            }
+        } else {
+            mMultiProfilePagerAdapter.clearInactiveProfileCache();
         }
     }
 
