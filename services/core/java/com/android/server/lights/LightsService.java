@@ -34,7 +34,7 @@ public class LightsService extends SystemService {
 
     final LightImpl mLights[] = new LightImpl[LightsManager.LIGHT_ID_COUNT];
 
-    private final class LightImpl extends Light {
+    private final class LightImpl extends LogicalLight {
 
         private final IBinder mDisplayToken;
         private final int mSurfaceControlMaximumBrightness;
@@ -249,7 +249,7 @@ public class LightsService extends SystemService {
 
     private final LightsManager mService = new LightsManager() {
         @Override
-        public Light getLight(int id) {
+        public LogicalLight getLight(int id) {
             if (0 <= id && id < LIGHT_ID_COUNT) {
                 return mLights[id];
             } else {
