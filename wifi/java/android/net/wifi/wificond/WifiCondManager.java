@@ -1052,6 +1052,22 @@ public class WifiCondManager {
     }
 
     /**
+     * Get the device phy capabilities for a given interface
+     */
+    @Nullable public DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String ifaceName) {
+        if (mWificond == null) {
+            Log.e(TAG, "Can not query for device wiphy capabilities at this time");
+            return null;
+        }
+
+        try {
+            return mWificond.getDeviceWiphyCapabilities(ifaceName);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Register the provided callback handler for SoftAp events. Note that the Soft AP itself is
      * configured using {@link #setupInterfaceForSoftApMode(String)}.
      *

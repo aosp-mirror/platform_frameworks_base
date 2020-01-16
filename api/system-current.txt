@@ -6776,6 +6776,15 @@ package android.net.wifi.rtt {
 
 package android.net.wifi.wificond {
 
+  public final class DeviceWiphyCapabilities implements android.os.Parcelable {
+    ctor public DeviceWiphyCapabilities();
+    method public int describeContents();
+    method public boolean isWifiStandardSupported(int);
+    method public void setWifiStandardSupport(int, boolean);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.DeviceWiphyCapabilities> CREATOR;
+  }
+
   public final class NativeScanResult implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public byte[] getBssid();
@@ -6840,6 +6849,7 @@ package android.net.wifi.wificond {
     method public void abortScan(@NonNull String);
     method public void enableVerboseLogging(boolean);
     method @NonNull public int[] getChannelsMhzForBand(int);
+    method @Nullable public android.net.wifi.wificond.DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String);
     method @NonNull public java.util.List<android.net.wifi.wificond.NativeScanResult> getScanResults(@NonNull String, int);
     method @Nullable public android.net.wifi.wificond.WifiCondManager.TxPacketCounters getTxPacketCounters(@NonNull String);
     method public boolean initialize(@NonNull Runnable);
