@@ -4051,6 +4051,7 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
+    @SuppressLint("ServiceName")
     public static final String WIFI_COND_SERVICE = "wificond";
 
     /**
