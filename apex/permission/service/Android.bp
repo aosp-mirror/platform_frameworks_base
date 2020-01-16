@@ -12,13 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-java_library {
-    name: "service-permission",
+filegroup {
+    name: "service-permission-sources",
     srcs: [
         "java/**/*.java",
     ],
-    sdk_version: "system_current",
+}
+
+java_library {
+    name: "service-permission",
+    srcs: [
+        ":service-permission-sources",
+    ],
+    // TODO(b/146758669): Use "system_current" after nullability annotations are system APIs.
+    sdk_version: "core_current",
     libs: [
+        "framework-annotations-lib",
+        // TODO(b/146758669): Remove this line after nullability annotations are system APIs.
+        "android_system_stubs_current",
         "framework-permission",
     ],
     apex_available: [
