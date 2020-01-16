@@ -26,6 +26,7 @@ import com.android.internal.infra.AndroidFuture;
 
 import com.google.android.icing.proto.SchemaProto;
 import com.google.android.icing.proto.SearchResultProto;
+import com.google.android.icing.proto.StatusProto;
 import com.google.android.icing.protobuf.InvalidProtocolBufferException;
 
 import java.util.List;
@@ -197,11 +198,11 @@ public class AppSearchManager {
                     callback.accept(null, e);
                     return;
                 }
-                if (searchResultProto.hasError()) {
+                if (searchResultProto.getStatus().getCode() != StatusProto.Code.OK) {
                     // TODO(sidchhabra): Add better exception handling.
                     callback.accept(
                             null,
-                            new RuntimeException(searchResultProto.getError().getErrorMessage()));
+                            new RuntimeException(searchResultProto.getStatus().getMessage()));
                     return;
                 }
                 SearchResults searchResults = new SearchResults(searchResultProto);
