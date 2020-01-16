@@ -773,39 +773,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private INotificationManager mNotificationManager =
-            INotificationManager.Stub.asInterface(
-                    ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-
-    private void pullNotificationStats(int reportId, int tagId, long elapsedNanos,
-            long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        final long callingToken = Binder.clearCallingIdentity();
-        try {
-            // determine last pull tine. Copy file trick from pullProcessStats?
-            long lastNotificationStatsNs = wallClockNanos -
-                    TimeUnit.NANOSECONDS.convert(1, TimeUnit.DAYS);
-
-            List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
-            long notificationStatsNs = mNotificationManager.pullStats(
-                    lastNotificationStatsNs, reportId, true, statsFiles);
-            if (statsFiles.size() != 1) {
-                return;
-            }
-            unpackStreamedData(tagId, elapsedNanos, wallClockNanos, pulledData, statsFiles);
-        } catch (IOException e) {
-            Log.e(TAG, "Getting notistats failed: ", e);
-
-        } catch (RemoteException e) {
-            Log.e(TAG, "Getting notistats failed: ", e);
-        } catch (SecurityException e) {
-            Log.e(TAG, "Getting notistats failed: ", e);
-        } finally {
-            Binder.restoreCallingIdentity(callingToken);
-        }
-
-    }
-
     static void unpackStreamedData(int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData, List<ParcelFileDescriptor> statsFiles)
             throws IOException {
@@ -1343,12 +1310,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.APP_OPS: {
                 pullAppOps(elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.NOTIFICATION_REMOTE_VIEWS: {
-                pullNotificationStats(NotificationManagerService.REPORT_REMOTE_VIEWS,
-                        tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

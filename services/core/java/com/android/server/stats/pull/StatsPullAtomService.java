@@ -201,6 +201,9 @@ public class StatsPullAtomService extends SystemService {
     private final Object mStoragedLock = new Object();
     @GuardedBy("mStoragedLock")
     private IStoraged mStorageService;
+    private final Object mNotificationStatsLock = new Object();
+    @GuardedBy("mNotificationStatsLock")
+    private INotificationManager mNotificationManagerService;
 
     private final Context mContext;
     private StatsManager mStatsManager;
@@ -374,6 +377,28 @@ public class StatsPullAtomService extends SystemService {
             }
         }
         return mStorageService;
+    }
+
+    private INotificationManager getINotificationManagerService() {
+        synchronized (mNotificationStatsLock) {
+            if (mNotificationManagerService == null) {
+                mNotificationManagerService = INotificationManager.Stub.asInterface(
+                                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+            }
+            if (mNotificationManagerService != null) {
+                try {
+                    mNotificationManagerService.asBinder().linkToDeath(() -> {
+                        synchronized (mNotificationStatsLock) {
+                            mNotificationManagerService = null;
+                        }
+                    }, /* flags */ 0);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "linkToDeath with notificationManager failed", e);
+                    mNotificationManagerService = null;
+                }
+            }
+        }
+        return mNotificationManagerService;
     }
 
     private void registerWifiBytesTransfer() {
@@ -2167,12 +2192,88 @@ public class StatsPullAtomService extends SystemService {
         // No op.
     }
 
-    private void registerNotificationRemoteViews() {
-        // No op.
+    static void unpackStreamedData(int atomTag, List<StatsEvent> pulledData,
+            List<ParcelFileDescriptor> statsFiles) throws IOException {
+        InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(statsFiles.get(0));
+        int[] len = new int[1];
+        byte[] stats = readFully(stream, len);
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeByteArray(Arrays.copyOf(stats, len[0]))
+                .build();
+        pulledData.add(e);
     }
 
-    private void pullNotificationRemoteViews() {
-        // No op.
+    static byte[] readFully(InputStream stream, int[] outLen) throws IOException {
+        int pos = 0;
+        final int initialAvail = stream.available();
+        byte[] data = new byte[initialAvail > 0 ? (initialAvail + 1) : 16384];
+        while (true) {
+            int amt = stream.read(data, pos, data.length - pos);
+            if (DEBUG) {
+                Slog.i(TAG, "Read " + amt + " bytes at " + pos + " of avail " + data.length);
+            }
+            if (amt < 0) {
+                if (DEBUG) {
+                    Slog.i(TAG, "**** FINISHED READING: pos=" + pos + " len=" + data.length);
+                }
+                outLen[0] = pos;
+                return data;
+            }
+            pos += amt;
+            if (pos >= data.length) {
+                byte[] newData = new byte[pos + 16384];
+                if (DEBUG) {
+                    Slog.i(TAG, "Copying " + pos + " bytes to new array len " + newData.length);
+                }
+                System.arraycopy(data, 0, newData, 0, pos);
+                data = newData;
+            }
+        }
+    }
+
+    private void registerNotificationRemoteViews() {
+        int tagId = StatsLog.NOTIFICATION_REMOTE_VIEWS;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullNotificationRemoteViews(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
+    }
+
+    private int pullNotificationRemoteViews(int atomTag, List<StatsEvent> pulledData) {
+        INotificationManager notificationManagerService = getINotificationManagerService();
+        if (notificationManagerService == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        final long callingToken = Binder.clearCallingIdentity();
+        try {
+            // determine last pull tine. Copy file trick from pullProcessStats?
+            long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
+            long lastNotificationStatsNs = wallClockNanos -
+                    TimeUnit.NANOSECONDS.convert(1, TimeUnit.DAYS);
+
+            List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
+            notificationManagerService.pullStats(lastNotificationStatsNs,
+                    NotificationManagerService.REPORT_REMOTE_VIEWS, true, statsFiles);
+            if (statsFiles.size() != 1) {
+                return StatsManager.PULL_SKIP;
+            }
+            unpackStreamedData(atomTag, pulledData, statsFiles);
+        } catch (IOException e) {
+            Slog.e(TAG, "Getting notistats failed: ", e);
+            return StatsManager.PULL_SKIP;
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Getting notistats failed: ", e);
+            return StatsManager.PULL_SKIP;
+        } catch (SecurityException e) {
+            Slog.e(TAG, "Getting notistats failed: ", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerDangerousPermissionStateSampled() {
