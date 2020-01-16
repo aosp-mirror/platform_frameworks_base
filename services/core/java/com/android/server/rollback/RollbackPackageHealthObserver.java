@@ -213,23 +213,6 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                 if (packageRollback.getVersionRolledBackFrom().equals(failedPackage)) {
                     return rollback;
                 }
-                // TODO(b/147666157): Extract version number of apk-in-apex so that we don't have
-                //  to rely on complicated reasoning as below
-
-                // Due to b/147666157, for apk in apex, we do not know the version we are rolling
-                // back from. But if a package X is embedded in apex A exclusively (not embedded in
-                // any other apex), which is not guaranteed, then it is sufficient to check only
-                // package names here, as the version of failedPackage and the PackageRollbackInfo
-                // can't be different. If failedPackage has a higher version, then it must have
-                // been updated somehow. There are two ways: it was updated by an update of apex A
-                // or updated directly as apk. In both cases, this rollback would have gotten
-                // expired when onPackageReplaced() was called. Since the rollback exists, it has
-                // same version as failedPackage.
-                if (packageRollback.isApkInApex()
-                        && packageRollback.getVersionRolledBackFrom().getPackageName()
-                        .equals(failedPackage.getPackageName())) {
-                    return rollback;
-                }
             }
         }
         return null;
