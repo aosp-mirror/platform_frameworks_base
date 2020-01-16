@@ -169,7 +169,7 @@ public class BubbleStackView extends FrameLayout {
      * Callback to run after the flyout hides. Also called if a new flyout is shown before the
      * previous one animates out.
      */
-    private Runnable mAfterFlyoutHides;
+    private Runnable mFlyoutOnHide;
 
     /** Layout change listener that moves the stack to the nearest valid position on rotation. */
     private OnLayoutChangeListener mOrientationChangedListener;
@@ -1401,109 +1401,104 @@ public class BubbleStackView extends FrameLayout {
     @VisibleForTesting
     void animateInFlyoutForBubble(Bubble bubble) {
         final CharSequence updateMessage = bubble.getUpdateMessage(getContext());
-
         if (!bubble.showFlyoutForBubble()) {
             // In case flyout was suppressed for this update, reset now.
             bubble.setSuppressFlyout(false);
             return;
         }
-
         if (updateMessage == null
                 || isExpanded()
                 || mIsExpansionAnimating
                 || mIsGestureInProgress
-                || mBubbleToExpandAfterFlyoutCollapse != null) {
+                || mBubbleToExpandAfterFlyoutCollapse != null
+                || bubble.getIconView() == null) {
             // Skip the message if none exists, we're expanded or animating expansion, or we're
-            // about to expand a bubble from the previous tapped flyout.
+            // about to expand a bubble from the previous tapped flyout, or if bubble view is null.
             return;
         }
-
-        if (bubble.getIconView() != null) {
-            // Temporarily suppress the dot while the flyout is visible.
-            bubble.getIconView().setSuppressDot(
-                    true /* suppressDot */, false /* animate */);
-
-            mFlyout.removeCallbacks(mAnimateInFlyout);
-            mFlyoutDragDeltaX = 0f;
-
-            if (mAfterFlyoutHides != null) {
-                mAfterFlyoutHides.run();
+        mFlyoutDragDeltaX = 0f;
+        clearFlyoutOnHide();
+        mFlyoutOnHide = () -> {
+            resetDot(bubble);
+            if (mBubbleToExpandAfterFlyoutCollapse == null) {
+                return;
             }
+            mBubbleData.setSelectedBubble(mBubbleToExpandAfterFlyoutCollapse);
+            mBubbleData.setExpanded(true);
+            mBubbleToExpandAfterFlyoutCollapse = null;
+        };
+        mFlyout.setVisibility(INVISIBLE);
 
-            mAfterFlyoutHides = () -> {
-                final boolean suppressDot = !bubble.showBubbleDot();
-                // If we're going to suppress the dot, make it visible first so it'll
-                // visibly animate away.
-                if (suppressDot) {
-                    bubble.getIconView().setSuppressDot(
-                            false /* suppressDot */, false /* animate */);
-                }
-                // Reset dot suppression. If we're not suppressing due to DND, then
-                // stop suppressing it with no animation (since the flyout has
-                // transformed into the dot). If we are suppressing due to DND, animate
-                // it away.
-                bubble.getIconView().setSuppressDot(
-                        suppressDot /* suppressDot */,
-                        suppressDot /* animate */);
+        // Temporarily suppress the dot while the flyout is visible.
+        bubble.getIconView().setSuppressDot(
+                true /* suppressDot */, false /* animate */);
 
-                if (mBubbleToExpandAfterFlyoutCollapse != null) {
-                    mBubbleData.setSelectedBubble(mBubbleToExpandAfterFlyoutCollapse);
-                    mBubbleData.setExpanded(true);
-                    mBubbleToExpandAfterFlyoutCollapse = null;
-                }
-            };
-
-            mFlyout.setVisibility(INVISIBLE);
-
-            // Post in case layout isn't complete and getWidth returns 0.
-            post(() -> {
-                // An auto-expanding bubble could have been posted during the time it takes to
-                // layout.
-                if (isExpanded()) {
-                    return;
-                }
-
-                final Runnable afterShow = () -> {
-                    mAnimateInFlyout = () -> {
-                        mFlyout.setVisibility(VISIBLE);
-                        bubble.getIconView().setSuppressDot(
-                                true /* suppressDot */, false /* animate */);
-                        mFlyoutDragDeltaX =
-                                mStackAnimationController.isStackOnLeftSide()
-                                        ? -mFlyout.getWidth()
-                                        : mFlyout.getWidth();
-                        animateFlyoutCollapsed(false /* collapsed */, 0 /* velX */);
-                        mFlyout.postDelayed(mHideFlyout, FLYOUT_HIDE_AFTER);
-                    };
-
-                    mFlyout.postDelayed(mAnimateInFlyout, 200);
+        // Start flyout expansion. Post in case layout isn't complete and getWidth returns 0.
+        post(() -> {
+            // An auto-expanding bubble could have been posted during the time it takes to
+            // layout.
+            if (isExpanded()) {
+                return;
+            }
+            final Runnable expandFlyoutAfterDelay = () -> {
+                mAnimateInFlyout = () -> {
+                    mFlyout.setVisibility(VISIBLE);
+                    mFlyoutDragDeltaX =
+                            mStackAnimationController.isStackOnLeftSide()
+                                    ? -mFlyout.getWidth()
+                                    : mFlyout.getWidth();
+                    animateFlyoutCollapsed(false /* collapsed */, 0 /* velX */);
+                    mFlyout.postDelayed(mHideFlyout, FLYOUT_HIDE_AFTER);
                 };
-
-                mFlyout.setupFlyoutStartingAsDot(
-                        updateMessage, mStackAnimationController.getStackPosition(), getWidth(),
-                        mStackAnimationController.isStackOnLeftSide(),
-                        bubble.getIconView().getBadgeColor(),
-                        afterShow,
-                        mAfterFlyoutHides,
-                        bubble.getIconView().getDotCenter());
-                mFlyout.bringToFront();
-            });
-        }
-
+                mFlyout.postDelayed(mAnimateInFlyout, 200);
+            };
+            mFlyout.setupFlyoutStartingAsDot(
+                    updateMessage, mStackAnimationController.getStackPosition(), getWidth(),
+                    mStackAnimationController.isStackOnLeftSide(),
+                    bubble.getIconView().getBadgeColor() /* dotColor */,
+                    expandFlyoutAfterDelay /* onLayoutComplete */,
+                    mFlyoutOnHide,
+                    bubble.getIconView().getDotCenter());
+            mFlyout.bringToFront();
+        });
         mFlyout.removeCallbacks(mHideFlyout);
         mFlyout.postDelayed(mHideFlyout, FLYOUT_HIDE_AFTER);
         logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__FLYOUT);
     }
 
+    private void resetDot(Bubble bubble) {
+        final boolean suppressDot = !bubble.showBubbleDot();
+        // If we're going to suppress the dot, make it visible first so it'll
+        // visibly animate away.
+
+        if (suppressDot) {
+            bubble.getIconView().setSuppressDot(
+                    false /* suppressDot */, false /* animate */);
+        }
+        // Reset dot suppression. If we're not suppressing due to DND, then
+        // stop suppressing it with no animation (since the flyout has
+        // transformed into the dot). If we are suppressing due to DND, animate
+        // it away.
+        bubble.getIconView().setSuppressDot(
+                suppressDot /* suppressDot */,
+                suppressDot /* animate */);
+    }
+
     /** Hide the flyout immediately and cancel any pending hide runnables. */
     private void hideFlyoutImmediate() {
-        if (mAfterFlyoutHides != null) {
-            mAfterFlyoutHides.run();
-        }
-
+        clearFlyoutOnHide();
         mFlyout.removeCallbacks(mAnimateInFlyout);
         mFlyout.removeCallbacks(mHideFlyout);
         mFlyout.hideFlyout();
+    }
+
+    private void clearFlyoutOnHide() {
+        mFlyout.removeCallbacks(mAnimateInFlyout);
+        if (mFlyoutOnHide == null) {
+            return;
+        }
+        mFlyoutOnHide.run();
+        mFlyoutOnHide = null;
     }
 
     @Override

@@ -61,7 +61,7 @@ public class BubbleView extends FrameLayout {
     // mBubbleIconFactory cannot be static because it depends on Context.
     private BubbleIconFactory mBubbleIconFactory;
 
-    private boolean mSuppressDot = false;
+    private boolean mSuppressDot;
 
     private Bubble mBubble;
 
@@ -140,6 +140,7 @@ public class BubbleView extends FrameLayout {
     public void setAppIcon(Drawable appIcon) {
         mUserBadgedAppIcon = appIcon;
     }
+
     /**
      * @return the {@link ExpandableNotificationRow} view to display notification content when the
      * bubble is expanded.
@@ -154,7 +155,6 @@ public class BubbleView extends FrameLayout {
         updateDotVisibility(animate, null /* after */);
     }
 
-
     /**
      * Sets whether or not to hide the dot even if we'd otherwise show it. This is used while the
      * flyout is visible or animating, to hide the dot until the flyout visually transforms into it.
@@ -166,7 +166,7 @@ public class BubbleView extends FrameLayout {
 
     /** Sets the position of the 'new' dot, animating it out and back in if requested. */
     void setDotPosition(boolean onLeft, boolean animate) {
-        if (animate && onLeft != mBadgedImageView.getDotOnLeft() && !mSuppressDot) {
+        if (animate && onLeft != mBadgedImageView.getDotOnLeft() && shouldShowDot()) {
             animateDot(false /* showDot */, () -> {
                 mBadgedImageView.setDotOnLeft(onLeft);
                 animateDot(true /* showDot */, null);
@@ -190,12 +190,12 @@ public class BubbleView extends FrameLayout {
      * after animation if requested.
      */
     private void updateDotVisibility(boolean animate, Runnable after) {
-        boolean showDot = mBubble.showBubbleDot() && !mSuppressDot;
-
+        final boolean showDot = shouldShowDot();
         if (animate) {
             animateDot(showDot, after);
         } else {
             mBadgedImageView.setShowDot(showDot);
+            mBadgedImageView.setDotScale(showDot ? 1f : 0f);
         }
     }
 
@@ -203,27 +203,25 @@ public class BubbleView extends FrameLayout {
      * Animates the badge to show or hide.
      */
     private void animateDot(boolean showDot, Runnable after) {
-        if (mBadgedImageView.isShowingDot() != showDot) {
-            if (showDot) {
-                mBadgedImageView.setShowDot(true);
-            }
-            mBadgedImageView.clearAnimation();
-            mBadgedImageView.animate().setDuration(200)
-                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                    .setUpdateListener((valueAnimator) -> {
-                        float fraction = valueAnimator.getAnimatedFraction();
-                        fraction = showDot ? fraction : 1f - fraction;
-                        mBadgedImageView.setDotScale(fraction);
-                    }).withEndAction(() -> {
-                        if (!showDot) {
-                            mBadgedImageView.setShowDot(false);
-                        }
-
-                        if (after != null) {
-                            after.run();
-                        }
-            }).start();
+        if (mBadgedImageView.isShowingDot() == showDot) {
+            return;
         }
+        // Do NOT wait until after animation ends to setShowDot
+        // to avoid overriding more recent showDot states.
+        mBadgedImageView.setShowDot(showDot);
+        mBadgedImageView.clearAnimation();
+        mBadgedImageView.animate().setDuration(200)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .setUpdateListener((valueAnimator) -> {
+                    float fraction = valueAnimator.getAnimatedFraction();
+                    fraction = showDot ? fraction : 1f - fraction;
+                    mBadgedImageView.setDotScale(fraction);
+                }).withEndAction(() -> {
+            mBadgedImageView.setDotScale(showDot ? 1f : 0f);
+            if (after != null) {
+                after.run();
+            }
+        }).start();
     }
 
     void updateViews() {
@@ -273,7 +271,11 @@ public class BubbleView extends FrameLayout {
         iconPath.transform(matrix);
         mBadgedImageView.drawDot(iconPath);
 
-        animateDot(mBubble.showBubbleDot() /* showDot */, null /* after */);
+        animateDot(shouldShowDot(), null /* after */);
+    }
+
+    boolean shouldShowDot() {
+        return mBubble.showBubbleDot() && !mSuppressDot;
     }
 
     int getBadgeColor() {

@@ -21,7 +21,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.widget.Switch;
+import android.text.TextUtils;
 
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.R;
@@ -79,24 +79,34 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
             return;
         }
         boolean newState = !mState.value;
-        mUiModeManager.setNightMode(newState ? UiModeManager.MODE_NIGHT_YES
-                : UiModeManager.MODE_NIGHT_NO);
+        mUiModeManager.setNightModeActivated(newState);
         refreshState(newState);
     }
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        int uiMode = mUiModeManager.getNightMode();
         boolean powerSave = mBatteryController.isPowerSave();
+        boolean isAuto = uiMode == UiModeManager.MODE_NIGHT_AUTO;
         boolean nightMode = (mContext.getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+                        & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
 
+        if (powerSave) {
+            state.secondaryLabel = mContext.getResources().getString(
+                    R.string.quick_settings_dark_mode_secondary_label_battery_saver);
+        } else if (isAuto) {
+            state.secondaryLabel = mContext.getResources().getString(nightMode
+                    ? R.string.quick_settings_dark_mode_secondary_label_until_sunrise
+                    : R.string.quick_settings_dark_mode_secondary_label_on_at_sunset);
+        } else {
+            state.secondaryLabel = null;
+        }
         state.value = nightMode;
-        state.label = mContext.getString(powerSave
-                ? R.string.quick_settings_ui_mode_night_label_battery_saver
-                : R.string.quick_settings_ui_mode_night_label);
-        state.contentDescription = state.label;
+        state.label = mContext.getString(R.string.quick_settings_ui_mode_night_label);
         state.icon = mIcon;
-        state.expandedAccessibilityClassName = Switch.class.getName();
+        state.contentDescription = TextUtils.isEmpty(state.secondaryLabel)
+                ? state.label
+                : TextUtils.concat(state.label, ", ", state.secondaryLabel);
         if (powerSave) {
             state.state = Tile.STATE_UNAVAILABLE;
         } else {
@@ -112,7 +122,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_DISPLAY_SETTINGS);
+        return new Intent(Settings.ACTION_DARK_THEME_SETTINGS);
     }
 
     @Override

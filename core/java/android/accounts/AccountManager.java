@@ -563,6 +563,21 @@ public class AccountManager {
      * account, or the AbstractAcccountAuthenticator managing the account did so or because the
      * client shares a signature with the managing AbstractAccountAuthenticator.
      *
+     * <div class="caution"><p><b>Caution: </b>This method returns personal and sensitive user data.
+     * If your app accesses, collects, uses, or shares personal and sensitive data, you must clearly
+     * disclose that fact to users. For apps published on Google Play, policies protecting user data
+     * require that you do the following:</p>
+     * <ul>
+     * <li>Disclose to the user how your app accesses, collects, uses, or shares personal and
+     * sensitive data. Learn more about
+     * <a href="https://play.google.com/about/privacy-security-deception/user-data/#!#personal-sensitive">acceptable
+     * disclosure and consent</a>.</li>
+     * <li>Provide a privacy policy that describes your use of this data on- and off-device.</li>
+     * </ul>
+     * <p>To learn more, visit the
+     * <a href="https://play.google.com/about/privacy-security-deception/user-data">Google Play
+     * Policy regarding user data</a>.</p></div>
+     *
      * <p>
      * It is safe to call this method from the main thread.
      *
@@ -649,6 +664,22 @@ public class AccountManager {
      * the account. For example, there are types corresponding to Google and Facebook. The exact
      * string token to use will be published somewhere associated with the authenticator in
      * question.
+     * </p>
+     *
+     * <div class="caution"><p><b>Caution: </b>This method returns personal and sensitive user data.
+     * If your app accesses, collects, uses, or shares personal and sensitive data, you must clearly
+     * disclose that fact to users. For apps published on Google Play, policies protecting user data
+     * require that you do the following:</p>
+     * <ul>
+     * <li>Disclose to the user how your app accesses, collects, uses, or shares personal and
+     * sensitive data. Learn more about
+     * <a href="https://play.google.com/about/privacy-security-deception/user-data/#!#personal-sensitive">acceptable
+     * disclosure and consent</a>.</li>
+     * <li>Provide a privacy policy that describes your use of this data on- and off-device.</li>
+     * </ul>
+     * <p>To learn more, visit the
+     * <a href="https://play.google.com/about/privacy-security-deception/user-data">Google Play
+     * Policy regarding user data</a>.</p></div>
      *
      * <p>
      * It is safe to call this method from the main thread.

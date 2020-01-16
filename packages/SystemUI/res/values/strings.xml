@@ -892,8 +892,12 @@
     <string name="quick_settings_secondary_label_until">Until <xliff:g id="time" example="7 am">%s</xliff:g></string>
     <!-- QuickSettings: Label for the toggle to activate dark theme (A.K.A Dark Mode). [CHAR LIMIT=20] -->
     <string name="quick_settings_ui_mode_night_label">Dark theme</string>
-    <!-- QuickSettings: Label for the dark theme tile when enabled by battery saver. [CHAR LIMIT=40] -->
-    <string name="quick_settings_ui_mode_night_label_battery_saver">Dark theme\nBattery saver</string>
+    <!-- QuickSettings: Secondary text for the dark theme tile when enabled by battery saver. [CHAR LIMIT=20] -->
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver">Battery Saver</string>
+    <!-- QuickSettings: Secondary text for when the Dark Mode will be enabled at sunset. [CHAR LIMIT=20] -->
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset">On at sunset</string>
+    <!-- QuickSettings: Secondary text for when the Dark Mode will be on until sunrise. [CHAR LIMIT=20] -->
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise">Until sunrise</string>
 
     <!-- QuickSettings: NFC tile [CHAR LIMIT=NONE] -->
     <string name="quick_settings_nfc_label">NFC</string>
@@ -963,6 +967,12 @@
 
     <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
     <string name="keyguard_retry">Swipe up to try again</string>
+
+    <!-- Indication when device is slow charging due to misalignment on the dock. [CHAR LIMIT=60] -->
+    <string name="dock_alignment_slow_charging" product="default">Realign phone for faster charging</string>
+
+    <!-- Indication when device is not charging due to bad placement on the dock. [CHAR LIMIT=60] -->
+    <string name="dock_alignment_not_charging" product="default">Realign phone to charge wirelessly</string>
 
     <!-- Text on keyguard screen and in Quick Settings footer indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=60] -->
     <string name="do_disclosure_generic">This device is managed by your organization</string>

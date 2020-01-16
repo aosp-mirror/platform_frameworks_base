@@ -116,8 +116,8 @@ public class NotificationShellCmdTest extends UiServiceTestCase {
         ArgumentCaptor<Notification> notificationCaptor =
                 ArgumentCaptor.forClass(Notification.class);
         verify(mMockBinderService).enqueueNotificationWithTag(
-                eq(NotificationShellCmd.NOTIFICATION_PACKAGE),
-                eq("android"),
+                eq(getContext().getPackageName()),
+                eq(getContext().getPackageName()),
                 eq(aTag),
                 eq(NotificationShellCmd.NOTIFICATION_ID),
                 notificationCaptor.capture(),

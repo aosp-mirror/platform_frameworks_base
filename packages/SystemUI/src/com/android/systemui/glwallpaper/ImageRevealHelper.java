@@ -19,6 +19,7 @@ package com.android.systemui.glwallpaper;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.util.Log;
 
 import com.android.systemui.Interpolators;
 
@@ -30,6 +31,7 @@ class ImageRevealHelper {
     private static final String TAG = ImageRevealHelper.class.getSimpleName();
     private static final float MAX_REVEAL = 0f;
     private static final float MIN_REVEAL = 1f;
+    private static final boolean DEBUG = true;
 
     private final ValueAnimator mAnimator;
     private final RevealStateListener mRevealListener;
@@ -56,8 +58,13 @@ class ImageRevealHelper {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (!mIsCanceled && mRevealListener != null) {
-                    mRevealListener.onRevealEnd();
+                if (mRevealListener != null) {
+                    if (DEBUG) {
+                        Log.d(TAG, "transition end, cancel=" + mIsCanceled + ", reveal=" + mReveal);
+                    }
+                    if (!mIsCanceled) {
+                        mRevealListener.onRevealEnd();
+                    }
                 }
                 mIsCanceled = false;
             }
@@ -65,16 +72,13 @@ class ImageRevealHelper {
             @Override
             public void onAnimationStart(Animator animation) {
                 if (mRevealListener != null) {
+                    if (DEBUG) {
+                        Log.d(TAG, "transition start");
+                    }
                     mRevealListener.onRevealStart(true /* animate */);
                 }
             }
         });
-    }
-
-    private void animate() {
-        mAnimator.cancel();
-        mAnimator.setFloatValues(mReveal, mAwake ? MAX_REVEAL : MIN_REVEAL);
-        mAnimator.start();
     }
 
     public float getReveal() {
@@ -82,8 +86,11 @@ class ImageRevealHelper {
     }
 
     void updateAwake(boolean awake, long duration) {
+        if (DEBUG) {
+            Log.d(TAG, "updateAwake: awake=" + awake + ", duration=" + duration);
+        }
+        mAnimator.cancel();
         mAwake = awake;
-        mAnimator.setDuration(duration);
         if (duration == 0) {
             // We are transiting from home to aod or aod to home directly,
             // we don't need to do transition in these cases.
@@ -92,7 +99,9 @@ class ImageRevealHelper {
             mRevealListener.onRevealStateChanged();
             mRevealListener.onRevealEnd();
         } else {
-            animate();
+            mAnimator.setDuration(duration);
+            mAnimator.setFloatValues(mReveal, mAwake ? MAX_REVEAL : MIN_REVEAL);
+            mAnimator.start();
         }
     }
 

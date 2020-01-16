@@ -210,7 +210,6 @@ class AlarmManagerService extends SystemService {
     IAlarmListener mTimeTickTrigger;
     PendingIntent mDateChangeSender;
     Random mRandom;
-    PendingIntent.CancelListener mOperationCancelListener;
     boolean mInteractive = true;
     long mNonInteractiveStartTime;
     long mNonInteractiveTime;
@@ -1498,7 +1497,6 @@ class AlarmManagerService extends SystemService {
 
         synchronized (mLock) {
             mHandler = new AlarmHandler();
-            mOperationCancelListener = (intent) -> removeImpl(intent, null);
             mConstants = new Constants(mHandler);
             mAppWakeupHistory = new AppWakeupHistory(Constants.DEFAULT_APP_STANDBY_WINDOW);
 
@@ -1750,9 +1748,6 @@ class AlarmManagerService extends SystemService {
         } else {
             maxElapsed = triggerElapsed + windowLength;
         }
-        if (operation != null) {
-            operation.registerCancelListener(mOperationCancelListener);
-        }
         synchronized (mLock) {
             if (DEBUG_BATCH) {
                 Slog.v(TAG, "set(" + operation + ") : type=" + type
@@ -1765,8 +1760,6 @@ class AlarmManagerService extends SystemService {
                         "Maximum limit of concurrent alarms " + mConstants.MAX_ALARMS_PER_UID
                                 + " reached for uid: " + UserHandle.formatUid(callingUid)
                                 + ", callingPackage: " + callingPackage;
-                mHandler.obtainMessage(AlarmHandler.UNREGISTER_CANCEL_LISTENER,
-                        operation).sendToTarget();
                 Slog.w(TAG, errorMsg);
                 throw new IllegalStateException(errorMsg);
             }
@@ -1787,8 +1780,6 @@ class AlarmManagerService extends SystemService {
             if (ActivityManager.getService().isAppStartModeDisabled(callingUid, callingPackage)) {
                 Slog.w(TAG, "Not setting alarm from " + callingUid + ":" + a
                         + " -- package not allowed to start");
-                mHandler.obtainMessage(AlarmHandler.UNREGISTER_CANCEL_LISTENER,
-                        operation).sendToTarget();
                 return;
             }
         } catch (RemoteException e) {
@@ -2042,6 +2033,11 @@ class AlarmManagerService extends SystemService {
         }
 
         @Override
+        public void remove(PendingIntent pi) {
+            mHandler.obtainMessage(AlarmHandler.REMOVE_FOR_CANCELED, pi).sendToTarget();
+        }
+
+        @Override
         public void registerInFlightListener(InFlightListener callback) {
             synchronized (mLock) {
                 mInFlightListeners.add(callback);
@@ -2146,8 +2142,6 @@ class AlarmManagerService extends SystemService {
             synchronized (mLock) {
                 removeLocked(operation, listener);
             }
-            mHandler.obtainMessage(AlarmHandler.UNREGISTER_CANCEL_LISTENER,
-                    operation).sendToTarget();
         }
 
         @Override
@@ -4152,7 +4146,7 @@ class AlarmManagerService extends SystemService {
         public static final int APP_STANDBY_BUCKET_CHANGED = 5;
         public static final int APP_STANDBY_PAROLE_CHANGED = 6;
         public static final int REMOVE_FOR_STOPPED = 7;
-        public static final int UNREGISTER_CANCEL_LISTENER = 8;
+        public static final int REMOVE_FOR_CANCELED = 8;
 
         AlarmHandler() {
             super(Looper.myLooper());
@@ -4235,10 +4229,10 @@ class AlarmManagerService extends SystemService {
                     }
                     break;
 
-                case UNREGISTER_CANCEL_LISTENER:
-                    final PendingIntent pi = (PendingIntent) msg.obj;
-                    if (pi != null) {
-                        pi.unregisterCancelListener(mOperationCancelListener);
+                case REMOVE_FOR_CANCELED:
+                    final PendingIntent operation = (PendingIntent) msg.obj;
+                    synchronized (mLock) {
+                        removeLocked(operation, null);
                     }
                     break;
 
@@ -4697,11 +4691,6 @@ class AlarmManagerService extends SystemService {
                                         Intent.EXTRA_ALARM_COUNT, alarm.count),
                                 mDeliveryTracker, mHandler, null,
                                 allowWhileIdle ? mIdleOptions : null);
-                        if (alarm.repeatInterval == 0) {
-                            // Keep the listener for repeating alarms until they get cancelled
-                            mHandler.obtainMessage(AlarmHandler.UNREGISTER_CANCEL_LISTENER,
-                                    alarm.operation).sendToTarget();
-                        }
                     } catch (PendingIntent.CanceledException e) {
                         if (alarm.repeatInterval > 0) {
                             // This IntentSender is no longer valid, but this

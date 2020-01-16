@@ -34,6 +34,7 @@ import android.util.Log;
 import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.bluetooth.LocalBluetoothProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 
 import java.io.FileDescriptor;
@@ -66,6 +67,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
 
     private boolean mEnabled;
     private int mConnectionState = BluetoothAdapter.STATE_DISCONNECTED;
+    private boolean mAudioProfileOnly;
+    private boolean mIsActive;
 
     private final H mHandler = new H(Looper.getMainLooper());
     private int mState;
@@ -103,6 +106,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         }
         pw.print("  mEnabled="); pw.println(mEnabled);
         pw.print("  mConnectionState="); pw.println(stateToString(mConnectionState));
+        pw.print("  mAudioProfileOnly="); pw.println(mAudioProfileOnly);
+        pw.print("  mIsActive="); pw.println(mIsActive);
         pw.print("  mConnectedDevices="); pw.println(mConnectedDevices);
         pw.print("  mCallbacks.size="); pw.println(mHandler.mCallbacks.size());
         pw.println("  Bluetooth Devices:");
@@ -176,6 +181,16 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     }
 
     @Override
+    public boolean isBluetoothAudioProfileOnly() {
+        return mAudioProfileOnly;
+    }
+
+    @Override
+    public boolean isBluetoothAudioActive() {
+        return mIsActive;
+    }
+
+    @Override
     public void setBluetoothEnabled(boolean enabled) {
         if (mLocalBluetoothManager != null) {
             mLocalBluetoothManager.getBluetoothAdapter().setBluetoothEnabled(enabled);
@@ -239,6 +254,48 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
             mConnectionState = state;
             mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
         }
+        updateAudioProfile();
+    }
+
+    private void updateActive() {
+        boolean isActive = false;
+
+        for (CachedBluetoothDevice device : getDevices()) {
+            isActive |= device.isActiveDevice(BluetoothProfile.HEADSET)
+                    || device.isActiveDevice(BluetoothProfile.A2DP)
+                    || device.isActiveDevice(BluetoothProfile.HEARING_AID);
+        }
+
+        if (mIsActive != isActive) {
+            mIsActive = isActive;
+            mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
+        }
+    }
+
+    private void updateAudioProfile() {
+        boolean audioProfileConnected = false;
+        boolean otherProfileConnected = false;
+
+        for (CachedBluetoothDevice device : getDevices()) {
+            for (LocalBluetoothProfile profile : device.getProfiles()) {
+                int profileId = profile.getProfileId();
+                boolean isConnected = device.isConnectedProfile(profile);
+                if (profileId == BluetoothProfile.HEADSET
+                        || profileId == BluetoothProfile.A2DP
+                        || profileId == BluetoothProfile.HEARING_AID) {
+                    audioProfileConnected |= isConnected;
+                } else {
+                    otherProfileConnected |= isConnected;
+                }
+            }
+        }
+
+        boolean audioProfileOnly = (audioProfileConnected && !otherProfileConnected);
+        if (audioProfileOnly != mAudioProfileOnly) {
+            mAudioProfileOnly = audioProfileOnly;
+            mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
+        }
+
     }
 
     @Override
@@ -290,6 +347,16 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         }
         mCachedState.remove(cachedDevice);
         updateConnected();
+        mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
+    }
+
+    @Override
+    public void onActiveDeviceChanged(CachedBluetoothDevice activeDevice, int bluetoothProfile) {
+        if (DEBUG) {
+            Log.d(TAG, "ActiveDeviceChanged=" + activeDevice.getAddress()
+                    + " profileId=" + bluetoothProfile);
+        }
+        updateActive();
         mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
     }
 
