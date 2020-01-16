@@ -22,9 +22,10 @@ interface IDynamicSystemService
 {
     /**
      * Start DynamicSystem installation.
+     * @param dsuSlot Name used to identify this installation
      * @return true if the call succeeds
      */
-    boolean startInstallation();
+    boolean startInstallation(@utf8InCpp String dsuSlot);
 
     /**
      * Create a DSU partition. This call may take 60~90 seconds. The caller

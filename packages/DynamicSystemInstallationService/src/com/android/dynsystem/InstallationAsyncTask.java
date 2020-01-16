@@ -89,10 +89,12 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
     interface ProgressListener {
         void onProgressUpdate(Progress progress);
+
         void onResult(int resultCode, Throwable detail);
     }
 
     private final String mUrl;
+    private final String mDsuSlot;
     private final long mSystemSize;
     private final long mUserdataSize;
     private final Context mContext;
@@ -106,9 +108,16 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     private InputStream mStream;
     private ZipFile mZipFile;
 
-    InstallationAsyncTask(String url, long systemSize, long userdataSize, Context context,
-            DynamicSystemManager dynSystem, ProgressListener listener) {
+    InstallationAsyncTask(
+            String url,
+            String dsuSlot,
+            long systemSize,
+            long userdataSize,
+            Context context,
+            DynamicSystemManager dynSystem,
+            ProgressListener listener) {
         mUrl = url;
+        mDsuSlot = dsuSlot;
         mSystemSize = systemSize;
         mUserdataSize = userdataSize;
         mContext = context;
@@ -126,14 +135,17 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
             verifyAndPrepare();
 
-            mDynSystem.startInstallation();
+            mDynSystem.startInstallation(mDsuSlot);
 
             installUserdata();
             if (isCancelled()) {
                 mDynSystem.remove();
                 return null;
             }
-
+            if (mUrl == null) {
+                mDynSystem.finishInstallation();
+                return null;
+            }
             installImages();
             if (isCancelled()) {
                 mDynSystem.remove();
@@ -194,6 +206,9 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     }
 
     private void verifyAndPrepare() throws Exception {
+        if (mUrl == null) {
+            return;
+        }
         String extension = mUrl.substring(mUrl.lastIndexOf('.') + 1);
 
         if ("gz".equals(extension) || "gzip".equals(extension)) {
