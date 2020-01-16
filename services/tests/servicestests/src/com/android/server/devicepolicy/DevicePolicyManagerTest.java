@@ -58,7 +58,6 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import static org.testng.Assert.assertThrows;
 
 import android.Manifest.permission;
-import android.annotation.RawRes;
 import android.app.Activity;
 import android.app.AppOpsManager;
 import android.app.Notification;
@@ -112,7 +111,6 @@ import org.mockito.internal.util.collections.Sets;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -5808,10 +5806,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     private File getPoliciesFile(File parentDir) {
         return new File(parentDir, "device_policies.xml");
-    }
-
-    private InputStream getRawStream(@RawRes int id) {
-        return mRealTestContext.getResources().openRawResource(id);
     }
 
     private void setUserSetupCompleteForUser(boolean isUserSetupComplete, int userhandle) {

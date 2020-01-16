@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<policies setup-complete="true" provisioning-state="3">
+    <admin name="com.android.frameworks.servicestests/com.android.server.devicepolicy.DummyDeviceAdmins$Admin1">
+        <policies flags="991"/>
+        <password-history-length value="33" />
+    </admin>
+</policies>
