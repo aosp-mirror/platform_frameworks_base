@@ -4602,7 +4602,9 @@ package android.net {
   }
 
   public class NetworkPolicyManager {
+    method @NonNull public android.telephony.SubscriptionPlan[] getSubscriptionPlans(int, @NonNull String);
     method public void setSubscriptionOverride(int, int, int, long, @NonNull String);
+    method public void setSubscriptionPlans(int, @NonNull android.telephony.SubscriptionPlan[], @NonNull String);
     field public static final int SUBSCRIPTION_OVERRIDE_CONGESTED = 2; // 0x2
     field public static final int SUBSCRIPTION_OVERRIDE_UNMETERED = 1; // 0x1
   }

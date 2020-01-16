@@ -337,7 +337,6 @@ public class NetworkPolicyManager {
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first
      * @param callingPackage the name of the package making the call.
-     *
      */
     public void setSubscriptionOverride(int subId, @SubscriptionOverrideMask int overrideMask,
             @SubscriptionOverrideMask int overrideValue, long timeoutMillis,
@@ -345,6 +344,37 @@ public class NetworkPolicyManager {
         try {
             mService.setSubscriptionOverride(subId, overrideMask, overrideValue, timeoutMillis,
                     callingPackage);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the subscription plans for a specific subscriber.
+     *
+     * @param subId the subscriber this relationship applies to.
+     * @param plans the list of plans.
+     * @param callingPackage the name of the package making the call
+     */
+    public void setSubscriptionPlans(int subId, @NonNull SubscriptionPlan[] plans,
+            @NonNull String callingPackage) {
+        try {
+            mService.setSubscriptionPlans(subId, plans, callingPackage);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get subscription plans for the given subscription id.
+     *
+     * @param subId the subscriber to get the subscription plans for.
+     * @param callingPackage the name of the package making the call.
+     */
+    @NonNull
+    public SubscriptionPlan[] getSubscriptionPlans(int subId, @NonNull String callingPackage) {
+        try {
+            return mService.getSubscriptionPlans(subId, callingPackage);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
