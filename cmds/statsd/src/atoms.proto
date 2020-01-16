@@ -342,7 +342,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10070
+    // Next: 10071
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -399,7 +399,7 @@ message Atom {
         ExternalStorageInfo external_storage_info = 10053;
         GpuStatsGlobalInfo gpu_stats_global_info = 10054;
         GpuStatsAppInfo gpu_stats_app_info = 10055;
-        SystemIonHeapSize system_ion_heap_size = 10056;
+        SystemIonHeapSize system_ion_heap_size = 10056 [deprecated = true];
         AppsOnExternalStorageInfo apps_on_external_storage_info = 10057;
         FaceSettings face_settings = 10058;
         CoolingDevice cooling_device = 10059;
@@ -413,6 +413,7 @@ message Atom {
         DangerousPermissionStateSampled dangerous_permission_state_sampled = 10067;
         GraphicsStats graphics_stats = 10068;
         RuntimeAppOpsAccess runtime_app_ops_access = 10069;
+        IonHeapSize ion_heap_size = 10070;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -6946,8 +6947,24 @@ message GpuStatsAppInfo {
  * Pulled from StatsCompanionService.
  */
 message SystemIonHeapSize {
+    // Deprecated due to limited support of ion stats in debugfs.
+    // Use `IonHeapSize` instead.
+    option deprecated = true;
+
     // Size of the system ion heap in bytes.
+    // Read from debugfs.
     optional int64 size_in_bytes = 1;
+}
+
+/*
+ * Logs the total size of the ion heap.
+ *
+ * Pulled from StatsCompanionService.
+ */
+message IonHeapSize {
+    // Total size of all ion heaps in kilobytes.
+    // Read from: /sys/kernel/ion/total_heaps_kb.
+    optional int32 total_size_kb = 1;
 }
 
 /*

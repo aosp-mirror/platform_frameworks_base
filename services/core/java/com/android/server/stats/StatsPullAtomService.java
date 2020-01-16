@@ -19,6 +19,7 @@ package com.android.server.stats;
 import static android.app.AppOpsManager.OP_FLAGS_ALL_TRUSTED;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
+import static android.os.Debug.getIonHeapsSizeKb;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.getUidForPid;
 import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
@@ -263,6 +264,7 @@ public class StatsPullAtomService extends SystemService {
         registerProcessMemoryHighWaterMark();
         registerProcessMemorySnapshot();
         registerSystemIonHeapSize();
+        registerIonHeapSize();
         registerProcessSystemIonHeapSize();
         registerTemperature();
         registerCoolingDevice();
@@ -952,6 +954,26 @@ public class StatsPullAtomService extends SystemService {
 
     private void pullSystemIonHeapSize() {
         // No op.
+    }
+
+    private void registerIonHeapSize() {
+        int tagId = StatsLog.ION_HEAP_SIZE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                /* PullAtomMetadata */ null,
+                (atomTag, data) -> pullIonHeapSize(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
+    }
+
+    private int pullIonHeapSize(int atomTag, List<StatsEvent> pulledData) {
+        int ionHeapSizeInKilobytes = (int) getIonHeapsSizeKb();
+        StatsEvent e = StatsEvent.newBuilder()
+              .setAtomId(atomTag)
+              .writeInt(ionHeapSizeInKilobytes)
+              .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerProcessSystemIonHeapSize() {
