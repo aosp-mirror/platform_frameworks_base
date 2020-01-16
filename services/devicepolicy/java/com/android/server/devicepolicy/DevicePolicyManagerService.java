@@ -8724,7 +8724,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return false;
         }
-        enforceManageUsers();
 
         return mInjector.binderWithCleanCallingIdentity(() -> {
             for (UserInfo ui : mUserManager.getUsers()) {

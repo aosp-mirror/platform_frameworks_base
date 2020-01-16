@@ -3832,11 +3832,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().userManager.getUsers())
                 .thenReturn(Arrays.asList(managedProfileUserInfo));
 
-        // Any caller without the MANAGE_USERS permission should get a security exception.
-        assertExpectException(SecurityException.class, null, () ->
-                dpm.isOrganizationOwnedDeviceWithManagedProfile());
-        // But when the right permission is granted, this should succeed.
-        mContext.permissions.add(android.Manifest.permission.MANAGE_USERS);
+        // Any caller should be able to call this method.
         assertFalse(dpm.isOrganizationOwnedDeviceWithManagedProfile());
         configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
         assertTrue(dpm.isOrganizationOwnedDeviceWithManagedProfile());
