@@ -223,4 +223,7 @@
 
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_PRESS_AND_HOLD}. -->
   <item type="id" name="accessibilityActionPressAndHold" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_IME_ENTER}. -->
+  <item type="id" name="accessibilityActionImeEnter" />
 </resources>

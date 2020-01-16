@@ -422,6 +422,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     static final int PROCESS_TEXT_REQUEST_CODE = 100;
 
+    // Accessibility action to send IME custom action for CTS testing.
+    public static final int ACCESSIBILITY_ACTION_IME_ENTER = R.id.accessibilityActionImeEnter;
+
     /**
      *  Return code of {@link #doKeyDown}.
      */
@@ -11740,6 +11743,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 info.setContentInvalid(true);
                 info.setError(mEditor.mError);
             }
+            // TextView will expose this action if it is editable and has focus.
+            if (isTextEditable() && isFocused()) {
+                CharSequence imeActionLabel = mContext.getResources().getString(
+                        com.android.internal.R.string.keyboardview_keycode_enter);
+                if (getImeActionId() != 0 && getImeActionLabel() != null) {
+                    imeActionLabel = getImeActionLabel();
+                    final int imeActionId = getImeActionId();
+                    // put ime action id into the extra data with ACTION_ARGUMENT_IME_ACTION_ID_INT.
+                    final Bundle argument = info.getExtras();
+                    argument.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_IME_ACTION_ID_INT,
+                            imeActionId);
+                }
+                AccessibilityNodeInfo.AccessibilityAction action =
+                        new AccessibilityNodeInfo.AccessibilityAction(
+                                ACCESSIBILITY_ACTION_IME_ENTER, imeActionLabel);
+                info.addAction(action);
+            }
         }
 
         if (!TextUtils.isEmpty(mText)) {
@@ -12048,6 +12068,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     int updatedTextLength = mText.length();
                     if (updatedTextLength > 0) {
                         Selection.setSelection(mSpannable, updatedTextLength);
+                    }
+                }
+            } return true;
+            case ACCESSIBILITY_ACTION_IME_ENTER: {
+                if (isFocused() && isTextEditable()) {
+                    final int imeActionId = (arguments != null) ? arguments.getInt(
+                            AccessibilityNodeInfo.ACTION_ARGUMENT_IME_ACTION_ID_INT,
+                            EditorInfo.IME_ACTION_UNSPECIFIED)
+                            : EditorInfo.IME_ACTION_UNSPECIFIED;
+                    if (imeActionId == getImeActionId()) {
+                        onEditorAction(imeActionId);
                     }
                 }
             } return true;

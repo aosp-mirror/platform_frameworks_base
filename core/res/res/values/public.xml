@@ -3054,6 +3054,7 @@
       <public name="accessibilitySystemActionToggleSplitScreen" />
       <public name="accessibilitySystemActionLockScreen" />
       <public name="accessibilitySystemActionTakeScreenshot" />
+      <public name="accessibilityActionImeEnter" />
     </public-group>
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE
