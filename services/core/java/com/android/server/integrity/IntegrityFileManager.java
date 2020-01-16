@@ -185,6 +185,10 @@ public class IntegrityFileManager {
                     && tmpDir.renameTo(mStagingDir))) {
                 throw new IOException("Error switching staging/rules directory");
             }
+
+            for (File file : mStagingDir.listFiles()) {
+                file.delete();
+            }
         }
     }
 
