@@ -1,7 +1,12 @@
 {
-  "postsubmit": [
+  "presubmit": [
     {
       "name": "FrameworksNetIntegrationTests"
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "FrameworksNetDeflakeTest"
     }
   ]
 }
