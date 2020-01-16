@@ -1147,8 +1147,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             @ShortcutType int shortcutType) {
         Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra(AccessibilityManager.EXTRA_SHORTCUT_TYPE, shortcutType);
         final Bundle bundle = ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle();
-        bundle.putInt(AccessibilityManager.EXTRA_SHORTCUT_TYPE, shortcutType);
         mContext.startActivityAsUser(intent, bundle, UserHandle.of(mCurrentUserId));
     }
 
