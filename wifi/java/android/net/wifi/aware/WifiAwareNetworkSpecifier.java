@@ -289,14 +289,6 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
         return sb.toString();
     }
 
-    /** @hide */
-    @Override
-    public void assertValidFromUid(int requestorUid) {
-        if (this.requestorUid != requestorUid) {
-            throw new SecurityException("mismatched UIDs");
-        }
-    }
-
     /**
      * A builder class for a Wi-Fi Aware network specifier to set up an Aware connection with a
      * peer.
