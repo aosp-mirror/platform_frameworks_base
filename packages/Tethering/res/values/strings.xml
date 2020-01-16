@@ -15,19 +15,21 @@
 -->
 <resources>
     <!-- Shown when the device is tethered -->
-    <!-- Strings for tethered notification title [CHAR LIMIT=200] -->
+    <!-- String for tethered notification title [CHAR LIMIT=200] -->
     <string name="tethered_notification_title">Tethering or hotspot active</string>
-    <!-- Strings for tethered notification message [CHAR LIMIT=200] -->
+    <!-- String for tethered notification message [CHAR LIMIT=200] -->
     <string name="tethered_notification_message">Tap to set up.</string>
 
     <!-- This notification is shown when tethering has been disabled on a user's device.
     The device is managed by the user's employer. Tethering can't be turned on unless the
     IT administrator allows it. The noun "admin" is another reference for "IT administrator." -->
-    <!-- Strings for tether disabling notification title [CHAR LIMIT=200] -->
+    <!-- String for tether disabling notification title [CHAR LIMIT=200] -->
     <string name="disable_tether_notification_title">Tethering is disabled</string>
-    <!-- Strings for tether disabling notification message [CHAR LIMIT=200] -->
+    <!-- String for tether disabling notification message [CHAR LIMIT=200] -->
     <string name="disable_tether_notification_message">Contact your admin for details</string>
 
-    <!-- Strings for tether notification channel name [CHAR LIMIT=200] -->
+    <!-- This string should be consistent with the "Hotspot & tethering" text in the "Network and
+    Internet" settings page. That is currently the tether_settings_title_all string. -->
+    <!-- String for tether notification channel name [CHAR LIMIT=200] -->
     <string name="notification_channel_tethering_status">Hotspot &amp; tethering status</string>
 </resources>
