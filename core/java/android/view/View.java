@@ -22,6 +22,7 @@ import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LO
 import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
 import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
+import static android.view.WindowInsetsAnimationCallback.DISPATCH_MODE_CONTINUE_ON_SUBTREE;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 
 import static java.lang.Math.max;
@@ -111,6 +112,7 @@ import android.view.AccessibilityIterators.WordTextSegmentIterator;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.WindowInsetsAnimationCallback.AnimationBounds;
 import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
+import android.view.WindowInsetsAnimationCallback.DispatchMode;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -949,22 +951,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static boolean sAcceptZeroSizeDragShadow;
 
     /**
-     * Prior to Q, {@link #dispatchApplyWindowInsets} had some issues:
-     * <ul>
-     *     <li>The modified insets changed by {@link #onApplyWindowInsets} were passed to the
-     *     entire view hierarchy in prefix order, including siblings as well as siblings of parents
-     *     further down the hierarchy. This violates the basic concepts of the view hierarchy, and
-     *     thus, the hierarchical dispatching mechanism was hard to use for apps.</li>
-     *
-     *     <li>Dispatch was stopped after the insets were fully consumed. This is somewhat confusing
-     *     for developers, but more importantly, by adding more granular information to
-     *     {@link WindowInsets} it becomes really cumbersome to define what consumed actually means
-     *     </li>
-     * </ul>
-     *
+     * Prior to R, {@link #dispatchApplyWindowInsets} had an issue:
+     * <p>The modified insets changed by {@link #onApplyWindowInsets} were passed to the
+     * entire view hierarchy in prefix order, including siblings as well as siblings of parents
+     * further down the hierarchy. This violates the basic concepts of the view hierarchy, and
+     * thus, the hierarchical dispatching mechanism was hard to use for apps.
+     * <p>
      * In order to make window inset dispatching work properly, we dispatch window insets
-     * in the view hierarchy in a proper hierarchical manner and don't stop dispatching if the
-     * insets are consumed if this flag is set to {@code false}.
+     * in the view hierarchy in a proper hierarchical manner if this flag is set to {@code false}.
      */
     static boolean sBrokenInsetsDispatch;
 
@@ -5231,7 +5225,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             sAcceptZeroSizeDragShadow = targetSdkVersion < Build.VERSION_CODES.P;
 
             sBrokenInsetsDispatch = ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
-                    || targetSdkVersion < Build.VERSION_CODES.Q;
+                    || targetSdkVersion < Build.VERSION_CODES.R;
 
             sBrokenWindowBackground = targetSdkVersion < Build.VERSION_CODES.Q;
 
@@ -11100,7 +11094,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Sets a {@link WindowInsetsAnimationCallback} to be notified about animations of windows that
      * cause insets.
-     *
+     * <p>
+     * When setting a listener, it's {@link WindowInsetsAnimationCallback#getDispatchMode() dispatch
+     * mode} will be retrieved and recorded until another listener will be set.
+     * </p>
      * @param listener The listener to set.
      */
     public void setWindowInsetsAnimationCallback(@Nullable WindowInsetsAnimationCallback listener) {
