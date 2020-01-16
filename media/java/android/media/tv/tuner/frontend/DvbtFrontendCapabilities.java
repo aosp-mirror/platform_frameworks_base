@@ -30,9 +30,9 @@ public class DvbtFrontendCapabilities extends FrontendCapabilities {
     private final boolean mIsT2Supported;
     private final boolean mIsMisoSupported;
 
-    DvbtFrontendCapabilities(int transmissionModeCap, int bandwidthCap, int constellationCap,
-            int coderateCap, int hierarchyCap, int guardIntervalCap, boolean isT2Supported,
-            boolean isMisoSupported) {
+    private DvbtFrontendCapabilities(int transmissionModeCap, int bandwidthCap,
+            int constellationCap, int coderateCap, int hierarchyCap, int guardIntervalCap,
+            boolean isT2Supported, boolean isMisoSupported) {
         mTransmissionModeCap = transmissionModeCap;
         mBandwidthCap = bandwidthCap;
         mConstellationCap = constellationCap;
@@ -43,36 +43,58 @@ public class DvbtFrontendCapabilities extends FrontendCapabilities {
         mIsMisoSupported = isMisoSupported;
     }
 
-    /** Gets transmission mode capability. */
+    /**
+     * Gets transmission mode capability.
+     */
+    @DvbtFrontendSettings.TransmissionMode
     public int getTransmissionModeCapability() {
         return mTransmissionModeCap;
     }
-    /** Gets bandwidth capability. */
+    /**
+     * Gets bandwidth capability.
+     */
+    @DvbtFrontendSettings.Bandwidth
     public int getBandwidthCapability() {
         return mBandwidthCap;
     }
-    /** Gets constellation capability. */
+    /**
+     * Gets constellation capability.
+     */
+    @DvbtFrontendSettings.Constellation
     public int getConstellationCapability() {
         return mConstellationCap;
     }
-    /** Gets code rate capability. */
+    /**
+     * Gets code rate capability.
+     */
+    @DvbtFrontendSettings.Coderate
     public int getCodeRateCapability() {
         return mCoderateCap;
     }
-    /** Gets hierarchy capability. */
+    /**
+     * Gets hierarchy capability.
+     */
+    @DvbtFrontendSettings.Hierarchy
     public int getHierarchyCapability() {
         return mHierarchyCap;
     }
-    /** Gets guard interval capability. */
+    /**
+     * Gets guard interval capability.
+     */
+    @DvbtFrontendSettings.GuardInterval
     public int getGuardIntervalCapability() {
         return mGuardIntervalCap;
     }
-    /** Returns whether T2 is supported. */
-    public boolean getIsT2Supported() {
+    /**
+     * Returns whether T2 is supported.
+     */
+    public boolean isT2Supported() {
         return mIsT2Supported;
     }
-    /** Returns whether MISO is supported. */
-    public boolean getIsMisoSupported() {
+    /**
+     * Returns whether MISO is supported.
+     */
+    public boolean isMisoSupported() {
         return mIsMisoSupported;
     }
 }

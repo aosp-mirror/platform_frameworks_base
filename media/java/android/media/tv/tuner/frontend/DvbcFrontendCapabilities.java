@@ -16,6 +16,8 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.media.tv.tuner.TunerConstants.FrontendInnerFec;
+
 /**
  * DVBC Capabilities.
  * @hide
@@ -25,21 +27,30 @@ public class DvbcFrontendCapabilities extends FrontendCapabilities {
     private final int mFecCap;
     private final int mAnnexCap;
 
-    DvbcFrontendCapabilities(int modulationCap, int fecCap, int annexCap) {
+    private DvbcFrontendCapabilities(int modulationCap, int fecCap, int annexCap) {
         mModulationCap = modulationCap;
         mFecCap = fecCap;
         mAnnexCap = annexCap;
     }
 
-    /** Gets modulation capability. */
+    /**
+     * Gets modulation capability.
+     */
+    @DvbcFrontendSettings.Modulation
     public int getModulationCapability() {
         return mModulationCap;
     }
-    /** Gets FEC capability. */
+    /**
+     * Gets inner FEC capability.
+     */
+    @FrontendInnerFec
     public int getFecCapability() {
         return mFecCap;
     }
-    /** Gets annex capability. */
+    /**
+     * Gets annex capability.
+     */
+    @DvbcFrontendSettings.Annex
     public int getAnnexCapability() {
         return mAnnexCap;
     }

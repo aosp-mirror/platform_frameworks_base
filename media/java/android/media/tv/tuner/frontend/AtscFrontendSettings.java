@@ -16,15 +16,105 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.content.Context;
+import android.hardware.tv.tuner.V1_0.Constants;
+import android.media.tv.tuner.TunerUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Frontend settings for ATSC.
  * @hide
  */
 public class AtscFrontendSettings extends FrontendSettings {
-    public int modulation;
 
-    AtscFrontendSettings(int frequency) {
+    /** @hide */
+    @IntDef(flag = true,
+            prefix = "MODULATION_",
+            value = {MODULATION_UNDEFINED, MODULATION_AUTO, MODULATION_MOD_8VSB,
+                    MODULATION_MOD_16VSB})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Modulation {}
+
+    /**
+     * Modulation undefined.
+     */
+    public static final int MODULATION_UNDEFINED = Constants.FrontendAtscModulation.UNDEFINED;
+    /**
+     * Hardware is able to detect and set modulation automatically
+     */
+    public static final int MODULATION_AUTO = Constants.FrontendAtscModulation.AUTO;
+    /**
+     * 8VSB Modulation.
+     */
+    public static final int MODULATION_MOD_8VSB = Constants.FrontendAtscModulation.MOD_8VSB;
+    /**
+     * 16VSB Modulation.
+     */
+    public static final int MODULATION_MOD_16VSB = Constants.FrontendAtscModulation.MOD_16VSB;
+
+
+    private final int mModulation;
+
+    private AtscFrontendSettings(int frequency, int modulation) {
         super(frequency);
+        mModulation = modulation;
+    }
+
+    /**
+     * Gets Modulation.
+     */
+    @Modulation
+    public int getModulation() {
+        return mModulation;
+    }
+
+    /**
+     * Creates a builder for {@link AtscFrontendSettings}.
+     *
+     * @param context the context of the caller.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @NonNull
+    public static Builder builder(@NonNull Context context) {
+        TunerUtils.checkTunerPermission(context);
+        return new Builder();
+    }
+
+    /**
+     * Builder for {@link AtscFrontendSettings}.
+     */
+    public static class Builder extends FrontendSettings.Builder<Builder> {
+        private int mModulation;
+
+        private Builder() {
+        }
+
+        /**
+         * Sets Modulation.
+         */
+        @NonNull
+        public Builder setModulation(@Modulation int modulation) {
+            mModulation = modulation;
+            return this;
+        }
+
+        /**
+         * Builds a {@link AtscFrontendSettings} object.
+         */
+        @NonNull
+        public AtscFrontendSettings build() {
+            return new AtscFrontendSettings(mFrequency, mModulation);
+        }
+
+        @Override
+        Builder self() {
+            return this;
+        }
     }
 
     @Override

@@ -16,20 +16,269 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.content.Context;
+import android.hardware.tv.tuner.V1_0.Constants;
+import android.media.tv.tuner.TunerUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Frontend settings for ISDBS.
  * @hide
  */
 public class IsdbsFrontendSettings extends FrontendSettings {
-    public int streamId;
-    public int streamIdType;
-    public int modulation;
-    public int coderate;
-    public int symbolRate;
-    public int rolloff;
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "STREAM_ID_TYPE_",
+            value = {STREAM_ID_TYPE_ID, STREAM_ID_TYPE_RELATIVE_NUMBER})
+    public @interface StreamIdType {}
 
-    IsdbsFrontendSettings(int frequency) {
+    /**
+     * Uses stream ID.
+     */
+    public static final int STREAM_ID_TYPE_ID = Constants.FrontendIsdbsStreamIdType.STREAM_ID;
+    /**
+     * Uses relative number.
+     */
+    public static final int STREAM_ID_TYPE_RELATIVE_NUMBER =
+            Constants.FrontendIsdbsStreamIdType.RELATIVE_STREAM_NUMBER;
+
+
+    /** @hide */
+    @IntDef(flag = true,
+            prefix = "MODULATION_",
+            value = {MODULATION_UNDEFINED, MODULATION_AUTO, MODULATION_MOD_BPSK,
+                    MODULATION_MOD_QPSK, MODULATION_MOD_TC8PSK})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Modulation {}
+
+    /**
+     * Modulation undefined.
+     */
+    public static final int MODULATION_UNDEFINED = Constants.FrontendIsdbsModulation.UNDEFINED;
+    /**
+     * Hardware is able to detect and set modulation automatically
+     */
+    public static final int MODULATION_AUTO = Constants.FrontendIsdbsModulation.AUTO;
+    /**
+     * BPSK Modulation.
+     */
+    public static final int MODULATION_MOD_BPSK = Constants.FrontendIsdbsModulation.MOD_BPSK;
+    /**
+     * QPSK Modulation.
+     */
+    public static final int MODULATION_MOD_QPSK = Constants.FrontendIsdbsModulation.MOD_QPSK;
+    /**
+     * TC8PSK Modulation.
+     */
+    public static final int MODULATION_MOD_TC8PSK = Constants.FrontendIsdbsModulation.MOD_TC8PSK;
+
+
+    /** @hide */
+    @IntDef(flag = true,
+            prefix = "CODERATE_",
+            value = {CODERATE_UNDEFINED, CODERATE_AUTO,
+            CODERATE_1_2, CODERATE_2_3, CODERATE_3_4,
+            CODERATE_5_6, CODERATE_7_8})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Coderate {}
+
+    /**
+     * Code rate undefined.
+     */
+    public static final int CODERATE_UNDEFINED = Constants.FrontendIsdbsCoderate.UNDEFINED;
+    /**
+     * Hardware is able to detect and set code rate automatically.
+     */
+    public static final int CODERATE_AUTO = Constants.FrontendIsdbsCoderate.AUTO;
+    /**
+     * 1_2 code rate.
+     */
+    public static final int CODERATE_1_2 = Constants.FrontendIsdbsCoderate.CODERATE_1_2;
+    /**
+     * 2_3 code rate.
+     */
+    public static final int CODERATE_2_3 = Constants.FrontendIsdbsCoderate.CODERATE_2_3;
+    /**
+     * 3_4 code rate.
+     */
+    public static final int CODERATE_3_4 = Constants.FrontendIsdbsCoderate.CODERATE_3_4;
+    /**
+     * 5_6 code rate.
+     */
+    public static final int CODERATE_5_6 = Constants.FrontendIsdbsCoderate.CODERATE_5_6;
+    /**
+     * 7_8 code rate.
+     */
+    public static final int CODERATE_7_8 = Constants.FrontendIsdbsCoderate.CODERATE_7_8;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "ROLLOFF_",
+            value = {ROLLOFF_UNDEFINED, ROLLOFF_0_35})
+    public @interface Rolloff {}
+
+    /**
+     * Roll off type undefined.
+     */
+    public static final int ROLLOFF_UNDEFINED = Constants.FrontendIsdbs3Rolloff.UNDEFINED;
+    /**
+     * 0.35 roll off type.
+     */
+    public static final int ROLLOFF_0_35 = Constants.FrontendIsdbsRolloff.ROLLOFF_0_35;
+
+
+    private final int mStreamId;
+    private final int mStreamIdType;
+    private final int mModulation;
+    private final int mCoderate;
+    private final int mSymbolRate;
+    private final int mRolloff;
+
+    private IsdbsFrontendSettings(int frequency, int streamId, int streamIdType, int modulation,
+            int coderate, int symbolRate, int rolloff) {
         super(frequency);
+        mStreamId = streamId;
+        mStreamIdType = streamIdType;
+        mModulation = modulation;
+        mCoderate = coderate;
+        mSymbolRate = symbolRate;
+        mRolloff = rolloff;
+    }
+
+    /**
+     * Gets Stream ID.
+     */
+    public int getStreamId() {
+        return mStreamId;
+    }
+    /**
+     * Gets Stream ID Type.
+     */
+    @StreamIdType
+    public int getStreamIdType() {
+        return mStreamIdType;
+    }
+    /**
+     * Gets Modulation.
+     */
+    @Modulation
+    public int getModulation() {
+        return mModulation;
+    }
+    /**
+     * Gets Code rate.
+     */
+    @Coderate
+    public int getCoderate() {
+        return mCoderate;
+    }
+    /**
+     * Gets Symbol Rate in symbols per second.
+     */
+    public int getSymbolRate() {
+        return mSymbolRate;
+    }
+    /**
+     * Gets Roll off type.
+     */
+    @Rolloff
+    public int getRolloff() {
+        return mRolloff;
+    }
+
+    /**
+     * Creates a builder for {@link IsdbsFrontendSettings}.
+     *
+     * @param context the context of the caller.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @NonNull
+    public static Builder builder(@NonNull Context context) {
+        TunerUtils.checkTunerPermission(context);
+        return new Builder();
+    }
+
+    /**
+     * Builder for {@link IsdbsFrontendSettings}.
+     */
+    public static class Builder extends FrontendSettings.Builder<Builder> {
+        private int mStreamId;
+        private int mStreamIdType;
+        private int mModulation;
+        private int mCoderate;
+        private int mSymbolRate;
+        private int mRolloff;
+
+        private Builder() {
+        }
+
+        /**
+         * Sets Stream ID.
+         */
+        @NonNull
+        public Builder setStreamId(int streamId) {
+            mStreamId = streamId;
+            return this;
+        }
+        /**
+         * Sets StreamIdType.
+         */
+        @NonNull
+        public Builder setStreamIdType(@StreamIdType int streamIdType) {
+            mStreamIdType = streamIdType;
+            return this;
+        }
+        /**
+         * Sets Modulation.
+         */
+        @NonNull
+        public Builder setModulation(@Modulation int modulation) {
+            mModulation = modulation;
+            return this;
+        }
+        /**
+         * Sets Code rate.
+         */
+        @NonNull
+        public Builder setCoderate(@Coderate int coderate) {
+            mCoderate = coderate;
+            return this;
+        }
+        /**
+         * Sets Symbol Rate in symbols per second.
+         */
+        @NonNull
+        public Builder setSymbolRate(int symbolRate) {
+            mSymbolRate = symbolRate;
+            return this;
+        }
+        /**
+         * Sets Roll off type.
+         */
+        @NonNull
+        public Builder setRolloff(@Rolloff int rolloff) {
+            mRolloff = rolloff;
+            return this;
+        }
+
+        /**
+         * Builds a {@link IsdbsFrontendSettings} object.
+         */
+        @NonNull
+        public IsdbsFrontendSettings build() {
+            return new IsdbsFrontendSettings(mFrequency, mStreamId, mStreamIdType, mModulation,
+                    mCoderate, mSymbolRate, mRolloff);
+        }
+
+        @Override
+        Builder self() {
+            return this;
+        }
     }
 
     @Override

@@ -24,16 +24,22 @@ public class Isdbs3FrontendCapabilities extends FrontendCapabilities {
     private final int mModulationCap;
     private final int mCoderateCap;
 
-    Isdbs3FrontendCapabilities(int modulationCap, int coderateCap) {
+    private Isdbs3FrontendCapabilities(int modulationCap, int coderateCap) {
         mModulationCap = modulationCap;
         mCoderateCap = coderateCap;
     }
 
-    /** Gets modulation capability. */
+    /**
+     * Gets modulation capability.
+     */
+    @Isdbs3FrontendSettings.Modulation
     public int getModulationCapability() {
         return mModulationCap;
     }
-    /** Gets code rate capability. */
+    /**
+     * Gets code rate capability.
+     */
+    @Isdbs3FrontendSettings.Coderate
     public int getCodeRateCapability() {
         return mCoderateCap;
     }

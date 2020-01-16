@@ -16,6 +16,8 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.media.tv.tuner.TunerConstants.FrontendInnerFec;
+
 /**
  * DVBS Capabilities.
  * @hide
@@ -25,21 +27,30 @@ public class DvbsFrontendCapabilities extends FrontendCapabilities {
     private final long mInnerFecCap;
     private final int mStandard;
 
-    DvbsFrontendCapabilities(int modulationCap, long innerFecCap, int standard) {
+    private DvbsFrontendCapabilities(int modulationCap, long innerFecCap, int standard) {
         mModulationCap = modulationCap;
         mInnerFecCap = innerFecCap;
         mStandard = standard;
     }
 
-    /** Gets modulation capability. */
+    /**
+     * Gets modulation capability.
+     */
+    @DvbsFrontendSettings.Modulation
     public int getModulationCapability() {
         return mModulationCap;
     }
-    /** Gets inner FEC capability. */
+    /**
+     * Gets inner FEC capability.
+     */
+    @FrontendInnerFec
     public long getInnerFecCapability() {
         return mInnerFecCap;
     }
-    /** Gets DVBS standard capability. */
+    /**
+     * Gets DVBS standard capability.
+     */
+    @DvbsFrontendSettings.Standard
     public int getStandardCapability() {
         return mStandard;
     }
