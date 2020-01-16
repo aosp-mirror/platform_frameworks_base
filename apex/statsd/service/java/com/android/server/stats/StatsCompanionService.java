@@ -890,61 +890,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullCpuTimePerThreadFreq(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        if (this.mKernelCpuThreadReader == null) {
-            throw new IllegalStateException("mKernelCpuThreadReader is null");
-        }
-        ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processCpuUsages =
-                this.mKernelCpuThreadReader.getProcessCpuUsageDiffed();
-        if (processCpuUsages == null) {
-            throw new IllegalStateException("processCpuUsages is null");
-        }
-        int[] cpuFrequencies = mKernelCpuThreadReader.getCpuFrequenciesKhz();
-        if (cpuFrequencies.length > CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES) {
-            String message = "Expected maximum " + CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES
-                    + " frequencies, but got " + cpuFrequencies.length;
-            Slog.w(TAG, message);
-            throw new IllegalStateException(message);
-        }
-        for (int i = 0; i < processCpuUsages.size(); i++) {
-            KernelCpuThreadReader.ProcessCpuUsage processCpuUsage = processCpuUsages.get(i);
-            ArrayList<KernelCpuThreadReader.ThreadCpuUsage> threadCpuUsages =
-                    processCpuUsage.threadCpuUsages;
-            for (int j = 0; j < threadCpuUsages.size(); j++) {
-                KernelCpuThreadReader.ThreadCpuUsage threadCpuUsage = threadCpuUsages.get(j);
-                if (threadCpuUsage.usageTimesMillis.length != cpuFrequencies.length) {
-                    String message = "Unexpected number of usage times,"
-                            + " expected " + cpuFrequencies.length
-                            + " but got " + threadCpuUsage.usageTimesMillis.length;
-                    Slog.w(TAG, message);
-                    throw new IllegalStateException(message);
-                }
-
-                StatsLogEventWrapper e =
-                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-                e.writeInt(processCpuUsage.uid);
-                e.writeInt(processCpuUsage.processId);
-                e.writeInt(threadCpuUsage.threadId);
-                e.writeString(processCpuUsage.processName);
-                e.writeString(threadCpuUsage.threadName);
-                for (int k = 0; k < CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES; k++) {
-                    if (k < cpuFrequencies.length) {
-                        e.writeInt(cpuFrequencies[k]);
-                        e.writeInt(threadCpuUsage.usageTimesMillis[k]);
-                    } else {
-                        // If we have no more frequencies to write, we still must write empty data.
-                        // We know that this data is empty (and not just zero) because all
-                        // frequencies are expected to be greater than zero
-                        e.writeInt(0);
-                        e.writeInt(0);
-                    }
-                }
-                pulledData.add(e);
-            }
-        }
-    }
-
     private void pullDebugElapsedClock(int tagId,
             long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
         final long elapsedMillis = SystemClock.elapsedRealtime();
@@ -1346,10 +1291,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.PROCESS_CPU_TIME: {
                 pullProcessCpuTime(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-            case StatsLog.CPU_TIME_PER_THREAD_FREQ: {
-                pullCpuTimePerThreadFreq(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

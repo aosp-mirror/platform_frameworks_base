@@ -113,9 +113,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::PROCESS_CPU_TIME},
          {.coolDownNs = 5 * NS_PER_SEC /* min cool-down in seconds*/,
           .puller = new StatsCompanionServicePuller(android::util::PROCESS_CPU_TIME)}},
-        {{.atomTag = android::util::CPU_TIME_PER_THREAD_FREQ},
-         {.additiveFields = {7, 9, 11, 13, 15, 17, 19, 21},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_THREAD_FREQ)}},
 
         // DebugElapsedClock.
         {{.atomTag = android::util::DEBUG_ELAPSED_CLOCK},

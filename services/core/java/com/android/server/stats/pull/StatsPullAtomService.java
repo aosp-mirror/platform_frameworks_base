@@ -227,6 +227,10 @@ public class StatsPullAtomService extends SystemService {
                     numSpeedSteps);
             firstCpuOfCluster += powerProfile.getNumCoresInCpuCluster(i);
         }
+
+        // Used for CPU_TIME_PER_THREAD_FREQ
+        mKernelCpuThreadReader =
+                KernelCpuThreadReaderSettingsObserver.getSettingsModifiedReader(mContext);
     }
 
     @Override
@@ -1875,12 +1879,78 @@ public class StatsPullAtomService extends SystemService {
         // No op.
     }
 
+    @Nullable
+    private KernelCpuThreadReaderDiff mKernelCpuThreadReader;
+    private static final int CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES = 8;
+
     private void registerCpuTimePerThreadFreq() {
-        // No op.
+        int tagId = StatsLog.CPU_TIME_PER_THREAD_FREQ;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {7, 9, 11, 13, 15, 17, 19, 21})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullCpuTimePerThreadFreq(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullCpuTimePerThreadFreq() {
-        // No op.
+    private int pullCpuTimePerThreadFreq(int atomTag, List<StatsEvent> pulledData) {
+        if (this.mKernelCpuThreadReader == null) {
+            Slog.e(TAG, "mKernelCpuThreadReader is null");
+            return StatsManager.PULL_SKIP;
+        }
+        ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processCpuUsages =
+                this.mKernelCpuThreadReader.getProcessCpuUsageDiffed();
+        if (processCpuUsages == null) {
+            Slog.e(TAG, "processCpuUsages is null");
+            return StatsManager.PULL_SKIP;
+        }
+        int[] cpuFrequencies = mKernelCpuThreadReader.getCpuFrequenciesKhz();
+        if (cpuFrequencies.length > CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES) {
+            String message = "Expected maximum " + CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES
+                    + " frequencies, but got " + cpuFrequencies.length;
+            Slog.w(TAG, message);
+            return StatsManager.PULL_SKIP;
+        }
+        for (int i = 0; i < processCpuUsages.size(); i++) {
+            KernelCpuThreadReader.ProcessCpuUsage processCpuUsage = processCpuUsages.get(i);
+            ArrayList<KernelCpuThreadReader.ThreadCpuUsage> threadCpuUsages =
+                    processCpuUsage.threadCpuUsages;
+            for (int j = 0; j < threadCpuUsages.size(); j++) {
+                KernelCpuThreadReader.ThreadCpuUsage threadCpuUsage = threadCpuUsages.get(j);
+                if (threadCpuUsage.usageTimesMillis.length != cpuFrequencies.length) {
+                    String message = "Unexpected number of usage times,"
+                            + " expected " + cpuFrequencies.length
+                            + " but got " + threadCpuUsage.usageTimesMillis.length;
+                    Slog.w(TAG, message);
+                    return StatsManager.PULL_SKIP;
+                }
+
+                StatsEvent.Builder e = StatsEvent.newBuilder();
+                e.setAtomId(atomTag);
+                e.writeInt(processCpuUsage.uid);
+                e.writeInt(processCpuUsage.processId);
+                e.writeInt(threadCpuUsage.threadId);
+                e.writeString(processCpuUsage.processName);
+                e.writeString(threadCpuUsage.threadName);
+                for (int k = 0; k < CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES; k++) {
+                    if (k < cpuFrequencies.length) {
+                        e.writeInt(cpuFrequencies[k]);
+                        e.writeInt(threadCpuUsage.usageTimesMillis[k]);
+                    } else {
+                        // If we have no more frequencies to write, we still must write empty data.
+                        // We know that this data is empty (and not just zero) because all
+                        // frequencies are expected to be greater than zero
+                        e.writeInt(0);
+                        e.writeInt(0);
+                    }
+                }
+                pulledData.add(e.build());
+            }
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     // TODO: move to top of file when all migrations are complete
