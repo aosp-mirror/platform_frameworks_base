@@ -130,7 +130,6 @@ import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureSession;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputMethodManager;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
 import android.view.inspector.InspectableProperty.FlagEntry;
@@ -7942,12 +7941,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (isPressed()) {
                 setPressed(false);
             }
-            if (mAttachInfo != null && mAttachInfo.mHasWindowFocus) {
-                notifyFocusChangeToInputMethodManager(false /* hasFocus */);
+            if (hasWindowFocus()) {
+                notifyFocusChangeToImeFocusController(false /* hasFocus */);
             }
             onFocusLost();
-        } else if (mAttachInfo != null && mAttachInfo.mHasWindowFocus) {
-            notifyFocusChangeToInputMethodManager(true /* hasFocus */);
+        } else if (hasWindowFocus()) {
+            notifyFocusChangeToImeFocusController(true /* hasFocus */);
         }
 
         invalidate(true);
@@ -7964,23 +7963,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Notify {@link InputMethodManager} about the focus change of the {@link View}.
-     *
-     * <p>Does nothing when {@link InputMethodManager} is not available.</p>
+     * Notify {@link ImeFocusController} about the focus change of the {@link View}.
      *
      * @param hasFocus {@code true} when the {@link View} is being focused.
      */
-    private void notifyFocusChangeToInputMethodManager(boolean hasFocus) {
-        final InputMethodManager imm =
-                getContext().getSystemService(InputMethodManager.class);
-        if (imm == null) {
+    private void notifyFocusChangeToImeFocusController(boolean hasFocus) {
+        if (mAttachInfo == null) {
             return;
         }
-        if (hasFocus) {
-            imm.focusIn(this);
-        } else {
-            imm.focusOut(this);
-        }
+        mAttachInfo.mViewRootImpl.getImeFocusController().onViewFocusChanged(this, hasFocus);
     }
 
     /** @hide */
@@ -13918,7 +13909,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mPrivateFlags3 &= ~PFLAG3_TEMPORARY_DETACH;
         onFinishTemporaryDetach();
         if (hasWindowFocus() && hasFocus()) {
-            notifyFocusChangeToInputMethodManager(true /* hasFocus */);
+            notifyFocusChangeToImeFocusController(true /* hasFocus */);
         }
         notifyEnterOrExitForAutoFillIfNeeded(true);
         notifyAppearedOrDisappearedForContentCaptureIfNeeded(true);
@@ -14326,13 +14317,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             mPrivateFlags3 &= ~PFLAG3_FINGER_DOWN;
             if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
-                notifyFocusChangeToInputMethodManager(false /* hasFocus */);
+                notifyFocusChangeToImeFocusController(false /* hasFocus */);
             }
             removeLongPressCallback();
             removeTapCallback();
             onFocusLost();
         } else if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
-            notifyFocusChangeToInputMethodManager(true /* hasFocus */);
+            notifyFocusChangeToImeFocusController(true /* hasFocus */);
         }
 
         refreshDrawableState();
@@ -14346,6 +14337,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public boolean hasWindowFocus() {
         return mAttachInfo != null && mAttachInfo.mHasWindowFocus;
+    }
+
+    /**
+     * @return {@code true} if this view is in a window that currently has IME focusable state.
+     * @hide
+     */
+    public boolean hasImeFocus() {
+        return mAttachInfo != null && mAttachInfo.mHasImeFocus;
     }
 
     /**
@@ -19644,7 +19643,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         rebuildOutline();
 
         if (isFocused()) {
-            notifyFocusChangeToInputMethodManager(true /* hasFocus */);
+            notifyFocusChangeToImeFocusController(true /* hasFocus */);
         }
     }
 
@@ -20227,9 +20226,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         onDetachedFromWindow();
         onDetachedFromWindowInternal();
 
-        InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
-        if (imm != null) {
-            imm.onViewDetachedFromWindow(this);
+        if (info != null) {
+            info.mViewRootImpl.getImeFocusController().onViewDetachedFromWindow(this);
         }
 
         ListenerInfo li = mListenerInfo;
@@ -28563,6 +28561,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         @UnsupportedAppUsage
         boolean mHasWindowFocus;
+
+        /**
+         * Indicates whether the view's window has IME focused.
+         */
+        boolean mHasImeFocus;
 
         /**
          * The current visibility of the window.
