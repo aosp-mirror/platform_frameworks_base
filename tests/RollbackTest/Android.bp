@@ -19,7 +19,10 @@ android_test {
     static_libs: ["androidx.test.rules", "cts-rollback-lib", "cts-install-lib"],
     test_suites: ["general-tests"],
     test_config: "RollbackTest.xml",
-    java_resources: [":com.android.apex.apkrollback.test_v2"],
+    java_resources: [
+        ":com.android.apex.apkrollback.test_v2",
+        ":com.android.apex.apkrollback.test_v2Crashing"
+    ],
 }
 
 java_test_host {
@@ -78,5 +81,15 @@ apex {
   file_contexts: ":apex.test-file_contexts",
   key: "com.android.apex.apkrollback.test.key",
   apps: ["TestAppAv2"],
+  installable: false,
+}
+
+apex {
+  name: "com.android.apex.apkrollback.test_v2Crashing",
+  manifest: "testdata/manifest_v2.json",
+  androidManifest: "testdata/AndroidManifest.xml",
+  file_contexts: ":apex.test-file_contexts",
+  key: "com.android.apex.apkrollback.test.key",
+  apps: ["TestAppACrashingV2"],
   installable: false,
 }
