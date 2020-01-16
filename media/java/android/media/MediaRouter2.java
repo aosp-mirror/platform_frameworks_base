@@ -284,26 +284,20 @@ public class MediaRouter2 {
      * Requests the media route provider service to create a session with the given route.
      *
      * @param route the route you want to create a session with.
-     * @param routeFeature the route feature of the session. Should not be empty.
      *
      * @see SessionCallback#onSessionCreated
      * @see SessionCallback#onSessionCreationFailed
      * @hide
      */
     @NonNull
-    public void requestCreateSession(@NonNull MediaRoute2Info route,
-            @NonNull String routeFeature) {
+    public void requestCreateSession(@NonNull MediaRoute2Info route) {
         Objects.requireNonNull(route, "route must not be null");
-        if (TextUtils.isEmpty(routeFeature)) {
-            throw new IllegalArgumentException("routeFeature must not be empty");
-        }
         // TODO: Check the given route exists
-        // TODO: Check the route supports the given routeFeature
 
         final int requestId;
         requestId = mSessionCreationRequestCnt.getAndIncrement();
 
-        SessionCreationRequest request = new SessionCreationRequest(requestId, route, routeFeature);
+        SessionCreationRequest request = new SessionCreationRequest(requestId, route);
         mSessionCreationRequests.add(request);
 
         Client2 client;
@@ -312,7 +306,7 @@ public class MediaRouter2 {
         }
         if (client != null) {
             try {
-                mMediaRouterService.requestCreateSession(client, route, routeFeature, requestId);
+                mMediaRouterService.requestCreateSession(client, route, requestId);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to request to create session.", ex);
                 mHandler.sendMessage(obtainMessage(MediaRouter2::createControllerOnHandler,
@@ -468,27 +462,18 @@ public class MediaRouter2 {
             mSessionCreationRequests.remove(matchingRequest);
 
             MediaRoute2Info requestedRoute = matchingRequest.mRoute;
-            String requestedRouteFeature = matchingRequest.mRouteFeature;
 
             if (sessionInfo == null) {
                 // TODO: We may need to distinguish between failure and rejection.
                 //       One way can be introducing 'reason'.
-                notifySessionCreationFailed(requestedRoute, requestedRouteFeature);
-                return;
-            } else if (!TextUtils.equals(requestedRouteFeature,
-                    sessionInfo.getRouteFeature())) {
-                Log.w(TAG, "The session has different route feature from what we requested. "
-                        + "(requested=" + requestedRouteFeature
-                        + ", actual=" + sessionInfo.getRouteFeature()
-                        + ")");
-                notifySessionCreationFailed(requestedRoute, requestedRouteFeature);
+                notifySessionCreationFailed(requestedRoute);
                 return;
             } else if (!sessionInfo.getSelectedRoutes().contains(requestedRoute.getId())) {
                 Log.w(TAG, "The session does not contain the requested route. "
                         + "(requestedRouteId=" + requestedRoute.getId()
                         + ", actualRoutes=" + sessionInfo.getSelectedRoutes()
                         + ")");
-                notifySessionCreationFailed(requestedRoute, requestedRouteFeature);
+                notifySessionCreationFailed(requestedRoute);
                 return;
             } else if (!TextUtils.equals(requestedRoute.getProviderId(),
                     sessionInfo.getProviderId())) {
@@ -496,7 +481,7 @@ public class MediaRouter2 {
                         + "(requested route's providerId=" + requestedRoute.getProviderId()
                         + ", actual providerId=" + sessionInfo.getProviderId()
                         + ")");
-                notifySessionCreationFailed(requestedRoute, requestedRouteFeature);
+                notifySessionCreationFailed(requestedRoute);
                 return;
             }
         }
@@ -617,10 +602,10 @@ public class MediaRouter2 {
         }
     }
 
-    private void notifySessionCreationFailed(MediaRoute2Info route, String routeFeature) {
+    private void notifySessionCreationFailed(MediaRoute2Info route) {
         for (SessionCallbackRecord record: mSessionCallbackRecords) {
             record.mExecutor.execute(
-                    () -> record.mSessionCallback.onSessionCreationFailed(route, routeFeature));
+                    () -> record.mSessionCallback.onSessionCreationFailed(route));
         }
     }
 
@@ -688,10 +673,8 @@ public class MediaRouter2 {
          * Called when the session creation request failed.
          *
          * @param requestedRoute the route info which was used for the request
-         * @param requestedRouteFeature the route feature which was used for the request
          */
-        public void onSessionCreationFailed(@NonNull MediaRoute2Info requestedRoute,
-                @NonNull String requestedRouteFeature) {}
+        public void onSessionCreationFailed(@NonNull MediaRoute2Info requestedRoute) {}
 
         /**
          * Called when the session info has changed.
@@ -749,16 +732,6 @@ public class MediaRouter2 {
         public String getSessionId() {
             synchronized (mControllerLock) {
                 return mSessionInfo.getId();
-            }
-        }
-
-        /**
-         * @return the feature which is used by the session mainly.
-         */
-        @NonNull
-        public String getRouteFeature() {
-            synchronized (mControllerLock) {
-                return mSessionInfo.getRouteFeature();
             }
         }
 
@@ -1012,7 +985,6 @@ public class MediaRouter2 {
             StringBuilder result = new StringBuilder()
                     .append("RoutingController{ ")
                     .append("sessionId=").append(getSessionId())
-                    .append(", routeFeature=").append(getRouteFeature())
                     .append(", selectedRoutes={")
                     .append(selectedRoutes)
                     .append("}")
@@ -1122,13 +1094,10 @@ public class MediaRouter2 {
 
     final class SessionCreationRequest {
         public final MediaRoute2Info mRoute;
-        public final String mRouteFeature;
         public final int mRequestId;
 
-        SessionCreationRequest(int requestId, @NonNull MediaRoute2Info route,
-                @NonNull String routeFeature) {
+        SessionCreationRequest(int requestId, @NonNull MediaRoute2Info route) {
             mRoute = route;
-            mRouteFeature = routeFeature;
             mRequestId = requestId;
         }
     }

@@ -73,11 +73,9 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     @Override
-    public void requestCreateSession(String packageName, String routeId, String routeType,
-            long requestId) {
+    public void requestCreateSession(String packageName, String routeId, long requestId) {
         if (mConnectionReady) {
-            mActiveConnection.requestCreateSession(packageName, routeId, routeType,
-                    requestId);
+            mActiveConnection.requestCreateSession(packageName, routeId, requestId);
             updateBinding();
         }
     }
@@ -429,11 +427,9 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             mClient.dispose();
         }
 
-        public void requestCreateSession(String packageName, String routeId, String routeType,
-                long requestId) {
+        public void requestCreateSession(String packageName, String routeId, long requestId) {
             try {
-                mProvider.requestCreateSession(packageName, routeId,
-                        routeType, requestId);
+                mProvider.requestCreateSession(packageName, routeId, requestId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to deliver request to create a session.", ex);
             }

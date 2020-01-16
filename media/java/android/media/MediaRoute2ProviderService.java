@@ -161,8 +161,8 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param sessionInfo information of the new session.
      *                    The {@link RoutingSessionInfo#getId() id} of the session must be unique.
      * @param requestId id of the previous request to create this session provided in
-     *                  {@link #onCreateSession(String, String, String, long)}
-     * @see #onCreateSession(String, String, String, long)
+     *                  {@link #onCreateSession(String, String, long)}
+     * @see #onCreateSession(String, String, long)
      * @hide
      */
     public final void notifySessionCreated(@NonNull RoutingSessionInfo sessionInfo,
@@ -196,8 +196,8 @@ public abstract class MediaRoute2ProviderService extends Service {
      * Notifies clients of that the session could not be created.
      *
      * @param requestId id of the previous request to create the session provided in
-     *                  {@link #onCreateSession(String, String, String, long)}.
-     * @see #onCreateSession(String, String, String, long)
+     *                  {@link #onCreateSession(String, String, long)}.
+     * @see #onCreateSession(String, String, long)
      * @hide
      */
     public final void notifySessionCreationFailed(long requestId) {
@@ -289,16 +289,15 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param packageName the package name of the application that selected the route
      * @param routeId the id of the route initially being connected
-     * @param routeFeature the route feature of the new session
      * @param requestId the id of this session creation request
      *
-     * @see RoutingSessionInfo.Builder#Builder(String, String, String)
+     * @see RoutingSessionInfo.Builder#Builder(String, String)
      * @see RoutingSessionInfo.Builder#addSelectedRoute(String)
      * @see RoutingSessionInfo.Builder#setControlHints(Bundle)
      * @hide
      */
     public abstract void onCreateSession(@NonNull String packageName, @NonNull String routeId,
-            @NonNull String routeFeature, long requestId);
+            long requestId);
 
     /**
      * Called when the session should be released. A client of the session or system can request
@@ -433,14 +432,12 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void requestCreateSession(String packageName, String routeId,
-                String routeFeature, long requestId) {
+        public void requestCreateSession(String packageName, String routeId, long requestId) {
             if (!checkCallerisSystem()) {
                 return;
             }
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onCreateSession,
-                    MediaRoute2ProviderService.this, packageName, routeId, routeFeature,
-                    requestId));
+                    MediaRoute2ProviderService.this, packageName, routeId, requestId));
         }
 
         @Override

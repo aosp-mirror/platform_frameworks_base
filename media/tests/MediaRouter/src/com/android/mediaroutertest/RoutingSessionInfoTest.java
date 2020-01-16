@@ -57,65 +57,32 @@ public class RoutingSessionInfoTest {
     public void testBuilderConstructorWithInvalidValues() {
         final String nullId = null;
         final String nullClientPackageName = null;
-        final String nullRouteFeature = null;
 
         final String emptyId = "";
         // Note: An empty string as client package name is valid.
-        final String emptyRouteFeature = "";
 
         final String validId = TEST_ID;
         final String validClientPackageName = TEST_CLIENT_PACKAGE_NAME;
-        final String validRouteFeature = TEST_ROUTE_FEATURE;
 
         // ID is invalid
         assertThrows(IllegalArgumentException.class, () -> new RoutingSessionInfo.Builder(
-                nullId, validClientPackageName, validRouteFeature));
+                nullId, validClientPackageName));
         assertThrows(IllegalArgumentException.class, () -> new RoutingSessionInfo.Builder(
-                emptyId, validClientPackageName, validRouteFeature));
+                emptyId, validClientPackageName));
 
         // client package name is invalid (null)
         assertThrows(NullPointerException.class, () -> new RoutingSessionInfo.Builder(
-                validId, nullClientPackageName, validRouteFeature));
+                validId, nullClientPackageName));
 
-        // route feature is invalid
+        // Both are invalid
         assertThrows(IllegalArgumentException.class, () -> new RoutingSessionInfo.Builder(
-                validId, validClientPackageName, nullRouteFeature));
+                nullId, nullClientPackageName));
         assertThrows(IllegalArgumentException.class, () -> new RoutingSessionInfo.Builder(
-                validId, validClientPackageName, emptyRouteFeature));
+                emptyId, nullClientPackageName));
+    }
 
-        // Two arguments are invalid - (1) ID and clientPackageName
-        assertThrows(IllegalArgumentException.class, () -> new RoutingSessionInfo.Builder(
-                nullId, nullClientPackageName, validRouteFeature));
-        assertThrows(IllegalArgumentException.class, () -> new RoutingSessionInfo.Builder(
-                emptyId, nullClientPackageName, validRouteFeature));
-
-        // Two arguments are invalid - (2) ID and routeFeature
-        assertThrows(IllegalArgumentException.class, () -> new RoutingSessionInfo.Builder(
-                nullId, validClientPackageName, nullRouteFeature));
-        assertThrows(IllegalArgumentException.class, () -> new RoutingSessionInfo.Builder(
-                nullId, validClientPackageName, emptyRouteFeature));
-        assertThrows(IllegalArgumentException.class, () -> new RoutingSessionInfo.Builder(
-                emptyId, validClientPackageName, nullRouteFeature));
-        assertThrows(IllegalArgumentException.class, () -> new RoutingSessionInfo.Builder(
-                emptyId, validClientPackageName, emptyRouteFeature));
-
-        // Two arguments are invalid - (3) clientPackageName and routeFeature
-        // Note that this throws NullPointerException.
-        assertThrows(NullPointerException.class, () -> new RoutingSessionInfo.Builder(
-                validId, nullClientPackageName, nullRouteFeature));
-        assertThrows(NullPointerException.class, () -> new RoutingSessionInfo.Builder(
-                validId, nullClientPackageName, emptyRouteFeature));
-
-        // All arguments are invalid
-        assertThrows(IllegalArgumentException.class, () -> new RoutingSessionInfo.Builder(
-                nullId, nullClientPackageName, nullRouteFeature));
-        assertThrows(IllegalArgumentException.class, () -> new RoutingSessionInfo.Builder(
-                nullId, nullClientPackageName, emptyRouteFeature));
-        assertThrows(IllegalArgumentException.class, () -> new RoutingSessionInfo.Builder(
-                emptyId, nullClientPackageName, nullRouteFeature));
-        assertThrows(IllegalArgumentException.class, () -> new RoutingSessionInfo.Builder(
-                emptyId, nullClientPackageName, emptyRouteFeature));
-
+    @Test
+    public void testBuilderCopyConstructorWithNull() {
         // Null RouteInfo (1-argument constructor)
         final RoutingSessionInfo nullRoutingSessionInfo = null;
         assertThrows(NullPointerException.class,
@@ -127,13 +94,13 @@ public class RoutingSessionInfoTest {
         // An empty string for client package name is valid. (for unknown cases)
         // Creating builder with it should not throw any exception.
         RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(
-                TEST_ID, "" /* clientPackageName*/, TEST_ROUTE_FEATURE);
+                TEST_ID, "" /* clientPackageName*/);
     }
 
     @Test
     public void testBuilderBuildWithEmptySelectedRoutesThrowsIAE() {
         RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(
-                TEST_ID, TEST_CLIENT_PACKAGE_NAME, TEST_ROUTE_FEATURE);
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME);
         // Note: Calling build() without adding any selected routes.
         assertThrows(IllegalArgumentException.class, () -> builder.build());
     }
@@ -141,7 +108,7 @@ public class RoutingSessionInfoTest {
     @Test
     public void testBuilderAddRouteMethodsWithIllegalArgumentsThrowsIAE() {
         RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(
-                TEST_ID, TEST_CLIENT_PACKAGE_NAME, TEST_ROUTE_FEATURE);
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME);
 
         final String nullRouteId = null;
         final String emptyRouteId = "";
@@ -168,7 +135,7 @@ public class RoutingSessionInfoTest {
     @Test
     public void testBuilderRemoveRouteMethodsWithIllegalArgumentsThrowsIAE() {
         RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(
-                TEST_ID, TEST_CLIENT_PACKAGE_NAME, TEST_ROUTE_FEATURE);
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME);
 
         final String nullRouteId = null;
         final String emptyRouteId = "";
@@ -198,7 +165,7 @@ public class RoutingSessionInfoTest {
         controlHints.putString(TEST_KEY, TEST_VALUE);
 
         RoutingSessionInfo sessionInfo = new RoutingSessionInfo.Builder(
-                TEST_ID, TEST_CLIENT_PACKAGE_NAME, TEST_ROUTE_FEATURE)
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME)
                 .addSelectedRoute(TEST_ROUTE_ID_0)
                 .addSelectedRoute(TEST_ROUTE_ID_1)
                 .addSelectableRoute(TEST_ROUTE_ID_2)
@@ -212,7 +179,6 @@ public class RoutingSessionInfoTest {
 
         assertEquals(TEST_ID, sessionInfo.getId());
         assertEquals(TEST_CLIENT_PACKAGE_NAME, sessionInfo.getClientPackageName());
-        assertEquals(TEST_ROUTE_FEATURE, sessionInfo.getRouteFeature());
 
         assertEquals(2, sessionInfo.getSelectedRoutes().size());
         assertEquals(TEST_ROUTE_ID_0, sessionInfo.getSelectedRoutes().get(0));
@@ -239,7 +205,7 @@ public class RoutingSessionInfoTest {
     @Test
     public void testBuilderAddRouteMethodsWithBuilderCopyConstructor() {
         RoutingSessionInfo sessionInfo = new RoutingSessionInfo.Builder(
-                TEST_ID, TEST_CLIENT_PACKAGE_NAME, TEST_ROUTE_FEATURE)
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME)
                 .addSelectedRoute(TEST_ROUTE_ID_0)
                 .addSelectableRoute(TEST_ROUTE_ID_2)
                 .addDeselectableRoute(TEST_ROUTE_ID_4)
@@ -273,7 +239,7 @@ public class RoutingSessionInfoTest {
     @Test
     public void testBuilderRemoveRouteMethods() {
         RoutingSessionInfo sessionInfo = new RoutingSessionInfo.Builder(
-                TEST_ID, TEST_CLIENT_PACKAGE_NAME, TEST_ROUTE_FEATURE)
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME)
                 .addSelectedRoute(TEST_ROUTE_ID_0)
                 .addSelectedRoute(TEST_ROUTE_ID_1)
                 .removeSelectedRoute(TEST_ROUTE_ID_1)
@@ -308,7 +274,7 @@ public class RoutingSessionInfoTest {
     @Test
     public void testBuilderRemoveRouteMethodsWithBuilderCopyConstructor() {
         RoutingSessionInfo sessionInfo = new RoutingSessionInfo.Builder(
-                TEST_ID, TEST_CLIENT_PACKAGE_NAME, TEST_ROUTE_FEATURE)
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME)
                 .addSelectedRoute(TEST_ROUTE_ID_0)
                 .addSelectedRoute(TEST_ROUTE_ID_1)
                 .addSelectableRoute(TEST_ROUTE_ID_2)
@@ -342,7 +308,7 @@ public class RoutingSessionInfoTest {
     @Test
     public void testBuilderClearRouteMethods() {
         RoutingSessionInfo sessionInfo = new RoutingSessionInfo.Builder(
-                TEST_ID, TEST_CLIENT_PACKAGE_NAME, TEST_ROUTE_FEATURE)
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME)
                 .addSelectedRoute(TEST_ROUTE_ID_0)
                 .addSelectedRoute(TEST_ROUTE_ID_1)
                 .clearSelectedRoutes()
@@ -374,7 +340,7 @@ public class RoutingSessionInfoTest {
     @Test
     public void testBuilderClearRouteMethodsWithBuilderCopyConstructor() {
         RoutingSessionInfo sessionInfo = new RoutingSessionInfo.Builder(
-                TEST_ID, TEST_CLIENT_PACKAGE_NAME, TEST_ROUTE_FEATURE)
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME)
                 .addSelectedRoute(TEST_ROUTE_ID_0)
                 .addSelectedRoute(TEST_ROUTE_ID_1)
                 .addSelectableRoute(TEST_ROUTE_ID_2)
@@ -408,7 +374,7 @@ public class RoutingSessionInfoTest {
         controlHints.putString(TEST_KEY, TEST_VALUE);
 
         RoutingSessionInfo sessionInfo1 = new RoutingSessionInfo.Builder(
-                TEST_ID, TEST_CLIENT_PACKAGE_NAME, TEST_ROUTE_FEATURE)
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME)
                 .addSelectedRoute(TEST_ROUTE_ID_0)
                 .addSelectedRoute(TEST_ROUTE_ID_1)
                 .addSelectableRoute(TEST_ROUTE_ID_2)
@@ -421,7 +387,7 @@ public class RoutingSessionInfoTest {
                 .build();
 
         RoutingSessionInfo sessionInfo2 = new RoutingSessionInfo.Builder(
-                TEST_ID, TEST_CLIENT_PACKAGE_NAME, TEST_ROUTE_FEATURE)
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME)
                 .addSelectedRoute(TEST_ROUTE_ID_0)
                 .addSelectedRoute(TEST_ROUTE_ID_1)
                 .addSelectableRoute(TEST_ROUTE_ID_2)
@@ -443,7 +409,7 @@ public class RoutingSessionInfoTest {
         controlHints.putString(TEST_KEY, TEST_VALUE);
 
         RoutingSessionInfo sessionInfo1 = new RoutingSessionInfo.Builder(
-                TEST_ID, TEST_CLIENT_PACKAGE_NAME, TEST_ROUTE_FEATURE)
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME)
                 .addSelectedRoute(TEST_ROUTE_ID_0)
                 .addSelectedRoute(TEST_ROUTE_ID_1)
                 .addSelectableRoute(TEST_ROUTE_ID_2)
@@ -467,7 +433,7 @@ public class RoutingSessionInfoTest {
         controlHints.putString(TEST_KEY, TEST_VALUE);
 
         RoutingSessionInfo sessionInfo = new RoutingSessionInfo.Builder(
-                TEST_ID, TEST_CLIENT_PACKAGE_NAME, TEST_ROUTE_FEATURE)
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME)
                 .addSelectedRoute(TEST_ROUTE_ID_0)
                 .addSelectedRoute(TEST_ROUTE_ID_1)
                 .addSelectableRoute(TEST_ROUTE_ID_2)
@@ -530,7 +496,7 @@ public class RoutingSessionInfoTest {
         controlHints.putString(TEST_KEY, TEST_VALUE);
 
         RoutingSessionInfo sessionInfo = new RoutingSessionInfo.Builder(
-                TEST_ID, TEST_CLIENT_PACKAGE_NAME, TEST_ROUTE_FEATURE)
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME)
                 .addSelectedRoute(TEST_ROUTE_ID_0)
                 .addSelectedRoute(TEST_ROUTE_ID_1)
                 .addSelectableRoute(TEST_ROUTE_ID_2)

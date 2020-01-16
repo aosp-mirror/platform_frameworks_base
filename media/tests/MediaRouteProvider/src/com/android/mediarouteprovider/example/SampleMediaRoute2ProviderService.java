@@ -167,8 +167,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onCreateSession(String packageName, String routeId, String routeFeature,
-            long requestId) {
+    public void onCreateSession(String packageName, String routeId, long requestId) {
         MediaRoute2Info route = mRoutes.get(routeId);
         if (route == null || TextUtils.equals(ROUTE_ID3_SESSION_CREATION_FAILED, routeId)) {
             // Tell the router that session cannot be created by passing null as sessionInfo.
@@ -185,8 +184,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
                 .build());
         mRouteIdToSessionId.put(routeId, sessionId);
 
-        RoutingSessionInfo sessionInfo = new RoutingSessionInfo.Builder(
-                sessionId, packageName, routeFeature)
+        RoutingSessionInfo sessionInfo = new RoutingSessionInfo.Builder(sessionId, packageName)
                 .addSelectedRoute(routeId)
                 .addSelectableRoute(ROUTE_ID4_TO_SELECT_AND_DESELECT)
                 .addTransferrableRoute(ROUTE_ID5_TO_TRANSFER_TO)
