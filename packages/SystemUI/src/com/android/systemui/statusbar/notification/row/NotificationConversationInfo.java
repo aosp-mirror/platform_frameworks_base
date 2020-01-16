@@ -54,6 +54,7 @@ import android.os.Handler;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -127,6 +128,8 @@ public class NotificationConversationInfo extends LinearLayout implements
             mBubbleController.onUserDemotedBubbleFromNotification(mEntry);
         } else {
             mBubbleController.onUserCreatedBubbleFromNotification(mEntry);
+            Settings.Global.putInt(
+                    mContext.getContentResolver(), Settings.Global.NOTIFICATION_BUBBLES, 1);
         }
         closeControls(v, true);
     };
