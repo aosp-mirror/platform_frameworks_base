@@ -464,6 +464,9 @@ public final class LoadedApk {
                     || appDir.equals(instrumentedAppDir)) {
                 outZipPaths.clear();
                 outZipPaths.add(instrumentationAppDir);
+                if (!instrumentationAppDir.equals(instrumentedAppDir)) {
+                    outZipPaths.add(instrumentedAppDir);
+                }
 
                 // Only add splits if the app did not request isolated split loading.
                 if (!aInfo.requestsIsolatedSplitLoading()) {
@@ -472,7 +475,6 @@ public final class LoadedApk {
                     }
 
                     if (!instrumentationAppDir.equals(instrumentedAppDir)) {
-                        outZipPaths.add(instrumentedAppDir);
                         if (instrumentedSplitAppDirs != null) {
                             Collections.addAll(outZipPaths, instrumentedSplitAppDirs);
                         }
