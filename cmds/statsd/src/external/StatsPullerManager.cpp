@@ -133,10 +133,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::FACE_SETTINGS},
          {.puller = new StatsCompanionServicePuller(android::util::FACE_SETTINGS)}},
 
-        // App ops
-        {{.atomTag = android::util::APP_OPS},
-         {.puller = new StatsCompanionServicePuller(android::util::APP_OPS)}},
-
         // VmsClientStats
         {{.atomTag = android::util::VMS_CLIENT_STATS},
          {.additiveFields = {5, 6, 7, 8, 9, 10},

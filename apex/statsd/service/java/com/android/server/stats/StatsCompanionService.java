@@ -856,65 +856,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullAppOps(long elapsedNanos, final long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long token = Binder.clearCallingIdentity();
-        try {
-            AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
-
-            CompletableFuture<HistoricalOps> ops = new CompletableFuture<>();
-            HistoricalOpsRequest histOpsRequest =
-                    new HistoricalOpsRequest.Builder(0, Long.MAX_VALUE).build();
-            appOps.getHistoricalOps(histOpsRequest, mContext.getMainExecutor(), ops::complete);
-
-            HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
-                    TimeUnit.MILLISECONDS);
-
-            for (int uidIdx = 0; uidIdx < histOps.getUidCount(); uidIdx++) {
-                final HistoricalUidOps uidOps = histOps.getUidOpsAt(uidIdx);
-                final int uid = uidOps.getUid();
-                for (int pkgIdx = 0; pkgIdx < uidOps.getPackageCount(); pkgIdx++) {
-                    final HistoricalPackageOps packageOps = uidOps.getPackageOpsAt(pkgIdx);
-                    for (int opIdx = 0; opIdx < packageOps.getOpCount(); opIdx++) {
-                        final AppOpsManager.HistoricalOp op  = packageOps.getOpAt(opIdx);
-                        StatsLogEventWrapper e = new StatsLogEventWrapper(StatsLog.APP_OPS,
-                                elapsedNanos, wallClockNanos);
-
-                        e.writeInt(uid);
-                        e.writeString(packageOps.getPackageName());
-                        e.writeInt(op.getOpCode());
-                        e.writeLong(op.getForegroundAccessCount(OP_FLAGS_ALL_TRUSTED));
-                        e.writeLong(op.getBackgroundAccessCount(OP_FLAGS_ALL_TRUSTED));
-                        e.writeLong(op.getForegroundRejectCount(OP_FLAGS_ALL_TRUSTED));
-                        e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_ALL_TRUSTED));
-                        e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_ALL_TRUSTED));
-                        e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_ALL_TRUSTED));
-
-                        String perm = AppOpsManager.opToPermission(op.getOpCode());
-                        if (perm == null) {
-                            e.writeBoolean(false);
-                        } else {
-                            PermissionInfo permInfo;
-                            try {
-                                permInfo = mContext.getPackageManager().getPermissionInfo(perm, 0);
-                                e.writeBoolean(permInfo.getProtection() == PROTECTION_DANGEROUS);
-                            } catch (PackageManager.NameNotFoundException exception) {
-                                e.writeBoolean(false);
-                            }
-                        }
-
-                        pulledData.add(e);
-                    }
-                }
-            }
-        } catch (Throwable t) {
-            Log.e(TAG, "Could not read appops", t);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-
     /**
      * Add a RoleHolder atom for each package that holds a role.
      *
@@ -1131,11 +1072,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.FACE_SETTINGS: {
                 pullFaceSettings(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.APP_OPS: {
-                pullAppOps(elapsedNanos, wallClockNanos, ret);
                 break;
             }
 
