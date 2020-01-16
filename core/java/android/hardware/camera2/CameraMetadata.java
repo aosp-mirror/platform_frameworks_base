@@ -366,6 +366,20 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int LENS_POSE_REFERENCE_GYROSCOPE = 1;
 
+    /**
+     * <p>The camera device cannot represent the values of {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}
+     * and {@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation} accurately enough. One such example is a camera device
+     * on the cover of a foldable phone: in order to measure the pose translation and rotation,
+     * some kind of hinge position sensor would be needed.</p>
+     * <p>The value of {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation} must be all zeros, and
+     * {@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation} must be values matching its default facing.</p>
+     *
+     * @see CameraCharacteristics#LENS_POSE_ROTATION
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#LENS_POSE_REFERENCE
+     */
+    public static final int LENS_POSE_REFERENCE_UNDEFINED = 2;
+
     //
     // Enumeration values for CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
     //

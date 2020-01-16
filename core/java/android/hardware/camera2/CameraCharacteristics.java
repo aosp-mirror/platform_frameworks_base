@@ -1539,10 +1539,15 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><code>p' = Rp</code></p>
      * <p>where <code>p</code> is in the device sensor coordinate system, and
      *  <code>p'</code> is in the camera-oriented coordinate system.</p>
+     * <p>If {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} is UNDEFINED, the quaternion rotation cannot
+     *  be accurately represented by the camera device, and will be represented by
+     *  default values matching its default facing.</p>
      * <p><b>Units</b>:
      * Quaternion coefficients</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
+     *
+     * @see CameraCharacteristics#LENS_POSE_REFERENCE
      */
     @PublicKey
     @NonNull
@@ -1577,6 +1582,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>When {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} is GYROSCOPE, then this position is relative to
      * the center of the primary gyroscope on the device. The axis definitions are the same as
      * with PRIMARY_CAMERA.</p>
+     * <p>When {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} is UNDEFINED, this position cannot be accurately
+     * represented by the camera device, and will be represented as <code>(0, 0, 0)</code>.</p>
      * <p><b>Units</b>: Meters</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
@@ -1714,20 +1721,24 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<float[]>("android.lens.radialDistortion", float[].class);
 
     /**
-     * <p>The origin for {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}.</p>
+     * <p>The origin for {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}, and the accuracy of
+     * {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation} and {@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}.</p>
      * <p>Different calibration methods and use cases can produce better or worse results
      * depending on the selected coordinate origin.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #LENS_POSE_REFERENCE_PRIMARY_CAMERA PRIMARY_CAMERA}</li>
      *   <li>{@link #LENS_POSE_REFERENCE_GYROSCOPE GYROSCOPE}</li>
+     *   <li>{@link #LENS_POSE_REFERENCE_UNDEFINED UNDEFINED}</li>
      * </ul></p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
+     * @see CameraCharacteristics#LENS_POSE_ROTATION
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
      * @see #LENS_POSE_REFERENCE_PRIMARY_CAMERA
      * @see #LENS_POSE_REFERENCE_GYROSCOPE
+     * @see #LENS_POSE_REFERENCE_UNDEFINED
      */
     @PublicKey
     @NonNull
