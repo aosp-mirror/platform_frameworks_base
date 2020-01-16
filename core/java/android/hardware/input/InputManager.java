@@ -18,6 +18,7 @@ package android.hardware.input;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
@@ -45,6 +46,7 @@ import android.view.InputEvent;
 import android.view.InputMonitor;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
+import android.view.VerifiedInputEvent;
 
 import com.android.internal.os.SomeArgs;
 
@@ -901,6 +903,27 @@ public final class InputManager {
 
         try {
             return mIm.injectInputEvent(event, mode);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Verify the details of an {@link android.view.InputEvent} that came from the system.
+     * If the event did not come from the system, or its details could not be verified, then this
+     * will return {@code null}. Receiving {@code null} does not mean that the event did not
+     * originate from the system, just that we were unable to verify it. This can
+     * happen for a number of reasons during normal operation.
+     *
+     * @param event The {@link android.view.InputEvent} to check
+     *
+     * @return {@link android.view.VerifiedInputEvent}, which is a subset of the provided
+     * {@link android.view.InputEvent}
+     *         {@code null} if the event could not be verified.
+     */
+    public @Nullable VerifiedInputEvent verifyInputEvent(@NonNull InputEvent event) {
+        try {
+            return mIm.verifyInputEvent(event);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

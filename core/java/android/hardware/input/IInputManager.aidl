@@ -27,6 +27,7 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
 import android.view.PointerIcon;
+import android.view.VerifiedInputEvent;
 
 /** @hide */
 interface IInputManager {
@@ -49,6 +50,8 @@ interface IInputManager {
     // applications, the caller must have the INJECT_EVENTS permission.
     @UnsupportedAppUsage
     boolean injectInputEvent(in InputEvent ev, int mode);
+
+    VerifiedInputEvent verifyInputEvent(in InputEvent ev);
 
     // Calibrate input device position
     TouchCalibration getTouchCalibrationForInputDevice(String inputDeviceDescriptor, int rotation);

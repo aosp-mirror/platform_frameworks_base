@@ -3,6 +3,7 @@ android_test {
 
     srcs: [
         "src/**/*.java",
+        "src/**/*.kt",
         "src/**/I*.aidl",
         "DisabledTestApp/src/**/*.java",
         "EnabledTestApp/src/**/*.java",
