@@ -204,11 +204,9 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
      * @param projection list of {@link android.provider.SearchIndexablesContract.RawData} columns
      *                   to put into the cursor. If {@code null} all supported columns should be
      *                   included.
-     *
-     * @hide
      */
     @Nullable
-    public Cursor queryDynamicRawData(String[] projection) {
+    public Cursor queryDynamicRawData(@Nullable String[] projection) {
         // By default no-op;
         return null;
     }

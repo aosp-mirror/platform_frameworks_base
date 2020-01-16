@@ -98,16 +98,14 @@ public class SearchIndexablesContract {
 
 
     /**
-     * Dynamic indexable raw data names.
-     *
-     * @hide
+     * The raw data name of dynamic index. This is used to compose the index path of provider
+     * for dynamic index.
      */
     public static final String DYNAMIC_INDEXABLES_RAW = "dynamic_indexables_raw";
 
     /**
-     * ContentProvider path for dynamic indexable raw data.
-     *
-     * @hide
+     * ContentProvider path for dynamic index. This is used to get the raw data of dynamic index
+     * from provider.
      */
     public static final String DYNAMIC_INDEXABLES_RAW_PATH =
             SETTINGS + "/" + DYNAMIC_INDEXABLES_RAW;
