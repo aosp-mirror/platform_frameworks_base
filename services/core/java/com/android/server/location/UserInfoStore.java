@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
+import android.os.Binder;
 import android.os.Build;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -152,7 +153,7 @@ public class UserInfoStore {
         // this intent is only sent to the current user
         if (mCachedParentUserId == mCurrentUserId) {
             mCachedParentUserId = UserHandle.USER_NULL;
-            mCachedProfileUserIds = null;
+            mCachedProfileUserIds = new int[]{UserHandle.USER_NULL};
         }
     }
 
@@ -185,16 +186,21 @@ public class UserInfoStore {
         } else {
             Preconditions.checkState(mUserManager != null);
 
-            UserInfo userInfo = mUserManager.getProfileParent(userId);
-            if (userInfo != null) {
-                parentUserId = userInfo.id;
-            } else {
-                // getProfileParent() returns null if the userId is already the parent...
-                parentUserId = userId;
-            }
+            long identity = Binder.clearCallingIdentity();
+            try {
+                UserInfo userInfo = mUserManager.getProfileParent(userId);
+                if (userInfo != null) {
+                    parentUserId = userInfo.id;
+                } else {
+                    // getProfileParent() returns null if the userId is already the parent...
+                    parentUserId = userId;
+                }
 
-            // force profiles into cache
-            getProfileUserIdsForParentUser(parentUserId);
+                // force profiles into cache
+                getProfileUserIdsForParentUser(parentUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         return parentUserId;
@@ -204,13 +210,24 @@ public class UserInfoStore {
     private int[] getProfileUserIdsForParentUser(@UserIdInt int parentUserId) {
         Preconditions.checkState(mUserManager != null);
 
+        // only assert on debug builds as this is a more expensive check
         if (Build.IS_DEBUGGABLE) {
-            Preconditions.checkArgument(mUserManager.getProfileParent(parentUserId) == null);
+            long identity = Binder.clearCallingIdentity();
+            try {
+                Preconditions.checkArgument(mUserManager.getProfileParent(parentUserId) == null);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         if (parentUserId != mCachedParentUserId) {
-            mCachedParentUserId = parentUserId;
-            mCachedProfileUserIds = mUserManager.getProfileIdsWithDisabled(parentUserId);
+            long identity = Binder.clearCallingIdentity();
+            try {
+                mCachedParentUserId = parentUserId;
+                mCachedProfileUserIds = mUserManager.getProfileIdsWithDisabled(parentUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         return mCachedProfileUserIds;
