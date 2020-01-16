@@ -2514,10 +2514,12 @@ package android.provider {
     method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static float getFloat(@NonNull String, @NonNull String, float);
     method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static int getInt(@NonNull String, @NonNull String, int);
     method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static long getLong(@NonNull String, @NonNull String, long);
+    method @NonNull @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static android.provider.DeviceConfig.Properties getProperties(@NonNull String, @NonNull java.lang.String...);
     method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static String getProperty(@NonNull String, @NonNull String);
     method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static String getString(@NonNull String, @NonNull String, @Nullable String);
     method public static void removeOnPropertiesChangedListener(@NonNull android.provider.DeviceConfig.OnPropertiesChangedListener);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void resetToDefaults(int, @Nullable String);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperties(@NonNull android.provider.DeviceConfig.Properties) throws android.provider.DeviceConfig.BadConfigException;
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(@NonNull String, @NonNull String, @Nullable String, boolean);
     field public static final String NAMESPACE_ANDROID = "android";
     field public static final String NAMESPACE_AUTOFILL = "autofill";
@@ -2527,6 +2529,10 @@ package android.provider {
     field public static final String NAMESPACE_PRIVACY = "privacy";
     field public static final String NAMESPACE_ROLLBACK = "rollback";
     field public static final String NAMESPACE_ROLLBACK_BOOT = "rollback_boot";
+  }
+
+  public static class DeviceConfig.BadConfigException extends java.lang.Exception {
+    ctor public DeviceConfig.BadConfigException();
   }
 
   public static interface DeviceConfig.OnPropertiesChangedListener {

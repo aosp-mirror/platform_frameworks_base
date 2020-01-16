@@ -2746,6 +2746,8 @@ public final class Settings {
 
         public ArrayMap<String, String> getStringsForPrefix(ContentResolver cr, String prefix,
                 List<String> names) {
+            String namespace = prefix.substring(0, prefix.length() - 1);
+            DeviceConfig.enforceReadPermission(ActivityThread.currentApplication(), namespace);
             ArrayMap<String, String> keyValues = new ArrayMap<>();
             int currentGeneration = -1;
 
