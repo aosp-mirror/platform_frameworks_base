@@ -26,6 +26,7 @@ import android.content.Context;
 import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.IBatchedLocationCallback;
+import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
 import android.location.IGnssStatusListener;
@@ -51,6 +52,7 @@ import com.android.server.LocationManagerServiceUtils.LinkedListener;
 import com.android.server.LocationManagerServiceUtils.LinkedListenerBase;
 import com.android.server.location.AppForegroundHelper;
 import com.android.server.location.CallerIdentity;
+import com.android.server.location.GnssAntennaInfoProvider;
 import com.android.server.location.GnssBatchingProvider;
 import com.android.server.location.GnssCapabilitiesProvider;
 import com.android.server.location.GnssLocationProvider;
@@ -87,6 +89,7 @@ public class GnssManagerService {
     private final GnssStatusListenerHelper mGnssStatusProvider;
     private final GnssMeasurementsProvider mGnssMeasurementsProvider;
     private final GnssMeasurementCorrectionsProvider mGnssMeasurementCorrectionsProvider;
+    private final GnssAntennaInfoProvider mGnssAntennaInfoProvider;
     private final GnssNavigationMessageProvider mGnssNavigationMessageProvider;
     private final GnssLocationProvider.GnssSystemInfoProvider mGnssSystemInfoProvider;
     private final GnssLocationProvider.GnssMetricsProvider mGnssMetricsProvider;
@@ -98,6 +101,11 @@ public class GnssManagerService {
     @GuardedBy("mGnssMeasurementsListeners")
     private final ArrayMap<IBinder, LinkedListener<IGnssMeasurementsListener>>
             mGnssMeasurementsListeners = new ArrayMap<>();
+
+    @GuardedBy("mGnssAntennaInfoListeners")
+    private final ArrayMap<IBinder,
+            LinkedListener<IGnssAntennaInfoListener>>
+            mGnssAntennaInfoListeners = new ArrayMap<>();
 
     @GuardedBy("mGnssNavigationMessageListeners")
     private final ArrayMap<IBinder, LinkedListener<IGnssNavigationMessageListener>>
@@ -147,6 +155,7 @@ public class GnssManagerService {
         mGnssLocationProvider = gnssLocationProvider;
         mGnssStatusProvider = mGnssLocationProvider.getGnssStatusProvider();
         mGnssMeasurementsProvider = mGnssLocationProvider.getGnssMeasurementsProvider();
+        mGnssAntennaInfoProvider = mGnssLocationProvider.getGnssAntennaInfoProvider();
         mGnssMeasurementCorrectionsProvider =
                 mGnssLocationProvider.getGnssMeasurementCorrectionsProvider();
         mGnssNavigationMessageProvider = mGnssLocationProvider.getGnssNavigationMessageProvider();
@@ -354,6 +363,14 @@ public class GnssManagerService {
                     uid,
                     foreground);
         }
+        synchronized (mGnssAntennaInfoListeners) {
+            updateListenersOnForegroundChangedLocked(
+                    mGnssAntennaInfoListeners,
+                    mGnssAntennaInfoProvider,
+                    IGnssAntennaInfoListener.Stub::asInterface,
+                    uid,
+                    foreground);
+        }
     }
 
     private <TListener extends IInterface> void updateListenersOnForegroundChangedLocked(
@@ -527,6 +544,40 @@ public class GnssManagerService {
         synchronized (mGnssMeasurementsListeners) {
             removeGnssDataListenerLocked(listener, mGnssMeasurementsProvider,
                     mGnssMeasurementsListeners);
+        }
+    }
+
+    /**
+     * Adds a GNSS Antenna Info listener.
+     *
+     * @param listener    called when GNSS antenna info is received
+     * @param packageName name of requesting package
+     * @return true if listener is successfully added, false otherwise
+     */
+    public boolean addGnssAntennaInfoListener(
+            IGnssAntennaInfoListener listener, String packageName,
+            @Nullable String featureId, @NonNull String listenerIdentifier) {
+        synchronized (mGnssAntennaInfoListeners) {
+            return addGnssDataListenerLocked(
+                    listener,
+                    packageName,
+                    featureId,
+                    listenerIdentifier,
+                    mGnssAntennaInfoProvider,
+                    mGnssAntennaInfoListeners,
+                    this::removeGnssAntennaInfoListener);
+        }
+    }
+
+    /**
+     * Removes a GNSS Antenna Info listener.
+     *
+     * @param listener called when GNSS antenna info is received
+     */
+    public void removeGnssAntennaInfoListener(IGnssAntennaInfoListener listener) {
+        synchronized (mGnssAntennaInfoListeners) {
+            removeGnssDataListenerLocked(
+                    listener, mGnssAntennaInfoProvider, mGnssAntennaInfoListeners);
         }
     }
 
