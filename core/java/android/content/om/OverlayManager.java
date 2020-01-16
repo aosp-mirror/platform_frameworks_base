@@ -22,7 +22,11 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.Context;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -39,6 +43,10 @@ public class OverlayManager {
 
     private final IOverlayManager mService;
     private final Context mContext;
+
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    private static final long THROW_SECURITY_EXCEPTIONS = 147340954;
 
     /**
      * Creates a new instance.
@@ -69,6 +77,9 @@ public class OverlayManager {
      * @param packageName the name of the overlay package to enable.
      * @param user The user for which to change the overlay.
      *
+     * @throws SecurityException when caller is not allowed to enable {@param packageName}
+     * @throws IllegalStateException when enabling fails otherwise
+     *
      * @hide
      */
     @SystemApi
@@ -77,11 +88,13 @@ public class OverlayManager {
             "android.permission.INTERACT_ACROSS_USERS_FULL"
     })
     public void setEnabledExclusiveInCategory(@NonNull final String packageName,
-            @NonNull UserHandle user) {
+            @NonNull UserHandle user) throws SecurityException, IllegalStateException {
         try {
             if (!mService.setEnabledExclusiveInCategory(packageName, user.getIdentifier())) {
                 throw new IllegalStateException("setEnabledExclusiveInCategory failed");
             }
+        } catch (SecurityException e) {
+            rethrowSecurityException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -97,6 +110,9 @@ public class OverlayManager {
      * @param enable {@code false} if the overlay should be turned off.
      * @param user The user for which to change the overlay.
      *
+     * @throws SecurityException when caller is not allowed to enable/disable {@param packageName}
+     * @throws IllegalStateException when enabling/disabling fails otherwise
+     *
      * @hide
      */
     @SystemApi
@@ -105,15 +121,16 @@ public class OverlayManager {
             "android.permission.INTERACT_ACROSS_USERS_FULL"
     })
     public void setEnabled(@NonNull final String packageName, final boolean enable,
-            @NonNull UserHandle user) {
+            @NonNull UserHandle user) throws SecurityException, IllegalStateException {
         try {
             if (!mService.setEnabled(packageName, enable, user.getIdentifier())) {
                 throw new IllegalStateException("setEnabled failed");
             }
+        } catch (SecurityException e) {
+            rethrowSecurityException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        return;
     }
 
     /**
@@ -185,6 +202,31 @@ public class OverlayManager {
             mService.invalidateCachesForOverlay(targetPackageName, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Starting on R, actor enforcement and app visibility changes introduce additional failure
+     * cases, but the SecurityException thrown with these checks is unexpected for existing
+     * consumers of the API.
+     *
+     * The only prior case it would be thrown is with a permission failure, but the calling
+     * application would be able to verify that themselves, and so they may choose to ignore
+     * catching SecurityException when calling these APIs.
+     *
+     * For R, this no longer holds true, and SecurityExceptions can be thrown for any number of
+     * reasons, none of which are exposed to the caller. So for consumers targeting below R,
+     * transform these SecurityExceptions into IllegalStateExceptions, which are a little more
+     * expected to be thrown by the setEnabled APIs.
+     *
+     * This will mask the prior permission exception if it applies, but it's assumed that apps
+     * wouldn't call the APIs without the permission on prior versions, and so it's safe to ignore.
+     */
+    private void rethrowSecurityException(SecurityException e) {
+        if (!Compatibility.isChangeEnabled(THROW_SECURITY_EXCEPTIONS)) {
+            throw new IllegalStateException(e);
+        } else {
+            throw e;
         }
     }
 }

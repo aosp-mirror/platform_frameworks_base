@@ -4368,7 +4368,7 @@ public class SettingsProvider extends ContentProvider {
                         try {
                             overlayManager.setEnabledExclusiveInCategory(
                                     NAV_BAR_MODE_2BUTTON_OVERLAY, UserHandle.USER_CURRENT);
-                        } catch (RemoteException e) {
+                        } catch (SecurityException | IllegalStateException | RemoteException e) {
                             throw new IllegalStateException(
                                     "Failed to set nav bar interaction mode overlay");
                         }

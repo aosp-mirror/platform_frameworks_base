@@ -387,7 +387,7 @@ public class NavigationModeController implements Dumpable {
                     Log.d(TAG, "setModeOverlay: overlayPackage=" + overlayPkg
                             + " userId=" + userId);
                 }
-            } catch (RemoteException e) {
+            } catch (SecurityException | IllegalStateException | RemoteException e) {
                 Log.e(TAG, "Failed to enable overlay " + overlayPkg + " for user " + userId);
             }
         });
