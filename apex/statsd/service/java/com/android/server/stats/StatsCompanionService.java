@@ -722,57 +722,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullBinderCallsStats(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        BinderCallsStatsService.Internal binderStats =
-                LocalServices.getService(BinderCallsStatsService.Internal.class);
-        if (binderStats == null) {
-            throw new IllegalStateException("binderStats is null");
-        }
-
-        List<ExportedCallStat> callStats = binderStats.getExportedCallStats();
-        binderStats.reset();
-        for (ExportedCallStat callStat : callStats) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(callStat.workSourceUid);
-            e.writeString(callStat.className);
-            e.writeString(callStat.methodName);
-            e.writeLong(callStat.callCount);
-            e.writeLong(callStat.exceptionCount);
-            e.writeLong(callStat.latencyMicros);
-            e.writeLong(callStat.maxLatencyMicros);
-            e.writeLong(callStat.cpuTimeMicros);
-            e.writeLong(callStat.maxCpuTimeMicros);
-            e.writeLong(callStat.maxReplySizeBytes);
-            e.writeLong(callStat.maxRequestSizeBytes);
-            e.writeLong(callStat.recordedCallCount);
-            e.writeInt(callStat.screenInteractive ? 1 : 0);
-            e.writeInt(callStat.callingUid);
-            pulledData.add(e);
-        }
-    }
-
-    private void pullBinderCallsStatsExceptions(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        BinderCallsStatsService.Internal binderStats =
-                LocalServices.getService(BinderCallsStatsService.Internal.class);
-        if (binderStats == null) {
-            throw new IllegalStateException("binderStats is null");
-        }
-
-        ArrayMap<String, Integer> exceptionStats = binderStats.getExportedExceptionStats();
-        // TODO: decouple binder calls exceptions with the rest of the binder calls data so that we
-        // can reset the exception stats.
-        for (Entry<String, Integer> entry : exceptionStats.entrySet()) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeString(entry.getKey());
-            e.writeInt(entry.getValue());
-            pulledData.add(e);
-        }
-    }
-
     private void pullLooperStats(int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         LooperStats looperStats = LocalServices.getService(LooperStats.class);
@@ -1627,16 +1576,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.SYSTEM_ELAPSED_REALTIME: {
                 pullSystemElapsedRealtime(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.BINDER_CALLS: {
-                pullBinderCallsStats(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.BINDER_CALLS_EXCEPTIONS: {
-                pullBinderCallsStatsExceptions(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

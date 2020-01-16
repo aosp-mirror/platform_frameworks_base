@@ -270,8 +270,8 @@ public class StatsPullAtomService extends SystemService {
         registerProcessSystemIonHeapSize();
         registerTemperature();
         registerCoolingDevice();
-        registerBinderCalls();
-        registerBinderCallsExceptions();
+        registerBinderCallsStats();
+        registerBinderCallsStatsExceptions();
         registerLooperStats();
         registerDiskStats();
         registerDirectoryUsage();
@@ -1348,20 +1348,82 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
-    private void registerBinderCalls() {
-        // No op.
+    private void registerBinderCallsStats() {
+        int tagId = StatsLog.BINDER_CALLS;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {4, 5, 6, 8, 12})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullBinderCallsStats(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullBinderCalls() {
-        // No op.
+    private int pullBinderCallsStats(int atomTag, List<StatsEvent> pulledData) {
+        BinderCallsStatsService.Internal binderStats =
+                LocalServices.getService(BinderCallsStatsService.Internal.class);
+        if (binderStats == null) {
+            Slog.e(TAG, "failed to get binderStats");
+            return StatsManager.PULL_SKIP;
+        }
+
+        List<ExportedCallStat> callStats = binderStats.getExportedCallStats();
+        binderStats.reset();
+        for (ExportedCallStat callStat : callStats) {
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(callStat.workSourceUid)
+                    .writeString(callStat.className)
+                    .writeString(callStat.methodName)
+                    .writeLong(callStat.callCount)
+                    .writeLong(callStat.exceptionCount)
+                    .writeLong(callStat.latencyMicros)
+                    .writeLong(callStat.maxLatencyMicros)
+                    .writeLong(callStat.cpuTimeMicros)
+                    .writeLong(callStat.maxCpuTimeMicros)
+                    .writeLong(callStat.maxReplySizeBytes)
+                    .writeLong(callStat.maxRequestSizeBytes)
+                    .writeLong(callStat.recordedCallCount)
+                    .writeInt(callStat.screenInteractive ? 1 : 0)
+                    .writeInt(callStat.callingUid)
+                    .build();
+            pulledData.add(e);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
-    private void registerBinderCallsExceptions() {
-        // No op.
+    private void registerBinderCallsStatsExceptions() {
+        int tagId = StatsLog.BINDER_CALLS_EXCEPTIONS;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullBinderCallsStatsExceptions(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullBinderCallsExceptions() {
-        // No op.
+    private int pullBinderCallsStatsExceptions(int atomTag, List<StatsEvent> pulledData) {
+        BinderCallsStatsService.Internal binderStats =
+                LocalServices.getService(BinderCallsStatsService.Internal.class);
+        if (binderStats == null) {
+            Slog.e(TAG, "failed to get binderStats");
+            return StatsManager.PULL_SKIP;
+        }
+
+        ArrayMap<String, Integer> exceptionStats = binderStats.getExportedExceptionStats();
+        // TODO: decouple binder calls exceptions with the rest of the binder calls data so that we
+        // can reset the exception stats.
+        for (Map.Entry<String, Integer> entry : exceptionStats.entrySet()) {
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeString(entry.getKey())
+                    .writeInt(entry.getValue())
+                    .build();
+            pulledData.add(e);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerLooperStats() {

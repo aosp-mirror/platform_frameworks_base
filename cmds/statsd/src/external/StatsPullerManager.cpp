@@ -95,15 +95,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
 
-        // binder_calls
-        {{.atomTag = android::util::BINDER_CALLS},
-         {.additiveFields = {4, 5, 6, 8, 12},
-          .puller = new StatsCompanionServicePuller(android::util::BINDER_CALLS)}},
-
-        // binder_calls_exceptions
-        {{.atomTag = android::util::BINDER_CALLS_EXCEPTIONS},
-         {.puller = new StatsCompanionServicePuller(android::util::BINDER_CALLS_EXCEPTIONS)}},
-
         // looper_stats
         {{.atomTag = android::util::LOOPER_STATS},
          {.additiveFields = {5, 6, 7, 8, 9},
