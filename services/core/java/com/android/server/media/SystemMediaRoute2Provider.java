@@ -26,6 +26,7 @@ import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -96,7 +97,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void requestCreateSession(String packageName, String routeId, long requestId) {
+    public void requestCreateSession(String packageName, String routeId, long requestId,
+            Bundle sessionHints) {
         // Do nothing
     }
 

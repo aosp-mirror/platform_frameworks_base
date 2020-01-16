@@ -24,6 +24,7 @@ import android.media.MediaRoute2Info;
 import android.media.MediaRouterClientState;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
+import android.os.Bundle;
 
 /**
  * {@hide}
@@ -52,7 +53,8 @@ interface IMediaRouterService {
     void requestSetVolume2(IMediaRouter2Client client, in MediaRoute2Info route, int volume);
     void requestUpdateVolume2(IMediaRouter2Client client, in MediaRoute2Info route, int direction);
 
-    void requestCreateSession(IMediaRouter2Client client, in MediaRoute2Info route, int requestId);
+    void requestCreateSession(IMediaRouter2Client client, in MediaRoute2Info route, int requestId,
+            in @nullable Bundle sessionHints);
     void setDiscoveryRequest2(IMediaRouter2Client client, in RouteDiscoveryPreference preference);
     void selectRoute(IMediaRouter2Client client, String sessionId, in MediaRoute2Info route);
     void deselectRoute(IMediaRouter2Client client, String sessionId, in MediaRoute2Info route);

@@ -92,6 +92,7 @@ public class MediaRouter2 {
     @GuardedBy("sRouterLock")
     private boolean mShouldUpdateRoutes;
     private volatile List<MediaRoute2Info> mFilteredRoutes = Collections.emptyList();
+    private volatile OnCreateSessionListener mOnCreateSessionListener;
 
     /**
      * Gets an instance of the media router associated with the context.
@@ -281,6 +282,19 @@ public class MediaRouter2 {
     }
 
     /**
+     * Sets an {@link OnCreateSessionListener} to send hints when creating a session.
+     * To send the hints, listener should be set <em>BEFORE</em> calling
+     * {@link #requestCreateSession(MediaRoute2Info)}.
+     *
+     * @param listener A listener to send optional app-specific hints when creating a session.
+     *                 {@code null} for unset.
+     * @hide
+     */
+    public void setOnCreateSessionListener(@Nullable OnCreateSessionListener listener) {
+        mOnCreateSessionListener = listener;
+    }
+
+    /**
      * Requests the media route provider service to create a session with the given route.
      *
      * @param route the route you want to create a session with.
@@ -300,13 +314,24 @@ public class MediaRouter2 {
         SessionCreationRequest request = new SessionCreationRequest(requestId, route);
         mSessionCreationRequests.add(request);
 
+
+        OnCreateSessionListener listener = mOnCreateSessionListener;
+        Bundle sessionHints = null;
+        if (listener != null) {
+            sessionHints = listener.onCreateSession(route);
+            if (sessionHints != null) {
+                sessionHints = new Bundle(sessionHints);
+            }
+        }
+
         Client2 client;
         synchronized (sRouterLock) {
             client = mClient;
         }
         if (client != null) {
             try {
-                mMediaRouterService.requestCreateSession(client, route, requestId);
+                mMediaRouterService.requestCreateSession(client, route, requestId,
+                        sessionHints);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to request to create session.", ex);
                 mHandler.sendMessage(obtainMessage(MediaRouter2::createControllerOnHandler,
@@ -704,6 +729,34 @@ public class MediaRouter2 {
          * @see RoutingController#isReleased()
          */
         public void onSessionReleased(@NonNull RoutingController controller) {}
+    }
+
+    /**
+     * A listener interface to send an optional app-specific hints when creating a session.
+     *
+     * @hide
+     */
+    public interface OnCreateSessionListener {
+        /**
+         * Called when the {@link MediaRouter2} is about to request
+         * the media route provider service to create a session with the given route.
+         * The {@link Bundle} returned here will be sent to media route provider service as a hint
+         * for creating a session.
+         * <p>
+         * To send hints when creating the session, set this listener before calling
+         * {@link #requestCreateSession(MediaRoute2Info)}.
+         * <p>
+         * This will be called on the same thread which calls
+         * {@link #requestCreateSession(MediaRoute2Info)}.
+         *
+         * @param route The route to create session with
+         * @return An optional bundle of app-specific arguments to send to the provider,
+         *         or null if none. The contents of this bundle may affect the result of
+         *         session creation.
+         * @see MediaRoute2ProviderService#onCreateSession(String, String, long, Bundle)
+         */
+        @Nullable
+        Bundle onCreateSession(@NonNull MediaRoute2Info route);
     }
 
     /**

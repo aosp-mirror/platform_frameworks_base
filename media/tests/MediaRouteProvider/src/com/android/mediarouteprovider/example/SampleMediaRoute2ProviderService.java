@@ -19,10 +19,12 @@ package com.android.mediarouteprovider.example;
 import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_TV;
 
+import android.annotation.Nullable;
 import android.content.Intent;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderService;
 import android.media.RoutingSessionInfo;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
 
@@ -167,7 +169,8 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onCreateSession(String packageName, String routeId, long requestId) {
+    public void onCreateSession(String packageName, String routeId, long requestId,
+            @Nullable Bundle sessionHints) {
         MediaRoute2Info route = mRoutes.get(routeId);
         if (route == null || TextUtils.equals(ROUTE_ID3_SESSION_CREATION_FAILED, routeId)) {
             // Tell the router that session cannot be created by passing null as sessionInfo.
@@ -188,6 +191,8 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
                 .addSelectedRoute(routeId)
                 .addSelectableRoute(ROUTE_ID4_TO_SELECT_AND_DESELECT)
                 .addTransferrableRoute(ROUTE_ID5_TO_TRANSFER_TO)
+                // Set control hints with given sessionHints
+                .setControlHints(sessionHints)
                 .build();
         notifySessionCreated(sessionInfo, requestId);
         publishRoutes();
