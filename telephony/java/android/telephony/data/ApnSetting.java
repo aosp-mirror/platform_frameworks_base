@@ -18,6 +18,7 @@ package android.telephony.data;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.hardware.radio.V1_5.ApnTypes;
@@ -123,6 +124,122 @@ public class ApnSetting implements Parcelable {
     public static final int AUTH_TYPE_CHAP = 2;
     /** Authentication type for PAP or CHAP. */
     public static final int AUTH_TYPE_PAP_OR_CHAP = 3;
+
+    /**
+     * APN types for data connections.  These are usage categories for an APN
+     * entry.  One APN entry may support multiple APN types, eg, a single APN
+     * may service regular internet traffic ("default") as well as MMS-specific
+     * connections.<br/>
+     * APN_TYPE_ALL is a special type to indicate that this APN entry can
+     * service all data connections.
+     * <p>
+     * Note: The goal is to deprecate this.  Due to the Carrier Table being used
+     * directly, this isn't feasible right now.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_ALL_STRING = "*";
+
+    /**
+     * APN type for default data traffic
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_DEFAULT_STRING = "default";
+
+
+    /**
+     * APN type for MMS traffic
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_MMS_STRING = "mms";
+
+
+    /**
+     * APN type for SUPL assisted GPS
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_SUPL_STRING = "supl";
+
+    /**
+     * APN type for DUN traffic
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_DUN_STRING = "dun";
+
+    /**
+     * APN type for HiPri traffic
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_HIPRI_STRING = "hipri";
+
+    /**
+     * APN type for FOTA
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_FOTA_STRING = "fota";
+
+    /**
+     * APN type for IMS
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_IMS_STRING = "ims";
+
+    /**
+     * APN type for CBS
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_CBS_STRING = "cbs";
+
+    /**
+     * APN type for IA Initial Attach APN
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_IA_STRING = "ia";
+
+    /**
+     * APN type for Emergency PDN. This is not an IA apn, but is used
+     * for access to carrier services in an emergency call situation.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_EMERGENCY_STRING = "emergency";
+
+    /**
+     * APN type for Mission Critical Services
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_MCX_STRING = "mcx";
+
+    /**
+     * APN type for XCAP
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String TYPE_XCAP_STRING = "xcap";
+
 
     /** @hide */
     @IntDef(prefix = { "AUTH_TYPE_" }, value = {
@@ -1290,10 +1407,13 @@ public class ApnSetting implements Parcelable {
     }
 
     /**
+     * Converts the integer value of an APN type to the string version.
      * @param apnTypeBitmask bitmask of APN types.
      * @return comma delimited list of APN types.
      * @hide
      */
+    @SystemApi
+    @NonNull
     public static String getApnTypesStringFromBitmask(int apnTypeBitmask) {
         List<String> types = new ArrayList<>();
         for (Integer type : APN_TYPE_INT_MAP.keySet()) {
