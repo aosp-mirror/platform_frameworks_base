@@ -3395,6 +3395,9 @@ public class UserManagerService extends IUserManager.Stub {
     private void dispatchUserAddedIntent(@NonNull UserInfo userInfo) {
         Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id);
+        // Also, add the UserHandle for mainline modules which can't use the @hide
+        // EXTRA_USER_HANDLE.
+        addedIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(userInfo.id));
         mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
                 android.Manifest.permission.MANAGE_USERS);
         MetricsLogger.count(mContext, userInfo.isGuest() ? TRON_GUEST_CREATED
@@ -3678,9 +3681,12 @@ public class UserManagerService extends IUserManager.Stub {
         // wiping the user's system directory and removing from the user list
         long ident = Binder.clearCallingIdentity();
         try {
-            Intent addedIntent = new Intent(Intent.ACTION_USER_REMOVED);
-            addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-            mContext.sendOrderedBroadcastAsUser(addedIntent, UserHandle.ALL,
+            Intent removedIntent = new Intent(Intent.ACTION_USER_REMOVED);
+            removedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+            // Also, add the UserHandle for mainline modules which can't use the @hide
+            // EXTRA_USER_HANDLE.
+            removedIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId));
+            mContext.sendOrderedBroadcastAsUser(removedIntent, UserHandle.ALL,
                     android.Manifest.permission.MANAGE_USERS,
 
                     new BroadcastReceiver() {

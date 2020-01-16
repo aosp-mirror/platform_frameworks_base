@@ -16,3 +16,4 @@ rule com.android.internal.util.TrafficStatsConstants* com.android.networkstack.t
 rule android.net.LocalLog* com.android.networkstack.tethering.LocalLog@1
 
 rule android.net.shared.Inet4AddressUtils* com.android.networkstack.tethering.shared.Inet4AddressUtils@1
+rule android.net.util.** com.android.networkstack.tethering.util.@1

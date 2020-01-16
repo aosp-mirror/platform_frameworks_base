@@ -2369,6 +2369,15 @@ public class WifiManager {
     }
 
     /**
+     * Query whether the device supports Station (STA) + Access point (AP) concurrency or not.
+     *
+     * @return true if this device supports STA + AP concurrency, false otherwise.
+     */
+    public boolean isStaApConcurrencySupported() {
+        return isFeatureSupported(WIFI_FEATURE_AP_STA);
+    }
+
+    /**
      * @deprecated Please use {@link android.content.pm.PackageManager#hasSystemFeature(String)}
      * with {@link android.content.pm.PackageManager#FEATURE_WIFI_RTT} and
      * {@link android.content.pm.PackageManager#FEATURE_WIFI_AWARE}.

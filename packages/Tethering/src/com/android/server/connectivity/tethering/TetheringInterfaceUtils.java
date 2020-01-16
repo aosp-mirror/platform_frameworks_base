@@ -21,8 +21,7 @@ import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
 import android.net.RouteInfo;
 import android.net.util.InterfaceSet;
-
-import com.android.net.module.util.NetUtils;
+import android.net.util.NetUtils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
