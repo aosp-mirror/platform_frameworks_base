@@ -119,7 +119,7 @@ public final class Tuner implements AutoCloseable  {
     private native int nativeStopScan();
     private native int nativeSetLnb(int lnbId);
     private native int nativeSetLna(boolean enable);
-    private native FrontendStatus[] nativeGetFrontendStatus(int[] statusTypes);
+    private native FrontendStatus nativeGetFrontendStatus(int[] statusTypes);
     private native int nativeGetAvSyncHwId(Filter filter);
     private native long nativeGetAvSyncTime(int avSyncId);
     private native int nativeConnectCiCam(int ciCamId);
@@ -297,11 +297,11 @@ public final class Tuner implements AutoCloseable  {
      *
      * @param statusTypes an array of status type which the caller request.
      *
-     * @return statuses an array of statuses which response the caller's
-     *         request.
+     * @return statuses which response the caller's requests.
      * @hide
      */
-    public FrontendStatus[] getFrontendStatus(int[] statusTypes) {
+    @Nullable
+    public FrontendStatus getFrontendStatus(int[] statusTypes) {
         return nativeGetFrontendStatus(statusTypes);
     }
 
