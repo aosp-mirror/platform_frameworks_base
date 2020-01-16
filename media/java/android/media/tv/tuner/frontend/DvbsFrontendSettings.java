@@ -112,31 +112,31 @@ public class DvbsFrontendSettings extends FrontendSettings {
     public @interface Rolloff {}
 
     /**
-     * Roll Off undefined.
+     * Rolloff range undefined.
      */
     public static final int ROLLOFF_UNDEFINED = Constants.FrontendDvbsRolloff.UNDEFINED;
     /**
-     * Roll Off 0_35.
+     * Rolloff range 0,35.
      */
     public static final int ROLLOFF_0_35 = Constants.FrontendDvbsRolloff.ROLLOFF_0_35;
     /**
-     * Roll Off 0_25.
+     * Rolloff range 0,25.
      */
     public static final int ROLLOFF_0_25 = Constants.FrontendDvbsRolloff.ROLLOFF_0_25;
     /**
-     * Roll Off 0_2.
+     * Rolloff range 0,20.
      */
     public static final int ROLLOFF_0_20 = Constants.FrontendDvbsRolloff.ROLLOFF_0_20;
     /**
-     * Roll Off 0_15.
+     * Rolloff range 0,15.
      */
     public static final int ROLLOFF_0_15 = Constants.FrontendDvbsRolloff.ROLLOFF_0_15;
     /**
-     * Roll Off 0_1.
+     * Rolloff range 0,10.
      */
     public static final int ROLLOFF_0_10 = Constants.FrontendDvbsRolloff.ROLLOFF_0_10;
     /**
-     * Roll Off 0_5.
+     * Rolloff range 0,5.
      */
     public static final int ROLLOFF_0_5 = Constants.FrontendDvbsRolloff.ROLLOFF_0_5;
 
@@ -188,6 +188,25 @@ public class DvbsFrontendSettings extends FrontendSettings {
      */
     public static final int STANDARD_S2X = Constants.FrontendDvbsStandard.S2X;
 
+    /** @hide */
+    @IntDef(prefix = "VCM_MODE_",
+            value = {VCM_MODE_UNDEFINED, VCM_MODE_AUTO, VCM_MODE_MANUAL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VcmMode {}
+
+    /**
+     * VCM mode undefined.
+     */
+    public static final int VCM_MODE_UNDEFINED = Constants.FrontendDvbsVcmMode.UNDEFINED;
+    /**
+     * Auto VCM mode.
+     */
+    public static final int VCM_MODE_AUTO = Constants.FrontendDvbsVcmMode.AUTO;
+    /**
+     * Manual VCM mode.
+     */
+    public static final int VCM_MODE_MANUAL = Constants.FrontendDvbsVcmMode.MANUAL;
+
 
     private final int mModulation;
     private final DvbsCodeRate mCoderate;
@@ -196,9 +215,10 @@ public class DvbsFrontendSettings extends FrontendSettings {
     private final int mPilot;
     private final int mInputStreamId;
     private final int mStandard;
+    private final int mVcmMode;
 
     private DvbsFrontendSettings(int frequency, int modulation, DvbsCodeRate coderate,
-            int symbolRate, int rolloff, int pilot, int inputStreamId, int standard) {
+            int symbolRate, int rolloff, int pilot, int inputStreamId, int standard, int vcm) {
         super(frequency);
         mModulation = modulation;
         mCoderate = coderate;
@@ -207,6 +227,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
         mPilot = pilot;
         mInputStreamId = inputStreamId;
         mStandard = standard;
+        mVcmMode = vcm;
     }
 
     /**
@@ -256,6 +277,13 @@ public class DvbsFrontendSettings extends FrontendSettings {
     public int getStandard() {
         return mStandard;
     }
+    /**
+     * Gets VCM mode.
+     */
+    @VcmMode
+    public int getVcmMode() {
+        return mVcmMode;
+    }
 
     /**
      * Creates a builder for {@link DvbsFrontendSettings}.
@@ -280,6 +308,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
         private int mPilot;
         private int mInputStreamId;
         private int mStandard;
+        private int mVcmMode;
 
         private Builder() {
         }
@@ -340,6 +369,14 @@ public class DvbsFrontendSettings extends FrontendSettings {
             mStandard = standard;
             return this;
         }
+        /**
+         * Sets VCM mode.
+         */
+        @NonNull
+        public Builder setVcmMode(@VcmMode int vcm) {
+            mVcmMode = vcm;
+            return this;
+        }
 
         /**
          * Builds a {@link DvbsFrontendSettings} object.
@@ -347,7 +384,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
         @NonNull
         public DvbsFrontendSettings build() {
             return new DvbsFrontendSettings(mFrequency, mModulation, mCoderate, mSymbolRate,
-                    mRolloff, mPilot, mInputStreamId, mStandard);
+                    mRolloff, mPilot, mInputStreamId, mStandard, mVcmMode);
         }
 
         @Override

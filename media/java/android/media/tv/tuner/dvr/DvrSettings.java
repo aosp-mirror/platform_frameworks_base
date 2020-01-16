@@ -19,8 +19,11 @@ package android.media.tv.tuner.dvr;
 import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerConstants.FilterStatus;
+import android.media.tv.tuner.TunerUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -94,9 +97,13 @@ public class DvrSettings {
 
     /**
      * Creates a builder for {@link DvrSettings}.
+     *
+     * @param context the context of the caller.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder newBuilder() {
+    public static Builder builder(Context context) {
+        TunerUtils.checkTunerPermission(context);
         return new Builder();
     }
 

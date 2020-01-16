@@ -32,7 +32,10 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public abstract class FilterConfiguration {
 
-    /** @hide */
+    /**
+     * TODO: moved to Filter. Remove it here.
+     * @hide
+     */
     @IntDef(prefix = "FILTER_TYPE_", value =
             {FILTER_TYPE_TS, FILTER_TYPE_MMTP, FILTER_TYPE_IP, FILTER_TYPE_TLV, FILTER_TYPE_ALP})
     @Retention(RetentionPolicy.SOURCE)

@@ -24,13 +24,13 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.tuner.TunerConstants.FilterStatus;
-import android.media.tv.tuner.TunerConstants.FilterSubtype;
 import android.media.tv.tuner.TunerConstants.FrontendScanType;
 import android.media.tv.tuner.TunerConstants.Result;
 import android.media.tv.tuner.dvr.Dvr;
 import android.media.tv.tuner.dvr.DvrCallback;
 import android.media.tv.tuner.dvr.DvrSettings;
-import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
+import android.media.tv.tuner.filter.Filter.Subtype;
+import android.media.tv.tuner.filter.Filter.Type;
 import android.media.tv.tuner.filter.FilterEvent;
 import android.media.tv.tuner.filter.TimeFilter;
 import android.media.tv.tuner.frontend.FrontendCallback;
@@ -102,7 +102,8 @@ public final class Tuner implements AutoCloseable  {
      * TODO: replace the other constructor
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
-    public Tuner(@NonNull Context context, @NonNull String tvInputSessionId, int useCase) {
+    public Tuner(@NonNull Context context, @NonNull String tvInputSessionId, int useCase,
+            @Nullable OnResourceLostListener listener) {
         mContext = context;
     }
 
@@ -113,7 +114,8 @@ public final class Tuner implements AutoCloseable  {
      *
      * @hide
      */
-    public void shareFrontend(@NonNull Tuner tuner) { }
+    public void shareFrontendFromTuner(@NonNull Tuner tuner) {
+    }
 
 
     private long mNativeContext; // used by native jMediaTuner
@@ -513,18 +515,18 @@ public final class Tuner implements AutoCloseable  {
      * @param subType the subtype of the filter.
      * @param bufferSize the buffer size of the filter to be opened in bytes. The buffer holds the
      * data output from the filter.
-     * @param cb the callback to receive notifications from filter.
      * @param executor the executor on which callback will be invoked. The default event handler
      * executor is used if it's {@code null}.
+     * @param cb the callback to receive notifications from filter.
      * @return the opened filter. {@code null} if the operation failed.
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Nullable
-    public Filter openFilter(@FilterType int mainType, @FilterSubtype int subType,
-            @BytesLong long bufferSize, @Nullable FilterCallback cb,
-            @CallbackExecutor @Nullable Executor executor) {
+    public Filter openFilter(@Type int mainType, @Subtype int subType,
+            @BytesLong long bufferSize, @CallbackExecutor @Nullable Executor executor,
+            @Nullable FilterCallback cb) {
         TunerUtils.checkTunerPermission(mContext);
         Filter filter = nativeOpenFilter(
                 mainType, TunerUtils.getFilterSubtype(mainType, subType), bufferSize);
@@ -540,16 +542,34 @@ public final class Tuner implements AutoCloseable  {
     /**
      * Opens an LNB (low-noise block downconverter) object.
      *
-     * @param cb the callback to receive notifications from LNB.
      * @param executor the executor on which callback will be invoked. The default event handler
      * executor is used if it's {@code null}.
+     * @param cb the callback to receive notifications from LNB.
      * @return the opened LNB object. {@code null} if the operation failed.
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Nullable
-    public Lnb openLnb(LnbCallback cb, @CallbackExecutor @Nullable Executor executor) {
+    public Lnb openLnb(@CallbackExecutor @Nullable Executor executor, LnbCallback cb) {
+        return openLnbByName(null, executor, cb);
+    }
+
+    /**
+     * Opens an LNB (low-noise block downconverter) object.
+     *
+     * @param name the LNB name.
+     * @param executor the executor on which callback will be invoked. The default event handler
+     * executor is used if it's {@code null}.
+     * @param cb the callback to receive notifications from LNB.
+     * @return the opened LNB object. {@code null} if the operation failed.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @Nullable
+    public Lnb openLnbByName(@Nullable String name, @CallbackExecutor @Nullable Executor executor,
+            LnbCallback cb) {
         TunerUtils.checkTunerPermission(mContext);
         // TODO: use resource manager to get LNB ID.
         return new Lnb(0);
@@ -608,17 +628,17 @@ public final class Tuner implements AutoCloseable  {
      * @param type the DVR type to be opened.
      * @param bufferSize the buffer size of the output in bytes. It's used to hold output data of
      * the attached filters.
-     * @param cb the callback to receive notifications from DVR.
      * @param executor the executor on which callback will be invoked. The default event handler
      * executor is used if it's {@code null}.
+     * @param cb the callback to receive notifications from DVR.
      * @return the opened DVR object. {@code null} if the operation failed.
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Nullable
-    public Dvr openDvr(@DvrSettings.Type int type, @BytesLong long bufferSize, DvrCallback cb,
-            @CallbackExecutor @Nullable Executor executor) {
+    public Dvr openDvr(@DvrSettings.Type int type, @BytesLong long bufferSize,
+            @CallbackExecutor @Nullable Executor executor, DvrCallback cb) {
         TunerUtils.checkTunerPermission(mContext);
         Dvr dvr = nativeOpenDvr(type, bufferSize);
         return dvr;
