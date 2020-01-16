@@ -3485,12 +3485,14 @@ message BinaryPushStateChanged {
         INSTALL_FAILURE_DOWNLOAD = 23;
         INSTALL_FAILURE_STATE_MISMATCH = 24;
         INSTALL_FAILURE_COMMIT = 25;
+        REBOOT_TRIGGERED = 26;
     }
     optional State state = 6;
     // Possible experiment ids for monitoring this push.
     optional TrainExperimentIds experiment_ids = 7 [(log_mode) = MODE_BYTES];
     // user id
     optional int32 user_id = 8;
+    optional int32 reason = 9;
 }
 
 /* Test atom, is not logged anywhere */
@@ -6782,6 +6784,7 @@ message TrainInfo {
         INSTALL_FAILURE_DOWNLOAD = 23;
         INSTALL_FAILURE_STATE_MISMATCH = 24;
         INSTALL_FAILURE_COMMIT = 25;
+        REBOOT_TRIGGERED = 26;
     }
     optional Status status = 4;
 }
