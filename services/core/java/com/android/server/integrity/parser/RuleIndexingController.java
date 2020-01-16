@@ -28,9 +28,9 @@ import com.android.server.integrity.model.BitInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /** Helper class to identify the necessary indexes that needs to be read. */
@@ -93,19 +93,28 @@ public class RuleIndexingController {
         return keyToIndexMap;
     }
 
-    private RuleIndexRange searchIndexingKeysRangeContainingKey(
+    private static RuleIndexRange searchIndexingKeysRangeContainingKey(
             LinkedHashMap<String, Integer> indexMap, String searchedKey) {
-        TreeSet<String> keyTreeSet =
-                indexMap.keySet().stream()
-                        .filter(key -> !key.matches(START_INDEXING_KEY) && !key.matches(
-                                END_INDEXING_KEY))
-                        .collect(Collectors.toCollection(TreeSet::new));
-
-        String minIndex = keyTreeSet.floor(searchedKey);
-        String maxIndex = keyTreeSet.higher(searchedKey);
-
+        List<String> keys = indexMap.keySet().stream().collect(Collectors.toList());
+        List<String> identifiedKeyRange =
+                searchKeysRangeContainingKey(keys, searchedKey, 0, keys.size() - 1);
         return new RuleIndexRange(
-                indexMap.get(minIndex == null ? START_INDEXING_KEY : minIndex),
-                indexMap.get(maxIndex == null ? END_INDEXING_KEY : maxIndex));
+                indexMap.get(identifiedKeyRange.get(0)), indexMap.get(identifiedKeyRange.get(1)));
+    }
+
+    private static List<String> searchKeysRangeContainingKey(
+            List<String> sortedKeyList, String key, int startIndex, int endIndex) {
+        if (endIndex - startIndex == 1) {
+            return Arrays.asList(sortedKeyList.get(startIndex), sortedKeyList.get(endIndex));
+        }
+
+        int midKeyIndex = startIndex + ((endIndex - startIndex) / 2);
+        String midKey = sortedKeyList.get(midKeyIndex);
+
+        if (key.compareTo(midKey) >= 0) {
+            return searchKeysRangeContainingKey(sortedKeyList, key, midKeyIndex, endIndex);
+        } else {
+            return searchKeysRangeContainingKey(sortedKeyList, key, startIndex, midKeyIndex);
+        }
     }
 }

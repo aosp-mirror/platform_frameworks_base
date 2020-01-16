@@ -16,6 +16,8 @@
 
 package com.android.server.integrity;
 
+import static com.android.server.integrity.model.IndexingFileConstants.INDEXING_BLOCK_SIZE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.integrity.AppInstallMetadata;
@@ -159,13 +161,14 @@ public class IntegrityFileManagerTest {
         // Create a rule set with 2500 package name indexed, 2500 app certificate indexed and
         // 500 unindexed rules.
         List<Rule> rules = new ArrayList<>();
+        int unindexedRuleCount = 70;
 
         for (int i = 0; i < 2500; i++) {
             rules.add(getPackageNameIndexedRule(String.format("%s%04d", packageName, i)));
             rules.add(getAppCertificateIndexedRule(String.format("%s%04d", appCertificate, i)));
         }
 
-        for (int i = 0; i < 70; i++) {
+        for (int i = 0; i < unindexedRuleCount; i++) {
             rules.add(getInstallerCertificateRule(String.format("%s%04d", installerName, i)));
         }
 
@@ -187,7 +190,8 @@ public class IntegrityFileManagerTest {
         List<Rule> rulesFetched = mIntegrityFileManager.readRules(appInstallMetadata);
 
         // Verify that we do not load all the rules and we have the necessary rules to evaluate.
-        assertThat(rulesFetched.size()).isEqualTo(270);
+        assertThat(rulesFetched.size())
+                .isEqualTo(INDEXING_BLOCK_SIZE * 2 + unindexedRuleCount);
         assertThat(rulesFetched)
                 .containsAllOf(
                         getPackageNameIndexedRule(installedPackageName),
