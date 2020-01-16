@@ -4788,27 +4788,33 @@ package android.media.tv.tuner.frontend {
     method public int getSifStandard();
     method public int getSignalType();
     method public int getType();
-    field public static final int SIF_BG = 1; // 0x1
-    field public static final int SIF_BG_A2 = 2; // 0x2
-    field public static final int SIF_BG_NICAM = 4; // 0x4
-    field public static final int SIF_DK = 16; // 0x10
-    field public static final int SIF_DK1 = 32; // 0x20
-    field public static final int SIF_DK2 = 64; // 0x40
-    field public static final int SIF_DK3 = 128; // 0x80
-    field public static final int SIF_DK_NICAM = 256; // 0x100
-    field public static final int SIF_I = 8; // 0x8
-    field public static final int SIF_I_NICAM = 16384; // 0x4000
-    field public static final int SIF_L = 512; // 0x200
-    field public static final int SIF_L_NICAM = 32768; // 0x8000
-    field public static final int SIF_L_PRIME = 65536; // 0x10000
-    field public static final int SIF_M = 1024; // 0x400
-    field public static final int SIF_M_A2 = 4096; // 0x1000
-    field public static final int SIF_M_BTSC = 2048; // 0x800
-    field public static final int SIF_M_EIA_J = 8192; // 0x2000
+    field public static final int SIF_AUTO = 1; // 0x1
+    field public static final int SIF_BG = 2; // 0x2
+    field public static final int SIF_BG_A2 = 4; // 0x4
+    field public static final int SIF_BG_NICAM = 8; // 0x8
+    field public static final int SIF_DK = 32; // 0x20
+    field public static final int SIF_DK1_A2 = 64; // 0x40
+    field public static final int SIF_DK2_A2 = 128; // 0x80
+    field public static final int SIF_DK3_A2 = 256; // 0x100
+    field public static final int SIF_DK_NICAM = 512; // 0x200
+    field public static final int SIF_I = 16; // 0x10
+    field public static final int SIF_I_NICAM = 32768; // 0x8000
+    field public static final int SIF_L = 1024; // 0x400
+    field public static final int SIF_L_NICAM = 65536; // 0x10000
+    field public static final int SIF_L_PRIME = 131072; // 0x20000
+    field public static final int SIF_M = 2048; // 0x800
+    field public static final int SIF_M_A2 = 8192; // 0x2000
+    field public static final int SIF_M_BTSC = 4096; // 0x1000
+    field public static final int SIF_M_EIAJ = 16384; // 0x4000
     field public static final int SIF_UNDEFINED = 0; // 0x0
-    field public static final int SIGNAL_TYPE_NTSC = 4; // 0x4
-    field public static final int SIGNAL_TYPE_PAL = 1; // 0x1
-    field public static final int SIGNAL_TYPE_SECAM = 2; // 0x2
+    field public static final int SIGNAL_TYPE_AUTO = 1; // 0x1
+    field public static final int SIGNAL_TYPE_NTSC = 32; // 0x20
+    field public static final int SIGNAL_TYPE_NTSC_443 = 64; // 0x40
+    field public static final int SIGNAL_TYPE_PAL = 2; // 0x2
+    field public static final int SIGNAL_TYPE_PAL_60 = 16; // 0x10
+    field public static final int SIGNAL_TYPE_PAL_M = 4; // 0x4
+    field public static final int SIGNAL_TYPE_PAL_N = 8; // 0x8
+    field public static final int SIGNAL_TYPE_SECAM = 128; // 0x80
     field public static final int SIGNAL_TYPE_UNDEFINED = 0; // 0x0
   }
 
