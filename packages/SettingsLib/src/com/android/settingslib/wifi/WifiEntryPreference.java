@@ -118,7 +118,7 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
             notifyChanged();
         }
 
-        setSummary(mWifiEntry.getSummary());
+        setSummary(mWifiEntry.getSummary(false /* concise */));
         mContentDescription = buildContentDescription();
     }
 

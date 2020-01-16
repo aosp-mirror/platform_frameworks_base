@@ -67,7 +67,7 @@ public class WifiEntryPreferenceTest {
         MockitoAnnotations.initMocks(this);
 
         when(mMockWifiEntry.getTitle()).thenReturn(MOCK_TITLE);
-        when(mMockWifiEntry.getSummary()).thenReturn(MOCK_SUMMARY);
+        when(mMockWifiEntry.getSummary(false /* concise */)).thenReturn(MOCK_SUMMARY);
 
         when(mMockIconInjector.getIcon(0)).thenReturn(mMockDrawable0);
         when(mMockIconInjector.getIcon(1)).thenReturn(mMockDrawable1);
@@ -112,7 +112,7 @@ public class WifiEntryPreferenceTest {
         final WifiEntryPreference pref =
                 new WifiEntryPreference(mContext, mMockWifiEntry, mMockIconInjector);
         final String updatedSummary = "updated summary";
-        when(mMockWifiEntry.getSummary()).thenReturn(updatedSummary);
+        when(mMockWifiEntry.getSummary(false /* concise */)).thenReturn(updatedSummary);
 
         pref.refresh();
 
