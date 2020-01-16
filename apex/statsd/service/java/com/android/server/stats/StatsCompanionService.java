@@ -722,36 +722,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullLooperStats(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        LooperStats looperStats = LocalServices.getService(LooperStats.class);
-        if (looperStats == null) {
-            throw new IllegalStateException("looperStats null");
-        }
-
-        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
-        looperStats.reset();
-        for (LooperStats.ExportedEntry entry : entries) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(entry.workSourceUid);
-            e.writeString(entry.handlerClassName);
-            e.writeString(entry.threadName);
-            e.writeString(entry.messageName);
-            e.writeLong(entry.messageCount);
-            e.writeLong(entry.exceptionCount);
-            e.writeLong(entry.recordedMessageCount);
-            e.writeLong(entry.totalLatencyMicros);
-            e.writeLong(entry.cpuUsageMicros);
-            e.writeBoolean(entry.isInteractive);
-            e.writeLong(entry.maxCpuUsageMicros);
-            e.writeLong(entry.maxLatencyMicros);
-            e.writeLong(entry.recordedDelayMessageCount);
-            e.writeLong(entry.delayMillis);
-            e.writeLong(entry.maxDelayMillis);
-            pulledData.add(e);
-        }
-    }
-
     private void pullDiskStats(int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         // Run a quick-and-dirty performance test: write 512 bytes
@@ -1576,11 +1546,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.SYSTEM_ELAPSED_REALTIME: {
                 pullSystemElapsedRealtime(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.LOOPER_STATS: {
-                pullLooperStats(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

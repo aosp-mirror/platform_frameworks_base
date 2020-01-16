@@ -1426,11 +1426,48 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerLooperStats() {
-        // No op.
+        int tagId = StatsLog.LOOPER_STATS;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {5, 6, 7, 8, 9})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullLooperStats(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullLooperStats() {
-        // No op.
+    private int pullLooperStats(int atomTag, List<StatsEvent> pulledData) {
+        LooperStats looperStats = LocalServices.getService(LooperStats.class);
+        if (looperStats == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        looperStats.reset();
+        for (LooperStats.ExportedEntry entry : entries) {
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(entry.workSourceUid)
+                    .writeString(entry.handlerClassName)
+                    .writeString(entry.threadName)
+                    .writeString(entry.messageName)
+                    .writeLong(entry.messageCount)
+                    .writeLong(entry.exceptionCount)
+                    .writeLong(entry.recordedMessageCount)
+                    .writeLong(entry.totalLatencyMicros)
+                    .writeLong(entry.cpuUsageMicros)
+                    .writeBoolean(entry.isInteractive)
+                    .writeLong(entry.maxCpuUsageMicros)
+                    .writeLong(entry.maxLatencyMicros)
+                    .writeLong(entry.recordedDelayMessageCount)
+                    .writeLong(entry.delayMillis)
+                    .writeLong(entry.maxDelayMillis)
+                    .build();
+            pulledData.add(e);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerDiskStats() {

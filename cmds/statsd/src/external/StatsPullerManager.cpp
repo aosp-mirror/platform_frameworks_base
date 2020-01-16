@@ -95,11 +95,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
 
-        // looper_stats
-        {{.atomTag = android::util::LOOPER_STATS},
-         {.additiveFields = {5, 6, 7, 8, 9},
-          .puller = new StatsCompanionServicePuller(android::util::LOOPER_STATS)}},
-
         // Disk Stats
         {{.atomTag = android::util::DISK_STATS},
          {.puller = new StatsCompanionServicePuller(android::util::DISK_STATS)}},
