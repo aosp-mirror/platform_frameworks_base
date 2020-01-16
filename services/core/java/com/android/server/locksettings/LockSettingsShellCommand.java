@@ -24,6 +24,7 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTE
 import android.app.ActivityManager;
 import android.app.admin.PasswordMetrics;
 import android.os.ShellCommand;
+import android.text.TextUtils;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtils.RequestThrottledException;
@@ -195,6 +196,9 @@ class LockSettingsShellCommand extends ShellCommand {
     }
 
     private LockscreenCredential getOldCredential() {
+        if (TextUtils.isEmpty(mOld)) {
+            return LockscreenCredential.createNone();
+        }
         if (mLockPatternUtils.isLockPasswordEnabled(mCurrentUserId)) {
             final int quality = mLockPatternUtils.getKeyguardStoredPasswordQuality(mCurrentUserId);
             if (LockPatternUtils.isQualityAlphabeticPassword(quality)) {
@@ -202,12 +206,15 @@ class LockSettingsShellCommand extends ShellCommand {
             } else {
                 return LockscreenCredential.createPin(mOld);
             }
-        } else if (mLockPatternUtils.isLockPatternEnabled(mCurrentUserId)) {
+        }
+        if (mLockPatternUtils.isLockPatternEnabled(mCurrentUserId)) {
             return LockscreenCredential.createPattern(LockPatternUtils.byteArrayToPattern(
                     mOld.getBytes()));
-        } else {
-            return LockscreenCredential.createNone();
         }
+        // User supplied some old credential but the device has neither password nor pattern,
+        // so just return a password credential (and let it be rejected during LSS verification)
+        return LockscreenCredential.createPassword(mOld);
+
     }
 
     private boolean runSetPattern() {
