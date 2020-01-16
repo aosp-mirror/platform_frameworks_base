@@ -12137,7 +12137,28 @@ package android.util {
     method public int getUid();
   }
 
+  public final class StatsEvent {
+    method @NonNull public static android.util.StatsEvent.Builder newBuilder();
+  }
+
+  public static final class StatsEvent.Builder {
+    method @NonNull public android.util.StatsEvent.Builder addBooleanAnnotation(byte, boolean);
+    method @NonNull public android.util.StatsEvent.Builder addIntAnnotation(byte, int);
+    method @NonNull public android.util.StatsEvent build();
+    method @NonNull public android.util.StatsEvent.Builder setAtomId(int);
+    method @NonNull public android.util.StatsEvent.Builder usePooledBuffer();
+    method @NonNull public android.util.StatsEvent.Builder writeAttributionChain(@NonNull int[], @NonNull String[]);
+    method @NonNull public android.util.StatsEvent.Builder writeBoolean(boolean);
+    method @NonNull public android.util.StatsEvent.Builder writeByteArray(@NonNull byte[]);
+    method @NonNull public android.util.StatsEvent.Builder writeFloat(float);
+    method @NonNull public android.util.StatsEvent.Builder writeInt(int);
+    method @NonNull public android.util.StatsEvent.Builder writeKeyValuePairs(@Nullable android.util.SparseIntArray, @Nullable android.util.SparseLongArray, @Nullable android.util.SparseArray<java.lang.String>, @Nullable android.util.SparseArray<java.lang.Float>);
+    method @NonNull public android.util.StatsEvent.Builder writeLong(long);
+    method @NonNull public android.util.StatsEvent.Builder writeString(@NonNull String);
+  }
+
   public final class StatsLog {
+    method public static void write(@NonNull android.util.StatsEvent);
     method public static void writeRaw(@NonNull byte[], int);
   }
 
