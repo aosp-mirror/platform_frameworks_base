@@ -95,14 +95,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
 
-        // temperature
-        {{.atomTag = android::util::TEMPERATURE},
-         {.puller = new StatsCompanionServicePuller(android::util::TEMPERATURE)}},
-
-        // cooling_device
-        {{.atomTag = android::util::COOLING_DEVICE},
-         {.puller = new StatsCompanionServicePuller(android::util::COOLING_DEVICE)}},
-
         // binder_calls
         {{.atomTag = android::util::BINDER_CALLS},
          {.additiveFields = {4, 5, 6, 8, 12},

@@ -1274,19 +1274,78 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerTemperature() {
-        // No op.
+        int tagId = StatsLog.TEMPERATURE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullTemperature(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullTemperature() {
-        // No op.
+    private int pullTemperature(int atomTag, List<StatsEvent> pulledData) {
+        IThermalService thermalService = getIThermalService();
+        if (thermalService == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        final long callingToken = Binder.clearCallingIdentity();
+        try {
+            List<Temperature> temperatures = thermalService.getCurrentTemperatures();
+            for (Temperature temp : temperatures) {
+                StatsEvent e = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeInt(temp.getType())
+                        .writeString(temp.getName())
+                        .writeInt((int) (temp.getValue() * 10))
+                        .writeInt(temp.getStatus())
+                        .build();
+                pulledData.add(e);
+            }
+        } catch (RemoteException e) {
+            // Should not happen.
+            Slog.e(TAG, "Disconnected from thermal service. Cannot pull temperatures.");
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerCoolingDevice() {
-        // No op.
+        int tagId = StatsLog.COOLING_DEVICE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullCooldownDevice(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullCooldownDevice() {
-        // No op.
+    private int pullCooldownDevice(int atomTag, List<StatsEvent> pulledData) {
+        IThermalService thermalService = getIThermalService();
+        if (thermalService == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        final long callingToken = Binder.clearCallingIdentity();
+        try {
+            List<CoolingDevice> devices = thermalService.getCurrentCoolingDevices();
+            for (CoolingDevice device : devices) {
+                StatsEvent e = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeInt(device.getType())
+                        .writeString(device.getName())
+                        .writeInt((int) (device.getValue()))
+                        .build();
+                pulledData.add(e);
+            }
+        } catch (RemoteException e) {
+            // Should not happen.
+            Slog.e(TAG, "Disconnected from thermal service. Cannot pull temperatures.");
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerBinderCalls() {

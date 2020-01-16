@@ -1247,49 +1247,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullTemperature(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long callingToken = Binder.clearCallingIdentity();
-        try {
-            List<Temperature> temperatures = sThermalService.getCurrentTemperatures();
-            for (Temperature temp : temperatures) {
-                StatsLogEventWrapper e =
-                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-                e.writeInt(temp.getType());
-                e.writeString(temp.getName());
-                e.writeInt((int) (temp.getValue() * 10));
-                e.writeInt(temp.getStatus());
-                pulledData.add(e);
-            }
-        } catch (RemoteException e) {
-            // Should not happen.
-            Slog.e(TAG, "Disconnected from thermal service. Cannot pull temperatures.");
-        } finally {
-            Binder.restoreCallingIdentity(callingToken);
-        }
-    }
-
-    private void pullCoolingDevices(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long callingToken = Binder.clearCallingIdentity();
-        try {
-            List<CoolingDevice> devices = sThermalService.getCurrentCoolingDevices();
-            for (CoolingDevice device : devices) {
-                StatsLogEventWrapper e =
-                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-                e.writeInt(device.getType());
-                e.writeString(device.getName());
-                e.writeInt((int) (device.getValue()));
-                pulledData.add(e);
-            }
-        } catch (RemoteException e) {
-            // Should not happen.
-            Slog.e(TAG, "Disconnected from thermal service. Cannot pull temperatures.");
-        } finally {
-            Binder.restoreCallingIdentity(callingToken);
-        }
-    }
-
     private void pullDebugElapsedClock(int tagId,
             long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
         final long elapsedMillis = SystemClock.elapsedRealtime();
@@ -1742,16 +1699,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.CPU_TIME_PER_THREAD_FREQ: {
                 pullCpuTimePerThreadFreq(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.TEMPERATURE: {
-                pullTemperature(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.COOLING_DEVICE: {
-                pullCoolingDevices(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 
