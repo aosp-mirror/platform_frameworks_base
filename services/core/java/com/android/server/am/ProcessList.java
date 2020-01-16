@@ -647,10 +647,9 @@ public final class ProcessList {
         // Get this after boot, and won't be changed until it's rebooted, as we don't
         // want some apps enabled while some apps disabled
         mAppDataIsolationEnabled =
-                SystemProperties.getBoolean(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
+                SystemProperties.getBoolean(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, true);
         mAppDataIsolationWhitelistedApps = new ArrayList<>(
                 SystemConfig.getInstance().getAppDataIsolationWhitelistedApps());
-
 
         if (sKillHandler == null) {
             sKillThread = new ServiceThread(TAG + ":kill",

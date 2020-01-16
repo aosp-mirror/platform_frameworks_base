@@ -4389,6 +4389,18 @@ public abstract class PackageManager {
     public abstract boolean shouldShowRequestPermissionRationale(@NonNull String permName);
 
     /**
+     * Gets the string that is displayed on the button which corresponds to granting background
+     * location in settings. The intended use for this is to help apps instruct users how to
+     * grant a background permission by providing the string that users will see.
+     *
+     * @return the string shown on the button for granting background location
+     */
+    @NonNull
+    public CharSequence getBackgroundPermissionButtonLabel() {
+        return "";
+    }
+
+    /**
      * Returns an {@link android.content.Intent} suitable for passing to
      * {@link android.app.Activity#startActivityForResult(android.content.Intent, int)}
      * which prompts the user to grant permissions to this application.
@@ -6053,6 +6065,11 @@ public abstract class PackageManager {
      * If the calling application does not hold the INSTALL_PACKAGES permission then
      * the result will always return {@code null} from
      * {@link InstallSourceInfo#getOriginatingPackageName()}.
+     * <p>
+     * If the package that requested the install has been uninstalled, then information about it
+     * will only be returned from {@link InstallSourceInfo#getInitiatingPackageName()} and
+     * {@link InstallSourceInfo#getInitiatingPackageSigningInfo()} if the calling package is
+     * requesting its own install information and is not an instant app.
      *
      * @param packageName The name of the package to query
      * @throws NameNotFoundException if the given package name is not installed

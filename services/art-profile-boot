@@ -538,7 +538,7 @@ Lcom/android/server/wm/WindowProcessController;->setCurrentProcState(I)V
 Lcom/android/server/am/ActivityManagerService;->updateLowMemStateLocked(III)Z
 Lcom/android/server/wm/ConfigurationContainer;->getWindowConfiguration()Landroid/app/WindowConfiguration;
 Lcom/android/server/am/OomAdjuster;->applyOomAdjLocked(Lcom/android/server/am/ProcessRecord;ZJJ)Z
-Lcom/android/server/am/AppCompactor;->useCompaction()Z
+Lcom/android/server/am/CachedAppOptimizer;->useCompaction()Z
 Lcom/android/server/am/ProcessList;->procStatesDifferForMem(II)Z
 Lcom/android/server/am/ActivityManagerService;->dispatchUidsChanged()V
 Lcom/android/server/audio/AudioService$VolumeStreamState;->setIndex(IILjava/lang/String;)Z

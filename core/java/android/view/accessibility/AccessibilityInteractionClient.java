@@ -17,10 +17,14 @@
 package android.view.accessibility;
 
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
@@ -335,6 +339,48 @@ public final class AccessibilityInteractionClient
 
         final SparseArray<List<AccessibilityWindowInfo>> emptyWindows = new SparseArray<>();
         return emptyWindows;
+    }
+
+
+    /**
+     * Finds an {@link AccessibilityNodeInfo} by accessibility id and given leash token instead of
+     * window id. This method is used to find the leashed node on the embedded view hierarchy.
+     *
+     * @param connectionId The id of a connection for interacting with the system.
+     * @param leashToken The token of the embedded hierarchy.
+     * @param accessibilityNodeId A unique view id or virtual descendant id from
+     *     where to start the search. Use
+     *     {@link android.view.accessibility.AccessibilityNodeInfo#ROOT_NODE_ID}
+     *     to start from the root.
+     * @param bypassCache Whether to bypass the cache while looking for the node.
+     * @param prefetchFlags flags to guide prefetching.
+     * @param arguments Optional action arguments.
+     * @return An {@link AccessibilityNodeInfo} if found, null otherwise.
+     */
+    public @Nullable AccessibilityNodeInfo findAccessibilityNodeInfoByAccessibilityId(
+            int connectionId, @NonNull IBinder leashToken, long accessibilityNodeId,
+            boolean bypassCache, int prefetchFlags, Bundle arguments) {
+        if (leashToken == null) {
+            return null;
+        }
+        int windowId = -1;
+        try {
+            IAccessibilityServiceConnection connection = getConnection(connectionId);
+            if (connection != null) {
+                windowId = connection.getWindowIdForLeashToken(leashToken);
+            } else {
+                if (DEBUG) {
+                    Log.w(LOG_TAG, "No connection for connection id: " + connectionId);
+                }
+            }
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while calling remote getWindowIdForLeashToken", re);
+        }
+        if (windowId == -1) {
+            return null;
+        }
+        return findAccessibilityNodeInfoByAccessibilityId(connectionId, windowId,
+                accessibilityNodeId, bypassCache, prefetchFlags, arguments);
     }
 
     /**
@@ -780,6 +826,31 @@ public final class AccessibilityInteractionClient
             }
             mInstanceLock.notifyAll();
         }
+    }
+
+    /**
+     * Takes the screenshot of the specified display and returns it by bitmap format.
+     *
+     * @param connectionId The id of a connection for interacting with the system.
+     * @param displayId The logic display id, use {@link Display#DEFAULT_DISPLAY} for
+     *                  default display.
+     * @return The screenshot bitmap on success, null otherwise.
+     */
+    public Bitmap takeScreenshot(int connectionId, int displayId) {
+        Bitmap screenShot = null;
+        try {
+            IAccessibilityServiceConnection connection = getConnection(connectionId);
+            if (connection != null) {
+                screenShot = connection.takeScreenshot(displayId);
+            } else {
+                if (DEBUG) {
+                    Log.w(LOG_TAG, "No connection for connection id: " + connectionId);
+                }
+            }
+        } catch (RemoteException re) {
+            Log.w(LOG_TAG, "Error while calling remote takeScreenshot", re);
+        }
+        return screenShot;
     }
 
     /**

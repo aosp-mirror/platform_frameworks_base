@@ -16,9 +16,11 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
@@ -39,18 +41,21 @@ import javax.inject.Singleton;
 public class NotifCoordinators implements Dumpable {
     private static final String TAG = "NotifCoordinators";
     private final List<Coordinator> mCoordinators = new ArrayList<>();
-
+    private final List<NotifSection> mOrderedSections = new ArrayList<>();
     /**
      * Creates all the coordinators.
      */
     @Inject
     public NotifCoordinators(
+            DumpController dumpController,
             FeatureFlags featureFlags,
             KeyguardCoordinator keyguardCoordinator,
             RankingCoordinator rankingCoordinator,
             ForegroundCoordinator foregroundCoordinator,
             DeviceProvisionedCoordinator deviceProvisionedCoordinator,
             PreparationCoordinator preparationCoordinator) {
+        dumpController.registerDumpable(TAG, this);
+
         mCoordinators.add(keyguardCoordinator);
         mCoordinators.add(rankingCoordinator);
         mCoordinators.add(foregroundCoordinator);
@@ -59,6 +64,13 @@ public class NotifCoordinators implements Dumpable {
             mCoordinators.add(preparationCoordinator);
         }
         // TODO: add new Coordinators here! (b/145134683, b/112656837)
+
+        // TODO: add the sections in a particular ORDER (HeadsUp < People < Alerting)
+        for (Coordinator c : mCoordinators) {
+            if (c.getSection() != null) {
+                mOrderedSections.add(c.getSection());
+            }
+        }
     }
 
     /**
@@ -69,6 +81,8 @@ public class NotifCoordinators implements Dumpable {
         for (Coordinator c : mCoordinators) {
             c.attach(pipeline);
         }
+
+        pipeline.setSections(mOrderedSections);
     }
 
     @Override
@@ -77,6 +91,10 @@ public class NotifCoordinators implements Dumpable {
         pw.println(TAG + ":");
         for (Coordinator c : mCoordinators) {
             pw.println("\t" + c.getClass());
+        }
+
+        for (NotifSection s : mOrderedSections) {
+            pw.println("\t" + s.getName());
         }
     }
 }

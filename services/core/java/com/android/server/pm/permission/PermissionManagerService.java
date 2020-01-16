@@ -55,6 +55,8 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ApplicationPackageManager;
 import android.app.IActivityManager;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -107,6 +109,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.RoSystemProperties;
@@ -224,6 +227,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private final Handler mHandler;
     private final Context mContext;
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
+    private final IPlatformCompat mPlatformCompat = IPlatformCompat.Stub.asInterface(
+            ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
 
     /** Internal storage for permissions and related settings */
     @GuardedBy("mLock")
@@ -1824,6 +1829,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return true;
     }
 
+    /**
+     * This change makes it so that apps are told to show rationale for asking for background
+     * location access every time they request.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    private static final long BACKGROUND_RATIONALE_CHANGE_ID = 147316723L;
+
     @Override
     public boolean shouldShowRequestPermissionRationale(String permName,
             String packageName, int userId) {
@@ -1860,6 +1873,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         if ((flags & fixedFlags) != 0) {
             return false;
+        }
+
+        try {
+            if (permName.equals(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                    && mPlatformCompat.isChangeEnabledByPackageName(BACKGROUND_RATIONALE_CHANGE_ID,
+                    packageName, userId)) {
+                return true;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to check if compatibility change is enabled.", e);
         }
 
         return (flags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;

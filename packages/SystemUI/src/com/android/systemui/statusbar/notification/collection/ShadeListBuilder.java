@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.collection;
 
 import static com.android.systemui.statusbar.notification.collection.GroupEntry.ROOT_ENTRY;
-import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpList;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_BUILD_STARTED;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_FINALIZING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_GROUPING;
@@ -31,7 +30,10 @@ import static com.android.systemui.statusbar.notification.collection.listbuilder
 import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
+import android.util.Pair;
 
+import com.android.systemui.DumpController;
+import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
@@ -39,13 +41,15 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.Pipeli
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.SectionsProvider;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
 import com.android.systemui.statusbar.notification.logging.NotifEvent;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,7 +67,7 @@ import javax.inject.Singleton;
  */
 @MainThread
 @Singleton
-public class ShadeListBuilder {
+public class ShadeListBuilder implements Dumpable {
     private final SystemClock mSystemClock;
     private final NotifLog mNotifLog;
 
@@ -79,7 +83,7 @@ public class ShadeListBuilder {
     private final List<NotifPromoter> mNotifPromoters = new ArrayList<>();
     private final List<NotifFilter> mNotifPreRenderFilters = new ArrayList<>();
     private final List<NotifComparator> mNotifComparators = new ArrayList<>();
-    private SectionsProvider mSectionsProvider = new DefaultSectionsProvider();
+    private final List<NotifSection> mNotifSections = new ArrayList<>();
 
     private final List<OnBeforeTransformGroupsListener> mOnBeforeTransformGroupsListeners =
             new ArrayList<>();
@@ -92,10 +96,14 @@ public class ShadeListBuilder {
     private final List<ListEntry> mReadOnlyNotifList = Collections.unmodifiableList(mNotifList);
 
     @Inject
-    public ShadeListBuilder(SystemClock systemClock, NotifLog notifLog) {
+    public ShadeListBuilder(
+            SystemClock systemClock,
+            NotifLog notifLog,
+            DumpController dumpController) {
         Assert.isMainThread();
         mSystemClock = systemClock;
         mNotifLog = notifLog;
+        dumpController.registerDumpable(TAG, this);
     }
 
     /**
@@ -163,12 +171,15 @@ public class ShadeListBuilder {
         promoter.setInvalidationListener(this::onPromoterInvalidated);
     }
 
-    void setSectionsProvider(SectionsProvider provider) {
+    void setSections(List<NotifSection> sections) {
         Assert.isMainThread();
         mPipelineState.requireState(STATE_IDLE);
 
-        mSectionsProvider = provider;
-        provider.setInvalidationListener(this::onSectionsProviderInvalidated);
+        mNotifSections.clear();
+        for (NotifSection section : sections) {
+            mNotifSections.add(section);
+            section.setInvalidationListener(this::onNotifSectionInvalidated);
+        }
     }
 
     void setComparators(List<NotifComparator> comparators) {
@@ -223,12 +234,12 @@ public class ShadeListBuilder {
         rebuildListIfBefore(STATE_TRANSFORMING);
     }
 
-    private void onSectionsProviderInvalidated(SectionsProvider provider) {
+    private void onNotifSectionInvalidated(NotifSection section) {
         Assert.isMainThread();
 
-        mNotifLog.log(NotifEvent.SECTIONS_PROVIDER_INVALIDATED, String.format(
-                "Sections provider \"%s\" invalidated; pipeline state is %d",
-                provider.getName(),
+        mNotifLog.log(NotifEvent.SECTION_INVALIDATED, String.format(
+                "Section \"%s\" invalidated; pipeline state is %d",
+                section.getName(),
                 mPipelineState.getState()));
 
         rebuildListIfBefore(STATE_SORTING);
@@ -311,7 +322,7 @@ public class ShadeListBuilder {
         sortList();
 
         // Step 6: Filter out entries after pre-group filtering, grouping, promoting and sorting
-        // Now filters can see grouping information to determine whether to filter or not
+        // Now filters can see grouping information to determine whether to filter or not.
         mPipelineState.incrementTo(STATE_PRE_RENDER_FILTERING);
         filterNotifs(mNotifList, mNewNotifList, mNotifPreRenderFilters);
         applyNewNotifList();
@@ -324,7 +335,7 @@ public class ShadeListBuilder {
 
         // Step 6: Dispatch the new list, first to any listeners and then to the view layer
         mNotifLog.log(NotifEvent.DISPATCH_FINAL_LIST, "List finalized, is:\n"
-                + dumpList(mNotifList));
+                + ListDumper.dumpTree(mNotifList, false, "\t\t"));
         dispatchOnBeforeRenderList(mReadOnlyNotifList);
         if (mOnRenderListListener != null) {
             mOnRenderListListener.onRenderList(mReadOnlyNotifList);
@@ -573,6 +584,8 @@ public class ShadeListBuilder {
      * filtered out during any of the filtering steps.
      */
     private void annulAddition(ListEntry entry) {
+        entry.setSection(-1);
+        entry.mNotifSection = null;
         entry.setParent(null);
         if (entry.mFirstAddedIteration == mIterationCount) {
             entry.mFirstAddedIteration = -1;
@@ -582,11 +595,12 @@ public class ShadeListBuilder {
     private void sortList() {
         // Assign sections to top-level elements and sort their children
         for (ListEntry entry : mNotifList) {
-            entry.setSection(mSectionsProvider.getSection(entry));
+            Pair<NotifSection, Integer> sectionWithIndex = applySections(entry);
             if (entry instanceof GroupEntry) {
                 GroupEntry parent = (GroupEntry) entry;
                 for (NotificationEntry child : parent.getChildren()) {
-                    child.setSection(0);
+                    child.mNotifSection = sectionWithIndex.first;
+                    child.setSection(sectionWithIndex.second);
                 }
                 parent.sortChildren(sChildComparator);
             }
@@ -747,6 +761,45 @@ public class ShadeListBuilder {
         return null;
     }
 
+    private Pair<NotifSection, Integer> applySections(ListEntry entry) {
+        final Pair<NotifSection, Integer> sectionWithIndex = findSection(entry);
+        final NotifSection section = sectionWithIndex.first;
+        final Integer sectionIndex = sectionWithIndex.second;
+
+        if (section != entry.mNotifSection) {
+            if (entry.mNotifSection == null) {
+                mNotifLog.log(NotifEvent.SECTION_CHANGED, String.format(
+                        "%s: sectioned by '%s' [index=%d].",
+                        entry.getKey(),
+                        section.getName(),
+                        sectionIndex));
+            } else {
+                mNotifLog.log(NotifEvent.SECTION_CHANGED, String.format(
+                        "%s: section changed: '%s' [index=%d] -> '%s [index=%d]'.",
+                        entry.getKey(),
+                        entry.mNotifSection,
+                        entry.getSection(),
+                        section,
+                        sectionIndex));
+            }
+
+            entry.mNotifSection = section;
+            entry.setSection(sectionIndex);
+        }
+
+        return sectionWithIndex;
+    }
+
+    private Pair<NotifSection, Integer> findSection(ListEntry entry) {
+        for (int i = 0; i < mNotifSections.size(); i++) {
+            NotifSection sectioner = mNotifSections.get(i);
+            if (sectioner.isInSection(entry)) {
+                return new Pair<>(sectioner, i);
+            }
+        }
+        return new Pair<>(sDefaultSection, mNotifSections.size());
+    }
+
     private void rebuildListIfBefore(@PipelineState.StateName int state) {
         mPipelineState.requireIsBefore(state);
         if (mPipelineState.is(STATE_IDLE)) {
@@ -772,6 +825,19 @@ public class ShadeListBuilder {
         }
     }
 
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("\t" + TAG + " shade notifications:");
+        if (getShadeList().size() == 0) {
+            pw.println("\t\t None");
+        }
+
+        pw.println(ListDumper.dumpTree(
+                getShadeList(),
+                true,
+                "\t\t"));
+    }
+
     /** See {@link #setOnRenderListListener(OnRenderListListener)} */
     public interface OnRenderListListener {
         /**
@@ -783,16 +849,13 @@ public class ShadeListBuilder {
         void onRenderList(List<ListEntry> entries);
     }
 
-    private static class DefaultSectionsProvider extends SectionsProvider {
-        DefaultSectionsProvider() {
-            super("DefaultSectionsProvider");
-        }
-
-        @Override
-        public int getSection(ListEntry entry) {
-            return 0;
-        }
-    }
+    private static final NotifSection sDefaultSection =
+            new NotifSection("DefaultSection") {
+                @Override
+                public boolean isInSection(ListEntry entry) {
+                    return true;
+                }
+            };
 
     private static final String TAG = "NotifListBuilderImpl";
 

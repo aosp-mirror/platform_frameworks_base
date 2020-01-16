@@ -56,6 +56,7 @@ import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
@@ -323,6 +324,7 @@ public class Dependency {
     @Inject Lazy<DisplayWindowController> mDisplayWindowController;
     @Inject Lazy<SystemWindows> mSystemWindows;
     @Inject Lazy<DisplayImeController> mDisplayImeController;
+    @Inject Lazy<RecordingController> mRecordingController;
 
     @Inject
     public Dependency() {
@@ -518,6 +520,8 @@ public class Dependency {
         //                    a new class maybe named DisplayDependency to solve per-display
         //                    Dependency problem.
         mProviders.put(AutoHideController.class, mAutoHideController::get);
+
+        mProviders.put(RecordingController.class, mRecordingController::get);
 
         sDependency = this;
     }

@@ -173,6 +173,13 @@ public class EditorTouchState {
                     mIsDragCloseToVertical = (4 * deltaXSquared) <= distanceSquared;
                 }
             }
+        } else if (action == MotionEvent.ACTION_CANCEL) {
+            mLastDownMillis = 0;
+            mLastUpMillis = 0;
+            mMultiTapStatus = MultiTapStatus.NONE;
+            mMultiTapInSameArea = false;
+            mMovedEnoughForDrag = false;
+            mIsDragCloseToVertical = false;
         }
     }
 

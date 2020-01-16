@@ -44,8 +44,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -121,7 +119,6 @@ public class RuleBinaryParserTest {
         rule.put(DEFAULT_FORMAT_VERSION_BYTES);
         rule.put(ruleBytes);
         RuleParser binaryParser = new RuleBinaryParser();
-        InputStream inputStream = new ByteArrayInputStream(rule.array());
         Rule expectedRule =
                 new Rule(
                         new CompoundFormula(
@@ -133,7 +130,8 @@ public class RuleBinaryParserTest {
                                                 /* isHashedValue= */ false))),
                         Rule.DENY);
 
-        List<Rule> rules = binaryParser.parse(inputStream, NO_INDEXING);
+        List<Rule> rules =
+                binaryParser.parse(RandomAccessObject.ofBytes(rule.array()), NO_INDEXING);
 
         assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
     }
@@ -323,6 +321,7 @@ public class RuleBinaryParserTest {
                 ByteBuffer.allocate(DEFAULT_FORMAT_VERSION_BYTES.length + ruleBytes.length);
         rule.put(DEFAULT_FORMAT_VERSION_BYTES);
         rule.put(ruleBytes);
+
         RuleParser binaryParser = new RuleBinaryParser();
         Rule expectedRule =
                 new Rule(
@@ -412,7 +411,7 @@ public class RuleBinaryParserTest {
 
         assertExpectException(
                 RuleParseException.class,
-                /* expectedExceptionMessageRegex */ "A rule must end with a '1' bit.",
+                /* expectedExceptionMessageRegex= */ "A rule must end with a '1' bit.",
                 () -> binaryParser.parse(rule.array()));
     }
 
@@ -439,7 +438,7 @@ public class RuleBinaryParserTest {
 
         assertExpectException(
                 RuleParseException.class,
-                /* expectedExceptionMessageRegex */ "Invalid byte index",
+                /* expectedExceptionMessageRegex */ "",
                 () -> binaryParser.parse(rule.array()));
     }
 

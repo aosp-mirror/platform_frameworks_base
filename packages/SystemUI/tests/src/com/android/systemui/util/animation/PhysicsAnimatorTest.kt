@@ -19,6 +19,7 @@ import com.android.systemui.util.animation.PhysicsAnimatorTestUtils.verifyAnimat
 import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -154,6 +155,7 @@ class PhysicsAnimatorTest : SysuiTestCase() {
         verify(mockEndListener).onAnimationEnd(
                 testView,
                 DynamicAnimation.TRANSLATION_X,
+                wasFling = false,
                 canceled = false,
                 finalValue = 10f,
                 finalVelocity = 0f,
@@ -175,6 +177,7 @@ class PhysicsAnimatorTest : SysuiTestCase() {
         verify(mockEndListener).onAnimationEnd(
                 testView,
                 DynamicAnimation.TRANSLATION_Y,
+                wasFling = false,
                 canceled = false,
                 finalValue = 500f,
                 finalVelocity = 0f,
@@ -214,8 +217,8 @@ class PhysicsAnimatorTest : SysuiTestCase() {
 
         verifyUpdateListenerCalls(animator, mockUpdateListener)
         verify(mockEndListener, times(1)).onAnimationEnd(
-                eq(testView), eq(DynamicAnimation.TRANSLATION_X), eq(false), anyFloat(), anyFloat(),
-                eq(true))
+                eq(testView), eq(DynamicAnimation.TRANSLATION_X), eq(false), eq(false), anyFloat(),
+                anyFloat(), eq(true))
         verify(mockEndAction, times(1)).run()
 
         animator
@@ -329,13 +332,24 @@ class PhysicsAnimatorTest : SysuiTestCase() {
         // The original end listener should also have been called, with allEnded = true since it was
         // provided to an animator that animated only TRANSLATION_X.
         verify(mockEndListener, times(1))
-                .onAnimationEnd(testView, DynamicAnimation.TRANSLATION_X, false, 200f, 0f, true)
+                .onAnimationEnd(
+                        testView, DynamicAnimation.TRANSLATION_X,
+                        wasFling = false,
+                        canceled = false,
+                        finalValue = 200f,
+                        finalVelocity = 0f,
+                        allRelevantPropertyAnimsEnded = true)
         verifyNoMoreInteractions(mockEndListener)
 
         // The second end listener should have been called, but with allEnded = false since it was
         // provided to an animator that animated both TRANSLATION_X and TRANSLATION_Y.
         verify(secondEndListener, times(1))
-                .onAnimationEnd(testView, DynamicAnimation.TRANSLATION_X, false, 200f, 0f, false)
+                .onAnimationEnd(testView, DynamicAnimation.TRANSLATION_X,
+                        wasFling = false,
+                        canceled = false,
+                        finalValue = 200f,
+                        finalVelocity = 0f,
+                        allRelevantPropertyAnimsEnded = false)
         verifyNoMoreInteractions(secondEndListener)
 
         PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(animator, DynamicAnimation.TRANSLATION_Y)
@@ -345,7 +359,12 @@ class PhysicsAnimatorTest : SysuiTestCase() {
         verifyNoMoreInteractions(mockEndListener)
 
         verify(secondEndListener, times(1))
-                .onAnimationEnd(testView, DynamicAnimation.TRANSLATION_Y, false, 4000f, 0f, true)
+                .onAnimationEnd(testView, DynamicAnimation.TRANSLATION_Y,
+                        wasFling = false,
+                        canceled = false,
+                        finalValue = 4000f,
+                        finalVelocity = 0f,
+                        allRelevantPropertyAnimsEnded = true)
         verifyNoMoreInteractions(secondEndListener)
     }
 
@@ -364,8 +383,8 @@ class PhysicsAnimatorTest : SysuiTestCase() {
         assertEquals(10f, testView.translationX, 1f)
         verify(mockEndListener, times(1))
                 .onAnimationEnd(
-                        eq(testView), eq(DynamicAnimation.TRANSLATION_X), eq(false), eq(10f),
-                        anyFloat(), eq(true))
+                        eq(testView), eq(DynamicAnimation.TRANSLATION_X), eq(true), eq(false),
+                        eq(10f), anyFloat(), eq(true))
 
         animator
                 .fling(
@@ -381,8 +400,39 @@ class PhysicsAnimatorTest : SysuiTestCase() {
         assertEquals(-5f, testView.translationX, 1f)
         verify(mockEndListener, times(1))
                 .onAnimationEnd(
-                        eq(testView), eq(DynamicAnimation.TRANSLATION_X), eq(false), eq(-5f),
-                        anyFloat(), eq(true))
+                        eq(testView), eq(DynamicAnimation.TRANSLATION_X), eq(true), eq(false),
+                        eq(-5f), anyFloat(), eq(true))
+    }
+
+    @Test
+    fun testIsPropertyAnimating() {
+        PhysicsAnimatorTestUtils.setAllAnimationsBlock(false)
+
+        testView.physicsAnimator
+                .spring(DynamicAnimation.TRANSLATION_X, 500f, springConfig)
+                .fling(DynamicAnimation.TRANSLATION_Y, 10f, flingConfig)
+                .spring(DynamicAnimation.TRANSLATION_Z, 1000f, springConfig)
+                .start()
+
+        // All of the properties we just started should be animating.
+        assertTrue(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_X))
+        assertTrue(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_Y))
+        assertTrue(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_Z))
+
+        // Block until x and y end.
+        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(testView.physicsAnimator,
+                DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y)
+
+        // Verify that x and y are no longer animating, but that Z is (it's springing to 1000f).
+        assertFalse(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_X))
+        assertFalse(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_Y))
+        assertTrue(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_Z))
+
+        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(DynamicAnimation.TRANSLATION_Z)
+
+        assertFalse(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_X))
+        assertFalse(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_Y))
+        assertFalse(testView.physicsAnimator.isPropertyAnimating(DynamicAnimation.TRANSLATION_Z))
     }
 
     @Test
@@ -393,6 +443,118 @@ class PhysicsAnimatorTest : SysuiTestCase() {
                 .start()
 
         assertEquals(200f, testView.translationX, 1f)
+    }
+
+    @Test
+    fun testFlingThenSpring() {
+        PhysicsAnimatorTestUtils.setAllAnimationsBlock(false)
+
+        // Start at 500f and fling hard to the left. We should quickly reach the 250f minimum, fly
+        // past it since there's so much velocity remaining, then spring back to 250f.
+        testView.translationX = 500f
+        animator
+                .flingThenSpring(
+                        DynamicAnimation.TRANSLATION_X,
+                        -5000f,
+                        flingConfig.apply { min = 250f },
+                        springConfig)
+                .addUpdateListener(mockUpdateListener)
+                .addEndListener(mockEndListener)
+                .withEndActions(mockEndAction::run)
+                .start()
+
+        // Block until we pass the minimum.
+        PhysicsAnimatorTestUtils.blockUntilFirstAnimationFrameWhereTrue(
+                animator) { v -> v.translationX <= 250f }
+
+        // Double check that the view is there.
+        assertTrue(testView.translationX <= 250f)
+
+        // The update listener should have been called with a value < 500f, and then a value less
+        // than or equal to the 250f minimum.
+        verifyAnimationUpdateFrames(animator, DynamicAnimation.TRANSLATION_X,
+                { u -> u.value < 500f },
+                { u -> u.value <= 250f })
+
+        // Despite the fact that the fling has ended, the end listener shouldn't have been called
+        // since we're about to begin springing the same property.
+        verifyNoMoreInteractions(mockEndListener)
+        verifyNoMoreInteractions(mockEndAction)
+
+        // Wait for the spring to finish.
+        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(DynamicAnimation.TRANSLATION_X)
+
+        // Make sure we continued past 250f since the spring should have been started with some
+        // remaining negative velocity from the fling.
+        verifyAnimationUpdateFrames(animator, DynamicAnimation.TRANSLATION_X,
+                { u -> u.value < 250f })
+
+        // At this point, the animation end listener should have been called once, and only once,
+        // when the spring ended at 250f.
+        verify(mockEndListener).onAnimationEnd(testView, DynamicAnimation.TRANSLATION_X,
+                wasFling = false,
+                canceled = false,
+                finalValue = 250f,
+                finalVelocity = 0f,
+                allRelevantPropertyAnimsEnded = true)
+        verifyNoMoreInteractions(mockEndListener)
+
+        // The end action should also have been called once.
+        verify(mockEndAction, times(1)).run()
+        verifyNoMoreInteractions(mockEndAction)
+
+        assertEquals(250f, testView.translationX)
+    }
+
+    @Test
+    fun testFlingThenSpring_objectOutsideFlingBounds() {
+        // Start the view at x = -500, well outside the fling bounds of min = 0f, with strong
+        // negative velocity.
+        testView.translationX = -500f
+        animator
+                .flingThenSpring(
+                        DynamicAnimation.TRANSLATION_X,
+                        -5000f,
+                        flingConfig.apply { min = 0f },
+                        springConfig)
+                .addUpdateListener(mockUpdateListener)
+                .addEndListener(mockEndListener)
+                .withEndActions(mockEndAction::run)
+                .start()
+
+        // The initial -5000f velocity should result in frames to the left of -500f before the view
+        // springs back towards 0f.
+        verifyAnimationUpdateFrames(
+                animator, DynamicAnimation.TRANSLATION_X,
+                { u -> u.value < -500f },
+                { u -> u.value > -500f })
+
+        // We should end up at the fling min.
+        assertEquals(0f, testView.translationX, 1f)
+    }
+
+    @Test
+    fun testFlingToMinMaxThenSpring() {
+        // Start at x = 500f.
+        testView.translationX = 500f
+
+        // Fling to the left at the very sad rate of -1 pixels per second. That won't get us much of
+        // anywhere, and certainly not to the 0f min.
+        animator
+                // Good thing we have flingToMinMaxThenSpring!
+                .flingThenSpring(
+                        DynamicAnimation.TRANSLATION_X,
+                        -10000f,
+                        flingConfig.apply { min = 0f },
+                        springConfig,
+                        flingMustReachMinOrMax = true)
+                .addUpdateListener(mockUpdateListener)
+                .addEndListener(mockEndListener)
+                .withEndActions(mockEndAction::run)
+                .start()
+
+        // Thanks, flingToMinMaxThenSpring, for adding enough velocity to get us here.
+        assertEquals(0f, testView.translationX, 1f)
     }
 
     /**

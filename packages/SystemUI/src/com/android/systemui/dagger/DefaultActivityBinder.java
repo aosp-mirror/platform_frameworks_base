@@ -19,7 +19,9 @@ package com.android.systemui.dagger;
 import android.app.Activity;
 
 import com.android.systemui.ForegroundServicesDialog;
+import com.android.systemui.bubbles.BubbleOverflowActivity;
 import com.android.systemui.keyguard.WorkLockActivity;
+import com.android.systemui.screenrecord.ScreenRecordDialog;
 import com.android.systemui.settings.BrightnessDialog;
 import com.android.systemui.tuner.TunerActivity;
 
@@ -29,7 +31,7 @@ import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
 /**
- * Services and Activities that are injectable should go here.
+ * Activities that are injectable should go here.
  */
 @Module
 public abstract class DefaultActivityBinder {
@@ -56,4 +58,16 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(BrightnessDialog.class)
     public abstract Activity bindBrightnessDialog(BrightnessDialog activity);
+
+    /** Inject into ScreenRecordDialog */
+    @Binds
+    @IntoMap
+    @ClassKey(ScreenRecordDialog.class)
+    public abstract Activity bindScreenRecordDialog(ScreenRecordDialog activity);
+
+    /** Inject into BubbleOverflowActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(BubbleOverflowActivity.class)
+    public abstract Activity bindBubbleOverflowActivity(BubbleOverflowActivity activity);
 }

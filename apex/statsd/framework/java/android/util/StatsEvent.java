@@ -20,6 +20,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.SystemClock;
 
 import com.android.internal.annotations.GuardedBy;
@@ -51,6 +52,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * </pre>
  * @hide
  **/
+@SystemApi
 public final class StatsEvent {
     // Type Ids.
     /**
@@ -270,6 +272,8 @@ public final class StatsEvent {
     /**
      * Recycle resources used by this StatsEvent object.
      * No actions should be taken on this StatsEvent after release() is called.
+     *
+     * @hide
      **/
     public void release() {
         if (mBuffer != null) {
@@ -359,16 +363,6 @@ public final class StatsEvent {
         @NonNull
         public Builder setAtomId(final int atomId) {
             mAtomId = atomId;
-            return this;
-        }
-
-        /**
-         * Sets the timestamp in nanos for this StatsEvent.
-         **/
-        @VisibleForTesting
-        @NonNull
-        public Builder setTimestampNs(final long timestampNs) {
-            mTimestampNs = timestampNs;
             return this;
         }
 
@@ -500,14 +494,14 @@ public final class StatsEvent {
          **/
         @NonNull
         public Builder writeKeyValuePairs(
-                @NonNull final SparseIntArray intMap,
-                @NonNull final SparseLongArray longMap,
-                @NonNull final SparseArray<String> stringMap,
-                @NonNull final SparseArray<Float> floatMap) {
-            final int intMapSize = intMap.size();
-            final int longMapSize = longMap.size();
-            final int stringMapSize = stringMap.size();
-            final int floatMapSize = floatMap.size();
+                @Nullable final SparseIntArray intMap,
+                @Nullable final SparseLongArray longMap,
+                @Nullable final SparseArray<String> stringMap,
+                @Nullable final SparseArray<Float> floatMap) {
+            final int intMapSize = null == intMap ? 0 : intMap.size();
+            final int longMapSize = null == longMap ? 0 : longMap.size();
+            final int stringMapSize = null == stringMap ? 0 : stringMap.size();
+            final int floatMapSize = null == floatMap ? 0 : floatMap.size();
             final int totalCount = intMapSize + longMapSize + stringMapSize + floatMapSize;
 
             if (totalCount > MAX_KEY_VALUE_PAIRS) {

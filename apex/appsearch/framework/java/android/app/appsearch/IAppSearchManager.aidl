@@ -28,4 +28,5 @@ interface IAppSearchManager {
      *     if setSchema fails.
      */
     void setSchema(in byte[] schemaProto, in AndroidFuture callback);
+    void put(in byte[] documentBytes, in AndroidFuture callback);
 }

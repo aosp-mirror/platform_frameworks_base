@@ -43,6 +43,16 @@ public class AppSearchManagerService extends SystemService {
             try {
                 SchemaProto schema = SchemaProto.parseFrom(schemaBytes);
                 throw new UnsupportedOperationException("setSchema not yet implemented: " + schema);
+
+            } catch (Throwable t) {
+                callback.completeExceptionally(t);
+            }
+        }
+
+        @Override
+        public void put(byte[] documentBytes, AndroidFuture callback) {
+            try {
+                throw new UnsupportedOperationException("Put document not yet implemented");
             } catch (Throwable t) {
                 callback.completeExceptionally(t);
             }

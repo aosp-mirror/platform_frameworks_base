@@ -28,7 +28,7 @@ import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STOP_APP_SWITCHES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
+import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
@@ -248,7 +248,6 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.KeyguardDismissCallback;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -344,6 +343,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public static final int RELAUNCH_REASON_WINDOWING_MODE_RESIZE = 1;
     /** This activity is being relaunched due to a free-resize operation. */
     public static final int RELAUNCH_REASON_FREE_RESIZE = 2;
+
+    /** Flag indicating that an applied transaction may have effected lifecycle */
+    private static final int TRANSACT_EFFECTS_CLIENT_CONFIG = 1;
+    private static final int TRANSACT_EFFECTS_LIFECYCLE = 1 << 1;
 
     Context mContext;
 
@@ -1436,7 +1439,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     int handleIncomingUser(int callingPid, int callingUid, int userId, String name) {
         return mAmInternal.handleIncomingUser(callingPid, callingUid, userId, false /* allowAll */,
-                ALLOW_FULL_ONLY, name, null /* callerPackage */);
+                ALLOW_NON_FULL, name, null /* callerPackage */);
     }
 
     @Override
@@ -3300,7 +3303,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    private void sanitizeAndApplyConfigChange(ConfigurationContainer container,
+    private int sanitizeAndApplyChange(ConfigurationContainer container,
             WindowContainerTransaction.Change change) {
         if (!(container instanceof Task || container instanceof ActivityStack)) {
             throw new RuntimeException("Invalid token in task transaction");
@@ -3312,12 +3315,22 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         configMask &= ActivityInfo.CONFIG_WINDOW_CONFIGURATION
                 | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
         windowMask &= WindowConfiguration.WINDOW_CONFIG_BOUNDS;
-        Configuration c = new Configuration(container.getRequestedOverrideConfiguration());
-        c.setTo(change.getConfiguration(), configMask, windowMask);
-        container.onRequestedOverrideConfigurationChanged(c);
-        // TODO(b/145675353): remove the following once we could apply new bounds to the
-        // pinned stack together with its children.
-        resizePinnedStackIfNeeded(container, configMask, windowMask, c);
+        int effects = 0;
+        if (configMask != 0) {
+            Configuration c = new Configuration(container.getRequestedOverrideConfiguration());
+            c.setTo(change.getConfiguration(), configMask, windowMask);
+            container.onRequestedOverrideConfigurationChanged(c);
+            // TODO(b/145675353): remove the following once we could apply new bounds to the
+            // pinned stack together with its children.
+            resizePinnedStackIfNeeded(container, configMask, windowMask, c);
+            effects |= TRANSACT_EFFECTS_CLIENT_CONFIG;
+        }
+        if ((change.getChangeMask() & WindowContainerTransaction.Change.CHANGE_FOCUSABLE) != 0) {
+            if (container.setFocusable(change.getFocusable())) {
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
+        }
+        return effects;
     }
 
     private void resizePinnedStackIfNeeded(ConfigurationContainer container, int configMask,
@@ -3334,9 +3347,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    private void applyWindowContainerChange(ConfigurationContainer cc,
+    private int applyWindowContainerChange(ConfigurationContainer cc,
             WindowContainerTransaction.Change c) {
-        sanitizeAndApplyConfigChange(cc, c);
+        int effects = sanitizeAndApplyChange(cc, c);
 
         Rect enterPipBounds = c.getEnterPipBounds();
         if (enterPipBounds != null) {
@@ -3344,25 +3357,58 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mStackSupervisor.updatePictureInPictureMode(tr,
                     enterPipBounds, true);
         }
+        return effects;
     }
 
     @Override
     public void applyContainerTransaction(WindowContainerTransaction t) {
         mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "applyContainerTransaction()");
+        if (t == null) {
+            return;
+        }
         long ident = Binder.clearCallingIdentity();
         try {
-            if (t == null) {
-                return;
-            }
             synchronized (mGlobalLock) {
-                Iterator<Map.Entry<IBinder, WindowContainerTransaction.Change>> entries =
-                        t.getChanges().entrySet().iterator();
-                while (entries.hasNext()) {
-                    final Map.Entry<IBinder, WindowContainerTransaction.Change> entry =
-                            entries.next();
-                    final ConfigurationContainer cc = ConfigurationContainer.RemoteToken.fromBinder(
-                            entry.getKey()).getContainer();
-                    applyWindowContainerChange(cc, entry.getValue());
+                int effects = 0;
+                deferWindowLayout();
+                try {
+                    ArraySet<WindowContainer> haveConfigChanges = new ArraySet<>();
+                    Iterator<Map.Entry<IBinder, WindowContainerTransaction.Change>> entries =
+                            t.getChanges().entrySet().iterator();
+                    while (entries.hasNext()) {
+                        final Map.Entry<IBinder, WindowContainerTransaction.Change> entry =
+                                entries.next();
+                        final ConfigurationContainer cc =
+                                ConfigurationContainer.RemoteToken.fromBinder(
+                                        entry.getKey()).getContainer();
+                        int containerEffect = applyWindowContainerChange(cc, entry.getValue());
+                        effects |= containerEffect;
+                        // Lifecycle changes will trigger ensureConfig for everything.
+                        if ((effects & TRANSACT_EFFECTS_LIFECYCLE) == 0
+                                && (containerEffect & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
+                            if (cc instanceof WindowContainer) {
+                                haveConfigChanges.add((WindowContainer) cc);
+                            }
+                        }
+                    }
+                    if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
+                        // Already calls ensureActivityConfig
+                        mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+                    } else if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
+                        final PooledConsumer f = PooledLambda.obtainConsumer(
+                                ActivityRecord::ensureActivityConfiguration,
+                                PooledLambda.__(ActivityRecord.class), 0,
+                                false /* preserveWindow */);
+                        try {
+                            for (int i = haveConfigChanges.size() - 1; i >= 0; --i) {
+                                haveConfigChanges.valueAt(i).forAllActivities(f);
+                            }
+                        } finally {
+                            f.recycle();
+                        }
+                    }
+                } finally {
+                    continueWindowLayout();
                 }
             }
         } finally {

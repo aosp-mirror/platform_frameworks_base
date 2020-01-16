@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest;
@@ -25,16 +27,20 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Bitmap;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.view.Display;
 
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -313,48 +319,16 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
     }
 
-    // TODO(a11y shortcut): Refactoring the logic here, after the new Settings shortcut Ui merged.
     public boolean isAccessibilityButtonAvailableLocked(AccessibilityUserState userState) {
         // If the service does not request the accessibility button, it isn't available
         if (!mRequestAccessibilityButton) {
             return false;
         }
-
         // If the accessibility button isn't currently shown, it cannot be available to services
         if (!mSystemSupport.isAccessibilityButtonShown()) {
             return false;
         }
-
-        // If magnification is on and assigned to the accessibility button, services cannot be
-        if (userState.isNavBarMagnificationEnabledLocked()
-                && userState.isNavBarMagnificationAssignedToAccessibilityButtonLocked()) {
-            return false;
-        }
-
-        int requestingServices = 0;
-        for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
-            final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
-            if (service.mRequestAccessibilityButton) {
-                requestingServices++;
-            }
-        }
-
-        if (requestingServices == 1) {
-            // If only a single service is requesting, it must be this service, and the
-            // accessibility button is available to it
-            return true;
-        } else {
-            // With more than one active service, we derive the target from the user's settings
-            if (userState.getServiceAssignedToAccessibilityButtonLocked() == null) {
-                // If the user has not made an assignment, we treat the button as available to
-                // all services until the user interacts with the button to make an assignment
-                return true;
-            } else {
-                // If an assignment was made, it defines availability
-                return mComponentName.equals(
-                        userState.getServiceAssignedToAccessibilityButtonLocked());
-            }
-        }
+        return true;
     }
 
     @Override
@@ -418,5 +392,16 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 }
             }
         }
+    }
+
+    @Override
+    public void takeScreenshotWithCallback(int displayId, RemoteCallback callback) {
+        mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
+            final Bitmap screenshot = super.takeScreenshot(displayId);
+            // Send back the result.
+            final Bundle payload = new Bundle();
+            payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT, screenshot);
+            callback.sendResult(payload);
+        }, null).recycleOnUse());
     }
 }

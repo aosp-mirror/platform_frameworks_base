@@ -44,4 +44,11 @@ oneway interface ISoundTriggerCallback {
      * and this event will be sent in addition to the abort event.
      */
     void onRecognitionAvailabilityChange(boolean available);
+    /**
+     * Notifies the client that the associated module has crashed and restarted. The module instance
+     * is no longer usable and will throw a ServiceSpecificException with a Status.DEAD_OBJECT code
+     * for every call. The client should detach, then re-attach to the module in order to get a new,
+     * usable instance. All state for this module has been lost.
+     */
+     void onModuleDied();
 }

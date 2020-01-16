@@ -72,7 +72,7 @@ public class AccessPointPreferenceTest {
 
         assertThat(AccessPointPreference.buildContentDescription(
                 RuntimeEnvironment.application, pref, ap))
-                .isEqualTo("ssid,connected,Wifi signal full.,Secure network");
+                .isEqualTo("ssid,connected,Wifi disconnected.,Secure network");
     }
 
     @Test

@@ -19,6 +19,7 @@ package android.widget;
 import static android.widget.espresso.ContextMenuUtils.assertContextMenuContainsItemDisabled;
 import static android.widget.espresso.ContextMenuUtils.assertContextMenuContainsItemEnabled;
 import static android.widget.espresso.ContextMenuUtils.assertContextMenuIsNotDisplayed;
+import static android.widget.espresso.DragHandleUtils.assertNoSelectionHandles;
 import static android.widget.espresso.DragHandleUtils.onHandleView;
 import static android.widget.espresso.TextViewActions.mouseClick;
 import static android.widget.espresso.TextViewActions.mouseClickOnTextAtIndex;
@@ -47,7 +48,6 @@ import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
 
 import androidx.test.filters.MediumTest;
-import androidx.test.filters.Suppress;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -87,11 +87,6 @@ public class TextViewActivityMouseTest {
         onView(withId(R.id.textview)).perform(
                 mouseDragOnText(helloWorld.indexOf("llo"), helloWorld.indexOf("ld!")));
         onView(withId(R.id.textview)).check(hasSelection("llo wor"));
-
-        onHandleView(com.android.internal.R.id.selection_start_handle)
-                .check(matches(isDisplayed()));
-        onHandleView(com.android.internal.R.id.selection_end_handle)
-                .check(matches(isDisplayed()));
 
         onView(withId(R.id.textview)).perform(mouseClickOnTextAtIndex(helloWorld.indexOf("w")));
         onView(withId(R.id.textview)).check(hasSelection(""));
@@ -193,7 +188,6 @@ public class TextViewActivityMouseTest {
     }
 
     @Test
-    @Suppress // Consistently failing. b/29591177
     public void testDragAndDrop_longClick() {
         final String text = "abc def ghi.";
         onView(withId(R.id.textview)).perform(mouseClick());
@@ -394,5 +388,30 @@ public class TextViewActivityMouseTest {
         onView(withId(R.id.textview)).perform(
                 mouseTripleClickAndDragOnText(text.indexOf("ird"), text.indexOf("First")));
         onView(withId(R.id.textview)).check(hasSelection(text));
+    }
+
+    @Test
+    public void testSelectionHandlesDisplay() {
+        final String helloWorld = "Hello world!";
+        onView(withId(R.id.textview)).perform(mouseClick());
+        onView(withId(R.id.textview)).perform(replaceText(helloWorld));
+
+        onView(withId(R.id.textview)).perform(
+                mouseDragOnText(helloWorld.indexOf("llo"), helloWorld.indexOf("ld!")));
+        onView(withId(R.id.textview)).check(hasSelection("llo wor"));
+
+        // Confirm that selection handles are shown when there is a selection.
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .check(matches(isDisplayed()));
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .check(matches(isDisplayed()));
+
+        onView(withId(R.id.textview)).perform(mouseClickOnTextAtIndex(helloWorld.indexOf("w")));
+        onView(withId(R.id.textview)).check(hasSelection(""));
+
+        // Confirm that the selection handles are not shown when there is no selection. This
+        // assertion is slow so we only do it in this one test case. The rest of the tests just
+        // assert via `hasSelection("")`.
+        assertNoSelectionHandles();
     }
 }

@@ -306,14 +306,17 @@ class BluetoothRouteProvider {
                 }
             } else if (state == BluetoothProfile.STATE_DISCONNECTING
                     || state == BluetoothProfile.STATE_DISCONNECTED) {
-                btRoute.connectedProfiles.delete(profile);
-                if (btRoute.connectedProfiles.size() == 0) {
-                    mBluetoothRoutes.remove(device.getAddress());
-                    if (mActiveDevice != null
-                            && TextUtils.equals(mActiveDevice.getAddress(), device.getAddress())) {
-                        mActiveDevice = null;
+                if (btRoute != null) {
+                    btRoute.connectedProfiles.delete(profile);
+                    if (btRoute.connectedProfiles.size() == 0) {
+                        mBluetoothRoutes.remove(device.getAddress());
+                        if (mActiveDevice != null
+                                && TextUtils.equals(mActiveDevice.getAddress(),
+                                device.getAddress())) {
+                            mActiveDevice = null;
+                        }
+                        notifyBluetoothRoutesUpdated();
                     }
-                    notifyBluetoothRoutesUpdated();
                 }
             }
         }

@@ -87,8 +87,10 @@ public class VisibilityLoggerMixin implements LifecycleObserver, OnAttach {
         if (mMetricsFeature == null || mMetricsCategory == METRICS_CATEGORY_UNKNOWN) {
             return;
         }
-        final int elapse = (int) (SystemClock.elapsedRealtime() - mCreationTimestamp);
-        mMetricsFeature.action(METRICS_CATEGORY_UNKNOWN, action, mMetricsCategory, key, elapse);
+        if (mCreationTimestamp != 0L) {
+            final int elapse = (int) (SystemClock.elapsedRealtime() - mCreationTimestamp);
+            mMetricsFeature.action(METRICS_CATEGORY_UNKNOWN, action, mMetricsCategory, key, elapse);
+        }
     }
 
     /**

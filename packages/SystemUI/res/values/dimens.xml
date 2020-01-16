@@ -213,6 +213,11 @@
     <!-- The horizontal space around the buttons in the inline settings -->
     <dimen name="notification_guts_button_horizontal_spacing">8dp</dimen>
 
+    <dimen name="notification_guts_conversation_header_height">84dp</dimen>
+    <dimen name="notification_guts_conversation_icon_size">52dp</dimen>
+    <dimen name="notification_guts_conversation_action_height">56dp</dimen>
+    <dimen name="notification_guts_conversation_action_text_padding_start">32dp</dimen>
+
     <!-- The height of the header in inline settings -->
     <dimen name="notification_guts_header_height">24dp</dimen>
 
@@ -1160,4 +1165,5 @@
     <dimen name="magnifier_up_down_controls_width">45dp</dimen>
     <dimen name="magnifier_up_down_controls_height">40dp</dimen>
 
+    <dimen name="app_icon_size">32dp</dimen>
 </resources>

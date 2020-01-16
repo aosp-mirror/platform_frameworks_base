@@ -60,10 +60,6 @@ const int64_t NO_ALARM_UPDATE = INT64_MAX;
 
 std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
 
-        // kernel_wakelock
-        {{.atomTag = android::util::KERNEL_WAKELOCK},
-         {.puller = new StatsCompanionServicePuller(android::util::KERNEL_WAKELOCK)}},
-
         // subsystem_sleep_state
         {{.atomTag = android::util::SUBSYSTEM_SLEEP_STATE},
          {.puller = new SubsystemSleepStatePuller()}},
@@ -71,37 +67,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // on_device_power_measurement
         {{.atomTag = android::util::ON_DEVICE_POWER_MEASUREMENT},
          {.puller = new PowerStatsPuller()}},
-
-        // cpu_time_per_freq
-        {{.atomTag = android::util::CPU_TIME_PER_FREQ},
-         {.additiveFields = {3},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_FREQ)}},
-
-        // cpu_time_per_uid
-        {{.atomTag = android::util::CPU_TIME_PER_UID},
-         {.additiveFields = {2, 3},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID)}},
-
-        // cpu_time_per_uid_freq
-        // the throttling is 3sec, handled in
-        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        {{.atomTag = android::util::CPU_TIME_PER_UID_FREQ},
-         {.additiveFields = {4},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID_FREQ)}},
-
-        // cpu_active_time
-        // the throttling is 3sec, handled in
-        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        {{.atomTag = android::util::CPU_ACTIVE_TIME},
-         {.additiveFields = {2},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_ACTIVE_TIME)}},
-
-        // cpu_cluster_time
-        // the throttling is 3sec, handled in
-        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        {{.atomTag = android::util::CPU_CLUSTER_TIME},
-         {.additiveFields = {3},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_CLUSTER_TIME)}},
 
         // wifi_activity_energy_info
         {{.atomTag = android::util::WIFI_ACTIVITY_INFO},
@@ -117,10 +82,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           .puller = new StatsCompanionServicePuller(android::util::SYSTEM_ELAPSED_REALTIME),
           .pullTimeoutNs = NS_PER_SEC / 2,
          }},
-
-        // system_uptime
-        {{.atomTag = android::util::SYSTEM_UPTIME},
-         {.puller = new StatsCompanionServicePuller(android::util::SYSTEM_UPTIME)}},
 
         // remaining_battery_capacity
         {{.atomTag = android::util::REMAINING_BATTERY_CAPACITY},
@@ -255,10 +216,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::DEBUG_FAILING_ELAPSED_CLOCK},
          {.additiveFields = {1, 2, 3, 4},
           .puller = new StatsCompanionServicePuller(android::util::DEBUG_FAILING_ELAPSED_CLOCK)}},
-
-        // BuildInformation.
-        {{.atomTag = android::util::BUILD_INFORMATION},
-         {.puller = new StatsCompanionServicePuller(android::util::BUILD_INFORMATION)}},
 
         // RoleHolder.
         {{.atomTag = android::util::ROLE_HOLDER},

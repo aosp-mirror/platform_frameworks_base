@@ -1,5 +1,8 @@
 package com.android.systemui.statusbar.policy;
 
+import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN;
+import static android.telephony.NetworkRegistrationInfo.DOMAIN_PS;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
@@ -418,7 +421,13 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
         // State from NR_5G to NONE NR_STATE_RESTRICTED, showing corresponding icon
         doReturn(NetworkRegistrationInfo.NR_STATE_RESTRICTED).when(mServiceState).getNrState();
-        doReturn(TelephonyManager.NETWORK_TYPE_LTE).when(mServiceState).getDataNetworkType();
+        NetworkRegistrationInfo fakeRegInfo = new NetworkRegistrationInfo.Builder()
+                .setTransportType(TRANSPORT_TYPE_WWAN)
+                .setDomain(DOMAIN_PS)
+                .setAccessNetworkTechnology(TelephonyManager.NETWORK_TYPE_LTE)
+                .build();
+        doReturn(fakeRegInfo).when(mServiceState)
+                .getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN);
         mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
 
@@ -480,8 +489,13 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
         verifyDataIndicators(TelephonyIcons.ICON_LTE);
 
-        when(mServiceState.getDataNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_HSPA);
+        NetworkRegistrationInfo fakeRegInfo = new NetworkRegistrationInfo.Builder()
+                .setTransportType(TRANSPORT_TYPE_WWAN)
+                .setDomain(DOMAIN_PS)
+                .setAccessNetworkTechnology(TelephonyManager.NETWORK_TYPE_HSPA)
+                .build();
+        when(mServiceState.getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN))
+                .thenReturn(fakeRegInfo);
         updateServiceState();
         verifyDataIndicators(TelephonyIcons.ICON_H);
     }

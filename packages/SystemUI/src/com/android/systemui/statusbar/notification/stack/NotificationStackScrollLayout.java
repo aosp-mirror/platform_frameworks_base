@@ -6207,6 +6207,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
 
         @Override
+        public void onSnooze(StatusBarNotification sbn, int hours) {
+            mStatusBar.setNotificationSnoozed(sbn, hours);
+        }
+
+        @Override
         public boolean shouldDismissQuickly() {
             return NotificationStackScrollLayout.this.isExpanded() && mAmbientState.isFullyAwake();
         }

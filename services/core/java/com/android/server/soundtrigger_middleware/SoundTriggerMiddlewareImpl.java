@@ -78,18 +78,17 @@ public class SoundTriggerMiddlewareImpl implements ISoundTriggerMiddlewareServic
     }
 
     /**
-     * Most generic constructor - gets an array of HAL driver instances.
+     * Constructor - gets an array of HAL driver factories.
      */
-    public SoundTriggerMiddlewareImpl(@NonNull ISoundTriggerHw[] halServices,
+    public SoundTriggerMiddlewareImpl(@NonNull HalFactory[] halFactories,
             @NonNull AudioSessionProvider audioSessionProvider) {
-        List<SoundTriggerModule> modules = new ArrayList<>(halServices.length);
+        List<SoundTriggerModule> modules = new ArrayList<>(halFactories.length);
 
-        for (int i = 0; i < halServices.length; ++i) {
-            ISoundTriggerHw service = halServices[i];
+        for (int i = 0; i < halFactories.length; ++i) {
             try {
-                modules.add(new SoundTriggerModule(service, audioSessionProvider));
+                modules.add(new SoundTriggerModule(halFactories[i], audioSessionProvider));
             } catch (Exception e) {
-                Log.e(TAG, "Failed to a SoundTriggerModule instance", e);
+                Log.e(TAG, "Failed to add a SoundTriggerModule instance", e);
             }
         }
 
@@ -97,11 +96,11 @@ public class SoundTriggerMiddlewareImpl implements ISoundTriggerMiddlewareServic
     }
 
     /**
-     * Convenience constructor - gets a single HAL driver instance.
+     * Convenience constructor - gets a single HAL factory.
      */
-    public SoundTriggerMiddlewareImpl(@NonNull ISoundTriggerHw halService,
+    public SoundTriggerMiddlewareImpl(@NonNull HalFactory factory,
             @NonNull AudioSessionProvider audioSessionProvider) {
-        this(new ISoundTriggerHw[]{halService}, audioSessionProvider);
+        this(new HalFactory[]{factory}, audioSessionProvider);
     }
 
     @Override

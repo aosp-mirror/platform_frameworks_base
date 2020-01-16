@@ -5915,7 +5915,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             final ActivityRecord resumedActivity = stack.getResumedActivity();
             if (resumedActivity != null
                     && (stack.getVisibility(resuming) != STACK_VISIBILITY_VISIBLE
-                    || !stack.isFocusable())) {
+                    || !stack.isTopActivityFocusable())) {
                 if (DEBUG_STATES) Slog.d(TAG_STATES, "pauseBackStacks: stack=" + stack
                         + " mResumedActivity=" + resumedActivity);
                 someActivityPaused |= stack.startPausingLocked(userLeaving, false /* uiSleeping*/,
@@ -6238,7 +6238,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             for (int i = getStackCount() - 1; i >= 0; --i) {
                 final ActivityStack stack = getStackAt(i);
                 // Only consider focusable stacks other than the current focused one.
-                if (stack == focusedStack || !stack.isFocusable()) {
+                if (stack == focusedStack || !stack.isTopActivityFocusable()) {
                     continue;
                 }
                 topRunning = stack.topRunningActivity();

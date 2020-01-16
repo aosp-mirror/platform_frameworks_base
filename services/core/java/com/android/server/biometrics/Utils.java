@@ -22,6 +22,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.BiometricPrompt.AuthenticationResultType;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -209,5 +210,31 @@ public class Utils {
                 break;
         }
         return biometricManagerCode;
+    }
+
+    /**
+     * Converts a {@link BiometricPrompt} dismissal reason to an authentication type at the level of
+     * granularity supported by {@link BiometricPrompt.AuthenticationResult}.
+     *
+     * @param reason The reason that the {@link BiometricPrompt} was dismissed. Must be one of:
+     *               {@link BiometricPrompt#DISMISSED_REASON_CREDENTIAL_CONFIRMED},
+     *               {@link BiometricPrompt#DISMISSED_REASON_BIOMETRIC_CONFIRMED}, or
+     *               {@link BiometricPrompt#DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED}
+     * @return An integer representing the authentication type for {@link
+     *         BiometricPrompt.AuthenticationResult}.
+     * @throws IllegalArgumentException if given an invalid dismissal reason.
+     */
+    public static @AuthenticationResultType int getAuthenticationTypeForResult(int reason) {
+        switch (reason) {
+            case BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED:
+                return BiometricPrompt.AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL;
+
+            case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED:
+            case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED:
+                return BiometricPrompt.AUTHENTICATION_RESULT_TYPE_BIOMETRIC;
+
+            default:
+                throw new IllegalArgumentException("Unsupported dismissal reason: " + reason);
+        }
     }
 }

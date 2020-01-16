@@ -1633,12 +1633,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         requestedVrComponent = (aInfo.requestedVrComponent == null) ?
                 null : ComponentName.unflattenFromString(aInfo.requestedVrComponent);
 
-        lockTaskLaunchMode = aInfo.lockTaskLaunchMode;
-        if (info.applicationInfo.isPrivilegedApp()
-                && (lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_ALWAYS
-                || lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_NEVER)) {
-            lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
-        }
+        lockTaskLaunchMode = getLockTaskLaunchMode(aInfo, options);
 
         if (options != null) {
             pendingOptions = options;
@@ -1646,13 +1641,25 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (usageReport != null) {
                 appTimeTracker = new AppTimeTracker(usageReport);
             }
-            final boolean useLockTask = pendingOptions.getLockTaskMode();
-            if (useLockTask && lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_DEFAULT) {
-                lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
-            }
             // Gets launch display id from options. It returns INVALID_DISPLAY if not set.
             mHandoverLaunchDisplayId = options.getLaunchDisplayId();
         }
+    }
+
+    static int getLockTaskLaunchMode(ActivityInfo aInfo, @Nullable ActivityOptions options) {
+        int lockTaskLaunchMode = aInfo.lockTaskLaunchMode;
+        if (aInfo.applicationInfo.isPrivilegedApp()
+                && (lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_ALWAYS
+                || lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_NEVER)) {
+            lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
+        }
+        if (options != null) {
+            final boolean useLockTask = options.getLockTaskMode();
+            if (useLockTask && lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_DEFAULT) {
+                lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
+            }
+        }
+        return lockTaskLaunchMode;
     }
 
     @Override
@@ -2130,8 +2137,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 (intent == null || (intent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0);
     }
 
+    @Override
     boolean isFocusable() {
-        return mRootWindowContainer.isFocusable(this, isAlwaysFocusable());
+        return super.isFocusable()
+                && (getWindowConfiguration().canReceiveKeys() || isAlwaysFocusable());
     }
 
     boolean isResizeable() {
@@ -2482,7 +2491,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // We are finishing the top focused activity and its stack has nothing to be focused so
             // the next focusable stack should be focused.
             if (mayAdjustTop
-                    && (stack.topRunningActivity() == null || !stack.isFocusable())) {
+                    && (stack.topRunningActivity() == null || !stack.isTopActivityFocusable())) {
                 if (shouldAdjustGlobalFocus) {
                     // Move the entire hierarchy to top with updating global top resumed activity
                     // and focused application if needed.

@@ -25,8 +25,6 @@ import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
-import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.telephony.CarrierConfigManager;
@@ -382,10 +380,6 @@ public class ProvisioningManager {
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void registerProvisioningChangedCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull Callback callback) throws ImsException {
-        if (!isImsAvailableOnDevice()) {
-            throw new ImsException("IMS not available on device.",
-                    ImsException.CODE_ERROR_UNSUPPORTED_OPERATION);
-        }
         callback.setExecutor(executor);
         try {
             getITelephony().registerImsProvisioningChangedCallback(mSubId, callback.getBinder());
@@ -597,39 +591,25 @@ public class ProvisioningManager {
     /**
      * Notify the framework that an RCS autoconfiguration XML file has been received for
      * provisioning.
+     * <p>
+     * Requires Permission: Manifest.permission.MODIFY_PHONE_STATE or that the calling app has
+     * carrier privileges (see {@link #hasCarrierPrivileges}).
      * @param config The XML file to be read. ASCII/UTF8 encoded text if not compressed.
      * @param isCompressed The XML file is compressed in gzip format and must be decompressed
      *         before being read.
-     * @hide
+     *
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void notifyRcsAutoConfigurationReceived(@NonNull byte[] config, boolean isCompressed) {
         if (config == null) {
             throw new IllegalArgumentException("Must include a non-null config XML file.");
         }
-        // TODO: Connect to ImsConfigImplBase.
-        throw new UnsupportedOperationException("notifyRcsAutoConfigurationReceived is not"
-                + "supported");
-    }
-
-    private static boolean isImsAvailableOnDevice() {
-        IPackageManager pm = IPackageManager.Stub.asInterface(
-                TelephonyFrameworkInitializer
-                        .getTelephonyServiceManager()
-                        .getPackageManagerServiceRegisterer()
-                        .get());
-        if (pm == null) {
-            // For some reason package manger is not available.. This will fail internally anyways,
-            // so do not throw error and allow.
-            return true;
-        }
         try {
-            return pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_IMS, 0);
+            getITelephony().notifyRcsAutoConfigurationReceived(mSubId, config, isCompressed);
         } catch (RemoteException e) {
-            // For some reason package manger is not available.. This will fail internally anyways,
-            // so do not throw error and allow.
+            throw e.rethrowAsRuntimeException();
         }
-        return true;
+
     }
 
     private static ITelephony getITelephony() {

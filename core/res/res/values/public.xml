@@ -3007,6 +3007,7 @@
       <public name="featureId" />
       <public name="supportsInlineSuggestions" />
       <public name="crossProfile" />
+      <public name="canTakeScreenshot"/>
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">

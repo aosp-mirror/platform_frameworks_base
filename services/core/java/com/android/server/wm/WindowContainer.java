@@ -247,6 +247,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     private MagnificationSpec mLastMagnificationSpec;
 
+    private boolean mIsFocusable = true;
+
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
         mPendingTransaction = wms.mTransactionFactory.get();
@@ -849,6 +851,21 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
         return false;
+    }
+
+    @Override
+    boolean isFocusable() {
+        return super.isFocusable() && mIsFocusable;
+    }
+
+    /** Set whether this container or its children can be focusable */
+    @Override
+    boolean setFocusable(boolean focusable) {
+        if (mIsFocusable == focusable) {
+            return false;
+        }
+        mIsFocusable = focusable;
+        return true;
     }
 
     /**

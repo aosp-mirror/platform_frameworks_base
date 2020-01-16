@@ -5137,7 +5137,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_P2P_DEVICE_NAME);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SAVED_STATE);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS);
-            MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_ENHANCED_AUTO_JOIN);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_NETWORK_SHOW_RSSI);
@@ -6418,6 +6417,15 @@ public final class Settings {
          */
         public static final String ACCESSIBILITY_BUTTON_TARGET_COMPONENT =
                 "accessibility_button_target_component";
+
+        /**
+         * The system class name of magnification controller which is a target to be toggled via
+         * accessibility shortcut or accessibility button.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER =
+                "com.android.server.accessibility.MagnificationController";
 
         /**
          * If touch exploration is enabled.
@@ -8811,9 +8819,9 @@ public final class Settings {
          * added to both AIRPLANE_MODE_RADIOS and AIRPLANE_MODE_TOGGLEABLE_RADIOS, then Wifi
          * will be turned off when entering airplane mode, but the user will be able to reenable
          * Wifi in the Settings app.
-         *
-         * {@hide}
+         * @hide
          */
+        @SystemApi
         public static final String AIRPLANE_MODE_TOGGLEABLE_RADIOS = "airplane_mode_toggleable_radios";
 
         /**
@@ -9985,17 +9993,9 @@ public final class Settings {
         * Setting to allow scans to be enabled even wifi is turned off for connectivity.
         * @hide
         */
+       @SystemApi
        public static final String WIFI_SCAN_ALWAYS_AVAILABLE =
                 "wifi_scan_always_enabled";
-
-        /**
-         * The interval in milliseconds at which wifi rtt ranging requests will be throttled when
-         * they are coming from the background.
-         *
-         * @hide
-         */
-        public static final String WIFI_RTT_BACKGROUND_EXEC_GAP_MS =
-                "wifi_rtt_background_exec_gap_ms";
 
         /**
          * Indicate whether factory reset request is pending.
@@ -10003,6 +10003,7 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          * @hide
          */
+        @SystemApi
         public static final String WIFI_P2P_PENDING_FACTORY_RESET =
                 "wifi_p2p_pending_factory_reset";
 
@@ -10012,6 +10013,7 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          * @hide
          */
+        @SystemApi
         public static final String SOFT_AP_TIMEOUT_ENABLED = "soft_ap_timeout_enabled";
 
         /**
@@ -10055,9 +10057,9 @@ public final class Settings {
          * enabled state.
          * @hide
          */
+        @SystemApi
         public static final String NETWORK_RECOMMENDATIONS_ENABLED =
                 "network_recommendations_enabled";
-
 
         /**
          * Which package name to use for network recommendations. If null, network recommendations
@@ -10083,17 +10085,6 @@ public final class Settings {
         public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
 
         /**
-         * The number of milliseconds the {@link com.android.server.NetworkScoreService}
-         * will give a recommendation request to complete before returning a default response.
-         *
-         * Type: long
-         * @hide
-         * @deprecated to be removed
-         */
-        public static final String NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS =
-                "network_recommendation_request_timeout_ms";
-
-        /**
          * The expiration time in milliseconds for the {@link android.net.WifiKey} request cache in
          * {@link com.android.server.wifi.RecommendedNetworkEvaluator}.
          *
@@ -10111,6 +10102,7 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          * @hide
          */
+        @SystemApi
         public static final String WIFI_SCAN_THROTTLE_ENABLED = "wifi_scan_throttle_enabled";
 
         /**
@@ -10219,18 +10211,11 @@ public final class Settings {
                "wifi_watchdog_poor_network_test_enabled";
 
        /**
-        * Setting to turn on suspend optimizations at screen off on Wi-Fi. Enabled by default and
-        * needs to be set to 0 to disable it.
-        * @hide
-        */
-       public static final String WIFI_SUSPEND_OPTIMIZATIONS_ENABLED =
-               "wifi_suspend_optimizations_enabled";
-
-       /**
         * Setting to enable verbose logging in Wi-Fi; disabled by default, and setting to 1
         * will enable it. In the future, additional values may be supported.
         * @hide
         */
+       @SystemApi
        public static final String WIFI_VERBOSE_LOGGING_ENABLED =
                "wifi_verbose_logging_enabled";
 
@@ -10256,68 +10241,9 @@ public final class Settings {
          * Errors in the parameters will cause the entire setting to be ignored.
          * @hide
          */
+        @SystemApi
         public static final String WIFI_SCORE_PARAMS =
                 "wifi_score_params";
-
-        /**
-         * Setting to enable logging WifiIsUnusableEvent in metrics
-         * which gets triggered when wifi becomes unusable.
-         * Disabled by default, and setting it to 1 will enable it.
-         * @hide
-         */
-        public static final String WIFI_IS_UNUSABLE_EVENT_METRICS_ENABLED =
-                "wifi_is_unusable_event_metrics_enabled";
-
-        /**
-         * The minimum number of txBad the framework has to observe
-         * to trigger a wifi data stall.
-         * @hide
-         */
-        public static final String WIFI_DATA_STALL_MIN_TX_BAD =
-                "wifi_data_stall_min_tx_bad";
-
-        /**
-         * The minimum number of txSuccess the framework has to observe
-         * to trigger a wifi data stall when rxSuccess is 0.
-         * @hide
-         */
-        public static final String WIFI_DATA_STALL_MIN_TX_SUCCESS_WITHOUT_RX =
-                "wifi_data_stall_min_tx_success_without_rx";
-
-        /**
-         * Setting to enable logging Wifi LinkSpeedCounts in metrics.
-         * Disabled by default, and setting it to 1 will enable it.
-         * @hide
-         */
-        public static final String WIFI_LINK_SPEED_METRICS_ENABLED =
-                "wifi_link_speed_metrics_enabled";
-
-        /**
-         * Setting to enable the PNO frequency culling optimization.
-         * Disabled by default, and setting it to 1 will enable it.
-         * The value is boolean (0 or 1).
-         * @hide
-         */
-        public static final String WIFI_PNO_FREQUENCY_CULLING_ENABLED =
-                "wifi_pno_frequency_culling_enabled";
-
-        /**
-         * Setting to enable including recency information when determining pno network priorities.
-         * Disabled by default, and setting it to 1 will enable it.
-         * The value is boolean (0 or 1).
-         * @hide
-         */
-        public static final String WIFI_PNO_RECENCY_SORTING_ENABLED =
-                "wifi_pno_recency_sorting_enabled";
-
-        /**
-         * Setting to enable the Wi-Fi link probing.
-         * Enabled by default, and setting it to 0 will disable it.
-         * The value is boolean (0 or 1).
-         * @hide
-         */
-        public static final String WIFI_LINK_PROBING_ENABLED =
-                "wifi_link_probing_enabled";
 
        /**
         * The maximum number of times we will retry a connection to an access
@@ -10358,6 +10284,7 @@ public final class Settings {
         * The Wi-Fi peer-to-peer device name
         * @hide
         */
+       @SystemApi
        public static final String WIFI_P2P_DEVICE_NAME = "wifi_p2p_device_name";
 
        /**

@@ -19,6 +19,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.ArrayMap
 import androidx.dynamicanimation.animation.FloatPropertyCompat
+import com.android.systemui.util.animation.PhysicsAnimatorTestUtils.prepareForTest
 import java.util.ArrayDeque
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -119,6 +120,7 @@ object PhysicsAnimatorTestUtils {
                 override fun onAnimationEnd(
                     target: T,
                     property: FloatPropertyCompat<in T>,
+                    wasFling: Boolean,
                     canceled: Boolean,
                     finalValue: Float,
                     finalVelocity: Float,
@@ -389,8 +391,6 @@ object PhysicsAnimatorTestUtils {
             val unblockLatch = CountDownLatch(if (startBlocksUntilAnimationsEnd) 2 else 1)
 
             animationThreadHandler.post {
-                val animatedProperties = animator.getAnimatedProperties()
-
                 // Add an update listener that dispatches to any test update listeners added by
                 // tests.
                 animator.addUpdateListener(object : PhysicsAnimator.UpdateListener<T> {
@@ -398,6 +398,10 @@ object PhysicsAnimatorTestUtils {
                         target: T,
                         values: ArrayMap<FloatPropertyCompat<in T>, PhysicsAnimator.AnimationUpdate>
                     ) {
+                        values.forEach { (property, value) ->
+                            allUpdates.getOrPut(property, { ArrayList() }).add(value)
+                        }
+
                         for (listener in testUpdateListeners) {
                             listener.onAnimationUpdateForProperty(target, values)
                         }
@@ -410,6 +414,7 @@ object PhysicsAnimatorTestUtils {
                     override fun onAnimationEnd(
                         target: T,
                         property: FloatPropertyCompat<in T>,
+                        wasFling: Boolean,
                         canceled: Boolean,
                         finalValue: Float,
                         finalVelocity: Float,
@@ -417,7 +422,7 @@ object PhysicsAnimatorTestUtils {
                     ) {
                         for (listener in testEndListeners) {
                             listener.onAnimationEnd(
-                                    target, property, canceled, finalValue, finalVelocity,
+                                    target, property, wasFling, canceled, finalValue, finalVelocity,
                                     allRelevantPropertyAnimsEnded)
                         }
 
@@ -431,31 +436,6 @@ object PhysicsAnimatorTestUtils {
                         }
                     }
                 })
-
-                val updateListeners = ArrayList<PhysicsAnimator.UpdateListener<T>>().also {
-                    it.add(object : PhysicsAnimator.UpdateListener<T> {
-                        override fun onAnimationUpdateForProperty(
-                            target: T,
-                            values: ArrayMap<FloatPropertyCompat<in T>,
-                                             PhysicsAnimator.AnimationUpdate>
-                        ) {
-                            values.forEach { (property, value) ->
-                                allUpdates.getOrPut(property, { ArrayList() }).add(value)
-                            }
-                        }
-                    })
-                }
-
-                /**
-                 * Add an internal listener at the head of the list that captures update values
-                 * directly from DynamicAnimation. We use this to build a list of all updates so we
-                 * can verify that InternalListener dispatches to the real listeners properly.
-                 */
-                animator.internalListeners.add(0, animator.InternalListener(
-                        animatedProperties,
-                        updateListeners,
-                        ArrayList(),
-                        ArrayList()))
 
                 animator.startInternal()
                 unblockLatch.countDown()

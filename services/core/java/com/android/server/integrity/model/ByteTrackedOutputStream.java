@@ -23,31 +23,41 @@ import java.io.OutputStream;
  * An output stream that tracks the total number written bytes since construction and allows
  * querying this value any time during the execution.
  *
- * This class is used for constructing the rule indexing.
+ * <p>This class is used for constructing the rule indexing.
  */
-public class ByteTrackedOutputStream {
+public class ByteTrackedOutputStream extends OutputStream {
 
-    private static int sWrittenBytesCount;
-    private static OutputStream sOutputStream;
+    private int mWrittenBytesCount;
+    private final OutputStream mOutputStream;
 
     public ByteTrackedOutputStream(OutputStream outputStream) {
-        sWrittenBytesCount = 0;
-        sOutputStream = outputStream;
+        mWrittenBytesCount = 0;
+        mOutputStream = outputStream;
+    }
+
+    @Override
+    public void write(int b) throws IOException {
+        mWrittenBytesCount++;
+        mOutputStream.write(b);
     }
 
     /**
-     * Writes the given bytes into the output stream provided in constructor and updates the
-     * total number of written bytes.
+     * Writes the given bytes into the output stream provided in constructor and updates the total
+     * number of written bytes.
      */
+    @Override
     public void write(byte[] bytes) throws IOException {
-        sWrittenBytesCount += bytes.length;
-        sOutputStream.write(bytes);
+        write(bytes, 0, bytes.length);
     }
 
-    /**
-     * Returns the total number of bytes written into the output stream at the requested time.
-     */
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        mWrittenBytesCount += len;
+        mOutputStream.write(b, off, len);
+    }
+
+    /** Returns the total number of bytes written into the output stream at the requested time. */
     public int getWrittenBytesCount() {
-        return sWrittenBytesCount;
+        return mWrittenBytesCount;
     }
 }

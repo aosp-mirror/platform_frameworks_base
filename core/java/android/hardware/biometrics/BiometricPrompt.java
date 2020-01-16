@@ -21,6 +21,7 @@ import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -40,6 +41,8 @@ import android.util.Log;
 
 import com.android.internal.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.security.Signature;
 import java.util.concurrent.Executor;
 
@@ -397,9 +400,11 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             new IBiometricServiceReceiver.Stub() {
 
         @Override
-        public void onAuthenticationSucceeded() throws RemoteException {
+        public void onAuthenticationSucceeded(@AuthenticationResultType int authenticationType)
+                throws RemoteException {
             mExecutor.execute(() -> {
-                final AuthenticationResult result = new AuthenticationResult(mCryptoObject);
+                final AuthenticationResult result =
+                        new AuthenticationResult(mCryptoObject, authenticationType);
                 mAuthenticationCallback.onAuthenticationSucceeded(result);
             });
         }
@@ -576,27 +581,61 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     }
 
     /**
-     * Container for callback data from {@link #authenticate( CancellationSignal, Executor,
+     * Authentication type reported by {@link AuthenticationResult} when the user authenticated by
+     * entering their device PIN, pattern, or password.
+     */
+    public static final int AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL = 1;
+
+    /**
+     * Authentication type reported by {@link AuthenticationResult} when the user authenticated by
+     * presenting some form of biometric (e.g. fingerprint or face).
+     */
+    public static final int AUTHENTICATION_RESULT_TYPE_BIOMETRIC = 2;
+
+    /**
+     * An {@link IntDef} representing the type of auth, as reported by {@link AuthenticationResult}.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL, AUTHENTICATION_RESULT_TYPE_BIOMETRIC})
+    public @interface AuthenticationResultType {
+    }
+
+    /**
+     * Container for callback data from {@link #authenticate(CancellationSignal, Executor,
      * AuthenticationCallback)} and {@link #authenticate(CryptoObject, CancellationSignal, Executor,
-     * AuthenticationCallback)}
+     * AuthenticationCallback)}.
      */
     public static class AuthenticationResult extends BiometricAuthenticator.AuthenticationResult {
         /**
          * Authentication result
          * @param crypto
+         * @param authenticationType
          * @hide
          */
-        public AuthenticationResult(CryptoObject crypto) {
+        public AuthenticationResult(CryptoObject crypto,
+                @AuthenticationResultType int authenticationType) {
             // Identifier and userId is not used for BiometricPrompt.
-            super(crypto, null /* identifier */, 0 /* userId */);
+            super(crypto, authenticationType, null /* identifier */, 0 /* userId */);
         }
+
         /**
-         * Obtain the crypto object associated with this transaction
-         * @return crypto object provided to {@link #authenticate( CryptoObject, CancellationSignal,
-         * Executor, AuthenticationCallback)}
+         * Provides the crypto object associated with this transaction.
+         * @return The crypto object provided to {@link #authenticate(CryptoObject,
+         * CancellationSignal, Executor, AuthenticationCallback)}
          */
         public CryptoObject getCryptoObject() {
             return (CryptoObject) super.getCryptoObject();
+        }
+
+        /**
+         * Provides the type of authentication (e.g. device credential or biometric) that was
+         * requested from and successfully provided by the user.
+         *
+         * @return An integer value representing the authentication method used.
+         */
+        public @AuthenticationResultType int getAuthenticationType() {
+            return super.getAuthenticationType();
         }
     }
 

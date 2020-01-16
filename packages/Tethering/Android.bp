@@ -16,7 +16,7 @@
 
 java_defaults {
     name: "TetheringAndroidLibraryDefaults",
-    platform_apis: true,
+    sdk_version: "system_current",
     srcs: [
         "src/**/*.java",
         ":framework-tethering-shared-srcs",
@@ -29,6 +29,7 @@ java_defaults {
         "netlink-client",
         "networkstack-aidl-interfaces-unstable-java",
         "android.hardware.tetheroffload.control-V1.0-java",
+        "net-utils-framework-common",
     ],
     libs: [
         "framework-tethering",
@@ -80,7 +81,7 @@ cc_library {
 // Common defaults for compiling the actual APK.
 java_defaults {
     name: "TetheringAppDefaults",
-    platform_apis: true,
+    sdk_version: "system_current",
     privileged: true,
     // Build system doesn't track transitive dependeicies for jni_libs, list all the dependencies
     // explicitly.

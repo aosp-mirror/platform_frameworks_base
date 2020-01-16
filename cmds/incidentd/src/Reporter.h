@@ -21,6 +21,7 @@
 #include "frameworks/base/core/proto/android/os/metadata.pb.h"
 #include <android/content/ComponentName.h>
 #include <android/os/IIncidentReportStatusListener.h>
+#include <android/os/IIncidentDumpCallback.h>
 #include <android/os/IncidentReportArgs.h>
 #include <android/util/protobuf.h>
 
@@ -39,6 +40,7 @@ using namespace std;
 using namespace android::content;
 using namespace android::os;
 
+class BringYourOwnSection;
 class Section;
 
 // ================================================================================
@@ -122,7 +124,7 @@ public:
     void forEachStreamingRequest(const function<void (const sp<ReportRequest>&)>& func);
 
     /**
-     * Call func(request) for each file descriptor that has 
+     * Call func(request) for each file descriptor.
      */
     void forEachFd(int sectionId, const function<void (const sp<ReportRequest>&)>& func);
 
@@ -251,7 +253,9 @@ private:
 // ================================================================================
 class Reporter : public virtual RefBase {
 public:
-    Reporter(const sp<WorkDirectory>& workDirectory, const sp<ReportBatch>& batch);
+    Reporter(const sp<WorkDirectory>& workDirectory,
+             const sp<ReportBatch>& batch,
+             const vector<BringYourOwnSection*>& registeredSections);
 
     virtual ~Reporter();
 
@@ -263,6 +267,10 @@ private:
     ReportWriter mWriter;
     sp<ReportBatch> mBatch;
     sp<ReportFile> mPersistedFile;
+    const vector<BringYourOwnSection*>& mRegisteredSections;
+
+    status_t execute_section(const Section* section, IncidentMetadata* metadata,
+        size_t* reportByteSize);
 
     void cancel_and_remove_failed_requests();
 };

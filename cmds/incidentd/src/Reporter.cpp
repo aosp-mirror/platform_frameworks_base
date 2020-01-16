@@ -364,7 +364,6 @@ void ReportWriter::startSection(int sectionId) {
     mSectionBufferSuccess = false;
     mHadError = false;
     mSectionErrors.clear();
-    
 }
 
 void ReportWriter::setSectionStats(const FdBuffer& buffer) {
@@ -470,10 +469,13 @@ status_t ReportWriter::writeSection(const FdBuffer& buffer) {
 
 
 // ================================================================================
-Reporter::Reporter(const sp<WorkDirectory>& workDirectory, const sp<ReportBatch>& batch)
+Reporter::Reporter(const sp<WorkDirectory>& workDirectory,
+                   const sp<ReportBatch>& batch,
+                   const vector<BringYourOwnSection*>& registeredSections)
         :mWorkDirectory(workDirectory),
          mWriter(batch),
-         mBatch(batch) {
+         mBatch(batch),
+         mRegisteredSections(registeredSections) {
 }
 
 Reporter::~Reporter() {
@@ -580,50 +582,15 @@ void Reporter::runReport(size_t* reportByteSize) {
     // For each of the report fields, see if we need it, and if so, execute the command
     // and report to those that care that we're doing it.
     for (const Section** section = SECTION_LIST; *section; section++) {
-        const int sectionId = (*section)->id;
-
-        // If nobody wants this section, skip it.
-        if (!mBatch->containsSection(sectionId)) {
-            continue;
-        }
-
-        ALOGD("Start incident report section %d '%s'", sectionId, (*section)->name.string());
-        IncidentMetadata::SectionStats* sectionMetadata = metadata.add_sections();
-
-        // Notify listener of starting
-        mBatch->forEachListener(sectionId, [sectionId](const auto& listener) {
-            listener->onReportSectionStatus(
-                    sectionId, IIncidentReportStatusListener::STATUS_STARTING);
-        });
-
-        // Go get the data and write it into the file descriptors.
-        mWriter.startSection(sectionId);
-        err = (*section)->Execute(&mWriter);
-        mWriter.endSection(sectionMetadata);
-
-        // Sections returning errors are fatal. Most errors should not be fatal.
-        if (err != NO_ERROR) {
-            mWriter.error((*section), err, "Section failed. Stopping report.");
+        if (execute_section(*section, &metadata, reportByteSize) != NO_ERROR) {
             goto DONE;
         }
+    }
 
-        // The returned max data size is used for throttling too many incident reports.
-        (*reportByteSize) += sectionMetadata->report_size_bytes();
-
-        // For any requests that failed during this section, remove them now.  We do this
-        // before calling back about section finished, so listeners do not erroniously get the
-        // impression that the section succeeded.  But we do it here instead of inside
-        // writeSection so that the callback is done from a known context and not from the
-        // bowels of a section, where changing the batch could cause odd errors.
-        cancel_and_remove_failed_requests();
-
-        // Notify listener of finishing
-        mBatch->forEachListener(sectionId, [sectionId](const auto& listener) {
-                listener->onReportSectionStatus(
-                        sectionId, IIncidentReportStatusListener::STATUS_FINISHED);
-        });
-
-        ALOGD("Finish incident report section %d '%s'", sectionId, (*section)->name.string());
+    for (const Section* section : mRegisteredSections) {
+        if (execute_section(section, &metadata, reportByteSize) != NO_ERROR) {
+            goto DONE;
+        }
     }
 
 DONE:
@@ -679,6 +646,55 @@ DONE:
     }
 
     ALOGI("Done taking incident report err=%s", strerror(-err));
+}
+
+status_t Reporter::execute_section(const Section* section, IncidentMetadata* metadata,
+        size_t* reportByteSize) {
+    const int sectionId = section->id;
+
+    // If nobody wants this section, skip it.
+    if (!mBatch->containsSection(sectionId)) {
+        return NO_ERROR;
+    }
+
+    ALOGD("Start incident report section %d '%s'", sectionId, section->name.string());
+    IncidentMetadata::SectionStats* sectionMetadata = metadata->add_sections();
+
+    // Notify listener of starting
+    mBatch->forEachListener(sectionId, [sectionId](const auto& listener) {
+        listener->onReportSectionStatus(
+                sectionId, IIncidentReportStatusListener::STATUS_STARTING);
+    });
+
+    // Go get the data and write it into the file descriptors.
+    mWriter.startSection(sectionId);
+    status_t err = section->Execute(&mWriter);
+    mWriter.endSection(sectionMetadata);
+
+    // Sections returning errors are fatal. Most errors should not be fatal.
+    if (err != NO_ERROR) {
+        mWriter.error(section, err, "Section failed. Stopping report.");
+        return err;
+    }
+
+    // The returned max data size is used for throttling too many incident reports.
+    (*reportByteSize) += sectionMetadata->report_size_bytes();
+
+    // For any requests that failed during this section, remove them now.  We do this
+    // before calling back about section finished, so listeners do not erroniously get the
+    // impression that the section succeeded.  But we do it here instead of inside
+    // writeSection so that the callback is done from a known context and not from the
+    // bowels of a section, where changing the batch could cause odd errors.
+    cancel_and_remove_failed_requests();
+
+    // Notify listener of finishing
+    mBatch->forEachListener(sectionId, [sectionId](const auto& listener) {
+            listener->onReportSectionStatus(
+                    sectionId, IIncidentReportStatusListener::STATUS_FINISHED);
+    });
+
+    ALOGD("Finish incident report section %d '%s'", sectionId, section->name.string());
+    return NO_ERROR;
 }
 
 void Reporter::cancel_and_remove_failed_requests() {

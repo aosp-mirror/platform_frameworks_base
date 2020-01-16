@@ -19,6 +19,8 @@ package android.app.appsearch;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import com.google.android.icing.proto.PropertyConfigProto;
 import com.google.android.icing.proto.SchemaProto;
 import com.google.android.icing.proto.SchemaTypeConfigProto;
@@ -70,7 +72,8 @@ public final class AppSearchSchema {
      * @hide
      */
     @NonNull
-    SchemaProto getProto() {
+    @VisibleForTesting
+    public SchemaProto getProto() {
         return mProto;
     }
 
@@ -288,7 +291,7 @@ public final class AppSearchSchema {
             @NonNull
             public PropertyConfig build() {
                 if (mProtoBuilder.getDataType() == PropertyConfigProto.DataType.Code.UNKNOWN) {
-                    throw new IllegalSchemaException("Missing dataType field");
+                    throw new IllegalSchemaException("Missing field: dataType");
                 }
                 if (mProtoBuilder.getSchemaType().isEmpty()
                         && mProtoBuilder.getDataType()
@@ -299,7 +302,7 @@ public final class AppSearchSchema {
                 }
                 if (mProtoBuilder.getCardinality()
                         == PropertyConfigProto.Cardinality.Code.UNKNOWN) {
-                    throw new IllegalSchemaException("Missing cardinality field");
+                    throw new IllegalSchemaException("Missing field: cardinality");
                 }
                 return new PropertyConfig(mProtoBuilder.build());
             }

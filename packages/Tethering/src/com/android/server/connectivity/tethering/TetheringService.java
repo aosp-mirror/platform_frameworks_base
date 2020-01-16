@@ -24,6 +24,7 @@ import static android.net.TetheringManager.TETHER_ERROR_UNSUPPORTED;
 import static android.net.dhcp.IDhcpServer.STATUS_UNKNOWN_ERROR;
 
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.net.IIntResultListener;
@@ -42,7 +43,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -363,7 +363,7 @@ public class TetheringService extends Service {
                     IBinder connector;
                     try {
                         final long before = System.currentTimeMillis();
-                        while ((connector = ServiceManager.getService(
+                        while ((connector = (IBinder) mContext.getSystemService(
                                 Context.NETWORK_STACK_SERVICE)) == null) {
                             if (System.currentTimeMillis() - before > NETWORKSTACK_TIMEOUT_MS) {
                                 Log.wtf(TAG, "Timeout, fail to get INetworkStackConnector");
@@ -376,6 +376,11 @@ public class TetheringService extends Service {
                         return null;
                     }
                     return INetworkStackConnector.Stub.asInterface(connector);
+                }
+
+                @Override
+                public BluetoothAdapter getBluetoothAdapter() {
+                    return BluetoothAdapter.getDefaultAdapter();
                 }
             };
         }

@@ -964,16 +964,26 @@ public final class MediaController {
         private final int mMaxVolume;
         private final int mCurrentVolume;
         private final AudioAttributes mAudioAttrs;
+        private final String mVolumeControlId;
 
         /**
          * @hide
          */
         public PlaybackInfo(int type, int control, int max, int current, AudioAttributes attrs) {
+            this(type, control, max, current, attrs, null);
+        }
+
+        /**
+         * @hide
+         */
+        public PlaybackInfo(int type, int control, int max, int current, AudioAttributes attrs,
+                String volumeControlId) {
             mVolumeType = type;
             mVolumeControl = control;
             mMaxVolume = max;
             mCurrentVolume = current;
             mAudioAttrs = attrs;
+            mVolumeControlId = volumeControlId;
         }
 
         PlaybackInfo(Parcel in) {
@@ -982,6 +992,7 @@ public final class MediaController {
             mMaxVolume = in.readInt();
             mCurrentVolume = in.readInt();
             mAudioAttrs = in.readParcelable(null);
+            mVolumeControlId = in.readString();
         }
 
         /**
@@ -1042,11 +1053,24 @@ public final class MediaController {
             return mAudioAttrs;
         }
 
+        /**
+         * Gets the volume control ID for this session. It can be used to identify which
+         * volume provider is used by the session.
+         *
+         * @return the volume control ID for this session or {@code null} if it's local playback
+         * or not set.
+         * @see VolumeProvider#getVolumeControlId()
+         */
+        @Nullable
+        public String getVolumeControlId() {
+            return mVolumeControlId;
+        }
+
         @Override
         public String toString() {
             return "volumeType=" + mVolumeType + ", volumeControl=" + mVolumeControl
                     + ", maxVolume=" + mMaxVolume + ", currentVolume=" + mCurrentVolume
-                    + ", audioAttrs=" + mAudioAttrs;
+                    + ", audioAttrs=" + mAudioAttrs + ", volumeControlId=" + mVolumeControlId;
         }
 
         @Override
@@ -1061,6 +1085,7 @@ public final class MediaController {
             dest.writeInt(mMaxVolume);
             dest.writeInt(mCurrentVolume);
             dest.writeParcelable(mAudioAttrs, flags);
+            dest.writeString(mVolumeControlId);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<PlaybackInfo> CREATOR =

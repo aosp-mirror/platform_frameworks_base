@@ -74,6 +74,18 @@ public class WindowContainerTransaction implements Parcelable {
         return this;
     }
 
+    /**
+     * Sets whether a container or any of its children can be focusable. When {@code false}, no
+     * child can be focused; however, when {@code true}, it is still possible for children to be
+     * non-focusable due to WM policy.
+     */
+    public WindowContainerTransaction setFocusable(IWindowContainer container, boolean focusable) {
+        Change chg = getOrCreateChange(container.asBinder());
+        chg.mFocusable = focusable;
+        chg.mChangeMask |= Change.CHANGE_FOCUSABLE;
+        return this;
+    }
+
     public Map<IBinder, Change> getChanges() {
         return mChanges;
     }
@@ -112,7 +124,11 @@ public class WindowContainerTransaction implements Parcelable {
      * @hide
      */
     public static class Change implements Parcelable {
+        public static final int CHANGE_FOCUSABLE = 1;
+
         private final Configuration mConfiguration = new Configuration();
+        private boolean mFocusable = true;
+        private int mChangeMask = 0;
         private @ActivityInfo.Config int mConfigSetMask = 0;
         private @WindowConfiguration.WindowConfig int mWindowSetMask = 0;
 
@@ -123,6 +139,8 @@ public class WindowContainerTransaction implements Parcelable {
 
         protected Change(Parcel in) {
             mConfiguration.readFromParcel(in);
+            mFocusable = in.readBoolean();
+            mChangeMask = in.readInt();
             mConfigSetMask = in.readInt();
             mWindowSetMask = in.readInt();
             mSchedulePipCallback = (in.readInt() != 0);
@@ -134,6 +152,18 @@ public class WindowContainerTransaction implements Parcelable {
 
         public Configuration getConfiguration() {
             return mConfiguration;
+        }
+
+        /** Gets the requested focusable value */
+        public boolean getFocusable() {
+            if ((mChangeMask & CHANGE_FOCUSABLE) == 0) {
+                throw new RuntimeException("Focusable not set. check CHANGE_FOCUSABLE first");
+            }
+            return mFocusable;
+        }
+
+        public int getChangeMask() {
+            return mChangeMask;
         }
 
         @ActivityInfo.Config
@@ -170,6 +200,9 @@ public class WindowContainerTransaction implements Parcelable {
             if (changesSss) {
                 sb.append("ssw:" + mConfiguration.smallestScreenWidthDp + ",");
             }
+            if ((mChangeMask & CHANGE_FOCUSABLE) != 0) {
+                sb.append("focusable:" + mFocusable + ",");
+            }
             sb.append("}");
             return sb.toString();
         }
@@ -177,6 +210,8 @@ public class WindowContainerTransaction implements Parcelable {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             mConfiguration.writeToParcel(dest, flags);
+            dest.writeBoolean(mFocusable);
+            dest.writeInt(mChangeMask);
             dest.writeInt(mConfigSetMask);
             dest.writeInt(mWindowSetMask);
 

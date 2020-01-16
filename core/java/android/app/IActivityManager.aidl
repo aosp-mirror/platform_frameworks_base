@@ -355,6 +355,12 @@ interface IActivityManager {
             in Bundle options, int userId);
     @UnsupportedAppUsage
     int stopUser(int userid, boolean force, in IStopUserCallback callback);
+    /**
+     * Check {@link com.android.server.am.ActivityManagerService#stopUserWithDelayedLocking(int, boolean, IStopUserCallback)}
+     * for details.
+     */
+    int stopUserWithDelayedLocking(int userid, boolean force, in IStopUserCallback callback);
+
     @UnsupportedAppUsage
     void registerUserSwitchObserver(in IUserSwitchObserver observer, in String name);
     void unregisterUserSwitchObserver(in IUserSwitchObserver observer);

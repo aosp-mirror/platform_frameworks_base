@@ -723,11 +723,11 @@
     <string name="permgroupdesc_sms">send and view SMS messages</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_storage">Storage</string>
+    <string name="permgrouplab_storage">Files and media</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_storage">access photos, media, and files on your device</string>
 
-    <!-- Title of a category of application permissioncds, listed so the user can choose whether they want to allow the application to do this. -->
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_microphone">Microphone</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_microphone">record audio</string>
@@ -793,6 +793,11 @@
     <!-- Description for the capability of an accessibility service to perform gestures. -->
     <string name="capability_desc_canCaptureFingerprintGestures">Can capture gestures performed on
         the device\'s fingerprint sensor.</string>
+
+    <!-- Title for the capability of an accessibility service to take screenshot. [CHAR LIMIT=32] -->
+    <string name="capability_title_canTakeScreenshot">Take screenshot</string>
+    <!-- Description for the capability of an accessibility service to take screenshot. [CHAR LIMIT=NONE] -->
+    <string name="capability_desc_canTakeScreenshot">Can take a screenshot of the display.</string>
 
     <!--  Permissions -->
 
@@ -4921,6 +4926,13 @@
     <string name="work_mode_off_message">Your work apps, notifications, data, and other work profile features will be turned on</string>
     <!-- Title for button to turn on work profile. [CHAR LIMIT=NONE] -->
     <string name="work_mode_turn_on">Turn on</string>
+
+    <!-- Title of the dialog that is shown when the user tries to launch a suspended application [CHAR LIMIT=50] -->
+    <string name="app_blocked_title">App is not available</string>
+    <!-- Default message shown in the dialog that is shown when the user tries to launch a suspended application [CHAR LIMIT=NONE] -->
+    <string name="app_blocked_message">
+        <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> is not available right now.
+    </string>
 
     <!-- Message displayed in dialog when app is too old to run on this verison of android. [CHAR LIMIT=NONE] -->
     <string name="deprecated_target_sdk_message">This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.</string>

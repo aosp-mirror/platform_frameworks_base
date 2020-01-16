@@ -257,7 +257,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     private final List<JobRestriction> mJobRestrictions;
 
     private final CountQuotaTracker mQuotaTracker;
-    private static final String QUOTA_TRACKER_SCHEDULE_TAG = ".schedule()";
+    private static final String QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG = ".schedulePersisted()";
     private final PlatformCompat mPlatformCompat;
 
     /**
@@ -522,7 +522,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final float DEFAULT_CONN_CONGESTION_DELAY_FRAC = 0.5f;
         private static final float DEFAULT_CONN_PREFETCH_RELAX_FRAC = 0.5f;
         private static final boolean DEFAULT_ENABLE_API_QUOTAS = true;
-        private static final int DEFAULT_API_QUOTA_SCHEDULE_COUNT = 500;
+        private static final int DEFAULT_API_QUOTA_SCHEDULE_COUNT = 250;
         private static final long DEFAULT_API_QUOTA_SCHEDULE_WINDOW_MS = MINUTE_IN_MILLIS;
         private static final boolean DEFAULT_API_QUOTA_SCHEDULE_THROW_EXCEPTION = true;
 
@@ -740,6 +740,8 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             ENABLE_API_QUOTAS = mParser.getBoolean(KEY_ENABLE_API_QUOTAS,
                 DEFAULT_ENABLE_API_QUOTAS);
+            // Set a minimum value on the quota limit so it's not so low that it interferes with
+            // legitimate use cases.
             API_QUOTA_SCHEDULE_COUNT = Math.max(250,
                     mParser.getInt(KEY_API_QUOTA_SCHEDULE_COUNT, DEFAULT_API_QUOTA_SCHEDULE_COUNT));
             API_QUOTA_SCHEDULE_WINDOW_MS = mParser.getDurationMillis(
@@ -1054,44 +1056,48 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     public int scheduleAsPackage(JobInfo job, JobWorkItem work, int uId, String packageName,
             int userId, String tag) {
-        final String pkg = packageName == null ? job.getService().getPackageName() : packageName;
-        if (!mQuotaTracker.isWithinQuota(userId, pkg, QUOTA_TRACKER_SCHEDULE_TAG)) {
-            Slog.e(TAG, userId + "-" + pkg + " has called schedule() too many times");
-            // TODO(b/145551233): attempt to restrict app
-            if (mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION
-                    && mPlatformCompat.isChangeEnabledByPackageName(
-                            CRASH_ON_EXCEEDED_LIMIT, pkg, userId)) {
-                final boolean isDebuggable;
-                synchronized (mLock) {
-                    if (!mDebuggableApps.containsKey(packageName)) {
-                        try {
-                            final ApplicationInfo appInfo = AppGlobals.getPackageManager()
-                                    .getApplicationInfo(pkg, 0, userId);
-                            if (appInfo != null) {
-                                mDebuggableApps.put(packageName,
-                                        (appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
-                            } else {
-                                return JobScheduler.RESULT_FAILURE;
+        if (job.isPersisted()) {
+            // Only limit schedule calls for persisted jobs.
+            final String pkg =
+                    packageName == null ? job.getService().getPackageName() : packageName;
+            if (!mQuotaTracker.isWithinQuota(userId, pkg, QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG)) {
+                Slog.e(TAG, userId + "-" + pkg + " has called schedule() too many times");
+                // TODO(b/145551233): attempt to restrict app
+                if (mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION
+                        && mPlatformCompat.isChangeEnabledByPackageName(
+                                CRASH_ON_EXCEEDED_LIMIT, pkg, userId)) {
+                    final boolean isDebuggable;
+                    synchronized (mLock) {
+                        if (!mDebuggableApps.containsKey(packageName)) {
+                            try {
+                                final ApplicationInfo appInfo = AppGlobals.getPackageManager()
+                                        .getApplicationInfo(pkg, 0, userId);
+                                if (appInfo != null) {
+                                    mDebuggableApps.put(packageName,
+                                            (appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+                                } else {
+                                    return JobScheduler.RESULT_FAILURE;
+                                }
+                            } catch (RemoteException e) {
+                                throw new RuntimeException(e);
                             }
-                        } catch (RemoteException e) {
-                            throw new RuntimeException(e);
                         }
+                        isDebuggable = mDebuggableApps.get(packageName);
                     }
-                    isDebuggable = mDebuggableApps.get(packageName);
+                    if (isDebuggable) {
+                        // Only throw the exception for debuggable apps.
+                        throw new IllegalStateException(
+                                "schedule()/enqueue() called more than "
+                                        + mQuotaTracker.getLimit(Category.SINGLE_CATEGORY)
+                                        + " times in the past "
+                                        + mQuotaTracker.getWindowSizeMs(Category.SINGLE_CATEGORY)
+                                        + "ms");
+                    }
                 }
-                if (isDebuggable) {
-                    // Only throw the exception for debuggable apps.
-                    throw new IllegalStateException(
-                            "schedule()/enqueue() called more than "
-                                    + mQuotaTracker.getLimit(Category.SINGLE_CATEGORY)
-                                    + " times in the past "
-                                    + mQuotaTracker.getWindowSizeMs(Category.SINGLE_CATEGORY)
-                                    + "ms");
-                }
+                return JobScheduler.RESULT_FAILURE;
             }
-            return JobScheduler.RESULT_FAILURE;
+            mQuotaTracker.noteEvent(userId, pkg, QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG);
         }
-        mQuotaTracker.noteEvent(userId, pkg, QUOTA_TRACKER_SCHEDULE_TAG);
 
         try {
             if (ActivityManager.getService().isAppStartModeDisabled(uId,

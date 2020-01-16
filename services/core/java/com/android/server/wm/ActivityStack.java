@@ -161,9 +161,9 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
+import android.view.ITaskOrganizer;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.view.ITaskOrganizer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -1248,13 +1248,20 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         }
     }
 
+    @Override
     boolean isFocusable() {
+        return super.isFocusable() && !(inSplitScreenPrimaryWindowingMode()
+                && mRootWindowContainer.mIsDockMinimized);
+    }
+
+    boolean isTopActivityFocusable() {
         final ActivityRecord r = topRunningActivity();
-        return mRootWindowContainer.isFocusable(this, r != null && r.isFocusable());
+        return r != null ? r.isFocusable()
+                : (isFocusable() && getWindowConfiguration().canReceiveKeys());
     }
 
     boolean isFocusableAndVisible() {
-        return isFocusable() && shouldBeVisible(null /* starting */);
+        return isTopActivityFocusable() && shouldBeVisible(null /* starting */);
     }
 
     @Override

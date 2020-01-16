@@ -1431,7 +1431,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   // Isolated process / webview / app zygote should be gated by SELinux and file permission
   // so they can't even traverse CE / DE directories.
   if (pkg_data_info_list != nullptr
-      && GetBoolProperty(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, false)) {
+      && GetBoolProperty(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, true)) {
     isolateAppData(env, pkg_data_info_list, uid, process_name, managed_nice_name,
         fail_fn);
   }

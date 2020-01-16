@@ -27,7 +27,6 @@ import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
-import static com.android.networkstack.tethering.R.bool.config_tether_enable_legacy_dhcp_server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -56,10 +55,10 @@ import android.telephony.CarrierConfigManager;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.R;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.test.BroadcastInterceptingContext;
+import com.android.networkstack.tethering.R;
 
 import org.junit.After;
 import org.junit.Before;
@@ -157,16 +156,18 @@ public final class EntitlementManagerTest {
                 eq(TetheringConfiguration.TETHER_ENABLE_LEGACY_DHCP_SERVER), anyBoolean()));
 
         when(mResources.getStringArray(R.array.config_tether_dhcp_range))
-            .thenReturn(new String[0]);
+                .thenReturn(new String[0]);
         when(mResources.getStringArray(R.array.config_tether_usb_regexs))
-            .thenReturn(new String[0]);
+                .thenReturn(new String[0]);
         when(mResources.getStringArray(R.array.config_tether_wifi_regexs))
-            .thenReturn(new String[0]);
+                .thenReturn(new String[0]);
         when(mResources.getStringArray(R.array.config_tether_bluetooth_regexs))
-            .thenReturn(new String[0]);
+                .thenReturn(new String[0]);
         when(mResources.getIntArray(R.array.config_tether_upstream_types))
-            .thenReturn(new int[0]);
-        when(mResources.getBoolean(config_tether_enable_legacy_dhcp_server)).thenReturn(false);
+                .thenReturn(new int[0]);
+        when(mResources.getBoolean(R.bool.config_tether_enable_legacy_dhcp_server)).thenReturn(
+                false);
+        when(mResources.getString(R.string.config_wifi_tether_enable)).thenReturn("");
         when(mLog.forSubComponent(anyString())).thenReturn(mLog);
 
         mMockContext = new MockContext(mContext);

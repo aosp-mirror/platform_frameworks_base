@@ -18,8 +18,10 @@ package android.accessibilityservice;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Bitmap;
 import android.graphics.Region;
 import android.os.Bundle;
+import android.os.RemoteCallback;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -102,4 +104,10 @@ interface IAccessibilityServiceConnection {
     boolean isFingerprintGestureDetectionAvailable();
 
     IBinder getOverlayWindowToken(int displayid);
+
+    int getWindowIdForLeashToken(IBinder token);
+
+    Bitmap takeScreenshot(int displayId);
+
+    void takeScreenshotWithCallback(int displayId, in RemoteCallback callback);
 }

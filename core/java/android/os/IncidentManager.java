@@ -31,6 +31,7 @@ import android.util.Slog;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -421,6 +422,39 @@ public class IncidentManager {
     }
 
     /**
+     * Callback for dumping an extended (usually vendor-supplied) incident report section
+     *
+     * @see #registerSection
+     * @see #unregisterSection
+     *
+     * @hide
+     */
+    public static class DumpCallback {
+        private Executor mExecutor;
+
+        IIncidentDumpCallback.Stub mBinder = new IIncidentDumpCallback.Stub() {
+            @Override
+            public void onDumpSection(ParcelFileDescriptor pfd) {
+                if (mExecutor != null) {
+                    mExecutor.execute(() -> {
+                        DumpCallback.this.onDumpSection(
+                                new ParcelFileDescriptor.AutoCloseOutputStream(pfd));
+                    });
+                } else {
+                    DumpCallback.this.onDumpSection(
+                            new ParcelFileDescriptor.AutoCloseOutputStream(pfd));
+                }
+            }
+        };
+
+        /**
+         * Called when incidentd requests to dump this section.
+         */
+        public void onDumpSection(OutputStream out) {
+        }
+    }
+
+    /**
      * @hide
      */
     public IncidentManager(Context context) {
@@ -524,6 +558,61 @@ public class IncidentManager {
         } catch (RemoteException ex) {
             // System process going down
             throw new RuntimeException(ex);
+        }
+    }
+
+    /**
+     * Register a callback to dump an extended incident report section with the given id and name.
+     * The callback function will be invoked when an incident report with all sections or sections
+     * matching the given id is being taken.
+     *
+     * @hide
+     */
+    public void registerSection(int id, String name, @NonNull DumpCallback callback) {
+        registerSection(id, name, mContext.getMainExecutor(), callback);
+    }
+
+    /**
+     * Register a callback to dump an extended incident report section with the given id and name,
+     * running on the supplied executor.
+     *
+     * @hide
+     */
+    public void registerSection(int id, String name, @NonNull @CallbackExecutor Executor executor,
+            @NonNull DumpCallback callback) {
+        try {
+            if (callback.mExecutor != null) {
+                throw new RuntimeException("Do not reuse DumpCallback objects when calling"
+                        + " registerSection");
+            }
+            callback.mExecutor = executor;
+            final IIncidentManager service = getIIncidentManagerLocked();
+            if (service == null) {
+                Slog.e(TAG, "registerSection can't find incident binder service");
+                return;
+            }
+            service.registerSection(id, name, callback.mBinder);
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "registerSection failed", ex);
+        }
+    }
+
+    /**
+     * Unregister an extended section dump function. The section must be previously registered with
+     * {@link #registerSection(int, String, DumpCallback)}
+     *
+     * @hide
+     */
+    public void unregisterSection(int id) {
+        try {
+            final IIncidentManager service = getIIncidentManagerLocked();
+            if (service == null) {
+                Slog.e(TAG, "unregisterSection can't find incident binder service");
+                return;
+            }
+            service.unregisterSection(id);
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "unregisterSection failed", ex);
         }
     }
 

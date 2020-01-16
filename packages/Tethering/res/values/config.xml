@@ -38,8 +38,9 @@
 
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
          Wifi P2P interfaces.  If the device doesn't want to support tethering over Wifi P2p this
-         should be empty.  An example would be "p2p-p2p.*" -->
+         should be empty.  An example would be "p2p-p2p\\d-.*" -->
     <string-array translatable="false" name="config_tether_wifi_p2p_regexs">
+        <item>"p2p-p2p\\d-.*"</item>
     </string-array>
 
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
@@ -100,7 +101,7 @@
 
     <!-- If the mobile hotspot feature requires provisioning, a package name and class name
          can be provided to launch a supported application that provisions the devices.
-         EntitlementManager will send an inent to Settings with the specified package name and
+         EntitlementManager will send an intent to Settings with the specified package name and
          class name in extras to launch provision app.
          TODO: note what extras here.
 

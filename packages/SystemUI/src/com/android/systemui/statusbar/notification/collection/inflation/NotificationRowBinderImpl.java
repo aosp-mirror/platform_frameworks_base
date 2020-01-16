@@ -41,6 +41,9 @@ import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.people.NotificationPersonExtractorPluginBoundary;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifierImpl;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
@@ -49,6 +52,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.ExtensionControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.Objects;
@@ -66,7 +70,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private final NotificationGroupManager mGroupManager;
     private final NotificationGutsManager mGutsManager;
     private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
-
     private final Context mContext;
     private final NotificationRowContentBinder mRowContentBinder;
     private final NotificationMessagingUtil mMessagingUtil;

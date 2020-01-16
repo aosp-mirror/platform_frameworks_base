@@ -543,6 +543,13 @@ public class WallpaperManager {
         mCmProxy = new ColorManagementProxy(context);
     }
 
+    // no-op constructor called just by DisabledWallpaperManager
+    /*package*/ WallpaperManager() {
+        mContext = null;
+        mCmProxy = null;
+        mWcgEnabled = false;
+    }
+
     /**
      * Retrieve a WallpaperManager associated with the given Context.
      */
@@ -568,8 +575,10 @@ public class WallpaperManager {
      *
      * @see Configuration#isScreenWideColorGamut()
      * @return True if wcg should be enabled for this device.
+     * @hide
      */
-    private boolean shouldEnableWideColorGamut() {
+    @TestApi
+    public boolean shouldEnableWideColorGamut() {
         return mWcgEnabled;
     }
 
@@ -877,6 +886,7 @@ public class WallpaperManager {
      * @see #FLAG_SYSTEM
      * @hide
      */
+    @TestApi
     @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     public boolean wallpaperSupportsWcg(int which) {
         if (!shouldEnableWideColorGamut()) {
@@ -893,6 +903,8 @@ public class WallpaperManager {
      *
      * @hide
      */
+    @TestApi
+    @Nullable
     @UnsupportedAppUsage
     public Bitmap getBitmap() {
         return getBitmap(false);

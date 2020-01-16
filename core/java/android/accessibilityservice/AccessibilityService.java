@@ -17,6 +17,7 @@
 package android.accessibilityservice;
 
 import android.accessibilityservice.GestureDescription.MotionEventGenerator;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,12 +27,15 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Bitmap;
 import android.graphics.Region;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -48,10 +52,13 @@ import android.view.accessibility.AccessibilityWindowInfo;
 
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Accessibility services should only be used to assist users with disabilities in using
@@ -482,6 +489,9 @@ public abstract class AccessibilityService extends Service {
     private final Object mLock = new Object();
 
     private FingerprintGestureController mFingerprintGestureController;
+
+    /** @hide */
+    public static final String KEY_ACCESSIBILITY_SCREENSHOT = "screenshot";
 
     /**
      * Callback for {@link android.view.accessibility.AccessibilityEvent}s.
@@ -1758,6 +1768,51 @@ public abstract class AccessibilityService extends Service {
             return mWindowManager;
         }
         return super.getSystemService(name);
+    }
+
+    /**
+     * Takes a screenshot of the specified display and returns it by {@link Bitmap.Config#HARDWARE}
+     * format.
+     * <p>
+     * <strong>Note:</strong> In order to take screenshot your service has
+     * to declare the capability to take screenshot by setting the
+     * {@link android.R.styleable#AccessibilityService_canTakeScreenshot}
+     * property in its meta-data. For details refer to {@link #SERVICE_META_DATA}.
+     * Besides, This API is only supported for default display now
+     * {@link Display#DEFAULT_DISPLAY}.
+     * </p>
+     *
+     * @param displayId The logic display id, must be {@link Display#DEFAULT_DISPLAY} for
+     *                  default display.
+     * @param executor Executor on which to run the callback.
+     * @param callback The callback invoked when the taking screenshot is done.
+     *
+     * @return {@code true} if the taking screenshot accepted, {@code false} if not.
+     */
+    public boolean takeScreenshot(int displayId, @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Bitmap> callback) {
+        Preconditions.checkNotNull(executor, "executor cannot be null");
+        Preconditions.checkNotNull(callback, "callback cannot be null");
+        final IAccessibilityServiceConnection connection =
+                AccessibilityInteractionClient.getInstance().getConnection(
+                        mConnectionId);
+        if (connection == null) {
+            return false;
+        }
+        try {
+            connection.takeScreenshotWithCallback(displayId, new RemoteCallback((result) -> {
+                final Bitmap screenshot = result.getParcelable(KEY_ACCESSIBILITY_SCREENSHOT);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> callback.accept(screenshot));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }));
+        } catch (RemoteException re) {
+            throw new RuntimeException(re);
+        }
+        return true;
     }
 
     /**

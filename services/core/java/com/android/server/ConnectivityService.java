@@ -79,7 +79,6 @@ import android.net.InetAddresses;
 import android.net.IpMemoryStore;
 import android.net.IpPrefix;
 import android.net.LinkProperties;
-import android.net.LinkProperties.CompareResult;
 import android.net.MatchAllNetworkSpecifier;
 import android.net.NattSocketKeepalive;
 import android.net.Network;
@@ -87,7 +86,6 @@ import android.net.NetworkAgent;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkConfig;
-import android.net.NetworkFactory;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMonitorManager;
@@ -114,6 +112,7 @@ import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.netlink.InetDiagMessage;
 import android.net.shared.PrivateDnsConfig;
+import android.net.util.LinkPropertiesUtils.CompareResult;
 import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.NetdService;
 import android.os.Binder;
@@ -2843,26 +2842,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return true;
         }
 
-        // TODO: delete when direct use of registerNetworkFactory is no longer supported.
-        private boolean maybeHandleNetworkFactoryMessage(Message msg) {
-            switch (msg.what) {
-                default:
-                    return false;
-                case NetworkFactory.EVENT_UNFULFILLABLE_REQUEST: {
-                    handleReleaseNetworkRequest((NetworkRequest) msg.obj, msg.sendingUid,
-                            /* callOnUnavailable */ true);
-                    break;
-                }
-            }
-            return true;
-        }
-
         @Override
         public void handleMessage(Message msg) {
             if (!maybeHandleAsyncChannelMessage(msg)
                     && !maybeHandleNetworkMonitorMessage(msg)
-                    && !maybeHandleNetworkAgentInfoMessage(msg)
-                    && !maybeHandleNetworkFactoryMessage(msg)) {
+                    && !maybeHandleNetworkAgentInfoMessage(msg)) {
                 maybeHandleNetworkAgentMessage(msg);
             }
         }

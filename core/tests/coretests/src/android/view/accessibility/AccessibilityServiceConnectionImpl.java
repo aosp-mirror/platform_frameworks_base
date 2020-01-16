@@ -19,9 +19,11 @@ package android.view.accessibility;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Bitmap;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteCallback;
 
 /**
  * Stub implementation of IAccessibilityServiceConnection so each test doesn't need to implement
@@ -143,4 +145,14 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
     public IBinder getOverlayWindowToken(int displayId) {
         return null;
     }
+
+    public int getWindowIdForLeashToken(IBinder token) {
+        return -1;
+    }
+
+    public Bitmap takeScreenshot(int displayId) {
+        return null;
+    }
+
+    public void takeScreenshotWithCallback(int displayId, RemoteCallback callback) {}
 }

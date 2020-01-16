@@ -338,6 +338,7 @@ message Atom {
         BootTimeEventElapsedTime boot_time_event_elapsed_time_reported = 240;
         BootTimeEventUtcTime boot_time_event_utc_time_reported = 241;
         BootTimeEventErrorCode boot_time_event_error_code_reported = 242;
+        UserspaceRebootReported userspace_reboot_reported = 243;
     }
 
     // Pulled events will start at field 10000.
@@ -7904,4 +7905,42 @@ message RuntimeAppOpsAccess {
     optional SamplingStrategy sampling_strategy = 6;
 }
 
-
+/*
+ * Logs userspace reboot outcome and duration.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/server/BootReceiver.java
+ */
+message UserspaceRebootReported {
+    // Possible outcomes of userspace reboot.
+    enum Outcome {
+        // Default value in case platform failed to determine the outcome.
+        OUTCOME_UNKNOWN = 0;
+        // Userspace reboot succeeded (i.e. boot completed without a fall back to hard reboot).
+        SUCCESS = 1;
+        // Userspace reboot shutdown sequence was aborted.
+        FAILED_SHUTDOWN_SEQUENCE_ABORTED = 2;
+        // Remounting userdata into checkpointing mode failed.
+        FAILED_USERDATA_REMOUNT = 3;
+        // Device didn't finish booting before timeout and userspace reboot watchdog issued a hard
+        // reboot.
+        FAILED_USERSPACE_REBOOT_WATCHDOG_TRIGGERED = 4;
+    }
+    // Outcome of userspace reboot. Always set.
+    optional Outcome outcome = 1;
+    // Duration of userspace reboot in case it has a successful outcome.
+    // Duration is measured as time between userspace reboot was initiated and until boot completed
+    // (e.g. sys.boot_completed=1).
+    optional int64 duration_millis = 2;
+    // State of primary user's (user0) credential encryption storage.
+    enum UserEncryptionState {
+        // Default value.
+        USER_ENCRYPTION_STATE_UNKNOWN = 0;
+        // Credential encrypted storage is unlocked.
+        UNLOCKED = 1;
+        // Credential encrypted storage is locked.
+        LOCKED = 2;
+    }
+    // State of primary user's encryption storage at the moment boot completed. Always set.
+    optional UserEncryptionState user_encryption_state = 3;
+}

@@ -33,8 +33,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 @RunWith(JUnit4.class)
@@ -52,9 +52,7 @@ public class BinaryFileOperationsTest {
                         IS_NOT_HASHED
                                 + getBits(PACKAGE_NAME.length(), VALUE_SIZE_BITS)
                                 + getValueBits(PACKAGE_NAME));
-        ByteBuffer rule = ByteBuffer.allocate(stringBytes.length);
-        rule.put(stringBytes);
-        BitInputStream inputStream = new BitInputStream(rule.array());
+        BitInputStream inputStream = new BitInputStream(new ByteArrayInputStream(stringBytes));
 
         String resultString = getStringValue(inputStream);
 
@@ -68,9 +66,7 @@ public class BinaryFileOperationsTest {
                         IS_HASHED
                                 + getBits(APP_CERTIFICATE.length(), VALUE_SIZE_BITS)
                                 + getValueBits(APP_CERTIFICATE));
-        ByteBuffer rule = ByteBuffer.allocate(ruleBytes.length);
-        rule.put(ruleBytes);
-        BitInputStream inputStream = new BitInputStream(rule.array());
+        BitInputStream inputStream = new BitInputStream(new ByteArrayInputStream(ruleBytes));
 
         String resultString = getStringValue(inputStream);
 
@@ -82,9 +78,7 @@ public class BinaryFileOperationsTest {
     @Test
     public void testGetStringValue_withSizeAndHashingInfo() throws IOException {
         byte[] ruleBytes = getBytes(getValueBits(PACKAGE_NAME));
-        ByteBuffer rule = ByteBuffer.allocate(ruleBytes.length);
-        rule.put(ruleBytes);
-        BitInputStream inputStream = new BitInputStream(rule.array());
+        BitInputStream inputStream = new BitInputStream(new ByteArrayInputStream(ruleBytes));
 
         String resultString = getStringValue(inputStream,
                 PACKAGE_NAME.length(), /* isHashedValue= */false);
@@ -96,9 +90,7 @@ public class BinaryFileOperationsTest {
     public void testGetIntValue() throws IOException {
         int randomValue = 15;
         byte[] ruleBytes = getBytes(getBits(randomValue, /* numOfBits= */ 32));
-        ByteBuffer rule = ByteBuffer.allocate(ruleBytes.length);
-        rule.put(ruleBytes);
-        BitInputStream inputStream = new BitInputStream(rule.array());
+        BitInputStream inputStream = new BitInputStream(new ByteArrayInputStream(ruleBytes));
 
         assertThat(getIntValue(inputStream)).isEqualTo(randomValue);
     }
@@ -107,9 +99,7 @@ public class BinaryFileOperationsTest {
     public void testGetBooleanValue_true() throws IOException {
         String booleanValue = "1";
         byte[] ruleBytes = getBytes(booleanValue);
-        ByteBuffer rule = ByteBuffer.allocate(ruleBytes.length);
-        rule.put(ruleBytes);
-        BitInputStream inputStream = new BitInputStream(rule.array());
+        BitInputStream inputStream = new BitInputStream(new ByteArrayInputStream(ruleBytes));
 
         assertThat(getBooleanValue(inputStream)).isEqualTo(true);
     }
@@ -118,9 +108,7 @@ public class BinaryFileOperationsTest {
     public void testGetBooleanValue_false() throws IOException {
         String booleanValue = "0";
         byte[] ruleBytes = getBytes(booleanValue);
-        ByteBuffer rule = ByteBuffer.allocate(ruleBytes.length);
-        rule.put(ruleBytes);
-        BitInputStream inputStream = new BitInputStream(rule.array());
+        BitInputStream inputStream = new BitInputStream(new ByteArrayInputStream(ruleBytes));
 
         assertThat(getBooleanValue(inputStream)).isEqualTo(false);
     }

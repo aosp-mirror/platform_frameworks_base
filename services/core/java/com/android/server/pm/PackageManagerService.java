@@ -190,6 +190,7 @@ import android.content.pm.SELinuxUtil;
 import android.content.pm.ServiceInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
@@ -20021,8 +20022,9 @@ public class PackageManagerService extends IPackageManager.Stub
         String initiatingPackageName;
         String originatingPackageName;
 
+        final InstallSource installSource;
         synchronized (mLock) {
-            final InstallSource installSource = getInstallSourceLocked(packageName, callingUid);
+            installSource = getInstallSourceLocked(packageName, callingUid);
             if (installSource == null) {
                 return null;
             }
@@ -20036,9 +20038,16 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             if (installSource.isInitiatingPackageUninstalled) {
-                // TODO(b/146555198) Allow the app itself to see the info
-                // (at least for non-instant apps)
-                initiatingPackageName = null;
+                // We can't check visibility in the usual way, since the initiating package is no
+                // longer present. So we apply simpler rules to whether to expose the info:
+                // 1. Instant apps can't see it.
+                // 2. Otherwise only the installed app itself can see it.
+                final boolean isInstantApp = getInstantAppPackageName(callingUid) != null;
+                if (!isInstantApp && isCallerSameApp(packageName, callingUid)) {
+                    initiatingPackageName = installSource.initiatingPackageName;
+                } else {
+                    initiatingPackageName = null;
+                }
             } else {
                 // All installSource strings are interned, so == is ok here
                 if (installSource.initiatingPackageName == installSource.installerPackageName) {
@@ -20063,13 +20072,27 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
+        // Remaining work can safely be done outside the lock. (Note that installSource is
+        // immutable so it's ok to carry on reading from it.)
+
         if (originatingPackageName != null && mContext.checkCallingOrSelfPermission(
                 Manifest.permission.INSTALL_PACKAGES) != PackageManager.PERMISSION_GRANTED) {
             originatingPackageName = null;
         }
 
-        return new InstallSourceInfo(initiatingPackageName, originatingPackageName,
-                installerPackageName);
+        // If you can see the initiatingPackageName, and we have valid signing info for it,
+        // then we let you see that too.
+        final SigningInfo initiatingPackageSigningInfo;
+        final PackageSignatures signatures = installSource.initiatingPackageSignatures;
+        if (initiatingPackageName != null && signatures != null
+                && signatures.mSigningDetails != SigningDetails.UNKNOWN) {
+            initiatingPackageSigningInfo = new SigningInfo(signatures.mSigningDetails);
+        } else {
+            initiatingPackageSigningInfo = null;
+        }
+
+        return new InstallSourceInfo(initiatingPackageName, initiatingPackageSigningInfo,
+                originatingPackageName, installerPackageName);
     }
 
     @GuardedBy("mLock")
@@ -22265,6 +22288,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     void onNewUserCreated(final int userId) {
         mPermissionManager.onNewUserCreated(userId);
+    }
+
+    boolean readPermissionStateForUser(@UserIdInt int userId) {
+        synchronized (mPackages) {
+            mSettings.readPermissionStateForUserSyncLPr(userId);
+            return mSettings.areDefaultRuntimePermissionsGrantedLPr(userId);
+        }
     }
 
     @Override

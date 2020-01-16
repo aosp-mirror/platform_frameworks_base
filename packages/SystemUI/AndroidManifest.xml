@@ -211,6 +211,7 @@
 
     <!-- accessibility -->
     <uses-permission android:name="android.permission.MODIFY_ACCESSIBILITY_DATA" />
+    <uses-permission android:name="android.permission.MANAGE_ACCESSIBILITY" />
 
     <!-- to control accessibility volume -->
     <uses-permission android:name="android.permission.CHANGE_ACCESSIBILITY_VOLUME" />
@@ -307,7 +308,8 @@
         </receiver>
 
         <activity android:name=".screenrecord.ScreenRecordDialog"
-            android:theme="@style/ScreenRecord" />
+            android:theme="@style/ScreenRecord"
+            android:excludeFromRecents="true" />
         <service android:name=".screenrecord.RecordingService" />
 
         <receiver android:name=".SysuiRestartReceiver"
@@ -634,6 +636,23 @@
                 <action android:name="android.intent.action.CHOOSER" />
                 <category android:name="android.intent.category.VOICE" />
             </intent-filter>
+        </activity>
+
+        <activity android:name=".controls.management.ControlsProviderSelectorActivity"
+                  android:label="Controls Providers"
+                  android:theme="@style/Theme.SystemUI"
+                  android:exported="true"
+                  android:excludeFromRecents="true"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:visibleToInstantApps="true">
+        </activity>
+
+        <activity android:name=".controls.management.ControlsFavoritingActivity"
+                  android:parentActivityName=".controls.management.ControlsProviderSelectorActivity"
+                  android:theme="@style/Theme.SystemUI"
+                  android:excludeFromRecents="true"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:visibleToInstantApps="true">
         </activity>
 
         <!-- Doze with notifications, run in main sysui process for every user  -->

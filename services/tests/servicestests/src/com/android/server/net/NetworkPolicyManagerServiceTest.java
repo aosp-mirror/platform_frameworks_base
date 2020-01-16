@@ -112,7 +112,7 @@ import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
-import android.net.StringNetworkSpecifier;
+import android.net.TelephonyNetworkSpecifier;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.INetworkManagementService;
@@ -1804,9 +1804,11 @@ public class NetworkPolicyManagerServiceTest {
                 .getService(NetworkPolicyManagerInternal.class);
         npmi.onStatsProviderLimitReached("TEST");
 
-        // Verifies that the limit reached leads to a force update.
+        // Verifies that the limit reached leads to a force update and new limit should be set.
         postMsgAndWaitForCompletion();
         verify(mStatsService).forceUpdate();
+        postMsgAndWaitForCompletion();
+        verify(mStatsService).setStatsProviderLimit(TEST_IFACE, 10000L - 4999L - 1999L);
     }
 
     /**
@@ -1911,7 +1913,8 @@ public class NetworkPolicyManagerServiceTest {
         if (!roaming) {
             nc.addCapability(NET_CAPABILITY_NOT_ROAMING);
         }
-        nc.setNetworkSpecifier(new StringNetworkSpecifier(String.valueOf(subId)));
+        nc.setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
+                .setSubscriptionId(subId).build());
         return nc;
     }
 

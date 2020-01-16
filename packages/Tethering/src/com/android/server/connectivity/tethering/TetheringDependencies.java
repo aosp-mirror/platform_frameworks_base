@@ -16,18 +16,15 @@
 
 package com.android.server.connectivity.tethering;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.net.INetd;
-import android.net.INetworkPolicyManager;
-import android.net.INetworkStatsService;
 import android.net.NetworkRequest;
 import android.net.ip.IpServer;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.Looper;
-import android.os.ServiceManager;
 
 import com.android.internal.util.StateMachine;
 
@@ -97,33 +94,6 @@ public abstract class TetheringDependencies {
     }
 
     /**
-     * Get a reference to INetworkManagementService to registerTetheringStatsProvider from
-     * OffloadController. Note: This should be removed soon by Usage refactor work in R
-     * development cycle.
-     */
-    public INetworkManagementService getINetworkManagementService() {
-        return INetworkManagementService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
-    }
-
-    /**
-     *  Get a reference to INetworkStatsService to force update tethering usage.
-     *  Note: This should be removed in R development cycle.
-     */
-    public INetworkStatsService getINetworkStatsService() {
-        return INetworkStatsService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
-    }
-
-    /**
-     * Get a reference to INetworkPolicyManager to be used by tethering.
-     */
-    public INetworkPolicyManager getINetworkPolicyManager() {
-        return INetworkPolicyManager.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
-    }
-
-    /**
      * Get a reference to INetd to be used by tethering.
      */
     public INetd getINetd(Context context) {
@@ -140,4 +110,9 @@ public abstract class TetheringDependencies {
      *  Get Context of TetheringSerice.
      */
     public abstract Context getContext();
+
+    /**
+     * Get a reference to BluetoothAdapter to be used by tethering.
+     */
+    public abstract BluetoothAdapter getBluetoothAdapter();
 }

@@ -2555,7 +2555,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             Process.setThreadGroupAndCpuset(BackgroundThread.get().getThreadId(),
                     Process.THREAD_GROUP_SYSTEM);
             Process.setThreadGroupAndCpuset(
-                    mOomAdjuster.mAppCompact.mCompactionThread.getThreadId(),
+                    mOomAdjuster.mCachedAppOptimizer.mCachedAppOptimizerThread.getThreadId(),
                     Process.THREAD_GROUP_SYSTEM);
         } catch (Exception e) {
             Slog.w(TAG, "Setting background thread cpuset failed");
@@ -5304,7 +5304,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 String data, Bundle extras, boolean ordered,
                                 boolean sticky, int sendingUser) {
                             synchronized (ActivityManagerService.this) {
-                                mOomAdjuster.mAppCompact.compactAllSystem();
+                                mOomAdjuster.mCachedAppOptimizer.compactAllSystem();
                                 requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
                             }
                         }
@@ -9000,7 +9000,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long timeSinceLastIdle = now - mLastIdleTime;
 
             // Compact all non-zygote processes to freshen up the page cache.
-            mOomAdjuster.mAppCompact.compactAllSystem();
+            mOomAdjuster.mCachedAppOptimizer.compactAllSystem();
 
             final long lowRamSinceLastIdle = getLowRamTimeSinceIdle(now);
             mLastIdleTime = now;
@@ -9108,13 +9108,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             final Resources res = mContext.getResources();
             mAppErrors.loadAppsNotReportingCrashesFromConfigLocked(res.getString(
                     com.android.internal.R.string.config_appsNotReportingCrashes));
-            mUserController.mUserSwitchUiEnabled = !res.getBoolean(
+            final boolean userSwitchUiEnabled = !res.getBoolean(
                     com.android.internal.R.bool.config_customUserSwitchUi);
-            mUserController.mMaxRunningUsers = res.getInteger(
+            final int maxRunningUsers = res.getInteger(
                     com.android.internal.R.integer.config_multiuserMaxRunningUsers);
-            mUserController.mDelayUserDataLocking = res.getBoolean(
+            final boolean delayUserDataLocking = res.getBoolean(
                     com.android.internal.R.bool.config_multiuserDelayUserDataLocking);
-
+            mUserController.setInitialConfig(userSwitchUiEnabled, maxRunningUsers,
+                    delayUserDataLocking);
             mWaitForNetworkTimeoutMs = waitForNetworkTimeoutMs;
             mPssDeferralTime = pssDeferralMs;
         }
@@ -10020,7 +10021,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized(this) {
             mConstants.dump(pw);
-            mOomAdjuster.dumpAppCompactorSettings(pw);
+            mOomAdjuster.dumpCachedAppOptimizerSettings(pw);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
@@ -10425,7 +10426,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if ("settings".equals(cmd)) {
                 synchronized (this) {
                     mConstants.dump(pw);
-                    mOomAdjuster.dumpAppCompactorSettings(pw);
+                    mOomAdjuster.dumpCachedAppOptimizerSettings(pw);
                 }
             } else if ("services".equals(cmd) || "s".equals(cmd)) {
                 if (dumpClient) {
@@ -17942,7 +17943,31 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public int stopUser(final int userId, boolean force, final IStopUserCallback callback) {
-        return mUserController.stopUser(userId, force, callback, null /* keyEvictedCallback */);
+        return mUserController.stopUser(userId, force, /* allowDelayedLocking= */ false,
+                /* callback= */ callback, /* keyEvictedCallback= */ null);
+    }
+
+    /**
+     * Stops user but allow delayed locking. Delayed locking keeps user unlocked even after
+     * stopping only if {@code config_multiuserDelayUserDataLocking} overlay is set true.
+     *
+     * <p>When delayed locking is not enabled through the overlay, this call becomes the same
+     * with {@link #stopUser(int, boolean, IStopUserCallback)} call.
+     *
+     * @param userId User id to stop.
+     * @param force Force stop the user even if the user is related with system user or current
+     *              user.
+     * @param callback Callback called when user has stopped.
+     *
+     * @return {@link ActivityManager#USER_OP_SUCCESS} when user is stopped successfully. Returns
+     *         other {@code ActivityManager#USER_OP_*} codes for failure.
+     *
+     */
+    @Override
+    public int stopUserWithDelayedLocking(final int userId, boolean force,
+            final IStopUserCallback callback) {
+        return mUserController.stopUser(userId, force, /* allowDelayedLocking= */ true,
+                /* callback= */ callback, /* keyEvictedCallback= */ null);
     }
 
     @Override
@@ -18348,7 +18373,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public int getMaxRunningUsers() {
-            return mUserController.mMaxRunningUsers;
+            return mUserController.getMaxRunningUsers();
         }
 
         @Override

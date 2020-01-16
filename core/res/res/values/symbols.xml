@@ -3036,6 +3036,9 @@
   <java-symbol type="string" name="app_suspended_more_details" />
   <java-symbol type="string" name="app_suspended_default_message" />
 
+  <java-symbol type="string" name="app_blocked_title" />
+  <java-symbol type="string" name="app_blocked_message" />
+
   <!-- Used internally for assistant to launch activity transitions -->
   <java-symbol type="id" name="cross_task_transition" />
 
@@ -3214,6 +3217,8 @@
   <java-symbol type="string" name="edit_accessibility_shortcut_menu_button" />
   <java-symbol type="string" name="cancel_accessibility_shortcut_menu_button" />
 
+  <java-symbol type="drawable" name="ic_accessibility_color_inversion" />
+  <java-symbol type="drawable" name="ic_accessibility_color_correction" />
   <java-symbol type="drawable" name="ic_accessibility_magnification" />
 
   <java-symbol type="drawable" name="ic_delete_item" />
@@ -3230,6 +3235,7 @@
   <java-symbol type="layout" name="autofill_dataset_picker"/>
   <java-symbol type="layout" name="autofill_dataset_picker_fullscreen"/>
   <java-symbol type="layout" name="autofill_dataset_picker_header_footer"/>
+  <java-symbol type="layout" name="autofill_inline_suggestion" />
   <java-symbol type="id" name="autofill" />
   <java-symbol type="id" name="autofill_dataset_footer"/>
   <java-symbol type="id" name="autofill_dataset_header"/>
@@ -3237,6 +3243,10 @@
   <java-symbol type="id" name="autofill_dataset_list"/>
   <java-symbol type="id" name="autofill_dataset_picker"/>
   <java-symbol type="id" name="autofill_dataset_title" />
+  <java-symbol type="id" name="autofill_inline_suggestion_end_icon" />
+  <java-symbol type="id" name="autofill_inline_suggestion_start_icon" />
+  <java-symbol type="id" name="autofill_inline_suggestion_subtitle" />
+  <java-symbol type="id" name="autofill_inline_suggestion_title" />
   <java-symbol type="id" name="autofill_save_custom_subtitle" />
   <java-symbol type="id" name="autofill_save_icon" />
   <java-symbol type="id" name="autofill_save_no" />
@@ -3801,5 +3811,14 @@
   <!-- Assistant handles -->
   <java-symbol type="dimen" name="assist_handle_shadow_radius" />
 
+  <!-- For Waterfall Display -->
+  <java-symbol type="dimen" name="waterfall_display_left_edge_size" />
+  <java-symbol type="dimen" name="waterfall_display_top_edge_size" />
+  <java-symbol type="dimen" name="waterfall_display_right_edge_size" />
+  <java-symbol type="dimen" name="waterfall_display_bottom_edge_size" />
+
+  <!-- Accessibility take screenshot -->
+  <java-symbol type="string" name="capability_desc_canTakeScreenshot" />
+  <java-symbol type="string" name="capability_title_canTakeScreenshot" />
 
 </resources>

@@ -128,6 +128,19 @@ public abstract class InputEventReceiver {
     }
 
     /**
+     * Called when a focus event is received.
+     *
+     * @param hasFocus if true, the window associated with this input channel has just received
+     *                 focus
+     *                 if false, the window associated with this input channel has just lost focus
+     * @param inTouchMode if true, the device is in touch mode
+     *                    if false, the device is not in touch mode
+     */
+    // Called from native code.
+    public void onFocusEvent(boolean hasFocus, boolean inTouchMode) {
+    }
+
+    /**
      * Called when a batched input event is pending.
      *
      * The batched input event will continue to accumulate additional movement
@@ -213,8 +226,13 @@ public abstract class InputEventReceiver {
         onBatchedInputEventPending();
     }
 
-    public static interface Factory {
-        public InputEventReceiver createInputEventReceiver(
-                InputChannel inputChannel, Looper looper);
+    /**
+     * Factory for InputEventReceiver
+     */
+    public interface Factory {
+        /**
+         * Create a new InputReceiver for a given inputChannel
+         */
+        InputEventReceiver createInputEventReceiver(InputChannel inputChannel, Looper looper);
     }
 }
