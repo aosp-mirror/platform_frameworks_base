@@ -16,6 +16,8 @@
 
 package com.android.server.integrity.model;
 
+import static com.android.server.integrity.model.ComponentBitSize.BYTE_BITS;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -24,7 +26,6 @@ import java.util.Arrays;
 public class BitOutputStream {
 
     private static final int BUFFER_SIZE = 4 * 1024;
-    private static final int BYTE_BITS = 8;
 
     private int mNextBitIndex;
 

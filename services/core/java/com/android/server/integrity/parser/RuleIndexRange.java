@@ -47,4 +47,9 @@ public class RuleIndexRange {
         return mStartIndex == ((RuleIndexRange) object).getStartIndex()
                 && mEndIndex == ((RuleIndexRange) object).getEndIndex();
     }
+
+    @Override
+    public String toString() {
+        return String.format("Range{%d, %d}", mStartIndex, mEndIndex);
+    }
 }

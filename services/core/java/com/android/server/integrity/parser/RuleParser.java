@@ -18,7 +18,6 @@ package com.android.server.integrity.parser;
 
 import android.content.integrity.Rule;
 
-import java.io.InputStream;
 import java.util.List;
 
 /** A helper class to parse rules into the {@link Rule} model. */
@@ -28,6 +27,6 @@ public interface RuleParser {
     List<Rule> parse(byte[] ruleBytes) throws RuleParseException;
 
     /** Parse rules from an input stream. */
-    List<Rule> parse(InputStream inputStream, List<RuleIndexRange> ruleIndexRanges)
+    List<Rule> parse(RandomAccessObject randomAccessObject, List<RuleIndexRange> ruleIndexRanges)
             throws RuleParseException;
 }

@@ -28,8 +28,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,7 +59,6 @@ public class RuleXmlParserTest {
                         + "</R>"
                         + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
-        InputStream inputStream = new ByteArrayInputStream(ruleXmlCompoundFormula.getBytes());
         Rule expectedRule =
                 new Rule(
                         new CompoundFormula(
@@ -73,7 +70,7 @@ public class RuleXmlParserTest {
                                                 /* isHashedValue= */ false))),
                         Rule.DENY);
 
-        List<Rule> rules = xmlParser.parse(inputStream, Collections.emptyList());
+        List<Rule> rules = xmlParser.parse(ruleXmlCompoundFormula.getBytes());
 
         assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
     }
@@ -617,13 +614,12 @@ public class RuleXmlParserTest {
                                 /* tag= */ "AF", atomicFormulaAttrs, /* closed= */ true)
                         + "</OF>"
                         + "</R>";
-        InputStream inputStream = new ByteArrayInputStream(ruleXmlWithNoRuleList.getBytes());
         RuleParser xmlParser = new RuleXmlParser();
 
         assertExpectException(
                 RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "Rules must start with RuleList <RL> tag",
-                () -> xmlParser.parse(inputStream, Collections.emptyList()));
+                () -> xmlParser.parse(ruleXmlWithNoRuleList.getBytes()));
     }
 
     private String generateTagWithAttribute(

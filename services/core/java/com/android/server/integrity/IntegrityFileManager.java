@@ -24,6 +24,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.integrity.model.RuleMetadata;
+import com.android.server.integrity.parser.RandomAccessObject;
 import com.android.server.integrity.parser.RuleBinaryParser;
 import com.android.server.integrity.parser.RuleIndexRange;
 import com.android.server.integrity.parser.RuleIndexingController;
@@ -64,10 +65,8 @@ public class IntegrityFileManager {
     // update rules atomically.
     private final File mStagingDir;
 
-    @Nullable
-    private RuleMetadata mRuleMetadataCache;
-    @Nullable
-    private RuleIndexingController mRuleIndexingController;
+    @Nullable private RuleMetadata mRuleMetadataCache;
+    @Nullable private RuleIndexingController mRuleIndexingController;
 
     /** Get the singleton instance of this class. */
     public static synchronized IntegrityFileManager getInstance() {
@@ -132,9 +131,9 @@ public class IntegrityFileManager {
         }
 
         try (FileOutputStream ruleFileOutputStream =
-                     new FileOutputStream(new File(mStagingDir, RULES_FILE));
-             FileOutputStream indexingFileOutputStream =
-                     new FileOutputStream(new File(mStagingDir, INDEXING_FILE))) {
+                        new FileOutputStream(new File(mStagingDir, RULES_FILE));
+                FileOutputStream indexingFileOutputStream =
+                        new FileOutputStream(new File(mStagingDir, INDEXING_FILE))) {
             mRuleSerializer.serialize(
                     rules, Optional.empty(), ruleFileOutputStream, indexingFileOutputStream);
         }
@@ -164,11 +163,10 @@ public class IntegrityFileManager {
             }
 
             // Read the rules based on the index information when available.
-            try (FileInputStream inputStream =
-                         new FileInputStream(new File(mRulesDir, RULES_FILE))) {
-                List<Rule> rules = mRuleParser.parse(inputStream, ruleReadingIndexes);
-                return rules;
-            }
+            File ruleFile = new File(mRulesDir, RULES_FILE);
+            List<Rule> rules =
+                    mRuleParser.parse(RandomAccessObject.ofFile(ruleFile), ruleReadingIndexes);
+            return rules;
         }
     }
 
