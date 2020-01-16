@@ -618,12 +618,4 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
         // not make much sense!
         return equals(other);
     }
-
-    /** @hide */
-    @Override
-    public void assertValidFromUid(int requestorUid) {
-        if (this.requestorUid != requestorUid) {
-            throw new SecurityException("mismatched UIDs");
-        }
-    }
 }
