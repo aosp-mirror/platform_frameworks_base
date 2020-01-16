@@ -20,12 +20,18 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.LocusId;
+import android.content.LocusIdProto;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutInfo.ShortcutFlags;
 import android.net.Uri;
+import android.util.Slog;
+import android.util.proto.ProtoInputStream;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.Preconditions;
+import com.android.server.people.ConversationInfoProto;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
@@ -34,6 +40,8 @@ import java.util.Objects;
  * Represents a conversation that is provided by the app based on {@link ShortcutInfo}.
  */
 public class ConversationInfo {
+
+    private static final String TAG = ConversationInfo.class.getSimpleName();
 
     private static final int FLAG_IMPORTANT = 1;
 
@@ -239,6 +247,72 @@ public class ConversationInfo {
 
     private boolean hasConversationFlags(@ConversationFlags int flags) {
         return (mConversationFlags & flags) == flags;
+    }
+
+    /** Writes field members to {@link ProtoOutputStream}. */
+    void writeToProto(@NonNull ProtoOutputStream protoOutputStream) {
+        protoOutputStream.write(ConversationInfoProto.SHORTCUT_ID, mShortcutId);
+        if (mLocusId != null) {
+            long locusIdToken = protoOutputStream.start(ConversationInfoProto.LOCUS_ID_PROTO);
+            protoOutputStream.write(LocusIdProto.LOCUS_ID, mLocusId.getId());
+            protoOutputStream.end(locusIdToken);
+        }
+        if (mContactUri != null) {
+            protoOutputStream.write(ConversationInfoProto.CONTACT_URI, mContactUri.toString());
+        }
+        if (mNotificationChannelId != null) {
+            protoOutputStream.write(ConversationInfoProto.NOTIFICATION_CHANNEL_ID,
+                    mNotificationChannelId);
+        }
+        protoOutputStream.write(ConversationInfoProto.SHORTCUT_FLAGS, mShortcutFlags);
+        protoOutputStream.write(ConversationInfoProto.CONVERSATION_FLAGS, mConversationFlags);
+    }
+
+    /** Reads from {@link ProtoInputStream} and constructs a {@link ConversationInfo}. */
+    @NonNull
+    static ConversationInfo readFromProto(@NonNull ProtoInputStream protoInputStream)
+            throws IOException {
+        ConversationInfo.Builder builder = new ConversationInfo.Builder();
+        while (protoInputStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (protoInputStream.getFieldNumber()) {
+                case (int) ConversationInfoProto.SHORTCUT_ID:
+                    builder.setShortcutId(
+                            protoInputStream.readString(ConversationInfoProto.SHORTCUT_ID));
+                    break;
+                case (int) ConversationInfoProto.LOCUS_ID_PROTO:
+                    long locusIdToken = protoInputStream.start(
+                            ConversationInfoProto.LOCUS_ID_PROTO);
+                    while (protoInputStream.nextField()
+                            != ProtoInputStream.NO_MORE_FIELDS) {
+                        if (protoInputStream.getFieldNumber() == (int) LocusIdProto.LOCUS_ID) {
+                            builder.setLocusId(new LocusId(
+                                    protoInputStream.readString(LocusIdProto.LOCUS_ID)));
+                        }
+                    }
+                    protoInputStream.end(locusIdToken);
+                    break;
+                case (int) ConversationInfoProto.CONTACT_URI:
+                    builder.setContactUri(Uri.parse(protoInputStream.readString(
+                            ConversationInfoProto.CONTACT_URI)));
+                    break;
+                case (int) ConversationInfoProto.NOTIFICATION_CHANNEL_ID:
+                    builder.setNotificationChannelId(protoInputStream.readString(
+                            ConversationInfoProto.NOTIFICATION_CHANNEL_ID));
+                    break;
+                case (int) ConversationInfoProto.SHORTCUT_FLAGS:
+                    builder.setShortcutFlags(protoInputStream.readInt(
+                            ConversationInfoProto.SHORTCUT_FLAGS));
+                    break;
+                case (int) ConversationInfoProto.CONVERSATION_FLAGS:
+                    builder.setConversationFlags(protoInputStream.readInt(
+                            ConversationInfoProto.CONVERSATION_FLAGS));
+                    break;
+                default:
+                    Slog.w(TAG, "Could not read undefined field: "
+                            + protoInputStream.getFieldNumber());
+            }
+        }
+        return builder.build();
     }
 
     /**

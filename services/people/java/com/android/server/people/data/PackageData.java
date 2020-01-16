@@ -22,6 +22,8 @@ import android.annotation.UserIdInt;
 import android.content.LocusId;
 import android.text.TextUtils;
 
+import java.io.File;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -43,15 +45,34 @@ public class PackageData {
 
     private final Predicate<String> mIsDefaultSmsAppPredicate;
 
+    private final File mPackageDataDir;
+
     PackageData(@NonNull String packageName, @UserIdInt int userId,
             @NonNull Predicate<String> isDefaultDialerPredicate,
-            @NonNull Predicate<String> isDefaultSmsAppPredicate) {
+            @NonNull Predicate<String> isDefaultSmsAppPredicate,
+            @NonNull ScheduledExecutorService scheduledExecutorService,
+            @NonNull File perUserPeopleDataDir,
+            @NonNull ContactsQueryHelper helper) {
         mPackageName = packageName;
         mUserId = userId;
-        mConversationStore = new ConversationStore();
+
+        mPackageDataDir = new File(perUserPeopleDataDir, mPackageName);
+        mConversationStore = new ConversationStore(mPackageDataDir, scheduledExecutorService,
+                helper);
         mEventStore = new EventStore();
         mIsDefaultDialerPredicate = isDefaultDialerPredicate;
         mIsDefaultSmsAppPredicate = isDefaultSmsAppPredicate;
+    }
+
+    /** Called when user is unlocked. */
+    void loadFromDisk() {
+        mPackageDataDir.mkdirs();
+        mConversationStore.loadConversationsFromDisk();
+    }
+
+    /** Called when device is shutting down. */
+    void saveToDisk() {
+        mConversationStore.saveConversationsToDisk();
     }
 
     @NonNull
