@@ -20,6 +20,5 @@ java_library {
         "framework-appsearch",
         "services.core",
     ],
-    static_libs: ["icing-java-proto-lite"],
     apex_available: ["com.android.appsearch"],
 }
