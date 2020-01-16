@@ -129,93 +129,29 @@ public final class TunerConstants {
      */
     public static final int FILTER_STATUS_OVERFLOW = Constants.DemuxFilterStatus.OVERFLOW;
 
-    /**
-     * Indexes can be tagged through TS (Transport Stream) header.
-     *
-     * @hide
-     */
-    @IntDef(flag = true, value = {TS_INDEX_FIRST_PACKET, TS_INDEX_PAYLOAD_UNIT_START_INDICATOR,
-            TS_INDEX_CHANGE_TO_NOT_SCRAMBLED, TS_INDEX_CHANGE_TO_EVEN_SCRAMBLED,
-            TS_INDEX_CHANGE_TO_ODD_SCRAMBLED, TS_INDEX_DISCONTINUITY_INDICATOR,
-            TS_INDEX_RANDOM_ACCESS_INDICATOR, TS_INDEX_PRIORITY_INDICATOR, TS_INDEX_PCR_FLAG,
-            TS_INDEX_OPCR_FLAG, TS_INDEX_SPLICING_POINT_FLAG, TS_INDEX_PRIVATE_DATA,
-            TS_INDEX_ADAPTATION_EXTENSION_FLAG})
+
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    public @interface TsIndex {}
+    @IntDef(prefix = "INDEX_TYPE_", value =
+            {INDEX_TYPE_NONE, INDEX_TYPE_SC, INDEX_TYPE_SC_HEVC})
+    public @interface ScIndexType {}
 
     /**
-     * TS index FIRST_PACKET.
+     * Start Code Index is not used.
      * @hide
      */
-    public static final int TS_INDEX_FIRST_PACKET = Constants.DemuxTsIndex.FIRST_PACKET;
+    public static final int INDEX_TYPE_NONE = Constants.DemuxRecordScIndexType.NONE;
     /**
-     * TS index PAYLOAD_UNIT_START_INDICATOR.
+     * Start Code index.
      * @hide
      */
-    public static final int TS_INDEX_PAYLOAD_UNIT_START_INDICATOR =
-            Constants.DemuxTsIndex.PAYLOAD_UNIT_START_INDICATOR;
+    public static final int INDEX_TYPE_SC = Constants.DemuxRecordScIndexType.SC;
     /**
-     * TS index CHANGE_TO_NOT_SCRAMBLED.
+     * Start Code index for HEVC.
      * @hide
      */
-    public static final int TS_INDEX_CHANGE_TO_NOT_SCRAMBLED =
-            Constants.DemuxTsIndex.CHANGE_TO_NOT_SCRAMBLED;
-    /**
-     * TS index CHANGE_TO_EVEN_SCRAMBLED.
-     * @hide
-     */
-    public static final int TS_INDEX_CHANGE_TO_EVEN_SCRAMBLED =
-            Constants.DemuxTsIndex.CHANGE_TO_EVEN_SCRAMBLED;
-    /**
-     * TS index CHANGE_TO_ODD_SCRAMBLED.
-     * @hide
-     */
-    public static final int TS_INDEX_CHANGE_TO_ODD_SCRAMBLED =
-            Constants.DemuxTsIndex.CHANGE_TO_ODD_SCRAMBLED;
-    /**
-     * TS index DISCONTINUITY_INDICATOR.
-     * @hide
-     */
-    public static final int TS_INDEX_DISCONTINUITY_INDICATOR =
-            Constants.DemuxTsIndex.DISCONTINUITY_INDICATOR;
-    /**
-     * TS index RANDOM_ACCESS_INDICATOR.
-     * @hide
-     */
-    public static final int TS_INDEX_RANDOM_ACCESS_INDICATOR =
-            Constants.DemuxTsIndex.RANDOM_ACCESS_INDICATOR;
-    /**
-     * TS index PRIORITY_INDICATOR.
-     * @hide
-     */
-    public static final int TS_INDEX_PRIORITY_INDICATOR = Constants.DemuxTsIndex.PRIORITY_INDICATOR;
-    /**
-     * TS index PCR_FLAG.
-     * @hide
-     */
-    public static final int TS_INDEX_PCR_FLAG = Constants.DemuxTsIndex.PCR_FLAG;
-    /**
-     * TS index OPCR_FLAG.
-     * @hide
-     */
-    public static final int TS_INDEX_OPCR_FLAG = Constants.DemuxTsIndex.OPCR_FLAG;
-    /**
-     * TS index SPLICING_POINT_FLAG.
-     * @hide
-     */
-    public static final int TS_INDEX_SPLICING_POINT_FLAG =
-            Constants.DemuxTsIndex.SPLICING_POINT_FLAG;
-    /**
-     * TS index PRIVATE_DATA.
-     * @hide
-     */
-    public static final int TS_INDEX_PRIVATE_DATA = Constants.DemuxTsIndex.PRIVATE_DATA;
-    /**
-     * TS index ADAPTATION_EXTENSION_FLAG.
-     * @hide
-     */
-    public static final int TS_INDEX_ADAPTATION_EXTENSION_FLAG =
-            Constants.DemuxTsIndex.ADAPTATION_EXTENSION_FLAG;
+    public static final int INDEX_TYPE_SC_HEVC = Constants.DemuxRecordScIndexType.SC_HEVC;
+
 
     /**
      * Indexes can be tagged by Start Code in PES (Packetized Elementary Stream)
