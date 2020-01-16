@@ -229,6 +229,7 @@ public class DexManager {
                     // If the dex file is the primary apk (or a split) and not isUsedByOtherApps
                     // do not record it. This case does not bring any new usable information
                     // and can be safely skipped.
+                    dexPathIndex++;
                     continue;
                 }
 

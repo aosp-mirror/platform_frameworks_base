@@ -160,6 +160,31 @@ public class DexManagerTests {
     }
 
     @Test
+    public void testNotifyPrimaryAndSecondary() {
+        List<String> dexFiles = mFooUser0.getBaseAndSplitDexPaths();
+        List<String> secondaries = mFooUser0.getSecondaryDexPaths();
+        int baseAndSplitCount = dexFiles.size();
+        dexFiles.addAll(secondaries);
+
+        notifyDexLoad(mFooUser0, dexFiles, mUser0);
+
+        PackageUseInfo pui = getPackageUseInfo(mFooUser0);
+        assertIsUsedByOtherApps(mFooUser0, pui, false);
+        assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
+
+        String[] allExpectedContexts = DexoptUtils.processContextForDexLoad(
+                Arrays.asList(mFooUser0.mClassLoader),
+                Arrays.asList(String.join(File.pathSeparator, dexFiles)));
+        String[] secondaryExpectedContexts = Arrays.copyOfRange(allExpectedContexts,
+                baseAndSplitCount, dexFiles.size());
+
+        assertSecondaryUse(mFooUser0, pui, secondaries, /*isUsedByOtherApps*/false, mUser0,
+                secondaryExpectedContexts);
+
+        assertHasDclInfo(mFooUser0, mFooUser0, secondaries);
+    }
+
+    @Test
     public void testNotifySecondaryForeign() {
         // Foo loads bar secondary files.
         List<String> barSecondaries = mBarUser0.getSecondaryDexPaths();
