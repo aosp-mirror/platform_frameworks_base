@@ -17,9 +17,14 @@ package com.android.server.appsearch;
 
 import android.app.appsearch.IAppSearchManager;
 import android.content.Context;
+import android.os.Binder;
+import android.os.UserHandle;
 
 import com.android.internal.infra.AndroidFuture;
+import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
+import com.android.server.appsearch.impl.AppSearchImpl;
+import com.android.server.appsearch.impl.ImplInstanceManager;
 
 import com.google.android.icing.proto.SchemaProto;
 
@@ -40,12 +45,20 @@ public class AppSearchManagerService extends SystemService {
     private class Stub extends IAppSearchManager.Stub {
         @Override
         public void setSchema(byte[] schemaBytes, AndroidFuture callback) {
+            Preconditions.checkNotNull(schemaBytes);
+            Preconditions.checkNotNull(callback);
+            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUserId = UserHandle.getUserId(callingUid);
+            long callingIdentity = Binder.clearCallingIdentity();
             try {
                 SchemaProto schema = SchemaProto.parseFrom(schemaBytes);
-                throw new UnsupportedOperationException("setSchema not yet implemented: " + schema);
-
+                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
+                impl.setSchema(callingUid, schema);
+                callback.complete(null);
             } catch (Throwable t) {
                 callback.completeExceptionally(t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
             }
         }
 
