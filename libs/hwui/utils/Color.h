@@ -105,6 +105,22 @@ ANDROID_API SkColorType PixelFormatToColorType(android::PixelFormat format);
 
 ANDROID_API sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace);
 
+/**
+ * Return the android_dataspace corresponding to colorSpace.
+ *
+ * Note: This currently only returns android_dataspaces with corresponding
+ * ADataSpaces. The NDK relies on this, so if you need to update it to return
+ * an android_dataspace *without* an ADataSpace, the NDK methods need to be
+ * updated.
+ *
+ * @param colorSpace May be null, in which case this will return
+ *                   HAL_DATASPACE_UNKNOWN.
+ * @param colorType Some SkColorSpaces are associated with more than one
+ *                  android_dataspace. In that case, the SkColorType is used to
+ *                  determine which one to return.
+ */
+ANDROID_API android_dataspace ColorSpaceToADataSpace(SkColorSpace*, SkColorType);
+
 struct Lab {
     float L;
     float a;
