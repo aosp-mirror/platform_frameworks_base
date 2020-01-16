@@ -8953,6 +8953,7 @@ package android.service.notification {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.notification.Adjustment> CREATOR;
     field public static final String KEY_CONTEXTUAL_ACTIONS = "key_contextual_actions";
     field public static final String KEY_IMPORTANCE = "key_importance";
+    field public static final String KEY_NOT_CONVERSATION = "key_not_conversation";
     field public static final String KEY_PEOPLE = "key_people";
     field public static final String KEY_RANKING_SCORE = "key_ranking_score";
     field public static final String KEY_SNOOZE_CRITERIA = "key_snooze_criteria";

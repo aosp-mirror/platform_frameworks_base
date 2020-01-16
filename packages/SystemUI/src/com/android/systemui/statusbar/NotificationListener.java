@@ -195,6 +195,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
                     new ArrayList<>(),
                     new ArrayList<>(),
                     false,
+                    false,
                     false
             );
         }

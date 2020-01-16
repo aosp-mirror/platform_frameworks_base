@@ -54,6 +54,7 @@ import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -164,6 +165,7 @@ public final class NotificationRecord {
     private boolean mShowBadge;
     private boolean mAllowBubble;
     private Light mLight;
+    private boolean mIsNotConversationOverride;
     /**
      * This list contains system generated smart actions from NAS, app-generated smart actions are
      * stored in Notification.actions with isContextual() set to true.
@@ -658,6 +660,10 @@ public final class NotificationRecord {
                 }
                 if (signals.containsKey(Adjustment.KEY_RANKING_SCORE)) {
                     mRankingScore = signals.getFloat(Adjustment.KEY_RANKING_SCORE);
+                }
+                if (signals.containsKey(Adjustment.KEY_NOT_CONVERSATION)) {
+                    mIsNotConversationOverride = signals.getBoolean(
+                            Adjustment.KEY_NOT_CONVERSATION);
                 }
                 if (!signals.isEmpty() && adjustment.getIssuer() != null) {
                     mAdjustmentIssuer = adjustment.getIssuer();
@@ -1307,6 +1313,25 @@ public final class NotificationRecord {
                 || notification.bigContentView != null
                 || notification.headsUpContentView != null;
         return hasCustomRemoteView && !hasDecoratedStyle;
+    }
+
+    /** Whether this notification is a conversation notification. */
+    public boolean isConversation() {
+        Notification notification = getNotification();
+        if (mChannel.isDemoted()
+                || !Notification.MessagingStyle.class.equals(notification.getNotificationStyle())) {
+            return false;
+        }
+        if (notification.getShortcutId() == null
+                && !FeatureFlagUtils.isEnabled(
+                        mContext, FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ)) {
+            return false;
+        }
+        if (mIsNotConversationOverride) {
+            return false;
+        }
+        // STOPSHIP b/137397357: Check shortcut to make a further decision
+        return true;
     }
 
     @VisibleForTesting
