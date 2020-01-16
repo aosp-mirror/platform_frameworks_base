@@ -357,6 +357,13 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String SCREENSHOT_SCROLLING_ENABLED = "enable_screenshot_scrolling";
 
+    // Flags related to Nav Bar
+
+    /**
+     * (boolean) Whether to force the Nav Bar handle to remain opaque.
+     */
+    public static final String NAV_BAR_HANDLE_FORCE_OPAQUE = "nav_bar_handle_force_opaque";
+
     private SystemUiDeviceConfigFlags() {
     }
 }

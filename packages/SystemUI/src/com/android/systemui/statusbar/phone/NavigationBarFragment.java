@@ -27,6 +27,7 @@ import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BAR_HANDLE_FORCE_OPAQUE;
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
@@ -64,6 +65,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
@@ -175,6 +177,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private Locale mLocale;
     private int mLayoutDirection;
 
+    private boolean mForceNavBarHandleOpaque;
+
     /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int) */
     private @Appearance int mAppearance;
 
@@ -227,14 +231,17 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         @Override
         public void onNavBarButtonAlphaChanged(float alpha, boolean animate) {
             ButtonDispatcher buttonDispatcher = null;
+            boolean forceVisible = false;
             if (QuickStepContract.isSwipeUpMode(mNavBarMode)) {
                 buttonDispatcher = mNavigationBarView.getBackButton();
             } else if (QuickStepContract.isGesturalMode(mNavBarMode)) {
+                forceVisible = mForceNavBarHandleOpaque;
                 buttonDispatcher = mNavigationBarView.getHomeHandle();
             }
             if (buttonDispatcher != null) {
-                buttonDispatcher.setVisibility(alpha > 0 ? View.VISIBLE : View.INVISIBLE);
-                buttonDispatcher.setAlpha(alpha, animate);
+                buttonDispatcher.setVisibility(
+                        (forceVisible || alpha > 0) ? View.VISIBLE : View.INVISIBLE);
+                buttonDispatcher.setAlpha(forceVisible ? 1f : alpha, animate);
             }
         }
     };
@@ -291,6 +298,21 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mDivider = divider;
         mRecentsOptional = recentsOptional;
         mHandler = mainHandler;
+
+        mForceNavBarHandleOpaque = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                NAV_BAR_HANDLE_FORCE_OPAQUE,
+                /* defaultValue = */ false);
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI, mHandler::post,
+                new DeviceConfig.OnPropertiesChangedListener() {
+                    @Override
+                    public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                        if (properties.getKeyset().contains(NAV_BAR_HANDLE_FORCE_OPAQUE)) {
+                            mForceNavBarHandleOpaque = properties.getBoolean(
+                                    NAV_BAR_HANDLE_FORCE_OPAQUE, /* defaultValue = */ false);
+                        }
+                    }
+                });
     }
 
     // ----- Fragment Lifecycle Callbacks -----
