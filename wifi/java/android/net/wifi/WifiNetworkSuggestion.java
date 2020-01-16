@@ -122,6 +122,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * Whether the setCredentialSharedWithUser have been called.
          */
         private boolean mIsSharedWithUserSet;
+
+        /**
+         * Whether this network is initialized with auto-join enabled (the default) or not.
+         */
+        private boolean mIsInitialAutoJoinEnabled;
+
         /**
          * Pre-shared key for use with WAPI-PSK networks.
          */
@@ -148,6 +154,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mIsMetered = false;
             mIsSharedWithUser = true;
             mIsSharedWithUserSet = false;
+            mIsInitialAutoJoinEnabled = true;
             mPriority = UNASSIGNED_PRIORITY;
             mCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
             mWapiPskPassphrase = null;
@@ -440,6 +447,27 @@ public final class WifiNetworkSuggestion implements Parcelable {
             return this;
         }
 
+        /**
+         * Specifies whether the suggestion is created with auto-join enabled or disabled. The
+         * user may modify the auto-join configuration of a suggestion directly once the device
+         * associates to the network.
+         * <p>
+         * If auto-join is initialized as disabled the user may still be able to manually connect
+         * to the network. Therefore, disabling auto-join only makes sense if
+         * {@link #setCredentialSharedWithUser(boolean)} is set to true (the default) which
+         * itself implies a secure (non-open) network.
+         * <p>
+         * If not set, defaults to true (i.e. auto-join is initialized as enabled).
+         *
+         * @param enabled true for initializing with auto-join enabled (the default), false to
+         *                initializing with auto-join disabled.
+         * @return Instance of (@link {@link Builder} to enable chaining of the builder method.
+         */
+        public @NonNull Builder setIsInitialAutoJoinEnabled(boolean enabled) {
+            mIsInitialAutoJoinEnabled = enabled;
+            return this;
+        }
+
         private void setSecurityParamsInWifiConfiguration(
                 @NonNull WifiConfiguration configuration) {
             if (!TextUtils.isEmpty(mWpa2PskPassphrase)) { // WPA-PSK network.
@@ -587,7 +615,6 @@ public final class WifiNetworkSuggestion implements Parcelable {
                             + "suggestion with Passpoint configuration");
                 }
                 wifiConfiguration = buildWifiConfigurationForPasspoint();
-
             } else {
                 if (mSsid == null) {
                     throw new IllegalStateException("setSsid should be invoked for suggestion");
@@ -608,6 +635,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
                     }
                     mIsSharedWithUser = false;
                 }
+
+                if (!mIsSharedWithUser && !mIsInitialAutoJoinEnabled) {
+                    throw new IllegalStateException("Should have not a network with both "
+                            + "setIsUserAllowedToManuallyConnect and "
+                            + "setIsAutoJoinEnabled set to false");
+                }
             }
 
             return new WifiNetworkSuggestion(
@@ -615,7 +648,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
                     mPasspointConfiguration,
                     mIsAppInteractionRequired,
                     mIsUserInteractionRequired,
-                    mIsSharedWithUser);
+                    mIsSharedWithUser,
+                    mIsInitialAutoJoinEnabled);
         }
     }
 
@@ -642,12 +676,19 @@ public final class WifiNetworkSuggestion implements Parcelable {
      * @hide
      */
     public final boolean isUserInteractionRequired;
+
     /**
      * Whether app share credential with the user, allow user use provided credential to
      * connect network manually.
      * @hide
      */
     public final boolean isUserAllowedToManuallyConnect;
+
+    /**
+     * Whether the suggestion will be initialized as auto-joined or not.
+     * @hide
+     */
+    public final boolean isInitialAutoJoinEnabled;
 
     /** @hide */
     public WifiNetworkSuggestion() {
@@ -656,6 +697,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
         this.isAppInteractionRequired = false;
         this.isUserInteractionRequired = false;
         this.isUserAllowedToManuallyConnect = true;
+        this.isInitialAutoJoinEnabled = true;
     }
 
     /** @hide */
@@ -663,7 +705,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
                                  @Nullable PasspointConfiguration passpointConfiguration,
                                  boolean isAppInteractionRequired,
                                  boolean isUserInteractionRequired,
-                                 boolean isUserAllowedToManuallyConnect) {
+                                 boolean isUserAllowedToManuallyConnect,
+                                 boolean isInitialAutoJoinEnabled) {
         checkNotNull(networkConfiguration);
         this.wifiConfiguration = networkConfiguration;
         this.passpointConfiguration = passpointConfiguration;
@@ -671,6 +714,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
         this.isAppInteractionRequired = isAppInteractionRequired;
         this.isUserInteractionRequired = isUserInteractionRequired;
         this.isUserAllowedToManuallyConnect = isUserAllowedToManuallyConnect;
+        this.isInitialAutoJoinEnabled = isInitialAutoJoinEnabled;
     }
 
     public static final @NonNull Creator<WifiNetworkSuggestion> CREATOR =
@@ -682,7 +726,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
                             in.readParcelable(null), // PasspointConfiguration
                             in.readBoolean(), // isAppInteractionRequired
                             in.readBoolean(), // isUserInteractionRequired
-                            in.readBoolean()  // isSharedCredentialWithUser
+                            in.readBoolean(), // isSharedCredentialWithUser
+                            in.readBoolean()  // isAutoJoinEnabled
                     );
                 }
 
@@ -704,6 +749,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
         dest.writeBoolean(isAppInteractionRequired);
         dest.writeBoolean(isUserInteractionRequired);
         dest.writeBoolean(isUserAllowedToManuallyConnect);
+        dest.writeBoolean(isInitialAutoJoinEnabled);
     }
 
     @Override
@@ -744,6 +790,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 .append(", isAppInteractionRequired=").append(isAppInteractionRequired)
                 .append(", isUserInteractionRequired=").append(isUserInteractionRequired)
                 .append(", isUserAllowedToManuallyConnect=").append(isUserAllowedToManuallyConnect)
+                .append(", isInitialAutoJoinEnabled=").append(isInitialAutoJoinEnabled)
                 .append(" ]");
         return sb.toString();
     }
