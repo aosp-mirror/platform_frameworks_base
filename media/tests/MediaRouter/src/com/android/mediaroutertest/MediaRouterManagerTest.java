@@ -20,7 +20,6 @@ import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
 import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -141,20 +140,6 @@ public class MediaRouterManagerTest {
     public void tearDown() {
         // unregister callbacks
         clearCallbacks();
-    }
-
-    //TODO: Move to a separate file
-    @Test
-    public void testMediaRoute2Info() {
-        MediaRoute2Info routeInfo1 = new MediaRoute2Info.Builder("id", "name")
-                .build();
-        MediaRoute2Info routeInfo2 = new MediaRoute2Info.Builder(routeInfo1).build();
-
-        MediaRoute2Info routeInfo3 = new MediaRoute2Info.Builder(routeInfo1)
-                .setClientPackageName(mPackageName).build();
-
-        assertEquals(routeInfo1, routeInfo2);
-        assertNotEquals(routeInfo1, routeInfo3);
     }
 
     /**
