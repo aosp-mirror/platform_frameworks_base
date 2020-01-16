@@ -45,7 +45,6 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
-import android.util.StatsLog;
 import android.view.Choreographer;
 import android.view.DisplayCutout;
 import android.view.Gravity;
@@ -73,6 +72,7 @@ import com.android.systemui.R;
 import com.android.systemui.bubbles.animation.ExpandedAnimationController;
 import com.android.systemui.bubbles.animation.PhysicsAnimationLayout;
 import com.android.systemui.bubbles.animation.StackAnimationController;
+import com.android.systemui.shared.system.SysUiStatsLog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -735,7 +735,7 @@ public class BubbleStackView extends FrameLayout {
         ViewClippingUtil.setClippingDeactivated(bubble.getIconView(), true, mClippingParameters);
         animateInFlyoutForBubble(bubble);
         requestUpdate();
-        logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
+        logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
         updatePointerPosition();
     }
 
@@ -749,7 +749,7 @@ public class BubbleStackView extends FrameLayout {
         if (removedIndex >= 0) {
             mBubbleContainer.removeViewAt(removedIndex);
             bubble.cleanupExpandedState();
-            logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
+            logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
         } else {
             Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);
         }
@@ -760,7 +760,7 @@ public class BubbleStackView extends FrameLayout {
     void updateBubble(Bubble bubble) {
         animateInFlyoutForBubble(bubble);
         requestUpdate();
-        logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__UPDATED);
+        logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__UPDATED);
     }
 
     public void updateBubbleOrder(List<Bubble> bubbles) {
@@ -800,8 +800,9 @@ public class BubbleStackView extends FrameLayout {
                 updateExpandedBubble();
                 updatePointerPosition();
                 requestUpdate();
-                logBubbleEvent(previouslySelected, StatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
-                logBubbleEvent(bubbleToSelect, StatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
+                logBubbleEvent(previouslySelected,
+                        SysUiStatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
+                logBubbleEvent(bubbleToSelect, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
                 notifyExpansionChanged(previouslySelected, false /* expanded */);
                 notifyExpansionChanged(bubbleToSelect, true /* expanded */);
             });
@@ -823,12 +824,12 @@ public class BubbleStackView extends FrameLayout {
         }
         if (mIsExpanded) {
             animateCollapse();
-            logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
+            logBubbleEvent(mExpandedBubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
         } else {
             animateExpansion();
             // TODO: move next line to BubbleData
-            logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
-            logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__STACK_EXPANDED);
+            logBubbleEvent(mExpandedBubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
+            logBubbleEvent(mExpandedBubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__STACK_EXPANDED);
         }
         notifyExpansionChanged(mExpandedBubble, mIsExpanded);
     }
@@ -845,7 +846,7 @@ public class BubbleStackView extends FrameLayout {
         }
         mBubbleData.dismissAll(reason);
         logBubbleEvent(null /* no bubble associated with bubble stack dismiss */,
-                StatsLog.BUBBLE_UICHANGED__ACTION__STACK_DISMISSED);
+                SysUiStatsLog.BUBBLE_UICHANGED__ACTION__STACK_DISMISSED);
     }
 
     /**
@@ -1093,7 +1094,7 @@ public class BubbleStackView extends FrameLayout {
 
         final float newStackX = mStackAnimationController.flingStackThenSpringToEdge(x, velX, velY);
         logBubbleEvent(null /* no bubble associated with bubble stack move */,
-                StatsLog.BUBBLE_UICHANGED__ACTION__STACK_MOVED);
+                SysUiStatsLog.BUBBLE_UICHANGED__ACTION__STACK_MOVED);
 
         mStackOnLeftOrWillBe = newStackX <= 0;
         updateBubbleZOrdersAndDotPosition(true /* animate */);
@@ -1443,7 +1444,7 @@ public class BubbleStackView extends FrameLayout {
         });
         mFlyout.removeCallbacks(mHideFlyout);
         mFlyout.postDelayed(mHideFlyout, FLYOUT_HIDE_AFTER);
-        logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__FLYOUT);
+        logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__FLYOUT);
     }
 
     /** Hide the flyout immediately and cancel any pending hide runnables. */
@@ -1641,7 +1642,7 @@ public class BubbleStackView extends FrameLayout {
     private void logBubbleEvent(@Nullable Bubble bubble, int action) {
         if (bubble == null || bubble.getEntry() == null
                 || bubble.getEntry().getSbn() == null) {
-            StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
+            SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
                     null /* package name */,
                     null /* notification channel */,
                     0 /* notification ID */,
@@ -1655,7 +1656,7 @@ public class BubbleStackView extends FrameLayout {
                     false /* isAppForeground (unused) */);
         } else {
             StatusBarNotification notification = bubble.getEntry().getSbn();
-            StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
+            SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
                     notification.getPackageName(),
                     notification.getNotification().getChannelId(),
                     notification.getId(),

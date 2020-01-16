@@ -28,7 +28,6 @@ import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
-import android.util.StatsLog;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -50,6 +49,7 @@ import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -615,8 +615,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
         public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) {
             if (success) {
-                StatsLog.write(StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,
-                    StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__SUCCESS);
+                SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,
+                        SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__SUCCESS);
                 mLockPatternUtils.reportSuccessfulPasswordAttempt(userId);
                 // Force a garbage collection in an attempt to erase any lockscreen password left in
                 // memory. Do it asynchronously with a 5-sec delay to avoid making the keyguard
@@ -628,8 +628,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                     Runtime.getRuntime().gc();
                 });
             } else {
-                StatsLog.write(StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,
-                    StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__FAILURE);
+                SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,
+                        SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__FAILURE);
                 KeyguardSecurityContainer.this.reportFailedUnlockAttempt(userId, timeoutMs);
             }
             mMetricsLogger.write(new LogMaker(MetricsEvent.BOUNCER)

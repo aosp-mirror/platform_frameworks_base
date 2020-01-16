@@ -27,7 +27,6 @@ import android.os.UserManager;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
-import android.util.StatsLog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,6 +46,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
@@ -248,8 +248,8 @@ public class KeyguardBouncer {
                 mKeyguardView.onResume();
                 mKeyguardView.resetSecurityContainer();
             }
-            StatsLog.write(StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
-                StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN);
+            SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
+                    SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN);
         }
     };
 
@@ -290,8 +290,8 @@ public class KeyguardBouncer {
 
     public void hide(boolean destroyView) {
         if (isShowing()) {
-            StatsLog.write(StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
-                StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__HIDDEN);
+            SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
+                    SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__HIDDEN);
             mDismissCallbackRegistry.notifyDismissCancelled();
         }
         mIsScrimmed = false;

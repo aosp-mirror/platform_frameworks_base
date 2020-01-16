@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.util.StatsLog;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +47,7 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.RemoteInputController;
@@ -319,8 +319,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mKeyguardStateController.notifyKeyguardState(mShowing,
                 mKeyguardStateController.isOccluded());
         reset(true /* hideBouncerWhenShowing */);
-        StatsLog.write(StatsLog.KEYGUARD_STATE_CHANGED,
-            StatsLog.KEYGUARD_STATE_CHANGED__STATE__SHOWN);
+        SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
+                SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__SHOWN);
     }
 
     /**
@@ -501,8 +501,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void setOccluded(boolean occluded, boolean animate) {
         mStatusBar.setOccluded(occluded);
         if (occluded && !mOccluded && mShowing) {
-            StatsLog.write(StatsLog.KEYGUARD_STATE_CHANGED,
-                StatsLog.KEYGUARD_STATE_CHANGED__STATE__OCCLUDED);
+            SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
+                    SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__OCCLUDED);
             if (mStatusBar.isInLaunchTransition()) {
                 mOccluded = true;
                 mStatusBar.fadeKeyguardAfterLaunchTransition(null /* beforeFading */,
@@ -516,8 +516,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 return;
             }
         } else if (!occluded && mOccluded && mShowing) {
-            StatsLog.write(StatsLog.KEYGUARD_STATE_CHANGED,
-                StatsLog.KEYGUARD_STATE_CHANGED__STATE__SHOWN);
+            SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
+                    SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__SHOWN);
         }
         boolean isOccluding = !mOccluded && occluded;
         mOccluded = occluded;
@@ -653,8 +653,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mStatusBarWindowController.setKeyguardShowing(false);
             mViewMediatorCallback.keyguardGone();
         }
-        StatsLog.write(StatsLog.KEYGUARD_STATE_CHANGED,
-            StatsLog.KEYGUARD_STATE_CHANGED__STATE__HIDDEN);
+        SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
+                SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__HIDDEN);
     }
 
     private boolean needsBypassFading() {

@@ -95,7 +95,7 @@ message Atom {
         ExcessiveCpuUsageReported excessive_cpu_usage_reported = 16;
         CachedKillReported cached_kill_reported = 17;
         ProcessMemoryStatReported process_memory_stat_reported = 18;
-        LauncherUIChanged launcher_event = 19;
+        LauncherUIChanged launcher_event = 19 [(module) = "sysui"];
         BatterySaverModeStateChanged battery_saver_mode_state_changed = 20;
         DeviceIdleModeStateChanged device_idle_mode_state_changed = 21;
         DeviceIdlingModeStateChanged device_idling_mode_state_changed = 22;
@@ -138,9 +138,9 @@ message Atom {
         OverlayStateChanged overlay_state_changed = 59;
         ForegroundServiceStateChanged foreground_service_state_changed = 60;
         CallStateChanged call_state_changed = 61;
-        KeyguardStateChanged keyguard_state_changed = 62;
-        KeyguardBouncerStateChanged keyguard_bouncer_state_changed = 63;
-        KeyguardBouncerPasswordEntered keyguard_bouncer_password_entered = 64;
+        KeyguardStateChanged keyguard_state_changed = 62 [(module) = "sysui"];
+        KeyguardBouncerStateChanged keyguard_bouncer_state_changed = 63 [(module) = "sysui"];
+        KeyguardBouncerPasswordEntered keyguard_bouncer_password_entered = 64 [(module) = "sysui"];
         AppDied app_died = 65;
         ResourceConfigurationChanged resource_configuration_changed = 66;
         BluetoothEnabledStateChanged bluetooth_enabled_state_changed = 67;
@@ -231,7 +231,7 @@ message Atom {
         UsbContaminantReported usb_contaminant_reported = 146;
         WatchdogRollbackOccurred watchdog_rollback_occurred = 147;
         BiometricSystemHealthIssueDetected biometric_system_health_issue_detected = 148;
-        BubbleUIChanged bubble_ui_changed = 149;
+        BubbleUIChanged bubble_ui_changed = 149 [(module) = "sysui"];
         ScheduledJobConstraintChanged scheduled_job_constraint_changed = 150;
         BluetoothActiveDeviceChanged bluetooth_active_device_changed = 151;
         BluetoothA2dpPlaybackStateChanged bluetooth_a2dp_playback_state_changed = 152;
@@ -262,7 +262,7 @@ message Atom {
         AssistGestureProgressReported assist_gesture_progress_reported = 176;
         TouchGestureClassified touch_gesture_classified = 177;
         HiddenApiUsed hidden_api_used = 178 [(allow_from_any_uid) = true];
-        StyleUIChanged style_ui_changed = 179 [(module) = "style"];
+        StyleUIChanged style_ui_changed = 179 [(module) = "sysui"];
         PrivacyIndicatorsInteracted privacy_indicators_interacted =
             180 [(module) = "permissioncontroller"];
         AppInstallOnExternalStorageReported app_install_on_external_storage_reported = 181;
@@ -317,7 +317,7 @@ message Atom {
         ConversationActionsEvent conversation_actions_event = 221  [(module) = "textclassifier"];
         LanguageDetectionEvent language_detection_event = 222  [(module) = "textclassifier"];
         ExclusionRectStateChanged exclusion_rect_state_changed = 223;
-        BackGesture back_gesture_reported_reported = 224;
+        BackGesture back_gesture_reported_reported = 224 [(module) = "sysui"];
         UpdateEngineUpdateAttemptReported update_engine_update_attempt_reported = 225;
         UpdateEngineSuccessfulUpdateReported update_engine_successful_update_reported = 226;
         CameraActionEvent camera_action_event = 227;
