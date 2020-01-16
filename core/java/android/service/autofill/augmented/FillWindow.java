@@ -242,6 +242,7 @@ public final class FillWindow implements AutoCloseable {
         synchronized (mLock) {
             if (mDestroyed) return;
             if (mUpdateCalled) {
+                mFillView.setOnClickListener(null);
                 hide();
                 mProxy.report(AutofillProxy.REPORT_EVENT_UI_DESTROYED);
             }

@@ -37,49 +37,26 @@
 
     <TextView
         android:id="@+id/content_preview_text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:layout_toStartOf="@id/copy_button"
         android:layout_centerVertical="true"
         android:ellipsize="end"
         android:fontFamily="@android:string/config_headlineFontFamily"
         android:textColor="?android:attr/textColorPrimary"
-        android:maxLines="2"/>
+        android:maxLines="2"
+        android:focusable="true"/>
 
-    <LinearLayout
-        android:id="@+id/copy_button"
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginStart="@dimen/chooser_view_spacing"
-        android:gravity="center"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
-        android:clickable="true"
-        style="?attr/borderlessButtonStyle">
-
-      <ImageView
-          android:layout_width="24dp"
-          android:layout_height="24dp"
-          android:gravity="top|center_horizontal"
-          android:src="@drawable/ic_content_copy_gm2" />
-
-      <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginTop="4dp"
-          android:gravity="center_horizontal"
-          android:text="@string/copy"
-          android:textColor="?android:textColorSecondary"
-          android:textSize="12sp"
-          android:maxWidth="72dp"
-          android:maxLines="2"
-          android:ellipsize="end" />
-    </LinearLayout>
   </RelativeLayout>
+
+  <include
+      android:id="@+id/chooser_action_row"
+      layout="@layout/chooser_action_row"
+      android:layout_width="@dimen/chooser_preview_width"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="@dimen/chooser_view_spacing"
+      android:layout_gravity="center"
+      />
 
   <!-- Required sub-layout so we can get the nice rounded corners-->
   <!-- around this section -->

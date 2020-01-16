@@ -49,9 +49,6 @@ import java.util.List;
  * To customize what type of view is used for the data object,
  * override {@link #getView(int, View, ViewGroup)}
  * and inflate a view resource.
- * For a code example, see
- * the <a href="https://github.com/googlesamples/android-CustomChoiceList/#readme">
- * CustomChoiceList</a> sample.
  * </p>
  * <p>
  * For an example of using an array adapter with a ListView, see the

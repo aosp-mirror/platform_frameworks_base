@@ -155,6 +155,12 @@ public final class NotificationEntry {
     public boolean canBubble;
 
     /**
+     * Whether this notification has changed in visual appearance since the previous post.
+     * New notifications are  interruptive by default.
+     */
+    public boolean isVisuallyInterruptive;
+
+    /**
      * Whether this notification is shown to the user as a high priority notification: visible on
      * the lock screen/status bar and in the top section in the shade.
      */
@@ -196,6 +202,7 @@ public final class NotificationEntry {
         suppressedVisualEffects = ranking.getSuppressedVisualEffects();
         suspended = ranking.isSuspended();
         canBubble = ranking.canBubble();
+        isVisuallyInterruptive = ranking.visuallyInterruptive();
     }
 
     public void setInterruption() {

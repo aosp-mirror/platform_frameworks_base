@@ -132,6 +132,7 @@ public class UserManagerServiceUserInfoTest {
         user.profileBadge = 2;
         user.partial = true;
         user.guestToRemove = true;
+        user.preCreated = true;
         return user;
     }
 
@@ -147,5 +148,6 @@ public class UserManagerServiceUserInfoTest {
         assertEquals("profile badge not preseved", one.profileBadge, two.profileBadge);
         assertEquals("partial not preseved", one.partial, two.partial);
         assertEquals("guestToRemove not preseved", one.guestToRemove, two.guestToRemove);
+        assertEquals("preCreated not preseved", one.preCreated, two.preCreated);
     }
 }

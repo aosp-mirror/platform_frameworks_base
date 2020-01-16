@@ -89,7 +89,6 @@ public class NotificationEntryManager implements
     private NotificationRowBinder mNotificationRowBinder;
 
     private NotificationPresenter mPresenter;
-    private NotificationListenerService.RankingMap mLatestRankingMap;
     @VisibleForTesting
     protected NotificationData mNotificationData;
 
@@ -168,8 +167,7 @@ public class NotificationEntryManager implements
     /** Adds a {@link NotificationLifetimeExtender}. */
     public void addNotificationLifetimeExtender(NotificationLifetimeExtender extender) {
         mNotificationLifetimeExtenders.add(extender);
-        extender.setCallback(key -> removeNotification(key, mLatestRankingMap,
-                UNDEFINED_DISMISS_REASON));
+        extender.setCallback(key -> removeNotification(key, null, UNDEFINED_DISMISS_REASON));
     }
 
     public NotificationData getNotificationData() {
@@ -307,7 +305,6 @@ public class NotificationEntryManager implements
             if (!forceRemove && !entryDismissed) {
                 for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
                     if (extender.shouldExtendLifetime(entry)) {
-                        mLatestRankingMap = ranking;
                         extendLifetime(entry, extender);
                         lifetimeExtended = true;
                         break;

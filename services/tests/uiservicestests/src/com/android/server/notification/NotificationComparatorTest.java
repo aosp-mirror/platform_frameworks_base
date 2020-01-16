@@ -68,6 +68,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     private final int uid2 = 1111111;
     private static final String TEST_CHANNEL_ID = "test_channel_id";
 
+    private NotificationRecord mRecordMinCallNonInterruptive;
     private NotificationRecord mRecordMinCall;
     private NotificationRecord mRecordHighCall;
     private NotificationRecord mRecordDefaultMedia;
@@ -105,6 +106,18 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         smsPkg = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.SMS_DEFAULT_APPLICATION);
 
+        Notification nonInterruptiveNotif = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setCategory(Notification.CATEGORY_CALL)
+                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
+                .build();
+        mRecordMinCallNonInterruptive = new NotificationRecord(mContext,
+                new StatusBarNotification(callPkg,
+                        callPkg, 1, "mRecordMinCallNonInterruptive", callUid, callUid,
+                        nonInterruptiveNotif,
+                        new UserHandle(userId), "", 2000), getDefaultChannel());
+        mRecordMinCallNonInterruptive.setSystemImportance(NotificationManager.IMPORTANCE_MIN);
+        mRecordMinCallNonInterruptive.setInterruptive(false);
+
         Notification n1 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_CALL)
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
@@ -113,6 +126,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
                 callPkg, 1, "minCall", callUid, callUid, n1,
                 new UserHandle(userId), "", 2000), getDefaultChannel());
         mRecordMinCall.setSystemImportance(NotificationManager.IMPORTANCE_MIN);
+        mRecordMinCall.setInterruptive(true);
 
         Notification n2 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_CALL)
@@ -245,6 +259,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         expected.add(mRecordCheater);
         expected.add(mRecordCheaterColorized);
         expected.add(mRecordMinCall);
+        expected.add(mRecordMinCallNonInterruptive);
 
         List<NotificationRecord> actual = new ArrayList<>();
         actual.addAll(expected);

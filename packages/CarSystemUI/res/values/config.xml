@@ -40,4 +40,19 @@
          slots that may be reused for things like IME control. -->
     <integer name="config_maxNotificationIcons">0</integer>
 
+    <!--
+        Initial alpha percent value for the background when the notification
+        shade is open. Should be a number between, and inclusive, 0 and 100.
+        If the number is 0, then the background alpha starts off fully
+        transparent. If the number if 100, then the background alpha starts off
+        fully opaque. -->
+    <integer name="config_initialNotificationBackgroundAlpha">0</integer>
+    <!--
+        Final alpha percent value for the background when the notification
+        shade is fully open. Should be a number between, and inclusive, 0 and
+        100. If this value is smaller than
+        config_initialNotificationBackgroundAlpha, the background will default
+        to a constant alpha percent value using the initial alpha. -->
+    <integer name="config_finalNotificationBackgroundAlpha">100</integer>
+
 </resources>

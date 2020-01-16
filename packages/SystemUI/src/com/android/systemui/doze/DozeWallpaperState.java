@@ -16,6 +16,7 @@
 
 package com.android.systemui.doze;
 
+import android.annotation.Nullable;
 import android.app.IWallpaperManager;
 import android.content.Context;
 import android.os.RemoteException;
@@ -37,6 +38,7 @@ public class DozeWallpaperState implements DozeMachine.Part {
     private static final String TAG = "DozeWallpaperState";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    @Nullable
     private final IWallpaperManager mWallpaperManagerService;
     private final DozeParameters mDozeParameters;
     private final BiometricUnlockController mBiometricUnlockController;
@@ -88,16 +90,18 @@ public class DozeWallpaperState implements DozeMachine.Part {
 
         if (isAmbientMode != mIsAmbientMode) {
             mIsAmbientMode = isAmbientMode;
-            try {
-                long duration = animated ? StackStateAnimator.ANIMATION_DURATION_WAKEUP : 0L;
-                if (DEBUG) {
-                    Log.i(TAG, "AOD wallpaper state changed to: " + mIsAmbientMode
+            if (mWallpaperManagerService != null) {
+                try {
+                    long duration = animated ? StackStateAnimator.ANIMATION_DURATION_WAKEUP : 0L;
+                    if (DEBUG) {
+                        Log.i(TAG, "AOD wallpaper state changed to: " + mIsAmbientMode
                             + ", animationDuration: " + duration);
+                    }
+                    mWallpaperManagerService.setInAmbientMode(mIsAmbientMode, duration);
+                } catch (RemoteException e) {
+                    // Cannot notify wallpaper manager service, but it's fine, let's just skip it.
+                    Log.w(TAG, "Cannot notify state to WallpaperManagerService: " + mIsAmbientMode);
                 }
-                mWallpaperManagerService.setInAmbientMode(mIsAmbientMode, duration);
-            } catch (RemoteException e) {
-                // Cannot notify wallpaper manager service, but it's fine, let's just skip it.
-                Log.w(TAG, "Cannot notify state to WallpaperManagerService: " + mIsAmbientMode);
             }
         }
     }
@@ -106,5 +110,6 @@ public class DozeWallpaperState implements DozeMachine.Part {
     public void dump(PrintWriter pw) {
         pw.println("DozeWallpaperState:");
         pw.println(" isAmbientMode: " + mIsAmbientMode);
+        pw.println(" hasWallpaperService: " + (mWallpaperManagerService != null));
     }
 }

@@ -127,11 +127,12 @@ class UsbUserSettingsManager {
      * Check for camera permission of the calling process.
      *
      * @param packageName Package name of the caller.
+     * @param pid Linux pid of the calling process.
      * @param uid Linux uid of the calling process.
      *
      * @return True in case camera permission is available, False otherwise.
      */
-    private boolean isCameraPermissionGranted(String packageName, int uid) {
+    private boolean isCameraPermissionGranted(String packageName, int pid, int uid) {
         int targetSdkVersion = android.os.Build.VERSION_CODES.P;
         try {
             ApplicationInfo aInfo = mPackageManager.getApplicationInfo(packageName, 0);
@@ -147,7 +148,8 @@ class UsbUserSettingsManager {
         }
 
         if (targetSdkVersion >= android.os.Build.VERSION_CODES.P) {
-            int allowed = mUserContext.checkCallingPermission(android.Manifest.permission.CAMERA);
+            int allowed = mUserContext.checkPermission(android.Manifest.permission.CAMERA, pid,
+                    uid);
             if (android.content.pm.PackageManager.PERMISSION_DENIED == allowed) {
                 Slog.i(TAG, "Camera permission required for USB video class devices");
                 return false;
@@ -157,9 +159,9 @@ class UsbUserSettingsManager {
         return true;
     }
 
-    public boolean hasPermission(UsbDevice device, String packageName, int uid) {
+    public boolean hasPermission(UsbDevice device, String packageName, int pid, int uid) {
         if (isCameraDevicePresent(device)) {
-            if (!isCameraPermissionGranted(packageName, uid)) {
+            if (!isCameraPermissionGranted(packageName, pid, uid)) {
                 return false;
             }
         }
@@ -171,8 +173,8 @@ class UsbUserSettingsManager {
         return mUsbPermissionManager.hasPermission(accessory, uid);
     }
 
-    public void checkPermission(UsbDevice device, String packageName, int uid) {
-        if (!hasPermission(device, packageName, uid)) {
+    public void checkPermission(UsbDevice device, String packageName, int pid, int uid) {
+        if (!hasPermission(device, packageName, pid, uid)) {
             throw new SecurityException("User has not given " + uid + "/" + packageName
                     + " permission to access device " + device.getDeviceName());
         }
@@ -206,11 +208,12 @@ class UsbUserSettingsManager {
                 accessory, canBeDefault, packageName, uid, mUserContext, pi);
     }
 
-    public void requestPermission(UsbDevice device, String packageName, PendingIntent pi, int uid) {
+    public void requestPermission(UsbDevice device, String packageName, PendingIntent pi, int pid,
+            int uid) {
         Intent intent = new Intent();
 
         // respond immediately if permission has already been granted
-        if (hasPermission(device, packageName, uid)) {
+        if (hasPermission(device, packageName, pid, uid)) {
             intent.putExtra(UsbManager.EXTRA_DEVICE, device);
             intent.putExtra(UsbManager.EXTRA_PERMISSION_GRANTED, true);
             try {
@@ -221,7 +224,7 @@ class UsbUserSettingsManager {
             return;
         }
         if (isCameraDevicePresent(device)) {
-            if (!isCameraPermissionGranted(packageName, uid)) {
+            if (!isCameraPermissionGranted(packageName, pid, uid)) {
                 intent.putExtra(UsbManager.EXTRA_DEVICE, device);
                 intent.putExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false);
                 try {

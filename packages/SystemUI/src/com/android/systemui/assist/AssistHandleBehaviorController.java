@@ -72,7 +72,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
     private final Runnable mHideHandles = this::hideHandles;
     private final Runnable mShowAndGo = this::showAndGoInternal;
     private final Provider<ScreenDecorations> mScreenDecorations;
-    private final PhenotypeHelper mPhenotypeHelper;
+    private final DeviceConfigHelper mDeviceConfigHelper;
     private final Map<AssistHandleBehavior, BehaviorController> mBehaviorMap;
 
     private boolean mHandlesShowing = false;
@@ -91,7 +91,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
             AssistUtils assistUtils,
             @Named(ASSIST_HANDLE_THREAD_NAME) Handler handler,
             Provider<ScreenDecorations> screenDecorations,
-            PhenotypeHelper phenotypeHelper,
+            DeviceConfigHelper deviceConfigHelper,
             Map<AssistHandleBehavior, BehaviorController> behaviorMap,
             NavigationModeController navigationModeController,
             DumpController dumpController) {
@@ -99,14 +99,14 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         mAssistUtils = assistUtils;
         mHandler = handler;
         mScreenDecorations = screenDecorations;
-        mPhenotypeHelper = phenotypeHelper;
+        mDeviceConfigHelper = deviceConfigHelper;
         mBehaviorMap = behaviorMap;
 
         mInGesturalMode = QuickStepContract.isGesturalMode(
                 navigationModeController.addListener(this::handleNavigationModeChange));
 
         setBehavior(getBehaviorMode());
-        mPhenotypeHelper.addOnPropertiesChangedListener(
+        mDeviceConfigHelper.addOnPropertiesChangedListener(
                 mHandler::post,
                 (properties) -> {
                     if (properties.getKeyset().contains(
@@ -206,19 +206,19 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
     }
 
     private long getShownFrequencyThreshold() {
-        return mPhenotypeHelper.getLong(
+        return mDeviceConfigHelper.getLong(
                 SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOWN_FREQUENCY_THRESHOLD_MS,
                 DEFAULT_SHOWN_FREQUENCY_THRESHOLD_MS);
     }
 
     private long getShowAndGoDuration() {
-        return mPhenotypeHelper.getLong(
+        return mDeviceConfigHelper.getLong(
                 SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOW_AND_GO_DURATION_MS,
                 DEFAULT_SHOW_AND_GO_DURATION_MS);
     }
 
     private String getBehaviorMode() {
-        return mPhenotypeHelper.getString(
+        return mDeviceConfigHelper.getString(
                 SystemUiDeviceConfigFlags.ASSIST_HANDLES_BEHAVIOR_MODE,
                 DEFAULT_BEHAVIOR.toString());
     }
