@@ -333,6 +333,15 @@ public final class DeviceConfig {
     public static final String NAMESPACE_WINDOW_MANAGER = "window_manager";
 
     /**
+     * Namespace for window manager features accessible by native code and
+     * loaded once per boot.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT = "window_manager_native_boot";
+
+    /**
      * List of namespaces which can be read without READ_DEVICE_CONFIG permission
      *
      * @hide
