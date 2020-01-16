@@ -722,30 +722,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullSystemIonHeapSize(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        final long systemIonHeapSizeInBytes = readSystemIonHeapSizeFromDebugfs();
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-        e.writeLong(systemIonHeapSizeInBytes);
-        pulledData.add(e);
-    }
-
-    private void pullProcessSystemIonHeapSize(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        List<IonAllocations> result = readProcessSystemIonHeapSizesFromDebugfs();
-        for (IonAllocations allocations : result) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(getUidForPid(allocations.pid));
-            e.writeString(readCmdlineFromProcfs(allocations.pid));
-            e.writeInt((int) (allocations.totalSizeInBytes / 1024));
-            e.writeInt(allocations.count);
-            e.writeInt((int) (allocations.maxSizeInBytes / 1024));
-            pulledData.add(e);
-        }
-    }
-
     private void pullBinderCallsStats(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -1694,16 +1670,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.SYSTEM_ELAPSED_REALTIME: {
                 pullSystemElapsedRealtime(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.SYSTEM_ION_HEAP_SIZE: {
-                pullSystemIonHeapSize(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.PROCESS_SYSTEM_ION_HEAP_SIZE: {
-                pullProcessSystemIonHeapSize(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

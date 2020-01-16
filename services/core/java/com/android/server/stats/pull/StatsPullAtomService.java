@@ -1208,11 +1208,23 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerSystemIonHeapSize() {
-        // No op.
+        int tagId = StatsLog.SYSTEM_ION_HEAP_SIZE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullSystemIonHeapSize(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullSystemIonHeapSize() {
-        // No op.
+    private int pullSystemIonHeapSize(int atomTag, List<StatsEvent> pulledData) {
+        final long systemIonHeapSizeInBytes = readSystemIonHeapSizeFromDebugfs();
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeLong(systemIonHeapSizeInBytes)
+                .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerIonHeapSize() {
@@ -1236,11 +1248,29 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerProcessSystemIonHeapSize() {
-        // No op.
+        int tagId = StatsLog.PROCESS_SYSTEM_ION_HEAP_SIZE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullProcessSystemIonHeapSize(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullProcessSystemIonHeapSize() {
-        // No op.
+    private int pullProcessSystemIonHeapSize(int atomTag, List<StatsEvent> pulledData) {
+        List<IonAllocations> result = readProcessSystemIonHeapSizesFromDebugfs();
+        for (IonAllocations allocations : result) {
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(getUidForPid(allocations.pid))
+                    .writeString(readCmdlineFromProcfs(allocations.pid))
+                    .writeInt((int) (allocations.totalSizeInBytes / 1024))
+                    .writeInt(allocations.count)
+                    .writeInt((int) (allocations.maxSizeInBytes / 1024))
+                    .build();
+            pulledData.add(e);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerTemperature() {
