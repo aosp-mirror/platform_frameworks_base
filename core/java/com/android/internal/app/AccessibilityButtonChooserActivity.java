@@ -75,11 +75,14 @@ public class AccessibilityButtonChooserActivity extends Activity {
     private static final char SERVICES_SEPARATOR = ':';
     private static final TextUtils.SimpleStringSplitter sStringColonSplitter =
             new TextUtils.SimpleStringSplitter(SERVICES_SEPARATOR);
+    @UserShortcutType
     private static final int ACCESSIBILITY_BUTTON_USER_TYPE = convertToUserType(
             ACCESSIBILITY_BUTTON);
+    @UserShortcutType
     private static final int ACCESSIBILITY_SHORTCUT_KEY_USER_TYPE = convertToUserType(
             ACCESSIBILITY_SHORTCUT_KEY);
 
+    @ShortcutType
     private int mShortcutType;
     private final List<AccessibilityButtonTarget> mTargets = new ArrayList<>();
     private AlertDialog mAlertDialog;
@@ -211,9 +214,14 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
         mShortcutType = getIntent().getIntExtra(AccessibilityManager.EXTRA_SHORTCUT_TYPE,
                 ACCESSIBILITY_BUTTON);
+        if ((mShortcutType != ACCESSIBILITY_BUTTON)
+                && (mShortcutType != ACCESSIBILITY_SHORTCUT_KEY)) {
+            throw new IllegalStateException("Unexpected shortcut type: " + mShortcutType);
+        }
+
         mTargets.addAll(getServiceTargets(this, mShortcutType));
 
-        mTargetAdapter = new TargetAdapter(mTargets);
+        mTargetAdapter = new TargetAdapter(mTargets, mShortcutType);
         mAlertDialog = new AlertDialog.Builder(this)
                 .setAdapter(mTargetAdapter, /* listener= */ null)
                 .setPositiveButton(
@@ -357,16 +365,21 @@ public class AccessibilityButtonChooserActivity extends Activity {
     private static class TargetAdapter extends BaseAdapter {
         @ShortcutMenuMode
         private int mShortcutMenuMode = ShortcutMenuMode.LAUNCH;
+        @ShortcutType
+        private int mShortcutButtonType;
         private List<AccessibilityButtonTarget> mButtonTargets;
 
-        TargetAdapter(List<AccessibilityButtonTarget> targets) {
+        TargetAdapter(List<AccessibilityButtonTarget> targets,
+                @ShortcutType int shortcutButtonType) {
             this.mButtonTargets = targets;
+            this.mShortcutButtonType = shortcutButtonType;
         }
 
-        void setShortcutMenuMode(int shortcutMenuMode) {
+        void setShortcutMenuMode(@ShortcutMenuMode int shortcutMenuMode) {
             mShortcutMenuMode = shortcutMenuMode;
         }
 
+        @ShortcutMenuMode
         int getShortcutMenuMode() {
             return mShortcutMenuMode;
         }
@@ -441,14 +454,16 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
         private void updateLegacyActionItemVisibility(@NonNull Context context,
                 @NonNull ViewHolder holder) {
-            final boolean isEditMenuMode = (mShortcutMenuMode == ShortcutMenuMode.EDIT);
+            final boolean isLaunchMenuMode = (mShortcutMenuMode == ShortcutMenuMode.LAUNCH);
+            final boolean isHardwareButtonTriggered =
+                    (mShortcutButtonType == ACCESSIBILITY_SHORTCUT_KEY);
 
-            holder.mLabelView.setEnabled(!isEditMenuMode);
-            holder.mViewItem.setEnabled(!isEditMenuMode);
+            holder.mLabelView.setEnabled(isLaunchMenuMode || isHardwareButtonTriggered);
+            holder.mViewItem.setEnabled(isLaunchMenuMode || isHardwareButtonTriggered);
             holder.mViewItem.setImageDrawable(context.getDrawable(R.drawable.ic_delete_item));
             holder.mViewItem.setVisibility(View.VISIBLE);
             holder.mSwitchItem.setVisibility(View.GONE);
-            holder.mItemContainer.setVisibility(isEditMenuMode ? View.VISIBLE : View.GONE);
+            holder.mItemContainer.setVisibility(isLaunchMenuMode ? View.GONE : View.VISIBLE);
         }
 
         private void updateInvisibleActionItemVisibility(@NonNull Context context,
@@ -574,8 +589,6 @@ public class AccessibilityButtonChooserActivity extends Activity {
             ams.notifyAccessibilityButtonClicked(getDisplayId(), target.getId());
         } else if (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
             switchServiceState(target);
-        } else {
-            throw new IllegalArgumentException("Unsupported shortcut type:" + mShortcutType);
         }
     }
 
@@ -611,13 +624,15 @@ public class AccessibilityButtonChooserActivity extends Activity {
                 ComponentName.unflattenFromString(target.getId());
 
         switch (target.getFragmentType()) {
+            case AccessibilityServiceFragmentType.LEGACY:
+                onLegacyTargetDeleted(targetComponentName);
+                break;
             case AccessibilityServiceFragmentType.INVISIBLE:
                 onInvisibleTargetDeleted(targetComponentName);
                 break;
             case AccessibilityServiceFragmentType.INTUITIVE:
                 onIntuitiveTargetDeleted(targetComponentName);
                 break;
-            case AccessibilityServiceFragmentType.LEGACY:
             case AccessibilityServiceFragmentType.BOUNCE:
                 // Do nothing
                 break;
@@ -630,6 +645,12 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
         if (mTargets.isEmpty()) {
             mAlertDialog.dismiss();
+        }
+    }
+
+    private void onLegacyTargetDeleted(ComponentName componentName) {
+        if (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
+            optOutValueFromSettings(this, ACCESSIBILITY_SHORTCUT_KEY_USER_TYPE, componentName);
         }
     }
 
@@ -648,8 +669,6 @@ public class AccessibilityButtonChooserActivity extends Activity {
                     ACCESSIBILITY_BUTTON_USER_TYPE, componentName)) {
                 disableService(componentName);
             }
-        } else {
-            throw new IllegalArgumentException("Unsupported shortcut type:" + mShortcutType);
         }
     }
 
@@ -658,8 +677,6 @@ public class AccessibilityButtonChooserActivity extends Activity {
             optOutValueFromSettings(this, ACCESSIBILITY_BUTTON_USER_TYPE, componentName);
         } else if (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
             optOutValueFromSettings(this, ACCESSIBILITY_SHORTCUT_KEY_USER_TYPE, componentName);
-        } else {
-            throw new IllegalArgumentException("Unsupported shortcut type:" + mShortcutType);
         }
     }
 
@@ -772,7 +789,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
      * @param componentName The component name that need to be opted out from Settings.
      */
     private void optOutValueFromSettings(
-            Context context, int shortcutType, ComponentName componentName) {
+            Context context, @UserShortcutType int shortcutType, ComponentName componentName) {
         final StringJoiner joiner = new StringJoiner(String.valueOf(SERVICES_SEPARATOR));
         final String targetsKey = convertToKey(shortcutType);
         final String targetsValue = Settings.Secure.getString(context.getContentResolver(),
