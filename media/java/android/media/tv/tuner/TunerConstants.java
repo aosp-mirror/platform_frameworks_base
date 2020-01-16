@@ -47,6 +47,27 @@ public final class TunerConstants {
      */
     public static final int INVALID_STREAM_ID = Constants.Constant.INVALID_STREAM_ID;
 
+    /** @hide */
+    @IntDef(prefix = "SCAN_TYPE_", value = {SCAN_TYPE_UNDEFINED, SCAN_TYPE_AUTO, SCAN_TYPE_BLIND})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScanType {}
+    /**
+     * Scan type undefined.
+     */
+    public static final int SCAN_TYPE_UNDEFINED = Constants.FrontendScanType.SCAN_UNDEFINED;
+    /**
+     * Scan type auto.
+     *
+     * <p> Tuner will send {@link #onLocked}
+     */
+    public static final int SCAN_TYPE_AUTO = Constants.FrontendScanType.SCAN_AUTO;
+    /**
+     * Blind scan.
+     *
+     * <p>Frequency range is not specified. The {@link android.media.tv.tuner.Tuner} will scan an
+     * implementation specific range.
+     */
+    public static final int SCAN_TYPE_BLIND = Constants.FrontendScanType.SCAN_BLIND;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
