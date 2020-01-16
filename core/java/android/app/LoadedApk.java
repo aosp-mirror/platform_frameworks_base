@@ -1178,13 +1178,26 @@ public final class LoadedApk {
         }
 
         try {
-            java.lang.ClassLoader cl = getClassLoader();
+            final java.lang.ClassLoader cl = getClassLoader();
             if (!mPackageName.equals("android")) {
                 Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                         "initializeJavaContextClassLoader");
                 initializeJavaContextClassLoader();
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
+
+            // Rewrite the R 'constants' for all library apks.
+            SparseArray<String> packageIdentifiers = getAssets().getAssignedPackageIdentifiers(
+                    false, false);
+            for (int i = 0, n = packageIdentifiers.size(); i < n; i++) {
+                final int id = packageIdentifiers.keyAt(i);
+                if (id == 0x01 || id == 0x7f) {
+                    continue;
+                }
+
+                rewriteRValues(cl, packageIdentifiers.valueAt(i), id);
+            }
+
             ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);
             app = mActivityThread.mInstrumentation.newApplication(
                     cl, appClass, appContext);
@@ -1211,19 +1224,6 @@ public final class LoadedApk {
                         + ": " + e.toString(), e);
                 }
             }
-        }
-
-        // Rewrite the R 'constants' for all library apks.
-        SparseArray<String> packageIdentifiers = getAssets().getAssignedPackageIdentifiers(
-                false, false);
-        final int N = packageIdentifiers.size();
-        for (int i = 0; i < N; i++) {
-            final int id = packageIdentifiers.keyAt(i);
-            if (id == 0x01 || id == 0x7f) {
-                continue;
-            }
-
-            rewriteRValues(getClassLoader(), packageIdentifiers.valueAt(i), id);
         }
 
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
