@@ -174,6 +174,8 @@ static const std::string ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY =
 static constexpr const uint64_t UPPER_HALF_WORD_MASK = 0xFFFF'FFFF'0000'0000;
 static constexpr const uint64_t LOWER_HALF_WORD_MASK = 0x0000'0000'FFFF'FFFF;
 
+static constexpr const char* kCurProfileDirPath = "/data/misc/profiles/cur";
+
 /**
  * The maximum value that the gUSAPPoolSizeMax variable may take.  This value
  * is a mirror of ZygoteServer.USAP_POOL_SIZE_MAX_LIMIT
@@ -1382,6 +1384,49 @@ static void isolateAppData(JNIEnv* env, jobjectArray pkg_data_info_list,
   freecon(dataDataContext);
 }
 
+/**
+ * Like isolateAppData(), isolate jit profile directories, so apps don't see what
+ * other apps are installed by reading content inside /data/misc/profiles/cur.
+ *
+ * The implementation is similar to isolateAppData(), it creates a tmpfs
+ * on /data/misc/profiles/cur, and bind mounts related package profiles to it.
+ */
+static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
+    uid_t uid, const char* process_name, jstring managed_nice_name,
+    fail_fn_t fail_fn) {
+
+  auto extract_fn = std::bind(ExtractJString, env, process_name, managed_nice_name, _1);
+  const userid_t user_id = multiuser_get_user_id(uid);
+
+  int size = (pkg_data_info_list != nullptr) ? env->GetArrayLength(pkg_data_info_list) : 0;
+  // Size should be a multiple of 3, as it contains list of <package_name, volume_uuid, inode>
+  if ((size % 3) != 0) {
+    fail_fn(CREATE_ERROR("Wrong pkg_inode_list size %d", size));
+  }
+
+  // Mount (namespace) tmpfs on profile directory, so apps no longer access
+  // the original profile directory anymore.
+  MountAppDataTmpFs(kCurProfileDirPath, fail_fn);
+
+  // Create profile directory for this user.
+  std::string actualCurUserProfile = StringPrintf("%s/%d", kCurProfileDirPath, user_id);
+  PrepareDir(actualCurUserProfile.c_str(), DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT,
+      fail_fn);
+
+  for (int i = 0; i < size; i += 3) {
+    jstring package_str = (jstring) (env->GetObjectArrayElement(pkg_data_info_list, i));
+    std::string packageName = extract_fn(package_str).value();
+
+    std::string actualCurPackageProfile = StringPrintf("%s/%s", actualCurUserProfile.c_str(),
+        packageName.c_str());
+    std::string mirrorCurPackageProfile = StringPrintf("/data_mirror/cur_profiles/%d/%s",
+        user_id, packageName.c_str());
+
+    PrepareDir(actualCurPackageProfile, DEFAULT_DATA_DIR_PERMISSION, uid, uid, fail_fn);
+    BindMount(mirrorCurPackageProfile, actualCurPackageProfile, fail_fn);
+  }
+}
+
 // Utility routine to specialize a zygote child process.
 static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
                              jint runtime_flags, jobjectArray rlimits,
@@ -1432,8 +1477,8 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   // so they can't even traverse CE / DE directories.
   if (pkg_data_info_list != nullptr
       && GetBoolProperty(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, true)) {
-    isolateAppData(env, pkg_data_info_list, uid, process_name, managed_nice_name,
-        fail_fn);
+    isolateAppData(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
+    isolateJitProfile(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
   }
 
   // If this zygote isn't root, it won't be able to create a process group,
