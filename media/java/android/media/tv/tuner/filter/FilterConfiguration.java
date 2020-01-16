@@ -33,8 +33,7 @@ import java.lang.annotation.RetentionPolicy;
 public abstract class FilterConfiguration {
 
     /** @hide */
-    @IntDef(prefix = "FILTER_TYPE_", value =
-            {FILTER_TYPE_TS, FILTER_TYPE_MMTP, FILTER_TYPE_IP, FILTER_TYPE_TLV, FILTER_TYPE_ALP})
+    @IntDef({FILTER_TYPE_TS, FILTER_TYPE_MMTP, FILTER_TYPE_IP, FILTER_TYPE_TLV, FILTER_TYPE_ALP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FilterType {}
 
@@ -59,30 +58,6 @@ public abstract class FilterConfiguration {
      */
     public static final int FILTER_TYPE_ALP = Constants.DemuxFilterMainType.ALP;
 
-
-    /** @hide */
-    @IntDef(prefix = "PACKET_TYPE_", value =
-            {PACKET_TYPE_IPV4, PACKET_TYPE_COMPRESSED, PACKET_TYPE_SIGNALING})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface PacketType {}
-
-    /**
-     * IP v4 packet type.
-     * @hide
-     */
-    public static final int PACKET_TYPE_IPV4 = 0;
-    /**
-     * Compressed packet type.
-     * @hide
-     */
-    public static final int PACKET_TYPE_COMPRESSED = 2;
-    /**
-     * Signaling packet type.
-     * @hide
-     */
-    public static final int PACKET_TYPE_SIGNALING = 4;
-
-
     @Nullable
     /* package */ final Settings mSettings;
 
@@ -101,28 +76,5 @@ public abstract class FilterConfiguration {
     @Nullable
     public Settings getSettings() {
         return mSettings;
-    }
-
-    /**
-     * Builder for {@link FilterConfiguration}.
-     *
-     * @param <T> The subclass to be built.
-     * @hide
-     */
-    public abstract static class Builder<T extends Builder<T>> {
-        /* package */ Settings mSettings;
-
-        /* package */ Builder() {
-        }
-
-        /**
-         * Sets filter settings.
-         */
-        @Nullable
-        public T setFrequency(Settings settings) {
-            mSettings = settings;
-            return self();
-        }
-        /* package */ abstract T self();
     }
 }

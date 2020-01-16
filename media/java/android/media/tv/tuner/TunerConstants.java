@@ -124,34 +124,6 @@ public final class TunerConstants {
      */
     public static final int FILTER_STATUS_OVERFLOW = Constants.DemuxFilterStatus.OVERFLOW;
 
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "INDEX_TYPE_", value =
-            {INDEX_TYPE_NONE, INDEX_TYPE_TS, INDEX_TYPE_SC, INDEX_TYPE_SC_HEVC})
-    public @interface IndexType {}
-
-    /**
-     * Index is not used.
-     * @hide
-     */
-    public static final int INDEX_TYPE_NONE = Constants.DemuxRecordIndexType.NONE;
-    /**
-     * TS index.
-     * @hide
-     */
-    public static final int INDEX_TYPE_TS = Constants.DemuxRecordIndexType.TS;
-    /**
-     * Start Code index.
-     * @hide
-     */
-    public static final int INDEX_TYPE_SC = Constants.DemuxRecordIndexType.SC;
-    /**
-     * Start Code index for HEVC.
-     * @hide
-     */
-    public static final int INDEX_TYPE_SC_HEVC = Constants.DemuxRecordIndexType.SC_HEVC;
-
     /**
      * Indexes can be tagged through TS (Transport Stream) header.
      *

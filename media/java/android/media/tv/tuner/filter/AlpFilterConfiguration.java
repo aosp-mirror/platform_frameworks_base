@@ -16,123 +16,20 @@
 
 package android.media.tv.tuner.filter;
 
-import android.annotation.IntDef;
-import android.annotation.NonNull;
-import android.annotation.RequiresPermission;
-import android.content.Context;
-import android.hardware.tv.tuner.V1_0.Constants;
-import android.media.tv.tuner.TunerUtils;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 /**
  * Filter configuration for a ALP filter.
  * @hide
  */
 public class AlpFilterConfiguration extends FilterConfiguration {
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "LENGTH_TYPE_", value =
-            {LENGTH_TYPE_UNDEFINED, LENGTH_TYPE_WITHOUT_ADDITIONAL_HEADER,
-            LENGTH_TYPE_WITH_ADDITIONAL_HEADER})
-    public @interface LengthType {}
+    private int mPacketType;
+    private int mLengthType;
 
-    /**
-     * Length type not defined.
-     */
-    public static final int LENGTH_TYPE_UNDEFINED = Constants.DemuxAlpLengthType.UNDEFINED;
-    /**
-     * Length does NOT include additional header.
-     */
-    public static final int LENGTH_TYPE_WITHOUT_ADDITIONAL_HEADER =
-            Constants.DemuxAlpLengthType.WITHOUT_ADDITIONAL_HEADER;
-    /**
-     * Length includes additional header.
-     */
-    public static final int LENGTH_TYPE_WITH_ADDITIONAL_HEADER =
-            Constants.DemuxAlpLengthType.WITH_ADDITIONAL_HEADER;
-
-
-    private final int mPacketType;
-    private final int mLengthType;
-
-    public AlpFilterConfiguration(Settings settings, int packetType, int lengthType) {
+    public AlpFilterConfiguration(Settings settings) {
         super(settings);
-        mPacketType = packetType;
-        mLengthType = lengthType;
     }
 
     @Override
     public int getType() {
         return FilterConfiguration.FILTER_TYPE_ALP;
-    }
-
-    /**
-     * Gets packet type.
-     */
-    @FilterConfiguration.PacketType
-    public int getPacketType() {
-        return mPacketType;
-    }
-    /**
-     * Gets length type.
-     */
-    @LengthType
-    public int getLengthType() {
-        return mLengthType;
-    }
-
-    /**
-     * Creates a builder for {@link AlpFilterConfiguration}.
-     *
-     * @param context the context of the caller.
-     */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
-    @NonNull
-    public static Builder builder(@NonNull Context context) {
-        TunerUtils.checkTunerPermission(context);
-        return new Builder();
-    }
-
-    /**
-     * Builder for {@link AlpFilterConfiguration}.
-     */
-    public static class Builder extends FilterConfiguration.Builder<Builder> {
-        private int mPacketType;
-        private int mLengthType;
-
-        private Builder() {
-        }
-
-        /**
-         * Sets packet type.
-         */
-        @NonNull
-        public Builder setPacketType(@FilterConfiguration.PacketType int packetType) {
-            mPacketType = packetType;
-            return this;
-        }
-        /**
-         * Sets length type.
-         */
-        @NonNull
-        public Builder setLengthType(@LengthType int lengthType) {
-            mLengthType = lengthType;
-            return this;
-        }
-
-        /**
-         * Builds a {@link AlpFilterConfiguration} object.
-         */
-        @NonNull
-        public AlpFilterConfiguration build() {
-            return new AlpFilterConfiguration(mSettings, mPacketType, mLengthType);
-        }
-
-        @Override
-        Builder self() {
-            return this;
-        }
     }
 }

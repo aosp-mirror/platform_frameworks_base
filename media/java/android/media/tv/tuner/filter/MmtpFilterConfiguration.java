@@ -16,78 +16,19 @@
 
 package android.media.tv.tuner.filter;
 
-import android.annotation.NonNull;
-import android.annotation.RequiresPermission;
-import android.content.Context;
-import android.media.tv.tuner.TunerUtils;
-
 /**
  * Filter configuration for a MMTP filter.
  * @hide
  */
 public class MmtpFilterConfiguration extends FilterConfiguration {
-    private final int mMmtpPid;
+    private int mMmtpPid;
 
-    public MmtpFilterConfiguration(Settings settings, int mmtpPid) {
+    public MmtpFilterConfiguration(Settings settings) {
         super(settings);
-        mMmtpPid = mmtpPid;
     }
 
     @Override
     public int getType() {
         return FilterConfiguration.FILTER_TYPE_MMTP;
-    }
-
-    /**
-     * Gets MMPT PID.
-     *
-     * <p>Packet ID is used to specify packets in MMTP.
-     */
-    public int getMmtpPid() {
-        return mMmtpPid;
-    }
-
-    /**
-     * Creates a builder for {@link IpFilterConfiguration}.
-     *
-     * @param context the context of the caller.
-     */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
-    @NonNull
-    public static Builder builder(@NonNull Context context) {
-        TunerUtils.checkTunerPermission(context);
-        return new Builder();
-    }
-
-    /**
-     * Builder for {@link IpFilterConfiguration}.
-     */
-    public static class Builder extends FilterConfiguration.Builder<Builder> {
-        private int mMmtpPid;
-
-        private Builder() {
-        }
-
-        /**
-         * Sets MMPT PID.
-         */
-        @NonNull
-        public Builder setMmtpPid(int mmtpPid) {
-            mMmtpPid = mmtpPid;
-            return this;
-        }
-
-        /**
-         * Builds a {@link IpFilterConfiguration} object.
-         */
-        @NonNull
-        public MmtpFilterConfiguration build() {
-            return new MmtpFilterConfiguration(mSettings, mMmtpPid);
-        }
-
-        @Override
-        Builder self() {
-            return this;
-        }
     }
 }
