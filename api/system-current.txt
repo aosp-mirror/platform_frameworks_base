@@ -11843,6 +11843,7 @@ package android.telephony.ims.feature {
   public abstract class ImsFeature {
     ctor public ImsFeature();
     method public abstract void changeEnabledCapabilities(android.telephony.ims.feature.CapabilityChangeRequest, android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
+    method public int getFeatureState();
     method public final int getSlotIndex();
     method public abstract void onFeatureReady();
     method public abstract void onFeatureRemoved();
