@@ -907,83 +907,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullDangerousPermissionState(int atomId, long elapsedNanos,
-            final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
-        long token = Binder.clearCallingIdentity();
-        Set<Integer> reportedUids = new HashSet<>();
-        try {
-            PackageManager pm = mContext.getPackageManager();
-
-            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
-
-            int numUsers = users.size();
-            for (int userNum = 0; userNum < numUsers; userNum++) {
-                UserHandle user = users.get(userNum).getUserHandle();
-
-                List<PackageInfo> pkgs = pm.getInstalledPackagesAsUser(
-                        PackageManager.GET_PERMISSIONS, user.getIdentifier());
-
-                int numPkgs = pkgs.size();
-                for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
-                    PackageInfo pkg = pkgs.get(pkgNum);
-
-                    if (pkg.requestedPermissions == null) {
-                        continue;
-                    }
-
-                    if (reportedUids.contains(pkg.applicationInfo.uid)) {
-                        // do not report same uid twice
-                        continue;
-                    }
-                    reportedUids.add(pkg.applicationInfo.uid);
-
-                    if (atomId == StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED
-                            && ThreadLocalRandom.current().nextFloat() > 0.2f) {
-                        continue;
-                    }
-
-                    int numPerms = pkg.requestedPermissions.length;
-                    for (int permNum  = 0; permNum < numPerms; permNum++) {
-                        String permName = pkg.requestedPermissions[permNum];
-
-                        PermissionInfo permissionInfo;
-                        int permissionFlags = 0;
-                        try {
-                            permissionInfo = pm.getPermissionInfo(permName, 0);
-                            permissionFlags =
-                                    pm.getPermissionFlags(permName, pkg.packageName, user);
-
-                        } catch (PackageManager.NameNotFoundException ignored) {
-                            continue;
-                        }
-
-                        if (permissionInfo.getProtection() != PROTECTION_DANGEROUS) {
-                            continue;
-                        }
-
-                        StatsLogEventWrapper e = new StatsLogEventWrapper(
-                                atomId, elapsedNanos, wallClockNanos);
-
-                        e.writeString(permName);
-                        e.writeInt(pkg.applicationInfo.uid);
-                        if (atomId == StatsLog.DANGEROUS_PERMISSION_STATE) {
-                            e.writeString(null);
-                        }
-                        e.writeBoolean((pkg.requestedPermissionsFlags[permNum]
-                                & REQUESTED_PERMISSION_GRANTED) != 0);
-                        e.writeInt(permissionFlags);
-
-                        pulledData.add(e);
-                    }
-                }
-            }
-        } catch (Throwable t) {
-            Log.e(TAG, "Could not read permissions", t);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
     private void pullAppOps(long elapsedNanos, final long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
@@ -1273,18 +1196,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.ROLE_HOLDER: {
                 pullRoleHolders(elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.DANGEROUS_PERMISSION_STATE: {
-                pullDangerousPermissionState(StatsLog.DANGEROUS_PERMISSION_STATE, elapsedNanos,
-                        wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED: {
-                pullDangerousPermissionState(StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED,
-                        elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

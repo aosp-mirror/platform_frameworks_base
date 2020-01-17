@@ -128,10 +128,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::ROLE_HOLDER},
          {.puller = new StatsCompanionServicePuller(android::util::ROLE_HOLDER)}},
 
-        // PermissionState.
-        {{.atomTag = android::util::DANGEROUS_PERMISSION_STATE},
-         {.puller = new StatsCompanionServicePuller(android::util::DANGEROUS_PERMISSION_STATE)}},
-
         // TrainInfo.
         {{.atomTag = android::util::TRAIN_INFO}, {.puller = new TrainInfoPuller()}},
 
@@ -167,11 +163,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::VMS_CLIENT_STATS},
          {.additiveFields = {5, 6, 7, 8, 9, 10},
           .puller = new CarStatsPuller(android::util::VMS_CLIENT_STATS)}},
-
-        // PermissionStateSampled.
-        {{.atomTag = android::util::DANGEROUS_PERMISSION_STATE_SAMPLED},
-         {.puller =
-               new StatsCompanionServicePuller(android::util::DANGEROUS_PERMISSION_STATE_SAMPLED)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {

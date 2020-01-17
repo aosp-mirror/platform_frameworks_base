@@ -301,7 +301,6 @@ public class StatsPullAtomService extends SystemService {
         registerDebugFailingElapsedClock();
         registerBuildInformation();
         registerRoleHolder();
-        registerDangerousPermissionState();
         registerTimeZoneDataInfo();
         registerExternalStorageInfo();
         registerAppsOnExternalStorageInfo();
@@ -2145,11 +2144,89 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerDangerousPermissionState() {
-        // No op.
+        int tagId = StatsLog.DANGEROUS_PERMISSION_STATE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullDangerousPermissionState(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullDangerousPermissionState() {
-        // No op.
+    private int pullDangerousPermissionState(int atomTag, List<StatsEvent> pulledData) {
+        final long token = Binder.clearCallingIdentity();
+        Set<Integer> reportedUids = new HashSet<>();
+        try {
+            PackageManager pm = mContext.getPackageManager();
+
+            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+
+            int numUsers = users.size();
+            for (int userNum = 0; userNum < numUsers; userNum++) {
+                UserHandle user = users.get(userNum).getUserHandle();
+
+                List<PackageInfo> pkgs = pm.getInstalledPackagesAsUser(
+                        PackageManager.GET_PERMISSIONS, user.getIdentifier());
+
+                int numPkgs = pkgs.size();
+                for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
+                    PackageInfo pkg = pkgs.get(pkgNum);
+
+                    if (pkg.requestedPermissions == null) {
+                        continue;
+                    }
+
+                    if (reportedUids.contains(pkg.applicationInfo.uid)) {
+                        // do not report same uid twice
+                        continue;
+                    }
+                    reportedUids.add(pkg.applicationInfo.uid);
+
+                    if (atomTag == StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED
+                            && ThreadLocalRandom.current().nextFloat() > 0.2f) {
+                        continue;
+                    }
+
+                    int numPerms = pkg.requestedPermissions.length;
+                    for (int permNum  = 0; permNum < numPerms; permNum++) {
+                        String permName = pkg.requestedPermissions[permNum];
+
+                        PermissionInfo permissionInfo;
+                        int permissionFlags = 0;
+                        try {
+                            permissionInfo = pm.getPermissionInfo(permName, 0);
+                            permissionFlags =
+                                    pm.getPermissionFlags(permName, pkg.packageName, user);
+                        } catch (PackageManager.NameNotFoundException ignored) {
+                            continue;
+                        }
+
+                        if (permissionInfo.getProtection() != PROTECTION_DANGEROUS) {
+                            continue;
+                        }
+
+                        StatsEvent.Builder e = StatsEvent.newBuilder();
+                        e.setAtomId(atomTag);
+                        e.writeString(permName);
+                        e.writeInt(pkg.applicationInfo.uid);
+                        if (atomTag == StatsLog.DANGEROUS_PERMISSION_STATE) {
+                            e.writeString("");
+                        }
+                        e.writeBoolean((pkg.requestedPermissionsFlags[permNum]
+                                & REQUESTED_PERMISSION_GRANTED) != 0);
+                        e.writeInt(permissionFlags);
+
+                        pulledData.add(e.build());
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            Log.e(TAG, "Could not read permissions", t);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerTimeZoneDataInfo() {
@@ -2277,10 +2354,12 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerDangerousPermissionStateSampled() {
-        // No op.
-    }
-
-    private void pullDangerousPermissionStateSampled() {
-        // No op.
+        int tagId = StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullDangerousPermissionState(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 }
