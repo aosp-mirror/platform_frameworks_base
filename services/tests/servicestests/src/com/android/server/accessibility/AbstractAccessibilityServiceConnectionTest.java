@@ -495,6 +495,13 @@ public class AbstractAccessibilityServiceConnectionTest {
     }
 
     @Test
+    public void getSystemActions() {
+        List<AccessibilityNodeInfo.AccessibilityAction> actions =
+                mServiceConnection.getSystemActions();
+        verify(mMockSystemActionPerformer).getSystemActions();
+    }
+
+    @Test
     public void isFingerprintGestureDetectionAvailable_hasFingerPrintSupport_returnTrue() {
         when(mMockFingerprintGestureDispatcher.isFingerprintGestureDetectionAvailable())
                 .thenReturn(true);

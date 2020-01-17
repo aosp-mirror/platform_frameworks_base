@@ -1254,6 +1254,11 @@ public final class UiAutomation {
                 }
 
                 @Override
+                public void onSystemActionsChanged() {
+                    /* do nothing */
+                }
+
+                @Override
                 public boolean onGesture(AccessibilityGestureEvent gestureEvent) {
                     /* do nothing */
                     return false;

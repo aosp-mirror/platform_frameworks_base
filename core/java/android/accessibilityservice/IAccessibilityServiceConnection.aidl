@@ -25,8 +25,10 @@ import android.os.RemoteCallback;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.accessibility.AccessibilityWindowInfo;
+import java.util.List;
 
 /**
  * Interface given to an AccessibilitySerivce to talk to the AccessibilityManagerService.
@@ -67,6 +69,7 @@ interface IAccessibilityServiceConnection {
     AccessibilityServiceInfo getServiceInfo();
 
     boolean performGlobalAction(int action);
+    List<AccessibilityNodeInfo.AccessibilityAction> getSystemActions();
 
     void disableSelf();
 

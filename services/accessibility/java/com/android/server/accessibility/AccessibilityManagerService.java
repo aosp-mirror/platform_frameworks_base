@@ -137,7 +137,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         implements AbstractAccessibilityServiceConnection.SystemSupport,
         AccessibilityUserState.ServiceInfoChangeListener,
         AccessibilityWindowManager.AccessibilityEventSender,
-        AccessibilitySecurityPolicy.AccessibilityUserManager {
+        AccessibilitySecurityPolicy.AccessibilityUserManager,
+        SystemActionPerformer.SystemActionsChangedListener {
 
     private static final boolean DEBUG = false;
 
@@ -294,7 +295,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mActivityTaskManagerService = LocalServices.getService(ActivityTaskManagerInternal.class);
         mPackageManager = mContext.getPackageManager();
         mSecurityPolicy = new AccessibilitySecurityPolicy(mContext, this);
-        mSystemActionPerformer = new SystemActionPerformer(mContext, mWindowManagerService);
+        mSystemActionPerformer =
+                new SystemActionPerformer(mContext, mWindowManagerService, null, this);
         mA11yWindowManager = new AccessibilityWindowManager(mLock, mMainHandler,
                 mWindowManagerService, this, mSecurityPolicy, this);
         mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
@@ -901,6 +903,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 handled = notifyGestureLocked(gestureEvent, true);
             }
             return handled;
+        }
+    }
+
+    /**
+     * Called when the system action list is changed.
+     */
+    @Override
+    public void onSystemActionsChanged() {
+        synchronized (mLock) {
+            AccessibilityUserState state = getCurrentUserStateLocked();
+            notifySystemActionsChangedLocked(state);
+        }
+    }
+
+    @VisibleForTesting
+    void notifySystemActionsChangedLocked(AccessibilityUserState userState) {
+        for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
+            AccessibilityServiceConnection service = userState.mBoundServices.get(i);
+            service.notifySystemActionsChangedLocked();
         }
     }
 

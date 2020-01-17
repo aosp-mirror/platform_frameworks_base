@@ -55,4 +55,6 @@ import android.view.KeyEvent;
     void onAccessibilityButtonClicked(int displayId);
 
     void onAccessibilityButtonAvailabilityChanged(boolean available);
+
+    void onSystemActionsChanged();
 }

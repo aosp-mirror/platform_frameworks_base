@@ -25,6 +25,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteCallback;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Stub implementation of IAccessibilityServiceConnection so each test doesn't need to implement
  * all of the methods
@@ -83,6 +86,10 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public boolean performGlobalAction(int action) {
         return false;
+    }
+
+    public List<AccessibilityNodeInfo.AccessibilityAction> getSystemActions() {
+        return Collections.emptyList();
     }
 
     public void disableSelf() {}

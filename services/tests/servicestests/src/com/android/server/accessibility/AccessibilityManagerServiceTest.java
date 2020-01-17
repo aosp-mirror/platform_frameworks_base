@@ -16,16 +16,28 @@
 
 package com.android.server.accessibility;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.Manifest;
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.IAccessibilityServiceClient;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Icon;
+import android.os.IBinder;
+import android.os.UserHandle;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
@@ -34,6 +46,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService.AccessibilityDisplayListener;
+import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -59,6 +72,14 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     private static final AccessibilityAction NEW_ACCESSIBILITY_ACTION =
             new AccessibilityAction(ACTION_ID, LABEL);
 
+    static final ComponentName COMPONENT_NAME = new ComponentName(
+            "com.android.server.accessibility", "AccessibilityManagerServiceTest");
+    static final int SERVICE_ID = 42;
+
+    @Mock private Context mMockContext;
+    @Mock private AccessibilityServiceInfo mMockServiceInfo;
+    @Mock private ResolveInfo mMockResolveInfo;
+    @Mock private AbstractAccessibilityServiceConnection.SystemSupport mMockSystemSupport;
     @Mock private PackageManager mMockPackageManager;
     @Mock private WindowManagerInternal mMockWindowManagerService;
     @Mock private AccessibilitySecurityPolicy mMockSecurityPolicy;
@@ -66,7 +87,12 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @Mock private AccessibilityWindowManager mMockA11yWindowManager;
     @Mock private AccessibilityDisplayListener mMockA11yDisplayListener;
     @Mock private ActivityTaskManagerInternal mMockActivityTaskManagerInternal;
+    @Mock private IBinder mMockBinder;
+    @Mock private IAccessibilityServiceClient mMockServiceClient;
+    private AccessibilityUserState mUserState;
 
+    private MessageCapturingHandler mHandler = new MessageCapturingHandler(null);
+    private AccessibilityServiceConnection mAccessibilityServiceConnection;
     private AccessibilityManagerService mA11yms;
 
     @Override
@@ -74,9 +100,11 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         MockitoAnnotations.initMocks(this);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
-        LocalServices.addService(WindowManagerInternal.class, mMockWindowManagerService);
+        LocalServices.addService(
+                WindowManagerInternal.class, mMockWindowManagerService);
         LocalServices.addService(
                 ActivityTaskManagerInternal.class, mMockActivityTaskManagerInternal);
+
         mA11yms = new AccessibilityManagerService(
             InstrumentationRegistry.getContext(),
             mMockPackageManager,
@@ -84,6 +112,35 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
             mMockSystemActionPerformer,
             mMockA11yWindowManager,
             mMockA11yDisplayListener);
+    }
+
+    private void setupAccessibilityServiceConnection() {
+        when(mMockContext.getSystemService(Context.DISPLAY_SERVICE)).thenReturn(
+                InstrumentationRegistry.getContext().getSystemService(
+                        Context.DISPLAY_SERVICE));
+        mUserState = new AccessibilityUserState(UserHandle.USER_SYSTEM, mMockContext, mA11yms);
+
+        when(mMockServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
+        mMockResolveInfo.serviceInfo = mock(ServiceInfo.class);
+        mMockResolveInfo.serviceInfo.applicationInfo = mock(ApplicationInfo.class);
+
+        when(mMockBinder.queryLocalInterface(any())).thenReturn(mMockServiceClient);
+        mAccessibilityServiceConnection = new AccessibilityServiceConnection(
+                mUserState,
+                mMockContext,
+                COMPONENT_NAME,
+                mMockServiceInfo,
+                SERVICE_ID,
+                mHandler,
+                new Object(),
+                mMockSecurityPolicy,
+                mMockSystemSupport,
+                mMockWindowManagerService,
+                mMockSystemActionPerformer,
+                mMockA11yWindowManager,
+                mMockActivityTaskManagerInternal);
+        mAccessibilityServiceConnection.bindLocked();
+        mAccessibilityServiceConnection.onServiceConnected(COMPONENT_NAME, mMockBinder);
     }
 
     @SmallTest
@@ -124,5 +181,12 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     public void testUnregisterSystemAction() throws Exception {
         mA11yms.unregisterSystemAction(ACTION_ID);
         verify(mMockSystemActionPerformer).unregisterSystemAction(ACTION_ID);
+    }
+
+    @SmallTest
+    public void testOnSystemActionsChanged() throws Exception {
+        setupAccessibilityServiceConnection();
+        mA11yms.notifySystemActionsChangedLocked(mUserState);
+        verify(mMockServiceClient).onSystemActionsChanged();
     }
 }
