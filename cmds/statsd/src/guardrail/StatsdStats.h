@@ -164,9 +164,6 @@ public:
     // Maximum number of pushed atoms statsd stats will track above kMaxPushedAtomId.
     static const int kMaxNonPlatformPushedAtoms = 100;
 
-    // Max platform atom tag number.
-    static const int32_t kMaxPlatformAtomTag = 100000;
-
     // Vendor pulled atom start id.
     static const int32_t kVendorPulledAtomStartTag = 150000;
 

@@ -21,7 +21,6 @@
 
 #include <android/os/IPullAtomCallback.h>
 #include <android/os/IStatsCompanionService.h>
-#include <android/os/IStatsPullerCallback.h>
 #include <cutils/log.h>
 #include <math.h>
 #include <stdint.h>
@@ -38,7 +37,6 @@
 #include "PowerStatsPuller.h"
 #include "ResourceHealthManagerPuller.h"
 #include "StatsCallbackPuller.h"
-#include "StatsCallbackPullerDeprecated.h"
 #include "StatsCompanionServicePuller.h"
 #include "SubsystemSleepStatePuller.h"
 #include "TrainInfoPuller.h"
@@ -343,21 +341,6 @@ int StatsPullerManager::ClearPullerCacheIfNecessary(int64_t timestampNs) {
     return totalCleared;
 }
 
-// Deprecated, remove after puller API is complete.
-void StatsPullerManager::RegisterPullerCallback(int32_t atomTag,
-        const sp<IStatsPullerCallback>& callback) {
-    AutoMutex _l(mLock);
-    // Platform pullers cannot be changed.
-    if (!isVendorPulledAtom(atomTag)) {
-        VLOG("RegisterPullerCallback: atom tag %d is not vendor pulled", atomTag);
-        return;
-    }
-    VLOG("RegisterPullerCallback: adding puller for tag %d", atomTag);
-    StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/true);
-    kAllPullAtomInfo[{.atomTag = atomTag}] = {
-            .puller = new StatsCallbackPullerDeprecated(atomTag, callback)};
-}
-
 void StatsPullerManager::RegisterPullAtomCallback(const int uid, const int32_t atomTag,
                                                   const int64_t coolDownNs, const int64_t timeoutNs,
                                                   const vector<int32_t>& additiveFields,
@@ -372,16 +355,6 @@ void StatsPullerManager::RegisterPullAtomCallback(const int uid, const int32_t a
             .puller = new StatsCallbackPuller(atomTag, callback, timeoutNs),
             .pullTimeoutNs = timeoutNs,
     };
-}
-
-void StatsPullerManager::UnregisterPullerCallback(int32_t atomTag) {
-    AutoMutex _l(mLock);
-    // Platform pullers cannot be changed.
-    if (!isVendorPulledAtom(atomTag)) {
-        return;
-    }
-    StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/false);
-    kAllPullAtomInfo.erase({.atomTag = atomTag});
 }
 
 void StatsPullerManager::UnregisterPullAtomCallback(const int uid, const int32_t atomTag) {

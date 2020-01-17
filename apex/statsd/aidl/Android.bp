@@ -23,7 +23,6 @@ filegroup {
         "android/os/IPullAtomResultReceiver.aidl",
         "android/os/IStatsCompanionService.aidl",
         "android/os/IStatsd.aidl",
-        "android/os/IStatsPullerCallback.aidl",
         "android/util/StatsEventParcel.aidl",
     ],
 }
