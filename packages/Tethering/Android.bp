@@ -34,7 +34,7 @@ java_defaults {
         "framework-tethering",
         "unsupportedappusage",
     ],
-
+    plugins: ["java_api_finder"],
     manifest: "AndroidManifestBase.xml",
 }
 
