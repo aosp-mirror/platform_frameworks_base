@@ -1836,10 +1836,8 @@ public class ServiceState implements Parcelable {
      * Get all of the available network registration info.
      *
      * @return List of {@link NetworkRegistrationInfo}
-     * @hide
      */
     @NonNull
-    @SystemApi
     public List<NetworkRegistrationInfo> getNetworkRegistrationInfoList() {
         synchronized (mNetworkRegistrationInfos) {
             List<NetworkRegistrationInfo> newList = new ArrayList<>();
