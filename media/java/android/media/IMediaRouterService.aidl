@@ -46,6 +46,7 @@ interface IMediaRouterService {
 
     // Methods for media router 2
     List<MediaRoute2Info> getSystemRoutes();
+    RoutingSessionInfo getSystemSessionInfo();
     void registerClient2(IMediaRouter2Client client, String packageName);
     void unregisterClient2(IMediaRouter2Client client);
     void sendControlRequest(IMediaRouter2Client client, in MediaRoute2Info route,

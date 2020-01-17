@@ -29,9 +29,6 @@ public class MediaRouter2Utils {
     static final String TAG = "MR2Utils";
     static final String SEPARATOR = ":";
 
-    /**
-     * @hide
-     */
     @NonNull
     public static String toUniqueId(@NonNull String providerId, @NonNull String id) {
         if (TextUtils.isEmpty(providerId)) {
@@ -49,8 +46,6 @@ public class MediaRouter2Utils {
     /**
      * Gets provider ID from unique ID.
      * If the corresponding provider ID could not be generated, it will return null.
-     *
-     * @hide
      */
     @Nullable
     public static String getProviderId(@NonNull String uniqueId) {
@@ -75,8 +70,6 @@ public class MediaRouter2Utils {
     /**
      * Gets the original ID (i.e. non-unique route/session ID) from unique ID.
      * If the corresponding ID could not be generated, it will return null.
-     *
-     * @hide
      */
     @Nullable
     public static String getOriginalId(@NonNull String uniqueId) {

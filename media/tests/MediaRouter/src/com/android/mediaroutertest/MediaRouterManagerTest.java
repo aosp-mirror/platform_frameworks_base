@@ -227,7 +227,7 @@ public class MediaRouterManagerTest {
 
         mManager.selectRoute(mPackageName, routeToSelect);
         assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
-        assertEquals(1, mManager.getActiveSessions().size());
+        assertEquals(2, mManager.getActiveSessions().size());
     }
 
     @Test

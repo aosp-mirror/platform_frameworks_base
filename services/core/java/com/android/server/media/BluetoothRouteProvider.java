@@ -17,6 +17,7 @@
 package com.android.server.media;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -58,6 +59,7 @@ class BluetoothRouteProvider {
     private final BroadcastReceiver mBroadcastReceiver = new BluetoothBroadcastReceiver();
     private final BluetoothProfileListener mProfileListener = new BluetoothProfileListener();
 
+    // TODO: The mActiveDevice should be set when BluetoothRouteProvider is created.
     private BluetoothDevice mActiveDevice = null;
 
     static synchronized BluetoothRouteProvider getInstance(@NonNull Context context,
@@ -123,6 +125,14 @@ class BluetoothRouteProvider {
             routes.add(btRoute.route);
         }
         return routes;
+    }
+
+    @Nullable String getActiveDeviceAddress() {
+        BluetoothDevice device = mActiveDevice;
+        if (device == null) {
+            return null;
+        }
+        return device.getAddress();
     }
 
     private void notifyBluetoothRoutesUpdated() {
@@ -281,8 +291,8 @@ class BluetoothRouteProvider {
                             setRouteConnectionStateForDevice(device,
                                     MediaRoute2Info.CONNECTION_STATE_CONNECTED);
                         }
-                        notifyBluetoothRoutesUpdated();
                         mActiveDevice = device;
+                        notifyBluetoothRoutesUpdated();
                     }
                     break;
                 case BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED:
