@@ -30,6 +30,7 @@ import android.annotation.StringDef;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
@@ -3930,6 +3931,7 @@ public abstract class Context {
      */
     @SystemApi
     @TestApi
+    @SuppressLint("ServiceName")
     public static final String STATUS_BAR_SERVICE = "statusbar";
 
     /**
@@ -4024,6 +4026,7 @@ public abstract class Context {
     public static final String NETWORK_STATS_SERVICE = "netstats";
     /** {@hide} */
     @SystemApi
+    @SuppressLint("ServiceName")
     public static final String NETWORK_POLICY_SERVICE = "netpolicy";
     /** {@hide} */
     public static final String NETWORK_WATCHLIST_SERVICE = "network_watchlist";
@@ -4379,6 +4382,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     @TestApi
+    @SuppressLint("ServiceName")  // TODO: This should be renamed to CONTENT_CAPTURE_SERVICE
     public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
 
     /**
@@ -4474,6 +4478,7 @@ public abstract class Context {
      * @hide
      */
     @TestApi
+    @SuppressLint("ServiceName")  // TODO: This should be renamed to DEVICE_IDLE_SERVICE
     public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
 
     /**
@@ -4483,6 +4488,7 @@ public abstract class Context {
      * @hide
      */
     @TestApi
+    @SuppressLint("ServiceName")  // TODO: This should be renamed to POWER_WHITELIST_SERVICE
     public static final String POWER_WHITELIST_MANAGER = "power_whitelist";
 
     /**
@@ -5053,6 +5059,7 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
+    @SuppressLint("ServiceName")
     public static final String BATTERY_STATS_SERVICE = "batterystats";
 
     /**
