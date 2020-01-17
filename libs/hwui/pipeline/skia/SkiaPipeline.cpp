@@ -458,9 +458,15 @@ void SkiaPipeline::renderFrameImpl(const SkRect& clip,
                                    const SkMatrix& preTransform) {
     SkAutoCanvasRestore saver(canvas, true);
     auto clipRestriction = preTransform.mapRect(clip).roundOut();
-    canvas->androidFramework_setDeviceClipRestriction(clipRestriction);
-    canvas->drawAnnotation(SkRect::Make(clipRestriction), "AndroidDeviceClipRestriction",
-        nullptr);
+    if (CC_UNLIKELY(mCaptureMode == CaptureMode::SingleFrameSKP
+         || mCaptureMode == CaptureMode::MultiFrameSKP)) {
+        canvas->drawAnnotation(SkRect::Make(clipRestriction), "AndroidDeviceClipRestriction",
+            nullptr);
+    } else {
+        // clip drawing to dirty region only when not recording SKP files (which should contain all
+        // draw ops on every frame)
+        canvas->androidFramework_setDeviceClipRestriction(clipRestriction);
+    }
     canvas->concat(preTransform);
 
     // STOPSHIP: Revert, temporary workaround to clear always F16 frame buffer for b/74976293
