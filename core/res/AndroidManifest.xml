@@ -2090,6 +2090,11 @@
     <permission android:name="android.permission.READ_ACTIVE_EMERGENCY_SESSION"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows listen permission to always reported signal strength.
+         @hide Used internally. -->
+    <permission android:name="android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH"
+        android:protectionLevel="signature|telephony" />
+
     <!-- @SystemApi Protects the ability to register any PhoneAccount with
          PhoneAccount#CAPABILITY_SIM_SUBSCRIPTION. This capability indicates that the PhoneAccount
          corresponds to a device SIM.
