@@ -43,12 +43,14 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2;
+import android.media.MediaRouter2.OnCreateSessionListener;
 import android.media.MediaRouter2.RouteCallback;
 import android.media.MediaRouter2.RoutingController;
 import android.media.MediaRouter2.SessionCallback;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -79,6 +81,9 @@ public class MediaRouter2Test {
     private Executor mExecutor;
 
     private static final int TIMEOUT_MS = 5000;
+
+    private static final String TEST_KEY = "test_key";
+    private static final String TEST_VALUE = "test_value";
 
     @Before
     public void setUp() throws Exception {
@@ -322,6 +327,74 @@ public class MediaRouter2Test {
 
         } finally {
             releaseControllers(createdControllers);
+            mRouter2.unregisterRouteCallback(routeCallback);
+            mRouter2.unregisterSessionCallback(sessionCallback);
+        }
+    }
+
+    @Test
+    public void testSetOnCreateSessionListener() throws Exception {
+        final List<String> sampleRouteFeature = new ArrayList<>();
+        sampleRouteFeature.add(FEATURE_SAMPLE);
+
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutes(sampleRouteFeature);
+        MediaRoute2Info route = routes.get(ROUTE_ID1);
+        assertNotNull(route);
+
+        final Bundle createSessionHints = new Bundle();
+        createSessionHints.putString(TEST_KEY, TEST_VALUE);
+        final OnCreateSessionListener listener = new OnCreateSessionListener() {
+            @Override
+            public Bundle onCreateSession(MediaRoute2Info route) {
+                return createSessionHints;
+            }
+        };
+
+        final CountDownLatch successLatch = new CountDownLatch(1);
+        final CountDownLatch failureLatch = new CountDownLatch(1);
+        final List<RoutingController> controllers = new ArrayList<>();
+
+        // Create session with this route
+        SessionCallback sessionCallback = new SessionCallback() {
+            @Override
+            public void onSessionCreated(RoutingController controller) {
+                assertNotNull(controller);
+                assertTrue(createRouteMap(controller.getSelectedRoutes()).containsKey(ROUTE_ID1));
+
+                // The SampleMediaRoute2ProviderService supposed to set control hints
+                // with the given creationSessionHints.
+                Bundle controlHints = controller.getControlHints();
+                assertNotNull(controlHints);
+                assertTrue(controlHints.containsKey(TEST_KEY));
+                assertEquals(TEST_VALUE, controlHints.getString(TEST_KEY));
+
+                controllers.add(controller);
+                successLatch.countDown();
+            }
+
+            @Override
+            public void onSessionCreationFailed(MediaRoute2Info requestedRoute) {
+                failureLatch.countDown();
+            }
+        };
+
+        // TODO: Remove this once the MediaRouter2 becomes always connected to the service.
+        RouteCallback routeCallback = new RouteCallback();
+        mRouter2.registerRouteCallback(mExecutor, routeCallback, RouteDiscoveryPreference.EMPTY);
+
+        try {
+            mRouter2.registerSessionCallback(mExecutor, sessionCallback);
+
+            // The SampleMediaRoute2ProviderService supposed to set control hints
+            // with the given creationSessionHints.
+            mRouter2.setOnCreateSessionListener(listener);
+            mRouter2.requestCreateSession(route);
+            assertTrue(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
+            // onSessionCreationFailed should not be called.
+            assertFalse(failureLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        } finally {
+            releaseControllers(controllers);
             mRouter2.unregisterRouteCallback(routeCallback);
             mRouter2.unregisterSessionCallback(sessionCallback);
         }

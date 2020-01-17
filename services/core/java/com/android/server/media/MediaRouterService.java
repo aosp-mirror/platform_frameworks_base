@@ -42,6 +42,7 @@ import android.media.RemoteDisplayState.RemoteDisplayInfo;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -460,8 +461,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void requestCreateSession(IMediaRouter2Client client, MediaRoute2Info route,
-            int requestId) {
-        mService2.requestCreateSession(client, route, requestId);
+            int requestId, Bundle sessionHints) {
+        mService2.requestCreateSession(client, route, requestId, sessionHints);
     }
 
     // Binder call

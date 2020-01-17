@@ -26,6 +26,7 @@ import android.media.IMediaRoute2ProviderClient;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
 import android.media.RoutingSessionInfo;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
@@ -73,9 +74,11 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     @Override
-    public void requestCreateSession(String packageName, String routeId, long requestId) {
+    public void requestCreateSession(String packageName, String routeId, long requestId,
+            Bundle sessionHints) {
         if (mConnectionReady) {
-            mActiveConnection.requestCreateSession(packageName, routeId, requestId);
+            mActiveConnection.requestCreateSession(
+                    packageName, routeId, requestId, sessionHints);
             updateBinding();
         }
     }
@@ -427,9 +430,10 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             mClient.dispose();
         }
 
-        public void requestCreateSession(String packageName, String routeId, long requestId) {
+        public void requestCreateSession(String packageName, String routeId, long requestId,
+                Bundle sessionHints) {
             try {
-                mProvider.requestCreateSession(packageName, routeId, requestId);
+                mProvider.requestCreateSession(packageName, routeId, requestId, sessionHints);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to deliver request to create a session.", ex);
             }

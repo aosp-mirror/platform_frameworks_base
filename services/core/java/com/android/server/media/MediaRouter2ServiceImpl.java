@@ -22,6 +22,7 @@ import static android.media.MediaRouter2Utils.getProviderId;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -178,14 +179,14 @@ class MediaRouter2ServiceImpl {
     }
 
     public void requestCreateSession(IMediaRouter2Client client, MediaRoute2Info route,
-            int requestId) {
+            int requestId, Bundle sessionHints) {
         Objects.requireNonNull(client, "client must not be null");
         Objects.requireNonNull(route, "route must not be null");
 
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                requestCreateSessionLocked(client, route, requestId);
+                requestCreateSessionLocked(client, route, requestId, sessionHints);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -446,7 +447,7 @@ class MediaRouter2ServiceImpl {
     }
 
     private void requestCreateSessionLocked(@NonNull IMediaRouter2Client client,
-            @NonNull MediaRoute2Info route, long requestId) {
+            @NonNull MediaRoute2Info route, long requestId, @Nullable Bundle sessionHints) {
         final IBinder binder = client.asBinder();
         final Client2Record clientRecord = mAllClientRecords.get(binder);
 
@@ -458,7 +459,8 @@ class MediaRouter2ServiceImpl {
         if (clientRecord != null) {
             clientRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::requestCreateSessionOnHandler,
-                            clientRecord.mUserRecord.mHandler, clientRecord, route, requestId));
+                            clientRecord.mUserRecord.mHandler,
+                            clientRecord, route, requestId, sessionHints));
         }
     }
 
@@ -617,9 +619,9 @@ class MediaRouter2ServiceImpl {
             }
             long uniqueRequestId = toUniqueRequestId(managerRecord.mClientId, requestId);
             if (clientRecord != null && managerRecord.mTrusted) {
-                //TODO: select route feature properly
+                //TODO: Use client's OnCreateSessionListener to send proper session hints.
                 requestCreateSessionLocked(clientRecord.mClient, route,
-                        uniqueRequestId);
+                        uniqueRequestId, null /* sessionHints */);
             }
         }
     }
@@ -980,7 +982,7 @@ class MediaRouter2ServiceImpl {
         }
 
         private void requestCreateSessionOnHandler(Client2Record clientRecord,
-                MediaRoute2Info route, long requestId) {
+                MediaRoute2Info route, long requestId, @Nullable Bundle sessionHints) {
 
             final MediaRoute2Provider provider = findProvider(route.getProviderId());
             if (provider == null) {
@@ -996,7 +998,7 @@ class MediaRouter2ServiceImpl {
             mSessionCreationRequests.add(request);
 
             provider.requestCreateSession(clientRecord.mPackageName, route.getOriginalId(),
-                    requestId);
+                    requestId, sessionHints);
         }
 
         private void selectRouteOnHandler(@NonNull Client2Record clientRecord,
