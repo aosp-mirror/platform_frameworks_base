@@ -586,7 +586,7 @@ java_library {
 genrule {
     name: "framework-statslog-gen",
     tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --java $(out)",
+    cmd: "$(location stats-log-api-gen) --java $(out) --worksource",
     out: ["android/util/StatsLogInternal.java"],
 }
 

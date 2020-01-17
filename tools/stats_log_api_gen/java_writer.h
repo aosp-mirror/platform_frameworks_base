@@ -31,8 +31,9 @@ namespace stats_log_api_gen {
 using namespace std;
 
 int write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl,
-                                    const string& moduleName, const string& javaClass,
-                                    const string& javaPackage, const bool supportQ);
+                         const string& moduleName, const string& javaClass,
+                         const string& javaPackage, const bool supportQ,
+                         const bool supportWorkSource);
 
 }  // namespace stats_log_api_gen
 }  // namespace android
