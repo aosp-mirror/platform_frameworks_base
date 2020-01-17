@@ -38,8 +38,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeoutException;
 
 class SystemPreparer extends ExternalResource {
-    private static final long REBOOT_SLEEP_MS = 30000;
-    private static final long OVERLAY_ENABLE_TIMEOUT_MS = 20000;
+    private static final long OVERLAY_ENABLE_TIMEOUT_MS = 30000;
 
     // The paths of the files pushed onto the device through this rule.
     private ArrayList<String> mPushedFiles = new ArrayList<>();
@@ -59,6 +58,7 @@ class SystemPreparer extends ExternalResource {
     SystemPreparer pushResourceFile(String resourcePath,
             String outputPath) throws DeviceNotAvailableException, IOException {
         final ITestDevice device = mDeviceProvider.getDevice();
+        device.executeAdbCommand("remount");
         assertTrue(device.pushFile(copyResourceToTemp(resourcePath), outputPath));
         mPushedFiles.add(outputPath);
         return this;
@@ -77,7 +77,7 @@ class SystemPreparer extends ExternalResource {
 
     /** Sets the enable state of an overlay pacakage. */
     SystemPreparer setOverlayEnabled(String packageName, boolean enabled)
-            throws ExecutionException, TimeoutException {
+            throws ExecutionException, DeviceNotAvailableException {
         final ITestDevice device = mDeviceProvider.getDevice();
 
         // Wait for the overlay to change its enabled state.
@@ -86,8 +86,10 @@ class SystemPreparer extends ExternalResource {
                 device.executeShellCommand(String.format("cmd overlay %s %s",
                         enabled ? "enable" : "disable", packageName));
 
-                final String pattern = (enabled ? "[x]" : "[ ]") + " " + packageName;
-                if (device.executeShellCommand("cmd overlay list").contains(pattern)) {
+                final String result = device.executeShellCommand("cmd overlay dump " + packageName);
+                final int startIndex = result.indexOf("mIsEnabled");
+                final int endIndex = result.indexOf('\n', startIndex);
+                if (result.substring(startIndex, endIndex).contains((enabled) ? "true" : "false")) {
                     return true;
                 }
             }
@@ -98,6 +100,8 @@ class SystemPreparer extends ExternalResource {
         try {
             enabledListener.get(OVERLAY_ENABLE_TIMEOUT_MS, MILLISECONDS);
         } catch (InterruptedException ignored) {
+        } catch (TimeoutException e) {
+            throw new IllegalStateException(device.executeShellCommand("cmd overlay list"));
         }
 
         return this;
@@ -106,14 +110,7 @@ class SystemPreparer extends ExternalResource {
     /** Restarts the device and waits until after boot is completed. */
     SystemPreparer reboot() throws DeviceNotAvailableException {
         final ITestDevice device = mDeviceProvider.getDevice();
-        device.executeShellCommand("stop");
-        device.executeShellCommand("start");
-        try {
-            // Sleep until the device is ready for test execution.
-            Thread.sleep(REBOOT_SLEEP_MS);
-        } catch (InterruptedException ignored) {
-        }
-
+        device.reboot();
         return this;
     }
 
@@ -141,12 +138,14 @@ class SystemPreparer extends ExternalResource {
     protected void after() {
         final ITestDevice device = mDeviceProvider.getDevice();
         try {
+            device.executeAdbCommand("remount");
             for (final String file : mPushedFiles) {
                 device.deleteFile(file);
             }
             for (final String packageName : mInstalledPackages) {
                 device.uninstallPackage(packageName);
             }
+            device.reboot();
         } catch (DeviceNotAvailableException e) {
             Assert.fail(e.toString());
         }
