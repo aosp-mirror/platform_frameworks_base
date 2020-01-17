@@ -266,12 +266,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     }
 
     private void reset() {
-        ArrayList<String> tiles = new ArrayList<>();
-        String defTiles = mContext.getString(R.string.quick_settings_tiles_default);
-        for (String tile : defTiles.split(",")) {
-            tiles.add(tile);
-        }
-        mTileAdapter.resetTileSpecs(mHost, tiles);
+        mTileAdapter.resetTileSpecs(mHost, QSTileHost.getDefaultSpecs(mContext));
     }
 
     private void setTileSpecs() {

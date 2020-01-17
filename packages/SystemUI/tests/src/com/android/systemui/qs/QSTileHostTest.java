@@ -44,6 +44,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -73,6 +74,7 @@ import javax.inject.Provider;
 public class QSTileHostTest extends SysuiTestCase {
 
     private static String MOCK_STATE_STRING = "MockState";
+    private static final String CUSTOM_TILE_SPEC = "custom(TEST_PKG/.TEST_CLS)";
 
     @Mock
     private StatusBarIconController mIconController;
@@ -92,6 +94,8 @@ public class QSTileHostTest extends SysuiTestCase {
     private QSTile.State mMockState;
     @Mock
     private StatusBar mStatusBar;
+    @Mock
+    private CustomTile mCustomTile;
 
     private Handler mHandler;
     private TestableLooper mLooper;
@@ -103,9 +107,8 @@ public class QSTileHostTest extends SysuiTestCase {
         mLooper = TestableLooper.get(this);
         mHandler = new Handler(mLooper.getLooper());
         mQSTileHost = new TestQSTileHost(mContext, mIconController, mDefaultFactory, mHandler,
-                mLooper.getLooper(),
-                mPluginManager, mTunerService, mAutoTiles, mDumpController, mBroadcastDispatcher,
-                mStatusBar);
+                mLooper.getLooper(), mPluginManager, mTunerService, mAutoTiles, mDumpController,
+                mBroadcastDispatcher, mStatusBar);
         setUpTileFactory();
         Settings.Secure.putStringForUser(mContext.getContentResolver(), QSTileHost.TILES_SETTING,
                 "", ActivityManager.getCurrentUser());
@@ -121,10 +124,13 @@ public class QSTileHostTest extends SysuiTestCase {
                             return new TestTile1(mQSTileHost);
                         case "spec2":
                             return new TestTile2(mQSTileHost);
+                        case CUSTOM_TILE_SPEC:
+                            return mCustomTile;
                         default:
                             return null;
                     }
                 });
+        when(mCustomTile.isAvailable()).thenReturn(true);
     }
 
     @Test
@@ -171,6 +177,39 @@ public class QSTileHostTest extends SysuiTestCase {
                 + TestTile2.class.getSimpleName() + ":\n"
                 + "    " + MOCK_STATE_STRING + "\n";
         assertEquals(output, w.getBuffer().toString());
+    }
+
+    @Test
+    public void testDefault() {
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.string.quick_settings_tiles_default, "spec1");
+        mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "default");
+        assertEquals(1, mQSTileHost.getTiles().size());
+        QSTile element = CollectionUtils.firstOrNull(mQSTileHost.getTiles());
+        assertTrue(element instanceof TestTile1);
+    }
+
+    @Test
+    public void testDefaultAndExtra() {
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.string.quick_settings_tiles_default, "spec1");
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.string.config_defaultExtraQuickSettingsTiles, "spec2");
+        mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "default");
+        assertEquals(2, mQSTileHost.getTiles().size());
+        QSTile[] elements = mQSTileHost.getTiles().toArray(new QSTile[0]);
+        assertTrue(elements[0] instanceof TestTile1);
+        assertTrue(elements[1] instanceof TestTile2);
+    }
+
+    @Test
+    public void testExtraCustom() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.string.config_defaultExtraQuickSettingsTiles,
+                CUSTOM_TILE_SPEC);
+        mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "default");
+        assertEquals(1, mQSTileHost.getTiles().size());
+        assertEquals(mCustomTile, CollectionUtils.firstOrNull(mQSTileHost.getTiles()));
     }
 
     private static class TestQSTileHost extends QSTileHost {
