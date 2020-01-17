@@ -2425,16 +2425,6 @@ public final class SmsManager {
     /** Intent extra name for HTTP status code for MMS HTTP failure in integer type */
     public static final String EXTRA_MMS_HTTP_STATUS = "android.telephony.extra.MMS_HTTP_STATUS";
 
-    /** Represents the received SMS message for importing {@hide} */
-    public static final int SMS_TYPE_INCOMING = 0;
-    /** Represents the sent SMS message for importing {@hide} */
-    public static final int SMS_TYPE_OUTGOING = 1;
-
-    /** Message status property: whether the message has been seen. 1 means seen, 0 not {@hide} */
-    public static final String MESSAGE_STATUS_SEEN = "seen";
-    /** Message status property: whether the message has been read. 1 means read, 0 not {@hide} */
-    public static final String MESSAGE_STATUS_READ = "read";
-
     /**
      * Get carrier-dependent MMS configuration values.
      *
