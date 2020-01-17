@@ -7983,12 +7983,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return false;
         }
-        if (parent) {
-            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
-                    DeviceAdminInfo.USES_POLICY_DISABLE_CAMERA, parent);
-            enforceProfileOwnerOfOrganizationOwnedDevice(ap);
-        }
         synchronized (getLockObject()) {
+            if (parent) {
+                final ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                        DeviceAdminInfo.USES_POLICY_DISABLE_CAMERA, parent);
+                enforceProfileOwnerOfOrganizationOwnedDevice(ap);
+            }
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
                 return (admin != null) ? admin.disableCamera : false;
