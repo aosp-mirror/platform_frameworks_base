@@ -113,6 +113,7 @@ public class WindowMagnificationController implements View.OnClickListener,
         if (mMirrorView != null) {
             return;
         }
+        setInitialStartBounds();
         createOverlayWindow();
     }
 
@@ -178,9 +179,20 @@ public class WindowMagnificationController implements View.OnClickListener,
         }
     }
 
-    private void createMirrorWindow() {
-        setInitialStartBounds();
+    /**
+     * Called when the configuration has changed, and it updates window magnification UI.
+     *
+     * @param configDiff a bit mask of the differences between the configurations
+     */
+    void onConfigurationChanged(int configDiff) {
+        // TODO(b/145780606): update toggle button UI.
+        if (mMirrorView != null) {
+            mWm.removeView(mMirrorView);
+            createMirrorWindow();
+        }
+    }
 
+    private void createMirrorWindow() {
         // The window should be the size the mirrored surface will be but also add room for the
         // border and the drag handle.
         int dragViewHeight = (int) mContext.getResources().getDimension(

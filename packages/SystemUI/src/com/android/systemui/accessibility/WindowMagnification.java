@@ -17,6 +17,8 @@
 package com.android.systemui.accessibility;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.provider.Settings;
@@ -35,10 +37,25 @@ public class WindowMagnification extends SystemUI {
     private WindowMagnificationController mWindowMagnificationController;
     private final Handler mHandler;
 
+    private Configuration mLastConfiguration;
+
     @Inject
     public WindowMagnification(Context context, @Main Handler mainHandler) {
         super(context);
         mHandler = mainHandler;
+        mLastConfiguration = new Configuration(context.getResources().getConfiguration());
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        final int configDiff = newConfig.diff(mLastConfiguration);
+        if ((configDiff & ActivityInfo.CONFIG_DENSITY) == 0) {
+            return;
+        }
+        mLastConfiguration.setTo(newConfig);
+        if (mWindowMagnificationController != null) {
+            mWindowMagnificationController.onConfigurationChanged(configDiff);
+        }
     }
 
     @Override
