@@ -24,8 +24,8 @@ namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-// When purgeable is INVALID_TIME it won't be logged at all.
-#define INVALID_TIME -1
+// When purgeable is INVALID_MEMORY_SIZE it won't be logged at all.
+#define INVALID_MEMORY_SIZE -1
 
 /**
  * Skia invokes the following SkTraceMemoryDump functions:
@@ -42,10 +42,10 @@ namespace skiapipeline {
  * "GPU Memory" category.
  */
 static std::unordered_map<const char*, const char*> sResourceMap = {
-        {"malloc", "Graphics CPU Memory"},          // taken from setMemoryBacking(backingType)
-        {"gl_texture", "Graphics Texture Memory"},  // taken from setMemoryBacking(backingType)
+        {"malloc", "HWUI CPU Memory"},          // taken from setMemoryBacking(backingType)
+        {"gl_texture", "HWUI Texture Memory"},  // taken from setMemoryBacking(backingType)
         {"Texture",
-         "Graphics Texture Memory"},  // taken from dumpStringValue(value, valueName="type")
+         "HWUI Texture Memory"},  // taken from dumpStringValue(value, valueName="type")
         // Uncomment categories below to split "GPU Memory" into more brackets for debugging.
         /*{"vk_buffer", "vk_buffer"},
         {"gl_renderbuffer", "gl_renderbuffer"},
@@ -105,10 +105,10 @@ void ATraceMemoryDump::startFrame() {
         // Once a category is observed in at least one frame, it is always reported in subsequent
         // frames (even if it is 0). Not logging a category to ATRACE would mean its value has not
         // changed since the previous frame, which is not what we want.
-        it.second.time = 0;
-        // If purgeableTime is INVALID_TIME, then logTraces won't log it at all.
-        if (it.second.purgeableTime != INVALID_TIME) {
-            it.second.purgeableTime = 0;
+        it.second.memory = 0;
+        // If purgeableMemory is INVALID_MEMORY_SIZE, then logTraces won't log it at all.
+        if (it.second.purgeableMemory != INVALID_MEMORY_SIZE) {
+            it.second.purgeableMemory = 0;
         }
     }
 }
@@ -119,12 +119,15 @@ void ATraceMemoryDump::startFrame() {
 void ATraceMemoryDump::logTraces() {
     // Accumulate data from last dumpName
     recordAndResetCountersIfNeeded("");
+    uint64_t hwui_all_frame_memory = 0;
     for (auto& it : mCurrentValues) {
-        ATRACE_INT64(it.first.c_str(), it.second.time);
-        if (it.second.purgeableTime != INVALID_TIME) {
-            ATRACE_INT64((std::string("Purgeable ") + it.first).c_str(), it.second.purgeableTime);
+        hwui_all_frame_memory += it.second.memory;
+        ATRACE_INT64(it.first.c_str(), it.second.memory);
+        if (it.second.purgeableMemory != INVALID_MEMORY_SIZE) {
+            ATRACE_INT64((std::string("Purgeable ") + it.first).c_str(), it.second.purgeableMemory);
         }
     }
+    ATRACE_INT64("HWUI All Memory", hwui_all_frame_memory);
 }
 
 /**
@@ -145,12 +148,12 @@ void ATraceMemoryDump::recordAndResetCountersIfNeeded(const char* dumpName) {
         // A new dumpName observed -> store the data already collected.
         auto memoryCounter = mCurrentValues.find(mCategory);
         if (memoryCounter != mCurrentValues.end()) {
-            memoryCounter->second.time += mLastDumpValue;
-            if (mLastPurgeableDumpValue != INVALID_TIME) {
-                if (memoryCounter->second.purgeableTime == INVALID_TIME) {
-                    memoryCounter->second.purgeableTime = mLastPurgeableDumpValue;
+            memoryCounter->second.memory += mLastDumpValue;
+            if (mLastPurgeableDumpValue != INVALID_MEMORY_SIZE) {
+                if (memoryCounter->second.purgeableMemory == INVALID_MEMORY_SIZE) {
+                    memoryCounter->second.purgeableMemory = mLastPurgeableDumpValue;
                 } else {
-                    memoryCounter->second.purgeableTime += mLastPurgeableDumpValue;
+                    memoryCounter->second.purgeableMemory += mLastPurgeableDumpValue;
                 }
             }
         } else {
@@ -164,10 +167,10 @@ void ATraceMemoryDump::recordAndResetCountersIfNeeded(const char* dumpName) {
 
 void ATraceMemoryDump::resetCurrentCounter(const char* dumpName) {
     mLastDumpValue = 0;
-    mLastPurgeableDumpValue = INVALID_TIME;
+    mLastPurgeableDumpValue = INVALID_MEMORY_SIZE;
     mLastDumpName = dumpName;
     // Categories not listed in sResourceMap are reported as "GPU memory"
-    mCategory = "GPU Memory";
+    mCategory = "HWUI GPU Memory";
 }
 
 } /* namespace skiapipeline */

@@ -62,8 +62,8 @@ private:
     std::string mCategory;
 
     struct TraceValue {
-        uint64_t time;
-        uint64_t purgeableTime;
+        uint64_t memory;
+        uint64_t purgeableMemory;
     };
 
     // keys are define in sResourceMap
