@@ -30,7 +30,6 @@ cc_binary_host {
         "utils.cpp",
     ],
     cflags: [
-        "-DSTATS_SCHEMA_LEGACY",
         "-Wall",
         "-Werror",
     ],

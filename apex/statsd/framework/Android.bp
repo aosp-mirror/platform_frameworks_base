@@ -43,6 +43,7 @@ java_library {
         "//frameworks/base/apex/statsd:__subpackages__",
         //TODO(b/146167933) remove this when framework is built with framework-statsd-stubs
         "//frameworks/base",
+        "//frameworks/opt/net/wifi/service",
     ],
     apex_available: [
         "com.android.os.statsd",

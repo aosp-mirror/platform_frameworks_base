@@ -112,7 +112,7 @@ cc_defaults {
     ],
 
     cflags: [
-        // "-DNEW_ENCODING_SCHEME",
+        "-DNEW_ENCODING_SCHEME",
     ],
 
     local_include_dirs: [
