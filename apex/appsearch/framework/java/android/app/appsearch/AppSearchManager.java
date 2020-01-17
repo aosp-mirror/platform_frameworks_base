@@ -71,10 +71,10 @@ public class AppSearchManager {
      *     <li>Adding a 'required' property
      * </ul>
      *
-     * @param schema The schema config for this app.
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive errors resulting from setting the schema. If the
      *                 operation succeeds, the callback will be invoked with {@code null}.
+     * @param schemas The schema configs for the types used by the calling app.
      *
      * @hide
      */
@@ -84,11 +84,19 @@ public class AppSearchManager {
     // TODO(b/145635424): Update the documentation above once the Schema mutation APIs of Icing
     //     Library are finalized
     public void setSchema(
-            @NonNull AppSearchSchema schema,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<? super Throwable> callback) {
-        SchemaProto schemaProto = schema.getProto();
-        byte[] schemaBytes = schemaProto.toByteArray();
+            @NonNull Consumer<? super Throwable> callback,
+            @NonNull AppSearchSchema... schemas) {
+        // Prepare the merged schema for transmission.
+        SchemaProto.Builder schemaProtoBuilder = SchemaProto.newBuilder();
+        for (AppSearchSchema schema : schemas) {
+            schemaProtoBuilder.addTypes(schema.getProto());
+        }
+
+        // Serialize and send the schema.
+        // TODO: This should use com.android.internal.infra.RemoteStream or another mechanism to
+        //  avoid binder limits.
+        byte[] schemaBytes = schemaProtoBuilder.build().toByteArray();
         AndroidFuture<Void> future = new AndroidFuture<>();
         try {
             mService.setSchema(schemaBytes, future);
