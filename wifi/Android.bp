@@ -114,6 +114,8 @@ droidstubs {
         ":framework-annotations",
         ":framework-wifi-updatable-sources",
     ],
+    // This is needed as IOnWifiActivityEnergyInfoListener.aidl in framework-wifi depends on
+    // WifiActivityEnergyInfo.aidl in framework-minus-apex
     aidl: {
         include_dirs: ["frameworks/base/core/java"],
     },
@@ -125,11 +127,6 @@ droidstubs {
 java_library {
     name: "framework-wifi-stubs",
     srcs: [":framework-wifi-stubs-srcs"],
-    aidl: {
-        export_include_dirs: [
-            "java",
-        ],
-    },
     sdk_version: "core_current",
     libs: ["android_system_stubs_current"],
     installable: false,
