@@ -4533,9 +4533,11 @@ package android.net {
 
   public final class NetworkCapabilities implements android.os.Parcelable {
     method public boolean deduceRestrictedCapability();
+    method @NonNull public java.util.List<java.lang.Integer> getAdministratorUids();
     method @Nullable public String getSSID();
     method @NonNull public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
+    method public void setAdministratorUids(@NonNull java.util.List<java.lang.Integer>);
     method @NonNull public android.net.NetworkCapabilities setSSID(@Nullable String);
     method @NonNull public android.net.NetworkCapabilities setTransportInfo(@NonNull android.net.TransportInfo);
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
