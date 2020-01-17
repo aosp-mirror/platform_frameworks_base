@@ -71,7 +71,6 @@ import android.service.autofill.FieldClassificationUserData;
 import android.service.autofill.FillContext;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
-import android.service.autofill.InlinePresentation;
 import android.service.autofill.InternalSanitizer;
 import android.service.autofill.InternalValidator;
 import android.service.autofill.SaveInfo;
@@ -93,9 +92,6 @@ import android.view.autofill.AutofillManager.SmartSuggestionMode;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 import android.view.autofill.IAutofillWindowPresenter;
-import android.view.inline.InlinePresentationSpec;
-import android.view.inputmethod.InlineSuggestion;
-import android.view.inputmethod.InlineSuggestionInfo;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InlineSuggestionsResponse;
 
@@ -106,8 +102,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
-import com.android.internal.view.inline.IInlineContentCallback;
-import com.android.internal.view.inline.IInlineContentProvider;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -148,6 +142,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private final Handler mHandler;
     private final Object mLock;
     private final AutoFillUI mUi;
+    private final Context mContext;
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
@@ -773,6 +768,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mLock = lock;
         mUi = ui;
         mHandler = handler;
+        mContext = context;
         mRemoteFillService = serviceComponentName == null ? null
                 : new RemoteFillService(context, serviceComponentName, userId, this,
                         bindInstantServiceAllowed);
@@ -2733,35 +2729,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return false;
         }
 
-        final int size = datasets.size();
-        final ArrayList<InlineSuggestion> inlineSuggestions = new ArrayList<>();
-
-        for (int index = 0; index < size; index++) {
-            final Dataset dataset = datasets.get(index);
-            //TODO(b/146453536): Use the proper presentation/spec for currently focused view.
-            final InlinePresentation inlinePresentation = dataset.getFieldInlinePresentation(0);
-            if (inlinePresentation == null) {
-                if (sDebug) Log.d(TAG, "Missing InlinePresentation on dataset=" + dataset);
-                continue;
-            }
-            final InlinePresentationSpec spec = inlinePresentation.getInlinePresentationSpec();
-            final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
-                    spec, InlineSuggestionInfo.SOURCE_AUTOFILL, new String[] { "" });
-
-            inlineSuggestions.add(new InlineSuggestion(inlineSuggestionInfo,
-                    new IInlineContentProvider.Stub() {
-                        @Override
-                        public void provideContent(int width, int height,
-                                IInlineContentCallback callback) throws RemoteException {
-                            getUiForShowing().getSuggestionSurfaceForShowing(dataset, response,
-                                    mCurrentViewId, width, height, callback);
-                        }
-                    }));
-        }
-
+        InlineSuggestionsResponse inlineSuggestionsResponse =
+                InlineSuggestionFactory.createInlineSuggestionsResponse(response.getRequestId(),
+                        datasets.toArray(new Dataset[]{}), mCurrentViewId, mContext, this);
         try  {
-            inlineContentCallback.onInlineSuggestionsResponse(
-                    new InlineSuggestionsResponse(inlineSuggestions));
+            inlineContentCallback.onInlineSuggestionsResponse(inlineSuggestionsResponse);
         } catch (RemoteException e) {
             Log.w(TAG, "onFillReady() remote error calling onInlineSuggestionsResponse()");
             return false;
