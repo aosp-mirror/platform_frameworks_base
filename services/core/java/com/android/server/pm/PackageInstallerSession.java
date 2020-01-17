@@ -152,7 +152,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final int MSG_COMMIT = 1;
     private static final int MSG_ON_PACKAGE_INSTALLED = 2;
     private static final int MSG_SEAL = 3;
-    private static final int MSG_TRANSFER = 4;
 
     /** XML constants used for persisting a session */
     static final String TAG_SESSION = "session";
@@ -388,32 +387,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
-            SomeArgs args;
-            String packageName;
-            IntentSender statusReceiver;
             switch (msg.what) {
                 case MSG_SEAL:
-                    statusReceiver = (IntentSender) msg.obj;
-
-                    handleSeal(statusReceiver);
+                    handleSeal((IntentSender) msg.obj);
                     break;
                 case MSG_COMMIT:
                     handleCommit();
                     break;
-                case MSG_TRANSFER:
-                    args = (SomeArgs) msg.obj;
-                    packageName = (String) args.arg1;
-                    statusReceiver = (IntentSender) args.arg2;
-                    args.recycle();
-
-                    handleTransfer(statusReceiver, packageName);
-                    break;
                 case MSG_ON_PACKAGE_INSTALLED:
-                    args = (SomeArgs) msg.obj;
-                    packageName = (String) args.arg1;
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final String packageName = (String) args.arg1;
                     final String message = (String) args.arg2;
                     final Bundle extras = (Bundle) args.arg3;
-                    statusReceiver = (IntentSender) args.arg4;
+                    final IntentSender statusReceiver = (IntentSender) args.arg4;
                     final int returnCode = args.argi1;
                     args.recycle();
 
@@ -459,7 +445,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * Checks if the permissions still need to be confirmed.
      *
      * <p>This is dependant on the identity of the installer, hence this cannot be cached if the
-     * installer might still {@link #transfer(String, IntentSender) change}.
+     * installer might still {@link #transfer(String) change}.
      *
      * @return {@code true} iff we need to ask to confirm the permissions?
      */
@@ -1403,11 +1389,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private int assertCanBeTransferredAndReturnNewOwner(String packageName)
-            throws PackageManager.NameNotFoundException {
+    @Override
+    public void transfer(String packageName) {
+        Objects.requireNonNull(packageName);
+
         ApplicationInfo newOwnerAppInfo = mPm.getApplicationInfo(packageName, 0, userId);
         if (newOwnerAppInfo == null) {
-            throw new PackageManager.NameNotFoundException(packageName);
+            throw new ParcelableException(new PackageManager.NameNotFoundException(packageName));
         }
 
         if (PackageManager.PERMISSION_GRANTED != mPm.checkUidPermission(
@@ -1422,106 +1410,31 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new SecurityException("Can only transfer sessions that use public options");
         }
 
-        return newOwnerAppInfo.uid;
-    }
-
-    @Override
-    public void transfer(String packageName, IntentSender statusReceiver) {
-        Objects.requireNonNull(statusReceiver);
-        Objects.requireNonNull(packageName);
-
-        try {
-            assertCanBeTransferredAndReturnNewOwner(packageName);
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new ParcelableException(e);
-        }
+        List<PackageInstallerSession> childSessions = getChildSessions();
 
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotSealedLocked("transfer");
-        }
 
-        final SomeArgs args = SomeArgs.obtain();
-        args.arg1 = packageName;
-        args.arg2 = statusReceiver;
-
-        mHandler.obtainMessage(MSG_TRANSFER, args).sendToTarget();
-    }
-
-    private void handleTransfer(IntentSender statusReceiver, String packageName) {
-        List<PackageInstallerSession> childSessions = getChildSessions();
-
-        try {
-            final int uid = assertCanBeTransferredAndReturnNewOwner(packageName);
-
-            synchronized (mLock) {
-                assertPreparedAndNotSealedLocked("transfer");
-
-                try {
-                    sealAndValidateLocked(childSessions);
-                } catch (StreamingException e) {
-                    throw new IllegalArgumentException("Streaming failed", e);
-                } catch (PackageManagerException e) {
-                    throw new IllegalArgumentException("Package is not valid", e);
-                }
-
-                if (!mPackageName.equals(mInstallSource.installerPackageName)) {
-                    throw new SecurityException(
-                            "Can only transfer sessions that update the original installer");
-                }
-
-                mInstallerUid = uid;
-                mInstallSource = InstallSource.create(packageName, null, packageName);
+            try {
+                sealLocked(childSessions);
+            } catch (PackageManagerException e) {
+                throw new IllegalArgumentException("Package is not valid", e);
             }
-        } catch (PackageManager.NameNotFoundException e) {
-            onSessionTransferStatus(statusReceiver, packageName,
-                    PackageInstaller.STATUS_FAILURE_NAME_NOT_FOUND, e.getMessage());
-            return;
-        } catch (IllegalStateException e) {
-            onSessionTransferStatus(statusReceiver, packageName,
-                    PackageInstaller.STATUS_FAILURE_ILLEGAL_STATE, e.getMessage());
-            return;
-        } catch (SecurityException e) {
-            onSessionTransferStatus(statusReceiver, packageName,
-                    PackageInstaller.STATUS_FAILURE_SECURITY, e.getMessage());
-            return;
-        } catch (Throwable e) {
-            onSessionTransferStatus(statusReceiver, packageName, PackageInstaller.STATUS_FAILURE,
-                    e.getMessage());
-            return;
+
+            if (!mPackageName.equals(mInstallSource.installerPackageName)) {
+                throw new SecurityException("Can only transfer sessions that update the original "
+                        + "installer");
+            }
+
+            mInstallerUid = newOwnerAppInfo.uid;
+            mInstallSource = InstallSource.create(packageName, null, packageName);
         }
 
         // Persist the fact that we've sealed ourselves to prevent
         // mutations of any hard links we create. We do this without holding
         // the session lock, since otherwise it's a lock inversion.
         mCallback.onSessionSealedBlocking(this);
-
-        // Report success.
-        onSessionTransferStatus(statusReceiver, packageName, PackageInstaller.STATUS_SUCCESS, null);
-    }
-
-    private void onSessionTransferStatus(IntentSender statusReceiver, String otherPackageName,
-            int status, String statusMessage) {
-        final String packageName;
-        synchronized (mLock) {
-            packageName = mPackageName;
-        }
-
-        final Intent fillIn = new Intent();
-        fillIn.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, packageName);
-        fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
-        fillIn.putExtra(PackageInstaller.EXTRA_OTHER_PACKAGE_NAME, otherPackageName);
-
-        fillIn.putExtra(PackageInstaller.EXTRA_STATUS, status);
-        if (!TextUtils.isEmpty(statusMessage)) {
-            fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, statusMessage);
-        }
-
-        try {
-            statusReceiver.sendIntent(mContext, 0, fillIn, null, null);
-        } catch (IntentSender.SendIntentException ignored) {
-        }
-
     }
 
     private void handleCommit() {
