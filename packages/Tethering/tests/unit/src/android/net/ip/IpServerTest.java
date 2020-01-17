@@ -273,7 +273,7 @@ public class IpServerTest {
         dispatchCommand(IpServer.CMD_TETHER_REQUESTED, STATE_LOCAL_ONLY);
         InOrder inOrder = inOrder(mCallback, mNetd);
         inOrder.verify(mNetd).interfaceSetCfg(argThat(cfg ->
-                  IFACE_NAME.equals(cfg.ifName) && assertContainsFlag(cfg.flags, IF_STATE_UP)));
+                  IFACE_NAME.equals(cfg.ifName) && assertNotContainsFlag(cfg.flags, IF_STATE_UP)));
         inOrder.verify(mNetd).tetherInterfaceAdd(IFACE_NAME);
         inOrder.verify(mNetd).networkAddInterface(INetd.LOCAL_NET_ID, IFACE_NAME);
         inOrder.verify(mNetd, times(2)).networkAddRoute(eq(INetd.LOCAL_NET_ID), eq(IFACE_NAME),
@@ -546,5 +546,15 @@ public class IpServerTest {
         }
         fail("Missing flag: " + match);
         return false;
+    }
+
+    private boolean assertNotContainsFlag(String[] flags, String match) {
+        for (String flag : flags) {
+            if (flag.equals(match)) {
+                fail("Unexpected flag: " + match);
+                return false;
+            }
+        }
+        return true;
     }
 }
