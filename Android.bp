@@ -472,7 +472,6 @@ java_library {
         "//frameworks/base/apex/permission/framework",
         "//frameworks/base/apex/statsd/service",
         "//frameworks/base/telephony",
-        "//frameworks/base/wifi",
         "//frameworks/opt/net/wifi/service",
     ],
 }
