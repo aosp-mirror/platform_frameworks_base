@@ -1265,16 +1265,6 @@ Status StatsService::sendAppBreadcrumbAtom(int32_t label, int32_t state) {
     return Status::ok();
 }
 
-Status StatsService::registerPullerCallback(int32_t atomTag,
-        const sp<android::os::IStatsPullerCallback>& pullerCallback,
-        const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
-
-    VLOG("StatsService::registerPullerCallback called.");
-    mPullerManager->RegisterPullerCallback(atomTag, pullerCallback);
-    return Status::ok();
-}
-
 Status StatsService::registerPullAtomCallback(int32_t uid, int32_t atomTag, int64_t coolDownNs,
                                     int64_t timeoutNs, const std::vector<int32_t>& additiveFields,
                                     const sp<android::os::IPullAtomCallback>& pullerCallback) {
@@ -1294,14 +1284,6 @@ Status StatsService::registerNativePullAtomCallback(int32_t atomTag, int64_t coo
     int32_t uid = IPCThreadState::self()->getCallingUid();
     mPullerManager->RegisterPullAtomCallback(uid, atomTag, coolDownNs, timeoutNs, additiveFields,
                                              pullerCallback);
-    return Status::ok();
-}
-
-Status StatsService::unregisterPullerCallback(int32_t atomTag, const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
-
-    VLOG("StatsService::unregisterPullerCallback called.");
-    mPullerManager->UnregisterPullerCallback(atomTag);
     return Status::ok();
 }
 

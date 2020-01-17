@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.os.IStatsPullerCallback;
 import android.os.IPendingIntentRef;
 import android.os.IPullAtomCallback;
 import android.os.ParcelFileDescriptor;
@@ -183,16 +182,6 @@ interface IStatsd {
      */
     void sendAppBreadcrumbAtom(int label, int state);
 
-    /**
-     * Registers a puller callback function that, when invoked, pulls the data
-     * for the specified vendor atom tag.
-     *
-     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS
-     * @deprecated please use registerPullAtomCallback.
-     */
-    oneway void registerPullerCallback(int atomTag, IStatsPullerCallback pullerCallback,
-                                       String packageName);
-
    /**
     * Registers a puller callback function that, when invoked, pulls the data
     * for the specified atom tag.
@@ -206,13 +195,6 @@ interface IStatsd {
     */
     oneway void registerNativePullAtomCallback(int atomTag, long coolDownNs, long timeoutNs,
                            in int[] additiveFields, IPullAtomCallback pullerCallback);
-
-   /**
-    * Unregisters a puller callback function for the given vendor atom.
-    *
-    * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS
-    */
-    oneway void unregisterPullerCallback(int atomTag, String packageName);
 
     /**
      * Unregisters any pullAtomCallback for the given uid/atom.

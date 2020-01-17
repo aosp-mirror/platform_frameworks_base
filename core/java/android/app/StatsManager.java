@@ -25,11 +25,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.IPullAtomCallback;
 import android.os.IPullAtomResultReceiver;
 import android.os.IStatsManagerService;
-import android.os.IStatsPullerCallback;
 import android.os.IStatsd;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -476,42 +474,6 @@ public final class StatsManager {
     }
 
     /**
-     * Registers a callback for an atom when that atom is to be pulled. The stats service will
-     * invoke pullData in the callback when the stats service determines that this atom needs to be
-     * pulled. Currently, this only works for atoms with tags above 100,000 that do not have a uid.
-     *
-     * @param atomTag   The tag of the atom for this puller callback. Must be at least 100000.
-     * @param callback  The callback to be invoked when the stats service pulls the atom.
-     * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
-     *
-     * @hide
-     * @deprecated Please use registerPullAtomCallback
-     */
-    @Deprecated
-    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
-    public void setPullerCallback(int atomTag, IStatsPullerCallback callback)
-            throws StatsUnavailableException {
-        synchronized (sLock) {
-            try {
-                IStatsd service = getIStatsdLocked();
-                if (callback == null) {
-                    service.unregisterPullerCallback(atomTag, mContext.getOpPackageName());
-                } else {
-                    service.registerPullerCallback(atomTag, callback,
-                            mContext.getOpPackageName());
-                }
-
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsd when registering data listener.");
-                throw new StatsUnavailableException("could not connect", e);
-            } catch (SecurityException e) {
-                throw new StatsUnavailableException(e.getMessage(), e);
-            }
-        }
-    }
-
-
-    /**
      * Temp registration for while the migration is in progress.
      *
      * @hide
@@ -732,32 +694,6 @@ public final class StatsManager {
          * @return {@link #PULL_SUCCESS} if the pull was successful, or {@link #PULL_SKIP} if not.
          */
         int onPullAtom(int atomTag, @NonNull List<StatsEvent> data);
-    }
-
-    private class StatsdDeathRecipient implements IBinder.DeathRecipient {
-        @Override
-        public void binderDied() {
-            synchronized (sLock) {
-                mService = null;
-            }
-        }
-    }
-
-    @GuardedBy("sLock")
-    private IStatsd getIStatsdLocked() throws StatsUnavailableException {
-        if (mService != null) {
-            return mService;
-        }
-        mService = IStatsd.Stub.asInterface(ServiceManager.getService("stats"));
-        if (mService == null) {
-            throw new StatsUnavailableException("could not be found");
-        }
-        try {
-            mService.asBinder().linkToDeath(new StatsdDeathRecipient(), 0);
-        } catch (RemoteException e) {
-            throw new StatsUnavailableException("could not connect when linkToDeath", e);
-        }
-        return mService;
     }
 
     @GuardedBy("sLock")
