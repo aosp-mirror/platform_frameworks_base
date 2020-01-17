@@ -20,7 +20,6 @@ import static com.android.server.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.slice.Slice;
 import android.content.Context;
 import android.os.RemoteException;
 import android.service.autofill.Dataset;
@@ -132,7 +131,7 @@ public final class InlineSuggestionFactory {
             }
         };
         final InlineSuggestion inlineSuggestion = new InlineSuggestion(inlineSuggestionInfo,
-                createInlineContentProvider(inlinePresentation.getSlice(), inlineSuggestionUi,
+                createInlineContentProvider(inlinePresentation, inlineSuggestionUi,
                         onClickListener));
         return inlineSuggestion;
     }
@@ -151,20 +150,22 @@ public final class InlineSuggestionFactory {
             client.fill(requestId, fieldIndex, dataset);
         };
         final InlineSuggestion inlineSuggestion = new InlineSuggestion(inlineSuggestionInfo,
-                createInlineContentProvider(inlinePresentation.getSlice(), inlineSuggestionUi,
+                createInlineContentProvider(inlinePresentation, inlineSuggestionUi,
                         onClickListener));
         return inlineSuggestion;
     }
 
     private static IInlineContentProvider.Stub createInlineContentProvider(
-            @NonNull Slice slice, @NonNull InlineSuggestionUi inlineSuggestionUi,
+            @NonNull InlinePresentation inlinePresentation,
+            @NonNull InlineSuggestionUi inlineSuggestionUi,
             @Nullable View.OnClickListener onClickListener) {
         return new IInlineContentProvider.Stub() {
             @Override
             public void provideContent(int width, int height,
                     IInlineContentCallback callback) {
                 UiThread.getHandler().post(() -> {
-                    SurfaceControl sc = inlineSuggestionUi.inflate(slice, width, height,
+                    SurfaceControl sc = inlineSuggestionUi.inflate(inlinePresentation, width,
+                            height,
                             onClickListener);
                     try {
                         callback.onContent(sc);

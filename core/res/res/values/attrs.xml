@@ -9167,4 +9167,12 @@
     </declare-styleable>
 
     <attr name="autoSizePresetSizes" />
+
+    <declare-styleable name="AutofillInlineSuggestion">
+        <!-- @hide @SystemApi -->
+        <attr name="isAutofillInlineSuggestionTheme" format="boolean" />
+        <attr name="autofillInlineSuggestionChip" format="reference" />
+        <attr name="autofillInlineSuggestionTitle" format="reference" />
+        <attr name="autofillInlineSuggestionSubtitle" format="reference" />
+    </declare-styleable>
 </resources>
