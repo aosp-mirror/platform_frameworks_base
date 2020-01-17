@@ -1884,11 +1884,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private boolean readAccessibilityShortcutKeySettingLocked(AccessibilityUserState userState) {
+        final String settingValue = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, userState.mUserId);
         final Set<String> targetsFromSetting = new ArraySet<>();
-        readColonDelimitedSettingToSet(Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
-                userState.mUserId, targetsFromSetting, str -> str);
-        if (targetsFromSetting.isEmpty()) {
-            // Fall back to device's default a11y service.
+        readColonDelimitedStringToSet(settingValue, targetsFromSetting, false, str -> str);
+        // Fall back to device's default a11y service, only when setting is never updated.
+        if (settingValue == null) {
             final String defaultService = mContext.getString(
                     R.string.config_defaultAccessibilityService);
             if (!TextUtils.isEmpty(defaultService)) {

@@ -371,7 +371,9 @@ public class AccessibilityShortcutController {
         // targets during boot. Needs to read settings directly here.
         String shortcutTargets = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, mUserId);
-        if (TextUtils.isEmpty(shortcutTargets)) {
+        // A11y warning dialog updates settings to empty string, when user disables a11y shortcut.
+        // Only fallback to default a11y service, when setting is never updated.
+        if (shortcutTargets == null) {
             shortcutTargets = mContext.getString(R.string.config_defaultAccessibilityService);
         }
         return !TextUtils.isEmpty(shortcutTargets);
