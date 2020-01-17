@@ -25,6 +25,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityManagerClient;
+import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.IWindow;
 
 /**
@@ -86,4 +87,5 @@ interface IAccessibilityManager {
 
     oneway void registerSystemAction(in RemoteAction action, int actionId);
     oneway void unregisterSystemAction(int actionId);
+    oneway void setWindowMagnificationConnection(in IWindowMagnificationConnection connection);
 }

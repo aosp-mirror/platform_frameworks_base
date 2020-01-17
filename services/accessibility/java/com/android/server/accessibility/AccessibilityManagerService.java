@@ -94,6 +94,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
+import android.view.accessibility.IWindowMagnificationConnection;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
@@ -106,6 +107,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.accessibility.magnification.WindowMagnificationManager;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -203,6 +205,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private AlertDialog mEnableTouchExplorationDialog;
 
     private AccessibilityInputFilter mInputFilter;
+
+    private WindowMagnificationManager mWindowMagnificationMgr;
 
     private boolean mHasInputFilter;
 
@@ -877,11 +881,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public void notifyAccessibilityButtonVisibilityChanged(boolean shown) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller does not hold permission "
-                    + android.Manifest.permission.STATUS_BAR_SERVICE);
-        }
+        mSecurityPolicy.enforceCallingOrSelfPermission(
+                android.Manifest.permission.STATUS_BAR_SERVICE);
         synchronized (mLock) {
             notifyAccessibilityButtonVisibilityChangedLocked(shown);
         }
@@ -2585,6 +2586,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private long getRecommendedTimeoutMillisLocked(AccessibilityUserState userState) {
         return IntPair.of(userState.getInteractiveUiTimeoutLocked(),
                 userState.getNonInteractiveUiTimeoutLocked());
+    }
+
+    @Override
+    public void setWindowMagnificationConnection(
+            IWindowMagnificationConnection connection) throws RemoteException {
+        mSecurityPolicy.enforceCallingOrSelfPermission(
+                android.Manifest.permission.STATUS_BAR_SERVICE);
+
+        getWindowMagnificationMgr().setConnection(connection);
+    }
+
+    WindowMagnificationManager getWindowMagnificationMgr() {
+        synchronized (mLock) {
+            if (mWindowMagnificationMgr == null) {
+                mWindowMagnificationMgr = new WindowMagnificationManager();
+            }
+            return mWindowMagnificationMgr;
+        }
     }
 
     @Override

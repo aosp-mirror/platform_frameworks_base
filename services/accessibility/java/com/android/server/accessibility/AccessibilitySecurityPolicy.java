@@ -550,4 +550,17 @@ public class AccessibilitySecurityPolicy {
             Binder.restoreCallingIdentity(identityToken);
         }
     }
+
+    /**
+     * Enforcing permission check to IPC caller or grant it if it's not through IPC.
+     *
+     * @param permission The permission to check
+     */
+    public void enforceCallingOrSelfPermission(@NonNull String permission) {
+        if (mContext.checkCallingOrSelfPermission(permission)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Caller does not hold permission "
+                    + permission);
+        }
+    }
 }
