@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -178,8 +179,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     // Last configuration that was reported to the process.
     private final Configuration mLastReportedConfiguration;
+    private final Configuration mNewOverrideConfig = new Configuration();
     // Registered display id as a listener to override config change
     private int mDisplayId;
+    private ActivityRecord mConfigActivityRecord;
 
     /** Whether our process is currently running a {@link RecentsAnimation} */
     private boolean mRunningRecentsAnimation;
@@ -325,6 +328,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** @return {@code true} if the process registered to a display as a config listener. */
     boolean registeredForDisplayConfigChanges() {
         return mDisplayId != INVALID_DISPLAY;
+    }
+
+    /** @return {@code true} if the process registered to an activity as a config listener. */
+    @VisibleForTesting
+    boolean registeredForActivityConfigChanges() {
+        return mConfigActivityRecord != null;
     }
 
     void postPendingUiCleanMsg(boolean pendingUiClean) {
@@ -483,7 +492,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     @Override
     protected ConfigurationContainer getParent() {
-        return null;
+        // Returning RootWindowContainer as the parent, so that this process controller always
+        // has full configuration and overrides (e.g. from display) are always added on top of
+        // global config.
+        return mAtm.mRootWindowContainer;
     }
 
     @HotPath(caller = HotPath.PROCESS_CHANGE)
@@ -507,10 +519,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
         mActivities.add(r);
+        updateActivityConfigurationListener();
     }
 
     void removeActivity(ActivityRecord r) {
         mActivities.remove(r);
+        updateActivityConfigurationListener();
     }
 
     void makeFinishingForProcessRemoved() {
@@ -521,6 +535,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     void clearActivities() {
         mActivities.clear();
+        updateActivityConfigurationListener();
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
@@ -964,19 +979,20 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAtm.mH.sendMessage(m);
     }
 
-    void registerDisplayConfigurationListenerLocked(DisplayContent displayContent) {
+    void registerDisplayConfigurationListener(DisplayContent displayContent) {
         if (displayContent == null) {
             return;
         }
-        // A process can only register to one display to listener to the override configuration
+        // A process can only register to one display to listen to the override configuration
         // change. Unregister existing listener if it has one before register the new one.
-        unregisterDisplayConfigurationListenerLocked();
+        unregisterDisplayConfigurationListener();
+        unregisterActivityConfigurationListener();
         mDisplayId = displayContent.mDisplayId;
         displayContent.registerConfigurationChangeListener(this);
     }
 
     @VisibleForTesting
-    void unregisterDisplayConfigurationListenerLocked() {
+    void unregisterDisplayConfigurationListener() {
         if (mDisplayId == INVALID_DISPLAY) {
             return;
         }
@@ -986,6 +1002,48 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             displayContent.unregisterConfigurationChangeListener(this);
         }
         mDisplayId = INVALID_DISPLAY;
+        onMergedOverrideConfigurationChanged(Configuration.EMPTY);
+    }
+
+    private void registerActivityConfigurationListener(ActivityRecord activityRecord) {
+        if (activityRecord == null) {
+            return;
+        }
+        // A process can only register to one activityRecord to listen to the override configuration
+        // change. Unregister existing listener if it has one before register the new one.
+        unregisterDisplayConfigurationListener();
+        unregisterActivityConfigurationListener();
+        mConfigActivityRecord = activityRecord;
+        activityRecord.registerConfigurationChangeListener(this);
+    }
+
+    private void unregisterActivityConfigurationListener() {
+        if (mConfigActivityRecord == null) {
+            return;
+        }
+        mConfigActivityRecord.unregisterConfigurationChangeListener(this);
+        mConfigActivityRecord = null;
+        onMergedOverrideConfigurationChanged(Configuration.EMPTY);
+    }
+
+    /**
+     * Check if activity configuration override for the activity process needs an update and perform
+     * if needed. By default we try to override the process configuration to match the top activity
+     * config to increase app compatibility with multi-window and multi-display. The process will
+     * always track the configuration of the non-finishing activity last added to the process.
+     */
+    private void updateActivityConfigurationListener() {
+        for (int i = mActivities.size() - 1; i >= 0; i--) {
+            final ActivityRecord activityRecord = mActivities.get(i);
+            if (!activityRecord.finishing && !activityRecord.containsListener(this)) {
+                // Eligible activity is found, update listener.
+                registerActivityConfigurationListener(activityRecord);
+                return;
+            }
+        }
+
+        // No eligible activities found, let's remove the configuration listener.
+        unregisterActivityConfigurationListener();
     }
 
     @Override
@@ -995,8 +1053,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     @Override
-    public void onRequestedOverrideConfigurationChanged(Configuration newOverrideConfig) {
-        super.onRequestedOverrideConfigurationChanged(newOverrideConfig);
+    public void onMergedOverrideConfigurationChanged(Configuration mergedOverrideConfig) {
+        // Make sure that we don't accidentally override the activity type.
+        mNewOverrideConfig.setTo(mergedOverrideConfig);
+        mNewOverrideConfig.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
+        super.onRequestedOverrideConfigurationChanged(mNewOverrideConfig);
         updateConfiguration();
     }
 

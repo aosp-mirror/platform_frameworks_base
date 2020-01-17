@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
@@ -56,6 +58,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -1174,5 +1177,161 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.destroyed("test");
 
         verify(mActivity).removeFromHistory(anyString());
+    }
+
+    @Test
+    public void testActivityOverridesProcessConfig() {
+        final WindowProcessController wpc = mActivity.app;
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertFalse(wpc.registeredForDisplayConfigChanges());
+
+        final ActivityRecord secondaryDisplayActivity =
+                createActivityOnDisplay(false /* defaultDisplay */, null /* process */);
+
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertEquals(0, mActivity.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+        assertNotEquals(mActivity.getConfiguration(),
+                secondaryDisplayActivity.getConfiguration());
+    }
+
+    @Test
+    public void testActivityOverridesProcessConfig_TwoActivities() {
+        final WindowProcessController wpc = mActivity.app;
+        assertTrue(wpc.registeredForActivityConfigChanges());
+
+        final Task firstTaskRecord = mActivity.getTask();
+        final ActivityRecord secondActivityRecord =
+                new ActivityBuilder(mService).setTask(firstTaskRecord).setUseProcess(wpc).build();
+
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertEquals(0, secondActivityRecord.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+    }
+
+    @Test
+    public void testActivityOverridesProcessConfig_TwoActivities_SecondaryDisplay() {
+        final WindowProcessController wpc = mActivity.app;
+        assertTrue(wpc.registeredForActivityConfigChanges());
+
+        final ActivityRecord secondActivityRecord =
+                new ActivityBuilder(mService).setTask(mTask).setUseProcess(wpc).build();
+
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertEquals(0, secondActivityRecord.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+    }
+
+    @Test
+    public void testActivityOverridesProcessConfig_TwoActivities_DifferentTasks() {
+        final WindowProcessController wpc = mActivity.app;
+        assertTrue(wpc.registeredForActivityConfigChanges());
+
+        final ActivityRecord secondActivityRecord =
+                createActivityOnDisplay(true /* defaultDisplay */, wpc);
+
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertEquals(0, secondActivityRecord.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+    }
+
+    @Test
+    public void testActivityOnDifferentDisplayUpdatesProcessOverride() {
+        final ActivityRecord secondaryDisplayActivity =
+                createActivityOnDisplay(false /* defaultDisplay */, null /* process */);
+        final WindowProcessController wpc = secondaryDisplayActivity.app;
+        assertTrue(wpc.registeredForActivityConfigChanges());
+
+        final ActivityRecord secondActivityRecord =
+                createActivityOnDisplay(true /* defaultDisplay */, wpc);
+
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertEquals(0, secondActivityRecord.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+        assertFalse(wpc.registeredForDisplayConfigChanges());
+    }
+
+    @Test
+    public void testActivityReparentChangesProcessOverride() {
+        final WindowProcessController wpc = mActivity.app;
+        final Task initialTask = mActivity.getTask();
+        final Configuration initialConf =
+                new Configuration(mActivity.getMergedOverrideConfiguration());
+        assertEquals(0, mActivity.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+        assertTrue(wpc.registeredForActivityConfigChanges());
+
+        // Create a new task with custom config to reparent the activity to.
+        final Task newTask =
+                new TaskBuilder(mSupervisor).setStack(initialTask.getStack()).build();
+        final Configuration newConfig = newTask.getConfiguration();
+        newConfig.densityDpi += 100;
+        newTask.onRequestedOverrideConfigurationChanged(newConfig);
+        assertEquals(newTask.getConfiguration().densityDpi, newConfig.densityDpi);
+
+        // Reparent the activity and verify that config override changed.
+        mActivity.reparent(newTask, 0 /* top */, "test");
+        assertEquals(mActivity.getConfiguration().densityDpi, newConfig.densityDpi);
+        assertEquals(mActivity.getMergedOverrideConfiguration().densityDpi, newConfig.densityDpi);
+
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertNotEquals(initialConf, wpc.getRequestedOverrideConfiguration());
+        assertEquals(0, mActivity.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+    }
+
+    @Test
+    public void testActivityReparentDoesntClearProcessOverride_TwoActivities() {
+        final WindowProcessController wpc = mActivity.app;
+        final Configuration initialConf =
+                new Configuration(mActivity.getMergedOverrideConfiguration());
+        final Task initialTask = mActivity.getTask();
+        final ActivityRecord secondActivity = new ActivityBuilder(mService).setTask(initialTask)
+                .setUseProcess(wpc).build();
+
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertEquals(0, secondActivity.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+
+        // Create a new task with custom config to reparent the second activity to.
+        final Task newTask =
+                new TaskBuilder(mSupervisor).setStack(initialTask.getStack()).build();
+        final Configuration newConfig = newTask.getConfiguration();
+        newConfig.densityDpi += 100;
+        newTask.onRequestedOverrideConfigurationChanged(newConfig);
+
+        // Reparent the activity and verify that config override changed.
+        secondActivity.reparent(newTask, 0 /* top */, "test");
+
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertEquals(0, secondActivity.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+        assertNotEquals(initialConf, wpc.getRequestedOverrideConfiguration());
+
+        // Reparent the first activity and verify that config override didn't change.
+        mActivity.reparent(newTask, 1 /* top */, "test");
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertEquals(0, secondActivity.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+        assertNotEquals(initialConf, wpc.getRequestedOverrideConfiguration());
+    }
+
+    /**
+     * Creates an activity on display. For non-default display request it will also create a new
+     * display with custom DisplayInfo.
+     */
+    private ActivityRecord createActivityOnDisplay(boolean defaultDisplay,
+            WindowProcessController process) {
+        final DisplayContent display;
+        if (defaultDisplay) {
+            display = mRootWindowContainer.getDefaultDisplay();
+        } else {
+            display = new TestDisplayContent.Builder(mService, 2000, 1000).setDensityDpi(300)
+                    .setPosition(DisplayContent.POSITION_TOP).build();
+        }
+        final ActivityStack stack = display.createStack(WINDOWING_MODE_UNDEFINED,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
+        return new ActivityBuilder(mService).setTask(task).setUseProcess(process).build();
     }
 }

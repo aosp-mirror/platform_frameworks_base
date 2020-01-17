@@ -1208,8 +1208,7 @@ public class ResourcesManager {
                 WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
                 ResourcesImpl r = weakImplRef != null ? weakImplRef.get() : null;
                 if (r != null) {
-                    applyConfigurationToResourcesLocked(config, compat, tmpConfig,
-                            defaultDisplayMetrics, key, r);
+                    applyConfigurationToResourcesLocked(config, compat, tmpConfig, key, r);
                 } else {
                     mResourceImpls.removeAt(i);
                 }
@@ -1224,8 +1223,7 @@ public class ResourcesManager {
                 }
 
                 applyConfigurationToResourcesLocked(config, compat, tmpConfig,
-                        defaultDisplayMetrics, resourcesWithLoaders.resourcesKey(),
-                        resources.getImpl());
+                        resourcesWithLoaders.resourcesKey(), resources.getImpl());
             }
 
             return changes != 0;
@@ -1236,40 +1234,33 @@ public class ResourcesManager {
 
     private void applyConfigurationToResourcesLocked(@NonNull Configuration config,
             @Nullable CompatibilityInfo compat, Configuration tmpConfig,
-            DisplayMetrics defaultDisplayMetrics, ResourcesKey key, ResourcesImpl resourcesImpl) {
+            ResourcesKey key, ResourcesImpl resourcesImpl) {
         if (DEBUG || DEBUG_CONFIGURATION) {
             Slog.v(TAG, "Changing resources "
                     + resourcesImpl + " config to: " + config);
         }
         int displayId = key.mDisplayId;
-        boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
-        DisplayMetrics dm = defaultDisplayMetrics;
         final boolean hasOverrideConfiguration = key.hasOverrideConfiguration();
-        if (!isDefaultDisplay || hasOverrideConfiguration) {
-            tmpConfig.setTo(config);
+        tmpConfig.setTo(config);
 
-            // Get new DisplayMetrics based on the DisplayAdjustments given
-            // to the ResourcesImpl. Update a copy if the CompatibilityInfo
-            // changed, because the ResourcesImpl object will handle the
-            // update internally.
-            DisplayAdjustments daj = resourcesImpl.getDisplayAdjustments();
-            if (compat != null) {
-                daj = new DisplayAdjustments(daj);
-                daj.setCompatibilityInfo(compat);
-            }
-            dm = getDisplayMetrics(displayId, daj);
-
-            if (!isDefaultDisplay) {
-                applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
-            }
-
-            if (hasOverrideConfiguration) {
-                tmpConfig.updateFrom(key.mOverrideConfiguration);
-            }
-            resourcesImpl.updateConfiguration(tmpConfig, dm, compat);
-        } else {
-            resourcesImpl.updateConfiguration(config, dm, compat);
+        // Get new DisplayMetrics based on the DisplayAdjustments given to the ResourcesImpl. Update
+        // a copy if the CompatibilityInfo changed, because the ResourcesImpl object will handle the
+        // update internally.
+        DisplayAdjustments daj = resourcesImpl.getDisplayAdjustments();
+        if (compat != null) {
+            daj = new DisplayAdjustments(daj);
+            daj.setCompatibilityInfo(compat);
         }
+        daj.setConfiguration(config);
+        DisplayMetrics dm = getDisplayMetrics(displayId, daj);
+        if (displayId != Display.DEFAULT_DISPLAY) {
+            applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
+        }
+
+        if (hasOverrideConfiguration) {
+            tmpConfig.updateFrom(key.mOverrideConfiguration);
+        }
+        resourcesImpl.updateConfiguration(tmpConfig, dm, compat);
     }
 
     /**

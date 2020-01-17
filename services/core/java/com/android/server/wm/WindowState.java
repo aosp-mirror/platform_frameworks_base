@@ -3402,7 +3402,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     "Reporting new frame to %s: %s", this,
                             mWindowFrames.mCompatFrame);
             final MergedConfiguration mergedConfiguration =
-                    new MergedConfiguration(mWmService.mRoot.getConfiguration(),
+                    new MergedConfiguration(getProcessGlobalConfiguration(),
                     getMergedOverrideConfiguration());
 
             setLastReportedMergedConfiguration(mergedConfiguration);
