@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,12 @@ import android.os.RemoteException;
 import com.android.internal.infra.AndroidFuture;
 
 import com.google.android.icing.proto.SchemaProto;
+import com.google.android.icing.proto.SearchResultProto;
+import com.google.android.icing.protobuf.InvalidProtocolBufferException;
 
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -126,5 +129,95 @@ public class AppSearchManager {
         }
         // TODO(b/147614371) Fix error report for multiple documents.
         future.whenCompleteAsync((noop, err) -> callback.accept(err), executor);
+    }
+
+    /**
+     * This method searches for documents based on a given query string. It also accepts
+     * specifications regarding how to search and format the results.
+     *
+     *<p>Currently we support following features in the raw query format:
+     * <ul>
+     *     <li>AND
+     *     AND joins (e.g. “match documents that have both the terms ‘dog’ and
+     *     ‘cat’”).
+     *     Example: hello world matches documents that have both ‘hello’ and ‘world’
+     *     <li>OR
+     *     OR joins (e.g. “match documents that have either the term ‘dog’ or
+     *     ‘cat’”).
+     *     Example: dog OR puppy
+     *     <li>Exclusion
+     *     Exclude a term (e.g. “match documents that do
+     *     not have the term ‘dog’”).
+     *     Example: -dog excludes the term ‘dog’
+     *     <li>Grouping terms
+     *     Allow for conceptual grouping of subqueries to enable hierarchical structures (e.g.
+     *     “match documents that have either ‘dog’ or ‘puppy’, and either ‘cat’ or ‘kitten’”).
+     *     Example: (dog puppy) (cat kitten) two one group containing two terms.
+     *     <li>Property restricts
+     *      which properties of a document to specifically match terms in (e.g.
+     *     “match documents where the ‘subject’ property contains ‘important’”).
+     *     Example: subject:important matches documents with the term ‘important’ in the
+     *     ‘subject’ property
+     *     <li>Schema type restricts
+     *     This is similar to property restricts, but allows for restricts on top-level document
+     *     fields, such as schema_type. Clients should be able to limit their query to documents of
+     *     a certain schema_type (e.g. “match documents that are of the ‘Email’ schema_type”).
+     *     Example: { schema_type_filters: “Email”, “Video”,query: “dog” } will match documents
+     *     that contain the query term ‘dog’ and are of either the ‘Email’ schema type or the
+     *     ‘Video’ schema type.
+     * </ul>
+     *
+     * <p> It is strongly recommended to use Jetpack APIs.
+     *
+     * @param queryExpression Query String to search.
+     * @param searchSpec Spec for setting filters, raw query etc.
+     * @param executor Executor on which to invoke the callback.
+     * @param callback  Callback to receive errors resulting from the query operation. If the
+     *                 operation succeeds, the callback will be invoked with {@code null}.
+     * @hide
+     */
+    @NonNull
+    public void query(
+            @NonNull String queryExpression,
+            @NonNull SearchSpec searchSpec,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull BiConsumer<? super SearchResults, ? super Throwable> callback) {
+        AndroidFuture<byte[]> future = new AndroidFuture<>();
+        future.whenCompleteAsync((searchResultBytes, err) -> {
+            if (err != null) {
+                callback.accept(null, err);
+                return;
+            }
+
+            if (searchResultBytes != null) {
+                SearchResultProto searchResultProto;
+                try {
+                    searchResultProto = SearchResultProto.parseFrom(searchResultBytes);
+                } catch (InvalidProtocolBufferException e) {
+                    callback.accept(null, e);
+                    return;
+                }
+                if (searchResultProto.hasError()) {
+                    // TODO(sidchhabra): Add better exception handling.
+                    callback.accept(
+                            null,
+                            new RuntimeException(searchResultProto.getError().getErrorMessage()));
+                    return;
+                }
+                SearchResults searchResults = new SearchResults(searchResultProto);
+                callback.accept(searchResults, null);
+                return;
+            }
+
+            // Nothing was supplied in the future at all
+            callback.accept(
+                    null, new IllegalStateException("Unknown failure occurred while querying"));
+        }, executor);
+
+        try {
+            mService.query(queryExpression, searchSpec.getProto().toByteArray(), future);
+        } catch (RemoteException e) {
+            future.completeExceptionally(e);
+        }
     }
 }

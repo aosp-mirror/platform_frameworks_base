@@ -1,5 +1,5 @@
 /**
- * Copyright 2019, The Android Open Source Project
+ * Copyright 2020, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,4 +29,13 @@ interface IAppSearchManager {
      */
     void setSchema(in byte[] schemaProto, in AndroidFuture callback);
     void put(in byte[] documentBytes, in AndroidFuture callback);
+    /**
+     * Searches a document based on a given query string.
+     *
+     * @param queryExpression Query String to search.
+     * @param searchSpec Serialized SearchSpecProto.
+     * @param callback {@link AndroidFuture}. Will be completed with a serialized
+     *     {@link SearchResultsProto}, or completed exceptionally if query fails.
+     */
+     void query(in String queryExpression, in byte[] searchSpecBytes, in AndroidFuture callback);
 }
