@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 
 /**
  * Configuration for a soft access point (a.k.a. Soft AP, SAP, Hotspot).
@@ -45,10 +44,10 @@ import java.util.concurrent.Executor;
  * framework how it should configure a hotspot.
  *
  * System apps can use this to configure a tethered hotspot using
- * {@link WifiManager#startTetheredHotspot(SoftApConfiguration)} and
- * {@link WifiManager#setSoftApConfiguration(SoftApConfiguration)}
+ * {@code WifiManager#startTetheredHotspot(SoftApConfiguration)} and
+ * {@code WifiManager#setSoftApConfiguration(SoftApConfiguration)}
  * or local-only hotspot using
- * {@link WifiManager#startLocalOnlyHotspot(SoftApConfiguration, Executor,
+ * {@code WifiManager#startLocalOnlyHotspot(SoftApConfiguration, Executor,
  * WifiManager.LocalOnlyHotspotCallback)}.
  *
  * Instances of this class are immutable; use {@link SoftApConfiguration.Builder} and its methods to
@@ -347,7 +346,7 @@ public final class SoftApConfiguration implements Parcelable {
 
     /**
      * Return String set to be the SSID for the AP.
-     * {@link #setSsid(String)}.
+     * {@link Builder#setSsid(String)}.
      */
     @Nullable
     public String getSsid() {
@@ -365,7 +364,7 @@ public final class SoftApConfiguration implements Parcelable {
 
     /**
      * Returns String set to be passphrase for current AP.
-     * {@link #setPassphrase(String, @SecurityType int)}.
+     * {@link Builder#setPassphrase(String, int)}.
      */
     @Nullable
     public String getPassphrase() {

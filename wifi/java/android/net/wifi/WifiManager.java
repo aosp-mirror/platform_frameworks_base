@@ -3740,9 +3740,10 @@ public class WifiManager {
         /**
          * Returns the {@link WifiConfiguration} of the current Local Only Hotspot (LOHS).
          * May be null if hotspot enabled and security type is not
-         * {@link WifiConfiguration.KeyMgmt.None} or {@link WifiConfiguration.KeyMgmt.WPA2_PSK}.
+         * {@code WifiConfiguration.KeyMgmt.None} or {@code WifiConfiguration.KeyMgmt.WPA2_PSK}.
          *
-         * @deprecated Use {@link getSoftApConfiguration()} to get the LOHS configuration.
+         * @deprecated Use {@code WifiManager#getSoftApConfiguration()} to get the
+         * LOHS configuration.
          */
         @Deprecated
         @Nullable
@@ -3751,7 +3752,7 @@ public class WifiManager {
         }
 
         /**
-         * Returns the {@link SoftapConfiguration} of the current Local Only Hotspot (LOHS).
+         * Returns the {@link SoftApConfiguration} of the current Local Only Hotspot (LOHS).
          */
         @NonNull
         public SoftApConfiguration getSoftApConfiguration() {
