@@ -19,9 +19,7 @@ package android.media.tv.tuner.filter;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.content.Context;
-import android.media.tv.tuner.TunerConstants;
 import android.media.tv.tuner.TunerUtils;
-import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
 
 /**
  * Filter Settings for a Download.
@@ -31,7 +29,7 @@ public class DownloadSettings extends Settings {
     private final int mDownloadId;
 
     private DownloadSettings(int mainType, int downloadId) {
-        super(TunerUtils.getFilterSubtype(mainType, TunerConstants.FILTER_SUBTYPE_DOWNLOAD));
+        super(TunerUtils.getFilterSubtype(mainType, Filter.SUBTYPE_DOWNLOAD));
         mDownloadId = downloadId;
     }
 
@@ -50,7 +48,7 @@ public class DownloadSettings extends Settings {
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder builder(@NonNull Context context, @FilterType int mainType) {
+    public static Builder builder(@NonNull Context context, @Filter.Type int mainType) {
         TunerUtils.checkTunerPermission(context);
         return new Builder(mainType);
     }

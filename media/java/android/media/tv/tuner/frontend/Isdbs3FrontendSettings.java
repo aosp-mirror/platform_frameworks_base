@@ -87,47 +87,47 @@ public class Isdbs3FrontendSettings extends FrontendSettings {
      */
     public static final int CODERATE_AUTO = Constants.FrontendIsdbs3Coderate.AUTO;
     /**
-     * 1_3 code rate.
+     * 1/3 code rate.
      */
     public static final int CODERATE_1_3 = Constants.FrontendIsdbs3Coderate.CODERATE_1_3;
     /**
-     * 2_5 code rate.
+     * 2/5 code rate.
      */
     public static final int CODERATE_2_5 = Constants.FrontendIsdbs3Coderate.CODERATE_2_5;
     /**
-     * 1_2 code rate.
+     * 1/2 code rate.
      */
     public static final int CODERATE_1_2 = Constants.FrontendIsdbs3Coderate.CODERATE_1_2;
     /**
-     * 3_5 code rate.
+     * 3/5 code rate.
      */
     public static final int CODERATE_3_5 = Constants.FrontendIsdbs3Coderate.CODERATE_3_5;
     /**
-     * 2_3 code rate.
+     * 2/3 code rate.
      */
     public static final int CODERATE_2_3 = Constants.FrontendIsdbs3Coderate.CODERATE_2_3;
     /**
-     * 3_4 code rate.
+     * 3/4 code rate.
      */
     public static final int CODERATE_3_4 = Constants.FrontendIsdbs3Coderate.CODERATE_3_4;
     /**
-     * 7_9 code rate.
+     * 7/9 code rate.
      */
     public static final int CODERATE_7_9 = Constants.FrontendIsdbs3Coderate.CODERATE_7_9;
     /**
-     * 4_5 code rate.
+     * 4/5 code rate.
      */
     public static final int CODERATE_4_5 = Constants.FrontendIsdbs3Coderate.CODERATE_4_5;
     /**
-     * 5_6 code rate.
+     * 5/6 code rate.
      */
     public static final int CODERATE_5_6 = Constants.FrontendIsdbs3Coderate.CODERATE_5_6;
     /**
-     * 7_8 code rate.
+     * 7/8 code rate.
      */
     public static final int CODERATE_7_8 = Constants.FrontendIsdbs3Coderate.CODERATE_7_8;
     /**
-     * 9_10 code rate.
+     * 9/10 code rate.
      */
     public static final int CODERATE_9_10 = Constants.FrontendIsdbs3Coderate.CODERATE_9_10;
 
@@ -138,11 +138,11 @@ public class Isdbs3FrontendSettings extends FrontendSettings {
     public @interface Rolloff {}
 
     /**
-     * Roll off type undefined.
+     * Rolloff type undefined.
      */
     public static final int ROLLOFF_UNDEFINED = Constants.FrontendIsdbs3Rolloff.UNDEFINED;
     /**
-     * 0.03 roll off type.
+     * 0,03 Rolloff.
      */
     public static final int ROLLOFF_0_03 = Constants.FrontendIsdbs3Rolloff.ROLLOFF_0_03;
 

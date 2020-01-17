@@ -17,10 +17,15 @@
 package android.media.tv.tuner.dvr;
 
 import android.annotation.BytesLong;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.Tuner.Filter;
 import android.media.tv.tuner.TunerConstants.Result;
 import android.os.ParcelFileDescriptor;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Digital Video Record (DVR) interface provides record control on Demux's output buffer and
@@ -29,6 +34,37 @@ import android.os.ParcelFileDescriptor;
  * @hide
  */
 public class Dvr {
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "PLAYBACK_STATUS_",
+            value = {PLAYBACK_STATUS_EMPTY, PLAYBACK_STATUS_ALMOST_EMPTY,
+                    PLAYBACK_STATUS_ALMOST_FULL, PLAYBACK_STATUS_FULL})
+    @interface PlaybackStatus {}
+
+    /**
+     * The space of the playback is empty.
+     */
+    public static final int PLAYBACK_STATUS_EMPTY = Constants.PlaybackStatus.SPACE_EMPTY;
+    /**
+     * The space of the playback is almost empty.
+     *
+     * <p> the threshold is set in {@link DvrSettings}.
+     */
+    public static final int PLAYBACK_STATUS_ALMOST_EMPTY =
+            Constants.PlaybackStatus.SPACE_ALMOST_EMPTY;
+    /**
+     * The space of the playback is almost full.
+     *
+     * <p> the threshold is set in {@link DvrSettings}.
+     */
+    public static final int PLAYBACK_STATUS_ALMOST_FULL =
+            Constants.PlaybackStatus.SPACE_ALMOST_FULL;
+    /**
+     * The space of the playback is full.
+     */
+    public static final int PLAYBACK_STATUS_FULL = Constants.PlaybackStatus.SPACE_FULL;
+
+
     private long mNativeContext;
     private DvrCallback mCallback;
 

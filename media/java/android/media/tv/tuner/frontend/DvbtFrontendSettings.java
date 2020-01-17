@@ -110,7 +110,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
      */
     public static final int BANDWIDTH_5MHZ = Constants.FrontendDvbtBandwidth.BANDWIDTH_5MHZ;
     /**
-     * 1.7 MHz bandwidth.
+     * 1,7 MHz bandwidth.
      */
     public static final int BANDWIDTH_1_7MHZ = Constants.FrontendDvbtBandwidth.BANDWIDTH_1_7MHZ;
     /**
@@ -232,39 +232,39 @@ public class DvbtFrontendSettings extends FrontendSettings {
      */
     public static final int CODERATE_AUTO = Constants.FrontendDvbtCoderate.AUTO;
     /**
-     * 1_2 code rate.
+     * 1/2 code rate.
      */
     public static final int CODERATE_1_2 = Constants.FrontendDvbtCoderate.CODERATE_1_2;
     /**
-     * 2_3 code rate.
+     * 2/3 code rate.
      */
     public static final int CODERATE_2_3 = Constants.FrontendDvbtCoderate.CODERATE_2_3;
     /**
-     * 3_4 code rate.
+     * 3/4 code rate.
      */
     public static final int CODERATE_3_4 = Constants.FrontendDvbtCoderate.CODERATE_3_4;
     /**
-     * 5_6 code rate.
+     * 5/6 code rate.
      */
     public static final int CODERATE_5_6 = Constants.FrontendDvbtCoderate.CODERATE_5_6;
     /**
-     * 7_8 code rate.
+     * 7/8 code rate.
      */
     public static final int CODERATE_7_8 = Constants.FrontendDvbtCoderate.CODERATE_7_8;
     /**
-     * 4_5 code rate.
+     * 4/5 code rate.
      */
     public static final int CODERATE_3_5 = Constants.FrontendDvbtCoderate.CODERATE_3_5;
     /**
-     * 4_5 code rate.
+     * 4/5 code rate.
      */
     public static final int CODERATE_4_5 = Constants.FrontendDvbtCoderate.CODERATE_4_5;
     /**
-     * 6_7 code rate.
+     * 6/7 code rate.
      */
     public static final int CODERATE_6_7 = Constants.FrontendDvbtCoderate.CODERATE_6_7;
     /**
-     * 8_9 code rate.
+     * 8/9 code rate.
      */
     public static final int CODERATE_8_9 = Constants.FrontendDvbtCoderate.CODERATE_8_9;
 

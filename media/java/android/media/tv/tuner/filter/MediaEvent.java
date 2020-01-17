@@ -16,6 +16,7 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.BytesLong;
 import android.annotation.Nullable;
 import android.media.tv.tuner.Tuner.Filter;
 
@@ -28,23 +29,27 @@ public class MediaEvent extends FilterEvent{
     private final int mStreamId;
     private final boolean mIsPtsPresent;
     private final long mPts;
-    private final int mDataLength;
+    private final long mDataLength;
+    private final long mOffset;
     private final Object mLinearBuffer;
     private final boolean mIsSecureMemory;
+    private final long mDataId;
     private final int mMpuSequenceNumber;
     private final boolean mIsPrivateData;
     private final AudioDescriptor mExtraMetaData;
 
     // This constructor is used by JNI code only
-    private MediaEvent(int streamId, boolean isPtsPresent, long pts, int dataLength, Object buffer,
-            boolean isSecureMemory, int mpuSequenceNumber, boolean isPrivateData,
-            AudioDescriptor extraMetaData) {
+    private MediaEvent(int streamId, boolean isPtsPresent, long pts, long dataLength, long offset,
+            Object buffer, boolean isSecureMemory, long dataId, int mpuSequenceNumber,
+            boolean isPrivateData, AudioDescriptor extraMetaData) {
         mStreamId = streamId;
         mIsPtsPresent = isPtsPresent;
         mPts = pts;
         mDataLength = dataLength;
+        mOffset = offset;
         mLinearBuffer = buffer;
         mIsSecureMemory = isSecureMemory;
+        mDataId = dataId;
         mMpuSequenceNumber = mpuSequenceNumber;
         mIsPrivateData = isPrivateData;
         mExtraMetaData = extraMetaData;
@@ -76,8 +81,17 @@ public class MediaEvent extends FilterEvent{
     /**
      * Gets data size in bytes of audio or video frame.
      */
-    public int getDataLength() {
+    @BytesLong
+    public long getDataLength() {
         return mDataLength;
+    }
+
+    /**
+     * The offset in the memory block which is shared among multiple Media Events.
+     */
+    @BytesLong
+    public long getOffset() {
+        return mOffset;
     }
 
     /**
@@ -98,6 +112,15 @@ public class MediaEvent extends FilterEvent{
      */
     public boolean getIsSecureMemory() {
         return mIsSecureMemory;
+    }
+
+    /**
+     * Gets the ID which is used by HAL to provide additional information for AV data.
+     *
+     * <p>For secure audio, it's the audio handle used by Audio Track.
+     */
+    public long getAvDataId() {
+        return mDataId;
     }
 
     /**

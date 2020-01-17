@@ -34,7 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class Descrambler implements AutoCloseable {
     /** @hide */
-    @IntDef(prefix = "PID_TYPE_", value = {PID_TYPE_T, PID_TYPE_MMPT})
+    @IntDef(prefix = "PID_TYPE_", value = {PID_TYPE_T, PID_TYPE_MMTP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PidType {}
 
@@ -45,7 +45,7 @@ public class Descrambler implements AutoCloseable {
     /**
      * Packet ID is used to specify packets in MMTP.
      */
-    public static final int PID_TYPE_MMPT = 2;
+    public static final int PID_TYPE_MMTP = 2;
 
 
     private long mNativeContext;

@@ -16,7 +16,6 @@
 
 package android.media.tv.tuner.filter;
 
-import android.media.tv.tuner.TunerConstants;
 import android.media.tv.tuner.TunerUtils;
 
 /**
@@ -26,6 +25,6 @@ import android.media.tv.tuner.TunerUtils;
 public class SectionSettings extends Settings {
 
     SectionSettings(int mainType) {
-        super(TunerUtils.getFilterSubtype(mainType, TunerConstants.FILTER_SUBTYPE_SECTION));
+        super(TunerUtils.getFilterSubtype(mainType, Filter.SUBTYPE_SECTION));
     }
 }

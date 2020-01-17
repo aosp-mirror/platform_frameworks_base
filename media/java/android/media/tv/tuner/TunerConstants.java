@@ -36,67 +36,40 @@ import java.lang.annotation.RetentionPolicy;
  */
 @SystemApi
 public final class TunerConstants {
-    /** @hide */
+    /**
+     * Invalid TS packet ID.
+     * @hide
+     */
     public static final int INVALID_TS_PID = Constants.Constant.INVALID_TS_PID;
-    /** @hide */
+    /**
+     * Invalid stream ID.
+     * @hide
+     */
     public static final int INVALID_STREAM_ID = Constants.Constant.INVALID_STREAM_ID;
 
 
     /** @hide */
-    @IntDef({FRONTEND_EVENT_TYPE_LOCKED, FRONTEND_EVENT_TYPE_NO_SIGNAL,
-            FRONTEND_EVENT_TYPE_LOST_LOCK})
+    @IntDef(prefix = "FRONTEND_EVENT_TYPE_",
+            value = {FRONTEND_EVENT_TYPE_LOCKED, FRONTEND_EVENT_TYPE_NO_SIGNAL,
+                    FRONTEND_EVENT_TYPE_LOST_LOCK})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendEventType {}
-    /** @hide */
+    /**
+     * Frontend locked.
+     * @hide
+     */
     public static final int FRONTEND_EVENT_TYPE_LOCKED = Constants.FrontendEventType.LOCKED;
-    /** @hide */
+    /**
+     * No signal detected.
+     * @hide
+     */
     public static final int FRONTEND_EVENT_TYPE_NO_SIGNAL = Constants.FrontendEventType.NO_SIGNAL;
-    /** @hide */
+    /**
+     * Frontend lock lost.
+     * @hide
+     */
     public static final int FRONTEND_EVENT_TYPE_LOST_LOCK = Constants.FrontendEventType.LOST_LOCK;
 
-
-    /** @hide */
-    @IntDef({FILTER_SUBTYPE_UNDEFINED, FILTER_SUBTYPE_SECTION, FILTER_SUBTYPE_PES,
-            FILTER_SUBTYPE_AUDIO, FILTER_SUBTYPE_VIDEO, FILTER_SUBTYPE_DOWNLOAD,
-            FILTER_SUBTYPE_RECORD, FILTER_SUBTYPE_TS, FILTER_SUBTYPE_PCR, FILTER_SUBTYPE_TEMI,
-            FILTER_SUBTYPE_MMPT, FILTER_SUBTYPE_NTP, FILTER_SUBTYPE_IP_PAYLOAD, FILTER_SUBTYPE_IP,
-            FILTER_SUBTYPE_PAYLOAD_THROUGH, FILTER_SUBTYPE_TLV, FILTER_SUBTYPE_PTP, })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FilterSubtype {}
-    /** @hide */
-    public static final int FILTER_SUBTYPE_UNDEFINED = 0;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_SECTION = 1;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_PES = 2;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_AUDIO = 3;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_VIDEO = 4;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_DOWNLOAD = 5;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_RECORD = 6;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_TS = 7;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_PCR = 8;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_TEMI = 9;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_MMPT = 10;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_NTP = 11;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_IP_PAYLOAD = 12;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_IP = 13;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_PAYLOAD_THROUGH = 14;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_TLV = 15;
-    /** @hide */
-    public static final int FILTER_SUBTYPE_PTP = 16;
 
     /** @hide */
     @IntDef(flag = true, prefix = "FILTER_STATUS_", value = {FILTER_STATUS_DATA_READY,
@@ -499,23 +472,6 @@ public final class TunerConstants {
             IsdbtFrontendSettings.MODULATION_MOD_64QAM})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendModulation {}
-
-
-    /** @hide */
-    @IntDef({FILTER_SETTINGS_TS, FILTER_SETTINGS_MMTP, FILTER_SETTINGS_IP, FILTER_SETTINGS_TLV,
-            FILTER_SETTINGS_ALP})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FilterSettingsType {}
-    /** @hide */
-    public static final int FILTER_SETTINGS_TS = Constants.DemuxFilterMainType.TS;
-    /** @hide */
-    public static final int FILTER_SETTINGS_MMTP = Constants.DemuxFilterMainType.MMTP;
-    /** @hide */
-    public static final int FILTER_SETTINGS_IP = Constants.DemuxFilterMainType.IP;
-    /** @hide */
-    public static final int FILTER_SETTINGS_TLV = Constants.DemuxFilterMainType.TLV;
-    /** @hide */
-    public static final int FILTER_SETTINGS_ALP = Constants.DemuxFilterMainType.ALP;
 
 
     /** @hide */

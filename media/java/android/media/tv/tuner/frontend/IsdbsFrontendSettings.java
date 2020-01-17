@@ -96,23 +96,23 @@ public class IsdbsFrontendSettings extends FrontendSettings {
      */
     public static final int CODERATE_AUTO = Constants.FrontendIsdbsCoderate.AUTO;
     /**
-     * 1_2 code rate.
+     * 1/2 code rate.
      */
     public static final int CODERATE_1_2 = Constants.FrontendIsdbsCoderate.CODERATE_1_2;
     /**
-     * 2_3 code rate.
+     * 2/3 code rate.
      */
     public static final int CODERATE_2_3 = Constants.FrontendIsdbsCoderate.CODERATE_2_3;
     /**
-     * 3_4 code rate.
+     * 3/4 code rate.
      */
     public static final int CODERATE_3_4 = Constants.FrontendIsdbsCoderate.CODERATE_3_4;
     /**
-     * 5_6 code rate.
+     * 5/6 code rate.
      */
     public static final int CODERATE_5_6 = Constants.FrontendIsdbsCoderate.CODERATE_5_6;
     /**
-     * 7_8 code rate.
+     * 7/8 code rate.
      */
     public static final int CODERATE_7_8 = Constants.FrontendIsdbsCoderate.CODERATE_7_8;
 
@@ -123,11 +123,11 @@ public class IsdbsFrontendSettings extends FrontendSettings {
     public @interface Rolloff {}
 
     /**
-     * Roll off type undefined.
+     * Rolloff type undefined.
      */
     public static final int ROLLOFF_UNDEFINED = Constants.FrontendIsdbs3Rolloff.UNDEFINED;
     /**
-     * 0.35 roll off type.
+     * 0,35 rolloff.
      */
     public static final int ROLLOFF_0_35 = Constants.FrontendIsdbsRolloff.ROLLOFF_0_35;
 

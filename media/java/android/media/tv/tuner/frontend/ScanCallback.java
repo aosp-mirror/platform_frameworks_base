@@ -16,6 +16,7 @@
 
 package android.media.tv.tuner.frontend;
 
+
 /**
  * Scan callback.
  *
@@ -31,11 +32,11 @@ public interface ScanCallback {
     /** scan progress percent (0..100) */
     void onProgress(int percent);
 
-    /** Signal frequency in Hertz */
-    void onFrequencyReport(int frequency);
+    /** Signal frequencies in Hertz */
+    void onFrequenciesReport(int[] frequency);
 
     /** Symbols per second */
-    void onSymbolRate(int rate);
+    void onSymbolRates(int[] rate);
 
     /** Locked Plp Ids for DVBT2 frontend. */
     void onPlpIds(int[] plpIds);
@@ -46,14 +47,23 @@ public interface ScanCallback {
     /** Stream Ids. */
     void onInputStreamIds(int[] inputStreamIds);
 
-    /** Locked signal standard. */
+    /** Locked signal standard for DVBS. */
     void onDvbsStandard(@DvbsFrontendSettings.Standard int dvbsStandandard);
 
-    /** Locked signal standard. */
+    /** Locked signal standard. for DVBT */
     void onDvbtStandard(@DvbtFrontendSettings.Standard int dvbtStandard);
+
+    /** Locked signal SIF standard for Analog. */
+    void onAnalogSifStandard(@AnalogFrontendSettings.SifStandard int sif);
 
     /** PLP status in a tuned frequency band for ATSC3 frontend. */
     void onAtsc3PlpInfos(Atsc3PlpInfo[] atsc3PlpInfos);
+
+    /** Frontend hierarchy. */
+    void onHierarchy(@DvbtFrontendSettings.Hierarchy int hierarchy);
+
+    /** Frontend hierarchy. */
+    void onSignalType(@AnalogFrontendSettings.SignalType int signalType);
 
     /** PLP information for ATSC3. */
     class Atsc3PlpInfo {

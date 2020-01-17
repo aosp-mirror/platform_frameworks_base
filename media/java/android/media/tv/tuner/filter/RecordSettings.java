@@ -24,7 +24,6 @@ import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerConstants;
 import android.media.tv.tuner.TunerConstants.ScIndexType;
 import android.media.tv.tuner.TunerUtils;
-import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -151,7 +150,7 @@ public class RecordSettings extends Settings {
     private final int mScIndexMask;
 
     private RecordSettings(int mainType, int tsIndexType, int scIndexType, int scIndexMask) {
-        super(TunerUtils.getFilterSubtype(mainType, TunerConstants.FILTER_SUBTYPE_RECORD));
+        super(TunerUtils.getFilterSubtype(mainType, Filter.SUBTYPE_RECORD));
         mTsIndexMask = tsIndexType;
         mScIndexType = scIndexType;
         mScIndexMask = scIndexMask;
@@ -187,7 +186,7 @@ public class RecordSettings extends Settings {
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder builder(@NonNull Context context, @FilterType int mainType) {
+    public static Builder builder(@NonNull Context context, @Filter.Type int mainType) {
         TunerUtils.checkTunerPermission(context);
         return new Builder(mainType);
     }
