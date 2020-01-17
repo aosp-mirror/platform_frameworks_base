@@ -47,30 +47,6 @@ public final class TunerConstants {
      */
     public static final int INVALID_STREAM_ID = Constants.Constant.INVALID_STREAM_ID;
 
-
-    /** @hide */
-    @IntDef(prefix = "FRONTEND_EVENT_TYPE_",
-            value = {FRONTEND_EVENT_TYPE_LOCKED, FRONTEND_EVENT_TYPE_NO_SIGNAL,
-                    FRONTEND_EVENT_TYPE_LOST_LOCK})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendEventType {}
-    /**
-     * Frontend locked.
-     * @hide
-     */
-    public static final int FRONTEND_EVENT_TYPE_LOCKED = Constants.FrontendEventType.LOCKED;
-    /**
-     * No signal detected.
-     * @hide
-     */
-    public static final int FRONTEND_EVENT_TYPE_NO_SIGNAL = Constants.FrontendEventType.NO_SIGNAL;
-    /**
-     * Frontend lock lost.
-     * @hide
-     */
-    public static final int FRONTEND_EVENT_TYPE_LOST_LOCK = Constants.FrontendEventType.LOST_LOCK;
-
-
     /** @hide */
     @IntDef(flag = true, prefix = "FILTER_STATUS_", value = {FILTER_STATUS_DATA_READY,
             FILTER_STATUS_LOW_WATER, FILTER_STATUS_HIGH_WATER, FILTER_STATUS_OVERFLOW})
