@@ -26,6 +26,24 @@ package com.android.permission.persistence {
 
 }
 
+package com.android.role.persistence {
+
+  public interface RolesPersistence {
+    method @NonNull public static com.android.role.persistence.RolesPersistence createInstance();
+    method public void delete(@NonNull android.os.UserHandle);
+    method @Nullable public com.android.role.persistence.RolesState read(@NonNull android.os.UserHandle);
+    method public void write(@NonNull com.android.role.persistence.RolesState, @NonNull android.os.UserHandle);
+  }
+
+  public final class RolesState {
+    ctor public RolesState(int, @Nullable String, @NonNull java.util.Map<java.lang.String,java.util.Set<java.lang.String>>);
+    method @Nullable public String getPackagesHash();
+    method @NonNull public java.util.Map<java.lang.String,java.util.Set<java.lang.String>> getRoles();
+    method public int getVersion();
+  }
+
+}
+
 package com.android.server {
 
   public abstract class SystemService {
