@@ -50,6 +50,47 @@ public class AppSearchManager {
     /**
      * Sets the schema being used by documents provided to the #put method.
      *
+     * <p>The schema provided here is compared to the stored copy of the schema previously supplied
+     * to {@link #setSchema}, if any, to determine how to treat existing documents. The following
+     * types of schema modifications are always safe and are made without deleting any existing
+     * documents:
+     * <ul>
+     *     <li>Addition of new types
+     *     <li>Addition of new
+     *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL
+     *             OPTIONAL} or
+     *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_REPEATED
+     *             REPEATED} properties to a type
+     *     <li>Changing the cardinality of a data type to be less restrictive (e.g. changing an
+     *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL
+     *             OPTIONAL} property into a
+     *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_REPEATED
+     *             REPEATED} property.
+     * </ul>
+     *
+     * <p>The following types of schema changes are not backwards-compatible. Supplying a schema
+     * with such changes will result in the provided callback being called with a {@link Throwable}
+     * describing the incompatibility, and the previously set schema will remain active:
+     * <ul>
+     *     <li>Removal of an existing type
+     *     <li>Removal of a property from a type
+     *     <li>Changing the data type ({@code boolean}, {@code long}, etc.) of an existing property
+     *     <li>For properties of {@code Document} type, changing the schema type of
+     *         {@code Document Documents} of that property
+     *     <li>Changing the cardinality of a data type to be more restrictive (e.g. changing an
+     *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL
+     *             OPTIONAL} property into a
+     *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_REQUIRED
+     *             REQUIRED} property).
+     *     <li>Adding a
+     *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_REQUIRED
+     *             REQUIRED} property.
+     * </ul>
+     *
+     * <p>If you need to make non-backwards-compatible changes as described above, you may set the
+     * {@code force} parameter to {@code true}. In this case, all documents which are not compatible
+     * with the new schema will be deleted.
+     *
      * <p>This operation is performed asynchronously. On success, the provided callback will be
      * called with {@code null}. On failure, the provided callback will be called with a
      * {@link Throwable} describing the failure.
@@ -57,36 +98,22 @@ public class AppSearchManager {
      * <p>It is a no-op to set the same schema as has been previously set; this is handled
      * efficiently.
      *
-     * <p>AppSearch automatically handles the following types of schema changes:
-     * <ul>
-     *     <li>Addition of new types (No changes to storage or index)
-     *     <li>Removal of an existing type (All documents of the removed type are deleted)
-     *     <li>Addition of new 'optional' property to a type (No changes to storage or index)
-     *     <li>Removal of existing property of any cardinality (All documents reindexed)
-     * </ul>
-     *
-     * <p>This method will return an error when attempting to make the following types of changes:
-     * <ul>
-     *     <li>Changing the type of an existing property
-     *     <li>Adding a 'required' property
-     * </ul>
-     *
+     * @param schemas The schema configs for the types used by the calling app.
+     * @param force Whether to force the new schema to be applied even if there are incompatible
+     *     changes versus the previously set schema. Documents which are incompatible with the new
+     *     schema will be deleted.
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive errors resulting from setting the schema. If the
      *                 operation succeeds, the callback will be invoked with {@code null}.
-     * @param schemas The schema configs for the types used by the calling app.
      *
      * @hide
      */
     // TODO(b/143789408): linkify #put after that API is created
-    // TODO(b/145635424): add a 'force' param to setSchema after the corresponding API is finalized
-    //     in Icing Library
-    // TODO(b/145635424): Update the documentation above once the Schema mutation APIs of Icing
-    //     Library are finalized
     public void setSchema(
+            List<AppSearchSchema> schemas,
+            boolean force,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<? super Throwable> callback,
-            @NonNull AppSearchSchema... schemas) {
+            @NonNull Consumer<? super Throwable> callback) {
         // Prepare the merged schema for transmission.
         SchemaProto.Builder schemaProtoBuilder = SchemaProto.newBuilder();
         for (AppSearchSchema schema : schemas) {
@@ -99,7 +126,7 @@ public class AppSearchManager {
         byte[] schemaBytes = schemaProtoBuilder.build().toByteArray();
         AndroidFuture<Void> future = new AndroidFuture<>();
         try {
-            mService.setSchema(schemaBytes, future);
+            mService.setSchema(schemaBytes, force, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
