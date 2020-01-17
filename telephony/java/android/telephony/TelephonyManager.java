@@ -9093,15 +9093,20 @@ public class TelephonyManager {
     }
 
     /**
-     * Requested state of SIM
-     *
-     * CARD_POWER_DOWN
      * Powers down the SIM. SIM must be up prior.
-     *
-     * CARD_POWER_UP
+     * @hide
+     */
+    @SystemApi
+    public static final int CARD_POWER_DOWN = 0;
+
+    /**
      * Powers up the SIM normally. SIM must be down prior.
-     *
-     * CARD_POWER_UP_PASS_THROUGH
+     * @hide
+     */
+    @SystemApi
+    public static final int CARD_POWER_UP = 1;
+
+    /**
      * Powers up the SIM in PASS_THROUGH mode. SIM must be down prior.
      * When SIM is powered up in PASS_THOUGH mode, the modem does not send
      * any command to it (for example SELECT of MF, or TERMINAL CAPABILITY),
@@ -9114,12 +9119,9 @@ public class TelephonyManager {
      * is activated, and normal behavior occurs at the next SIM initialization,
      * unless PASS_THROUGH mode is requested again. Hence, the last power-up mode
      * is NOT persistent across boots. On reboot, SIM will power up normally.
+     * @hide
      */
-    /** @hide */
-    public static final int CARD_POWER_DOWN = 0;
-    /** @hide */
-    public static final int CARD_POWER_UP = 1;
-    /** @hide */
+    @SystemApi
     public static final int CARD_POWER_UP_PASS_THROUGH = 2;
 
     /**
