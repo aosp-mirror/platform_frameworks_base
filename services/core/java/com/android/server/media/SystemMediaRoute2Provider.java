@@ -96,8 +96,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void requestCreateSession(String packageName, String routeId, String routeType,
-            long requestId) {
+    public void requestCreateSession(String packageName, String routeId, long requestId) {
         // Do nothing
     }
 

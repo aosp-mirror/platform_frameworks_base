@@ -178,18 +178,14 @@ class MediaRouter2ServiceImpl {
     }
 
     public void requestCreateSession(IMediaRouter2Client client, MediaRoute2Info route,
-            String routeFeature, int requestId) {
+            int requestId) {
         Objects.requireNonNull(client, "client must not be null");
         Objects.requireNonNull(route, "route must not be null");
-        if (TextUtils.isEmpty(routeFeature)) {
-            throw new IllegalArgumentException("routeFeature must not be empty");
-        }
 
         final long token = Binder.clearCallingIdentity();
-
         try {
             synchronized (mLock) {
-                requestCreateSessionLocked(client, route, routeFeature, requestId);
+                requestCreateSessionLocked(client, route, requestId);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -450,7 +446,7 @@ class MediaRouter2ServiceImpl {
     }
 
     private void requestCreateSessionLocked(@NonNull IMediaRouter2Client client,
-            @NonNull MediaRoute2Info route, @NonNull String routeFeature, long requestId) {
+            @NonNull MediaRoute2Info route, long requestId) {
         final IBinder binder = client.asBinder();
         final Client2Record clientRecord = mAllClientRecords.get(binder);
 
@@ -462,8 +458,7 @@ class MediaRouter2ServiceImpl {
         if (clientRecord != null) {
             clientRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::requestCreateSessionOnHandler,
-                            clientRecord.mUserRecord.mHandler,
-                            clientRecord, route, routeFeature, requestId));
+                            clientRecord.mUserRecord.mHandler, clientRecord, route, requestId));
         }
     }
 
@@ -624,7 +619,7 @@ class MediaRouter2ServiceImpl {
             if (clientRecord != null && managerRecord.mTrusted) {
                 //TODO: select route feature properly
                 requestCreateSessionLocked(clientRecord.mClient, route,
-                        route.getFeatures().get(0), uniqueRequestId);
+                        uniqueRequestId);
             }
         }
     }
@@ -985,7 +980,7 @@ class MediaRouter2ServiceImpl {
         }
 
         private void requestCreateSessionOnHandler(Client2Record clientRecord,
-                MediaRoute2Info route, String routeFeature, long requestId) {
+                MediaRoute2Info route, long requestId) {
 
             final MediaRoute2Provider provider = findProvider(route.getProviderId());
             if (provider == null) {
@@ -995,20 +990,13 @@ class MediaRouter2ServiceImpl {
                 return;
             }
 
-            if (!route.getFeatures().contains(routeFeature)) {
-                Slog.w(TAG, "Ignoring session creation request since the given route=" + route
-                        + " doesn't support the given feature=" + routeFeature);
-                notifySessionCreationFailed(clientRecord, toClientRequestId(requestId));
-                return;
-            }
-
             // TODO: Apply timeout for each request (How many seconds should we wait?)
-            SessionCreationRequest request = new SessionCreationRequest(
-                    clientRecord, route, routeFeature, requestId);
+            SessionCreationRequest request =
+                    new SessionCreationRequest(clientRecord, route, requestId);
             mSessionCreationRequests.add(request);
 
             provider.requestCreateSession(clientRecord.mPackageName, route.getOriginalId(),
-                    routeFeature, requestId);
+                    requestId);
         }
 
         private void selectRouteOnHandler(@NonNull Client2Record clientRecord,
@@ -1173,15 +1161,11 @@ class MediaRouter2ServiceImpl {
             }
 
             String originalRouteId = matchingRequest.mRoute.getId();
-            String originalRouteFeature = matchingRequest.mRouteFeature;
             Client2Record client2Record = matchingRequest.mClientRecord;
 
-            if (!sessionInfo.getSelectedRoutes().contains(originalRouteId)
-                    || !TextUtils.equals(originalRouteFeature,
-                        sessionInfo.getRouteFeature())) {
+            if (!sessionInfo.getSelectedRoutes().contains(originalRouteId)) {
                 Slog.w(TAG, "Created session doesn't match the original request."
                         + " originalRouteId=" + originalRouteId
-                        + ", originalRouteFeature=" + originalRouteFeature
                         + ", requestId=" + requestId + ", sessionInfo=" + sessionInfo);
                 notifySessionCreationFailed(matchingRequest.mClientRecord,
                         toClientRequestId(requestId));
@@ -1470,15 +1454,12 @@ class MediaRouter2ServiceImpl {
         final class SessionCreationRequest {
             public final Client2Record mClientRecord;
             public final MediaRoute2Info mRoute;
-            public final String mRouteFeature;
             public final long mRequestId;
 
             SessionCreationRequest(@NonNull Client2Record clientRecord,
-                    @NonNull MediaRoute2Info route,
-                    @NonNull String routeFeature, long requestId) {
+                    @NonNull MediaRoute2Info route, long requestId) {
                 mClientRecord = clientRecord;
                 mRoute = route;
-                mRouteFeature = routeFeature;
                 mRequestId = requestId;
             }
         }
