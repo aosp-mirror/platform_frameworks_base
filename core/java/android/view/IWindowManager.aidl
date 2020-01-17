@@ -32,6 +32,7 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
+import android.view.DisplayCutout;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
@@ -739,4 +740,12 @@ interface IWindowManager
      * Called when a remote process modifies insets on a display window container.
      */
     void modifyDisplayWindowInsets(int displayId, in InsetsState state);
+
+    /**
+     * Called to get the expected window insets.
+     * TODO(window-context): Remove when new insets flag is available.
+     */
+    void getWindowInsets(in WindowManager.LayoutParams attrs, int displayId,
+            out Rect outContentInsets, out Rect outStableInsets,
+            out DisplayCutout.ParcelableWrapper displayCutout);
 }

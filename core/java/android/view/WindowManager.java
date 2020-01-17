@@ -437,6 +437,49 @@ public interface WindowManager extends ViewManager {
     public void removeViewImmediate(View view);
 
     /**
+     * Returns the {@link WindowMetrics} according to the current system state.
+     * <p>
+     * The metrics describe the size of the area the window would occupy with
+     * {@link LayoutParams#MATCH_PARENT MATCH_PARENT} width and height, and the {@link WindowInsets}
+     * such a window would have.
+     * <p>
+     * The value of this is based on the <b>current</b> windowing state of the system.
+     *
+     * For example, for activities in multi-window mode, the metrics returned are based on the
+     * current bounds that the user has selected for the {@link android.app.Activity Activity}'s
+     * task.
+     *
+     * @see #getMaximumWindowMetrics()
+     * @see WindowMetrics
+     */
+    default @NonNull WindowMetrics getCurrentWindowMetrics() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Returns the largets {@link WindowMetrics} an app may expect in the current system state.
+     * <p>
+     * The metrics describe the size of the largest potential area the window might occupy with
+     * {@link LayoutParams#MATCH_PARENT MATCH_PARENT} width and height, and the {@link WindowInsets}
+     * such a window would have.
+     * <p>
+     * The value of this is based on the largest <b>potential</b> windowing state of the system.
+     *
+     * For example, for activities in multi-window mode, the metrics returned are based on the
+     * what the bounds would be if the user expanded the {@link android.app.Activity Activity}'s
+     * task to cover the entire screen.
+     *
+     * Note that this might still be smaller than the size of the physical display if certain areas
+     * of the display are not available to windows created in this {@link Context}.
+     *
+     * @see #getMaximumWindowMetrics()
+     * @see WindowMetrics
+     */
+    default @NonNull WindowMetrics getMaximumWindowMetrics() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Used to asynchronously request Keyboard Shortcuts from the focused window.
      *
      * @hide

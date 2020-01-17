@@ -7927,4 +7927,33 @@ public class WindowManagerService extends IWindowManager.Stub
         return mDisplayWindowSettings.shouldShowImeLocked(displayContent)
                 || mForceDesktopModeOnExternalDisplays;
     }
+
+    @Override
+    public void getWindowInsets(WindowManager.LayoutParams attrs,
+            int displayId, Rect outContentInsets, Rect outStableInsets,
+            DisplayCutout.ParcelableWrapper displayCutout) {
+        synchronized (mGlobalLock) {
+            final DisplayContent dc = mRoot.getDisplayContent(displayId);
+            final WindowToken windowToken = dc.getWindowToken(attrs.token);
+            final ActivityRecord activity;
+            if (windowToken != null && windowToken.asActivityRecord() != null) {
+                activity = windowToken.asActivityRecord();
+            } else {
+                activity = null;
+            }
+            final Rect taskBounds = new Rect();
+            final boolean floatingStack;
+            if (activity != null && activity.getTask() != null) {
+                final Task task = activity.getTask();
+                task.getBounds(taskBounds);
+                floatingStack = task.isFloating();
+            } else {
+                floatingStack = false;
+            }
+            final DisplayFrames displayFrames = dc.mDisplayFrames;
+            final DisplayPolicy policy = dc.getDisplayPolicy();
+            policy.getLayoutHintLw(attrs, taskBounds, displayFrames, floatingStack,
+                    new Rect(), outContentInsets, outStableInsets, displayCutout);
+        }
+    }
 }
