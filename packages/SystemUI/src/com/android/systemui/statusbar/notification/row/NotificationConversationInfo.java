@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static android.app.Notification.EXTRA_IS_GROUP_CONVERSATION;
-import static android.app.NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
@@ -103,7 +102,6 @@ public class NotificationConversationInfo extends LinearLayout implements
     private NotificationEntry mEntry;
     private StatusBarNotification mSbn;
     private boolean mIsDeviceProvisioned;
-
     private int mStartingChannelImportance;
     private boolean mStartedAsBubble;
     private boolean mIsBubbleable;
@@ -212,11 +210,10 @@ public class NotificationConversationInfo extends LinearLayout implements
         mLauncherApps = launcherApps;
         mConversationId = mNotificationChannel.getConversationId();
         if (TextUtils.isEmpty(mNotificationChannel.getConversationId())) {
-            mConversationId = mSbn.getNotification().getShortcutId();
+            mConversationId = mSbn.getShortcutId(mContext);
         }
-        // TODO: flag this when flag exists
         if (TextUtils.isEmpty(mConversationId)) {
-            mConversationId = mSbn.getId() + mSbn.getTag() + PLACEHOLDER_CONVERSATION_ID;
+            throw new IllegalArgumentException("Does not have required information");
         }
         // TODO: consider querying this earlier in the notification pipeline and passing it in
         LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery()
@@ -243,10 +240,9 @@ public class NotificationConversationInfo extends LinearLayout implements
         // a custom channel
         if (TextUtils.isEmpty(mNotificationChannel.getConversationId())) {
             try {
-                // TODO: associate this key with this channel service side so the customization
-                // isn't forgotten on the next update
                 mINotificationManager.createConversationNotificationChannelForPackage(
-                        mPackageName, mAppUid, mNotificationChannel, mConversationId);
+                        mPackageName, mAppUid, mSbn.getKey(), mNotificationChannel,
+                        mConversationId);
                 mNotificationChannel = mINotificationManager.getConversationNotificationChannel(
                         mContext.getOpPackageName(), UserHandle.getUserId(mAppUid), mPackageName,
                         mNotificationChannel.getId(), false, mConversationId);
@@ -363,7 +359,6 @@ public class NotificationConversationInfo extends LinearLayout implements
             image.setImageDrawable(mLauncherApps.getShortcutBadgedIconDrawable(mShortcutInfo,
                     mContext.getResources().getDisplayMetrics().densityDpi));
         } else {
-            // TODO: flag this behavior
             if (mSbn.getNotification().extras.getBoolean(EXTRA_IS_GROUP_CONVERSATION, false)) {
                 // TODO: maybe use a generic group icon, or a composite of recent senders
                 image.setImageDrawable(mPm.getDefaultActivityIcon());
@@ -391,7 +386,6 @@ public class NotificationConversationInfo extends LinearLayout implements
         if (mShortcutInfo != null) {
             name.setText(mShortcutInfo.getShortLabel());
         } else {
-            // TODO: flag this behavior
             Bundle extras = mSbn.getNotification().extras;
             String nameString = extras.getString(Notification.EXTRA_CONVERSATION_TITLE);
             if (TextUtils.isEmpty(nameString)) {

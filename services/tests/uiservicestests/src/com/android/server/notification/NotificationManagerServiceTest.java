@@ -5834,7 +5834,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.createNotificationChannels(PKG, new ParceledListSlice(Arrays.asList(
                 orig)));
 
-        mBinderService.createConversationNotificationChannelForPackage(PKG, mUid, orig, "friend");
+        mBinderService.createConversationNotificationChannelForPackage(
+                PKG, mUid, "key", orig, "friend");
 
         NotificationChannel friendChannel = mBinderService.getConversationNotificationChannel(
                 PKG, 0, PKG, original.getId(), false, "friend");
@@ -5869,9 +5870,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         String conversationId = "friend";
 
         mBinderService.createConversationNotificationChannelForPackage(
-                PKG, mUid, NotificationChannel.CREATOR.createFromParcel(msgParcel), conversationId);
+                PKG, mUid, "key", NotificationChannel.CREATOR.createFromParcel(msgParcel),
+                conversationId);
         mBinderService.createConversationNotificationChannelForPackage(
-                PKG, mUid, NotificationChannel.CREATOR.createFromParcel(callParcel),
+                PKG, mUid, "key", NotificationChannel.CREATOR.createFromParcel(callParcel),
                 conversationId);
 
         NotificationChannel messagesChild = mBinderService.getConversationNotificationChannel(

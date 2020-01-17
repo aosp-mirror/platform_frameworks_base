@@ -22,6 +22,7 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.util.FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ;
 
 import static com.android.server.notification.PreferencesHelper.NOTIFICATION_CHANNEL_COUNT_LIMIT;
 
@@ -2857,5 +2858,85 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         } catch (IllegalArgumentException e) {
             // good
         }
+    }
+
+    @Test
+    public void testPlaceholderConversationId_flagOn() throws Exception {
+        Settings.Global.putString(
+                mContext.getContentResolver(), NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "true");
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
+                + "<channel id=\"id\" name=\"hi\" importance=\"3\" conv_id=\"foo:placeholder_id\"/>"
+                + "</package>"
+                + "</ranking>";
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertNotNull(mHelper.getNotificationChannel(PKG_O, UID_O, "id", true));
+    }
+
+    @Test
+    public void testPlaceholderConversationId_flagOff() throws Exception {
+        Settings.Global.putString(
+                mContext.getContentResolver(), NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "false");
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
+                + "<channel id=\"id\" name=\"hi\" importance=\"3\" conv_id=\"foo:placeholder_id\"/>"
+                + "</package>"
+                + "</ranking>";
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertNull(mHelper.getNotificationChannel(PKG_O, UID_O, "id", true));
+    }
+
+    @Test
+    public void testNormalConversationId_flagOff() throws Exception {
+        Settings.Global.putString(
+                mContext.getContentResolver(), NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "false");
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
+                + "<channel id=\"id\" name=\"hi\" importance=\"3\" conv_id=\"other\"/>"
+                + "</package>"
+                + "</ranking>";
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertNotNull(mHelper.getNotificationChannel(PKG_O, UID_O, "id", true));
+    }
+
+    @Test
+    public void testNoConversationId_flagOff() throws Exception {
+        Settings.Global.putString(
+                mContext.getContentResolver(), NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "false");
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
+                + "<channel id=\"id\" name=\"hi\" importance=\"3\"/>"
+                + "</package>"
+                + "</ranking>";
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertNotNull(mHelper.getNotificationChannel(PKG_O, UID_O, "id", true));
     }
 }
