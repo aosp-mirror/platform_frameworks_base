@@ -28,17 +28,13 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Icon;
 import android.os.IBinder;
-import android.service.autofill.Dataset;
 import android.util.Log;
-import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.autofill.AutofillId;
-import android.view.autofill.AutofillValue;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -69,23 +65,18 @@ public class InlineSuggestionUi {
      */
     @MainThread
     @Nullable
-    public SurfaceControl inflate(@NonNull Dataset dataset, @NonNull AutofillId autofillId,
-            int width, int height, @Nullable View.OnClickListener onClickListener) {
+    public SurfaceControl inflate(@NonNull Slice slice, int width, int height,
+            @Nullable View.OnClickListener onClickListener) {
         Log.d(TAG, "Inflating the inline suggestion UI");
-        final int index = dataset.getFieldIds().indexOf(autofillId);
-        if (index < 0) {
-            Slog.w(TAG, "inflateInlineSuggestion(): AutofillId=" + autofillId
-                    + " not found in dataset");
-            return null;
-        }
-        final AutofillValue datasetValue = dataset.getFieldValues().get(index);
+
         //TODO(b/137800469): Pass in inputToken from IME.
         final SurfaceControlViewHost wvr = new SurfaceControlViewHost(mContext,
                 mContext.getDisplay(), (IBinder) null);
         final SurfaceControl sc = wvr.getSurfacePackage().getSurfaceControl();
-
-        final ViewGroup suggestionView =
-                (ViewGroup) renderSlice(dataset.getFieldInlinePresentation(index).getSlice());
+        final ViewGroup suggestionView = (ViewGroup) renderSlice(slice);
+        if (onClickListener != null) {
+            suggestionView.setOnClickListener(onClickListener);
+        }
 
         WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(width, height,
