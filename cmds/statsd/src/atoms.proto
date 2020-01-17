@@ -396,7 +396,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10074
+    // Next: 10075
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -477,6 +477,7 @@ message Atom {
                 10072 [(module) = "framework"];
         PackageNotificationChannelGroupPreferences package_notification_channel_group_preferences =
                 10073 [(module) = "framework"];
+        GnssStats gnss_stats = 10074 [(module) = "framework"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -8475,20 +8476,71 @@ message SdkExtensionStatus {
  *   frameworks/base/services/core/java/com/android/server/am/CachedAppOptimizer.java
  */
 message AppFreezeChanged {
-  // The type of event.
-  enum Action {
-    UNKNOWN = 0;
-    FREEZE_APP = 1;
-    UNFREEZE_APP = 2;
-  }
-  optional Action action = 1;
+    // The type of event.
+    enum Action {
+        UNKNOWN = 0;
+        FREEZE_APP = 1;
+        UNFREEZE_APP = 2;
+    }
+    optional Action action = 1;
 
-  // Pid of the process being frozen.
-  optional int32 pid = 2;
+    // Pid of the process being frozen.
+    optional int32 pid = 2;
 
-  // Name of the process being frozen.
-  optional string process_name = 3;
+    // Name of the process being frozen.
+    optional string process_name = 3;
 
-  // Time since last unfrozen.
-  optional int64 time_unfrozen_millis = 4;
+    // Time since last unfrozen.
+    optional int64 time_unfrozen_millis = 4;
+}
+
+/**
+ * Logs gnss stats from location service provider
+ *
+ * Pulled from:
+ *  frameworks/base/location/java/com/android/internal/location/gnssmetrics/GnssMetrics.java
+ */
+
+message GnssStats {
+    // Number of location reports since boot
+    optional int64 location_reports = 1;
+
+    // Total pulled reports of Location failures since boot
+    optional int64 location_failure_reports = 2;
+
+    // Number of time to first fix reports since boot
+    optional int64 time_to_first_fix_reports = 3;
+
+    // Total pulled reported time to first fix (in milli-seconds) since boot
+    optional int64 time_to_first_fix_milli_s = 4;
+
+    // Number of position accuracy reports since boot
+    optional int64 position_accuracy_reports = 5;
+
+    // Total pulled reported position accuracy (in meters) since boot
+    optional int64 position_accuracy_meters = 6;
+
+    // Number of top 4 average CN0 reports since boot
+    optional int64 top_four_average_cn0_reports = 7;
+
+    // Total pulled reported of top 4 average CN0 (dB-mHz) since boot
+    optional int64 top_four_average_cn0_db_mhz = 8;
+
+    // Number of l5 top 4 average CN0 reports since boot
+    optional int64 l5_top_four_average_cn0_reports = 9;
+
+    // Total pulled reported of l5 top 4 average CN0 (dB-mHz) since boot
+    optional int64 l5_top_four_average_cn0_db_mhz = 10;
+
+    // Total number of sv status messages reports since boot
+    optional int64 sv_status_reports = 11;
+
+    // Total number of sv status messages reports, where sv is used in fix since boot
+    optional int64 sv_status_reports_used_in_fix = 12;
+
+    // Total number of L5 sv status messages reports since boot
+    optional int64 l5_sv_status_reports = 13;
+
+    // Total number of L5 sv status messages reports, where sv is used in fix since boot
+    optional int64 l5_sv_status_reports_used_in_fix = 14;
 }
