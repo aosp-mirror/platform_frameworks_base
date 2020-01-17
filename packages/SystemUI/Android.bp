@@ -142,7 +142,7 @@ android_app {
     resource_dirs: [],
 
     platform_apis: true,
-    product_specific: true,
+    system_ext_specific: true,
     certificate: "platform",
     privileged: true,
 
