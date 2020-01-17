@@ -563,10 +563,12 @@
 
     <protected-broadcast android:name="com.android.sync.SYNC_CONN_STATUS_CHANGED" />
 
-    <protected-broadcast android:name="com.android.phone.SIP_INCOMING_CALL" />
+    <protected-broadcast android:name="android.net.sip.action.SIP_INCOMING_CALL" />
     <protected-broadcast android:name="com.android.phone.SIP_ADD_PHONE" />
-    <protected-broadcast android:name="com.android.phone.SIP_REMOVE_PHONE" />
-    <protected-broadcast android:name="com.android.phone.SIP_CALL_OPTION_CHANGED" />
+    <protected-broadcast android:name="android.net.sip.action.SIP_REMOVE_PROFILE" />
+    <protected-broadcast android:name="android.net.sip.action.SIP_SERVICE_UP" />
+    <protected-broadcast android:name="android.net.sip.action.SIP_CALL_OPTION_CHANGED" />
+    <protected-broadcast android:name="android.net.sip.action.START_SIP" />
 
     <protected-broadcast android:name="android.bluetooth.adapter.action.BLE_ACL_CONNECTED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.BLE_ACL_DISCONNECTED" />
