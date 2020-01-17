@@ -489,6 +489,10 @@ MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#EGYPTIAN_HIEROGLYPH
     
 MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#ELYMAIC:
     
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#KHITAN_SMALL_SCRIPT:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#LISU_SUPPLEMENT:
+    
 MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#NANDINAGARI:
     
 MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#NYIAKENG_PUACHUE_HMONG:
@@ -499,22 +503,28 @@ MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#SMALL_KANA_EXTENSIO
     
 MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#SYMBOLS_AND_PICTOGRAPHS_EXTENDED_A:
     
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#SYMBOLS_FOR_LEGACY_COMPUTING:
+    
 MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#TAMIL_SUPPLEMENT:
     
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#TANGUT_SUPPLEMENT:
+    
 MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#WANCHO:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#YEZIDI:
     
 MissingNullability: android.icu.text.DateTimePatternGenerator#getFieldDisplayName(int, android.icu.text.DateTimePatternGenerator.DisplayWidth):
     
 MissingNullability: android.icu.text.DateTimePatternGenerator#getFieldDisplayName(int, android.icu.text.DateTimePatternGenerator.DisplayWidth) parameter #1:
     
 MissingNullability: android.icu.util.MeasureUnit#ATMOSPHERE:
-    Missing nullability on field `ATMOSPHERE` in class `class android.icu.util.MeasureUnit`
+    
 MissingNullability: android.icu.util.MeasureUnit#PERCENT:
-    Missing nullability on field `PERCENT` in class `class android.icu.util.MeasureUnit`
+    
 MissingNullability: android.icu.util.MeasureUnit#PERMILLE:
-    Missing nullability on field `PERMILLE` in class `class android.icu.util.MeasureUnit`
+    
 MissingNullability: android.icu.util.MeasureUnit#PETABYTE:
-    Missing nullability on field `PETABYTE` in class `class android.icu.util.MeasureUnit`
+    
 MissingNullability: android.icu.util.VersionInfo#UNICODE_12_0:
     
 MissingNullability: android.icu.util.VersionInfo#UNICODE_12_1:
