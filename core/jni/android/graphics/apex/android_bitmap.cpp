@@ -23,6 +23,7 @@
 
 #include <GraphicsJNI.h>
 #include <hwui/Bitmap.h>
+#include <utils/Color.h>
 
 using namespace android;
 
@@ -122,6 +123,7 @@ AndroidBitmapInfo ABitmap_getInfo(ABitmap* bitmapHandle) {
     return getInfo(bitmap->info(), bitmap->rowBytes());
 }
 
+namespace {
 static bool nearlyEqual(float a, float b) {
     // By trial and error, this is close enough to match for the ADataSpaces we
     // compare for.
@@ -156,6 +158,7 @@ static constexpr skcms_Matrix3x3 kDCIP3 = {{
         {0.226676, 0.710327, 0.0629966},
         {0.000800549, 0.0432385, 0.78275},
 }};
+} // anonymous namespace
 
 ADataSpace ABitmap_getDataSpace(ABitmap* bitmapHandle) {
     Bitmap* bitmap = TypeCast::toBitmap(bitmapHandle);
@@ -242,4 +245,136 @@ void ABitmap_notifyPixelsChanged(ABitmap* bitmapHandle) {
         ALOGE("Attempting to modify an immutable Bitmap!");
     }
     return bitmap->notifyPixelsChanged();
+}
+
+namespace {
+SkAlphaType getAlphaType(const AndroidBitmapInfo* info) {
+    switch (info->flags & ANDROID_BITMAP_FLAGS_ALPHA_MASK) {
+        case ANDROID_BITMAP_FLAGS_ALPHA_OPAQUE:
+            return kOpaque_SkAlphaType;
+        case ANDROID_BITMAP_FLAGS_ALPHA_PREMUL:
+            return kPremul_SkAlphaType;
+        case ANDROID_BITMAP_FLAGS_ALPHA_UNPREMUL:
+            return kUnpremul_SkAlphaType;
+        default:
+            return kUnknown_SkAlphaType;
+    }
+}
+
+class CompressWriter : public SkWStream {
+public:
+    CompressWriter(void* userContext, AndroidBitmap_compress_write_fn fn)
+          : mUserContext(userContext), mFn(fn), mBytesWritten(0) {}
+
+    bool write(const void* buffer, size_t size) override {
+        if (mFn(mUserContext, buffer, size)) {
+            mBytesWritten += size;
+            return true;
+        }
+        return false;
+    }
+
+    size_t bytesWritten() const override { return mBytesWritten; }
+
+private:
+    void* mUserContext;
+    AndroidBitmap_compress_write_fn mFn;
+    size_t mBytesWritten;
+};
+
+} // anonymous namespace
+
+int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const void* pixels,
+                     AndroidBitmapCompressFormat inFormat, int32_t quality, void* userContext,
+                     AndroidBitmap_compress_write_fn fn) {
+    Bitmap::JavaCompressFormat format;
+    switch (inFormat) {
+        case ANDROID_BITMAP_COMPRESS_FORMAT_JPEG:
+            format = Bitmap::JavaCompressFormat::Jpeg;
+            break;
+        case ANDROID_BITMAP_COMPRESS_FORMAT_PNG:
+            format = Bitmap::JavaCompressFormat::Png;
+            break;
+        case ANDROID_BITMAP_COMPRESS_FORMAT_WEBP_LOSSY:
+            format = Bitmap::JavaCompressFormat::WebpLossy;
+            break;
+        case ANDROID_BITMAP_COMPRESS_FORMAT_WEBP_LOSSLESS:
+            format = Bitmap::JavaCompressFormat::WebpLossless;
+            break;
+        default:
+            // kWEBP_JavaEncodeFormat is a valid parameter for Bitmap::compress,
+            // for the deprecated Bitmap.CompressFormat.WEBP, but it should not
+            // be provided via the NDK. Other integers are likewise invalid.
+            return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
+    }
+
+    SkColorType colorType;
+    switch (info->format) {
+        case ANDROID_BITMAP_FORMAT_RGBA_8888:
+            colorType = kN32_SkColorType;
+            break;
+        case ANDROID_BITMAP_FORMAT_RGB_565:
+            colorType = kRGB_565_SkColorType;
+            break;
+        case ANDROID_BITMAP_FORMAT_A_8:
+            // FIXME b/146637821: Should this encode as grayscale? We should
+            // make the same decision as for encoding an android.graphics.Bitmap.
+            // Note that encoding kAlpha_8 as WebP or JPEG will fail. Encoding
+            // it to PNG encodes as GRAY+ALPHA with a secret handshake that we
+            // only care about the alpha. I'm not sure whether Android decoding
+            // APIs respect that handshake.
+            colorType = kAlpha_8_SkColorType;
+            break;
+        case ANDROID_BITMAP_FORMAT_RGBA_F16:
+            colorType = kRGBA_F16_SkColorType;
+            break;
+        default:
+            return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
+    }
+
+    auto alphaType = getAlphaType(info);
+    if (alphaType == kUnknown_SkAlphaType) {
+        return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
+    }
+
+    sk_sp<SkColorSpace> cs;
+    if (info->format == ANDROID_BITMAP_FORMAT_A_8) {
+        // FIXME: A Java Bitmap with ALPHA_8 never has a ColorSpace. So should
+        // we force that here (as I'm doing now) or should we treat anything
+        // besides ADATASPACE_UNKNOWN as an error?
+        cs = nullptr;
+    } else {
+        cs = uirenderer::DataSpaceToColorSpace((android_dataspace) dataSpace);
+        // DataSpaceToColorSpace treats UNKNOWN as SRGB, but compress forces the
+        // client to specify SRGB if that is what they want.
+        if (!cs || dataSpace == ADATASPACE_UNKNOWN) {
+            return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
+        }
+    }
+
+    {
+        size_t size;
+        if (!Bitmap::computeAllocationSize(info->stride, info->height, &size)) {
+            return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
+        }
+    }
+
+    auto imageInfo =
+            SkImageInfo::Make(info->width, info->height, colorType, alphaType, std::move(cs));
+    SkBitmap bitmap;
+    // We are not going to modify the pixels, but installPixels expects them to
+    // not be const, since for all it knows we might want to draw to the SkBitmap.
+    if (!bitmap.installPixels(imageInfo, const_cast<void*>(pixels), info->stride)) {
+        return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
+    }
+
+    CompressWriter stream(userContext, fn);
+    switch (Bitmap::compress(bitmap, format, quality, &stream)) {
+        case Bitmap::CompressResult::Success:
+            return ANDROID_BITMAP_RESULT_SUCCESS;
+        case Bitmap::CompressResult::AllocationFailed:
+            return ANDROID_BITMAP_RESULT_ALLOCATION_FAILED;
+        case Bitmap::CompressResult::Error:
+            return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
+    }
 }
