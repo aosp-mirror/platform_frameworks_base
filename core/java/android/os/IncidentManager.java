@@ -36,6 +36,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -426,10 +427,9 @@ public class IncidentManager {
      *
      * @see #registerSection
      * @see #unregisterSection
-     *
-     * @hide
      */
     public static class DumpCallback {
+        private int mId;
         private Executor mExecutor;
 
         IIncidentDumpCallback.Stub mBinder = new IIncidentDumpCallback.Stub() {
@@ -437,20 +437,25 @@ public class IncidentManager {
             public void onDumpSection(ParcelFileDescriptor pfd) {
                 if (mExecutor != null) {
                     mExecutor.execute(() -> {
-                        DumpCallback.this.onDumpSection(
+                        DumpCallback.this.onDumpSection(mId,
                                 new ParcelFileDescriptor.AutoCloseOutputStream(pfd));
                     });
                 } else {
-                    DumpCallback.this.onDumpSection(
+                    DumpCallback.this.onDumpSection(mId,
                             new ParcelFileDescriptor.AutoCloseOutputStream(pfd));
                 }
             }
         };
 
         /**
-         * Called when incidentd requests to dump this section.
+         * Dump the registered section as a protobuf message to the given OutputStream. Called when
+         * incidentd requests to dump this section.
+         *
+         * @param id  the id of the registered section. The same id used in calling
+         *            {@link #registerSection(int, String, DumpCallback)} will be passed in here.
+         * @param out the OutputStream to write the protobuf message
          */
-        public void onDumpSection(OutputStream out) {
+        public void onDumpSection(int id, @NonNull OutputStream out) {
         }
     }
 
@@ -563,12 +568,20 @@ public class IncidentManager {
 
     /**
      * Register a callback to dump an extended incident report section with the given id and name.
-     * The callback function will be invoked when an incident report with all sections or sections
-     * matching the given id is being taken.
      *
-     * @hide
+     * Calling <code>registerSection</code> with a duplicate id will override previous registration.
+     * However, the request must come from the same calling uid.
+     *
+     * @param id       the ID of the extended section. It should be unique system-wide, and be
+     *                 different from IDs of all existing section in
+     *                 frameworks/base/core/proto/android/os/incident.proto.
+     *                 Also see incident.proto for other rules about the ID.
+     * @param name     the name to display in logs and/or stderr when taking an incident report
+     *                 containing this section, mainly for debugging purpose
+     * @param callback the callback function to be invoked when an incident report with all sections
+     *                 or sections matching the given id is being taken
      */
-    public void registerSection(int id, String name, @NonNull DumpCallback callback) {
+    public void registerSection(int id, @NonNull String name, @NonNull DumpCallback callback) {
         registerSection(id, name, mContext.getMainExecutor(), callback);
     }
 
@@ -576,16 +589,27 @@ public class IncidentManager {
      * Register a callback to dump an extended incident report section with the given id and name,
      * running on the supplied executor.
      *
-     * @hide
+     * @param id       the ID of the extended section. It should be unique system-wide, and be
+     *                 different from IDs of all existing section in
+     *                 frameworks/base/core/proto/android/os/incident.proto.
+     *                 Also see incident.proto for other rules about the ID.
+     * @param name     the name to display in logs and/or stderr when taking an incident report
+     *                 containing this section, mainly for debugging purpose
+     * @param executor the executor used to run the callback
+     * @param callback the callback function to be invoked when an incident report with all sections
+     *                 or sections matching the given id is being taken
      */
-    public void registerSection(int id, String name, @NonNull @CallbackExecutor Executor executor,
-            @NonNull DumpCallback callback) {
+    public void registerSection(int id, @NonNull String name,
+                @NonNull @CallbackExecutor Executor executor, @NonNull DumpCallback callback) {
+        Objects.requireNonNull(executor, "executor cannot be null");
+        Objects.requireNonNull(callback, "callback cannot be null");
         try {
             if (callback.mExecutor != null) {
                 throw new RuntimeException("Do not reuse DumpCallback objects when calling"
                         + " registerSection");
             }
             callback.mExecutor = executor;
+            callback.mId = id;
             final IIncidentManager service = getIIncidentManagerLocked();
             if (service == null) {
                 Slog.e(TAG, "registerSection can't find incident binder service");
@@ -599,9 +623,7 @@ public class IncidentManager {
 
     /**
      * Unregister an extended section dump function. The section must be previously registered with
-     * {@link #registerSection(int, String, DumpCallback)}
-     *
-     * @hide
+     * {@link #registerSection(int, String, DumpCallback)} by the same calling uid.
      */
     public void unregisterSection(int id) {
         try {
@@ -719,7 +741,7 @@ public class IncidentManager {
                 throw new RuntimeException("Invalid URI: No "
                         + URI_PARAM_REPORT_ID + " parameter. " + uri);
             }
-        
+
             try {
                 getCompanionServiceLocked().deleteIncidentReports(pkg, cls, id);
             } catch (RemoteException ex) {
