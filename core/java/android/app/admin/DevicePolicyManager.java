@@ -8935,7 +8935,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owners to set a local system update policy. When a new policy is set,
+     * Called by device owners or profile owners of an organization-owned managed profile to to set
+     * a local system update policy. When a new policy is set,
      * {@link #ACTION_SYSTEM_UPDATE_POLICY_CHANGED} is broadcasted.
      * <p>
      * If the supplied system update policy has freeze periods set but the freeze periods do not
@@ -8953,7 +8954,8 @@ public class DevicePolicyManager {
      *            components in the device owner package can set system update policies and the most
      *            recent policy takes effect.
      * @param policy the new policy, or {@code null} to clear the current policy.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not a device owner or a profile owner of an
+     *      organization-owned managed profile.
      * @throws IllegalArgumentException if the policy type or maintenance window is not valid.
      * @throws SystemUpdatePolicy.ValidationFailedException if the policy's freeze period does not
      *             meet the requirement.
@@ -11028,7 +11030,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to install a system update from the given file. The device will be
+     * Called by device owner or profile owner of an organization-owned managed profile to install
+     * a system update from the given file. The device will be
      * rebooted in order to finish installing the update. Note that if the device is rebooted, this
      * doesn't necessarily mean that the update has been applied successfully. The caller should
      * additionally check the system version with {@link android.os.Build#FINGERPRINT} or {@link
