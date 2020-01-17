@@ -14360,46 +14360,74 @@ public final class Settings {
 
     /**
      * Activity Action: Show setting page to process the addition of Wi-Fi networks to the user's
-     * saved network list. The app should send a new intent with an extra that holds a maximum of
-     * five {@link android.net.wifi.WifiConfiguration} that specify credentials for the networks to
-     * be added to the user's database. The Intent should be sent via the {@link
-     * android.app.Activity#startActivityForResult(Intent, int)} API.
+     * saved network list. The app should send a new intent with an extra that holds a maximum
+     * of five {@link android.net.wifi.WifiNetworkSuggestion} that specify credentials for the
+     * networks to be added to the user's database. The Intent should be sent via the
+     * {@link android.app.Activity#startActivityForResult(Intent, int)} API.
      * <p>
      * Note: The app sending the Intent to add the credentials doesn't get any ownership over the
      * newly added network(s). For the Wi-Fi stack, these networks will look like the user
      * manually added them from the Settings UI.
      * <p>
-     * Input: The app should put parcelable array list to
-     * {@link android.net.wifi.WifiConfiguration} into the
-     * {@link #EXTRA_WIFI_CONFIGURATION_LIST} extra.
+     * Input: The app should put parcelable array list of
+     * {@link android.net.wifi.WifiNetworkSuggestion} into the {@link #EXTRA_WIFI_NETWORK_LIST}
+     * extra.
      * <p>
      * Output: After {@link android.app.Activity#startActivityForResult(Intent, int)}, the
      * callback {@link android.app.Activity#onActivityResult(int, int, Intent)} will have a
      * result code {@link android.app.Activity#RESULT_OK} to indicate user pressed the save
      * button to save the networks or {@link android.app.Activity#RESULT_CANCELED} to indicate
      * that the user rejected the request. Additionally, an integer array list, stored in
-     * {@link #EXTRA_WIFI_CONFIGURATION_RESULT_LIST}, will indicate the process result of
-     * each network.
+     * {@link #EXTRA_WIFI_NETWORK_RESULT_LIST}, will indicate the process result of each network.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_WIFI_ADD_NETWORKS =
             "android.settings.WIFI_ADD_NETWORKS";
 
     /**
-     * A bundle extra of {@link #ACTION_WIFI_ADD_NETWORKS} intent action that indicates all the
-     * {@link android.net.wifi.WifiConfiguration} that would be saved.
+     * A bundle extra of {@link #ACTION_WIFI_ADD_NETWORKS} intent action that indicates the list
+     * of the {@link android.net.wifi.WifiNetworkSuggestion} elements. The maximum count of the
+     * {@link android.net.wifi.WifiNetworkSuggestion} elements in the list will be five.
+     * <p>
+     * For example:
+     * To provide credentials for one open and one WPA2 networks:
+     *
+     * <pre>{@code
+     * final WifiNetworkSuggestion suggestion1 =
+     *       new WifiNetworkSuggestion.Builder()
+     *       .setSsid("test111111")
+     *       .build();
+     * final WifiNetworkSuggestion suggestion2 =
+     *       new WifiNetworkSuggestion.Builder()
+     *       .setSsid("test222222")
+     *       .setWpa2Passphrase("test123456")
+     *       .build();
+     * final List<WifiNetworkSuggestion> suggestionsList = new ArrayList<>;
+     * suggestionsList.add(suggestion1);
+     * suggestionsList.add(suggestion2);
+     * Bundle bundle = new Bundle();
+     * bundle.putParcelableArrayList(Settings.EXTRA_WIFI_NETWORK_LIST,(ArrayList<? extends
+     * Parcelable>) suggestionsList);
+     * final Intent intent = new Intent(Settings.ACTION_WIFI_ADD_NETWORKS);
+     * intent.putExtras(bundle);
+     * startActivityForResult(intent, 0);
+     * }</pre>
      */
-    public static final String EXTRA_WIFI_CONFIGURATION_LIST =
-            "android.provider.extra.WIFI_CONFIGURATION_LIST";
+    public static final String EXTRA_WIFI_NETWORK_LIST =
+            "android.provider.extra.WIFI_NETWORK_LIST";
 
     /**
      * A bundle extra of the result of {@link #ACTION_WIFI_ADD_NETWORKS} intent action that
-     * indicates the action result of the saved {@link android.net.wifi.WifiConfiguration}. It's
-     * value of AddWifiResult interface, and will be 1:1 mapping to the element in {@link
-     * #EXTRA_WIFI_CONFIGURATION_LIST}.
+     * indicates the action result of the saved {@link android.net.wifi.WifiNetworkSuggestion}.
+     * Its value is a list of integers, and all the elements will be 1:1 mapping to the elements
+     * in {@link #EXTRA_WIFI_NETWORK_LIST}, if user press cancel to cancel the add networks
+     * request, then its value will be null.
+     * <p>
+     * Note: The integer value will be one of the {@link #ADD_WIFI_RESULT_SUCCESS},
+     * {@link #ADD_WIFI_RESULT_ADD_OR_UPDATE_FAILED}, or {@link #ADD_WIFI_RESULT_ALREADY_EXISTS}}.
      */
-    public static final String EXTRA_WIFI_CONFIGURATION_RESULT_LIST =
-            "android.provider.extra.WIFI_CONFIGURATION_RESULT_LIST";
+    public static final String EXTRA_WIFI_NETWORK_RESULT_LIST =
+            "android.provider.extra.WIFI_NETWORK_RESULT_LIST";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
