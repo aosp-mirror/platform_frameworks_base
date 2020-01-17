@@ -66,6 +66,7 @@ import android.util.DebugUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.StatsLog;
+import android.util.proto.ProtoOutputStream;
 import android.view.InputDevice;
 
 import com.android.internal.annotations.GuardedBy;
@@ -165,6 +166,7 @@ public class VibratorService extends IVibratorService.Stub
     private ExternalVibration mCurrentExternalVibration;
     private boolean mVibratorUnderExternalControl;
     private boolean mLowPowerMode;
+    private boolean mIsVibrating;
     private int mHapticFeedbackIntensity;
     private int mNotificationIntensity;
     private int mRingIntensity;
@@ -326,6 +328,14 @@ public class VibratorService extends IVibratorService.Stub
                     .append(", reason: ")
                     .append(mReason)
                     .toString();
+        }
+
+        void dumpProto(ProtoOutputStream proto, long fieldId) {
+            synchronized (this) {
+                final long token = proto.start(fieldId);
+                proto.write(VibrationProto.START_TIME, mStartTimeDebug);
+                proto.end(token);
+            }
         }
     }
 
@@ -1363,6 +1373,7 @@ public class VibratorService extends IVibratorService.Stub
             StatsLog.write_non_chained(StatsLog.VIBRATOR_STATE_CHANGED, uid, null,
                     StatsLog.VIBRATOR_STATE_CHANGED__STATE__ON, millis);
             mCurVibUid = uid;
+            mIsVibrating = true;
         } catch (RemoteException e) {
         }
     }
@@ -1376,6 +1387,7 @@ public class VibratorService extends IVibratorService.Stub
             } catch (RemoteException e) { }
             mCurVibUid = -1;
         }
+        mIsVibrating = false;
     }
 
     private void setVibratorUnderExternalControl(boolean externalControl) {
@@ -1388,6 +1400,93 @@ public class VibratorService extends IVibratorService.Stub
         }
         mVibratorUnderExternalControl = externalControl;
         vibratorSetExternalControl(externalControl);
+    }
+
+    private void dumpInternal(PrintWriter pw) {
+        pw.println("Vibrator Service:");
+        synchronized (mLock) {
+            pw.print("  mCurrentVibration=");
+            if (mCurrentVibration != null) {
+                pw.println(mCurrentVibration.toInfo().toString());
+            } else {
+                pw.println("null");
+            }
+            pw.print("  mCurrentExternalVibration=" + mCurrentExternalVibration);
+            pw.println("  mVibratorUnderExternalControl=" + mVibratorUnderExternalControl);
+            pw.println("  mIsVibrating=" + mIsVibrating);
+            pw.println("  mLowPowerMode=" + mLowPowerMode);
+            pw.println("  mHapticFeedbackIntensity=" + mHapticFeedbackIntensity);
+            pw.println("  mNotificationIntensity=" + mNotificationIntensity);
+            pw.println("  mRingIntensity=" + mRingIntensity);
+            pw.println("  mSupportedEffects=" + mSupportedEffects);
+            pw.println();
+            pw.println("  Previous ring vibrations:");
+            for (VibrationInfo info : mPreviousRingVibrations) {
+                pw.print("    ");
+                pw.println(info.toString());
+            }
+
+            pw.println("  Previous notification vibrations:");
+            for (VibrationInfo info : mPreviousNotificationVibrations) {
+                pw.println("    " + info);
+            }
+
+            pw.println("  Previous alarm vibrations:");
+            for (VibrationInfo info : mPreviousAlarmVibrations) {
+                pw.println("    " + info);
+            }
+
+            pw.println("  Previous vibrations:");
+            for (VibrationInfo info : mPreviousVibrations) {
+                pw.println("    " + info);
+            }
+
+            pw.println("  Previous external vibrations:");
+            for (ExternalVibration vib : mPreviousExternalVibrations) {
+                pw.println("    " + vib);
+            }
+        }
+    }
+
+    private void dumpProto(FileDescriptor fd) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+
+        synchronized (mLock) {
+            if (mCurrentVibration != null) {
+                mCurrentVibration.toInfo().dumpProto(proto,
+                    VibratorServiceDumpProto.CURRENT_VIBRATION);
+            }
+            proto.write(VibratorServiceDumpProto.IS_VIBRATING, mIsVibrating);
+            proto.write(VibratorServiceDumpProto.VIBRATOR_UNDER_EXTERNAL_CONTROL,
+                mVibratorUnderExternalControl);
+            proto.write(VibratorServiceDumpProto.LOW_POWER_MODE, mLowPowerMode);
+            proto.write(VibratorServiceDumpProto.HAPTIC_FEEDBACK_INTENSITY,
+                mHapticFeedbackIntensity);
+            proto.write(VibratorServiceDumpProto.NOTIFICATION_INTENSITY,
+                mNotificationIntensity);
+            proto.write(VibratorServiceDumpProto.RING_INTENSITY, mRingIntensity);
+
+            for (VibrationInfo info : mPreviousRingVibrations) {
+                info.dumpProto(proto,
+                    VibratorServiceDumpProto.PREVIOUS_RING_VIBRATIONS);
+            }
+
+            for (VibrationInfo info : mPreviousNotificationVibrations) {
+                info.dumpProto(proto,
+                    VibratorServiceDumpProto.PREVIOUS_NOTIFICATION_VIBRATIONS);
+            }
+
+            for (VibrationInfo info : mPreviousAlarmVibrations) {
+                info.dumpProto(proto,
+                    VibratorServiceDumpProto.PREVIOUS_ALARM_VIBRATIONS);
+            }
+
+            for (VibrationInfo info : mPreviousVibrations) {
+                info.dumpProto(proto,
+                    VibratorServiceDumpProto.PREVIOUS_VIBRATIONS);
+            }
+        }
+        proto.flush();
     }
 
     private class VibrateThread extends Thread {
@@ -1556,47 +1655,22 @@ public class VibratorService extends IVibratorService.Stub
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-        pw.println("Vibrator Service:");
-        synchronized (mLock) {
-            pw.print("  mCurrentVibration=");
-            if (mCurrentVibration != null) {
-                pw.println(mCurrentVibration.toInfo().toString());
+        final long ident = Binder.clearCallingIdentity();
+
+        boolean isDumpProto = false;
+        for (String arg : args) {
+            if (arg.equals("--proto")) {
+                isDumpProto = true;
+            }
+        }
+        try {
+            if (isDumpProto) {
+                dumpProto(fd);
             } else {
-                pw.println("null");
+                dumpInternal(pw);
             }
-            pw.print("  mCurrentExternalVibration=" + mCurrentExternalVibration);
-            pw.println("  mVibratorUnderExternalControl=" + mVibratorUnderExternalControl);
-            pw.println("  mLowPowerMode=" + mLowPowerMode);
-            pw.println("  mHapticFeedbackIntensity=" + mHapticFeedbackIntensity);
-            pw.println("  mNotificationIntensity=" + mNotificationIntensity);
-            pw.println("  mRingIntensity=" + mRingIntensity);
-            pw.println("  mSupportedEffects=" + mSupportedEffects);
-            pw.println();
-            pw.println("  Previous ring vibrations:");
-            for (VibrationInfo info : mPreviousRingVibrations) {
-                pw.print("    ");
-                pw.println(info.toString());
-            }
-
-            pw.println("  Previous notification vibrations:");
-            for (VibrationInfo info : mPreviousNotificationVibrations) {
-                pw.println("    " + info);
-            }
-
-            pw.println("  Previous alarm vibrations:");
-            for (VibrationInfo info : mPreviousAlarmVibrations) {
-                pw.println("    " + info);
-            }
-
-            pw.println("  Previous vibrations:");
-            for (VibrationInfo info : mPreviousVibrations) {
-                pw.println("    " + info);
-            }
-
-            pw.println("  Previous external vibrations:");
-            for (ExternalVibration vib : mPreviousExternalVibrations) {
-                pw.println("    " + vib);
-            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
