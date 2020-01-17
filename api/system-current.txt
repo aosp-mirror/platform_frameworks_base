@@ -10230,6 +10230,9 @@ package android.telephony.ims {
     method public boolean isCapable(int);
     method public boolean isCapable(@NonNull String);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CAPABILITY_CALL_COMPOSER = 4194304; // 0x400000
+    field public static final int CAPABILITY_CHAT_BOT = 67108864; // 0x4000000
+    field public static final int CAPABILITY_CHAT_BOT_ROLE = 134217728; // 0x8000000
     field public static final int CAPABILITY_CHAT_SESSION = 2; // 0x2
     field public static final int CAPABILITY_CHAT_SESSION_STORE_FORWARD = 4; // 0x4
     field public static final int CAPABILITY_CHAT_STANDALONE = 1; // 0x1
@@ -10246,9 +10249,13 @@ package android.telephony.ims {
     field public static final int CAPABILITY_IMAGE_SHARE = 256; // 0x100
     field public static final int CAPABILITY_IP_VIDEO_CALL = 16384; // 0x4000
     field public static final int CAPABILITY_IP_VOICE_CALL = 8192; // 0x2000
+    field public static final int CAPABILITY_PLUG_IN = 268435456; // 0x10000000
+    field public static final int CAPABILITY_POST_CALL = 8388608; // 0x800000
     field public static final int CAPABILITY_RCS_VIDEO_CALL = 1048576; // 0x100000
     field public static final int CAPABILITY_RCS_VIDEO_ONLY_CALL = 2097152; // 0x200000
     field public static final int CAPABILITY_RCS_VOICE_CALL = 524288; // 0x80000
+    field public static final int CAPABILITY_SHARED_MAP = 16777216; // 0x1000000
+    field public static final int CAPABILITY_SHARED_SKETCH = 33554432; // 0x2000000
     field public static final int CAPABILITY_SOCIAL_PRESENCE = 2048; // 0x800
     field public static final int CAPABILITY_VIDEO_SHARE = 1024; // 0x400
     field public static final int CAPABILITY_VIDEO_SHARE_DURING_CS_CALL = 512; // 0x200
