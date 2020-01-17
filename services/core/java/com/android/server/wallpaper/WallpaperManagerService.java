@@ -3392,6 +3392,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
+        pw.print("mDefaultWallpaperComponent="); pw.println(mDefaultWallpaperComponent);
+        pw.print("mImageWallpaper="); pw.println(mImageWallpaper);
+
         synchronized (mLock) {
             pw.println("System wallpaper state:");
             for (int i = 0; i < mWallpaperMap.size(); i++) {
