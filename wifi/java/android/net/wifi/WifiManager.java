@@ -3223,9 +3223,13 @@ public class WifiManager {
      * Gets the Wi-Fi AP Configuration.
      * @return AP details in WifiConfiguration
      *
+     * Note that AP detail may contain configuration which is cannot be represented
+     * by the legacy WifiConfiguration, in such cases a null will be returned.
+     *
      * @deprecated This API is deprecated. Use {@link #getSoftApConfiguration()} instead.
      * @hide
      */
+    @Nullable
     @SystemApi
     @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE)
     @Deprecated
@@ -3727,13 +3731,15 @@ public class WifiManager {
     public class LocalOnlyHotspotReservation implements AutoCloseable {
 
         private final CloseGuard mCloseGuard = new CloseGuard();
-        private final SoftApConfiguration mConfig;
+        private final SoftApConfiguration mSoftApConfig;
+        private final WifiConfiguration mWifiConfig;
         private boolean mClosed = false;
 
         /** @hide */
         @VisibleForTesting
         public LocalOnlyHotspotReservation(SoftApConfiguration config) {
-            mConfig = config;
+            mSoftApConfig = config;
+            mWifiConfig = config.toWifiConfiguration();
             mCloseGuard.open("close");
         }
 
@@ -3748,7 +3754,7 @@ public class WifiManager {
         @Deprecated
         @Nullable
         public WifiConfiguration getWifiConfiguration() {
-            return convertToWifiConfiguration(mConfig);
+            return mWifiConfig;
         }
 
         /**
@@ -3756,40 +3762,7 @@ public class WifiManager {
          */
         @NonNull
         public SoftApConfiguration getSoftApConfiguration() {
-            return mConfig;
-        }
-
-        /**
-         * Convert to WifiConfiguration from SoftApConfuration.
-         *
-         * Copy to the filed which is public and used by SoftAp.
-         */
-        private WifiConfiguration convertToWifiConfiguration(SoftApConfiguration softApConfig) {
-            if (softApConfig == null) return null;
-
-            WifiConfiguration wifiConfig = new WifiConfiguration();
-            wifiConfig.networkId = WifiConfiguration.LOCAL_ONLY_NETWORK_ID;
-            wifiConfig.SSID = softApConfig.getSsid();
-            if (softApConfig.getBssid() != null) {
-                wifiConfig.BSSID = softApConfig.getBssid().toString();
-            }
-            wifiConfig.preSharedKey = softApConfig.getPassphrase();
-            wifiConfig.hiddenSSID = softApConfig.isHiddenSsid();
-            int authType = softApConfig.getSecurityType();
-            switch (authType) {
-                case SoftApConfiguration.SECURITY_TYPE_OPEN:
-                    authType = WifiConfiguration.KeyMgmt.NONE;
-                    wifiConfig.allowedKeyManagement.set(authType);
-                    break;
-                case SoftApConfiguration.SECURITY_TYPE_WPA2_PSK:
-                    authType = WifiConfiguration.KeyMgmt.WPA2_PSK;
-                    wifiConfig.allowedKeyManagement.set(authType);
-                    break;
-                default:
-                    wifiConfig = null;
-                    break;
-            }
-            return wifiConfig;
+            return mSoftApConfig;
         }
 
         @Override
