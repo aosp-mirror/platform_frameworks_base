@@ -50,18 +50,12 @@ public final class AccessNetworkConstants {
 
     /**
      * Transport type for Wireless Wide Area Networks (i.e. Cellular)
-     * @hide
      */
-    @SystemApi
-    @TestApi
     public static final int TRANSPORT_TYPE_WWAN = 1;
 
     /**
      * Transport type for Wireless Local Area Networks (i.e. Wifi)
-     * @hide
      */
-    @SystemApi
-    @TestApi
     public static final int TRANSPORT_TYPE_WLAN = 2;
 
     /** @hide */
