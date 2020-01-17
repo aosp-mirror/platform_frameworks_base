@@ -1,0 +1,9 @@
+// Signature format: 2.0
+package android.os.ext {
+
+  public class SdkExtensions {
+    method public static int getExtensionVersion(int);
+  }
+
+}
+
