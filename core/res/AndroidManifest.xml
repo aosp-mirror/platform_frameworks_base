@@ -2531,6 +2531,14 @@
                 android:description="@string/permdesc_useDataInBackground"
                 android:protectionLevel="normal" />
 
+    <!-- Allows a companion app to associate to Wi-Fi.
+         <p>Only for use by a single pre-approved app.
+         @hide
+         @SystemApi
+    -->
+    <permission android:name="android.permission.COMPANION_APPROVE_WIFI_CONNECTIONS"
+                android:protectionLevel="signature|privileged" />
+
 
     <!-- ================================== -->
     <!-- Permissions affecting the system wallpaper -->
