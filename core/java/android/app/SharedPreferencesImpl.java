@@ -66,8 +66,9 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
     /**
      * There will now be a callback to {@link
-     * OnSharedPreferenceChangeListener#onSharedPreferenceChanged(SharedPreferences, String)} with
-     * a {@code null} key on {@link Editor#clear()}.
+     * android.content.SharedPreferences.OnSharedPreferenceChangeListener#onSharedPreferenceChanged
+     * OnSharedPreferenceChangeListener.onSharedPreferenceChanged} with a {@code null} key on
+     * {@link android.content.SharedPreferences.Editor#clear Editor.clear}.
      */
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
