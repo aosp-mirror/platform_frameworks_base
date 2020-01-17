@@ -13929,6 +13929,19 @@ public final class Settings {
          */
         public static final String POWER_BUTTON_SUPPRESSION_DELAY_AFTER_GESTURE_WAKE =
                 "power_button_suppression_delay_after_gesture_wake";
+
+        /**
+         * An integer indicating whether the device is in Common Criteria mode. When enabled,
+         * certain device functionalities are tuned to meet the higher security level required
+         * by Common Criteria certification. Examples include:
+         *   Bluetooth long term key material is additionally integrity-protected with AES-GCM.
+         *   WiFi configuration store is additionally integrity-protected with AES-GCM.
+         * A value of 0 means Common Criteria mode is not enabled (default), a value of non-zero
+         * means Common Criteria mode is enabled.
+         * @hide
+         */
+        @SystemApi(client = SystemApi.Client.MODULE_APPS)
+        public static final String COMMON_CRITERIA_MODE = "common_criteria_mode";
     }
 
     /**

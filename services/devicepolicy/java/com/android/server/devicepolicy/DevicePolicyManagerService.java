@@ -15051,4 +15051,29 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Slog.d(LOG_TAG, message);
         }
     }
+
+    @Override
+    public void setCommonCriteriaModeEnabled(ComponentName admin, boolean enabled) {
+        synchronized (getLockObject()) {
+            getActiveAdminForCallerLocked(admin,
+                    DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER);
+        }
+        mInjector.binderWithCleanCallingIdentity(
+                () -> mInjector.settingsGlobalPutInt(Settings.Global.COMMON_CRITERIA_MODE,
+                        enabled ? 1 : 0));
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_COMMON_CRITERIA_MODE)
+                .setAdmin(admin)
+                .setBoolean(enabled)
+                .write();
+    }
+
+    @Override
+    public boolean isCommonCriteriaModeEnabled(ComponentName admin) {
+        synchronized (getLockObject()) {
+            getActiveAdminForCallerLocked(admin,
+                    DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER);
+        }
+        return mInjector.settingsGlobalGetInt(Settings.Global.COMMON_CRITERIA_MODE, 0) != 0;
+    }
 }
