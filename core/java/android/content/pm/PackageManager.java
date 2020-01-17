@@ -1948,6 +1948,13 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CONSUMER_IR = "android.hardware.consumerir";
 
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports a Context Hub.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CONTEXTHUB = "android.hardware.context_hub";
+
     /** {@hide} */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CTS = "android.software.cts";
