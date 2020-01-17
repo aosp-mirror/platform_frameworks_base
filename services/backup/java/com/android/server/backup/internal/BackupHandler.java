@@ -158,10 +158,6 @@ public class BackupHandler extends Handler {
                                 .disposeOfTransportClient(transportClient, callerLogString);
                     }
                     Slog.v(TAG, "Backup requested but no transport available");
-                    synchronized (backupManagerService.getQueueLock()) {
-                        backupManagerService.setBackupRunning(false);
-                    }
-                    backupManagerService.getWakelock().release();
                     break;
                 }
 
@@ -169,6 +165,21 @@ public class BackupHandler extends Handler {
                 List<String> queue = new ArrayList<>();
                 DataChangedJournal oldJournal = backupManagerService.getJournal();
                 synchronized (backupManagerService.getQueueLock()) {
+                    // Don't run backups if one is already running.
+                    if (backupManagerService.isBackupRunning()) {
+                        Slog.i(TAG, "Backup time but one already running");
+                        return;
+                    }
+
+                    if (DEBUG) {
+                        Slog.v(TAG, "Running a backup pass");
+                    }
+
+                    // Acquire the wakelock and pass it to the backup thread. It will be released
+                    // once backup concludes.
+                    backupManagerService.setBackupRunning(true);
+                    backupManagerService.getWakelock().acquire();
+
                     // Do we have any work to do?  Construct the work queue
                     // then release the synchronization lock to actually run
                     // the backup.

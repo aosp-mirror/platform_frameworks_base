@@ -131,7 +131,6 @@
 
     <protected-broadcast android:name="android.os.action.SETTING_RESTORED" />
 
-    <protected-broadcast android:name="android.app.backup.intent.RUN" />
     <protected-broadcast android:name="android.app.backup.intent.CLEAR" />
     <protected-broadcast android:name="android.app.backup.intent.INIT" />
 
