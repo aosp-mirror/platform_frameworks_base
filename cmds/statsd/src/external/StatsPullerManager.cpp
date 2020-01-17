@@ -104,20 +104,8 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
          {.additiveFields = {1, 2, 3, 4},
           .puller = new StatsCompanionServicePuller(android::util::DEBUG_FAILING_ELAPSED_CLOCK)}},
 
-        // RoleHolder.
-        {{.atomTag = android::util::ROLE_HOLDER},
-         {.puller = new StatsCompanionServicePuller(android::util::ROLE_HOLDER)}},
-
         // TrainInfo.
         {{.atomTag = android::util::TRAIN_INFO}, {.puller = new TrainInfoPuller()}},
-
-        // TimeZoneDataInfo.
-        {{.atomTag = android::util::TIME_ZONE_DATA_INFO},
-         {.puller = new StatsCompanionServicePuller(android::util::TIME_ZONE_DATA_INFO)}},
-
-        // ExternalStorageInfo
-        {{.atomTag = android::util::EXTERNAL_STORAGE_INFO},
-         {.puller = new StatsCompanionServicePuller(android::util::EXTERNAL_STORAGE_INFO)}},
 
         // GpuStatsGlobalInfo
         {{.atomTag = android::util::GPU_STATS_GLOBAL_INFO},
@@ -127,17 +115,9 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::GPU_STATS_APP_INFO},
          {.puller = new GpuStatsPuller(android::util::GPU_STATS_APP_INFO)}},
 
-        // AppsOnExternalStorageInfo
-        {{.atomTag = android::util::APPS_ON_EXTERNAL_STORAGE_INFO},
-         {.puller = new StatsCompanionServicePuller(android::util::APPS_ON_EXTERNAL_STORAGE_INFO)}},
-
         // Face Settings
         {{.atomTag = android::util::FACE_SETTINGS},
          {.puller = new StatsCompanionServicePuller(android::util::FACE_SETTINGS)}},
-
-        // App ops
-        {{.atomTag = android::util::APP_OPS},
-         {.puller = new StatsCompanionServicePuller(android::util::APP_OPS)}},
 
         // VmsClientStats
         {{.atomTag = android::util::VMS_CLIENT_STATS},

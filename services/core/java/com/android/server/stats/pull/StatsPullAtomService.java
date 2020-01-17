@@ -168,6 +168,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.MissingResourceException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -207,6 +208,7 @@ public class StatsPullAtomService extends SystemService {
 
     private final Context mContext;
     private StatsManager mStatsManager;
+    private StorageManager mStorageManager;
 
     public StatsPullAtomService(Context context) {
         super(context);
@@ -218,6 +220,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager = (StatsManager) mContext.getSystemService(Context.STATS_MANAGER);
         mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         mTelephony = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        mStorageManager = (StorageManager) mContext.getSystemService(StorageManager.class);
 
         // Used to initialize the CPU Frequency atom.
         PowerProfile powerProfile = new PowerProfile(mContext);
@@ -2217,11 +2220,61 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerRoleHolder() {
-        // No op.
+        int tagId = StatsLog.ROLE_HOLDER;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullRoleHolder(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullRoleHolder() {
-        // No op.
+    // Add a RoleHolder atom for each package that holds a role.
+    private int pullRoleHolder(int atomTag, List<StatsEvent> pulledData) {
+        long callingToken = Binder.clearCallingIdentity();
+        try {
+            PackageManager pm = mContext.getPackageManager();
+            RoleManagerInternal rmi = LocalServices.getService(RoleManagerInternal.class);
+
+            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+
+            int numUsers = users.size();
+            for (int userNum = 0; userNum < numUsers; userNum++) {
+                int userId = users.get(userNum).getUserHandle().getIdentifier();
+
+                ArrayMap<String, ArraySet<String>> roles = rmi.getRolesAndHolders(userId);
+
+                int numRoles = roles.size();
+                for (int roleNum = 0; roleNum < numRoles; roleNum++) {
+                    String roleName = roles.keyAt(roleNum);
+                    ArraySet<String> holders = roles.valueAt(roleNum);
+
+                    int numHolders = holders.size();
+                    for (int holderNum = 0; holderNum < numHolders; holderNum++) {
+                        String holderName = holders.valueAt(holderNum);
+
+                        PackageInfo pkg;
+                        try {
+                            pkg = pm.getPackageInfoAsUser(holderName, 0, userId);
+                        } catch (PackageManager.NameNotFoundException e) {
+                            Slog.w(TAG, "Role holder " + holderName + " not found");
+                            return StatsManager.PULL_SKIP;
+                        }
+
+                        StatsEvent e = StatsEvent.newBuilder()
+                                .setAtomId(atomTag)
+                                .writeInt(pkg.applicationInfo.uid)
+                                .writeString(holderName)
+                                .writeString(roleName)
+                                .build();
+                        pulledData.add(e);
+                    }
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerDangerousPermissionState() {
@@ -2311,27 +2364,136 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerTimeZoneDataInfo() {
-        // No op.
+        int tagId = StatsLog.TIME_ZONE_DATA_INFO;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullTimeZoneDataInfo(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullTimeZoneDataInfo() {
-        // No op.
+    private int pullTimeZoneDataInfo(int atomTag, List<StatsEvent> pulledData) {
+        String tzDbVersion = "Unknown";
+        try {
+            tzDbVersion = android.icu.util.TimeZone.getTZDataVersion();
+        } catch (MissingResourceException e) {
+            Slog.e(TAG, "Getting tzdb version failed: ", e);
+            return StatsManager.PULL_SKIP;
+        }
+
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeString(tzDbVersion)
+                .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerExternalStorageInfo() {
-        // No op.
+        int tagId = StatsLog.EXTERNAL_STORAGE_INFO;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullExternalStorageInfo(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullExternalStorageInfo() {
-        // No op.
+    private int pullExternalStorageInfo(int atomTag, List<StatsEvent> pulledData) {
+        if (mStorageManager == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        List<VolumeInfo> volumes = mStorageManager.getVolumes();
+        for (VolumeInfo vol : volumes) {
+            final String envState = VolumeInfo.getEnvironmentForState(vol.getState());
+            final DiskInfo diskInfo = vol.getDisk();
+            if (diskInfo != null && envState.equals(Environment.MEDIA_MOUNTED)) {
+                // Get the type of the volume, if it is adoptable or portable.
+                int volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__OTHER;
+                if (vol.getType() == TYPE_PUBLIC) {
+                    volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__PUBLIC;
+                } else if (vol.getType() == TYPE_PRIVATE) {
+                    volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__PRIVATE;
+                }
+
+                // Get the type of external storage inserted in the device (sd cards, usb, etc.)
+                int externalStorageType;
+                if (diskInfo.isSd()) {
+                    externalStorageType = StorageEnums.SD_CARD;
+                } else if (diskInfo.isUsb()) {
+                    externalStorageType = StorageEnums.USB;
+                } else {
+                    externalStorageType = StorageEnums.OTHER;
+                }
+
+                StatsEvent e = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeInt(externalStorageType)
+                        .writeInt(volumeType)
+                        .writeLong(diskInfo.size)
+                        .build();
+                pulledData.add(e);
+            }
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerAppsOnExternalStorageInfo() {
-        // No op.
+        int tagId = StatsLog.APPS_ON_EXTERNAL_STORAGE_INFO;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullAppsOnExternalStorageInfo(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullAppsOnExternalStorageInfo() {
-        // No op.
+    private int pullAppsOnExternalStorageInfo(int atomTag, List<StatsEvent> pulledData) {
+        if (mStorageManager == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        PackageManager pm = mContext.getPackageManager();
+        List<ApplicationInfo> apps = pm.getInstalledApplications(/*flags=*/ 0);
+        for (ApplicationInfo appInfo : apps) {
+            UUID storageUuid = appInfo.storageUuid;
+            if (storageUuid == null) {
+                continue;
+            }
+
+            VolumeInfo volumeInfo = mStorageManager.findVolumeByUuid(
+                    appInfo.storageUuid.toString());
+            if (volumeInfo == null) {
+                continue;
+            }
+
+            DiskInfo diskInfo = volumeInfo.getDisk();
+            if (diskInfo == null) {
+                continue;
+            }
+
+            int externalStorageType = -1;
+            if (diskInfo.isSd()) {
+                externalStorageType = StorageEnums.SD_CARD;
+            } else if (diskInfo.isUsb()) {
+                externalStorageType = StorageEnums.USB;
+            } else if (appInfo.isExternal()) {
+                externalStorageType = StorageEnums.OTHER;
+            }
+
+            // App is installed on external storage.
+            if (externalStorageType != -1) {
+                StatsEvent e = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeInt(externalStorageType)
+                        .writeString(appInfo.packageName)
+                        .build();
+                pulledData.add(e);
+            }
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerFaceSettings() {
@@ -2343,11 +2505,74 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerAppOps() {
-        // No op.
+        int tagId = StatsLog.APP_OPS;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullAppOps(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
+
     }
 
-    private void pullAppOps() {
-        // No op.
+    private int pullAppOps(int atomTag, List<StatsEvent> pulledData) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+
+            CompletableFuture<HistoricalOps> ops = new CompletableFuture<>();
+            HistoricalOpsRequest histOpsRequest =
+                    new HistoricalOpsRequest.Builder(0, Long.MAX_VALUE).build();
+            appOps.getHistoricalOps(histOpsRequest, mContext.getMainExecutor(), ops::complete);
+
+            HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
+                    TimeUnit.MILLISECONDS);
+
+            for (int uidIdx = 0; uidIdx < histOps.getUidCount(); uidIdx++) {
+                final HistoricalUidOps uidOps = histOps.getUidOpsAt(uidIdx);
+                final int uid = uidOps.getUid();
+                for (int pkgIdx = 0; pkgIdx < uidOps.getPackageCount(); pkgIdx++) {
+                    final HistoricalPackageOps packageOps = uidOps.getPackageOpsAt(pkgIdx);
+                    for (int opIdx = 0; opIdx < packageOps.getOpCount(); opIdx++) {
+                        final AppOpsManager.HistoricalOp op  = packageOps.getOpAt(opIdx);
+
+                        StatsEvent.Builder e = StatsEvent.newBuilder();
+                        e.setAtomId(atomTag);
+                        e.writeInt(uid);
+                        e.writeString(packageOps.getPackageName());
+                        e.writeInt(op.getOpCode());
+                        e.writeLong(op.getForegroundAccessCount(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getBackgroundAccessCount(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getForegroundRejectCount(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_ALL_TRUSTED));
+
+                        String perm = AppOpsManager.opToPermission(op.getOpCode());
+                        if (perm == null) {
+                            e.writeBoolean(false);
+                        } else {
+                            PermissionInfo permInfo;
+                            try {
+                                permInfo = mContext.getPackageManager().getPermissionInfo(perm, 0);
+                                e.writeBoolean(permInfo.getProtection() == PROTECTION_DANGEROUS);
+                            } catch (PackageManager.NameNotFoundException exception) {
+                                e.writeBoolean(false);
+                            }
+                        }
+
+                        pulledData.add(e.build());
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            // TODO: catch exceptions at a more granular level
+            Slog.e(TAG, "Could not read appops", t);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     static void unpackStreamedData(int atomTag, List<StatsEvent> pulledData,
