@@ -7099,7 +7099,7 @@ package android.os {
     method @Nullable public android.os.NativeHandle getHandle();
     method @NonNull public String getName();
     method public long getSize();
-    method @NonNull public android.os.NativeHandle releaseHandle();
+    method @Nullable public android.os.NativeHandle releaseHandle();
   }
 
   public class HidlSupport {
