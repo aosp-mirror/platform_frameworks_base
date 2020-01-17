@@ -487,9 +487,6 @@ class ZygoteConnection {
 
         Zygote.setAppProcessName(parsedArgs, TAG);
 
-        // Set the Java Language thread priority to the default value for new apps.
-        Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
-
         // End of the postFork event.
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         if (parsedArgs.mInvokeWith != null) {
