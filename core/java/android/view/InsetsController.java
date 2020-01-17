@@ -28,7 +28,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.net.InvalidPacketException.ErrorCode;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -620,6 +619,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     public void notifyVisibilityChanged() {
         mViewRoot.notifyInsetsChanged();
         sendStateToWindowManager();
+    }
+
+    /**
+     * @see ViewRootImpl#updateCompatSysUiVisibility(int, boolean, boolean)
+     */
+    public void updateCompatSysUiVisibility(@InternalInsetsType int type, boolean visible,
+            boolean hasControl) {
+        mViewRoot.updateCompatSysUiVisibility(type, visible, hasControl);
     }
 
     /**

@@ -21,10 +21,14 @@ import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowInsets.Type.systemBars;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,6 +43,8 @@ import android.view.SurfaceControl.Transaction;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.test.InsetsModeSession;
 
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -49,8 +55,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
-
-import androidx.test.runner.AndroidJUnit4;
 
 /**
  * Tests for {@link InsetsAnimationControlImpl}.
@@ -90,6 +94,8 @@ public class InsetsAnimationControlImplTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        doNothing().when(mMockController).updateCompatSysUiVisibility(
+                anyInt(), anyBoolean(), anyBoolean());
         mTopLeash = new SurfaceControl.Builder(mSession)
                 .setName("testSurface")
                 .build();
