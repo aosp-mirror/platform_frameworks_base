@@ -1651,6 +1651,10 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @UnsupportedAppUsage
+    protected ApplicationPackageManager(ContextImpl context, IPackageManager pm) {
+        this(context, pm, ActivityThread.getPermissionManager());
+    }
+
     protected ApplicationPackageManager(ContextImpl context, IPackageManager pm,
             IPermissionManager permissionManager) {
         mContext = context;
