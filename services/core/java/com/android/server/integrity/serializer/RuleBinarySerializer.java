@@ -56,6 +56,9 @@ import java.util.stream.Collectors;
 
 /** A helper class to serialize rules from the {@link Rule} model to Binary representation. */
 public class RuleBinarySerializer implements RuleSerializer {
+    static final int TOTAL_RULE_SIZE_LIMIT = 200000;
+    static final int INDEXED_RULE_SIZE_LIMIT = 100000;
+    static final int NONINDEXED_RULE_SIZE_LIMIT = 1000;
 
     // Get the byte representation for a list of rules.
     @Override
@@ -79,9 +82,22 @@ public class RuleBinarySerializer implements RuleSerializer {
             OutputStream indexingFileOutputStream)
             throws RuleSerializeException {
         try {
+            if (rules == null) {
+                throw new IllegalArgumentException("Null rules cannot be serialized.");
+            }
+
+            if (rules.size() > TOTAL_RULE_SIZE_LIMIT) {
+                throw new IllegalArgumentException("Too many rules provided.");
+            }
+
             // Determine the indexing groups and the order of the rules within each indexed group.
             Map<Integer, Map<String, List<Rule>>> indexedRules =
                     RuleIndexingDetailsIdentifier.splitRulesIntoIndexBuckets(rules);
+
+            // Validate the rule blocks are not larger than expected limits.
+            verifySize(indexedRules.get(PACKAGE_NAME_INDEXED), INDEXED_RULE_SIZE_LIMIT);
+            verifySize(indexedRules.get(APP_CERTIFICATE_INDEXED), INDEXED_RULE_SIZE_LIMIT);
+            verifySize(indexedRules.get(NOT_INDEXED), NONINDEXED_RULE_SIZE_LIMIT);
 
             // Serialize the rules.
             ByteTrackedOutputStream ruleFileByteTrackedOutputStream =
@@ -109,6 +125,16 @@ public class RuleBinarySerializer implements RuleSerializer {
             indexingBitOutputStream.flush();
         } catch (Exception e) {
             throw new RuleSerializeException(e.getMessage(), e);
+        }
+    }
+
+    private void verifySize(Map<String, List<Rule>> ruleListMap, int ruleSizeLimit) {
+        int totalRuleCount =
+                ruleListMap.values().stream()
+                        .map(list -> list.size())
+                        .collect(Collectors.summingInt(Integer::intValue));
+        if (totalRuleCount > ruleSizeLimit) {
+            throw new IllegalArgumentException("Too many rules provided in the indexing group.");
         }
     }
 

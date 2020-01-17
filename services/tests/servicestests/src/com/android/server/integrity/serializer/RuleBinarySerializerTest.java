@@ -30,6 +30,8 @@ import static com.android.server.integrity.model.ComponentBitSize.VALUE_SIZE_BIT
 import static com.android.server.integrity.model.IndexingFileConstants.END_INDEXING_KEY;
 import static com.android.server.integrity.model.IndexingFileConstants.INDEXING_BLOCK_SIZE;
 import static com.android.server.integrity.model.IndexingFileConstants.START_INDEXING_KEY;
+import static com.android.server.integrity.serializer.RuleBinarySerializer.INDEXED_RULE_SIZE_LIMIT;
+import static com.android.server.integrity.serializer.RuleBinarySerializer.NONINDEXED_RULE_SIZE_LIMIT;
 import static com.android.server.integrity.utils.TestUtils.getBits;
 import static com.android.server.integrity.utils.TestUtils.getBytes;
 import static com.android.server.integrity.utils.TestUtils.getValueBits;
@@ -112,8 +114,7 @@ public class RuleBinarySerializerTest {
 
         assertExpectException(
                 RuleSerializeException.class,
-                /* expectedExceptionMessageRegex= */ "Index buckets cannot be created for null"
-                        + " rule list.",
+                /* expectedExceptionMessageRegex= */ "Null rules cannot be serialized.",
                 () -> binarySerializer.serialize(null, /* formatVersion= */ Optional.empty()));
     }
 
@@ -203,8 +204,8 @@ public class RuleBinarySerializerTest {
                         + getBits(DEFAULT_FORMAT_VERSION_BYTES.length, /* numOfBits= */ 32)
                         + SERIALIZED_END_INDEXING_KEY
                         + getBits(
-                                DEFAULT_FORMAT_VERSION_BYTES.length + getBytes(expectedBits).length,
-                                /* numOfBits= */ 32);
+                        DEFAULT_FORMAT_VERSION_BYTES.length + getBytes(expectedBits).length,
+                        /* numOfBits= */ 32);
         expectedIndexingOutputStream.write(
                 getBytes(
                         expectedIndexingBitsForIndexed
@@ -616,6 +617,131 @@ public class RuleBinarySerializerTest {
                 .isEqualTo(expectedOrderedRuleOutputStream.toByteArray());
         assertThat(indexingOutputStream.toByteArray())
                 .isEqualTo(expectedIndexingOutputStream.toByteArray());
+    }
+
+    @Test
+    public void testBinaryString_totalRuleSizeLimitReached() {
+        int ruleCount = INDEXED_RULE_SIZE_LIMIT - 1;
+        String packagePrefix = "package.name.";
+        String appCertificatePrefix = "app.cert.";
+        String installerNamePrefix = "installer.";
+
+        // Create the rule set with more rules than the system can handle in total.
+        List<Rule> ruleList = new ArrayList();
+        for (int count = 0; count < ruleCount; count++) {
+            ruleList.add(
+                    getRuleWithPackageNameAndSampleInstallerName(
+                            String.format("%s%04d", packagePrefix, count)));
+        }
+        for (int count = 0; count < ruleCount; count++) {
+            ruleList.add(
+                    getRuleWithAppCertificateAndSampleInstallerName(
+                            String.format("%s%04d", appCertificatePrefix, count)));
+        }
+        for (int count = 0; count < NONINDEXED_RULE_SIZE_LIMIT - 1; count++) {
+            ruleList.add(
+                    getNonIndexedRuleWithInstallerName(
+                            String.format("%s%04d", installerNamePrefix, count)));
+        }
+
+        // Serialize the rules.
+        ByteArrayOutputStream ruleOutputStream = new ByteArrayOutputStream();
+        ByteArrayOutputStream indexingOutputStream = new ByteArrayOutputStream();
+        RuleSerializer binarySerializer = new RuleBinarySerializer();
+
+        assertExpectException(
+                RuleSerializeException.class,
+                "Too many rules provided",
+                () ->
+                        binarySerializer.serialize(
+                                ruleList,
+                                /* formatVersion= */ Optional.empty(),
+                                ruleOutputStream,
+                                indexingOutputStream));
+    }
+
+    @Test
+    public void testBinaryString_tooManyPackageNameIndexedRules() {
+        String packagePrefix = "package.name.";
+
+        // Create a rule set with too many package name indexed rules.
+        List<Rule> ruleList = new ArrayList();
+        for (int count = 0; count < INDEXED_RULE_SIZE_LIMIT + 1; count++) {
+            ruleList.add(
+                    getRuleWithPackageNameAndSampleInstallerName(
+                            String.format("%s%04d", packagePrefix, count)));
+        }
+
+        // Serialize the rules.
+        ByteArrayOutputStream ruleOutputStream = new ByteArrayOutputStream();
+        ByteArrayOutputStream indexingOutputStream = new ByteArrayOutputStream();
+        RuleSerializer binarySerializer = new RuleBinarySerializer();
+
+        assertExpectException(
+                RuleSerializeException.class,
+                "Too many rules provided in the indexing group.",
+                () ->
+                        binarySerializer.serialize(
+                                ruleList,
+                                /* formatVersion= */ Optional.empty(),
+                                ruleOutputStream,
+                                indexingOutputStream));
+    }
+
+    @Test
+    public void testBinaryString_tooManyAppCertificateIndexedRules() {
+        String appCertificatePrefix = "app.cert.";
+
+        // Create a rule set with too many app certificate indexed rules.
+        List<Rule> ruleList = new ArrayList();
+        for (int count = 0; count < INDEXED_RULE_SIZE_LIMIT + 1; count++) {
+            ruleList.add(
+                    getRuleWithAppCertificateAndSampleInstallerName(
+                            String.format("%s%04d", appCertificatePrefix, count)));
+        }
+
+        // Serialize the rules.
+        ByteArrayOutputStream ruleOutputStream = new ByteArrayOutputStream();
+        ByteArrayOutputStream indexingOutputStream = new ByteArrayOutputStream();
+        RuleSerializer binarySerializer = new RuleBinarySerializer();
+
+        assertExpectException(
+                RuleSerializeException.class,
+                "Too many rules provided in the indexing group.",
+                () ->
+                        binarySerializer.serialize(
+                                ruleList,
+                                /* formatVersion= */ Optional.empty(),
+                                ruleOutputStream,
+                                indexingOutputStream));
+    }
+
+    @Test
+    public void testBinaryString_tooManyNonIndexedRules() {
+        String installerNamePrefix = "installer.";
+
+        // Create a rule set with too many unindexed rules.
+        List<Rule> ruleList = new ArrayList();
+        for (int count = 0; count < NONINDEXED_RULE_SIZE_LIMIT + 1; count++) {
+            ruleList.add(
+                    getNonIndexedRuleWithInstallerName(
+                            String.format("%s%04d", installerNamePrefix, count)));
+        }
+
+        // Serialize the rules.
+        ByteArrayOutputStream ruleOutputStream = new ByteArrayOutputStream();
+        ByteArrayOutputStream indexingOutputStream = new ByteArrayOutputStream();
+        RuleSerializer binarySerializer = new RuleBinarySerializer();
+
+        assertExpectException(
+                RuleSerializeException.class,
+                "Too many rules provided in the indexing group.",
+                () ->
+                        binarySerializer.serialize(
+                                ruleList,
+                                /* formatVersion= */ Optional.empty(),
+                                ruleOutputStream,
+                                indexingOutputStream));
     }
 
     private Rule getRuleWithPackageNameAndSampleInstallerName(String packageName) {
