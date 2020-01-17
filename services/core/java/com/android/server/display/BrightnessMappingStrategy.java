@@ -109,11 +109,17 @@ public abstract class BrightnessMappingStrategy {
         return levels;
     }
 
-    private static float[] getFloatArray(TypedArray array) {
+    /**
+     * Extracts a float array from the specified {@link TypedArray}.
+     *
+     * @param array The array to convert.
+     * @return the given array as a float array.
+     */
+    public static float[] getFloatArray(TypedArray array) {
         final int N = array.length();
         float[] vals = new float[N];
         for (int i = 0; i < N; i++) {
-            vals[i] = array.getFloat(i, -1.0f);
+            vals[i] = array.getFloat(i, PowerManager.BRIGHTNESS_OFF_FLOAT);
         }
         array.recycle();
         return vals;
@@ -335,7 +341,7 @@ public abstract class BrightnessMappingStrategy {
         }
     }
 
-    protected float normalizeAbsoluteBrightness(int brightness) {
+    protected static float normalizeAbsoluteBrightness(int brightness) {
         brightness = MathUtils.constrain(brightness,
                 PowerManager.BRIGHTNESS_OFF, PowerManager.BRIGHTNESS_ON);
         return (float) brightness / PowerManager.BRIGHTNESS_ON;

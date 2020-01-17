@@ -49,6 +49,12 @@ public abstract class Light {
      */
     public abstract void setBrightness(int brightness, int brightnessMode);
 
+    /**
+     * Set the brightness of a display using the brightness range defines in a
+     * display-device-configuration file.
+     */
+    public abstract void setBrightnessFloat(float brightness);
+
     public abstract void setColor(int color);
     public abstract void setFlashing(int color, int mode, int onMS, int offMS);
     public abstract void pulse();

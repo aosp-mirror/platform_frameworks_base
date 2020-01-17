@@ -247,6 +247,19 @@ public final class PowerManager {
      */
     public static final int BRIGHTNESS_DEFAULT = -1;
 
+    /**
+     * Brightness value for fully off in float.
+     * TODO: rename this to BRIGHTNES_OFF and remove the integer-based constant.
+     * @hide
+     */
+    public static final float BRIGHTNESS_OFF_FLOAT = -1.0f;
+
+    /**
+     * Invalid brightness value.
+     * @hide
+     */
+    public static final float BRIGHTNESS_INVALID_FLOAT = Float.NaN;
+
     // Note: Be sure to update android.os.BatteryStats and PowerManager.h
     // if adding or modifying user activity event constants.
 
