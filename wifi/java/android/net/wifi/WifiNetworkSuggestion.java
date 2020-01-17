@@ -657,12 +657,14 @@ public final class WifiNetworkSuggestion implements Parcelable {
      * Network configuration for the provided network.
      * @hide
      */
+    @NonNull
     public final WifiConfiguration wifiConfiguration;
 
     /**
      * Passpoint configuration for the provided network.
      * @hide
      */
+    @Nullable
     public final PasspointConfiguration passpointConfiguration;
 
     /**
@@ -692,7 +694,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
 
     /** @hide */
     public WifiNetworkSuggestion() {
-        this.wifiConfiguration = null;
+        this.wifiConfiguration = new WifiConfiguration();
         this.passpointConfiguration = null;
         this.isAppInteractionRequired = false;
         this.isUserInteractionRequired = false;
@@ -793,5 +795,26 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 .append(", isInitialAutoJoinEnabled=").append(isInitialAutoJoinEnabled)
                 .append(" ]");
         return sb.toString();
+    }
+
+    /**
+     * Get the {@link WifiConfiguration} associated with this Suggestion.
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public WifiConfiguration getWifiConfiguration() {
+        return wifiConfiguration;
+    }
+
+    /**
+     * Get the {@link PasspointConfiguration} associated with this Suggestion, or null if this
+     * Suggestion is not for a Passpoint network.
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public PasspointConfiguration getPasspointConfiguration() {
+        return passpointConfiguration;
     }
 }
