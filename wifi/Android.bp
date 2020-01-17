@@ -98,7 +98,6 @@ java_library {
     },
     hostdex: true, // for hiddenapi check
     visibility: [
-        "//frameworks/base", // TODO(b/140299412) remove once all dependencies are fixed
         "//frameworks/opt/net/wifi/service:__subpackages__",
     ] + test_access_hidden_api_whitelist,
     apex_available: [
