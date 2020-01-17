@@ -491,7 +491,7 @@ public class HdmiControlService extends SystemService {
             mIoThread.start();
             mIoLooper = mIoThread.getLooper();
         }
-        mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
+        mPowerStatus = getInitialPowerStatus();
         mProhibitMode = false;
         mHdmiControlEnabled = readBooleanSetting(Global.HDMI_CONTROL_ENABLED, true);
         mMhlInputChangeEnabled = readBooleanSetting(Global.MHL_INPUT_SWITCHING_ENABLED, true);
@@ -538,6 +538,28 @@ public class HdmiControlService extends SystemService {
         mMhlController.setOption(OPTION_MHL_SERVICE_CONTROL, ENABLED);
     }
 
+    private void bootCompleted() {
+        // on boot, if device is interactive, set HDMI CEC state as powered on as well
+        if (mPowerManager.isInteractive() && isPowerStandbyOrTransient()) {
+            onWakeUp();
+        }
+    }
+
+    /**
+     * Returns the initial power status used when the HdmiControlService starts.
+     */
+    @VisibleForTesting
+    int getInitialPowerStatus() {
+        // The initial power status is POWER_STATUS_TRANSIENT_TO_STANDBY.
+        // Once boot completes the service transitions to POWER_STATUS_ON if the device is
+        // interactive.
+        // Quiescent boot is a special boot mode, in which the screen stays off during boot
+        // and the device goes to sleep after boot has finished.
+        // We don't transition to POWER_STATUS_ON initially, as we might be booting in quiescent
+        // mode, during which we don't want to appear powered on to avoid being made active source.
+        return HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY;
+    }
+
     @VisibleForTesting
     void setCecController(HdmiCecController cecController) {
         mCecController = cecController;
@@ -553,7 +575,9 @@ public class HdmiControlService extends SystemService {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             mTvInputManager = (TvInputManager) getContext().getSystemService(
                     Context.TV_INPUT_SERVICE);
-            mPowerManager = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
+            mPowerManager = getContext().getSystemService(PowerManager.class);
+        } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+            runOnServiceThread(this::bootCompleted);
         }
     }
 
@@ -579,9 +603,7 @@ public class HdmiControlService extends SystemService {
      * Called when the initialization of local devices is complete.
      */
     private void onInitializeCecComplete(int initiatedBy) {
-        if (mPowerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON) {
-            mPowerStatus = HdmiControlManager.POWER_STATUS_ON;
-        }
+        updatePowerStatusOnInitializeCecComplete();
         mWakeUpMessageReceived = false;
 
         if (isTvDeviceEnabled()) {
@@ -603,6 +625,17 @@ public class HdmiControlService extends SystemService {
         if (reason != -1) {
             invokeVendorCommandListenersOnControlStateChanged(true, reason);
             announceHdmiControlStatusChange(true);
+        }
+    }
+
+    /**
+     * Updates the power status once the initialization of local devices is complete.
+     */
+    private void updatePowerStatusOnInitializeCecComplete() {
+        if (mPowerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON) {
+            mPowerStatus = HdmiControlManager.POWER_STATUS_ON;
+        } else if (mPowerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY) {
+            mPowerStatus = HdmiControlManager.POWER_STATUS_STANDBY;
         }
     }
 
@@ -2664,6 +2697,13 @@ public class HdmiControlService extends SystemService {
     int getPowerStatus() {
         assertRunOnServiceThread();
         return mPowerStatus;
+    }
+
+    @ServiceThreadOnly
+    @VisibleForTesting
+    void setPowerStatus(int powerStatus) {
+        assertRunOnServiceThread();
+        mPowerStatus = powerStatus;
     }
 
     @ServiceThreadOnly
