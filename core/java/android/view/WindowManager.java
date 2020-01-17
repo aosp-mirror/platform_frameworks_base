@@ -452,13 +452,48 @@ public interface WindowManager extends ViewManager {
      * Message for taking fullscreen screenshot
      * @hide
      */
-    final int TAKE_SCREENSHOT_FULLSCREEN = 1;
+    int TAKE_SCREENSHOT_FULLSCREEN = 1;
 
     /**
      * Message for taking screenshot of selected region.
      * @hide
      */
-    final int TAKE_SCREENSHOT_SELECTED_REGION = 2;
+    int TAKE_SCREENSHOT_SELECTED_REGION = 2;
+
+    /**
+     * Message for handling a screenshot flow with an image provided by the caller.
+     * @hide
+     */
+    int TAKE_SCREENSHOT_PROVIDED_IMAGE = 3;
+
+    /**
+     * Parcel key for the screen shot bitmap sent with messages of type
+     * {@link #TAKE_SCREENSHOT_PROVIDED_IMAGE}, type {@link android.graphics.Bitmap}
+     * @hide
+     */
+    String PARCEL_KEY_SCREENSHOT_BITMAP = "screenshot_screen_bitmap";
+
+    /**
+     * Parcel key for the screen bounds of the image sent with messages of type
+     * [@link {@link #TAKE_SCREENSHOT_PROVIDED_IMAGE}], type {@link Rect} in screen coordinates.
+     * @hide
+     */
+    String PARCEL_KEY_SCREENSHOT_BOUNDS = "screenshot_screen_bounds";
+
+    /**
+     * Parcel key for the task id of the task that the screen shot was taken of, sent with messages
+     * of type [@link {@link #TAKE_SCREENSHOT_PROVIDED_IMAGE}], type int.
+     * @hide
+     */
+    String PARCEL_KEY_SCREENSHOT_TASK_ID = "screenshot_task_id";
+
+    /**
+     * Parcel key for the visible insets of the image sent with messages of type
+     * [@link {@link #TAKE_SCREENSHOT_PROVIDED_IMAGE}], type {@link android.graphics.Insets} in
+     * screen coordinates.
+     * @hide
+     */
+    String PARCEL_KEY_SCREENSHOT_INSETS = "screenshot_insets";
 
     /**
      * @hide

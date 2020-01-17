@@ -38,6 +38,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
@@ -55,6 +57,7 @@ import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
+import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.Dumpable;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipUI;
@@ -115,6 +118,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
     private final Intent mQuickStepIntent;
+    private final ScreenshotHelper mScreenshotHelper;
 
     private Region mActiveNavBarRegion;
 
@@ -365,6 +369,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
         }
 
+        @Override
+        public void handleImageAsScreenshot(Bitmap screenImage, Rect locationInScreen,
+                Insets visibleInsets, int taskId) {
+            mScreenshotHelper.provideScreenshot(screenImage, locationInScreen, visibleInsets,
+                    taskId, mHandler, null);
+        }
+
         private boolean verifyCaller(String reason) {
             final int callerId = Binder.getCallingUserHandle().getIdentifier();
             if (callerId != mCurrentBoundedUserId) {
@@ -518,6 +529,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
         // Listen for status bar state changes
         statusBarWinController.registerCallback(mStatusBarWindowCallback);
+        mScreenshotHelper = new ScreenshotHelper(context);
     }
 
     public void notifyBackAction(boolean completed, int downX, int downY, boolean isButton,
