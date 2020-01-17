@@ -371,10 +371,16 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         poContext.binder.callingUid = UserHandle.getUid(COPE_PROFILE_USER_ID, COPE_ADMIN1_APP_ID);
 
         runAsCaller(poContext, dpms, dpm -> {
-            // Check that DO policy is now set on parent instance.
-            assertEquals(33, dpm.getParentProfileInstance(admin1).getPasswordHistoryLength(admin1));
-            // And NOT set on profile instance.
-            assertEquals(0, dpm.getPasswordHistoryLength(admin1));
+            assertEquals("Password history policy wasn't migrated to PO parent instance",
+                    33, dpm.getParentProfileInstance(admin1).getPasswordHistoryLength(admin1));
+            assertEquals("Password history policy was put into non-parent PO instance",
+                    0, dpm.getPasswordHistoryLength(admin1));
+
+            assertTrue("User restriction wasn't migrated to PO parent instance",
+                    dpm.getParentProfileInstance(admin1).getUserRestrictions(admin1)
+                            .containsKey(UserManager.DISALLOW_BLUETOOTH));
+            assertFalse("User restriction was put into non-parent PO instance",
+                    dpm.getUserRestrictions(admin1).containsKey(UserManager.DISALLOW_BLUETOOTH));
 
             // TODO(b/143516163): verify more policies.
         });

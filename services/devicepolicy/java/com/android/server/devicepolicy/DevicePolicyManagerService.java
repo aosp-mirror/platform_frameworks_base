@@ -2556,7 +2556,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         for (final String restriction : doAdmin.userRestrictions.keySet()) {
             if (UserRestrictionsUtils.canProfileOwnerOfOrganizationOwnedDeviceChange(restriction)) {
-                parentAdmin.userRestrictions.putBoolean(
+                parentAdmin.ensureUserRestrictions().putBoolean(
                         restriction, doAdmin.userRestrictions.getBoolean(restriction));
             }
         }
