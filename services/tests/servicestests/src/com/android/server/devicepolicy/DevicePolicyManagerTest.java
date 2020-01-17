@@ -2183,6 +2183,63 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThat(actualAccounts).containsExactlyElementsIn(expectedAccounts);
     }
 
+    public void testSetApplicationHiddenWithDO() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        mContext.packageName = admin1.getPackageName();
+        setUpPackageManagerForAdmin(admin1, mContext.binder.callingUid);
+
+        String packageName = "com.google.android.test";
+
+        dpm.setApplicationHidden(admin1, packageName, true);
+        verify(getServices().ipackageManager).setApplicationHiddenSettingAsUser(packageName,
+                true, UserHandle.USER_SYSTEM);
+
+        dpm.setApplicationHidden(admin1, packageName, false);
+        verify(getServices().ipackageManager).setApplicationHiddenSettingAsUser(packageName,
+                false, UserHandle.USER_SYSTEM);
+
+        verify(getServices().ipackageManager, never()).getPackageInfo(packageName,
+                PackageManager.MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM);
+        verify(getServices().ipackageManager, never()).getPackageInfo(packageName,
+                PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.MATCH_SYSTEM_ONLY,
+                UserHandle.USER_SYSTEM);
+    }
+
+    public void testSetApplicationHiddenWithPOOfOrganizationOwnedDevice() throws Exception {
+        final int MANAGED_PROFILE_USER_ID = DpmMockContext.CALLER_USER_HANDLE;
+        final int MANAGED_PROFILE_ADMIN_UID =
+                UserHandle.getUid(MANAGED_PROFILE_USER_ID, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+
+        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
+        mContext.packageName = admin1.getPackageName();
+        setUpPackageManagerForAdmin(admin1, mContext.binder.callingUid);
+
+        String packageName = "com.google.android.test";
+
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.applicationInfo = new ApplicationInfo();
+        packageInfo.applicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
+        when(getServices().userManager.getProfileParent(MANAGED_PROFILE_USER_ID))
+                .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
+        when(getServices().ipackageManager.getPackageInfo(packageName,
+                PackageManager.MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM)).thenReturn(
+                packageInfo);
+        when(getServices().ipackageManager.getPackageInfo(packageName,
+                PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.MATCH_SYSTEM_ONLY,
+                UserHandle.USER_SYSTEM)).thenReturn(packageInfo);
+
+        parentDpm.setApplicationHidden(admin1, packageName, true);
+        verify(getServices().ipackageManager).setApplicationHiddenSettingAsUser(packageName,
+                true, UserHandle.USER_SYSTEM);
+
+        parentDpm.setApplicationHidden(admin1, packageName, false);
+        verify(getServices().ipackageManager).setApplicationHiddenSettingAsUser(packageName,
+                false, UserHandle.USER_SYSTEM);
+    }
+
     public void testGetMacAddress() throws Exception {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
