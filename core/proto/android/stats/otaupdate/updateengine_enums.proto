@@ -1,0 +1,82 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.stats.otaupdate;
+
+// The payload type of an OTA update attempt on A/B devices.
+enum PayloadType {
+    FULL = 10000;
+    DELTA = 10001;
+}
+
+// The attempt result reported by the update engine for an OTA update.
+enum AttemptResult {
+    UPDATE_SUCCEEDED = 10000;
+    INTERNAL_ERROR = 10001;
+    PAYLOAD_DOWNLOAD_ERROR = 10002;
+    METADATA_MALFORMED = 10003;
+    OPERATION_MALFORMED = 10004;
+    OPERATION_EXECUTION_ERROR = 10005;
+    METADATA_VERIFICATION_FAILED = 10006;
+    PAYLOAD_VERIFICATION_FAILED = 10007;
+    VERIFICATION_FAILED = 10008;
+    POSTINSTALL_FAILED = 10009;
+    ABNORMAL_TERMINATION = 10010;
+    UPDATE_CANCELED = 10011;
+    UPDATE_SUCCEEDED_NOT_ACTIVE = 10012;
+}
+
+// The error code reported by the update engine after an OTA update attempt
+// on A/B devices. More details in system/update_engine/common/error_code.h
+enum ErrorCode {
+    SUCCESS = 10000;
+    ERROR = 10001;
+    FILESYSTEM_COPIER_ERROR = 10004;
+    POST_INSTALL_RUNNER_ERROR = 10005;
+    PAYLOAD_MISMATCHED_TYPE_ERROR = 10006;
+    INSTALL_DEVICE_OPEN_ERROR = 10007;
+    KERNEL_DEVICE_OPEN_ERROR = 10008;
+    DOWNLOAD_TRANSFER_ERROR = 10009;
+    PAYLOAD_HASH_MISMATCH_ERROR = 10010;
+    PAYLOAD_SIZE_MISMATCH_ERROR = 10011;
+    DOWNLOAD_PAYLOAD_VERIFICATION_ERROR = 10012;
+    DOWNLOAD_NEW_PARTITION_INFO_ERROR = 10013;
+    DOWNLOAD_WRITE_ERROR = 10014;
+    NEW_ROOTFS_VERIFICATION_ERROR = 10015;
+    SIGNED_DELTA_PAYLOAD_EXPECTED_ERROR = 10017;
+    DOWNLOAD_PAYLOAD_PUB_KEY_VERIFICATION_ERROR = 10018;
+    DOWNLOAD_STATE_INITIALIZATION_ERROR = 10020;
+    DOWNLOAD_INVALID_METADATA_MAGIC_STRING = 10021;
+    DOWNLOAD_SIGNATURE_MISSING_IN_MANIFEST = 10022;
+    DOWNLOAD_MANIFEST_PARSE_ERROR = 10023;
+    DOWNLOAD_METADATA_SIGNATURE_ERROR = 10024;
+    DOWNLOAD_METADATA_SIGNATURE_VERIFICATION_ERROR = 10025;
+    DOWNLOAD_METADATA_SIGNATURE_MISMATCH = 10026;
+    DOWNLOAD_OPERATION_HASH_VERIFICATION_ERROR = 10027;
+    DOWNLOAD_OPERATION_EXECUTION_ERROR = 10028;
+    DOWNLOAD_OPERATION_HASH_MISMATCH = 10029;
+    DOWNLOAD_INVALID_METADATA_SIZE = 10032;
+    DOWNLOAD_INVALID_METADATA_SIGNATURE = 10033;
+    DOWNLOAD_OPERATION_HASH_MISSING_ERROR = 10038;
+    DOWNLOAD_METADATA_SIGNATURE_MISSING_ERROR = 10039;
+    UNSUPPORTED_MAJOR_PAYLOAD_VERSION = 10044;
+    UNSUPPORTED_MINOR_PAYLOAD_VERSION = 10045;
+    FILESYSTEM_VERIFIER_ERROR = 10047;
+    USER_CANCELED = 10048;
+    PAYLOAD_TIMESTAMP_ERROR = 10051;
+    UPDATED_BUT_NOT_ACTIVE = 10052;
+}
