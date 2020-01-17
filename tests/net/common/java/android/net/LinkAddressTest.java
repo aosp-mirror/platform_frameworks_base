@@ -38,6 +38,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.os.SystemClock;
+
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -316,10 +318,82 @@ public class LinkAddressTest {
 
         l = new LinkAddress(V6_ADDRESS, 64, 123, 456);
         assertParcelingIsLossless(l);
+        l = new LinkAddress(V6_ADDRESS, 64, 123, 456,
+                1L, 3600000L);
+        assertParcelingIsLossless(l);
 
         l = new LinkAddress(V4 + "/28", IFA_F_PERMANENT, RT_SCOPE_LINK);
-        assertParcelSane(l, 4);
+        assertParcelSane(l, 6);
     }
+
+    @Test
+    public void testDeprecationTime() {
+        try {
+            new LinkAddress(V6_ADDRESS, 64, 0, 456,
+                    LinkAddress.LIFETIME_UNKNOWN,
+                    SystemClock.elapsedRealtime() + 200000);
+            fail("Only one time provided should cause exception");
+        } catch (IllegalArgumentException expected) { }
+
+        try {
+            new LinkAddress(V6_ADDRESS, 64, 0, 456,
+                    SystemClock.elapsedRealtime() - 100000,
+                    SystemClock.elapsedRealtime() - 200000);
+            fail("deprecation time later than expiration time should cause exception");
+        } catch (IllegalArgumentException expected) { }
+
+        try {
+            new LinkAddress(V6_ADDRESS, 64, 0, 456,
+                    -2, SystemClock.elapsedRealtime());
+            fail("negative deprecation time should cause exception");
+        } catch (IllegalArgumentException expected) { }
+    }
+
+    @Test
+    public void testExpirationTime() {
+        try {
+            new LinkAddress(V6_ADDRESS, 64, 0, 456,
+                    SystemClock.elapsedRealtime() + 200000,
+                    LinkAddress.LIFETIME_UNKNOWN);
+            fail("Only one time provided should cause exception");
+        } catch (IllegalArgumentException expected) { }
+
+        try {
+            new LinkAddress(V6_ADDRESS, 64, 0, 456,
+                    SystemClock.elapsedRealtime() - 10000, -2);
+            fail("negative expiration time should cause exception");
+        } catch (IllegalArgumentException expected) { }
+    }
+
+    @Test
+    public void testGetFlags() {
+        LinkAddress l = new LinkAddress(V6_ADDRESS, 64, 123, RT_SCOPE_HOST);
+        assertEquals(123, l.getFlags());
+
+        // Test if deprecated bit was added/remove automatically based on the provided deprecation
+        // time
+        l = new LinkAddress(V6_ADDRESS, 64, 0, RT_SCOPE_HOST,
+                SystemClock.elapsedRealtime() - 100000, LinkAddress.LIFETIME_PERMANENT);
+        // Check if the flag is added automatically.
+        assertTrue((l.getFlags() & IFA_F_DEPRECATED) != 0);
+
+        l = new LinkAddress(V6_ADDRESS, 64, IFA_F_DEPRECATED, RT_SCOPE_HOST,
+                SystemClock.elapsedRealtime() + 100000, LinkAddress.LIFETIME_PERMANENT);
+        // Check if the flag is removed automatically.
+        assertTrue((l.getFlags() & IFA_F_DEPRECATED) == 0);
+
+        l = new LinkAddress(V6_ADDRESS, 64, IFA_F_DEPRECATED, RT_SCOPE_HOST,
+                LinkAddress.LIFETIME_PERMANENT, LinkAddress.LIFETIME_PERMANENT);
+        // Check if the permanent flag is added.
+        assertTrue((l.getFlags() & IFA_F_PERMANENT) != 0);
+
+        l = new LinkAddress(V6_ADDRESS, 64, IFA_F_PERMANENT, RT_SCOPE_HOST,
+                SystemClock.elapsedRealtime() - 100000,
+                SystemClock.elapsedRealtime() + 100000);
+        // Check if the permanent flag is removed
+        assertTrue((l.getFlags() & IFA_F_PERMANENT) == 0);
+    }
+
 
     private void assertGlobalPreferred(LinkAddress l, String msg) {
         assertTrue(msg, l.isGlobalPreferred());
@@ -389,5 +463,12 @@ public class LinkAddressTest {
                             (IFA_F_TEMPORARY|IFA_F_TENTATIVE|IFA_F_OPTIMISTIC),
                             RT_SCOPE_UNIVERSE);
         assertGlobalPreferred(l, "v6,global,tempaddr+optimistic");
+
+        l = new LinkAddress(V6_ADDRESS, 64, IFA_F_DEPRECATED,
+                RT_SCOPE_UNIVERSE, SystemClock.elapsedRealtime() + 100000,
+                SystemClock.elapsedRealtime() + 200000);
+        // Although the deprecated bit is set, but the deprecation time is in the future, test
+        // if the flag is removed automatically.
+        assertGlobalPreferred(l, "v6,global,tempaddr+deprecated in the future");
     }
 }
