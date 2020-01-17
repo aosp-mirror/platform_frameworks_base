@@ -50,6 +50,7 @@ import android.content.pm.dex.ArtManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -7619,4 +7620,19 @@ public abstract class PackageManager {
             "sendDeviceCustomizationReadyBroadcast not implemented in subclass");
     }
 
+    /**
+     * Returns if the provided drawable represents the default activity icon provided by the system.
+     *
+     * PackageManager provides a default icon for any package/activity if the app itself does not
+     * define one or if the system encountered any error when loading the icon.
+     *
+     * @return true if the drawable represents the default activity icon, false otherwise
+     * @see #getDefaultActivityIcon()
+     */
+    public boolean isDefaultApplicationIcon(@NonNull Drawable drawable) {
+        int resId = drawable instanceof AdaptiveIconDrawable
+                ? ((AdaptiveIconDrawable) drawable).getSourceDrawableResId() : Resources.ID_NULL;
+        return resId == com.android.internal.R.drawable.sym_def_app_icon
+                || resId == com.android.internal.R.drawable.sym_app_on_sd_unavailable_icon;
+    }
 }
