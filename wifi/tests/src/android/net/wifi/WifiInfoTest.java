@@ -39,6 +39,8 @@ public class WifiInfoTest {
     private static final String TEST_FQDN = "test.com";
     private static final String TEST_PROVIDER_NAME = "test";
     private static final int TEST_WIFI_STANDARD = ScanResult.WIFI_STANDARD_11AC;
+    private static final int TEST_MAX_SUPPORTED_TX_LINK_SPEED_MBPS = 866;
+    private static final int TEST_MAX_SUPPORTED_RX_LINK_SPEED_MBPS = 1200;
 
     /**
      *  Verify parcel write/read with WifiInfo.
@@ -56,6 +58,8 @@ public class WifiInfoTest {
         writeWifiInfo.setProviderFriendlyName(TEST_PROVIDER_NAME);
         writeWifiInfo.setAppPackageName(TEST_PACKAGE_NAME);
         writeWifiInfo.setWifiStandard(TEST_WIFI_STANDARD);
+        writeWifiInfo.setMaxSupportedTxLinkSpeedMbps(TEST_MAX_SUPPORTED_TX_LINK_SPEED_MBPS);
+        writeWifiInfo.setMaxSupportedRxLinkSpeedMbps(TEST_MAX_SUPPORTED_RX_LINK_SPEED_MBPS);
 
         Parcel parcel = Parcel.obtain();
         writeWifiInfo.writeToParcel(parcel, 0);
@@ -75,5 +79,26 @@ public class WifiInfoTest {
         assertEquals(TEST_FQDN, readWifiInfo.getPasspointFqdn());
         assertEquals(TEST_PROVIDER_NAME, readWifiInfo.getPasspointProviderFriendlyName());
         assertEquals(TEST_WIFI_STANDARD, readWifiInfo.getWifiStandard());
+        assertEquals(TEST_MAX_SUPPORTED_TX_LINK_SPEED_MBPS,
+                readWifiInfo.getMaxSupportedTxLinkSpeedMbps());
+        assertEquals(TEST_MAX_SUPPORTED_RX_LINK_SPEED_MBPS,
+                readWifiInfo.getMaxSupportedRxLinkSpeedMbps());
+    }
+
+    /**
+     *  Verify values after reset()
+     */
+    @Test
+    public void testWifiInfoResetValue() throws Exception {
+        WifiInfo wifiInfo = new WifiInfo();
+        wifiInfo.reset();
+        assertEquals(WifiInfo.LINK_SPEED_UNKNOWN, wifiInfo.getMaxSupportedTxLinkSpeedMbps());
+        assertEquals(WifiInfo.LINK_SPEED_UNKNOWN, wifiInfo.getMaxSupportedRxLinkSpeedMbps());
+        assertEquals(WifiInfo.LINK_SPEED_UNKNOWN, wifiInfo.getTxLinkSpeedMbps());
+        assertEquals(WifiInfo.LINK_SPEED_UNKNOWN, wifiInfo.getRxLinkSpeedMbps());
+        assertEquals(WifiInfo.INVALID_RSSI, wifiInfo.getRssi());
+        assertEquals(WifiManager.UNKNOWN_SSID, wifiInfo.getSSID());
+        assertEquals(null, wifiInfo.getBSSID());
+        assertEquals(-1, wifiInfo.getNetworkId());
     }
 }
