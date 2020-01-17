@@ -159,6 +159,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
 
     ResourceParserOptions parser_options;
     parser_options.error_on_positional_arguments = !options.legacy_mode;
+    parser_options.preserve_visibility_of_styleables = options.preserve_visibility_of_styleables;
     parser_options.translatable = translatable_file;
 
     // If visibility was forced, we need to use it when creating a new resource and also error if
