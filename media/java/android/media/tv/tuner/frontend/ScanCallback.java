@@ -16,6 +16,11 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.IntDef;
+import android.hardware.tv.tuner.V1_0.Constants;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Scan callback.
@@ -23,11 +28,34 @@ package android.media.tv.tuner.frontend;
  * @hide
  */
 public interface ScanCallback {
+
+    /** @hide */
+    @IntDef(prefix = "SCAN_TYPE_", value = {SCAN_TYPE_UNDEFINED, SCAN_TYPE_AUTO, SCAN_TYPE_BLIND})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ScanType {}
+    /**
+     * Scan type undefined.
+     */
+    int SCAN_TYPE_UNDEFINED = Constants.FrontendScanType.SCAN_UNDEFINED;
+    /**
+     * Scan type auto.
+     *
+     * <p> Tuner will send {@link #onLocked}
+     */
+    int SCAN_TYPE_AUTO = Constants.FrontendScanType.SCAN_AUTO;
+    /**
+     * Blind scan.
+     *
+     * <p>Frequency range is not specified. The {@link android.media.tv.tuner.Tuner} will scan an
+     * implementation specific range.
+     */
+    int SCAN_TYPE_BLIND = Constants.FrontendScanType.SCAN_BLIND;
+
     /** Scan locked the signal. */
-    void onLocked(boolean isLocked);
+    void onLocked();
 
     /** Scan stopped. */
-    void onEnd(boolean isEnd);
+    void onScanStopped();
 
     /** scan progress percent (0..100) */
     void onProgress(int percent);

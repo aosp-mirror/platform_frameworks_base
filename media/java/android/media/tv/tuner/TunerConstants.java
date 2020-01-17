@@ -218,20 +218,6 @@ public final class TunerConstants {
     public static final int SC_HEVC_INDEX_SLICE_TRAIL_CRA =
             Constants.DemuxScHevcIndex.SLICE_TRAIL_CRA;
 
-
-    /** @hide */
-    @IntDef({FRONTEND_SCAN_UNDEFINED, FRONTEND_SCAN_AUTO, FRONTEND_SCAN_BLIND})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendScanType {}
-    /** @hide */
-    public static final int FRONTEND_SCAN_UNDEFINED = Constants.FrontendScanType.SCAN_UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_SCAN_AUTO = Constants.FrontendScanType.SCAN_AUTO;
-    /** @hide */
-    public static final int FRONTEND_SCAN_BLIND = Constants.FrontendScanType.SCAN_BLIND;
-
-
-
     /** @hide */
     @LongDef({FEC_UNDEFINED, FEC_AUTO, FEC_1_2, FEC_1_3, FEC_1_4, FEC_1_5, FEC_2_3, FEC_2_5,
             FEC_2_9, FEC_3_4, FEC_3_5, FEC_4_5, FEC_4_15, FEC_5_6, FEC_5_9, FEC_6_7, FEC_7_8,
