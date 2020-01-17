@@ -218,7 +218,7 @@ public final class SystemServer {
     private static final String STATS_COMPANION_LIFECYCLE_CLASS =
             "com.android.server.stats.StatsCompanion$Lifecycle";
     private static final String STATS_PULL_ATOM_SERVICE_CLASS =
-            "com.android.server.stats.StatsPullAtomService";
+            "com.android.server.stats.pull.StatsPullAtomService";
     private static final String USB_SERVICE_CLASS =
             "com.android.server.usb.UsbService$Lifecycle";
     private static final String MIDI_SERVICE_CLASS =

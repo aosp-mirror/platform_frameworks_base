@@ -24,11 +24,11 @@ import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
-import static com.android.server.stats.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
-import static com.android.server.stats.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
-import static com.android.server.stats.ProcfsMemoryUtil.forEachPid;
-import static com.android.server.stats.ProcfsMemoryUtil.readCmdlineFromProcfs;
-import static com.android.server.stats.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
+import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
+import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
+import static com.android.server.stats.pull.ProcfsMemoryUtil.forEachPid;
+import static com.android.server.stats.pull.ProcfsMemoryUtil.readCmdlineFromProcfs;
+import static com.android.server.stats.pull.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -135,8 +135,8 @@ import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.role.RoleManagerInternal;
-import com.android.server.stats.IonMemoryUtil.IonAllocations;
-import com.android.server.stats.ProcfsMemoryUtil.MemorySnapshot;
+import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
+import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
 
@@ -722,207 +722,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullProcessMemoryState(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        List<ProcessMemoryState> processMemoryStates =
-                LocalServices.getService(
-                        ActivityManagerInternal.class).getMemoryStateForProcesses();
-        for (ProcessMemoryState processMemoryState : processMemoryStates) {
-            final MemoryStat memoryStat = readMemoryStatFromFilesystem(processMemoryState.uid,
-                    processMemoryState.pid);
-            if (memoryStat == null) {
-                continue;
-            }
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(processMemoryState.uid);
-            e.writeString(processMemoryState.processName);
-            e.writeInt(processMemoryState.oomScore);
-            e.writeLong(memoryStat.pgfault);
-            e.writeLong(memoryStat.pgmajfault);
-            e.writeLong(memoryStat.rssInBytes);
-            e.writeLong(memoryStat.cacheInBytes);
-            e.writeLong(memoryStat.swapInBytes);
-            e.writeLong(-1);  // unused
-            e.writeLong(-1);  // unused
-            e.writeInt(-1);  // unsed
-            pulledData.add(e);
-        }
-    }
-
-    private void pullProcessMemoryHighWaterMark(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        List<ProcessMemoryState> managedProcessList =
-                LocalServices.getService(
-                        ActivityManagerInternal.class).getMemoryStateForProcesses();
-        for (ProcessMemoryState managedProcess : managedProcessList) {
-            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(managedProcess.pid);
-            if (snapshot == null) {
-                continue;
-            }
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(managedProcess.uid);
-            e.writeString(managedProcess.processName);
-            // RSS high-water mark in bytes.
-            e.writeLong((long) snapshot.rssHighWaterMarkInKilobytes * 1024L);
-            e.writeInt(snapshot.rssHighWaterMarkInKilobytes);
-            pulledData.add(e);
-        }
-        forEachPid((pid, cmdLine) -> {
-            if (!MEMORY_INTERESTING_NATIVE_PROCESSES.contains(cmdLine)) {
-                return;
-            }
-            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(pid);
-            if (snapshot == null) {
-                return;
-            }
-            // Sometimes we get here a process that is not included in the whitelist. It comes
-            // from forking the zygote for an app. We can ignore that sample because this process
-            // is collected by ProcessMemoryState.
-            if (isAppUid(snapshot.uid)) {
-                return;
-            }
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(snapshot.uid);
-            e.writeString(cmdLine);
-            // RSS high-water mark in bytes.
-            e.writeLong((long) snapshot.rssHighWaterMarkInKilobytes * 1024L);
-            e.writeInt(snapshot.rssHighWaterMarkInKilobytes);
-            pulledData.add(e);
-        });
-        // Invoke rss_hwm_reset binary to reset RSS HWM counters for all processes.
-        SystemProperties.set("sys.rss_hwm_reset.on", "1");
-    }
-
-    private void pullProcessMemorySnapshot(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        List<ProcessMemoryState> managedProcessList =
-                LocalServices.getService(
-                        ActivityManagerInternal.class).getMemoryStateForProcesses();
-        for (ProcessMemoryState managedProcess : managedProcessList) {
-            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(managedProcess.pid);
-            if (snapshot == null) {
-                continue;
-            }
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(managedProcess.uid);
-            e.writeString(managedProcess.processName);
-            e.writeInt(managedProcess.pid);
-            e.writeInt(managedProcess.oomScore);
-            e.writeInt(snapshot.rssInKilobytes);
-            e.writeInt(snapshot.anonRssInKilobytes);
-            e.writeInt(snapshot.swapInKilobytes);
-            e.writeInt(snapshot.anonRssInKilobytes + snapshot.swapInKilobytes);
-            pulledData.add(e);
-        }
-        forEachPid((pid, cmdLine) -> {
-            if (!MEMORY_INTERESTING_NATIVE_PROCESSES.contains(cmdLine)) {
-                return;
-            }
-            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(pid);
-            if (snapshot == null) {
-                return;
-            }
-            // Sometimes we get here a process that is not included in the whitelist. It comes
-            // from forking the zygote for an app. We can ignore that sample because this process
-            // is collected by ProcessMemoryState.
-            if (isAppUid(snapshot.uid)) {
-                return;
-            }
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(snapshot.uid);
-            e.writeString(cmdLine);
-            e.writeInt(pid);
-            e.writeInt(-1001);  // Placeholder for native processes, OOM_SCORE_ADJ_MIN - 1.
-            e.writeInt(snapshot.rssInKilobytes);
-            e.writeInt(snapshot.anonRssInKilobytes);
-            e.writeInt(snapshot.swapInKilobytes);
-            e.writeInt(snapshot.anonRssInKilobytes + snapshot.swapInKilobytes);
-            pulledData.add(e);
-        });
-    }
-
-    private static boolean isAppUid(int uid) {
-        return uid >= MIN_APP_UID;
-    }
-
-    private void pullSystemIonHeapSize(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        final long systemIonHeapSizeInBytes = readSystemIonHeapSizeFromDebugfs();
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-        e.writeLong(systemIonHeapSizeInBytes);
-        pulledData.add(e);
-    }
-
-    private void pullProcessSystemIonHeapSize(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        List<IonAllocations> result = readProcessSystemIonHeapSizesFromDebugfs();
-        for (IonAllocations allocations : result) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(getUidForPid(allocations.pid));
-            e.writeString(readCmdlineFromProcfs(allocations.pid));
-            e.writeInt((int) (allocations.totalSizeInBytes / 1024));
-            e.writeInt(allocations.count);
-            e.writeInt((int) (allocations.maxSizeInBytes / 1024));
-            pulledData.add(e);
-        }
-    }
-
-    private void pullBinderCallsStats(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        BinderCallsStatsService.Internal binderStats =
-                LocalServices.getService(BinderCallsStatsService.Internal.class);
-        if (binderStats == null) {
-            throw new IllegalStateException("binderStats is null");
-        }
-
-        List<ExportedCallStat> callStats = binderStats.getExportedCallStats();
-        binderStats.reset();
-        for (ExportedCallStat callStat : callStats) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(callStat.workSourceUid);
-            e.writeString(callStat.className);
-            e.writeString(callStat.methodName);
-            e.writeLong(callStat.callCount);
-            e.writeLong(callStat.exceptionCount);
-            e.writeLong(callStat.latencyMicros);
-            e.writeLong(callStat.maxLatencyMicros);
-            e.writeLong(callStat.cpuTimeMicros);
-            e.writeLong(callStat.maxCpuTimeMicros);
-            e.writeLong(callStat.maxReplySizeBytes);
-            e.writeLong(callStat.maxRequestSizeBytes);
-            e.writeLong(callStat.recordedCallCount);
-            e.writeInt(callStat.screenInteractive ? 1 : 0);
-            e.writeInt(callStat.callingUid);
-            pulledData.add(e);
-        }
-    }
-
-    private void pullBinderCallsStatsExceptions(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        BinderCallsStatsService.Internal binderStats =
-                LocalServices.getService(BinderCallsStatsService.Internal.class);
-        if (binderStats == null) {
-            throw new IllegalStateException("binderStats is null");
-        }
-
-        ArrayMap<String, Integer> exceptionStats = binderStats.getExportedExceptionStats();
-        // TODO: decouple binder calls exceptions with the rest of the binder calls data so that we
-        // can reset the exception stats.
-        for (Entry<String, Integer> entry : exceptionStats.entrySet()) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeString(entry.getKey());
-            e.writeInt(entry.getValue());
-            pulledData.add(e);
-        }
-    }
-
     private void pullLooperStats(int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         LooperStats looperStats = LocalServices.getService(LooperStats.class);
@@ -1397,49 +1196,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullTemperature(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long callingToken = Binder.clearCallingIdentity();
-        try {
-            List<Temperature> temperatures = sThermalService.getCurrentTemperatures();
-            for (Temperature temp : temperatures) {
-                StatsLogEventWrapper e =
-                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-                e.writeInt(temp.getType());
-                e.writeString(temp.getName());
-                e.writeInt((int) (temp.getValue() * 10));
-                e.writeInt(temp.getStatus());
-                pulledData.add(e);
-            }
-        } catch (RemoteException e) {
-            // Should not happen.
-            Slog.e(TAG, "Disconnected from thermal service. Cannot pull temperatures.");
-        } finally {
-            Binder.restoreCallingIdentity(callingToken);
-        }
-    }
-
-    private void pullCoolingDevices(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long callingToken = Binder.clearCallingIdentity();
-        try {
-            List<CoolingDevice> devices = sThermalService.getCurrentCoolingDevices();
-            for (CoolingDevice device : devices) {
-                StatsLogEventWrapper e =
-                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-                e.writeInt(device.getType());
-                e.writeString(device.getName());
-                e.writeInt((int) (device.getValue()));
-                pulledData.add(e);
-            }
-        } catch (RemoteException e) {
-            // Should not happen.
-            Slog.e(TAG, "Disconnected from thermal service. Cannot pull temperatures.");
-        } finally {
-            Binder.restoreCallingIdentity(callingToken);
-        }
-    }
-
     private void pullDebugElapsedClock(int tagId,
             long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
         final long elapsedMillis = SystemClock.elapsedRealtime();
@@ -1823,41 +1579,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 break;
             }
 
-            case StatsLog.PROCESS_MEMORY_STATE: {
-                pullProcessMemoryState(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.PROCESS_MEMORY_HIGH_WATER_MARK: {
-                pullProcessMemoryHighWaterMark(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.PROCESS_MEMORY_SNAPSHOT: {
-                pullProcessMemorySnapshot(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.SYSTEM_ION_HEAP_SIZE: {
-                pullSystemIonHeapSize(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.PROCESS_SYSTEM_ION_HEAP_SIZE: {
-                pullProcessSystemIonHeapSize(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.BINDER_CALLS: {
-                pullBinderCallsStats(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.BINDER_CALLS_EXCEPTIONS: {
-                pullBinderCallsStatsExceptions(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
             case StatsLog.LOOPER_STATS: {
                 pullLooperStats(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
@@ -1917,16 +1638,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.CPU_TIME_PER_THREAD_FREQ: {
                 pullCpuTimePerThreadFreq(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.TEMPERATURE: {
-                pullTemperature(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.COOLING_DEVICE: {
-                pullCoolingDevices(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 
