@@ -133,6 +133,22 @@ public class UserManager {
     public static final String USER_TYPE_SYSTEM_HEADLESS = "android.os.usertype.system.HEADLESS";
 
     /**
+     * Flag passed to {@link #requestQuietModeEnabled} to request disabling quiet mode only if
+     * there is no need to confirm the user credentials. If credentials are required to disable
+     * quiet mode, {@link #requestQuietModeEnabled} will do nothing and return {@code false}.
+     */
+    public static final int QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED = 0x1;
+
+    /**
+     * List of flags available for the {@link #requestQuietModeEnabled} method.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "QUIET_MODE_" }, value = {
+            QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED })
+    public @interface QuietModeFlag {}
+
+    /**
      * @hide
      * No user restriction.
      */
@@ -3216,6 +3232,25 @@ public class UserManager {
     }
 
     /**
+     * Perform the same operation as {@link #requestQuietModeEnabled(boolean, UserHandle)}, but
+     * with a flag to tweak the behavior of the request.
+     *
+     * @param enableQuietMode whether quiet mode should be enabled or disabled
+     * @param userHandle user handle of the profile
+     * @param flags Can be 0 or {@link #QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED}.
+     * @return {@code false} if user's credential is needed in order to turn off quiet mode,
+     *         {@code true} otherwise
+     * @throws SecurityException if the caller is invalid
+     * @throws IllegalArgumentException if {@code userHandle} is not a managed profile
+     *
+     * @see #isQuietModeEnabled(UserHandle)
+     */
+    public boolean requestQuietModeEnabled(boolean enableQuietMode, @NonNull UserHandle userHandle,
+            @QuietModeFlag int flags) {
+        return requestQuietModeEnabled(enableQuietMode, userHandle, null, flags);
+    }
+
+    /**
      * Similar to {@link #requestQuietModeEnabled(boolean, UserHandle)}, except you can specify
      * a target to start when user is unlocked. If {@code target} is specified, caller must have
      * the {@link android.Manifest.permission#MANAGE_USERS} permission.
@@ -3225,9 +3260,23 @@ public class UserManager {
      */
     public boolean requestQuietModeEnabled(
             boolean enableQuietMode, @NonNull UserHandle userHandle, IntentSender target) {
+        return requestQuietModeEnabled(enableQuietMode, userHandle, target, 0);
+    }
+    /**
+     * Similar to {@link #requestQuietModeEnabled(boolean, UserHandle)}, except you can specify
+     * a target to start when user is unlocked. If {@code target} is specified, caller must have
+     * the {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * @see {@link #requestQuietModeEnabled(boolean, UserHandle)}
+     * @hide
+     */
+    public boolean requestQuietModeEnabled(
+            boolean enableQuietMode, @NonNull UserHandle userHandle, IntentSender target,
+            int flags) {
         try {
             return mService.requestQuietModeEnabled(
-                    mContext.getPackageName(), enableQuietMode, userHandle.getIdentifier(), target);
+                    mContext.getPackageName(), enableQuietMode, userHandle.getIdentifier(), target,
+                    flags);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
