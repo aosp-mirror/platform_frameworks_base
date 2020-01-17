@@ -320,8 +320,10 @@ package android.app {
   }
 
   public final class NotificationChannel implements android.os.Parcelable {
+    method public boolean isBlockableSystem();
     method public boolean isImportanceLockedByCriticalDeviceFunction();
     method public boolean isImportanceLockedByOEM();
+    method public void setBlockableSystem(boolean);
     method public void setImportanceLockedByCriticalDeviceFunction(boolean);
     method public void setImportanceLockedByOEM(boolean);
   }
