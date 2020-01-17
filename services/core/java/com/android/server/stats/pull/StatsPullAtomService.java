@@ -173,7 +173,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -349,14 +348,14 @@ public class StatsPullAtomService extends SystemService {
     }
     private void registerWifiBytesTransfer() {
         int tagId = StatsLog.WIFI_BYTES_TRANSFER;
-        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3, 4, 5})
                 .build();
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 metadata,
-                (atomTag, data) -> pullWifiBytesTransfer(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullWifiBytesTransfer(atomTag, data)
         );
     }
 
@@ -441,14 +440,14 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerWifiBytesTransferBackground() {
         int tagId = StatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG;
-        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {3, 4, 5, 6})
                 .build();
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 metadata,
-                (atomTag, data) -> pullWifiBytesTransferBackground(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullWifiBytesTransferBackground(atomTag, data)
         );
     }
 
@@ -479,14 +478,14 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerMobileBytesTransfer() {
         int tagId = StatsLog.MOBILE_BYTES_TRANSFER;
-        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3, 4, 5})
                 .build();
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 metadata,
-                (atomTag, data) -> pullMobileBytesTransfer(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullMobileBytesTransfer(atomTag, data)
         );
     }
 
@@ -517,14 +516,14 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerMobileBytesTransferBackground() {
         int tagId = StatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG;
-        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {3, 4, 5, 6})
                 .build();
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 metadata,
-                (atomTag, data) -> pullMobileBytesTransferBackground(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullMobileBytesTransferBackground(atomTag, data)
         );
     }
 
@@ -555,14 +554,14 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerBluetoothBytesTransfer() {
         int tagId = StatsLog.BLUETOOTH_BYTES_TRANSFER;
-        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3})
                 .build();
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 metadata,
-                (atomTag, data) -> pullBluetoothBytesTransfer(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullBluetoothBytesTransfer(atomTag, data)
         );
     }
 
@@ -634,8 +633,8 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 /* PullAtomMetadata */ null,
-                (atomTag, data) -> pullKernelWakelock(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullKernelWakelock(atomTag, data)
         );
     }
 
@@ -670,14 +669,14 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerCpuTimePerFreq() {
         int tagId = StatsLog.CPU_TIME_PER_FREQ;
-        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {3})
                 .build();
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 metadata,
-                (atomTag, data) -> pullCpuTimePerFreq(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullCpuTimePerFreq(atomTag, data)
         );
     }
 
@@ -701,14 +700,14 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerCpuTimePerUid() {
         int tagId = StatsLog.CPU_TIME_PER_UID;
-        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3})
                 .build();
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 metadata,
-                (atomTag, data) -> pullCpuTimePerUid(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullCpuTimePerUid(atomTag, data)
         );
     }
 
@@ -730,14 +729,14 @@ public class StatsPullAtomService extends SystemService {
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
         int tagId = StatsLog.CPU_TIME_PER_UID_FREQ;
-        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {4})
                 .build();
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 metadata,
-                (atomTag, data) -> pullCpuTimeperUidFreq(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullCpuTimeperUidFreq(atomTag, data)
         );
     }
 
@@ -762,14 +761,14 @@ public class StatsPullAtomService extends SystemService {
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
         int tagId = StatsLog.CPU_ACTIVE_TIME;
-        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2})
                 .build();
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 metadata,
-                (atomTag, data) -> pullCpuActiveTime(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullCpuActiveTime(atomTag, data)
         );
     }
 
@@ -789,14 +788,14 @@ public class StatsPullAtomService extends SystemService {
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
         int tagId = StatsLog.CPU_CLUSTER_TIME;
-        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {3})
                 .build();
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 metadata,
-                (atomTag, data) -> pullCpuClusterTime(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullCpuClusterTime(atomTag, data)
         );
     }
 
@@ -913,8 +912,8 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 /* metadata */ null,
-                (atomTag, data) -> pullBluetoothActivityInfo(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullBluetoothActivityInfo(atomTag, data)
         );
     }
 
@@ -949,8 +948,8 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                (atomTag, data) -> pullSystemUptime(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullSystemUptime(atomTag, data)
         );
     }
 
@@ -1232,8 +1231,8 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 /* PullAtomMetadata */ null,
-                (atomTag, data) -> pullIonHeapSize(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullIonHeapSize(atomTag, data)
         );
     }
 
@@ -1511,8 +1510,8 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 /* PullAtomMetadata */ null,
-                (atomTag, data) -> pullPowerProfile(atomTag, data),
-                Executors.newSingleThreadExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullPowerProfile(atomTag, data)
         );
     }
 
@@ -1681,8 +1680,8 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                (atomTag, data) -> pullBuildInformation(atomTag, data),
-                BackgroundThread.getExecutor()
+                BackgroundThread.getExecutor(),
+                (atomTag, data) -> pullBuildInformation(atomTag, data)
         );
     }
 
