@@ -256,6 +256,71 @@ public class AudioTrack extends PlayerBase
      */
     public static final int ENCAPSULATION_MODE_HANDLE = 2;
 
+    /* Dual Mono handling is used when a stereo audio stream
+     * contains separate audio content on the left and right channels.
+     * Such information about the content of the stream may be found, for example, in
+     * ITU T-REC-J.94-201610 A.6.2.3 Component descriptor.
+     */
+    /** @hide */
+    @IntDef({
+        DUAL_MONO_MODE_OFF,
+        DUAL_MONO_MODE_LR,
+        DUAL_MONO_MODE_LL,
+        DUAL_MONO_MODE_RR,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DualMonoMode {}
+    // Important: The DUAL_MONO_MODE values must be kept in sync with native header files.
+    /**
+     * This mode disables any Dual Mono presentation effect.
+     *
+     */
+    public static final int DUAL_MONO_MODE_OFF = 0;
+
+    /**
+     * This mode indicates that a stereo stream should be presented
+     * with the left and right audio channels blended together
+     * and delivered to both channels.
+     *
+     * Behavior for non-stereo streams is implementation defined.
+     * A suggested guideline is that the left-right stereo symmetric
+     * channels are pairwise blended;
+     * the other channels such as center are left alone.
+     *
+     * The Dual Mono effect occurs before volume scaling.
+     */
+    public static final int DUAL_MONO_MODE_LR = 1;
+
+    /**
+     * This mode indicates that a stereo stream should be presented
+     * with the left audio channel replicated into the right audio channel.
+     *
+     * Behavior for non-stereo streams is implementation defined.
+     * A suggested guideline is that all channels with left-right
+     * stereo symmetry will have the left channel position replicated
+     * into the right channel position.
+     * The center channels (with no left/right symmetry) or unbalanced
+     * channels are left alone.
+     *
+     * The Dual Mono effect occurs before volume scaling.
+     */
+    public static final int DUAL_MONO_MODE_LL = 2;
+
+    /**
+     * This mode indicates that a stereo stream should be presented
+     * with the right audio channel replicated into the left audio channel.
+     *
+     * Behavior for non-stereo streams is implementation defined.
+     * A suggested guideline is that all channels with left-right
+     * stereo symmetry will have the right channel position replicated
+     * into the left channel position.
+     * The center channels (with no left/right symmetry) or unbalanced
+     * channels are left alone.
+     *
+     * The Dual Mono effect occurs before volume scaling.
+     */
+    public static final int DUAL_MONO_MODE_RR = 3;
+
     /** @hide */
     @IntDef({
         WRITE_BLOCKING,
@@ -1353,6 +1418,140 @@ public class AudioTrack extends PlayerBase
         return native_is_direct_output_supported(format.getEncoding(), format.getSampleRate(),
                 format.getChannelMask(), format.getChannelIndexMask(),
                 attributes.getContentType(), attributes.getUsage(), attributes.getFlags());
+    }
+
+    /*
+     * The MAX_LEVEL should be exactly representable by an IEEE 754-2008 base32 float.
+     * This means fractions must be divisible by a power of 2. For example,
+     * 10.25f is OK as 0.25 is 1/4, but 10.1f is NOT OK as 1/10 is not expressable by
+     * a finite binary fraction.
+     *
+     * 48.f is the nominal max for API level {@link android os.Build.VERSION_CODES#R}.
+     * We use this to suggest a baseline range for implementation.
+     *
+     * The API contract specification allows increasing this value in a future
+     * API release, but not decreasing this value.
+     */
+    private static final float MAX_AUDIO_DESCRIPTION_MIX_LEVEL = 48.f;
+
+    private static boolean isValidAudioDescriptionMixLevel(float level) {
+        return !(Float.isNaN(level) || level > MAX_AUDIO_DESCRIPTION_MIX_LEVEL);
+    }
+
+    /**
+     * Sets the Audio Description mix level in dB.
+     *
+     * For AudioTracks incorporating a secondary Audio Description stream
+     * (where such contents may be sent through an Encapsulation Mode
+     * {@link #ENCAPSULATION_MODE_ELEMENTARY_STREAM} or {@link #ENCAPSULATION_MODE_HANDLE}
+     * or internally by a HW channel),
+     * the level of mixing of the Audio Description to the Main Audio stream
+     * is controlled by this method.
+     *
+     * Such mixing occurs <strong>prior</strong> to overall volume scaling.
+     *
+     * @param level a floating point value between
+     *     {@code Float.NEGATIVE_INFINITY} to {@code +48.f},
+     *     where {@code Float.NEGATIVE_INFINITY} means the Audio Description is not mixed
+     *     and a level of {@code 0.f} means the Audio Description is mixed without scaling.
+     * @return true on success, false on failure.
+     */
+    public boolean setAudioDescriptionMixLeveldB(
+            @FloatRange(to = 48.f, toInclusive = true) float level) {
+        if (!isValidAudioDescriptionMixLevel(level)) {
+            throw new IllegalArgumentException("level is out of range" + level);
+        }
+        return native_set_audio_description_mix_level_db(level) == SUCCESS;
+    }
+
+    /**
+     * Returns the Audio Description mix level in dB.
+     *
+     * If Audio Description mixing is unavailable from the hardware device,
+     * a value of {@code Float.NEGATIVE_INFINITY} is returned.
+     *
+     * @return the current Audio Description Mix Level in dB.
+     *     A value of {@code Float.NEGATIVE_INFINITY} means
+     *     that the audio description is not mixed or
+     *     the hardware is not available.
+     *     This should reflect the <strong>true</strong> internal device mix level;
+     *     hence the application might receive any floating value
+     *     except {@code Float.NaN}.
+     */
+    public float getAudioDescriptionMixLeveldB() {
+        float[] level = { Float.NEGATIVE_INFINITY };
+        try {
+            final int status = native_get_audio_description_mix_level_db(level);
+            if (status != SUCCESS || Float.isNaN(level[0])) {
+                return Float.NEGATIVE_INFINITY;
+            }
+        } catch (Exception e) {
+            return Float.NEGATIVE_INFINITY;
+        }
+        return level[0];
+    }
+
+    private static boolean isValidDualMonoMode(@DualMonoMode int dualMonoMode) {
+        switch (dualMonoMode) {
+            case DUAL_MONO_MODE_OFF:
+            case DUAL_MONO_MODE_LR:
+            case DUAL_MONO_MODE_LL:
+            case DUAL_MONO_MODE_RR:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Sets the Dual Mono mode presentation on the output device.
+     *
+     * The Dual Mono mode is generally applied to stereo audio streams
+     * where the left and right channels come from separate sources.
+     *
+     * For compressed audio, where the decoding is done in hardware,
+     * Dual Mono presentation needs to be performed
+     * by the hardware output device
+     * as the PCM audio is not available to the framework.
+     *
+     * @param dualMonoMode one of {@link #DUAL_MONO_MODE_OFF},
+     *     {@link #DUAL_MONO_MODE_LR},
+     *     {@link #DUAL_MONO_MODE_LL},
+     *     {@link #DUAL_MONO_MODE_RR}.
+     *
+     * @return true on success, false on failure if the output device
+     *     does not support Dual Mono mode.
+     */
+    public boolean setDualMonoMode(@DualMonoMode int dualMonoMode) {
+        if (!isValidDualMonoMode(dualMonoMode)) {
+            throw new IllegalArgumentException(
+                    "Invalid Dual Mono mode " + dualMonoMode);
+        }
+        return native_set_dual_mono_mode(dualMonoMode) == SUCCESS;
+    }
+
+    /**
+     * Returns the Dual Mono mode presentation setting.
+     *
+     * If no Dual Mono presentation is available for the output device,
+     * then {@link #DUAL_MONO_MODE_OFF} is returned.
+     *
+     * @return one of {@link #DUAL_MONO_MODE_OFF},
+     *     {@link #DUAL_MONO_MODE_LR},
+     *     {@link #DUAL_MONO_MODE_LL},
+     *     {@link #DUAL_MONO_MODE_RR}.
+     */
+    public @DualMonoMode int getDualMonoMode() {
+        int[] dualMonoMode = { DUAL_MONO_MODE_OFF };
+        try {
+            final int status = native_get_dual_mono_mode(dualMonoMode);
+            if (status != SUCCESS || !isValidDualMonoMode(dualMonoMode[0])) {
+                return DUAL_MONO_MODE_OFF;
+            }
+        } catch (Exception e) {
+            return DUAL_MONO_MODE_OFF;
+        }
+        return dualMonoMode[0];
     }
 
     // mask of all the positional channels supported, however the allowed combinations
@@ -3946,6 +4145,11 @@ public class AudioTrack extends PlayerBase
     private native int native_getPortId();
 
     private native void native_set_delay_padding(int delayInFrames, int paddingInFrames);
+
+    private native int native_set_audio_description_mix_level_db(float level);
+    private native int native_get_audio_description_mix_level_db(float[] level);
+    private native int native_set_dual_mono_mode(int dualMonoMode);
+    private native int native_get_dual_mono_mode(int[] dualMonoMode);
 
     //---------------------------------------------------------
     // Utility methods
