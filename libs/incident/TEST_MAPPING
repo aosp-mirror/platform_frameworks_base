@@ -1,0 +1,21 @@
+{
+  "presubmit": [
+    {
+      "name": "libincident_c_api_test"
+    },
+    {
+      "name": "GtsIncidentConfirmationTestCases"
+    },
+    {
+      "name": "GtsIncidentManagerTestCases"
+    }
+  ],
+  "postsubmit": [
+  ],
+  "imports": [
+    {
+      "path": "frameworks/base/cmds/incidentd"
+    }
+  ]
+}
+

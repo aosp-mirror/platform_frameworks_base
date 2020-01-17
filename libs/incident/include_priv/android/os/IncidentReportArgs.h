@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_OS_DUMPSTATE_ARGS_H_
-#define ANDROID_OS_DUMPSTATE_ARGS_H_
+#ifndef ANDROID_OS_INCIDENT_REPORT_ARGS_H
+#define ANDROID_OS_INCIDENT_REPORT_ARGS_H
 
+#include <binder/IServiceManager.h>
 #include <binder/Parcel.h>
 #include <binder/Parcelable.h>
 #include <utils/String16.h>
@@ -29,7 +30,8 @@ namespace os {
 
 using namespace std;
 
-// DESTINATION enum value, sync with frameworks/base/core/proto/android/privacy.proto
+// DESTINATION enum value, sync with frameworks/base/core/proto/android/privacy.proto,
+// incident/incident_report.h and IncidentReportArgs.java
 const uint8_t PRIVACY_POLICY_LOCAL = 0;
 const uint8_t PRIVACY_POLICY_EXPLICIT = 100;
 const uint8_t PRIVACY_POLICY_AUTOMATIC = 200;
@@ -74,4 +76,4 @@ private:
 }
 }
 
-#endif // ANDROID_OS_DUMPSTATE_ARGS_H_
+#endif // ANDROID_OS_INCIDENT_REPORT_ARGS_H

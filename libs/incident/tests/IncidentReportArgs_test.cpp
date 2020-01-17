@@ -20,6 +20,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+// Checks that all of the inline methods on IncidentReportRequest and the real C functions
+// result in a working IncidentReportArgs.
 TEST(IncidentReportArgsTest, testSerialization) {
     IncidentReportArgs args;
     args.setAll(0);
