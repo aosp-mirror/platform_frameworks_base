@@ -22,6 +22,8 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * Allows a network transport to provide the system with policy and configuration information about
  * a particular network when registering a {@link NetworkAgent}. This information cannot change once the agent is registered.
@@ -52,21 +54,45 @@ public final class NetworkAgentConfig implements Parcelable {
     public boolean explicitlySelected;
 
     /**
+     * @return whether this network was explicitly selected by the user.
+     */
+    public boolean isExplicitlySelected() {
+        return explicitlySelected;
+    }
+
+    /**
      * Set if the user desires to use this network even if it is unvalidated. This field has meaning
      * only if {@link explicitlySelected} is true. If it is, this field must also be set to the
      * appropriate value based on previous user choice.
      *
+     * TODO : rename this field to match its accessor
      * @hide
      */
     public boolean acceptUnvalidated;
 
     /**
+     * @return whether the system should accept this network even if it doesn't validate.
+     */
+    public boolean isUnvalidatedConnectivityAcceptable() {
+        return acceptUnvalidated;
+    }
+
+    /**
      * Whether the user explicitly set that this network should be validated even if presence of
      * only partial internet connectivity.
      *
+     * TODO : rename this field to match its accessor
      * @hide
      */
     public boolean acceptPartialConnectivity;
+
+    /**
+     * @return whether the system should validate this network even if it only offers partial
+     *     Internet connectivity.
+     */
+    public boolean isPartialConnectivityAcceptable() {
+        return acceptPartialConnectivity;
+    }
 
     /**
      * Set to avoid surfacing the "Sign in to network" notification.
@@ -134,9 +160,11 @@ public final class NetworkAgentConfig implements Parcelable {
      * Set to true if the PRIVATE_DNS_BROKEN notification has shown for this network.
      * Reset this bit when private DNS mode is changed from strict mode to opportunistic/off mode.
      *
+     * This is not parceled, because it would not make sense.
+     *
      * @hide
      */
-    public boolean hasShownBroken;
+    public transient boolean hasShownBroken;
 
     /**
      * The name of the legacy network type. It's a free-form string used in logging.
@@ -163,6 +191,7 @@ public final class NetworkAgentConfig implements Parcelable {
             allowBypass = nac.allowBypass;
             explicitlySelected = nac.explicitlySelected;
             acceptUnvalidated = nac.acceptUnvalidated;
+            acceptPartialConnectivity = nac.acceptPartialConnectivity;
             subscriberId = nac.subscriberId;
             provisioningNotificationDisabled = nac.provisioningNotificationDisabled;
             skip464xlat = nac.skip464xlat;
@@ -176,6 +205,43 @@ public final class NetworkAgentConfig implements Parcelable {
      */
     public static class Builder {
         private final NetworkAgentConfig mConfig = new NetworkAgentConfig();
+
+        /**
+         * Sets whether the network was explicitly selected by the user.
+         *
+         * @return this builder, to facilitate chaining.
+         */
+        @NonNull
+        public Builder setExplicitlySelected(final boolean explicitlySelected) {
+            mConfig.explicitlySelected = explicitlySelected;
+            return this;
+        }
+
+        /**
+         * Sets whether the system should validate this network even if it is found not to offer
+         * Internet connectivity.
+         *
+         * @return this builder, to facilitate chaining.
+         */
+        @NonNull
+        public Builder setUnvalidatedConnectivityAcceptable(
+                final boolean unvalidatedConnectivityAcceptable) {
+            mConfig.acceptUnvalidated = unvalidatedConnectivityAcceptable;
+            return this;
+        }
+
+        /**
+         * Sets whether the system should validate this network even if it is found to only offer
+         * partial Internet connectivity.
+         *
+         * @return this builder, to facilitate chaining.
+         */
+        @NonNull
+        public Builder setPartialConnectivityAcceptable(
+                final boolean partialConnectivityAcceptable) {
+            mConfig.acceptPartialConnectivity = partialConnectivityAcceptable;
+            return this;
+        }
 
         /**
          * Sets the subscriber ID for this network.
@@ -245,6 +311,45 @@ public final class NetworkAgentConfig implements Parcelable {
     }
 
     @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final NetworkAgentConfig that = (NetworkAgentConfig) o;
+        return allowBypass == that.allowBypass
+                && explicitlySelected == that.explicitlySelected
+                && acceptUnvalidated == that.acceptUnvalidated
+                && acceptPartialConnectivity == that.acceptPartialConnectivity
+                && provisioningNotificationDisabled == that.provisioningNotificationDisabled
+                && skip464xlat == that.skip464xlat
+                && legacyType == that.legacyType
+                && Objects.equals(subscriberId, that.subscriberId)
+                && Objects.equals(legacyTypeName, that.legacyTypeName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(allowBypass, explicitlySelected, acceptUnvalidated,
+                acceptPartialConnectivity, provisioningNotificationDisabled, subscriberId,
+                skip464xlat, legacyType, legacyTypeName);
+    }
+
+    @Override
+    public String toString() {
+        return "NetworkAgentConfig {"
+                + " allowBypass = " + allowBypass
+                + ", explicitlySelected = " + explicitlySelected
+                + ", acceptUnvalidated = " + acceptUnvalidated
+                + ", acceptPartialConnectivity = " + acceptPartialConnectivity
+                + ", provisioningNotificationDisabled = " + provisioningNotificationDisabled
+                + ", subscriberId = '" + subscriberId + '\''
+                + ", skip464xlat = " + skip464xlat
+                + ", legacyType = " + legacyType
+                + ", hasShownBroken = " + hasShownBroken
+                + ", legacyTypeName = '" + legacyTypeName + '\''
+                + "}";
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -254,9 +359,12 @@ public final class NetworkAgentConfig implements Parcelable {
         out.writeInt(allowBypass ? 1 : 0);
         out.writeInt(explicitlySelected ? 1 : 0);
         out.writeInt(acceptUnvalidated ? 1 : 0);
+        out.writeInt(acceptPartialConnectivity ? 1 : 0);
         out.writeString(subscriberId);
         out.writeInt(provisioningNotificationDisabled ? 1 : 0);
         out.writeInt(skip464xlat ? 1 : 0);
+        out.writeInt(legacyType);
+        out.writeString(legacyTypeName);
     }
 
     public static final @NonNull Creator<NetworkAgentConfig> CREATOR =
@@ -267,9 +375,12 @@ public final class NetworkAgentConfig implements Parcelable {
             networkAgentConfig.allowBypass = in.readInt() != 0;
             networkAgentConfig.explicitlySelected = in.readInt() != 0;
             networkAgentConfig.acceptUnvalidated = in.readInt() != 0;
+            networkAgentConfig.acceptPartialConnectivity = in.readInt() != 0;
             networkAgentConfig.subscriberId = in.readString();
             networkAgentConfig.provisioningNotificationDisabled = in.readInt() != 0;
             networkAgentConfig.skip464xlat = in.readInt() != 0;
+            networkAgentConfig.legacyType = in.readInt();
+            networkAgentConfig.legacyTypeName = in.readString();
             return networkAgentConfig;
         }
 
