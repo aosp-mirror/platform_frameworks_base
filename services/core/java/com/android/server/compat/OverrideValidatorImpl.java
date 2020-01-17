@@ -53,6 +53,7 @@ public class OverrideValidatorImpl extends IOverrideValidator.Stub {
     public OverrideAllowedState getOverrideAllowedState(long changeId, String packageName) {
         boolean debuggableBuild = false;
         boolean finalBuild = false;
+        int minTargetSdk = mCompatConfig.minTargetSdkForChangeId(changeId);
 
         debuggableBuild = mAndroidBuildClassifier.isDebuggableBuild();
         finalBuild = mAndroidBuildClassifier.isFinalBuild();
@@ -76,14 +77,13 @@ public class OverrideValidatorImpl extends IOverrideValidator.Stub {
         if ((applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
             return new OverrideAllowedState(DISABLED_NOT_DEBUGGABLE, -1, -1);
         }
-        int minTargetSdk = mCompatConfig.minTargetSdkForChangeId(changeId);
-        // Do not allow overriding non-target sdk gated changes on user builds
-        if (minTargetSdk == -1) {
-            return new OverrideAllowedState(DISABLED_NON_TARGET_SDK, appTargetSdk, minTargetSdk);
-        }
         // Allow overriding any change for debuggable apps on non-final builds.
         if (!finalBuild) {
             return new OverrideAllowedState(ALLOWED, appTargetSdk, minTargetSdk);
+        }
+        // Do not allow overriding non-target sdk gated changes on user builds
+        if (minTargetSdk == -1) {
+            return new OverrideAllowedState(DISABLED_NON_TARGET_SDK, appTargetSdk, minTargetSdk);
         }
         // Only allow to opt-in for a targetSdk gated change.
         if (applicationInfo.targetSdkVersion < minTargetSdk) {
