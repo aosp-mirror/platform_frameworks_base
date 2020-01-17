@@ -40,8 +40,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -115,6 +115,11 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         mHistoryManager.onBootPhaseAppsCanStart();
     }
 
+    @After
+    public void tearDown() {
+        mHistoryManager.onDestroy();
+    }
+
     @Test
     public void testOnUserUnlocked() {
         assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isFalse();
@@ -126,19 +131,49 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
     }
 
     @Test
-    @Ignore("b/147012298")
     public void testOnUserUnlocked_historyDisabled() {
+        // create a history
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+        assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isTrue();
+        // lock user
+        mHistoryManager.onUserStopped(USER_SYSTEM);
+
+        // turn off history
         Settings.Secure.putIntForUser(getContext().getContentResolver(),
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, USER_SYSTEM);
         mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
-        assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isFalse();
-        assertThat(mHistoryManager.isUserUnlocked(USER_SYSTEM)).isFalse();
 
+        // unlock user, verify that history is disabled
         mHistoryManager.onUserUnlocked(USER_SYSTEM);
 
         assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isFalse();
-        assertThat(mHistoryManager.isUserUnlocked(USER_SYSTEM)).isFalse();
         verify(mDb, times(1)).disableHistory();
+    }
+
+    @Test
+    public void testOnUserUnlocked_historyDisabledThenEnabled() {
+        // create a history
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+        assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isTrue();
+
+        // lock user
+        mHistoryManager.onUserStopped(USER_SYSTEM);
+
+        // turn off history
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, USER_SYSTEM);
+        mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
+
+        // turn on history
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 1, USER_SYSTEM);
+        mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
+
+        // unlock user, verify that history is NOT disabled
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+
+        assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isTrue();
+        verify(mDb, never()).disableHistory();
     }
 
     @Test
@@ -223,6 +258,8 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
 
     @Test
     public void testOnPackageRemoved_historyDisabled() {
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+
         Settings.Secure.putIntForUser(getContext().getContentResolver(),
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, USER_SYSTEM);
         mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
@@ -426,6 +463,8 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
     @Test
     public void testIsHistoryEnabled() {
         assertThat(mHistoryManager.isHistoryEnabled(USER_SYSTEM)).isTrue();
+
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
 
         Settings.Secure.putIntForUser(getContext().getContentResolver(),
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0,  USER_SYSTEM);
