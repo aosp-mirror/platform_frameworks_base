@@ -208,6 +208,7 @@ public class StatsPullAtomService extends SystemService {
 
     private final Context mContext;
     private StatsManager mStatsManager;
+    private StorageManager mStorageManager;
 
     public StatsPullAtomService(Context context) {
         super(context);
@@ -219,6 +220,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager = (StatsManager) mContext.getSystemService(Context.STATS_MANAGER);
         mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         mTelephony = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        mStorageManager = (StorageManager) mContext.getSystemService(StorageManager.class);
 
         // Used to initialize the CPU Frequency atom.
         PowerProfile powerProfile = new PowerProfile(mContext);
@@ -2389,19 +2391,109 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerExternalStorageInfo() {
-        // No op.
+        int tagId = StatsLog.EXTERNAL_STORAGE_INFO;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullExternalStorageInfo(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullExternalStorageInfo() {
-        // No op.
+    private int pullExternalStorageInfo(int atomTag, List<StatsEvent> pulledData) {
+        if (mStorageManager == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        List<VolumeInfo> volumes = mStorageManager.getVolumes();
+        for (VolumeInfo vol : volumes) {
+            final String envState = VolumeInfo.getEnvironmentForState(vol.getState());
+            final DiskInfo diskInfo = vol.getDisk();
+            if (diskInfo != null && envState.equals(Environment.MEDIA_MOUNTED)) {
+                // Get the type of the volume, if it is adoptable or portable.
+                int volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__OTHER;
+                if (vol.getType() == TYPE_PUBLIC) {
+                    volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__PUBLIC;
+                } else if (vol.getType() == TYPE_PRIVATE) {
+                    volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__PRIVATE;
+                }
+
+                // Get the type of external storage inserted in the device (sd cards, usb, etc.)
+                int externalStorageType;
+                if (diskInfo.isSd()) {
+                    externalStorageType = StorageEnums.SD_CARD;
+                } else if (diskInfo.isUsb()) {
+                    externalStorageType = StorageEnums.USB;
+                } else {
+                    externalStorageType = StorageEnums.OTHER;
+                }
+
+                StatsEvent e = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeInt(externalStorageType)
+                        .writeInt(volumeType)
+                        .writeLong(diskInfo.size)
+                        .build();
+                pulledData.add(e);
+            }
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerAppsOnExternalStorageInfo() {
-        // No op.
+        int tagId = StatsLog.APPS_ON_EXTERNAL_STORAGE_INFO;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullAppsOnExternalStorageInfo(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullAppsOnExternalStorageInfo() {
-        // No op.
+    private int pullAppsOnExternalStorageInfo(int atomTag, List<StatsEvent> pulledData) {
+        if (mStorageManager == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        PackageManager pm = mContext.getPackageManager();
+        List<ApplicationInfo> apps = pm.getInstalledApplications(/*flags=*/ 0);
+        for (ApplicationInfo appInfo : apps) {
+            UUID storageUuid = appInfo.storageUuid;
+            if (storageUuid == null) {
+                continue;
+            }
+
+            VolumeInfo volumeInfo = mStorageManager.findVolumeByUuid(
+                    appInfo.storageUuid.toString());
+            if (volumeInfo == null) {
+                continue;
+            }
+
+            DiskInfo diskInfo = volumeInfo.getDisk();
+            if (diskInfo == null) {
+                continue;
+            }
+
+            int externalStorageType = -1;
+            if (diskInfo.isSd()) {
+                externalStorageType = StorageEnums.SD_CARD;
+            } else if (diskInfo.isUsb()) {
+                externalStorageType = StorageEnums.USB;
+            } else if (appInfo.isExternal()) {
+                externalStorageType = StorageEnums.OTHER;
+            }
+
+            // App is installed on external storage.
+            if (externalStorageType != -1) {
+                StatsEvent e = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeInt(externalStorageType)
+                        .writeString(appInfo.packageName)
+                        .build();
+                pulledData.add(e);
+            }
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerFaceSettings() {

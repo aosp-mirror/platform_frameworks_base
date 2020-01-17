@@ -109,10 +109,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // TrainInfo.
         {{.atomTag = android::util::TRAIN_INFO}, {.puller = new TrainInfoPuller()}},
 
-        // ExternalStorageInfo
-        {{.atomTag = android::util::EXTERNAL_STORAGE_INFO},
-         {.puller = new StatsCompanionServicePuller(android::util::EXTERNAL_STORAGE_INFO)}},
-
         // GpuStatsGlobalInfo
         {{.atomTag = android::util::GPU_STATS_GLOBAL_INFO},
          {.puller = new GpuStatsPuller(android::util::GPU_STATS_GLOBAL_INFO)}},
@@ -120,10 +116,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // GpuStatsAppInfo
         {{.atomTag = android::util::GPU_STATS_APP_INFO},
          {.puller = new GpuStatsPuller(android::util::GPU_STATS_APP_INFO)}},
-
-        // AppsOnExternalStorageInfo
-        {{.atomTag = android::util::APPS_ON_EXTERNAL_STORAGE_INFO},
-         {.puller = new StatsCompanionServicePuller(android::util::APPS_ON_EXTERNAL_STORAGE_INFO)}},
 
         // Face Settings
         {{.atomTag = android::util::FACE_SETTINGS},

@@ -856,79 +856,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullExternalStorageInfo(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        StorageManager storageManager = mContext.getSystemService(StorageManager.class);
-        if (storageManager != null) {
-            List<VolumeInfo> volumes = storageManager.getVolumes();
-            for (VolumeInfo vol : volumes) {
-                final String envState = VolumeInfo.getEnvironmentForState(vol.getState());
-                final DiskInfo diskInfo = vol.getDisk();
-                if (diskInfo != null) {
-                    if (envState.equals(Environment.MEDIA_MOUNTED)) {
-                        // Get the type of the volume, if it is adoptable or portable.
-                        int volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__OTHER;
-                        if (vol.getType() == TYPE_PUBLIC) {
-                            volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__PUBLIC;
-                        } else if (vol.getType() == TYPE_PRIVATE) {
-                            volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__PRIVATE;
-                        }
-                        // Get the type of external storage inserted in the device (sd cards,
-                        // usb, etc)
-                        int externalStorageType;
-                        if (diskInfo.isSd()) {
-                            externalStorageType = StorageEnums.SD_CARD;
-                        } else if (diskInfo.isUsb()) {
-                            externalStorageType = StorageEnums.USB;
-                        } else {
-                            externalStorageType = StorageEnums.OTHER;
-                        }
-                        StatsLogEventWrapper e =
-                                new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-                        e.writeInt(externalStorageType);
-                        e.writeInt(volumeType);
-                        e.writeLong(diskInfo.size);
-                        pulledData.add(e);
-                    }
-                }
-            }
-        }
-    }
-
-    private void pullAppsOnExternalStorageInfo(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        PackageManager pm = mContext.getPackageManager();
-        StorageManager storage = mContext.getSystemService(StorageManager.class);
-        List<ApplicationInfo> apps = pm.getInstalledApplications(/* flags = */ 0);
-        for (ApplicationInfo appInfo : apps) {
-            UUID storageUuid = appInfo.storageUuid;
-            if (storageUuid != null) {
-                VolumeInfo volumeInfo = storage.findVolumeByUuid(appInfo.storageUuid.toString());
-                if (volumeInfo != null) {
-                    DiskInfo diskInfo = volumeInfo.getDisk();
-                    if (diskInfo != null) {
-                        int externalStorageType = -1;
-                        if (diskInfo.isSd()) {
-                            externalStorageType = StorageEnums.SD_CARD;
-                        } else if (diskInfo.isUsb()) {
-                            externalStorageType = StorageEnums.USB;
-                        } else if (appInfo.isExternal()) {
-                            externalStorageType = StorageEnums.OTHER;
-                        }
-                        // App is installed on external storage.
-                        if (externalStorageType != -1) {
-                            StatsLogEventWrapper e =
-                                    new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-                            e.writeInt(externalStorageType);
-                            e.writeString(appInfo.packageName);
-                            pulledData.add(e);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private void pullFaceSettings(int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         long callingToken = Binder.clearCallingIdentity();
@@ -998,16 +925,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.DEBUG_FAILING_ELAPSED_CLOCK: {
                 pullDebugFailingElapsedClock(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.EXTERNAL_STORAGE_INFO: {
-                pullExternalStorageInfo(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.APPS_ON_EXTERNAL_STORAGE_INFO: {
-                pullAppsOnExternalStorageInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 
