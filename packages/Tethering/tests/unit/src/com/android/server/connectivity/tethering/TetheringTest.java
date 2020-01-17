@@ -493,13 +493,15 @@ public class TetheringTest {
 
     private void sendWifiP2pConnectionChanged(
             boolean isGroupFormed, boolean isGroupOwner, String ifname) {
+        WifiP2pGroup group = null;
         WifiP2pInfo p2pInfo = new WifiP2pInfo();
         p2pInfo.groupFormed = isGroupFormed;
-        p2pInfo.isGroupOwner = isGroupOwner;
-
-        WifiP2pGroup group = mock(WifiP2pGroup.class);
-        when(group.isGroupOwner()).thenReturn(isGroupOwner);
-        when(group.getInterface()).thenReturn(ifname);
+        if (isGroupFormed) {
+            p2pInfo.isGroupOwner = isGroupOwner;
+            group = mock(WifiP2pGroup.class);
+            when(group.isGroupOwner()).thenReturn(isGroupOwner);
+            when(group.getInterface()).thenReturn(ifname);
+        }
 
         final Intent intent = mock(Intent.class);
         when(intent.getAction()).thenReturn(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
