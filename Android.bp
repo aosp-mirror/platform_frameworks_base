@@ -1266,7 +1266,8 @@ java_library {
     aidl: {
         export_include_dirs: ["telephony/java"],
     },
-    sdk_version: "system_current",
+    sdk_version: "core_current",
+    libs: ["android_system_stubs_current"],
 }
 
 java_library {
