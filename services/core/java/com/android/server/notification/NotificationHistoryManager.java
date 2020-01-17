@@ -68,11 +68,18 @@ public class NotificationHistoryManager {
     private final SparseArray<List<String>> mUserPendingPackageRemovals = new SparseArray<>();
     @GuardedBy("mLock")
     private final SparseBooleanArray mHistoryEnabled = new SparseBooleanArray();
+    @GuardedBy("mLock")
+    private final SparseBooleanArray mUserPendingHistoryDisables = new SparseBooleanArray();
 
     public NotificationHistoryManager(Context context, Handler handler) {
         mContext = context;
         mUserManager = context.getSystemService(UserManager.class);
         mSettingsObserver = new SettingsObserver(handler);
+    }
+
+    @VisibleForTesting
+    void onDestroy() {
+        mSettingsObserver.stopObserving();
     }
 
     void onBootPhaseAppsCanStart() {
@@ -99,8 +106,8 @@ public class NotificationHistoryManager {
             }
 
             // delete history if it was disabled when the user was locked
-            if (!mHistoryEnabled.get(userId)) {
-                userHistory.disableHistory();
+            if (mUserPendingHistoryDisables.get(userId)) {
+                disableHistory(userHistory, userId);
             }
         }
     }
@@ -118,6 +125,7 @@ public class NotificationHistoryManager {
             // removed) - we just need clean up our internal state for GC
             mUserPendingPackageRemovals.put(userId, null);
             mHistoryEnabled.put(userId, false);
+            mUserPendingHistoryDisables.put(userId, false);
             onUserStopped(userId);
         }
     }
@@ -213,18 +221,27 @@ public class NotificationHistoryManager {
 
     void onHistoryEnabledChanged(@UserIdInt int userId, boolean historyEnabled) {
         synchronized (mLock) {
-            mHistoryEnabled.put(userId, historyEnabled);
-
-            // These requests might fail if the user is locked; onUserUnlocked will pick up those
-            // cases
+            if (historyEnabled) {
+                mHistoryEnabled.put(userId, historyEnabled);
+            }
             final NotificationHistoryDatabase userHistory =
                     getUserHistoryAndInitializeIfNeededLocked(userId);
             if (userHistory != null) {
                 if (!historyEnabled) {
-                    userHistory.disableHistory();
+                    disableHistory(userHistory, userId);
                 }
+            } else {
+                mUserPendingHistoryDisables.put(userId, !historyEnabled);
             }
         }
+    }
+
+    private void disableHistory(NotificationHistoryDatabase userHistory, @UserIdInt int userId) {
+        userHistory.disableHistory();
+
+        mUserPendingHistoryDisables.put(userId, false);
+        mHistoryEnabled.put(userId, false);
+        mUserState.put(userId, null);
     }
 
     @GuardedBy("mLock")
@@ -314,6 +331,11 @@ public class NotificationHistoryManager {
                     update(null, userInfo.id);
                 }
             }
+        }
+
+        void stopObserving() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.unregisterContentObserver(this);
         }
 
         @Override
