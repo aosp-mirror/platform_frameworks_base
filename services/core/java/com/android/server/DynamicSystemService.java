@@ -44,9 +44,9 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
     private static final String TAG = "DynamicSystemService";
     private static final String NO_SERVICE_ERROR = "no gsiservice";
     private static final int GSID_ROUGH_TIMEOUT_MS = 8192;
-    private static final String PATH_DEFAULT = "/data/gsi";
+    private static final String PATH_DEFAULT = "/data/gsi/";
     private Context mContext;
-    private String mInstallPath;
+    private String mInstallPath, mDsuSlot;
     private volatile IGsiService mGsiService;
 
     DynamicSystemService(Context context) {
@@ -115,7 +115,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
     }
 
     @Override
-    public boolean startInstallation() throws RemoteException {
+    public boolean startInstallation(String dsuSlot) throws RemoteException {
         IGsiService service = getGsiService();
         // priority from high to low: sysprop -> sdcard -> /data
         String path = SystemProperties.get("os.aot.path");
@@ -129,16 +129,17 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
                 if (!Environment.MEDIA_MOUNTED.equals(volume.getState())) continue;
                 File sdCard = volume.getPathFile();
                 if (sdCard.isDirectory()) {
-                    path = sdCard.getPath();
+                    path = new File(sdCard, dsuSlot).getPath();
                     break;
                 }
             }
             if (path.isEmpty()) {
-                path = PATH_DEFAULT;
+                path = PATH_DEFAULT + dsuSlot;
             }
             Slog.i(TAG, "startInstallation -> " + path);
         }
         mInstallPath = path;
+        mDsuSlot = dsuSlot;
         if (service.openInstall(path) != 0) {
             Slog.i(TAG, "Failed to open " + path);
             return false;
@@ -203,7 +204,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
     public boolean setEnable(boolean enable, boolean oneShot) throws RemoteException {
         IGsiService gsiService = getGsiService();
         if (enable) {
-            return gsiService.enableGsi(oneShot) == 0;
+            return gsiService.enableGsi(oneShot, mDsuSlot) == 0;
         } else {
             return gsiService.disableGsi();
         }

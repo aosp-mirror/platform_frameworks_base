@@ -363,7 +363,7 @@ public final class DocumentsContract {
          * <p>
          * Type: INTEGER (int)
          *
-         * @see #FLAG_DIR_BLOCKS_TREE
+         * @see #FLAG_DIR_BLOCKS_OPEN_DOCUMENT_TREE
          * @see #FLAG_DIR_PREFERS_GRID
          * @see #FLAG_DIR_PREFERS_LAST_MODIFIED
          * @see #FLAG_DIR_SUPPORTS_CREATE
@@ -567,7 +567,7 @@ public final class DocumentsContract {
          * @see Intent#ACTION_OPEN_DOCUMENT_TREE
          * @see #COLUMN_FLAGS
          */
-        public static final int FLAG_DIR_BLOCKS_TREE = 1 << 15;
+        public static final int FLAG_DIR_BLOCKS_OPEN_DOCUMENT_TREE = 1 << 15;
     }
 
     /**

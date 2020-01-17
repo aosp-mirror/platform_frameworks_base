@@ -856,18 +856,6 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
-     * For debug: date at which the config was last updated
-     */
-    public String updateTime;
-
-    /**
-     * @hide
-     * For debug: date at which the config was last updated
-     */
-    public String creationTime;
-
-    /**
-     * @hide
      * The WiFi configuration is considered to have no internet access for purpose of autojoining
      * if there has been a report of it having no internet access, and, it never have had
      * internet access in the past.
@@ -1493,12 +1481,6 @@ public class WifiConfiguration implements Parcelable {
         private String mConnectChoice;
 
         /**
-         * The system timestamp when we records the connectChoice. This value is obtained from
-         * System.currentTimeMillis
-         */
-        private long mConnectChoiceTimestamp = INVALID_NETWORK_SELECTION_DISABLE_TIMESTAMP;
-
-        /**
          * Used to cache the temporary candidate during the network selection procedure. It will be
          * kept updating once a new scan result has a higher score than current one
          */
@@ -1599,25 +1581,6 @@ public class WifiConfiguration implements Parcelable {
          */
         public void setConnectChoice(String newConnectChoice) {
             mConnectChoice = newConnectChoice;
-        }
-
-        /**
-         * get the timeStamp when user select a choice over this configuration
-         * @return returns when current connectChoice is set (time from System.currentTimeMillis)
-         * @hide
-         */
-        public long getConnectChoiceTimestamp() {
-            return mConnectChoiceTimestamp;
-        }
-
-        /**
-         * set the timeStamp when user select a choice over this configuration
-         * @param timeStamp, the timestamp set to connectChoiceTimestamp, expected timestamp should
-         *        be obtained from System.currentTimeMillis
-         * @hide
-         */
-        public void setConnectChoiceTimestamp(long timeStamp) {
-            mConnectChoiceTimestamp = timeStamp;
         }
 
         /** Get the current Quality network selection status as a String (for debugging). */
@@ -1902,7 +1865,6 @@ public class WifiConfiguration implements Parcelable {
             setCandidate(source.getCandidate());
             setCandidateScore(source.getCandidateScore());
             setConnectChoice(source.getConnectChoice());
-            setConnectChoiceTimestamp(source.getConnectChoiceTimestamp());
             setHasEverConnected(source.getHasEverConnected());
         }
 
@@ -1919,7 +1881,6 @@ public class WifiConfiguration implements Parcelable {
             if (getConnectChoice() != null) {
                 dest.writeInt(CONNECT_CHOICE_EXISTS);
                 dest.writeString(getConnectChoice());
-                dest.writeLong(getConnectChoiceTimestamp());
             } else {
                 dest.writeInt(CONNECT_CHOICE_NOT_EXISTS);
             }
@@ -1938,10 +1899,8 @@ public class WifiConfiguration implements Parcelable {
             setNetworkSelectionBSSID(in.readString());
             if (in.readInt() == CONNECT_CHOICE_EXISTS) {
                 setConnectChoice(in.readString());
-                setConnectChoiceTimestamp(in.readLong());
             } else {
                 setConnectChoice(null);
-                setConnectChoiceTimestamp(INVALID_NETWORK_SELECTION_DISABLE_TIMESTAMP);
             }
             setHasEverConnected(in.readInt() != 0);
         }
@@ -2165,9 +2124,6 @@ public class WifiConfiguration implements Parcelable {
         }
         if (mNetworkSelectionStatus.getConnectChoice() != null) {
             sbuf.append(" connect choice: ").append(mNetworkSelectionStatus.getConnectChoice());
-            sbuf.append(" connect choice set time: ")
-                    .append(logTimeOfDay(
-                            mNetworkSelectionStatus.getConnectChoiceTimestamp()));
         }
         sbuf.append(" hasEverConnected: ")
                 .append(mNetworkSelectionStatus.getHasEverConnected()).append("\n");
@@ -2178,12 +2134,6 @@ public class WifiConfiguration implements Parcelable {
         if (this.numNoInternetAccessReports > 0) {
             sbuf.append(" numNoInternetAccessReports ");
             sbuf.append(this.numNoInternetAccessReports).append("\n");
-        }
-        if (this.updateTime != null) {
-            sbuf.append(" update ").append(this.updateTime).append("\n");
-        }
-        if (this.creationTime != null) {
-            sbuf.append(" creation ").append(this.creationTime).append("\n");
         }
         if (this.validatedInternetAccess) sbuf.append(" validatedInternetAccess");
         if (this.ephemeral) sbuf.append(" ephemeral");
@@ -2731,8 +2681,6 @@ public class WifiConfiguration implements Parcelable {
             allowAutojoin = source.allowAutojoin;
             numNoInternetAccessReports = source.numNoInternetAccessReports;
             noInternetAccessExpected = source.noInternetAccessExpected;
-            creationTime = source.creationTime;
-            updateTime = source.updateTime;
             shared = source.shared;
             recentFailure.setAssociationStatus(source.recentFailure.getAssociationStatus());
             mRandomizedMacAddress = source.mRandomizedMacAddress;

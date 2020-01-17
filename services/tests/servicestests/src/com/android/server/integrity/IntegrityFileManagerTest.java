@@ -16,6 +16,8 @@
 
 package com.android.server.integrity;
 
+import static com.android.server.integrity.model.IndexingFileConstants.INDEXING_BLOCK_SIZE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.integrity.AppInstallMetadata;
@@ -135,14 +137,15 @@ public class IntegrityFileManagerTest {
                 Arrays.asList(packageNameRule, packageCertRule, versionCodeRule, randomRule);
         mIntegrityFileManager.writeRules(VERSION, RULE_PROVIDER, rules);
 
-        AppInstallMetadata appInstallMetadata = new AppInstallMetadata.Builder()
-                .setPackageName(packageName)
-                .setAppCertificate(packageCert)
-                .setVersionCode(version)
-                .setInstallerName("abc")
-                .setInstallerCertificate("abc")
-                .setIsPreInstalled(true)
-                .build();
+        AppInstallMetadata appInstallMetadata =
+                new AppInstallMetadata.Builder()
+                        .setPackageName(packageName)
+                        .setAppCertificate(packageCert)
+                        .setVersionCode(version)
+                        .setInstallerName("abc")
+                        .setInstallerCertificate("abc")
+                        .setIsPreInstalled(true)
+                        .build();
         List<Rule> rulesFetched = mIntegrityFileManager.readRules(appInstallMetadata);
 
         assertThat(rulesFetched)
@@ -158,13 +161,14 @@ public class IntegrityFileManagerTest {
         // Create a rule set with 2500 package name indexed, 2500 app certificate indexed and
         // 500 unindexed rules.
         List<Rule> rules = new ArrayList<>();
+        int unindexedRuleCount = 70;
 
         for (int i = 0; i < 2500; i++) {
             rules.add(getPackageNameIndexedRule(String.format("%s%04d", packageName, i)));
             rules.add(getAppCertificateIndexedRule(String.format("%s%04d", appCertificate, i)));
         }
 
-        for (int i = 0; i < 70; i++) {
+        for (int i = 0; i < unindexedRuleCount; i++) {
             rules.add(getInstallerCertificateRule(String.format("%s%04d", installerName, i)));
         }
 
@@ -174,18 +178,20 @@ public class IntegrityFileManagerTest {
         // Read the rules for a specific rule.
         String installedPackageName = String.format("%s%04d", packageName, 264);
         String installedAppCertificate = String.format("%s%04d", appCertificate, 1264);
-        AppInstallMetadata appInstallMetadata = new AppInstallMetadata.Builder()
-                .setPackageName(installedPackageName)
-                .setAppCertificate(installedAppCertificate)
-                .setVersionCode(250)
-                .setInstallerName("abc")
-                .setInstallerCertificate("abc")
-                .setIsPreInstalled(true)
-                .build();
+        AppInstallMetadata appInstallMetadata =
+                new AppInstallMetadata.Builder()
+                        .setPackageName(installedPackageName)
+                        .setAppCertificate(installedAppCertificate)
+                        .setVersionCode(250)
+                        .setInstallerName("abc")
+                        .setInstallerCertificate("abc")
+                        .setIsPreInstalled(true)
+                        .build();
         List<Rule> rulesFetched = mIntegrityFileManager.readRules(appInstallMetadata);
 
         // Verify that we do not load all the rules and we have the necessary rules to evaluate.
-        assertThat(rulesFetched.size()).isEqualTo(270);
+        assertThat(rulesFetched.size())
+                .isEqualTo(INDEXING_BLOCK_SIZE * 2 + unindexedRuleCount);
         assertThat(rulesFetched)
                 .containsAllOf(
                         getPackageNameIndexedRule(installedPackageName),
@@ -195,27 +201,38 @@ public class IntegrityFileManagerTest {
     private Rule getPackageNameIndexedRule(String packageName) {
         return new Rule(
                 new StringAtomicFormula(
-                        AtomicFormula.PACKAGE_NAME,
-                        packageName,
-                        /* isHashedValue= */ false),
+                        AtomicFormula.PACKAGE_NAME, packageName, /* isHashedValue= */ false),
                 Rule.DENY);
     }
 
     private Rule getAppCertificateIndexedRule(String appCertificate) {
         return new Rule(
                 new StringAtomicFormula(
-                        AtomicFormula.APP_CERTIFICATE,
-                        appCertificate,
-                        /* isHashedValue= */ false),
+                        AtomicFormula.APP_CERTIFICATE, appCertificate, /* isHashedValue= */ false),
                 Rule.DENY);
     }
 
     private Rule getInstallerCertificateRule(String installerCert) {
         return new Rule(
                 new StringAtomicFormula(
-                        AtomicFormula.INSTALLER_NAME,
-                        installerCert,
-                        /* isHashedValue= */ false),
+                        AtomicFormula.INSTALLER_NAME, installerCert, /* isHashedValue= */ false),
                 Rule.DENY);
+    }
+
+    @Test
+    public void testStagingDirectoryCleared() throws Exception {
+        // We must push rules two times to ensure that staging directory is empty because we cleared
+        // it, rather than because original rules directory is empty.
+        mIntegrityFileManager.writeRules(VERSION, RULE_PROVIDER, Collections.EMPTY_LIST);
+        mIntegrityFileManager.writeRules(VERSION, RULE_PROVIDER, Collections.EMPTY_LIST);
+
+        assertStagingDirectoryCleared();
+    }
+
+    private void assertStagingDirectoryCleared() {
+        File stagingDir = new File(mTmpDir, "integrity_staging");
+        assertThat(stagingDir.exists()).isTrue();
+        assertThat(stagingDir.isDirectory()).isTrue();
+        assertThat(stagingDir.listFiles()).isEmpty();
     }
 }

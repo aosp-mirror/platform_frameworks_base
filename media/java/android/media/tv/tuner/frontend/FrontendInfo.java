@@ -16,77 +16,98 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.NonNull;
 import android.media.tv.tuner.frontend.FrontendSettings.Type;
+import android.media.tv.tuner.frontend.FrontendStatus.FrontendStatusType;
+import android.util.Range;
 
 /**
- * Frontend info.
+ * This class is used to specify meta information of a frontend.
+ *
  * @hide
  */
 public class FrontendInfo {
     private final int mId;
     private final int mType;
-    private final int mMinFrequency;
-    private final int mMaxFrequency;
-    private final int mMinSymbolRate;
-    private final int mMaxSymbolRate;
+    private final Range<Integer> mFrequencyRange;
+    private final Range<Integer> mSymbolRateRange;
     private final int mAcquireRange;
     private final int mExclusiveGroupId;
     private final int[] mStatusCaps;
     private final FrontendCapabilities mFrontendCap;
 
-    FrontendInfo(int id, int type, int minFrequency, int maxFrequency, int minSymbolRate,
+    private FrontendInfo(int id, int type, int minFrequency, int maxFrequency, int minSymbolRate,
             int maxSymbolRate, int acquireRange, int exclusiveGroupId, int[] statusCaps,
             FrontendCapabilities frontendCap) {
         mId = id;
         mType = type;
-        mMinFrequency = minFrequency;
-        mMaxFrequency = maxFrequency;
-        mMinSymbolRate = minSymbolRate;
-        mMaxSymbolRate = maxSymbolRate;
+        mFrequencyRange = new Range<>(minFrequency, maxFrequency);
+        mSymbolRateRange = new Range<>(minSymbolRate, maxSymbolRate);
         mAcquireRange = acquireRange;
         mExclusiveGroupId = exclusiveGroupId;
         mStatusCaps = statusCaps;
         mFrontendCap = frontendCap;
     }
 
-    /** Gets frontend ID. */
+    /**
+     * Gets frontend ID.
+     */
     public int getId() {
         return mId;
     }
-    /** Gets frontend type. */
+    /**
+     * Gets frontend type.
+     */
     @Type
     public int getType() {
         return mType;
     }
-    /** Gets min frequency. */
-    public int getMinFrequency() {
-        return mMinFrequency;
+
+    /**
+     * Gets supported frequency range in Hz.
+     */
+    @NonNull
+    public Range<Integer> getFrequencyRange() {
+        return mFrequencyRange;
     }
-    /** Gets max frequency. */
-    public int getMaxFrequency() {
-        return mMaxFrequency;
+
+    /**
+     * Gets symbol rate range in symbols per second.
+     */
+    @NonNull
+    public Range<Integer> getSymbolRateRange() {
+        return mSymbolRateRange;
     }
-    /** Gets min symbol rate. */
-    public int getMinSymbolRate() {
-        return mMinSymbolRate;
-    }
-    /** Gets max symbol rate. */
-    public int getMaxSymbolRate() {
-        return mMaxSymbolRate;
-    }
-    /** Gets acquire range. */
+
+    /**
+     * Gets acquire range in Hz.
+     *
+     * <p>The maximum frequency difference the frontend can detect.
+     */
     public int getAcquireRange() {
         return mAcquireRange;
     }
-    /** Gets exclusive group ID. */
+    /**
+     * Gets exclusive group ID.
+     *
+     * <p>Frontends with the same exclusive group ID indicates they can't function at same time. For
+     * instance, they share some hardware modules.
+     */
     public int getExclusiveGroupId() {
         return mExclusiveGroupId;
     }
-    /** Gets status capabilities. */
+    /**
+     * Gets status capabilities.
+     *
+     * @return An array of supported status types.
+     */
+    @FrontendStatusType
     public int[] getStatusCapabilities() {
         return mStatusCaps;
     }
-    /** Gets frontend capability. */
+    /**
+     * Gets frontend capabilities.
+     */
     public FrontendCapabilities getFrontendCapability() {
         return mFrontendCap;
     }

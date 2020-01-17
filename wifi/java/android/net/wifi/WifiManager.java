@@ -2369,6 +2369,15 @@ public class WifiManager {
     }
 
     /**
+     * Query whether the device supports Station (STA) + Access point (AP) concurrency or not.
+     *
+     * @return true if this device supports STA + AP concurrency, false otherwise.
+     */
+    public boolean isStaApConcurrencySupported() {
+        return isFeatureSupported(WIFI_FEATURE_AP_STA);
+    }
+
+    /**
      * @deprecated Please use {@link android.content.pm.PackageManager#hasSystemFeature(String)}
      * with {@link android.content.pm.PackageManager#FEATURE_WIFI_RTT} and
      * {@link android.content.pm.PackageManager#FEATURE_WIFI_AWARE}.
@@ -2606,6 +2615,8 @@ public class WifiManager {
      * the same permissions as {@link #getScanResults}. If such access is not allowed,
      * {@link WifiInfo#getSSID} will return {@link #UNKNOWN_SSID} and
      * {@link WifiInfo#getBSSID} will return {@code "02:00:00:00:00:00"}.
+     * {@link WifiInfo#getPasspointFqdn()} will return null.
+     * {@link WifiInfo#getPasspointProviderFriendlyName()} will return null.
      *
      * @return the Wi-Fi information, contained in {@link WifiInfo}.
      */
@@ -4226,6 +4237,24 @@ public class WifiManager {
     public void allowAutojoinPasspoint(@NonNull String fqdn, boolean enableAutoJoin) {
         try {
             mService.allowAutojoinPasspoint(fqdn, enableAutoJoin);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Configure MAC randomization setting for a Passpoint profile.
+     * MAC randomization is enabled by default.
+     *
+     * @param fqdn the FQDN (fully qualified domain name) of the passpoint profile.
+     * @param enable true to enable MAC randomization, false to disable MAC randomization.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void setMacRandomizationSettingPasspointEnabled(@NonNull String fqdn, boolean enable) {
+        try {
+            mService.setMacRandomizationSettingPasspointEnabled(fqdn, enable);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

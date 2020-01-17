@@ -16,21 +16,344 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.content.Context;
+import android.hardware.tv.tuner.V1_0.Constants;
+import android.media.tv.tuner.TunerUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Frontend settings for DVBS.
  * @hide
  */
 public class DvbsFrontendSettings extends FrontendSettings {
-    public int modulation;
-    public DvbsCodeRate coderate;
-    public int symbolRate;
-    public int rolloff;
-    public int pilot;
-    public int inputStreamId;
-    public byte standard;
+    /** @hide */
+    @IntDef(flag = true,
+            prefix = "MODULATION_",
+            value = {MODULATION_UNDEFINED, MODULATION_AUTO, MODULATION_MOD_QPSK,
+                    MODULATION_MOD_8PSK, MODULATION_MOD_16QAM, MODULATION_MOD_16PSK,
+                    MODULATION_MOD_32PSK, MODULATION_MOD_ACM, MODULATION_MOD_8APSK,
+                    MODULATION_MOD_16APSK, MODULATION_MOD_32APSK, MODULATION_MOD_64APSK,
+                    MODULATION_MOD_128APSK, MODULATION_MOD_256APSK, MODULATION_MOD_RESERVED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Modulation {}
 
-    DvbsFrontendSettings(int frequency) {
+    /**
+     * Modulation undefined.
+     */
+    public static final int MODULATION_UNDEFINED = Constants.FrontendDvbsModulation.UNDEFINED;
+    /**
+     * Hardware is able to detect and set modulation automatically
+     */
+    public static final int MODULATION_AUTO = Constants.FrontendDvbsModulation.AUTO;
+    /**
+     * QPSK Modulation.
+     */
+    public static final int MODULATION_MOD_QPSK = Constants.FrontendDvbsModulation.MOD_QPSK;
+    /**
+     * 8PSK Modulation.
+     */
+    public static final int MODULATION_MOD_8PSK = Constants.FrontendDvbsModulation.MOD_8PSK;
+    /**
+     * 16QAM Modulation.
+     */
+    public static final int MODULATION_MOD_16QAM = Constants.FrontendDvbsModulation.MOD_16QAM;
+    /**
+     * 16PSK Modulation.
+     */
+    public static final int MODULATION_MOD_16PSK = Constants.FrontendDvbsModulation.MOD_16PSK;
+    /**
+     * 32PSK Modulation.
+     */
+    public static final int MODULATION_MOD_32PSK = Constants.FrontendDvbsModulation.MOD_32PSK;
+    /**
+     * ACM Modulation.
+     */
+    public static final int MODULATION_MOD_ACM = Constants.FrontendDvbsModulation.MOD_ACM;
+    /**
+     * 8APSK Modulation.
+     */
+    public static final int MODULATION_MOD_8APSK = Constants.FrontendDvbsModulation.MOD_8APSK;
+    /**
+     * 16APSK Modulation.
+     */
+    public static final int MODULATION_MOD_16APSK = Constants.FrontendDvbsModulation.MOD_16APSK;
+    /**
+     * 32APSK Modulation.
+     */
+    public static final int MODULATION_MOD_32APSK = Constants.FrontendDvbsModulation.MOD_32APSK;
+    /**
+     * 64APSK Modulation.
+     */
+    public static final int MODULATION_MOD_64APSK = Constants.FrontendDvbsModulation.MOD_64APSK;
+    /**
+     * 128APSK Modulation.
+     */
+    public static final int MODULATION_MOD_128APSK = Constants.FrontendDvbsModulation.MOD_128APSK;
+    /**
+     * 256APSK Modulation.
+     */
+    public static final int MODULATION_MOD_256APSK = Constants.FrontendDvbsModulation.MOD_256APSK;
+    /**
+     * Reversed Modulation.
+     */
+    public static final int MODULATION_MOD_RESERVED = Constants.FrontendDvbsModulation.MOD_RESERVED;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "ROLLOFF_",
+            value = {ROLLOFF_UNDEFINED, ROLLOFF_0_35, ROLLOFF_0_25, ROLLOFF_0_20, ROLLOFF_0_15,
+                    ROLLOFF_0_10, ROLLOFF_0_5})
+    public @interface Rolloff {}
+
+    /**
+     * Roll Off undefined.
+     */
+    public static final int ROLLOFF_UNDEFINED = Constants.FrontendDvbsRolloff.UNDEFINED;
+    /**
+     * Roll Off 0_35.
+     */
+    public static final int ROLLOFF_0_35 = Constants.FrontendDvbsRolloff.ROLLOFF_0_35;
+    /**
+     * Roll Off 0_25.
+     */
+    public static final int ROLLOFF_0_25 = Constants.FrontendDvbsRolloff.ROLLOFF_0_25;
+    /**
+     * Roll Off 0_2.
+     */
+    public static final int ROLLOFF_0_20 = Constants.FrontendDvbsRolloff.ROLLOFF_0_20;
+    /**
+     * Roll Off 0_15.
+     */
+    public static final int ROLLOFF_0_15 = Constants.FrontendDvbsRolloff.ROLLOFF_0_15;
+    /**
+     * Roll Off 0_1.
+     */
+    public static final int ROLLOFF_0_10 = Constants.FrontendDvbsRolloff.ROLLOFF_0_10;
+    /**
+     * Roll Off 0_5.
+     */
+    public static final int ROLLOFF_0_5 = Constants.FrontendDvbsRolloff.ROLLOFF_0_5;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "PILOT_",
+            value = {PILOT_UNDEFINED, PILOT_ON, PILOT_OFF, PILOT_AUTO})
+    public @interface Pilot {}
+
+    /**
+     * Pilot mode undefined.
+     */
+    public static final int PILOT_UNDEFINED = Constants.FrontendDvbsPilot.UNDEFINED;
+    /**
+     * Pilot mode on.
+     */
+    public static final int PILOT_ON = Constants.FrontendDvbsPilot.ON;
+    /**
+     * Pilot mode off.
+     */
+    public static final int PILOT_OFF = Constants.FrontendDvbsPilot.OFF;
+    /**
+     * Pilot mode auto.
+     */
+    public static final int PILOT_AUTO = Constants.FrontendDvbsPilot.AUTO;
+
+
+    /** @hide */
+    @IntDef(flag = true,
+            prefix = "STANDARD_",
+            value = {STANDARD_AUTO, STANDARD_S, STANDARD_S2, STANDARD_S2X})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Standard {}
+
+    /**
+     * Standard undefined.
+     */
+    public static final int STANDARD_AUTO = Constants.FrontendDvbsStandard.AUTO;
+    /**
+     * Standard S.
+     */
+    public static final int STANDARD_S = Constants.FrontendDvbsStandard.S;
+    /**
+     * Standard S2.
+     */
+    public static final int STANDARD_S2 = Constants.FrontendDvbsStandard.S2;
+    /**
+     * Standard S2X.
+     */
+    public static final int STANDARD_S2X = Constants.FrontendDvbsStandard.S2X;
+
+
+    private final int mModulation;
+    private final DvbsCodeRate mCoderate;
+    private final int mSymbolRate;
+    private final int mRolloff;
+    private final int mPilot;
+    private final int mInputStreamId;
+    private final int mStandard;
+
+    private DvbsFrontendSettings(int frequency, int modulation, DvbsCodeRate coderate,
+            int symbolRate, int rolloff, int pilot, int inputStreamId, int standard) {
         super(frequency);
+        mModulation = modulation;
+        mCoderate = coderate;
+        mSymbolRate = symbolRate;
+        mRolloff = rolloff;
+        mPilot = pilot;
+        mInputStreamId = inputStreamId;
+        mStandard = standard;
+    }
+
+    /**
+     * Gets Modulation.
+     */
+    @Modulation
+    public int getModulation() {
+        return mModulation;
+    }
+    /**
+     * Gets Code rate.
+     */
+    @Nullable
+    public DvbsCodeRate getCoderate() {
+        return mCoderate;
+    }
+    /**
+     * Gets Symbol Rate in symbols per second.
+     */
+    public int getSymbolRate() {
+        return mSymbolRate;
+    }
+    /**
+     * Gets Rolloff.
+     */
+    @Rolloff
+    public int getRolloff() {
+        return mRolloff;
+    }
+    /**
+     * Gets Pilot mode.
+     */
+    @Pilot
+    public int getPilot() {
+        return mPilot;
+    }
+    /**
+     * Gets Input Stream ID.
+     */
+    public int getInputStreamId() {
+        return mInputStreamId;
+    }
+    /**
+     * Gets DVBS sub-standard.
+     */
+    @Standard
+    public int getStandard() {
+        return mStandard;
+    }
+
+    /**
+     * Creates a builder for {@link DvbsFrontendSettings}.
+     *
+     * @param context the context of the caller.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @NonNull
+    public static Builder builder(@NonNull Context context) {
+        TunerUtils.checkTunerPermission(context);
+        return new Builder();
+    }
+
+    /**
+     * Builder for {@link DvbsFrontendSettings}.
+     */
+    public static class Builder extends FrontendSettings.Builder<Builder> {
+        private int mModulation;
+        private DvbsCodeRate mCoderate;
+        private int mSymbolRate;
+        private int mRolloff;
+        private int mPilot;
+        private int mInputStreamId;
+        private int mStandard;
+
+        private Builder() {
+        }
+
+        /**
+         * Sets Modulation.
+         */
+        @NonNull
+        public Builder setModulation(@Modulation int modulation) {
+            mModulation = modulation;
+            return this;
+        }
+        /**
+         * Sets Code rate.
+         */
+        @NonNull
+        public Builder setCoderate(@Nullable DvbsCodeRate coderate) {
+            mCoderate = coderate;
+            return this;
+        }
+        /**
+         * Sets Symbol Rate.
+         */
+        @NonNull
+        public Builder setSymbolRate(int symbolRate) {
+            mSymbolRate = symbolRate;
+            return this;
+        }
+        /**
+         * Sets Rolloff.
+         */
+        @NonNull
+        public Builder setRolloff(@Rolloff int rolloff) {
+            mRolloff = rolloff;
+            return this;
+        }
+        /**
+         * Sets Pilot mode.
+         */
+        @NonNull
+        public Builder setPilot(@Pilot int pilot) {
+            mPilot = pilot;
+            return this;
+        }
+        /**
+         * Sets Input Stream ID.
+         */
+        @NonNull
+        public Builder setInputStreamId(int inputStreamId) {
+            mInputStreamId = inputStreamId;
+            return this;
+        }
+        /**
+         * Sets Standard.
+         */
+        @NonNull
+        public Builder setStandard(@Standard int standard) {
+            mStandard = standard;
+            return this;
+        }
+
+        /**
+         * Builds a {@link DvbsFrontendSettings} object.
+         */
+        @NonNull
+        public DvbsFrontendSettings build() {
+            return new DvbsFrontendSettings(mFrequency, mModulation, mCoderate, mSymbolRate,
+                    mRolloff, mPilot, mInputStreamId, mStandard);
+        }
+
+        @Override
+        Builder self() {
+            return this;
+        }
     }
 
     @Override

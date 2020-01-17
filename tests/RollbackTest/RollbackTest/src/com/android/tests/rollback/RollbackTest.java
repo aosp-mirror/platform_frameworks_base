@@ -392,9 +392,6 @@ public class RollbackTest {
                     RollbackManager.PROPERTY_ROLLBACK_LIFETIME_MILLIS,
                     Long.toString(expirationTime), false /* makeDefault*/);
 
-            // Pull the new expiration time from DeviceConfig
-            rm.reloadPersistedData();
-
             // Uninstall TestApp.A
             Uninstall.packages(TestApp.A);
             assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(-1);
@@ -456,9 +453,6 @@ public class RollbackTest {
             DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK_BOOT,
                     RollbackManager.PROPERTY_ROLLBACK_LIFETIME_MILLIS,
                     Long.toString(expirationTime), false /* makeDefault*/);
-
-            // Pull the new expiration time from DeviceConfig
-            rm.reloadPersistedData();
 
             // Install app A with rollback enabled
             Uninstall.packages(TestApp.A);

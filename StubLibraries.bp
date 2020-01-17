@@ -51,6 +51,10 @@ stubs_defaults {
         ":core_public_api_files",
         ":ike-api-srcs",
     ],
+    // TODO(b/147699819): remove below aidl includes.
+    aidl: {
+        local_include_dirs: ["telephony/java"],
+    },
     libs: ["framework-internal-utils"],
     installable: false,
     annotations_enabled: true,

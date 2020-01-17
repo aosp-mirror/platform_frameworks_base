@@ -18,6 +18,7 @@ package com.android.server.usage;
 
 import static com.android.internal.util.ArrayUtils.defeatNullable;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.usage.StorageStatsManagerInternal.StorageStatsAugmenter;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -46,6 +47,7 @@ import android.os.Message;
 import android.os.ParcelableException;
 import android.os.StatFs;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.CrateInfo;
@@ -58,6 +60,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.DataUnit;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseLongArray;
 
@@ -77,6 +80,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 public class StorageStatsService extends IStorageStatsManager.Stub {
     private static final String TAG = "StorageStatsService";
@@ -111,6 +116,9 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     private final Installer mInstaller;
     private final H mHandler;
 
+    private final CopyOnWriteArrayList<Pair<String, StorageStatsAugmenter>>
+            mStorageStatsAugmenters = new CopyOnWriteArrayList<>();
+
     public StorageStatsService(Context context) {
         mContext = Preconditions.checkNotNull(context);
         mAppOps = Preconditions.checkNotNull(context.getSystemService(AppOpsManager.class));
@@ -139,6 +147,8 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 }
             }
         });
+
+        LocalServices.addService(StorageStatsManagerInternal.class, new LocalService());
     }
 
     private void invalidateMounts() {
@@ -300,6 +310,12 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             } catch (InstallerException e) {
                 throw new ParcelableException(new IOException(e.getMessage()));
             }
+            if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
+                forEachStorageStatsAugmenter((storageStatsAugmenter) -> {
+                    storageStatsAugmenter.augmentStatsForPackage(stats,
+                            packageName, userId, callingPackage);
+                }, "queryStatsForPackage");
+            }
             return translate(stats);
         }
     }
@@ -353,6 +369,12 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         } catch (InstallerException e) {
             throw new ParcelableException(new IOException(e.getMessage()));
         }
+
+        if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
+            forEachStorageStatsAugmenter((storageStatsAugmenter) -> {
+                storageStatsAugmenter.augmentStatsForUid(stats, uid, callingPackage);
+            }, "queryStatsForUid");
+        }
         return translate(stats);
     }
 
@@ -378,6 +400,12 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             }
         } catch (InstallerException e) {
             throw new ParcelableException(new IOException(e.getMessage()));
+        }
+
+        if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
+            forEachStorageStatsAugmenter((storageStatsAugmenter) -> {
+                storageStatsAugmenter.augmentStatsForUser(stats, userId, callingPackage);
+            }, "queryStatsForUser");
         }
         return translate(stats);
     }
@@ -703,6 +731,31 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             return new ParceledListSlice<>(convertCrateInfoFrom(crateMetadatas));
         } catch (InstallerException e) {
             throw new ParcelableException(new IOException(e.getMessage()));
+        }
+    }
+
+    void forEachStorageStatsAugmenter(@NonNull Consumer<StorageStatsAugmenter> consumer,
+                @NonNull String queryTag) {
+        for (int i = 0, count = mStorageStatsAugmenters.size(); i < count; ++i) {
+            final Pair<String, StorageStatsAugmenter> pair = mStorageStatsAugmenters.get(i);
+            final String augmenterTag = pair.first;
+            final StorageStatsAugmenter storageStatsAugmenter = pair.second;
+
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, queryTag + ":" + augmenterTag);
+            try {
+                consumer.accept(storageStatsAugmenter);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+            }
+        }
+    }
+
+    private class LocalService extends StorageStatsManagerInternal {
+        @Override
+        public void registerStorageStatsAugmenter(
+                @NonNull StorageStatsAugmenter storageStatsAugmenter,
+                @NonNull String tag) {
+            mStorageStatsAugmenters.add(Pair.create(tag, storageStatsAugmenter));
         }
     }
 }

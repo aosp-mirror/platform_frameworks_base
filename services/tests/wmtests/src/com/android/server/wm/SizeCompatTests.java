@@ -391,6 +391,33 @@ public class SizeCompatTests extends ActivityTestsBase {
         assertEquals(null, compatTokens.get(0));
     }
 
+    @Test
+    public void testShouldUseSizeCompatModeOnResizableTask() {
+        setUpApp(new TestDisplayContent.Builder(mService, 1000, 2500).build());
+
+        // Make the task root resizable.
+        mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
+
+        // Create a size compat activity on the same task.
+        final ActivityRecord activity = new ActivityBuilder(mService)
+                .setTask(mTask)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .build();
+        assertTrue(activity.shouldUseSizeCompatMode());
+
+        // The non-resizable activity should not be size compat because it is on a resizable task
+        // in multi-window mode.
+        mStack.setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
+        assertFalse(activity.shouldUseSizeCompatMode());
+
+        // The non-resizable activity should not be size compat because the display support
+        // changing windowing mode from fullscreen to freeform.
+        mStack.mDisplayContent.setDisplayWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
+        mStack.setWindowingMode(WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
+        assertFalse(activity.shouldUseSizeCompatMode());
+    }
+
     /**
      * Setup {@link #mActivity} as a size-compat-mode-able activity with fixed aspect and/or
      * orientation.

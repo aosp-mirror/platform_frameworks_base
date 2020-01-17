@@ -122,6 +122,8 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetColor(long transactionObj, long nativeObject, float[] color);
     private static native void nativeSetFlags(long transactionObj, long nativeObject,
             int flags, int mask);
+    private static native void nativeSetFrameRateSelectionPriority(long transactionObj,
+            long nativeObject, int priority);
     private static native void nativeSetWindowCrop(long transactionObj, long nativeObject,
             int l, int t, int r, int b);
     private static native void nativeSetCornerRadius(long transactionObj, long nativeObject,
@@ -2242,6 +2244,19 @@ public final class SurfaceControl implements Parcelable {
             } else {
                 return hide(sc);
             }
+        }
+
+        /**
+         * This information is passed to SurfaceFlinger to decide which window should have a
+         * priority when deciding about the refresh rate of the display. All windows have the
+         * lowest priority by default.
+         * @hide
+         */
+        @NonNull
+        public Transaction setFrameRateSelectionPriority(@NonNull SurfaceControl sc, int priority) {
+            sc.checkNotReleased();
+            nativeSetFrameRateSelectionPriority(mNativeObject, sc.mNativeObject, priority);
+            return this;
         }
 
         /**

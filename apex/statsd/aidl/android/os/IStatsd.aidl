@@ -212,12 +212,17 @@ interface IStatsd {
     *
     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS
     */
-   oneway void unregisterPullerCallback(int atomTag, String packageName);
+    oneway void unregisterPullerCallback(int atomTag, String packageName);
 
-  /**
-   * Unregisters any pullAtomCallback for the given uid/atom.
-   */
-   oneway void unregisterPullAtomCallback(int uid, int atomTag);
+    /**
+     * Unregisters any pullAtomCallback for the given uid/atom.
+     */
+    oneway void unregisterPullAtomCallback(int uid, int atomTag);
+
+    /**
+     * Unregisters any pullAtomCallback for the given atom.
+     */
+    oneway void unregisterNativePullAtomCallback(int atomTag);
 
     /**
      * The install requires staging.

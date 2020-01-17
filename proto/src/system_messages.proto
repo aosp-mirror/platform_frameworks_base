@@ -237,6 +237,9 @@ message SystemMessage {
     // Inform the user that the current network may not support using a randomized MAC address.
     NOTE_NETWORK_NO_MAC_RANDOMIZATION_SUPPORT = 56;
 
+    // Inform the user that EAP failure occurs
+    NOTE_WIFI_EAP_FAILURE = 57;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release

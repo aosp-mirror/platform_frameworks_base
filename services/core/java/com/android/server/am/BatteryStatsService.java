@@ -402,7 +402,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public ParcelFileDescriptor getStatisticsStream() {
-        mContext.enforceCallingPermission(
+        mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BATTERY_STATS, null);
         //Slog.i("foo", "SENDING BATTERY INFO:");
         //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo", Log.LOG_ID_SYSTEM));

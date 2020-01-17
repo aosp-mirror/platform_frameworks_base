@@ -36,7 +36,7 @@ public class DynamicSystemServiceTest extends AndroidTestCase {
     public void test1() {
         assertTrue("dynamic_system service available", mService != null);
         try {
-            mService.startInstallation();
+            mService.startInstallation("dsu");
             fail("DynamicSystemService did not throw SecurityException as expected");
         } catch (SecurityException e) {
             // expected

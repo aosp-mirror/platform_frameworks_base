@@ -32,7 +32,7 @@ interface IRcsFeatureListener {
     oneway void onNetworkResponse(int code, in String reason, int operationToken);
     oneway void onCapabilityRequestResponsePresence(in List<RcsContactUceCapability> infos,
     int operationToken);
-    oneway void onNotifyUpdateCapabilities();
+    oneway void onNotifyUpdateCapabilities(int publishTriggerType);
     oneway void onUnpublish();
     // RcsSipOptionsImplBase specific
     oneway void onCapabilityRequestResponseOptions(int code, in String reason,

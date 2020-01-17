@@ -2005,6 +2005,15 @@
         <attr name="maxSdkVersion" />
     </declare-styleable>
 
+    <!-- The <code>extension-sdk</code> tag is a child of the <uses-sdk> tag,
+         and specifies required extension sdk features. -->
+    <declare-styleable name="AndroidManifestExtensionSdk">
+        <!-- The extension SDK version that this tag refers to. -->
+        <attr name="sdkVersion" format="integer" />
+        <!-- The minimum version of the extension SDK this application requires.-->
+        <attr name="minExtensionVersion" format="integer" />
+    </declare-styleable>
+
     <!-- The <code>library</code> tag declares that this apk is providing itself
          as a shared library for other applications to use.  It can only be used
          with apks that are built in to the system image.  Other apks can link to

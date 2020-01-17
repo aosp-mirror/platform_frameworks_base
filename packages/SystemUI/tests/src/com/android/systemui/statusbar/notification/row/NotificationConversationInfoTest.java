@@ -62,6 +62,7 @@ import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -681,6 +682,34 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 anyString(), anyInt(), captor.capture());
         assertFalse(captor.getValue().canBypassDnd());
+    }
+
+    @Test
+    public void testDemote() throws Exception {
+        mNotificationInfo.bindNotification(
+                mShortcutManager,
+                mLauncherApps,
+                mMockPackageManager,
+                mMockINotificationManager,
+                mVisualStabilityManager,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mEntry,
+                null,
+                null,
+                null,
+                true);
+
+
+        ImageButton demote = mNotificationInfo.findViewById(R.id.demote);
+        demote.performClick();
+        mTestableLooper.processAllMessages();
+
+        ArgumentCaptor<NotificationChannel> captor =
+                ArgumentCaptor.forClass(NotificationChannel.class);
+        verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
+                anyString(), anyInt(), captor.capture());
+        assertTrue(captor.getValue().isDemoted());
     }
 
     @Test

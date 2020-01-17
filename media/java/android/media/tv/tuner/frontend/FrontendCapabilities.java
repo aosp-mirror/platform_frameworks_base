@@ -17,7 +17,8 @@
 package android.media.tv.tuner.frontend;
 
 /**
- * Frontend Capabilities.
+ * Frontend capabilities.
+ *
  * @hide
  */
 public abstract class FrontendCapabilities {

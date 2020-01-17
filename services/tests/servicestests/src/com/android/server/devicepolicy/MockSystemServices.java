@@ -15,6 +15,7 @@
  */
 package com.android.server.devicepolicy;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -234,6 +235,13 @@ public class MockSystemServices {
                     final int userId1 = (int) invocation.getArguments()[0];
                     final UserInfo ui = getUserInfo(userId1);
                     return ui == null ? null : getUserInfo(ui.profileGroupId);
+                }
+        );
+        when(userManager.getProfileParent(any(UserHandle.class))).thenAnswer(
+                invocation -> {
+                    final UserHandle userHandle = (UserHandle) invocation.getArguments()[0];
+                    final UserInfo ui = getUserInfo(userHandle.getIdentifier());
+                    return ui == null ? UserHandle.USER_NULL : UserHandle.of(ui.profileGroupId);
                 }
         );
         when(userManager.getProfiles(anyInt())).thenAnswer(

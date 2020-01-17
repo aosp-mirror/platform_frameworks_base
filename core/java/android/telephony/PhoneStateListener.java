@@ -985,7 +985,7 @@ public class PhoneStateListener {
      *        TS 24.301 9.9.4.4. Integer.MAX_VALUE if this value is unused.
      */
     public void onRegistrationFailed(@NonNull CellIdentity cellIdentity, @NonNull String chosenPlmn,
-            @NetworkRegistrationInfo.Domain int domain, int causeCode, int additionalCauseCode) {
+            int domain, int causeCode, int additionalCauseCode) {
         // default implementation empty
     }
 
@@ -1277,7 +1277,7 @@ public class PhoneStateListener {
         }
 
         public void onRegistrationFailed(@NonNull CellIdentity cellIdentity,
-                @NonNull String chosenPlmn, @NetworkRegistrationInfo.Domain int domain,
+                @NonNull String chosenPlmn, int domain,
                 int causeCode, int additionalCauseCode) {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;

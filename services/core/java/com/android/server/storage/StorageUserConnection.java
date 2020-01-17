@@ -60,7 +60,8 @@ import java.util.concurrent.TimeoutException;
  */
 public final class StorageUserConnection {
     private static final String TAG = "StorageUserConnection";
-    private static final int REMOTE_TIMEOUT_SECONDS = 15;
+
+    public static final int REMOTE_TIMEOUT_SECONDS = 5;
 
     private final Object mLock = new Object();
     private final Context mContext;

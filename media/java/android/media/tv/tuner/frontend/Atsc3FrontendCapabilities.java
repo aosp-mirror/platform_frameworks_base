@@ -28,8 +28,8 @@ public class Atsc3FrontendCapabilities extends FrontendCapabilities {
     private final int mFecCap;
     private final int mDemodOutputFormatCap;
 
-    Atsc3FrontendCapabilities(int bandwidthCap, int modulationCap, int timeInterleaveModeCap,
-            int codeRateCap, int fecCap, int demodOutputFormatCap) {
+    private Atsc3FrontendCapabilities(int bandwidthCap, int modulationCap,
+            int timeInterleaveModeCap, int codeRateCap, int fecCap, int demodOutputFormatCap) {
         mBandwidthCap = bandwidthCap;
         mModulationCap = modulationCap;
         mTimeInterleaveModeCap = timeInterleaveModeCap;
@@ -38,27 +38,45 @@ public class Atsc3FrontendCapabilities extends FrontendCapabilities {
         mDemodOutputFormatCap = demodOutputFormatCap;
     }
 
-    /** Gets bandwidth capability. */
+    /**
+     * Gets bandwidth capability.
+     */
+    @Atsc3FrontendSettings.Bandwidth
     public int getBandwidthCapability() {
         return mBandwidthCap;
     }
-    /** Gets modulation capability. */
+    /**
+     * Gets modulation capability.
+     */
+    @Atsc3FrontendSettings.Modulation
     public int getModulationCapability() {
         return mModulationCap;
     }
-    /** Gets time interleave mod capability. */
+    /**
+     * Gets time interleave mod capability.
+     */
+    @Atsc3FrontendSettings.TimeInterleaveMode
     public int getTimeInterleaveModeCapability() {
         return mTimeInterleaveModeCap;
     }
-    /** Gets code rate capability. */
+    /**
+     * Gets code rate capability.
+     */
+    @Atsc3FrontendSettings.CodeRate
     public int getCodeRateCapability() {
         return mCodeRateCap;
     }
-    /** Gets FEC capability. */
+    /**
+     * Gets FEC capability.
+     */
+    @Atsc3FrontendSettings.Fec
     public int getFecCapability() {
         return mFecCap;
     }
-    /** Gets demodulator output format capability. */
+    /**
+     * Gets demodulator output format capability.
+     */
+    @Atsc3FrontendSettings.DemodOutputFormat
     public int getDemodOutputFormatCapability() {
         return mDemodOutputFormatCap;
     }

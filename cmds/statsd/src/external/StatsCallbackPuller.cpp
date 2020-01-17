@@ -42,7 +42,7 @@ StatsCallbackPuller::StatsCallbackPuller(int tagId, const sp<IPullAtomCallback>&
 }
 
 bool StatsCallbackPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
-    VLOG("StatsCallbackPuller called for tag %d", mTagId)
+    VLOG("StatsCallbackPuller called for tag %d", mTagId);
     if(mCallback == nullptr) {
         ALOGW("No callback registered");
         return false;

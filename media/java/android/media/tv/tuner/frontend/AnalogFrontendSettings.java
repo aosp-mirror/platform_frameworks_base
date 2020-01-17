@@ -30,8 +30,9 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class AnalogFrontendSettings extends FrontendSettings {
     /** @hide */
-    @IntDef(flag = true, value = {SIGNAL_TYPE_UNDEFINED, SIGNAL_TYPE_PAL, SIGNAL_TYPE_SECAM,
-            SIGNAL_TYPE_NTSC})
+    @IntDef(flag = true,
+            prefix = "SIGNAL_TYPE_",
+            value = {SIGNAL_TYPE_UNDEFINED, SIGNAL_TYPE_PAL, SIGNAL_TYPE_SECAM, SIGNAL_TYPE_NTSC})
     @Retention(RetentionPolicy.SOURCE)
     public @interface SignalType {}
 
@@ -54,7 +55,9 @@ public class AnalogFrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true, value = {SIF_UNDEFINED, SIF_BG, SIF_BG_A2, SIF_BG_NICAM, SIF_I, SIF_DK,
+    @IntDef(flag = true,
+            prefix = "SIF_",
+            value = {SIF_UNDEFINED, SIF_BG, SIF_BG_A2, SIF_BG_NICAM, SIF_I, SIF_DK,
             SIF_DK1, SIF_DK2, SIF_DK3, SIF_DK_NICAM, SIF_L, SIF_M, SIF_M_BTSC, SIF_M_A2,
             SIF_M_EIA_J, SIF_I_NICAM, SIF_L_NICAM, SIF_L_PRIME})
     @Retention(RetentionPolicy.SOURCE)

@@ -65,6 +65,7 @@ import android.os.FileUtils;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.ext.SdkExtensions;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -1615,11 +1616,72 @@ public class ApkParseUtils {
                 );
             }
 
+            int type;
+            final int innerDepth = parser.getDepth();
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                    && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
+                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                    continue;
+                }
+                if (parser.getName().equals("extension-sdk")) {
+                    final ParseResult result =
+                            parseExtensionSdk(parseInput, parsingPackage, res, parser);
+                    if (!result.isSuccess()) {
+                        return result;
+                    }
+                } else {
+                    Slog.w(TAG, "Unknown element under <uses-sdk>: " + parser.getName()
+                            + " at " + parsingPackage.getBaseCodePath() + " "
+                            + parser.getPositionDescription());
+                }
+                XmlUtils.skipCurrentTag(parser);
+            }
+
             parsingPackage.setMinSdkVersion(minSdkVersion)
                     .setTargetSdkVersion(targetSdkVersion);
         }
+        return parseInput.success(parsingPackage);
+    }
 
-        XmlUtils.skipCurrentTag(parser);
+    private static ParseResult parseExtensionSdk(
+            ParseInput parseInput,
+            ParsingPackage parsingPackage,
+            Resources res,
+            XmlResourceParser parser
+    ) throws IOException, XmlPullParserException {
+        TypedArray sa = res.obtainAttributes(parser,
+                com.android.internal.R.styleable.AndroidManifestExtensionSdk);
+        int sdkVersion = sa.getInt(
+                com.android.internal.R.styleable.AndroidManifestExtensionSdk_sdkVersion, -1);
+        int minVersion = sa.getInt(
+                com.android.internal.R.styleable.AndroidManifestExtensionSdk_minExtensionVersion,
+                -1);
+        sa.recycle();
+
+        if (sdkVersion < 0) {
+            return parseInput.error(
+                PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                "<extension-sdk> must specify an sdkVersion >= 0");
+        }
+        if (minVersion < 0) {
+            return parseInput.error(
+                PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                "<extension-sdk> must specify minExtensionVersion >= 0");
+        }
+
+        try {
+            int version = SdkExtensions.getExtensionVersion(sdkVersion);
+            if (version < minVersion) {
+                return parseInput.error(
+                        PackageManager.INSTALL_FAILED_OLDER_SDK,
+                        "Package requires " + sdkVersion + " extension version " + minVersion
+                                + " which exceeds device version " + version);
+            }
+        } catch (RuntimeException e) {
+            return parseInput.error(
+                    PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                    "Specified sdkVersion " + sdkVersion + " is not valid");
+        }
         return parseInput.success(parsingPackage);
     }
 

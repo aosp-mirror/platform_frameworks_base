@@ -68,14 +68,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::ON_DEVICE_POWER_MEASUREMENT},
          {.puller = new PowerStatsPuller()}},
 
-        // wifi_activity_energy_info
-        {{.atomTag = android::util::WIFI_ACTIVITY_INFO},
-         {.puller = new StatsCompanionServicePuller(android::util::WIFI_ACTIVITY_INFO)}},
-
-        // modem_activity_info
-        {{.atomTag = android::util::MODEM_ACTIVITY_INFO},
-         {.puller = new StatsCompanionServicePuller(android::util::MODEM_ACTIVITY_INFO)}},
-
         // system_elapsed_realtime
         {{.atomTag = android::util::SYSTEM_ELAPSED_REALTIME},
          {.coolDownNs = NS_PER_SEC,
@@ -192,20 +184,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::CPU_TIME_PER_THREAD_FREQ},
          {.additiveFields = {7, 9, 11, 13, 15, 17, 19, 21},
           .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_THREAD_FREQ)}},
-
-        // DeviceCalculatedPowerUse.
-        {{.atomTag = android::util::DEVICE_CALCULATED_POWER_USE},
-         {.puller = new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_USE)}},
-
-        // DeviceCalculatedPowerBlameUid.
-        {{.atomTag = android::util::DEVICE_CALCULATED_POWER_BLAME_UID},
-         {.puller = new StatsCompanionServicePuller(
-                  android::util::DEVICE_CALCULATED_POWER_BLAME_UID)}},
-
-        // DeviceCalculatedPowerBlameOther.
-        {{.atomTag = android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER},
-         {.puller = new StatsCompanionServicePuller(
-                  android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER)}},
 
         // DebugElapsedClock.
         {{.atomTag = android::util::DEBUG_ELAPSED_CLOCK},

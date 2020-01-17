@@ -19,6 +19,7 @@ package com.android.server.stats;
 import static android.app.AppOpsManager.OP_FLAGS_ALL_TRUSTED;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
+import static android.os.Debug.getIonHeapsSizeKb;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.getUidForPid;
 import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
@@ -210,6 +211,8 @@ public class StatsPullAtomService extends SystemService {
     @Override
     public void onStart() {
         mStatsManager = (StatsManager) mContext.getSystemService(Context.STATS_MANAGER);
+        mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        mTelephony = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
 
         // Used to initialize the CPU Frequency atom.
         PowerProfile powerProfile = new PowerProfile(mContext);
@@ -263,6 +266,7 @@ public class StatsPullAtomService extends SystemService {
         registerProcessMemoryHighWaterMark();
         registerProcessMemorySnapshot();
         registerSystemIonHeapSize();
+        registerIonHeapSize();
         registerProcessSystemIonHeapSize();
         registerTemperature();
         registerCoolingDevice();
@@ -812,19 +816,96 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerWifiActivityInfo() {
-        // No op.
+        int tagId = StatsLog.WIFI_ACTIVITY_INFO;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullWifiActivityInfo(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullWifiActivityInfo() {
-        // No op.
+    private WifiManager mWifiManager;
+    private TelephonyManager mTelephony;
+
+    private int pullWifiActivityInfo(int atomTag, List<StatsEvent> pulledData) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            SynchronousResultReceiver wifiReceiver = new SynchronousResultReceiver("wifi");
+            mWifiManager.getWifiActivityEnergyInfoAsync(
+                    new Executor() {
+                        @Override
+                        public void execute(Runnable runnable) {
+                            // run the listener on the binder thread, if it was run on the main
+                            // thread it would deadlock since we would be waiting on ourselves
+                            runnable.run();
+                        }
+                    },
+                    info -> {
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, info);
+                        wifiReceiver.send(0, bundle);
+                    }
+            );
+            final WifiActivityEnergyInfo wifiInfo = awaitControllerInfo(wifiReceiver);
+            if (wifiInfo == null) {
+                return StatsManager.PULL_SKIP;
+            }
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeLong(wifiInfo.getTimeSinceBootMillis())
+                    .writeInt(wifiInfo.getStackState())
+                    .writeLong(wifiInfo.getControllerTxDurationMillis())
+                    .writeLong(wifiInfo.getControllerRxDurationMillis())
+                    .writeLong(wifiInfo.getControllerIdleDurationMillis())
+                    .writeLong(wifiInfo.getControllerEnergyUsedMicroJoules())
+                    .build();
+            pulledData.add(e);
+        } catch (RuntimeException e) {
+            Slog.e(TAG, "failed to getWifiActivityEnergyInfoAsync", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerModemActivityInfo() {
-        // No op.
+        int tagId = StatsLog.MODEM_ACTIVITY_INFO;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullModemActivityInfo(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullModemActivityInfo() {
-        // No op.
+    private int pullModemActivityInfo(int atomTag, List<StatsEvent> pulledData) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            SynchronousResultReceiver modemReceiver = new SynchronousResultReceiver("telephony");
+            mTelephony.requestModemActivityInfo(modemReceiver);
+            final ModemActivityInfo modemInfo = awaitControllerInfo(modemReceiver);
+            if (modemInfo == null) {
+                return StatsManager.PULL_SKIP;
+            }
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeLong(modemInfo.getTimestamp())
+                    .writeLong(modemInfo.getSleepTimeMillis())
+                    .writeLong(modemInfo.getIdleTimeMillis())
+                    .writeLong(modemInfo.getTransmitPowerInfo().get(0).getTimeInMillis())
+                    .writeLong(modemInfo.getTransmitPowerInfo().get(1).getTimeInMillis())
+                    .writeLong(modemInfo.getTransmitPowerInfo().get(2).getTimeInMillis())
+                    .writeLong(modemInfo.getTransmitPowerInfo().get(3).getTimeInMillis())
+                    .writeLong(modemInfo.getTransmitPowerInfo().get(4).getTimeInMillis())
+                    .writeLong(modemInfo.getReceiveTimeMillis())
+                    .build();
+            pulledData.add(e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerBluetoothActivityInfo() {
@@ -952,6 +1033,26 @@ public class StatsPullAtomService extends SystemService {
 
     private void pullSystemIonHeapSize() {
         // No op.
+    }
+
+    private void registerIonHeapSize() {
+        int tagId = StatsLog.ION_HEAP_SIZE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                /* PullAtomMetadata */ null,
+                (atomTag, data) -> pullIonHeapSize(atomTag, data),
+                Executors.newSingleThreadExecutor()
+        );
+    }
+
+    private int pullIonHeapSize(int atomTag, List<StatsEvent> pulledData) {
+        int ionHeapSizeInKilobytes = (int) getIonHeapsSizeKb();
+        StatsEvent e = StatsEvent.newBuilder()
+              .setAtomId(atomTag)
+              .writeInt(ionHeapSizeInKilobytes)
+              .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerProcessSystemIonHeapSize() {
@@ -1113,28 +1214,119 @@ public class StatsPullAtomService extends SystemService {
         // No op.
     }
 
-    private void registerDeviceCalculatedPowerUse() {
-        // No op.
+    // TODO: move to top of file when all migrations are complete
+    private BatteryStatsHelper mBatteryStatsHelper = null;
+    private static final int MAX_BATTERY_STATS_HELPER_FREQUENCY_MS = 1000;
+    private long mBatteryStatsHelperTimestampMs = -MAX_BATTERY_STATS_HELPER_FREQUENCY_MS;
+    private static final long MILLI_AMP_HR_TO_NANO_AMP_SECS = 1_000_000L * 3600L;
+
+    private BatteryStatsHelper getBatteryStatsHelper() {
+        if (mBatteryStatsHelper == null) {
+            final long callingToken = Binder.clearCallingIdentity();
+            try {
+                // clearCallingIdentity required for BatteryStatsHelper.checkWifiOnly().
+                mBatteryStatsHelper = new BatteryStatsHelper(mContext, false);
+            } finally {
+                Binder.restoreCallingIdentity(callingToken);
+            }
+            mBatteryStatsHelper.create((Bundle) null);
+        }
+        long currentTime = SystemClock.elapsedRealtime();
+        if (currentTime - mBatteryStatsHelperTimestampMs >= MAX_BATTERY_STATS_HELPER_FREQUENCY_MS) {
+            // Load BatteryStats and do all the calculations.
+            mBatteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED, UserHandle.USER_ALL);
+            // Calculations are done so we don't need to save the raw BatteryStats data in RAM.
+            mBatteryStatsHelper.clearStats();
+            mBatteryStatsHelperTimestampMs = currentTime;
+        }
+        return mBatteryStatsHelper;
     }
 
-    private void pullDeviceCalculatedPowerUse() {
-        // No op.
+    private long milliAmpHrsToNanoAmpSecs(double mAh) {
+        return (long) (mAh * MILLI_AMP_HR_TO_NANO_AMP_SECS + 0.5);
+    }
+
+    private void registerDeviceCalculatedPowerUse() {
+        int tagId = StatsLog.DEVICE_CALCULATED_POWER_USE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullDeviceCalculatedPowerUse(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
+    }
+
+    private int pullDeviceCalculatedPowerUse(int atomTag, List<StatsEvent> pulledData) {
+        BatteryStatsHelper bsHelper = getBatteryStatsHelper();
+        StatsEvent e = StatsEvent.newBuilder()
+                .setAtomId(atomTag)
+                .writeLong(milliAmpHrsToNanoAmpSecs(bsHelper.getComputedPower()))
+                .build();
+        pulledData.add(e);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerDeviceCalculatedPowerBlameUid() {
-        // No op.
+        int tagId = StatsLog.DEVICE_CALCULATED_POWER_BLAME_UID;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullDeviceCalculatedPowerBlameUid(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullDeviceCalculatedPowerBlameUid() {
-        // No op.
+    private int pullDeviceCalculatedPowerBlameUid(int atomTag, List<StatsEvent> pulledData) {
+        final List<BatterySipper> sippers = getBatteryStatsHelper().getUsageList();
+        if (sippers == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        for (BatterySipper bs : sippers) {
+            if (bs.drainType != bs.drainType.APP) {
+                continue;
+            }
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(bs.uidObj.getUid())
+                    .writeLong(milliAmpHrsToNanoAmpSecs(bs.totalPowerMah))
+                    .build();
+            pulledData.add(e);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerDeviceCalculatedPowerBlameOther() {
-        // No op.
+        int tagId = StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullDeviceCalculatedPowerBlameOther(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullDeviceCalculatedPowerBlameOther() {
-        // No op.
+    private int pullDeviceCalculatedPowerBlameOther(int atomTag, List<StatsEvent> pulledData) {
+        final List<BatterySipper> sippers = getBatteryStatsHelper().getUsageList();
+        if (sippers == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        for (BatterySipper bs : sippers) {
+            if (bs.drainType == bs.drainType.APP) {
+                continue; // This is a separate atom; see pullDeviceCalculatedPowerBlameUid().
+            }
+            if (bs.drainType == bs.drainType.USER) {
+                continue; // This is not supported. We purposefully calculate over USER_ALL.
+            }
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeInt(bs.drainType.ordinal())
+                    .writeLong(milliAmpHrsToNanoAmpSecs(bs.totalPowerMah))
+                    .build();
+            pulledData.add(e);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerDebugElapsedClock() {

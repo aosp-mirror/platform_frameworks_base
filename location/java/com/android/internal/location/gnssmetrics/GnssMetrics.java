@@ -110,7 +110,6 @@ public class GnssMetrics {
      * Logs the status of a location report received from the HAL
      */
     public void logReceivedLocationStatus(boolean isSuccessful) {
-        StatsLog.write(StatsLog.GPS_LOCATION_STATUS_REPORTED, isSuccessful);
         if (!isSuccessful) {
             mLocationFailureStatistics.addItem(1.0);
             return;
@@ -127,7 +126,6 @@ public class GnssMetrics {
                 DEFAULT_TIME_BETWEEN_FIXES_MILLISECS, desiredTimeBetweenFixesMilliSeconds)) - 1;
         if (numReportMissed > 0) {
             for (int i = 0; i < numReportMissed; i++) {
-                StatsLog.write(StatsLog.GPS_LOCATION_STATUS_REPORTED, false);
                 mLocationFailureStatistics.addItem(1.0);
             }
         }
@@ -138,7 +136,6 @@ public class GnssMetrics {
      */
     public void logTimeToFirstFixMilliSecs(int timeToFirstFixMilliSeconds) {
         mTimeToFirstFixSecStatistics.addItem((double) (timeToFirstFixMilliSeconds / 1000));
-        StatsLog.write(StatsLog.GPS_TIME_TO_FIRST_FIX_REPORTED, timeToFirstFixMilliSeconds);
     }
 
     /**

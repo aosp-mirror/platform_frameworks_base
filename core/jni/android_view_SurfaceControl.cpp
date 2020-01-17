@@ -423,6 +423,14 @@ static void nativeSetFlags(JNIEnv* env, jclass clazz, jlong transactionObj,
     transaction->setFlags(ctrl, flags, mask);
 }
 
+static void nativeSetFrameRateSelectionPriority(JNIEnv* env, jclass clazz, jlong transactionObj,
+        jlong nativeObject, jint priority) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    transaction->setFrameRateSelectionPriority(ctrl, priority);
+}
+
 static void nativeSetTransparentRegionHint(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jobject regionObj) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
@@ -1362,6 +1370,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetColorSpaceAgnostic },
     {"nativeSetFlags", "(JJII)V",
             (void*)nativeSetFlags },
+    {"nativeSetFrameRateSelectionPriority", "(JJI)V",
+            (void*)nativeSetFrameRateSelectionPriority },
     {"nativeSetWindowCrop", "(JJIIII)V",
             (void*)nativeSetWindowCrop },
     {"nativeSetCornerRadius", "(JJF)V",

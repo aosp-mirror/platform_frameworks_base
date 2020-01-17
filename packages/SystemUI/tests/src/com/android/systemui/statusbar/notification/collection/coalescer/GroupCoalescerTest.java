@@ -80,7 +80,8 @@ public class GroupCoalescerTest extends SysuiTestCase {
                         mExecutor,
                         mClock,
                         mLog,
-                        LINGER_DURATION);
+                        MIN_LINGER_DURATION,
+                        MAX_LINGER_DURATION);
         mCoalescer.setNotificationHandler(mListener);
         mCoalescer.attach(mListenerService);
 
@@ -96,7 +97,7 @@ public class GroupCoalescerTest extends SysuiTestCase {
                 new NotificationEntryBuilder()
                         .setId(0)
                         .setPkg(TEST_PACKAGE_A));
-        mClock.advanceTime(LINGER_DURATION);
+        mClock.advanceTime(MIN_LINGER_DURATION);
 
         // THEN the event is passed through to the handler
         verify(mListener).onNotificationPosted(notif1.sbn, notif1.rankingMap);
@@ -144,11 +145,15 @@ public class GroupCoalescerTest extends SysuiTestCase {
                 .setId(1)
                 .setGroup(mContext, GROUP_1));
 
+        mClock.advanceTime(2);
+
         NotifEvent notif2 = mNoMan.postNotif(new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_A)
                 .setId(2)
                 .setGroup(mContext, GROUP_1)
                 .setGroupSummary(mContext, true));
+
+        mClock.advanceTime(3);
 
         NotifEvent notif3 = mNoMan.postNotif(new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_A)
@@ -161,7 +166,7 @@ public class GroupCoalescerTest extends SysuiTestCase {
         verify(mListener, never()).onNotificationBatchPosted(anyList());
 
         // WHEN enough time passes
-        mClock.advanceTime(LINGER_DURATION);
+        mClock.advanceTime(MIN_LINGER_DURATION);
 
         // THEN the coalesced notifs are applied. The summary is sorted to the front.
         verify(mListener).onNotificationBatchPosted(Arrays.asList(
@@ -212,7 +217,7 @@ public class GroupCoalescerTest extends SysuiTestCase {
 
         // WHEN the time runs out on the remainder of the group
         clearInvocations(mListener);
-        mClock.advanceTime(LINGER_DURATION);
+        mClock.advanceTime(MIN_LINGER_DURATION);
 
         // THEN no lingering batch is applied
         verify(mListener, never()).onNotificationBatchPosted(anyList());
@@ -225,11 +230,13 @@ public class GroupCoalescerTest extends SysuiTestCase {
                 .setPkg(TEST_PACKAGE_A)
                 .setId(1)
                 .setGroup(mContext, GROUP_1));
+        mClock.advanceTime(2);
         NotifEvent notif2a = mNoMan.postNotif(new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_A)
                 .setId(2)
                 .setContentTitle(mContext, "Version 1")
                 .setGroup(mContext, GROUP_1));
+        mClock.advanceTime(4);
 
         // WHEN one of them gets updated
         NotifEvent notif2b = mNoMan.postNotif(new NotificationEntryBuilder()
@@ -248,7 +255,7 @@ public class GroupCoalescerTest extends SysuiTestCase {
                 any(RankingMap.class));
 
         // THEN second, the update is emitted
-        mClock.advanceTime(LINGER_DURATION);
+        mClock.advanceTime(MIN_LINGER_DURATION);
         verify(mListener).onNotificationBatchPosted(Collections.singletonList(
                 new CoalescedEvent(notif2b.key, 0, notif2b.sbn, notif2b.ranking, null)
         ));
@@ -308,14 +315,61 @@ public class GroupCoalescerTest extends SysuiTestCase {
                 .setId(17));
 
         // THEN they have the new rankings when they are eventually emitted
-        mClock.advanceTime(LINGER_DURATION);
+        mClock.advanceTime(MIN_LINGER_DURATION);
         verify(mListener).onNotificationBatchPosted(Arrays.asList(
                 new CoalescedEvent(notif1.key, 0, notif1.sbn, ranking1b, null),
                 new CoalescedEvent(notif2.key, 1, notif2.sbn, ranking2b, null)
         ));
     }
 
-    private static final long LINGER_DURATION = 4700;
+    @Test
+    public void testMaxLingerDuration() {
+        // GIVEN five coalesced notifications that have collectively taken 20ms to arrive, 2ms
+        // longer than the max linger duration
+        NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE_A)
+                .setId(1)
+                .setGroup(mContext, GROUP_1));
+        mClock.advanceTime(4);
+        NotifEvent notif2 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE_A)
+                .setId(2)
+                .setGroup(mContext, GROUP_1));
+        mClock.advanceTime(4);
+        NotifEvent notif3 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE_A)
+                .setId(3)
+                .setGroup(mContext, GROUP_1));
+        mClock.advanceTime(4);
+        NotifEvent notif4 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE_A)
+                .setId(4)
+                .setGroup(mContext, GROUP_1));
+        mClock.advanceTime(4);
+        NotifEvent notif5 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE_A)
+                .setId(5)
+                .setGroup(mContext, GROUP_1));
+        mClock.advanceTime(4);
+
+        // WHEN a sixth notification arrives
+        NotifEvent notif6 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE_A)
+                .setId(6)
+                .setGroup(mContext, GROUP_1));
+
+        // THEN the first five notifications are emitted in a batch
+        verify(mListener).onNotificationBatchPosted(Arrays.asList(
+                new CoalescedEvent(notif1.key, 0, notif1.sbn, notif1.ranking, null),
+                new CoalescedEvent(notif2.key, 1, notif2.sbn, notif2.ranking, null),
+                new CoalescedEvent(notif3.key, 2, notif3.sbn, notif3.ranking, null),
+                new CoalescedEvent(notif4.key, 3, notif4.sbn, notif4.ranking, null),
+                new CoalescedEvent(notif5.key, 4, notif5.sbn, notif5.ranking, null)
+        ));
+    }
+
+    private static final long MIN_LINGER_DURATION = 5;
+    private static final long MAX_LINGER_DURATION = 18;
 
     private static final String TEST_PACKAGE_A = "com.test.package_a";
     private static final String TEST_PACKAGE_B = "com.test.package_b";

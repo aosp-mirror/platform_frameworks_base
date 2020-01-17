@@ -28,10 +28,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.parsing.ComponentParseUtils;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
 import android.content.pm.parsing.PackageImpl;
 import android.content.pm.parsing.ParsingPackage;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Process;
 import android.util.ArrayMap;
@@ -49,6 +51,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -116,6 +119,15 @@ public class AppsFilterTest {
                 .addActivity(activity);
     }
 
+    private static ParsingPackage pkgWithProvider(String packageName, String authority) {
+        ComponentParseUtils.ParsedProvider provider = new ComponentParseUtils.ParsedProvider();
+        provider.setPackageName(packageName);
+        provider.setExported(true);
+        provider.setAuthority(authority);
+        return pkg(packageName)
+                .addProvider(provider);
+    }
+
     @Before
     public void setup() throws Exception {
         mExisting = new ArrayMap<>();
@@ -144,6 +156,55 @@ public class AppsFilterTest {
                 pkg("com.some.package", new IntentFilter("TEST_ACTION")), DUMMY_TARGET_UID);
         PackageSetting calling = simulateAddPackage(appsFilter,
                 pkg("com.some.other.package", new Intent("TEST_ACTION")), DUMMY_CALLING_UID);
+
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+    }
+
+    @Test
+    public void testQueriesProvider_FilterMatches() {
+        final AppsFilter appsFilter =
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+        appsFilter.onSystemReady();
+
+        PackageSetting target = simulateAddPackage(appsFilter,
+                pkgWithProvider("com.some.package", "com.some.authority"), DUMMY_TARGET_UID);
+        PackageSetting calling = simulateAddPackage(appsFilter,
+                pkg("com.some.other.package",
+                        new Intent().setData(Uri.parse("content://com.some.authority"))),
+                DUMMY_CALLING_UID);
+
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+    }
+
+    @Test
+    public void testQueriesDifferentProvider_Filters() {
+        final AppsFilter appsFilter =
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+        appsFilter.onSystemReady();
+
+        PackageSetting target = simulateAddPackage(appsFilter,
+                pkgWithProvider("com.some.package", "com.some.authority"), DUMMY_TARGET_UID);
+        PackageSetting calling = simulateAddPackage(appsFilter,
+                pkg("com.some.other.package",
+                        new Intent().setData(Uri.parse("content://com.some.other.authority"))),
+                DUMMY_CALLING_UID);
+
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+    }
+
+    @Test
+    public void testQueriesProviderWithSemiColon_FilterMatches() {
+        final AppsFilter appsFilter =
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+        appsFilter.onSystemReady();
+
+        PackageSetting target = simulateAddPackage(appsFilter,
+                pkgWithProvider("com.some.package", "com.some.authority;com.some.other.authority"),
+                DUMMY_TARGET_UID);
+        PackageSetting calling = simulateAddPackage(appsFilter,
+                pkg("com.some.other.package",
+                        new Intent().setData(Uri.parse("content://com.some.authority"))),
+                DUMMY_CALLING_UID);
 
         assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
     }

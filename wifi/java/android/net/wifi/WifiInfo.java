@@ -700,6 +700,11 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Returns the Fully Qualified Domain Name of the network if it is a Passpoint network.
+     * <p>
+     * The FQDN may be
+     * <lt>{@code null} if no network currently connected, currently connected network is not
+     * passpoint network or the caller has insufficient permissions to access the FQDN.</lt>
+     * </p>
      */
     public @Nullable String getPasspointFqdn() {
         return mFqdn;
@@ -712,6 +717,12 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Returns the Provider Friendly Name of the network if it is a Passpoint network.
+     * <p>
+     * The Provider Friendly Name may be
+     * <lt>{@code null} if no network currently connected, currently connected network is not
+     * passpoint network or the caller has insufficient permissions to access the Provider Friendly
+     * Name. </lt>
+     * </p>
      */
     public @Nullable String getPasspointProviderFriendlyName() {
         return mProviderFriendlyName;

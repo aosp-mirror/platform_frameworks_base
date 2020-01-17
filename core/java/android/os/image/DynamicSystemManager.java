@@ -106,9 +106,9 @@ public class DynamicSystemManager {
      * @return true if the call succeeds
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-    public boolean startInstallation() {
+    public boolean startInstallation(String dsuSlot) {
         try {
-            return mService.startInstallation();
+            return mService.startInstallation(dsuSlot);
         } catch (RemoteException e) {
             throw new RuntimeException(e.toString());
         }

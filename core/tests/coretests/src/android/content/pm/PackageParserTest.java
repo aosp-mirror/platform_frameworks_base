@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.apex.ApexInfo;
 import android.content.Context;
@@ -485,5 +486,35 @@ public class PackageParserTest {
         assertTrue(pi.isApex);
         assertTrue((pi.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0);
         assertTrue((pi.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0);
+    }
+
+    @Test
+    public void testUsesSdk() throws Exception {
+        parsePackage("install_uses_sdk.apk_r0", R.raw.install_uses_sdk_r0, x -> x);
+        try {
+            parsePackage("install_uses_sdk.apk_r5", R.raw.install_uses_sdk_r5, x -> x);
+            fail("Expected parsing exception due to incompatible extension SDK version");
+        } catch (PackageParser.PackageParserException expected) {
+            assertEquals(PackageManager.INSTALL_FAILED_OLDER_SDK, expected.error);
+        }
+        try {
+            parsePackage("install_uses_sdk.apk_q0", R.raw.install_uses_sdk_q0, x -> x);
+            fail("Expected parsing exception due to non-existent extension SDK");
+        } catch (PackageParser.PackageParserException expected) {
+            assertEquals(PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED, expected.error);
+        }
+        try {
+            parsePackage("install_uses_sdk.apk_r", R.raw.install_uses_sdk_r, x -> x);
+            fail("Expected parsing exception due to unspecified extension SDK version");
+        } catch (PackageParser.PackageParserException expected) {
+            assertEquals(PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED, expected.error);
+        }
+        try {
+            parsePackage("install_uses_sdk.apk_0", R.raw.install_uses_sdk_0, x -> x);
+            fail("Expected parsing exception due to unspecified extension SDK");
+        } catch (PackageParser.PackageParserException expected) {
+            assertEquals(PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED, expected.error);
+        }
+
     }
 }

@@ -16,17 +16,21 @@
 
 package com.android.overlaytest.remounted;
 
+import static org.junit.Assert.assertTrue;
+
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
+import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
-import java.util.Collections;
-import java.util.List;
-
 @RunWith(DeviceJUnit4ClassRunner.class)
-public class OverlaySharedLibraryTest extends OverlayHostTest {
+public class OverlaySharedLibraryTest extends BaseHostJUnit4Test {
     private static final String TARGET_APK = "OverlayRemountedTest_Target.apk";
     private static final String TARGET_PACKAGE = "com.android.overlaytest.remounted.target";
     private static final String SHARED_LIBRARY_APK =
@@ -38,6 +42,17 @@ public class OverlaySharedLibraryTest extends OverlayHostTest {
     private static final String SHARED_LIBRARY_OVERLAY_PACKAGE =
             "com.android.overlaytest.remounted.shared_library.overlay";
 
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final SystemPreparer preparer = new SystemPreparer(temporaryFolder, this::getDevice);
+
+    @Rule
+    public final RuleChain ruleChain = RuleChain.outerRule(temporaryFolder).around(preparer);
+
+    @Before
+    public void startBefore() throws DeviceNotAvailableException {
+        getDevice().waitForDeviceAvailable();
+    }
+
     @Test
     public void testSharedLibrary() throws Exception {
         final String targetResource = resourceName(TARGET_PACKAGE, "bool",
@@ -45,23 +60,20 @@ public class OverlaySharedLibraryTest extends OverlayHostTest {
         final String libraryResource = resourceName(SHARED_LIBRARY_PACKAGE, "bool",
                 "shared_library_overlaid");
 
-        mPreparer.pushResourceFile(SHARED_LIBRARY_APK, "/product/app/SharedLibrary.apk")
+        preparer.pushResourceFile(SHARED_LIBRARY_APK, "/product/app/SharedLibrary.apk")
                 .installResourceApk(SHARED_LIBRARY_OVERLAY_APK, SHARED_LIBRARY_OVERLAY_PACKAGE)
                 .reboot()
                 .setOverlayEnabled(SHARED_LIBRARY_OVERLAY_PACKAGE, false)
                 .installResourceApk(TARGET_APK, TARGET_PACKAGE);
 
         // The shared library resource is not currently overlaid.
-        retrieveResource(Collections.emptyList(), targetResource, libraryResource);
-        assertResource(targetResource, 0x12 /* TYPE_INT_BOOLEAN */, "false");
-        assertResource(libraryResource, 0x12 /* TYPE_INT_BOOLEAN */, "false");
+        assertResource(targetResource, "false");
+        assertResource(libraryResource, "false");
 
         // Overlay the shared library resource.
-        mPreparer.setOverlayEnabled(SHARED_LIBRARY_OVERLAY_PACKAGE, true);
-        retrieveResource(getPackagePaths(SHARED_LIBRARY_OVERLAY_PACKAGE), targetResource,
-                libraryResource);
-        assertResource(targetResource, 0x12 /* TYPE_INT_BOOLEAN */, "true");
-        assertResource(libraryResource, 0x12 /* TYPE_INT_BOOLEAN */, "true");
+        preparer.setOverlayEnabled(SHARED_LIBRARY_OVERLAY_PACKAGE, true);
+        assertResource(targetResource, "true");
+        assertResource(libraryResource, "true");
     }
 
     @Test
@@ -71,20 +83,27 @@ public class OverlaySharedLibraryTest extends OverlayHostTest {
         final String libraryResource = resourceName(SHARED_LIBRARY_PACKAGE, "bool",
                 "shared_library_overlaid");
 
-        mPreparer.pushResourceFile(SHARED_LIBRARY_APK, "/product/app/SharedLibrary.apk")
+        preparer.pushResourceFile(SHARED_LIBRARY_APK, "/product/app/SharedLibrary.apk")
                 .installResourceApk(SHARED_LIBRARY_OVERLAY_APK, SHARED_LIBRARY_OVERLAY_PACKAGE)
                 .setOverlayEnabled(SHARED_LIBRARY_OVERLAY_PACKAGE, true)
                 .reboot()
                 .installResourceApk(TARGET_APK, TARGET_PACKAGE);
 
-        retrieveResource(getPackagePaths(SHARED_LIBRARY_OVERLAY_PACKAGE), targetResource,
-                libraryResource);
-        assertResource(targetResource, 0x12 /* TYPE_INT_BOOLEAN */, "true");
-        assertResource(libraryResource, 0x12 /* TYPE_INT_BOOLEAN */, "true");
+        assertResource(targetResource, "true");
+        assertResource(libraryResource, "true");
     }
 
-    private void retrieveResource(List<String> requiredOverlayPaths, String... resourceNames)
+    /** Builds the full name of a resource in the form package:type/entry. */
+    String resourceName(String pkg, String type, String entry) {
+        return String.format("%s:%s/%s", pkg, type, entry);
+    }
+
+    void assertResource(String resourceName, String expectedValue)
             throws DeviceNotAvailableException {
-        retrieveResource(TARGET_PACKAGE, requiredOverlayPaths, resourceNames);
+        final String result = getDevice().executeShellCommand(
+                String.format("cmd overlay lookup %s %s", TARGET_PACKAGE, resourceName));
+        assertTrue(String.format("expected: <[%s]> in: <[%s]>", expectedValue, result),
+                result.equals(expectedValue + "\n") ||
+                result.endsWith("-> " + expectedValue + "\n"));
     }
 }

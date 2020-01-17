@@ -50,6 +50,7 @@ import android.net.NetworkPolicyManager;
 import android.os.BatteryManagerInternal;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 
 import com.android.server.AppStateTracker;
@@ -95,6 +96,7 @@ public class JobSchedulerServiceTest {
                 .initMocks(this)
                 .strictness(Strictness.LENIENT)
                 .mockStatic(LocalServices.class)
+                .mockStatic(ServiceManager.class)
                 .startMocking();
 
         // Called in JobSchedulerService constructor.

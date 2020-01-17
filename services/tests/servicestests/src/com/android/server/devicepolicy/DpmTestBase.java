@@ -24,6 +24,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
+import android.annotation.RawRes;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -36,6 +37,7 @@ import android.content.pm.ResolveInfo;
 import android.os.UserHandle;
 import android.test.AndroidTestCase;
 
+import java.io.InputStream;
 import java.util.List;
 
 public abstract class DpmTestBase extends AndroidTestCase {
@@ -255,5 +257,9 @@ public abstract class DpmTestBase extends AndroidTestCase {
                 anyString(), anyLong())).thenAnswer(
                 invocation -> invocation.getArguments()[1]
         );
+    }
+
+    protected InputStream getRawStream(@RawRes int id) {
+        return mRealTestContext.getResources().openRawResource(id);
     }
 }

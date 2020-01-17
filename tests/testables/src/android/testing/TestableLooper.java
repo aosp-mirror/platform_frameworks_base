@@ -234,6 +234,7 @@ public class TestableLooper {
             try {
                 mLooper = setAsMain ? Looper.getMainLooper() : createLooper();
                 mTestableLooper = new TestableLooper(mLooper, false);
+                mTestableLooper.getLooper().getThread().setName(test.getClass().getName());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

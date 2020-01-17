@@ -17,24 +17,33 @@
 package android.media.tv.tuner.frontend;
 
 /**
- * Analog Capabilities.
+ * Capabilities for analog tuners.
+ *
  * @hide
  */
 public class AnalogFrontendCapabilities extends FrontendCapabilities {
+    @AnalogFrontendSettings.SignalType
     private final int mTypeCap;
+    @AnalogFrontendSettings.SifStandard
     private final int mSifStandardCap;
 
-    AnalogFrontendCapabilities(int typeCap, int sifStandardCap) {
+    // Called by JNI code.
+    private AnalogFrontendCapabilities(int typeCap, int sifStandardCap) {
         mTypeCap = typeCap;
         mSifStandardCap = sifStandardCap;
     }
+
     /**
-     * Gets type capability.
+     * Gets analog signal type capability.
      */
-    public int getTypeCapability() {
+    @AnalogFrontendSettings.SignalType
+    public int getSignalTypeCapability() {
         return mTypeCap;
     }
-    /** Gets SIF standard capability. */
+    /**
+     * Gets Standard Interchange Format (SIF) capability.
+     */
+    @AnalogFrontendSettings.SifStandard
     public int getSifStandardCapability() {
         return mSifStandardCap;
     }

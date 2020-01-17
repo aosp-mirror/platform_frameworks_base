@@ -431,6 +431,47 @@ TEST_F(TableFlattenerTest, FlattenSharedLibrary) {
   EXPECT_EQ("lib", iter->second);
 }
 
+TEST_F(TableFlattenerTest, FlattenSharedLibraryWithStyle) {
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetCompilationPackage("lib").SetPackageId(0x00).Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("lib", 0x00)
+          .AddValue("lib:style/Theme",
+                    ResourceId(0x00030001),
+                    test::StyleBuilder()
+                    .AddItem("lib:attr/bar", ResourceId(0x00010002),
+                             ResourceUtils::TryParseInt("2"))
+                    .AddItem("lib:attr/foo", ResourceId(0x00010001),
+                             ResourceUtils::TryParseInt("1"))
+                    .AddItem("android:attr/bar", ResourceId(0x01010002),
+                             ResourceUtils::TryParseInt("4"))
+                    .AddItem("android:attr/foo", ResourceId(0x01010001),
+                             ResourceUtils::TryParseInt("3"))
+                    .Build())
+          .Build();
+  ResourceTable result;
+  ASSERT_TRUE(Flatten(context.get(), {}, table.get(), &result));
+
+  Maybe<ResourceTable::SearchResult> search_result =
+      result.FindResource(test::ParseNameOrDie("lib:style/Theme"));
+  ASSERT_TRUE(search_result);
+  EXPECT_EQ(0x00u, search_result.value().package->id.value());
+  EXPECT_EQ(0x03u, search_result.value().type->id.value());
+  EXPECT_EQ(0x01u, search_result.value().entry->id.value());
+  ASSERT_EQ(1u, search_result.value().entry->values.size());
+  Value* value = search_result.value().entry->values[0]->value.get();
+  Style* style = ValueCast<Style>(value);
+  ASSERT_TRUE(style);
+  ASSERT_EQ(4u, style->entries.size());
+  // Ensure the attributes from the shared library come after the items from
+  // android.
+  EXPECT_EQ(0x01010001, style->entries[0].key.id.value());
+  EXPECT_EQ(0x01010002, style->entries[1].key.id.value());
+  EXPECT_EQ(0x00010001, style->entries[2].key.id.value());
+  EXPECT_EQ(0x00010002, style->entries[3].key.id.value());
+}
+
 TEST_F(TableFlattenerTest, FlattenTableReferencingSharedLibraries) {
   std::unique_ptr<IAaptContext> context =
       test::ContextBuilder().SetCompilationPackage("app").SetPackageId(0x7f).Build();

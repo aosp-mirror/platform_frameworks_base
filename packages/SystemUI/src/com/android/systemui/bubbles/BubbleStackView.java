@@ -73,7 +73,6 @@ import com.android.systemui.R;
 import com.android.systemui.bubbles.animation.ExpandedAnimationController;
 import com.android.systemui.bubbles.animation.PhysicsAnimationLayout;
 import com.android.systemui.bubbles.animation.StackAnimationController;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -714,22 +713,6 @@ public class BubbleStackView extends FrameLayout {
      */
     Bubble getExpandedBubble() {
         return mExpandedBubble;
-    }
-
-    /**
-     * Sets the bubble that should be expanded and expands if needed.
-     *
-     * @param key the {@link NotificationEntry#key} associated with the bubble to expand.
-     * @deprecated replaced by setSelectedBubble(Bubble) + setExpanded(true)
-     */
-    @Deprecated
-    void setExpandedBubble(String key) {
-        Bubble bubbleToExpand = mBubbleData.getBubbleWithKey(key);
-        if (bubbleToExpand != null) {
-            setSelectedBubble(bubbleToExpand);
-            bubbleToExpand.setShowInShade(false);
-            setExpanded(true);
-        }
     }
 
     // via BubbleData.Listener

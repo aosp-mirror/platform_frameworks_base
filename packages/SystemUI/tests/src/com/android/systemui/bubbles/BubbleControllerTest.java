@@ -356,8 +356,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Switch which bubble is expanded
         mBubbleController.selectBubble(mRow.getEntry().getKey());
-        stackView.setExpandedBubble(mRow.getEntry().getKey());
-        assertEquals(mRow.getEntry(), stackView.getExpandedBubble().getEntry());
+        mBubbleController.expandStack();
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry().getKey()));
 

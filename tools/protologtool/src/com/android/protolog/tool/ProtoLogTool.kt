@@ -53,35 +53,37 @@ object ProtoLogTool {
 
         val executor = newThreadPool()
 
-        command.javaSourceArgs.map { path ->
-            executor.submitCallable {
-                val transformer = SourceTransformer(command.protoLogImplClassNameArg,
-                        command.protoLogCacheClassNameArg, processor)
-                val file = File(path)
-                val text = injector.readText(file)
-                val outSrc = try {
-                    val code = tryParse(text, path)
-                    if (containsProtoLogText(text, command.protoLogClassNameArg)) {
-                        transformer.processClass(text, path, packagePath(file, code), code)
-                    } else {
+        try {
+            command.javaSourceArgs.map { path ->
+                executor.submitCallable {
+                    val transformer = SourceTransformer(command.protoLogImplClassNameArg,
+                            command.protoLogCacheClassNameArg, processor)
+                    val file = File(path)
+                    val text = injector.readText(file)
+                    val outSrc = try {
+                        val code = tryParse(text, path)
+                        if (containsProtoLogText(text, command.protoLogClassNameArg)) {
+                            transformer.processClass(text, path, packagePath(file, code), code)
+                        } else {
+                            text
+                        }
+                    } catch (ex: ParsingException) {
+                        // If we cannot parse this file, skip it (and log why). Compilation will
+                        // fail in a subsequent build step.
+                        injector.reportParseError(ex)
                         text
                     }
-                } catch (ex: ParsingException) {
-                    // If we cannot parse this file, skip it (and log why). Compilation will fail
-                    // in a subsequent build step.
-                    injector.reportParseError(ex)
-                    text
+                    path to outSrc
                 }
-                path to outSrc
+            }.map { future ->
+                val (path, outSrc) = future.get()
+                outJar.putNextEntry(ZipEntry(path))
+                outJar.write(outSrc.toByteArray())
+                outJar.closeEntry()
             }
-        }.map { future ->
-            val (path, outSrc) = future.get()
-            outJar.putNextEntry(ZipEntry(path))
-            outJar.write(outSrc.toByteArray())
-            outJar.closeEntry()
+        } finally {
+            executor.shutdown()
         }
-
-        executor.shutdown()
 
         val cacheSplit = command.protoLogCacheClassNameArg.split(".")
         val cacheName = cacheSplit.last()
@@ -153,29 +155,31 @@ ${updates.replaceIndent("                    ")}
 
         val executor = newThreadPool()
 
-        command.javaSourceArgs.map { path ->
-            executor.submitCallable {
-                val file = File(path)
-                val text = injector.readText(file)
-                if (containsProtoLogText(text, command.protoLogClassNameArg)) {
-                    try {
-                        val code = tryParse(text, path)
-                        builder.findLogCalls(code, path, packagePath(file, code))
-                    } catch (ex: ParsingException) {
-                        // If we cannot parse this file, skip it (and log why). Compilation will fail
-                        // in a subsequent build step.
-                        injector.reportParseError(ex)
+        try {
+            command.javaSourceArgs.map { path ->
+                executor.submitCallable {
+                    val file = File(path)
+                    val text = injector.readText(file)
+                    if (containsProtoLogText(text, command.protoLogClassNameArg)) {
+                        try {
+                            val code = tryParse(text, path)
+                            builder.findLogCalls(code, path, packagePath(file, code))
+                        } catch (ex: ParsingException) {
+                            // If we cannot parse this file, skip it (and log why). Compilation will
+                            // fail in a subsequent build step.
+                            injector.reportParseError(ex)
+                            null
+                        }
+                    } else {
                         null
                     }
-                } else {
-                    null
                 }
+            }.forEach { future ->
+                builder.addLogCalls(future.get() ?: return@forEach)
             }
-        }.forEach { future ->
-            builder.addLogCalls(future.get() ?: return@forEach)
+        } finally {
+            executor.shutdown()
         }
-
-        executor.shutdown()
 
         val out = injector.fileOutputStream(command.viewerConfigJsonArg)
         out.write(builder.build().toByteArray())

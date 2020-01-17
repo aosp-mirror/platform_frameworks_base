@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.coalescer;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,8 @@ public class EventBatch {
      * summaries.
      */
     final List<CoalescedEvent> mMembers = new ArrayList<>();
+
+    @Nullable Runnable mCancelShortTimeout;
 
     EventBatch(long createdTimestamp, String groupKey) {
         mCreatedTimestamp = createdTimestamp;

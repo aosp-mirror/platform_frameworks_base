@@ -19,6 +19,7 @@ package android.util;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.DeadSystemException;
 
@@ -400,7 +401,7 @@ public final class Log {
      * @param message The message you would like logged.
      * @hide
      */
-    // @SystemApi(client= SystemApi.Client.MODULE_LIBRARIES) // TODO Uncomment once http://ag/9956147 is in.
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static int logToRadioBuffer(@Level int priority, @Nullable String tag,
             @Nullable String message) {
         return println_native(LOG_ID_RADIO, priority, tag, message);

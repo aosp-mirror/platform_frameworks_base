@@ -2539,7 +2539,8 @@ public class Activity extends ContextThemeWrapper
         mCalled = true;
 
         if (mAutoFillResetNeeded) {
-            getAutofillManager().onInvisibleForAutofill();
+            // If stopped without changing the configurations, the response should expire.
+            getAutofillManager().onInvisibleForAutofill(!mChangingConfigurations);
         } else if (mIntent != null
                 && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)
                 && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY)) {

@@ -3008,6 +3008,10 @@
       <public name="supportsInlineSuggestions" />
       <public name="crossProfile" />
       <public name="canTakeScreenshot"/>
+      <!-- @hide @SystemApi -->
+      <public name="sdkVersion" />
+      <!-- @hide @SystemApi -->
+      <public name="minExtensionVersion" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">

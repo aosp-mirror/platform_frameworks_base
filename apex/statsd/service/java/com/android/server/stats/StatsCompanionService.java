@@ -714,111 +714,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    /**
-     * Helper method to extract the Parcelable controller info from a
-     * SynchronousResultReceiver.
-     */
-    private static <T extends Parcelable> T awaitControllerInfo(
-            @Nullable SynchronousResultReceiver receiver) {
-        if (receiver == null) {
-            return null;
-        }
-
-        try {
-            final SynchronousResultReceiver.Result result =
-                    receiver.awaitResult(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS);
-            if (result.bundle != null) {
-                // This is the final destination for the Bundle.
-                result.bundle.setDefusable(true);
-
-                final T data = result.bundle.getParcelable(
-                        RESULT_RECEIVER_CONTROLLER_KEY);
-                if (data != null) {
-                    return data;
-                }
-            }
-            Slog.e(TAG, "no controller energy info supplied for " + receiver.getName());
-        } catch (TimeoutException e) {
-            Slog.w(TAG, "timeout reading " + receiver.getName() + " stats");
-        }
-        return null;
-    }
-
-    private void pullWifiActivityInfo(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        WifiManager wifiManager;
-        synchronized (this) {
-            if (mWifiManager == null) {
-                mWifiManager = mContext.getSystemService(WifiManager.class);
-            }
-            wifiManager = mWifiManager;
-        }
-        if (wifiManager == null) {
-            return;
-        }
-        long token = Binder.clearCallingIdentity();
-        try {
-            SynchronousResultReceiver wifiReceiver = new SynchronousResultReceiver("wifi");
-            wifiManager.getWifiActivityEnergyInfoAsync(
-                    new Executor() {
-                        @Override
-                        public void execute(Runnable runnable) {
-                            // run the listener on the binder thread, if it was run on the main
-                            // thread it would deadlock since we would be waiting on ourselves
-                            runnable.run();
-                        }
-                    },
-                    info -> {
-                        Bundle bundle = new Bundle();
-                        bundle.putParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, info);
-                        wifiReceiver.send(0, bundle);
-                    }
-            );
-            final WifiActivityEnergyInfo wifiInfo = awaitControllerInfo(wifiReceiver);
-            if (wifiInfo == null) {
-                return;
-            }
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeLong(wifiInfo.getTimeSinceBootMillis());
-            e.writeInt(wifiInfo.getStackState());
-            e.writeLong(wifiInfo.getControllerTxDurationMillis());
-            e.writeLong(wifiInfo.getControllerRxDurationMillis());
-            e.writeLong(wifiInfo.getControllerIdleDurationMillis());
-            e.writeLong(wifiInfo.getControllerEnergyUsedMicroJoules());
-            pulledData.add(e);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    private void pullModemActivityInfo(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long token = Binder.clearCallingIdentity();
-        synchronized (this) {
-            if (mTelephony == null) {
-                mTelephony = mContext.getSystemService(TelephonyManager.class);
-            }
-        }
-        if (mTelephony != null) {
-            SynchronousResultReceiver modemReceiver = new SynchronousResultReceiver("telephony");
-            mTelephony.requestModemActivityInfo(modemReceiver);
-            final ModemActivityInfo modemInfo = awaitControllerInfo(modemReceiver);
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeLong(modemInfo.getTimestamp());
-            e.writeLong(modemInfo.getSleepTimeMillis());
-            e.writeLong(modemInfo.getIdleTimeMillis());
-            e.writeLong(modemInfo.getTransmitPowerInfo().get(0).getTimeInMillis());
-            e.writeLong(modemInfo.getTransmitPowerInfo().get(1).getTimeInMillis());
-            e.writeLong(modemInfo.getTransmitPowerInfo().get(2).getTimeInMillis());
-            e.writeLong(modemInfo.getTransmitPowerInfo().get(3).getTimeInMillis());
-            e.writeLong(modemInfo.getTransmitPowerInfo().get(4).getTimeInMillis());
-            e.writeLong(modemInfo.getReceiveTimeMillis());
-            pulledData.add(e);
-        }
-    }
-
     private void pullSystemElapsedRealtime(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -1404,78 +1299,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private BatteryStatsHelper getBatteryStatsHelper() {
-        if (mBatteryStatsHelper == null) {
-            final long callingToken = Binder.clearCallingIdentity();
-            try {
-                // clearCallingIdentity required for BatteryStatsHelper.checkWifiOnly().
-                mBatteryStatsHelper = new BatteryStatsHelper(mContext, false);
-            } finally {
-                Binder.restoreCallingIdentity(callingToken);
-            }
-            mBatteryStatsHelper.create((Bundle) null);
-        }
-        long currentTime = SystemClock.elapsedRealtime();
-        if (currentTime - mBatteryStatsHelperTimestampMs >= MAX_BATTERY_STATS_HELPER_FREQUENCY_MS) {
-            // Load BatteryStats and do all the calculations.
-            mBatteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED, UserHandle.USER_ALL);
-            // Calculations are done so we don't need to save the raw BatteryStats data in RAM.
-            mBatteryStatsHelper.clearStats();
-            mBatteryStatsHelperTimestampMs = currentTime;
-        }
-        return mBatteryStatsHelper;
-    }
-
-    private long milliAmpHrsToNanoAmpSecs(double mAh) {
-        final long MILLI_AMP_HR_TO_NANO_AMP_SECS = 1_000_000L * 3600L;
-        return (long) (mAh * MILLI_AMP_HR_TO_NANO_AMP_SECS + 0.5);
-    }
-
-    private void pullDeviceCalculatedPowerUse(int tagId,
-            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
-        BatteryStatsHelper bsHelper = getBatteryStatsHelper();
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-        e.writeLong(milliAmpHrsToNanoAmpSecs(bsHelper.getComputedPower()));
-        pulledData.add(e);
-    }
-
-    private void pullDeviceCalculatedPowerBlameUid(int tagId,
-            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
-        final List<BatterySipper> sippers = getBatteryStatsHelper().getUsageList();
-        if (sippers == null) {
-            return;
-        }
-        for (BatterySipper bs : sippers) {
-            if (bs.drainType != bs.drainType.APP) {
-                continue;
-            }
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(bs.uidObj.getUid());
-            e.writeLong(milliAmpHrsToNanoAmpSecs(bs.totalPowerMah));
-            pulledData.add(e);
-        }
-    }
-
-    private void pullDeviceCalculatedPowerBlameOther(int tagId,
-            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
-        final List<BatterySipper> sippers = getBatteryStatsHelper().getUsageList();
-        if (sippers == null) {
-            return;
-        }
-        for (BatterySipper bs : sippers) {
-            if (bs.drainType == bs.drainType.APP) {
-                continue; // This is a separate atom; see pullDeviceCalculatedPowerBlameUid().
-            }
-            if (bs.drainType == bs.drainType.USER) {
-                continue; // This is not supported. We purposefully calculate over USER_ALL.
-            }
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(bs.drainType.ordinal());
-            e.writeLong(milliAmpHrsToNanoAmpSecs(bs.totalPowerMah));
-            pulledData.add(e);
-        }
-    }
-
     private void pullDiskIo(int tagId, long elapsedNanos, final long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         mStoragedUidIoStatsReader.readAbsolute((uid, fgCharsRead, fgCharsWrite, fgBytesRead,
@@ -1995,16 +1818,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
         switch (tagId) {
 
-            case StatsLog.WIFI_ACTIVITY_INFO: {
-                pullWifiActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.MODEM_ACTIVITY_INFO: {
-                pullModemActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
             case StatsLog.SYSTEM_ELAPSED_REALTIME: {
                 pullSystemElapsedRealtime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
@@ -2104,21 +1917,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.CPU_TIME_PER_THREAD_FREQ: {
                 pullCpuTimePerThreadFreq(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.DEVICE_CALCULATED_POWER_USE: {
-                pullDeviceCalculatedPowerUse(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.DEVICE_CALCULATED_POWER_BLAME_UID: {
-                pullDeviceCalculatedPowerBlameUid(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER: {
-                pullDeviceCalculatedPowerBlameOther(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

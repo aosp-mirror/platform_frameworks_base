@@ -487,11 +487,8 @@ public final class WindowManagerGlobal {
         ViewRootImpl root = mRoots.get(index);
         View view = root.getView();
 
-        if (view != null) {
-            InputMethodManager imm = view.getContext().getSystemService(InputMethodManager.class);
-            if (imm != null) {
-                imm.windowDismissed(mViews.get(index).getWindowToken());
-            }
+        if (root != null) {
+            root.getImeFocusController().onWindowDismissed();
         }
         boolean deferred = root.die(immediate);
         if (view != null) {

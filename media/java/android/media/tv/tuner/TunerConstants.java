@@ -20,6 +20,11 @@ import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
+import android.media.tv.tuner.frontend.DvbcFrontendSettings;
+import android.media.tv.tuner.frontend.DvbsFrontendSettings;
+import android.media.tv.tuner.frontend.Isdbs3FrontendSettings;
+import android.media.tv.tuner.frontend.IsdbsFrontendSettings;
+import android.media.tv.tuner.frontend.IsdbtFrontendSettings;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -124,93 +129,29 @@ public final class TunerConstants {
      */
     public static final int FILTER_STATUS_OVERFLOW = Constants.DemuxFilterStatus.OVERFLOW;
 
-    /**
-     * Indexes can be tagged through TS (Transport Stream) header.
-     *
-     * @hide
-     */
-    @IntDef(flag = true, value = {TS_INDEX_FIRST_PACKET, TS_INDEX_PAYLOAD_UNIT_START_INDICATOR,
-            TS_INDEX_CHANGE_TO_NOT_SCRAMBLED, TS_INDEX_CHANGE_TO_EVEN_SCRAMBLED,
-            TS_INDEX_CHANGE_TO_ODD_SCRAMBLED, TS_INDEX_DISCONTINUITY_INDICATOR,
-            TS_INDEX_RANDOM_ACCESS_INDICATOR, TS_INDEX_PRIORITY_INDICATOR, TS_INDEX_PCR_FLAG,
-            TS_INDEX_OPCR_FLAG, TS_INDEX_SPLICING_POINT_FLAG, TS_INDEX_PRIVATE_DATA,
-            TS_INDEX_ADAPTATION_EXTENSION_FLAG})
+
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    public @interface TsIndex {}
+    @IntDef(prefix = "INDEX_TYPE_", value =
+            {INDEX_TYPE_NONE, INDEX_TYPE_SC, INDEX_TYPE_SC_HEVC})
+    public @interface ScIndexType {}
 
     /**
-     * TS index FIRST_PACKET.
+     * Start Code Index is not used.
      * @hide
      */
-    public static final int TS_INDEX_FIRST_PACKET = Constants.DemuxTsIndex.FIRST_PACKET;
+    public static final int INDEX_TYPE_NONE = Constants.DemuxRecordScIndexType.NONE;
     /**
-     * TS index PAYLOAD_UNIT_START_INDICATOR.
+     * Start Code index.
      * @hide
      */
-    public static final int TS_INDEX_PAYLOAD_UNIT_START_INDICATOR =
-            Constants.DemuxTsIndex.PAYLOAD_UNIT_START_INDICATOR;
+    public static final int INDEX_TYPE_SC = Constants.DemuxRecordScIndexType.SC;
     /**
-     * TS index CHANGE_TO_NOT_SCRAMBLED.
+     * Start Code index for HEVC.
      * @hide
      */
-    public static final int TS_INDEX_CHANGE_TO_NOT_SCRAMBLED =
-            Constants.DemuxTsIndex.CHANGE_TO_NOT_SCRAMBLED;
-    /**
-     * TS index CHANGE_TO_EVEN_SCRAMBLED.
-     * @hide
-     */
-    public static final int TS_INDEX_CHANGE_TO_EVEN_SCRAMBLED =
-            Constants.DemuxTsIndex.CHANGE_TO_EVEN_SCRAMBLED;
-    /**
-     * TS index CHANGE_TO_ODD_SCRAMBLED.
-     * @hide
-     */
-    public static final int TS_INDEX_CHANGE_TO_ODD_SCRAMBLED =
-            Constants.DemuxTsIndex.CHANGE_TO_ODD_SCRAMBLED;
-    /**
-     * TS index DISCONTINUITY_INDICATOR.
-     * @hide
-     */
-    public static final int TS_INDEX_DISCONTINUITY_INDICATOR =
-            Constants.DemuxTsIndex.DISCONTINUITY_INDICATOR;
-    /**
-     * TS index RANDOM_ACCESS_INDICATOR.
-     * @hide
-     */
-    public static final int TS_INDEX_RANDOM_ACCESS_INDICATOR =
-            Constants.DemuxTsIndex.RANDOM_ACCESS_INDICATOR;
-    /**
-     * TS index PRIORITY_INDICATOR.
-     * @hide
-     */
-    public static final int TS_INDEX_PRIORITY_INDICATOR = Constants.DemuxTsIndex.PRIORITY_INDICATOR;
-    /**
-     * TS index PCR_FLAG.
-     * @hide
-     */
-    public static final int TS_INDEX_PCR_FLAG = Constants.DemuxTsIndex.PCR_FLAG;
-    /**
-     * TS index OPCR_FLAG.
-     * @hide
-     */
-    public static final int TS_INDEX_OPCR_FLAG = Constants.DemuxTsIndex.OPCR_FLAG;
-    /**
-     * TS index SPLICING_POINT_FLAG.
-     * @hide
-     */
-    public static final int TS_INDEX_SPLICING_POINT_FLAG =
-            Constants.DemuxTsIndex.SPLICING_POINT_FLAG;
-    /**
-     * TS index PRIVATE_DATA.
-     * @hide
-     */
-    public static final int TS_INDEX_PRIVATE_DATA = Constants.DemuxTsIndex.PRIVATE_DATA;
-    /**
-     * TS index ADAPTATION_EXTENSION_FLAG.
-     * @hide
-     */
-    public static final int TS_INDEX_ADAPTATION_EXTENSION_FLAG =
-            Constants.DemuxTsIndex.ADAPTATION_EXTENSION_FLAG;
+    public static final int INDEX_TYPE_SC_HEVC = Constants.DemuxRecordScIndexType.SC_HEVC;
+
 
     /**
      * Indexes can be tagged by Start Code in PES (Packetized Elementary Stream)
@@ -317,156 +258,6 @@ public final class TunerConstants {
     public static final int FRONTEND_SCAN_BLIND = Constants.FrontendScanType.SCAN_BLIND;
 
 
-    /** @hide */
-    @IntDef({FRONTEND_STATUS_TYPE_DEMOD_LOCK, FRONTEND_STATUS_TYPE_SNR, FRONTEND_STATUS_TYPE_BER,
-            FRONTEND_STATUS_TYPE_PER, FRONTEND_STATUS_TYPE_PRE_BER,
-            FRONTEND_STATUS_TYPE_SIGNAL_QUALITY, FRONTEND_STATUS_TYPE_SIGNAL_STRENGTH,
-            FRONTEND_STATUS_TYPE_SYMBOL_RATE, FRONTEND_STATUS_TYPE_FEC,
-            FRONTEND_STATUS_TYPE_MODULATION, FRONTEND_STATUS_TYPE_SPECTRAL,
-            FRONTEND_STATUS_TYPE_LNB_VOLTAGE, FRONTEND_STATUS_TYPE_PLP_ID,
-            FRONTEND_STATUS_TYPE_EWBS, FRONTEND_STATUS_TYPE_AGC, FRONTEND_STATUS_TYPE_LNA,
-            FRONTEND_STATUS_TYPE_LAYER_ERROR, FRONTEND_STATUS_TYPE_VBER_CN,
-            FRONTEND_STATUS_TYPE_LBER_CN, FRONTEND_STATUS_TYPE_XER_CN, FRONTEND_STATUS_TYPE_MER,
-            FRONTEND_STATUS_TYPE_FREQ_OFFSET, FRONTEND_STATUS_TYPE_HIERARCHY,
-            FRONTEND_STATUS_TYPE_RF_LOCK, FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendStatusType {}
-
-    /**
-     * Lock status for Demod.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_DEMOD_LOCK =
-            Constants.FrontendStatusType.DEMOD_LOCK;
-    /**
-     * Signal to Noise Ratio.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_SNR = Constants.FrontendStatusType.SNR;
-    /**
-     * Bit Error Ratio.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_BER = Constants.FrontendStatusType.BER;
-    /**
-     * Packages Error Ratio.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_PER = Constants.FrontendStatusType.PER;
-    /**
-     * Bit Error Ratio before FEC.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_PRE_BER = Constants.FrontendStatusType.PRE_BER;
-    /**
-     * Signal Quality (0..100). Good data over total data in percent can be
-     * used as a way to present Signal Quality.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_SIGNAL_QUALITY =
-            Constants.FrontendStatusType.SIGNAL_QUALITY;
-    /**
-     * Signal Strength.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_SIGNAL_STRENGTH =
-            Constants.FrontendStatusType.SIGNAL_STRENGTH;
-    /**
-     * Symbol Rate.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_SYMBOL_RATE =
-            Constants.FrontendStatusType.SYMBOL_RATE;
-    /**
-     * Forward Error Correction Type.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_FEC = Constants.FrontendStatusType.FEC;
-    /**
-     * Modulation Type.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_MODULATION =
-            Constants.FrontendStatusType.MODULATION;
-    /**
-     * Spectral Inversion Type.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_SPECTRAL = Constants.FrontendStatusType.SPECTRAL;
-    /**
-     * LNB Voltage.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_LNB_VOLTAGE =
-            Constants.FrontendStatusType.LNB_VOLTAGE;
-    /**
-     * Physical Layer Pipe ID.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_PLP_ID = Constants.FrontendStatusType.PLP_ID;
-    /**
-     * Status for Emergency Warning Broadcasting System.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_EWBS = Constants.FrontendStatusType.EWBS;
-    /**
-     * Automatic Gain Control.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_AGC = Constants.FrontendStatusType.AGC;
-    /**
-     * Low Noise Amplifier.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_LNA = Constants.FrontendStatusType.LNA;
-    /**
-     * Error status by layer.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_LAYER_ERROR =
-            Constants.FrontendStatusType.LAYER_ERROR;
-    /**
-     * CN value by VBER.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_VBER_CN = Constants.FrontendStatusType.VBER_CN;
-    /**
-     * CN value by LBER.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_LBER_CN = Constants.FrontendStatusType.LBER_CN;
-    /**
-     * CN value by XER.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_XER_CN = Constants.FrontendStatusType.XER_CN;
-    /**
-     * Moduration Error Ratio.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_MER = Constants.FrontendStatusType.MER;
-    /**
-     * Difference between tuning frequency and actual locked frequency.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_FREQ_OFFSET =
-            Constants.FrontendStatusType.FREQ_OFFSET;
-    /**
-     * Hierarchy for DVBT.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_HIERARCHY = Constants.FrontendStatusType.HIERARCHY;
-    /**
-     * Lock status for RF.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_RF_LOCK = Constants.FrontendStatusType.RF_LOCK;
-    /**
-     * PLP information in a frequency band for ATSC3.0 frontend.
-     * @hide
-     */
-    public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO =
-            Constants.FrontendStatusType.ATSC3_PLP_INFO;
 
     /** @hide */
     @LongDef({FEC_UNDEFINED, FEC_AUTO, FEC_1_2, FEC_1_3, FEC_1_4, FEC_1_5, FEC_2_3, FEC_2_5,
@@ -665,630 +456,50 @@ public final class TunerConstants {
 
 
     /** @hide */
-    @IntDef({DVBC_MODULATION_UNDEFINED, DVBC_MODULATION_AUTO, DVBC_MODULATION_MOD_16QAM,
-            DVBC_MODULATION_MOD_32QAM, DVBC_MODULATION_MOD_64QAM, DVBC_MODULATION_MOD_128QAM,
-            DVBC_MODULATION_MOD_256QAM, DVBS_MODULATION_UNDEFINED, DVBS_MODULATION_AUTO,
-            DVBS_MODULATION_MOD_QPSK, DVBS_MODULATION_MOD_8PSK, DVBS_MODULATION_MOD_16QAM,
-            DVBS_MODULATION_MOD_16PSK, DVBS_MODULATION_MOD_32PSK, DVBS_MODULATION_MOD_ACM,
-            DVBS_MODULATION_MOD_8APSK, DVBS_MODULATION_MOD_16APSK, DVBS_MODULATION_MOD_32APSK,
-            DVBS_MODULATION_MOD_64APSK, DVBS_MODULATION_MOD_128APSK, DVBS_MODULATION_MOD_256APSK,
-            DVBS_MODULATION_MOD_RESERVED, ISDBS_MODULATION_UNDEFINED, ISDBS_MODULATION_AUTO,
-            ISDBS_MODULATION_MOD_BPSK, ISDBS_MODULATION_MOD_QPSK, ISDBS_MODULATION_MOD_TC8PSK,
-            ISDBS3_MODULATION_UNDEFINED, ISDBS3_MODULATION_AUTO, ISDBS3_MODULATION_MOD_BPSK,
-            ISDBS3_MODULATION_MOD_QPSK, ISDBS3_MODULATION_MOD_8PSK, ISDBS3_MODULATION_MOD_16APSK,
-            ISDBS3_MODULATION_MOD_32APSK, ISDBT_MODULATION_UNDEFINED, ISDBT_MODULATION_AUTO,
-            ISDBT_MODULATION_MOD_DQPSK, ISDBT_MODULATION_MOD_QPSK, ISDBT_MODULATION_MOD_16QAM,
-            ISDBT_MODULATION_MOD_64QAM})
+    @IntDef(value = {
+            DvbcFrontendSettings.MODULATION_UNDEFINED,
+            DvbcFrontendSettings.MODULATION_AUTO,
+            DvbcFrontendSettings.MODULATION_MOD_16QAM,
+            DvbcFrontendSettings.MODULATION_MOD_32QAM,
+            DvbcFrontendSettings.MODULATION_MOD_64QAM,
+            DvbcFrontendSettings.MODULATION_MOD_128QAM,
+            DvbcFrontendSettings.MODULATION_MOD_256QAM,
+            DvbsFrontendSettings.MODULATION_UNDEFINED,
+            DvbsFrontendSettings.MODULATION_AUTO,
+            DvbsFrontendSettings.MODULATION_MOD_QPSK,
+            DvbsFrontendSettings.MODULATION_MOD_8PSK,
+            DvbsFrontendSettings.MODULATION_MOD_16QAM,
+            DvbsFrontendSettings.MODULATION_MOD_16PSK,
+            DvbsFrontendSettings.MODULATION_MOD_32PSK,
+            DvbsFrontendSettings.MODULATION_MOD_ACM,
+            DvbsFrontendSettings.MODULATION_MOD_8APSK,
+            DvbsFrontendSettings.MODULATION_MOD_16APSK,
+            DvbsFrontendSettings.MODULATION_MOD_32APSK,
+            DvbsFrontendSettings.MODULATION_MOD_64APSK,
+            DvbsFrontendSettings.MODULATION_MOD_128APSK,
+            DvbsFrontendSettings.MODULATION_MOD_256APSK,
+            DvbsFrontendSettings.MODULATION_MOD_RESERVED,
+            IsdbsFrontendSettings.MODULATION_UNDEFINED,
+            IsdbsFrontendSettings.MODULATION_AUTO,
+            IsdbsFrontendSettings.MODULATION_MOD_BPSK,
+            IsdbsFrontendSettings.MODULATION_MOD_QPSK,
+            IsdbsFrontendSettings.MODULATION_MOD_TC8PSK,
+            Isdbs3FrontendSettings.MODULATION_UNDEFINED,
+            Isdbs3FrontendSettings.MODULATION_AUTO,
+            Isdbs3FrontendSettings.MODULATION_MOD_BPSK,
+            Isdbs3FrontendSettings.MODULATION_MOD_QPSK,
+            Isdbs3FrontendSettings.MODULATION_MOD_8PSK,
+            Isdbs3FrontendSettings.MODULATION_MOD_16APSK,
+            Isdbs3FrontendSettings.MODULATION_MOD_32APSK,
+            IsdbtFrontendSettings.MODULATION_UNDEFINED,
+            IsdbtFrontendSettings.MODULATION_AUTO,
+            IsdbtFrontendSettings.MODULATION_MOD_DQPSK,
+            IsdbtFrontendSettings.MODULATION_MOD_QPSK,
+            IsdbtFrontendSettings.MODULATION_MOD_16QAM,
+            IsdbtFrontendSettings.MODULATION_MOD_64QAM})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendModulation {}
-    /** @hide */
-    public static final int DVBC_MODULATION_UNDEFINED = Constants.FrontendDvbcModulation.UNDEFINED;
-    /** @hide */
-    public static final int DVBC_MODULATION_AUTO = Constants.FrontendDvbcModulation.AUTO;
-    /** @hide */
-    public static final int DVBC_MODULATION_MOD_16QAM = Constants.FrontendDvbcModulation.MOD_16QAM;
-    /** @hide */
-    public static final int DVBC_MODULATION_MOD_32QAM = Constants.FrontendDvbcModulation.MOD_32QAM;
-    /** @hide */
-    public static final int DVBC_MODULATION_MOD_64QAM = Constants.FrontendDvbcModulation.MOD_64QAM;
-    /** @hide */
-    public static final int DVBC_MODULATION_MOD_128QAM =
-            Constants.FrontendDvbcModulation.MOD_128QAM;
-    /** @hide */
-    public static final int DVBC_MODULATION_MOD_256QAM =
-            Constants.FrontendDvbcModulation.MOD_256QAM;
-    /** @hide */
-    public static final int DVBS_MODULATION_UNDEFINED = Constants.FrontendDvbsModulation.UNDEFINED;
-    /** @hide */
-    public static final int DVBS_MODULATION_AUTO = Constants.FrontendDvbsModulation.AUTO;
-    /** @hide */
-    public static final int DVBS_MODULATION_MOD_QPSK = Constants.FrontendDvbsModulation.MOD_QPSK;
-    /** @hide */
-    public static final int DVBS_MODULATION_MOD_8PSK = Constants.FrontendDvbsModulation.MOD_8PSK;
-    /** @hide */
-    public static final int DVBS_MODULATION_MOD_16QAM = Constants.FrontendDvbsModulation.MOD_16QAM;
-    /** @hide */
-    public static final int DVBS_MODULATION_MOD_16PSK = Constants.FrontendDvbsModulation.MOD_16PSK;
-    /** @hide */
-    public static final int DVBS_MODULATION_MOD_32PSK = Constants.FrontendDvbsModulation.MOD_32PSK;
-    /** @hide */
-    public static final int DVBS_MODULATION_MOD_ACM = Constants.FrontendDvbsModulation.MOD_ACM;
-    /** @hide */
-    public static final int DVBS_MODULATION_MOD_8APSK = Constants.FrontendDvbsModulation.MOD_8APSK;
-    /** @hide */
-    public static final int DVBS_MODULATION_MOD_16APSK =
-            Constants.FrontendDvbsModulation.MOD_16APSK;
-    /** @hide */
-    public static final int DVBS_MODULATION_MOD_32APSK =
-            Constants.FrontendDvbsModulation.MOD_32APSK;
-    /** @hide */
-    public static final int DVBS_MODULATION_MOD_64APSK =
-            Constants.FrontendDvbsModulation.MOD_64APSK;
-    /** @hide */
-    public static final int DVBS_MODULATION_MOD_128APSK =
-            Constants.FrontendDvbsModulation.MOD_128APSK;
-    /** @hide */
-    public static final int DVBS_MODULATION_MOD_256APSK =
-            Constants.FrontendDvbsModulation.MOD_256APSK;
-    /** @hide */
-    public static final int DVBS_MODULATION_MOD_RESERVED =
-            Constants.FrontendDvbsModulation.MOD_RESERVED;
-    /** @hide */
-    public static final int ISDBS_MODULATION_UNDEFINED =
-            Constants.FrontendIsdbsModulation.UNDEFINED;
-    /** @hide */
-    public static final int ISDBS_MODULATION_AUTO = Constants.FrontendIsdbsModulation.AUTO;
-    /** @hide */
-    public static final int ISDBS_MODULATION_MOD_BPSK = Constants.FrontendIsdbsModulation.MOD_BPSK;
-    /** @hide */
-    public static final int ISDBS_MODULATION_MOD_QPSK = Constants.FrontendIsdbsModulation.MOD_QPSK;
-    /** @hide */
-    public static final int ISDBS_MODULATION_MOD_TC8PSK =
-            Constants.FrontendIsdbsModulation.MOD_TC8PSK;
-    /** @hide */
-    public static final int ISDBS3_MODULATION_UNDEFINED =
-            Constants.FrontendIsdbs3Modulation.UNDEFINED;
-    /** @hide */
-    public static final int ISDBS3_MODULATION_AUTO = Constants.FrontendIsdbs3Modulation.AUTO;
-    /** @hide */
-    public static final int ISDBS3_MODULATION_MOD_BPSK =
-            Constants.FrontendIsdbs3Modulation.MOD_BPSK;
-    /** @hide */
-    public static final int ISDBS3_MODULATION_MOD_QPSK =
-            Constants.FrontendIsdbs3Modulation.MOD_QPSK;
-    /** @hide */
-    public static final int ISDBS3_MODULATION_MOD_8PSK =
-            Constants.FrontendIsdbs3Modulation.MOD_8PSK;
-    /** @hide */
-    public static final int ISDBS3_MODULATION_MOD_16APSK =
-            Constants.FrontendIsdbs3Modulation.MOD_16APSK;
-    /** @hide */
-    public static final int ISDBS3_MODULATION_MOD_32APSK =
-            Constants.FrontendIsdbs3Modulation.MOD_32APSK;
-    /** @hide */
-    public static final int ISDBT_MODULATION_UNDEFINED =
-            Constants.FrontendIsdbtModulation.UNDEFINED;
-    /** @hide */
-    public static final int ISDBT_MODULATION_AUTO = Constants.FrontendIsdbtModulation.AUTO;
-    /** @hide */
-    public static final int ISDBT_MODULATION_MOD_DQPSK =
-            Constants.FrontendIsdbtModulation.MOD_DQPSK;
-    /** @hide */
-    public static final int ISDBT_MODULATION_MOD_QPSK = Constants.FrontendIsdbtModulation.MOD_QPSK;
-    /** @hide */
-    public static final int ISDBT_MODULATION_MOD_16QAM =
-            Constants.FrontendIsdbtModulation.MOD_16QAM;
-    /** @hide */
-    public static final int ISDBT_MODULATION_MOD_64QAM =
-            Constants.FrontendIsdbtModulation.MOD_64QAM;
 
-
-    /** @hide */
-    @IntDef({SPECTRAL_INVERSION_UNDEFINED, SPECTRAL_INVERSION_NORMAL, SPECTRAL_INVERSION_INVERTED})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendDvbcSpectralInversion {}
-    /** @hide */
-    public static final int SPECTRAL_INVERSION_UNDEFINED =
-            Constants.FrontendDvbcSpectralInversion.UNDEFINED;
-    /** @hide */
-    public static final int SPECTRAL_INVERSION_NORMAL =
-            Constants.FrontendDvbcSpectralInversion.NORMAL;
-    /** @hide */
-    public static final int SPECTRAL_INVERSION_INVERTED =
-            Constants.FrontendDvbcSpectralInversion.INVERTED;
-
-
-    /** @hide */
-    @IntDef({HIERARCHY_UNDEFINED, HIERARCHY_AUTO, HIERARCHY_NON_NATIVE, HIERARCHY_1_NATIVE,
-            HIERARCHY_2_NATIVE, HIERARCHY_4_NATIVE, HIERARCHY_NON_INDEPTH, HIERARCHY_1_INDEPTH,
-            HIERARCHY_2_INDEPTH, HIERARCHY_4_INDEPTH})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendDvbtHierarchy {}
-    /** @hide */
-    public static final int HIERARCHY_UNDEFINED = Constants.FrontendDvbtHierarchy.UNDEFINED;
-    /** @hide */
-    public static final int HIERARCHY_AUTO = Constants.FrontendDvbtHierarchy.AUTO;
-    /** @hide */
-    public static final int HIERARCHY_NON_NATIVE =
-            Constants.FrontendDvbtHierarchy.HIERARCHY_NON_NATIVE;
-    /** @hide */
-    public static final int HIERARCHY_1_NATIVE = Constants.FrontendDvbtHierarchy.HIERARCHY_1_NATIVE;
-    /** @hide */
-    public static final int HIERARCHY_2_NATIVE = Constants.FrontendDvbtHierarchy.HIERARCHY_2_NATIVE;
-    /** @hide */
-    public static final int HIERARCHY_4_NATIVE = Constants.FrontendDvbtHierarchy.HIERARCHY_4_NATIVE;
-    /** @hide */
-    public static final int HIERARCHY_NON_INDEPTH =
-            Constants.FrontendDvbtHierarchy.HIERARCHY_NON_INDEPTH;
-    /** @hide */
-    public static final int HIERARCHY_1_INDEPTH =
-            Constants.FrontendDvbtHierarchy.HIERARCHY_1_INDEPTH;
-    /** @hide */
-    public static final int HIERARCHY_2_INDEPTH =
-            Constants.FrontendDvbtHierarchy.HIERARCHY_2_INDEPTH;
-    /** @hide */
-    public static final int HIERARCHY_4_INDEPTH =
-            Constants.FrontendDvbtHierarchy.HIERARCHY_4_INDEPTH;
-
-    /** @hide */
-    @IntDef({FRONTEND_ATSC_MODULATION_UNDEFINED, FRONTEND_ATSC_MODULATION_AUTO,
-            FRONTEND_ATSC_MODULATION_MOD_8VSB, FRONTEND_ATSC_MODULATION_MOD_16VSB})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendAtscModulation {}
-    /** @hide */
-    public static final int FRONTEND_ATSC_MODULATION_UNDEFINED =
-            Constants.FrontendAtscModulation.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_ATSC_MODULATION_AUTO = Constants.FrontendAtscModulation.AUTO;
-    /** @hide */
-    public static final int FRONTEND_ATSC_MODULATION_MOD_8VSB =
-            Constants.FrontendAtscModulation.MOD_8VSB;
-    /** @hide */
-    public static final int FRONTEND_ATSC_MODULATION_MOD_16VSB =
-            Constants.FrontendAtscModulation.MOD_16VSB;
-
-    /** @hide */
-    @IntDef({FRONTEND_ATSC3_BANDWIDTH_UNDEFINED, FRONTEND_ATSC3_BANDWIDTH_AUTO,
-            FRONTEND_ATSC3_BANDWIDTH_BANDWIDTH_6MHZ, FRONTEND_ATSC3_BANDWIDTH_BANDWIDTH_7MHZ,
-            FRONTEND_ATSC3_BANDWIDTH_BANDWIDTH_8MHZ})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendAtsc3Bandwidth {}
-    /** @hide */
-    public static final int FRONTEND_ATSC3_BANDWIDTH_UNDEFINED =
-            Constants.FrontendAtsc3Bandwidth.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_BANDWIDTH_AUTO = Constants.FrontendAtsc3Bandwidth.AUTO;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_BANDWIDTH_BANDWIDTH_6MHZ =
-            Constants.FrontendAtsc3Bandwidth.BANDWIDTH_6MHZ;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_BANDWIDTH_BANDWIDTH_7MHZ =
-            Constants.FrontendAtsc3Bandwidth.BANDWIDTH_7MHZ;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_BANDWIDTH_BANDWIDTH_8MHZ =
-            Constants.FrontendAtsc3Bandwidth.BANDWIDTH_8MHZ;
-
-    /** @hide */
-    @IntDef({FRONTEND_ATSC3_MODULATION_UNDEFINED, FRONTEND_ATSC3_MODULATION_AUTO,
-            FRONTEND_ATSC3_MODULATION_MOD_QPSK, FRONTEND_ATSC3_MODULATION_MOD_16QAM,
-            FRONTEND_ATSC3_MODULATION_MOD_64QAM, FRONTEND_ATSC3_MODULATION_MOD_256QAM,
-            FRONTEND_ATSC3_MODULATION_MOD_1024QAM, FRONTEND_ATSC3_MODULATION_MOD_4096QAM})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendAtsc3Modulation {}
-    /** @hide */
-    public static final int FRONTEND_ATSC3_MODULATION_UNDEFINED =
-            Constants.FrontendAtsc3Modulation.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_MODULATION_AUTO = Constants.FrontendAtsc3Modulation.AUTO;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_MODULATION_MOD_QPSK =
-            Constants.FrontendAtsc3Modulation.MOD_QPSK;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_MODULATION_MOD_16QAM =
-            Constants.FrontendAtsc3Modulation.MOD_16QAM;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_MODULATION_MOD_64QAM =
-            Constants.FrontendAtsc3Modulation.MOD_64QAM;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_MODULATION_MOD_256QAM =
-            Constants.FrontendAtsc3Modulation.MOD_256QAM;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_MODULATION_MOD_1024QAM =
-            Constants.FrontendAtsc3Modulation.MOD_1024QAM;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_MODULATION_MOD_4096QAM =
-            Constants.FrontendAtsc3Modulation.MOD_4096QAM;
-
-    /** @hide */
-    @IntDef({FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_UNDEFINED,
-            FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_AUTO, FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_CTI,
-            FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_HTI})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendAtsc3TimeInterleaveMode {}
-    /** @hide */
-    public static final int FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_UNDEFINED =
-            Constants.FrontendAtsc3TimeInterleaveMode.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_AUTO =
-            Constants.FrontendAtsc3TimeInterleaveMode.AUTO;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_CTI =
-            Constants.FrontendAtsc3TimeInterleaveMode.CTI;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_HTI =
-            Constants.FrontendAtsc3TimeInterleaveMode.HTI;
-
-    /** @hide */
-    @IntDef({FRONTEND_ATSC3_CODERATE_UNDEFINED, FRONTEND_ATSC3_CODERATE_AUTO,
-            FRONTEND_ATSC3_CODERATE_2_15, FRONTEND_ATSC3_CODERATE_3_15,
-            FRONTEND_ATSC3_CODERATE_4_15, FRONTEND_ATSC3_CODERATE_5_15,
-            FRONTEND_ATSC3_CODERATE_6_15, FRONTEND_ATSC3_CODERATE_7_15,
-            FRONTEND_ATSC3_CODERATE_8_15, FRONTEND_ATSC3_CODERATE_9_15,
-            FRONTEND_ATSC3_CODERATE_10_15, FRONTEND_ATSC3_CODERATE_11_15,
-            FRONTEND_ATSC3_CODERATE_12_15, FRONTEND_ATSC3_CODERATE_13_15})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendAtsc3CodeRate {}
-    /** @hide */
-    public static final int FRONTEND_ATSC3_CODERATE_UNDEFINED =
-            Constants.FrontendAtsc3CodeRate.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_CODERATE_AUTO = Constants.FrontendAtsc3CodeRate.AUTO;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_CODERATE_2_15 =
-            Constants.FrontendAtsc3CodeRate.CODERATE_2_15;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_CODERATE_3_15 =
-            Constants.FrontendAtsc3CodeRate.CODERATE_3_15;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_CODERATE_4_15 =
-            Constants.FrontendAtsc3CodeRate.CODERATE_4_15;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_CODERATE_5_15 =
-            Constants.FrontendAtsc3CodeRate.CODERATE_5_15;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_CODERATE_6_15 =
-            Constants.FrontendAtsc3CodeRate.CODERATE_6_15;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_CODERATE_7_15 =
-            Constants.FrontendAtsc3CodeRate.CODERATE_7_15;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_CODERATE_8_15 =
-            Constants.FrontendAtsc3CodeRate.CODERATE_8_15;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_CODERATE_9_15 =
-            Constants.FrontendAtsc3CodeRate.CODERATE_9_15;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_CODERATE_10_15 =
-            Constants.FrontendAtsc3CodeRate.CODERATE_10_15;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_CODERATE_11_15 =
-            Constants.FrontendAtsc3CodeRate.CODERATE_11_15;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_CODERATE_12_15 =
-            Constants.FrontendAtsc3CodeRate.CODERATE_12_15;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_CODERATE_13_15 =
-            Constants.FrontendAtsc3CodeRate.CODERATE_13_15;
-
-    /** @hide */
-    @IntDef({FRONTEND_ATSC3_FEC_UNDEFINED, FRONTEND_ATSC3_FEC_AUTO, FRONTEND_ATSC3_FEC_BCH_LDPC_16K,
-            FRONTEND_ATSC3_FEC_BCH_LDPC_64K, FRONTEND_ATSC3_FEC_CRC_LDPC_16K,
-            FRONTEND_ATSC3_FEC_CRC_LDPC_64K, FRONTEND_ATSC3_FEC_LDPC_16K,
-            FRONTEND_ATSC3_FEC_LDPC_64K})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendAtsc3Fec {}
-    /** @hide */
-    public static final int FRONTEND_ATSC3_FEC_UNDEFINED = Constants.FrontendAtsc3Fec.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_FEC_AUTO = Constants.FrontendAtsc3Fec.AUTO;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_FEC_BCH_LDPC_16K =
-            Constants.FrontendAtsc3Fec.BCH_LDPC_16K;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_FEC_BCH_LDPC_64K =
-            Constants.FrontendAtsc3Fec.BCH_LDPC_64K;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_FEC_CRC_LDPC_16K =
-            Constants.FrontendAtsc3Fec.CRC_LDPC_16K;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_FEC_CRC_LDPC_64K =
-            Constants.FrontendAtsc3Fec.CRC_LDPC_64K;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_FEC_LDPC_16K = Constants.FrontendAtsc3Fec.LDPC_16K;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_FEC_LDPC_64K = Constants.FrontendAtsc3Fec.LDPC_64K;
-
-    /** @hide */
-    @IntDef({FRONTEND_ATSC3_DEMOD_OUTPUT_FORMAT_UNDEFINED,
-            FRONTEND_ATSC3_DEMOD_OUTPUT_FORMAT_ATSC3_LINKLAYER_PACKET,
-            FRONTEND_ATSC3_DEMOD_OUTPUT_FORMAT_BASEBAND_PACKET})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendAtsc3DemodOutputFormat {}
-    /** @hide */
-    public static final int FRONTEND_ATSC3_DEMOD_OUTPUT_FORMAT_UNDEFINED =
-            Constants.FrontendAtsc3DemodOutputFormat.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_DEMOD_OUTPUT_FORMAT_ATSC3_LINKLAYER_PACKET =
-            Constants.FrontendAtsc3DemodOutputFormat.ATSC3_LINKLAYER_PACKET;
-    /** @hide */
-    public static final int FRONTEND_ATSC3_DEMOD_OUTPUT_FORMAT_BASEBAND_PACKET =
-            Constants.FrontendAtsc3DemodOutputFormat.BASEBAND_PACKET;
-
-    /** @hide */
-    @IntDef(prefix = "FRONTEND_DVBS_STANDARD",
-            value = {FRONTEND_DVBS_STANDARD_AUTO, FRONTEND_DVBS_STANDARD_S,
-                    FRONTEND_DVBS_STANDARD_S2,
-                    FRONTEND_DVBS_STANDARD_S2X})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendDvbsStandard {
-    }
-    /** @hide */
-    public static final int FRONTEND_DVBS_STANDARD_AUTO = Constants.FrontendDvbsStandard.AUTO;
-    /** @hide */
-    public static final int FRONTEND_DVBS_STANDARD_S = Constants.FrontendDvbsStandard.S;
-    /** @hide */
-    public static final int FRONTEND_DVBS_STANDARD_S2 = Constants.FrontendDvbsStandard.S2;
-    /** @hide */
-    public static final int FRONTEND_DVBS_STANDARD_S2X = Constants.FrontendDvbsStandard.S2X;
-
-    /** @hide */
-    @IntDef({FRONTEND_DVBC_ANNEX_UNDEFINED, FRONTEND_DVBC_ANNEX_A, FRONTEND_DVBC_ANNEX_B,
-            FRONTEND_DVBC_ANNEX_C})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendDvbcAnnex {}
-    /** @hide */
-    public static final int FRONTEND_DVBC_ANNEX_UNDEFINED = Constants.FrontendDvbcAnnex.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_DVBC_ANNEX_A = Constants.FrontendDvbcAnnex.A;
-    /** @hide */
-    public static final int FRONTEND_DVBC_ANNEX_B = Constants.FrontendDvbcAnnex.B;
-    /** @hide */
-    public static final int FRONTEND_DVBC_ANNEX_C = Constants.FrontendDvbcAnnex.C;
-
-    /** @hide */
-    @IntDef({FRONTEND_DVBT_TRANSMISSION_MODE_UNDEFINED, FRONTEND_DVBT_TRANSMISSION_MODE_AUTO,
-            FRONTEND_DVBT_TRANSMISSION_MODE_2K, FRONTEND_DVBT_TRANSMISSION_MODE_8K,
-            FRONTEND_DVBT_TRANSMISSION_MODE_4K, FRONTEND_DVBT_TRANSMISSION_MODE_1K,
-            FRONTEND_DVBT_TRANSMISSION_MODE_16K, FRONTEND_DVBT_TRANSMISSION_MODE_32K})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendDvbtTransmissionMode {}
-    /** @hide */
-    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_UNDEFINED =
-            Constants.FrontendDvbtTransmissionMode.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_AUTO =
-            Constants.FrontendDvbtTransmissionMode.AUTO;
-    /** @hide */
-    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_2K =
-            Constants.FrontendDvbtTransmissionMode.MODE_2K;
-    /** @hide */
-    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_8K =
-            Constants.FrontendDvbtTransmissionMode.MODE_8K;
-    /** @hide */
-    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_4K =
-            Constants.FrontendDvbtTransmissionMode.MODE_4K;
-    /** @hide */
-    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_1K =
-            Constants.FrontendDvbtTransmissionMode.MODE_1K;
-    /** @hide */
-    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_16K =
-            Constants.FrontendDvbtTransmissionMode.MODE_16K;
-    /** @hide */
-    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_32K =
-            Constants.FrontendDvbtTransmissionMode.MODE_32K;
-
-    /** @hide */
-    @IntDef({FRONTEND_DVBT_BANDWIDTH_UNDEFINED, FRONTEND_DVBT_BANDWIDTH_AUTO,
-            FRONTEND_DVBT_BANDWIDTH_8MHZ, FRONTEND_DVBT_BANDWIDTH_7MHZ,
-            FRONTEND_DVBT_BANDWIDTH_6MHZ, FRONTEND_DVBT_BANDWIDTH_5MHZ,
-            FRONTEND_DVBT_BANDWIDTH_1_7MHZ, FRONTEND_DVBT_BANDWIDTH_10MHZ})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendDvbtBandwidth {}
-    /** @hide */
-    public static final int FRONTEND_DVBT_BANDWIDTH_UNDEFINED =
-            Constants.FrontendDvbtBandwidth.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_DVBT_BANDWIDTH_AUTO = Constants.FrontendDvbtBandwidth.AUTO;
-    /** @hide */
-    public static final int FRONTEND_DVBT_BANDWIDTH_8MHZ =
-            Constants.FrontendDvbtBandwidth.BANDWIDTH_8MHZ;
-    /** @hide */
-    public static final int FRONTEND_DVBT_BANDWIDTH_7MHZ =
-            Constants.FrontendDvbtBandwidth.BANDWIDTH_7MHZ;
-    /** @hide */
-    public static final int FRONTEND_DVBT_BANDWIDTH_6MHZ =
-            Constants.FrontendDvbtBandwidth.BANDWIDTH_6MHZ;
-    /** @hide */
-    public static final int FRONTEND_DVBT_BANDWIDTH_5MHZ =
-            Constants.FrontendDvbtBandwidth.BANDWIDTH_5MHZ;
-    /** @hide */
-    public static final int FRONTEND_DVBT_BANDWIDTH_1_7MHZ =
-            Constants.FrontendDvbtBandwidth.BANDWIDTH_1_7MHZ;
-    /** @hide */
-    public static final int FRONTEND_DVBT_BANDWIDTH_10MHZ =
-            Constants.FrontendDvbtBandwidth.BANDWIDTH_10MHZ;
-
-    /** @hide */
-    @IntDef({FRONTEND_DVBT_CONSTELLATION_UNDEFINED, FRONTEND_DVBT_CONSTELLATION_AUTO,
-            FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_QPSK,
-            FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_16QAM,
-            FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_64QAM,
-            FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_256QAM})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendDvbtConstellation {}
-    /** @hide */
-    public static final int FRONTEND_DVBT_CONSTELLATION_UNDEFINED =
-            Constants.FrontendDvbtConstellation.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CONSTELLATION_AUTO =
-            Constants.FrontendDvbtConstellation.AUTO;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_QPSK =
-            Constants.FrontendDvbtConstellation.CONSTELLATION_QPSK;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_16QAM =
-            Constants.FrontendDvbtConstellation.CONSTELLATION_16QAM;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_64QAM =
-            Constants.FrontendDvbtConstellation.CONSTELLATION_64QAM;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_256QAM =
-            Constants.FrontendDvbtConstellation.CONSTELLATION_256QAM;
-
-    /** @hide */
-    @IntDef({FRONTEND_DVBT_CODERATE_UNDEFINED, FRONTEND_DVBT_CODERATE_AUTO,
-            FRONTEND_DVBT_CODERATE_1_2, FRONTEND_DVBT_CODERATE_2_3, FRONTEND_DVBT_CODERATE_3_4,
-            FRONTEND_DVBT_CODERATE_5_6, FRONTEND_DVBT_CODERATE_7_8, FRONTEND_DVBT_CODERATE_3_5,
-            FRONTEND_DVBT_CODERATE_4_5, FRONTEND_DVBT_CODERATE_6_7, FRONTEND_DVBT_CODERATE_8_9})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendDvbtCoderate {}
-    /** @hide */
-    public static final int FRONTEND_DVBT_CODERATE_UNDEFINED =
-            Constants.FrontendDvbtCoderate.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CODERATE_AUTO = Constants.FrontendDvbtCoderate.AUTO;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CODERATE_1_2 =
-            Constants.FrontendDvbtCoderate.CODERATE_1_2;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CODERATE_2_3 =
-            Constants.FrontendDvbtCoderate.CODERATE_2_3;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CODERATE_3_4 =
-            Constants.FrontendDvbtCoderate.CODERATE_3_4;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CODERATE_5_6 =
-            Constants.FrontendDvbtCoderate.CODERATE_5_6;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CODERATE_7_8 =
-            Constants.FrontendDvbtCoderate.CODERATE_7_8;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CODERATE_3_5 =
-            Constants.FrontendDvbtCoderate.CODERATE_3_5;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CODERATE_4_5 =
-            Constants.FrontendDvbtCoderate.CODERATE_4_5;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CODERATE_6_7 =
-            Constants.FrontendDvbtCoderate.CODERATE_6_7;
-    /** @hide */
-    public static final int FRONTEND_DVBT_CODERATE_8_9 =
-            Constants.FrontendDvbtCoderate.CODERATE_8_9;
-
-    /** @hide */
-    @IntDef({FRONTEND_DVBT_GUARD_INTERVAL_UNDEFINED, FRONTEND_DVBT_GUARD_INTERVAL_AUTO,
-            FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_32, FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_16,
-            FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_8, FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_4,
-            FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_128,
-            FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_19_128,
-            FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_19_256})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendDvbtGuardInterval {}
-    /** @hide */
-    public static final int FRONTEND_DVBT_GUARD_INTERVAL_UNDEFINED =
-            Constants.FrontendDvbtGuardInterval.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_DVBT_GUARD_INTERVAL_AUTO =
-            Constants.FrontendDvbtGuardInterval.AUTO;
-    /** @hide */
-    public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_32 =
-            Constants.FrontendDvbtGuardInterval.INTERVAL_1_32;
-    /** @hide */
-    public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_16 =
-            Constants.FrontendDvbtGuardInterval.INTERVAL_1_16;
-    /** @hide */
-    public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_8 =
-            Constants.FrontendDvbtGuardInterval.INTERVAL_1_8;
-    /** @hide */
-    public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_4 =
-            Constants.FrontendDvbtGuardInterval.INTERVAL_1_4;
-    /** @hide */
-    public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_128 =
-            Constants.FrontendDvbtGuardInterval.INTERVAL_1_128;
-    /** @hide */
-    public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_19_128 =
-            Constants.FrontendDvbtGuardInterval.INTERVAL_19_128;
-    /** @hide */
-    public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_19_256 =
-            Constants.FrontendDvbtGuardInterval.INTERVAL_19_256;
-
-    /** @hide */
-    @IntDef(prefix = "FRONTEND_DVBT_STANDARD",
-            value = {FRONTEND_DVBT_STANDARD_AUTO, FRONTEND_DVBT_STANDARD_T,
-                    FRONTEND_DVBT_STANDARD_T2}
-    )
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendDvbtStandard {}
-    /** @hide */
-    public static final int FRONTEND_DVBT_STANDARD_AUTO = Constants.FrontendDvbtStandard.AUTO;
-    /** @hide */
-    public static final int FRONTEND_DVBT_STANDARD_T = Constants.FrontendDvbtStandard.T;
-    /** @hide */
-    public static final int FRONTEND_DVBT_STANDARD_T2 = Constants.FrontendDvbtStandard.T2;
-
-    /** @hide */
-    @IntDef({FRONTEND_ISDBS_CODERATE_UNDEFINED, FRONTEND_ISDBS_CODERATE_AUTO,
-            FRONTEND_ISDBS_CODERATE_1_2, FRONTEND_ISDBS_CODERATE_2_3, FRONTEND_ISDBS_CODERATE_3_4,
-            FRONTEND_ISDBS_CODERATE_5_6, FRONTEND_ISDBS_CODERATE_7_8})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendIsdbsCoderate {}
-    /** @hide */
-    public static final int FRONTEND_ISDBS_CODERATE_UNDEFINED =
-            Constants.FrontendIsdbsCoderate.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_ISDBS_CODERATE_AUTO = Constants.FrontendIsdbsCoderate.AUTO;
-    /** @hide */
-    public static final int FRONTEND_ISDBS_CODERATE_1_2 =
-            Constants.FrontendIsdbsCoderate.CODERATE_1_2;
-    /** @hide */
-    public static final int FRONTEND_ISDBS_CODERATE_2_3 =
-            Constants.FrontendIsdbsCoderate.CODERATE_2_3;
-    /** @hide */
-    public static final int FRONTEND_ISDBS_CODERATE_3_4 =
-            Constants.FrontendIsdbsCoderate.CODERATE_3_4;
-    /** @hide */
-    public static final int FRONTEND_ISDBS_CODERATE_5_6 =
-            Constants.FrontendIsdbsCoderate.CODERATE_5_6;
-    /** @hide */
-    public static final int FRONTEND_ISDBS_CODERATE_7_8 =
-            Constants.FrontendIsdbsCoderate.CODERATE_7_8;
-
-    /** @hide */
-    @IntDef({FRONTEND_ISDBT_MODE_UNDEFINED, FRONTEND_ISDBT_MODE_AUTO, FRONTEND_ISDBT_MODE_1,
-            FRONTEND_ISDBT_MODE_2, FRONTEND_ISDBT_MODE_3})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendIsdbtMode {}
-    /** @hide */
-    public static final int FRONTEND_ISDBT_MODE_UNDEFINED = Constants.FrontendIsdbtMode.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_ISDBT_MODE_AUTO = Constants.FrontendIsdbtMode.AUTO;
-    /** @hide */
-    public static final int FRONTEND_ISDBT_MODE_1 = Constants.FrontendIsdbtMode.MODE_1;
-    /** @hide */
-    public static final int FRONTEND_ISDBT_MODE_2 = Constants.FrontendIsdbtMode.MODE_2;
-    /** @hide */
-    public static final int FRONTEND_ISDBT_MODE_3 = Constants.FrontendIsdbtMode.MODE_3;
-
-    /** @hide */
-    @IntDef({FRONTEND_ISDBT_BANDWIDTH_UNDEFINED, FRONTEND_ISDBT_BANDWIDTH_AUTO,
-            FRONTEND_ISDBT_BANDWIDTH_8MHZ, FRONTEND_ISDBT_BANDWIDTH_7MHZ,
-            FRONTEND_ISDBT_BANDWIDTH_6MHZ})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FrontendIsdbtBandwidth {}
-    /** @hide */
-    public static final int FRONTEND_ISDBT_BANDWIDTH_UNDEFINED =
-            Constants.FrontendIsdbtBandwidth.UNDEFINED;
-    /** @hide */
-    public static final int FRONTEND_ISDBT_BANDWIDTH_AUTO = Constants.FrontendIsdbtBandwidth.AUTO;
-    /** @hide */
-    public static final int FRONTEND_ISDBT_BANDWIDTH_8MHZ =
-            Constants.FrontendIsdbtBandwidth.BANDWIDTH_8MHZ;
-    /** @hide */
-    public static final int FRONTEND_ISDBT_BANDWIDTH_7MHZ =
-            Constants.FrontendIsdbtBandwidth.BANDWIDTH_7MHZ;
-    /** @hide */
-    public static final int FRONTEND_ISDBT_BANDWIDTH_6MHZ =
-            Constants.FrontendIsdbtBandwidth.BANDWIDTH_6MHZ;
 
     /** @hide */
     @IntDef({FILTER_SETTINGS_TS, FILTER_SETTINGS_MMTP, FILTER_SETTINGS_IP, FILTER_SETTINGS_TLV,

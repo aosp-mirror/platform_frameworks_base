@@ -53,6 +53,7 @@ import "frameworks/base/core/proto/android/stats/mediametrics/mediametrics.proto
 import "frameworks/base/core/proto/android/stats/mediaprovider/mediaprovider_enums.proto";
 import "frameworks/base/core/proto/android/stats/storage/storage_enums.proto";
 import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
+import "frameworks/base/core/proto/android/stats/sysui/notification_enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
@@ -324,8 +325,6 @@ message Atom {
             228 [(allow_from_any_uid) = true];
         PerfettoUploaded perfetto_uploaded = 229 [(module) = "perfetto"];
         VmsClientConnectionStateChanged vms_client_connection_state_changed = 230;
-        GpsLocationStatusReported gps_location_status_reported = 231;
-        GpsTimeToFirstFixReported gps_time_to_first_fix_reported = 232;
         MediaProviderScanEvent media_provider_scan_event = 233 [(module) = "mediaprovider"];
         MediaProviderDeletionEvent media_provider_deletion_event = 234 [(module) = "mediaprovider"];
         MediaProviderPermissionEvent media_provider_permission_event =
@@ -339,10 +338,13 @@ message Atom {
         BootTimeEventUtcTime boot_time_event_utc_time_reported = 241;
         BootTimeEventErrorCode boot_time_event_error_code_reported = 242;
         UserspaceRebootReported userspace_reboot_reported = 243;
+        NotificationReported notification_reported = 244;
+        NotificationPanelReported notification_panel_reported = 245;
+        NotificationChannelModified notification_panel_modified = 246;
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10070
+    // Next: 10071
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -399,7 +401,7 @@ message Atom {
         ExternalStorageInfo external_storage_info = 10053;
         GpuStatsGlobalInfo gpu_stats_global_info = 10054;
         GpuStatsAppInfo gpu_stats_app_info = 10055;
-        SystemIonHeapSize system_ion_heap_size = 10056;
+        SystemIonHeapSize system_ion_heap_size = 10056 [deprecated = true];
         AppsOnExternalStorageInfo apps_on_external_storage_info = 10057;
         FaceSettings face_settings = 10058;
         CoolingDevice cooling_device = 10059;
@@ -413,6 +415,7 @@ message Atom {
         DangerousPermissionStateSampled dangerous_permission_state_sampled = 10067;
         GraphicsStats graphics_stats = 10068;
         RuntimeAppOpsAccess runtime_app_ops_access = 10069;
+        IonHeapSize ion_heap_size = 10070;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -737,27 +740,6 @@ message GpsSignalQualityChanged {
     optional android.server.location.GpsSignalQualityEnum level = 1;
 }
 
-/**
- * Gps location status report
- *
- * Logged from:
- *   /frameworks/base/location/java/com/android/internal/location/gnssmetrics/GnssMetrics.java
- */
-message GpsLocationStatusReported {
-    // Boolean stating if location was acquired
-    optional bool location_success = 1;
-}
-
-/**
- * Gps log time to first fix report
- *
- * Logged from:
- *   /frameworks/base/location/java/com/android/internal/location/gnssmetrics/GnssMetrics.java
- */
-message GpsTimeToFirstFixReported {
-    // int32 reporting the time to first fix in milliseconds
-    optional int32 time_to_first_fix_millis = 1;
-}
 
 /**
  * Logs when a sync manager sync state changes.
@@ -3309,6 +3291,10 @@ message GenericAtom {
  * this button" or "this dialog was displayed".
  * Keep the UI event stream clean: don't use for system or background events.
  * Log using the UiEventLogger wrapper - don't write with the StatsLog API directly.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/
+ *   frameworks/base/packages/SystemUI/src/com/android/systemui/
  */
 message UiEventReported {
     // The event_id.
@@ -3318,6 +3304,122 @@ message UiEventReported {
     optional int32 uid = 2 [(is_uid) = true];
     optional string package_name = 3;
 }
+
+/**
+ * Reports a notification was created or updated.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/notification/
+ */
+message NotificationReported {
+    // The event_id (as for UiEventReported).
+    optional int32 event_id = 1;
+    // The notifying app's uid and package.
+    optional int32 uid = 2 [(is_uid) = true];
+    optional string package_name = 3;
+    // A small system-assigned identifier for the notification.
+    // Locally probably-unique, but expect collisions across users and/or days.
+    optional int32 instance_id = 4;
+    // The app-assigned notification ID and tag
+    optional int32 notification_id = 5;
+    optional string notification_tag = 6;
+    optional string channel_id = 7;  // App-assigned channel ID
+
+    // Grouping information
+    optional string group_id = 8;  // Group the notification currently belongs to
+    optional int32 group_instance_id = 9;  // Instance_id of the group-summary notification
+    optional bool is_group_summary = 10;  // Tags the group-summary notification
+
+    // Attributes
+    optional string category = 11;   // App-assigned notification category (API-defined strings)
+    optional int32 style = 12;       // App-assigned notification style
+    optional int32 num_people = 13;  // Number of Person records attached to the notification
+
+    // Ordering, importance and interruptiveness
+
+    optional int32 position = 14;    // Position in NotificationManager's list
+
+    optional android.stats.sysui.NotificationImportance importance = 15;
+    optional int32 alerting = 16;    // Bitfield, 1=buzz 2=beep 4=blink
+
+    enum NotificationImportanceExplanation {
+        IMPORTANCE_EXPLANATION_UNKNOWN = 0;
+        IMPORTANCE_EXPLANATION_APP = 1;     // App-specified channel importance.
+        IMPORTANCE_EXPLANATION_USER = 2;    // User-specified channel importance.
+        IMPORTANCE_EXPLANATION_ASST = 3;    // Notification Assistant override.
+        IMPORTANCE_EXPLANATION_SYSTEM = 4;  // System override.
+        // Like _APP, but based on pre-channels priority signal.
+        IMPORTANCE_EXPLANATION_APP_PRE_CHANNELS = 5;
+    }
+
+    optional NotificationImportanceExplanation importance_source = 17;
+    optional android.stats.sysui.NotificationImportance importance_initial = 18;
+    optional NotificationImportanceExplanation importance_initial_source = 19;
+    optional android.stats.sysui.NotificationImportance importance_asst = 20;
+    optional int32 assistant_hash = 21;
+    optional float assistant_ranking_score = 22;
+}
+
+message Notification {
+    // The notifying app's uid and package.
+    optional int32 uid = 1 [(is_uid) = true];
+    optional string package_name = 2;
+    // A small system-assigned identifier for the notification.
+    optional int32 instance_id = 3;
+
+    // Grouping information.
+    optional int32 group_instance_id = 4;
+    optional bool is_group_summary = 5;
+
+    // The section of the shade that the notification is in.
+    // See NotificationSectionsManager.PriorityBucket.
+    enum NotificationSection {
+        SECTION_UNKNOWN = 0;
+        SECTION_PEOPLE = 1;
+        SECTION_ALERTING = 2;
+        SECTION_SILENT = 3;
+    }
+    optional NotificationSection section = 6;
+}
+
+message NotificationList {
+    repeated Notification notifications = 1;  // An ordered sequence of notifications.
+}
+
+/**
+ * Reports a notification panel was displayed, e.g. from the lockscreen or status bar.
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/
+ */
+message NotificationPanelReported {
+    // The event_id (as for UiEventReported).
+    optional int32 event_id = 1;
+    optional int32 num_notifications = 2;
+    // The notifications in the panel, in the order that they appear there.
+    optional NotificationList notifications = 3 [(log_mode) = MODE_BYTES];
+}
+
+/**
+ * Reports a notification channel, or channel group, was created, updated, or deleted.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/notification/
+ */
+message NotificationChannelModified {
+    // The event_id (as for UiEventReported).
+    optional int32 event_id = 1;
+    // The notifying app's uid and package.
+    optional int32 uid = 2 [(is_uid) = true];
+    optional string package_name = 3;
+    // App-assigned notification channel ID or channel-group ID
+    optional string channel_id = 4;
+    // Previous importance setting, if applicable
+    optional android.stats.sysui.NotificationImportance old_importance = 5;
+    // New importance setting
+    optional android.stats.sysui.NotificationImportance importance = 6;
+}
+
 
 /**
  * Logs when a biometric acquire event occurs.
@@ -3507,12 +3609,14 @@ message BinaryPushStateChanged {
         INSTALL_FAILURE_DOWNLOAD = 23;
         INSTALL_FAILURE_STATE_MISMATCH = 24;
         INSTALL_FAILURE_COMMIT = 25;
+        REBOOT_TRIGGERED = 26;
     }
     optional State state = 6;
     // Possible experiment ids for monitoring this push.
     optional TrainExperimentIds experiment_ids = 7 [(log_mode) = MODE_BYTES];
     // user id
     optional int32 user_id = 8;
+    optional int32 reason = 9;
 }
 
 /* Test atom, is not logged anywhere */
@@ -6804,6 +6908,7 @@ message TrainInfo {
         INSTALL_FAILURE_DOWNLOAD = 23;
         INSTALL_FAILURE_STATE_MISMATCH = 24;
         INSTALL_FAILURE_COMMIT = 25;
+        REBOOT_TRIGGERED = 26;
     }
     optional Status status = 4;
 }
@@ -6946,8 +7051,24 @@ message GpuStatsAppInfo {
  * Pulled from StatsCompanionService.
  */
 message SystemIonHeapSize {
+    // Deprecated due to limited support of ion stats in debugfs.
+    // Use `IonHeapSize` instead.
+    option deprecated = true;
+
     // Size of the system ion heap in bytes.
+    // Read from debugfs.
     optional int64 size_in_bytes = 1;
+}
+
+/*
+ * Logs the total size of the ion heap.
+ *
+ * Pulled from StatsCompanionService.
+ */
+message IonHeapSize {
+    // Total size of all ion heaps in kilobytes.
+    // Read from: /sys/kernel/ion/total_heaps_kb.
+    optional int32 total_size_kb = 1;
 }
 
 /*

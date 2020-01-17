@@ -16,6 +16,7 @@
 
 package android.media.tv.tuner;
 
+import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,6 +28,8 @@ import android.media.tv.tuner.TunerConstants.FilterSubtype;
 import android.media.tv.tuner.TunerConstants.FrontendScanType;
 import android.media.tv.tuner.TunerConstants.Result;
 import android.media.tv.tuner.dvr.Dvr;
+import android.media.tv.tuner.dvr.DvrCallback;
+import android.media.tv.tuner.dvr.DvrSettings;
 import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
 import android.media.tv.tuner.filter.FilterEvent;
 import android.media.tv.tuner.filter.TimeFilter;
@@ -88,6 +91,31 @@ public final class Tuner implements AutoCloseable  {
         nativeSetup();
     }
 
+    /**
+     * Constructs a Tuner instance.
+     *
+     * @param context the context of the caller.
+     * @param tvInputSessionId the session ID of the TV input.
+     * @param useCase the use case of this Tuner instance.
+     *
+     * @hide
+     * TODO: replace the other constructor
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    public Tuner(@NonNull Context context, @NonNull String tvInputSessionId, int useCase) {
+        mContext = context;
+    }
+
+    /**
+     * Shares the frontend resource with another Tuner instance
+     *
+     * @param tuner the Tuner instance to share frontend resource with.
+     *
+     * @hide
+     */
+    public void shareFrontend(@NonNull Tuner tuner) { }
+
+
     private long mNativeContext; // used by native jMediaTuner
 
     /** @hide */
@@ -119,13 +147,13 @@ public final class Tuner implements AutoCloseable  {
     private native int nativeStopScan();
     private native int nativeSetLnb(int lnbId);
     private native int nativeSetLna(boolean enable);
-    private native FrontendStatus[] nativeGetFrontendStatus(int[] statusTypes);
+    private native FrontendStatus nativeGetFrontendStatus(int[] statusTypes);
     private native int nativeGetAvSyncHwId(Filter filter);
     private native long nativeGetAvSyncTime(int avSyncId);
     private native int nativeConnectCiCam(int ciCamId);
     private native int nativeDisconnectCiCam();
     private native FrontendInfo nativeGetFrontendInfo(int id);
-    private native Filter nativeOpenFilter(int type, int subType, int bufferSize);
+    private native Filter nativeOpenFilter(int type, int subType, long bufferSize);
     private native TimeFilter nativeOpenTimeFilter();
 
     private native List<Integer> nativeGetLnbIds();
@@ -133,7 +161,7 @@ public final class Tuner implements AutoCloseable  {
 
     private native Descrambler nativeOpenDescrambler();
 
-    private native Dvr nativeOpenDvr(int type, int bufferSize);
+    private native Dvr nativeOpenDvr(int type, long bufferSize);
 
     private static native DemuxCapabilities nativeGetDemuxCapabilities();
 
@@ -157,6 +185,21 @@ public final class Tuner implements AutoCloseable  {
          * @param status the new status of the filter.
          */
         void onFilterStatusChanged(@NonNull Filter filter, @FilterStatus int status);
+    }
+
+
+    /**
+     * Listener for resource lost.
+     *
+     * @hide
+     */
+    public interface OnResourceLostListener {
+        /**
+         * Invoked when resource lost.
+         *
+         * @param tuner the tuner instance whose resource is being reclaimed.
+         */
+        void onResourceLost(@NonNull Tuner tuner);
     }
 
     @Nullable
@@ -221,23 +264,32 @@ public final class Tuner implements AutoCloseable  {
     /**
      * Stops a previous tuning.
      *
-     * If the method completes successfully the frontend is no longer tuned and no data
+     * <p>If the method completes successfully, the frontend is no longer tuned and no data
      * will be sent to attached filters.
      *
      * @return result status of the operation.
+     *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @Result
     public int stopTune() {
+        TunerUtils.checkTunerPermission(mContext);
         return nativeStopTune();
     }
 
     /**
      * Scan channels.
+     *
+     * @param settings A {@link FrontendSettings} to configure the frontend.
+     * @param scanType The scan type.
+     *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     public int scan(@NonNull FrontendSettings settings, @FrontendScanType int scanType,
             @NonNull @CallbackExecutor Executor executor, @NonNull ScanCallback scanCallback) {
+        TunerUtils.checkTunerPermission(mContext);
         mScanCallback = scanCallback;
         mScanCallbackExecutor = executor;
         return nativeScan(settings.getType(), settings, scanType);
@@ -255,6 +307,7 @@ public final class Tuner implements AutoCloseable  {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @Result
     public int stopScan() {
         TunerUtils.checkTunerPermission(mContext);
         int retVal = nativeStopScan();
@@ -266,42 +319,49 @@ public final class Tuner implements AutoCloseable  {
     /**
      * Sets Low-Noise Block downconverter (LNB) for satellite frontend.
      *
-     * This assigns a hardware LNB resource to the satellite tuner. It can be
+     * <p>This assigns a hardware LNB resource to the satellite tuner. It can be
      * called multiple times to update LNB assignment.
      *
      * @param lnb the LNB instance.
      *
      * @return result status of the operation.
+     *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @Result
     public int setLnb(@NonNull Lnb lnb) {
+        TunerUtils.checkTunerPermission(mContext);
         return nativeSetLnb(lnb.mId);
     }
 
     /**
      * Enable or Disable Low Noise Amplifier (LNA).
      *
-     * @param enable true to activate LNA module; false to deactivate LNA
+     * @param enable {@code true} to activate LNA module; {@code false} to deactivate LNA.
      *
      * @return result status of the operation.
+     *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @Result
     public int setLna(boolean enable) {
+        TunerUtils.checkTunerPermission(mContext);
         return nativeSetLna(enable);
     }
 
     /**
      * Gets the statuses of the frontend.
      *
-     * This retrieve the statuses of the frontend for given status types.
+     * <p>This retrieve the statuses of the frontend for given status types.
      *
-     * @param statusTypes an array of status type which the caller request.
-     *
-     * @return statuses an array of statuses which response the caller's
-     *         request.
+     * @param statusTypes an array of status types which the caller requests.
+     * @return statuses which response the caller's requests.
      * @hide
      */
-    public FrontendStatus[] getFrontendStatus(int[] statusTypes) {
+    @Nullable
+    public FrontendStatus getFrontendStatus(int[] statusTypes) {
         return nativeGetFrontendStatus(statusTypes);
     }
 
@@ -310,59 +370,77 @@ public final class Tuner implements AutoCloseable  {
      *
      * @param filter the filter instance for the hardware sync ID.
      * @return the id of hardware A/V sync.
+     *
      * @hide
      */
-    public int getAvSyncHwId(Filter filter) {
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    public int getAvSyncHwId(@NonNull Filter filter) {
+        TunerUtils.checkTunerPermission(mContext);
         return nativeGetAvSyncHwId(filter);
     }
+
     /**
-     * Gets the current timestamp for A/V sync
+     * Gets the current timestamp for Audio/Video sync
      *
-     * The timestamp is maintained by hardware. The timestamp based on 90KHz, and it's format is the
-     * same as PTS (Presentation Time Stamp).
+     * <p>The timestamp is maintained by hardware. The timestamp based on 90KHz, and it's format is
+     * the same as PTS (Presentation Time Stamp).
      *
      * @param avSyncHwId the hardware id of A/V sync.
      * @return the current timestamp of hardware A/V sync.
+     *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     public long getAvSyncTime(int avSyncHwId) {
+        TunerUtils.checkTunerPermission(mContext);
         return nativeGetAvSyncTime(avSyncHwId);
     }
-
 
     /**
      * Connects Conditional Access Modules (CAM) through Common Interface (CI)
      *
-     * The demux uses the output from the frontend as the input by default, and must change to use
-     * the output from CI-CAM as the input after this call.
+     * <p>The demux uses the output from the frontend as the input by default, and must change to
+     * use the output from CI-CAM as the input after this call.
      *
      * @param ciCamId specify CI-CAM Id to connect.
      * @return result status of the operation.
+     *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
     public int connectCiCam(int ciCamId) {
+        TunerUtils.checkTunerPermission(mContext);
         return nativeConnectCiCam(ciCamId);
     }
 
     /**
      * Disconnects Conditional Access Modules (CAM)
      *
-     * The demux will use the output from the frontend as the input after this call.
+     * <p>The demux will use the output from the frontend as the input after this call.
      *
      * @return result status of the operation.
+     *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
     public int disconnectCiCam() {
+        TunerUtils.checkTunerPermission(mContext);
         return nativeDisconnectCiCam();
     }
 
     /**
-     * Retrieve the frontend information.
+     * Gets the frontend information.
+     *
+     * @return The frontend information. {@code null} if the operation failed.
+     *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @Nullable
     public FrontendInfo getFrontendInfo() {
+        TunerUtils.checkTunerPermission(mContext);
         if (mFrontend == null) {
             throw new IllegalStateException("frontend is not initialized");
         }
@@ -370,10 +448,13 @@ public final class Tuner implements AutoCloseable  {
     }
 
     /**
-     * Gets frontend ID.
+     * Gets the frontend ID.
+     *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     public int getFrontendId() {
+        TunerUtils.checkTunerPermission(mContext);
         if (mFrontend == null) {
             throw new IllegalStateException("frontend is not initialized");
         }
@@ -382,6 +463,7 @@ public final class Tuner implements AutoCloseable  {
 
     /**
      * Gets Demux capabilities.
+     *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
@@ -424,8 +506,26 @@ public final class Tuner implements AutoCloseable  {
         private Filter() {}
     }
 
-    private Filter openFilter(@FilterType int mainType, @FilterSubtype int subType, int bufferSize,
-            FilterCallback cb) {
+    /**
+     * Opens a filter object based on the given types and buffer size.
+     *
+     * @param mainType the main type of the filter.
+     * @param subType the subtype of the filter.
+     * @param bufferSize the buffer size of the filter to be opened in bytes. The buffer holds the
+     * data output from the filter.
+     * @param cb the callback to receive notifications from filter.
+     * @param executor the executor on which callback will be invoked. The default event handler
+     * executor is used if it's {@code null}.
+     * @return the opened filter. {@code null} if the operation failed.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @Nullable
+    public Filter openFilter(@FilterType int mainType, @FilterSubtype int subType,
+            @BytesLong long bufferSize, @Nullable FilterCallback cb,
+            @CallbackExecutor @Nullable Executor executor) {
+        TunerUtils.checkTunerPermission(mContext);
         Filter filter = nativeOpenFilter(
                 mainType, TunerUtils.getFilterSubtype(mainType, subType), bufferSize);
         if (filter != null) {
@@ -435,6 +535,24 @@ public final class Tuner implements AutoCloseable  {
             }
         }
         return filter;
+    }
+
+    /**
+     * Opens an LNB (low-noise block downconverter) object.
+     *
+     * @param cb the callback to receive notifications from LNB.
+     * @param executor the executor on which callback will be invoked. The default event handler
+     * executor is used if it's {@code null}.
+     * @return the opened LNB object. {@code null} if the operation failed.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @Nullable
+    public Lnb openLnb(LnbCallback cb, @CallbackExecutor @Nullable Executor executor) {
+        TunerUtils.checkTunerPermission(mContext);
+        // TODO: use resource manager to get LNB ID.
+        return new Lnb(0);
     }
 
     private List<Integer> getLnbIds() {
@@ -484,7 +602,24 @@ public final class Tuner implements AutoCloseable  {
         return nativeOpenDescrambler();
     }
 
-    private Dvr openDvr(int type, int bufferSize) {
+    /**
+     * Open a DVR (Digital Video Record) instance.
+     *
+     * @param type the DVR type to be opened.
+     * @param bufferSize the buffer size of the output in bytes. It's used to hold output data of
+     * the attached filters.
+     * @param cb the callback to receive notifications from DVR.
+     * @param executor the executor on which callback will be invoked. The default event handler
+     * executor is used if it's {@code null}.
+     * @return the opened DVR object. {@code null} if the operation failed.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @Nullable
+    public Dvr openDvr(@DvrSettings.Type int type, @BytesLong long bufferSize, DvrCallback cb,
+            @CallbackExecutor @Nullable Executor executor) {
+        TunerUtils.checkTunerPermission(mContext);
         Dvr dvr = nativeOpenDvr(type, bufferSize);
         return dvr;
     }

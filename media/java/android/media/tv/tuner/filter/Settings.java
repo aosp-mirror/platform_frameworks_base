@@ -39,4 +39,20 @@ public abstract class Settings {
     public int getType() {
         return mType;
     }
+
+
+    /**
+     * Builder for {@link Settings}.
+     *
+     * @param <T> The subclass to be built.
+     * @hide
+     */
+    public abstract static class Builder<T extends Builder<T>> {
+        /* package */ final int mMainType;
+
+        /* package */ Builder(int mainType) {
+            mMainType = mainType;
+        }
+        /* package */ abstract T self();
+    }
 }

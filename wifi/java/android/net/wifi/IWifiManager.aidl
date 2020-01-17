@@ -92,6 +92,8 @@ interface IWifiManager
 
     void allowAutojoinPasspoint(String fqdn, boolean enableAutoJoin);
 
+    void setMacRandomizationSettingPasspointEnabled(String fqdn, boolean enable);
+
     boolean startScan(String packageName, String featureId);
 
     List<ScanResult> getScanResults(String callingPackage, String callingFeatureId);
