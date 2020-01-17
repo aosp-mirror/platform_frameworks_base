@@ -4567,6 +4567,70 @@ public class AudioManager {
     }
 
     /**
+     * @hide
+     * Sets an additional audio output device delay in milliseconds.
+     *
+     * The additional output delay is a request to the output device to
+     * delay audio presentation (generally with respect to video presentation for better
+     * synchronization).
+     * It may not be supported by all output devices,
+     * and typically increases the audio latency by the amount of additional
+     * audio delay requested.
+     *
+     * If additional audio delay is supported by an audio output device,
+     * it is expected to be supported for all output streams (and configurations)
+     * opened on that device.
+     *
+     * @param device an instance of {@link AudioDeviceInfo} returned from {@link getDevices()}.
+     * @param delayMs delay in milliseconds desired.  This should be in range of {@code 0}
+     *     to the value returned by {@link #getMaxAdditionalOutputDeviceDelay()}.
+     * @return true if successful, false if the device does not support output device delay
+     *     or the delay is not in range of {@link #getMaxAdditionalOutputDeviceDelay()}.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public boolean setAdditionalOutputDeviceDelay(
+            @NonNull AudioDeviceInfo device, @IntRange(from = 0) int delayMs) {
+        Objects.requireNonNull(device);
+        // Implement the setter in r-dev or r-tv-dev as needed.
+        return false;
+    }
+
+    /**
+     * @hide
+     * Returns the current additional audio output device delay in milliseconds.
+     *
+     * @param device an instance of {@link AudioDeviceInfo} returned from {@link getDevices()}.
+     * @return the additional output device delay. This is a non-negative number.
+     *     {@code 0} is returned if unsupported.
+     */
+    @SystemApi
+    @IntRange(from = 0)
+    public int getAdditionalOutputDeviceDelay(@NonNull AudioDeviceInfo device) {
+        Objects.requireNonNull(device);
+        // Implement the getter in r-dev or r-tv-dev as needed.
+        return 0;
+    }
+
+    /**
+     * @hide
+     * Returns the maximum additional audio output device delay in milliseconds.
+     *
+     * @param device an instance of {@link AudioDeviceInfo} returned from {@link getDevices()}.
+     * @return the maximum output device delay in milliseconds that can be set.
+     *     This is a non-negative number
+     *     representing the additional audio delay supported for the device.
+     *     {@code 0} is returned if unsupported.
+     */
+    @SystemApi
+    @IntRange(from = 0)
+    public int getMaxAdditionalOutputDeviceDelay(@NonNull AudioDeviceInfo device) {
+        Objects.requireNonNull(device);
+        // Implement the getter in r-dev or r-tv-dev as needed.
+        return 0;
+    }
+
+    /**
      * Returns the estimated latency for the given stream type in milliseconds.
      *
      * DO NOT UNHIDE. The existing approach for doing A/V sync has too many problems. We need
