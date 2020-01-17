@@ -73,4 +73,12 @@ interface IMediaRouterService {
             in MediaRoute2Info route, int direction);
 
     List<RoutingSessionInfo> getActiveSessions(IMediaRouter2Manager manager);
+    void selectClientRoute(IMediaRouter2Manager manager,
+            String sessionId, in MediaRoute2Info route);
+    void deselectClientRoute(IMediaRouter2Manager manager,
+            String sessionId, in MediaRoute2Info route);
+    void transferToClientRoute(IMediaRouter2Manager manager,
+            String sessionId, in MediaRoute2Info route);
+    void releaseClientSession(IMediaRouter2Manager manager, String sessionId);
+
 }

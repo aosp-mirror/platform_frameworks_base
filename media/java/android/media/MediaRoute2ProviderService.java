@@ -177,7 +177,6 @@ public abstract class MediaRoute2ProviderService extends Service {
             }
             mSessionInfo.put(sessionInfo.getId(), sessionInfo);
         }
-        schedulePublishState();
 
         if (mClient == null) {
             return;
