@@ -2888,8 +2888,6 @@ package android.telephony {
 
   public final class AccessNetworkConstants {
     field public static final int TRANSPORT_TYPE_INVALID = -1; // 0xffffffff
-    field public static final int TRANSPORT_TYPE_WLAN = 2; // 0x2
-    field public static final int TRANSPORT_TYPE_WWAN = 1; // 0x1
   }
 
   public final class CallQuality implements android.os.Parcelable {
@@ -2952,36 +2950,18 @@ package android.telephony {
   }
 
   public final class NetworkRegistrationInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getAccessNetworkTechnology();
-    method @NonNull public java.util.List<java.lang.Integer> getAvailableServices();
-    method @Nullable public android.telephony.CellIdentity getCellIdentity();
     method @Nullable public android.telephony.DataSpecificRegistrationInfo getDataSpecificInfo();
-    method public int getDomain();
     method public int getRegistrationState();
     method public int getRejectCause();
     method public int getRoamingType();
-    method public int getTransportType();
     method public boolean isEmergencyEnabled();
-    method public boolean isRoaming();
     method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationInfo> CREATOR;
-    field public static final int DOMAIN_CS = 1; // 0x1
-    field public static final int DOMAIN_CS_PS = 3; // 0x3
-    field public static final int DOMAIN_PS = 2; // 0x2
-    field public static final int DOMAIN_UNKNOWN = 0; // 0x0
     field public static final int REGISTRATION_STATE_DENIED = 3; // 0x3
     field public static final int REGISTRATION_STATE_HOME = 1; // 0x1
     field public static final int REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING = 0; // 0x0
     field public static final int REGISTRATION_STATE_NOT_REGISTERED_SEARCHING = 2; // 0x2
     field public static final int REGISTRATION_STATE_ROAMING = 5; // 0x5
     field public static final int REGISTRATION_STATE_UNKNOWN = 4; // 0x4
-    field public static final int SERVICE_TYPE_DATA = 2; // 0x2
-    field public static final int SERVICE_TYPE_EMERGENCY = 5; // 0x5
-    field public static final int SERVICE_TYPE_SMS = 3; // 0x3
-    field public static final int SERVICE_TYPE_UNKNOWN = 0; // 0x0
-    field public static final int SERVICE_TYPE_VIDEO = 4; // 0x4
-    field public static final int SERVICE_TYPE_VOICE = 1; // 0x1
   }
 
   public static final class NetworkRegistrationInfo.Builder {
