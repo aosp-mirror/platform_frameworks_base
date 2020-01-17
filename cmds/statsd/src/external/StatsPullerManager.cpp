@@ -68,13 +68,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::ON_DEVICE_POWER_MEASUREMENT},
          {.puller = new PowerStatsPuller()}},
 
-        // system_elapsed_realtime
-        {{.atomTag = android::util::SYSTEM_ELAPSED_REALTIME},
-         {.coolDownNs = NS_PER_SEC,
-          .puller = new StatsCompanionServicePuller(android::util::SYSTEM_ELAPSED_REALTIME),
-          .pullTimeoutNs = NS_PER_SEC / 2,
-         }},
-
         // remaining_battery_capacity
         {{.atomTag = android::util::REMAINING_BATTERY_CAPACITY},
          {.puller = new ResourceHealthManagerPuller(android::util::REMAINING_BATTERY_CAPACITY)}},
@@ -95,35 +88,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
 
-        // looper_stats
-        {{.atomTag = android::util::LOOPER_STATS},
-         {.additiveFields = {5, 6, 7, 8, 9},
-          .puller = new StatsCompanionServicePuller(android::util::LOOPER_STATS)}},
-
-        // Disk Stats
-        {{.atomTag = android::util::DISK_STATS},
-         {.puller = new StatsCompanionServicePuller(android::util::DISK_STATS)}},
-
-        // Directory usage
-        {{.atomTag = android::util::DIRECTORY_USAGE},
-         {.puller = new StatsCompanionServicePuller(android::util::DIRECTORY_USAGE)}},
-
-        // Size of app's code, data, and cache
-        {{.atomTag = android::util::APP_SIZE},
-         {.puller = new StatsCompanionServicePuller(android::util::APP_SIZE)}},
-
-        // Size of specific categories of files. Eg. Music.
-        {{.atomTag = android::util::CATEGORY_SIZE},
-         {.puller = new StatsCompanionServicePuller(android::util::CATEGORY_SIZE)}},
-
-        // Number of fingerprints enrolled for each user.
-        {{.atomTag = android::util::NUM_FINGERPRINTS_ENROLLED},
-         {.puller = new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS_ENROLLED)}},
-
-        // Number of faces enrolled for each user.
-        {{.atomTag = android::util::NUM_FACES_ENROLLED},
-         {.puller = new StatsCompanionServicePuller(android::util::NUM_FACES_ENROLLED)}},
-
         // ProcStats.
         {{.atomTag = android::util::PROC_STATS},
          {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS)}},
@@ -131,20 +95,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // ProcStatsPkgProc.
         {{.atomTag = android::util::PROC_STATS_PKG_PROC},
          {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS_PKG_PROC)}},
-
-        // Disk I/O stats per uid.
-        {{.atomTag = android::util::DISK_IO},
-         {.additiveFields = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
-          .coolDownNs = 3 * NS_PER_SEC,
-          .puller = new StatsCompanionServicePuller(android::util::DISK_IO)}},
-
-        // Process cpu stats. Min cool-down is 5 sec, inline with what AcitivityManagerService uses.
-        {{.atomTag = android::util::PROCESS_CPU_TIME},
-         {.coolDownNs = 5 * NS_PER_SEC /* min cool-down in seconds*/,
-          .puller = new StatsCompanionServicePuller(android::util::PROCESS_CPU_TIME)}},
-        {{.atomTag = android::util::CPU_TIME_PER_THREAD_FREQ},
-         {.additiveFields = {7, 9, 11, 13, 15, 17, 19, 21},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_THREAD_FREQ)}},
 
         // DebugElapsedClock.
         {{.atomTag = android::util::DEBUG_ELAPSED_CLOCK},
@@ -159,10 +109,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // RoleHolder.
         {{.atomTag = android::util::ROLE_HOLDER},
          {.puller = new StatsCompanionServicePuller(android::util::ROLE_HOLDER)}},
-
-        // PermissionState.
-        {{.atomTag = android::util::DANGEROUS_PERMISSION_STATE},
-         {.puller = new StatsCompanionServicePuller(android::util::DANGEROUS_PERMISSION_STATE)}},
 
         // TrainInfo.
         {{.atomTag = android::util::TRAIN_INFO}, {.puller = new TrainInfoPuller()}},
@@ -199,15 +145,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::VMS_CLIENT_STATS},
          {.additiveFields = {5, 6, 7, 8, 9, 10},
           .puller = new CarStatsPuller(android::util::VMS_CLIENT_STATS)}},
-
-        // NotiifcationRemoteViews.
-        {{.atomTag = android::util::NOTIFICATION_REMOTE_VIEWS},
-         {.puller = new StatsCompanionServicePuller(android::util::NOTIFICATION_REMOTE_VIEWS)}},
-
-        // PermissionStateSampled.
-        {{.atomTag = android::util::DANGEROUS_PERMISSION_STATE_SAMPLED},
-         {.puller =
-               new StatsCompanionServicePuller(android::util::DANGEROUS_PERMISSION_STATE_SAMPLED)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
