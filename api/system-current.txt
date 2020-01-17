@@ -6121,13 +6121,18 @@ package android.net {
 
   public class LinkAddress implements android.os.Parcelable {
     ctor public LinkAddress(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int, int, int);
+    ctor public LinkAddress(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int, int, int, long, long);
     ctor public LinkAddress(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int);
     ctor public LinkAddress(@NonNull String);
     ctor public LinkAddress(@NonNull String, int, int);
+    method public long getDeprecationTime();
+    method public long getExpirationTime();
     method public boolean isGlobalPreferred();
     method public boolean isIpv4();
     method public boolean isIpv6();
     method public boolean isSameAddressAs(@Nullable android.net.LinkAddress);
+    field public static final long LIFETIME_PERMANENT = 9223372036854775807L; // 0x7fffffffffffffffL
+    field public static final long LIFETIME_UNKNOWN = -1L; // 0xffffffffffffffffL
   }
 
   public final class LinkProperties implements android.os.Parcelable {
