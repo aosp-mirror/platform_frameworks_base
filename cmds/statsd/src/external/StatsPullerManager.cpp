@@ -115,10 +115,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::GPU_STATS_APP_INFO},
          {.puller = new GpuStatsPuller(android::util::GPU_STATS_APP_INFO)}},
 
-        // Face Settings
-        {{.atomTag = android::util::FACE_SETTINGS},
-         {.puller = new StatsCompanionServicePuller(android::util::FACE_SETTINGS)}},
-
         // VmsClientStats
         {{.atomTag = android::util::VMS_CLIENT_STATS},
          {.additiveFields = {5, 6, 7, 8, 9, 10},

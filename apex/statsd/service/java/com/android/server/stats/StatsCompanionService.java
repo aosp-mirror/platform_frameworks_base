@@ -856,43 +856,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullFaceSettings(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long callingToken = Binder.clearCallingIdentity();
-        try {
-            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
-            int numUsers = users.size();
-            for (int userNum = 0; userNum < numUsers; userNum++) {
-                int userId = users.get(userNum).getUserHandle().getIdentifier();
-
-                StatsLogEventWrapper e =
-                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED, 1,
-                        userId) != 0);
-                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD,
-                        0, userId) != 0);
-                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED, 1,
-                        userId) != 0);
-                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.FACE_UNLOCK_APP_ENABLED, 1,
-                        userId) != 0);
-                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION, 0,
-                        userId) != 0);
-                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.FACE_UNLOCK_DIVERSITY_REQUIRED, 1,
-                        userId) != 0);
-
-                pulledData.add(e);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(callingToken);
-        }
-    }
-
     /**
      * Pulls various data.
      */
@@ -925,11 +888,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.DEBUG_FAILING_ELAPSED_CLOCK: {
                 pullDebugFailingElapsedClock(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.FACE_SETTINGS: {
-                pullFaceSettings(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 
