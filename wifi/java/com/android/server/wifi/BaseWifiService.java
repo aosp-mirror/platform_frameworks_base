@@ -32,6 +32,7 @@ import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ISuggestionConnectionStatusListener;
 import android.net.wifi.ITrafficStateCallback;
 import android.net.wifi.ITxPacketCountListener;
+import android.net.wifi.IWifiConnectedNetworkScorer;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.SoftApConfiguration;
@@ -598,6 +599,17 @@ public class BaseWifiService extends IWifiManager.Stub {
     @Override
     public List<WifiConfiguration> getWifiConfigForMatchedNetworkSuggestionsSharedWithUser(
             List<ScanResult> scanResults) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean setWifiConnectedNetworkScorer(IBinder binder,
+            IWifiConnectedNetworkScorer scorer) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void clearWifiConnectedNetworkScorer() {
         throw new UnsupportedOperationException();
     }
 }
