@@ -31,7 +31,6 @@ import android.media.MediaRouter2.RouteCallback;
 import android.media.MediaRouter2.SessionCallback;
 import android.media.MediaRouter2Manager;
 import android.media.RouteDiscoveryPreference;
-import android.media.RoutingSessionInfo;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -39,6 +38,7 @@ import android.text.TextUtils;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -138,8 +138,6 @@ public class MediaRouterManagerTest {
 
     @After
     public void tearDown() {
-        // order matters (callbacks should be cleared at the last)
-        releaseAllSessions();
         // unregister callbacks
         clearCallbacks();
     }
@@ -225,83 +223,110 @@ public class MediaRouterManagerTest {
         MediaRoute2Info routeToSelect = routes.get(ROUTE_ID1);
         assertNotNull(routeToSelect);
 
-        mManager.selectRoute(mPackageName, routeToSelect);
-        assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
-        assertEquals(1, mManager.getActiveSessions().size());
+        try {
+            mManager.selectRoute(mPackageName, routeToSelect);
+            assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        } finally {
+            //TODO: release the session
+            //mManager.selectRoute(mPackageName, null);
+        }
+    }
+
+    /**
+     * Tests if MR2Manager.Callback.onRouteSelected is called
+     * when a route is selected by MR2Manager.
+     */
+    @Test
+    @Ignore("TODO: test session created callback instead of onRouteSelected")
+    public void testManagerOnRouteSelected() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
+
+        addRouterCallback(new RouteCallback());
+        addManagerCallback(new MediaRouter2Manager.Callback() {
+            @Override
+            public void onRouteSelected(String packageName, MediaRoute2Info route) {
+                if (TextUtils.equals(mPackageName, packageName)
+                        && route != null && TextUtils.equals(route.getId(), ROUTE_ID1)) {
+                    latch.countDown();
+                }
+            }
+        });
+
+        MediaRoute2Info routeToSelect = routes.get(ROUTE_ID1);
+        assertNotNull(routeToSelect);
+
+        try {
+            mManager.selectRoute(mPackageName, routeToSelect);
+            assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        } finally {
+            //TODO: release the session
+            //mManager.selectRoute(mPackageName, null);
+        }
     }
 
     @Test
-    public void testGetRoutingControllers() throws Exception {
+    @Ignore("TODO: enable this when 'releasing session' is implemented")
+    public void testGetActiveRoutes() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
 
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
         addRouterCallback(new RouteCallback());
         addManagerCallback(new MediaRouter2Manager.Callback() {
             @Override
-            public void onSessionCreated(MediaRouter2Manager.RoutingController controller) {
-                if (TextUtils.equals(mPackageName, controller.getClientPackageName())
-                        && createRouteMap(controller.getSelectedRoutes()).containsKey(ROUTE_ID1)) {
+            public void onRouteSelected(String packageName, MediaRoute2Info route) {
+                if (TextUtils.equals(mPackageName, packageName)
+                        && route != null && TextUtils.equals(route.getId(), ROUTE_ID1)) {
                     latch.countDown();
                 }
             }
         });
 
-        assertEquals(0, mManager.getRoutingControllers(mPackageName).size());
+        //TODO: it fails due to not releasing session
+        assertEquals(0, mManager.getActiveSessions().size());
 
         mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1));
         latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
 
-        List<MediaRouter2Manager.RoutingController> controllers =
-                mManager.getRoutingControllers(mPackageName);
+        assertEquals(1, mManager.getActiveSessions().size());
 
-        assertEquals(1, controllers.size());
-
-        MediaRouter2Manager.RoutingController routingController = controllers.get(0);
+        //TODO: release the session
+        /*
         awaitOnRouteChangedManager(
-                () -> routingController.release(),
+                () -> mManager.selectRoute(mPackageName, null),
                 ROUTE_ID1,
                 route -> TextUtils.equals(route.getClientPackageName(), null));
-        assertEquals(0, mManager.getRoutingControllers(mPackageName).size());
+        assertEquals(0, mManager.getActiveRoutes().size());
+        */
     }
 
     /**
-     * Tests select, transfer, release of routes of a provider
+     * Tests selecting and unselecting routes of a single provider.
      */
     @Test
-    public void testSelectAndTransferAndRelease() throws Exception {
+    @Ignore("TODO: enable when session is released")
+    public void testSingleProviderSelect() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
         addRouterCallback(new RouteCallback());
 
-        CountDownLatch onSessionCreatedLatch = new CountDownLatch(1);
-
-        addManagerCallback(new MediaRouter2Manager.Callback() {
-            @Override
-            public void onSessionCreated(MediaRouter2Manager.RoutingController controller) {
-                assertNotNull(controller);
-                onSessionCreatedLatch.countDown();
-            }
-        });
         awaitOnRouteChangedManager(
                 () -> mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1)),
                 ROUTE_ID1,
                 route -> TextUtils.equals(route.getClientPackageName(), mPackageName));
-        assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
-
-        List<MediaRouter2Manager.RoutingController> controllers =
-                mManager.getRoutingControllers(mPackageName);
-
-        assertEquals(1, controllers.size());
-        MediaRouter2Manager.RoutingController routingController = controllers.get(0);
 
         awaitOnRouteChangedManager(
-                () -> mManager.selectRoute(mPackageName, routes.get(ROUTE_ID5_TO_TRANSFER_TO)),
-                ROUTE_ID5_TO_TRANSFER_TO,
+                () -> mManager.selectRoute(mPackageName, routes.get(ROUTE_ID2)),
+                ROUTE_ID2,
                 route -> TextUtils.equals(route.getClientPackageName(), mPackageName));
 
+        //TODO: release the session
+        /*
         awaitOnRouteChangedManager(
-                () -> routingController.release(),
-                ROUTE_ID5_TO_TRANSFER_TO,
+                () -> mManager.selectRoute(mPackageName, null),
+                ROUTE_ID2,
                 route -> TextUtils.equals(route.getClientPackageName(), null));
+
+        */
     }
 
     @Test
@@ -434,14 +459,5 @@ public class MediaRouterManagerTest {
             mRouter2.unregisterSessionCallback(sessionCallback);
         }
         mSessionCallbacks.clear();
-    }
-
-    private void releaseAllSessions() {
-        // ensure ManagerRecord in MediaRouter2ServiceImpl
-        addManagerCallback(new MediaRouter2Manager.Callback());
-
-        for (RoutingSessionInfo session : mManager.getActiveSessions()) {
-            mManager.getControllerForSession(session).release();
-        }
     }
 }

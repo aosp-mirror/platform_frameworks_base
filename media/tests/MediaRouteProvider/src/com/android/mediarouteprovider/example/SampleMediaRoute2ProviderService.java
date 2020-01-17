@@ -210,7 +210,6 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
             }
         }
         notifySessionReleased(sessionId);
-        publishRoutes();
     }
 
     @Override
@@ -266,27 +265,6 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     @Override
     public void onTransferToRoute(String sessionId, String routeId) {
         RoutingSessionInfo sessionInfo = getSessionInfo(sessionId);
-        MediaRoute2Info route = mRoutes.get(routeId);
-
-        if (sessionInfo == null || route == null) {
-            return;
-        }
-
-        for (String selectedRouteId : sessionInfo.getSelectedRoutes()) {
-            mRouteIdToSessionId.remove(selectedRouteId);
-            MediaRoute2Info selectedRoute = mRoutes.get(selectedRouteId);
-            if (selectedRoute != null) {
-                mRoutes.put(selectedRouteId, new MediaRoute2Info.Builder(selectedRoute)
-                        .setClientPackageName(null)
-                        .build());
-            }
-        }
-
-        mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
-                .setClientPackageName(sessionInfo.getClientPackageName())
-                .build());
-        mRouteIdToSessionId.put(routeId, sessionId);
-
         RoutingSessionInfo newSessionInfo = new RoutingSessionInfo.Builder(sessionInfo)
                 .clearSelectedRoutes()
                 .addSelectedRoute(routeId)
@@ -294,7 +272,6 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
                 .removeTransferrableRoute(routeId)
                 .build();
         notifySessionUpdated(newSessionInfo);
-        publishRoutes();
     }
 
     void maybeDeselectRoute(String routeId) {

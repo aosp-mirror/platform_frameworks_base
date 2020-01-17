@@ -556,33 +556,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         return mService2.getActiveSessions(manager);
     }
 
-    // Binder call
-    @Override
-    public void selectClientRoute(IMediaRouter2Manager manager, String sessionId,
-            MediaRoute2Info route) {
-        mService2.selectClientRoute(manager, sessionId, route);
-    }
-
-    // Binder call
-    @Override
-    public void deselectClientRoute(IMediaRouter2Manager manager, String sessionId,
-            MediaRoute2Info route) {
-        mService2.deselectClientRoute(manager, sessionId, route);
-    }
-
-    // Binder call
-    @Override
-    public void transferToClientRoute(IMediaRouter2Manager manager, String sessionId,
-            MediaRoute2Info route) {
-        mService2.transferToClientRoute(manager, sessionId, route);
-    }
-
-    // Binder call
-    @Override
-    public void releaseClientSession(IMediaRouter2Manager manager, String sessionId) {
-        mService2.releaseClientSession(manager, sessionId);
-    }
-
     void restoreBluetoothA2dp() {
         try {
             boolean a2dpOn;
