@@ -76,6 +76,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -697,11 +698,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mStageName = new File(backupManagerService.getDataDir(), packageName + ".stage");
         mNewStateName = new File(mStateDir, packageName + ".new");
 
-        // don't stage the 'android' package where the wallpaper data lives.  this is
-        // an optimization: we know there's no widget data hosted/published by that
-        // package, and this way we avoid doing a spurious copy of MB-sized wallpaper
-        // data following the download.
-        boolean staging = !packageName.equals(PLATFORM_PACKAGE_NAME);
+        boolean staging = shouldStageBackupData(packageName);
         ParcelFileDescriptor stage;
         File downloadFile = (staging) ? mStageName : mBackupDataName;
         boolean startedAgentRestore = false;
@@ -768,8 +765,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             startedAgentRestore = true;
             mAgent.doRestoreWithExcludedKeys(mBackupData, appVersionCode, mNewState,
                     mEphemeralOpToken, backupManagerService.getBackupManagerBinder(),
-                    mExcludedKeys.containsKey(packageName)
-                            ? new ArrayList<>(mExcludedKeys.get(packageName)) : null);
+                    new ArrayList<>(getExcludedKeysForPackage(packageName)));
         } catch (Exception e) {
             Slog.e(TAG, "Unable to call app for restore: " + packageName, e);
             EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
@@ -785,9 +781,24 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     }
 
     @VisibleForTesting
+    boolean shouldStageBackupData(String packageName) {
+        // Backup data is staged for 2 reasons:
+        // 1. We might need to exclude keys from the data before passing it to the agent
+        // 2. Widget metadata needs to be separated from the rest to be handled separately
+        // But 'android' package doesn't contain widget metadata so we want to skip staging for it
+        // when there are no keys to be excluded either.
+        return !packageName.equals(PLATFORM_PACKAGE_NAME) ||
+                !getExcludedKeysForPackage(PLATFORM_PACKAGE_NAME).isEmpty();
+    }
+
+    private Set<String> getExcludedKeysForPackage(String packageName) {
+        return mExcludedKeys.getOrDefault(packageName, Collections.emptySet());
+    }
+
+    @VisibleForTesting
     void filterExcludedKeys(String packageName, BackupDataInput in, BackupDataOutput out)
             throws Exception {
-        Set<String> excludedKeysForPackage = mExcludedKeys.get(packageName);
+        Set<String> excludedKeysForPackage = getExcludedKeysForPackage(packageName);
 
         byte[] buffer = new byte[8192]; // will grow when needed
         while (in.readNextHeader()) {
