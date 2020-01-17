@@ -849,6 +849,17 @@ public class TelecomManager {
      */
     public static final int PRESENTATION_PAYPHONE = 4;
 
+
+    /*
+     * Values for the adb property "persist.radio.videocall.audio.output"
+     */
+    /** @hide */
+    public static final int AUDIO_OUTPUT_ENABLE_SPEAKER = 0;
+    /** @hide */
+    public static final int AUDIO_OUTPUT_DISABLE_SPEAKER = 1;
+    /** @hide */
+    public static final int AUDIO_OUTPUT_DEFAULT = AUDIO_OUTPUT_ENABLE_SPEAKER;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(
