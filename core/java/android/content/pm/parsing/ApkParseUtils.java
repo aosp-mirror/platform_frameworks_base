@@ -2640,6 +2640,7 @@ public class ApkParseUtils {
         activity.directBootAware = false;
         activity.rotationAnimation = ROTATION_ANIMATION_UNSPECIFIED;
         activity.colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
+        activity.preferMinimalPostProcessing = ActivityInfo.MINIMAL_POST_PROCESSING_DEFAULT;
         if (hardwareAccelerated) {
             activity.flags |= ActivityInfo.FLAG_HARDWARE_ACCELERATED;
         }

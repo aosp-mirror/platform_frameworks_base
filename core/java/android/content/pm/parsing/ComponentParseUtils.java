@@ -553,6 +553,7 @@ public class ComponentParseUtils {
         public String requestedVrComponent;
         public int rotationAnimation = -1;
         public int colorMode;
+        public boolean preferMinimalPostProcessing;
         public int order;
 
         public ActivityInfo.WindowLayout windowLayout;
@@ -640,6 +641,7 @@ public class ComponentParseUtils {
             dest.writeString(this.requestedVrComponent);
             dest.writeInt(this.rotationAnimation);
             dest.writeInt(this.colorMode);
+            dest.writeBoolean(this.preferMinimalPostProcessing);
             dest.writeInt(this.order);
             dest.writeBundle(this.metaData);
 
@@ -685,6 +687,7 @@ public class ComponentParseUtils {
             this.requestedVrComponent = in.readString();
             this.rotationAnimation = in.readInt();
             this.colorMode = in.readInt();
+            this.preferMinimalPostProcessing = in.readByte() != 0;
             this.order = in.readInt();
             this.metaData = in.readBundle();
             if (in.readInt() == 1) {
@@ -1644,6 +1647,10 @@ public class ComponentParseUtils {
 
                 result.colorMode = sa.getInt(R.styleable.AndroidManifestActivity_colorMode,
                         ActivityInfo.COLOR_MODE_DEFAULT);
+
+                result.preferMinimalPostProcessing = sa.getBoolean(
+                        R.styleable.AndroidManifestActivity_preferMinimalPostProcessing,
+                        ActivityInfo.MINIMAL_POST_PROCESSING_DEFAULT);
 
                 if (sa.getBoolean(R.styleable.AndroidManifestActivity_showWhenLocked, false)) {
                     result.flags |= ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
