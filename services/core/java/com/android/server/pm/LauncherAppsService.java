@@ -35,6 +35,7 @@ import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageManager;
+import android.content.pm.IShortcutChangeCallback;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
@@ -678,6 +679,16 @@ public class LauncherAppsService extends SystemService {
                             callingPackage, changedSince, packageName, shortcutIds,
                             componentName, flags, targetUser.getIdentifier(),
                             injectBinderCallingPid(), injectBinderCallingUid()));
+        }
+
+        @Override
+        public void registerShortcutChangeCallback(String callingPackage, long changedSince,
+                String packageName, List shortcutIds, ComponentName componentName, int flags,
+                IShortcutChangeCallback callback, int callbackId) {
+        }
+
+        @Override
+        public void unregisterShortcutChangeCallback(String callingPackage, int callbackId) {
         }
 
         @Override
