@@ -181,7 +181,7 @@ droidstubs {
 // They however are NOT used for building the API stub.
 droidstubs {
     name: "module-app-api",
-    defaults: ["metalava-non-updatable-api-stubs-default"],
+    defaults: ["metalava-api-stubs-default"],
     libs: ["framework-all"],
     arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args +
@@ -211,7 +211,7 @@ droidstubs {
 
 droidstubs {
     name: "module-lib-api",
-    defaults: ["metalava-non-updatable-api-stubs-default"],
+    defaults: ["metalava-api-stubs-default"],
     libs: ["framework-all"],
     arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args +
@@ -245,7 +245,7 @@ droidstubs {
 // the ones with 'client=MODULE_LIBRARIES'.
 droidstubs {
     name: "module-app-api-stubs-docs",
-    defaults: ["metalava-non-updatable-api-stubs-default"],
+    defaults: ["metalava-api-stubs-default"],
     libs: ["framework-all"],
     arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args +
@@ -259,7 +259,7 @@ droidstubs {
 
 droidstubs {
     name: "module-lib-api-stubs-docs",
-    defaults: ["metalava-non-updatable-api-stubs-default"],
+    defaults: ["metalava-api-stubs-default"],
     libs: ["framework-all"],
     arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args +
