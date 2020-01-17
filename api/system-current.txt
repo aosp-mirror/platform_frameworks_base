@@ -4650,6 +4650,21 @@ package android.media.tv {
 
 package android.media.tv.tuner {
 
+  public class DemuxCapabilities {
+    method public int getAudioFilterCount();
+    method public int getDemuxCount();
+    method public int getFilterCapabilities();
+    method @Nullable @Size(5) public int[] getLinkCapabilities();
+    method public int getPcrFilterCount();
+    method public int getPesFilterCount();
+    method public int getPlaybackCount();
+    method public int getRecordCount();
+    method public int getSectionFilterCount();
+    method public long getSectionFilterLength();
+    method public int getTsFilterCount();
+    method public int getVideoFilterCount();
+  }
+
   public abstract class FrontendSettings {
     method public final int getFrequency();
     method public abstract int getType();

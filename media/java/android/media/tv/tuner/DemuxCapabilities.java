@@ -16,9 +16,11 @@
 
 package android.media.tv.tuner;
 
+import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.SystemApi;
 import android.media.tv.tuner.filter.FilterConfiguration;
 
 import java.lang.annotation.Retention;
@@ -29,6 +31,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@SystemApi
 public class DemuxCapabilities {
 
     /** @hide */
@@ -42,33 +45,33 @@ public class DemuxCapabilities {
     @Retention(RetentionPolicy.SOURCE)
     public @interface FilterCapabilities {}
 
-    private final int mNumDemux;
-    private final int mNumRecord;
-    private final int mNumPlayback;
-    private final int mNumTsFilter;
-    private final int mNumSectionFilter;
-    private final int mNumAudioFilter;
-    private final int mNumVideoFilter;
-    private final int mNumPesFilter;
-    private final int mNumPcrFilter;
-    private final int mNumBytesInSectionFilter;
+    private final int mDemuxCount;
+    private final int mRecordCount;
+    private final int mPlaybackCount;
+    private final int mTsFilterCount;
+    private final int mSectionFilterCount;
+    private final int mAudioFilterCount;
+    private final int mVideoFilterCount;
+    private final int mPesFilterCount;
+    private final int mPcrFilterCount;
+    private final long mSectionFilterLength;
     private final int mFilterCaps;
     private final int[] mLinkCaps;
 
     // Used by JNI
-    private DemuxCapabilities(int numDemux, int numRecord, int numPlayback, int numTsFilter,
-            int numSectionFilter, int numAudioFilter, int numVideoFilter, int numPesFilter,
-            int numPcrFilter, int numBytesInSectionFilter, int filterCaps, int[] linkCaps) {
-        mNumDemux = numDemux;
-        mNumRecord = numRecord;
-        mNumPlayback = numPlayback;
-        mNumTsFilter = numTsFilter;
-        mNumSectionFilter = numSectionFilter;
-        mNumAudioFilter = numAudioFilter;
-        mNumVideoFilter = numVideoFilter;
-        mNumPesFilter = numPesFilter;
-        mNumPcrFilter = numPcrFilter;
-        mNumBytesInSectionFilter = numBytesInSectionFilter;
+    private DemuxCapabilities(int demuxCount, int recordCount, int playbackCount, int tsFilterCount,
+            int sectionFilterCount, int audioFilterCount, int videoFilterCount, int pesFilterCount,
+            int pcrFilterCount, long sectionFilterLength, int filterCaps, int[] linkCaps) {
+        mDemuxCount = demuxCount;
+        mRecordCount = recordCount;
+        mPlaybackCount = playbackCount;
+        mTsFilterCount = tsFilterCount;
+        mSectionFilterCount = sectionFilterCount;
+        mAudioFilterCount = audioFilterCount;
+        mVideoFilterCount = videoFilterCount;
+        mPesFilterCount = pesFilterCount;
+        mPcrFilterCount = pcrFilterCount;
+        mSectionFilterLength = sectionFilterLength;
         mFilterCaps = filterCaps;
         mLinkCaps = linkCaps;
     }
@@ -76,62 +79,63 @@ public class DemuxCapabilities {
     /**
      * Gets total number of demuxes.
      */
-    public int getNumDemux() {
-        return mNumDemux;
+    public int getDemuxCount() {
+        return mDemuxCount;
     }
     /**
      * Gets max number of recordings at a time.
      */
-    public int getNumRecord() {
-        return mNumRecord;
+    public int getRecordCount() {
+        return mRecordCount;
     }
     /**
      * Gets max number of playbacks at a time.
      */
-    public int getNumPlayback() {
-        return mNumPlayback;
+    public int getPlaybackCount() {
+        return mPlaybackCount;
     }
     /**
      * Gets number of TS filters.
      */
-    public int getNumTsFilter() {
-        return mNumTsFilter;
+    public int getTsFilterCount() {
+        return mTsFilterCount;
     }
     /**
      * Gets number of section filters.
      */
-    public int getNumSectionFilter() {
-        return mNumSectionFilter;
+    public int getSectionFilterCount() {
+        return mSectionFilterCount;
     }
     /**
      * Gets number of audio filters.
      */
-    public int getNumAudioFilter() {
-        return mNumAudioFilter;
+    public int getAudioFilterCount() {
+        return mAudioFilterCount;
     }
     /**
      * Gets number of video filters.
      */
-    public int getNumVideoFilter() {
-        return mNumVideoFilter;
+    public int getVideoFilterCount() {
+        return mVideoFilterCount;
     }
     /**
      * Gets number of PES filters.
      */
-    public int getNumPesFilter() {
-        return mNumPesFilter;
+    public int getPesFilterCount() {
+        return mPesFilterCount;
     }
     /**
      * Gets number of PCR filters.
      */
-    public int getNumPcrFilter() {
-        return mNumPcrFilter;
+    public int getPcrFilterCount() {
+        return mPcrFilterCount;
     }
     /**
      * Gets number of bytes in the mask of a section filter.
      */
-    public int getNumBytesInSectionFilter() {
-        return mNumBytesInSectionFilter;
+    @BytesLong
+    public long getSectionFilterLength() {
+        return mSectionFilterLength;
     }
     /**
      * Gets filter capabilities in bit field.
