@@ -90,7 +90,7 @@ prebuilt_etc {
 
 prebuilt_etc {
     name: "privapp_whitelist_com.android.provision",
-    product_specific: true,
+    system_ext_specific: true,
     sub_dir: "permissions",
     src: "com.android.provision.xml",
     filename_from_src: true,
