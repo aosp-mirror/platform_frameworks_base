@@ -34,18 +34,17 @@
 # made today requires touching the same file, just copy the old
 # touch step and add it to the end of the list.
 #
-# ************************************************
-# NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
-# ************************************************
+# *****************************************************************
+# NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THE BANNER
+# *****************************************************************
 
 # For example:
 #$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/AndroidTests_intermediates)
 #$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/core_intermediates)
 #$(call add-clean-step, find $(OUT_DIR) -type f -name "IGTalkSession*" -print0 | xargs -0 rm -f)
 #$(call add-clean-step, rm -rf $(PRODUCT_OUT)/data/*)
-$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/priv-app/WallpaperCropper)
-$(call add-clean-step, rm -rf $(TARGET_OUT_PRODUCT)/priv-app/WallpaperCropper)
-
-# ************************************************
-# NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
-# ************************************************
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/product/priv-app/SystemUI)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/product/priv-app/SystemUI)
+# ******************************************************************
+# NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER
+# ******************************************************************
