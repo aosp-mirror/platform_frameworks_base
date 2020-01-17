@@ -35,6 +35,8 @@ struct CompileOptions {
   bool pseudolocalize = false;
   bool no_png_crunch = false;
   bool legacy_mode = false;
+  // See comments on aapt::ResourceParserOptions.
+  bool preserve_visibility_of_styleables = false;
   bool verbose = false;
 };
 
@@ -56,6 +58,11 @@ class CompileCommand : public Command {
     AddOptionalSwitch("--no-crunch", "Disables PNG processing", &options_.no_png_crunch);
     AddOptionalSwitch("--legacy", "Treat errors that used to be valid in AAPT as warnings",
         &options_.legacy_mode);
+    AddOptionalSwitch("--preserve-visibility-of-styleables",
+                      "If specified, apply the same visibility rules for\n"
+                      "styleables as are used for all other resources.\n"
+                      "Otherwise, all stylesables will be made public.",
+                      &options_.preserve_visibility_of_styleables);
     AddOptionalFlag("--visibility",
         "Sets the visibility of the compiled resources to the specified\n"
             "level. Accepted levels: public, private, default", &visibility_);
