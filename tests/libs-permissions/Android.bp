@@ -2,6 +2,7 @@ java_library {
     name: "com.android.test.libs.product",
     installable: true,
     product_specific: true,
+    sdk_version: "current",
     srcs: ["product/java/**/*.java"],
     required: ["com.android.test.libs.product.xml"],
 }
