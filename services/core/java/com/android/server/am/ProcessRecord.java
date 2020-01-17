@@ -62,8 +62,6 @@ import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.Zygote;
-import com.android.server.LocalServices;
-import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowProcessController;
 import com.android.server.wm.WindowProcessListener;
 
@@ -1793,9 +1791,6 @@ class ProcessRecord implements WindowProcessListener {
         /** current wait for debugger dialog */
         private AppWaitingForDebuggerDialog mWaitDialog;
 
-        private final WindowManagerInternal mWmInternal =
-                LocalServices.getService(WindowManagerInternal.class);
-
         boolean hasCrashDialogs() {
             return mCrashDialogs != null;
         }
@@ -1921,7 +1916,9 @@ class ProcessRecord implements WindowProcessListener {
             }
             // If there is no foreground window display, fallback to last used display.
             if (displayContexts.isEmpty() || lastUsedOnly) {
-                displayContexts.add(mWmInternal.getTopFocusedDisplayUiContext());
+                displayContexts.add(mService.mWmInternal != null
+                        ? mService.mWmInternal.getTopFocusedDisplayUiContext()
+                        : mService.mUiContext);
             }
             return displayContexts;
         }

@@ -362,6 +362,7 @@ import com.android.server.wm.ActivityMetricsLaunchObserver;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerService;
+import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerService;
 import com.android.server.wm.WindowProcessController;
 
@@ -1504,6 +1505,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @VisibleForTesting
     public WindowManagerService mWindowManager;
+    WindowManagerInternal mWmInternal;
     @VisibleForTesting
     public ActivityTaskManagerService mActivityTaskManager;
     @VisibleForTesting
@@ -2084,6 +2086,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void setWindowManager(WindowManagerService wm) {
         synchronized (this) {
             mWindowManager = wm;
+            mWmInternal = LocalServices.getService(WindowManagerInternal.class);
             mActivityTaskManager.setWindowManager(wm);
         }
     }
