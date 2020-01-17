@@ -7786,7 +7786,10 @@ public class ActivityManagerService extends IActivityManager.Stub
      *
      * Test cases are at cts/tests/appsecurity-tests/test-apps/UsePermissionDiffCert/
      *     src/com/android/cts/usespermissiondiffcertapp/AccessPermissionWithDiffSigTest.java
+     *
+     * @deprecated -- use getProviderMimeTypeAsync.
      */
+    @Deprecated
     public String getProviderMimeType(Uri uri, int userId) {
         enforceNotIsolatedCaller("getProviderMimeType");
         final String name = uri.getAuthority();
@@ -7845,6 +7848,43 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return null;
+    }
+
+    /**
+     * Allows apps to retrieve the MIME type of a URI.
+     * If an app is in the same user as the ContentProvider, or if it is allowed to interact across
+     * users, then it does not need permission to access the ContentProvider.
+     * Either way, it needs cross-user uri grants.
+     */
+    @Override
+    public void getProviderMimeTypeAsync(Uri uri, int userId, RemoteCallback resultCallback) {
+        enforceNotIsolatedCaller("getProviderMimeTypeAsync");
+        final String name = uri.getAuthority();
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        final int safeUserId = mUserController.unsafeConvertIncomingUser(userId);
+        final long ident = canClearIdentity(callingPid, callingUid, userId)
+                ? Binder.clearCallingIdentity() : 0;
+        try {
+            final ContentProviderHolder holder = getContentProviderExternalUnchecked(name, null,
+                    callingUid, "*getmimetype*", safeUserId);
+            if (holder != null) {
+                holder.provider.getTypeAsync(uri, new RemoteCallback(result -> {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        removeContentProviderExternalUnchecked(name, null, safeUserId);
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                    resultCallback.sendResult(result);
+                }));
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Content provider dead retrieving " + uri, e);
+            resultCallback.sendResult(Bundle.EMPTY);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     int checkContentProviderUriPermission(Uri uri, int userId, int callingUid, int modeFlags) {

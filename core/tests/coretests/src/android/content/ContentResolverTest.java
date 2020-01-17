@@ -191,4 +191,22 @@ public class ContentResolverTest {
         assertEquals(uri, ContentResolver
                 .translateDeprecatedDataPath(ContentResolver.translateDeprecatedDataPath(uri)));
     }
+
+    @Test
+    public void testGetType_localProvider() {
+        // This provider is running in the same process as the test and is already registered with
+        // the ContentResolver when the application starts, see
+        // ActivityThread#installContentProviders. This allows ContentResolver to follow a
+        // streamlined code path.
+        String type = mResolver.getType(Uri.parse("content://android.content.FakeProviderLocal"));
+        assertEquals("fake/local", type);
+    }
+
+    @Test
+    public void testGetType_remoteProvider() {
+        // This provider is running in a different process, which will need to be started
+        // in order to acquire the provider
+        String type = mResolver.getType(Uri.parse("content://android.content.FakeProviderRemote"));
+        assertEquals("fake/remote", type);
+    }
 }

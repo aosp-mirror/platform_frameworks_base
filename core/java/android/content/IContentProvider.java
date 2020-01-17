@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.IInterface;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 
 import java.io.FileNotFoundException;
@@ -42,6 +43,14 @@ public interface IContentProvider extends IInterface {
             @Nullable Bundle queryArgs, @Nullable ICancellationSignal cancellationSignal)
             throws RemoteException;
     public String getType(Uri url) throws RemoteException;
+
+    /**
+     * An oneway version of getType. The functionality is exactly the same, except that the
+     * call returns immediately, and the resulting type is returned when available via
+     * a binder callback.
+     */
+    void getTypeAsync(Uri uri, RemoteCallback callback) throws RemoteException;
+
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
             + "ContentProviderClient#insert(android.net.Uri, android.content.ContentValues)} "
@@ -152,4 +161,5 @@ public interface IContentProvider extends IInterface {
     static final int UNCANONICALIZE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 25;
     static final int REFRESH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 26;
     static final int CHECK_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 27;
+    int GET_TYPE_ASYNC_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 28;
 }

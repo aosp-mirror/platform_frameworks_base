@@ -33,6 +33,7 @@ import android.os.ICancellationSignal;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 
 import java.io.FileNotFoundException;
@@ -143,6 +144,14 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     reply.writeNoException();
                     reply.writeString(type);
 
+                    return true;
+                }
+
+                case GET_TYPE_ASYNC_TRANSACTION: {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    Uri url = Uri.CREATOR.createFromParcel(data);
+                    RemoteCallback callback = RemoteCallback.CREATOR.createFromParcel(data);
+                    getTypeAsync(url, callback);
                     return true;
                 }
 
@@ -491,6 +500,22 @@ final class ContentProviderProxy implements IContentProvider
         } finally {
             data.recycle();
             reply.recycle();
+        }
+    }
+
+    @Override
+    /* oneway */ public void getTypeAsync(Uri uri, RemoteCallback callback) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInterfaceToken(IContentProvider.descriptor);
+
+            uri.writeToParcel(data, 0);
+            callback.writeToParcel(data, 0);
+
+            mRemote.transact(IContentProvider.GET_TYPE_ASYNC_TRANSACTION, data, null,
+                    IBinder.FLAG_ONEWAY);
+        } finally {
+            data.recycle();
         }
     }
 
