@@ -8367,6 +8367,13 @@ package android.telephony {
     field public static final int TRANSPORT_TYPE_INVALID = -1; // 0xffffffff
   }
 
+  public static final class AccessNetworkConstants.NgranBands {
+    method public static int getFrequencyRangeGroup(int);
+    field public static final int FREQUENCY_RANGE_GROUP_1 = 1; // 0x1
+    field public static final int FREQUENCY_RANGE_GROUP_2 = 2; // 0x2
+    field public static final int FREQUENCY_RANGE_GROUP_UNKNOWN = 0; // 0x0
+  }
+
   public final class CallAttributes implements android.os.Parcelable {
     ctor public CallAttributes(@NonNull android.telephony.PreciseCallState, int, @NonNull android.telephony.CallQuality);
     method public int describeContents();
