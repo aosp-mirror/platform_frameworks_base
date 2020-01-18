@@ -59,9 +59,15 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.Ikev2VpnProfile;
+import android.net.InetAddresses;
+import android.net.IpPrefix;
+import android.net.IpSecManager;
+import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo.DetailedState;
+import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.VpnManager;
 import android.net.VpnService;
@@ -84,6 +90,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.R;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
+import com.android.server.IpSecService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -93,6 +100,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.net.Inet4Address;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -125,6 +133,9 @@ public class VpnTest {
     }
 
     static final String TEST_VPN_PKG = "com.dummy.vpn";
+    private static final String TEST_VPN_SERVER = "1.2.3.4";
+    private static final String TEST_VPN_IDENTITY = "identity";
+    private static final byte[] TEST_VPN_PSK = "psk".getBytes();
 
     /**
      * Names and UIDs for some fake packages. Important points:
@@ -151,23 +162,39 @@ public class VpnTest {
     @Mock private Vpn.SystemServices mSystemServices;
     @Mock private Vpn.Ikev2SessionCreator mIkev2SessionCreator;
     @Mock private ConnectivityManager mConnectivityManager;
+    @Mock private IpSecService mIpSecService;
     @Mock private KeyStore mKeyStore;
-    private final VpnProfile mVpnProfile = new VpnProfile("key");
+    private final VpnProfile mVpnProfile;
+
+    private IpSecManager mIpSecManager;
+
+    public VpnTest() throws Exception {
+        // Build an actual VPN profile that is capable of being converted to and from an
+        // Ikev2VpnProfile
+        final Ikev2VpnProfile.Builder builder =
+                new Ikev2VpnProfile.Builder(TEST_VPN_SERVER, TEST_VPN_IDENTITY);
+        builder.setAuthPsk(TEST_VPN_PSK);
+        mVpnProfile = builder.build().toVpnProfile();
+    }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mIpSecManager = new IpSecManager(mContext, mIpSecService);
+
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         setMockedPackages(mPackages);
 
-        when(mContext.getPackageName()).thenReturn(Vpn.class.getPackage().getName());
+        when(mContext.getPackageName()).thenReturn(TEST_VPN_PKG);
+        when(mContext.getOpPackageName()).thenReturn(TEST_VPN_PKG);
         when(mContext.getSystemService(eq(Context.USER_SERVICE))).thenReturn(mUserManager);
         when(mContext.getSystemService(eq(Context.APP_OPS_SERVICE))).thenReturn(mAppOps);
         when(mContext.getSystemService(eq(Context.NOTIFICATION_SERVICE)))
                 .thenReturn(mNotificationManager);
         when(mContext.getSystemService(eq(Context.CONNECTIVITY_SERVICE)))
                 .thenReturn(mConnectivityManager);
+        when(mContext.getSystemService(eq(Context.IPSEC_SERVICE))).thenReturn(mIpSecManager);
         when(mContext.getString(R.string.config_customVpnAlwaysOnDisconnectedDialogComponent))
                 .thenReturn(Resources.getSystem().getString(
                         R.string.config_customVpnAlwaysOnDisconnectedDialogComponent));
@@ -957,6 +984,26 @@ public class VpnTest {
 
         setAndVerifyAlwaysOnPackage(vpn, uid, false);
         assertTrue(vpn.startAlwaysOnVpn(mKeyStore));
+
+        // TODO: Test the Ikev2VpnRunner started up properly. Relies on utility methods added in
+        // a subsequent CL.
+    }
+
+    @Test
+    public void testStartLegacyVpn() throws Exception {
+        final Vpn vpn = createVpn(primaryUser.id);
+        setMockedUsers(primaryUser);
+
+        // Dummy egress interface
+        final String egressIface = "DUMMY0";
+        final LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName(egressIface);
+
+        final RouteInfo defaultRoute = new RouteInfo(new IpPrefix(Inet4Address.ANY, 0),
+                        InetAddresses.parseNumericAddress("192.0.2.0"), egressIface);
+        lp.addRoute(defaultRoute);
+
+        vpn.startLegacyVpn(mVpnProfile, mKeyStore, lp);
 
         // TODO: Test the Ikev2VpnRunner started up properly. Relies on utility methods added in
         // a subsequent CL.
