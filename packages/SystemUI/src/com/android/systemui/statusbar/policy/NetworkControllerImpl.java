@@ -319,7 +319,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         filter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
         filter.addAction(TelephonyManager.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED);
         filter.addAction(Intent.ACTION_SERVICE_STATE);
-        filter.addAction(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION);
+        filter.addAction(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
         filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
