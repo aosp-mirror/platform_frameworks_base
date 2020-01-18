@@ -2211,12 +2211,12 @@
 
     <!-- Must be required by a NetworkService to ensure that only the
          system can bind to it.
-         <p>Protection level: signature
+         <p>Protection level: signature|telephony
          @SystemApi
          @hide
     -->
     <permission android:name="android.permission.BIND_TELEPHONY_NETWORK_SERVICE"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signature|telephony" />
 
     <!-- @SystemApi Allows an application to manage embedded subscriptions (those on a eUICC)
          through EuiccManager APIs.
