@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.stats;
+package com.android.server.stats.pull;
 
-import static com.android.server.stats.IonMemoryUtil.parseIonHeapSizeFromDebugfs;
-import static com.android.server.stats.IonMemoryUtil.parseProcessIonHeapSizesFromDebugfs;
+import static com.android.server.stats.pull.IonMemoryUtil.parseIonHeapSizeFromDebugfs;
+import static com.android.server.stats.pull.IonMemoryUtil.parseProcessIonHeapSizesFromDebugfs;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.stats.IonMemoryUtil.IonAllocations;
+import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
 
 import org.junit.Test;
 

@@ -27,6 +27,8 @@
 #include <android/hardware_buffer.h>
 #endif
 
+class SkWStream;
+
 namespace android {
 
 enum class PixelStorageType {
@@ -142,6 +144,26 @@ public:
   // and places that value in size.
   static bool computeAllocationSize(size_t rowBytes, int height, size_t* size);
 
+  // These must match the int values of CompressFormat in Bitmap.java, as well as
+  // AndroidBitmapCompressFormat.
+  enum class JavaCompressFormat {
+    Jpeg = 0,
+    Png = 1,
+    Webp = 2,
+    WebpLossy = 3,
+    WebpLossless = 4,
+  };
+
+  enum class CompressResult {
+    Success,
+    AllocationFailed,
+    Error,
+  };
+
+  CompressResult compress(JavaCompressFormat format, int32_t quality, SkWStream* stream);
+
+  static CompressResult compress(const SkBitmap& bitmap, JavaCompressFormat format,
+                                 int32_t quality, SkWStream* stream);
 private:
     static sk_sp<Bitmap> allocateAshmemBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);
     static sk_sp<Bitmap> allocateHeapBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);

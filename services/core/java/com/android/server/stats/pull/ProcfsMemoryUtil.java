@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.stats;
+package com.android.server.stats.pull;
 
 import static android.os.Process.PROC_OUT_STRING;
 
@@ -22,7 +22,7 @@ import android.os.Process;
 
 import java.util.function.BiConsumer;
 
-final class ProcfsMemoryUtil {
+public final class ProcfsMemoryUtil {
     private static final int[] CMDLINE_OUT = new int[] { PROC_OUT_STRING };
     private static final String[] STATUS_KEYS = new String[] {
             "Uid:",
@@ -39,7 +39,7 @@ final class ProcfsMemoryUtil {
      * VmSwap fields in /proc/pid/status in kilobytes or null if not available.
      */
     @Nullable
-    static MemorySnapshot readMemorySnapshotFromProcfs(int pid) {
+    public static MemorySnapshot readMemorySnapshotFromProcfs(int pid) {
         long[] output = new long[STATUS_KEYS.length];
         output[0] = -1;
         Process.readProcLines("/proc/" + pid + "/status", STATUS_KEYS, output);
@@ -63,7 +63,7 @@ final class ProcfsMemoryUtil {
      * Returns content of /proc/pid/cmdline (e.g. /system/bin/statsd) or an empty string
      * if the file is not available.
      */
-    static String readCmdlineFromProcfs(int pid) {
+    public static String readCmdlineFromProcfs(int pid) {
         String[] cmdline = new String[1];
         if (!Process.readProcFile("/proc/" + pid + "/cmdline", CMDLINE_OUT, cmdline, null, null)) {
             return "";
@@ -71,7 +71,7 @@ final class ProcfsMemoryUtil {
         return cmdline[0];
     }
 
-    static void forEachPid(BiConsumer<Integer, String> func) {
+    public static void forEachPid(BiConsumer<Integer, String> func) {
         int[] pids = new int[1024];
         pids = Process.getPids("/proc", pids);
         for (int pid : pids) {
@@ -86,7 +86,7 @@ final class ProcfsMemoryUtil {
         }
     }
 
-    static final class MemorySnapshot {
+    public static final class MemorySnapshot {
         public int uid;
         public int rssHighWaterMarkInKilobytes;
         public int rssInKilobytes;

@@ -2556,7 +2556,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         for (final String restriction : doAdmin.userRestrictions.keySet()) {
             if (UserRestrictionsUtils.canProfileOwnerOfOrganizationOwnedDeviceChange(restriction)) {
-                parentAdmin.userRestrictions.putBoolean(
+                parentAdmin.ensureUserRestrictions().putBoolean(
                         restriction, doAdmin.userRestrictions.getBoolean(restriction));
             }
         }
@@ -7983,12 +7983,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return false;
         }
-        if (parent) {
-            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
-                    DeviceAdminInfo.USES_POLICY_DISABLE_CAMERA, parent);
-            enforceProfileOwnerOfOrganizationOwnedDevice(ap);
-        }
         synchronized (getLockObject()) {
+            if (parent) {
+                final ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                        DeviceAdminInfo.USES_POLICY_DISABLE_CAMERA, parent);
+                enforceProfileOwnerOfOrganizationOwnedDevice(ap);
+            }
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
                 return (admin != null) ? admin.disableCamera : false;
@@ -15050,5 +15050,30 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (VERBOSE_LOG) {
             Slog.d(LOG_TAG, message);
         }
+    }
+
+    @Override
+    public void setCommonCriteriaModeEnabled(ComponentName admin, boolean enabled) {
+        synchronized (getLockObject()) {
+            getActiveAdminForCallerLocked(admin,
+                    DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER);
+        }
+        mInjector.binderWithCleanCallingIdentity(
+                () -> mInjector.settingsGlobalPutInt(Settings.Global.COMMON_CRITERIA_MODE,
+                        enabled ? 1 : 0));
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_COMMON_CRITERIA_MODE)
+                .setAdmin(admin)
+                .setBoolean(enabled)
+                .write();
+    }
+
+    @Override
+    public boolean isCommonCriteriaModeEnabled(ComponentName admin) {
+        synchronized (getLockObject()) {
+            getActiveAdminForCallerLocked(admin,
+                    DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER);
+        }
+        return mInjector.settingsGlobalGetInt(Settings.Global.COMMON_CRITERIA_MODE, 0) != 0;
     }
 }

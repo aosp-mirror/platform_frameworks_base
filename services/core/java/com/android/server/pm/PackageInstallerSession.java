@@ -1374,15 +1374,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     /**
-     * If session should be sealed, then it's sealed to prevent further modification
-     * and then it's validated.
-     *
-     * If the session was sealed but something went wrong then it's destroyed.
+     * If session should be sealed, then it's sealed to prevent further modification.
+     * If the session can't be sealed then it's destroyed.
      *
      * <p> This is meant to be called after all of the sessions are loaded and added to
      * PackageInstallerService
      */
-    void sealAndValidateIfNecessary() {
+    void sealIfNecessary() {
         synchronized (mLock) {
             if (!mShouldBeSealed || isStagedAndInTerminalState()) {
                 return;
@@ -1391,9 +1389,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         List<PackageInstallerSession> childSessions = getChildSessions();
         synchronized (mLock) {
             try {
-                sealAndValidateLocked(childSessions);
-            } catch (StreamingException e) {
-                Slog.e(TAG, "Streaming failed", e);
+                sealLocked(childSessions);
             } catch (PackageManagerException e) {
                 Slog.e(TAG, "Package not valid", e);
             }

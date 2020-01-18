@@ -20,7 +20,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityThread;
+import android.app.Application;
 import android.net.MacAddress;
 import android.net.MatchAllNetworkSpecifier;
 import android.net.NetworkRequest;
@@ -30,8 +30,11 @@ import android.os.Parcelable;
 import android.os.PatternMatcher;
 import android.os.Process;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -41,6 +44,7 @@ import java.util.Objects;
  * {@link WifiNetworkSpecifier.Builder} class to create an instance.
  */
 public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parcelable {
+    private static final String TAG = "WifiNetworkSpecifier";
 
     /**
      * Builder used to create {@link WifiNetworkSpecifier} objects.
@@ -436,7 +440,22 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
                     mBssidPatternMatcher,
                     buildWifiConfiguration(),
                     Process.myUid(),
-                    ActivityThread.currentApplication().getApplicationContext().getOpPackageName());
+                    getCurrentApplicationReflectively().getApplicationContext().getOpPackageName());
+        }
+
+        // TODO(b/144102365): Remove once refactor is complete
+        private static Application getCurrentApplicationReflectively() {
+            try {
+                // reflection for static method android.app.ActivityThread#currentApplication()
+                Class<?> klass = Class.forName("android.app.ActivityThread");
+                Method currentApplicationMethod = klass.getDeclaredMethod("currentApplication");
+                Object result = currentApplicationMethod.invoke(null);
+                return (Application) result;
+            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException
+                    | InvocationTargetException e) {
+                Log.e(TAG, "Failed to call ActivityThread#currentApplication() reflectively!", e);
+                throw new RuntimeException(e);
+            }
         }
     }
 

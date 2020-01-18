@@ -39,6 +39,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.uidRulesToString;
@@ -5840,17 +5841,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } else {
             newNc.addCapability(NET_CAPABILITY_FOREGROUND);
         }
-        if (nai.isSuspended()) {
-            newNc.removeCapability(NET_CAPABILITY_NOT_SUSPENDED);
-        } else {
-            newNc.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
-        }
         if (nai.partialConnectivity) {
             newNc.addCapability(NET_CAPABILITY_PARTIAL_CONNECTIVITY);
         } else {
             newNc.removeCapability(NET_CAPABILITY_PARTIAL_CONNECTIVITY);
         }
         newNc.setPrivateDnsBroken(nai.networkCapabilities.isPrivateDnsBroken());
+
+        // TODO : remove this once all factories are updated to send NOT_SUSPENDED
+        if (!newNc.hasTransport(TRANSPORT_CELLULAR)) {
+            newNc.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
+        }
 
         return newNc;
     }
@@ -5896,6 +5897,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // on this network. We might have been called by rematchNetworkAndRequests when a
             // network changed foreground state.
             processListenRequests(nai);
+            final boolean prevSuspended = !prevNc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
+            final boolean suspended = !newNc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
+            if (prevSuspended != suspended) {
+                // TODO (b/73132094) : remove this call once the few users of onSuspended and
+                // onResumed have been removed.
+                notifyNetworkCallbacks(nai, suspended ? ConnectivityManager.CALLBACK_SUSPENDED
+                        : ConnectivityManager.CALLBACK_RESUMED);
+                // updateNetworkInfo will mix in the suspended info from the capabilities and
+                // take appropriate action for the network having possibly changed state.
+                updateNetworkInfo(nai, nai.networkInfo);
+            }
         } else {
             // If the requestable capabilities have changed or the score changed, we can't have been
             // called by rematchNetworkAndRequests, so it's safe to start a rematch.
@@ -5903,6 +5915,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
 
+        // TODO : static analysis indicates that prevNc can't be null here (getAndSetNetworkCaps
+        // never returns null), so mark the relevant members and functions in nai as @NonNull and
+        // remove this test
         if (prevNc != null) {
             final boolean oldMetered = prevNc.isMetered();
             final boolean newMetered = newNc.isMetered();
@@ -6597,10 +6612,30 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void updateNetworkInfo(NetworkAgentInfo networkAgent, NetworkInfo newInfo) {
+    @NonNull
+    private NetworkInfo mixInInfo(@NonNull final NetworkAgentInfo nai, @NonNull NetworkInfo info) {
+        final NetworkInfo newInfo = new NetworkInfo(info);
+        // The suspended bit is managed in NetworkCapabilities.
+        final boolean suspended =
+                !nai.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
+        if (suspended && info.getDetailedState() == NetworkInfo.DetailedState.CONNECTED) {
+            // Only override the state with SUSPENDED if the network is currently in CONNECTED
+            // state. This is because the network could have been suspended before connecting,
+            // or it could be disconnecting while being suspended, and in both these cases
+            // the state should not be overridden. Note that the only detailed state that
+            // maps to State.CONNECTED is DetailedState.CONNECTED, so there is also no need to
+            // worry about multiple different substates of CONNECTED.
+            newInfo.setDetailedState(NetworkInfo.DetailedState.SUSPENDED, info.getReason(),
+                    info.getExtraInfo());
+        }
+        return newInfo;
+    }
+
+    private void updateNetworkInfo(NetworkAgentInfo networkAgent, NetworkInfo info) {
+        final NetworkInfo newInfo = mixInInfo(networkAgent, info);
+
         final NetworkInfo.State state = newInfo.getState();
         NetworkInfo oldInfo = null;
-        final int oldScore = networkAgent.getCurrentScore();
         synchronized (networkAgent) {
             oldInfo = networkAgent.networkInfo;
             networkAgent.networkInfo = newInfo;
@@ -6682,17 +6717,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         } else if (networkAgent.created && (oldInfo.getState() == NetworkInfo.State.SUSPENDED ||
                 state == NetworkInfo.State.SUSPENDED)) {
-            // going into or coming out of SUSPEND: re-score and notify
-            if (networkAgent.getCurrentScore() != oldScore) {
-                rematchAllNetworksAndRequests();
-            }
-            updateCapabilities(networkAgent.getCurrentScore(), networkAgent,
-                    networkAgent.networkCapabilities);
-            // TODO (b/73132094) : remove this call once the few users of onSuspended and
-            // onResumed have been removed.
-            notifyNetworkCallbacks(networkAgent, (state == NetworkInfo.State.SUSPENDED ?
-                    ConnectivityManager.CALLBACK_SUSPENDED :
-                    ConnectivityManager.CALLBACK_RESUMED));
             mLegacyTypeTracker.update(networkAgent);
         }
     }

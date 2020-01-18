@@ -43,6 +43,9 @@ android_robolectric_test {
         "platform-test-annotations",
         "testng",
     ],
+    static_libs: [
+        "androidx.test.ext.truth",
+    ],
 
     instrumentation_for: "FrameworksServicesLib",
 }

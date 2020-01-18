@@ -1444,6 +1444,29 @@ public final class AccessibilityManager {
         return null;
     }
 
+    /**
+     *
+     * Sets an {@link IWindowMagnificationConnection} that manipulates window magnification.
+     *
+     * @param connection The connection that manipulates window magnification.
+     * @hide
+     */
+    public void setWindowMagnificationConnection(@Nullable
+            IWindowMagnificationConnection connection) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.setWindowMagnificationConnection(connection);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error setting window magnfication connection", re);
+        }
+    }
+
     private IAccessibilityManager getServiceLocked() {
         if (mService == null) {
             tryConnectToServiceLocked(null);

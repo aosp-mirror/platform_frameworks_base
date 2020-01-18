@@ -113,7 +113,7 @@ public final class TextLinks implements Parcelable {
      * Returns the text that was used to generate these links.
      */
     @NonNull
-    public String getText() {
+    public CharSequence getText() {
         return mFullText;
     }
 
@@ -370,8 +370,8 @@ public final class TextLinks implements Parcelable {
         }
 
         /**
-         * @return ordered list of locale preferences that can be used to disambiguate
-         *      the provided text
+         * Returns an ordered list of locale preferences that can be used to disambiguate the
+         * provided text.
          */
         @Nullable
         public LocaleList getDefaultLocales() {
@@ -379,7 +379,8 @@ public final class TextLinks implements Parcelable {
         }
 
         /**
-         * @return The config representing the set of entities to look for
+         * Returns the config representing the set of entities to look for
+         *
          * @see Builder#setEntityConfig(EntityConfig)
          */
         @Nullable
@@ -398,8 +399,8 @@ public final class TextLinks implements Parcelable {
         }
 
         /**
-         * @return reference time based on which relative dates (e.g. "tomorrow") should be
-         *      interpreted.
+         * Returns reference time based on which relative dates (e.g. "tomorrow") should be
+         * interpreted.
          */
         @Nullable
         public ZonedDateTime getReferenceTime() {
@@ -473,6 +474,9 @@ public final class TextLinks implements Parcelable {
             }
 
             /**
+             * Sets ordered list of locale preferences that may be used to disambiguate the
+             * provided text.
+             *
              * @param defaultLocales ordered list of locale preferences that may be used to
              *                       disambiguate the provided text. If no locale preferences exist,
              *                       set this to null or an empty locale list.
@@ -524,9 +528,11 @@ public final class TextLinks implements Parcelable {
             }
 
             /**
-             * @param referenceTime reference time based on which relative dates (e.g. "tomorrow"
-             *      should be interpreted. This should usually be the time when the text was
-             *      originally composed.
+             * Sets the reference time based on which relative dates (e.g.
+             * "tomorrow") should be interpreted.
+             *
+             * @param referenceTime reference time based on which relative dates. This should
+             *                      usually be the time when the text was originally composed.
              *
              * @return this builder
              */
@@ -716,6 +722,8 @@ public final class TextLinks implements Parcelable {
         }
 
         /**
+         * Adds a TextLink.
+         *
          * @see #addLink(int, int, Map)
          * @param urlSpan An optional URLSpan to delegate to. NOTE: Not parcelled.
          */

@@ -94,6 +94,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
+import android.view.accessibility.IWindowMagnificationConnection;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
@@ -106,6 +107,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.accessibility.magnification.WindowMagnificationManager;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -135,7 +137,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         implements AbstractAccessibilityServiceConnection.SystemSupport,
         AccessibilityUserState.ServiceInfoChangeListener,
         AccessibilityWindowManager.AccessibilityEventSender,
-        AccessibilitySecurityPolicy.AccessibilityUserManager {
+        AccessibilitySecurityPolicy.AccessibilityUserManager,
+        SystemActionPerformer.SystemActionsChangedListener {
 
     private static final boolean DEBUG = false;
 
@@ -203,6 +206,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private AlertDialog mEnableTouchExplorationDialog;
 
     private AccessibilityInputFilter mInputFilter;
+
+    private WindowMagnificationManager mWindowMagnificationMgr;
 
     private boolean mHasInputFilter;
 
@@ -290,7 +295,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mActivityTaskManagerService = LocalServices.getService(ActivityTaskManagerInternal.class);
         mPackageManager = mContext.getPackageManager();
         mSecurityPolicy = new AccessibilitySecurityPolicy(mContext, this);
-        mSystemActionPerformer = new SystemActionPerformer(mContext, mWindowManagerService);
+        mSystemActionPerformer =
+                new SystemActionPerformer(mContext, mWindowManagerService, null, this);
         mA11yWindowManager = new AccessibilityWindowManager(mLock, mMainHandler,
                 mWindowManagerService, this, mSecurityPolicy, this);
         mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
@@ -877,11 +883,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public void notifyAccessibilityButtonVisibilityChanged(boolean shown) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller does not hold permission "
-                    + android.Manifest.permission.STATUS_BAR_SERVICE);
-        }
+        mSecurityPolicy.enforceCallingOrSelfPermission(
+                android.Manifest.permission.STATUS_BAR_SERVICE);
         synchronized (mLock) {
             notifyAccessibilityButtonVisibilityChangedLocked(shown);
         }
@@ -900,6 +903,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 handled = notifyGestureLocked(gestureEvent, true);
             }
             return handled;
+        }
+    }
+
+    /**
+     * Called when the system action list is changed.
+     */
+    @Override
+    public void onSystemActionsChanged() {
+        synchronized (mLock) {
+            AccessibilityUserState state = getCurrentUserStateLocked();
+            notifySystemActionsChangedLocked(state);
+        }
+    }
+
+    @VisibleForTesting
+    void notifySystemActionsChangedLocked(AccessibilityUserState userState) {
+        for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
+            AccessibilityServiceConnection service = userState.mBoundServices.get(i);
+            service.notifySystemActionsChangedLocked();
         }
     }
 
@@ -1883,11 +1905,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private boolean readAccessibilityShortcutKeySettingLocked(AccessibilityUserState userState) {
+        final String settingValue = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, userState.mUserId);
         final Set<String> targetsFromSetting = new ArraySet<>();
-        readColonDelimitedSettingToSet(Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
-                userState.mUserId, targetsFromSetting, str -> str);
-        if (targetsFromSetting.isEmpty()) {
-            // Fall back to device's default a11y service.
+        readColonDelimitedStringToSet(settingValue, targetsFromSetting, false, str -> str);
+        // Fall back to device's default a11y service, only when setting is never updated.
+        if (settingValue == null) {
             final String defaultService = mContext.getString(
                     R.string.config_defaultAccessibilityService);
             if (!TextUtils.isEmpty(defaultService)) {
@@ -2585,6 +2608,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private long getRecommendedTimeoutMillisLocked(AccessibilityUserState userState) {
         return IntPair.of(userState.getInteractiveUiTimeoutLocked(),
                 userState.getNonInteractiveUiTimeoutLocked());
+    }
+
+    @Override
+    public void setWindowMagnificationConnection(
+            IWindowMagnificationConnection connection) throws RemoteException {
+        mSecurityPolicy.enforceCallingOrSelfPermission(
+                android.Manifest.permission.STATUS_BAR_SERVICE);
+
+        getWindowMagnificationMgr().setConnection(connection);
+    }
+
+    WindowMagnificationManager getWindowMagnificationMgr() {
+        synchronized (mLock) {
+            if (mWindowMagnificationMgr == null) {
+                mWindowMagnificationMgr = new WindowMagnificationManager();
+            }
+            return mWindowMagnificationMgr;
+        }
     }
 
     @Override

@@ -51,7 +51,6 @@ public final class RoutingSessionInfo implements Parcelable {
 
     final String mId;
     final String mClientPackageName;
-    final String mRouteFeature;
     @Nullable
     final String mProviderId;
     final List<String> mSelectedRoutes;
@@ -66,7 +65,6 @@ public final class RoutingSessionInfo implements Parcelable {
 
         mId = builder.mId;
         mClientPackageName = builder.mClientPackageName;
-        mRouteFeature = builder.mRouteFeature;
         mProviderId = builder.mProviderId;
 
         // TODO: Needs to check that the routes already have unique IDs.
@@ -87,7 +85,6 @@ public final class RoutingSessionInfo implements Parcelable {
 
         mId = ensureString(src.readString());
         mClientPackageName = ensureString(src.readString());
-        mRouteFeature = ensureString(src.readString());
         mProviderId = src.readString();
 
         mSelectedRoutes = ensureList(src.createStringArrayList());
@@ -119,7 +116,7 @@ public final class RoutingSessionInfo implements Parcelable {
      * In order to ensure uniqueness in {@link MediaRouter2} side, the value of this method
      * can be different from what was set in {@link MediaRoute2ProviderService}.
      *
-     * @see Builder#Builder(String, String, String)
+     * @see Builder#Builder(String, String)
      */
     @NonNull
     public String getId() {
@@ -131,7 +128,7 @@ public final class RoutingSessionInfo implements Parcelable {
     }
 
     /**
-     * Gets the original id set by {@link Builder#Builder(String, String, String)}.
+     * Gets the original id set by {@link Builder#Builder(String, String)}.
      * @hide
      */
     @NonNull
@@ -145,15 +142,6 @@ public final class RoutingSessionInfo implements Parcelable {
     @NonNull
     public String getClientPackageName() {
         return mClientPackageName;
-    }
-
-    /**
-     * Gets the route feature of the session.
-     * Routes that don't have the feature can't be selected into the session.
-     */
-    @NonNull
-    public String getRouteFeature() {
-        return mRouteFeature;
     }
 
     /**
@@ -214,7 +202,6 @@ public final class RoutingSessionInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mId);
         dest.writeString(mClientPackageName);
-        dest.writeString(mRouteFeature);
         dest.writeString(mProviderId);
         dest.writeStringList(mSelectedRoutes);
         dest.writeStringList(mSelectableRoutes);
@@ -235,7 +222,6 @@ public final class RoutingSessionInfo implements Parcelable {
         RoutingSessionInfo other = (RoutingSessionInfo) obj;
         return Objects.equals(mId, other.mId)
                 && Objects.equals(mClientPackageName, other.mClientPackageName)
-                && Objects.equals(mRouteFeature, other.mRouteFeature)
                 && Objects.equals(mProviderId, other.mProviderId)
                 && Objects.equals(mSelectedRoutes, other.mSelectedRoutes)
                 && Objects.equals(mSelectableRoutes, other.mSelectableRoutes)
@@ -245,7 +231,7 @@ public final class RoutingSessionInfo implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mClientPackageName, mRouteFeature, mProviderId,
+        return Objects.hash(mId, mClientPackageName, mProviderId,
                 mSelectedRoutes, mSelectableRoutes, mDeselectableRoutes, mTransferrableRoutes);
     }
 
@@ -254,7 +240,6 @@ public final class RoutingSessionInfo implements Parcelable {
         StringBuilder result = new StringBuilder()
                 .append("RoutingSessionInfo{ ")
                 .append("sessionId=").append(mId)
-                .append(", routeFeature=").append(mRouteFeature)
                 .append(", selectedRoutes={")
                 .append(String.join(",", mSelectedRoutes))
                 .append("}")
@@ -295,7 +280,6 @@ public final class RoutingSessionInfo implements Parcelable {
     public static final class Builder {
         final String mId;
         final String mClientPackageName;
-        final String mRouteFeature;
         String mProviderId;
         final List<String> mSelectedRoutes;
         final List<String> mSelectableRoutes;
@@ -314,22 +298,16 @@ public final class RoutingSessionInfo implements Parcelable {
          * @param id ID of the session. Must not be empty.
          * @param clientPackageName package name of the client app which uses this session.
          *                          If is is unknown, then just use an empty string.
-         * @param routeFeature the route feature of session. Must not be empty.
          * @see MediaRoute2Info#getId()
          */
-        public Builder(@NonNull String id, @NonNull String clientPackageName,
-                @NonNull String routeFeature) {
+        public Builder(@NonNull String id, @NonNull String clientPackageName) {
             if (TextUtils.isEmpty(id)) {
                 throw new IllegalArgumentException("id must not be empty");
             }
             Objects.requireNonNull(clientPackageName, "clientPackageName must not be null");
-            if (TextUtils.isEmpty(routeFeature)) {
-                throw new IllegalArgumentException("routeFeature must not be empty");
-            }
 
             mId = id;
             mClientPackageName = clientPackageName;
-            mRouteFeature = routeFeature;
             mSelectedRoutes = new ArrayList<>();
             mSelectableRoutes = new ArrayList<>();
             mDeselectableRoutes = new ArrayList<>();
@@ -347,7 +325,6 @@ public final class RoutingSessionInfo implements Parcelable {
 
             mId = sessionInfo.mId;
             mClientPackageName = sessionInfo.mClientPackageName;
-            mRouteFeature = sessionInfo.mRouteFeature;
             mProviderId = sessionInfo.mProviderId;
 
             mSelectedRoutes = new ArrayList<>(sessionInfo.mSelectedRoutes);

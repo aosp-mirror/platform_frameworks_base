@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 import android.app.AlarmManager;
 import android.app.test.TestAlarmManager;
 import android.content.Context;
+import android.net.wifi.ScanResult;
 import android.net.wifi.SoftApInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiScanner;
@@ -396,7 +397,6 @@ public class WifiCondManagerTest {
         assertTrue(mWificondControl.tearDownInterfaces());
         verify(mWifiScannerImpl).unsubscribeScanEvents();
     }
-
 
     /**
      * Verifies that tearDownInterfaces() returns false when wificond is not started.
@@ -1034,6 +1034,25 @@ public class WifiCondManagerTest {
                 WifiCondManager.SEND_MGMT_FRAME_ERROR_UNKNOWN);
         mLooper.dispatchAll();
         verify(mSendMgmtFrameCallback).onFailure(WifiCondManager.SEND_MGMT_FRAME_ERROR_TIMEOUT);
+    }
+
+    /**
+     * Tests getDeviceWiphyCapabililties
+     */
+    @Test
+    public void testGetDeviceWiphyCapabilities() throws Exception {
+        DeviceWiphyCapabilities capaExpected = new DeviceWiphyCapabilities();
+
+        capaExpected.setWifiStandardSupport(ScanResult.WIFI_STANDARD_11N, true);
+        capaExpected.setWifiStandardSupport(ScanResult.WIFI_STANDARD_11AC, true);
+        capaExpected.setWifiStandardSupport(ScanResult.WIFI_STANDARD_11AX, false);
+
+        when(mWificond.getDeviceWiphyCapabilities(TEST_INTERFACE_NAME))
+                .thenReturn(capaExpected);
+
+        DeviceWiphyCapabilities capaActual =
+                mWificondControl.getDeviceWiphyCapabilities(TEST_INTERFACE_NAME);
+        assertEquals(capaExpected, capaActual);
     }
 
     // Create a ArgumentMatcher which captures a SingleScanSettings parameter and checks if it

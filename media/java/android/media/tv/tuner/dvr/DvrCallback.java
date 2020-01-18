@@ -16,6 +16,9 @@
 
 package android.media.tv.tuner.dvr;
 
+import android.media.tv.tuner.TunerConstants.FilterStatus;
+import android.media.tv.tuner.dvr.Dvr.PlaybackStatus;
+
 /**
  * Callback interface for receiving information from DVR interfaces.
  *
@@ -25,9 +28,9 @@ public interface DvrCallback {
     /**
      * Invoked when record status changed.
      */
-    void onRecordStatusChanged(int status);
+    void onRecordStatusChanged(@FilterStatus int status);
     /**
      * Invoked when playback status changed.
      */
-    void onPlaybackStatusChanged(int status);
+    void onPlaybackStatusChanged(@PlaybackStatus int status);
 }

@@ -457,15 +457,6 @@ static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
             sk_ref_sp(bitmap->info().colorSpace())));
 }
 
-// These must match the int values in Bitmap.java
-enum JavaEncodeFormat {
-    kJPEG_JavaEncodeFormat = 0,
-    kPNG_JavaEncodeFormat = 1,
-    kWEBP_JavaEncodeFormat = 2,
-    kWEBP_LOSSY_JavaEncodeFormat = 3,
-    kWEBP_LOSSLESS_JavaEncodeFormat = 4,
-};
-
 static jboolean Bitmap_compress(JNIEnv* env, jobject clazz, jlong bitmapHandle,
                                 jint format, jint quality,
                                 jobject jstream, jbyteArray jstorage) {
@@ -479,51 +470,9 @@ static jboolean Bitmap_compress(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         return JNI_FALSE;
     }
 
-    SkBitmap skbitmap;
-    bitmap->getSkBitmap(&skbitmap);
-    if (skbitmap.colorType() == kRGBA_F16_SkColorType) {
-        // Convert to P3 before encoding. This matches SkAndroidCodec::computeOutputColorSpace
-        // for wide gamuts.
-        auto cs = SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
-        auto info = skbitmap.info().makeColorType(kRGBA_8888_SkColorType)
-                                   .makeColorSpace(std::move(cs));
-        SkBitmap p3;
-        if (!p3.tryAllocPixels(info)) {
-            return JNI_FALSE;
-        }
-
-        SkPixmap pm;
-        SkAssertResult(p3.peekPixels(&pm));  // should always work if tryAllocPixels() did.
-        if (!skbitmap.readPixels(pm)) {
-            return JNI_FALSE;
-        }
-        skbitmap = p3;
-    }
-    SkEncodedImageFormat fm;
-    switch (format) {
-        case kJPEG_JavaEncodeFormat:
-            fm = SkEncodedImageFormat::kJPEG;
-            break;
-        case kPNG_JavaEncodeFormat:
-            fm = SkEncodedImageFormat::kPNG;
-            break;
-        case kWEBP_JavaEncodeFormat:
-            fm = SkEncodedImageFormat::kWEBP;
-            break;
-        case kWEBP_LOSSY_JavaEncodeFormat:
-        case kWEBP_LOSSLESS_JavaEncodeFormat: {
-            SkWebpEncoder::Options options;
-            options.fQuality = quality;
-            options.fCompression = format == kWEBP_LOSSY_JavaEncodeFormat ?
-                    SkWebpEncoder::Compression::kLossy : SkWebpEncoder::Compression::kLossless;
-            return SkWebpEncoder::Encode(strm.get(), skbitmap.pixmap(), options) ?
-                    JNI_TRUE : JNI_FALSE;
-        }
-        default:
-            return JNI_FALSE;
-    }
-
-    return SkEncodeImage(strm.get(), skbitmap, fm, quality) ? JNI_TRUE : JNI_FALSE;
+    auto fm = static_cast<Bitmap::JavaCompressFormat>(format);
+    auto result = bitmap->bitmap().compress(fm, quality, strm.get());
+    return result == Bitmap::CompressResult::Success ? JNI_TRUE : JNI_FALSE;
 }
 
 static inline void bitmapErase(SkBitmap bitmap, const SkColor4f& color,

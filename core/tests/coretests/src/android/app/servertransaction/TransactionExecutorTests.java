@@ -124,7 +124,7 @@ public class TransactionExecutorTests {
         assertArrayEquals(new int[] {}, path(ON_START));
         assertArrayEquals(new int[] {ON_RESUME}, path(ON_RESUME));
         assertArrayEquals(new int[] {ON_RESUME, ON_PAUSE}, path(ON_PAUSE));
-        assertArrayEquals(new int[] {ON_RESUME, ON_PAUSE, ON_STOP}, path(ON_STOP));
+        assertArrayEquals(new int[] {ON_STOP}, path(ON_STOP));
         assertArrayEquals(new int[] {ON_RESUME, ON_PAUSE, ON_STOP, ON_DESTROY}, path(ON_DESTROY));
     }
 
@@ -362,7 +362,9 @@ public class TransactionExecutorTests {
     public void testClosestStateResolutionFromOnStart() {
         mClientRecord.setState(ON_START);
         assertEquals(ON_RESUME, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
-                new int[] {ON_CREATE, ON_RESUME, ON_PAUSE, ON_STOP, ON_DESTROY})));
+                new int[] {ON_CREATE, ON_RESUME, ON_PAUSE, ON_DESTROY})));
+        assertEquals(ON_STOP, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_STOP})));
         assertEquals(ON_CREATE, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
                 new int[] {ON_CREATE})));
     }

@@ -30,14 +30,13 @@ java_library {
     libs: [
         "framework-minus-apex",  // TODO(b/146218515) should be framework-system-stubs
     ],
-    static_libs: [
-        "icing-java-proto-lite",
-    ],
+    static_libs: ["icing-java-proto-lite"],
     visibility: [
-        "//frameworks/base/apex/appsearch:__subpackages__",
         // TODO(b/146218515) remove this when framework is built with the stub of appsearch
         "//frameworks/base",
+        "//frameworks/base/apex/appsearch:__subpackages__",
     ],
+    permitted_packages: ["android.app.appsearch"],
     apex_available: ["com.android.appsearch"],
 }
 

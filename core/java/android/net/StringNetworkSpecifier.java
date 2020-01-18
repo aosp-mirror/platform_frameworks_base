@@ -26,7 +26,16 @@ import com.android.internal.util.Preconditions;
 
 import java.util.Objects;
 
-/** @hide */
+/**
+ * @deprecated use other subclass of {@link android.net.NetworkSpecifier},
+ *             eg. {@link android.net.TelephonyNetworkSpecifier},
+ *             {@link android.net.wifi.WifiNetworkSpecifier} instead.
+ *             @see {@link android.net.NetworkRequest#setNetworkSpecifier(String)} for details.
+ * @removed this class was tentatively made SystemApi in December 2019 in the scramble for
+ *          publishing mainline APIs, it should be removed before R release is published.
+ * @hide
+ */
+@Deprecated
 @SystemApi
 public final class StringNetworkSpecifier extends NetworkSpecifier implements Parcelable {
     /**

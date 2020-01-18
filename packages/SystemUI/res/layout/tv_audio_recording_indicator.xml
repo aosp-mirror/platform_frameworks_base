@@ -32,8 +32,8 @@
             android:orientation="horizontal">
 
             <FrameLayout
-                android:layout_width="90dp"
-                android:layout_height="94dp">
+                android:layout_width="45dp"
+                android:layout_height="47dp">
 
                 <View
                     android:id="@+id/icon_container_bg"
@@ -43,35 +43,34 @@
 
                 <FrameLayout
                     android:id="@+id/icon_mic"
-                    android:layout_width="70dp"
-                    android:layout_height="70dp"
-                    android:layout_marginLeft="12dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginRight="8dp"
-                    android:layout_marginBottom="12dp">
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginLeft="6dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="6dp">
 
                     <View
-                        android:layout_width="54dp"
-                        android:layout_height="54dp"
+                        android:layout_width="27dp"
+                        android:layout_height="27dp"
                         android:layout_gravity="center"
                         android:background="@drawable/tv_circle_dark"/>
 
                     <ImageView
                         android:id="@+id/pulsating_circle"
-                        android:layout_width="54dp"
-                        android:layout_height="54dp"
+                        android:layout_width="27dp"
+                        android:layout_height="27dp"
                         android:layout_gravity="center"
                         android:background="@drawable/tv_circle_white_translucent"/>
 
                     <ImageView
-                        android:layout_width="54dp"
-                        android:layout_height="54dp"
+                        android:layout_width="27dp"
+                        android:layout_height="27dp"
                         android:layout_gravity="center"
                         android:src="@drawable/tv_ring_white"/>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
                         android:layout_gravity="center"
                         android:background="@drawable/tv_ic_mic_white"/>
                 </FrameLayout>
@@ -81,29 +80,30 @@
             <LinearLayout
                 android:id="@+id/texts_container"
                 android:layout_width="wrap_content"
-                android:layout_height="94dp"
+                android:layout_height="47dp"
                 android:background="@color/tv_audio_recording_indicator_background"
-                android:gravity="center_vertical"
                 android:orientation="vertical"
                 android:visibility="visible">
 
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="14dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="1dp"
                     android:text="@string/mic_active"
                     android:textColor="@android:color/white"
                     android:fontFamily="sans-serif"
-                    android:textSize="20dp"/>
+                    android:textSize="10dp"/>
 
                 <TextView
                     android:id="@+id/text"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="14dp"
                     android:singleLine="true"
                     android:text="SomeApplication accessed your microphone"
                     android:textColor="@android:color/white"
                     android:fontFamily="sans-serif"
-                    android:textSize="16dp"/>
+                    android:textSize="8dp"/>
 
             </LinearLayout>
 
@@ -113,8 +113,8 @@
 
     <View
         android:id="@+id/bg_right"
-        android:layout_width="24dp"
-        android:layout_height="94dp"
+        android:layout_width="12dp"
+        android:layout_height="47dp"
         android:background="@drawable/tv_rect_dark_right_rounded"
         android:visibility="visible"/>
 

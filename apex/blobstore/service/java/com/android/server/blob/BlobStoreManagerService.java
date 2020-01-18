@@ -15,8 +15,14 @@
  */
 package com.android.server.blob;
 
+import android.annotation.CurrentTimeSecondsLong;
+import android.annotation.IdRes;
+import android.annotation.NonNull;
+import android.app.blob.BlobHandle;
 import android.app.blob.IBlobStoreManager;
+import android.app.blob.IBlobStoreSession;
 import android.content.Context;
+import android.os.ParcelFileDescriptor;
 
 import com.android.server.SystemService;
 
@@ -25,8 +31,11 @@ import com.android.server.SystemService;
  */
 public class BlobStoreManagerService extends SystemService {
 
+    private final Context mContext;
+
     public BlobStoreManagerService(Context context) {
         super(context);
+        mContext = context;
     }
 
     @Override
@@ -35,5 +44,29 @@ public class BlobStoreManagerService extends SystemService {
     }
 
     private class Stub extends IBlobStoreManager.Stub {
+        @Override
+        public long createSession(@NonNull BlobHandle blobHandle, @NonNull String packageName) {
+            return 0;
+        }
+
+        @Override
+        public IBlobStoreSession openSession(long sessionId) {
+            return null;
+        }
+
+        @Override
+        public ParcelFileDescriptor openBlob(@NonNull BlobHandle blobHandle,
+                @NonNull String packageName) {
+            return null;
+        }
+
+        @Override
+        public void acquireLease(@NonNull BlobHandle blobHandle, @IdRes int descriptionResId,
+                @CurrentTimeSecondsLong long leaseTimeout, @NonNull String packageName) {
+        }
+
+        @Override
+        public void releaseLease(@NonNull BlobHandle blobHandle, @NonNull String packageName) {
+        }
     }
 }

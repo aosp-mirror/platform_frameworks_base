@@ -58,6 +58,11 @@ void ABitmap_notifyPixelsChanged(ABitmap* bitmap);
 AndroidBitmapFormat ABitmapConfig_getFormatFromConfig(JNIEnv* env, jobject bitmapConfigObj);
 jobject ABitmapConfig_getConfigFromFormat(JNIEnv* env, AndroidBitmapFormat format);
 
+// NDK access
+int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const void* pixels,
+                     AndroidBitmapCompressFormat format, int32_t quality, void* userContext,
+                     AndroidBitmap_compress_write_fn);
+
 __END_DECLS
 
 #ifdef	__cplusplus

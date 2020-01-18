@@ -39,6 +39,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+import java.util.function.BinaryOperator;
+import java.util.function.UnaryOperator;
 
 /**
  * Represents a SQLite database connection.
@@ -123,8 +125,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             boolean enableTrace, boolean enableProfile, int lookasideSlotSize,
             int lookasideSlotCount);
     private static native void nativeClose(long connectionPtr);
-    private static native void nativeRegisterCustomFunction(long connectionPtr,
-            SQLiteCustomFunction function);
+    private static native void nativeRegisterCustomScalarFunction(long connectionPtr,
+            String name, UnaryOperator<String> function);
+    private static native void nativeRegisterCustomAggregateFunction(long connectionPtr,
+            String name, BinaryOperator<String> function);
     private static native void nativeRegisterLocalizedCollators(long connectionPtr, String locale);
     private static native long nativePrepareStatement(long connectionPtr, String sql);
     private static native void nativeFinalizeStatement(long connectionPtr, long statementPtr);
@@ -225,13 +229,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         setJournalSizeLimit();
         setAutoCheckpointInterval();
         setLocaleFromConfiguration();
-
-        // Register custom functions.
-        final int functionCount = mConfiguration.customFunctions.size();
-        for (int i = 0; i < functionCount; i++) {
-            SQLiteCustomFunction function = mConfiguration.customFunctions.get(i);
-            nativeRegisterCustomFunction(mConnectionPtr, function);
-        }
+        setCustomFunctionsFromConfiguration();
     }
 
     private void dispose(boolean finalized) {
@@ -457,6 +455,19 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
     }
 
+    private void setCustomFunctionsFromConfiguration() {
+        for (int i = 0; i < mConfiguration.customScalarFunctions.size(); i++) {
+            nativeRegisterCustomScalarFunction(mConnectionPtr,
+                    mConfiguration.customScalarFunctions.keyAt(i),
+                    mConfiguration.customScalarFunctions.valueAt(i));
+        }
+        for (int i = 0; i < mConfiguration.customAggregateFunctions.size(); i++) {
+            nativeRegisterCustomAggregateFunction(mConnectionPtr,
+                    mConfiguration.customAggregateFunctions.keyAt(i),
+                    mConfiguration.customAggregateFunctions.valueAt(i));
+        }
+    }
+
     private void checkDatabaseWiped() {
         if (!SQLiteGlobal.checkDbWipe()) {
             return;
@@ -491,15 +502,6 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     void reconfigure(SQLiteDatabaseConfiguration configuration) {
         mOnlyAllowReadOnlyOperations = false;
 
-        // Register custom functions.
-        final int functionCount = configuration.customFunctions.size();
-        for (int i = 0; i < functionCount; i++) {
-            SQLiteCustomFunction function = configuration.customFunctions.get(i);
-            if (!mConfiguration.customFunctions.contains(function)) {
-                nativeRegisterCustomFunction(mConnectionPtr, function);
-            }
-        }
-
         // Remember what changed.
         boolean foreignKeyModeChanged = configuration.foreignKeyConstraintsEnabled
                 != mConfiguration.foreignKeyConstraintsEnabled;
@@ -507,6 +509,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 & (SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING
                 | SQLiteDatabase.ENABLE_LEGACY_COMPATIBILITY_WAL)) != 0;
         boolean localeChanged = !configuration.locale.equals(mConfiguration.locale);
+        boolean customScalarFunctionsChanged = !configuration.customScalarFunctions
+                .equals(mConfiguration.customScalarFunctions);
+        boolean customAggregateFunctionsChanged = !configuration.customAggregateFunctions
+                .equals(mConfiguration.customAggregateFunctions);
 
         // Update configuration parameters.
         mConfiguration.updateParametersFrom(configuration);
@@ -514,19 +520,17 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         // Update prepared statement cache size.
         mPreparedStatementCache.resize(configuration.maxSqlCacheSize);
 
-        // Update foreign key mode.
         if (foreignKeyModeChanged) {
             setForeignKeyModeFromConfiguration();
         }
-
-        // Update WAL.
         if (walModeChanged) {
             setWalModeFromConfiguration();
         }
-
-        // Update locale.
         if (localeChanged) {
             setLocaleFromConfiguration();
+        }
+        if (customScalarFunctionsChanged || customAggregateFunctionsChanged) {
+            setCustomFunctionsFromConfiguration();
         }
     }
 

@@ -40,7 +40,8 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public class Lnb implements AutoCloseable {
     /** @hide */
-    @IntDef({VOLTAGE_NONE, VOLTAGE_5V, VOLTAGE_11V, VOLTAGE_12V, VOLTAGE_13V, VOLTAGE_14V,
+    @IntDef(prefix = "VOLTAGE_",
+            value = {VOLTAGE_NONE, VOLTAGE_5V, VOLTAGE_11V, VOLTAGE_12V, VOLTAGE_13V, VOLTAGE_14V,
             VOLTAGE_15V, VOLTAGE_18V, VOLTAGE_19V})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Voltage {}
@@ -83,7 +84,8 @@ public class Lnb implements AutoCloseable {
     public static final int VOLTAGE_19V = Constants.LnbVoltage.VOLTAGE_19V;
 
     /** @hide */
-    @IntDef({TONE_NONE, TONE_CONTINUOUS})
+    @IntDef(prefix = "TONE_",
+            value = {TONE_NONE, TONE_CONTINUOUS})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Tone {}
 
@@ -97,7 +99,8 @@ public class Lnb implements AutoCloseable {
     public static final int TONE_CONTINUOUS = Constants.LnbTone.CONTINUOUS;
 
     /** @hide */
-    @IntDef({POSITION_UNDEFINED, POSITION_A, POSITION_B})
+    @IntDef(prefix = "POSITION_",
+            value = {POSITION_UNDEFINED, POSITION_A, POSITION_B})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Position {}
 
@@ -113,6 +116,37 @@ public class Lnb implements AutoCloseable {
      * Position B of two-band LNBs
      */
     public static final int POSITION_B = Constants.LnbPosition.POSITION_B;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "EVENT_TYPE_",
+            value = {EVENT_TYPE_DISEQC_RX_OVERFLOW, EVENT_TYPE_DISEQC_RX_TIMEOUT,
+            EVENT_TYPE_DISEQC_RX_PARITY_ERROR, EVENT_TYPE_LNB_OVERLOAD})
+    public @interface EventType {}
+
+    /**
+     * Outgoing Diseqc message overflow.
+     * @hide
+     */
+    public static final int EVENT_TYPE_DISEQC_RX_OVERFLOW =
+            Constants.LnbEventType.DISEQC_RX_OVERFLOW;
+    /**
+     * Outgoing Diseqc message isn't delivered on time.
+     * @hide
+     */
+    public static final int EVENT_TYPE_DISEQC_RX_TIMEOUT =
+            Constants.LnbEventType.DISEQC_RX_TIMEOUT;
+    /**
+     * Incoming Diseqc message has parity error.
+     * @hide
+     */
+    public static final int EVENT_TYPE_DISEQC_RX_PARITY_ERROR =
+            Constants.LnbEventType.DISEQC_RX_PARITY_ERROR;
+    /**
+     * LNB is overload.
+     * @hide
+     */
+    public static final int EVENT_TYPE_LNB_OVERLOAD = Constants.LnbEventType.LNB_OVERLOAD;
 
     int mId;
     LnbCallback mCallback;

@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
@@ -40,6 +41,7 @@ import android.service.notification.RankingHelperProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.FeatureFlagUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -139,6 +141,8 @@ public class PreferencesHelper implements RankingConfig {
     private boolean mAreChannelsBypassingDnd;
     private boolean mHideSilentStatusBarIcons = DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS;
 
+    private boolean mAllowInvalidShortcuts = false;
+
     private static final String BADGING_FORCED_TRUE = "force_badging_true_for_bug";
 
     // STOPSHIP (b/142218092) this should be removed before ship
@@ -164,6 +168,8 @@ public class PreferencesHelper implements RankingConfig {
         updateBadgingEnabled();
         updateBubblesEnabled();
         syncChannelsBypassingDnd(mContext.getUserId());
+        mAllowInvalidShortcuts = FeatureFlagUtils.isEnabled(mContext,
+                FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ);
     }
 
     public void readXml(XmlPullParser parser, boolean forRestore, int userId)
@@ -266,7 +272,14 @@ public class PreferencesHelper implements RankingConfig {
                                         }
                                         channel.setImportanceLockedByCriticalDeviceFunction(
                                                 r.defaultAppLockedImportance);
-                                        r.channels.put(id, channel);
+                                        boolean isInvalidShortcutChannel =
+                                                channel.getConversationId() != null &&
+                                                        channel.getConversationId().contains(
+                                                                PLACEHOLDER_CONVERSATION_ID);
+                                        if (mAllowInvalidShortcuts || (!mAllowInvalidShortcuts
+                                                && !isInvalidShortcutChannel)) {
+                                            r.channels.put(id, channel);
+                                        }
                                     }
                                 }
                                 // Delegate

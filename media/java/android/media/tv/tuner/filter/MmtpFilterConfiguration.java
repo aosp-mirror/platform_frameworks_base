@@ -39,7 +39,7 @@ public class MmtpFilterConfiguration extends FilterConfiguration {
     }
 
     /**
-     * Gets MMPT PID.
+     * Gets MMTP PID.
      *
      * <p>Packet ID is used to specify packets in MMTP.
      */
@@ -69,7 +69,7 @@ public class MmtpFilterConfiguration extends FilterConfiguration {
         }
 
         /**
-         * Sets MMPT PID.
+         * Sets MMTP PID.
          */
         @NonNull
         public Builder setMmtpPid(int mmtpPid) {

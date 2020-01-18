@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
@@ -50,13 +49,10 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
-import android.app.PendingIntent;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -76,9 +72,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.bubbles.BubbleController;
-import com.android.systemui.bubbles.BubblesTestActivity;
-import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -116,8 +109,6 @@ public class NotificationInfoTest extends SysuiTestCase {
     private Set<NotificationChannel> mDefaultNotificationChannelSet = new HashSet<>();
     private StatusBarNotification mSbn;
     private NotificationEntry mEntry;
-    private StatusBarNotification mBubbleSbn;
-    private NotificationEntry mBubbleEntry;
 
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
@@ -131,8 +122,6 @@ public class NotificationInfoTest extends SysuiTestCase {
     private NotificationBlockingHelperManager mBlockingHelperManager;
     @Mock
     private VisualStabilityManager mVisualStabilityManager;
-    @Mock
-    private BubbleController mBubbleController;
 
     @Before
     public void setUp() throws Exception {
@@ -143,7 +132,6 @@ public class NotificationInfoTest extends SysuiTestCase {
 
         mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
-        mDependency.injectTestDependency(BubbleController.class, mBubbleController);
         // Inflate the layout
         final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
         mNotificationInfo = (NotificationInfo) layoutInflater.inflate(R.layout.notification_info,
@@ -184,15 +172,6 @@ public class NotificationInfoTest extends SysuiTestCase {
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 new Notification(), UserHandle.CURRENT, null, 0);
         mEntry = new NotificationEntryBuilder().setSbn(mSbn).build();
-
-        PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0,
-                new Intent(mContext, BubblesTestActivity.class), 0);
-        mBubbleSbn = new SbnBuilder(mSbn).setBubbleMetadata(
-                new Notification.BubbleMetadata.Builder()
-                        .setIntent(bubbleIntent)
-                        .setIcon(Icon.createWithResource(mContext, R.drawable.android)).build())
-                .build();
-        mBubbleEntry = new NotificationEntryBuilder().setSbn(mBubbleSbn).build();
 
         Settings.Secure.putInt(mContext.getContentResolver(),
                 NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
@@ -765,7 +744,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
-                mBubbleEntry,
+                mEntry,
                 null,
                 null,
                 null,
@@ -785,7 +764,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
-                mBubbleEntry,
+                mEntry,
                 null,
                 null,
                 null,
@@ -794,162 +773,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 IMPORTANCE_DEFAULT,
                 false);
         assertTrue(mNotificationInfo.findViewById(R.id.silence).isSelected());
-    }
-
-    @Test
-    public void testBindNotification_bubbleIsSelected() throws Exception {
-        mBubbleEntry.getSbn().getNotification().flags |= FLAG_BUBBLE;
-        mNotificationInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mVisualStabilityManager,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mNotificationChannelSet,
-                mBubbleEntry,
-                null,
-                null,
-                null,
-                true,
-                false,
-                IMPORTANCE_DEFAULT,
-                true);
-
-        View bubbleView = mNotificationInfo.findViewById(R.id.bubble);
-        assertEquals(View.VISIBLE, bubbleView.getVisibility());
-        assertTrue(bubbleView.isSelected());
-    }
-
-    @Test
-    public void testBindNotification_whenCanBubble() throws Exception {
-        mNotificationInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mVisualStabilityManager,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mNotificationChannelSet,
-                mBubbleEntry,
-                null,
-                null,
-                null,
-                true,
-                false,
-                IMPORTANCE_DEFAULT,
-                true);
-
-        View bubbleView = mNotificationInfo.findViewById(R.id.bubble);
-        assertEquals(View.VISIBLE, bubbleView.getVisibility());
-        assertFalse(bubbleView.isSelected());
-    }
-
-    @Test
-    public void testBindNotification_whenCantBubble() throws Exception {
-        mNotificationInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mVisualStabilityManager,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mNotificationChannelSet,
-                mEntry,
-                null,
-                null,
-                null,
-                true,
-                false,
-                IMPORTANCE_DEFAULT,
-                true);
-        View bubbleView = mNotificationInfo.findViewById(R.id.bubble);
-        assertEquals(View.GONE, bubbleView.getVisibility());
-    }
-
-    @Test
-    public void testBubble_promotesBubble() throws Exception {
-        mNotificationInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mVisualStabilityManager,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mNotificationChannelSet,
-                mBubbleEntry,
-                null,
-                null,
-                null,
-                true,
-                false,
-                IMPORTANCE_DEFAULT,
-                true);
-
-        assertFalse(mBubbleEntry.isBubble());
-
-        // Promote it
-        mNotificationInfo.findViewById(R.id.bubble).performClick();
-        mNotificationInfo.findViewById(R.id.done).performClick();
-        mNotificationInfo.handleCloseControls(true, false);
-
-        verify(mBubbleController, times(1)).onUserCreatedBubbleFromNotification(mBubbleEntry);
-    }
-
-    @Test
-    public void testAlert_demotesBubble() throws Exception {
-        mBubbleEntry.getSbn().getNotification().flags |= FLAG_BUBBLE;
-
-        mNotificationInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mVisualStabilityManager,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mNotificationChannelSet,
-                mBubbleEntry,
-                null,
-                null,
-                null,
-                true,
-                false,
-                IMPORTANCE_DEFAULT,
-                true);
-
-        assertTrue(mBubbleEntry.isBubble());
-
-        // Demote it
-        mNotificationInfo.findViewById(R.id.alert).performClick();
-        mNotificationInfo.findViewById(R.id.done).performClick();
-        mNotificationInfo.handleCloseControls(true, false);
-
-        verify(mBubbleController, times(1)).onUserDemotedBubbleFromNotification(mBubbleEntry);
-    }
-
-    @Test
-    public void testSilence_demotesBubble() throws Exception {
-        mBubbleEntry.getSbn().getNotification().flags |= FLAG_BUBBLE;
-
-        mNotificationInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mVisualStabilityManager,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mNotificationChannelSet,
-                mBubbleEntry,
-                null,
-                null,
-                null,
-                true,
-                false,
-                IMPORTANCE_DEFAULT,
-                true);
-
-        assertTrue(mBubbleEntry.isBubble());
-
-        // Demote it
-        mNotificationInfo.findViewById(R.id.silence).performClick();
-        mNotificationInfo.findViewById(R.id.done).performClick();
-        mNotificationInfo.handleCloseControls(true, false);
-
-        verify(mBubbleController, times(1)).onUserDemotedBubbleFromNotification(mBubbleEntry);
     }
 
     @Test

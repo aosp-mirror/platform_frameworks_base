@@ -3141,8 +3141,6 @@ package android.telephony {
 
   public final class AccessNetworkConstants {
     field public static final int TRANSPORT_TYPE_INVALID = -1; // 0xffffffff
-    field public static final int TRANSPORT_TYPE_WLAN = 2; // 0x2
-    field public static final int TRANSPORT_TYPE_WWAN = 1; // 0x1
   }
 
   public final class BarringInfo implements android.os.Parcelable {
@@ -3218,36 +3216,18 @@ package android.telephony {
   }
 
   public final class NetworkRegistrationInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getAccessNetworkTechnology();
-    method @NonNull public java.util.List<java.lang.Integer> getAvailableServices();
-    method @Nullable public android.telephony.CellIdentity getCellIdentity();
     method @Nullable public android.telephony.DataSpecificRegistrationInfo getDataSpecificInfo();
-    method public int getDomain();
     method public int getRegistrationState();
     method public int getRejectCause();
     method public int getRoamingType();
-    method public int getTransportType();
     method public boolean isEmergencyEnabled();
-    method public boolean isRoaming();
     method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationInfo> CREATOR;
-    field public static final int DOMAIN_CS = 1; // 0x1
-    field public static final int DOMAIN_CS_PS = 3; // 0x3
-    field public static final int DOMAIN_PS = 2; // 0x2
-    field public static final int DOMAIN_UNKNOWN = 0; // 0x0
     field public static final int REGISTRATION_STATE_DENIED = 3; // 0x3
     field public static final int REGISTRATION_STATE_HOME = 1; // 0x1
     field public static final int REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING = 0; // 0x0
     field public static final int REGISTRATION_STATE_NOT_REGISTERED_SEARCHING = 2; // 0x2
     field public static final int REGISTRATION_STATE_ROAMING = 5; // 0x5
     field public static final int REGISTRATION_STATE_UNKNOWN = 4; // 0x4
-    field public static final int SERVICE_TYPE_DATA = 2; // 0x2
-    field public static final int SERVICE_TYPE_EMERGENCY = 5; // 0x5
-    field public static final int SERVICE_TYPE_SMS = 3; // 0x3
-    field public static final int SERVICE_TYPE_UNKNOWN = 0; // 0x0
-    field public static final int SERVICE_TYPE_VIDEO = 4; // 0x4
-    field public static final int SERVICE_TYPE_VOICE = 1; // 0x1
   }
 
   public static final class NetworkRegistrationInfo.Builder {
@@ -3296,7 +3276,7 @@ package android.telephony {
 
   public final class SmsManager {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int checkSmsShortCodeDestination(String, String);
-    method public void sendMultipartTextMessage(@NonNull String, @NonNull String, @NonNull java.util.List<java.lang.String>, @Nullable java.util.List<android.app.PendingIntent>, @Nullable java.util.List<android.app.PendingIntent>, @NonNull String);
+    method public void sendMultipartTextMessage(@NonNull String, @Nullable String, @NonNull java.util.List<java.lang.String>, @Nullable java.util.List<android.app.PendingIntent>, @Nullable java.util.List<android.app.PendingIntent>, @NonNull String);
     field public static final int SMS_CATEGORY_FREE_SHORT_CODE = 1; // 0x1
     field public static final int SMS_CATEGORY_NOT_SHORT_CODE = 0; // 0x0
     field public static final int SMS_CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE = 3; // 0x3
@@ -3393,6 +3373,7 @@ package android.telephony.ims {
     method public int getEmergencyServiceCategories();
     method @NonNull public java.util.List<java.lang.String> getEmergencyUrns();
     method public android.telephony.ims.ImsStreamMediaProfile getMediaProfile();
+    method @Nullable public android.os.Bundle getProprietaryCallExtras();
     method public int getRestrictCause();
     method public int getServiceType();
     method public static int getVideoStateFromCallType(int);
@@ -3446,6 +3427,7 @@ package android.telephony.ims {
     field public static final String EXTRA_DISPLAY_TEXT = "DisplayText";
     field public static final String EXTRA_EMERGENCY_CALL = "e_call";
     field public static final String EXTRA_IS_CALL_PULL = "CallPull";
+    field public static final String EXTRA_OEM_EXTRAS = "android.telephony.ims.extra.OEM_EXTRAS";
     field public static final String EXTRA_OI = "oi";
     field public static final String EXTRA_OIR = "oir";
     field public static final String EXTRA_REMOTE_URI = "remote_uri";
@@ -3924,6 +3906,7 @@ package android.telephony.ims.feature {
   public abstract class ImsFeature {
     ctor public ImsFeature();
     method public abstract void changeEnabledCapabilities(android.telephony.ims.feature.CapabilityChangeRequest, android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
+    method public int getFeatureState();
     method public final int getSlotIndex();
     method public abstract void onFeatureReady();
     method public abstract void onFeatureRemoved();
@@ -4171,6 +4154,17 @@ package android.telephony.ims.stub {
     method public int updateClir(int);
     method public int updateColp(boolean);
     method public int updateColr(int);
+    field public static final int CALL_BARRING_ALL = 7; // 0x7
+    field public static final int CALL_BARRING_ALL_INCOMING = 1; // 0x1
+    field public static final int CALL_BARRING_ALL_OUTGOING = 2; // 0x2
+    field public static final int CALL_BARRING_ANONYMOUS_INCOMING = 6; // 0x6
+    field public static final int CALL_BARRING_INCOMING_ALL_SERVICES = 9; // 0x9
+    field public static final int CALL_BARRING_OUTGOING_ALL_SERVICES = 8; // 0x8
+    field public static final int CALL_BARRING_OUTGOING_INTL = 3; // 0x3
+    field public static final int CALL_BARRING_OUTGOING_INTL_EXCL_HOME = 4; // 0x4
+    field public static final int CALL_BARRING_SPECIFIC_INCOMING_CALLS = 10; // 0xa
+    field public static final int CALL_BLOCKING_INCOMING_WHEN_ROAMING = 5; // 0x5
+    field public static final int INVALID_RESULT = -1; // 0xffffffff
   }
 
 }

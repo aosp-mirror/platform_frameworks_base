@@ -19,9 +19,7 @@ package android.media.tv.tuner.filter;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.content.Context;
-import android.media.tv.tuner.TunerConstants;
 import android.media.tv.tuner.TunerUtils;
-import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
 
 /**
  * Filter Settings for a Video and Audio.
@@ -35,8 +33,8 @@ public class AvSettings extends Settings {
         super(TunerUtils.getFilterSubtype(
                 mainType,
                 isAudio
-                        ? TunerConstants.FILTER_SUBTYPE_AUDIO
-                        : TunerConstants.FILTER_SUBTYPE_VIDEO));
+                        ? Filter.SUBTYPE_AUDIO
+                        : Filter.SUBTYPE_VIDEO));
         mIsPassthrough = isPassthrough;
     }
 
@@ -57,7 +55,7 @@ public class AvSettings extends Settings {
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
     public static Builder builder(
-            @NonNull Context context, @FilterType int mainType, boolean isAudio) {
+            @NonNull Context context, @Filter.Type int mainType, boolean isAudio) {
         TunerUtils.checkTunerPermission(context);
         return new Builder(mainType, isAudio);
     }

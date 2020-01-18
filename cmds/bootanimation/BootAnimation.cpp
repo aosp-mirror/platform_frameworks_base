@@ -100,6 +100,7 @@ static constexpr size_t FONT_NUM_ROWS = FONT_NUM_CHARS / FONT_NUM_COLS;
 static const int TEXT_CENTER_VALUE = INT_MAX;
 static const int TEXT_MISSING_VALUE = INT_MIN;
 static const char EXIT_PROP_NAME[] = "service.bootanim.exit";
+static const char DISPLAYS_PROP_NAME[] = "persist.service.bootanim.displays";
 static const int ANIM_ENTRY_NAME_MAX = ANIM_PATH_MAX + 1;
 static constexpr size_t TEXT_POS_LEN_MAX = 16;
 
@@ -291,10 +292,10 @@ status_t BootAnimation::readyToRun() {
 
     // this guest property specifies multi-display IDs to show the boot animation
     // multiple ids can be set with comma (,) as separator, for example:
-    // setprop boot.animation.displays 19260422155234049,19261083906282754
+    // setprop persist.boot.animation.displays 19260422155234049,19261083906282754
     Vector<uint64_t> physicalDisplayIds;
     char displayValue[PROPERTY_VALUE_MAX] = "";
-    property_get("boot.animation.displays", displayValue, "");
+    property_get(DISPLAYS_PROP_NAME, displayValue, "");
     bool isValid = displayValue[0] != '\0';
     if (isValid) {
         char *p = displayValue;
@@ -306,7 +307,7 @@ status_t BootAnimation::readyToRun() {
             p ++;
         }
         if (!isValid)
-            SLOGE("Invalid syntax for the value of system prop: boot.animation.displays");
+            SLOGE("Invalid syntax for the value of system prop: %s", DISPLAYS_PROP_NAME);
     }
     if (isValid) {
         std::istringstream stream(displayValue);

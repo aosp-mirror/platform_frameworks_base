@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
 import android.content.pm.ApplicationInfo;
+import android.content.res.Configuration;
 import android.platform.test.annotations.Presubmit;
 
 import org.junit.Before;
@@ -62,33 +63,33 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
 
         // Register to display 1 as a listener.
         TestDisplayContent testDisplayContent1 = createTestDisplayContentInContainer();
-        mWpc.registerDisplayConfigurationListenerLocked(testDisplayContent1);
+        mWpc.registerDisplayConfigurationListener(testDisplayContent1);
         assertTrue(testDisplayContent1.containsListener(mWpc));
         assertEquals(testDisplayContent1.mDisplayId, mWpc.getDisplayId());
 
         // Move to display 2.
         TestDisplayContent testDisplayContent2 = createTestDisplayContentInContainer();
-        mWpc.registerDisplayConfigurationListenerLocked(testDisplayContent2);
+        mWpc.registerDisplayConfigurationListener(testDisplayContent2);
         assertFalse(testDisplayContent1.containsListener(mWpc));
         assertTrue(testDisplayContent2.containsListener(mWpc));
         assertEquals(testDisplayContent2.mDisplayId, mWpc.getDisplayId());
 
         // Null DisplayContent will not change anything.
-        mWpc.registerDisplayConfigurationListenerLocked(null);
+        mWpc.registerDisplayConfigurationListener(null);
         assertTrue(testDisplayContent2.containsListener(mWpc));
         assertEquals(testDisplayContent2.mDisplayId, mWpc.getDisplayId());
 
         // Unregister listener will remove the wpc from registered displays.
-        mWpc.unregisterDisplayConfigurationListenerLocked();
+        mWpc.unregisterDisplayConfigurationListener();
         assertFalse(testDisplayContent1.containsListener(mWpc));
         assertFalse(testDisplayContent2.containsListener(mWpc));
         assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
 
         // Unregistration still work even if the display was removed.
-        mWpc.registerDisplayConfigurationListenerLocked(testDisplayContent1);
+        mWpc.registerDisplayConfigurationListener(testDisplayContent1);
         assertEquals(testDisplayContent1.mDisplayId, mWpc.getDisplayId());
         mRootWindowContainer.removeChild(testDisplayContent1);
-        mWpc.unregisterDisplayConfigurationListenerLocked();
+        mWpc.unregisterDisplayConfigurationListener();
         assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
     }
 
@@ -127,6 +128,24 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
         orderVerifier.verify(mMockListener, times(3)).setRunningRemoteAnimation(eq(true));
         orderVerifier.verify(mMockListener, times(1)).setRunningRemoteAnimation(eq(false));
         orderVerifier.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testConfigurationForSecondaryScreen() {
+        final WindowProcessController wpc = new WindowProcessController(
+                mService, mock(ApplicationInfo.class), null, 0, -1, null, null);
+        // By default, the process should not listen to any display.
+        assertEquals(INVALID_DISPLAY, wpc.getDisplayId());
+
+        // Register to a new display as a listener.
+        final DisplayContent display = new TestDisplayContent.Builder(mService, 2000, 1000)
+                .setDensityDpi(300).setPosition(DisplayContent.POSITION_TOP).build();
+        wpc.registerDisplayConfigurationListener(display);
+
+        assertEquals(display.mDisplayId, wpc.getDisplayId());
+        final Configuration expectedConfig = mService.mRootWindowContainer.getConfiguration();
+        expectedConfig.updateFrom(display.getConfiguration());
+        assertEquals(expectedConfig, wpc.getConfiguration());
     }
 
     private TestDisplayContent createTestDisplayContentInContainer() {

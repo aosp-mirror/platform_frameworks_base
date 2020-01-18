@@ -797,7 +797,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 true);
         verify(mMockINotificationManager, times(1)).createConversationNotificationChannelForPackage(
-                anyString(), anyInt(), any(), eq(CONVERSATION_ID));
+                anyString(), anyInt(), anyString(), any(), eq(CONVERSATION_ID));
     }
 
     @Test
@@ -817,7 +817,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 true);
         verify(mMockINotificationManager, never()).createConversationNotificationChannelForPackage(
-                anyString(), anyInt(), any(), eq(CONVERSATION_ID));
+                anyString(), anyInt(), anyString(), any(), eq(CONVERSATION_ID));
     }
 
     @Test

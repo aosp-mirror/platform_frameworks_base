@@ -461,4 +461,7 @@ interface IDevicePolicyManager {
     void setProtectedPackages(in ComponentName admin, in List<String> packages);
 
     List<String> getProtectedPackages(in ComponentName admin);
+
+    void setCommonCriteriaModeEnabled(in ComponentName admin, boolean enabled);
+    boolean isCommonCriteriaModeEnabled(in ComponentName admin);
 }

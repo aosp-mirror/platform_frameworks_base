@@ -3,5 +3,6 @@
     <admin name="com.android.frameworks.servicestests/com.android.server.devicepolicy.DummyDeviceAdmins$Admin1">
         <policies flags="991"/>
         <password-history-length value="33" />
+        <user-restrictions no_bluetooth="true" />
     </admin>
 </policies>

@@ -241,26 +241,12 @@ int AImageDecoderHeaderInfo_getAlphaFlags(const AImageDecoderHeaderInfo* info) {
     }
 }
 
-SkAlphaType toAlphaType(int androidBitmapFlags) {
-    switch (androidBitmapFlags) {
-        case ANDROID_BITMAP_FLAGS_ALPHA_PREMUL:
-            return kPremul_SkAlphaType;
-        case ANDROID_BITMAP_FLAGS_ALPHA_UNPREMUL:
-            return kUnpremul_SkAlphaType;
-        case ANDROID_BITMAP_FLAGS_ALPHA_OPAQUE:
-            return kOpaque_SkAlphaType;
-        default:
-            return kUnknown_SkAlphaType;
-    }
-}
-
-int AImageDecoder_setAlphaFlags(AImageDecoder* decoder, int alphaFlag) {
-    if (!decoder || alphaFlag < ANDROID_BITMAP_FLAGS_ALPHA_PREMUL
-            || alphaFlag > ANDROID_BITMAP_FLAGS_ALPHA_UNPREMUL) {
+int AImageDecoder_setUnpremultipliedRequired(AImageDecoder* decoder, bool required) {
+    if (!decoder) {
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
 
-    return toDecoder(decoder)->setOutAlphaType(toAlphaType(alphaFlag))
+    return toDecoder(decoder)->setUnpremultipliedRequired(required)
             ? ANDROID_IMAGE_DECODER_SUCCESS : ANDROID_IMAGE_DECODER_INVALID_CONVERSION;
 }
 

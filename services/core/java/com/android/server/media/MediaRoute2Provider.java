@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.RoutingSessionInfo;
+import android.os.Bundle;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -49,8 +50,8 @@ abstract class MediaRoute2Provider {
         mCallback = callback;
     }
 
-    public abstract void requestCreateSession(String packageName, String routeId,
-            String routeType, long requestId);
+    public abstract void requestCreateSession(String packageName, String routeId, long requestId,
+            @Nullable Bundle sessionHints);
     public abstract void releaseSession(String sessionId);
 
     public abstract void selectRoute(String sessionId, String routeId);

@@ -18,6 +18,7 @@ package android.telephony.ims;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -40,10 +41,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Parcelable object to handle IMS call profile.
- * It is created from GSMA IR.92/IR.94, 3GPP TS 24.229/TS 26.114/TS26.111.
- * It provides the service and call type, the additional information related to the call.
- *
+ * A Parcelable object to handle the IMS call profile, which provides the service, call type, and
+ * additional information related to the call.
+ * <p>
+ * See the following specifications for more information about this class: GSMA IR.92/IR.94,
+ * 3GPP TS 24.229/TS 26.114/TS26.111.
  * @hide
  */
 @SystemApi
@@ -151,12 +153,13 @@ public final class ImsCallProfile implements Parcelable {
      */
     public static final String EXTRA_CONFERENCE_AVAIL = "conference_avail";
 
-    // Extra string for internal use only. OEMs should not use
-    // this for packing extras.
     /**
+     * Extra key used to store a Bundle containing proprietary extras to send to the ImsService.
+     * Use {@link #getProprietaryCallExtras()} instead.
      * @hide
      */
-    public static final String EXTRA_OEM_EXTRAS = "OemCallExtras";
+    @TestApi
+    public static final String EXTRA_OEM_EXTRAS = "android.telephony.ims.extra.OEM_EXTRAS";
 
     /**
      * Rule for originating identity (number) presentation, MO/MT.
@@ -685,6 +688,18 @@ public final class ImsCallProfile implements Parcelable {
 
     public Bundle getCallExtras() {
         return mCallExtras;
+    }
+
+    /**
+     * Get the proprietary extras set for this ImsCallProfile.
+     * @return A {@link Bundle} containing proprietary call extras that were not set by the
+     * platform.
+     */
+    public @Nullable Bundle getProprietaryCallExtras() {
+        if (mCallExtras == null) {
+            return null;
+        }
+        return mCallExtras.getBundle(EXTRA_OEM_EXTRAS);
     }
 
     public ImsStreamMediaProfile getMediaProfile() {

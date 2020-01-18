@@ -16,18 +16,46 @@
 
 package com.android.server.testing.shadows;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.os.UserManager;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 /** Shadow for {@link UserManager}. */
 @Implements(UserManager.class)
 public class ShadowUserManager extends org.robolectric.shadows.ShadowUserManager {
+    private final Map<Integer, Set<Integer>> profileIds = new HashMap<>();
+
     /** @see UserManager#isUserUnlocked() */
     @Implementation
     public boolean isUserUnlocked(@UserIdInt int userId) {
         return false;
+    }
+
+    /** @see UserManager#getProfileIds(int, boolean) () */
+    @Implementation
+    @NonNull
+    public int[] getProfileIds(@UserIdInt int userId, boolean enabledOnly) {
+        // Currently, enabledOnly is ignored.
+        if (!profileIds.containsKey(userId)) {
+            return new int[] {userId};
+        }
+        return profileIds.get(userId).stream().mapToInt(Number::intValue).toArray();
+    }
+
+    /** Add a collection of profile IDs, all within the same profile group. */
+    public void addProfileIds(@UserIdInt int... userIds) {
+        final Set<Integer> profileGroup = new HashSet<>();
+        for (int userId : userIds) {
+            profileGroup.add(userId);
+            profileIds.put(userId, profileGroup);
+        }
     }
 }

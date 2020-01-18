@@ -208,6 +208,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.FeatureFlagUtils;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
@@ -3038,7 +3039,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void createConversationNotificationChannelForPackage(String pkg, int uid,
-                NotificationChannel parentChannel, String conversationId) {
+                String triggeringKey, NotificationChannel parentChannel, String conversationId) {
             enforceSystemOrSystemUI("only system can call this");
             Preconditions.checkNotNull(parentChannel);
             Preconditions.checkNotNull(conversationId);
@@ -3049,6 +3050,8 @@ public class NotificationManagerService extends SystemService {
             conversationChannel.setConversationId(parentId, conversationId);
             createNotificationChannelsImpl(
                     pkg, uid, new ParceledListSlice(Arrays.asList(conversationChannel)));
+            mRankingHandler.requestSort();
+            handleSavePolicyFile();
         }
 
         @Override
@@ -5257,9 +5260,10 @@ public class NotificationManagerService extends SystemService {
         if (mIsTelevision && (new Notification.TvExtender(notification)).getChannelId() != null) {
             channelId = (new Notification.TvExtender(notification)).getChannelId();
         }
-        // TODO: flag this behavior
         String shortcutId = notification.getShortcutId();
-        if (shortcutId == null
+        if (FeatureFlagUtils.isEnabled(getContext(),
+                FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ)
+            && shortcutId == null
             && notification.getNotificationStyle() == Notification.MessagingStyle.class) {
             shortcutId = id + tag + NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
         }

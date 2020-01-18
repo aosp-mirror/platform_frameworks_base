@@ -18,6 +18,7 @@ package com.android.server.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.util.FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 
 import com.android.server.UiServiceTestCase;
@@ -52,6 +54,7 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
     public void testExtractsUpdatedChannel() {
         NotificationChannelExtractor extractor = new NotificationChannelExtractor();
         extractor.setConfig(mConfig);
+        extractor.initialize(mContext, null);
 
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_LOW);
         final Notification.Builder builder = new Notification.Builder(getContext())
@@ -59,6 +62,64 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
         Notification n = builder.build();
         StatusBarNotification sbn = new StatusBarNotification("", "", 0, "", 0,
+                0, n, UserHandle.ALL, null, System.currentTimeMillis());
+        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
+
+        NotificationChannel updatedChannel =
+                new NotificationChannel("a", "", IMPORTANCE_HIGH);
+        when(mConfig.getConversationNotificationChannel(
+                any(), anyInt(), eq("a"), eq(null), eq(true), eq(false)))
+                .thenReturn(updatedChannel);
+
+        assertNull(extractor.process(r));
+        assertEquals(updatedChannel, r.getChannel());
+    }
+
+    @Test
+    public void testInvalidShortcutFlagEnabled_looksUpCorrectChannel() {
+        Settings.Global.putString(
+                mContext.getContentResolver(), NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "true");
+
+        NotificationChannelExtractor extractor = new NotificationChannelExtractor();
+        extractor.setConfig(mConfig);
+        extractor.initialize(mContext, null);
+
+        NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_LOW);
+        final Notification.Builder builder = new Notification.Builder(getContext())
+                .setContentTitle("foo")
+                .setStyle(new Notification.MessagingStyle("name"))
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+        Notification n = builder.build();
+        StatusBarNotification sbn = new StatusBarNotification("", "", 0, "tag", 0,
+                0, n, UserHandle.ALL, null, System.currentTimeMillis());
+        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
+
+        NotificationChannel updatedChannel =
+                new NotificationChannel("a", "", IMPORTANCE_HIGH);
+        when(mConfig.getConversationNotificationChannel(
+                any(), anyInt(), eq("a"), eq(r.sbn.getShortcutId(mContext)), eq(true), eq(false)))
+                .thenReturn(updatedChannel);
+
+        assertNull(extractor.process(r));
+        assertEquals(updatedChannel, r.getChannel());
+    }
+
+    @Test
+    public void testInvalidShortcutFlagDisabled_looksUpCorrectChannel() {
+        Settings.Global.putString(
+                mContext.getContentResolver(), NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "false");
+
+        NotificationChannelExtractor extractor = new NotificationChannelExtractor();
+        extractor.setConfig(mConfig);
+        extractor.initialize(mContext, null);
+
+        NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_LOW);
+        final Notification.Builder builder = new Notification.Builder(getContext())
+                .setContentTitle("foo")
+                .setStyle(new Notification.MessagingStyle("name"))
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+        Notification n = builder.build();
+        StatusBarNotification sbn = new StatusBarNotification("", "", 0, "tag", 0,
                 0, n, UserHandle.ALL, null, System.currentTimeMillis());
         NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
 

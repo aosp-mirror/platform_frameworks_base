@@ -113,7 +113,7 @@ public final class TextLinksParams {
             return TextLinks.STATUS_UNSUPPORTED_CHARACTER;
         }
 
-        if (!textString.startsWith(textLinks.getText())) {
+        if (!textString.startsWith(textLinks.getText().toString())) {
             return TextLinks.STATUS_DIFFERENT_TEXT;
         }
         if (textLinks.getLinks().isEmpty()) {

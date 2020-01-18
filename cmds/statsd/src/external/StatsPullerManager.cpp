@@ -21,7 +21,6 @@
 
 #include <android/os/IPullAtomCallback.h>
 #include <android/os/IStatsCompanionService.h>
-#include <android/os/IStatsPullerCallback.h>
 #include <cutils/log.h>
 #include <math.h>
 #include <stdint.h>
@@ -38,7 +37,6 @@
 #include "PowerStatsPuller.h"
 #include "ResourceHealthManagerPuller.h"
 #include "StatsCallbackPuller.h"
-#include "StatsCallbackPullerDeprecated.h"
 #include "StatsCompanionServicePuller.h"
 #include "SubsystemSleepStatePuller.h"
 #include "TrainInfoPuller.h"
@@ -68,13 +66,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::ON_DEVICE_POWER_MEASUREMENT},
          {.puller = new PowerStatsPuller()}},
 
-        // system_elapsed_realtime
-        {{.atomTag = android::util::SYSTEM_ELAPSED_REALTIME},
-         {.coolDownNs = NS_PER_SEC,
-          .puller = new StatsCompanionServicePuller(android::util::SYSTEM_ELAPSED_REALTIME),
-          .pullTimeoutNs = NS_PER_SEC / 2,
-         }},
-
         // remaining_battery_capacity
         {{.atomTag = android::util::REMAINING_BATTERY_CAPACITY},
          {.puller = new ResourceHealthManagerPuller(android::util::REMAINING_BATTERY_CAPACITY)}},
@@ -95,74 +86,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
 
-        // process_memory_state
-        {{.atomTag = android::util::PROCESS_MEMORY_STATE},
-         {.additiveFields = {4, 5, 6, 7, 8},
-          .puller = new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}},
-
-        // process_memory_high_water_mark
-        {{.atomTag = android::util::PROCESS_MEMORY_HIGH_WATER_MARK},
-         {.puller =
-                  new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_HIGH_WATER_MARK)}},
-
-        // process_memory_snapshot
-        {{.atomTag = android::util::PROCESS_MEMORY_SNAPSHOT},
-         {.puller = new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_SNAPSHOT)}},
-
-        // system_ion_heap_size
-        {{.atomTag = android::util::SYSTEM_ION_HEAP_SIZE},
-         {.puller = new StatsCompanionServicePuller(android::util::SYSTEM_ION_HEAP_SIZE)}},
-
-        // process_system_ion_heap_size
-        {{.atomTag = android::util::PROCESS_SYSTEM_ION_HEAP_SIZE},
-         {.puller = new StatsCompanionServicePuller(android::util::PROCESS_SYSTEM_ION_HEAP_SIZE)}},
-
-        // temperature
-        {{.atomTag = android::util::TEMPERATURE},
-         {.puller = new StatsCompanionServicePuller(android::util::TEMPERATURE)}},
-
-        // cooling_device
-        {{.atomTag = android::util::COOLING_DEVICE},
-         {.puller = new StatsCompanionServicePuller(android::util::COOLING_DEVICE)}},
-
-        // binder_calls
-        {{.atomTag = android::util::BINDER_CALLS},
-         {.additiveFields = {4, 5, 6, 8, 12},
-          .puller = new StatsCompanionServicePuller(android::util::BINDER_CALLS)}},
-
-        // binder_calls_exceptions
-        {{.atomTag = android::util::BINDER_CALLS_EXCEPTIONS},
-         {.puller = new StatsCompanionServicePuller(android::util::BINDER_CALLS_EXCEPTIONS)}},
-
-        // looper_stats
-        {{.atomTag = android::util::LOOPER_STATS},
-         {.additiveFields = {5, 6, 7, 8, 9},
-          .puller = new StatsCompanionServicePuller(android::util::LOOPER_STATS)}},
-
-        // Disk Stats
-        {{.atomTag = android::util::DISK_STATS},
-         {.puller = new StatsCompanionServicePuller(android::util::DISK_STATS)}},
-
-        // Directory usage
-        {{.atomTag = android::util::DIRECTORY_USAGE},
-         {.puller = new StatsCompanionServicePuller(android::util::DIRECTORY_USAGE)}},
-
-        // Size of app's code, data, and cache
-        {{.atomTag = android::util::APP_SIZE},
-         {.puller = new StatsCompanionServicePuller(android::util::APP_SIZE)}},
-
-        // Size of specific categories of files. Eg. Music.
-        {{.atomTag = android::util::CATEGORY_SIZE},
-         {.puller = new StatsCompanionServicePuller(android::util::CATEGORY_SIZE)}},
-
-        // Number of fingerprints enrolled for each user.
-        {{.atomTag = android::util::NUM_FINGERPRINTS_ENROLLED},
-         {.puller = new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS_ENROLLED)}},
-
-        // Number of faces enrolled for each user.
-        {{.atomTag = android::util::NUM_FACES_ENROLLED},
-         {.puller = new StatsCompanionServicePuller(android::util::NUM_FACES_ENROLLED)}},
-
         // ProcStats.
         {{.atomTag = android::util::PROC_STATS},
          {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS)}},
@@ -170,20 +93,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // ProcStatsPkgProc.
         {{.atomTag = android::util::PROC_STATS_PKG_PROC},
          {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS_PKG_PROC)}},
-
-        // Disk I/O stats per uid.
-        {{.atomTag = android::util::DISK_IO},
-         {.additiveFields = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
-          .coolDownNs = 3 * NS_PER_SEC,
-          .puller = new StatsCompanionServicePuller(android::util::DISK_IO)}},
-
-        // Process cpu stats. Min cool-down is 5 sec, inline with what AcitivityManagerService uses.
-        {{.atomTag = android::util::PROCESS_CPU_TIME},
-         {.coolDownNs = 5 * NS_PER_SEC /* min cool-down in seconds*/,
-          .puller = new StatsCompanionServicePuller(android::util::PROCESS_CPU_TIME)}},
-        {{.atomTag = android::util::CPU_TIME_PER_THREAD_FREQ},
-         {.additiveFields = {7, 9, 11, 13, 15, 17, 19, 21},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_THREAD_FREQ)}},
 
         // DebugElapsedClock.
         {{.atomTag = android::util::DEBUG_ELAPSED_CLOCK},
@@ -195,24 +104,8 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
          {.additiveFields = {1, 2, 3, 4},
           .puller = new StatsCompanionServicePuller(android::util::DEBUG_FAILING_ELAPSED_CLOCK)}},
 
-        // RoleHolder.
-        {{.atomTag = android::util::ROLE_HOLDER},
-         {.puller = new StatsCompanionServicePuller(android::util::ROLE_HOLDER)}},
-
-        // PermissionState.
-        {{.atomTag = android::util::DANGEROUS_PERMISSION_STATE},
-         {.puller = new StatsCompanionServicePuller(android::util::DANGEROUS_PERMISSION_STATE)}},
-
         // TrainInfo.
         {{.atomTag = android::util::TRAIN_INFO}, {.puller = new TrainInfoPuller()}},
-
-        // TimeZoneDataInfo.
-        {{.atomTag = android::util::TIME_ZONE_DATA_INFO},
-         {.puller = new StatsCompanionServicePuller(android::util::TIME_ZONE_DATA_INFO)}},
-
-        // ExternalStorageInfo
-        {{.atomTag = android::util::EXTERNAL_STORAGE_INFO},
-         {.puller = new StatsCompanionServicePuller(android::util::EXTERNAL_STORAGE_INFO)}},
 
         // GpuStatsGlobalInfo
         {{.atomTag = android::util::GPU_STATS_GLOBAL_INFO},
@@ -222,31 +115,14 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::GPU_STATS_APP_INFO},
          {.puller = new GpuStatsPuller(android::util::GPU_STATS_APP_INFO)}},
 
-        // AppsOnExternalStorageInfo
-        {{.atomTag = android::util::APPS_ON_EXTERNAL_STORAGE_INFO},
-         {.puller = new StatsCompanionServicePuller(android::util::APPS_ON_EXTERNAL_STORAGE_INFO)}},
-
         // Face Settings
         {{.atomTag = android::util::FACE_SETTINGS},
          {.puller = new StatsCompanionServicePuller(android::util::FACE_SETTINGS)}},
-
-        // App ops
-        {{.atomTag = android::util::APP_OPS},
-         {.puller = new StatsCompanionServicePuller(android::util::APP_OPS)}},
 
         // VmsClientStats
         {{.atomTag = android::util::VMS_CLIENT_STATS},
          {.additiveFields = {5, 6, 7, 8, 9, 10},
           .puller = new CarStatsPuller(android::util::VMS_CLIENT_STATS)}},
-
-        // NotiifcationRemoteViews.
-        {{.atomTag = android::util::NOTIFICATION_REMOTE_VIEWS},
-         {.puller = new StatsCompanionServicePuller(android::util::NOTIFICATION_REMOTE_VIEWS)}},
-
-        // PermissionStateSampled.
-        {{.atomTag = android::util::DANGEROUS_PERMISSION_STATE_SAMPLED},
-         {.puller =
-               new StatsCompanionServicePuller(android::util::DANGEROUS_PERMISSION_STATE_SAMPLED)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
@@ -445,21 +321,6 @@ int StatsPullerManager::ClearPullerCacheIfNecessary(int64_t timestampNs) {
     return totalCleared;
 }
 
-// Deprecated, remove after puller API is complete.
-void StatsPullerManager::RegisterPullerCallback(int32_t atomTag,
-        const sp<IStatsPullerCallback>& callback) {
-    AutoMutex _l(mLock);
-    // Platform pullers cannot be changed.
-    if (!isVendorPulledAtom(atomTag)) {
-        VLOG("RegisterPullerCallback: atom tag %d is not vendor pulled", atomTag);
-        return;
-    }
-    VLOG("RegisterPullerCallback: adding puller for tag %d", atomTag);
-    StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/true);
-    kAllPullAtomInfo[{.atomTag = atomTag}] = {
-            .puller = new StatsCallbackPullerDeprecated(atomTag, callback)};
-}
-
 void StatsPullerManager::RegisterPullAtomCallback(const int uid, const int32_t atomTag,
                                                   const int64_t coolDownNs, const int64_t timeoutNs,
                                                   const vector<int32_t>& additiveFields,
@@ -474,16 +335,6 @@ void StatsPullerManager::RegisterPullAtomCallback(const int uid, const int32_t a
             .puller = new StatsCallbackPuller(atomTag, callback, timeoutNs),
             .pullTimeoutNs = timeoutNs,
     };
-}
-
-void StatsPullerManager::UnregisterPullerCallback(int32_t atomTag) {
-    AutoMutex _l(mLock);
-    // Platform pullers cannot be changed.
-    if (!isVendorPulledAtom(atomTag)) {
-        return;
-    }
-    StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/false);
-    kAllPullAtomInfo.erase({.atomTag = atomTag});
 }
 
 void StatsPullerManager::UnregisterPullAtomCallback(const int uid, const int32_t atomTag) {

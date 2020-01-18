@@ -83,8 +83,23 @@ public final class RcsContactUceCapability implements Parcelable {
     public static final int CAPABILITY_RCS_VOICE_CALL = (1 << 19);
     /** Supports RCS video calling */
     public static final int CAPABILITY_RCS_VIDEO_CALL = (1 << 20);
-    /** Supports RCS video calling, where video media can not be dropped */
+    /** Supports RCS video calling, where video media can not be dropped. */
     public static final int CAPABILITY_RCS_VIDEO_ONLY_CALL = (1 << 21);
+    /** Supports call composer, where outgoing calls can be enriched with pre-call content.*/
+    public static final int CAPABILITY_CALL_COMPOSER = (1 << 22);
+    /** Supports post call information that is included in the call if the call is missed.*/
+    public static final int CAPABILITY_POST_CALL = (1 << 23);
+    /** Supports sharing a map where the user can draw, share markers, and share their position. */
+    public static final int CAPABILITY_SHARED_MAP = (1 << 24);
+    /** Supports sharing a canvas, where users can draw, add images, and change background colors.*/
+    public static final int CAPABILITY_SHARED_SKETCH = (1 << 25);
+    /** Supports communication with Chatbots. */
+    public static final int CAPABILITY_CHAT_BOT = (1 << 26);
+    /** Supports Chatbot roles. */
+    public static final int CAPABILITY_CHAT_BOT_ROLE = (1 << 27);
+    /** Supports the unidirectional plug-ins framework. */
+    public static final int CAPABILITY_PLUG_IN = (1 << 28);
+
 
     /** @hide*/
     @Retention(RetentionPolicy.SOURCE)
@@ -110,7 +125,14 @@ public final class RcsContactUceCapability implements Parcelable {
             CAPABILITY_GEOLOCATION_PULL_FILE_TRANSFER,
             CAPABILITY_RCS_VOICE_CALL,
             CAPABILITY_RCS_VIDEO_CALL,
-            CAPABILITY_RCS_VIDEO_ONLY_CALL
+            CAPABILITY_RCS_VIDEO_ONLY_CALL,
+            CAPABILITY_CALL_COMPOSER,
+            CAPABILITY_POST_CALL,
+            CAPABILITY_SHARED_MAP,
+            CAPABILITY_SHARED_SKETCH,
+            CAPABILITY_CHAT_BOT,
+            CAPABILITY_CHAT_BOT_ROLE,
+            CAPABILITY_PLUG_IN
     })
     public @interface CapabilityFlag {}
 
@@ -183,7 +205,7 @@ public final class RcsContactUceCapability implements Parcelable {
     }
 
     private final Uri mContactUri;
-    private int mCapabilities;
+    private long mCapabilities;
     private List<String> mExtensionTags = new ArrayList<>();
     private Map<Integer, Uri> mServiceMap = new HashMap<>();
 
@@ -198,7 +220,7 @@ public final class RcsContactUceCapability implements Parcelable {
 
     private RcsContactUceCapability(Parcel in) {
         mContactUri = in.readParcelable(Uri.class.getClassLoader());
-        mCapabilities = in.readInt();
+        mCapabilities = in.readLong();
         in.readStringList(mExtensionTags);
         // read mServiceMap as key,value pair
         int mapSize = in.readInt();
@@ -223,7 +245,7 @@ public final class RcsContactUceCapability implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeParcelable(mContactUri, 0);
-        out.writeInt(mCapabilities);
+        out.writeLong(mCapabilities);
         out.writeStringList(mExtensionTags);
         // write mServiceMap as key,value pairs
         int mapSize = mServiceMap.keySet().size();

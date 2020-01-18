@@ -161,8 +161,7 @@ final class RemoteAugmentedAutofillService
                                 @Override
                                 public void onSuccess(@Nullable Dataset[] inlineSuggestionsData) {
                                     maybeHandleInlineSuggestions(sessionId, inlineSuggestionsData,
-                                            focusedId, inlineSuggestionsRequest,
-                                            inlineSuggestionsCallback, client);
+                                            focusedId, inlineSuggestionsCallback, client);
                                     requestAutofill.complete(null);
                                 }
 
@@ -226,19 +225,15 @@ final class RemoteAugmentedAutofillService
 
     private void maybeHandleInlineSuggestions(int sessionId,
             @Nullable Dataset[] inlineSuggestionsData, @NonNull AutofillId focusedId,
-            @Nullable InlineSuggestionsRequest inlineSuggestionsRequest,
             @Nullable IInlineSuggestionsResponseCallback inlineSuggestionsCallback,
             @NonNull IAutoFillManagerClient client) {
-        if (inlineSuggestionsRequest == null
-                || ArrayUtils.isEmpty(inlineSuggestionsData)
-                || inlineSuggestionsCallback == null) {
+        if (ArrayUtils.isEmpty(inlineSuggestionsData) || inlineSuggestionsCallback == null) {
             return;
         }
         try {
             inlineSuggestionsCallback.onInlineSuggestionsResponse(
-                    InlineSuggestionFactory.createAugmentedInlineSuggestionsResponse(
-                            sessionId, inlineSuggestionsData, focusedId, inlineSuggestionsRequest,
-                            getJobHandler(), mContext, client));
+                    InlineSuggestionFactory.createAugmentedInlineSuggestionsResponse(sessionId,
+                            inlineSuggestionsData, focusedId, mContext, client));
         } catch (RemoteException e) {
             Slog.w(TAG, "Exception sending inline suggestions response back to IME.");
         }

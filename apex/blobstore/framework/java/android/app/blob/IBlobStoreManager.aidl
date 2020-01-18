@@ -15,6 +15,16 @@
  */
 package android.app.blob;
 
+import android.app.blob.BlobHandle;
+import android.app.blob.IBlobStoreSession;
+
 /** {@hide} */
 interface IBlobStoreManager {
+    long createSession(in BlobHandle handle, in String packageName);
+    IBlobStoreSession openSession(long sessionId);
+    ParcelFileDescriptor openBlob(in BlobHandle handle, in String packageName);
+
+    void acquireLease(in BlobHandle handle, int descriptionResId, long leaseTimeout,
+            in String packageName);
+    void releaseLease(in BlobHandle handle, in String packageName);
 }

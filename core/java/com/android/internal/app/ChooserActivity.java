@@ -71,6 +71,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Parcelable;
+import android.os.PatternMatcher;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -1650,10 +1651,28 @@ public class ChooserActivity extends ResolverActivity implements
         try {
             final Intent intent = getTargetIntent();
             String dataString = intent.getDataString();
-            if (TextUtils.isEmpty(dataString)) {
-                dataString = intent.getType();
+            if (!TextUtils.isEmpty(dataString)) {
+                return new IntentFilter(intent.getAction(), dataString);
             }
-            return new IntentFilter(intent.getAction(), dataString);
+            IntentFilter intentFilter = new IntentFilter(intent.getAction(), intent.getType());
+            List<Uri> contentUris = new ArrayList<>();
+            if (Intent.ACTION_SEND.equals(intent.getAction())) {
+                Uri uri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                if (uri != null) {
+                    contentUris.add(uri);
+                }
+            } else {
+                List<Uri> uris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+                if (uris != null) {
+                    contentUris.addAll(uris);
+                }
+            }
+            for (Uri uri : contentUris) {
+                intentFilter.addDataScheme(uri.getScheme());
+                intentFilter.addDataAuthority(uri.getAuthority(), null);
+                intentFilter.addDataPath(uri.getPath(), PatternMatcher.PATTERN_LITERAL);
+            }
+            return intentFilter;
         } catch (Exception e) {
             Log.e(TAG, "failed to get target intent filter " + e);
             return null;

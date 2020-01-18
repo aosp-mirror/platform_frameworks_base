@@ -337,11 +337,10 @@ public abstract class ImsFeature {
     }
 
     /**
-     * @return The current state of the feature, defined as {@link #STATE_UNAVAILABLE},
-     * {@link #STATE_INITIALIZING}, or {@link #STATE_READY}.
-     * @hide
+     * @return The current state of the ImsFeature, set previously by {@link #setFeatureState(int)}
+     * or {@link #STATE_UNAVAILABLE} if it has not been updated  yet.
      */
-    public int getFeatureState() {
+    public @ImsState int getFeatureState() {
         synchronized (mLock) {
             return mState;
         }

@@ -188,7 +188,7 @@ public class OverrideValidatorImplTest {
     }
 
     @Test
-    public void getOverrideAllowedState_betaBuildEnabledChangeDebugApp_rejectOverride()
+    public void getOverrideAllowedState_betaBuildEnabledChangeDebugApp_allowOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(betaBuild(), mContext)
                         .addEnabledChangeWithId(1).build();
@@ -203,11 +203,11 @@ public class OverrideValidatorImplTest {
                 overrideValidator.getOverrideAllowedState(1, PACKAGE_NAME);
 
         assertThat(allowedState)
-                .isEqualTo(new OverrideAllowedState(DISABLED_NON_TARGET_SDK, -1, -1));
+                .isEqualTo(new OverrideAllowedState(ALLOWED, -1, -1));
     }
 
     @Test
-    public void getOverrideAllowedState_betaBuildDisabledChangeDebugApp_rejectOverride()
+    public void getOverrideAllowedState_betaBuildDisabledChangeDebugApp_allowOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(betaBuild(), mContext)
                         .addDisabledChangeWithId(1).build();
@@ -221,7 +221,7 @@ public class OverrideValidatorImplTest {
                 overrideValidator.getOverrideAllowedState(1, PACKAGE_NAME);
 
         assertThat(allowedState)
-                .isEqualTo(new OverrideAllowedState(DISABLED_NON_TARGET_SDK, -1, -1));
+                .isEqualTo(new OverrideAllowedState(ALLOWED, -1, -1));
     }
 
     @Test

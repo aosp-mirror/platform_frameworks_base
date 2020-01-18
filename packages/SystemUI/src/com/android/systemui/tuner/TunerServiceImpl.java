@@ -117,7 +117,7 @@ public class TunerServiceImpl extends TunerService {
             String blacklistStr = getValue(StatusBarIconController.ICON_BLACKLIST);
             if (blacklistStr != null) {
                 ArraySet<String> iconBlacklist =
-                        StatusBarIconController.getIconBlacklist(blacklistStr);
+                        StatusBarIconController.getIconBlacklist(mContext, blacklistStr);
 
                 iconBlacklist.add("rotate");
                 iconBlacklist.add("headset");

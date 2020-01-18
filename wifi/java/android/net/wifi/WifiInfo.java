@@ -124,9 +124,19 @@ public class WifiInfo implements Parcelable {
     private int mTxLinkSpeed;
 
     /**
+     * Max supported Tx(transmit) link speed in Mbps
+     */
+    private int mMaxSupportedTxLinkSpeed;
+
+    /**
      * Rx(receive) Link speed in Mbps
      */
     private int mRxLinkSpeed;
+
+    /**
+     * Max supported Rx(receive) link speed in Mbps
+     */
+    private int mMaxSupportedRxLinkSpeed;
 
     /**
      * Frequency in MHz
@@ -303,6 +313,8 @@ public class WifiInfo implements Parcelable {
         setLinkSpeed(LINK_SPEED_UNKNOWN);
         setTxLinkSpeedMbps(LINK_SPEED_UNKNOWN);
         setRxLinkSpeedMbps(LINK_SPEED_UNKNOWN);
+        setMaxSupportedTxLinkSpeedMbps(LINK_SPEED_UNKNOWN);
+        setMaxSupportedRxLinkSpeedMbps(LINK_SPEED_UNKNOWN);
         setFrequency(-1);
         setMeteredHint(false);
         setEphemeral(false);
@@ -356,6 +368,8 @@ public class WifiInfo implements Parcelable {
             mRxSuccessRate = source.mRxSuccessRate;
             score = source.score;
             mWifiStandard = source.mWifiStandard;
+            mMaxSupportedTxLinkSpeed = source.mMaxSupportedTxLinkSpeed;
+            mMaxSupportedRxLinkSpeed = source.mMaxSupportedRxLinkSpeed;
         }
     }
 
@@ -552,11 +566,28 @@ public class WifiInfo implements Parcelable {
     }
 
     /**
+     * Returns the maximum supported transmit link speed in Mbps
+     * @return the max supported tx link speed or {@link #LINK_SPEED_UNKNOWN} if link speed is
+     * unknown. @see #LINK_SPEED_UNKNOWN
+     */
+    public int getMaxSupportedTxLinkSpeedMbps() {
+        return mMaxSupportedTxLinkSpeed;
+    }
+
+    /**
      * Update the last transmitted packet bit rate in Mbps.
      * @hide
      */
     public void setTxLinkSpeedMbps(int txLinkSpeed) {
         mTxLinkSpeed = txLinkSpeed;
+    }
+
+    /**
+     * Set the maximum supported transmit link speed in Mbps
+     * @hide
+     */
+    public void setMaxSupportedTxLinkSpeedMbps(int maxSupportedTxLinkSpeed) {
+        mMaxSupportedTxLinkSpeed = maxSupportedTxLinkSpeed;
     }
 
     /**
@@ -570,11 +601,28 @@ public class WifiInfo implements Parcelable {
     }
 
     /**
+     * Returns the maximum supported receive link speed in Mbps
+     * @return the max supported Rx link speed or {@link #LINK_SPEED_UNKNOWN} if link speed is
+     * unknown. @see #LINK_SPEED_UNKNOWN
+     */
+    public int getMaxSupportedRxLinkSpeedMbps() {
+        return mMaxSupportedRxLinkSpeed;
+    }
+
+    /**
      * Update the last received packet bit rate in Mbps.
      * @hide
      */
     public void setRxLinkSpeedMbps(int rxLinkSpeed) {
         mRxLinkSpeed = rxLinkSpeed;
+    }
+
+    /**
+     * Set the maximum supported receive link speed in Mbps
+     * @hide
+     */
+    public void setMaxSupportedRxLinkSpeedMbps(int maxSupportedRxLinkSpeed) {
+        mMaxSupportedRxLinkSpeed = maxSupportedRxLinkSpeed;
     }
 
     /**
@@ -864,7 +912,11 @@ public class WifiInfo implements Parcelable {
                 .append(", RSSI: ").append(mRssi)
                 .append(", Link speed: ").append(mLinkSpeed).append(LINK_SPEED_UNITS)
                 .append(", Tx Link speed: ").append(mTxLinkSpeed).append(LINK_SPEED_UNITS)
+                .append(", Max Supported Tx Link speed: ")
+                .append(mMaxSupportedTxLinkSpeed).append(LINK_SPEED_UNITS)
                 .append(", Rx Link speed: ").append(mRxLinkSpeed).append(LINK_SPEED_UNITS)
+                .append(", Max Supported Rx Link speed: ")
+                .append(mMaxSupportedRxLinkSpeed).append(LINK_SPEED_UNITS)
                 .append(", Frequency: ").append(mFrequency).append(FREQUENCY_UNITS)
                 .append(", Net ID: ").append(mNetworkId)
                 .append(", Metered hint: ").append(mMeteredHint)
@@ -917,6 +969,8 @@ public class WifiInfo implements Parcelable {
         dest.writeString(mFqdn);
         dest.writeString(mProviderFriendlyName);
         dest.writeInt(mWifiStandard);
+        dest.writeInt(mMaxSupportedTxLinkSpeed);
+        dest.writeInt(mMaxSupportedRxLinkSpeed);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -959,6 +1013,8 @@ public class WifiInfo implements Parcelable {
                 info.mFqdn = in.readString();
                 info.mProviderFriendlyName = in.readString();
                 info.mWifiStandard = in.readInt();
+                info.mMaxSupportedTxLinkSpeed = in.readInt();
+                info.mMaxSupportedRxLinkSpeed = in.readInt();
                 return info;
             }
 

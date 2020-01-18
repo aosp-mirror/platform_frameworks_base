@@ -24,6 +24,7 @@ import android.media.MediaRoute2Info;
 import android.media.MediaRouterClientState;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
+import android.os.Bundle;
 
 /**
  * {@hide}
@@ -47,12 +48,13 @@ interface IMediaRouterService {
     List<MediaRoute2Info> getSystemRoutes();
     void registerClient2(IMediaRouter2Client client, String packageName);
     void unregisterClient2(IMediaRouter2Client client);
-    void sendControlRequest(IMediaRouter2Client client, in MediaRoute2Info route, in Intent request);
+    void sendControlRequest(IMediaRouter2Client client, in MediaRoute2Info route,
+            in Intent request);
     void requestSetVolume2(IMediaRouter2Client client, in MediaRoute2Info route, int volume);
     void requestUpdateVolume2(IMediaRouter2Client client, in MediaRoute2Info route, int direction);
 
-    void requestCreateSession(IMediaRouter2Client client, in MediaRoute2Info route,
-            String routeFeature, int requestId);
+    void requestCreateSession(IMediaRouter2Client client, in MediaRoute2Info route, int requestId,
+            in @nullable Bundle sessionHints);
     void setDiscoveryRequest2(IMediaRouter2Client client, in RouteDiscoveryPreference preference);
     void selectRoute(IMediaRouter2Client client, String sessionId, in MediaRoute2Info route);
     void deselectRoute(IMediaRouter2Client client, String sessionId, in MediaRoute2Info route);
@@ -71,4 +73,12 @@ interface IMediaRouterService {
             in MediaRoute2Info route, int direction);
 
     List<RoutingSessionInfo> getActiveSessions(IMediaRouter2Manager manager);
+    void selectClientRoute(IMediaRouter2Manager manager,
+            String sessionId, in MediaRoute2Info route);
+    void deselectClientRoute(IMediaRouter2Manager manager,
+            String sessionId, in MediaRoute2Info route);
+    void transferToClientRoute(IMediaRouter2Manager manager,
+            String sessionId, in MediaRoute2Info route);
+    void releaseClientSession(IMediaRouter2Manager manager, String sessionId);
+
 }

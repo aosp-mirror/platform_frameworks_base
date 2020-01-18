@@ -3859,21 +3859,20 @@ public class TelephonyManager {
     }
 
     /**
-     * Return if the current radio is LTE on CDMA. This is a tri-state return value as for a period
-     * of time the mode may be unknown.
+     * Return if the current radio has global mode enabled, meaning it supports
+     * both 3GPP and 3GPP2 radio technologies at the same time.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
-     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
-     * @return {@link PhoneConstants#LTE_ON_CDMA_UNKNOWN}, {@link PhoneConstants#LTE_ON_CDMA_FALSE}
-     * or {@link PhoneConstants#LTE_ON_CDMA_TRUE}
-     *
+     * @return {@code true} if global mode is enabled
+     *         {@code false} if global mode is not enabled or unknown
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    @UnsupportedAppUsage
-    public int getLteOnCdmaMode() {
-        return getLteOnCdmaMode(getSubId());
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isGlobalModeEnabled() {
+        return getLteOnCdmaMode(getSubId()) == PhoneConstants.LTE_ON_CDMA_TRUE;
     }
 
     /**
@@ -3886,7 +3885,7 @@ public class TelephonyManager {
      * or {@link PhoneConstants#LTE_ON_CDMA_TRUE}
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @UnsupportedAppUsage
     public int getLteOnCdmaMode(int subId) {
         try {
@@ -9535,15 +9534,20 @@ public class TelephonyManager {
     }
 
     /**
-     * Requested state of SIM
-     *
-     * CARD_POWER_DOWN
      * Powers down the SIM. SIM must be up prior.
-     *
-     * CARD_POWER_UP
+     * @hide
+     */
+    @SystemApi
+    public static final int CARD_POWER_DOWN = 0;
+
+    /**
      * Powers up the SIM normally. SIM must be down prior.
-     *
-     * CARD_POWER_UP_PASS_THROUGH
+     * @hide
+     */
+    @SystemApi
+    public static final int CARD_POWER_UP = 1;
+
+    /**
      * Powers up the SIM in PASS_THROUGH mode. SIM must be down prior.
      * When SIM is powered up in PASS_THOUGH mode, the modem does not send
      * any command to it (for example SELECT of MF, or TERMINAL CAPABILITY),
@@ -9556,12 +9560,9 @@ public class TelephonyManager {
      * is activated, and normal behavior occurs at the next SIM initialization,
      * unless PASS_THROUGH mode is requested again. Hence, the last power-up mode
      * is NOT persistent across boots. On reboot, SIM will power up normally.
+     * @hide
      */
-    /** @hide */
-    public static final int CARD_POWER_DOWN = 0;
-    /** @hide */
-    public static final int CARD_POWER_UP = 1;
-    /** @hide */
+    @SystemApi
     public static final int CARD_POWER_UP_PASS_THROUGH = 2;
 
     /**
@@ -10981,9 +10982,15 @@ public class TelephonyManager {
     }
 
     /**
-     * Checks if FEATURE_TELEPHONY_DATA is enabled.
-     *
-     * @hide
+     * @return true if the current device is "data capable" over a radio on the device.
+     * <p>
+     * "Data capable" means that this device supports packet-switched
+     * data connections over the telephony network.
+     * <p>
+     * Note: the meaning of this flag is subtly different from the
+     * PackageManager.FEATURE_TELEPHONY system feature, which is available
+     * on any device with a telephony radio, even if the device is
+     * voice-only.
      */
     public boolean isDataCapable() {
         if (mContext == null) return true;

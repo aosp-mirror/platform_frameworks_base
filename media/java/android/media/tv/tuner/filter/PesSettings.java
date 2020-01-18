@@ -20,9 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.media.tv.tuner.TunerConstants;
 import android.media.tv.tuner.TunerUtils;
-import android.media.tv.tuner.filter.FilterConfiguration.FilterType;
 
 /**
  * Filter Settings for a PES Data.
@@ -34,8 +32,8 @@ public class PesSettings extends Settings {
     private final int mStreamId;
     private final boolean mIsRaw;
 
-    private PesSettings(@FilterType int mainType, int streamId, boolean isRaw) {
-        super(TunerUtils.getFilterSubtype(mainType, TunerConstants.FILTER_SUBTYPE_PES));
+    private PesSettings(@Filter.Type int mainType, int streamId, boolean isRaw) {
+        super(TunerUtils.getFilterSubtype(mainType, Filter.SUBTYPE_PES));
         mStreamId = streamId;
         mIsRaw = isRaw;
     }
@@ -65,7 +63,7 @@ public class PesSettings extends Settings {
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder builder(@NonNull Context context, @FilterType int mainType) {
+    public static Builder builder(@NonNull Context context, @Filter.Type int mainType) {
         TunerUtils.checkTunerPermission(context);
         return new Builder(mainType);
     }

@@ -12602,11 +12602,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 return findViewInsideOutShouldExist(root, mNextFocusForwardId);
             case FOCUS_BACKWARD: {
                 if (mID == View.NO_ID) return null;
-                final int id = mID;
                 return root.findViewByPredicateInsideOut(this, new Predicate<View>() {
                     @Override
                     public boolean test(View t) {
-                        return t.mNextFocusForwardId == id;
+                        return t.findViewById(t.mNextFocusForwardId) == View.this;
                     }
                 });
             }

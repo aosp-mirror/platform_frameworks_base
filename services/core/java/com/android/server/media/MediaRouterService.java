@@ -42,6 +42,7 @@ import android.media.RemoteDisplayState.RemoteDisplayInfo;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -460,8 +461,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void requestCreateSession(IMediaRouter2Client client, MediaRoute2Info route,
-            String routeType, int requestId) {
-        mService2.requestCreateSession(client, route, routeType, requestId);
+            int requestId, Bundle sessionHints) {
+        mService2.requestCreateSession(client, route, requestId, sessionHints);
     }
 
     // Binder call
@@ -554,6 +555,33 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     @Override
     public List<RoutingSessionInfo> getActiveSessions(IMediaRouter2Manager manager) {
         return mService2.getActiveSessions(manager);
+    }
+
+    // Binder call
+    @Override
+    public void selectClientRoute(IMediaRouter2Manager manager, String sessionId,
+            MediaRoute2Info route) {
+        mService2.selectClientRoute(manager, sessionId, route);
+    }
+
+    // Binder call
+    @Override
+    public void deselectClientRoute(IMediaRouter2Manager manager, String sessionId,
+            MediaRoute2Info route) {
+        mService2.deselectClientRoute(manager, sessionId, route);
+    }
+
+    // Binder call
+    @Override
+    public void transferToClientRoute(IMediaRouter2Manager manager, String sessionId,
+            MediaRoute2Info route) {
+        mService2.transferToClientRoute(manager, sessionId, route);
+    }
+
+    // Binder call
+    @Override
+    public void releaseClientSession(IMediaRouter2Manager manager, String sessionId) {
+        mService2.releaseClientSession(manager, sessionId);
     }
 
     void restoreBluetoothA2dp() {

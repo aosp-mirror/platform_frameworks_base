@@ -22,6 +22,7 @@ import static android.media.MediaRouter2Utils.getProviderId;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -63,12 +64,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * TODO: Merge this to MediaRouterService once it's finished.
+ * Implements features related to {@link android.media.MediaRouter2} and
+ * {@link android.media.MediaRouter2Manager}.
  */
 class MediaRouter2ServiceImpl {
     private static final String TAG = "MR2ServiceImpl";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final long ROUTE_SELECTION_REQUEST_TIMEOUT_MS = 5000L;
 
     private final Context mContext;
     private final Object mLock = new Object();
@@ -178,18 +179,14 @@ class MediaRouter2ServiceImpl {
     }
 
     public void requestCreateSession(IMediaRouter2Client client, MediaRoute2Info route,
-            String routeFeature, int requestId) {
+            int requestId, Bundle sessionHints) {
         Objects.requireNonNull(client, "client must not be null");
         Objects.requireNonNull(route, "route must not be null");
-        if (TextUtils.isEmpty(routeFeature)) {
-            throw new IllegalArgumentException("routeFeature must not be empty");
-        }
 
         final long token = Binder.clearCallingIdentity();
-
         try {
             synchronized (mLock) {
-                requestCreateSessionLocked(client, route, routeFeature, requestId);
+                requestCreateSessionLocked(client, route, requestId, sessionHints);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -381,6 +378,53 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    public void selectClientRoute(IMediaRouter2Manager manager, String sessionId,
+            MediaRoute2Info route) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                selectClientRouteLocked(manager, sessionId, route);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    public void deselectClientRoute(IMediaRouter2Manager manager, String sessionId,
+            MediaRoute2Info route) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                deselectClientRouteLocked(manager, sessionId, route);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    public void transferToClientRoute(IMediaRouter2Manager manager, String sessionId,
+            MediaRoute2Info route) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                transferClientRouteLocked(manager, sessionId, route);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    public void releaseClientSession(IMediaRouter2Manager manager, String sessionId) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                releaseClientSessionLocked(manager, sessionId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     //TODO: Review this is handling multi-user properly.
     void switchUser() {
         synchronized (mLock) {
@@ -421,6 +465,7 @@ class MediaRouter2ServiceImpl {
             int uid, int pid, String packageName, int userId, boolean trusted) {
         final IBinder binder = client.asBinder();
         if (mAllClientRecords.get(binder) == null) {
+
             UserRecord userRecord = getOrCreateUserRecordLocked(userId);
             Client2Record clientRecord = new Client2Record(userRecord, client, uid, pid,
                     packageName, trusted);
@@ -450,7 +495,7 @@ class MediaRouter2ServiceImpl {
     }
 
     private void requestCreateSessionLocked(@NonNull IMediaRouter2Client client,
-            @NonNull MediaRoute2Info route, @NonNull String routeFeature, long requestId) {
+            @NonNull MediaRoute2Info route, long requestId, @Nullable Bundle sessionHints) {
         final IBinder binder = client.asBinder();
         final Client2Record clientRecord = mAllClientRecords.get(binder);
 
@@ -463,7 +508,7 @@ class MediaRouter2ServiceImpl {
             clientRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::requestCreateSessionOnHandler,
                             clientRecord.mUserRecord.mHandler,
-                            clientRecord, route, routeFeature, requestId));
+                            clientRecord, route, requestId, sessionHints));
         }
     }
 
@@ -622,9 +667,9 @@ class MediaRouter2ServiceImpl {
             }
             long uniqueRequestId = toUniqueRequestId(managerRecord.mClientId, requestId);
             if (clientRecord != null && managerRecord.mTrusted) {
-                //TODO: select route feature properly
+                //TODO: Use client's OnCreateSessionListener to send proper session hints.
                 requestCreateSessionLocked(clientRecord.mClient, route,
-                        route.getFeatures().get(0), uniqueRequestId);
+                        uniqueRequestId, null /* sessionHints */);
             }
         }
     }
@@ -658,6 +703,7 @@ class MediaRouter2ServiceImpl {
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
         if (managerRecord == null) {
+            Slog.w(TAG, "getActiveSessionLocked: Ignoring unknown manager");
             return Collections.emptyList();
         }
 
@@ -679,6 +725,93 @@ class MediaRouter2ServiceImpl {
             }
         }
         return userRecord;
+    }
+
+    private void selectClientRouteLocked(IMediaRouter2Manager manager, String sessionId,
+            MediaRoute2Info route) {
+        final IBinder binder = manager.asBinder();
+        ManagerRecord managerRecord = mAllManagerRecords.get(binder);
+
+        if (managerRecord == null) {
+            Slog.w(TAG, "selectClientRouteLocked: Ignoring unknown manager.");
+            return;
+        }
+        //TODO: we shouldn't ignore selecting request for unknown clients. (RCN?)
+        Client2Record clientRecord = managerRecord.mUserRecord.mHandler
+                .findClientforSessionLocked(sessionId);
+        if (clientRecord == null) {
+            Slog.w(TAG, "selectClientRouteLocked: Ignoring unknown session.");
+            return;
+        }
+
+        clientRecord.mUserRecord.mHandler.sendMessage(
+                obtainMessage(UserHandler::selectRouteOnHandler,
+                            clientRecord.mUserRecord.mHandler,
+                            clientRecord, sessionId, route));
+    }
+
+    private void deselectClientRouteLocked(IMediaRouter2Manager manager, String sessionId,
+            MediaRoute2Info route) {
+        final IBinder binder = manager.asBinder();
+        ManagerRecord managerRecord = mAllManagerRecords.get(binder);
+
+        if (managerRecord == null) {
+            Slog.w(TAG, "deselectClientRouteLocked: Ignoring unknown manager.");
+            return;
+        }
+        //TODO: we shouldn't ignore selecting request for unknown clients. (RCN?)
+        Client2Record clientRecord = managerRecord.mUserRecord.mHandler
+                .findClientforSessionLocked(sessionId);
+        if (clientRecord == null) {
+            Slog.w(TAG, "deslectClientRouteLocked: Ignoring unknown session.");
+            return;
+        }
+
+        clientRecord.mUserRecord.mHandler.sendMessage(
+                obtainMessage(UserHandler::deselectRouteOnHandler,
+                        clientRecord.mUserRecord.mHandler,
+                        clientRecord, sessionId, route));
+    }
+
+    private void transferClientRouteLocked(IMediaRouter2Manager manager, String sessionId,
+            MediaRoute2Info route) {
+        final IBinder binder = manager.asBinder();
+        ManagerRecord managerRecord = mAllManagerRecords.get(binder);
+
+        if (managerRecord == null) {
+            Slog.w(TAG, "transferClientRouteLocked: Ignoring unknown manager.");
+            return;
+        }
+        //TODO: we shouldn't ignore selecting request for unknown clients. (RCN?)
+        Client2Record clientRecord = managerRecord.mUserRecord.mHandler
+                .findClientforSessionLocked(sessionId);
+        if (clientRecord == null) {
+            Slog.w(TAG, "transferClientRouteLocked: Ignoring unknown session.");
+            return;
+        }
+
+        clientRecord.mUserRecord.mHandler.sendMessage(
+                obtainMessage(UserHandler::transferToRouteOnHandler,
+                        clientRecord.mUserRecord.mHandler,
+                        clientRecord, sessionId, route));
+    }
+
+    private void releaseClientSessionLocked(IMediaRouter2Manager manager, String sessionId) {
+        final IBinder binder = manager.asBinder();
+        ManagerRecord managerRecord = mAllManagerRecords.get(binder);
+
+        if (managerRecord == null) {
+            Slog.w(TAG, "releaseClientSessionLocked: Ignoring unknown manager.");
+            return;
+        }
+
+        Client2Record clientRecord = managerRecord.mUserRecord.mHandler
+                .findClientforSessionLocked(sessionId);
+
+        managerRecord.mUserRecord.mHandler.sendMessage(
+                obtainMessage(UserHandler::releaseSessionOnHandler,
+                        managerRecord.mUserRecord.mHandler,
+                        clientRecord, sessionId));
     }
 
     private void disposeUserIfNeededLocked(UserRecord userRecord) {
@@ -901,6 +1034,11 @@ class MediaRouter2ServiceImpl {
                     this, provider, sessionInfo));
         }
 
+        @Nullable
+        public Client2Record findClientforSessionLocked(@NonNull String sessionId) {
+            return mSessionToClientMap.get(sessionId);
+        }
+
         //TODO: notify session info updates
         private void onProviderStateChangedOnHandler(MediaRoute2Provider provider) {
             int providerIndex = getProviderInfoIndex(provider.getUniqueId());
@@ -985,7 +1123,7 @@ class MediaRouter2ServiceImpl {
         }
 
         private void requestCreateSessionOnHandler(Client2Record clientRecord,
-                MediaRoute2Info route, String routeFeature, long requestId) {
+                MediaRoute2Info route, long requestId, @Nullable Bundle sessionHints) {
 
             final MediaRoute2Provider provider = findProvider(route.getProviderId());
             if (provider == null) {
@@ -995,20 +1133,13 @@ class MediaRouter2ServiceImpl {
                 return;
             }
 
-            if (!route.getFeatures().contains(routeFeature)) {
-                Slog.w(TAG, "Ignoring session creation request since the given route=" + route
-                        + " doesn't support the given feature=" + routeFeature);
-                notifySessionCreationFailed(clientRecord, toClientRequestId(requestId));
-                return;
-            }
-
             // TODO: Apply timeout for each request (How many seconds should we wait?)
-            SessionCreationRequest request = new SessionCreationRequest(
-                    clientRecord, route, routeFeature, requestId);
+            SessionCreationRequest request =
+                    new SessionCreationRequest(clientRecord, route, requestId);
             mSessionCreationRequests.add(request);
 
             provider.requestCreateSession(clientRecord.mPackageName, route.getOriginalId(),
-                    routeFeature, requestId);
+                    requestId, sessionHints);
         }
 
         private void selectRouteOnHandler(@NonNull Client2Record clientRecord,
@@ -1140,9 +1271,10 @@ class MediaRouter2ServiceImpl {
         private void onSessionCreatedOnHandler(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo, long requestId) {
 
+            notifySessionCreatedToManagers(getManagers(), sessionInfo);
+
             if (requestId == MediaRoute2ProviderService.REQUEST_ID_UNKNOWN) {
                 // The session is created without any matching request.
-                // TODO: Tell managers for the session creation
                 return;
             }
 
@@ -1173,15 +1305,11 @@ class MediaRouter2ServiceImpl {
             }
 
             String originalRouteId = matchingRequest.mRoute.getId();
-            String originalRouteFeature = matchingRequest.mRouteFeature;
             Client2Record client2Record = matchingRequest.mClientRecord;
 
-            if (!sessionInfo.getSelectedRoutes().contains(originalRouteId)
-                    || !TextUtils.equals(originalRouteFeature,
-                        sessionInfo.getRouteFeature())) {
+            if (!sessionInfo.getSelectedRoutes().contains(originalRouteId)) {
                 Slog.w(TAG, "Created session doesn't match the original request."
                         + " originalRouteId=" + originalRouteId
-                        + ", originalRouteFeature=" + originalRouteFeature
                         + ", requestId=" + requestId + ", sessionInfo=" + sessionInfo);
                 notifySessionCreationFailed(matchingRequest.mClientRecord,
                         toClientRequestId(requestId));
@@ -1192,7 +1320,6 @@ class MediaRouter2ServiceImpl {
             notifySessionCreated(matchingRequest.mClientRecord,
                     sessionInfo, toClientRequestId(requestId));
             mSessionToClientMap.put(sessionInfo.getId(), client2Record);
-            // TODO: Tell managers for the session creation
         }
 
         private void onSessionCreationFailedOnHandler(@NonNull MediaRoute2Provider provider,
@@ -1221,29 +1348,29 @@ class MediaRouter2ServiceImpl {
 
         private void onSessionInfoChangedOnHandler(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo) {
+            List<IMediaRouter2Manager> managers = getManagers();
+            notifySessionInfosChangedToManagers(managers);
 
             Client2Record client2Record = mSessionToClientMap.get(
                     sessionInfo.getId());
             if (client2Record == null) {
                 Slog.w(TAG, "No matching client found for session=" + sessionInfo);
-                // TODO: Tell managers for the session update
                 return;
             }
             notifySessionInfoChanged(client2Record, sessionInfo);
-            // TODO: Tell managers for the session update
         }
 
         private void onSessionReleasedOnHandler(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo) {
+            List<IMediaRouter2Manager> managers = getManagers();
+            notifySessionInfosChangedToManagers(managers);
 
             Client2Record client2Record = mSessionToClientMap.get(sessionInfo.getId());
             if (client2Record == null) {
                 Slog.w(TAG, "No matching client found for session=" + sessionInfo);
-                // TODO: Tell managers for the session release
                 return;
             }
             notifySessionReleased(client2Record, sessionInfo);
-            // TODO: Tell managers for the session release
         }
 
         private void notifySessionCreated(Client2Record clientRecord,
@@ -1349,11 +1476,6 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        // TODO: Remove notifyRouteSelected* methods
-        private void notifyRouteSelectedToClient(IMediaRouter2Client client,
-                MediaRoute2Info route, int reason, Bundle controlHints) {
-        }
-
         private void notifyRoutesAddedToClients(List<IMediaRouter2Client> clients,
                 List<MediaRoute2Info> routes) {
             for (IMediaRouter2Client client : clients) {
@@ -1435,6 +1557,29 @@ class MediaRouter2ServiceImpl {
             }
         }
 
+        private void notifySessionCreatedToManagers(List<IMediaRouter2Manager> managers,
+                RoutingSessionInfo sessionInfo) {
+            for (IMediaRouter2Manager manager : managers) {
+                try {
+                    manager.notifySessionCreated(sessionInfo);
+                } catch (RemoteException ex) {
+                    Slog.w(TAG, "notifySessionCreatedToManagers: "
+                            + "failed to notify. Manager probably died.", ex);
+                }
+            }
+        }
+
+        private void notifySessionInfosChangedToManagers(List<IMediaRouter2Manager> managers) {
+            for (IMediaRouter2Manager manager : managers) {
+                try {
+                    manager.notifySessionsUpdated();
+                } catch (RemoteException ex) {
+                    Slog.w(TAG, "notifySessionInfosChangedToManagers: "
+                            + "failed to notify. Manager probably died.", ex);
+                }
+            }
+        }
+
         private void updateClientUsage(Client2Record clientRecord) {
             MediaRouter2ServiceImpl service = mServiceRef.get();
             if (service == null) {
@@ -1448,8 +1593,6 @@ class MediaRouter2ServiceImpl {
             }
             for (IMediaRouter2Manager manager : managers) {
                 try {
-                    manager.notifyRouteSelected(clientRecord.mPackageName,
-                            clientRecord.mSelectedRoute);
                     manager.notifyPreferredFeaturesChanged(clientRecord.mPackageName,
                             clientRecord.mDiscoveryPreference.getPreferredFeatures());
                 } catch (RemoteException ex) {
@@ -1470,15 +1613,12 @@ class MediaRouter2ServiceImpl {
         final class SessionCreationRequest {
             public final Client2Record mClientRecord;
             public final MediaRoute2Info mRoute;
-            public final String mRouteFeature;
             public final long mRequestId;
 
             SessionCreationRequest(@NonNull Client2Record clientRecord,
-                    @NonNull MediaRoute2Info route,
-                    @NonNull String routeFeature, long requestId) {
+                    @NonNull MediaRoute2Info route, long requestId) {
                 mClientRecord = clientRecord;
                 mRoute = route;
-                mRouteFeature = routeFeature;
                 mRequestId = requestId;
             }
         }

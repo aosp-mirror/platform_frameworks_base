@@ -2413,41 +2413,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         Intent intent = new Intent(ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
         intent.putExtra(PHONE_CONSTANTS_STATE_KEY, dataStateToString(state));
         intent.putExtra(PHONE_CONSTANTS_DATA_APN_KEY, apn);
-        intent.putExtra(PHONE_CONSTANTS_DATA_APN_TYPE_KEY, getApnTypesStringFromBitmask(apnType));
+        intent.putExtra(PHONE_CONSTANTS_DATA_APN_TYPE_KEY,
+                ApnSetting.getApnTypesStringFromBitmask(apnType));
         intent.putExtra(PHONE_CONSTANTS_SUBSCRIPTION_KEY, subId);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
-    }
-
-    private static final Map<Integer, String> APN_TYPE_INT_MAP;
-    static {
-        APN_TYPE_INT_MAP = new android.util.ArrayMap<Integer, String>();
-        APN_TYPE_INT_MAP.put(ApnSetting.TYPE_DEFAULT, "default");
-        APN_TYPE_INT_MAP.put(ApnSetting.TYPE_MMS, "mms");
-        APN_TYPE_INT_MAP.put(ApnSetting.TYPE_SUPL, "supl");
-        APN_TYPE_INT_MAP.put(ApnSetting.TYPE_DUN, "dun");
-        APN_TYPE_INT_MAP.put(ApnSetting.TYPE_HIPRI, "hipri");
-        APN_TYPE_INT_MAP.put(ApnSetting.TYPE_FOTA, "fota");
-        APN_TYPE_INT_MAP.put(ApnSetting.TYPE_IMS, "ims");
-        APN_TYPE_INT_MAP.put(ApnSetting.TYPE_CBS, "cbs");
-        APN_TYPE_INT_MAP.put(ApnSetting.TYPE_IA, "ia");
-        APN_TYPE_INT_MAP.put(ApnSetting.TYPE_EMERGENCY, "emergency");
-        APN_TYPE_INT_MAP.put(ApnSetting.TYPE_MCX, "mcx");
-        APN_TYPE_INT_MAP.put(ApnSetting.TYPE_XCAP, "xcap");
-    }
-
-    /**
-     * Copy of ApnSetting#getApnTypesStringFromBitmask for legacy broadcast.
-     * @param apnTypeBitmask bitmask of APN types.
-     * @return comma delimited list of APN types.
-     */
-    private static String getApnTypesStringFromBitmask(int apnTypeBitmask) {
-        List<String> types = new ArrayList<>();
-        for (Integer type : APN_TYPE_INT_MAP.keySet()) {
-            if ((apnTypeBitmask & type) == type) {
-                types.add(APN_TYPE_INT_MAP.get(type));
-            }
-        }
-        return android.text.TextUtils.join(",", types);
     }
 
     private void enforceNotifyPermissionOrCarrierPrivilege(String method) {

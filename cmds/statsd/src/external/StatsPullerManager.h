@@ -18,7 +18,6 @@
 
 #include <android/os/IPullAtomCallback.h>
 #include <android/os/IStatsCompanionService.h>
-#include <android/os/IStatsPullerCallback.h>
 #include <binder/IServiceManager.h>
 #include <utils/RefBase.h>
 #include <utils/threads.h>
@@ -116,14 +115,9 @@ public:
 
     void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService);
 
-    // Deprecated, remove after puller API is complete.
-    void RegisterPullerCallback(int32_t atomTag, const sp<IStatsPullerCallback>& callback);
-
     void RegisterPullAtomCallback(const int uid, const int32_t atomTag, const int64_t coolDownNs,
                                   const int64_t timeoutNs, const vector<int32_t>& additiveFields,
                                   const sp<IPullAtomCallback>& callback);
-
-    void UnregisterPullerCallback(int32_t atomTag);
 
     void UnregisterPullAtomCallback(const int uid, const int32_t atomTag);
 
