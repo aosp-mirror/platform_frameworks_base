@@ -40,14 +40,14 @@ public class AppSearchDocumentTest {
     @Test
     public void testDocumentEquals_Identical() {
         Document document1 = Document.newBuilder("uri1", "schemaType1")
-                .setCreationTimestampSecs(0L)
+                .setCreationTimestampMillis(0L)
                 .setProperty("longKey1", 1L, 2L, 3L)
                 .setProperty("doubleKey1", 1.0, 2.0, 3.0)
                 .setProperty("booleanKey1", true, false, true)
                 .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
                 .build();
         Document document2 = Document.newBuilder("uri1", "schemaType1")
-                .setCreationTimestampSecs(0L)
+                .setCreationTimestampMillis(0L)
                 .setProperty("longKey1", 1L, 2L, 3L)
                 .setProperty("doubleKey1", 1.0, 2.0, 3.0)
                 .setProperty("booleanKey1", true, false, true)
@@ -60,7 +60,7 @@ public class AppSearchDocumentTest {
     @Test
     public void testDocumentEquals_DifferentOrder() {
         Document document1 = Document.newBuilder("uri1", "schemaType1")
-                .setCreationTimestampSecs(0L)
+                .setCreationTimestampMillis(0L)
                 .setProperty("longKey1", 1L, 2L, 3L)
                 .setProperty("doubleKey1", 1.0, 2.0, 3.0)
                 .setProperty("booleanKey1", true, false, true)
@@ -69,7 +69,7 @@ public class AppSearchDocumentTest {
 
         // Create second document with same parameter but different order.
         Document document2 = Document.newBuilder("uri1", "schemaType1")
-                .setCreationTimestampSecs(0L)
+                .setCreationTimestampMillis(0L)
                 .setProperty("booleanKey1", true, false, true)
                 .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
                 .setProperty("doubleKey1", 1.0, 2.0, 3.0)
@@ -182,7 +182,7 @@ public class AppSearchDocumentTest {
     public void testDocumentProtoPopulation() {
         Document document = Document.newBuilder("uri1", "schemaType1")
                 .setScore(1)
-                .setCreationTimestampSecs(0)
+                .setCreationTimestampMillis(0)
                 .setProperty("longKey1", 1L)
                 .setProperty("doubleKey1", 1.0)
                 .setProperty("booleanKey1", true)
@@ -191,7 +191,7 @@ public class AppSearchDocumentTest {
 
         // Create the Document proto. Need to sort the property order by key.
         DocumentProto.Builder documentProtoBuilder = DocumentProto.newBuilder()
-                .setUri("uri1").setSchema("schemaType1").setScore(1).setCreationTimestampSecs(0);
+                .setUri("uri1").setSchema("schemaType1").setScore(1).setCreationTimestampMs(0);
         HashMap<String, PropertyProto.Builder> propertyProtoMap = new HashMap<>();
         propertyProtoMap.put("longKey1",
                 PropertyProto.newBuilder().setName("longKey1").addInt64Values(1L));
