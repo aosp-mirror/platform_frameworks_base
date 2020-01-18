@@ -28,6 +28,7 @@ import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -162,6 +163,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     private Bundle mBiometricPromptBundle;
     private boolean mRequireConfirmation;
     private int mUserId;
+    private int mEffectiveUserId;
     @AuthDialog.DialogSize int mSize = AuthDialog.SIZE_UNKNOWN;
 
     private TextView mTitleView;
@@ -278,6 +280,10 @@ public abstract class AuthBiometricView extends LinearLayout {
 
     public void setUserId(int userId) {
         mUserId = userId;
+    }
+
+    public void setEffectiveUserId(int effectiveUserId) {
+        mEffectiveUserId = effectiveUserId;
     }
 
     public void setRequireConfirmation(boolean requireConfirmation) {
@@ -650,8 +656,9 @@ public abstract class AuthBiometricView extends LinearLayout {
         if (isDeviceCredentialAllowed()) {
 
             final @Utils.CredentialType int credentialType =
-                    Utils.getCredentialType(mContext, mUserId);
-            switch(credentialType) {
+                    Utils.getCredentialType(mContext, mEffectiveUserId);
+
+            switch (credentialType) {
                 case Utils.CREDENTIAL_PIN:
                     negativeText = getResources().getString(R.string.biometric_dialog_use_pin);
                     break;

@@ -18,19 +18,25 @@ package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
+import android.os.UserManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -57,6 +63,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
     private TestableAuthContainer mAuthContainer;
 
     private @Mock AuthDialogCallback mCallback;
+    private @Mock UserManager mUserManager;
 
     @Before
     public void setup() {
@@ -156,6 +163,18 @@ public class AuthContainerViewTest extends SysuiTestCase {
         verify(mAuthContainer.mFrameLayout).addView(mAuthContainer.mCredentialView);
     }
 
+    @Test
+    public void testCredentialViewUsesEffectiveUserId() {
+        final int dummyEffectiveUserId = 200;
+        when(mUserManager.getCredentialOwnerProfile(anyInt())).thenReturn(dummyEffectiveUserId);
+
+        initializeContainer(Authenticators.DEVICE_CREDENTIAL);
+        mAuthContainer.onAttachedToWindowInternal();
+        assertTrue(mAuthContainer.mCredentialView instanceof AuthCredentialPatternView);
+        assertEquals(dummyEffectiveUserId, mAuthContainer.mCredentialView.mEffectiveUserId);
+        assertEquals(Utils.CREDENTIAL_PATTERN, mAuthContainer.mCredentialView.mCredentialType);
+    }
+
     private void initializeContainer(int authenticators) {
         AuthContainerView.Config config = new AuthContainerView.Config();
         config.mContext = mContext;
@@ -210,6 +229,16 @@ public class AuthContainerViewTest extends SysuiTestCase {
         @Override
         public int getAnimateCredentialStartDelayMs() {
             return 0;
+        }
+
+        @Override
+        public UserManager getUserManager(Context context) {
+            return mUserManager;
+        }
+
+        @Override
+        public @Utils.CredentialType int getCredentialType(Context context, int effectiveUserId) {
+            return Utils.CREDENTIAL_PATTERN;
         }
     }
 }
