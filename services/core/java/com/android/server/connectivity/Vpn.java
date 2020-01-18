@@ -216,14 +216,14 @@ public class Vpn {
      * Whether to keep the connection active after rebooting, or upgrading or reinstalling. This
      * only applies to {@link VpnService} connections.
      */
-    private boolean mAlwaysOn = false;
+    @VisibleForTesting protected boolean mAlwaysOn = false;
 
     /**
      * Whether to disable traffic outside of this VPN even when the VPN is not connected. System
      * apps can still bypass by choosing explicit networks. Has no effect if {@link mAlwaysOn} is
-     * not set.
+     * not set. Applies to all types of VPNs.
      */
-    private boolean mLockdown = false;
+    @VisibleForTesting protected boolean mLockdown = false;
 
     /**
      * Set of packages in addition to the VPN app itself that can access the network directly when
@@ -252,14 +252,14 @@ public class Vpn {
     private final int mUserHandle;
 
     public Vpn(Looper looper, Context context, INetworkManagementService netService,
-            @UserIdInt int userHandle) {
-        this(looper, context, netService, userHandle,
+            @UserIdInt int userHandle, @NonNull KeyStore keyStore) {
+        this(looper, context, netService, userHandle, keyStore,
                 new SystemServices(context), new Ikev2SessionCreator());
     }
 
     @VisibleForTesting
     protected Vpn(Looper looper, Context context, INetworkManagementService netService,
-            int userHandle, SystemServices systemServices,
+            int userHandle, @NonNull KeyStore keyStore, SystemServices systemServices,
             Ikev2SessionCreator ikev2SessionCreator) {
         mContext = context;
         mNetd = netService;
@@ -285,7 +285,7 @@ public class Vpn {
         mNetworkCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN);
         updateCapabilities(null /* defaultNetwork */);
 
-        loadAlwaysOnPackage();
+        loadAlwaysOnPackage(keyStore);
     }
 
     /**
@@ -437,21 +437,34 @@ public class Vpn {
     /**
      * Checks if a VPN app supports always-on mode.
      *
-     * In order to support the always-on feature, an app has to
+     * <p>In order to support the always-on feature, an app has to either have an installed
+     * PlatformVpnProfile, or:
+     *
      * <ul>
-     *     <li>target {@link VERSION_CODES#N API 24} or above, and
-     *     <li>not opt out through the {@link VpnService#SERVICE_META_DATA_SUPPORTS_ALWAYS_ON}
-     *         meta-data field.
+     *   <li>target {@link VERSION_CODES#N API 24} or above, and
+     *   <li>not opt out through the {@link VpnService#SERVICE_META_DATA_SUPPORTS_ALWAYS_ON}
+     *       meta-data field.
      * </ul>
      *
      * @param packageName the canonical package name of the VPN app
+     * @param keyStore the keystore instance to use for checking if the app has a Platform VPN
+     *     profile installed.
      * @return {@code true} if and only if the VPN app exists and supports always-on mode
      */
-    public boolean isAlwaysOnPackageSupported(String packageName) {
+    public boolean isAlwaysOnPackageSupported(String packageName, @NonNull KeyStore keyStore) {
         enforceSettingsPermission();
 
         if (packageName == null) {
             return false;
+        }
+
+        final long oldId = Binder.clearCallingIdentity();
+        try {
+            if (getVpnProfilePrivileged(packageName, keyStore) != null) {
+                return true;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
         }
 
         PackageManager pm = mContext.getPackageManager();
@@ -485,27 +498,31 @@ public class Vpn {
     }
 
     /**
-     * Configures an always-on VPN connection through a specific application.
-     * This connection is automatically granted and persisted after a reboot.
+     * Configures an always-on VPN connection through a specific application. This connection is
+     * automatically granted and persisted after a reboot.
      *
-     * <p>The designated package should exist and declare a {@link VpnService} in its
-     *    manifest guarded by {@link android.Manifest.permission.BIND_VPN_SERVICE},
-     *    otherwise the call will fail.
+     * <p>The designated package should either have a PlatformVpnProfile installed, or declare a
+     * {@link VpnService} in its manifest guarded by {@link
+     * android.Manifest.permission.BIND_VPN_SERVICE}, otherwise the call will fail.
      *
      * <p>Note that this method does not check if the VPN app supports always-on mode. The check is
-     *    delayed to {@link #startAlwaysOnVpn()}, which is always called immediately after this
-     *    method in {@link android.net.IConnectivityManager#setAlwaysOnVpnPackage}.
+     * delayed to {@link #startAlwaysOnVpn()}, which is always called immediately after this method
+     * in {@link android.net.IConnectivityManager#setAlwaysOnVpnPackage}.
      *
      * @param packageName the package to designate as always-on VPN supplier.
      * @param lockdown whether to prevent traffic outside of a VPN, for example while connecting.
      * @param lockdownWhitelist packages to be whitelisted from lockdown.
+     * @param keyStore the Keystore instance to use for checking of PlatformVpnProfile(s)
      * @return {@code true} if the package has been set as always-on, {@code false} otherwise.
      */
     public synchronized boolean setAlwaysOnPackage(
-            String packageName, boolean lockdown, List<String> lockdownWhitelist) {
+            @Nullable String packageName,
+            boolean lockdown,
+            @Nullable List<String> lockdownWhitelist,
+            @NonNull KeyStore keyStore) {
         enforceControlPermissionOrInternalCaller();
 
-        if (setAlwaysOnPackageInternal(packageName, lockdown, lockdownWhitelist)) {
+        if (setAlwaysOnPackageInternal(packageName, lockdown, lockdownWhitelist, keyStore)) {
             saveAlwaysOnPackage();
             return true;
         }
@@ -513,20 +530,22 @@ public class Vpn {
     }
 
     /**
-     * Configures an always-on VPN connection through a specific application, the same as
-     * {@link #setAlwaysOnPackage}.
+     * Configures an always-on VPN connection through a specific application, the same as {@link
+     * #setAlwaysOnPackage}.
      *
-     * Does not perform permission checks. Does not persist any of the changes to storage.
+     * <p>Does not perform permission checks. Does not persist any of the changes to storage.
      *
      * @param packageName the package to designate as always-on VPN supplier.
      * @param lockdown whether to prevent traffic outside of a VPN, for example while connecting.
      * @param lockdownWhitelist packages to be whitelisted from lockdown. This is only used if
-     *        {@code lockdown} is {@code true}. Packages must not contain commas.
+     *     {@code lockdown} is {@code true}. Packages must not contain commas.
+     * @param keyStore the system keystore instance to check for profiles
      * @return {@code true} if the package has been set as always-on, {@code false} otherwise.
      */
     @GuardedBy("this")
     private boolean setAlwaysOnPackageInternal(
-            String packageName, boolean lockdown, List<String> lockdownWhitelist) {
+            @Nullable String packageName, boolean lockdown,
+            @Nullable List<String> lockdownWhitelist, @NonNull KeyStore keyStore) {
         if (VpnConfig.LEGACY_VPN.equals(packageName)) {
             Log.w(TAG, "Not setting legacy VPN \"" + packageName + "\" as always-on.");
             return false;
@@ -542,11 +561,18 @@ public class Vpn {
         }
 
         if (packageName != null) {
-            // TODO: Give the minimum permission possible; if there is a Platform VPN profile, only
-            // grant ACTIVATE_PLATFORM_VPN.
-            // Pre-authorize new always-on VPN package. Grant the full ACTIVATE_VPN appop, allowing
-            // both VpnService and Platform VPNs.
-            if (!setPackageAuthorization(packageName, VpnManager.TYPE_VPN_SERVICE)) {
+            final VpnProfile profile;
+            final long oldId = Binder.clearCallingIdentity();
+            try {
+                profile = getVpnProfilePrivileged(packageName, keyStore);
+            } finally {
+                Binder.restoreCallingIdentity(oldId);
+            }
+
+            // Pre-authorize new always-on VPN package.
+            final int grantType =
+                    (profile == null) ? VpnManager.TYPE_VPN_SERVICE : VpnManager.TYPE_VPN_PLATFORM;
+            if (!setPackageAuthorization(packageName, grantType)) {
                 return false;
             }
             mAlwaysOn = true;
@@ -611,11 +637,9 @@ public class Vpn {
         }
     }
 
-    /**
-     * Load the always-on package and lockdown config from Settings.Secure
-     */
+    /** Load the always-on package and lockdown config from Settings. */
     @GuardedBy("this")
-    private void loadAlwaysOnPackage() {
+    private void loadAlwaysOnPackage(@NonNull KeyStore keyStore) {
         final long token = Binder.clearCallingIdentity();
         try {
             final String alwaysOnPackage = mSystemServices.settingsSecureGetStringForUser(
@@ -626,17 +650,21 @@ public class Vpn {
                     Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST, mUserHandle);
             final List<String> whitelistedPackages = TextUtils.isEmpty(whitelistString)
                     ? Collections.emptyList() : Arrays.asList(whitelistString.split(","));
-            setAlwaysOnPackageInternal(alwaysOnPackage, alwaysOnLockdown, whitelistedPackages);
+            setAlwaysOnPackageInternal(
+                    alwaysOnPackage, alwaysOnLockdown, whitelistedPackages, keyStore);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
     }
 
     /**
+     * Starts the currently selected always-on VPN
+     *
+     * @param keyStore the keyStore instance for looking up PlatformVpnProfile(s)
      * @return {@code true} if the service was started, the service was already connected, or there
-     *         was no always-on VPN to start. {@code false} otherwise.
+     *     was no always-on VPN to start. {@code false} otherwise.
      */
-    public boolean startAlwaysOnVpn() {
+    public boolean startAlwaysOnVpn(@NonNull KeyStore keyStore) {
         final String alwaysOnPackage;
         synchronized (this) {
             alwaysOnPackage = getAlwaysOnPackage();
@@ -645,8 +673,8 @@ public class Vpn {
                 return true;
             }
             // Remove always-on VPN if it's not supported.
-            if (!isAlwaysOnPackageSupported(alwaysOnPackage)) {
-                setAlwaysOnPackage(null, false, null);
+            if (!isAlwaysOnPackageSupported(alwaysOnPackage, keyStore)) {
+                setAlwaysOnPackage(null, false, null, keyStore);
                 return false;
             }
             // Skip if the service is already established. This isn't bulletproof: it's not bound
@@ -657,10 +685,24 @@ public class Vpn {
             }
         }
 
-        // Tell the OS that background services in this app need to be allowed for
-        // a short time, so we can bootstrap the VPN service.
         final long oldId = Binder.clearCallingIdentity();
         try {
+            // Prefer VPN profiles, if any exist.
+            VpnProfile profile = getVpnProfilePrivileged(alwaysOnPackage, keyStore);
+            if (profile != null) {
+                startVpnProfilePrivileged(profile, alwaysOnPackage);
+
+                // If the above startVpnProfilePrivileged() call returns, the Ikev2VpnProfile was
+                // correctly parsed, and the VPN has started running in a different thread. The only
+                // other possibility is that the above call threw an exception, which will be
+                // caught below, and returns false (clearing the always-on VPN). Once started, the
+                // Platform VPN cannot permanantly fail, and is resiliant to temporary failures. It
+                // will continue retrying until shut down by the user, or always-on is toggled off.
+                return true;
+            }
+
+            // Tell the OS that background services in this app need to be allowed for
+            // a short time, so we can bootstrap the VPN service.
             DeviceIdleController.LocalService idleController =
                     LocalServices.getService(DeviceIdleController.LocalService.class);
             idleController.addPowerSaveTempWhitelistApp(Process.myUid(), alwaysOnPackage,
@@ -675,6 +717,9 @@ public class Vpn {
                 Log.e(TAG, "VpnService " + serviceIntent + " failed to start", e);
                 return false;
             }
+        } catch (Exception e) {
+            Log.e(TAG, "Error starting always-on VPN", e);
+            return false;
         } finally {
             Binder.restoreCallingIdentity(oldId);
         }
@@ -2816,6 +2861,10 @@ public class Vpn {
         return isVpnProfilePreConsented(mContext, packageName);
     }
 
+    private boolean isCurrentIkev2VpnLocked(@NonNull String packageName) {
+        return isCurrentPreparedPackage(packageName) && mVpnRunner instanceof IkeV2VpnRunner;
+    }
+
     /**
      * Deletes an app-provisioned VPN profile.
      *
@@ -2832,6 +2881,17 @@ public class Vpn {
 
         Binder.withCleanCallingIdentity(
                 () -> {
+                    // If this profile is providing the current VPN, turn it off, disabling
+                    // always-on as well if enabled.
+                    if (isCurrentIkev2VpnLocked(packageName)) {
+                        if (mAlwaysOn) {
+                            // Will transitively call prepareInternal(VpnConfig.LEGACY_VPN).
+                            setAlwaysOnPackage(null, false, null, keyStore);
+                        } else {
+                            prepareInternal(VpnConfig.LEGACY_VPN);
+                        }
+                    }
+
                     keyStore.delete(getProfileNameForPackage(packageName), Process.SYSTEM_UID);
                 });
     }
@@ -2942,11 +3002,9 @@ public class Vpn {
 
         // To stop the VPN profile, the caller must be the current prepared package and must be
         // running an Ikev2VpnProfile.
-        if (!isCurrentPreparedPackage(packageName) && mVpnRunner instanceof IkeV2VpnRunner) {
-            return;
+        if (isCurrentIkev2VpnLocked(packageName)) {
+            prepareInternal(VpnConfig.LEGACY_VPN);
         }
-
-        prepareInternal(VpnConfig.LEGACY_VPN);
     }
 
     /**
