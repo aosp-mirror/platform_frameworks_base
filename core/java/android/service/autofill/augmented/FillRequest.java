@@ -53,7 +53,7 @@ public final class FillRequest {
      * Gets the task of the activity associated with this request.
      */
     public int getTaskId() {
-        return mProxy.taskId;
+        return mProxy.mTaskId;
     }
 
     /**
@@ -61,7 +61,7 @@ public final class FillRequest {
      */
     @NonNull
     public ComponentName getActivityComponent() {
-        return mProxy.componentName;
+        return mProxy.mComponentName;
     }
 
     /**

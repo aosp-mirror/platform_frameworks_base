@@ -7558,6 +7558,29 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
+
+        @Override
+        public boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
+                int displayId) {
+            final IBinder destinationInputToken;
+
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                if (displayContent == null) {
+                    return false;
+                }
+                final WindowState imeWindow = displayContent.mInputMethodWindow;
+                if (imeWindow == null) {
+                    return false;
+                }
+                if (imeWindow.mInputChannel == null) {
+                    return false;
+                }
+                destinationInputToken = imeWindow.mInputChannel.getToken();
+            }
+
+            return mInputManager.transferTouchFocus(sourceInputToken, destinationInputToken);
+        }
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {
