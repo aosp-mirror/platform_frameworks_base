@@ -287,7 +287,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"пристапува до календарот"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"испраќа и прикажува SMS-пораки"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Капацитет"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Датотеки и аудиовизуелни содржини"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"пристапува до фотографии, аудио-видео и датотеки на уредот"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"снима аудио"</string>
@@ -313,6 +313,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Може да допрете, повлечете, штипнете и да користите други движења."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Движења за отпечатоци"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Може да сними движења што се направени на сензорот за отпечатоци на уредот."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Правење слика од екранот"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Може да направи слика од екранот."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"оневозможи или измени статусна лента"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Дозволува апликацијата да ја оневозможи статусната лента или да додава или отстранува системски икони."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"да стане статусна лента"</string>
@@ -1454,7 +1456,7 @@
     <string name="sync_really_delete" msgid="5657871730315579051">"Избриши ги ставките"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Врати ги избришаните"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Не прави ништо засега"</string>
-    <string name="choose_account_label" msgid="5557833752759831548">"Избери сметка"</string>
+    <string name="choose_account_label" msgid="5557833752759831548">"Изберете сметка"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Додај сметка"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"Додај сметка"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Зголеми"</string>
@@ -1612,6 +1614,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Да го зголемиме звукот над препорачаното ниво?\n\nСлушањето звуци со голема јачина подолги периоди може да ви го оштети сетилото за слух."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Да се користи кратенка за „Пристапност“?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Кога е вклучена кратенката, ако ги притиснете двете копчиња за јачина на звук во времетраење од 3 секунди, ќе се стартува функција на пристапност.\n\n Тековна функција на пристапност:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Функцијата може да ја промените во „Поставки“ &gt; „Пристапност“."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Испразни"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Изменете ги кратенките"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Откажи"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Исклучи ја кратенката"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Користи кратенка"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инверзија на бои"</string>
@@ -1847,6 +1852,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Да се вклучи работниот профил?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Вашите работни апликации, известувања, податоци и други функции на работниот профил ќе бидат вклучени"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Вклучи"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Апликацијата не е достапна"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> не е достапна во моментов."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Апликацијава е создадена за постара верзија на Android и може да не функционира правилно. Проверете за ажурирања или контактирајте со програмерот."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверка за ажурирање"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Имате нови пораки"</string>
@@ -1957,13 +1964,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батеријата може да се потроши пред вообичаеното време за полнење"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Активиран е „Штедачот на батерија“ за да се продолжи траењето на батеријата"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Штедач на батерија"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Штедачот на батерија нема да се реактивира додека батеријата не се потроши до одредено ниво повторно"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Батеријата е доволно полна. Штедачот на батерија нема да се реактивира додека батеријата не се потроши до одредено ниво повторно."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Телефонот е наполнет <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Таблетот е наполнет <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Уредот е наполнет <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Штедачот на батерија е исклучен. Функциите веќе не се ограничени."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Штедачот на батерија е исклучен. Функциите веќе не се ограничени."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Штедачот на батерија е исклучен"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефонот е доволно полн. Функциите веќе не се ограничени."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Таблетот е доволно полн. Функциите веќе не се ограничени."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Уредот е доволно полн. Функциите веќе не се ограничени."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Папка"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Апликација за Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Датотека"</string>

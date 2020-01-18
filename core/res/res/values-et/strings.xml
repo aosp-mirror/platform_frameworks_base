@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"juurdepääs kalendrile"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"saata ja vaadata SMS-sõnumeid"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Mäluruum"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"juurdepääs seadmesse salvestatud fotodele, meediasisule ja failidele"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"heli salvestamine"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Saate puudutada, pühkida, sõrmi kokku-lahku liigutada ja teisi liigutusi teha."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Sõrmejälje liigutused"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Teil on võimalik jäädvustada seadme sõrmejäljeanduril tehtud liigutused."</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"keela või muuda olekuriba"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Võimaldab rakendusel keelata olekuriba või lisada ja eemaldada süsteemiikoone."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"olekuribana kuvamine"</string>
@@ -1454,7 +1459,7 @@
     <string name="sync_really_delete" msgid="5657871730315579051">"Kustuta üksused"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Võtke kustutamised tagasi"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Ära tee praegu midagi"</string>
-    <string name="choose_account_label" msgid="5557833752759831548">"Konto valimine"</string>
+    <string name="choose_account_label" msgid="5557833752759831548">"Valige konto"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Konto lisamine"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"Lisa konto"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Suurendamine"</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Kas suurendada helitugevuse taset üle soovitatud taseme?\n\nPikaajaline valju helitugevusega kuulamine võib kuulmist kahjustada."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Kas kasutada juurdepääsetavuse otseteed?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Kui otsetee on sisse lülitatud, käivitab mõlema helitugevuse nupu kolm sekundit all hoidmine juurdepääsetavuse funktsiooni.\n\n Praegune juurdepääsetavuse funktsioon:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Saate seda funktsiooni muuta valikutega Seaded &gt; Juurdepääsetavus."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Tühi"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Muuda otseteid"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Tühista"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Lülita otsetee välja"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Kasuta otseteed"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Värvide ümberpööramine"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Kas lülitada tööprofiil sisse?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Teie töörakendused, märguanded, andmed ja muud tööprofiili funktsioonid lülitatakse sisse"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Lülita sisse"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"See rakendus on loodud Androidi vanema versiooni jaoks ega pruugi õigesti töötada. Otsige värskendusi või võtke ühendust arendajaga."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Otsi värskendust"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Teile on uusi sõnumeid"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Aku võib enne tavapärast laadimist tühjaks saada"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akusäästja aktiveeriti aku tööea pikendamiseks"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Akusäästja"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Akusäästja lülitatakse uuesti sisse, kui aku hakkab tühjaks saama"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Aku on piisavalt laetud. Akusäästja lülitatakse uuesti sisse, kui aku hakkab tühjaks saama."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Telefon on <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> laetud"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Tahvelarvuti on <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> laetud"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Seade on <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> laetud"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Akusäästja on välja lülitatud. Funktsioonid ei ole enam piiratud."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Akusäästja on välja lülitatud. Funktsioonid ei ole enam piiratud."</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"Kaust"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Androidi rakendus"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Fail"</string>

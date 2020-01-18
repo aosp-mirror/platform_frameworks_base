@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"캘린더에 액세스"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS 메시지 전송 및 보기"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"저장용량"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"기기 사진, 미디어, 파일 액세스"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"마이크"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"오디오 녹음"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"탭, 스와이프, 확대/축소 및 기타 동작을 실행할 수 있습니다."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"지문 동작"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"기기 지문 센서에서 동작을 캡처합니다."</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"상태 표시줄 사용 중지 또는 수정"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"앱이 상태 표시줄을 사용중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 허용합니다."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"상태 표시줄에 위치"</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"권장 수준 이상으로 볼륨을 높이시겠습니까?\n\n높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"접근성 단축키를 사용하시겠습니까?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"단축키가 사용 설정된 경우 두 개의 볼륨 버튼을 3초간 누르면 접근성 기능이 시작됩니다.\n\n 현재 접근성 기능:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n \'설정 &gt; 접근성\'에서 기능을 변경할 수 있습니다."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"비우기"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"단축키 수정"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"취소"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"단축키 사용 중지"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"단축키 사용"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"색상 반전"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"직장 프로필을 사용 설정하시겠어요?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"업무용 앱, 알림, 데이터 및 기타 직장 프로필 기능이 사용 설정됩니다."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"사용 설정"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"이 앱은 Android 이전 버전에 맞게 개발되었기 때문에 제대로 작동하지 않을 수 있습니다. 업데이트를 확인하거나 개발자에게 문의하세요."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"업데이트 확인"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"새 메시지 있음"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"평소에 충전하는 시간 전에 배터리가 소진될 수 있습니다."</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"배터리 수명을 연장하기 위해 배터리 세이버가 활성화되었습니다."</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"절전 모드"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"배터리가 다시 부족해지기 전까지 절전 모드가 재활성화되지 않음"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"배터리가 충분히 충전되었습니다. 배터리가 다시 부족해지기 전까지는 절전 모드가 재활성화되지 않습니다."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"휴대전화 <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> 충전됨"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"태블릿 <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> 충전됨"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"기기 <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> 충전됨"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"절전 모드가 꺼져 있습니다. 기능이 더 이상 제한되지 않습니다."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"절전 모드가 사용 중지되었습니다. 기능이 더 이상 제한되지 않습니다."</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"폴더"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android 애플리케이션"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"파일"</string>

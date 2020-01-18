@@ -287,7 +287,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"έχει πρόσβαση στο ημερολόγιό σας"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"στέλνει και να διαβάζει μηνύματα SMS"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Αποθηκευτικός χώρος"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Αρχεία και μέσα"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"έχει πρόσβαση στις φωτογραφίες/πολυμέσα/αρχεία στη συσκευή σας"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Μικρόφωνο"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ηχογραφεί"</string>
@@ -313,6 +313,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Επιτρέπει το πάτημα, την ολίσθηση, το πλησίασμα και άλλες κινήσεις."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Κινήσεις δακτυλικών αποτυπωμάτων"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Μπορεί να αναγνωρίσει κινήσεις που εκτελούνται στον αισθητήρα δακτυλικού αποτυπώματος της συσκευής."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Λήψη στιγμιότυπου οθόνης"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Μπορεί να τραβήξει στιγμιότυπο της οθόνης."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"απενεργοποιεί ή να τροποποιεί την γραμμή κατάστασης"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Επιτρέπει στην εφαρμογή να απενεργοποιεί τη γραμμή κατάστασης ή να προσθέτει και να αφαιρεί εικονίδια συστήματος."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ορίζεται ως γραμμή κατάστασης"</string>
@@ -1610,6 +1612,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Αυξάνετε την ένταση ήχου πάνω από το επίπεδο ασφαλείας;\n\nΑν ακούτε μουσική σε υψηλή ένταση για μεγάλο χρονικό διάστημα ενδέχεται να προκληθεί βλάβη στην ακοή σας."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Να χρησιμοποιείται η συντόμευση προσβασιμότητας;"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Όταν η συντόμευση είναι ενεργοποιημένη, το πάτημα και των δύο κουμπιών έντασης ήχου για 3 δευτερόλεπτα θα ξεκινήσει μια λειτουργία προσβασιμότητας.\n\n Τρέχουσα λειτουργία προσβασιμότητας:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Μπορείτε να αλλάξετε τη λειτουργία από τις Ρυθμίσεις &gt; Προσβασιμότητα."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Κενό"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Επεξεργασία συντομεύσεων"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Άκυρο"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Απενεργοποίηση συντόμευσης"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Χρήση συντόμευσης"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Αντιστροφή χρωμάτων"</string>
@@ -1845,6 +1850,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Ενεργοποίηση προφίλ εργασίας;"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Οι εφαρμογές, οι ειδοποιήσεις και τα δεδομένα εργασίας σας, καθώς και άλλες λειτουργίες του προφίλ εργασίας, θα ενεργοποιηθούν"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Ενεργοποίηση"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Η εφαρμογή δεν είναι διαθέσιμη"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> δεν είναι διαθέσιμη αυτήν τη στιγμή."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Αυτή η εφαρμογή δημιουργήθηκε για παλαιότερη έκδοση του Android και μπορεί να μην λειτουργεί σωστά. Δοκιμάστε να ελέγξετε εάν υπάρχουν ενημερώσεις ή επικοινωνήστε με τον προγραμματιστή."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Έλεγχος για ενημέρωση"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Έχετε νέα μηνύματα"</string>
@@ -1955,13 +1962,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Η μπαταρία μπορεί να εξαντληθεί πριν από τη συνηθισμένη φόρτιση"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Η Εξοικονόμηση μπαταρίας ενεργοποιήθηκε για την επέκταση της διάρκειας ζωής της μπαταρίας"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Εξοικονόμηση μπαταρίας"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Η Εξοικονόμηση μπαταρίας δεν θα ενεργοποιηθεί ξανά προτού η στάθμη της μπαταρίας είναι ξανά χαμηλή"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Η μπαταρία φορτίστηκε σε επαρκές επίπεδο. Η Εξοικονόμηση μπαταρίας δεν θα ενεργοποιηθεί ξανά προτού η στάθμη της μπαταρίας είναι ξανά χαμηλή."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Το τηλέφωνο <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> φορτίστηκε"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Επίπεδο φόρτισης tablet <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Η συσκευή <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> φορτίστηκε"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Η Εξοικονόμηση μπαταρίας είναι ανενεργή. Οι λειτουργίες δεν περιορίζονται πλέον."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Η Εξοικονόμηση μπαταρίας απενεργοποιήθηκε. Οι λειτουργίες δεν περιορίζονται πλέον."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Η Εξοικονόμηση μπαταρίας απενεργοποιήθηκε"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Το τηλέφωνο είναι αρκετά φορτισμένο. Οι λειτουργίες δεν περιορίζονται πλέον."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Το tablet είναι αρκετά φορτισμένο. Οι λειτουργίες δεν περιορίζονται πλέον."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Η συσκευή είναι αρκετά φορτισμένη. Οι λειτουργίες δεν περιορίζονται πλέον."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Φάκελος"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Εφαρμογή Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Αρχείο"</string>

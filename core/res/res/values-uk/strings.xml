@@ -293,7 +293,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"отримувати доступ до календаря"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"надсилати та переглядати SMS-повідомлення"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Пам’ять"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"отримувати доступ до фотографій, мультимедійного вмісту та файлів на вашому пристрої"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Мікрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"записувати аудіо"</string>
@@ -319,6 +320,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Можна торкатися, проводити пальцем, стискати пальці та виконувати інші жести."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Жести на сканері відбитків пальців"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Може фіксувати жести на сканері відбитків пальців."</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"вимикати чи змін. рядок стану"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Дозволяє програмі вимикати рядок стану чи додавати та видаляти піктограми системи."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"відображатися як рядок стану"</string>
@@ -1654,6 +1659,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Збільшити гучність понад рекомендований рівень?\n\nЯкщо слухати надто гучну музику тривалий час, можна пошкодити слух."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Використовувати швидке ввімкнення?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Коли ярлик увімкнено, після натискання обох клавіш гучності й утримування їх протягом 3 секунд увімкнеться функція спеціальних можливостей.\n\n Поточна функція спеціальних можливостей:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Цю функцію можна змінити в меню \"Налаштування\" &gt; \"Спеціальні можливості\"."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Очистити"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Редагувати засоби"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Скасувати"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Вимкнути ярлик"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Використовувати ярлик"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія кольорів"</string>
@@ -1909,6 +1917,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Увімкнути робочий профіль?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Додатки, сповіщення, дані й інші функції робочого профілю буде ввімкнено"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Увімкнути"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Цей додаток створений для старішої версії Android і може працювати неналежним чином. Спробуйте знайти оновлення або зв’яжіться з розробником."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Шукати оновлення"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"У вас є нові повідомлення"</string>
@@ -2021,13 +2033,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятор може розрядитися раніше ніж зазвичай"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режим енергозбереження активовано для збільшення часу роботи акумулятора"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Режим енергозбереження"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Режим енергозбереження не ввімкнеться, доки рівень заряду знову не знизиться"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Акумулятор заряджено достатньо. Режим енергозбереження буде знову ввімкнено, коли рівень заряду знизиться."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Телефон заряджено на <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Планшет заряджено на <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Пристрій заряджено на <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Режим енергозбереження вимкнено. Функції вже не обмежено."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Режим енергозбереження вимкнено. Функції вже не обмежено."</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"Папка"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Додаток Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Файл"</string>

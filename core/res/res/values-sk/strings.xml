@@ -293,7 +293,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"prístup ku kalendáru"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"posielanie a zobrazovanie SMS"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Úložisko"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"prístup k fotkám, médiám a súborom v zariadení"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofón"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"nahrávanie zvuku"</string>
@@ -319,6 +320,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Je možné použiť klepnutie, prejdenie, stiahnutie prstami a ďalšie gestá."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestá odtlačkom prsta"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Dokáže zaznamenať gestá na senzore odtlačkov prstov zariadenia."</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"zakázanie alebo zmeny stavového riadka"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Umožňuje aplikácii vypnúť stavový riadok alebo pridať a odstrániť systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"vydávanie sa za stavový riadok"</string>
@@ -1654,6 +1659,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Zvýšiť hlasitosť nad odporúčanú úroveň?\n\nDlhodobé počúvanie pri vysokej hlasitosti môže poškodiť váš sluch."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Použiť skratku dostupnosti?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Keď je skratka zapnutá, stlačením obidvoch tlačidiel hlasitosti na tri sekundy spustíte funkciu dostupnosti.\n\n Aktuálna funkcia dostupnosti:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Funkciu môžete zmeniť v časti Nastavenia &gt; Dostupnosť."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Prázdne"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Upraviť skratky"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Zrušiť"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Vypnúť skratku"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Použiť skratku"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzia farieb"</string>
@@ -1909,6 +1917,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Zapnúť pracovný profil?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Pracovné aplikácie, upozornenia, dáta a ďalšie funkcie pracovného profilu sa zapnú"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Zapnúť"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Táto aplikácia bola zostavená pre staršiu verziu Androidu a nemusí správne fungovať. Skúste skontrolovať dostupnosť aktualizácií alebo kontaktovať vývojára."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Skontrolovať dostupnosť aktualizácie"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Máte nové správy."</string>
@@ -2021,13 +2033,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batéria sa môže vybiť pred obvyklým nabitím"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Bol aktivovaný šetrič batérie na predĺženie výdrže batérie"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Šetrič batérie"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Šetrič batérie sa znova aktivuje až pri nízkej úrovni nabitia batérie"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Batéria bola nabitá na dostatočnú úroveň. Šetrič batérie sa znova aktivuje až pri nízkej úrovni nabitia batérie."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Úroveň nabitia telefónu: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Úroveň nabitia tabletu: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Úroveň nabitia zariadenia: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Šetrič batérie je vypnutý. Funkcie už nie sú obmedzené."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Šetrič batérie bol vypnutý. Funkcie už nie sú obmedzené."</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"Priečinok"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Aplikácia pre Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Súbor"</string>

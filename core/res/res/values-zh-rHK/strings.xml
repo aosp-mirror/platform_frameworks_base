@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"存取您的日曆"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"短訊"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"傳送和查看短訊"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"儲存空間"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"存取裝置上的相片、媒體和檔案"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"麥克風"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"錄音"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"可以輕按、滑動和兩指縮放，並執行其他手勢。"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"指紋手勢"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"可以擷取在裝置指紋感應器上執行的手勢。"</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"停用或修改狀態列"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"允許應用程式停用狀態列，並可新增或移除系統圖示。"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"成為狀態列"</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要調高音量 (比建議的音量更大聲) 嗎？\n\n長時間聆聽高分貝音量可能會導致您的聽力受損。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用無障礙功能快速鍵嗎？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"快速鍵開啟後，同時按住音量按鈕 3 秒，無障礙功能便會啟用。\n\n目前的無障礙功能：\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n如要變更功能，請前往「設定」&gt;「無障礙功能」。"</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"空白"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"編輯捷徑"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"取消"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"關閉快速鍵"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"使用快速鍵"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"色彩反轉"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"要開啟工作設定檔嗎？"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"系統將開啟您的工作應用程式、通知、資料和其他工作設定檔功能"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"開啟"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"此應用程式專為舊版 Android 打造，因此可能無法正常運作。請嘗試檢查更新，或與開發人員聯絡。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"檢查更新"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"您有新的訊息"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"電量可能會在日常充電前耗盡"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"「省電模式」已啟用，以便延長電池壽命"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"省電模式"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"當再次出現低電量時，省電模式才會重新啟用"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"電池已充至足夠電量。當再次出現低電量時，省電模式才會重新啟用。"</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"手機已充電至 <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"平板電腦已充電至 <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"裝置已充電至 <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"已關閉省電模式。各項功能已不再受限。"</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"已關閉省電模式。各項功能已不再受限。"</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"資料夾"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android 應用程式"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"檔案"</string>

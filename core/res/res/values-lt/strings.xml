@@ -293,7 +293,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"pasiekti kalendorių"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"siųsti ir peržiūrėti SMS pranešimus"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Saugykla"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Failai ir medija"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"pasiekti nuotraukas, mediją ir failus įrenginyje"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofonas"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"įrašyti garso įrašą"</string>
@@ -319,6 +319,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Galima paliesti, perbraukti, suimti ir atlikti kitus veiksmus gestais."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Piršto antspaudo gestai"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Gali užfiksuoti gestus, atliktus naudojant įrenginio piršto antspaudo jutiklį."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ekrano kopijos kūrimas"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Galima sukurti vaizdo ekrano kopiją."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"išjungti ar keisti būsenos juostą"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Leidžiama programai neleisti būsenos juostos arba pridėti ir pašalinti sistemos piktogramas."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"būti būsenos juosta"</string>
@@ -1654,6 +1656,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Padidinti garsą daugiau nei rekomenduojamas lygis?\n\nIlgai klausydami dideliu garsu galite pažeisti klausą."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Naudoti spartųjį pritaikymo neįgaliesiems klavišą?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Kai spartusis klavišas įjungtas, spaudžiant abu garsumo mygtukus 3 sekundes bus paleista pritaikymo neįgaliesiems funkcija.\n\n Dabartinė pritaikymo neįgaliesiems funkcija:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>„\n“\n Funkciją galite pakeisti skiltyje „Nustatymai“ &gt; „Pritaikymas neįgaliesiems“."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Išvalyti"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Redaguoti sparčiuosius klavišus"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Atšaukti"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Išjungti spartųjį klavišą"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Naudoti spartųjį klavišą"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Spalvų inversija"</string>
@@ -1909,6 +1914,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Įjungti darbo profilį?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Darbo programos, pranešimai, duomenys ir kitos darbo profilio funkcijos bus išjungtos"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Įjungti"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Programa nepasiekiama."</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Programa „<xliff:g id="APP_NAME">%1$s</xliff:g>“ šiuo metu nepasiekiama."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ši programa sukurta naudoti senesnės versijos sistemoje „Android“ ir gali tinkamai neveikti. Pabandykite patikrinti, ar yra naujinių, arba susisiekite su kūrėju."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Tikrinti, ar yra naujinių"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Turite naujų pranešimų"</string>
@@ -2021,13 +2028,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumuliatoriaus energija gali išsekti prieš įprastą įkrovimą"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akumuliatoriaus tausojimo priemonė suaktyvinta, kad akumuliatorius veiktų ilgiau"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Akumuliatoriaus tausojimo priemonė"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Akumuliatoriaus tausojimo priemonė nebus iš naujo suaktyvinta, kol akumuliatorius vėl beveik išseks"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Pasiektas tinkamas akumuliatoriaus įkrovimo lygis. Akumuliatoriaus tausojimo priemonė nebus iš naujo suaktyvinta, kol akumuliatorius vėl beveik išseks."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Telefono įkrovimo lygis: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Planšetinio kompiuterio įkrovimo lygis: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Įrenginio įkrovimo lygis: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Akumuliatoriaus tausojimo priemonė išjungta. Funkcijos neberibojamos."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Akumuliatoriaus tausojimo priemonė išjungta. Funkcijos neberibojamos."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Akumuliatoriaus tausojimo priemonė išjungta"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefonas pakankamai įkrautas. Funkcijos neberibojamos."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Planšetinis kompiuteris pakankamai įkrautas. Funkcijos neberibojamos."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Įrenginys pakankamai įkrautas. Funkcijos neberibojamos."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Aplankas"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"„Android“ programa"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Failas"</string>

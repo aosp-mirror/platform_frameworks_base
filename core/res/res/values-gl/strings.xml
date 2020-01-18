@@ -287,7 +287,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceder ao teu calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar e consultar mensaxes de SMS"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Almacenamento"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Ficheiros e contido multimedia"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"acceder a fotos, contido multimedia e ficheiros no teu dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micrófono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"gravar audio"</string>
@@ -313,6 +313,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Podes tocar, pasar o dedo, beliscar e realizar outros xestos."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Xestos de impresión dixital"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Pode rexistrar os xestos realizados no sensor de impresión dixital do dispositivo."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Facer captura de pantalla"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pode facer capturas de pantalla."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar ou modificar a barra de estado"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite á aplicación desactivar a barra de estado ou engadir e eliminar as iconas do sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"actuar como a barra de estado"</string>
@@ -1610,6 +1612,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Queres subir o volume máis do nivel recomendado?\n\nA reprodución de son a un volume elevado durante moito tempo pode provocar danos nos oídos."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Queres utilizar o atallo de accesibilidade?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Cando o atallo está activado, podes premer os dous botóns de volume durante 3 segundos para iniciar unha función de accesibilidade.\n\n Función de accesibilidade actual:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Podes cambiar a función en Configuración &gt; Accesibilidade."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Baleirar"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar atallos"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Cancelar"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactivar atallo"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar atallo"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversión de cor"</string>
@@ -1845,6 +1850,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Activar o perfil de traballo?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Activaranse as túas aplicacións de traballo, as notificacións, os datos e outras funcións do perfil de traballo"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activar"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"A aplicación non está dispoñible"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"A aplicación <xliff:g id="APP_NAME">%1$s</xliff:g> non está dispoñible neste momento."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Esta aplicación deseñouse para unha versión anterior de Android e quizais non funcione correctamente. Proba a buscar actualizacións ou contacta co programador."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Buscar actualización"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tes mensaxes novas"</string>
@@ -1955,13 +1962,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"A batería pode esgotarse antes do habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Para ampliar a duración da batería activouse a función Aforro de batería"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Aforro de batería"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"A función Aforro de batería non se activará de novo ata que volva quedar pouca batería"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"A batería cargouse ata un nivel suficiente. A función Aforro de batería non se activará de novo ata que volva quedar pouca batería."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Nivel de batería do teléfono: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Nivel de batería da tableta: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Nivel de batería do dispositivo: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"A función Aforro de batería está desactivada. Xa non se restrinxirá ningunha función."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Desactivouse a función Aforro de batería. Xa non se restrinxirá ningunha función."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Desactivouse a función Aforro de batería."</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"O teléfono non ten suficiente batería. Xa non se restrinxirán as funcións."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"A tableta non ten suficiente batería. Xa non se restrinxirán as funcións."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"O dispositivo non ten suficiente batería. Xa non se restrinxirán as funcións."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Cartafol"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Aplicación Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Ficheiro"</string>

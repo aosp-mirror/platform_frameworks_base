@@ -287,7 +287,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accedere al calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"inviare e visualizzare SMS"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Archiviazione"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"File e contenuti multimediali"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"accedere a foto, contenuti multimediali e file sul dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"registrare audio"</string>
@@ -313,6 +313,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Consente di toccare, far scorrere, pizzicare ed eseguire altri gesti."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gesti con sensore di impronte"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"È in grado di rilevare i gesti compiuti con il sensore di impronte dei dispositivi."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Acquisire screenshot"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Può acquisire uno screenshot del display."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"disattivazione o modifica della barra di stato"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Consente all\'applicazione di disattivare la barra di stato o di aggiungere e rimuovere icone di sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ruolo di barra di stato"</string>
@@ -1610,6 +1612,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vuoi aumentare il volume oltre il livello consigliato?\n\nL\'ascolto ad alto volume per lunghi periodi di tempo potrebbe danneggiare l\'udito."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Usare la scorciatoia Accessibilità?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Quando la scorciatoia è attiva, puoi premere entrambi i pulsanti del volume per tre secondi per avviare una funzione di accessibilità.\n\n Funzione di accessibilità corrente:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Puoi cambiare la funzione in Impostazioni &gt; Accessibilità."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Svuota"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Modifica scorciatoie"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Annulla"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Disattiva scorciatoia"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Usa scorciatoia"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversione colori"</string>
@@ -1845,6 +1850,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Attivare il profilo di lavoro?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Le tue app di lavoro, le notifiche, i dati e altri elementi del profilo di lavoro saranno attivati."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Attiva"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"L\'app non è disponibile"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> non è al momento disponibile."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Questa app è stata realizzata per una versione precedente di Android e potrebbe non funzionare correttamente. Prova a verificare la disponibilità di aggiornamenti o contatta lo sviluppatore."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Verifica la presenza di aggiornamenti"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Hai nuovi messaggi"</string>
@@ -1955,13 +1962,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"La batteria potrebbe esaurirsi prima della ricarica abituale"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Risparmio energetico attivo per far durare di più la batteria"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Risparmio energetico"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Risparmio energetico non si riattiverà finché la batteria non raggiungerà nuovamente un livello di carica basso"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"La batteria ha raggiunto un livello di carica sufficiente. Risparmio energetico non si riattiverà finché la batteria non raggiungerà nuovamente un livello di carica basso"</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Livello di carica del telefono: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Livello di carica del tablet: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Livello di carica del dispositivo: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Il risparmio energetico è disattivato. Funzionalità non più limitate."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Risparmio energetico disattivato. Funzionalità non più limitate."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Risparmio energetico disattivato"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Il telefono ha carica sufficiente. Funzionalità non più limitate."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Il tablet ha carica sufficiente. Funzionalità non più limitate."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Il dispositivo ha carica sufficiente. Funzionalità non più limitate."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Cartella"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Applicazione Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"File"</string>

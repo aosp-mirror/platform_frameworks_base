@@ -299,7 +299,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"الوصول تقويمك"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"التخزين"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"الوصول إلى الصور والوسائط والملفات على جهازك"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"الميكروفون"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"تسجيل الصوت"</string>
@@ -322,9 +323,13 @@
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"التحكم في تكبير الشاشة"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"يمكنك التحكّم في مستوى تكبير/تصغير الشاشة وتحديد الموضع."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"تنفيذ إيماءات"</string>
-    <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"يمكن النقر والتمرير بسرعة والتصغير وتنفيذ إيماءات أخرى."</string>
+    <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"يمكن النقر والتمرير بسرعة والتصغير أو التكبير بإصبعين وتنفيذ إيماءات أخرى."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"إيماءات بصمات الإصبع"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"يمكن أن تلتقط الإيماءات التي تم تنفيذها على جهاز استشعار بصمات الإصبع في الجهاز."</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"إيقاف شريط الحالة أو تعديله"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"للسماح للتطبيق بإيقاف شريط الحالة أو إضافة رموز نظام وإزالتها."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"العمل كشريط للحالة"</string>
@@ -658,13 +663,13 @@
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"للسماح للمالك ببدء استخدام الإذن لأحد التطبيقات. ولن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"تعيين قواعد كلمة المرور"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"للتحكم في الطول والأحرف المسموح بها في كلمات المرور وأرقام التعريف الشخصي في قفل الشاشة."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"مراقبة محاولات إلغاء قفل الشاشة"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"لمراقبة عدد مرات كتابة كلمات المرور غير الصحيحة عند إلغاء تأمين الشاشة وتأمين الجهاز اللوحي أو مسح جميع بياناته في حالة كتابة الكثير من كلمات المرور غير الصحيحة."</string>
-    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"‏يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء قفل الشاشة، وقفل جهاز Android TV أو محو جميع بيانات جهاز Android TV إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء تأمين الشاشة، وتأمين الهاتف ومحو جميع بياناته إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء تأمين الشاشة، وتأمين الجهاز اللوحي ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"‏يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء قفل الشاشة، وقفل جهاز Android TV أو محو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء تأمين الشاشة، وتأمين الهاتف ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"مراقبة محاولات فتح قفل الشاشة"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"لمراقبة عدد مرات كتابة كلمات المرور غير الصحيحة عند فتح قفل الشاشة وتأمين الجهاز اللوحي أو مسح جميع بياناته في حالة كتابة الكثير من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"‏يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وقفل جهاز Android TV أو محو جميع بيانات جهاز Android TV إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين الهاتف ومحو جميع بياناته إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين الجهاز اللوحي ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"‏يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وقفل جهاز Android TV أو محو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين الهاتف ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"تغيير قفل الشاشة"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"إمكانية تغيير قفل الشاشة"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"قفل الشاشة"</string>
@@ -821,7 +826,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"صحيح!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"أعد المحاولة"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"أعد المحاولة"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"إلغاء قفل جميع الميزات والبيانات"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"فتح قفل جميع الميزات والبيانات"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"تم تجاوز الحد الأقصى لعدد محاولات تأمين الجهاز بالوجه"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"‏ليست هناك شريحة SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"‏ليس هناك شريحة SIM في الجهاز اللوحي."</string>
@@ -843,22 +848,22 @@
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"‏شريحة SIM مؤمّنة بكود PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"راجع دليل المستخدم أو اتصل بخدمة العملاء."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"‏شريحة SIM مؤمّنة."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"‏جارٍ إلغاء تأمين شريحة SIM…"</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"‏جارٍ فتح قفل شريحة SIM…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"لقد رسمت نقش فتح القفل بطريقة غير صحيحة <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة.\n\nيُرجى إعادة المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"لقد كتبت كلمة المرور <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة بشكل غير صحيح. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"‏لقد كتبت رمز PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة بشكل غير صحيح. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"‏لقد رسمت نقش فتح القفل بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات تسجيل الدخول إلى Google.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"‏لقد رسمت نقش فتح القفل بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء<xliff:g id="NUMBER_1">%2$d</xliff:g> محاولة أخرى غير ناجحة، ستُطالب بإلغاء قفل جهاز Android TV باستخدام معلومات تسجيل الدخول إلى Google.\n\n يُرجى إعادة المحاولة بعد <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"‏لقد رسمت نقش فتح القفل بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام معلومات تسجيل الدخول إلى Google.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"لقد حاولت إلغاء تأمين الجهاز اللوحي <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الجهاز اللوحي إلى الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"‏لقد حاولت إلغاء قفل جهاز Android TV بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> محاولة أخرى غير ناجحة، ستتم إعادة ضبط جهاز Android TV على الإعداد التلقائي للمصنع وسيتم فقدان جميع بيانات المستخدمين."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"لقد حاولت إلغاء تأمين الهاتف <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الهاتف إلى الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"لقد حاولت إلغاء تأمين الجهاز اللوحي <xliff:g id="NUMBER">%d</xliff:g> من المرات بشكل غير صحيح. سيتم الآن إعادة تعيين الجهاز اللوحي إلى الإعدادات الأساسية."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"‏لقد حاولت إلغاء قفل جهاز Android TV بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. ستتم الآن إعادة ضبط جهاز Android TV على الإعداد التلقائي للمصنع."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"لقد حاولت إلغاء تأمين الهاتف <xliff:g id="NUMBER">%d</xliff:g> من المرات بشكل غير صحيح. سيتم الآن إعادة تعيين الهاتف إلى الإعدادات الأساسية."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"لقد حاولت فتح قفل الجهاز اللوحي <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الجهاز اللوحي إلى الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"‏لقد حاولت فتح قفل جهاز Android TV بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> محاولة أخرى غير ناجحة، ستتم إعادة ضبط جهاز Android TV على الإعداد التلقائي للمصنع وسيتم فقدان جميع بيانات المستخدمين."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"لقد حاولت فتح قفل الهاتف <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الهاتف إلى الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"لقد حاولت فتح قفل الجهاز اللوحي <xliff:g id="NUMBER">%d</xliff:g> من المرات بشكل غير صحيح. سيتم الآن إعادة تعيين الجهاز اللوحي إلى الإعدادات الأساسية."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"‏لقد حاولت فتح قفل جهاز Android TV بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. ستتم الآن إعادة ضبط جهاز Android TV على الإعداد التلقائي للمصنع."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"لقد حاولت فتح قفل الهاتف <xliff:g id="NUMBER">%d</xliff:g> من المرات بشكل غير صحيح. سيتم الآن إعادة تعيين الهاتف إلى الإعدادات الأساسية."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"حاول مرة أخرى خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"هل نسيت النمط؟"</string>
-    <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"إلغاء تأمين الحساب"</string>
+    <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"فتح قفل الحساب"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"محاولات النقش كثيرة جدًا"</string>
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"‏لإلغاء التأمين، سجّل الدخول بحسابك في Google."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"اسم المستخدم (البريد إلكتروني)"</string>
@@ -867,7 +872,7 @@
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"اسم المستخدم غير صحيح أو كلمة المرور غير صحيحة."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"‏هل نسيت اسم المستخدم أو كلمة المرور؟\nانتقل إلى "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"جارٍ التحقق..."</string>
-    <string name="lockscreen_unlock_label" msgid="4648257878373307582">"إلغاء تأمين"</string>
+    <string name="lockscreen_unlock_label" msgid="4648257878373307582">"فتح قفل"</string>
     <string name="lockscreen_sound_on_label" msgid="1660281470535492430">"تشغيل الصوت"</string>
     <string name="lockscreen_sound_off_label" msgid="2331496559245450053">"الصوت متوقف"</string>
     <string name="lockscreen_access_pattern_start" msgid="3778502525702613399">"بدأ النمط"</string>
@@ -879,8 +884,8 @@
     <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"‏%1$s. الأداة %2$d من %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"إضافة أداة."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"فارغة"</string>
-    <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"تم توسيع منطقة إلغاء القفل."</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"تم تصغير منطقة إلغاء القفل."</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"تم توسيع منطقة فتح القفل."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"تم تصغير منطقة فتح القفل."</string>
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"أداة <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"محدد المستخدم"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"الحالة"</string>
@@ -889,14 +894,14 @@
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"بدأت إعادة ترتيب الأدوات."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"انتهت إعادة ترتيب الأدوات."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"تم حذف أداة <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
-    <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"توسيع منطقة إلغاء القفل."</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"إلغاء القفل باستخدام التمرير."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"إلغاء القفل باستخدام النقش."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"توسيع منطقة فتح القفل."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"فتح القفل باستخدام التمرير."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"فتح القفل باستخدام النقش."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"تأمين الجهاز بالوجه."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"‏إلغاء القفل باستخدام رمز PIN."</string>
-    <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"‏إلغاء قفل رقم التعريف الشخصي لشريحة SIM."</string>
-    <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"‏إلغاء قفل مفتاح PUK لشريحة SIM."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="6130186108581153265">"إلغاء القفل باستخدام كلمة المرور."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"‏فتح القفل باستخدام رمز PIN."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"‏فتح قفل رقم التعريف الشخصي لشريحة SIM."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"‏فتح قفل مفتاح PUK لشريحة SIM."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="6130186108581153265">"فتح القفل باستخدام كلمة المرور."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="1419570880512350689">"منطقة النقش."</string>
     <string name="keyguard_accessibility_slide_area" msgid="4331399051142520176">"منطقة التمرير."</string>
     <string name="password_keyboard_label_symbol_key" msgid="2716255580853511949">"?123"</string>
@@ -1388,7 +1393,7 @@
     <string name="adb_active_notification_message" msgid="5617264033476778211">"‏انقر لإيقاف تصحيح أخطاء الجهاز عبر USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"‏اختيار إيقاف تصحيح أخطاء USB."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"تم تفعيل وضع \"مفعّل الاختبار\""</string>
-    <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"يمكنك إجراء إعادة ضبط على إعدادات المصنع لإيقاف وضع \"مفعِّل اختبار\"."</string>
+    <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"يمكنك إجراء إعادة ضبط على الإعدادات الأصلية لإيقاف وضع \"مفعِّل اختبار\"."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"وحدة التحكّم التسلسلية مفعّلة"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"الأداء متأثر. لإيقاف وحدة التحكّم، تحقّق من برنامج الإقلاع."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"‏السوائل والشوائب في منفذ USB"</string>
@@ -1398,7 +1403,7 @@
     <string name="taking_remote_bugreport_notification_title" msgid="1582531382166919850">"جارٍ الحصول على تقرير الخطأ…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="6708897723753334999">"هل تريد مشاركة تقرير الخطأ؟"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="3077385149217638550">"جارٍ مشاركة تقرير الخطأ…"</string>
-    <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"طلب المشرف الحصول على تقرير خطأ للمساعدة في تحرِّي مشكلة هذا الجهاز وإصلاحها؛ ويمكن أن تتم مشاركة التطبيقات والبيانات."</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"طلب المشرف الحصول على تقرير خطأ للمساعدة في تحديد مشكلة هذا الجهاز وحلّها؛ ويمكن أن تتم مشاركة التطبيقات والبيانات."</string>
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"مشاركة"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"رفض"</string>
     <string name="select_input_method" msgid="3971267998568587025">"اختيار أسلوب الإدخال"</string>
@@ -1464,7 +1469,7 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"للسماح لتطبيق ما بطلب حذف الحِزم."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"طلب تجاهل تحسينات البطارية"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"للسماح للتطبيق بطلب الإذن لتجاهل تحسينات البطارية في هذا التطبيق."</string>
-    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"اضغط مرتين للتحكم في التكبير/التصغير"</string>
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"اضغط مرتين للتحكم في التكبير أو التصغير"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"تعذرت إضافة أداة."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"تنفيذ"</string>
     <string name="ime_action_search" msgid="4501435960587287668">"بحث"</string>
@@ -1667,7 +1672,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"‏شريحة SIM غير مفعّلة الآن. أدخل رمز PUK للمتابعة. اتصل بمشغل شبكة الجوال للاطلاع على التفاصيل."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"‏إدخال رمز رمز PIN المراد"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"‏تأكيد رمز رمز PIN المراد"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"‏جارٍ إلغاء تأمين شريحة SIM…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"‏جارٍ فتح قفل شريحة SIM…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"‏رمز PIN غير صحيح."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"اكتب  رقم التعريف الشخصي المكون من ٤ إلى ٨ أرقام."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"‏يجب أن يتكون رمز PUK من ۸ أرقام."</string>
@@ -1684,12 +1689,12 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"‏لقد كتبت رمز PIN بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"لقد كتبت كلمة المرور بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"لقد رسمت نقش فتح القفل بطريقة غير صحيحة <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"لقد حاولت إلغاء تأمين الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الجهاز اللوحي على الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"‏لقد حاولت إلغاء قفل جهاز Android TV بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> محاولة أخرى غير ناجحة، ستتم إعادة ضبط جهاز Android TV على الإعداد التلقائي للمصنع وسيتم فقدان جميع بيانات المستخدمين."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"لقد حاولت إلغاء تأمين الهاتف بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الهاتف على الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"لقد حاولت إلغاء تأمين الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الجهاز اللوحي على الإعدادات الأساسية."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"‏لقد حاولت إلغاء قفل جهاز Android TV بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. ستتم الآن إعادة ضبط جهاز Android TV على الإعداد التلقائي للمصنع."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"لقد حاولت إلغاء تأمين الهاتف بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الهاتف على الإعدادات الأساسية."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"لقد حاولت فتح قفل الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الجهاز اللوحي على الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"‏لقد حاولت فتح قفل جهاز Android TV بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> محاولة أخرى غير ناجحة، ستتم إعادة ضبط جهاز Android TV على الإعداد التلقائي للمصنع وسيتم فقدان جميع بيانات المستخدمين."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"لقد حاولت فتح قفل الهاتف بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الهاتف على الإعدادات الأساسية وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"لقد حاولت فتح قفل الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الجهاز اللوحي على الإعدادات الأساسية."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"‏لقد حاولت فتح قفل جهاز Android TV بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. ستتم الآن إعادة ضبط جهاز Android TV على الإعداد التلقائي للمصنع."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"لقد حاولت فتح قفل الهاتف بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الهاتف على الإعدادات الأساسية."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"لقد رسمت نقش فتح القفل بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستطالَب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات حساب بريد إلكتروني.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"‏لقد رسمت نقش فتح القفل بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> محاولة أخرى غير ناجحة، ستُطالب بإلغاء قفل جهاز Android TV باستخدام حساب بريد إلكتروني.\n\n يُرجى إعادة المحاولة بعد <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"لقد رسمت نقش فتح القفل بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
@@ -1698,6 +1703,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"هل تريد رفع مستوى الصوت فوق المستوى الموصى به؟\n\nقد يضر سماع صوت عالٍ لفترات طويلة بسمعك."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"هل تريد استخدام اختصار \"سهولة الاستخدام\"؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"عند تشغيل الاختصار، يؤدي الضغط على زرّي مستوى الصوت لمدة 3 ثوانٍ إلى تفعيل ميزة \"سهولة الاستخدام\".\n\n ميزة \"سهولة الاستخدام\" الحالية:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n يمكنك تغيير الميزة من \"الإعدادات\" &gt; \"سهولة الاستخدام\"."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"فارغ"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"تعديل الاختصارات"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"إلغاء"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"إيقاف الاختصار"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"استخدام الاختصار"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"عكس الألوان"</string>
@@ -1973,6 +1981,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"تفعيل الملف الشخصي للعمل؟"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"سيتم تفعيل تطبيقات العمل التي تستخدمها والإشعارات والبيانات وغيرها من ميزات الملف الشخصي للعمل"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"تشغيل"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏تمّ إنشاء هذا التطبيق لإصدار قديم من Android وقد لا يعمل بشكل صحيح. جرِّب البحث عن تحديثات أو الاتصال بمطوّر البرامج."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"البحث عن تحديث"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"لديك رسائل جديدة"</string>
@@ -2035,7 +2047,7 @@
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ليس الآن"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"أبدًا"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"تعديل"</string>
-    <string name="autofill_continue_yes" msgid="7914985605534510385">"متابعة"</string>
+    <string name="autofill_continue_yes" msgid="7914985605534510385">"مواصلة"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"كلمة مرور"</string>
     <string name="autofill_save_type_address" msgid="3111006395818252885">"عنوان"</string>
     <string name="autofill_save_type_credit_card" msgid="3583795235862046693">"بطاقة ائتمان"</string>
@@ -2087,13 +2099,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"قد تنفد طاقة البطارية قبل الشحن المعتاد"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"تم تفعيل \"توفير شحن البطارية\" لإطالة عمرها."</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"توفير شحن البطارية"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"لن يتم تفعيل ميزة \"توفير شحن البطارية\" مرة أخرى حتى تنخفض طاقة البطارية مرة أخرى."</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"وصل شحن البطارية إلى مستوى كافٍ. لن يتم تفعيل ميزة \"توفير شحن البطارية\" حتى تنخفض طاقة البطارية مرة أخرى."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"وصل مستوى شحن الهاتف إلى <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"وصل مستوى شحن الجهاز اللوحي إلى <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"وصل مستوى شحن الجهاز إلى <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"توفير شحن البطارية لا يعمل. لم تعُد الميزات مقيّدة."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"تم تفعيل \"توفير شحن البطارية\". لم تعُد الميزات مقيّدة."</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"مجلّد"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"‏تطبيق Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ملف"</string>

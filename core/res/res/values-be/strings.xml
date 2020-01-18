@@ -293,7 +293,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"атрымліваць доступ да вашага календара"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"адпраўляць і праглядаць SMS-паведамленні"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Сховішча"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"атрымліваць доступ да фатаграфій, медыяфайлаў і файлаў на вашай прыладзе"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Мікрафон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"запісваць аўдыя"</string>
@@ -319,6 +320,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Можна кранаць, праводзіць пальцам, маштабаваць шчыпком, а таксама выконваць іншыя жэсты."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Жэсты на сканеры адбіткаў пальцаў"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Можа распазнаваць жэсты на сканеры адбіткаў пальцаў прылады."</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"адключаць ці змяняць радок стану"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Дазваляе прыкладанням адключаць радок стану або дадаваць і выдаляць сістэмныя значкі."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"быць панэллю стану"</string>
@@ -1654,6 +1659,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Павялiчыць гук вышэй рэкамендаванага ўзроўню?\n\nДоўгае праслухоўванне музыкi на вялiкай гучнасцi можа пашкодзiць ваш слых."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Выкарыстоўваць камбінацыю хуткага доступу для спецыяльных магчымасцей?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Калі камбінацыя хуткага доступу ўключана, вы можаце націснуць абедзве кнопкі гучнасці і ўтрымліваць іх 3 секунды, каб уключыць функцыю спецыяльных магчымасцей.\n\n Бягучая функцыя спецыяльных магчымасцей:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Вы можаце змяніць гэту функцыю ў меню \"Налады &gt; Спецыяльныя магчымасці\"."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Пуста"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Змяніць ярлыкі"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Скасаваць"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Дэактываваць камбінацыю хуткага доступу"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Выкарыстоўваць камбінацыю хуткага доступу"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія колеру"</string>
@@ -1909,6 +1917,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Уключыць працоўны профіль?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Будуць уключаны вашы рабочыя праграмы, апавяшчэнні, даныя і іншыя функцыі працоўнага профілю"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Уключыць"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Гэта праграма была створана для больш старой версіі Android і можа не працаваць належным чынам. Праверце наяўнасць абнаўленняў або звярніцеся да распрацоўшчыка."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Праверыць на наяўнасць абнаўленняў"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"У вас ёсць новыя паведамленні"</string>
@@ -2021,13 +2033,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятар можа разрадзіцца хутчэй, чым прыйдзе час звычайнай зарадкі"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Каб павялічыць тэрмін работы акумулятара, уключаны рэжым эканоміі зараду"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Эканомія зараду"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Рэжым эканоміі зараду ўключыцца зноў, калі ў акумулятара будзе нізкі зарад"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Акумулятар зараджаны да дастатковага ўзроўню. Рэжым эканоміі зараду ўключыцца зноў, калі ў акумулятара будзе нізкі зарад."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Узровень зараду тэлефона: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Узровень зараду планшэта: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Узровень зараду прылады: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Рэжым эканоміі зараду выключаны. Функцыі больш не абмежаваны."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Рэжым эканоміі зараду выключаны. Функцыі больш не абмежаваны."</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"Папка"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Праграма Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Файл"</string>
