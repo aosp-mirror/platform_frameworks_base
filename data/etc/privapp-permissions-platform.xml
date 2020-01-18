@@ -50,6 +50,7 @@ applications that come with the platform
         <permission name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
         <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
+        <permission name="android.permission.STATUS_BAR"/>
         <permission name="android.permission.STOP_APP_SWITCHES"/>
         <permission name="com.android.voicemail.permission.READ_VOICEMAIL"/>
         <permission name="com.android.voicemail.permission.WRITE_VOICEMAIL"/>
