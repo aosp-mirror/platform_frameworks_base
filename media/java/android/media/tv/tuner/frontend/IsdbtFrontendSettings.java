@@ -19,17 +19,21 @@ package android.media.tv.tuner.frontend;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerUtils;
+import android.media.tv.tuner.frontend.DvbtFrontendSettings.CodeRate;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
  * Frontend settings for ISDBT.
+ *
  * @hide
  */
+@SystemApi
 public class IsdbtFrontendSettings extends FrontendSettings {
     /** @hide */
     @IntDef(flag = true,
@@ -125,16 +129,18 @@ public class IsdbtFrontendSettings extends FrontendSettings {
 
     private final int mModulation;
     private final int mBandwidth;
-    private final int mCoderate;
+    private final int mMode;
+    private final int mCodeRate;
     private final int mGuardInterval;
     private final int mServiceAreaId;
 
-    private IsdbtFrontendSettings(int frequency, int modulation, int bandwidth, int coderate,
-            int guardInterval, int serviceAreaId) {
+    private IsdbtFrontendSettings(int frequency, int modulation, int bandwidth, int mode,
+            int codeRate, int guardInterval, int serviceAreaId) {
         super(frequency);
         mModulation = modulation;
         mBandwidth = bandwidth;
-        mCoderate = coderate;
+        mMode = mode;
+        mCodeRate = codeRate;
         mGuardInterval = guardInterval;
         mServiceAreaId = serviceAreaId;
     }
@@ -154,11 +160,18 @@ public class IsdbtFrontendSettings extends FrontendSettings {
         return mBandwidth;
     }
     /**
+     * Gets ISDBT mode.
+     */
+    @Mode
+    public int getMode() {
+        return mMode;
+    }
+    /**
      * Gets Code rate.
      */
-    @DvbtFrontendSettings.Coderate
-    public int getCoderate() {
-        return mCoderate;
+    @CodeRate
+    public int getCodeRate() {
+        return mCodeRate;
     }
     /**
      * Gets Guard Interval.
@@ -192,7 +205,8 @@ public class IsdbtFrontendSettings extends FrontendSettings {
     public static class Builder extends FrontendSettings.Builder<Builder> {
         private int mModulation;
         private int mBandwidth;
-        private int mCoderate;
+        private int mMode;
+        private int mCodeRate;
         private int mGuardInterval;
         private int mServiceAreaId;
 
@@ -216,11 +230,19 @@ public class IsdbtFrontendSettings extends FrontendSettings {
             return this;
         }
         /**
+         * Sets ISDBT mode.
+         */
+        @NonNull
+        public Builder setMode(@Mode int mode) {
+            mMode = mode;
+            return this;
+        }
+        /**
          * Sets Code rate.
          */
         @NonNull
-        public Builder setCoderate(@DvbtFrontendSettings.Coderate int coderate) {
-            mCoderate = coderate;
+        public Builder setCodeRate(@CodeRate int codeRate) {
+            mCodeRate = codeRate;
             return this;
         }
         /**
@@ -245,8 +267,8 @@ public class IsdbtFrontendSettings extends FrontendSettings {
          */
         @NonNull
         public IsdbtFrontendSettings build() {
-            return new IsdbtFrontendSettings(
-                    mFrequency, mModulation, mBandwidth, mCoderate, mGuardInterval, mServiceAreaId);
+            return new IsdbtFrontendSettings(mFrequency, mModulation, mBandwidth, mMode, mCodeRate,
+                    mGuardInterval, mServiceAreaId);
         }
 
         @Override

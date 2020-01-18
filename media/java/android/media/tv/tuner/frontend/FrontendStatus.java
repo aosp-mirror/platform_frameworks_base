@@ -18,6 +18,7 @@ package android.media.tv.tuner.frontend;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.Lnb;
 import android.media.tv.tuner.TunerConstants.FrontendInnerFec;
@@ -27,10 +28,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Frontend status
+ * Frontend status.
  *
  * @hide
  */
+@SystemApi
 public class FrontendStatus {
 
     /** @hide */

@@ -16,12 +16,15 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.SystemApi;
 import android.media.tv.tuner.TunerConstants.FrontendInnerFec;
 
 /**
  * DVBC Capabilities.
+ *
  * @hide
  */
+@SystemApi
 public class DvbcFrontendCapabilities extends FrontendCapabilities {
     private final int mModulationCap;
     private final int mFecCap;

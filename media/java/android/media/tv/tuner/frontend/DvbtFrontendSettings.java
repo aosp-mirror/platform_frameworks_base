@@ -19,6 +19,7 @@ package android.media.tv.tuner.frontend;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerUtils;
@@ -28,8 +29,10 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Frontend settings for DVBT.
+ *
  * @hide
  */
+@SystemApi
 public class DvbtFrontendSettings extends FrontendSettings {
 
     /** @hide */
@@ -220,7 +223,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
             value = {CODERATE_UNDEFINED, CODERATE_AUTO, CODERATE_1_2, CODERATE_2_3, CODERATE_3_4,
             CODERATE_5_6, CODERATE_7_8, CODERATE_3_5, CODERATE_4_5, CODERATE_6_7, CODERATE_8_9})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface Coderate {}
+    public @interface CodeRate {}
 
     /**
      * Code rate undefined.
@@ -371,8 +374,8 @@ public class DvbtFrontendSettings extends FrontendSettings {
     private final int mBandwidth;
     private final int mConstellation;
     private final int mHierarchy;
-    private final int mHpCoderate;
-    private final int mLpCoderate;
+    private final int mHpCodeRate;
+    private final int mLpCodeRate;
     private final int mGuardInterval;
     private final boolean mIsHighPriority;
     private final int mStandard;
@@ -382,7 +385,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
     private final int mPlpGroupId;
 
     private DvbtFrontendSettings(int frequency, int transmissionMode, int bandwidth,
-            int constellation, int hierarchy, int hpCoderate, int lpCoderate, int guardInterval,
+            int constellation, int hierarchy, int hpCodeRate, int lpCodeRate, int guardInterval,
             boolean isHighPriority, int standard, boolean isMiso, int plpMode, int plpId,
             int plpGroupId) {
         super(frequency);
@@ -390,8 +393,8 @@ public class DvbtFrontendSettings extends FrontendSettings {
         mBandwidth = bandwidth;
         mConstellation = constellation;
         mHierarchy = hierarchy;
-        mHpCoderate = hpCoderate;
-        mLpCoderate = lpCoderate;
+        mHpCodeRate = hpCodeRate;
+        mLpCodeRate = lpCodeRate;
         mGuardInterval = guardInterval;
         mIsHighPriority = isHighPriority;
         mStandard = standard;
@@ -432,16 +435,16 @@ public class DvbtFrontendSettings extends FrontendSettings {
     /**
      * Gets Code Rate for High Priority level.
      */
-    @Coderate
-    public int getHpCoderate() {
-        return mHpCoderate;
+    @CodeRate
+    public int getHpCodeRate() {
+        return mHpCodeRate;
     }
     /**
      * Gets Code Rate for Low Priority level.
      */
-    @Coderate
-    public int getLpCoderate() {
-        return mLpCoderate;
+    @CodeRate
+    public int getLpCodeRate() {
+        return mLpCodeRate;
     }
     /**
      * Gets Guard Interval.
@@ -509,8 +512,8 @@ public class DvbtFrontendSettings extends FrontendSettings {
         private int mBandwidth;
         private int mConstellation;
         private int mHierarchy;
-        private int mHpCoderate;
-        private int mLpCoderate;
+        private int mHpCodeRate;
+        private int mLpCodeRate;
         private int mGuardInterval;
         private boolean mIsHighPriority;
         private int mStandard;
@@ -558,16 +561,16 @@ public class DvbtFrontendSettings extends FrontendSettings {
          * Sets Code Rate for High Priority level.
          */
         @NonNull
-        public Builder setHpCoderate(@Coderate int hpCoderate) {
-            mHpCoderate = hpCoderate;
+        public Builder setHpCodeRate(@CodeRate int hpCodeRate) {
+            mHpCodeRate = hpCodeRate;
             return this;
         }
         /**
          * Sets Code Rate for Low Priority level.
          */
         @NonNull
-        public Builder setLpCoderate(@Coderate int lpCoderate) {
-            mLpCoderate = lpCoderate;
+        public Builder setLpCodeRate(@CodeRate int lpCodeRate) {
+            mLpCodeRate = lpCodeRate;
             return this;
         }
         /**
@@ -633,7 +636,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
         @NonNull
         public DvbtFrontendSettings build() {
             return new DvbtFrontendSettings(mFrequency, mTransmissionMode, mBandwidth,
-                    mConstellation, mHierarchy, mHpCoderate, mLpCoderate, mGuardInterval,
+                    mConstellation, mHierarchy, mHpCodeRate, mLpCodeRate, mGuardInterval,
                     mIsHighPriority, mStandard, mIsMiso, mPlpMode, mPlpId, mPlpGroupId);
         }
 

@@ -16,17 +16,22 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.SystemApi;
+import android.media.tv.tuner.frontend.Isdbs3FrontendSettings.CodeRate;
+
 /**
  * ISDBS-3 Capabilities.
+ *
  * @hide
  */
+@SystemApi
 public class Isdbs3FrontendCapabilities extends FrontendCapabilities {
     private final int mModulationCap;
-    private final int mCoderateCap;
+    private final int mCodeRateCap;
 
-    private Isdbs3FrontendCapabilities(int modulationCap, int coderateCap) {
+    private Isdbs3FrontendCapabilities(int modulationCap, int codeRateCap) {
         mModulationCap = modulationCap;
-        mCoderateCap = coderateCap;
+        mCodeRateCap = codeRateCap;
     }
 
     /**
@@ -39,8 +44,8 @@ public class Isdbs3FrontendCapabilities extends FrontendCapabilities {
     /**
      * Gets code rate capability.
      */
-    @Isdbs3FrontendSettings.Coderate
+    @CodeRate
     public int getCodeRateCapability() {
-        return mCoderateCap;
+        return mCodeRateCap;
     }
 }

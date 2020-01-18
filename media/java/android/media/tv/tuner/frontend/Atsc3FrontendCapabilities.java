@@ -16,10 +16,14 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.SystemApi;
+
 /**
  * ATSC-3 Capabilities.
+ *
  * @hide
  */
+@SystemApi
 public class Atsc3FrontendCapabilities extends FrontendCapabilities {
     private final int mBandwidthCap;
     private final int mModulationCap;
@@ -63,7 +67,7 @@ public class Atsc3FrontendCapabilities extends FrontendCapabilities {
      * Gets code rate capability.
      */
     @Atsc3FrontendSettings.CodeRate
-    public int getCodeRateCapability() {
+    public int getPlpCodeRateCapability() {
         return mCodeRateCap;
     }
     /**

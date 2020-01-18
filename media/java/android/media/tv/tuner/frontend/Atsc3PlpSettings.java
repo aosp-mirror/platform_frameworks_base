@@ -18,13 +18,16 @@ package android.media.tv.tuner.frontend;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.tuner.TunerUtils;
 
 /**
- * PLP settings for ATSC-3.
+ * Physical Layer Pipe (PLP) settings for ATSC-3.
+ *
  * @hide
  */
+@SystemApi
 public class Atsc3PlpSettings {
     private final int mPlpId;
     private final int mModulation;

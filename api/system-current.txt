@@ -5143,6 +5143,11 @@ package android.media.tv.tuner.filter {
 
 package android.media.tv.tuner.frontend {
 
+  public class AnalogFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
+    method public int getSifStandardCapability();
+    method public int getSignalTypeCapability();
+  }
+
   public class AnalogFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder builder(@NonNull android.content.Context);
     method public int getSifStandard();
@@ -5180,13 +5185,359 @@ package android.media.tv.tuner.frontend {
 
   public static class AnalogFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder> {
     method @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings build();
-    method @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder setASignalType(int);
     method @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder setSifStandard(int);
+    method @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder setSignalType(int);
+  }
+
+  public class Atsc3FrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
+    method public int getBandwidthCapability();
+    method public int getDemodOutputFormatCapability();
+    method public int getFecCapability();
+    method public int getModulationCapability();
+    method public int getPlpCodeRateCapability();
+    method public int getTimeInterleaveModeCapability();
+  }
+
+  public class Atsc3FrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder builder(@NonNull android.content.Context);
+    method public int getBandwidth();
+    method public int getDemodOutputFormat();
+    method @NonNull public android.media.tv.tuner.frontend.Atsc3PlpSettings[] getPlpSettings();
+    method public int getType();
+    field public static final int BANDWIDTH_AUTO = 1; // 0x1
+    field public static final int BANDWIDTH_BANDWIDTH_6MHZ = 2; // 0x2
+    field public static final int BANDWIDTH_BANDWIDTH_7MHZ = 4; // 0x4
+    field public static final int BANDWIDTH_BANDWIDTH_8MHZ = 8; // 0x8
+    field public static final int BANDWIDTH_UNDEFINED = 0; // 0x0
+    field public static final int CODERATE_10_15 = 512; // 0x200
+    field public static final int CODERATE_11_15 = 1024; // 0x400
+    field public static final int CODERATE_12_15 = 2048; // 0x800
+    field public static final int CODERATE_13_15 = 4096; // 0x1000
+    field public static final int CODERATE_2_15 = 2; // 0x2
+    field public static final int CODERATE_3_15 = 4; // 0x4
+    field public static final int CODERATE_4_15 = 8; // 0x8
+    field public static final int CODERATE_5_15 = 16; // 0x10
+    field public static final int CODERATE_6_15 = 32; // 0x20
+    field public static final int CODERATE_7_15 = 64; // 0x40
+    field public static final int CODERATE_8_15 = 128; // 0x80
+    field public static final int CODERATE_9_15 = 256; // 0x100
+    field public static final int CODERATE_AUTO = 1; // 0x1
+    field public static final int CODERATE_UNDEFINED = 0; // 0x0
+    field public static final int DEMOD_OUTPUT_FORMAT_ATSC3_LINKLAYER_PACKET = 1; // 0x1
+    field public static final int DEMOD_OUTPUT_FORMAT_BASEBAND_PACKET = 2; // 0x2
+    field public static final int DEMOD_OUTPUT_FORMAT_UNDEFINED = 0; // 0x0
+    field public static final int FEC_AUTO = 1; // 0x1
+    field public static final int FEC_BCH_LDPC_16K = 2; // 0x2
+    field public static final int FEC_BCH_LDPC_64K = 4; // 0x4
+    field public static final int FEC_CRC_LDPC_16K = 8; // 0x8
+    field public static final int FEC_CRC_LDPC_64K = 16; // 0x10
+    field public static final int FEC_LDPC_16K = 32; // 0x20
+    field public static final int FEC_LDPC_64K = 64; // 0x40
+    field public static final int FEC_UNDEFINED = 0; // 0x0
+    field public static final int MODULATION_AUTO = 1; // 0x1
+    field public static final int MODULATION_MOD_1024QAM = 32; // 0x20
+    field public static final int MODULATION_MOD_16QAM = 4; // 0x4
+    field public static final int MODULATION_MOD_256QAM = 16; // 0x10
+    field public static final int MODULATION_MOD_4096QAM = 64; // 0x40
+    field public static final int MODULATION_MOD_64QAM = 8; // 0x8
+    field public static final int MODULATION_MOD_QPSK = 2; // 0x2
+    field public static final int MODULATION_UNDEFINED = 0; // 0x0
+    field public static final int TIME_INTERLEAVE_MODE_AUTO = 1; // 0x1
+    field public static final int TIME_INTERLEAVE_MODE_CTI = 2; // 0x2
+    field public static final int TIME_INTERLEAVE_MODE_HTI = 4; // 0x4
+    field public static final int TIME_INTERLEAVE_MODE_UNDEFINED = 0; // 0x0
+  }
+
+  public static class Atsc3FrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder> {
+    method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings build();
+    method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setBandwidth(int);
+    method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setDemodOutputFormat(byte);
+    method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setPlpSettings(@NonNull android.media.tv.tuner.frontend.Atsc3PlpSettings[]);
   }
 
   public class Atsc3PlpInfo {
     method public boolean getLlsFlag();
     method public int getPlpId();
+  }
+
+  public class Atsc3PlpSettings {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.Atsc3PlpSettings.Builder builder(@NonNull android.content.Context);
+    method public int getCodeRate();
+    method public int getFec();
+    method public int getInterleaveMode();
+    method public int getModulation();
+    method public int getPlpId();
+  }
+
+  public static class Atsc3PlpSettings.Builder {
+    method @NonNull public android.media.tv.tuner.frontend.Atsc3PlpSettings build();
+    method @NonNull public android.media.tv.tuner.frontend.Atsc3PlpSettings.Builder setCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.Atsc3PlpSettings.Builder setFec(int);
+    method @NonNull public android.media.tv.tuner.frontend.Atsc3PlpSettings.Builder setInterleaveMode(int);
+    method @NonNull public android.media.tv.tuner.frontend.Atsc3PlpSettings.Builder setModulation(int);
+    method @NonNull public android.media.tv.tuner.frontend.Atsc3PlpSettings.Builder setPlpId(int);
+  }
+
+  public class AtscFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
+    method public int getModulationCapability();
+  }
+
+  public class AtscFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.AtscFrontendSettings.Builder builder(@NonNull android.content.Context);
+    method public int getModulation();
+    method public int getType();
+    field public static final int MODULATION_AUTO = 1; // 0x1
+    field public static final int MODULATION_MOD_16VSB = 8; // 0x8
+    field public static final int MODULATION_MOD_8VSB = 4; // 0x4
+    field public static final int MODULATION_UNDEFINED = 0; // 0x0
+  }
+
+  public static class AtscFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.AtscFrontendSettings.Builder> {
+    method @NonNull public android.media.tv.tuner.frontend.AtscFrontendSettings build();
+    method @NonNull public android.media.tv.tuner.frontend.AtscFrontendSettings.Builder setModulation(int);
+  }
+
+  public class DvbcFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
+    method public int getAnnexCapability();
+    method public int getFecCapability();
+    method public int getModulationCapability();
+  }
+
+  public class DvbcFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder builder(@NonNull android.content.Context);
+    method public byte getAnnex();
+    method public long getFec();
+    method public int getModulation();
+    method public int getOuterFec();
+    method public int getSpectralInversion();
+    method public int getSymbolRate();
+    method public int getType();
+    field public static final int ANNEX_A = 1; // 0x1
+    field public static final int ANNEX_B = 2; // 0x2
+    field public static final int ANNEX_C = 4; // 0x4
+    field public static final int ANNEX_UNDEFINED = 0; // 0x0
+    field public static final int MODULATION_AUTO = 1; // 0x1
+    field public static final int MODULATION_MOD_128QAM = 16; // 0x10
+    field public static final int MODULATION_MOD_16QAM = 2; // 0x2
+    field public static final int MODULATION_MOD_256QAM = 32; // 0x20
+    field public static final int MODULATION_MOD_32QAM = 4; // 0x4
+    field public static final int MODULATION_MOD_64QAM = 8; // 0x8
+    field public static final int MODULATION_UNDEFINED = 0; // 0x0
+    field public static final int OUTER_FEC_OUTER_FEC_NONE = 1; // 0x1
+    field public static final int OUTER_FEC_OUTER_FEC_RS = 2; // 0x2
+    field public static final int OUTER_FEC_UNDEFINED = 0; // 0x0
+    field public static final int SPECTRAL_INVERSION_INVERTED = 2; // 0x2
+    field public static final int SPECTRAL_INVERSION_NORMAL = 1; // 0x1
+    field public static final int SPECTRAL_INVERSION_UNDEFINED = 0; // 0x0
+  }
+
+  public static class DvbcFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder> {
+    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings build();
+    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setAnnex(byte);
+    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setFec(long);
+    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setModulation(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setOuterFec(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setSpectralInversion(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setSymbolRate(int);
+  }
+
+  public class DvbsCodeRate {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.DvbsCodeRate.Builder builder(@NonNull android.content.Context);
+    method public int getBitsPer1000Symbol();
+    method public long getInnerFec();
+    method public boolean isLinear();
+    method public boolean isShortFrameEnabled();
+  }
+
+  public static class DvbsCodeRate.Builder {
+    method @NonNull public android.media.tv.tuner.frontend.DvbsCodeRate build();
+    method @NonNull public android.media.tv.tuner.frontend.DvbsCodeRate.Builder setBitsPer1000Symbol(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbsCodeRate.Builder setInnerFec(long);
+    method @NonNull public android.media.tv.tuner.frontend.DvbsCodeRate.Builder setLinear(boolean);
+    method @NonNull public android.media.tv.tuner.frontend.DvbsCodeRate.Builder setShortFrameEnabled(boolean);
+  }
+
+  public class DvbsFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
+    method public long getInnerFecCapability();
+    method public int getModulationCapability();
+    method public int getStandardCapability();
+  }
+
+  public class DvbsFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder builder(@NonNull android.content.Context);
+    method @Nullable public android.media.tv.tuner.frontend.DvbsCodeRate getCodeRate();
+    method public int getInputStreamId();
+    method public int getModulation();
+    method public int getPilot();
+    method public int getRolloff();
+    method public int getStandard();
+    method public int getSymbolRate();
+    method public int getType();
+    method public int getVcmMode();
+    field public static final int MODULATION_AUTO = 1; // 0x1
+    field public static final int MODULATION_MOD_128APSK = 2048; // 0x800
+    field public static final int MODULATION_MOD_16APSK = 256; // 0x100
+    field public static final int MODULATION_MOD_16PSK = 16; // 0x10
+    field public static final int MODULATION_MOD_16QAM = 8; // 0x8
+    field public static final int MODULATION_MOD_256APSK = 4096; // 0x1000
+    field public static final int MODULATION_MOD_32APSK = 512; // 0x200
+    field public static final int MODULATION_MOD_32PSK = 32; // 0x20
+    field public static final int MODULATION_MOD_64APSK = 1024; // 0x400
+    field public static final int MODULATION_MOD_8APSK = 128; // 0x80
+    field public static final int MODULATION_MOD_8PSK = 4; // 0x4
+    field public static final int MODULATION_MOD_ACM = 64; // 0x40
+    field public static final int MODULATION_MOD_QPSK = 2; // 0x2
+    field public static final int MODULATION_MOD_RESERVED = 8192; // 0x2000
+    field public static final int MODULATION_UNDEFINED = 0; // 0x0
+    field public static final int PILOT_AUTO = 3; // 0x3
+    field public static final int PILOT_OFF = 2; // 0x2
+    field public static final int PILOT_ON = 1; // 0x1
+    field public static final int PILOT_UNDEFINED = 0; // 0x0
+    field public static final int ROLLOFF_0_10 = 5; // 0x5
+    field public static final int ROLLOFF_0_15 = 4; // 0x4
+    field public static final int ROLLOFF_0_20 = 3; // 0x3
+    field public static final int ROLLOFF_0_25 = 2; // 0x2
+    field public static final int ROLLOFF_0_35 = 1; // 0x1
+    field public static final int ROLLOFF_0_5 = 6; // 0x6
+    field public static final int ROLLOFF_UNDEFINED = 0; // 0x0
+    field public static final int STANDARD_AUTO = 1; // 0x1
+    field public static final int STANDARD_S = 2; // 0x2
+    field public static final int STANDARD_S2 = 4; // 0x4
+    field public static final int STANDARD_S2X = 8; // 0x8
+    field public static final int VCM_MODE_AUTO = 1; // 0x1
+    field public static final int VCM_MODE_MANUAL = 2; // 0x2
+    field public static final int VCM_MODE_UNDEFINED = 0; // 0x0
+  }
+
+  public static class DvbsFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder> {
+    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings build();
+    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setCodeRate(@Nullable android.media.tv.tuner.frontend.DvbsCodeRate);
+    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setInputStreamId(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setModulation(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setPilot(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setRolloff(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setStandard(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setSymbolRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setVcmMode(int);
+  }
+
+  public class DvbtFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
+    method public int getBandwidthCapability();
+    method public int getCodeRateCapability();
+    method public int getConstellationCapability();
+    method public int getGuardIntervalCapability();
+    method public int getHierarchyCapability();
+    method public int getTransmissionModeCapability();
+    method public boolean isMisoSupported();
+    method public boolean isT2Supported();
+  }
+
+  public class DvbtFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder builder(@NonNull android.content.Context);
+    method public int getBandwidth();
+    method public int getConstellation();
+    method public int getGuardInterval();
+    method public int getHierarchy();
+    method public int getHpCodeRate();
+    method public int getLpCodeRate();
+    method public int getPlpGroupId();
+    method public int getPlpId();
+    method public int getPlpMode();
+    method public int getStandard();
+    method public int getTransmissionMode();
+    method public int getType();
+    method public boolean isHighPriority();
+    method public boolean isMiso();
+    field public static final int BANDWIDTH_10MHZ = 64; // 0x40
+    field public static final int BANDWIDTH_1_7MHZ = 32; // 0x20
+    field public static final int BANDWIDTH_5MHZ = 16; // 0x10
+    field public static final int BANDWIDTH_6MHZ = 8; // 0x8
+    field public static final int BANDWIDTH_7MHZ = 4; // 0x4
+    field public static final int BANDWIDTH_8MHZ = 2; // 0x2
+    field public static final int BANDWIDTH_AUTO = 1; // 0x1
+    field public static final int BANDWIDTH_UNDEFINED = 0; // 0x0
+    field public static final int CODERATE_1_2 = 2; // 0x2
+    field public static final int CODERATE_2_3 = 4; // 0x4
+    field public static final int CODERATE_3_4 = 8; // 0x8
+    field public static final int CODERATE_3_5 = 64; // 0x40
+    field public static final int CODERATE_4_5 = 128; // 0x80
+    field public static final int CODERATE_5_6 = 16; // 0x10
+    field public static final int CODERATE_6_7 = 256; // 0x100
+    field public static final int CODERATE_7_8 = 32; // 0x20
+    field public static final int CODERATE_8_9 = 512; // 0x200
+    field public static final int CODERATE_AUTO = 1; // 0x1
+    field public static final int CODERATE_UNDEFINED = 0; // 0x0
+    field public static final int CONSTELLATION_AUTO = 1; // 0x1
+    field public static final int CONSTELLATION_CONSTELLATION_16QAM = 4; // 0x4
+    field public static final int CONSTELLATION_CONSTELLATION_256QAM = 16; // 0x10
+    field public static final int CONSTELLATION_CONSTELLATION_64QAM = 8; // 0x8
+    field public static final int CONSTELLATION_CONSTELLATION_QPSK = 2; // 0x2
+    field public static final int CONSTELLATION_UNDEFINED = 0; // 0x0
+    field public static final int GUARD_INTERVAL_AUTO = 1; // 0x1
+    field public static final int GUARD_INTERVAL_INTERVAL_19_128 = 64; // 0x40
+    field public static final int GUARD_INTERVAL_INTERVAL_19_256 = 128; // 0x80
+    field public static final int GUARD_INTERVAL_INTERVAL_1_128 = 32; // 0x20
+    field public static final int GUARD_INTERVAL_INTERVAL_1_16 = 4; // 0x4
+    field public static final int GUARD_INTERVAL_INTERVAL_1_32 = 2; // 0x2
+    field public static final int GUARD_INTERVAL_INTERVAL_1_4 = 16; // 0x10
+    field public static final int GUARD_INTERVAL_INTERVAL_1_8 = 8; // 0x8
+    field public static final int GUARD_INTERVAL_UNDEFINED = 0; // 0x0
+    field public static final int HIERARCHY_1_INDEPTH = 64; // 0x40
+    field public static final int HIERARCHY_1_NATIVE = 4; // 0x4
+    field public static final int HIERARCHY_2_INDEPTH = 128; // 0x80
+    field public static final int HIERARCHY_2_NATIVE = 8; // 0x8
+    field public static final int HIERARCHY_4_INDEPTH = 256; // 0x100
+    field public static final int HIERARCHY_4_NATIVE = 16; // 0x10
+    field public static final int HIERARCHY_AUTO = 1; // 0x1
+    field public static final int HIERARCHY_NON_INDEPTH = 32; // 0x20
+    field public static final int HIERARCHY_NON_NATIVE = 2; // 0x2
+    field public static final int HIERARCHY_UNDEFINED = 0; // 0x0
+    field public static final int PLP_MODE_AUTO = 1; // 0x1
+    field public static final int PLP_MODE_MANUAL = 2; // 0x2
+    field public static final int PLP_MODE_UNDEFINED = 0; // 0x0
+    field public static final int STANDARD_AUTO = 1; // 0x1
+    field public static final int STANDARD_T = 2; // 0x2
+    field public static final int STANDARD_T2 = 4; // 0x4
+    field public static final int TRANSMISSION_MODE_16K = 32; // 0x20
+    field public static final int TRANSMISSION_MODE_1K = 16; // 0x10
+    field public static final int TRANSMISSION_MODE_2K = 2; // 0x2
+    field public static final int TRANSMISSION_MODE_32K = 64; // 0x40
+    field public static final int TRANSMISSION_MODE_4K = 8; // 0x8
+    field public static final int TRANSMISSION_MODE_8K = 4; // 0x4
+    field public static final int TRANSMISSION_MODE_AUTO = 1; // 0x1
+    field public static final int TRANSMISSION_MODE_UNDEFINED = 0; // 0x0
+  }
+
+  public static class DvbtFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder> {
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings build();
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setBandwidth(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setConstellation(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setGuardInterval(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHierarchy(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHighPriority(boolean);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHpCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setLpCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setMiso(boolean);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setPlpGroupId(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setPlpId(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setPlpMode(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setStandard(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setTransmissionMode(int);
+  }
+
+  public abstract class FrontendCapabilities {
+    ctor public FrontendCapabilities();
+  }
+
+  public class FrontendInfo {
+    method public int getAcquireRange();
+    method public int getExclusiveGroupId();
+    method @NonNull public android.util.Range<java.lang.Integer> getFrequencyRange();
+    method @NonNull public android.media.tv.tuner.frontend.FrontendCapabilities getFrontendCapability();
+    method public int getId();
+    method @NonNull public int[] getStatusCapabilities();
+    method @NonNull public android.util.Range<java.lang.Integer> getSymbolRateRange();
+    method public int getType();
   }
 
   public abstract class FrontendSettings {
@@ -5206,6 +5557,200 @@ package android.media.tv.tuner.frontend {
 
   public abstract static class FrontendSettings.Builder<T extends android.media.tv.tuner.frontend.FrontendSettings.Builder<T>> {
     method @IntRange(from=1) @NonNull public T setFrequency(int);
+  }
+
+  public class FrontendStatus {
+    method public int getAgc();
+    method @NonNull public android.media.tv.tuner.frontend.FrontendStatus.Atsc3PlpInfo[] getAtsc3PlpInfo();
+    method public int getBer();
+    method public long getFec();
+    method public int getFreqOffset();
+    method public int getHierarchy();
+    method @NonNull public boolean[] getLayerErrors();
+    method public int getLberCn();
+    method public int getLnbVoltage();
+    method public int getMer();
+    method public int getModulation();
+    method public int getPer();
+    method public int getPerBer();
+    method public int getPlpId();
+    method public int getSignalQuality();
+    method public int getSignalStrength();
+    method public int getSnr();
+    method public int getSpectralInversion();
+    method public int getSymbolRate();
+    method public int getVberCn();
+    method public int getXerCn();
+    method public boolean isDemodLocked();
+    method public boolean isEwbs();
+    method public boolean isLnaOn();
+    method public boolean isRfLock();
+    field public static final int FRONTEND_STATUS_TYPE_AGC = 14; // 0xe
+    field public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO = 24; // 0x18
+    field public static final int FRONTEND_STATUS_TYPE_BER = 2; // 0x2
+    field public static final int FRONTEND_STATUS_TYPE_DEMOD_LOCK = 0; // 0x0
+    field public static final int FRONTEND_STATUS_TYPE_EWBS = 13; // 0xd
+    field public static final int FRONTEND_STATUS_TYPE_FEC = 8; // 0x8
+    field public static final int FRONTEND_STATUS_TYPE_FREQ_OFFSET = 21; // 0x15
+    field public static final int FRONTEND_STATUS_TYPE_HIERARCHY = 22; // 0x16
+    field public static final int FRONTEND_STATUS_TYPE_LAYER_ERROR = 16; // 0x10
+    field public static final int FRONTEND_STATUS_TYPE_LBER_CN = 18; // 0x12
+    field public static final int FRONTEND_STATUS_TYPE_LNA = 15; // 0xf
+    field public static final int FRONTEND_STATUS_TYPE_LNB_VOLTAGE = 11; // 0xb
+    field public static final int FRONTEND_STATUS_TYPE_MER = 20; // 0x14
+    field public static final int FRONTEND_STATUS_TYPE_MODULATION = 9; // 0x9
+    field public static final int FRONTEND_STATUS_TYPE_PER = 3; // 0x3
+    field public static final int FRONTEND_STATUS_TYPE_PLP_ID = 12; // 0xc
+    field public static final int FRONTEND_STATUS_TYPE_PRE_BER = 4; // 0x4
+    field public static final int FRONTEND_STATUS_TYPE_RF_LOCK = 23; // 0x17
+    field public static final int FRONTEND_STATUS_TYPE_SIGNAL_QUALITY = 5; // 0x5
+    field public static final int FRONTEND_STATUS_TYPE_SIGNAL_STRENGTH = 6; // 0x6
+    field public static final int FRONTEND_STATUS_TYPE_SNR = 1; // 0x1
+    field public static final int FRONTEND_STATUS_TYPE_SPECTRAL = 10; // 0xa
+    field public static final int FRONTEND_STATUS_TYPE_SYMBOL_RATE = 7; // 0x7
+    field public static final int FRONTEND_STATUS_TYPE_VBER_CN = 17; // 0x11
+    field public static final int FRONTEND_STATUS_TYPE_XER_CN = 19; // 0x13
+  }
+
+  public static class FrontendStatus.Atsc3PlpInfo {
+    method public int getPlpId();
+    method public int getUec();
+    method public boolean isLock();
+  }
+
+  public class Isdbs3FrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
+    method public int getCodeRateCapability();
+    method public int getModulationCapability();
+  }
+
+  public class Isdbs3FrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder builder(@NonNull android.content.Context);
+    method public int getCodeRate();
+    method public int getModulation();
+    method public int getRolloff();
+    method public int getStreamId();
+    method public int getStreamIdType();
+    method public int getSymbolRate();
+    method public int getType();
+    field public static final int CODERATE_1_2 = 8; // 0x8
+    field public static final int CODERATE_1_3 = 2; // 0x2
+    field public static final int CODERATE_2_3 = 32; // 0x20
+    field public static final int CODERATE_2_5 = 4; // 0x4
+    field public static final int CODERATE_3_4 = 64; // 0x40
+    field public static final int CODERATE_3_5 = 16; // 0x10
+    field public static final int CODERATE_4_5 = 256; // 0x100
+    field public static final int CODERATE_5_6 = 512; // 0x200
+    field public static final int CODERATE_7_8 = 1024; // 0x400
+    field public static final int CODERATE_7_9 = 128; // 0x80
+    field public static final int CODERATE_9_10 = 2048; // 0x800
+    field public static final int CODERATE_AUTO = 1; // 0x1
+    field public static final int CODERATE_UNDEFINED = 0; // 0x0
+    field public static final int MODULATION_AUTO = 1; // 0x1
+    field public static final int MODULATION_MOD_16APSK = 16; // 0x10
+    field public static final int MODULATION_MOD_32APSK = 32; // 0x20
+    field public static final int MODULATION_MOD_8PSK = 8; // 0x8
+    field public static final int MODULATION_MOD_BPSK = 2; // 0x2
+    field public static final int MODULATION_MOD_QPSK = 4; // 0x4
+    field public static final int MODULATION_UNDEFINED = 0; // 0x0
+    field public static final int ROLLOFF_0_03 = 1; // 0x1
+    field public static final int ROLLOFF_UNDEFINED = 0; // 0x0
+  }
+
+  public static class Isdbs3FrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder> {
+    method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings build();
+    method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setModulation(int);
+    method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setRolloff(int);
+    method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setStreamId(int);
+    method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setStreamIdType(int);
+    method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setSymbolRate(int);
+  }
+
+  public class IsdbsFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
+    method public int getCodeRateCapability();
+    method public int getModulationCapability();
+  }
+
+  public class IsdbsFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder builder(@NonNull android.content.Context);
+    method public int getCodeRate();
+    method public int getModulation();
+    method public int getRolloff();
+    method public int getStreamId();
+    method public int getStreamIdType();
+    method public int getSymbolRate();
+    method public int getType();
+    field public static final int CODERATE_1_2 = 2; // 0x2
+    field public static final int CODERATE_2_3 = 4; // 0x4
+    field public static final int CODERATE_3_4 = 8; // 0x8
+    field public static final int CODERATE_5_6 = 16; // 0x10
+    field public static final int CODERATE_7_8 = 32; // 0x20
+    field public static final int CODERATE_AUTO = 1; // 0x1
+    field public static final int CODERATE_UNDEFINED = 0; // 0x0
+    field public static final int MODULATION_AUTO = 1; // 0x1
+    field public static final int MODULATION_MOD_BPSK = 2; // 0x2
+    field public static final int MODULATION_MOD_QPSK = 4; // 0x4
+    field public static final int MODULATION_MOD_TC8PSK = 8; // 0x8
+    field public static final int MODULATION_UNDEFINED = 0; // 0x0
+    field public static final int ROLLOFF_0_35 = 1; // 0x1
+    field public static final int ROLLOFF_UNDEFINED = 0; // 0x0
+    field public static final int STREAM_ID_TYPE_ID = 0; // 0x0
+    field public static final int STREAM_ID_TYPE_RELATIVE_NUMBER = 1; // 0x1
+  }
+
+  public static class IsdbsFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder> {
+    method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings build();
+    method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setModulation(int);
+    method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setRolloff(int);
+    method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setStreamId(int);
+    method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setStreamIdType(int);
+    method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setSymbolRate(int);
+  }
+
+  public class IsdbtFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
+    method public int getBandwidthCapability();
+    method public int getCodeRateCapability();
+    method public int getGuardIntervalCapability();
+    method public int getModeCapability();
+    method public int getModulationCapability();
+  }
+
+  public class IsdbtFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder builder(@NonNull android.content.Context);
+    method public int getBandwidth();
+    method public int getCodeRate();
+    method public int getGuardInterval();
+    method public int getMode();
+    method public int getModulation();
+    method public int getServiceAreaId();
+    method public int getType();
+    field public static final int BANDWIDTH_6MHZ = 8; // 0x8
+    field public static final int BANDWIDTH_7MHZ = 4; // 0x4
+    field public static final int BANDWIDTH_8MHZ = 2; // 0x2
+    field public static final int BANDWIDTH_AUTO = 1; // 0x1
+    field public static final int BANDWIDTH_UNDEFINED = 0; // 0x0
+    field public static final int MODE_1 = 2; // 0x2
+    field public static final int MODE_2 = 4; // 0x4
+    field public static final int MODE_3 = 8; // 0x8
+    field public static final int MODE_AUTO = 1; // 0x1
+    field public static final int MODE_UNDEFINED = 0; // 0x0
+    field public static final int MODULATION_AUTO = 1; // 0x1
+    field public static final int MODULATION_MOD_16QAM = 8; // 0x8
+    field public static final int MODULATION_MOD_64QAM = 16; // 0x10
+    field public static final int MODULATION_MOD_DQPSK = 2; // 0x2
+    field public static final int MODULATION_MOD_QPSK = 4; // 0x4
+    field public static final int MODULATION_UNDEFINED = 0; // 0x0
+  }
+
+  public static class IsdbtFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder> {
+    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings build();
+    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setBandwidth(int);
+    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setGuardInterval(int);
+    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setMode(int);
+    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setModulation(int);
+    method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setServiceAreaId(int);
   }
 
   public interface OnTuneEventListener {

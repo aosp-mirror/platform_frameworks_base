@@ -19,6 +19,7 @@ package android.media.tv.tuner.frontend;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerConstants.FrontendInnerFec;
@@ -29,8 +30,10 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Frontend settings for DVBC.
+ *
  * @hide
  */
+@SystemApi
 public class DvbcFrontendSettings extends FrontendSettings {
 
     /** @hide */

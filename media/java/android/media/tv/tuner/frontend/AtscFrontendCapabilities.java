@@ -16,10 +16,14 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.SystemApi;
+
 /**
  * ATSC Capabilities.
+ *
  * @hide
  */
+@SystemApi
 public class AtscFrontendCapabilities extends FrontendCapabilities {
     private final int mModulationCap;
 

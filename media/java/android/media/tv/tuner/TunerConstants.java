@@ -58,7 +58,7 @@ public final class TunerConstants {
     /**
      * Scan type auto.
      *
-     * <p> Tuner will send {@link #onLocked}
+     * <p> Tuner will send {@link android.media.tv.tuner.frontend.ScanCallback#onLocked}
      */
     public static final int SCAN_TYPE_AUTO = Constants.FrontendScanType.SCAN_AUTO;
     /**

@@ -18,22 +18,25 @@ package android.media.tv.tuner.frontend;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.tuner.TunerConstants.FrontendInnerFec;
 import android.media.tv.tuner.TunerUtils;
 
 /**
  * Code rate for DVBS.
+ *
  * @hide
  */
+@SystemApi
 public class DvbsCodeRate {
-    private final long mFec;
+    private final long mInnerFec;
     private final boolean mIsLinear;
     private final boolean mIsShortFrames;
     private final int mBitsPer1000Symbol;
 
     private DvbsCodeRate(long fec, boolean isLinear, boolean isShortFrames, int bitsPer1000Symbol) {
-        mFec = fec;
+        mInnerFec = fec;
         mIsLinear = isLinear;
         mIsShortFrames = isShortFrames;
         mBitsPer1000Symbol = bitsPer1000Symbol;
@@ -43,8 +46,8 @@ public class DvbsCodeRate {
      * Gets inner FEC.
      */
     @FrontendInnerFec
-    public long getFec() {
-        return mFec;
+    public long getInnerFec() {
+        return mInnerFec;
     }
     /**
      * Checks whether it's linear.
@@ -93,7 +96,7 @@ public class DvbsCodeRate {
          * Sets inner FEC.
          */
         @NonNull
-        public Builder setFec(@FrontendInnerFec long fec) {
+        public Builder setInnerFec(@FrontendInnerFec long fec) {
             mFec = fec;
             return this;
         }

@@ -17,6 +17,7 @@
 package android.media.tv.tuner.frontend;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.media.tv.tuner.frontend.FrontendSettings.Type;
 import android.media.tv.tuner.frontend.FrontendStatus.FrontendStatusType;
 import android.util.Range;
@@ -26,6 +27,7 @@ import android.util.Range;
  *
  * @hide
  */
+@SystemApi
 public class FrontendInfo {
     private final int mId;
     private final int mType;
@@ -102,12 +104,14 @@ public class FrontendInfo {
      * @return An array of supported status types.
      */
     @FrontendStatusType
+    @NonNull
     public int[] getStatusCapabilities() {
         return mStatusCaps;
     }
     /**
      * Gets frontend capabilities.
      */
+    @NonNull
     public FrontendCapabilities getFrontendCapability() {
         return mFrontendCap;
     }
