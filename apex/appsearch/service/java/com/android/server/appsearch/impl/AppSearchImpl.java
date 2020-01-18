@@ -45,8 +45,10 @@ public final class AppSearchImpl {
      *
      * @param callingUid The uid of the app calling AppSearch.
      * @param origSchema The schema to set for this app.
+     * @param force Whether to force-apply the schema even if it is incompatible. Documents which do
+     *     not comply with the new schema will be deleted.
      */
-    public void setSchema(int callingUid, @NonNull SchemaProto origSchema) {
+    public void setSchema(int callingUid, @NonNull SchemaProto origSchema, boolean force) {
         // Rewrite schema type names to include the calling app's package and uid.
         String typePrefix = getTypePrefix(callingUid);
         SchemaProto.Builder schemaBuilder = origSchema.toBuilder();
