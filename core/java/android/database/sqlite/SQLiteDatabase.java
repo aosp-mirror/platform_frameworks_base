@@ -62,6 +62,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
+import java.util.function.BinaryOperator;
+import java.util.function.UnaryOperator;
 
 /**
  * Exposes methods to manage a SQLite database.
@@ -958,26 +960,87 @@ public final class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * Registers a CustomFunction callback as a function that can be called from
-     * SQLite database triggers.
+     * Register a custom scalar function that can be called from SQL
+     * expressions.
+     * <p>
+     * For example, registering a custom scalar function named {@code REVERSE}
+     * could be used in a query like
+     * {@code SELECT REVERSE(name) FROM employees}.
+     * <p>
+     * When attempting to register multiple functions with the same function
+     * name, SQLite will replace any previously defined functions with the
+     * latest definition, regardless of what function type they are. SQLite does
+     * not support unregistering functions.
      *
-     * @param name the name of the sqlite3 function
-     * @param numArgs the number of arguments for the function
-     * @param function callback to call when the function is executed
-     * @hide
+     * @param functionName Case-insensitive name to register this function
+     *            under, limited to 255 UTF-8 bytes in length.
+     * @param scalarFunction Functional interface that will be invoked when the
+     *            function name is used by a SQL statement. The argument values
+     *            from the SQL statement are passed to the functional interface,
+     *            and the return values from the functional interface are
+     *            returned back into the SQL statement.
+     * @throws SQLiteException if the custom function could not be registered.
+     * @see #setCustomAggregateFunction(String, BinaryOperator)
      */
-    public void addCustomFunction(String name, int numArgs, CustomFunction function) {
-        // Create wrapper (also validates arguments).
-        SQLiteCustomFunction wrapper = new SQLiteCustomFunction(name, numArgs, function);
+    public void setCustomScalarFunction(@NonNull String functionName,
+            @NonNull UnaryOperator<String> scalarFunction) throws SQLiteException {
+        Objects.requireNonNull(functionName);
+        Objects.requireNonNull(scalarFunction);
 
         synchronized (mLock) {
             throwIfNotOpenLocked();
 
-            mConfigurationLocked.customFunctions.add(wrapper);
+            mConfigurationLocked.customScalarFunctions.put(functionName, scalarFunction);
             try {
                 mConnectionPoolLocked.reconfigure(mConfigurationLocked);
             } catch (RuntimeException ex) {
-                mConfigurationLocked.customFunctions.remove(wrapper);
+                mConfigurationLocked.customScalarFunctions.remove(functionName);
+                throw ex;
+            }
+        }
+    }
+
+    /**
+     * Register a custom aggregate function that can be called from SQL
+     * expressions.
+     * <p>
+     * For example, registering a custom aggregation function named
+     * {@code LONGEST} could be used in a query like
+     * {@code SELECT LONGEST(name) FROM employees}.
+     * <p>
+     * The implementation of this method follows the reduction flow outlined in
+     * {@link java.util.stream.Stream#reduce(BinaryOperator)}, and the custom
+     * aggregation function is expected to be an associative accumulation
+     * function, as defined by that class.
+     * <p>
+     * When attempting to register multiple functions with the same function
+     * name, SQLite will replace any previously defined functions with the
+     * latest definition, regardless of what function type they are. SQLite does
+     * not support unregistering functions.
+     *
+     * @param functionName Case-insensitive name to register this function
+     *            under, limited to 255 UTF-8 bytes in length.
+     * @param aggregateFunction Functional interface that will be invoked when
+     *            the function name is used by a SQL statement. The argument
+     *            values from the SQL statement are passed to the functional
+     *            interface, and the return values from the functional interface
+     *            are returned back into the SQL statement.
+     * @throws SQLiteException if the custom function could not be registered.
+     * @see #setCustomScalarFunction(String, UnaryOperator)
+     */
+    public void setCustomAggregateFunction(@NonNull String functionName,
+            @NonNull BinaryOperator<String> aggregateFunction) throws SQLiteException {
+        Objects.requireNonNull(functionName);
+        Objects.requireNonNull(aggregateFunction);
+
+        synchronized (mLock) {
+            throwIfNotOpenLocked();
+
+            mConfigurationLocked.customAggregateFunctions.put(functionName, aggregateFunction);
+            try {
+                mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            } catch (RuntimeException ex) {
+                mConfigurationLocked.customAggregateFunctions.remove(functionName);
                 throw ex;
             }
         }
