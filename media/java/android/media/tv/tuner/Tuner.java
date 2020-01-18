@@ -33,6 +33,7 @@ import android.media.tv.tuner.filter.Filter.Type;
 import android.media.tv.tuner.filter.FilterEvent;
 import android.media.tv.tuner.filter.TimeFilter;
 import android.media.tv.tuner.frontend.FrontendInfo;
+import android.media.tv.tuner.frontend.FrontendSettings;
 import android.media.tv.tuner.frontend.FrontendStatus;
 import android.media.tv.tuner.frontend.OnTuneEventListener;
 import android.media.tv.tuner.frontend.ScanCallback;

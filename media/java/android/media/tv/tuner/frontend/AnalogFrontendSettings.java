@@ -18,7 +18,11 @@ package android.media.tv.tuner.frontend;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
+import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
+import android.media.tv.tuner.TunerUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,6 +32,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@SystemApi
 public class AnalogFrontendSettings extends FrontendSettings {
     /** @hide */
     @IntDef(flag = true,
@@ -137,7 +142,7 @@ public class AnalogFrontendSettings extends FrontendSettings {
     public static final int SIF_L_PRIME = Constants.FrontendAnalogSifStandard.L_PRIME;
 
 
-    private final int mAnalogType;
+    private final int mSignalType;
     private final int mSifStandard;
 
     @Override
@@ -150,8 +155,8 @@ public class AnalogFrontendSettings extends FrontendSettings {
      * Gets analog signal type.
      */
     @SignalType
-    public int getAnalogType() {
-        return mAnalogType;
+    public int getSignalType() {
+        return mSignalType;
     }
 
     /**
@@ -164,43 +169,37 @@ public class AnalogFrontendSettings extends FrontendSettings {
 
     /**
      * Creates a builder for {@link AnalogFrontendSettings}.
+     *
+     * @parm the context of the caller.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder newBuilder() {
+    public static Builder builder(@NonNull Context context) {
+        TunerUtils.checkTunerPermission(context);
         return new Builder();
     }
 
-    private AnalogFrontendSettings(int frequency, int analogType, int sifStandard) {
+    private AnalogFrontendSettings(int frequency, int signalType, int sifStandard) {
         super(frequency);
-        mAnalogType = analogType;
+        mSignalType = signalType;
         mSifStandard = sifStandard;
     }
 
     /**
      * Builder for {@link AnalogFrontendSettings}.
      */
-    public static class Builder {
-        private int mFrequency;
-        private int mAnalogType;
+    public static class Builder extends FrontendSettings.Builder<Builder> {
+        private int mSignalType;
         private int mSifStandard;
 
         private Builder() {}
 
         /**
-         * Sets frequency in Hz.
+         * Sets analog signal type.
          */
         @NonNull
-        public Builder setFrequency(int frequency) {
-            mFrequency = frequency;
-            return this;
-        }
-
-        /**
-         * Sets analog type.
-         */
-        @NonNull
-        public Builder setAnalogType(@SignalType int analogType) {
-            mAnalogType = analogType;
+        public Builder setASignalType(@SignalType int signalType) {
+            mSignalType = signalType;
             return this;
         }
 
@@ -218,7 +217,12 @@ public class AnalogFrontendSettings extends FrontendSettings {
          */
         @NonNull
         public AnalogFrontendSettings build() {
-            return new AnalogFrontendSettings(mFrequency, mAnalogType, mSifStandard);
+            return new AnalogFrontendSettings(mFrequency, mSignalType, mSifStandard);
+        }
+
+        @Override
+        Builder self() {
+            return this;
         }
     }
 }
