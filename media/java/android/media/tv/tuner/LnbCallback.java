@@ -17,6 +17,8 @@
 package android.media.tv.tuner;
 
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.media.tv.tuner.Lnb.EventType;
 
 /**
@@ -24,6 +26,7 @@ import android.media.tv.tuner.Lnb.EventType;
  *
  * @hide
  */
+@SystemApi
 public interface LnbCallback {
     /**
      * Invoked when there is a LNB event.
@@ -37,5 +40,5 @@ public interface LnbCallback {
      * Equipment Control) message which is specified by EUTELSAT Bus Functional
      * Specification Version 4.2.
      */
-    void onDiseqcMessage(byte[] diseqcMessage);
+    void onDiseqcMessage(@NonNull byte[] diseqcMessage);
 }

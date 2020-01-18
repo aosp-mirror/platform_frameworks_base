@@ -564,12 +564,11 @@ public final class Tuner implements AutoCloseable  {
      * executor is used if it's {@code null}.
      * @param cb the callback to receive notifications from LNB.
      * @return the opened LNB object. {@code null} if the operation failed.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Nullable
-    public Lnb openLnb(@CallbackExecutor @Nullable Executor executor, LnbCallback cb) {
+    public Lnb openLnb(@CallbackExecutor @Nullable Executor executor, @Nullable LnbCallback cb) {
+        TunerUtils.checkTunerPermission(mContext);
         return openLnbByName(null, executor, cb);
     }
 
@@ -581,13 +580,11 @@ public final class Tuner implements AutoCloseable  {
      * executor is used if it's {@code null}.
      * @param cb the callback to receive notifications from LNB.
      * @return the opened LNB object. {@code null} if the operation failed.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Nullable
     public Lnb openLnbByName(@Nullable String name, @CallbackExecutor @Nullable Executor executor,
-            LnbCallback cb) {
+            @NonNull LnbCallback cb) {
         TunerUtils.checkTunerPermission(mContext);
         // TODO: use resource manager to get LNB ID.
         return new Lnb(0);
