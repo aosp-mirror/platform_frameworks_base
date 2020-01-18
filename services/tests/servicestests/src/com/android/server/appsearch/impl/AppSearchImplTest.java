@@ -103,7 +103,7 @@ public class AppSearchImplTest {
                 () -> impl.setSchema(
                         /*callingUid=*/Integer.MAX_VALUE,
                         SchemaProto.getDefaultInstance(),
-                        /*force=*/false));
+                        /*forceOverride=*/false));
         assertThat(e).hasMessageThat().contains("Failed to look up package name");
     }
 }
