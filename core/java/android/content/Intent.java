@@ -4021,6 +4021,7 @@ public class Intent implements Parcelable, Cloneable {
      * <p>
      * @see #EXTRA_SIM_STATE
      * @see #EXTRA_SIM_LOCKED_REASON
+     * @see #EXTRA_REBROADCAST_ON_UNLOCK
      *
      * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED} or
      * {@link #ACTION_SIM_APPLICATION_STATE_CHANGED}
@@ -4195,6 +4196,18 @@ public class Intent implements Parcelable, Cloneable {
     @Deprecated
     @SystemApi
     public static final String SIM_ABSENT_ON_PERM_DISABLED = "PERM_DISABLED";
+
+    /**
+     * The extra used with {@link #ACTION_SIM_STATE_CHANGED} for indicating whether this broadcast
+     * is a rebroadcast on unlock. Defaults to {@code false} if not specified.
+     *
+     * @hide
+     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED} or
+     * {@link #ACTION_SIM_APPLICATION_STATE_CHANGED}
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_REBROADCAST_ON_UNLOCK = "rebroadcastOnUnlock";
 
     /**
      * Broadcast Action: indicate that the phone service state has changed.
