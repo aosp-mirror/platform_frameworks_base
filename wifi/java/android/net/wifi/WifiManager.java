@@ -1948,6 +1948,15 @@ public class WifiManager {
      * @param config The Passpoint configuration to be added
      * @throws IllegalArgumentException if configuration is invalid or Passpoint is not enabled on
      *                                  the device.
+     *
+     * Deprecated for general app usage - except DO/PO apps.
+     * See {@link WifiNetworkSuggestion.Builder#setPasspointConfig(PasspointConfiguration)} to
+     * create a passpoint suggestion.
+     * See {@link #addNetworkSuggestions(List)}, {@link #removeNetworkSuggestions(List)} for new
+     * API to add Wi-Fi networks for consideration when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#R} or above, except for system of DO/PO apps, this API
+     * will throw {@link IllegalArgumentException}
      */
     public void addOrUpdatePasspointConfiguration(PasspointConfiguration config) {
         try {
