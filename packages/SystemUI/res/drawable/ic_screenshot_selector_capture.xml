@@ -1,0 +1,12 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:drawable="@drawable/ic_screenshot_selector_bg"
+        android:height="48dp"
+        android:width="48dp" />
+    <item
+        android:drawable="@drawable/ic_screenshot_selector_capture_fg"
+        android:height="24dp"
+        android:width="24dp"
+        android:left="12dp"
+        android:top="12dp" />
+</layer-list>

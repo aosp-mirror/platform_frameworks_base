@@ -38,5 +38,31 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
-        android:pointerIcon="crosshair"/>
+        android:pointerIcon="crosshair">
+        <LinearLayout
+            android:id="@+id/global_screenshot_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="24dp"
+            android:animateLayoutChanges="true">
+            <ImageView
+                android:id="@+id/global_screenshot_selector_capture"
+                android:clickable="true"
+                android:visibility="gone"
+                android:contentDescription="@string/global_screenshot_selector_capture_description"
+                android:src="@drawable/ic_screenshot_selector_capture"
+                android:layout_gravity="fill"
+                android:layout_height="48dp"
+                android:layout_width="48dp"
+                android:layout_marginEnd="96dp" />
+            <ImageView
+                android:id="@+id/global_screenshot_selector_cancel"
+                android:clickable="true"
+                android:contentDescription="@string/global_screenshot_selector_cancel_description"
+                android:src="@drawable/ic_screenshot_selector_cancel"
+                android:layout_height="48dp"
+                android:layout_width="48dp" />
+        </LinearLayout>
+    </com.android.systemui.screenshot.ScreenshotSelectorView>
 </FrameLayout>
