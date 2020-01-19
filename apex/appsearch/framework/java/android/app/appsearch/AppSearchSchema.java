@@ -18,41 +18,38 @@ package android.app.appsearch;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import com.google.android.icing.proto.PropertyConfigProto;
-import com.google.android.icing.proto.SchemaProto;
 import com.google.android.icing.proto.SchemaTypeConfigProto;
+import com.google.android.icing.proto.TermMatchType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Set;
 
 /**
- * Representation of the AppSearch Schema.
+ * The AppSearch Schema for a particular type of document.
  *
- * <p>The schema is the set of document types, properties, and config (like tokenization type)
- * understood by AppSearch for this app.
+ * <p>For example, an e-mail message or a music recording could be a schema type.
+ *
+ * <p>The schema consists of type information, properties, and config (like tokenization type).
  *
  * @hide
  */
 public final class AppSearchSchema {
-    private final SchemaProto mProto;
+    private final SchemaTypeConfigProto mProto;
 
-    private AppSearchSchema(SchemaProto proto) {
+    private AppSearchSchema(SchemaTypeConfigProto proto) {
         mProto = proto;
     }
 
     /** Creates a new {@link AppSearchSchema.Builder}. */
     @NonNull
-    public static AppSearchSchema.Builder newBuilder() {
-        return new AppSearchSchema.Builder();
-    }
-
-    /** Creates a new {@link SchemaType.Builder}. */
-    @NonNull
-    public static SchemaType.Builder newSchemaTypeBuilder(@NonNull String typeName) {
-        return new SchemaType.Builder(typeName);
+    public static AppSearchSchema.Builder newBuilder(@NonNull String typeName) {
+        return new AppSearchSchema.Builder(typeName);
     }
 
     /** Creates a new {@link PropertyConfig.Builder}. */
@@ -61,32 +58,34 @@ public final class AppSearchSchema {
         return new PropertyConfig.Builder(propertyName);
     }
 
-    /** Creates a new {@link IndexingConfig.Builder}. */
-    @NonNull
-    public static IndexingConfig.Builder newIndexingConfigBuilder() {
-        return new IndexingConfig.Builder();
-    }
-
     /**
-     * Returns the schema proto populated by the {@link AppSearchSchema} builders.
+     * Returns the {@link SchemaTypeConfigProto} populated by this builder.
      * @hide
      */
     @NonNull
     @VisibleForTesting
-    public SchemaProto getProto() {
+    public SchemaTypeConfigProto getProto() {
         return mProto;
+    }
+
+    @Override
+    public String toString() {
+        return mProto.toString();
     }
 
     /** Builder for {@link AppSearchSchema objects}. */
     public static final class Builder {
-        private final SchemaProto.Builder mProtoBuilder = SchemaProto.newBuilder();
+        private final SchemaTypeConfigProto.Builder mProtoBuilder =
+                SchemaTypeConfigProto.newBuilder();
 
-        private Builder() {}
+        private Builder(@NonNull String typeName) {
+            mProtoBuilder.setSchemaType(typeName);
+        }
 
-        /** Adds a supported type to this app's AppSearch schema. */
+        /** Adds a property to the given type. */
         @NonNull
-        public AppSearchSchema.Builder addType(@NonNull SchemaType schemaType) {
-            mProtoBuilder.addTypes(schemaType.mProto);
+        public AppSearchSchema.Builder addProperty(@NonNull PropertyConfig propertyConfig) {
+            mProtoBuilder.addProperties(propertyConfig.mProto);
             return this;
         }
 
@@ -97,47 +96,15 @@ public final class AppSearchSchema {
          */
         @NonNull
         public AppSearchSchema build() {
+            Set<String> propertyNames = new ArraySet<>();
+            for (PropertyConfigProto propertyConfigProto : mProtoBuilder.getPropertiesList()) {
+                if (!propertyNames.add(propertyConfigProto.getPropertyName())) {
+                    throw new IllegalSchemaException(
+                            "Property defined more than once: "
+                                    + propertyConfigProto.getPropertyName());
+                }
+            }
             return new AppSearchSchema(mProtoBuilder.build());
-        }
-    }
-
-    /**
-     * Represents a type of a document.
-     *
-     * <p>For example, an e-mail message or a music recording could be a schema type.
-     */
-    public static final class SchemaType {
-        private final SchemaTypeConfigProto mProto;
-
-        private SchemaType(SchemaTypeConfigProto proto) {
-            mProto = proto;
-        }
-
-        /** Builder for {@link SchemaType} objects. */
-        public static final class Builder {
-            private final SchemaTypeConfigProto.Builder mProtoBuilder =
-                    SchemaTypeConfigProto.newBuilder();
-
-            private Builder(@NonNull String typeName) {
-                mProtoBuilder.setSchemaType(typeName);
-            }
-
-            /** Adds a property to the given type. */
-            @NonNull
-            public SchemaType.Builder addProperty(@NonNull PropertyConfig propertyConfig) {
-                mProtoBuilder.addProperties(propertyConfig.mProto);
-                return this;
-            }
-
-            /**
-             * Constructs a new {@link SchemaType} from the contents of this builder.
-             *
-             * <p>After calling this method, the builder must no longer be used.
-             */
-            @NonNull
-            public SchemaType build() {
-                return new SchemaType(mProtoBuilder.build());
-            }
         }
     }
 
@@ -197,130 +164,14 @@ public final class AppSearchSchema {
         /** Exactly one value [1]. */
         public static final int CARDINALITY_REQUIRED = 3;
 
-        private final PropertyConfigProto mProto;
-
-        private PropertyConfig(PropertyConfigProto proto) {
-            mProto = proto;
-        }
-
-        /**
-         * Builder for {@link PropertyConfig}.
-         *
-         * <p>The following properties must be set, or {@link PropertyConfig} construction will
-         * fail:
-         * <ul>
-         *     <li>dataType
-         *     <li>cardinality
-         * </ul>
-         *
-         * <p>In addition, if {@code schemaType} is {@link #DATA_TYPE_DOCUMENT}, {@code schemaType}
-         * is also required.
-         */
-        public static final class Builder {
-            private final PropertyConfigProto.Builder mProtoBuilder =
-                    PropertyConfigProto.newBuilder();
-
-            private Builder(String propertyName) {
-                mProtoBuilder.setPropertyName(propertyName);
-            }
-
-            /**
-             * Type of data the property contains (e.g. string, int, bytes, etc).
-             *
-             * <p>This property must be set.
-             */
-            @NonNull
-            public PropertyConfig.Builder setDataType(@DataType int dataType) {
-                PropertyConfigProto.DataType.Code dataTypeProto =
-                        PropertyConfigProto.DataType.Code.forNumber(dataType);
-                if (dataTypeProto == null) {
-                    throw new IllegalArgumentException("Invalid dataType: " + dataType);
-                }
-                mProtoBuilder.setDataType(dataTypeProto);
-                return this;
-            }
-
-            /**
-             * The logical schema-type of the contents of this property.
-             *
-             * <p>Only required when {@link #setDataType(int)} is set to
-             * {@link #DATA_TYPE_DOCUMENT}. Otherwise, it is ignored.
-             */
-            @NonNull
-            public PropertyConfig.Builder setSchemaType(@NonNull String schemaType) {
-                mProtoBuilder.setSchemaType(schemaType);
-                return this;
-            }
-
-            /**
-             * The cardinality of the property (whether it is optional, required or repeated).
-             *
-             * <p>This property must be set.
-             */
-            @NonNull
-            public PropertyConfig.Builder setCardinality(@Cardinality int cardinality) {
-                PropertyConfigProto.Cardinality.Code cardinalityProto =
-                        PropertyConfigProto.Cardinality.Code.forNumber(cardinality);
-                if (cardinalityProto == null) {
-                    throw new IllegalArgumentException("Invalid cardinality: " + cardinality);
-                }
-                mProtoBuilder.setCardinality(cardinalityProto);
-                return this;
-            }
-
-            /**
-             * Configures how this property should be indexed.
-             *
-             * <p>If this is not supplied, the property will not be indexed at all.
-             */
-            @NonNull
-            public PropertyConfig.Builder setIndexingConfig(
-                    @NonNull IndexingConfig indexingConfig) {
-                mProtoBuilder.setIndexingConfig(indexingConfig.mProto);
-                return this;
-            }
-
-            /**
-             * Constructs a new {@link PropertyConfig} from the contents of this builder.
-             *
-             * <p>After calling this method, the builder must no longer be used.
-             *
-             * @throws IllegalSchemaException If the property is not correctly populated (e.g.
-             *     missing {@code dataType}).
-             */
-            @NonNull
-            public PropertyConfig build() {
-                if (mProtoBuilder.getDataType() == PropertyConfigProto.DataType.Code.UNKNOWN) {
-                    throw new IllegalSchemaException("Missing field: dataType");
-                }
-                if (mProtoBuilder.getSchemaType().isEmpty()
-                        && mProtoBuilder.getDataType()
-                                == PropertyConfigProto.DataType.Code.DOCUMENT) {
-                    throw new IllegalSchemaException(
-                            "Missing field: schemaType (required for configs with "
-                                    + "dataType = DOCUMENT)");
-                }
-                if (mProtoBuilder.getCardinality()
-                        == PropertyConfigProto.Cardinality.Code.UNKNOWN) {
-                    throw new IllegalSchemaException("Missing field: cardinality");
-                }
-                return new PropertyConfig(mProtoBuilder.build());
-            }
-        }
-    }
-
-    /** Configures how a property should be indexed so that it can be retrieved by queries. */
-    public static final class IndexingConfig {
         /** Encapsulates the configurations on how AppSearch should query/index these terms. */
-        // NOTE: The integer values of these constants must match the proto enum constants in
-        // com.google.android.icing.proto.TermMatchType.Code.
-        @IntDef(prefix = {"TERM_MATCH_TYPE_"}, value = {
-                TERM_MATCH_TYPE_UNKNOWN,
-                TERM_MATCH_TYPE_EXACT_ONLY,
-                TERM_MATCH_TYPE_PREFIX,
+        @IntDef(prefix = {"INDEXING_TYPE_"}, value = {
+                INDEXING_TYPE_NONE,
+                INDEXING_TYPE_EXACT_TERMS,
+                INDEXING_TYPE_PREFIXES,
         })
         @Retention(RetentionPolicy.SOURCE)
-        public @interface TermMatchType {}
+        public @interface IndexingType {}
 
         /**
          * Content in this property will not be tokenized or indexed.
@@ -328,9 +179,9 @@ public final class AppSearchSchema {
          * <p>Useful if the data type is not made up of terms (e.g.
          * {@link PropertyConfig#DATA_TYPE_DOCUMENT} or {@link PropertyConfig#DATA_TYPE_BYTES}
          * type). All the properties inside the nested property won't be indexed regardless of the
-         * value of {@code termMatchType} for the nested properties.
+         * value of {@code indexingType} for the nested properties.
          */
-        public static final int TERM_MATCH_TYPE_UNKNOWN = 0;
+        public static final int INDEXING_TYPE_NONE = 0;
 
         /**
          * Content in this property should only be returned for queries matching the exact tokens
@@ -338,7 +189,7 @@ public final class AppSearchSchema {
          *
          * <p>Ex. A property with "fool" should NOT match a query for "foo".
          */
-        public static final int TERM_MATCH_TYPE_EXACT_ONLY = 1;
+        public static final int INDEXING_TYPE_EXACT_TERMS = 1;
 
         /**
          * Content in this property should be returned for queries that are either exact matches or
@@ -346,7 +197,7 @@ public final class AppSearchSchema {
          *
          * <p>Ex. A property with "fool" <b>should</b> match a query for "foo".
          */
-        public static final int TERM_MATCH_TYPE_PREFIX = 2;
+        public static final int INDEXING_TYPE_PREFIXES = 2;
 
         /** Configures how tokens should be extracted from this property. */
         // NOTE: The integer values of these constants must match the proto enum constants in
@@ -367,59 +218,151 @@ public final class AppSearchSchema {
         /** Tokenization for plain text. */
         public static final int TOKENIZER_TYPE_PLAIN = 1;
 
-        private final com.google.android.icing.proto.IndexingConfig mProto;
+        private final PropertyConfigProto mProto;
 
-        private IndexingConfig(com.google.android.icing.proto.IndexingConfig proto) {
+        private PropertyConfig(PropertyConfigProto proto) {
             mProto = proto;
         }
 
+        @Override
+        public String toString() {
+            return mProto.toString();
+        }
+
         /**
-         * Builder for {@link IndexingConfig} objects.
+         * Builder for {@link PropertyConfig}.
          *
-         * <p>You may skip adding an {@link IndexingConfig} for a property, which is equivalent to
-         * an {@link IndexingConfig} having {@code termMatchType} equal to
-         * {@link #TERM_MATCH_TYPE_UNKNOWN}. In this case the property will not be indexed.
+         * <p>The following properties must be set, or {@link PropertyConfig} construction will
+         * fail:
+         * <ul>
+         *     <li>dataType
+         *     <li>cardinality
+         * </ul>
+         *
+         * <p>In addition, if {@code schemaType} is {@link #DATA_TYPE_DOCUMENT}, {@code schemaType}
+         * is also required.
          */
         public static final class Builder {
-            private final com.google.android.icing.proto.IndexingConfig.Builder mProtoBuilder =
-                    com.google.android.icing.proto.IndexingConfig.newBuilder();
+            private final PropertyConfigProto.Builder mPropertyConfigProto =
+                    PropertyConfigProto.newBuilder();
+            private final com.google.android.icing.proto.IndexingConfig.Builder
+                    mIndexingConfigProto =
+                        com.google.android.icing.proto.IndexingConfig.newBuilder();
 
-            private Builder() {}
+            private Builder(String propertyName) {
+                mPropertyConfigProto.setPropertyName(propertyName);
+            }
 
-            /** Configures how the content of this property should be matched in the index. */
+            /**
+             * Type of data the property contains (e.g. string, int, bytes, etc).
+             *
+             * <p>This property must be set.
+             */
             @NonNull
-            public IndexingConfig.Builder setTermMatchType(@TermMatchType int termMatchType) {
-                com.google.android.icing.proto.TermMatchType.Code termMatchTypeProto =
-                        com.google.android.icing.proto.TermMatchType.Code.forNumber(termMatchType);
-                if (termMatchTypeProto == null) {
-                    throw new IllegalArgumentException("Invalid termMatchType: " + termMatchType);
+            public PropertyConfig.Builder setDataType(@DataType int dataType) {
+                PropertyConfigProto.DataType.Code dataTypeProto =
+                        PropertyConfigProto.DataType.Code.forNumber(dataType);
+                if (dataTypeProto == null) {
+                    throw new IllegalArgumentException("Invalid dataType: " + dataType);
                 }
-                mProtoBuilder.setTermMatchType(termMatchTypeProto);
+                mPropertyConfigProto.setDataType(dataTypeProto);
+                return this;
+            }
+
+            /**
+             * The logical schema-type of the contents of this property.
+             *
+             * <p>Only required when {@link #setDataType(int)} is set to
+             * {@link #DATA_TYPE_DOCUMENT}. Otherwise, it is ignored.
+             */
+            @NonNull
+            public PropertyConfig.Builder setSchemaType(@NonNull String schemaType) {
+                mPropertyConfigProto.setSchemaType(schemaType);
+                return this;
+            }
+
+            /**
+             * The cardinality of the property (whether it is optional, required or repeated).
+             *
+             * <p>This property must be set.
+             */
+            @NonNull
+            public PropertyConfig.Builder setCardinality(@Cardinality int cardinality) {
+                PropertyConfigProto.Cardinality.Code cardinalityProto =
+                        PropertyConfigProto.Cardinality.Code.forNumber(cardinality);
+                if (cardinalityProto == null) {
+                    throw new IllegalArgumentException("Invalid cardinality: " + cardinality);
+                }
+                mPropertyConfigProto.setCardinality(cardinalityProto);
+                return this;
+            }
+
+            /**
+             * Configures how a property should be indexed so that it can be retrieved by queries.
+             */
+            @NonNull
+            public PropertyConfig.Builder setIndexingType(@IndexingType int indexingType) {
+                TermMatchType.Code termMatchTypeProto;
+                switch (indexingType) {
+                    case INDEXING_TYPE_NONE:
+                        termMatchTypeProto = TermMatchType.Code.UNKNOWN;
+                        break;
+                    case INDEXING_TYPE_EXACT_TERMS:
+                        termMatchTypeProto = TermMatchType.Code.EXACT_ONLY;
+                        break;
+                    case INDEXING_TYPE_PREFIXES:
+                        termMatchTypeProto = TermMatchType.Code.PREFIX;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Invalid indexingType: " + indexingType);
+                }
+                mIndexingConfigProto.setTermMatchType(termMatchTypeProto);
                 return this;
             }
 
             /** Configures how this property should be tokenized (split into words). */
             @NonNull
-            public IndexingConfig.Builder setTokenizerType(@TokenizerType int tokenizerType) {
+            public PropertyConfig.Builder setTokenizerType(@TokenizerType int tokenizerType) {
                 com.google.android.icing.proto.IndexingConfig.TokenizerType.Code
                         tokenizerTypeProto =
                             com.google.android.icing.proto.IndexingConfig
-                                    .TokenizerType.Code.forNumber(tokenizerType);
+                                .TokenizerType.Code.forNumber(tokenizerType);
                 if (tokenizerTypeProto == null) {
                     throw new IllegalArgumentException("Invalid tokenizerType: " + tokenizerType);
                 }
-                mProtoBuilder.setTokenizerType(tokenizerTypeProto);
+                mIndexingConfigProto.setTokenizerType(tokenizerTypeProto);
                 return this;
             }
 
             /**
-             * Constructs a new {@link IndexingConfig} from the contents of this builder.
+             * Constructs a new {@link PropertyConfig} from the contents of this builder.
              *
              * <p>After calling this method, the builder must no longer be used.
+             *
+             * @throws IllegalSchemaException If the property is not correctly populated (e.g.
+             *     missing {@code dataType}).
              */
             @NonNull
-            public IndexingConfig build() {
-                return new IndexingConfig(mProtoBuilder.build());
+            public PropertyConfig build() {
+                mPropertyConfigProto.setIndexingConfig(mIndexingConfigProto);
+                // TODO(b/147692920): Send the schema to Icing Lib for official validation, instead
+                //     of partially reimplementing some of the validation Icing does here.
+                if (mPropertyConfigProto.getDataType()
+                        == PropertyConfigProto.DataType.Code.UNKNOWN) {
+                    throw new IllegalSchemaException("Missing field: dataType");
+                }
+                if (mPropertyConfigProto.getSchemaType().isEmpty()
+                        && mPropertyConfigProto.getDataType()
+                            == PropertyConfigProto.DataType.Code.DOCUMENT) {
+                    throw new IllegalSchemaException(
+                            "Missing field: schemaType (required for configs with "
+                                    + "dataType = DOCUMENT)");
+                }
+                if (mPropertyConfigProto.getCardinality()
+                        == PropertyConfigProto.Cardinality.Code.UNKNOWN) {
+                    throw new IllegalSchemaException("Missing field: cardinality");
+                }
+                return new PropertyConfig(mPropertyConfigProto.build());
             }
         }
     }

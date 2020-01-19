@@ -16,7 +16,7 @@
 
 package android.app.appsearch;
 
-import android.annotation.CurrentTimeSecondsLong;
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,7 +32,6 @@ import com.google.android.icing.proto.PropertyProto;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Collection of all AppSearch Document Types.
@@ -150,14 +149,14 @@ public final class AppSearch {
         }
 
         /**
-         * Get the creation timestamp in seconds of the {@link Document}.
+         * Get the creation timestamp in milliseconds of the {@link Document}. Value will be in the
+         * {@link System#currentTimeMillis()} time base.
          *
          * @hide
          */
-        // TODO(b/143789408) Change seconds to millis with Icing library.
-        @CurrentTimeSecondsLong
-        public long getCreationTimestampSecs() {
-            return mProto.getCreationTimestampSecs();
+        @CurrentTimeMillisLong
+        public long getCreationTimestampMillis() {
+            return mProto.getCreationTimestampMs();
         }
 
         /**
@@ -381,8 +380,7 @@ public final class AppSearch {
                 mBuilderTypeInstance = (BuilderType) this;
                 mProtoBuilder.setUri(uri).setSchema(schemaType);
                  // Set current timestamp for creation timestamp by default.
-                setCreationTimestampSecs(
-                        TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()));
+                setCreationTimestampMillis(System.currentTimeMillis());
             }
 
             /**
@@ -404,14 +402,15 @@ public final class AppSearch {
             }
 
             /**
-             * Set the creation timestamp in seconds of the {@link Document}.
+             * Set the creation timestamp in milliseconds of the {@link Document}. Should be set
+             * using a value obtained from the {@link System#currentTimeMillis()} time base.
              *
              * @hide
              */
             @NonNull
-            public BuilderType setCreationTimestampSecs(
-                    @CurrentTimeSecondsLong long creationTimestampSecs) {
-                mProtoBuilder.setCreationTimestampSecs(creationTimestampSecs);
+            public BuilderType setCreationTimestampMillis(
+                    @CurrentTimeMillisLong long creationTimestampMillis) {
+                mProtoBuilder.setCreationTimestampMs(creationTimestampMillis);
                 return mBuilderTypeInstance;
             }
 

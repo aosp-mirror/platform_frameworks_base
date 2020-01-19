@@ -170,7 +170,7 @@ public class AnalogFrontendSettings extends FrontendSettings {
     /**
      * Creates a builder for {@link AnalogFrontendSettings}.
      *
-     * @parm the context of the caller.
+     * @param the context of the caller.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull

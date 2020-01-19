@@ -101,7 +101,9 @@ public class AppSearchImplTest {
         IllegalStateException e = expectThrows(
                 IllegalStateException.class,
                 () -> impl.setSchema(
-                        /*callingUid=*/Integer.MAX_VALUE, SchemaProto.getDefaultInstance()));
+                        /*callingUid=*/Integer.MAX_VALUE,
+                        SchemaProto.getDefaultInstance(),
+                        /*force=*/false));
         assertThat(e).hasMessageThat().contains("Failed to look up package name");
     }
 }

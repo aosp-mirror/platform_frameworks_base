@@ -36,7 +36,7 @@ public class CustomerDocumentTest {
     public void testBuildCustomerDocument() {
         CustomerDocument customerDocument = CustomerDocument.newBuilder("uri1")
                 .setScore(1)
-                .setCreationTimestampSecs(0)
+                .setCreationTimestampMillis(0)
                 .setProperty("longKey1", 1L, 2L, 3L)
                 .setProperty("doubleKey1", 1.0, 2.0, 3.0)
                 .setProperty("booleanKey1", true, false, true)
@@ -46,7 +46,7 @@ public class CustomerDocumentTest {
         assertThat(customerDocument.getUri()).isEqualTo("uri1");
         assertThat(customerDocument.getSchemaType()).isEqualTo("customerDocument");
         assertThat(customerDocument.getScore()).isEqualTo(1);
-        assertThat(customerDocument.getCreationTimestampSecs()).isEqualTo(0L);
+        assertThat(customerDocument.getCreationTimestampMillis()).isEqualTo(0L);
         assertThat(customerDocument.getPropertyLongArray("longKey1")).asList()
                 .containsExactly(1L, 2L, 3L);
         assertThat(customerDocument.getPropertyDoubleArray("doubleKey1")).usingExactEquality()

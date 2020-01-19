@@ -262,32 +262,60 @@ public abstract class NetworkAgent {
      */
     public static final int CMD_REMOVE_KEEPALIVE_PACKET_FILTER = BASE + 17;
 
-    // TODO : remove these two constructors. They are a stopgap measure to help sheperding a number
-    // of dependent changes that would conflict throughout the automerger graph. Having these
-    // temporarily helps with the process of going through with all these dependent changes across
-    // the entire tree.
-    /** @hide TODO: decide which of these to expose. */
+    /** @hide TODO: remove and replace usage with the public constructor. */
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
         this(looper, context, logTag, ni, nc, lp, score, null, NetworkProvider.ID_NONE);
     }
 
-    /** @hide TODO: decide which of these to expose. */
+    /** @hide TODO: remove and replace usage with the public constructor. */
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score, NetworkAgentConfig config) {
         this(looper, context, logTag, ni, nc, lp, score, config, NetworkProvider.ID_NONE);
     }
 
-    /** @hide TODO: decide which of these to expose. */
+    /** @hide TODO: remove and replace usage with the public constructor. */
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score, int providerId) {
         this(looper, context, logTag, ni, nc, lp, score, null, providerId);
     }
 
-    /** @hide TODO: decide which of these to expose. */
+    /** @hide TODO: remove and replace usage with the public constructor. */
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score, NetworkAgentConfig config,
             int providerId) {
+        this(looper, context, logTag, nc, lp, score, config, providerId, ni);
+    }
+
+    private static NetworkInfo getLegacyNetworkInfo(final NetworkAgentConfig config) {
+        // The subtype can be changed with (TODO) setLegacySubtype, but it starts
+        // with the type and an empty description.
+        return new NetworkInfo(config.legacyType, config.legacyType, config.legacyTypeName, "");
+    }
+
+    /**
+     * Create a new network agent.
+     * @param context a {@link Context} to get system services from.
+     * @param looper the {@link Looper} on which to invoke the callbacks.
+     * @param logTag the tag for logs
+     * @param nc the initial {@link NetworkCapabilities} of this network. Update with
+     *           sendNetworkCapabilities.
+     * @param lp the initial {@link LinkProperties} of this network. Update with sendLinkProperties.
+     * @param score the initial score of this network. Update with sendNetworkScore.
+     * @param config an immutable {@link NetworkAgentConfig} for this agent.
+     * @param provider the {@link NetworkProvider} managing this agent.
+     */
+    public NetworkAgent(@NonNull Context context, @NonNull Looper looper, @NonNull String logTag,
+            @NonNull NetworkCapabilities nc, @NonNull LinkProperties lp, int score,
+            @NonNull NetworkAgentConfig config, @Nullable NetworkProvider provider) {
+        this(looper, context, logTag, nc, lp, score, config,
+                provider == null ? NetworkProvider.ID_NONE : provider.getProviderId(),
+                getLegacyNetworkInfo(config));
+    }
+
+    private NetworkAgent(Looper looper, Context context, String logTag, NetworkCapabilities nc,
+            LinkProperties lp, int score, NetworkAgentConfig config, int providerId,
+            NetworkInfo ni) {
         mHandler = new NetworkAgentHandler(looper);
         LOG_TAG = logTag;
         mContext = context;

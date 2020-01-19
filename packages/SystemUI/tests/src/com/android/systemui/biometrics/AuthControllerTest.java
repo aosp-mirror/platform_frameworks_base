@@ -20,7 +20,6 @@ import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
-import static junit.framework.TestCase.assertNotNull;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -290,6 +289,24 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     // Corner case tests
+
+    @Test
+    public void testCancelAuthentication_whenCredentialConfirmed_doesntCrash() throws Exception {
+        // It's possible that before the client is notified that credential is confirmed, the client
+        // requests to cancel authentication.
+        //
+        // Test that the following sequence of events does not crash SystemUI:
+        // 1) Credential is confirmed
+        // 2) Client cancels authentication
+
+        showDialog(Authenticators.DEVICE_CREDENTIAL, BiometricPrompt.TYPE_NONE);
+        verify(mDialog1).show(any(), any());
+
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_CREDENTIAL_AUTHENTICATED);
+        verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED);
+
+        mAuthController.hideAuthenticationDialog();
+    }
 
     @Test
     public void testShowNewDialog_beforeOldDialogDismissed_SkipsAnimations() {

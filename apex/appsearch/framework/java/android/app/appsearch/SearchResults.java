@@ -60,7 +60,7 @@ public final class SearchResults {
         public AppSearch.Document getDocument() {
             return AppSearch.Document.newBuilder(mResultProto.getDocument().getUri(),
                     mResultProto.getDocument().getSchema())
-                    .setCreationTimestampSecs(mResultProto.getDocument().getCreationTimestampSecs())
+                    .setCreationTimestampMillis(mResultProto.getDocument().getCreationTimestampMs())
                     .setScore(mResultProto.getDocument().getScore())
                     .build();
         }

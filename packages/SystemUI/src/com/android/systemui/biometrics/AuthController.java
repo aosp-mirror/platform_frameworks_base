@@ -338,7 +338,13 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     @Override
     public void hideAuthenticationDialog() {
-        if (DEBUG) Log.d(TAG, "hideAuthenticationDialog");
+        if (DEBUG) Log.d(TAG, "hideAuthenticationDialog: " + mCurrentDialog);
+
+        if (mCurrentDialog == null) {
+            // Could be possible if the caller canceled authentication after credential success
+            // but before the client was notified.
+            return;
+        }
 
         mCurrentDialog.dismissFromSystemServer();
 
