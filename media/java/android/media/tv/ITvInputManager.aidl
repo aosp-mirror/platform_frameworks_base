@@ -95,7 +95,7 @@ interface ITvInputManager {
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();
     ITvInputHardware acquireTvInputHardware(int deviceId, in ITvInputHardwareCallback callback,
-            in TvInputInfo info, int userId);
+            in TvInputInfo info, int userId, String tvInputSessionId, int priorityHint);
     void releaseTvInputHardware(int deviceId, in ITvInputHardware hardware, int userId);
 
     // For TV input capturing

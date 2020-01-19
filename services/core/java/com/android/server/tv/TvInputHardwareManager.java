@@ -44,6 +44,7 @@ import android.media.tv.ITvInputHardware;
 import android.media.tv.ITvInputHardwareCallback;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
+import android.media.tv.TvInputService.PriorityHintUseCaseType;
 import android.media.tv.TvStreamConfig;
 import android.os.Handler;
 import android.os.IBinder;
@@ -363,7 +364,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
      * release is notified via ITvInputHardwareCallback.onReleased().
      */
     public ITvInputHardware acquireHardware(int deviceId, ITvInputHardwareCallback callback,
-            TvInputInfo info, int callingUid, int resolvedUserId) {
+            TvInputInfo info, int callingUid, int resolvedUserId,
+            String tvInputSessionId, @PriorityHintUseCaseType int priorityHint) {
         if (callback == null) {
             throw new NullPointerException();
         }
@@ -373,6 +375,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 Slog.e(TAG, "Invalid deviceId : " + deviceId);
                 return null;
             }
+            // TODO: check with TRM to compare the client's priority with the current holder's
+            // priority. If lower, do nothing.
             if (checkUidChangedLocked(connection, callingUid, resolvedUserId)) {
                 TvInputHardwareImpl hardware =
                         new TvInputHardwareImpl(connection.getHardwareInfoLocked());
