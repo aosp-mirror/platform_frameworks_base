@@ -2491,6 +2491,20 @@ public class WifiManager {
     }
 
     /**
+     * Check if the chipset supports a certain Wi-Fi standard.
+     * @param standard the IEEE 802.11 standard to check on.
+     *        valid values from {@link ScanResult}'s {@code WIFI_STANDARD_}
+     * @return {@code true} if supported, {@code false} otherwise.
+     */
+    public boolean isWifiStandardSupported(@ScanResult.WifiStandard int standard) {
+        try {
+            return mService.isWifiStandardSupported(standard);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Interface for Wi-Fi activity energy info listener. Should be implemented by applications and
      * set when calling {@link WifiManager#getWifiActivityEnergyInfoAsync}.
      *

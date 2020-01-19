@@ -117,6 +117,8 @@ interface IWifiManager
 
     boolean is6GHzBandSupported();
 
+    boolean isWifiStandardSupported(int standard);
+
     boolean needs5GHzToAnyApBandConversion();
 
     DhcpInfo getDhcpInfo();

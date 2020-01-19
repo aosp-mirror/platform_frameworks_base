@@ -1959,6 +1959,17 @@ public class WifiManagerTest {
     }
 
     /**
+     * Test behavior of {@link WifiManager#isWifiStandardSupported()}
+     */
+    @Test
+    public void testIsWifiStandardSupported() throws Exception {
+        int standard = ScanResult.WIFI_STANDARD_11AX;
+        when(mWifiService.isWifiStandardSupported(standard)).thenReturn(true);
+        assertTrue(mWifiManager.isWifiStandardSupported(standard));
+        verify(mWifiService).isWifiStandardSupported(standard);
+    }
+
+    /**
      * Test behavior of {@link WifiManager#getDhcpInfo()}
      */
     @Test
