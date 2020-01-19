@@ -2971,7 +2971,7 @@ public class WifiManager {
      * Each application can make a single active call to this method. The {@link
      * LocalOnlyHotspotCallback#onStarted(LocalOnlyHotspotReservation)} callback supplies the
      * requestor with a {@link LocalOnlyHotspotReservation} that contains a
-     * {@link WifiConfiguration} with the SSID, security type and credentials needed to connect
+     * {@link SoftApConfiguration} with the SSID, security type and credentials needed to connect
      * to the hotspot.  Communicating this information is up to the application.
      * <p>
      * If the LocalOnlyHotspot cannot be created, the {@link LocalOnlyHotspotCallback#onFailed(int)}
@@ -3136,7 +3136,7 @@ public class WifiManager {
      * Allow callers (Settings UI) to watch LocalOnlyHotspot state changes.  Callers will
      * receive a {@link LocalOnlyHotspotSubscription} object as a parameter of the
      * {@link LocalOnlyHotspotObserver#onRegistered(LocalOnlyHotspotSubscription)}. The registered
-     * callers will receive the {@link LocalOnlyHotspotObserver#onStarted(WifiConfiguration)} and
+     * callers will receive the {@link LocalOnlyHotspotObserver#onStarted(SoftApConfiguration)} and
      * {@link LocalOnlyHotspotObserver#onStopped()} callbacks.
      * <p>
      * Applications should have the
@@ -3711,13 +3711,13 @@ public class WifiManager {
     }
 
     /**
-     * LocalOnlyHotspotReservation that contains the {@link WifiConfiguration} for the active
+     * LocalOnlyHotspotReservation that contains the {@link SoftApConfiguration} for the active
      * LocalOnlyHotspot request.
      * <p>
      * Applications requesting LocalOnlyHotspot for sharing will receive an instance of the
      * LocalOnlyHotspotReservation in the
      * {@link LocalOnlyHotspotCallback#onStarted(LocalOnlyHotspotReservation)} call.  This
-     * reservation contains the relevant {@link WifiConfiguration}.
+     * reservation contains the relevant {@link SoftApConfiguration}.
      * When an application is done with the LocalOnlyHotspot, they should call {@link
      * LocalOnlyHotspotReservation#close()}.  Once this happens, the application will not receive
      * any further callbacks. If the LocalOnlyHotspot is stopped due to a
@@ -3727,18 +3727,69 @@ public class WifiManager {
     public class LocalOnlyHotspotReservation implements AutoCloseable {
 
         private final CloseGuard mCloseGuard = new CloseGuard();
-        private final WifiConfiguration mConfig;
+        private final SoftApConfiguration mConfig;
         private boolean mClosed = false;
 
         /** @hide */
         @VisibleForTesting
-        public LocalOnlyHotspotReservation(WifiConfiguration config) {
+        public LocalOnlyHotspotReservation(SoftApConfiguration config) {
             mConfig = config;
             mCloseGuard.open("close");
         }
 
+        /**
+         * Returns the {@link WifiConfiguration} of the current Local Only Hotspot (LOHS).
+         * May be null if hotspot enabled and security type is not
+         * {@code WifiConfiguration.KeyMgmt.None} or {@code WifiConfiguration.KeyMgmt.WPA2_PSK}.
+         *
+         * @deprecated Use {@code WifiManager#getSoftApConfiguration()} to get the
+         * LOHS configuration.
+         */
+        @Deprecated
+        @Nullable
         public WifiConfiguration getWifiConfiguration() {
+            return convertToWifiConfiguration(mConfig);
+        }
+
+        /**
+         * Returns the {@link SoftApConfiguration} of the current Local Only Hotspot (LOHS).
+         */
+        @NonNull
+        public SoftApConfiguration getSoftApConfiguration() {
             return mConfig;
+        }
+
+        /**
+         * Convert to WifiConfiguration from SoftApConfuration.
+         *
+         * Copy to the filed which is public and used by SoftAp.
+         */
+        private WifiConfiguration convertToWifiConfiguration(SoftApConfiguration softApConfig) {
+            if (softApConfig == null) return null;
+
+            WifiConfiguration wifiConfig = new WifiConfiguration();
+            wifiConfig.networkId = WifiConfiguration.LOCAL_ONLY_NETWORK_ID;
+            wifiConfig.SSID = softApConfig.getSsid();
+            if (softApConfig.getBssid() != null) {
+                wifiConfig.BSSID = softApConfig.getBssid().toString();
+            }
+            wifiConfig.preSharedKey = softApConfig.getPassphrase();
+            wifiConfig.hiddenSSID = softApConfig.isHiddenSsid();
+            int authType = softApConfig.getSecurityType();
+            switch (authType) {
+                case SoftApConfiguration.SECURITY_TYPE_OPEN:
+                    authType = WifiConfiguration.KeyMgmt.NONE;
+                    wifiConfig.allowedKeyManagement.set(authType);
+                    break;
+                case SoftApConfiguration.SECURITY_TYPE_WPA2_PSK:
+                    authType = WifiConfiguration.KeyMgmt.WPA2_PSK;
+                    wifiConfig.allowedKeyManagement.set(authType);
+                    break;
+                default:
+                    wifiConfig = null;
+                    break;
+            }
+            return wifiConfig;
         }
 
         @Override
@@ -3835,7 +3886,7 @@ public class WifiManager {
         }
 
         @Override
-        public void onHotspotStarted(WifiConfiguration config) {
+        public void onHotspotStarted(SoftApConfiguration config) {
             WifiManager manager = mWifiManager.get();
             if (manager == null) return;
 
@@ -3927,7 +3978,7 @@ public class WifiManager {
         /**
          * LocalOnlyHotspot started with the supplied config.
          */
-        public void onStarted(WifiConfiguration config) {};
+        public void onStarted(SoftApConfiguration config) {};
 
         /**
          * LocalOnlyHotspot stopped.
@@ -3967,7 +4018,7 @@ public class WifiManager {
         }
 
         @Override
-        public void onHotspotStarted(WifiConfiguration config) {
+        public void onHotspotStarted(SoftApConfiguration config) {
             WifiManager manager = mWifiManager.get();
             if (manager == null) return;
 

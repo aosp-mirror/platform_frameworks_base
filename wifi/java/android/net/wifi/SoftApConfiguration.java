@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 
 /**
  * Configuration for a soft access point (a.k.a. Soft AP, SAP, Hotspot).
@@ -45,22 +44,21 @@ import java.util.concurrent.Executor;
  * framework how it should configure a hotspot.
  *
  * System apps can use this to configure a tethered hotspot using
- * {@link WifiManager#startTetheredHotspot(SoftApConfiguration)} and
- * {@link WifiManager#setSoftApConfiguration(SoftApConfiguration)}
+ * {@code WifiManager#startTetheredHotspot(SoftApConfiguration)} and
+ * {@code WifiManager#setSoftApConfiguration(SoftApConfiguration)}
  * or local-only hotspot using
- * {@link WifiManager#startLocalOnlyHotspot(SoftApConfiguration, Executor,
+ * {@code WifiManager#startLocalOnlyHotspot(SoftApConfiguration, Executor,
  * WifiManager.LocalOnlyHotspotCallback)}.
  *
  * Instances of this class are immutable; use {@link SoftApConfiguration.Builder} and its methods to
  * create a new instance.
  *
- * @hide
  */
-@SystemApi
 public final class SoftApConfiguration implements Parcelable {
 
     @VisibleForTesting
     static final int PSK_MIN_LEN = 8;
+
     @VisibleForTesting
     static final int PSK_MAX_LEN = 63;
 
@@ -207,22 +205,24 @@ public final class SoftApConfiguration implements Parcelable {
     private final int mShutdownTimeoutMillis;
 
     /**
-     * Security types we support.
+     * THe definition of security type OPEN.
      */
-    /** @hide */
-    @SystemApi
     public static final int SECURITY_TYPE_OPEN = 0;
 
-    /** @hide */
-    @SystemApi
+
+    /**
+     * The definition of security type WPA2-PSK.
+     */
     public static final int SECURITY_TYPE_WPA2_PSK = 1;
 
-    /** @hide */
-    @SystemApi
+    /**
+     * The definition of security type WPA3-SAE Transition mode.
+     */
     public static final int SECURITY_TYPE_WPA3_SAE_TRANSITION = 2;
 
-    /** @hide */
-    @SystemApi
+    /**
+     * The definition of security type WPA3-SAE.
+     */
     public static final int SECURITY_TYPE_WPA3_SAE = 3;
 
     /** @hide */
@@ -346,7 +346,7 @@ public final class SoftApConfiguration implements Parcelable {
 
     /**
      * Return String set to be the SSID for the AP.
-     * {@link #setSsid(String)}.
+     * {@link Builder#setSsid(String)}.
      */
     @Nullable
     public String getSsid() {
@@ -364,7 +364,7 @@ public final class SoftApConfiguration implements Parcelable {
 
     /**
      * Returns String set to be passphrase for current AP.
-     * {@link #setPassphrase(String, @SecurityType int)}.
+     * {@link Builder#setPassphrase(String, int)}.
      */
     @Nullable
     public String getPassphrase() {
@@ -383,7 +383,10 @@ public final class SoftApConfiguration implements Parcelable {
     /**
      * Returns {@link BandType} set to be the band for the AP.
      * {@link Builder#setBand(@BandType int)}.
+     *
+     * @hide
      */
+    @SystemApi
     public @BandType int getBand() {
         return mBand;
     }
@@ -391,7 +394,10 @@ public final class SoftApConfiguration implements Parcelable {
     /**
      * Returns Integer set to be the channel for the AP.
      * {@link Builder#setChannel(int)}.
+     *
+     * @hide
      */
+    @SystemApi
     public int getChannel() {
         return mChannel;
     }
@@ -408,7 +414,10 @@ public final class SoftApConfiguration implements Parcelable {
     /**
      * Returns the maximum number of clients that can associate to the AP.
      * {@link Builder#setMaxNumberOfClients(int)}.
+     *
+     * @hide
      */
+    @SystemApi
     public int getMaxNumberOfClients() {
         return mMaxNumberOfClients;
     }
@@ -417,7 +426,10 @@ public final class SoftApConfiguration implements Parcelable {
      * Returns the shutdown timeout in milliseconds.
      * The Soft AP will shutdown when there are no devices associated to it for
      * the timeout duration. See {@link Builder#setShutdownTimeoutMillis(int)}.
+     *
+     * @hide
      */
+    @SystemApi
     public int getShutdownTimeoutMillis() {
         return mShutdownTimeoutMillis;
     }
@@ -426,7 +438,10 @@ public final class SoftApConfiguration implements Parcelable {
      * Returns a flag indicating whether clients need to be pre-approved by the user.
      * (true: authorization required) or not (false: not required).
      * {@link Builder#enableClientControlByUser(Boolean)}.
+     *
+     * @hide
      */
+    @SystemApi
     public boolean isClientControlByUserEnabled() {
         return mClientControlByUser;
     }
@@ -435,8 +450,11 @@ public final class SoftApConfiguration implements Parcelable {
      * Returns List of clients which aren't allowed to associate to the AP.
      *
      * Clients are configured using {@link Builder#setClientList(List, List)}
+     *
+     * @hide
      */
     @NonNull
+    @SystemApi
     public List<MacAddress> getBlockedClientList() {
         return mBlockedClientList;
     }
@@ -444,8 +462,11 @@ public final class SoftApConfiguration implements Parcelable {
     /**
      * List of clients which are allowed to associate to the AP.
      * Clients are configured using {@link Builder#setClientList(List, List)}
+     *
+     * @hide
      */
     @NonNull
+    @SystemApi
     public List<MacAddress> getAllowedClientList() {
         return mAllowedClientList;
     }
@@ -456,7 +477,10 @@ public final class SoftApConfiguration implements Parcelable {
      *
      * All fields are optional. By default, SSID and BSSID are automatically chosen by the
      * framework, and an open network is created.
+     *
+     * @hide
      */
+    @SystemApi
     public static final class Builder {
         private String mSsid;
         private MacAddress mBssid;

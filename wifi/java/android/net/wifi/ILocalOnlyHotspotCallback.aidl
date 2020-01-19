@@ -16,7 +16,7 @@
 
 package android.net.wifi;
 
-import android.net.wifi.WifiConfiguration;
+import android.net.wifi.SoftApConfiguration;
 
 /**
  * Communicates LOHS status back to the application process.
@@ -24,7 +24,7 @@ import android.net.wifi.WifiConfiguration;
  * @hide
  */
 oneway interface ILocalOnlyHotspotCallback {
-    void onHotspotStarted(in WifiConfiguration config);
+    void onHotspotStarted(in SoftApConfiguration config);
     void onHotspotStopped();
     void onHotspotFailed(int reason);
 }
