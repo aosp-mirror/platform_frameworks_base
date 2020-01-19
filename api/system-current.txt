@@ -567,6 +567,10 @@ package android.app {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.PackageOps> CREATOR;
   }
 
+  public final class ApplicationExitInfo implements android.os.Parcelable {
+    method @NonNull public android.os.UserHandle getUserHandle();
+  }
+
   public class BroadcastOptions {
     method public static android.app.BroadcastOptions makeBasic();
     method @RequiresPermission("android.permission.START_ACTIVITIES_FROM_BACKGROUND") public void setBackgroundActivityStartsAllowed(boolean);

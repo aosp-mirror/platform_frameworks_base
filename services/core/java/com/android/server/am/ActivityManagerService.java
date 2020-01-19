@@ -155,6 +155,7 @@ import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
 import android.app.ApplicationErrorReport;
+import android.app.ApplicationExitInfo;
 import android.app.ApplicationThreadConstants;
 import android.app.BroadcastOptions;
 import android.app.ContentProviderHolder;
@@ -684,7 +685,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Process management.
      */
-    final ProcessList mProcessList = new ProcessList();
+    final ProcessList mProcessList;
 
     /**
      * Tracking long-term execution of processes to look for abuse and other
@@ -1534,7 +1535,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 TAG, "Death received in " + this
                 + " for thread " + mAppThread.asBinder());
             synchronized(ActivityManagerService.this) {
-                appDiedLocked(mApp, mPid, mAppThread, true);
+                appDiedLocked(mApp, mPid, mAppThread, true, null);
             }
         }
     }
@@ -2382,6 +2383,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ? new ActivityManagerConstants(mContext, this, mHandler) : null;
         final ActiveUids activeUids = new ActiveUids(this, false /* postChangesToAtm */);
         mPlatformCompat = null;
+        mProcessList = injector.getProcessList(this);
         mProcessList.init(this, activeUids, mPlatformCompat);
         mLowMemDetector = null;
         mOomAdjuster = hasHandlerThread
@@ -2436,6 +2438,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final ActiveUids activeUids = new ActiveUids(this, true /* postChangesToAtm */);
         mPlatformCompat = (PlatformCompat) ServiceManager.getService(
                 Context.PLATFORM_COMPAT_SERVICE);
+        mProcessList = mInjector.getProcessList(this);
         mProcessList.init(this, activeUids, mPlatformCompat);
         mLowMemDetector = new LowMemDetector(this);
         mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
@@ -3680,13 +3683,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    final void appDiedLocked(ProcessRecord app) {
-       appDiedLocked(app, app.pid, app.thread, false);
+    final void appDiedLocked(ProcessRecord app, String reason) {
+        appDiedLocked(app, app.pid, app.thread, false, reason);
     }
 
     @GuardedBy("this")
     final void appDiedLocked(ProcessRecord app, int pid, IApplicationThread thread,
-            boolean fromBinderDied) {
+            boolean fromBinderDied, String reason) {
         // First check if this ProcessRecord is actually active for the pid.
         synchronized (mPidsSelfLocked) {
             ProcessRecord curProc = mPidsSelfLocked.get(pid);
@@ -3704,6 +3707,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!app.killed) {
             if (!fromBinderDied) {
                 killProcessQuiet(pid);
+                mProcessList.noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_UNKNOWN, reason);
             }
             ProcessList.killProcessGroup(app.uid, pid);
             app.killed = true;
@@ -4727,7 +4732,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             cleanupAppInLaunchingProvidersLocked(app, true);
             // Take care of any services that are waiting for the process.
             mServices.processStartTimedOutLocked(app);
-            app.kill("start timeout", true);
+            app.kill("start timeout", ApplicationExitInfo.REASON_INITIALIZATION_FAILURE, true);
             if (app.isolated) {
                 mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
             }
@@ -4814,6 +4819,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (pid > 0 && pid != MY_PID) {
                 killProcessQuiet(pid);
                 //TODO: killProcessGroup(app.info.uid, pid);
+                mProcessList.noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_UNKNOWN, "attach failed");
             } else {
                 try {
                     thread.scheduleExit();
@@ -5153,7 +5160,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (badApp) {
-            app.kill("error during init", true);
+            app.kill("error during init", ApplicationExitInfo.REASON_INITIALIZATION_FAILURE, true);
             handleAppDiedLocked(app, false, true);
             return false;
         }
@@ -7544,7 +7551,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     proc.info.uid);
             final long ident = Binder.clearCallingIdentity();
             try {
-                appDiedLocked(proc);
+                appDiedLocked(proc, "unstable content provider");
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -8856,7 +8863,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 int adj = proc.setAdj;
                 if (adj >= worstType && !proc.killedByAm) {
-                    proc.kill(reason, true);
+                    proc.kill(reason, ApplicationExitInfo.REASON_OTHER, true);
                     killed = true;
                 }
             }
@@ -8904,7 +8911,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 final int adj = proc.setAdj;
                 if (adj > belowAdj && !proc.killedByAm) {
-                    proc.kill(reason, true);
+                    proc.kill(reason, ApplicationExitInfo.REASON_PERMISSION_CHANGE, true);
                     killed = true;
                 }
             }
@@ -9048,7 +9055,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                             TimeUtils.formatDuration(lowRamSinceLastIdle, sb);
                             Slog.wtfQuiet(TAG, sb.toString());
                             proc.kill("idle maint (pss " + proc.lastPss
-                                    + " from " + proc.initialIdlePss + ")", true);
+                                    + " from " + proc.initialIdlePss + ")",
+                                    ApplicationExitInfo.REASON_OTHER,
+                                    ApplicationExitInfo.SUBREASON_MEMORY_PRESSURE,
+                                    true);
                         }
                     }
                 } else if (proc.setProcState < ActivityManager.PROCESS_STATE_HOME
@@ -9145,6 +9155,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Make sure we have the current profile info, since it is needed for security checks.
             mUserController.onSystemReady();
             mAppOpsService.systemReady();
+            mProcessList.onSystemReady();
             mSystemReady = true;
             t.traceEnd();
         }
@@ -9972,6 +9983,67 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public ParceledListSlice<ApplicationExitInfo> getHistoricalProcessExitReasons(
+            String packageName, int pid, int maxNum, int userId) {
+        enforceNotIsolatedCaller("getHistoricalProcessExitReasons");
+
+        // For the simplification, we don't support USER_ALL nor USER_CURRENT here.
+        if (userId == UserHandle.USER_ALL || userId == UserHandle.USER_CURRENT) {
+            throw new IllegalArgumentException("Unsupported userId");
+        }
+
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getCallingUserId();
+        mUserController.handleIncomingUser(callingPid, callingUid, userId, true, ALLOW_NON_FULL,
+                "getHistoricalProcessExitReasons", null);
+
+        final ArrayList<ApplicationExitInfo> results = new ArrayList<ApplicationExitInfo>();
+        if (!TextUtils.isEmpty(packageName)) {
+            final int uid = enforceDumpPermissionForPackage(packageName, userId, callingUid,
+                      "getHistoricalProcessExitReasons");
+            if (uid != Process.INVALID_UID) {
+                mProcessList.mAppExitInfoTracker.getExitInfo(
+                        packageName, uid, pid, maxNum, results);
+            }
+        } else {
+            // If no package name is given, use the caller's uid as the filter uid.
+            mProcessList.mAppExitInfoTracker.getExitInfo(
+                    packageName, callingUid, pid, maxNum, results);
+        }
+
+        return new ParceledListSlice<ApplicationExitInfo>(results);
+    }
+
+    /**
+     * Check if the calling process has the permission to dump given package,
+     * throw SecurityException if it doesn't have the permission.
+     *
+     * @return The UID of the given package, or {@link android.os.Process#INVALID_UID}
+     *         if the package is not found.
+     */
+    private int enforceDumpPermissionForPackage(String packageName, int userId, int callingUid,
+            String function) {
+        long identity = Binder.clearCallingIdentity();
+        int uid = Process.INVALID_UID;
+        try {
+            uid = mPackageManagerInt.getPackageUid(packageName,
+                    MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        if (uid == Process.INVALID_UID) {
+            return Process.INVALID_UID;
+        }
+        if (UserHandle.getAppId(uid) != UserHandle.getAppId(callingUid)) {
+            // Requires the DUMP permission if the target package doesn't belong
+            // to the caller.
+            enforceCallingPermission(android.Manifest.permission.DUMP, function);
+        }
+        return uid;
+    }
+
+    @Override
     public void getMyMemoryState(ActivityManager.RunningAppProcessInfo outState) {
         if (outState == null) {
             throw new IllegalArgumentException("outState is null");
@@ -10149,6 +10221,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
+            }
+            mProcessList.mAppExitInfoTracker.dumpHistoryProcessExitInfo(pw, dumpPackage);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------"
+                        + "------------");
             }
             dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage, dumpAppId);
             pw.println();
@@ -10448,6 +10526,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (this) {
                     dumpUsersLocked(pw);
                 }
+            } else if ("exit-info".equals(cmd)) {
+                if (opti < args.length) {
+                    dumpPackage = args[opti];
+                    opti++;
+                }
+                mProcessList.mAppExitInfoTracker.dumpHistoryProcessExitInfo(pw, dumpPackage);
             } else {
                 // Dumping a single activity?
                 if (!mAtmInternal.dumpActivity(fd, pw, cmd, args, opti, dumpAll,
@@ -14061,7 +14145,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     capp.kill("depends on provider "
                             + cpr.name.flattenToShortString()
                             + " in dying proc " + (proc != null ? proc.processName : "??")
-                            + " (adj " + (proc != null ? proc.setAdj : "??") + ")", true);
+                            + " (adj " + (proc != null ? proc.setAdj : "??") + ")",
+                            ApplicationExitInfo.REASON_OTHER,
+                            true);
                 }
             } else if (capp.thread != null && conn.provider.provider != null) {
                 try {
@@ -14146,6 +14232,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Take care of any launching providers waiting for this process.
         if (cleanupAppInLaunchingProvidersLocked(app, false)) {
+            mProcessList.noteProcessDiedLocked(app);
             restart = true;
         }
 
@@ -14242,6 +14329,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcessesOnHold.remove(app);
 
         mAtmInternal.onCleanUpApplicationRecord(app.getWindowProcessController());
+        mProcessList.noteProcessDiedLocked(app);
 
         if (restart && !app.isolated) {
             // We have components that still need to be running in the
@@ -16968,7 +17056,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     uptimeSince, cputimeUsed);
                         }
                         app.kill("excessive cpu " + cputimeUsed + " during " + uptimeSince
-                                + " dur=" + checkDur + " limit=" + cpuLimit, true);
+                                + " dur=" + checkDur + " limit=" + cpuLimit,
+                                ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE,
+                                ApplicationExitInfo.SUBREASON_EXCESSIVE_CPU,
+                                true);
                         app.baseProcessTracker.reportExcessiveCpu(app.pkgList.mPkgList);
                         for (int ipkg = app.pkgList.size() - 1; ipkg >= 0; ipkg--) {
                             ProcessStats.ProcessStateHolder holder = app.pkgList.valueAt(ipkg);
@@ -17602,7 +17693,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + (app.thread != null ? app.thread.asBinder() : null)
                     + ")\n");
                 if (app.pid > 0 && app.pid != MY_PID) {
-                    app.kill("empty", false);
+                    app.kill("empty",
+                            ApplicationExitInfo.REASON_OTHER,
+                            ApplicationExitInfo.SUBREASON_TRIM_EMPTY,
+                            false);
                 } else if (app.thread != null) {
                     try {
                         app.thread.scheduleExit();
@@ -18432,7 +18526,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final ProcessRecord pr = (ProcessRecord) wpc.mOwner;
                     if (pr.setSchedGroup == ProcessList.SCHED_GROUP_BACKGROUND
                             && pr.curReceivers.isEmpty()) {
-                        pr.kill("remove task", true);
+                        pr.kill("remove task", ApplicationExitInfo.REASON_OTHER, true);
                     } else {
                         // We delay killing processes that are not in the background or running a
                         // receiver.
@@ -19235,6 +19329,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return mNmi.isNetworkRestrictedForUid(uid);
             }
             return false;
+        }
+
+        /**
+         * Return the process list instance
+         */
+        public ProcessList getProcessList(ActivityManagerService service) {
+            return new ProcessList();
         }
 
         private boolean ensureHasNetworkManagementInternal() {

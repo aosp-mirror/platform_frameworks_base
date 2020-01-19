@@ -64,6 +64,7 @@ import static com.android.server.am.ActivityManagerService.TOP_APP_PRIORITY_BOOS
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 
 import android.app.ActivityManager;
+import android.app.ApplicationExitInfo;
 import android.app.usage.UsageEvents;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
@@ -757,7 +758,10 @@ public final class OomAdjuster {
                             lastCachedGroupUid = lastCachedGroup = 0;
                         }
                         if ((numCached - numCachedExtraGroup) > cachedProcessLimit) {
-                            app.kill("cached #" + numCached, true);
+                            app.kill("cached #" + numCached,
+                                    ApplicationExitInfo.REASON_OTHER,
+                                    ApplicationExitInfo.SUBREASON_TOO_MANY_CACHED,
+                                    true);
                         }
                         break;
                     case PROCESS_STATE_CACHED_EMPTY:
@@ -765,11 +769,17 @@ public final class OomAdjuster {
                                 && app.lastActivityTime < oldTime) {
                             app.kill("empty for "
                                     + ((oldTime + ProcessList.MAX_EMPTY_TIME - app.lastActivityTime)
-                                    / 1000) + "s", true);
+                                    / 1000) + "s",
+                                    ApplicationExitInfo.REASON_OTHER,
+                                    ApplicationExitInfo.SUBREASON_TRIM_EMPTY,
+                                    true);
                         } else {
                             numEmpty++;
                             if (numEmpty > emptyProcessLimit) {
-                                app.kill("empty #" + numEmpty, true);
+                                app.kill("empty #" + numEmpty,
+                                        ApplicationExitInfo.REASON_OTHER,
+                                        ApplicationExitInfo.SUBREASON_TOO_MANY_EMPTY,
+                                        true);
                             }
                         }
                         break;
@@ -786,7 +796,7 @@ public final class OomAdjuster {
                     // definition not re-use the same process again, and it is
                     // good to avoid having whatever code was running in them
                     // left sitting around after no longer needed.
-                    app.kill("isolated not needed", true);
+                    app.kill("isolated not needed", ApplicationExitInfo.REASON_OTHER, true);
                 } else {
                     // Keeping this process, update its uid.
                     updateAppUidRecLocked(app);
@@ -2032,7 +2042,7 @@ public final class OomAdjuster {
             }
             if (app.waitingToKill != null && app.curReceivers.isEmpty()
                     && app.setSchedGroup == ProcessList.SCHED_GROUP_BACKGROUND) {
-                app.kill(app.waitingToKill, true);
+                app.kill(app.waitingToKill, ApplicationExitInfo.REASON_OTHER, true);
                 success = false;
             } else {
                 int processGroup;

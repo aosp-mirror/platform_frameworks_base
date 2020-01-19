@@ -36,6 +36,7 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.ApplicationExitInfo;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.Notification;
@@ -2730,7 +2731,7 @@ public final class ActiveServices {
             created = true;
         } catch (DeadObjectException e) {
             Slog.w(TAG, "Application dead when creating service " + r);
-            mAm.appDiedLocked(app);
+            mAm.appDiedLocked(app, "Died when creating service");
             throw e;
         } finally {
             if (!created) {
@@ -3649,7 +3650,8 @@ public final class ActiveServices {
                             && proc.pid != 0 && proc.pid != ActivityManagerService.MY_PID
                             && proc.setProcState >= ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
                         proc.kill("bound to service " + sr.shortInstanceName
-                                + " in dying proc " + (app != null ? app.processName : "??"), true);
+                                + " in dying proc " + (app != null ? app.processName : "??"),
+                                ApplicationExitInfo.REASON_OTHER, true);
                     }
                 }
             }

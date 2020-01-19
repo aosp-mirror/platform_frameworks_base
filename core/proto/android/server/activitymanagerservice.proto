@@ -19,6 +19,7 @@ syntax = "proto2";
 package com.android.server.am;
 
 import "frameworks/base/core/proto/android/app/activitymanager.proto";
+import "frameworks/base/core/proto/android/app/appexitinfo.proto";
 import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/app/notification.proto";
 import "frameworks/base/core/proto/android/app/profilerinfo.proto";
@@ -1081,4 +1082,24 @@ message AppTimeTrackerProto {
 
     optional .android.util.Duration started_time = 4;
     optional string started_package = 5;
+}
+
+// sync with com.android.server.am.am.ProcessList.java
+message AppsExitInfoProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int64 last_update_timestamp = 1;
+    message Package {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string package_name = 1;
+        message User {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional int32 uid = 1;
+            repeated .android.app.ApplicationExitInfoProto app_exit_info = 2;
+        }
+        repeated User users = 2;
+    }
+    repeated Package packages = 2;
 }
