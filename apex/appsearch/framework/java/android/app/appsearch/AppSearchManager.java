@@ -54,7 +54,7 @@ public class AppSearchManager {
     }
 
     /**
-     * Sets the schema being used by documents provided to the #put method.
+     * Sets the schema being used by documents provided to the {@link #putDocuments} method.
      *
      * <p>The schema provided here is compared to the stored copy of the schema previously supplied
      * to {@link #setSchema}, if any, to determine how to treat existing documents. The following
@@ -106,13 +106,12 @@ public class AppSearchManager {
      *
      * @hide
      */
-    // TODO(b/143789408): linkify #put after that API is created
     public void setSchema(@NonNull AppSearchSchema... schemas) {
         setSchema(Arrays.asList(schemas), /*forceOverride=*/false);
     }
 
     /**
-     * Sets the schema being used by documents provided to the #put method.
+     * Sets the schema being used by documents provided to the {@link #putDocuments} method.
      *
      * <p>This method is similar to {@link #setSchema(AppSearchSchema...)}, except for the
      * {@code forceOverride} parameter. If a backwards-incompatible schema is specified but the
@@ -129,7 +128,6 @@ public class AppSearchManager {
      *
      * @hide
      */
-    // TODO(b/143789408): linkify #put after that API is created
     public void setSchema(@NonNull List<AppSearchSchema> schemas, boolean forceOverride) {
         // Prepare the merged schema for transmission.
         SchemaProto.Builder schemaProtoBuilder = SchemaProto.newBuilder();
@@ -151,26 +149,28 @@ public class AppSearchManager {
     }
 
     /**
-     * Index {@link Document} to AppSearch
+     * Index {@link android.app.appsearch.AppSearch.Document Documents} into AppSearch.
      *
-     * <p>You should not call this method directly; instead, use the {@code AppSearch#put()} API
-     * provided by JetPack.
+     * <p>You should not call this method directly; instead, use the
+     * {@code AppSearch#putDocuments()} API provided by JetPack.
      *
-     * <p>The schema should be set via {@link #setSchema} method.
+     * <p>Each {@link AppSearch.Document Document's} {@code schemaType} field must be set to the
+     * name of a schema type previously registered via the {@link #setSchema} method.
      *
      * @param documents {@link Document Documents} that need to be indexed.
      * @param executor Executor on which to invoke the callback.
-     * @param callback Callback to receive errors resulting from setting the schema. If the
-     *                 operation succeeds, the callback will be invoked with {@code null}.
+     * @param callback Callback to receive errors. On success, it will be called with {@code null}.
+     *     On failure, it will be called with a {@link Throwable} describing the failure.
      */
-    public void put(@NonNull List<Document> documents,
+    public void putDocuments(
+            @NonNull List<Document> documents,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<? super Throwable> callback) {
         AndroidFuture<Void> future = new AndroidFuture<>();
         for (Document document : documents) {
             // TODO(b/146386470) batching Document protos
             try {
-                mService.put(document.getProto().toByteArray(), future);
+                mService.putDocument(document.getProto().toByteArray(), future);
             } catch (RemoteException e) {
                 future.completeExceptionally(e);
                 break;

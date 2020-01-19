@@ -22,7 +22,9 @@ import android.content.Context;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import com.google.android.icing.proto.DocumentProto;
 import com.google.android.icing.proto.PropertyConfigProto;
+import com.google.android.icing.proto.PropertyProto;
 import com.google.android.icing.proto.SchemaProto;
 import com.google.android.icing.proto.SchemaTypeConfigProto;
 
@@ -95,6 +97,60 @@ public final class AppSearchImpl {
     }
 
     /**
+     * Adds a document to the AppSearch index.
+     *
+     * @param callingUid The uid of the app calling AppSearch.
+     * @param origDocument The document to index.
+     */
+    public void putDocument(int callingUid, @NonNull DocumentProto origDocument) {
+        // Rewrite the type names to include the app's prefix
+        String typePrefix = getTypePrefix(callingUid);
+        DocumentProto.Builder documentBuilder = origDocument.toBuilder();
+        rewriteDocumentTypes(typePrefix, documentBuilder);
+        mFakeIcing.put(documentBuilder.build());
+    }
+
+    /**
+     * Rewrites all types mentioned anywhere in {@code documentBuilder} to prepend
+     * {@code typePrefix}.
+     *
+     * @param typePrefix The prefix to add
+     * @param documentBuilder The document to mutate
+     */
+    @VisibleForTesting
+    void rewriteDocumentTypes(
+            @NonNull String typePrefix,
+            @NonNull DocumentProto.Builder documentBuilder) {
+        // Rewrite the type name to include the app's prefix
+        String newSchema = typePrefix + documentBuilder.getSchema();
+        documentBuilder.setSchema(newSchema);
+
+        // Add namespace. If we ever allow users to set their own namespaces, this will have
+        // to change to prepend the prefix instead of setting the whole namespace. We will also have
+        // to store the namespaces in a map similar to the type map so we can rewrite queries with
+        // empty namespaces.
+        documentBuilder.setNamespace(typePrefix);
+
+        // Recurse into derived documents
+        for (int propertyIdx = 0;
+                propertyIdx < documentBuilder.getPropertiesCount();
+                propertyIdx++) {
+            int documentCount = documentBuilder.getProperties(propertyIdx).getDocumentValuesCount();
+            if (documentCount > 0) {
+                PropertyProto.Builder propertyBuilder =
+                        documentBuilder.getProperties(propertyIdx).toBuilder();
+                for (int documentIdx = 0; documentIdx < documentCount; documentIdx++) {
+                    DocumentProto.Builder derivedDocumentBuilder =
+                            propertyBuilder.getDocumentValues(documentIdx).toBuilder();
+                    rewriteDocumentTypes(typePrefix, derivedDocumentBuilder);
+                    propertyBuilder.setDocumentValues(documentIdx, derivedDocumentBuilder);
+                }
+                documentBuilder.setProperties(propertyIdx, propertyBuilder);
+            }
+        }
+    }
+
+   /**
      * Returns a type prefix in a format like {@code com.example.package@1000/} or
      * {@code com.example.sharedname:5678@1000/}.
      */
