@@ -22,15 +22,25 @@ interface IAppSearchManager {
     /**
      * Sets the schema.
      *
-     * @param schemaProto Serialized SchemaProto.
+     * @param schemaBytes Serialized SchemaProto.
      * @param forceOverride Whether to apply the new schema even if it is incompatible. All
      *     incompatible documents will be deleted.
      * @param callback {@link AndroidFuture}&lt;{@link Void}&gt;. Will be completed with
      *     {@code null} upon successful completion of the setSchema call, or completed
      *     exceptionally if setSchema fails.
      */
-    void setSchema(in byte[] schemaProto, boolean forceOverride, in AndroidFuture callback);
-    void put(in byte[] documentBytes, in AndroidFuture callback);
+    void setSchema(in byte[] schemaBytes, boolean forceOverride, in AndroidFuture callback);
+
+    /**
+     * Inserts a document into the index.
+     *
+     * @param documentBytes serialized DocumentProto
+     * @param callback {@link AndroidFuture}&lt;{@link Void}&gt;. Will be completed with
+     *     {@code null} upon successful completion of the put call, or completed exceptionally if
+     *     put fails.
+     */
+    void putDocument(in byte[] documentBytes, in AndroidFuture callback);
+
     /**
      * Searches a document based on a given query string.
      *

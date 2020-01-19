@@ -20,6 +20,7 @@ import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.appsearch.AppSearchSchema.PropertyConfig;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -574,10 +575,6 @@ public final class AppSearch {
      * @hide
      */
     public static class Email extends Document {
-
-        /** The name of the schema type for {@link Email} documents.*/
-        public static final String SCHEMA_TYPE = "builtin:Email";
-
         private static final String KEY_FROM = "from";
         private static final String KEY_TO = "to";
         private static final String KEY_CC = "cc";
@@ -585,14 +582,53 @@ public final class AppSearch {
         private static final String KEY_SUBJECT = "subject";
         private static final String KEY_BODY = "body";
 
-        /**
-         * Creates a new {@link Email} from the contents of an existing {@link Document}.
-         *
-         * @param document The {@link Document} containing the email content.
-         */
-        public Email(@NonNull Document document) {
-            super(document);
-        }
+        /** The name of the schema type for {@link Email} documents.*/
+        public static final String SCHEMA_TYPE = "builtin:Email";
+
+        public static final AppSearchSchema SCHEMA = AppSearchSchema.newBuilder(SCHEMA_TYPE)
+                .addProperty(AppSearchSchema.newPropertyBuilder(KEY_FROM)
+                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                        .build()
+
+                ).addProperty(AppSearchSchema.newPropertyBuilder(KEY_TO)
+                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                        .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
+                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                        .build()
+
+                ).addProperty(AppSearchSchema.newPropertyBuilder(KEY_CC)
+                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                        .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
+                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                        .build()
+
+                ).addProperty(AppSearchSchema.newPropertyBuilder(KEY_BCC)
+                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                        .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
+                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                        .build()
+
+                ).addProperty(AppSearchSchema.newPropertyBuilder(KEY_SUBJECT)
+                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                        .build()
+
+                ).addProperty(AppSearchSchema.newPropertyBuilder(KEY_BODY)
+                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                        .build()
+
+                ).build();
 
         /**
          * Creates a new {@link Email.Builder}.
@@ -601,6 +637,15 @@ public final class AppSearch {
          */
         public static Builder newBuilder(@NonNull String uri) {
             return new Builder(uri);
+        }
+
+        /**
+         * Creates a new {@link Email} from the contents of an existing {@link Document}.
+         *
+         * @param document The {@link Document} containing the email content.
+         */
+        public Email(@NonNull Document document) {
+            super(document);
         }
 
         /**
@@ -615,10 +660,10 @@ public final class AppSearch {
         }
 
         /**
-         * Get the destination address of {@link Email}.
+         * Get the destination addresses of {@link Email}.
          *
-         * @return Returns the destination address of {@link Email} or {@code null} if it's not been
-         *         set yet.
+         * @return Returns the destination addresses of {@link Email} or {@code null} if it's not
+         *         been set yet.
          * @hide
          */
         @Nullable
