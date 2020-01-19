@@ -391,6 +391,9 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Az NFC ki van kapcsolva"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Az NFC be van kapcsolva"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Képernyő rögzítése"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Kezdés"</string>
+    <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Leállítás"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Váltás az alkalmazások között felfelé csúsztatással"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Húzza jobbra az ujját az alkalmazások közötti gyors váltáshoz"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Áttekintés be- és kikapcsolása"</string>
@@ -471,6 +474,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Az összes törlése"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Kezelés"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Néma értesítések"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"Beszélgetések"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Az összes néma értesítés törlése"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Ne zavarjanak funkcióval szüneteltetett értesítések"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Indítás most"</string>
@@ -689,6 +693,14 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"Személyre szabás"</string>
     <string name="notification_done" msgid="6215117625922713976">"Kész"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Visszavonás"</string>
+    <string name="demote" msgid="6225813324237153980">"Értesítés megjelölése mint nem beszélgetés"</string>
+    <string name="notification_conversation_favorite" msgid="8252976467488182853">"Kedvenc"</string>
+    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"Törlés a kedvencek közül"</string>
+    <string name="notification_conversation_mute" msgid="477431709687199671">"Némítás"</string>
+    <string name="notification_conversation_unmute" msgid="410885000669775294">"Némítás feloldása"</string>
+    <string name="notification_conversation_bubble" msgid="4598142032706190028">"Megjelenítés buborékként"</string>
+    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"Buborékok kikapcsolása"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Hozzáadás a kezdőképernyőhöz"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> – <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"értesítésvezérlők"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"értesítések halasztási beállításai"</string>

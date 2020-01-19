@@ -37,7 +37,7 @@
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"બૅટરી સેવર વિશે"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"ચાલુ કરો"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"બૅટરી સેવર ચાલુ કરો"</string>
-    <string name="status_bar_settings_settings_button" msgid="534331565185171556">"સેટિંગ્સ"</string>
+    <string name="status_bar_settings_settings_button" msgid="534331565185171556">"સેટિંગ"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"વાઇ-ફાઇ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ઑટો રોટેટ સ્ક્રીન"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"મ્યૂટ કરો"</string>
@@ -224,7 +224,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"નોટિફિકેશન શેડ."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ઝડપી સેટિંગ્સ."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"લૉક સ્ક્રીન."</string>
-    <string name="accessibility_desc_settings" msgid="6728577365389151969">"સેટિંગ્સ"</string>
+    <string name="accessibility_desc_settings" msgid="6728577365389151969">"સેટિંગ"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"ઝલક."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"કાર્ય લૉક સ્ક્રીન"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"બંધ કરો"</string>
@@ -295,7 +295,7 @@
     </plurals>
     <string name="notification_summary_message_format" msgid="5158219088501909966">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="6818779631806163080">"સૂચનાઓની સેટિંગ્સ"</string>
-    <string name="status_bar_notification_app_settings_title" msgid="5050006438806013903">"<xliff:g id="APP_NAME">%s</xliff:g> સેટિંગ્સ"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5050006438806013903">"<xliff:g id="APP_NAME">%s</xliff:g> સેટિંગ"</string>
     <string name="accessibility_rotation_lock_off" msgid="3880436123632448930">"સ્ક્રીન આપમેળે ફરશે."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"સ્ક્રીન લેન્ડસ્કેપ ઓરિએન્ટેશનમાં લૉક કરેલ છે."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"સ્ક્રીન પોટ્રેટ ઓરિએન્ટેશનમાં લૉક કરેલ છે."</string>
@@ -333,7 +333,7 @@
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"મીડિયા ઉપકરણ"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"ફક્ત કટોકટીના કૉલ્સ"</string>
-    <string name="quick_settings_settings_label" msgid="2214639529565474534">"સેટિંગ્સ"</string>
+    <string name="quick_settings_settings_label" msgid="2214639529565474534">"સેટિંગ"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"સમય"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"હું"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"વપરાશકર્તા"</string>
@@ -391,6 +391,12 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC અક્ષમ કરેલ છે"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC સક્ષમ કરેલ છે"</string>
+    <!-- no translation found for quick_settings_screen_record_label (1594046461509776676) -->
+    <skip />
+    <!-- no translation found for quick_settings_screen_record_start (1574725369331638985) -->
+    <skip />
+    <!-- no translation found for quick_settings_screen_record_stop (8087348522976412119) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ઍપ સ્વિચ કરવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ઍપને ઝડપથી સ્વિચ કરવા માટે જમણે ખેંચો"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ઝલકને ટૉગલ કરો"</string>
@@ -471,6 +477,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"બધુ સાફ કરો"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"મેનેજ કરો"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"સાઇલન્ટ નોટિફિકેશન"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"વાતચીત"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"બધા સાઇલન્ટ નોટિફિકેશન સાફ કરો"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ખલેલ પાડશો નહીં દ્વારા થોભાવેલ નોટિફિકેશન"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"હવે પ્રારંભ કરો"</string>
@@ -689,6 +696,22 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"કસ્ટમાઇઝ કરો"</string>
     <string name="notification_done" msgid="6215117625922713976">"થઈ ગયું"</string>
     <string name="inline_undo" msgid="9026953267645116526">"રદ કરો"</string>
+    <!-- no translation found for demote (6225813324237153980) -->
+    <skip />
+    <!-- no translation found for notification_conversation_favorite (8252976467488182853) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unfavorite (633301300443356176) -->
+    <skip />
+    <!-- no translation found for notification_conversation_mute (477431709687199671) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unmute (410885000669775294) -->
+    <skip />
+    <!-- no translation found for notification_conversation_bubble (4598142032706190028) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unbubble (2303087159802926401) -->
+    <skip />
+    <!-- no translation found for notification_conversation_home_screen (8347136037958438935) -->
+    <skip />
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"સૂચના નિયંત્રણો"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"સૂચના સ્નૂઝ કરવાના વિકલ્પો"</string>
@@ -885,7 +908,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"સામાન્ય સંદેશા"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"સ્ટોરેજ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"હિન્ટ"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"ઝટપટ ઍપ્લિકેશનો"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"ઝટપટ ઍપ્લિકેશન"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ચાલી રહી છે"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ઍપ ઇન્સ્ટૉલ કર્યા વિના ખુલી જાય છે."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ઍપ ઇન્સ્ટૉલ કર્યા વિના ખુલી જાય છે. વધુ જાણવા માટે ટૅપ કરો."</string>

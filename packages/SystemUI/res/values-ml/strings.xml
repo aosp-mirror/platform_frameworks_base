@@ -391,6 +391,12 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC പ്രവർത്തനക്ഷമമാക്കി"</string>
+    <!-- no translation found for quick_settings_screen_record_label (1594046461509776676) -->
+    <skip />
+    <!-- no translation found for quick_settings_screen_record_start (1574725369331638985) -->
+    <skip />
+    <!-- no translation found for quick_settings_screen_record_stop (8087348522976412119) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ആപ്പുകൾ മാറാൻ മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ആപ്പുകൾ പെട്ടെന്ന് മാറാൻ വലത്തോട്ട് വലിച്ചിടുക"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"അവലോകനം മാറ്റുക"</string>
@@ -465,13 +471,13 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"ബാറ്ററി ലാഭിക്കൽ ഓഫാക്കുക"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"റെക്കോർഡ് ചെയ്യുമ്പോഴോ കാസ്‌റ്റ് ചെയ്യുമ്പോഴോ നിങ്ങളുടെ ഉപകരണത്തിൽ നിന്ന് പ്ലേ ചെയ്യുന്നതോ നിങ്ങളുടെ സ്‌ക്രീനിൽ ദൃശ്യമാകുന്നതോ ആയ എല്ലാ വിവരങ്ങളിലേക്കും <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> എന്നതിന് ആക്‌സസ് ഉണ്ടായിരിക്കും. നിങ്ങൾ പ്ലേ ചെയ്യുന്ന ഒഡിയോ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, പാസ്‌വേഡുകൾ എന്നിവ പോലുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"റെക്കോർഡ് ചെയ്യുമ്പോഴോ കാസ്‌റ്റ് ചെയ്യുമ്പോഴോ നിങ്ങളുടെ ഉപകരണത്തിൽ നിന്ന് പ്ലേ ചെയ്യുന്നതോ നിങ്ങളുടെ സ്‌ക്രീനിൽ ദൃശ്യമാകുന്നതോ ആയ എല്ലാ വിവരങ്ങളിലേക്കും ഈ ഫംഗ്‌ഷൻ ലഭ്യമാക്കുന്ന സേവനത്തിന് ആക്‌സസ് ഉണ്ടായിരിക്കും. നിങ്ങൾ പ്ലേ ചെയ്യുന്ന ഒഡിയോ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, പാസ്‌വേഡുകൾ എന്നിവ പോലുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"റെക്കോർഡ് ചെയ്യൽ അല്ലെങ്കിൽ കാസ്റ്റ് ചെയ്യൽ ആരംഭിക്കണോ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ഉപയോഗിച്ച് റെക്കോർഡ് ചെയ്യൽ അല്ലെങ്കിൽ കാസ്‌റ്റ് ചെയ്യൽ ആരംഭിക്കണോ?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"വീണ്ടും കാണിക്കരുത്"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"എല്ലാം മായ്‌ക്കുക"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"മാനേജ് ചെയ്യുക"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"നിശബ്‌ദ അറിയിപ്പുകൾ"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"സംഭാഷണങ്ങൾ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"എല്ലാ നിശബ്‌ദ അറിയിപ്പുകളും മായ്ക്കുക"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'ശല്യപ്പെടുത്തരുത്\' വഴി അറിയിപ്പുകൾ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ഇപ്പോൾ ആരംഭിക്കുക"</string>
@@ -690,6 +696,22 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"ഇഷ്‌ടാനുസൃതമാക്കുക"</string>
     <string name="notification_done" msgid="6215117625922713976">"പൂർത്തിയായി"</string>
     <string name="inline_undo" msgid="9026953267645116526">"പഴയപടിയാക്കുക"</string>
+    <!-- no translation found for demote (6225813324237153980) -->
+    <skip />
+    <!-- no translation found for notification_conversation_favorite (8252976467488182853) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unfavorite (633301300443356176) -->
+    <skip />
+    <!-- no translation found for notification_conversation_mute (477431709687199671) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unmute (410885000669775294) -->
+    <skip />
+    <!-- no translation found for notification_conversation_bubble (4598142032706190028) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unbubble (2303087159802926401) -->
+    <skip />
+    <!-- no translation found for notification_conversation_home_screen (8347136037958438935) -->
+    <skip />
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"അറിയിപ്പ് നിയന്ത്രണങ്ങൾ"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"അറിയിപ്പ് സ്‌നൂസ് ഓപ്ഷനുകൾ"</string>

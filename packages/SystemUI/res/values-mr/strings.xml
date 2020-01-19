@@ -391,6 +391,12 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC अक्षम केले आहे"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC सक्षम केले आहे"</string>
+    <!-- no translation found for quick_settings_screen_record_label (1594046461509776676) -->
+    <skip />
+    <!-- no translation found for quick_settings_screen_record_start (1574725369331638985) -->
+    <skip />
+    <!-- no translation found for quick_settings_screen_record_stop (8087348522976412119) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"अ‍ॅप्स स्विच करण्यासाठी वर स्वाइप करा"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"अ‍ॅप्स वर झटपट स्विच करण्यासाठी उजवीकडे ड्रॅग करा"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"अवलोकन टॉगल करा."</string>
@@ -465,13 +471,13 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"बॅटरी सेव्हर बंद करा"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"तुमच्या स्क्रीनवर दृश्यमान असलेल्या किंवा रेकॉर्ड किंवा कास्ट करताना तुमच्या डिव्हाइसमधून प्ले केलेल्या सर्व माहितीचा अ‍ॅक्सेस <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ला असेल. यामध्ये पासवर्ड, पेमेंट तपशील, फोटो, मेसेज आणि तुम्ही प्ले केलेला ऑडिओ यासारख्या माहितीचा समावेश असतो."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"हे कार्य पुरवठा करणाऱ्या सेवेस तुमच्या स्क्रीनवर दृश्यमान असलेल्या किंवा रेकॉर्ड किंवा कास्ट करताना तुमच्या डिव्हाइसमधून प्ले केलेल्या सर्व माहितीचा अ‍ॅक्सेस असेल. यामध्ये पासवर्ड, पेमेंट तपशील, फोटो, मेसेज आणि तुम्ही प्ले केलेला ऑडिओ यासारख्या माहितीचा समावेश असतो."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"रेकॉर्ड किंवा कास्ट करणे सुरू करायचे आहे का ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ने रेकॉर्ड करणे किंवा कास्ट करणे सुरू करा?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"पुन्हा दर्शवू नका"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"सर्व साफ करा"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"व्यवस्थापित करा"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"सायलंट सूचना"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"संभाषणे"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"सर्व सायलंट सूचना साफ करा"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"व्यत्यय आणून नकाद्वारे सूचना थांबवल्या"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"आता सुरू करा"</string>
@@ -690,6 +696,22 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"कस्टमाइझ करा"</string>
     <string name="notification_done" msgid="6215117625922713976">"पूर्ण झाले"</string>
     <string name="inline_undo" msgid="9026953267645116526">"पहिल्यासारखे करा"</string>
+    <!-- no translation found for demote (6225813324237153980) -->
+    <skip />
+    <!-- no translation found for notification_conversation_favorite (8252976467488182853) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unfavorite (633301300443356176) -->
+    <skip />
+    <!-- no translation found for notification_conversation_mute (477431709687199671) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unmute (410885000669775294) -->
+    <skip />
+    <!-- no translation found for notification_conversation_bubble (4598142032706190028) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unbubble (2303087159802926401) -->
+    <skip />
+    <!-- no translation found for notification_conversation_home_screen (8347136037958438935) -->
+    <skip />
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"सूचना नियंत्रणे"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"सूचना स्नूझ पर्याय"</string>

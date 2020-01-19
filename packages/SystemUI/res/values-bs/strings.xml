@@ -393,6 +393,9 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC je onemogućen"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC je omogućen"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Snimanje ekrana"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Započnite"</string>
+    <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Zaustavite"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Prevucite prema gore za promjenu aplikacije"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Prevucite udesno za brzu promjenu aplikacija"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Pregled uključivanja/isključivanja"</string>
@@ -474,6 +477,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Očisti sve"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Upravljajte"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Nečujna obavještenja"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"Razgovori"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Obriši sva nečujna obavještenja"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Obavještenja su pauzirana načinom rada Ne ometaj"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Započni odmah"</string>
@@ -694,6 +698,14 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"Prilagodi"</string>
     <string name="notification_done" msgid="6215117625922713976">"Gotovo"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Opozovi"</string>
+    <string name="demote" msgid="6225813324237153980">"Označi da ovo obavještenje nije razgovor"</string>
+    <string name="notification_conversation_favorite" msgid="8252976467488182853">"Omiljeno"</string>
+    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"Ukloni iz omiljenog"</string>
+    <string name="notification_conversation_mute" msgid="477431709687199671">"Isključi zvuk"</string>
+    <string name="notification_conversation_unmute" msgid="410885000669775294">"Uključi zvuk"</string>
+    <string name="notification_conversation_bubble" msgid="4598142032706190028">"Prikaži kao oblačić"</string>
+    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"Isključi oblačiće"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Dodaj na početni ekran"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"kontrole obavještenja"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"opcije za odgodu obavještenja"</string>

@@ -391,6 +391,9 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"A opción NFC está desactivada"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"A opción NFC está activada"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Gravación da pantalla"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
+    <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Deter"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Pasar o dedo cara arriba para cambiar de aplicación"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arrastra cara á dereita para cambiar de aplicacións rapidamente"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activar/desactivar Visión xeral"</string>
@@ -465,13 +468,13 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Desactivar a función Aforro de batería"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> terá acceso a toda a información visible na pantalla ou reproducida desde o teu dispositivo mentres graves ou emitas contido. Isto inclúe información como contrasinais, detalles de pago, fotos, mensaxes e o audio que reproduzas."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"O servizo que proporciona esta función terá acceso a toda a información visible na pantalla ou reproducida desde o teu dispositivo mentres graves ou emitas contido. Isto inclúe información como contrasinais, detalles de pago, fotos, mensaxes e o audio que reproduzas."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Queres iniciar a gravación ou a emisión?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Queres comezar a gravar ou emitir contido con <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Non mostrar outra vez"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Eliminar todas"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Xestionar"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notificacións silenciadas"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversas"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Borra todas as notificacións silenciadas"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"O modo Non molestar puxo en pausa as notificacións"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Iniciar agora"</string>
@@ -690,6 +693,14 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"Personalizar"</string>
     <string name="notification_done" msgid="6215117625922713976">"Feito"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Desfacer"</string>
+    <string name="demote" msgid="6225813324237153980">"Marcar que esta notificación non é unha conversa"</string>
+    <string name="notification_conversation_favorite" msgid="8252976467488182853">"Engadir a favoritos"</string>
+    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"Quitar de favoritos"</string>
+    <string name="notification_conversation_mute" msgid="477431709687199671">"Silenciar"</string>
+    <string name="notification_conversation_unmute" msgid="410885000669775294">"Activar son"</string>
+    <string name="notification_conversation_bubble" msgid="4598142032706190028">"Mostrar como unha burbulla"</string>
+    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"Desactivar burbullas"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Engadir á pantalla de inicio"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"controis de notificacións"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"opcións para adiar notificacións"</string>
