@@ -52,7 +52,7 @@ public class AppSearchManagerService extends SystemService {
 
     private class Stub extends IAppSearchManager.Stub {
         @Override
-        public void setSchema(byte[] schemaBytes, boolean force, AndroidFuture callback) {
+        public void setSchema(byte[] schemaBytes, boolean forceOverride, AndroidFuture callback) {
             Preconditions.checkNotNull(schemaBytes);
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
@@ -61,7 +61,7 @@ public class AppSearchManagerService extends SystemService {
             try {
                 SchemaProto schema = SchemaProto.parseFrom(schemaBytes);
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                impl.setSchema(callingUid, schema, force);
+                impl.setSchema(callingUid, schema, forceOverride);
                 callback.complete(null);
             } catch (Throwable t) {
                 callback.completeExceptionally(t);

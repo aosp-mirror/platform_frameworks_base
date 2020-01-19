@@ -29,7 +29,9 @@ import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.StatusProto;
 import com.google.android.icing.protobuf.InvalidProtocolBufferException;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -73,7 +75,7 @@ public class AppSearchManager {
      * </ul>
      *
      * <p>The following types of schema changes are not backwards-compatible. Supplying a schema
-     * with such changes will result in the provided callback being called with a {@link Throwable}
+     * with such changes will result in this call throwing an {@link IllegalSchemaException}
      * describing the incompatibility, and the previously set schema will remain active:
      * <ul>
      *     <li>Removal of an existing type
@@ -91,33 +93,44 @@ public class AppSearchManager {
      *             REQUIRED} property.
      * </ul>
      *
-     * <p>If you need to make non-backwards-compatible changes as described above, you may set the
-     * {@code force} parameter to {@code true}. In this case, all documents which are not compatible
-     * with the new schema will be deleted.
-     *
-     * <p>This operation is performed asynchronously. On success, the provided callback will be
-     * called with {@code null}. On failure, the provided callback will be called with a
-     * {@link Throwable} describing the failure.
+     * <p>If you need to make non-backwards-compatible changes as described above, instead use the
+     * {@link #setSchema(List, boolean)} method with the {@code forceOverride} parameter set to
+     * {@code true}.
      *
      * <p>It is a no-op to set the same schema as has been previously set; this is handled
      * efficiently.
      *
      * @param schemas The schema configs for the types used by the calling app.
-     * @param force Whether to force the new schema to be applied even if there are incompatible
-     *     changes versus the previously set schema. Documents which are incompatible with the new
-     *     schema will be deleted.
-     * @param executor Executor on which to invoke the callback.
-     * @param callback Callback to receive errors resulting from setting the schema. If the
-     *                 operation succeeds, the callback will be invoked with {@code null}.
+     * @throws IllegalSchemaException If the provided schema is invalid, or is incompatible with the
+     *     previous schema.
      *
      * @hide
      */
     // TODO(b/143789408): linkify #put after that API is created
-    public void setSchema(
-            List<AppSearchSchema> schemas,
-            boolean force,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<? super Throwable> callback) {
+    public void setSchema(@NonNull AppSearchSchema... schemas) {
+        setSchema(Arrays.asList(schemas), /*forceOverride=*/false);
+    }
+
+    /**
+     * Sets the schema being used by documents provided to the #put method.
+     *
+     * <p>This method is similar to {@link #setSchema(AppSearchSchema...)}, except for the
+     * {@code forceOverride} parameter. If a backwards-incompatible schema is specified but the
+     * {@code forceOverride} parameter is set to {@code true}, instead of throwing an
+     * {@link IllegalSchemaException}, all documents which are not compatible with the new schema
+     * will be deleted and the incompatible schema will be applied.
+     *
+     * @param schemas The schema configs for the types used by the calling app.
+     * @param forceOverride Whether to force the new schema to be applied even if there are
+     *     incompatible changes versus the previously set schema. Documents which are incompatible
+     *     with the new schema will be deleted.
+     * @throws IllegalSchemaException If the provided schema is invalid, or is incompatible with the
+     *     previous schema and the {@code forceOverride} parameter is set to {@code false}.
+     *
+     * @hide
+     */
+    // TODO(b/143789408): linkify #put after that API is created
+    public void setSchema(@NonNull List<AppSearchSchema> schemas, boolean forceOverride) {
         // Prepare the merged schema for transmission.
         SchemaProto.Builder schemaProtoBuilder = SchemaProto.newBuilder();
         for (AppSearchSchema schema : schemas) {
@@ -130,11 +143,11 @@ public class AppSearchManager {
         byte[] schemaBytes = schemaProtoBuilder.build().toByteArray();
         AndroidFuture<Void> future = new AndroidFuture<>();
         try {
-            mService.setSchema(schemaBytes, force, future);
+            mService.setSchema(schemaBytes, forceOverride, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
-        future.whenCompleteAsync((noop, err) -> callback.accept(err), executor);
+        getFutureOrThrow(future);
     }
 
     /**
@@ -254,6 +267,23 @@ public class AppSearchManager {
             mService.query(queryExpression, searchSpec.getProto().toByteArray(), future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
+        }
+    }
+
+    private static <T> T getFutureOrThrow(@NonNull AndroidFuture<T> future) {
+        try {
+            return future.get();
+        } catch (Throwable e) {
+            if (e instanceof ExecutionException) {
+                e = e.getCause();
+            }
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            if (e instanceof Error) {
+                throw (Error) e;
+            }
+            throw new RuntimeException(e);
         }
     }
 }
