@@ -69,7 +69,7 @@ public class AuthCredentialPatternView extends AuthCredentialView {
                 mPendingLockCheck = LockPatternChecker.checkCredential(
                         mLockPatternUtils,
                         credential,
-                        mUserId,
+                        mEffectiveUserId,
                         this::onPatternChecked);
             }
         }
@@ -99,7 +99,8 @@ public class AuthCredentialPatternView extends AuthCredentialView {
         super.onFinishInflate();
         mLockPatternView = findViewById(R.id.lockPattern);
         mLockPatternView.setOnPatternListener(new UnlockPatternListener());
-        mLockPatternView.setInStealthMode(!mLockPatternUtils.isVisiblePatternEnabled(mUserId));
+        mLockPatternView.setInStealthMode(
+                !mLockPatternUtils.isVisiblePatternEnabled(mEffectiveUserId));
         mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
     }
 }

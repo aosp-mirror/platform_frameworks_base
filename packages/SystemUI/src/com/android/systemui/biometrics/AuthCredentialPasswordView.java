@@ -96,7 +96,7 @@ public class AuthCredentialPasswordView extends AuthCredentialView
     }
 
     private void checkPasswordAndUnlock() {
-        try (LockscreenCredential password =  mCredentialType == Utils.CREDENTIAL_PIN
+        try (LockscreenCredential password = mCredentialType == Utils.CREDENTIAL_PIN
                 ? LockscreenCredential.createPinOrNone(mPasswordField.getText())
                 : LockscreenCredential.createPasswordOrNone(mPasswordField.getText())) {
             if (password.isNone()) {
@@ -104,7 +104,7 @@ public class AuthCredentialPasswordView extends AuthCredentialView
             }
 
             mPendingLockCheck = LockPatternChecker.checkCredential(mLockPatternUtils,
-                    password, mUserId, this::onCredentialChecked);
+                    password, mEffectiveUserId, this::onCredentialChecked);
         }
     }
 
