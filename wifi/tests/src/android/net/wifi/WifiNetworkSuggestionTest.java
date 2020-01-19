@@ -758,4 +758,20 @@ public class WifiNetworkSuggestionTest {
                 .setIsInitialAutoJoinEnabled(false)
                 .build();
     }
+
+    /**
+     * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
+     * when set both {@link WifiNetworkSuggestion.Builder#setIsInitialAutoJoinEnabled(boolean)}
+     * and {@link WifiNetworkSuggestion.Builder#setCredentialSharedWithUser(boolean)} (boolean)}
+     * to false on a passpoint suggestion.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testSetIsAutoJoinDisabledWithSecureNetworkNotSharedWithUserForPasspoint() {
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
+                .setCredentialSharedWithUser(false)
+                .setIsInitialAutoJoinEnabled(false)
+                .build();
+    }
 }
