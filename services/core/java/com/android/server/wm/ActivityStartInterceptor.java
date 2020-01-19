@@ -178,6 +178,11 @@ class ActivityStartInterceptor {
         return interceptWorkProfileChallengeIfNeeded();
     }
 
+    private boolean hasCrossProfileAnimation() {
+        return mActivityOptions != null
+                && mActivityOptions.getAnimationType() == ANIM_OPEN_CROSS_PROFILE_APPS;
+    }
+
     /**
      * If the activity option is the {@link ActivityOptions#ANIM_OPEN_CROSS_PROFILE_APPS} one,
      * defer the animation until the original intent is started.
@@ -185,8 +190,7 @@ class ActivityStartInterceptor {
      * @return the activity option used to start the original intent.
      */
     private Bundle deferCrossProfileAppsAnimationIfNecessary() {
-        if (mActivityOptions != null
-                && mActivityOptions.getAnimationType() == ANIM_OPEN_CROSS_PROFILE_APPS) {
+        if (hasCrossProfileAnimation()) {
             mActivityOptions = null;
             return ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle();
         }
@@ -255,9 +259,13 @@ class ActivityStartInterceptor {
         }
         final SuspendDialogInfo dialogInfo = pmi.getSuspendedDialogInfo(suspendedPackage,
                 suspendingPackage, mUserId);
+        final Bundle crossProfileOptions = hasCrossProfileAnimation()
+                ? ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle()
+                : null;
+        final IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
+                FLAG_IMMUTABLE);
         mIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(suspendedPackage,
-                suspendingPackage, dialogInfo, deferCrossProfileAppsAnimationIfNecessary(),
-                mUserId);
+                suspendingPackage, dialogInfo, crossProfileOptions, target, mUserId);
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;

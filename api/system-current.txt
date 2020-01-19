@@ -1768,6 +1768,7 @@ package android.content {
     field @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public static final String ACTION_MANAGE_SPECIAL_APP_ACCESSES = "android.intent.action.MANAGE_SPECIAL_APP_ACCESSES";
     field public static final String ACTION_MASTER_CLEAR_NOTIFICATION = "android.intent.action.MASTER_CLEAR_NOTIFICATION";
     field public static final String ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION = "android.intent.action.PACKAGE_NEEDS_INTEGRITY_VERIFICATION";
+    field public static final String ACTION_PACKAGE_UNSUSPENDED_MANUALLY = "android.intent.action.PACKAGE_UNSUSPENDED_MANUALLY";
     field public static final String ACTION_PENDING_INCIDENT_REPORTS_CHANGED = "android.intent.action.PENDING_INCIDENT_REPORTS_CHANGED";
     field public static final String ACTION_PRE_BOOT_COMPLETED = "android.intent.action.PRE_BOOT_COMPLETED";
     field public static final String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
@@ -2308,6 +2309,8 @@ package android.content.pm {
   public final class SuspendDialogInfo implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int BUTTON_ACTION_MORE_DETAILS = 0; // 0x0
+    field public static final int BUTTON_ACTION_UNSUSPEND = 1; // 0x1
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.SuspendDialogInfo> CREATOR;
   }
 
@@ -2317,6 +2320,7 @@ package android.content.pm {
     method @NonNull public android.content.pm.SuspendDialogInfo.Builder setIcon(@DrawableRes int);
     method @NonNull public android.content.pm.SuspendDialogInfo.Builder setMessage(@NonNull String);
     method @NonNull public android.content.pm.SuspendDialogInfo.Builder setMessage(@StringRes int);
+    method @NonNull public android.content.pm.SuspendDialogInfo.Builder setNeutralButtonAction(int);
     method @NonNull public android.content.pm.SuspendDialogInfo.Builder setNeutralButtonText(@StringRes int);
     method @NonNull public android.content.pm.SuspendDialogInfo.Builder setTitle(@StringRes int);
   }

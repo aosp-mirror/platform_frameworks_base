@@ -4919,6 +4919,8 @@
     </string>
     <!-- Title of the button to show users more details about why the app has been suspended [CHAR LIMIT=50]-->
     <string name="app_suspended_more_details">Learn more</string>
+    <!-- Title of the button to unsuspend a suspended app immediately [CHAR LIMIT=50]-->
+    <string name="app_suspended_unsuspend_message">Unpause app</string>
 
     <!-- Title of a dialog. The string is asking if the user wants to turn on their work profile, which contains work apps that are managed by their employer. "Work" is an adjective. [CHAR LIMIT=30] -->
     <string name="work_mode_off_title">Turn on work profile?</string>
