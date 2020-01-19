@@ -287,7 +287,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accedir al calendari"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar i llegir missatges SMS"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Emmagatzematge"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Fitxers i multimèdia"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"accedir a fotos, contingut multimèdia i fitxers del dispositiu"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micròfon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"gravar àudio"</string>
@@ -313,6 +313,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Permet tocar, lliscar, pinçar i fer altres gestos."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos d\'empremtes dactilars"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Captura gestos realitzats en el sensor d\'empremtes dactilars del dispositiu."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fes una captura de pantalla"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pots fer una captura de la pantalla."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar o modificar la barra d\'estat"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permet que l\'aplicació desactivi la barra d\'estat o afegeixi i elimini icones del sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"aparèixer a la barra d\'estat"</string>
@@ -1610,6 +1612,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vols apujar el volum per sobre del nivell recomanat?\n\nSi escoltes música a un volum alt durant períodes llargs, pots danyar-te l\'oïda."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vols fer servir la drecera d\'accessibilitat?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Si la drecera està activada, prem els dos botons de volum durant 3 segons, per iniciar una funció d\'accessibilitat.\n\n Funció d\'accessibilitat actual:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Pots canviar la funció a Configuració &gt; Accessibilitat."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Buida"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edita les dreceres"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Cancel·la"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactiva la drecera"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilitza la drecera"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversió dels colors"</string>
@@ -1845,6 +1850,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Activar el perfil professional?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"S\'activaran les teves aplicacions per a la feina, les notificacions, les dades i altres funcions del perfil professional"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activa"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"L\'aplicació no està disponible"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Ara mateix, <xliff:g id="APP_NAME">%1$s</xliff:g> no està disponible."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Aquesta aplicació es va crear per a una versió antiga d\'Android i pot ser que no funcioni correctament. Prova de cercar actualitzacions o contacta amb el desenvolupador."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Cerca actualitzacions"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tens missatges nous"</string>
@@ -1955,13 +1962,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"És possible que la bateria s\'esgoti abans de la càrrega habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"S\'ha activat l\'estalvi de bateria per prolongar-ne la durada"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Estalvi de bateria"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"L\'estalvi de bateria no es tornarà a activar fins que no tornis a tenir poca bateria"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"La bateria ja està suficientment carregada. L\'estalvi de bateria no es tornarà a activar fins que no tornis a tenir poca bateria."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"El telèfon està carregat un <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Tauleta carregada un <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"El dispositiu està carregat un <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"L\'estalvi de bateria s\'ha desactivat. Les funcions ja no estan restringides."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"L\'estalvi de bateria s\'ha desactivat. Les funcions ja no estan restringides."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"L\'estalvi de bateria s\'ha desactivat"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"El telèfon té prou bateria. Les funcions ja no estan restringides."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"La tauleta té prou bateria. Les funcions ja no estan restringides."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"El dispositiu té prou bateria. Les funcions ja no estan restringides."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Carpeta"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Aplicació d\'Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Fitxer"</string>

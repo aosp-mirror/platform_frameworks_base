@@ -287,7 +287,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"hozzáférés a naptárhoz"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS-ek küldése és megtekintése"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Tárhely"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Fájlok és média"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"az eszközön lévő fotók, médiatartalmak és fájlok elérése"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"hanganyag rögzítése"</string>
@@ -313,6 +313,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Koppintás, ujjak gyors csúsztatása és összehúzása, illetve egyéb kézmozdulatok végrehajtása."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Kézmozdulatok az ujjlenyomat-érzékelőn"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Érzékeli az eszköz ujjlenyomat-érzékelőjén végzett kézmozdulatokat."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Képernyőkép készítése"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Készíthet képernyőképet a kijelzőről."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"állapotsor kikapcsolása vagy módosítása"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Lehetővé teszi az alkalmazás számára az állapotsor kikapcsolását, illetve rendszerikonok hozzáadását és eltávolítását."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"az állapotsor szerepének átvétele"</string>
@@ -1610,6 +1612,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Az ajánlott szint fölé szeretné emelni a hangerőt?\n\nHa hosszú időn át teszi ki magát nagy hangerőnek, azzal károsíthatja a hallását."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Szeretné használni a Kisegítő lehetőségek billentyűparancsot?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Ha be van kapcsolva a billentyűparancs, a két hangerőgomb 3 másodpercig tartó lenyomásával elindíthatja a kisegítő lehetőségek egyik funkcióját.\n\n A kisegítő lehetőségek jelenleg beállított funkciója:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n A funkciót a Beállítások &gt; Kisegítő lehetőségek menüpontban módosíthatja."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Üres"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Gyorsparancsszerkesztés"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Mégse"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Billentyűparancs kikapcsolása"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Billentyűparancs használata"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Színek invertálása"</string>
@@ -1845,6 +1850,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Bekapcsolja a munkaprofilt?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"A munkahelyi alkalmazások, értesítések, adatok és a munkaprofilhoz tartozó egyéb funkciók be lesznek kapcsolva"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Bekapcsolás"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Az alkalmazás nem hozzáférhető"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> jelenleg nem hozzáférhető."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ez az alkalmazás az Android egyik korábbi verziójához készült, így elképzelhető, hogy nem működik majd megfelelően ezen a rendszeren. Keressen frissítéseket, vagy vegye fel a kapcsolatot a fejlesztővel."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Frissítés keresése"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Új üzenetei érkeztek"</string>
@@ -1955,13 +1962,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Előfordulhat, hogy az akkumulátor lemerül a szokásos töltési időszak előtt"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akkumulátorkímélő mód aktiválva az akkumulátor üzemidejének növelése érdekében"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Akkumulátorkímélő mód"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Az Akkumulátorkímélő mód nem aktiválódik újra addig, amíg az akkumulátor közel nem kerül a lemerüléshez"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Az akkumulátor töltöttségi szintje elégséges. Az Akkumulátorkímélő mód nem aktiválódik újra addig, amíg az akkumulátor közel nem kerül a lemerüléshez."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"A telefon töltöttségi szintje: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"A táblagép töltöttségi szintje: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Az eszköz töltöttségi szintje: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Akkumulátorkímélő mód kikapcsolva. A funkciók használata most már nincs korlátozva."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Akkumulátorkímélő mód kikapcsolva. A funkciók használata most már nincs korlátozva."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Akkumulátorkímélő mód kikapcsolva"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"A telefon töltöttsége elegendő. A funkciók használata már nincs korlátozva."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"A táblagép töltöttsége elegendő. A funkciók használata már nincs korlátozva."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Az eszköz töltöttsége elegendő. A funkciók használata már nincs korlátozva."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Mappa"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android-alkalmazás"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Fájl"</string>

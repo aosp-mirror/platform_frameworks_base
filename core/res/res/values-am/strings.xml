@@ -287,7 +287,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"የእርስዎን ቀን መቁጠሪያ ይድረሱበት"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"ኤስኤምኤስ"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"የኤስኤምኤስ መልዕክቶችን ይላኩና ይመልከቱ"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"ማከማቻ"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"ፋይሎች እና ሚዲያ"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"በመሳሪያዎ ላይ ያሉ ፎቶዎችን፣ ማህደረመረጃን እና ፋይሎችን ይድረሱ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ማይክሮፎን"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ኦዲዮ ይቅዱ"</string>
@@ -313,6 +313,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"መታ ማድረግ፣ ማንሸራተት፣ መቆንጠጥ እና ሌሎች የጣት ምልክቶችን ማከናወን ይችላል።"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"የጣት አሻራ ምልክቶች"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"በመሣሪያው የጣት አሻራ ዳሳሽ ላይ የተከናወኑ የጣት ምልክቶችን መያዝ ይችላል።"</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ቅጽበታዊ ገጽ እይታን ያነሳል"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"የማሳያው ቅጽበታዊ ገጽ እይታን ማንሳት ይችላል።"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"የሁኔቴ አሞሌ አቦዝን ወይም ቀይር"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"የስርዓት አዶዎችን ወደ ሁኔታ አሞሌ ላለማስቻል ወይም ለማከል እና ለማስወገድ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"የሁኔታ አሞሌ መሆን"</string>
@@ -1610,6 +1612,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ድምጹ ከሚመከረው መጠን በላይ ከፍ ይበል?\n\nበከፍተኛ ድምጽ ለረጅም ጊዜ ማዳመጥ ጆሮዎን ሊጎዳው ይችላል።"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"የተደራሽነት አቋራጭ ጥቅም ላይ ይዋል?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"አቋራጩ ሲበራ ሁለቱንም የድምፅ አዝራሮች ለ3 ሰከንዶች ተጭኖ መቆየት የተደራሽነት ባህሪን ያስጀምረዋል።\n\n አሁን ያለ የተደራሽነት ባህሪ፦\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ባህሪውን በቅንብሮች &gt; ተደራሽነት ውስጥ ሊለውጡት ይችላሉ።"</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"ባዶ"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"አቋራጮችን አርትዕ ያድርጉ"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"ይቅር"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"አቋራጩን አጥፋ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"አቋራጭ ይጠቀሙ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ተቃራኒ ቀለም"</string>
@@ -1845,6 +1850,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"የስራ መገለጫ ይብራ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"የእርስዎ የስራ መተግበሪያዎች፣ ማሳወቂያዎች፣ ውሂብ እና ሌሎች የስራ መገለጫ ባህሪያት ይበራሉ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"አብራ"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"መተግበሪያ አይገኝም"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> አሁን አይገኝም።"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ይህ መተግበሪያ ለቆየ የAndroid ስሪት ነው የተገነባው፣ እና በአግባቡ ላይሰራ ይችላል። ዝማኔዎች ካሉ ለመመልከት ይሞክሩ፣ ወይም ደግሞ ገንቢውን ያነጋግሩ።"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ዝማኔ ካለ አረጋግጥ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"አዲስ መልዕክቶች አለዎት"</string>
@@ -1955,13 +1962,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ባትሪ ከተለመደው ኃይል መሙላት በፊት ሊያልቅ ይችላል"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"የባትሪ ቆጣቢ የባትሪ ዕድሜን ለማራዘም ገብሯል።"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ባትሪ ቆጣቢ"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"ባትሪ ቆጣቢ ባትሪ እንደገና ዝቅ እስከሚል ድረስ ዳግም አይገብርም።"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"ባትሪ በቂ ወደ ሆነ ደረጃ ኃይል ተሞልቷል። የባትሪ ቆጣቢ ባቲትው እንደገና ዝቅ እስከሚል ድረስ ዳግም አይገብርም።"</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"ስልክ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ኃይል ተሞልቷል"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"ጡባዊ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ኃይል ተሞልቷል"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"መሣሪያ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ኃይል ተሞልቷል"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"የባትሪ ኃይል ቆጣቢ ጠፍቷል። ባህሪያት ከእንግዲህ የተገደቡ አይደሉም።"</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"የባትሪ ቆጣቢ ጠፍቷል። ባህሪያት ከእንግዲህ የተገደቡ አይደሉም።"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"የባትሪ ቆጣቢ ጠፍቷል"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ስልክ በቂ የባትሪ ኃይል አለው። ባህሪያት ከእንግዲህ የተገደቡ አይደሉም።"</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"ጡባዊ በቂ የባትሪ ኃይል አለው። ባህሪያት ከእንግዲህ የተገደቡ አይደሉም።"</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"መሣሪያ በቂ የባትሪ ኃይል የለውም። ባህሪያት ከእንግዲህ የተገደቡ አይደሉም።"</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"አቃፊ"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"የAndroid መተግበሪያ"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ፋይል"</string>

@@ -287,7 +287,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"få tillgång till din kalender"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"skicka och visa sms"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Lagring"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Filer och media"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"få åtkomst till foton, media och filer på din enhet"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"spela in ljud"</string>
@@ -313,6 +313,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Kan trycka, svepa, nypa och göra andra rörelser."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Fingeravtrycksrörelser"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan registrera rörelser som utförs med hjälp av enhetens fingeravtryckssensor."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skärmdump"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Du kan ta en skärmdump av skärmen."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"inaktivera eller ändra statusfält"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Tillåter att appen inaktiverar statusfältet eller lägger till och tar bort systemikoner."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"visas i statusfältet"</string>
@@ -1610,6 +1612,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vill du höja volymen över den rekommenderade nivån?\n\nAtt lyssna med stark volym långa stunder åt gången kan skada hörseln."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vill du använda Aktivera tillgänglighet snabbt?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"När kortkommandot har aktiverats startar du en tillgänglighetsfunktion genom att trycka ned båda volymknapparna i tre sekunder.\n\n Aktuell tillgänglighetsfunktion:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Du kan ändra funktionen i Inställningar &gt; Tillgänglighet."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Töm"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Redigera genvägar"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Avbryt"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Inaktivera kortkommandot"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Använd kortkommandot"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverterade färger"</string>
@@ -1845,6 +1850,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Vill du aktivera jobbprofilen?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Jobbappar, aviseringar, data och andra funktioner i jobbprofilen aktiveras"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivera"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Appen är inte tillgänglig"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> är inte tillgängligt just nu."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Appen har utvecklats för en äldre version av Android och kanske inte fungerar som den ska. Testa att söka efter uppdateringar eller kontakta utvecklaren."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Sök efter uppdateringar"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du har nya meddelanden"</string>
@@ -1955,13 +1962,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batteriet kan ta slut innan du brukar ladda det"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterisparläget har aktiverats för att utöka batteritiden"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Batterisparläge"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Batterisparläget aktiveras inte igen förrän batterinivån är låg"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Batteriet har laddats tillräckligt. Batterisparläget aktiveras inte igen förrän batterinivån är låg."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Mobilen är laddad till <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Surfplattan är laddad till <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Enheten är laddad till <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Batterisparläget har inaktiverats. Funktioner begränsas inte längre."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Batterisparläget har inaktiverats. Funktioner begränsas inte längre."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Batterisparläget har inaktiverats"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefonen har laddats tillräckligt. Funktioner begränsas inte längre."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Surfplattan har laddats tillräckligt. Funktioner begränsas inte längre."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Enheten har laddats tillräckligt. Funktioner begränsas inte längre."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Mapp"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android-app"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Fil"</string>

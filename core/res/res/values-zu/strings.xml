@@ -287,7 +287,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"finyelela kukhalenda yakho"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"I-SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"thumela uphinde ubuke imilayezo ye-SMS"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Isitoreji"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Amafayela nemidiya"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"finyelela kuzithombe, imidiya, namafayela kudivayisi yakho"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"I-Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"rekhoda ividiyo"</string>
@@ -313,6 +313,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Ingathepha, iswayiphe, incinze, futhi yenze okunye ukuthintwa."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Ukuthinta kwezigxivizo zeminwe"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Ingathatha ukuthinta okwenziwe kunzwa yezigxivizo zeminwe zedivayisi."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Thatha isithombe-skrini"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Ingathatha isithombe-skrini sesiboniso"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"khubaza noma guqula ibha yomumo"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Ivumela uhlelo lokusebenza ukuthi yenze umudwa ochaza ngesimo ukuthi ungasebenzi noma ukufaka noma ukukhipha izithonjana zohlelo."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"yiba yibha yesimo"</string>
@@ -1610,6 +1612,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Khuphukisa ivolumu ngaphezu kweleveli enconyiwe?\n\nUkulalela ngevolumu ephezulu izikhathi ezide kungahle kulimaze ukuzwa kwakho."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Sebenzisa isinqamuleli sokufinyelela?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Uma kuvulwe isinqamuleli, ukucindezela zombili izinkinobho zevolumu amasekhondi angu-3 kuzoqala isici sokufinyelela.\n\n Isici samanje sokufinyelela:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Ungashintsha isici kuzilungiselelo &gt; Ukufinyelela."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Akunalutho"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Hlela izinqamuleli"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Khansela"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Vala isinqamuleli"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sebenzisa isinqamuleli"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Ukuguqulwa kombala"</string>
@@ -1845,6 +1850,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Vula iphrofayela yomsebenzi?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Izinhlelo zakho zokusebenza zomsebenzi, izaziso, idatha, nezinye izici zephrofayela yomsebenzi kuzovulwa"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Vula"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Uhlelo lokusebenza alutholakali"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> ayitholakali khona manje."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Lolu hlelo lokusebenza belakhelwe inguqulo endala ye-Android futhi kungenzeka lungasebenzi kahle. Zama ukuhlolela izibuyekezo, noma uxhumane nonjiniyela."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Hlola izibuyekezo"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Unemilayezo emisha"</string>
@@ -1955,13 +1962,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Ibhethri lingaphela ngaphambi kokushaja okuvamile"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Isilondolozi sebhethri siyasebenza ngaphandle kwempilo yebhethri"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Isilondolozi sebhethri"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Isilondolozi sebhethri ngeke siphinde senziwe sisebenze lize libe phansi ibhethri futhi"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Ibhethri lishajwe kufikela kuleveli elanele. Isilondolozi sebhethri ngeke siphinde senziwe sisebenze ibhethri lize liphinde libe phansi futhi."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Ifoni engu-<xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> igcwalisiwe"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Ithebulethi ishajwe ngokungu-<xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Idivayisi ishajwe ngokungu-<xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Isilondolozi sebhethri sivaliwe. Izici azisakhawulelwe."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Isilondolozi sebhethri sivaliwe. Izici azisakhawulelwe."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Isilondolozi sebhethri sivaliwe"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Ifoni inokushajwa okwanele. Izici azisakhawulelwe."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Ithebulethi inokushajwa okwanele. Izici azisakhawulelwe."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Idivayisi inokushajwa okwanele. Izici azisakhawulelwe."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Ifolda"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Uhlelo lokusebenza lwe-Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Ifayela"</string>

@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"तपाईंको पात्रोमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS सन्देशहरू पठाउनुहोस् र हेर्नुहोस्"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"भण्डारण"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"तपाईंको यन्त्रमा तस्बिर, मिडिया, र फाइलहरूमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"माइक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"अडियो रेकर्ड गर्नुहोस्"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"ट्याप, स्वाइप गर्न, थिच्न र अन्य इसाराहरू सम्बन्धी कार्य गर्न सक्छ"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"फिंगरप्रिन्टका इसाराहरू"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"यसले यन्त्रक‍ो फिंगरप्रिन्टसम्बन्धी सेन्सरमा गरिएका इसाराहरूलाई खिच्‍न सक्छ।"</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"स्थिति पट्टिलाई अक्षम वा संशोधित गर्नुहोस्"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"स्थिति पट्टि असक्षम पार्न वा प्रणाली आइकनहरू थप्न र हटाउन अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"वस्तुस्थिति पट्टी हुन दिनुहोस्"</string>
@@ -1616,6 +1621,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"सिफारिस तहभन्दा आवाज ठुलो गर्नुहुन्छ?\n\nलामो समय सम्म उच्च आवाजमा सुन्दा तपाईँको सुन्ने शक्तिलाई हानी गर्न सक्छ।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"पहुँच सम्बन्धी सर्टकट प्रयोग गर्ने हो?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"सर्टकट सक्रिय हुँदा, भोल्युमका दुवै बटनहरूलाई ३ सेकेन्डसम्म थिची राख्नाले पहुँच सम्बन्धी कुनै सुविधा सुरु हुनेछ।\n\n हाल व्यवहारमा रहेको पहुँच सम्बन्धी सुविधा:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n तपाईं सेटिङहरू अन्तर्गतको पहुँच सम्बन्धी विकल्पमा गई उक्त सुविधालाई बदल्न सक्नुहुन्छ।"</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"खाली"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"सर्टकटहरू सम्पादन गर्नुहोस्"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"रद्द गर्नुहोस्"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"सर्टकटलाई निष्क्रिय पार्नुहोस्"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"सर्टकट प्रयोग गर्नुहोस्"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रङ्ग उल्टाउने सुविधा"</string>
@@ -1851,6 +1859,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"कार्य प्रोफाइल सक्रिय गर्ने?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"तपाईंका कार्यसम्बन्धी अनुप्रयोग, सूचना, डेटा र कार्य प्रोफाइलका अन्य सुविधाहरू सक्रिय गरिने छन्‌"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"सक्रिय गर्नुहोस्"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"यो अनुप्रयोग Android को पुरानो संस्करणका लागि बनाइएको हुनाले यसले सही ढङ्गले काम नगर्न सक्छ। अद्यावधिकहरू उपलब्ध छन् वा छैनन् भनी जाँच गरी हेर्नुहोस् वा यसको विकासकर्तालाई सम्पर्क गर्नुहोस्।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"अद्यावधिक उपलब्ध छ वा छैन भनी जाँच गर्नुहोस्"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"तपाईंलाई नयाँ सन्देश आएको छ"</string>
@@ -1961,13 +1973,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"प्रायः चार्ज गर्ने समय हुनुभन्दा पहिले नै ब्याट्री सकिन सक्छ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ब्याट्रीको आयु बढाउन ब्याट्री सेभर सक्रिय गरियो"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ब्याट्री सेभर"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"फेरि ब्याट्री कम नभएसम्म ब्याट्री सेभर पुनः सक्रिय हुने छैन"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"ब्याट्री पर्याप्त हुने गरी चार्ज गरिएको छ। ब्याट्रीको चार्ज कम नभएसम्म ब्याट्री सेभर पुनः सक्रिय हुने छैन।"</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"फोन <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> चार्ज भयो"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"ट्याब्लेट <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> चार्ज भयो"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"यन्त्र <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> चार्ज गरियो"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"ब्याट्री सेभर निष्क्रिय छ। सुविधाहरूलाई अब उप्रान्त प्रतिबन्ध लगाइँदैन।"</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"ब्याट्री सेभर निष्क्रिय पारियो। सुविधाहरूलाई अब उप्रान्त प्रतिबन्ध लगाइँदैन।"</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"फोल्डर"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android अनुप्रयोग"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"फाइल"</string>

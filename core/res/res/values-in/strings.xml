@@ -287,7 +287,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"mengakses kalender"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"mengirim dan melihat pesan SMS"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Penyimpanan"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"File dan media"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"mengakses foto, media, dan file di perangkat"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"merekam audio"</string>
@@ -313,6 +313,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Dapat mengetuk, menggeser, mencubit, dan melakukan isyarat lainnya."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestur sidik jari"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Dapat merekam gestur yang dilakukan di sensor sidik jari perangkat."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ambil screenshot"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Dapat mengambil screenshot tampilan."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"nonaktifkan atau ubah bilah status"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Mengizinkan apl menonaktifkan bilah status atau menambah dan menghapus ikon sistem."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"jadikan bilah status"</string>
@@ -1610,6 +1612,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Mengeraskan volume di atas tingkat yang disarankan?\n\nMendengarkan dengan volume keras dalam waktu yang lama dapat merusak pendengaran Anda."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gunakan Pintasan Aksesibilitas?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Saat pintasan aktif, menekan kedua tombol volume selama 3 detik akan memulai fitur aksesibilitas.\n\n Fitur aksesibilitas saat ini:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Anda dapat mengubah fitur di Setelan &gt; Aksesibilitas."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Kosong"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edit pintasan"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Batal"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Nonaktifkan Pintasan"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gunakan Pintasan"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversi Warna"</string>
@@ -1845,6 +1850,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Aktifkan profil kerja?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Aplikasi kerja, notifikasi, data, dan fitur profil kerja lainnya akan diaktifkan"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktifkan"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Aplikasi tidak tersedia"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak tersedia saat ini."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Aplikasi ini dibuat untuk Android versi lama dan mungkin tidak berfungsi sebagaimana mestinya. Coba periksa apakah ada update, atau hubungi developer."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Periksa apakah ada update"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Ada pesan baru"</string>
@@ -1955,13 +1962,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterai mungkin habis sebelum pengisian daya biasanya"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Penghemat Baterai diaktifkan untuk memperpanjang masa pakai baterai"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Penghemat Baterai"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Penghemat Baterai tidak akan aktif lagi sampai baterai lemah kembali"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Baterai telah terisi ke tingkat yang memadai. Penghemat Baterai tidak akan aktif lagi sampai baterai lemah kembali."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Ponsel terisi <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Tablet terisi <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Perangkat terisi <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Penghemat Baterai nonaktif. Fitur tidak lagi dibatasi."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Penghemat Baterai dinonaktifkan. Fitur tidak lagi dibatasi."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Penghemat Baterai dinonaktifkan"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Baterai ponsel cukup terisi. Fitur tidak lagi dibatasi."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Baterai tablet cukup terisi. Fitur tidak lagi dibatasi."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Baterai perangkat cukup terisi. Fitur tidak lagi dibatasi."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Folder"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Aplikasi Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"File"</string>

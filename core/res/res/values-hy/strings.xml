@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"օգտագործել օրացույցը"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ուղարկել և դիտել SMS-ները"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Տարածք"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"օգտագործել լուսանկարները, մեդիա ֆայլերը և ձեր սարքում պահվող մյուս ֆայլերը"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Խոսափող"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ձայնագրել"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Կարող է հպել, թերթել, պտղունցել և կատարել այլ ժեստեր:"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Մատնահետքերի սկաների ժեստեր"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Կարող է արձանագրել մատնահետքերի սկաների վրա կատարվող ժեստերը"</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"անջատել կամ փոփոխել կարգավիճակի գոտին"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Թույլ է տալիս հավելվածին անջատել կարգավիճակի գոտին կամ ավելացնել ու հեռացնել համակարգի պատկերակները:"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"լինել կարգավիճակի գոտի"</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ձայնը բարձրացնե՞լ խորհուրդ տրվող մակարդակից ավել:\n\nԵրկարատև բարձրաձայն լսելը կարող է վնասել ձեր լսողությունը:"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Օգտագործե՞լ Մատչելիության դյուրանցումը։"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Հատուկ գործառույթն օգտագործելու համար սեղմեք և 3 վայրկյան սեղմած պահեք ձայնի ուժգնության երկու կոճակները, երբ գործառույթը միացված է։\n\n Մատչելիության ակտիվ գործառույթը՝\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Գործառույթը կարող եք փոփոխել՝ անցնելով Կարգավորումներ &gt; Հատուկ գործառույթներ։"</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Դատարկ"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Փոփոխել դյուրանցումները"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Չեղարկել"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Անջատել դյուրանցումը"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Օգտագործել դյուրանցումը"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Գունաշրջում"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Միացնե՞լ աշխատանքային պրոֆիլը"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Ձեր աշխատանքային հավելվածները, ծանուցումները, տվյալները և աշխատանքային պրոֆիլի մյուս գործառույթները կմիանան"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Միացնել"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Այս հավելվածը ստեղծվել է Android-ի ավելի հին տարբերակի համար և կարող է պատշաճ չաշխատել: Ստուգեք թարմացումների առկայությունը կամ դիմեք մշակողին:"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Ստուգել նոր տարբերակի առկայությունը"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Դուք ունեք նոր հաղորդագրություններ"</string>
@@ -1858,7 +1870,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"Ամրացնել <xliff:g id="LABEL">%1$s</xliff:g> հավելվածը"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Ապամրացնել"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Ապամրացնել <xliff:g id="LABEL">%1$s</xliff:g> հավելվածը"</string>
-    <string name="app_info" msgid="6113278084877079851">"Հավելվածի տվյալներ"</string>
+    <string name="app_info" msgid="6113278084877079851">"Հավելվածի մասին"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Ցուցադրական օգտատերը գործարկվում է…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Սարաքը վերակայվում է…"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Մարտկոցի լիցքը կարող է սովորականից շուտ սպառվել"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Մարտկոցի կյանքը երկարացնելու համար ակտիվացվել է մարտկոցի տնտեսման ռեժիմը"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Մարտկոցի տնտեսում"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Մարտկոցի տնտեսումը նորից կմիանա, երբ մարտկոցի լիցքը ցածր լինի"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Մարտկոցը բավարար լիցքավորված է։ Մարտկոցի տնտեսման ռեժիմը նորից կմիանա, երբ մարտկոցի լիցքը ցածր լինի։"</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Հեռախոսի լիցքը՝ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Պլանշետի լիցքը՝ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Սարքի լիցքը՝ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Մարտկոցի տնտեսման ռեժիմն անջատված է: Գործառույթներն այլևս չեն սահմանափակվում։"</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Մարտկոցի տնտեսումն անջատված է։ Գործառույթներն այլևս չեն սահմանափակվում։"</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"Պանակ"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android հավելված"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Ֆայլ"</string>

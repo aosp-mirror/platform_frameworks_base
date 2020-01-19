@@ -287,7 +287,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"toegang krijgen tot je agenda"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"sms\'jes verzenden en bekijken"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Opslagruimte"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Bestanden en media"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"toegang krijgen tot foto\'s, media en bestanden op je apparaat"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfoon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"audio opnemen"</string>
@@ -313,6 +313,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Kan tikken, vegen, samenknijpen en andere gebaren uitvoeren."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Vingerafdrukgebaren"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan gebaren registreren die op de vingerafdruksensor van het apparaat worden getekend."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Screenshot maken"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan een screenshot van het scherm maken."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"statusbalk uitschakelen of wijzigen"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Hiermee kan de app de statusbalk uitschakelen of systeempictogrammen toevoegen en verwijderen."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"de statusbalk zijn"</string>
@@ -1610,6 +1612,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Volume verhogen tot boven het aanbevolen niveau?\n\nAls je langere tijd op hoog volume naar muziek luistert, raakt je gehoor mogelijk beschadigd."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Snelkoppeling toegankelijkheid gebruiken?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Wanneer de snelkoppeling is ingeschakeld, kun je drie seconden op beide volumeknoppen drukken om een toegankelijkheidsfunctie te starten.\n\n Huidige toegankelijkheidsfunctie:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Je kunt de functie wijzigen in Instellingen &gt; Toegankelijkheid."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Leeg"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Snelkoppelingen bewerken"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Annuleren"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Sneltoets uitschakelen"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sneltoets gebruiken"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Kleurinversie"</string>
@@ -1845,6 +1850,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Werkprofiel inschakelen?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Je werk-apps, meldingen, gegevens en andere functies van je werkprofiel worden uitgeschakeld"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Inschakelen"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"App is niet beschikbaar"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is momenteel niet beschikbaar."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Deze app is ontwikkeld voor een oudere versie van Android en werkt mogelijk niet op de juiste manier. Controleer op updates of neem contact op met de ontwikkelaar."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Controleren op update"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Je hebt nieuwe berichten"</string>
@@ -1955,13 +1962,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"De batterij raakt mogelijk leeg voordat deze normaal gesproken wordt opgeladen"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterijbesparing is geactiveerd om de batterijduur te verlengen"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Batterijbesparing"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Batterijbesparing kan pas opnieuw worden geactiveerd zodra de batterij bijna leeg is"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Batterij is voldoende opgeladen. Batterijbesparing kan pas opnieuw worden geactiveerd zodra de batterij bijna leeg is."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Telefoon is <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> opgeladen"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Tablet is <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> opgeladen"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Apparaat is <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> opgeladen"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Batterijbesparing staat uit. Functies worden niet meer beperkt."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Batterijbesparing is uitgeschakeld. Functies worden niet meer beperkt."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Batterijbesparing is uitgeschakeld"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefoon is voldoende opgeladen. Functies worden niet meer beperkt."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Tablet is voldoende opgeladen. Functies worden niet meer beperkt."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Apparaat is voldoende opgeladen. Functies worden niet meer beperkt."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Map"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android-app"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Bestand"</string>

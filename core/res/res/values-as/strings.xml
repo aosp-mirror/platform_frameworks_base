@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"আপোনাৰ কেলেণ্ডাৰ ব্যৱহাৰ কৰিব পাৰে"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"এছএমএছ"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"এছএমএছ বার্তা পঠিয়াব আৰু চাব পাৰে"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"সঞ্চয়াগাৰ"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"আপোনাৰ ডিভাইচৰ ফট\', মিডিয়া আৰু ফাইলসমূহ ব্যৱহাৰ কৰিব পাৰে"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"মাইক্ৰ\'ফ\'ন"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"অডিঅ\' ৰেকর্ড কৰিব পাৰে"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"টেপ কৰা, ছোৱাইপ কৰা, পিঞ্চ কৰা আৰু আঙুলিৰ স্পৰ্শেৰে নিৰ্দেশ কৰা অন্যান্য কাৰ্যসমূহ কৰিব পাৰে।"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"ফিংগাৰপ্ৰিণ্ট নিৰ্দেশ"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ডিভাইচটোৰ ফিংগাৰপ্ৰিণ্ট ছেন্সৰত দিয়া নিৰ্দেশ বুজিব পাৰে।"</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"স্থিতি দণ্ড অক্ষম কৰক বা সলনি কৰক"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"স্থিতি দণ্ড অক্ষম কৰিবলৈ বা ছিষ্টেম আইকন আঁতৰাবলৈ এপটোক অনুমতি দিয়ে।"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"স্থিতি দণ্ড হ\'ব পাৰে"</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"অনুমোদিত স্তৰতকৈ ওপৰলৈ ভলিউম বঢ়াব নেকি?\n\nদীৰ্ঘ সময়ৰ বাবে উচ্চ ভলিউমত শুনাৰ ফলত শ্ৰৱণ ক্ষমতাৰ ক্ষতি হ\'ব পাৰে।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"দিব্যাংগসকলৰ সুবিধাৰ শ্বৰ্টকাট ব্যৱহাৰ কৰেনে?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"শ্বৰ্টকাট অন হৈ থকাৰ সময়ত দুয়োটা ভলিউম বুটামত ৩ ছেকেণ্ডৰ বাবে ছাপ দি থাকিলে দিব্যাংগসকলৰ বাবে থকা সুবিধা এটা আৰম্ভ হ\'ব। \n\n চলিত দিব্যাংগসকলৰ সুবিধা:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n আপুনি এই সুবিধাটো ছেটিংসমূহ &gt; দিব্যাংগসকলৰ বাবে সুবিধা-লৈ গৈ সলনি কৰিব পাৰে।"</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"খালী কৰক"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"শ্বৰ্টকাটসমূহ সম্পাদনা কৰক"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"বাতিল কৰক"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"শ্বৰ্টকাট অফ কৰক"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"শ্বৰ্টকাট ব্যৱহাৰ কৰক"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ৰং বিপৰীতকৰণ"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"কৰ্মস্থানৰ প্ৰ\'ফাইল অন কৰিবনে?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"আপোনাৰ কৰ্মস্থানৰ এপসমূহ, জাননীসমূহ, ডেটা আৰু কৰ্মস্থানৰ প্ৰ\'ফাইলৰ অইন সুবিধাসমূহ অন কৰা হ\'ব"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"অন কৰক"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"এই এপটো Androidৰ এটা পুৰণা সংস্কৰণৰ বাবে প্ৰস্তুত কৰা হৈছিল, আৰু ই বিচৰাধৰণে কাম নকৰিবও পাৰে। ইয়াৰ আপডে’ট আছে নেকি চাওক, বা বিকাশকৰ্তাৰ সৈতে যোগাযোগ কৰক।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"আপডে’ট আছে নেকি চাওক"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"আপুনি নতুন বার্তা লাভ কৰিছে"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"চ্চাৰ্জ কৰাৰ সচৰাচৰ সময়ৰ আগতেই বেটাৰি শেষ হ’ব পাৰে"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"বেটাৰিৰ খৰচ কমাবলৈ বেটাৰি সঞ্চয়কাৰী অন কৰা হৈছে"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"বেটাৰি সঞ্চয়কাৰী"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"বেটাৰিৰ চাৰ্জ নকমালৈকে বেটাৰি সঞ্চয়কাৰী পুনৰ সক্ৰিয় নহয়"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"বেটাৰি পৰ্যাপ্ত পৰিমাণে চাৰ্জ হৈছে। বেটাৰিৰ চাৰ্জ নকমালৈকে বেটাৰি সঞ্চয়কাৰী পুনৰ সক্ৰিয় নহয়।"</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"ফ’ন <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> চাৰ্জ হ’ল"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"টেবলেট <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> চাৰ্জ হ’ল"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"ডিভাইচটো <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> চাৰ্জ হ’ল"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"বেটাৰি সঞ্চয়কাৰী অফ আছে। সুবিধাবোৰ ব্যৱহাৰ কৰাত এতিয়া বাধা নাই।"</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"বেটাৰি সঞ্চয়কাৰী অফ কৰা হ’ল। সুবিধাবোৰ ব্যৱহাৰ কৰাত এতিয়া বাধা নাই।"</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"ফ’ল্ডাৰ"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android এপ্লিকেশ্বন"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ফাইল"</string>

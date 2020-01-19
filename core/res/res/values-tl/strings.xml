@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"i-access ang iyong kalendaryo"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"magpadala at tumingin ng mga mensaheng SMS"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Storage"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"i-access ang mga larawan, media at file sa iyong device"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikropono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"mag-record ng audio"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"May kakayahang mag-tap, mag-swipe, mag-pinch at magsagawa ng iba pang mga galaw."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Mga galaw gamit ang fingerprint"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Makukunan ang mga galaw na ginawa sa sensor para sa fingerprint ng device."</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"i-disable o baguhin ang status bar"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Pinapayagan ang app na i-disable ang status bar o magdagdag at mag-alis ng mga icon ng system."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"maging status bar"</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lakasan ang volume nang lagpas sa inirerekomendang antas?\n\nMaaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gagamitin ang Shortcut sa Pagiging Accessible?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume sa loob ng 3 segundo.\n\n Kasalukuyang feature ng pagiging naa-access:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Maaari mong baguhin ang feature sa Mga Setting &gt; Pagiging Accessible."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Bakantehin"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"I-edit ang mga shortcut"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Kanselahin"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"I-off ang Shortcut"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gamitin ang Shortcut"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Pag-invert ng Kulay"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"I-on ang profile sa trabaho?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Mao-on ang iyong mga app sa trabaho, notification, data, at iba pang feature sa profile sa trabaho"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"I-on"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ang app na ito ay ginawa para sa mas lumang bersyon ng Android at maaaring hindi gumana nang maayos. Subukang tingnan kung may mga update, o makipag-ugnayan sa developer."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Tingnan kung may update"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Mayroon kang mga bagong mensahe"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Maaaring maubos ang baterya bago ang karaniwang pag-charge"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Na-activate ang Pangtipid sa Baterya para patagalin ang buhay ng baterya"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Pangtipid sa Baterya"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Hindi muling maa-activate ang Pangtipid sa Baterya hangga\'t hindi pa ulit mababa ang baterya"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Na-charge na ang baterya sa sapat na antas. Hindi muling maa-activate ang Pangtipid sa Baterya hangga\'t hindi pa ulit mababa ang baterya."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"<xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ang charge ng telepono"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"<xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ang charge ng tablet"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"<xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ang charge ng baterya"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Na-off ang Pangtipid sa Baterya. Hindi na pinaghihigpitan ang mga feature."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Na-off ang Pangtipid sa Baterya. Hindi na pinaghihigpitan ang mga feature."</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"Folder"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android application"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"File"</string>

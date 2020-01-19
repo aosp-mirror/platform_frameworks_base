@@ -287,7 +287,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"има достъп до календара ви"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"да изпраща и преглежда SMS съобщения"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Хранилище"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Файлове и мултимедия"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"да има достъп до снимките, мултимедията и файловете на устройството ви"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"записва звук"</string>
@@ -313,6 +313,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Можете да докосвате, да прекарвате пръст, да събирате пръсти и да извършвате други жестове."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Жестове за отпечатък"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Може да улавя жестовете, извършени върху сензора за отпечатъци на устройството."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Създаване на екранна снимка"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Може да създава екранни снимки."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"деактивиране или промяна на лентата на състоянието"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Разрешава на приложението да деактивира лентата на състоянието или да добавя и премахва системни икони."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"изпълняване на ролята на лента на състоянието"</string>
@@ -1610,6 +1612,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Да се увеличи ли силата на звука над препоръчителното ниво?\n\nПродължителното слушане при висока сила на звука може да увреди слуха ви."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Искате ли да използвате пряк път към функцията за достъпност?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Когато прекият път е включен, можете да стартирате дадена функция за достъпност, като натиснете двата бутона за промяна на силата на звука и ги задържите 3 секунди.\n\n Текущата функция за достъпност е:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Можете да промените функцията от „Настройки“ &gt; „Достъпност“."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Празно"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Редактиране на преките пътища"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Отказ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Изключване на прекия път"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Използване на пряк път"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инвертиране на цветовете"</string>
@@ -1845,6 +1850,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Вкл. на служ. потр. профил?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Служебните ви приложения, известия и данни, както и другите функции на служебния потребителски профил ще бъдат включени"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Включване"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Приложението не е достъпно"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"В момента няма достъп до <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Това приложение бе създадено за по-стара версия на Android и може да не работи правилно. Опитайте да проверите за актуализации или се свържете с програмиста."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверка за актуализация"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Имате нови съобщения"</string>
@@ -1955,13 +1962,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батерията може да се изтощи преди обичайното зареждане"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режимът за запазване на батерията е активиран с цел удължаване на живота на батерията"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Режим за запазване на батерията"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Режимът за запазване на батерията няма да се активира отново, докато тя пак не се изтощи"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Батерията е достатъчно заредена. Режимът за запазването й няма да се активира отново, докато тя пак не се изтощи."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Телефонът е зареден на <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Таблетът е зареден на <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Устройството е заредено на <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Режимът за запазване на батерията е изключен. Функциите вече не са ограничени."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Режимът за запазване на батерията е изключен. Функциите вече не са ограничени."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Режимът за запазване на батерията е изключен"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Батерията на телефона има достатъчно заряд. Функциите вече не са ограничени."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Батерията на таблета има достатъчно заряд. Функциите вече не са ограничени."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Батерията на устройството има достатъчно заряд. Функциите вече не са ограничени."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Папка"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Приложение за Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Файл"</string>
