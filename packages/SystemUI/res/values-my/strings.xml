@@ -391,6 +391,12 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ကို ပိတ်ထားသည်"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ကို ဖွင့်ထားသည်"</string>
+    <!-- no translation found for quick_settings_screen_record_label (1594046461509776676) -->
+    <skip />
+    <!-- no translation found for quick_settings_screen_record_start (1574725369331638985) -->
+    <skip />
+    <!-- no translation found for quick_settings_screen_record_stop (8087348522976412119) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"အက်ပ်များကို ဖွင့်ရန် အပေါ်သို့ ပွတ်ဆွဲပါ"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"အက်ပ်များကို ပြောင်းရန် ညာဘက်သို့ ဖိဆွဲပါ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ဖွင့်၊ ပိတ် အနှစ်ချုပ်"</string>
@@ -465,13 +471,13 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"ဘက်ထရီ အားထိန်းကို ပိတ်ရန်"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> သည် အသံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ် သင့်မျက်နှာပြင်တွင် မြင်ရသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အချက်အလက်မှန်သမျှကို သုံးနိုင်ပါမည်။ ၎င်းတွင် စကားဝှက်များ၊ ငွေပေးချေမှုအသေးစိတ်များ၊ ဓာတ်ပုံများ၊ မက်ဆေ့ဂျ်များနှင့် သင်ဖွင့်သည့်အသံကဲ့သို့သော အချက်အလက်များ ပါဝင်သည်။"</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ဤလုပ်ဆောင်ချက်ကို ပေးအပ်သည့် ဝန်ဆောင်မှုသည် အသံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ် သင့်မျက်နှာပြင်တွင် မြင်ရသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အချက်အလက်မှန်သမျှကို သုံးနိုင်ပါမည်။ ၎င်းတွင် စကားဝှက်များ၊ ငွေပေးချေမှုအသေးစိတ်များ၊ ဓာတ်ပုံများ၊ မက်ဆေ့ဂျ်များနှင့် သင်ဖွင့်သည့်အသံကဲ့သို့သော အချက်အလက်များ ပါဝင်သည်။"</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ဖမ်းယူခြင်း သို့မဟုတ် ကာစ်လုပ်ခြင်း စတင်မလား။"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> နှင့် ဖမ်းယူခြင်း သို့မဟုတ် ကာစ်လုပ်ခြင်း စတင်မလား။"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"နောက်ထပ် မပြပါနှင့်"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"အားလုံး ဖယ်ရှားရန်"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"စီမံရန်"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"အကြောင်းကြားချက်များကို အသံတိတ်ခြင်း"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"စကားဝိုင်းများ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"အသံတိတ် အကြောင်းကြားချက်များအားလုံးကို ရှင်းလင်းရန်"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"အကြောင်းကြားချက်များကို \'မနှောင့်ယှက်ရ\' က ခေတ္တရပ်ထားသည်"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ယခု စတင်ပါ"</string>
@@ -690,6 +696,22 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"စိတ်ကြိုက်ပြုလုပ်ရန်"</string>
     <string name="notification_done" msgid="6215117625922713976">"ပြီးပါပြီ"</string>
     <string name="inline_undo" msgid="9026953267645116526">"တစ်ဆင့်နောက်ပြန်ရန်"</string>
+    <!-- no translation found for demote (6225813324237153980) -->
+    <skip />
+    <!-- no translation found for notification_conversation_favorite (8252976467488182853) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unfavorite (633301300443356176) -->
+    <skip />
+    <!-- no translation found for notification_conversation_mute (477431709687199671) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unmute (410885000669775294) -->
+    <skip />
+    <!-- no translation found for notification_conversation_bubble (4598142032706190028) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unbubble (2303087159802926401) -->
+    <skip />
+    <!-- no translation found for notification_conversation_home_screen (8347136037958438935) -->
+    <skip />
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"အကြောင်းကြားချက် ထိန်းချုပ်မှုများ"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"အကြောင်းကြားချက်များကို ဆိုင်းငံ့ရန် ရွေးချယ်စရာများ"</string>

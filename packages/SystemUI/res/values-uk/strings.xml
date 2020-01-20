@@ -395,6 +395,12 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC вимкнено"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ввімкнено"</string>
+    <!-- no translation found for quick_settings_screen_record_label (1594046461509776676) -->
+    <skip />
+    <!-- no translation found for quick_settings_screen_record_start (1574725369331638985) -->
+    <skip />
+    <!-- no translation found for quick_settings_screen_record_stop (8087348522976412119) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Проводьте пальцем угору, щоб переходити між додатками"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Перетягуйте праворуч, щоб швидко переходити між додатками"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Увімкнути або вимкнути огляд"</string>
@@ -477,6 +483,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Очистити все"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Керувати"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Беззвучні сповіщення"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"Чати"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Очистити всі беззвучні сповіщення"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Режим \"Не турбувати\" призупинив сповіщення"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Почати зараз"</string>
@@ -695,6 +702,22 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"Налаштувати"</string>
     <string name="notification_done" msgid="6215117625922713976">"Готово"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Відмінити"</string>
+    <!-- no translation found for demote (6225813324237153980) -->
+    <skip />
+    <!-- no translation found for notification_conversation_favorite (8252976467488182853) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unfavorite (633301300443356176) -->
+    <skip />
+    <!-- no translation found for notification_conversation_mute (477431709687199671) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unmute (410885000669775294) -->
+    <skip />
+    <!-- no translation found for notification_conversation_bubble (4598142032706190028) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unbubble (2303087159802926401) -->
+    <skip />
+    <!-- no translation found for notification_conversation_home_screen (8347136037958438935) -->
+    <skip />
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"елементи керування сповіщеннями"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"параметри відкладення сповіщень"</string>

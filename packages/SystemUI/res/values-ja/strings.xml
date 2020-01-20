@@ -391,6 +391,12 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC は無効です"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC は有効です"</string>
+    <!-- no translation found for quick_settings_screen_record_label (1594046461509776676) -->
+    <skip />
+    <!-- no translation found for quick_settings_screen_record_start (1574725369331638985) -->
+    <skip />
+    <!-- no translation found for quick_settings_screen_record_stop (8087348522976412119) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"アプリを切り替えるには上にスワイプ"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"右にドラッグするとアプリを素早く切り替えることができます"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"概要を切り替え"</string>
@@ -465,13 +471,13 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"バッテリー セーバーを OFF"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>は、記録中やキャスト中に画面上に表示またはデバイスから再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などの情報が含まれます。"</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、記録中やキャスト中に画面上に表示またはデバイスから再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などの情報が含まれます。"</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"記録やキャストを開始しますか？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>で記録やキャストを開始しますか？"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"次回から表示しない"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"すべて消去"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"サイレント通知"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"会話"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"サイレント通知がすべて消去されます"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"サイレント モードにより通知は一時停止中です"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"今すぐ開始"</string>
@@ -690,6 +696,22 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"カスタマイズ"</string>
     <string name="notification_done" msgid="6215117625922713976">"完了"</string>
     <string name="inline_undo" msgid="9026953267645116526">"元に戻す"</string>
+    <!-- no translation found for demote (6225813324237153980) -->
+    <skip />
+    <!-- no translation found for notification_conversation_favorite (8252976467488182853) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unfavorite (633301300443356176) -->
+    <skip />
+    <!-- no translation found for notification_conversation_mute (477431709687199671) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unmute (410885000669775294) -->
+    <skip />
+    <!-- no translation found for notification_conversation_bubble (4598142032706190028) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unbubble (2303087159802926401) -->
+    <skip />
+    <!-- no translation found for notification_conversation_home_screen (8347136037958438935) -->
+    <skip />
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"通知管理"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"通知スヌーズ設定"</string>

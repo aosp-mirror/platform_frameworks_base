@@ -391,6 +391,9 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Slökkt á NFC"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Kveikt á NFC"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Skjáupptaka"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Hefja"</string>
+    <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stöðva"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Strjúktu upp til að skipta á milli forrita"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Dragðu til hægri til að skipta hratt á milli forrita"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Kveikja/slökkva á yfirliti"</string>
@@ -471,6 +474,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Hreinsa allt"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Stjórna"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Þöglar tilkynningar"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"Samtöl"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Hreinsa allar þöglar tilkynningar"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Hlé gert á tilkynningum þar sem stillt er á „Ónáðið ekki“"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Byrja núna"</string>
@@ -689,6 +693,14 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"Sérsníða"</string>
     <string name="notification_done" msgid="6215117625922713976">"Lokið"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Afturkalla"</string>
+    <string name="demote" msgid="6225813324237153980">"Merkja þessa tilkynningu sem „ekki samtal“"</string>
+    <string name="notification_conversation_favorite" msgid="8252976467488182853">"Eftirlæti"</string>
+    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"Fjarlægja úr eftirlæti"</string>
+    <string name="notification_conversation_mute" msgid="477431709687199671">"Þagga"</string>
+    <string name="notification_conversation_unmute" msgid="410885000669775294">"Hætta að þagga"</string>
+    <string name="notification_conversation_bubble" msgid="4598142032706190028">"Sýna sem blöðru"</string>
+    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"Slökkva á blöðrum"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Bæta á heimaskjá"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"tilkynningastýringar"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"þöggunarstillingar tilkynninga"</string>

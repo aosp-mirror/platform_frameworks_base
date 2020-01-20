@@ -391,6 +391,9 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC dinonaktifkan"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC diaktifkan"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Rekaman Layar"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Mulai"</string>
+    <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Berhenti"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Geser ke atas untuk beralih aplikasi"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Tarik ke kanan untuk beralih aplikasi dengan cepat"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Aktifkan Ringkasan"</string>
@@ -465,13 +468,13 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Nonaktifkan Penghemat Baterai"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> akan memiliki akses ke semua informasi yang terlihat di layar atau diputar dari perangkat saat merekam atau melakukan transmisi. Ini mencakup informasi seperti sandi, detail pembayaran, foto, pesan, dan audio yang Anda putar."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Layanan yang menyediakan fungsi ini akan memiliki akses ke semua informasi yang terlihat di layar atau diputar dari perangkat saat merekam atau melakukan transmisi. Ini mencakup informasi seperti sandi, detail pembayaran, foto, pesan, dan audio yang Anda putar."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Mulai merekam atau melakukan transmisi?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Mulai merekam atau melakukan transmisi dengan <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Jangan tampilkan lagi"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Hapus semua"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Kelola"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notifikasi senyap"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"Percakapan"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Hapus semua notifikasi senyap"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notifikasi dijeda oleh mode Jangan Ganggu"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Mulai sekarang"</string>
@@ -690,6 +693,14 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"Sesuaikan"</string>
     <string name="notification_done" msgid="6215117625922713976">"Selesai"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Urungkan"</string>
+    <string name="demote" msgid="6225813324237153980">"Tandai notifikasi ini sebagai bukan percakapan"</string>
+    <string name="notification_conversation_favorite" msgid="8252976467488182853">"Favorit"</string>
+    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"Batal favoritkan"</string>
+    <string name="notification_conversation_mute" msgid="477431709687199671">"Bisukan"</string>
+    <string name="notification_conversation_unmute" msgid="410885000669775294">"Bunyikan"</string>
+    <string name="notification_conversation_bubble" msgid="4598142032706190028">"Tampilkan sebagai balon"</string>
+    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"Nonaktifkan balon"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Tambahkan ke layar utama"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"kontrol notifikasi"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"opsi tunda notifikasi"</string>

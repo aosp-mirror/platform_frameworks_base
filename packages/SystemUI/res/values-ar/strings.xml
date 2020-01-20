@@ -109,7 +109,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"الكاميرا"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"الهاتف"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"المساعد الصوتي"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"إلغاء القفل"</string>
+    <string name="accessibility_unlock_button" msgid="122785427241471085">"فتح القفل"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"في انتظار بصمة الإصبع"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"فتح القفل بدون استخدام بصمة إصبعك"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"مسح الوجه"</string>
@@ -140,7 +140,7 @@
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"جارٍ البحث عن وجهك…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"رمز الوجه"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"زر تكبير/تصغير للتوافق."</string>
-    <string name="accessibility_compatibility_zoom_example" msgid="2617218726091234073">"استخدام التكبير/التصغير لتحويل شاشة صغيرة إلى شاشة أكبر"</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="2617218726091234073">"استخدام التكبير أو التصغير لتحويل شاشة صغيرة إلى شاشة أكبر"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"تم توصيل البلوتوث."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7195823280221275929">"تم فصل البلوتوث."</string>
     <string name="accessibility_no_battery" msgid="3789287732041910804">"ليست هناك بطارية."</string>
@@ -399,6 +399,12 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"‏الاتصالات قصيرة المدى (NFC)"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"تم إيقاف الاتصال القريب المدى"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"تم تفعيل الاتصال القريب المدى"</string>
+    <!-- no translation found for quick_settings_screen_record_label (1594046461509776676) -->
+    <skip />
+    <!-- no translation found for quick_settings_screen_record_start (1574725369331638985) -->
+    <skip />
+    <!-- no translation found for quick_settings_screen_record_stop (8087348522976412119) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"مرّر سريعًا لأعلى لتبديل التطبيقات"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"اسحب لليسار للتبديل السريع بين التطبيقات"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"تبديل \"النظرة العامة\""</string>
@@ -477,13 +483,13 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"إيقاف ميزة توفير شحن البطارية"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"سيتمكن تطبيق <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> من الوصول إلى كل المعلومات المرئية لك على الشاشة أو التي يتم تشغيلها على جهازك أثناء التسجيل أو الإرسال. ويشمل ذلك معلومات مثل كلمات المرور وتفاصيل الدفع والصور والرسائل والمقاطع الصوتية التي تشغِّلها."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ستتمكن الخدمة التي تقدّم هذه الوظيفة من الوصول إلى كل المعلومات المرئية لك على الشاشة أو التي يتم تشغيلها على جهازك أثناء التسجيل أو الإرسال. ويشمل ذلك معلومات مثل كلمات المرور وتفاصيل الدفع والصور والرسائل والمقاطع الصوتية التي تشغِّلها."</string>
-    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
-    <skip />
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"هل تريد بدء التسجيل أو الإرسال؟"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"هل تريد بدء التسجيل أو الإرسال باستخدام <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>؟"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"عدم الإظهار مرة أخرى"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"محو الكل"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"إدارة"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"الإشعارات الصامتة"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"المحادثات"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"محو جميع الإشعارات الصامتة"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"تم إيقاف الإشعارات مؤقتًا وفقًا لإعداد \"الرجاء عدم الإزعاج\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"البدء الآن"</string>
@@ -544,10 +550,10 @@
     <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"أنت متصل بـ <xliff:g id="APPLICATION">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطتك الشخصية على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
     <string name="monitoring_description_app_work" msgid="3713084153786663662">"يخضع الملف الشخصي للعمل لإدارة <xliff:g id="ORGANIZATION">%1$s</xliff:g>. تم ربط الملف الشخصي بـ <xliff:g id="APPLICATION">%2$s</xliff:g>، الذي يمكنه مراقبة أنشطة شبكتك، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب.\n\nيمكنك الاتصال بالمشرف للحصول على مزيد من المعلومات."</string>
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"يخضع الملف الشخصي للعمل لإدارة <xliff:g id="ORGANIZATION">%1$s</xliff:g>. تم ربط هذا الملف الشخصي بـ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>، الذي يمكنه مراقبة أنشطة شبكتك، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب.\n\nتم ربطك بـ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>، الذي يمكنه مراقبة أنشطة شبكتك الشخصية."</string>
-    <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"‏إلغاء القفل باستمرار بواسطة TrustAgent"</string>
-    <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"سيظل الجهاز مقفلاً إلى أن يتم إلغاء قفله يدويًا"</string>
+    <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"‏فتح القفل باستمرار بواسطة TrustAgent"</string>
+    <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"سيظل الجهاز مقفلاً إلى أن يتم فتح قفله يدويًا"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"الحصول على الإشعارات بشكل أسرع"</string>
-    <string name="hidden_notifications_text" msgid="5899627470450792578">"الاطّلاع عليها قبل إلغاء القفل"</string>
+    <string name="hidden_notifications_text" msgid="5899627470450792578">"الاطّلاع عليها قبل فتح القفل"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"لا، شكرًا"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"إعداد"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -702,6 +708,22 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"تخصيص"</string>
     <string name="notification_done" msgid="6215117625922713976">"تم"</string>
     <string name="inline_undo" msgid="9026953267645116526">"تراجع"</string>
+    <!-- no translation found for demote (6225813324237153980) -->
+    <skip />
+    <!-- no translation found for notification_conversation_favorite (8252976467488182853) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unfavorite (633301300443356176) -->
+    <skip />
+    <!-- no translation found for notification_conversation_mute (477431709687199671) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unmute (410885000669775294) -->
+    <skip />
+    <!-- no translation found for notification_conversation_bubble (4598142032706190028) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unbubble (2303087159802926401) -->
+    <skip />
+    <!-- no translation found for notification_conversation_home_screen (8347136037958438935) -->
+    <skip />
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"عناصر التحكم في الإشعارات"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"خيارات تأجيل الإشعارات"</string>
