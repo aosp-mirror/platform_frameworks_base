@@ -782,6 +782,12 @@ public class SubscriptionManager {
     public static final String UICC_APPLICATIONS_ENABLED = SimInfo.UICC_APPLICATIONS_ENABLED;
 
     /**
+     * Indicate which network type is allowed. By default it's enabled.
+     * @hide
+     */
+    public static final String ALLOWED_NETWORK_TYPES = SimInfo.ALLOWED_NETWORK_TYPES;
+
+    /**
      * Broadcast Action: The user has changed one of the default subs related to
      * data, phone calls, or sms</p>
      *
@@ -2434,7 +2440,28 @@ public class SubscriptionManager {
             try {
                 return Integer.parseInt(result);
             } catch (NumberFormatException err) {
-                logd("getBooleanSubscriptionProperty NumberFormat exception");
+                logd("getIntegerSubscriptionProperty NumberFormat exception");
+            }
+        }
+        return defValue;
+    }
+
+    /**
+     * Returns long value corresponding to query result.
+     * @param subId Subscription Id of Subscription
+     * @param propKey Column name in SubscriptionInfo database
+     * @param defValue Default long value to be returned
+     * @return long result value to be returned
+     * @hide
+     */
+    public static long getLongSubscriptionProperty(int subId, String propKey, long defValue,
+                                                     Context context) {
+        String result = getSubscriptionProperty(subId, propKey, context);
+        if (result != null) {
+            try {
+                return Long.parseLong(result);
+            } catch (NumberFormatException err) {
+                logd("getLongSubscriptionProperty NumberFormat exception");
             }
         }
         return defValue;

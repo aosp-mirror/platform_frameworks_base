@@ -5374,5 +5374,11 @@ public final class Telephony {
 
         /** Whether uicc applications is set to be enabled or disabled. By default it's enabled. */
         public static final String UICC_APPLICATIONS_ENABLED = "uicc_applications_enabled";
+
+        /**
+         * TelephonyProvider column name for allowed network types. Indicate which network types
+         * are allowed. Default is -1.
+         */
+        public static final String ALLOWED_NETWORK_TYPES = "allowed_network_types";
     }
 }
