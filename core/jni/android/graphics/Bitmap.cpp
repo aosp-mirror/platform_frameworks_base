@@ -243,7 +243,8 @@ Bitmap* GraphicsJNI::getNativeBitmap(JNIEnv* env, jobject bitmap) {
     return localBitmap.valid() ? &localBitmap->bitmap() : nullptr;
 }
 
-SkImageInfo GraphicsJNI::getBitmapInfo(JNIEnv* env, jobject bitmap, uint32_t* outRowBytes) {
+SkImageInfo GraphicsJNI::getBitmapInfo(JNIEnv* env, jobject bitmap, uint32_t* outRowBytes,
+                                       bool* isHardware) {
     SkASSERT(env);
     SkASSERT(bitmap);
     SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
@@ -251,6 +252,9 @@ SkImageInfo GraphicsJNI::getBitmapInfo(JNIEnv* env, jobject bitmap, uint32_t* ou
     LocalScopedBitmap localBitmap(bitmapHandle);
     if (outRowBytes) {
         *outRowBytes = localBitmap->rowBytes();
+    }
+    if (isHardware) {
+        *isHardware = localBitmap->isHardware();
     }
     return localBitmap->info();
 }

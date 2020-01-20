@@ -78,7 +78,7 @@ static SkColorType getColorType(AndroidBitmapFormat format) {
     }
 }
 
-static uint32_t getInfoFlags(const SkImageInfo& info) {
+static uint32_t getAlphaFlags(const SkImageInfo& info) {
     switch (info.alphaType()) {
         case kUnknown_SkAlphaType:
             LOG_ALWAYS_FATAL("Bitmap has no alpha type");
@@ -90,6 +90,14 @@ static uint32_t getInfoFlags(const SkImageInfo& info) {
         case kUnpremul_SkAlphaType:
             return ANDROID_BITMAP_FLAGS_ALPHA_UNPREMUL;
     }
+}
+
+static uint32_t getInfoFlags(const SkImageInfo& info, bool isHardware) {
+    uint32_t flags = getAlphaFlags(info);
+    if (isHardware) {
+        flags |= ANDROID_BITMAP_FLAGS_IS_HARDWARE;
+    }
+    return flags;
 }
 
 ABitmap* ABitmap_copy(ABitmap* srcBitmapHandle, AndroidBitmapFormat dstFormat) {
@@ -108,19 +116,19 @@ ABitmap* ABitmap_copy(ABitmap* srcBitmapHandle, AndroidBitmapFormat dstFormat) {
     return nullptr;
 }
 
-static AndroidBitmapInfo getInfo(const SkImageInfo& imageInfo, uint32_t rowBytes) {
+static AndroidBitmapInfo getInfo(const SkImageInfo& imageInfo, uint32_t rowBytes, bool isHardware) {
     AndroidBitmapInfo info;
     info.width = imageInfo.width();
     info.height = imageInfo.height();
     info.stride = rowBytes;
     info.format = getFormat(imageInfo);
-    info.flags = getInfoFlags(imageInfo);
+    info.flags = getInfoFlags(imageInfo, isHardware);
     return info;
 }
 
 AndroidBitmapInfo ABitmap_getInfo(ABitmap* bitmapHandle) {
     Bitmap* bitmap = TypeCast::toBitmap(bitmapHandle);
-    return getInfo(bitmap->info(), bitmap->rowBytes());
+    return getInfo(bitmap->info(), bitmap->rowBytes(), bitmap->isHardware());
 }
 
 namespace {
@@ -219,8 +227,9 @@ ADataSpace ABitmap_getDataSpace(ABitmap* bitmapHandle) {
 
 AndroidBitmapInfo ABitmap_getInfoFromJava(JNIEnv* env, jobject bitmapObj) {
     uint32_t rowBytes = 0;
-    SkImageInfo imageInfo = GraphicsJNI::getBitmapInfo(env, bitmapObj, &rowBytes);
-    return getInfo(imageInfo, rowBytes);
+    bool isHardware = false;
+    SkImageInfo imageInfo = GraphicsJNI::getBitmapInfo(env, bitmapObj, &rowBytes, &isHardware);
+    return getInfo(imageInfo, rowBytes, isHardware);
 }
 
 void* ABitmap_getPixels(ABitmap* bitmapHandle) {
@@ -377,4 +386,13 @@ int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const 
         case Bitmap::CompressResult::Error:
             return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
     }
+}
+
+AHardwareBuffer* ABitmap_getHardwareBuffer(ABitmap* bitmapHandle) {
+    Bitmap* bitmap = TypeCast::toBitmap(bitmapHandle);
+    AHardwareBuffer* buffer = bitmap->hardwareBuffer();
+    if (buffer) {
+        AHardwareBuffer_acquire(buffer);
+    }
+    return buffer;
 }

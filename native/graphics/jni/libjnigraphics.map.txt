@@ -22,6 +22,7 @@ LIBJNIGRAPHICS {
     AndroidBitmap_lockPixels;
     AndroidBitmap_unlockPixels;
     AndroidBitmap_compress; # introduced=30
+    AndroidBitmap_getHardwareBuffer; #introduced=30
   local:
     *;
 };

@@ -76,6 +76,21 @@ int AndroidBitmap_unlockPixels(JNIEnv* env, jobject jbitmap) {
     return ANDROID_BITMAP_RESULT_SUCCESS;
 }
 
+int AndroidBitmap_getHardwareBuffer(JNIEnv* env, jobject jbitmap, AHardwareBuffer** outBuffer) {
+    if (NULL == env || NULL == jbitmap || NULL == outBuffer) {
+        return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
+    }
+
+    android::graphics::Bitmap bitmap(env, jbitmap);
+
+    if (!bitmap.isValid()) {
+        return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
+    }
+
+    *outBuffer = bitmap.getHardwareBuffer();
+    return *outBuffer == NULL ? ANDROID_BITMAP_RESULT_BAD_PARAMETER : ANDROID_BITMAP_RESULT_SUCCESS;
+}
+
 int AndroidBitmap_compress(const AndroidBitmapInfo* info,
                            int32_t dataSpace,
                            const void* pixels,
