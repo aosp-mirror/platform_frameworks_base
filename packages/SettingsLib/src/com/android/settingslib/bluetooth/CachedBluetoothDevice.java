@@ -184,13 +184,28 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
     }
 
+    /**
+     * Connect this device.
+     *
+     * @param connectAllProfiles {@code true} to connect all profile, {@code false} otherwise.
+     *
+     * @deprecated use {@link #connect()} instead.
+     */
+    @Deprecated
     public void connect(boolean connectAllProfiles) {
+        connect();
+    }
+
+    /**
+     * Connect this device.
+     */
+    public void connect() {
         if (!ensurePaired()) {
             return;
         }
 
         mConnectAttempted = SystemClock.elapsedRealtime();
-        connectWithoutResettingTimer(connectAllProfiles);
+        connectAllEnabledProfiles();
     }
 
     public long getHiSyncId() {
@@ -211,10 +226,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     void onBondingDockConnect() {
         // Attempt to connect if UUIDs are available. Otherwise,
         // we will connect when the ACTION_UUID intent arrives.
-        connect(false);
+        connect();
     }
 
-    private void connectWithoutResettingTimer(boolean connectAllProfiles) {
+    private void connectAllEnabledProfiles() {
         synchronized (mProfileLock) {
             // Try to initialize the profiles if they were not.
             if (mProfiles.isEmpty()) {
@@ -229,36 +244,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 return;
             }
 
-            int preferredProfiles = 0;
-            for (LocalBluetoothProfile profile : mProfiles) {
-                if (connectAllProfiles ? profile.accessProfileEnabled()
-                        : profile.isAutoConnectable()) {
-                    if (profile.isPreferred(mDevice)) {
-                        ++preferredProfiles;
-                        connectInt(profile);
-                    }
-                }
-            }
-            if (BluetoothUtils.D) Log.d(TAG, "Preferred profiles = " + preferredProfiles);
-
-            if (preferredProfiles == 0) {
-                connectAutoConnectableProfiles();
-            }
-        }
-    }
-
-    private void connectAutoConnectableProfiles() {
-        if (!ensurePaired()) {
-            return;
-        }
-
-        synchronized (mProfileLock) {
-            for (LocalBluetoothProfile profile : mProfiles) {
-                if (profile.isAutoConnectable()) {
-                    profile.setPreferred(mDevice, true);
-                    connectInt(profile);
-                }
-            }
+            mLocalAdapter.connectAllEnabledProfiles(mDevice);
         }
     }
 
@@ -625,7 +611,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
          */
         if (!mProfiles.isEmpty()
                 && ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime())) {
-            connectWithoutResettingTimer(false);
+            connectAllEnabledProfiles();
         }
 
         dispatchAttributesChanged();
@@ -644,7 +630,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         refresh();
 
         if (bondState == BluetoothDevice.BOND_BONDED && mDevice.isBondingInitiatedLocally()) {
-            connect(false);
+            connect();
         }
     }
 
