@@ -350,8 +350,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
     public static final int STANDARD_T2 = Constants.FrontendDvbtStandard.T2;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "PLP_MODE_",
+    @IntDef(prefix = "PLP_MODE_",
             value = {PLP_MODE_UNDEFINED, PLP_MODE_AUTO, PLP_MODE_MANUAL})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlpMode {}

@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.media.tv.TvInputService;
 import android.media.tv.tuner.TunerConstants.Result;
 import android.media.tv.tuner.dvr.DvrPlayback;
 import android.media.tv.tuner.dvr.DvrRecorder;
@@ -55,7 +56,7 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
-public final class Tuner implements AutoCloseable  {
+public class Tuner implements AutoCloseable  {
     private static final String TAG = "MediaTvTuner";
     private static final boolean DEBUG = false;
 
@@ -88,25 +89,13 @@ public final class Tuner implements AutoCloseable  {
     /**
      * Constructs a Tuner instance.
      *
-     * @param context context of the caller.
-     */
-    public Tuner(@NonNull Context context) {
-        mContext = context;
-        nativeSetup();
-    }
-
-    /**
-     * Constructs a Tuner instance.
-     *
      * @param context the context of the caller.
      * @param tvInputSessionId the session ID of the TV input.
      * @param useCase the use case of this Tuner instance.
-     *
-     * @hide
-     * TODO: replace the other constructor
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
-    public Tuner(@NonNull Context context, @NonNull String tvInputSessionId, int useCase,
+    public Tuner(@NonNull Context context, @NonNull String tvInputSessionId,
+            @TvInputService.PriorityHintUseCaseType int useCase,
             @Nullable OnResourceLostListener listener) {
         mContext = context;
     }
@@ -115,18 +104,21 @@ public final class Tuner implements AutoCloseable  {
      * Shares the frontend resource with another Tuner instance
      *
      * @param tuner the Tuner instance to share frontend resource with.
-     *
-     * @hide
      */
     public void shareFrontendFromTuner(@NonNull Tuner tuner) {
+        // TODO: implementation.
     }
 
 
     private long mNativeContext; // used by native jMediaTuner
 
-    /** @hide */
+    /**
+     * Releases the Tuner instance.
+     */
     @Override
-    public void close() {}
+    public void close() {
+        // TODO: implementation.
+    }
 
     /**
      * Native Initialization.
@@ -176,7 +168,7 @@ public final class Tuner implements AutoCloseable  {
     /**
      * Listener for resource lost.
      *
-     * @hide
+     * <p>Resource is reclaimed and tuner instance is forced to close.
      */
     public interface OnResourceLostListener {
         /**
@@ -395,8 +387,6 @@ public final class Tuner implements AutoCloseable  {
      *
      * @param filter the filter instance for the hardware sync ID.
      * @return the id of hardware A/V sync.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     public int getAvSyncHwId(@NonNull Filter filter) {
@@ -412,8 +402,6 @@ public final class Tuner implements AutoCloseable  {
      *
      * @param avSyncHwId the hardware id of A/V sync.
      * @return the current timestamp of hardware A/V sync.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     public long getAvSyncTime(int avSyncHwId) {
@@ -429,8 +417,6 @@ public final class Tuner implements AutoCloseable  {
      *
      * @param ciCamId specify CI-CAM Id to connect.
      * @return result status of the operation.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
@@ -445,8 +431,6 @@ public final class Tuner implements AutoCloseable  {
      * <p>The demux will use the output from the frontend as the input after this call.
      *
      * @return result status of the operation.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
@@ -472,8 +456,6 @@ public final class Tuner implements AutoCloseable  {
 
     /**
      * Gets Demux capabilities.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Nullable
@@ -595,19 +577,6 @@ public final class Tuner implements AutoCloseable  {
     private void onLnbEvent(int eventType) {
         if (mHandler != null) {
             mHandler.sendMessage(mHandler.obtainMessage(MSG_ON_LNB_EVENT, eventType, 0));
-        }
-    }
-
-    /**
-     * This class is used to interact with descramblers.
-     *
-     * <p> Descrambler is a hardware component used to descramble data.
-     *
-     * <p> This class controls the TIS interaction with Tuner HAL.
-     * TODO: Remove
-     */
-    public class Descrambler {
-        private Descrambler() {
         }
     }
 

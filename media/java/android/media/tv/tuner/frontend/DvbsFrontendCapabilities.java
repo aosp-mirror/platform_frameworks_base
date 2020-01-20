@@ -17,7 +17,6 @@
 package android.media.tv.tuner.frontend;
 
 import android.annotation.SystemApi;
-import android.media.tv.tuner.TunerConstants.FrontendInnerFec;
 
 /**
  * DVBS Capabilities.
@@ -46,7 +45,7 @@ public class DvbsFrontendCapabilities extends FrontendCapabilities {
     /**
      * Gets inner FEC capability.
      */
-    @FrontendInnerFec
+    @FrontendSettings.InnerFec
     public long getInnerFecCapability() {
         return mInnerFecCap;
     }

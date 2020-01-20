@@ -22,7 +22,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
-import android.media.tv.tuner.TunerConstants.FrontendInnerFec;
 import android.media.tv.tuner.TunerUtils;
 
 import java.lang.annotation.Retention;
@@ -172,7 +171,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
     /**
      * Gets Inner Forward Error Correction.
      */
-    @FrontendInnerFec
+    @InnerFec
     public long getFec() {
         return mFec;
     }
@@ -242,7 +241,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
          * Sets Inner Forward Error Correction.
          */
         @NonNull
-        public Builder setFec(@FrontendInnerFec long fec) {
+        public Builder setFec(@InnerFec long fec) {
             mFec = fec;
             return this;
         }

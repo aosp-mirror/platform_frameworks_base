@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.media.tv.tuner.TunerConstants.FrontendInnerFec;
 import android.media.tv.tuner.TunerUtils;
 
 /**
@@ -45,7 +44,7 @@ public class DvbsCodeRate {
     /**
      * Gets inner FEC.
      */
-    @FrontendInnerFec
+    @FrontendSettings.InnerFec
     public long getInnerFec() {
         return mInnerFec;
     }
@@ -96,7 +95,7 @@ public class DvbsCodeRate {
          * Sets inner FEC.
          */
         @NonNull
-        public Builder setInnerFec(@FrontendInnerFec long fec) {
+        public Builder setInnerFec(@FrontendSettings.InnerFec long fec) {
             mFec = fec;
             return this;
         }

@@ -22,8 +22,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
-import android.media.tv.tuner.TunerConstants;
-import android.media.tv.tuner.TunerConstants.ScIndexType;
 import android.media.tv.tuner.TunerUtils;
 
 import java.lang.annotation.Retention;
@@ -112,27 +110,128 @@ public class RecordSettings extends Settings {
      */
     public static final int TS_INDEX_ADAPTATION_EXTENSION_FLAG =
             Constants.DemuxTsIndex.ADAPTATION_EXTENSION_FLAG;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "INDEX_TYPE_", value =
+            {INDEX_TYPE_NONE, INDEX_TYPE_SC, INDEX_TYPE_SC_HEVC})
+    public @interface ScIndexType {}
+
+    /**
+     * Start Code Index is not used.
+     */
+    public static final int INDEX_TYPE_NONE = Constants.DemuxRecordScIndexType.NONE;
+    /**
+     * Start Code index.
+     */
+    public static final int INDEX_TYPE_SC = Constants.DemuxRecordScIndexType.SC;
+    /**
+     * Start Code index for HEVC.
+     */
+    public static final int INDEX_TYPE_SC_HEVC = Constants.DemuxRecordScIndexType.SC_HEVC;
+
+    /**
+     * Indexes can be tagged by Start Code in PES (Packetized Elementary Stream)
+     * according to ISO/IEC 13818-1.
+     * @hide
+     */
+    @IntDef(flag = true, value = {SC_INDEX_I_FRAME, SC_INDEX_P_FRAME, SC_INDEX_B_FRAME,
+            SC_INDEX_SEQUENCE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScIndex {}
+
+    /**
+     * SC index for a new I-frame.
+     */
+    public static final int SC_INDEX_I_FRAME = Constants.DemuxScIndex.I_FRAME;
+    /**
+     * SC index for a new P-frame.
+     */
+    public static final int SC_INDEX_P_FRAME = Constants.DemuxScIndex.P_FRAME;
+    /**
+     * SC index for a new B-frame.
+     */
+    public static final int SC_INDEX_B_FRAME = Constants.DemuxScIndex.B_FRAME;
+    /**
+     * SC index for a new sequence.
+     */
+    public static final int SC_INDEX_SEQUENCE = Constants.DemuxScIndex.SEQUENCE;
+
+
+    /**
+     * Indexes can be tagged by NAL unit group in HEVC according to ISO/IEC 23008-2.
+     *
+     * @hide
+     */
+    @IntDef(flag = true,
+            value = {SC_HEVC_INDEX_SPS, SC_HEVC_INDEX_AUD, SC_HEVC_INDEX_SLICE_CE_BLA_W_LP,
+            SC_HEVC_INDEX_SLICE_BLA_W_RADL, SC_HEVC_INDEX_SLICE_BLA_N_LP,
+            SC_HEVC_INDEX_SLICE_IDR_W_RADL, SC_HEVC_INDEX_SLICE_IDR_N_LP,
+            SC_HEVC_INDEX_SLICE_TRAIL_CRA})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScHevcIndex {}
+
+    /**
+     * SC HEVC index SPS.
+     */
+    public static final int SC_HEVC_INDEX_SPS = Constants.DemuxScHevcIndex.SPS;
+    /**
+     * SC HEVC index AUD.
+     */
+    public static final int SC_HEVC_INDEX_AUD = Constants.DemuxScHevcIndex.AUD;
+    /**
+     * SC HEVC index SLICE_CE_BLA_W_LP.
+     */
+    public static final int SC_HEVC_INDEX_SLICE_CE_BLA_W_LP =
+            Constants.DemuxScHevcIndex.SLICE_CE_BLA_W_LP;
+    /**
+     * SC HEVC index SLICE_BLA_W_RADL.
+     */
+    public static final int SC_HEVC_INDEX_SLICE_BLA_W_RADL =
+            Constants.DemuxScHevcIndex.SLICE_BLA_W_RADL;
+    /**
+     * SC HEVC index SLICE_BLA_N_LP.
+     */
+    public static final int SC_HEVC_INDEX_SLICE_BLA_N_LP =
+            Constants.DemuxScHevcIndex.SLICE_BLA_N_LP;
+    /**
+     * SC HEVC index SLICE_IDR_W_RADL.
+     */
+    public static final int SC_HEVC_INDEX_SLICE_IDR_W_RADL =
+            Constants.DemuxScHevcIndex.SLICE_IDR_W_RADL;
+    /**
+     * SC HEVC index SLICE_IDR_N_LP.
+     */
+    public static final int SC_HEVC_INDEX_SLICE_IDR_N_LP =
+            Constants.DemuxScHevcIndex.SLICE_IDR_N_LP;
+    /**
+     * SC HEVC index SLICE_TRAIL_CRA.
+     */
+    public static final int SC_HEVC_INDEX_SLICE_TRAIL_CRA =
+            Constants.DemuxScHevcIndex.SLICE_TRAIL_CRA;
+
     /**
      * @hide
      */
     @IntDef(flag = true,
             prefix = "SC_",
             value = {
-                TunerConstants.SC_INDEX_I_FRAME,
-                TunerConstants.SC_INDEX_P_FRAME,
-                TunerConstants.SC_INDEX_B_FRAME,
-                TunerConstants.SC_INDEX_SEQUENCE,
-                TunerConstants.SC_HEVC_INDEX_SPS,
-                TunerConstants.SC_HEVC_INDEX_AUD,
-                TunerConstants.SC_HEVC_INDEX_SLICE_CE_BLA_W_LP,
-                TunerConstants.SC_HEVC_INDEX_SLICE_BLA_W_RADL,
-                TunerConstants.SC_HEVC_INDEX_SLICE_BLA_N_LP,
-                TunerConstants.SC_HEVC_INDEX_SLICE_IDR_W_RADL,
-                TunerConstants.SC_HEVC_INDEX_SLICE_IDR_N_LP,
-                TunerConstants.SC_HEVC_INDEX_SLICE_TRAIL_CRA,
+                SC_INDEX_I_FRAME,
+                SC_INDEX_P_FRAME,
+                SC_INDEX_B_FRAME,
+                SC_INDEX_SEQUENCE,
+                SC_HEVC_INDEX_SPS,
+                SC_HEVC_INDEX_AUD,
+                SC_HEVC_INDEX_SLICE_CE_BLA_W_LP,
+                SC_HEVC_INDEX_SLICE_BLA_W_RADL,
+                SC_HEVC_INDEX_SLICE_BLA_N_LP,
+                SC_HEVC_INDEX_SLICE_IDR_W_RADL,
+                SC_HEVC_INDEX_SLICE_IDR_N_LP,
+                SC_HEVC_INDEX_SLICE_TRAIL_CRA,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScIndexMask {}
+
 
 
     private final int mTsIndexMask;

@@ -18,6 +18,7 @@ package android.media.tv.tuner.frontend;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
@@ -33,8 +34,9 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public abstract class FrontendSettings {
     /** @hide */
-    @IntDef({TYPE_UNDEFINED, TYPE_ANALOG, TYPE_ATSC, TYPE_ATSC3, TYPE_DVBC, TYPE_DVBS, TYPE_DVBT,
-            TYPE_ISDBS, TYPE_ISDBS3, TYPE_ISDBT})
+    @IntDef(prefix = "TYPE_",
+            value = {TYPE_UNDEFINED, TYPE_ANALOG, TYPE_ATSC, TYPE_ATSC3, TYPE_DVBC, TYPE_DVBS,
+                    TYPE_DVBT, TYPE_ISDBS, TYPE_ISDBS3, TYPE_ISDBT})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
 
@@ -79,10 +81,173 @@ public abstract class FrontendSettings {
      */
     public static final int TYPE_ISDBT = Constants.FrontendType.ISDBT;
 
-    private final int mFrequency;
+
 
     /** @hide */
-    public FrontendSettings(int frequency) {
+    @LongDef(flag = true,
+            prefix = "FEC_",
+            value = {FEC_UNDEFINED, FEC_AUTO, FEC_1_2, FEC_1_3, FEC_1_4, FEC_1_5, FEC_2_3, FEC_2_5,
+            FEC_2_9, FEC_3_4, FEC_3_5, FEC_4_5, FEC_4_15, FEC_5_6, FEC_5_9, FEC_6_7, FEC_7_8,
+            FEC_7_9, FEC_7_15, FEC_8_9, FEC_8_15, FEC_9_10, FEC_9_20, FEC_11_15, FEC_11_20,
+            FEC_11_45, FEC_13_18, FEC_13_45, FEC_14_45, FEC_23_36, FEC_25_36, FEC_26_45, FEC_28_45,
+            FEC_29_45, FEC_31_45, FEC_32_45, FEC_77_90})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InnerFec {}
+
+    /**
+     * FEC not defined.
+     */
+    public static final long FEC_UNDEFINED = Constants.FrontendInnerFec.FEC_UNDEFINED;
+    /**
+     * hardware is able to detect and set FEC automatically.
+     */
+    public static final long FEC_AUTO = Constants.FrontendInnerFec.AUTO;
+    /**
+     * 1/2 conv. code rate.
+     */
+    public static final long FEC_1_2 = Constants.FrontendInnerFec.FEC_1_2;
+    /**
+     * 1/3 conv. code rate.
+     */
+    public static final long FEC_1_3 = Constants.FrontendInnerFec.FEC_1_3;
+    /**
+     * 1/4 conv. code rate.
+     */
+    public static final long FEC_1_4 = Constants.FrontendInnerFec.FEC_1_4;
+    /**
+     * 1/5 conv. code rate.
+     */
+    public static final long FEC_1_5 = Constants.FrontendInnerFec.FEC_1_5;
+    /**
+     * 2/3 conv. code rate.
+     */
+    public static final long FEC_2_3 = Constants.FrontendInnerFec.FEC_2_3;
+    /**
+     * 2/5 conv. code rate.
+     */
+    public static final long FEC_2_5 = Constants.FrontendInnerFec.FEC_2_5;
+    /**
+     * 2/9 conv. code rate.
+     */
+    public static final long FEC_2_9 = Constants.FrontendInnerFec.FEC_2_9;
+    /**
+     * 3/4 conv. code rate.
+     */
+    public static final long FEC_3_4 = Constants.FrontendInnerFec.FEC_3_4;
+    /**
+     * 3/5 conv. code rate.
+     */
+    public static final long FEC_3_5 = Constants.FrontendInnerFec.FEC_3_5;
+    /**
+     * 4/5 conv. code rate.
+     */
+    public static final long FEC_4_5 = Constants.FrontendInnerFec.FEC_4_5;
+    /**
+     * 4/15 conv. code rate.
+     */
+    public static final long FEC_4_15 = Constants.FrontendInnerFec.FEC_4_15;
+    /**
+     * 5/6 conv. code rate.
+     */
+    public static final long FEC_5_6 = Constants.FrontendInnerFec.FEC_5_6;
+    /**
+     * 5/9 conv. code rate.
+     */
+    public static final long FEC_5_9 = Constants.FrontendInnerFec.FEC_5_9;
+    /**
+     * 6/7 conv. code rate.
+     */
+    public static final long FEC_6_7 = Constants.FrontendInnerFec.FEC_6_7;
+    /**
+     * 7/8 conv. code rate.
+     */
+    public static final long FEC_7_8 = Constants.FrontendInnerFec.FEC_7_8;
+    /**
+     * 7/9 conv. code rate.
+     */
+    public static final long FEC_7_9 = Constants.FrontendInnerFec.FEC_7_9;
+    /**
+     * 7/15 conv. code rate.
+     */
+    public static final long FEC_7_15 = Constants.FrontendInnerFec.FEC_7_15;
+    /**
+     * 8/9 conv. code rate.
+     */
+    public static final long FEC_8_9 = Constants.FrontendInnerFec.FEC_8_9;
+    /**
+     * 8/15 conv. code rate.
+     */
+    public static final long FEC_8_15 = Constants.FrontendInnerFec.FEC_8_15;
+    /**
+     * 9/10 conv. code rate.
+     */
+    public static final long FEC_9_10 = Constants.FrontendInnerFec.FEC_9_10;
+    /**
+     * 9/20 conv. code rate.
+     */
+    public static final long FEC_9_20 = Constants.FrontendInnerFec.FEC_9_20;
+    /**
+     * 11/15 conv. code rate.
+     */
+    public static final long FEC_11_15 = Constants.FrontendInnerFec.FEC_11_15;
+    /**
+     * 11/20 conv. code rate.
+     */
+    public static final long FEC_11_20 = Constants.FrontendInnerFec.FEC_11_20;
+    /**
+     * 11/45 conv. code rate.
+     */
+    public static final long FEC_11_45 = Constants.FrontendInnerFec.FEC_11_45;
+    /**
+     * 13/18 conv. code rate.
+     */
+    public static final long FEC_13_18 = Constants.FrontendInnerFec.FEC_13_18;
+    /**
+     * 13/45 conv. code rate.
+     */
+    public static final long FEC_13_45 = Constants.FrontendInnerFec.FEC_13_45;
+    /**
+     * 14/45 conv. code rate.
+     */
+    public static final long FEC_14_45 = Constants.FrontendInnerFec.FEC_14_45;
+    /**
+     * 23/36 conv. code rate.
+     */
+    public static final long FEC_23_36 = Constants.FrontendInnerFec.FEC_23_36;
+    /**
+     * 25/36 conv. code rate.
+     */
+    public static final long FEC_25_36 = Constants.FrontendInnerFec.FEC_25_36;
+    /**
+     * 26/45 conv. code rate.
+     */
+    public static final long FEC_26_45 = Constants.FrontendInnerFec.FEC_26_45;
+    /**
+     * 28/45 conv. code rate.
+     */
+    public static final long FEC_28_45 = Constants.FrontendInnerFec.FEC_28_45;
+    /**
+     * 29/45 conv. code rate.
+     */
+    public static final long FEC_29_45 = Constants.FrontendInnerFec.FEC_29_45;
+    /**
+     * 31/45 conv. code rate.
+     */
+    public static final long FEC_31_45 = Constants.FrontendInnerFec.FEC_31_45;
+    /**
+     * 32/45 conv. code rate.
+     */
+    public static final long FEC_32_45 = Constants.FrontendInnerFec.FEC_32_45;
+    /**
+     * 77/90 conv. code rate.
+     */
+    public static final long FEC_77_90 = Constants.FrontendInnerFec.FEC_77_90;
+
+
+
+    private final int mFrequency;
+
+    FrontendSettings(int frequency) {
         mFrequency = frequency;
     }
 

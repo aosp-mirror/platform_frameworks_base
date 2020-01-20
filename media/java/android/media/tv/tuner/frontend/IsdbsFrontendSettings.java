@@ -127,7 +127,7 @@ public class IsdbsFrontendSettings extends FrontendSettings {
     /**
      * Rolloff type undefined.
      */
-    public static final int ROLLOFF_UNDEFINED = Constants.FrontendIsdbs3Rolloff.UNDEFINED;
+    public static final int ROLLOFF_UNDEFINED = Constants.FrontendIsdbsRolloff.UNDEFINED;
     /**
      * 0,35 rolloff.
      */

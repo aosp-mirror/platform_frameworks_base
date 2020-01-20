@@ -17,7 +17,6 @@
 package android.media.tv.tuner.frontend;
 
 import android.annotation.SystemApi;
-import android.media.tv.tuner.frontend.IsdbsFrontendSettings.CodeRate;
 
 /**
  * ISDBS Capabilities.
@@ -44,7 +43,7 @@ public class IsdbsFrontendCapabilities extends FrontendCapabilities {
     /**
      * Gets code rate capability.
      */
-    @CodeRate
+    @IsdbsFrontendSettings.CodeRate
     public int getCodeRateCapability() {
         return mCodeRateCap;
     }
