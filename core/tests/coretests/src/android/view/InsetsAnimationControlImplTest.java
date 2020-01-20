@@ -41,6 +41,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 import android.view.SurfaceControl.Transaction;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
+import android.view.animation.LinearInterpolator;
 import android.view.test.InsetsModeSession;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -121,7 +122,7 @@ public class InsetsAnimationControlImplTest {
         controls.put(ITYPE_NAVIGATION_BAR, navConsumer.getControl());
         mController = new InsetsAnimationControlImpl(controls,
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
-                mMockController, 10 /* durationMs */,
+                mMockController, 10 /* durationMs */, new LinearInterpolator(),
                 false /* fade */, LAYOUT_INSETS_DURING_ANIMATION_SHOWN);
     }
 
