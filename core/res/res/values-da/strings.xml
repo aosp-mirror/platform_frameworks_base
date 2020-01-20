@@ -368,7 +368,7 @@
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"Denne app kan vises oven på andre apps"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"Denne app kan vises oven på andre apps eller andre dele af skærmen. Dette kan forstyrre den normale brug af appen og ændre visningen af andre apps."</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"kør i baggrunden"</string>
-    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Denne app kan køre i baggrunden. Dette kan aflade batteriet hurtigere."</string>
+    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Denne app kan køre i baggrunden. Dette kan dræne batteriet hurtigere."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"brug data i baggrunden"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Denne app kan bruge data i baggrunden. Dette kan øge dataforbruget."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"sørge for, at appen altid kører"</string>
