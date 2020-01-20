@@ -2402,7 +2402,8 @@ public interface WindowManager extends ViewManager {
                 flag = true,
                 value = {LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT,
                         LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES,
-                        LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER})
+                        LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER,
+                        LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS})
         @interface LayoutInDisplayCutoutMode {}
 
         /**
@@ -2414,6 +2415,7 @@ public interface WindowManager extends ViewManager {
          * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
          * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
          * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+         * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
          * @see DisplayCutout
          * @see android.R.attr#windowLayoutInDisplayCutoutMode
          *         android:windowLayoutInDisplayCutoutMode
@@ -2445,13 +2447,6 @@ public interface WindowManager extends ViewManager {
          *         android:windowLayoutInDisplayCutoutMode
          */
         public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT = 0;
-
-        /**
-         * @deprecated use {@link #LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES}
-         * @hide
-         */
-        @Deprecated
-        public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS = 1;
 
         /**
          * The window is always allowed to extend into the {@link DisplayCutout} areas on the short
@@ -2516,6 +2511,25 @@ public interface WindowManager extends ViewManager {
          */
         public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER = 2;
 
+        /**
+         * The window is always allowed to extend into the {@link DisplayCutout} areas on the all
+         * edges of the screen.
+         *
+         * <p>
+         * The window must make sure that no important content overlaps with the
+         * {@link DisplayCutout}.
+         *
+         * <p>
+         * In this mode, the window extends under cutouts on the all edges of the display in both
+         * portrait and landscape, regardless of whether the window is hiding the system bars.
+         *
+         * @see DisplayCutout
+         * @see WindowInsets#getDisplayCutout()
+         * @see #layoutInDisplayCutoutMode
+         * @see android.R.attr#windowLayoutInDisplayCutoutMode
+         *         android:windowLayoutInDisplayCutoutMode
+         */
+        public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS = 3;
 
         /**
          * When this window has focus, disable touch pad pointer gesture processing.
