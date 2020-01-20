@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.statusbar.phone;
@@ -25,7 +25,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
-import android.content.res.Resources;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.WindowManager;
@@ -49,11 +48,11 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
-public class StatusBarWindowControllerTest extends SysuiTestCase {
+public class NotificationShadeWindowControllerTest extends SysuiTestCase {
 
     @Mock private WindowManager mWindowManager;
     @Mock private DozeParameters mDozeParameters;
-    @Mock private StatusBarWindowView mStatusBarView;
+    @Mock private NotificationShadeWindowView mStatusBarView;
     @Mock private IActivityManager mActivityManager;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
@@ -61,28 +60,28 @@ public class StatusBarWindowControllerTest extends SysuiTestCase {
     @Mock private SysuiColorExtractor mColorExtractor;
     @Mock ColorExtractor.GradientColors mGradientColors;
     @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
-    @Mock private Resources mResources;
 
-    private StatusBarWindowController mStatusBarWindowController;
+    private NotificationShadeWindowController mNotificationShadeWindowController;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
-        when(mSuperStatusBarViewFactory.getStatusBarWindowView()).thenReturn(mStatusBarView);
+        when(mSuperStatusBarViewFactory.getNotificationShadeWindowView())
+                .thenReturn(mStatusBarView);
 
-        mStatusBarWindowController = new StatusBarWindowController(mContext, mWindowManager,
-                mActivityManager, mDozeParameters, mStatusBarStateController,
+        mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,
+                mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardBypassController, mColorExtractor,
-                mSuperStatusBarViewFactory, mResources);
+                mSuperStatusBarViewFactory);
 
-        mStatusBarWindowController.attach();
+        mNotificationShadeWindowController.attach();
     }
 
     @Test
     public void testSetDozing_hidesSystemOverlays() {
-        mStatusBarWindowController.setDozing(true);
+        mNotificationShadeWindowController.setDozing(true);
         ArgumentCaptor<WindowManager.LayoutParams> captor =
                 ArgumentCaptor.forClass(WindowManager.LayoutParams.class);
         verify(mWindowManager).updateViewLayout(any(), captor.capture());
@@ -91,7 +90,7 @@ public class StatusBarWindowControllerTest extends SysuiTestCase {
         assertThat(flag).isNotEqualTo(0);
 
         reset(mWindowManager);
-        mStatusBarWindowController.setDozing(false);
+        mNotificationShadeWindowController.setDozing(false);
         verify(mWindowManager).updateViewLayout(any(), captor.capture());
         flag = captor.getValue().privateFlags
                 & WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
@@ -100,7 +99,7 @@ public class StatusBarWindowControllerTest extends SysuiTestCase {
 
     @Test
     public void testOnThemeChanged_doesntCrash() {
-        mStatusBarWindowController.onThemeChanged();
+        mNotificationShadeWindowController.onThemeChanged();
     }
 
     @Test
@@ -110,6 +109,6 @@ public class StatusBarWindowControllerTest extends SysuiTestCase {
 
     @Test
     public void testSetForcePluginOpen_beforeStatusBarInitialization() {
-        mStatusBarWindowController.setForcePluginOpen(true);
+        mNotificationShadeWindowController.setForcePluginOpen(true);
     }
 }

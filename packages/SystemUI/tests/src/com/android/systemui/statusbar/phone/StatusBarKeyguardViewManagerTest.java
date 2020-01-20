@@ -104,7 +104,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mock(KeyguardUpdateMonitor.class),
                 mock(NavigationModeController.class),
                 mock(DockManager.class),
-                mock(StatusBarWindowController.class),
+                mock(NotificationShadeWindowController.class),
                 mKeyguardStateController,
                 mock(NotificationMediaManager.class));
         mStatusBarKeyguardViewManager.registerStatusBar(mStatusBar, mContainer,
@@ -270,12 +270,12 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 KeyguardUpdateMonitor keyguardUpdateMonitor,
                 NavigationModeController navigationModeController,
                 DockManager dockManager,
-                StatusBarWindowController statusBarWindowController,
+                NotificationShadeWindowController notificationShadeWindowController,
                 KeyguardStateController keyguardStateController,
                 NotificationMediaManager notificationMediaManager) {
             super(context, callback, lockPatternUtils, sysuiStatusBarStateController,
                     configurationController, keyguardUpdateMonitor, navigationModeController,
-                    dockManager, statusBarWindowController, keyguardStateController,
+                    dockManager, notificationShadeWindowController, keyguardStateController,
                     notificationMediaManager);
         }
 

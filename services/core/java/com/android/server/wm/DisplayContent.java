@@ -65,7 +65,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -75,7 +74,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
@@ -875,7 +874,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (w.mHasSurface && isDisplayed) {
                 final int type = w.mAttrs.type;
                 if (type == TYPE_SYSTEM_DIALOG || type == TYPE_SYSTEM_ERROR
-                        || (w.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
+                        || mWmService.mPolicy.isKeyguardShowing()) {
                     mTmpApplySurfaceChangesTransactionState.syswin = true;
                 }
                 if (mTmpApplySurfaceChangesTransactionState.preferredRefreshRate == 0
@@ -3557,7 +3556,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final SparseBooleanArray drawnWindowTypes = new SparseBooleanArray();
         // Presuppose keyguard is drawn because if its window isn't attached, we don't know if it
         // wants to be shown or hidden, then it should not delay enabling the screen.
-        drawnWindowTypes.put(TYPE_STATUS_BAR, true);
+        drawnWindowTypes.put(TYPE_NOTIFICATION_SHADE, true);
 
         final WindowState visibleNotDrawnWindow = getWindow(w -> {
             if (w.mViewVisibility == View.VISIBLE && !w.mObscured && !w.isDrawnLw()) {
@@ -3568,8 +3567,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 if (type == TYPE_BOOT_PROGRESS || type == TYPE_BASE_APPLICATION
                         || type == TYPE_WALLPAPER) {
                     drawnWindowTypes.put(type, true);
-                } else if (type == TYPE_STATUS_BAR) {
-                    drawnWindowTypes.put(TYPE_STATUS_BAR, mWmService.mPolicy.isKeyguardDrawnLw());
+                } else if (type == TYPE_NOTIFICATION_SHADE) {
+                    drawnWindowTypes.put(TYPE_NOTIFICATION_SHADE,
+                            mWmService.mPolicy.isKeyguardDrawnLw());
                 }
             }
             return false;
@@ -3591,7 +3591,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final boolean haveBootMsg = drawnWindowTypes.get(TYPE_BOOT_PROGRESS);
         final boolean haveApp = drawnWindowTypes.get(TYPE_BASE_APPLICATION);
         final boolean haveWallpaper = drawnWindowTypes.get(TYPE_WALLPAPER);
-        final boolean haveKeyguard = drawnWindowTypes.get(TYPE_STATUS_BAR);
+        final boolean haveKeyguard = drawnWindowTypes.get(TYPE_NOTIFICATION_SHADE);
 
         ProtoLog.i(WM_DEBUG_SCREEN_ON,
                 "******** booted=%b msg=%b haveBoot=%b haveApp=%b haveWall=%b "
@@ -5445,7 +5445,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         final boolean stickyHideNav =
                 (sysUiVisibility & stickyHideNavFlags) == stickyHideNavFlags;
-        return !stickyHideNav && type != TYPE_INPUT_METHOD && type != TYPE_STATUS_BAR
+        return !stickyHideNav && type != TYPE_INPUT_METHOD && type != TYPE_NOTIFICATION_SHADE
                 && win.getActivityType() != ACTIVITY_TYPE_HOME;
     }
 

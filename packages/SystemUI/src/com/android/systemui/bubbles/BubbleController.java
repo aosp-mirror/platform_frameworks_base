@@ -89,9 +89,9 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -166,7 +166,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private final HashSet<String> mUserBlockedBubbles;
 
     // Bubbles get added to the status bar view
-    private final StatusBarWindowController mStatusBarWindowController;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final ZenModeController mZenModeController;
     private StatusBarStateListener mStatusBarStateListener;
     private final ScreenshotHelper mScreenshotHelper;
@@ -245,7 +245,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     @Inject
     public BubbleController(Context context,
-            StatusBarWindowController statusBarWindowController,
+            NotificationShadeWindowController notificationShadeWindowController,
             StatusBarStateController statusBarStateController,
             ShadeController shadeController,
             BubbleData data,
@@ -256,14 +256,14 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             NotificationGroupManager groupManager,
             NotificationEntryManager entryManager,
             RemoteInputUriController remoteInputUriController) {
-        this(context, statusBarWindowController, statusBarStateController, shadeController,
+        this(context, notificationShadeWindowController, statusBarStateController, shadeController,
                 data, null /* synchronizer */, configurationController, interruptionStateProvider,
                 zenModeController, notifUserManager, groupManager, entryManager,
                 remoteInputUriController);
     }
 
     public BubbleController(Context context,
-            StatusBarWindowController statusBarWindowController,
+            NotificationShadeWindowController notificationShadeWindowController,
             StatusBarStateController statusBarStateController,
             ShadeController shadeController,
             BubbleData data,
@@ -324,7 +324,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     }
                 });
 
-        mStatusBarWindowController = statusBarWindowController;
+        mNotificationShadeWindowController = notificationShadeWindowController;
         mStatusBarStateListener = new StatusBarStateListener();
         statusBarStateController.addCallback(mStatusBarStateListener);
 
@@ -377,10 +377,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private void ensureStackViewCreated() {
         if (mStackView == null) {
             mStackView = new BubbleStackView(mContext, mBubbleData, mSurfaceSynchronizer);
-            ViewGroup sbv = mStatusBarWindowController.getStatusBarView();
-            int bubbleScrimIndex = sbv.indexOfChild(sbv.findViewById(R.id.scrim_for_bubble));
+            ViewGroup nsv = mNotificationShadeWindowController.getNotificationShadeView();
+            int bubbleScrimIndex = nsv.indexOfChild(nsv.findViewById(R.id.scrim_for_bubble));
             int stackIndex = bubbleScrimIndex + 1;  // Show stack above bubble scrim.
-            sbv.addView(mStackView, stackIndex,
+            nsv.addView(mStackView, stackIndex,
                     new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
             if (mExpandListener != null) {
                 mStackView.setExpandListener(mExpandListener);
@@ -473,7 +473,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             if (listener != null) {
                 listener.onBubbleExpandChanged(isExpanding, key);
             }
-            mStatusBarWindowController.setBubbleExpanded(isExpanding);
+            mNotificationShadeWindowController.setBubbleExpanded(isExpanding);
         });
         if (mStackView != null) {
             mStackView.setExpandListener(mExpandListener);
@@ -944,9 +944,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
 
         // Let listeners know if bubble state changed.
-        boolean hadBubbles = mStatusBarWindowController.getBubblesShowing();
+        boolean hadBubbles = mNotificationShadeWindowController.getBubblesShowing();
         boolean hasBubblesShowing = hasBubbles() && mStackView.getVisibility() == VISIBLE;
-        mStatusBarWindowController.setBubblesShowing(hasBubblesShowing);
+        mNotificationShadeWindowController.setBubblesShowing(hasBubblesShowing);
         if (mStateChangeListener != null && hadBubbles != hasBubblesShowing) {
             mStateChangeListener.onHasBubblesChanged(hasBubblesShowing);
         }
@@ -983,7 +983,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 && context.getDisplay().getDisplayId() == DEFAULT_DISPLAY;
         final Bubble expandedBubble = mStackView.getExpandedBubble();
         if (defaultDisplay && expandedBubble != null && isStackExpanded()
-                && !mStatusBarWindowController.getPanelExpanded()) {
+                && !mNotificationShadeWindowController.getPanelExpanded()) {
             return expandedBubble;
         }
         return null;

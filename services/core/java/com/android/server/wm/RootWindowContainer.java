@@ -35,7 +35,6 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
@@ -1147,7 +1146,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // While a dream or keyguard is showing, obscure ordinary application content on
                 // secondary displays (by forcibly enabling mirroring unless there is other content
                 // we want to show) but still allow opaque keyguard dialogs to be shown.
-                if (type == TYPE_DREAM || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
+                if (type == TYPE_DREAM || mWmService.mPolicy.isKeyguardShowing()) {
                     mObscureApplicationContentOnSecondaryDisplays = true;
                 }
                 displayHasContent = true;

@@ -65,7 +65,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mBypassController;
     private final int mAutoHeadsUpNotificationDecay;
-    private View mStatusBarWindowView;
+    private View mNotificationShadeWindowView;
     private NotificationGroupManager mGroupManager;
     private VisualStabilityManager mVisualStabilityManager;
     private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
@@ -124,14 +124,13 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         initResources();
     }
 
-
-    public void setUp(@NonNull View statusBarWindowView,
+    public void setUp(@NonNull View notificationShadeWindowView,
             @NonNull NotificationGroupManager groupManager,
             @NonNull StatusBar bar,
             @NonNull VisualStabilityManager visualStabilityManager) {
-        mStatusBarWindowView = statusBarWindowView;
-        mStatusBarTouchableRegionManager = new StatusBarTouchableRegionManager(mContext, this, bar,
-                statusBarWindowView);
+        mNotificationShadeWindowView = notificationShadeWindowView;
+        mStatusBarTouchableRegionManager = new StatusBarTouchableRegionManager(this, bar,
+                notificationShadeWindowView);
         mGroupManager = groupManager;
         mVisualStabilityManager = visualStabilityManager;
 
@@ -364,7 +363,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         // updated yet, but callbacks leading out of the headsUp manager, querying it. Let's
         // therefore also check if the topEntry is null.
         if (!hasPinnedHeadsUp() || topEntry == null) {
-            mTouchableRegion.set(0, 0, mStatusBarWindowView.getWidth(), mStatusBarHeight);
+            mTouchableRegion.set(0, 0, mNotificationShadeWindowView.getWidth(), mStatusBarHeight);
             updateRegionForNotch(mTouchableRegion);
 
         } else {
@@ -386,7 +385,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     }
 
     private void updateRegionForNotch(Region region) {
-        WindowInsets windowInsets = mStatusBarWindowView.getRootWindowInsets();
+        WindowInsets windowInsets = mNotificationShadeWindowView.getRootWindowInsets();
         if (windowInsets == null) {
             Log.w(TAG, "StatusBarWindowView is not attached.");
             return;

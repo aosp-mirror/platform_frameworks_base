@@ -34,8 +34,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
-import com.android.systemui.statusbar.phone.StatusBarWindowView;
-import com.android.systemui.statusbar.phone.StatusBarWindowViewController;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,20 +49,22 @@ public class ActivityLaunchAnimatorTest extends SysuiTestCase {
 
     private ActivityLaunchAnimator mLaunchAnimator;
     private ActivityLaunchAnimator.Callback mCallback = mock(ActivityLaunchAnimator.Callback.class);
-    private StatusBarWindowViewController mStatusBarWindowViewController = mock(
-            StatusBarWindowViewController.class);
-    private StatusBarWindowView mStatusBarWindowView = mock(StatusBarWindowView.class);
+    private NotificationShadeWindowViewController mNotificationShadeWindowViewController = mock(
+            NotificationShadeWindowViewController.class);
+    private NotificationShadeWindowView mNotificationShadeWindowView = mock(
+            NotificationShadeWindowView.class);
     private NotificationListContainer mNotificationContainer
             = mock(NotificationListContainer.class);
     private ExpandableNotificationRow mRow = mock(ExpandableNotificationRow.class);
 
     @Before
     public void setUp() throws Exception {
-        when(mStatusBarWindowViewController.getView()).thenReturn(mStatusBarWindowView);
-        when(mStatusBarWindowView.getResources()).thenReturn(mContext.getResources());
+        when(mNotificationShadeWindowViewController.getView())
+                .thenReturn(mNotificationShadeWindowView);
+        when(mNotificationShadeWindowView.getResources()).thenReturn(mContext.getResources());
         when(mCallback.areLaunchAnimationsEnabled()).thenReturn(true);
         mLaunchAnimator = new ActivityLaunchAnimator(
-                mStatusBarWindowViewController,
+                mNotificationShadeWindowViewController,
                 mCallback,
                 mock(NotificationPanelViewController.class),
                 mNotificationContainer);
@@ -92,7 +94,7 @@ public class ActivityLaunchAnimatorTest extends SysuiTestCase {
         RemoteAnimationAdapter launchAnimation = mLaunchAnimator.getLaunchAnimation(mRow,
                 false /* occluded */);
         Assert.assertTrue("No animation generated", launchAnimation != null);
-        executePostsImmediately(mStatusBarWindowView);
+        executePostsImmediately(mNotificationShadeWindowView);
         mLaunchAnimator.setLaunchResult(ActivityManager.START_SUCCESS,
                 true /* wasIntentActivity */);
         verify(mCallback).onExpandAnimationTimedOut();

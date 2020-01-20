@@ -39,6 +39,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
@@ -812,55 +813,57 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                 return  16;
             case TYPE_STATUS_BAR:
                 return  17;
-            case TYPE_STATUS_BAR_PANEL:
+            case TYPE_NOTIFICATION_SHADE:
                 return  18;
-            case TYPE_STATUS_BAR_SUB_PANEL:
+            case TYPE_STATUS_BAR_PANEL:
                 return  19;
-            case TYPE_KEYGUARD_DIALOG:
+            case TYPE_STATUS_BAR_SUB_PANEL:
                 return  20;
+            case TYPE_KEYGUARD_DIALOG:
+                return  21;
             case TYPE_VOLUME_OVERLAY:
                 // the on-screen volume indicator and controller shown when the user
                 // changes the device volume
-                return  21;
+                return  22;
             case TYPE_SYSTEM_OVERLAY:
                 // the on-screen volume indicator and controller shown when the user
                 // changes the device volume
-                return  canAddInternalSystemWindow ? 22 : 11;
+                return  canAddInternalSystemWindow ? 23 : 11;
             case TYPE_NAVIGATION_BAR:
                 // the navigation bar, if available, shows atop most things
-                return  23;
+                return  24;
             case TYPE_NAVIGATION_BAR_PANEL:
                 // some panels (e.g. search) need to show on top of the navigation bar
-                return  24;
+                return  25;
             case TYPE_SCREENSHOT:
                 // screenshot selection layer shouldn't go above system error, but it should cover
                 // navigation bars at the very least.
-                return  25;
+                return  26;
             case TYPE_SYSTEM_ERROR:
                 // system-level error dialogs
-                return  canAddInternalSystemWindow ? 26 : 10;
+                return  canAddInternalSystemWindow ? 27 : 10;
             case TYPE_MAGNIFICATION_OVERLAY:
                 // used to highlight the magnified portion of a display
-                return  27;
+                return  28;
             case TYPE_DISPLAY_OVERLAY:
                 // used to simulate secondary display devices
-                return  28;
+                return  29;
             case TYPE_DRAG:
                 // the drag layer: input for drag-and-drop is associated with this window,
                 // which sits above all other focusable windows
-                return  29;
+                return  30;
             case TYPE_ACCESSIBILITY_OVERLAY:
                 // overlay put by accessibility services to intercept user interaction
-                return  30;
+                return  31;
             case TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY:
-                return 31;
+                return 32;
             case TYPE_SECURE_SYSTEM_OVERLAY:
-                return  32;
-            case TYPE_BOOT_PROGRESS:
                 return  33;
+            case TYPE_BOOT_PROGRESS:
+                return  34;
             case TYPE_POINTER:
                 // the (mouse) pointer layer
-                return  34;
+                return  35;
             default:
                 Slog.e("WindowManager", "Unknown window type: " + type);
                 return APPLICATION_LAYER;
@@ -1193,6 +1196,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @return true if in keyguard is occluded, false otherwise
      */
     public boolean isKeyguardOccluded();
+
+    /**
+     * @return true if in keyguard is on.
+     */
+    boolean isKeyguardShowing();
 
     /**
      * @return true if in keyguard is on and not occluded.

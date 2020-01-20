@@ -1367,14 +1367,7 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mExpectingSynthesizedDown) {
             mExpectingSynthesizedDown = false;
             maybeVibrateOnOpening();
-            Runnable runnable = () -> fling(velocity > 1f ? 1000f * velocity : 0,
-                    true /* expand */);
-            if (mStatusBar.getStatusBarWindow().getHeight() != mStatusBar.getStatusBarHeight()) {
-                // The panel is already expanded to its full size, let's expand directly
-                runnable.run();
-            } else {
-                mExpandAfterLayoutRunnable = runnable;
-            }
+            fling(velocity > 1f ? 1000f * velocity : 0, true /* expand */);
             onTrackingStopped(false);
         }
     }

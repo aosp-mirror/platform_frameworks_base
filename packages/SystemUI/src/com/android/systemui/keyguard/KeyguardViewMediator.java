@@ -88,9 +88,9 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.util.InjectionInflationController;
 
 import java.io.FileDescriptor;
@@ -212,7 +212,7 @@ public class KeyguardViewMediator extends SystemUI {
     private AlarmManager mAlarmManager;
     private AudioManager mAudioManager;
     private StatusBarManager mStatusBarManager;
-    private final StatusBarWindowController mStatusBarWindowController;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final Executor mUiBgExecutor;
 
     private boolean mSystemReady;
@@ -691,7 +691,7 @@ public class KeyguardViewMediator extends SystemUI {
             FalsingManager falsingManager,
             LockPatternUtils lockPatternUtils,
             BroadcastDispatcher broadcastDispatcher,
-            StatusBarWindowController statusBarWindowController,
+            NotificationShadeWindowController notificationShadeWindowController,
             Lazy<StatusBarKeyguardViewManager> statusBarKeyguardViewManagerLazy,
             DismissCallbackRegistry dismissCallbackRegistry,
             @UiBackground Executor uiBgExecutor) {
@@ -699,7 +699,7 @@ public class KeyguardViewMediator extends SystemUI {
         mFalsingManager = falsingManager;
         mLockPatternUtils = lockPatternUtils;
         mBroadcastDispatcher = broadcastDispatcher;
-        mStatusBarWindowController = statusBarWindowController;
+        mNotificationShadeWindowController = notificationShadeWindowController;
         mStatusBarKeyguardViewManagerLazy = statusBarKeyguardViewManagerLazy;
         mDismissCallbackRegistry = dismissCallbackRegistry;
         mUiBgExecutor = uiBgExecutor;
@@ -1819,7 +1819,7 @@ public class KeyguardViewMediator extends SystemUI {
             adjustStatusBarLocked();
             userActivity();
             mUpdateMonitor.setKeyguardGoingAway(false);
-            mStatusBarWindowController.setKeyguardGoingAway(false);
+            mNotificationShadeWindowController.setKeyguardGoingAway(false);
             mShowKeyguardWakeLock.release();
         }
         mKeyguardDisplayManager.show();
@@ -1852,7 +1852,7 @@ public class KeyguardViewMediator extends SystemUI {
             }
 
             mUpdateMonitor.setKeyguardGoingAway(true);
-            mStatusBarWindowController.setKeyguardGoingAway(true);
+            mNotificationShadeWindowController.setKeyguardGoingAway(true);
 
             // Don't actually hide the Keyguard at the moment, wait for window
             // manager until it tells us it's safe to do so with

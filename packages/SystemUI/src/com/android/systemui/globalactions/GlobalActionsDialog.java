@@ -97,8 +97,8 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ScrimController;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.EmergencyDialerConstants;
@@ -1528,7 +1528,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private float mScrimAlpha;
         private ResetOrientationData mResetOrientationData;
         private boolean mHadTopUi;
-        private final StatusBarWindowController mStatusBarWindowController;
+        private final NotificationShadeWindowController mNotificationShadeWindowController;
         private boolean mControlsEnabled;
 
         ActionsDialog(Context context, MyAdapter adapter,
@@ -1539,7 +1539,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mAdapter = adapter;
             mColorExtractor = Dependency.get(SysuiColorExtractor.class);
             mStatusBarService = Dependency.get(IStatusBarService.class);
-            mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
+            mNotificationShadeWindowController =
+                    Dependency.get(NotificationShadeWindowController.class);
             mControlsEnabled = controlsEnabled;
 
             // Window initialization
@@ -1721,8 +1722,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public void show() {
             super.show();
             mShowing = true;
-            mHadTopUi = mStatusBarWindowController.getForceHasTopUi();
-            mStatusBarWindowController.setForceHasTopUi(true);
+            mHadTopUi = mNotificationShadeWindowController.getForceHasTopUi();
+            mNotificationShadeWindowController.setForceHasTopUi(true);
             mBackgroundDrawable.setAlpha(0);
             mGlobalActionsLayout.setTranslationX(mGlobalActionsLayout.getAnimationOffsetX());
             mGlobalActionsLayout.setTranslationY(mGlobalActionsLayout.getAnimationOffsetY());
@@ -1775,7 +1776,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         private void completeDismiss() {
-            mStatusBarWindowController.setForceHasTopUi(mHadTopUi);
+            mNotificationShadeWindowController.setForceHasTopUi(mHadTopUi);
             super.dismiss();
         }
 

@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.phone.dagger;
 
 import com.android.systemui.statusbar.phone.NotificationPanelView;
-import com.android.systemui.statusbar.phone.StatusBarWindowView;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 
 import dagger.Module;
 import dagger.Provides;
@@ -28,8 +28,8 @@ public abstract class StatusBarViewModule {
     @Provides
     @StatusBarComponent.StatusBarScope
     public static NotificationPanelView getNotificationPanelView(
-            StatusBarWindowView statusBarWindowView) {
-        return statusBarWindowView.getNotificationPanelView();
+            NotificationShadeWindowView notificationShadeWindowView) {
+        return notificationShadeWindowView.getNotificationPanelView();
     }
 
 }

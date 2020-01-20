@@ -56,10 +56,10 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
-public class StatusBarWindowViewTest extends SysuiTestCase {
+public class NotificationShadeWindowViewTest extends SysuiTestCase {
 
-    private StatusBarWindowView mView;
-    private StatusBarWindowViewController mController;
+    private NotificationShadeWindowView mView;
+    private NotificationShadeWindowViewController mController;
 
     @Mock private NotificationWakeUpCoordinator mCoordinator;
     @Mock private PulseExpansionHandler mPulseExpansionHandler;
@@ -84,15 +84,16 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mView = spy(new StatusBarWindowView(getContext(), null));
+        mView = spy(new NotificationShadeWindowView(getContext(), null));
         when(mView.findViewById(R.id.notification_stack_scroller))
                 .thenReturn(mNotificationStackScrollLayout);
+
         when(mStatusBarStateController.isDozing()).thenReturn(false);
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
 
         when(mDockManager.isDocked()).thenReturn(false);
 
-        mController = new StatusBarWindowViewController(
+        mController = new NotificationShadeWindowViewController(
                 new InjectionInflationController(
                         SystemUIFactory.getInstance().getRootComponent()),
                 mCoordinator,

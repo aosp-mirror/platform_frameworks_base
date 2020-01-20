@@ -24,10 +24,10 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ShadeControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -41,13 +41,13 @@ public class CarShadeControllerImpl extends ShadeControllerImpl {
     @Inject
     public CarShadeControllerImpl(CommandQueue commandQueue,
             StatusBarStateController statusBarStateController,
-            StatusBarWindowController statusBarWindowController,
+            NotificationShadeWindowController notificationShadeWindowController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             WindowManager windowManager,
             Lazy<StatusBar> statusBarLazy,
             Lazy<AssistManager> assistManagerLazy,
             Lazy<BubbleController> bubbleControllerLazy) {
-        super(commandQueue, statusBarStateController, statusBarWindowController,
+        super(commandQueue, statusBarStateController, notificationShadeWindowController,
                 statusBarKeyguardViewManager, windowManager,
                 statusBarLazy, assistManagerLazy, bubbleControllerLazy);
     }
@@ -61,14 +61,14 @@ public class CarShadeControllerImpl extends ShadeControllerImpl {
             return;
         }
 
-        mStatusBarWindowController.setStatusBarFocusable(false);
-        getCarStatusBar().getStatusBarWindowViewController().cancelExpandHelper();
+        mNotificationShadeWindowController.setNotificationShadeFocusable(false);
+        getCarStatusBar().getNotificationShadeWindowViewController().cancelExpandHelper();
         getStatusBarView().collapsePanel(true /* animate */, delayed, speedUpFactor);
 
         getCarStatusBar().animateNotificationPanel(getCarStatusBar().getClosingVelocity(), true);
 
         if (!getCarStatusBar().isTracking()) {
-            mStatusBarWindowController.setPanelVisible(false);
+            mNotificationShadeWindowController.setPanelVisible(false);
             getCarNotificationView().setVisibility(View.INVISIBLE);
         }
 

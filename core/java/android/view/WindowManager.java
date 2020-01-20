@@ -1131,6 +1131,15 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY = FIRST_SYSTEM_WINDOW + 39;
 
         /**
+         * Window type: the notification shade and keyguard. There can be only one status bar
+         * window; it is placed at the top of the screen, and all other
+         * windows are shifted down so they are below it.
+         * In multiuser systems shows on all users' windows.
+         * @hide
+         */
+        public static final int TYPE_NOTIFICATION_SHADE = FIRST_SYSTEM_WINDOW + 40;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;
@@ -1732,14 +1741,6 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_SYSTEM_ERROR = 0x00000100;
 
         /**
-         * Flag whether the current window is a keyguard window, meaning that it will hide all other
-         * windows behind it except for windows with flag {@link #FLAG_SHOW_WHEN_LOCKED} set.
-         * Further, this can only be set by {@link LayoutParams#TYPE_STATUS_BAR}.
-         * {@hide}
-         */
-        public static final int PRIVATE_FLAG_KEYGUARD = 0x00000400;
-
-        /**
          * Flag that prevents the wallpaper behind the current window from receiving touch events.
          *
          * {@hide}
@@ -1748,12 +1749,12 @@ public interface WindowManager extends ViewManager {
 
         /**
          * Flag to force the status bar window to be visible all the time. If the bar is hidden when
-         * this flag is set it will be shown again and the bar will have a transparent background.
+         * this flag is set it will be shown again.
          * This can only be set by {@link LayoutParams#TYPE_STATUS_BAR}.
          *
          * {@hide}
          */
-        public static final int PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT = 0x00001000;
+        public static final int PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR = 0x00001000;
 
         /**
          * Flag indicating that the x, y, width, and height members should be
@@ -1917,17 +1918,13 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_SYSTEM_ERROR,
                         name = "SYSTEM_ERROR"),
                 @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_KEYGUARD,
-                        equals = PRIVATE_FLAG_KEYGUARD,
-                        name = "KEYGUARD"),
-                @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
                         equals = PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
                         name = "DISABLE_WALLPAPER_TOUCH_EVENTS"),
                 @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT,
-                        equals = PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT,
-                        name = "FORCE_STATUS_BAR_VISIBLE_TRANSPARENT"),
+                        mask = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
+                        equals = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
+                        name = "FORCE_STATUS_BAR_VISIBLE"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_PRESERVE_GEOMETRY,
                         equals = PRIVATE_FLAG_PRESERVE_GEOMETRY,
