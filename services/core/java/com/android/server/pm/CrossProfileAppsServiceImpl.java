@@ -168,6 +168,50 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     }
 
     @Override
+    public void startActivityAsUserByIntent(
+            IApplicationThread caller,
+            String callingPackage,
+            Intent intent,
+            @UserIdInt int userId) throws RemoteException {
+        Objects.requireNonNull(callingPackage);
+        Objects.requireNonNull(intent);
+        Objects.requireNonNull(intent.getComponent(), "The intent must have a Component set");
+
+        verifyCallingPackage(callingPackage);
+
+        final int callerUserId = mInjector.getCallingUserId();
+        final int callingUid = mInjector.getCallingUid();
+
+        List<UserHandle> allowedTargetUsers = getTargetUserProfilesUnchecked(
+                callingPackage, callerUserId);
+        if (callerUserId != userId && !allowedTargetUsers.contains(UserHandle.of(userId))) {
+            throw new SecurityException(callingPackage + " cannot access unrelated user " + userId);
+        }
+
+        Intent launchIntent = new Intent(intent);
+        launchIntent.setPackage(callingPackage);
+
+        if (!callingPackage.equals(launchIntent.getComponent().getPackageName())) {
+            throw new SecurityException(
+                    callingPackage + " attempts to start an activity in other package - "
+                            + launchIntent.getComponent().getPackageName());
+        }
+
+        if (callerUserId != userId) {
+            if (!hasInteractAcrossProfilesPermission(callingPackage)) {
+                throw new SecurityException("Attempt to launch activity without required "
+                        + android.Manifest.permission.INTERACT_ACROSS_PROFILES + " permission"
+                        + " or target user is not in the same profile group.");
+            }
+        }
+
+        verifyActivityCanHandleIntent(launchIntent, callingUid, userId);
+
+        mInjector.getActivityTaskManagerInternal().startActivityAsUser(
+                caller, callingPackage, launchIntent, /* options= */ null, userId);
+    }
+
+    @Override
     public boolean canRequestInteractAcrossProfiles(String callingPackage) {
         Objects.requireNonNull(callingPackage);
         verifyCallingPackage(callingPackage);
@@ -209,6 +253,11 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         if (targetUserProfiles.isEmpty()) {
             return false;
         }
+
+        return hasInteractAcrossProfilesPermission(callingPackage);
+    }
+
+    private boolean hasInteractAcrossProfilesPermission(String callingPackage) {
         final int callingUid = mInjector.getCallingUid();
         return isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS_FULL, callingUid)
                 || isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS, callingUid)
@@ -262,6 +311,27 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                             callingUid,
                             userId);
             return info != null && info.applicationInfo.enabled;
+        } finally {
+            mInjector.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void verifyActivityCanHandleIntent(
+            Intent launchIntent, int callingUid, @UserIdInt int userId) {
+        final long ident = mInjector.clearCallingIdentity();
+        try {
+            final List<ResolveInfo> activities =
+                    mInjector.getPackageManagerInternal().queryIntentActivities(
+                            launchIntent,
+                            launchIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                            MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                            callingUid,
+                            userId);
+
+            if (!activities.isEmpty()) {
+                return;
+            }
+            throw new SecurityException("Activity cannot handle intent");
         } finally {
             mInjector.restoreCallingIdentity(ident);
         }
