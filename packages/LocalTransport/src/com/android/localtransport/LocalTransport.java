@@ -211,6 +211,12 @@ public class LocalTransport extends BackupTransport {
 
     private int performBackupInternal(
             PackageInfo packageInfo, ParcelFileDescriptor data, int flags) {
+        if ((flags & BackupTransport.FLAG_DATA_NOT_CHANGED) != 0) {
+            // For unchanged data notifications we do nothing and tell the
+            // caller everything was OK
+            return BackupTransport.TRANSPORT_OK;
+        }
+
         boolean isIncremental = (flags & FLAG_INCREMENTAL) != 0;
         boolean isNonIncremental = (flags & FLAG_NON_INCREMENTAL) != 0;
 
