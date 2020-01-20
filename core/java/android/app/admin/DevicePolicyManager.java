@@ -4203,7 +4203,18 @@ public class DevicePolicyManager {
      * device by first calling {@link #resetPassword} to set the password and then lock the device.
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance returned by
-     * {@link #getParentProfileInstance(ComponentName)} in order to lock the parent profile.
+     * {@link #getParentProfileInstance(ComponentName)} in order to lock the parent profile as
+     * well as the managed profile.
+     * <p>
+     * NOTE: In order to lock the parent profile and evict the encryption key of the managed
+     * profile, {@link #lockNow()} must be called twice: First, {@link #lockNow()} should be called
+     * on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)}, then {@link #lockNow(int)} should be
+     * called on the {@link DevicePolicyManager} instance associated with the managed profile,
+     * with the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag.
+     * Calling the method twice in this order ensures that all users are locked and does not
+     * stop the device admin on the managed profile from issuing a second call to lock its own
+     * profile.
      *
      * @param flags May be 0 or {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}.
      * @throws SecurityException if the calling application does not own an active administrator
