@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ចូលប្រើប្រិតិទិនរបស់អ្នក"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"សារ SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ផ្ញើ និងមើលសារ SMS"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"ទំហំ​ផ្ទុក"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"ចូលដំណើការរូបភាព មេឌៀ និងឯកសារនៅលើឧបករណ៍របស់អ្នក"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"មីក្រូ​ហ្វូន"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ថតសំឡេង"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"អាចប៉ះ អូស ច្បិច និងធ្វើកាយវិការផ្សេងទៀត"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"ចលនា​ស្នាមម្រាមដៃ"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"អាចចាប់យក​ចលនា​ដែលធ្វើនៅលើ​នៅលើ​ឧបករណ៍​ចាប់​ស្នាម​ម្រាមដៃ​របស់ឧបករណ៍បាន។"</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"បិទ ឬ​កែ​របារ​ស្ថានភាព"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ឲ្យ​កម្មវិធី​បិទ​របារ​ស្ថានភាព ឬ​បន្ថែម និង​លុប​រូប​តំណាង​ប្រព័ន្ធ។"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ធ្វើជារបារស្ថានភាព"</string>
@@ -1612,6 +1617,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"បង្កើន​កម្រិត​សំឡេង​លើស​ពី​កម្រិត​បាន​ផ្ដល់​យោបល់?\n\nការ​ស្ដាប់​នៅ​កម្រិត​សំឡេង​ខ្លាំង​យូរ​អាច​ធ្វើឲ្យ​ខូច​ត្រចៀក។"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ប្រើប្រាស់​ផ្លូវកាត់​ភាព​ងាយស្រួល?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"នៅពេល​ផ្លូវកាត់​នេះបើក ការ​ចុច​ប៊ូតុង​កម្រិត​សំឡេង​ទាំង​ពីរ​ឲ្យ​ជាប់​រយៈពេល​ 3 វិនាទីនឹង​ចាប់ផ្តើម​មុខងារ​ភាពងាយស្រួល។\n\n មុខងារ​ភាពងាយស្រួល​បច្ចុប្បន្ន៖\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n អ្នក​អាច​ផ្លាស់​ប្តូរ​មុខងារ​នេះ​បាន​នៅក្នុង​ការ កំណត់ &gt; ភាព​ងាយស្រួល។"</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"លុបទាំងអស់"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"កែ​ផ្លូវកាត់"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"បោះបង់"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"បិទ​ផ្លូវកាត់"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ប្រើប្រាស់​ផ្លូវកាត់"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"បញ្ច្រាស​ពណ៌"</string>
@@ -1847,6 +1855,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"បើក​កម្រង​ព័ត៌មាន​ការ​ងារ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"កម្មវិធី​ការងារ ការ​ជូនដំណឹង ទិន្នន័យ និង​មុខងារ​កម្រង​ព័ត៌មាន​ការងារ​ផ្សេង​ទៀត​របស់អ្នក​នឹង​ត្រូវ​បាន​បើក"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"បើក"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"កម្មវិធី​នេះ​ត្រូវបាន​បង្កើត​ឡើង​សម្រាប់​កំណែ​ប្រព័ន្ធ​ប្រតិបត្តិការ Android ចាស់ ហើយ​វាអាច​ដំណើរការ​ខុសប្រក្រតី។ សូម​សាកល្បង​ពិនិត្យមើល​កំណែ​ថ្មី ឬ​ទាក់ទង​ទៅអ្នក​អភិវឌ្ឍន៍។"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"រក​មើល​កំណែ​ថ្មី"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"អ្នកមានសារថ្មី"</string>
@@ -1957,13 +1969,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ថ្ម​អាច​នឹង​អស់ មុនពេល​សាកថ្មធម្មតា"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"បាន​បើក​ដំណើរការកម្មវិធី​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"កម្មវិធីសន្សំថ្ម"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"កម្មវិធី​សន្សំ​ថ្មនឹង​មិន​បើក​ដំណើរការឡើងវិញ​ទេ រហូតទាល់តែ​ថ្មមានកម្រិតទាប​ម្ដងទៀត"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"ថ្ម​បាន​សាក​ដល់​កម្រិត​គ្រប់គ្រាន់ហើយ។ កម្មវិធី​សន្សំ​ថ្មនឹង​មិន​បើក​ដំណើរការ​ឡើងវិញទេ រហូតទាល់តែ​ថ្មមានកម្រិតទាប​ម្ដងទៀត។"</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"បាន​សាកថ្មទូរសព្ទ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"បាន​សាកថ្មថេប្លេត <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"បានសាកថ្មឧបករណ៍ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"កម្មវិធី​សន្សំ​ថ្ម​បាន​បិទ។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"បានបិទកម្មវិធី​សន្សំ​ថ្ម។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"ថត"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"​កម្មវិធី Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ឯកសារ"</string>

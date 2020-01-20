@@ -22,6 +22,7 @@ import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
+import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.getFreeMemory;
@@ -53,6 +54,9 @@ import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppProtoEnums;
+import android.app.ApplicationExitInfo;
+import android.app.ApplicationExitInfo.Reason;
+import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -62,6 +66,8 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.net.LocalSocket;
+import android.net.LocalSocketAddress;
 import android.os.AppZygote;
 import android.os.Binder;
 import android.os.Build;
@@ -113,6 +119,7 @@ import com.android.server.wm.WindowManagerService;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -282,6 +289,10 @@ public final class ProcessList {
     private static final String PROPERTY_USE_APP_IMAGE_STARTUP_CACHE =
             "persist.device_config.runtime_native.use_app_image_startup_cache";
 
+    // The socket path for zygote to send unsolicited msg.
+    // Must keep sync with com_android_internal_os_Zygote.cpp.
+    private static final String UNSOL_ZYGOTE_MSG_SOCKET_PATH = "/data/system/unsolzygotesocket";
+
     // Low Memory Killer Daemon command codes.
     // These must be kept in sync with lmk_cmd definitions in lmkd.h
     //
@@ -416,12 +427,6 @@ public final class ProcessList {
     ActiveUids mActiveUids;
 
     /**
-     * The listener who is intereted with the lmkd kills.
-     */
-    @GuardedBy("mService")
-    private LmkdKillListener mLmkdKillListener = null;
-
-    /**
      * The currently running isolated processes.
      */
     final SparseArray<ProcessRecord> mIsolatedProcesses = new SparseArray<>();
@@ -432,12 +437,40 @@ public final class ProcessList {
     final ProcessMap<AppZygote> mAppZygotes = new ProcessMap<AppZygote>();
 
     /**
+     * Managees the {@link android.app.ApplicationExitInfo} records.
+     */
+    @GuardedBy("mAppExitInfoTracker")
+    final AppExitInfoTracker mAppExitInfoTracker = new AppExitInfoTracker();
+
+    /**
      * The processes that are forked off an application zygote.
      */
     final ArrayMap<AppZygote, ArrayList<ProcessRecord>> mAppZygoteProcesses =
             new ArrayMap<AppZygote, ArrayList<ProcessRecord>>();
 
     private PlatformCompat mPlatformCompat = null;
+
+    /**
+     * The server socket in system_server, zygote will connect to it
+     * in order to send unsolicited messages to system_server.
+     */
+    private LocalSocket mSystemServerSocketForZygote;
+
+    /**
+     * Maximum number of bytes that an incoming unsolicited zygote message could be.
+     * To be updated if new message type needs to be supported.
+     */
+    private static final int MAX_ZYGOTE_UNSOLICITED_MESSAGE_SIZE = 16;
+
+    /**
+     * The buffer to be used to receive the incoming unsolicited zygote message.
+     */
+    private final byte[] mZygoteUnsolicitedMessage = new byte[MAX_ZYGOTE_UNSOLICITED_MESSAGE_SIZE];
+
+    /**
+     * The buffer to be used to receive the SIGCHLD data, it includes pid/uid/status.
+     */
+    private final int[] mZygoteSigChldMessage = new int[3];
 
     interface LmkdKillListener {
         /**
@@ -597,7 +630,6 @@ public final class ProcessList {
     final class KillHandler extends Handler {
         static final int KILL_PROCESS_GROUP_MSG = 4000;
         static final int LMKD_RECONNECT_MSG = 4001;
-        static final int LMKD_PROC_KILLED_MSG = 4002;
 
         public KillHandler(Looper looper) {
             super(looper, null, true);
@@ -620,10 +652,6 @@ public final class ProcessList {
                                 KillHandler.LMKD_RECONNECT_MSG), LMKD_RECONNECT_DELAY_MS);
                     }
                     break;
-                case LMKD_PROC_KILLED_MSG:
-                    handleLmkdProcKilled(msg.arg1 /* pid */, msg.arg2 /* uid */);
-                    break;
-
                 default:
                     super.handleMessage(msg);
             }
@@ -692,9 +720,8 @@ public final class ProcessList {
                                     if (receivedLen != 12) {
                                         return false;
                                     }
-                                    sKillHandler.obtainMessage(KillHandler.LMKD_PROC_KILLED_MSG,
-                                            dataReceived.getInt(4), dataReceived.getInt(8))
-                                            .sendToTarget();
+                                    mAppExitInfoTracker.scheduleNoteLmkdProcKilled(
+                                            dataReceived.getInt(4), dataReceived.getInt(8));
                                     return true;
                                 default:
                                     return false;
@@ -702,7 +729,19 @@ public final class ProcessList {
                         }
                     }
             );
+            // Start listening on incoming connections from zygotes.
+            mSystemServerSocketForZygote = createSystemServerSocketForZygote();
+            if (mSystemServerSocketForZygote != null) {
+                sKillHandler.getLooper().getQueue().addOnFileDescriptorEventListener(
+                        mSystemServerSocketForZygote.getFileDescriptor(),
+                        EVENT_INPUT, this::handleZygoteMessages);
+            }
+            mAppExitInfoTracker.init(mService, sKillThread.getLooper());
         }
+    }
+
+    void onSystemReady() {
+        mAppExitInfoTracker.onSystemReady();
     }
 
     void applyDisplaySize(WindowManagerService wm) {
@@ -1437,7 +1476,10 @@ public final class ProcessList {
                             proc.lastCachedPss, holder.appVersion);
                 }
             }
-            proc.kill(Long.toString(proc.lastCachedPss) + "k from cached", true);
+            proc.kill(Long.toString(proc.lastCachedPss) + "k from cached",
+                    ApplicationExitInfo.REASON_OTHER,
+                    ApplicationExitInfo.SUBREASON_LARGE_CACHED,
+                    true);
         } else if (proc != null && !keepIfLarge
                 && mService.mLastMemoryLevel > ProcessStats.ADJ_MEM_FACTOR_NORMAL
                 && proc.setProcState >= ActivityManager.PROCESS_STATE_CACHED_EMPTY) {
@@ -1456,7 +1498,10 @@ public final class ProcessList {
                                 proc.lastCachedPss, holder.appVersion);
                     }
                 }
-                proc.kill(Long.toString(proc.lastCachedPss) + "k from cached", true);
+                proc.kill(Long.toString(proc.lastCachedPss) + "k from cached",
+                        ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_LARGE_CACHED,
+                        true);
             }
         }
         return proc;
@@ -2151,6 +2196,9 @@ public final class ProcessList {
         if (doKill) {
             // do the killing
             ProcessList.killProcessGroup(app.uid, app.pid);
+            noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
+                    ApplicationExitInfo.SUBREASON_UNKNOWN,
+                    String.format(formatString, ""));
         }
 
         // wait for the death
@@ -2229,6 +2277,8 @@ public final class ProcessList {
             app.pendingStart = false;
             killProcessQuiet(pid);
             Process.killProcessGroup(app.uid, app.pid);
+            noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
+                    ApplicationExitInfo.SUBREASON_UNKNOWN, reason);
             return false;
         }
         mService.mBatteryStatsService.noteProcessStart(app.processName, app.info.uid);
@@ -2314,6 +2364,8 @@ public final class ProcessList {
                     if (app.pid > 0) {
                         killProcessQuiet(app.pid);
                         ProcessList.killProcessGroup(app.uid, app.pid);
+                        noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
+                                ApplicationExitInfo.SUBREASON_UNKNOWN, "hasn't been killed");
                     } else {
                         app.pendingStart = false;
                     }
@@ -2444,6 +2496,12 @@ public final class ProcessList {
     @GuardedBy("mService")
     boolean removeProcessLocked(ProcessRecord app,
             boolean callerWillRestart, boolean allowRestart, String reason) {
+        return removeProcessLocked(app, callerWillRestart, allowRestart, reason,
+                ApplicationExitInfo.REASON_OTHER);
+    }
+
+    boolean removeProcessLocked(ProcessRecord app,
+            boolean callerWillRestart, boolean allowRestart, String reason, int reasonCode) {
         final String name = app.processName;
         final int uid = app.uid;
         if (DEBUG_PROCESSES) Slog.d(TAG_PROCESSES,
@@ -2479,7 +2537,7 @@ public final class ProcessList {
                     needRestart = true;
                 }
             }
-            app.kill(reason, true);
+            app.kill(reason, reasonCode, true);
             mService.handleAppDiedLocked(app, willRestart, allowRestart);
             if (willRestart) {
                 removeLruProcessLocked(app);
@@ -2564,6 +2622,7 @@ public final class ProcessList {
                 // the uid of the isolated process is specified by the caller.
                 uid = isolatedUid;
             }
+            mAppExitInfoTracker.mIsolatedUidRecords.addIsolatedUid(uid, info.uid);
             mService.getPackageManagerInternalLocked().addIsolatedUid(uid, info.uid);
 
             // Register the isolated UID with this application so BatteryStats knows to
@@ -3537,27 +3596,93 @@ public final class ProcessList {
         }
     }
 
-    void setLmkdKillListener(final LmkdKillListener listener) {
-        synchronized (mService) {
-            mLmkdKillListener = listener;
+    /**
+     * Create a server socket in system_server, zygote will connect to it
+     * in order to send unsolicited messages to system_server.
+     */
+    private LocalSocket createSystemServerSocketForZygote() {
+        // The file system entity for this socket is created with 0666 perms, owned
+        // by system:system. selinux restricts things so that only zygotes can
+        // access it.
+        final File socketFile = new File(UNSOL_ZYGOTE_MSG_SOCKET_PATH);
+        if (socketFile.exists()) {
+            socketFile.delete();
         }
-    }
 
-    private void handleLmkdProcKilled(final int pid, final int uid) {
-        // Log only now
-        if (DEBUG_PROCESSES) {
-            Slog.i(TAG, "lmkd kill: pid=" + pid + " uid=" + uid);
-        }
-
-        if (mService == null) {
-            return;
-        }
-        // Notify any interesed party regarding the lmkd kills
-        synchronized (mService) {
-            final LmkdKillListener listener = mLmkdKillListener;
-            if (listener != null) {
-                mService.mHandler.post(()-> listener.onLmkdKillOccurred(pid, uid));
+        LocalSocket serverSocket = null;
+        try {
+            serverSocket = new LocalSocket(LocalSocket.SOCKET_DGRAM);
+            serverSocket.bind(new LocalSocketAddress(
+                    UNSOL_ZYGOTE_MSG_SOCKET_PATH, LocalSocketAddress.Namespace.FILESYSTEM));
+            Os.chmod(UNSOL_ZYGOTE_MSG_SOCKET_PATH, 0666);
+        } catch (Exception e) {
+            if (serverSocket != null) {
+                try {
+                    serverSocket.close();
+                } catch (IOException ex) {
+                }
+                serverSocket = null;
             }
         }
+        return serverSocket;
+    }
+
+    /**
+     * Handle the unsolicited message from zygote.
+     */
+    private int handleZygoteMessages(FileDescriptor fd, int events) {
+        final int eventFd = fd.getInt$();
+        if ((events & EVENT_INPUT) != 0) {
+            // An incoming message from zygote
+            try {
+                final int len = Os.read(fd, mZygoteUnsolicitedMessage, 0,
+                        mZygoteUnsolicitedMessage.length);
+                if (len > 0 && mZygoteSigChldMessage.length == Zygote.nativeParseSigChld(
+                        mZygoteUnsolicitedMessage, len, mZygoteSigChldMessage)) {
+                    mAppExitInfoTracker.handleZygoteSigChld(
+                            mZygoteSigChldMessage[0] /* pid */,
+                            mZygoteSigChldMessage[1] /* uid */,
+                            mZygoteSigChldMessage[2] /* status */);
+                }
+            } catch (Exception e) {
+                Slog.w(TAG, "Exception in reading unsolicited zygote message: " + e);
+            }
+        }
+        return EVENT_INPUT;
+    }
+
+    /**
+     * Called by ActivityManagerService when a process died.
+     */
+    @GuardedBy("mService")
+    void noteProcessDiedLocked(final ProcessRecord app) {
+        if (DEBUG_PROCESSES) {
+            Slog.i(TAG, "note: " + app + " died, saving the exit info");
+        }
+
+        mAppExitInfoTracker.scheduleNoteProcessDiedLocked(app);
+    }
+
+    /**
+     * Called by ActivityManagerService when it decides to kill an application process.
+     */
+    void noteAppKill(final ProcessRecord app, final @Reason int reason,
+            final @SubReason int subReason, final String msg) {
+        if (DEBUG_PROCESSES) {
+            Slog.i(TAG, "note: " + app + " is being killed, reason: " + reason
+                    + ", sub-reason: " + subReason + ", message: " + msg);
+        }
+        mAppExitInfoTracker.scheduleNoteAppKill(app, reason, subReason, msg);
+    }
+
+    void noteAppKill(final int pid, final int uid, final @Reason int reason,
+            final @SubReason int subReason, final String msg) {
+        if (DEBUG_PROCESSES) {
+            Slog.i(TAG, "note: " + pid + " is being killed, reason: " + reason
+                    + ", sub-reason: " + subReason + ", message: " + msg);
+        }
+
+        mAppExitInfoTracker.scheduleNoteAppKill(pid, uid, reason, subReason, msg);
     }
 }
+

@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"truy cập lịch của bạn"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Tin nhắn SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"gửi và xem tin nhắn SMS"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Bộ nhớ"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"truy cập ảnh, phương tiện và tệp trên thiết bị của bạn"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micrô"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ghi âm"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Có thể nhấn, vuốt, chụm và thực hiện các cử chỉ khác."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Cử chỉ vân tay"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Có thể ghi lại các cử chỉ được thực hiện trên cảm biến vân tay của thiết bị."</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"vô hiệu hóa hoặc sửa đổi thanh trạng thái"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Cho phép ứng dụng vô hiệu hóa thanh trạng thái hoặc thêm và xóa biểu tượng hệ thống."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"trở thành thanh trạng thái"</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Bạn tăng âm lượng lên quá mức khuyên dùng?\n\nViệc nghe ở mức âm lượng cao trong thời gian dài có thể gây tổn thương thính giác của bạn."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Sử dụng phím tắt Hỗ trợ tiếp cận?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Khi phím tắt được bật, nhấn cả hai nút âm lượng trong 3 giây sẽ bắt đầu một tính năng trợ năng.\n\n Tính năng trợ năng hiện tại:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Bạn có thể thay đổi tính năng trong Cài đặt &gt; Trợ năng."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Xóa sạch"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Chỉnh sửa phím tắt"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Hủy"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Tắt phím tắt"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sử dụng phím tắt"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Đảo màu"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Bạn muốn bật hồ sơ công việc?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Ứng dụng công việc, thông báo, dữ liệu và các tính năng khác của hồ sơ công việc sẽ được bật"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Bật"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ứng dụng này được xây dựng cho một phiên bản Android cũ hơn và có thể hoạt động không bình thường. Hãy thử kiểm tra các bản cập nhật hoặc liên hệ với nhà phát triển."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kiểm tra bản cập nhật"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Bạn có tin nhắn mới"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pin có thể hết trước khi sạc bình thường"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Trình tiết kiệm pin được kích hoạt để kéo dài thời lượng pin"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Trình tiết kiệm pin"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Trình tiết kiệm pin sẽ chỉ kích hoạt lại khi sắp hết pin"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Pin đã sạc đủ. Trình tiết kiệm pin sẽ chỉ kích hoạt lại khi pin sắp hết."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Điện thoại đã sạc được <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Máy tính bảng đã sạc được <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Thiết bị đã sạc được <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Trình tiết kiệm pin đã tắt. Các tính năng không bị hạn chế nữa."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Trình tiết kiệm pin đã tắt. Các tính năng không bị hạn chế nữa."</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"Thư mục"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Ứng dụng Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Tệp"</string>

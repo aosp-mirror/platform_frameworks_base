@@ -635,14 +635,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
                     }
                     mIsSharedWithUser = false;
                 }
-
-                if (!mIsSharedWithUser && !mIsInitialAutoJoinEnabled) {
-                    throw new IllegalStateException("Should have not a network with both "
-                            + "setIsUserAllowedToManuallyConnect and "
-                            + "setIsAutoJoinEnabled set to false");
-                }
             }
-
+            if (!mIsSharedWithUser && !mIsInitialAutoJoinEnabled) {
+                throw new IllegalStateException("Should have not a network with both "
+                        + "setCredentialSharedWithUser and "
+                        + "setIsAutoJoinEnabled set to false");
+            }
             return new WifiNetworkSuggestion(
                     wifiConfiguration,
                     mPasspointConfiguration,

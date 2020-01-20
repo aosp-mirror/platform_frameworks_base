@@ -8547,9 +8547,13 @@ public class TelephonyManager {
         return false;
     }
 
-    /** @hide */
+    /**
+     * @deprecated use {@link #supplyPinReportPinResult(String pin)} instead.
+     *
+     * @hide */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @Deprecated
     public int[] supplyPinReportResult(String pin) {
         try {
             ITelephony telephony = getITelephony();
@@ -8561,9 +8565,13 @@ public class TelephonyManager {
         return new int[0];
     }
 
-    /** @hide */
+    /**
+     * @deprecated use {@link #supplyPukReportPinResult(String puk, String pin)} instead.
+     *
+     * @hide */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @Deprecated
     public int[] supplyPukReportResult(String puk, String pin) {
         try {
             ITelephony telephony = getITelephony();
@@ -8573,6 +8581,55 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#]", e);
         }
         return new int[0];
+    }
+
+    /**
+     * Used when the user attempts to enter their pin.
+     *
+     * @param pin The user entered pin.
+     * @return The result of the pin.
+     *
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public PinResult supplyPinReportPinResult(@NonNull String pin) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                int[] result = telephony.supplyPinReportResultForSubscriber(getSubId(), pin);
+                return new PinResult(result[0], result[1]);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#supplyPinReportResultForSubscriber", e);
+        }
+        return null;
+    }
+
+    /**
+     * Used when the user attempts to enter the puk or their pin.
+     *
+     * @param puk The product unblocking key.
+     * @param pin The user entered pin.
+     * @return The result of the pin.
+     *
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public PinResult supplyPukReportPinResult(@NonNull String puk, @NonNull String pin) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                int[] result = telephony.supplyPukReportResultForSubscriber(getSubId(), puk, pin);
+                return new PinResult(result[0], result[1]);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#]", e);
+        }
+        return null;
     }
 
     /**
@@ -12507,5 +12564,109 @@ public class TelephonyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * The IccLock state or password was changed successfully.
+     * @hide
+     */
+    @SystemApi
+    public static final int CHANGE_ICC_LOCK_SUCCESS = Integer.MAX_VALUE;
+
+    /**
+     * Check whether ICC pin lock is enabled.
+     * This is a sync call which returns the cached pin enabled state.
+     *
+     * @return {@code true} if ICC lock enabled, {@code false} if ICC lock disabled.
+     *
+     * @throws SecurityException if the caller doesn't have the permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @WorkerThread
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isIccLockEnabled() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isIccLockEnabled(getSubId());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "isIccLockEnabled RemoteException", e);
+        }
+        return false;
+    }
+
+    /**
+     * Set the ICC pin lock enabled or disabled.
+     *
+     * If enable/disable ICC pin lock successfully, a value of {@link Integer#MAX_VALUE} is
+     * returned.
+     * If an incorrect old password is specified, the return value will indicate how many more
+     * attempts the user can make to change the password before the SIM is locked.
+     * Using PUK code to unlock SIM if enter the incorrect old password 3 times.
+     *
+     * @param enabled    "true" for locked, "false" for unlocked.
+     * @param password   needed to change the ICC pin state, aka. Pin1
+     * @return an integer representing the status of IccLock enabled or disabled in the following
+     * three cases:
+     *   - {@link TelephonyManager#CHANGE_ICC_LOCK_SUCCESS} if enabled or disabled IccLock
+     *   successfully.
+     *   - Positive number and zero for remaining password attempts.
+     *   - Negative number for other failure cases (such like enabling/disabling PIN failed).
+     *
+     * @throws SecurityException if the caller doesn't have the permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public int setIccLockEnabled(boolean enabled, @NonNull String password) {
+        checkNotNull(password, "setIccLockEnabled password can't be null.");
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.setIccLockEnabled(getSubId(), enabled, password);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "setIccLockEnabled RemoteException", e);
+        }
+        return 0;
+    }
+
+    /**
+     * Change the ICC password used in ICC pin lock.
+     *
+     * If the password was changed successfully, a value of {@link Integer#MAX_VALUE} is returned.
+     * If an incorrect old password is specified, the return value will indicate how many more
+     * attempts the user can make to change the password before the SIM is locked.
+     * Using PUK code to unlock SIM if enter the incorrect old password 3 times.
+     *
+     * @param oldPassword is the old password
+     * @param newPassword is the new password
+     * @return an integer representing the status of IccLock changed in the following three cases:
+     *   - {@link TelephonyManager#CHANGE_ICC_LOCK_SUCCESS} if changed IccLock successfully.
+     *   - Positive number and zero for remaining password attempts.
+     *   - Negative number for other failure cases (such like enabling/disabling PIN failed).
+     *
+     * @throws SecurityException if the caller doesn't have the permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public int changeIccLockPassword(@NonNull String oldPassword, @NonNull String newPassword) {
+        checkNotNull(oldPassword, "changeIccLockPassword oldPassword can't be null.");
+        checkNotNull(newPassword, "changeIccLockPassword newPassword can't be null.");
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.changeIccLockPassword(getSubId(), oldPassword, newPassword);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "changeIccLockPassword RemoteException", e);
+        }
+        return 0;
     }
 }

@@ -287,7 +287,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"taqvimingizga kirish"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS xabarlarni yuborish va ko‘rish"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Xotira"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Fayllar va media"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"qurilmangizdagi surat, multimedia va fayllarga kirish"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ovoz yozib olish"</string>
@@ -313,6 +313,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Bosish, surish; jipslashtirish va boshqa imo-ishoralarni amalga oshirish mumkin."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Barmoq izi ishoralari"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Barmoq izi skanerida kiritilgan ishoralarni taniy oladi."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Skrinshot olish"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Ekrandan skrinshot olishi mumkin."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"holat panelini o‘zgartirish yoki o‘chirish"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Ilova holat panelini o‘chirib qo‘yishi hamda tizim ikonkalarini qo‘shishi yoki olib tashlashi mumkin."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"holat qatorida ko‘rinishi"</string>
@@ -1610,6 +1612,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Tovush balandligi tavsiya etilgan darajadan ham yuqori qilinsinmi?\n\nUzoq vaqt davomida baland ovozda tinglash eshitish qobiliyatingizga salbiy ta’sir ko‘rsatishi mumkin."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Tezkor ishga tushirishdan foydalanilsinmi?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Maxsus imkoniyatlar funksiyasidan foydalanish uchun u yoniqligida ikkala ovoz balandligini boshqarish tugmasini 3 soniya bosib turing.\n\n Joriy maxsus imkoniyatlar funksiyasi:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Bu funksiyani Sozlamalar &gt; Maxsus imkoniyatlar orqali o‘zgartirish mumkin."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Boʻshatish"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Tezkor tugmalarni tahrirlash"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Bekor qilish"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Tezkor ishga tushirishni o‘chirib qo‘yish"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Tezkor ishga tushirishdan foydalanish"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Ranglarni akslantirish"</string>
@@ -1845,6 +1850,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Ishchi profil yoqilsinmi?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Ishchi ilovalar, bildirishnomalar, ma’lumotlar va boshqa ishchi profil imkoniyatlari yoqiladi"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Yoqish"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Ilova ishlamayapti"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Ayni vaqtda <xliff:g id="APP_NAME">%1$s</xliff:g> ilovasi ishlamayapti."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Bu ilova eskiroq Android versiyalariga chiqarilgan va xato ishlashi mumkin. Yangilanishlarini tekshiring yoki dasturchi bilan bog‘laning."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Yangilanish borligini tekshirish"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Sizga yangi SMS keldi"</string>
@@ -1955,13 +1962,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batareya quvvati odatdagidan ertaroq tugashi mumkin"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batareya quvvati uzoqroq ishlashi uchun Tejamkor rejim yoqildi"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Quvvat tejash"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Quvvat tejash rejimi qatareya quvvati kamaymaguncha qayta yoqilmaydi"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Batareya yetarli darajada quvvatlandi. Quvvat tejash rejimi qatareya quvvati kamaymaguncha qayta yoqilmaydi."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Telefon <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> quvvat oldi"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Planshet <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> quvvat oldi"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Qurilma <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> quvvat oldi"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Quvvat tejash rejimi faolsizlantirildi. Funksiyalar endi cheklovlarsiz ishlaydi."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Quvvat tejash rejimi faolsizlantirildi. Funksiyalar endi cheklovlarsiz ishlaydi."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Quvvat tejash rejimi faolsizlantirildi"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefon yetarli quvvatlandi. Funksiyalar endi cheklovlarsiz ishlaydi."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Planshet yetarli quvvatlandi. Funksiyalar endi cheklovlarsiz ishlaydi."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Qurilma yetarli quvvatlandi. Funksiyalar endi cheklovlarsiz ishlaydi."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Jild"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android ilova"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Fayl"</string>

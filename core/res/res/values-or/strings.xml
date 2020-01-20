@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ଆପଣଙ୍କ କ୍ୟାଲେଣ୍ଡର୍‍ ଆକ୍ସେସ୍‍ କରେ"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS ମେସେଜ୍‍ ପଠାନ୍ତୁ ଓ ଦେଖନ୍ତୁ"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"ଷ୍ଟୋରେଜ୍‌"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"ଆପଣଙ୍କ ଡିଭାଇସ୍‌ରେ ଥିବା ଫଟୋ, ମିଡିଆ ଓ ଫାଇଲ୍‍ ଆକ୍ସେସ୍‍ କରେ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ମାଇକ୍ରୋଫୋନ୍"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ଅଡିଓ ରେକର୍ଡ କରେ"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"ଟାପ୍‍, ସ୍ୱାଇପ୍‍, ପିଞ୍ଚ ଓ ଅନ୍ୟାନ୍ୟ ଜେଶ୍ଚର୍‍ ସମ୍ପାଦନ କରିପାରିବ।"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"ଟିପଚିହ୍ନ ଜେଶ୍ଚର"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ଡିଭାଇସ୍‌ର ଟିପଚିହ୍ନ ସେନସର୍ ଉପରେ ଜେଶ୍ଚର୍‍ କ୍ୟାପଚର୍‍ କାର୍ଯ୍ୟ କରାଯାଇପାରିବ।"</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"ଷ୍ଟାଟସ୍‌ ବାର୍‌କୁ ଅକ୍ଷମ କିମ୍ୱା ସଂଶୋଧନ କରନ୍ତୁ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ଆପ୍‍କୁ, ସ୍ଥିତି ବାର୍‍ ଅକ୍ଷମ କରିବାକୁ କିମ୍ବା ସିଷ୍ଟମ୍‍ ଆଇକନ୍‍ ଯୋଡ଼ିବା କିମ୍ବା ବାହାର କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ଷ୍ଟାଟସ୍‍ ବାର୍‍ ରହିବାକୁ ଦିଅନ୍ତୁ"</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ମାତ୍ରା ବଢ଼ାଇ ସୁପାରିଶ ସ୍ତର ବଢ଼ାଉଛନ୍ତି? \n\n ଲମ୍ବା ସମୟ ପର୍ଯ୍ୟନ୍ତ ଉଚ୍ଚ ଶବ୍ଦରେ ଶୁଣିଲେ ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତି ଖରାପ ହୋଇପାରେ।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ଆକ୍ସେସବିଲିଟି ଶର୍ଟକଟ୍‍ ବ୍ୟବହାର କରିବେ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"ସର୍ଟକଟ୍‌ ଅନ୍‌ ଥିବା ବେଳେ, ଉଭୟ ଭଲ୍ୟୁମ୍‍ ବଟନ୍‍ 3 ସେକେଣ୍ଡ ପାଇଁ ଦବାଇବା ଦ୍ୱାରା ଆକ୍ସେସବିଲିଟି ବୈଶିଷ୍ଟ ଆରମ୍ଭ ହେବ।\n\n ସମ୍ପ୍ରତି ଆକ୍ସେସବିଲିଟି ବୈଶିଷ୍ଟ୍ୟ:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ସେଟିଙ୍ଗ ଓ ଆକ୍ସେସବିଲିଟିରେ ଆପଣ ବୈଶିଷ୍ଟ୍ୟ ବଦଳାଇ ପାରିବେ।"</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"ଖାଲି କରନ୍ତୁ"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ସର୍ଟକଟଗୁଡ଼ିକୁ ସମ୍ପାଦନ କରନ୍ତୁ"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"ବାତିଲ୍ କରନ୍ତୁ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ଶର୍ଟକଟ୍‍ ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ଶର୍ଟକଟ୍‍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ରଙ୍ଗ ବଦଳାଇବାର ସୁବିଧା"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌କୁ ଚାଲୁ କରିବେ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"ଆପଣଙ୍କର କାର୍ଯ୍ୟକାରୀ ଆପ୍‌, ବିଜ୍ଞପ୍ତି, ଡାଟା ଓ ଅନ୍ୟ ୱର୍କ ପ୍ରୋଫାଇଲ୍‌ଗୁଡ଼ିକ ଚାଲୁ ହୋଇଯିବ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ଅନ୍ କରନ୍ତୁ"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ଏହି ଆପ୍‌କୁ Androidର ପୁରୁଣା ଭର୍ସନ୍ ପାଇଁ ନିର୍ମାଣ କରାଯାଇଥିଲା ଏବଂ ଠିକ୍ ଭାବେ କାମ କରିନପାରେ। ଏହାପାଇଁ ଅପଡେଟ୍‌ ଅଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ କିମ୍ବା ଡେଭେଲପର୍‌ଙ୍କ ସହିତ ସମ୍ପର୍କ କରନ୍ତୁ।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ଅପଡେଟ୍‌ ପାଇଁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ଆପଣଙ୍କ ପାଖରେ ନୂଆ ମେସେଜ୍‍ ରହିଛି"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ସାଧାରଣ ଭାବରେ ଚାର୍ଜ୍ କରିବା ପୂର୍ବରୁ ବ୍ୟାଟେରୀ ସରିଯାଇପାରେ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ବ୍ୟାଟେରୀର ସମୟକୁ ବଢ଼ାଇବା ପାଇଁ ବ୍ୟଟେରୀ ସେଭର୍‍କୁ କାର୍ଯ୍ୟକାରୀ କରାଯାଇଛି"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ବ୍ୟାଟେରୀ ସେଭର୍"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"ବ୍ୟାଟେରୀ ଟାର୍ଜ କମ୍ ନହେବା ପର୍ଯ୍ୟନ୍ତ ବ୍ୟାଟେରୀ ସେଭର୍‌ ପୁନଃସକ୍ରିୟ ହୁଏ ନାହିଁ"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"ବ୍ୟାଟେରୀ ଏକ ପର୍ଯ୍ୟାପ୍ତ ସ୍ତର ପର୍ଯ୍ୟନ୍ତ ଚାର୍ଜ ହୋଇଛି। ବ୍ୟାଟେରୀ ପୁଣି କମ୍ ନହେବା ପର୍ଯ୍ୟନ୍ତ ବ୍ୟାଟେରୀ ସେଭର୍‌ ପୁନଃସକ୍ରିୟ ହେବନାହିଁ।"</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"ଫୋନ୍ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ଚାର୍ଜ ହୋଇଛି"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"ଟାବ୍‌ଲେଟ୍‌ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ଚାର୍ଜ ହୋଇଛି"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"ଡିଭାଇସ୍ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ଚାର୍ଜ ହୋଇଛି"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"ବ୍ୟାଟେରୀ ସେଭର୍ ବନ୍ଦ ଅଛି ବୈଶିଷ୍ଟ୍ୟ ଆଉ ପ୍ରତିବନ୍ଧିତ ନୁହେଁ।"</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ବନ୍ଦ ଅଛି। ବୈଶିଷ୍ଟ୍ୟ ଆଉ ପ୍ରତିବନ୍ଧିତ ନୁହେଁ।"</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"ଫୋଲ୍ଡର୍"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android ଆପ୍ଲିକେସନ୍"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ଫାଇଲ୍"</string>

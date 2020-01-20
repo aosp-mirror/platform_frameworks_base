@@ -4303,4 +4303,7 @@
 
     <!-- Package name of the required service extension package. -->
     <string name="config_servicesExtensionPackage" translatable="false">android.ext.services</string>
+
+    <!-- Retention policy: number of records to kept for the historical exit info per package. -->
+    <integer name="config_app_exit_info_history_list_size">16</integer>
 </resources>

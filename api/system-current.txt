@@ -567,6 +567,10 @@ package android.app {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.PackageOps> CREATOR;
   }
 
+  public final class ApplicationExitInfo implements android.os.Parcelable {
+    method @NonNull public android.os.UserHandle getUserHandle();
+  }
+
   public class BroadcastOptions {
     method public static android.app.BroadcastOptions makeBasic();
     method @RequiresPermission("android.permission.START_ACTIVITIES_FROM_BACKGROUND") public void setBackgroundActivityStartsAllowed(boolean);
@@ -6113,29 +6117,17 @@ package android.net.wifi {
   }
 
   public final class SoftApConfiguration implements android.os.Parcelable {
-    method public int describeContents();
     method @NonNull public java.util.List<android.net.MacAddress> getAllowedClientList();
     method public int getBand();
     method @NonNull public java.util.List<android.net.MacAddress> getBlockedClientList();
-    method @Nullable public android.net.MacAddress getBssid();
     method public int getChannel();
     method public int getMaxNumberOfClients();
-    method @Nullable public String getPassphrase();
-    method public int getSecurityType();
     method public int getShutdownTimeoutMillis();
-    method @Nullable public String getSsid();
     method public boolean isClientControlByUserEnabled();
-    method public boolean isHiddenSsid();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int BAND_2GHZ = 1; // 0x1
     field public static final int BAND_5GHZ = 2; // 0x2
     field public static final int BAND_6GHZ = 4; // 0x4
     field public static final int BAND_ANY = 7; // 0x7
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.SoftApConfiguration> CREATOR;
-    field public static final int SECURITY_TYPE_OPEN = 0; // 0x0
-    field public static final int SECURITY_TYPE_WPA2_PSK = 1; // 0x1
-    field public static final int SECURITY_TYPE_WPA3_SAE = 3; // 0x3
-    field public static final int SECURITY_TYPE_WPA3_SAE_TRANSITION = 2; // 0x2
   }
 
   public static final class SoftApConfiguration.Builder {
@@ -10359,6 +10351,19 @@ package android.telephony {
     field public static final int LISTEN_VOICE_ACTIVATION_STATE = 131072; // 0x20000
   }
 
+  public final class PinResult implements android.os.Parcelable {
+    ctor public PinResult(int, int);
+    method public int describeContents();
+    method public int getAttemptsRemaining();
+    method @NonNull public static android.telephony.PinResult getDefaultFailedResult();
+    method public int getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PinResult> CREATOR;
+    field public static final int PIN_RESULT_TYPE_FAILURE = 2; // 0x2
+    field public static final int PIN_RESULT_TYPE_INCORRECT = 1; // 0x1
+    field public static final int PIN_RESULT_TYPE_SUCCESS = 0; // 0x0
+  }
+
   public final class PreciseCallState implements android.os.Parcelable {
     ctor public PreciseCallState(int, int, int, int, int);
     method public int describeContents();
@@ -10727,6 +10732,7 @@ package android.telephony {
   public class TelephonyManager {
     method public int addDevicePolicyOverrideApn(@NonNull android.content.Context, @NonNull android.telephony.data.ApnSetting);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void call(String, String);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int changeIccLockPassword(@NonNull String, @NonNull String);
     method public int checkCarrierPrivilegesForPackage(String);
     method public int checkCarrierPrivilegesForPackageAnyPhone(String);
     method public void dial(String);
@@ -10795,6 +10801,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isGlobalModeEnabled();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean isIccLockEnabled();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isIdle();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isInEmergencySmsMode();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isManualNetworkSelectionAllowed();
@@ -10829,6 +10836,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setDataAllowedDuringVoiceCall(boolean);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabled(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataRoamingEnabled(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setIccLockEnabled(boolean, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMultiSimCarrierRestriction(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunisticNetworkState(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setPolicyDataEnabled(boolean);
@@ -10842,9 +10850,11 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVoiceActivationState(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void shutdownAllRadios();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean supplyPin(String);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPinReportResult(String);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.PinResult supplyPinReportPinResult(@NonNull String);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPinReportResult(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean supplyPuk(String, String);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPukReportResult(String, String);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.PinResult supplyPukReportPinResult(@NonNull String, @NonNull String);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPukReportResult(String, String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean switchSlots(int[]);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void toggleRadioOnOff();
     method public void updateServiceLocation();
@@ -10875,6 +10885,7 @@ package android.telephony {
     field public static final int CDMA_SUBSCRIPTION_NV = 1; // 0x1
     field public static final int CDMA_SUBSCRIPTION_RUIM_SIM = 0; // 0x0
     field public static final int CDMA_SUBSCRIPTION_UNKNOWN = -1; // 0xffffffff
+    field public static final int CHANGE_ICC_LOCK_SUCCESS = 2147483647; // 0x7fffffff
     field public static final int DEFAULT_PREFERRED_NETWORK_MODE = 0; // 0x0
     field public static final String EXTRA_ANOMALY_DESCRIPTION = "android.telephony.extra.ANOMALY_DESCRIPTION";
     field public static final String EXTRA_ANOMALY_ID = "android.telephony.extra.ANOMALY_ID";

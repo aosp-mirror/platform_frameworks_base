@@ -290,7 +290,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceseze calendarul"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"trimită și să vadă mesajele SMS"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Stocare"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"acceseze fotografiile, conținutul media și fișierele de pe dispozitiv"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"înregistreze sunet"</string>
@@ -316,6 +317,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Poate atinge, glisa, ciupi sau folosi alte gesturi."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gesturi ce implică amprente"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Poate reda gesturile făcute pe senzorul de amprentă al dispozitivului."</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"dezactivare sau modificare bare de stare"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite aplicației să dezactiveze bara de stare sau să adauge și să elimine pictograme de sistem."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"să fie bara de stare"</string>
@@ -1632,6 +1637,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ridicați volumul mai sus de nivelul recomandat?\n\nAscultarea la volum ridicat pe perioade lungi de timp vă poate afecta auzul."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Utilizați comanda rapidă pentru accesibilitate?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Când comanda rapidă este activată, dacă apăsați ambele butoane de volum timp de 3 secunde, veți lansa o funcție de accesibilitate.\n\n Funcția actuală de accesibilitate:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Puteți schimba funcția în Setări &gt; Accesibilitate."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Goliți"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editați comenzile rapide"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Anulați"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Dezactivați comanda rapidă"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizați comanda rapidă"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversarea culorilor"</string>
@@ -1877,6 +1885,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Activați profilul de serviciu?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Se vor activa aplicațiile dvs. de serviciu, notificările, datele și alte funcții ale profilului de serviciu"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activați"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Această aplicație a fost creată pentru o versiune Android mai veche și este posibil să nu funcționeze corect. Încercați să căutați actualizări sau contactați dezvoltatorul."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Căutați actualizări"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Aveți mesaje noi"</string>
@@ -1988,13 +2000,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria se poate descărca înainte de încărcarea obișnuită"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Economisirea bateriei este activată pentru a prelungi durata de funcționare a bateriei"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Economisirea bateriei"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Economisirea bateriei se va reactiva când bateria va fi descărcată din nou"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Bateria s-a încărcat la un nivel suficient. Economisirea bateriei se va reactiva când bateria va fi descărcată din nou."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Telefonul este încărcat <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Tableta este încărcată <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Dispozitivul este încărcat <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Economisirea bateriei este dezactivată. Funcțiile nu mai sunt limitate."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Economisirea bateriei a fost dezactivată. Funcțiile nu mai sunt limitate."</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"Dosar"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Aplicație Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Fișier"</string>

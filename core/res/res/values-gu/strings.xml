@@ -247,7 +247,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"એરપ્લેન મોડ"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"એરપ્લેન મોડ ચાલુ છે."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"એરપ્લેન મોડ બંધ છે."</string>
-    <string name="global_action_settings" msgid="4671878836947494217">"સેટિંગ્સ"</string>
+    <string name="global_action_settings" msgid="4671878836947494217">"સેટિંગ"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"સહાય"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"વૉઇસ સહાય"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"લૉકડાઉન"</string>
@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"તમારા કેલેન્ડરને ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS સંદેશા મોકલવાની અને જોવાની"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"સ્ટોરેજ"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"તમારા ઉપકરણ પર ફોટો, મીડિયા અને ફાઇલો ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"માઇક્રોફોન"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ઑડિઓ રેકોર્ડ કરવાની"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"ટૅપ, સ્વાઇપ, પિંચ કરી અને અન્ય હાવભાવ કરી શકે છે."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"ફિંગરપ્રિન્ટ સંકેતો"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ડિવાઇસના ફિંગરપ્રિન્ટ સેન્સર પર કરવામાં આવેલા સંકેતો કૅપ્ચર કરી શકે છે."</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"સ્ટેટસ બારને અક્ષમ કરો અથવા તેમાં ફેરફાર કરો"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ઍપ્લિકેશનને સ્ટેટસ બાર અક્ષમ કરવાની અથવા સિસ્ટમ આયકન્સ ઉમેરવા અને દૂર કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"સ્ટેટસ બારમાં બતાવો"</string>
@@ -1552,7 +1557,7 @@
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ઉપકરણ સાથે કનેક્ટ કરો"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ઉપકરણ પર સ્ક્રીન કાસ્ટ કરો"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"ઉપકરણો માટે શોધી રહ્યું છે…"</string>
-    <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"સેટિંગ્સ"</string>
+    <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"સેટિંગ"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ડિસ્કનેક્ટ કરો"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"સ્કેન કરી રહ્યું છે..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"કનેક્ટ કરી રહ્યું છે..."</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ભલામણ કરેલ સ્તરની ઉપર વૉલ્યૂમ વધાર્યો?\n\nલાંબા સમય સુધી ઊંચા અવાજે સાંભળવું તમારી શ્રવણક્ષમતાને નુકસાન પહોંચાડી શકે છે."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ઍક્સેસિબિલિટી શૉર્ટકટનો ઉપયોગ કરીએ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"જ્યારે શૉર્ટકટ ચાલુ હોય, ત્યારે બન્ને વૉલ્યૂમ બટનને 3 સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધા શરૂ થઈ જશે.\n\n વર્તમાન ઍક્સેસિબિલિટી સુવિધા:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n તમે સેટિંગ્સ &gt; ઍક્સેસિબિલિટીમાં જઈને આ સુવિધા બદલી શકો છો."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"ખાલી કરો"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"શૉર્ટકટમાં ફેરફાર કરો"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"રદ કરો"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"શૉર્ટકટ બંધ કરો"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"શૉર્ટકટનો ઉપયોગ કરો"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"રંગનો વ્યુત્ક્રમ"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"કાર્યાલયની પ્રોફાઇલ ચાલુ કરીએ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"તમારી કાર્યાલયની ઍપ, નોટિફિકેશન, ડેટા અને અન્ય કાર્યાલયની પ્રોફાઇલ સુવિધાઓ ચાલુ કરવામાં આવશે"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ચાલુ કરો"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"આ ઍપ Androidના જૂના વર્ઝન માટે બનાવવામાં આવ્યું હતું અને તે કદાચ તે યોગ્ય રીતે કાર્ય કરી શકશે નહીં. અપડેટ માટે તપાસવાનો પ્રયાસ કરો અથવા ડેવલપરનો સંપર્ક કરો."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"અપડેટ માટે તપાસો"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"તમારી પાસે નવા સંદેશા છે"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"સામાન્ય રીતે ચાર્જ કરવાના સમય પહેલાં બૅટરી સમાપ્ત થઈ શકે છે"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"બૅટરી આવરદા વધારવા માટે બૅટરી સેવર ચાલુ કર્યું"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"બૅટરી સેવર"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"બૅટરી ફરીથી ઓછી નહીં થાય ત્યાં સુધી બૅટરી સેવર ફરીથી સક્રિય નહીં થાય"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"બૅટરી પૂરતા લેવલ સુધી ચાર્જ થઈ ગઈ છે. બૅટરી ફરીથી ઓછી નહીં થાય ત્યાં સુધી બૅટરી સેવર ફરીથી સક્રિય નહીં થાય"</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"ફોન <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ચાર્જ થયો છે"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"ટૅબ્લેટ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ચાર્જ થયું છે"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"ડિવાઇસ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ચાર્જ થયું છે"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"બૅટરી સેવર બંધ છે. સુવિધાઓ હવે મર્યાદિત નથી."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"બૅટરી સેવર બંધ કર્યું. સુવિધાઓ હવે મર્યાદિત નથી."</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"ફોલ્ડર"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android ઍપ"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ફાઇલ"</string>

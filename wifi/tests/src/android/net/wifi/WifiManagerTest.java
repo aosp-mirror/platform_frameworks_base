@@ -106,6 +106,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -147,6 +148,50 @@ public class WifiManagerTest {
     private WifiNetworkSuggestion mWifiNetworkSuggestion;
     private ScanResultsCallback mScanResultsCallback;
     private WifiActivityEnergyInfo mWifiActivityEnergyInfo;
+
+    /**
+     * Util function to check public field which used for softap  in WifiConfiguration
+     * same as the value in SoftApConfiguration.
+     *
+     */
+    private boolean compareWifiAndSoftApConfiguration(
+            SoftApConfiguration softApConfig, WifiConfiguration wifiConfig) {
+        if (!Objects.equals(wifiConfig.SSID, softApConfig.getSsid())) {
+            return false;
+        }
+        if (!Objects.equals(wifiConfig.BSSID, softApConfig.getBssid())) {
+            return false;
+        }
+        if (!Objects.equals(wifiConfig.preSharedKey, softApConfig.getPassphrase())) {
+            return false;
+        }
+
+        if (wifiConfig.hiddenSSID != softApConfig.isHiddenSsid()) {
+            return false;
+        }
+        switch (softApConfig.getSecurityType()) {
+            case SoftApConfiguration.SECURITY_TYPE_OPEN:
+                if (wifiConfig.getAuthType() != WifiConfiguration.KeyMgmt.NONE) {
+                    return false;
+                }
+                break;
+            case SoftApConfiguration.SECURITY_TYPE_WPA2_PSK:
+                if (wifiConfig.getAuthType() != WifiConfiguration.KeyMgmt.WPA2_PSK) {
+                    return false;
+                }
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    private SoftApConfiguration generatorTestSoftApConfig() {
+        return new SoftApConfiguration.Builder()
+                .setSsid("TestSSID")
+                .setPassphrase("TestPassphrase", SoftApConfiguration.SECURITY_TYPE_WPA2_PSK)
+                .build();
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -212,12 +257,12 @@ public class WifiManagerTest {
      */
     @Test
     public void testStartTetheredHotspotCallsServiceWithSoftApConfig() throws Exception {
-        SoftApConfiguration mSoftApConfig = new SoftApConfiguration.Builder().build();
-        when(mWifiService.startTetheredHotspot(eq(mSoftApConfig))).thenReturn(true);
-        assertTrue(mWifiManager.startTetheredHotspot(mSoftApConfig));
+        SoftApConfiguration softApConfig = generatorTestSoftApConfig();
+        when(mWifiService.startTetheredHotspot(eq(softApConfig))).thenReturn(true);
+        assertTrue(mWifiManager.startTetheredHotspot(softApConfig));
 
-        when(mWifiService.startTetheredHotspot(eq(mSoftApConfig))).thenReturn(false);
-        assertFalse(mWifiManager.startTetheredHotspot(mSoftApConfig));
+        when(mWifiService.startTetheredHotspot(eq(softApConfig))).thenReturn(false);
+        assertFalse(mWifiManager.startTetheredHotspot(softApConfig));
     }
 
     /**
@@ -239,14 +284,18 @@ public class WifiManagerTest {
      */
     @Test
     public void testCreationAndCloseOfLocalOnlyHotspotReservation() throws Exception {
+        SoftApConfiguration softApConfig = generatorTestSoftApConfig();
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class), anyString(),
                 nullable(String.class), eq(null))).thenReturn(REQUEST_REGISTERED);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
 
-        callback.onStarted(mWifiManager.new LocalOnlyHotspotReservation(mApConfig));
+        callback.onStarted(mWifiManager.new LocalOnlyHotspotReservation(softApConfig));
 
-        assertEquals(mApConfig, callback.mRes.getWifiConfiguration());
+        assertEquals(softApConfig, callback.mRes.getSoftApConfiguration());
+        WifiConfiguration wifiConfig = callback.mRes.getWifiConfiguration();
+        assertTrue(compareWifiAndSoftApConfiguration(softApConfig, wifiConfig));
+
         callback.mRes.close();
         verify(mWifiService).stopLocalOnlyHotspot();
     }
@@ -257,15 +306,18 @@ public class WifiManagerTest {
     @Test
     public void testLocalOnlyHotspotReservationCallsStopProperlyInTryWithResources()
             throws Exception {
+        SoftApConfiguration softApConfig = generatorTestSoftApConfig();
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class), anyString(),
                 nullable(String.class), eq(null))).thenReturn(REQUEST_REGISTERED);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
 
-        callback.onStarted(mWifiManager.new LocalOnlyHotspotReservation(mApConfig));
+        callback.onStarted(mWifiManager.new LocalOnlyHotspotReservation(softApConfig));
 
         try (WifiManager.LocalOnlyHotspotReservation res = callback.mRes) {
-            assertEquals(mApConfig, res.getWifiConfiguration());
+            assertEquals(softApConfig, res.getSoftApConfiguration());
+            WifiConfiguration wifiConfig = callback.mRes.getWifiConfiguration();
+            assertTrue(compareWifiAndSoftApConfiguration(softApConfig, wifiConfig));
         }
 
         verify(mWifiService).stopLocalOnlyHotspot();
@@ -315,6 +367,7 @@ public class WifiManagerTest {
      */
     @Test
     public void testLocalOnlyHotspotCallback() {
+        SoftApConfiguration softApConfig = generatorTestSoftApConfig();
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         assertFalse(callback.mOnStartedCalled);
         assertFalse(callback.mOnStoppedCalled);
@@ -323,7 +376,7 @@ public class WifiManagerTest {
 
         // test onStarted
         WifiManager.LocalOnlyHotspotReservation res =
-                mWifiManager.new LocalOnlyHotspotReservation(mApConfig);
+                mWifiManager.new LocalOnlyHotspotReservation(softApConfig);
         callback.onStarted(res);
         assertEquals(res, callback.mRes);
         assertTrue(callback.mOnStartedCalled);
@@ -349,7 +402,7 @@ public class WifiManagerTest {
         public boolean mOnRegistered = false;
         public boolean mOnStartedCalled = false;
         public boolean mOnStoppedCalled = false;
-        public WifiConfiguration mConfig = null;
+        public SoftApConfiguration mConfig = null;
         public LocalOnlyHotspotSubscription mSub = null;
         public long mCallingThreadId = -1;
 
@@ -361,7 +414,7 @@ public class WifiManagerTest {
         }
 
         @Override
-        public void onStarted(WifiConfiguration config) {
+        public void onStarted(SoftApConfiguration config) {
             mOnStartedCalled = true;
             mConfig = config;
             mCallingThreadId = Thread.currentThread().getId();
@@ -380,6 +433,7 @@ public class WifiManagerTest {
     @Test
     public void testLocalOnlyHotspotObserver() {
         TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
+        SoftApConfiguration softApConfig = generatorTestSoftApConfig();
         assertFalse(observer.mOnRegistered);
         assertFalse(observer.mOnStartedCalled);
         assertFalse(observer.mOnStoppedCalled);
@@ -395,18 +449,18 @@ public class WifiManagerTest {
         assertEquals(null, observer.mConfig);
         assertEquals(sub, observer.mSub);
 
-        observer.onStarted(mApConfig);
+        observer.onStarted(softApConfig);
         assertTrue(observer.mOnRegistered);
         assertTrue(observer.mOnStartedCalled);
         assertFalse(observer.mOnStoppedCalled);
-        assertEquals(mApConfig, observer.mConfig);
+        assertEquals(softApConfig, observer.mConfig);
         assertEquals(sub, observer.mSub);
 
         observer.onStopped();
         assertTrue(observer.mOnRegistered);
         assertTrue(observer.mOnStartedCalled);
         assertTrue(observer.mOnStoppedCalled);
-        assertEquals(mApConfig, observer.mConfig);
+        assertEquals(softApConfig, observer.mConfig);
         assertEquals(sub, observer.mSub);
     }
 
@@ -488,6 +542,7 @@ public class WifiManagerTest {
      */
     @Test
     public void testOnStartedIsCalledWithReservation() throws Exception {
+        SoftApConfiguration softApConfig = generatorTestSoftApConfig();
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         TestLooper callbackLooper = new TestLooper();
         Handler callbackHandler = new Handler(callbackLooper.getLooper());
@@ -501,11 +556,44 @@ public class WifiManagerTest {
         assertFalse(callback.mOnStartedCalled);
         assertEquals(null, callback.mRes);
         // now trigger the callback
-        internalCallback.getValue().onHotspotStarted(mApConfig);
+        internalCallback.getValue().onHotspotStarted(softApConfig);
         mLooper.dispatchAll();
         callbackLooper.dispatchAll();
         assertTrue(callback.mOnStartedCalled);
-        assertEquals(mApConfig, callback.mRes.getWifiConfiguration());
+        assertEquals(softApConfig, callback.mRes.getSoftApConfiguration());
+        WifiConfiguration wifiConfig = callback.mRes.getWifiConfiguration();
+        assertTrue(compareWifiAndSoftApConfiguration(softApConfig, wifiConfig));
+    }
+
+    /**
+     * Verify the LOHS onStarted callback is triggered when WifiManager receives a HOTSPOT_STARTED
+     * message from WifiServiceImpl when softap enabled with SAE security type.
+     */
+    @Test
+    public void testOnStartedIsCalledWithReservationAndSaeSoftApConfig() throws Exception {
+        SoftApConfiguration softApConfig = new SoftApConfiguration.Builder()
+                .setSsid("TestSSID")
+                .setPassphrase("TestPassphrase", SoftApConfiguration.SECURITY_TYPE_WPA3_SAE)
+                .build();
+        TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
+        TestLooper callbackLooper = new TestLooper();
+        Handler callbackHandler = new Handler(callbackLooper.getLooper());
+        ArgumentCaptor<ILocalOnlyHotspotCallback> internalCallback =
+                ArgumentCaptor.forClass(ILocalOnlyHotspotCallback.class);
+        when(mWifiService.startLocalOnlyHotspot(internalCallback.capture(), anyString(),
+                nullable(String.class), eq(null))).thenReturn(REQUEST_REGISTERED);
+        mWifiManager.startLocalOnlyHotspot(callback, callbackHandler);
+        callbackLooper.dispatchAll();
+        mLooper.dispatchAll();
+        assertFalse(callback.mOnStartedCalled);
+        assertEquals(null, callback.mRes);
+        // now trigger the callback
+        internalCallback.getValue().onHotspotStarted(softApConfig);
+        mLooper.dispatchAll();
+        callbackLooper.dispatchAll();
+        assertTrue(callback.mOnStartedCalled);
+        assertEquals(softApConfig, callback.mRes.getSoftApConfiguration());
+        assertEquals(null, callback.mRes.getWifiConfiguration());
     }
 
     /**
@@ -1037,6 +1125,7 @@ public class WifiManagerTest {
      */
     @Test
     public void testObserverOnStartedIsCalledWithWifiConfig() throws Exception {
+        SoftApConfiguration softApConfig = generatorTestSoftApConfig();
         TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
         TestLooper observerLooper = new TestLooper();
         Handler observerHandler = new Handler(observerLooper.getLooper());
@@ -1048,11 +1137,11 @@ public class WifiManagerTest {
         mLooper.dispatchAll();
         assertFalse(observer.mOnStartedCalled);
         // now trigger the callback
-        internalCallback.getValue().onHotspotStarted(mApConfig);
+        internalCallback.getValue().onHotspotStarted(softApConfig);
         mLooper.dispatchAll();
         observerLooper.dispatchAll();
         assertTrue(observer.mOnStartedCalled);
-        assertEquals(mApConfig, observer.mConfig);
+        assertEquals(softApConfig, observer.mConfig);
     }
 
     /**
@@ -1248,7 +1337,7 @@ public class WifiManagerTest {
      */
     @Test
     public void testSetSoftApConfigurationSuccessReturnsTrue() throws Exception {
-        SoftApConfiguration apConfig = new SoftApConfiguration.Builder().build();
+        SoftApConfiguration apConfig = generatorTestSoftApConfig();
 
         when(mWifiService.setSoftApConfiguration(eq(apConfig), eq(TEST_PACKAGE_NAME)))
                 .thenReturn(true);
@@ -1260,7 +1349,7 @@ public class WifiManagerTest {
      */
     @Test
     public void testSetSoftApConfigurationFailureReturnsFalse() throws Exception {
-        SoftApConfiguration apConfig = new SoftApConfiguration.Builder().build();
+        SoftApConfiguration apConfig = generatorTestSoftApConfig();
 
         when(mWifiService.setSoftApConfiguration(eq(apConfig), eq(TEST_PACKAGE_NAME)))
                 .thenReturn(false);
@@ -1275,7 +1364,7 @@ public class WifiManagerTest {
         doThrow(new SecurityException()).when(mWifiService).setSoftApConfiguration(any(), any());
 
         try {
-            mWifiManager.setSoftApConfiguration(new SoftApConfiguration.Builder().build());
+            mWifiManager.setSoftApConfiguration(generatorTestSoftApConfig());
             fail("setWifiApConfiguration should rethrow Exceptions from WifiService");
         } catch (SecurityException e) { }
     }
@@ -1867,6 +1956,17 @@ public class WifiManagerTest {
         when(mWifiService.is6GHzBandSupported()).thenReturn(true);
         assertTrue(mWifiManager.is6GHzBandSupported());
         verify(mWifiService).is6GHzBandSupported();
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#isWifiStandardSupported()}
+     */
+    @Test
+    public void testIsWifiStandardSupported() throws Exception {
+        int standard = ScanResult.WIFI_STANDARD_11AX;
+        when(mWifiService.isWifiStandardSupported(standard)).thenReturn(true);
+        assertTrue(mWifiManager.isWifiStandardSupported(standard));
+        verify(mWifiService).isWifiStandardSupported(standard);
     }
 
     /**

@@ -27,6 +27,9 @@ import static com.android.server.am.ActivityManagerService.MY_PID;
 
 import android.app.ActivityManager;
 import android.app.ApplicationErrorReport;
+import android.app.ApplicationExitInfo;
+import android.app.ApplicationExitInfo.Reason;
+import android.app.ApplicationExitInfo.SubReason;
 import android.app.Dialog;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
@@ -776,7 +779,8 @@ class ProcessRecord implements WindowProcessListener {
                 } catch (RemoteException e) {
                     // If it's already dead our work is done. If it's wedged just kill it.
                     // We won't get the crash dialog or the error reporting.
-                    kill("scheduleCrash for '" + message + "' failed", true);
+                    kill("scheduleCrash for '" + message + "' failed",
+                            ApplicationExitInfo.REASON_CRASH, true);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -784,7 +788,11 @@ class ProcessRecord implements WindowProcessListener {
         }
     }
 
-    void kill(String reason, boolean noisy) {
+    void kill(String reason, @Reason int reasonCode, boolean noisy) {
+        kill(reason, reasonCode, ApplicationExitInfo.SUBREASON_UNKNOWN, noisy);
+    }
+
+    void kill(String reason, @Reason int reasonCode, @SubReason int subReason, boolean noisy) {
         if (!killedByAm) {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "kill");
             if (mService != null && (noisy || info.uid == mService.mCurOomAdjUid)) {
@@ -793,6 +801,7 @@ class ProcessRecord implements WindowProcessListener {
                         info.uid);
             }
             if (pid > 0) {
+                mService.mProcessList.noteAppKill(this, reasonCode, subReason, reason);
                 EventLog.writeEvent(EventLogTags.AM_KILL, userId, pid, processName, setAdj, reason);
                 Process.killProcessQuiet(pid);
                 ProcessList.killProcessGroup(uid, pid);
@@ -1374,9 +1383,9 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     @Override
-    public void appDied() {
+    public void appDied(String reason) {
         synchronized (mService) {
-            mService.appDiedLocked(this);
+            mService.appDiedLocked(this, reason);
         }
     }
 
@@ -1441,7 +1450,8 @@ class ProcessRecord implements WindowProcessListener {
         ArrayList<Integer> firstPids = new ArrayList<>(5);
         SparseArray<Boolean> lastPids = new SparseArray<>(20);
 
-        mWindowProcessController.appEarlyNotResponding(annotation, () -> kill("anr", true));
+        mWindowProcessController.appEarlyNotResponding(annotation, () -> kill("anr",
+                  ApplicationExitInfo.REASON_ANR, true));
 
         long anrTime = SystemClock.uptimeMillis();
         if (isMonitorCpuUsage()) {
@@ -1592,7 +1602,8 @@ class ProcessRecord implements WindowProcessListener {
         mService.addErrorToDropBox("anr", this, processName, activityShortComponentName,
                 parentShortComponentName, parentPr, annotation, cpuInfo, tracesFile, null);
 
-        if (mWindowProcessController.appNotResponding(info.toString(), () -> kill("anr", true),
+        if (mWindowProcessController.appNotResponding(info.toString(), () -> kill("anr",
+                ApplicationExitInfo.REASON_ANR, true),
                 () -> {
                     synchronized (mService) {
                         mService.mServices.scheduleServiceTimeoutLocked(this);
@@ -1609,7 +1620,7 @@ class ProcessRecord implements WindowProcessListener {
             }
 
             if (isSilentAnr() && !isDebugging()) {
-                kill("bg anr", true);
+                kill("bg anr", ApplicationExitInfo.REASON_ANR, true);
                 return;
             }
 

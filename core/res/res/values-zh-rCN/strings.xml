@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"访问您的日历"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"短信"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"发送和查看短信"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"存储空间"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"访问您设备上的照片、媒体内容和文件"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"麦克风"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"录制音频"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"可执行点按、滑动、双指张合等手势。"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"指纹手势"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"可以捕获在设备指纹传感器上执行的手势。"</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"停用或修改状态栏"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"允许应用停用状态栏或者增删系统图标。"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"用作状态栏"</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要将音量调高到建议的音量以上吗？\n\n长时间保持高音量可能会损伤听力。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用无障碍快捷方式吗？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"开启快捷方式后，同时按下两个音量按钮 3 秒钟即可启动所设定的无障碍功能。\n\n当前设定的无障碍功能：\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n如需更改设定的功能，请依次转到“设置”&gt;“无障碍”。"</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"清空"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"修改快捷方式"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"取消"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"关闭快捷方式"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"使用快捷方式"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"颜色反转"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"要开启工作资料吗？"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"您的工作应用、通知、数据及其他工作资料功能将会开启"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"开启"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"此应用专为旧版 Android 打造，因此可能无法正常运行。请尝试检查更新或与开发者联系。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"检查更新"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"您有新消息"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"电池电量可能会在您平时的充电时间之前耗尽"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已启用省电模式以延长电池续航时间"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"省电模式"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"电池电量不足时才会再次启用省电模式"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"电池电量已充足。电池电量不足时才会再次启用省电模式。"</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"手机已充电到 <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"平板电脑已充电到 <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"设备已充电到 <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"省电模式已关闭。各项功能不再受限。"</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"省电模式已关闭，各项功能不再受限。"</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"文件夹"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android 应用"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"文件"</string>

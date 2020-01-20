@@ -63,7 +63,7 @@ public abstract class AuthCredentialView extends LinearLayout {
     protected AuthContainerView mContainerView;
     protected Callback mCallback;
     protected AsyncTask<?, ?, ?> mPendingLockCheck;
-    protected int mUserId;
+    protected int mEffectiveUserId;
     protected ErrorTimer mErrorTimer;
 
     interface Callback {
@@ -137,8 +137,12 @@ public abstract class AuthCredentialView extends LinearLayout {
         view.setText(string);
     }
 
-    void setUser(int user) {
-        mUserId = user;
+    void setEffectiveUserId(int effectiveUserId) {
+        mEffectiveUserId = effectiveUserId;
+    }
+
+    void setCredentialType(@Utils.CredentialType int credentialType) {
+        mCredentialType = credentialType;
     }
 
     void setCallback(Callback callback) {
@@ -165,8 +169,6 @@ public abstract class AuthCredentialView extends LinearLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-
-        mCredentialType = Utils.getCredentialType(mContext, mUserId);
 
         setText(mTitleView, mBiometricPromptBundle.getString(BiometricPrompt.KEY_TITLE));
         setTextOrHide(mSubtitleView,
@@ -230,7 +232,8 @@ public abstract class AuthCredentialView extends LinearLayout {
         } else {
             if (timeoutMs > 0) {
                 mHandler.removeCallbacks(mClearErrorRunnable);
-                long deadline = mLockPatternUtils.setLockoutAttemptDeadline(mUserId, timeoutMs);
+                long deadline = mLockPatternUtils.setLockoutAttemptDeadline(
+                        mEffectiveUserId, timeoutMs);
                 mErrorTimer = new ErrorTimer(mContext,
                         deadline - SystemClock.elapsedRealtime(),
                         LockPatternUtils.FAILED_ATTEMPT_COUNTDOWN_INTERVAL_MS,

@@ -28,6 +28,7 @@ import com.android.server.appsearch.impl.AppSearchImpl;
 import com.android.server.appsearch.impl.FakeIcing;
 import com.android.server.appsearch.impl.ImplInstanceManager;
 
+import com.google.android.icing.proto.DocumentProto;
 import com.google.android.icing.proto.SchemaProto;
 import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.SearchSpecProto;
@@ -52,7 +53,7 @@ public class AppSearchManagerService extends SystemService {
 
     private class Stub extends IAppSearchManager.Stub {
         @Override
-        public void setSchema(byte[] schemaBytes, boolean force, AndroidFuture callback) {
+        public void setSchema(byte[] schemaBytes, boolean forceOverride, AndroidFuture callback) {
             Preconditions.checkNotNull(schemaBytes);
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
@@ -61,7 +62,7 @@ public class AppSearchManagerService extends SystemService {
             try {
                 SchemaProto schema = SchemaProto.parseFrom(schemaBytes);
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                impl.setSchema(callingUid, schema, force);
+                impl.setSchema(callingUid, schema, forceOverride);
                 callback.complete(null);
             } catch (Throwable t) {
                 callback.completeExceptionally(t);
@@ -71,11 +72,21 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void put(byte[] documentBytes, AndroidFuture callback) {
+        public void putDocument(byte[] documentBytes, AndroidFuture callback) {
+            Preconditions.checkNotNull(documentBytes);
+            Preconditions.checkNotNull(callback);
+            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUserId = UserHandle.getUserId(callingUid);
+            long callingIdentity = Binder.clearCallingIdentity();
             try {
-                throw new UnsupportedOperationException("Put document not yet implemented");
+                DocumentProto document = DocumentProto.parseFrom(documentBytes);
+                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
+                impl.putDocument(callingUid, document);
+                callback.complete(null);
             } catch (Throwable t) {
                 callback.completeExceptionally(t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
             }
         }
         // TODO(sidchhabra):Init FakeIcing properly.

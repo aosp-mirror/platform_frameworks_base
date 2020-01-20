@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"qasje te kalendari yt"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"dërgo dhe shiko mesazhet SMS"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Hapësira e ruajtjes"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"qasjen te fotografitë, përmbajtjet audio-vizuale dhe skedarët në pajisje"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"regjistro audio"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Mund të trokasë, rrëshqasë, bashkojë gishtat dhe kryejë gjeste të tjera."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gjestet e gjurmës së gishtit"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Mund të regjistrojë gjestet e kryera në sensorin e gjurmës së gishtit të pajisjes."</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"çaktivizo ose modifiko shiritin e statusit"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Lejon aplikacionin të çaktivizojë shiritin e statusit dhe të heqë ikonat e sistemit."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"të bëhet shiriti i statusit"</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Të ngrihet volumi mbi nivelin e rekomanduar?\n\nDëgjimi me volum të lartë për periudha të gjata mund të dëmtojë dëgjimin."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Të përdoret shkurtorja e qasshmërisë?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Kur shkurtorja është e aktivizuar, shtypja e të dy butonave për 3 sekonda do të nisë një funksion qasshmërie.\n\n Funksioni aktual i qasshmërisë:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Mund ta ndryshosh funksionin te Cilësimet &gt; Qasshmëria."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Boshatis"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Redakto shkurtoret"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Anulo"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Çaktivizo shkurtoren"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Përdor shkurtoren"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Kthimi i ngjyrës"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Të aktivizohet profili i punës?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Aplikacionet e punës, njoftimet, të dhënat e tua dhe funksionet e tjera të profilit të punës do të aktivizohen"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivizo"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ky aplikacion është ndërtuar për një version më të vjetër të Android dhe mund të mos funksionojë mirë. Provo të kontrollosh për përditësime ose kontakto me zhvilluesin."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kontrollo për përditësim"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Ke mesazhe të reja"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria mund të mbarojë përpara ngarkimit të zakonshëm"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"\"Kursyesi i baterisë\" u aktivizua për të zgjatur jetëgjatësinë e baterisë"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Kursyesi i baterisë"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"\"Kursyesi i baterisë\" nuk do të aktivizohet përsëri derisa bateria të jetë përsëri në nivel të ulët"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Bateria është karikuar në një nivel të mjaftueshëm. \"Kursyesi i baterisë\" nuk do të aktivizohet përsëri deri sa bateria të jetë përsëri në nivel të ulët."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Telefoni është karikuar në <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Tableti është karikuar në <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Pajisja është karikuar në <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"\"Kursyesi i baterisë\" është joaktiv. Funksionet nuk janë më të kufizuara."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"\"Kursyesi i baterisë\" është çaktivizuar. Funksionet nuk janë më të kufizuara."</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"Dosje"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Aplikacion i Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Skedar"</string>

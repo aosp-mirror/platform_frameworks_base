@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ifikie kalenda yako"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"itume na iangalie SMS"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Hifadhi"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"ifikie picha, maudhui na faili kwenye kifaa chako"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Kipokea sauti"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"irekodi sauti"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Unaweza kugusa, kutelezesha kidole, kubana na kutekeleza ishara zingine."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Ishara za alama ya kidole"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Inaweza kurekodi ishara zinazotekelezwa kwenye kitambua alama ya kidole."</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"zima au rekebisha mwambaa hali"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Inaruhusu programu kulemaza upau wa hali au kuongeza na kutoa aikoni za mfumo."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"kuwa sehemu ya arifa"</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ungependa kupandisha sauti zaidi ya kiwango kinachopendekezwa?\n\nKusikiliza kwa sauti ya juu kwa muda mrefu kunaweza kuharibu uwezo wako wa kusikia."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Ungependa kutumia njia ya mkato ya ufikivu?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Unapowasha kipengele cha njia ya mkato, hatua ya kubonyeza vitufe vyote viwili vya sauti kwa dakika 3 itafungua kipengele cha ufikivu.\n\n Kipengele cha ufikivu kilichopo kwa sasa:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Unaweza kubadilisha kipengele hiki katika Mipangilio &gt; Zana za ufikivu."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Tupu"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Kubadilisha njia za mkato"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Ghairi"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Zima kipengele cha Njia ya Mkato"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Tumia Njia ya Mkato"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Ugeuzaji rangi"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Ungependa kuwasha wasifu wa kazini?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Hatua hii itawasha data, arifa, programu za kazini, arifa na vipengele vingine vya wasifu wa kazini"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Washa"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Programu hii iliundwa kwa ajili ya toleo la zamani la Android na huenda isifanye kazi vizuri. Jaribu kuangalia masasisho au uwasiliane na msanidi programu."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Angalia masasisho"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Una ujumbe mpya"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Huenda betri itakwisha chaji mapema"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Imewasha Kiokoa Betri ili kurefusha muda wa matumizi ya betri"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Kiokoa betri"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Kiokoa betri hakitawashwa tena hadi chaji ipungue tena"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Betri imejazwa chaji hadi kiwango cha kutosha. Kiokoa betri hakitawashwa tena hadi chaji ya betri ipungue tena."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Simu ina <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ya chaji"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Kompyuta kibao ina <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ya chaji"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Kifaa kina <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ya chaji"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Kiokoa betri kimezimwa. Vipengele havizuiliwi tena."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Kiokoa betri kimezimwa. Vipengele havizuiliwi tena."</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"Folda"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Programu ya Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Faili"</string>

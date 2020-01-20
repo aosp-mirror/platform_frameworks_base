@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ເຂົ້າ​ຫາ​ປະ​ຕິ​ທິນ​ຂອງ​ທ່ານ"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ສົ່ງ ແລະ​ເບິ່ງ​ຂໍ້​ຄວາມ SMS"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"ພື້ນທີ່ຈັດເກັບຂໍ້ມູນ"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"ເຂົ້າເຖິງຮູບຖ່າຍ, ສື່ ແລະໄຟລ໌ຢູ່ເທິງອຸປະກອນຂອງທ່ານ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ໄມໂຄຣໂຟນ"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ບັນທຶກສຽງ"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"ສາມາດແຕະ, ປັດນີ້ວມື, ຢິບນິ້ວມື ແລະ ດຳເນີນທ່າທາງອື່ນ."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"ທ່າທາງລາຍນິ້ວມື"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ສາມາດບັນທຶກທ່າທາງທີ່ເກີດຂຶ້ນໃນອຸປະກອນເຊັນເຊີລາຍນິ້ວມືໄດ້."</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"ປິດການນນຳໃຊ້ ຫຼື ແກ້ໄຂແຖບສະຖານະ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ອະນຸຍາດໃຫ້ແອັບຯປິດການເຮັດວຽກຂອງແຖບສະຖານະ ຫຼືເພີ່ມ ແລະລຶບໄອຄອນລະບົບອອກໄດ້."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ເປັນ​ແຖບ​ສະ​ຖາ​ນະ"</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ເພີ່ມ​ລະ​ດັບ​ສຽງ​ໃຫ້​ເກີນກວ່າ​ລະ​ດັບ​ທີ່​ແນະ​ນຳ​ບໍ?\n\n​ການ​ຮັບ​ຟັງ​ສຽງ​ໃນ​ລະ​ດັບ​ທີ່​ສູງ​ເປັນ​ໄລ​ຍະ​ເວ​ລາ​ດົນ​​ອາດ​ເຮັດ​ໃຫ້​ການ​ຟັງ​ຂອງ​ທ່ານ​ມີ​ບັນ​ຫາ​ໄດ້."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ໃຊ້ປຸ່ມລັດການຊ່ວຍເຂົ້າເຖິງບໍ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"ເມື່ອເປີດໃຊ້ປຸ່ມລັດແລ້ວ, ໃຫ້ກົດປຸ່ມສຽງທັງສອງຄ້າງໄວ້ 3 ວິນາທີເພື່ອເລີ່ມຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ.\n\n ຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງປັດຈຸບັນ:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ທ່ານສາມາດປ່ຽນຄຸນສົມບັດໄດ້ໃນການຕັ້ງຄ່າ &gt; ການຊ່ວຍເຂົ້າເຖິງ."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"ຫວ່າງເປົ່າ"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ແກ້ໄຂທາງລັດ"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"ຍົກເລີກ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ປິດປຸ່ມລັດ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ໃຊ້ປຸ່ມລັດ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ການປີ້ນສີ"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"ເປີດໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກບໍ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"ແອັບວຽກຂອງທ່ານ, ການແຈ້ງເຕືອນ, ຂໍ້ມູນ ແລະ ຄຸນສົມບັດໂປຣໄຟລ໌ວຽກຈະຖືກເປີດໃຊ້"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ເປີດ​"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ແອັບນີ້ຖືກສ້າງຂຶ້ນສຳລັບ Android ເວີຊັນທີ່ເກົ່າກວ່າ ແລະ ອາດເຮັດວຽກໄດ້ບໍ່ປົກກະຕິ. ໃຫ້ລອງກວດສອບເບິ່ງອັບເດດ ຫຼື ຕິດຕໍ່ຜູ້ພັດທະນາ."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ກວດເບິ່ງອັບເດດ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ທ່ານມີຂໍ້ຄວາມໃໝ່"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ແບັດເຕີຣີອາດໝົດກ່ອນການສາກຕາມປົກກະຕິ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ເປີດຕົວປະຢັດແບັດເຕີຣີເພື່ອຂະຫຍາຍອາຍຸແບັດເຕີຣີ"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ຕົວປະຢັດແບັດເຕີຣີ"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"ຈະບໍ່ມີການເປີດໃຊ້ຕົວປະຢັດແບັດເຕີຣີຄືນໃໝ່ຈົນກວ່າແບັດເຕີຣີຈະເຫຼືອໜ້ອຍອີກເທື່ອໜຶ່ງ"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"ສາກແບັດເຕີຣີຮອດລະດັບທີ່ພຽງພໍແລ້ວ. ຕົວປະຢັດແບັດເຕີຣີຈະບໍ່ເປີດໃຊ້ຄືນໃໝ່ຈົນກວ່າແບັດເຕີຣີຈະເຫຼືອໜ້ອຍກີເທື່ອໜຶ່ງ."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"ສາກໂທລະສັບແລ້ວ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"ສາກແທັບເລັດແລ້ວ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"ສາກອຸປະກອນແລ້ວ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"ຕົວປະຢັດແບັດເຕີຣີປິດຢູ່. ບໍ່ມີການຈຳກັດຄຸນສົມບັດອີກຕໍ່ໄປແລ້ວ."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"ປິດຕົວປະຢັດແບັດເຕີຣີແລ້ວ. ບໍ່ມີການຈຳກັດຄຸນສົມບັດອີກຕໍ່ໄປແລ້ວ."</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"ໂຟນເດີ"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"ແອັບພລິເຄຊັນ Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ໄຟລ໌"</string>

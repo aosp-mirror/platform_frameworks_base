@@ -86,7 +86,7 @@ public final class DisplayCutout {
      * @hide
      */
     public static final DisplayCutout NO_CUTOUT = new DisplayCutout(
-            ZERO_RECT, ZERO_RECT, ZERO_RECT, ZERO_RECT, ZERO_RECT,
+            ZERO_RECT, Insets.NONE, ZERO_RECT, ZERO_RECT, ZERO_RECT, ZERO_RECT,
             false /* copyArguments */);
 
 
@@ -103,8 +103,12 @@ public final class DisplayCutout {
     private static float sCachedDensity;
     @GuardedBy("CACHE_LOCK")
     private static Pair<Path, DisplayCutout> sCachedCutout = NULL_PAIR;
+    @GuardedBy("CACHE_LOCK")
+    private static Insets sCachedWaterfallInsets;
 
     private final Rect mSafeInsets;
+    @NonNull
+    private final Insets mWaterfallInsets;
 
 
     /**
@@ -251,7 +255,32 @@ public final class DisplayCutout {
     // TODO(b/73953958): @VisibleForTesting(visibility = PRIVATE)
     public DisplayCutout(@NonNull Insets safeInsets, @Nullable Rect boundLeft,
             @Nullable Rect boundTop, @Nullable Rect boundRight, @Nullable Rect boundBottom) {
-        this(safeInsets.toRect(), boundLeft, boundTop, boundRight, boundBottom, true);
+        this(safeInsets.toRect(), Insets.NONE, boundLeft, boundTop, boundRight, boundBottom, true);
+    }
+
+    /**
+     * Creates a DisplayCutout instance.
+     *
+     * <p>Note that this is only useful for tests. For production code, developers should always
+     * use a {@link DisplayCutout} obtained from the system.</p>
+     *
+     * @param safeInsets the insets from each edge which avoid the display cutout as returned by
+     *                   {@link #getSafeInsetTop()} etc.
+     * @param boundLeft the left bounding rect of the display cutout in pixels. If null is passed,
+     *                  it's treated as an empty rectangle (0,0)-(0,0).
+     * @param boundTop the top bounding rect of the display cutout in pixels.  If null is passed,
+     *                  it's treated as an empty rectangle (0,0)-(0,0).
+     * @param boundRight the right bounding rect of the display cutout in pixels.  If null is
+     *                  passed, it's treated as an empty rectangle (0,0)-(0,0).
+     * @param boundBottom the bottom bounding rect of the display cutout in pixels.  If null is
+     *                   passed, it's treated as an empty rectangle (0,0)-(0,0).
+     * @param waterfallInsets the insets for the curved areas in waterfall display.
+     */
+    public DisplayCutout(@NonNull Insets safeInsets, @Nullable Rect boundLeft,
+            @Nullable Rect boundTop, @Nullable Rect boundRight, @Nullable Rect boundBottom,
+            @NonNull Insets waterfallInsets) {
+        this(safeInsets.toRect(), waterfallInsets, boundLeft, boundTop, boundRight, boundBottom,
+                true);
     }
 
     /**
@@ -269,7 +298,7 @@ public final class DisplayCutout {
     // TODO(b/73953958): @VisibleForTesting(visibility = PRIVATE)
     @Deprecated
     public DisplayCutout(@Nullable Rect safeInsets, @Nullable List<Rect> boundingRects) {
-        this(safeInsets, extractBoundsFromList(safeInsets, boundingRects),
+        this(safeInsets, Insets.NONE, extractBoundsFromList(safeInsets, boundingRects),
                 true /* copyArguments */);
     }
 
@@ -281,19 +310,23 @@ public final class DisplayCutout {
      * @param copyArguments if true, create a copy of the arguments. If false, the passed arguments
      *                      are not copied and MUST remain unchanged forever.
      */
-    private DisplayCutout(Rect safeInsets, Rect boundLeft, Rect boundTop, Rect boundRight,
-                         Rect boundBottom, boolean copyArguments) {
+    private DisplayCutout(Rect safeInsets, Insets waterfallInsets, Rect boundLeft,
+                        Rect boundTop, Rect boundRight, Rect boundBottom, boolean copyArguments) {
         mSafeInsets = getCopyOrRef(safeInsets, copyArguments);
+        mWaterfallInsets = waterfallInsets == null ? Insets.NONE : waterfallInsets;
         mBounds = new Bounds(boundLeft, boundTop, boundRight, boundBottom, copyArguments);
     }
 
-    private DisplayCutout(Rect safeInsets, Rect[] bounds, boolean copyArguments) {
+    private DisplayCutout(Rect safeInsets, Insets waterfallInsets, Rect[] bounds,
+                        boolean copyArguments) {
         mSafeInsets = getCopyOrRef(safeInsets, copyArguments);
+        mWaterfallInsets = waterfallInsets == null ? Insets.NONE : waterfallInsets;
         mBounds = new Bounds(bounds, copyArguments);
     }
 
-    private DisplayCutout(Rect safeInsets, Bounds bounds) {
+    private DisplayCutout(Rect safeInsets, Insets waterfallInsets, Bounds bounds) {
         mSafeInsets = safeInsets;
+        mWaterfallInsets = waterfallInsets == null ? Insets.NONE : waterfallInsets;
         mBounds = bounds;
 
     }
@@ -307,6 +340,14 @@ public final class DisplayCutout {
             return r;
         }
     }
+
+    /**
+     * Return the waterfall insets.
+     */
+    public @NonNull Insets getWaterfallInsets() {
+        return mWaterfallInsets;
+    }
+
 
     /**
      * Find the position of the bounding rect, and create an array of Rect whose index represents
@@ -476,7 +517,8 @@ public final class DisplayCutout {
 
     @Override
     public int hashCode() {
-        return mSafeInsets.hashCode() * 48271 + mBounds.hashCode();
+        return (mSafeInsets.hashCode() * 48271 + mBounds.hashCode()) * 48271
+                + mWaterfallInsets.hashCode();
     }
 
     @Override
@@ -486,7 +528,8 @@ public final class DisplayCutout {
         }
         if (o instanceof DisplayCutout) {
             DisplayCutout c = (DisplayCutout) o;
-            return mSafeInsets.equals(c.mSafeInsets) && mBounds.equals(c.mBounds);
+            return mSafeInsets.equals(c.mSafeInsets) && mBounds.equals(c.mBounds)
+                    && mWaterfallInsets.equals(c.mWaterfallInsets);
         }
         return false;
     }
@@ -494,6 +537,7 @@ public final class DisplayCutout {
     @Override
     public String toString() {
         return "DisplayCutout{insets=" + mSafeInsets
+                + " waterfall=" + mWaterfallInsets
                 + " boundingRect={" + mBounds + "}"
                 + "}";
     }
@@ -508,6 +552,7 @@ public final class DisplayCutout {
         mBounds.getRect(BOUNDS_POSITION_TOP).dumpDebug(proto, BOUND_TOP);
         mBounds.getRect(BOUNDS_POSITION_RIGHT).dumpDebug(proto, BOUND_RIGHT);
         mBounds.getRect(BOUNDS_POSITION_BOTTOM).dumpDebug(proto, BOUND_BOTTOM);
+        mWaterfallInsets.toRect().dumpDebug(proto, INSETS);
         proto.end(token);
     }
 
@@ -553,7 +598,7 @@ public final class DisplayCutout {
             }
         }
 
-        return new DisplayCutout(safeInsets, bounds, false /* copyArguments */);
+        return new DisplayCutout(safeInsets, mWaterfallInsets, bounds, false /* copyArguments */);
     }
 
     /**
@@ -565,7 +610,7 @@ public final class DisplayCutout {
      * @hide
      */
     public DisplayCutout replaceSafeInsets(Rect safeInsets) {
-        return new DisplayCutout(new Rect(safeInsets), mBounds);
+        return new DisplayCutout(new Rect(safeInsets), mWaterfallInsets, mBounds);
     }
 
     private static int atLeastZero(int value) {
@@ -585,7 +630,16 @@ public final class DisplayCutout {
         for (int i = 0; i < BOUNDS_POSITION_LENGTH; ++i) {
             bounds[i] = (pos == i) ? new Rect(left, top, right, bottom) : new Rect();
         }
-        return new DisplayCutout(ZERO_RECT, bounds, false /* copyArguments */);
+        return new DisplayCutout(ZERO_RECT, Insets.NONE, bounds, false /* copyArguments */);
+    }
+
+    /**
+     * Creates an instance from a bounding and waterfall insets.
+     *
+     * @hide
+     */
+    public static DisplayCutout fromBoundsAndWaterfall(Rect[] bounds, Insets waterfallInsets) {
+        return new DisplayCutout(ZERO_RECT, waterfallInsets, bounds, false /* copyArguments */);
     }
 
     /**
@@ -594,7 +648,7 @@ public final class DisplayCutout {
      * @hide
      */
     public static DisplayCutout fromBounds(Rect[] bounds) {
-        return new DisplayCutout(ZERO_RECT, bounds, false /* copyArguments */);
+        return new DisplayCutout(ZERO_RECT, Insets.NONE, bounds, false /* copyArguments */);
     }
 
     /**
@@ -606,7 +660,8 @@ public final class DisplayCutout {
      */
     public static DisplayCutout fromResourcesRectApproximation(Resources res, int displayWidth, int displayHeight) {
         return fromSpec(res.getString(R.string.config_mainBuiltInDisplayCutoutRectApproximation),
-                displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT);
+                displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT,
+                loadWaterfallInset(res));
     }
 
     /**
@@ -617,7 +672,8 @@ public final class DisplayCutout {
     public static Path pathFromResources(Resources res, int displayWidth, int displayHeight) {
         return pathAndDisplayCutoutFromSpec(
                 res.getString(R.string.config_mainBuiltInDisplayCutout),
-                displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT).first;
+                displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT,
+                loadWaterfallInset(res)).first;
     }
 
     /**
@@ -627,91 +683,109 @@ public final class DisplayCutout {
      */
     @VisibleForTesting(visibility = PRIVATE)
     public static DisplayCutout fromSpec(String spec, int displayWidth, int displayHeight,
-            float density) {
-        return pathAndDisplayCutoutFromSpec(spec, displayWidth, displayHeight, density).second;
+            float density, Insets waterfallInsets) {
+        return pathAndDisplayCutoutFromSpec(
+                spec, displayWidth, displayHeight, density, waterfallInsets).second;
     }
 
     private static Pair<Path, DisplayCutout> pathAndDisplayCutoutFromSpec(String spec,
-            int displayWidth, int displayHeight, float density) {
-        if (TextUtils.isEmpty(spec)) {
+            int displayWidth, int displayHeight, float density, Insets waterfallInsets) {
+        if (TextUtils.isEmpty(spec) && waterfallInsets.equals(Insets.NONE)) {
             return NULL_PAIR;
         }
+
         synchronized (CACHE_LOCK) {
             if (spec.equals(sCachedSpec) && sCachedDisplayWidth == displayWidth
                     && sCachedDisplayHeight == displayHeight
-                    && sCachedDensity == density) {
+                    && sCachedDensity == density
+                    && waterfallInsets.equals(sCachedWaterfallInsets)) {
                 return sCachedCutout;
             }
         }
-        spec = spec.trim();
-        final float offsetX;
-        if (spec.endsWith(RIGHT_MARKER)) {
-            offsetX = displayWidth;
-            spec = spec.substring(0, spec.length() - RIGHT_MARKER.length()).trim();
-        } else if (spec.endsWith(LEFT_MARKER)) {
-            offsetX = 0;
-            spec = spec.substring(0, spec.length() - LEFT_MARKER.length()).trim();
-        } else {
-            offsetX = displayWidth / 2f;
-        }
-        final boolean inDp = spec.endsWith(DP_MARKER);
-        if (inDp) {
-            spec = spec.substring(0, spec.length() - DP_MARKER.length());
-        }
 
-        String bottomSpec = null;
-        if (spec.contains(BOTTOM_MARKER)) {
-            String[] splits = spec.split(BOTTOM_MARKER, 2);
-            spec = splits[0].trim();
-            bottomSpec = splits[1].trim();
-        }
-
-        final Path p;
-        final Region r = Region.obtain();
-        try {
-            p = PathParser.createPathFromPathData(spec);
-        } catch (Throwable e) {
-            Log.wtf(TAG, "Could not inflate cutout: ", e);
-            return NULL_PAIR;
-        }
-
-        final Matrix m = new Matrix();
-        if (inDp) {
-            m.postScale(density, density);
-        }
-        m.postTranslate(offsetX, 0);
-        p.transform(m);
-
-        Rect boundTop = new Rect();
-        toRectAndAddToRegion(p, r, boundTop);
-        final int topInset = boundTop.bottom;
-
+        Path p = null;
+        Rect boundTop = null;
         Rect boundBottom = null;
-        final int bottomInset;
-        if (bottomSpec != null) {
-            final Path bottomPath;
-            try {
-                bottomPath = PathParser.createPathFromPathData(bottomSpec);
-            } catch (Throwable e) {
-                Log.wtf(TAG, "Could not inflate bottom cutout: ", e);
-                return NULL_PAIR;
+        Rect safeInset = new Rect();
+        String bottomSpec = null;
+        if (!TextUtils.isEmpty(spec)) {
+            spec = spec.trim();
+            final float offsetX;
+            if (spec.endsWith(RIGHT_MARKER)) {
+                offsetX = displayWidth;
+                spec = spec.substring(0, spec.length() - RIGHT_MARKER.length()).trim();
+            } else if (spec.endsWith(LEFT_MARKER)) {
+                offsetX = 0;
+                spec = spec.substring(0, spec.length() - LEFT_MARKER.length()).trim();
+            } else {
+                offsetX = displayWidth / 2f;
             }
-            // Keep top transform
-            m.postTranslate(0, displayHeight);
-            bottomPath.transform(m);
-            p.addPath(bottomPath);
-            boundBottom = new Rect();
-            toRectAndAddToRegion(bottomPath, r, boundBottom);
-            bottomInset = displayHeight - boundBottom.top;
-        } else {
-            bottomInset = 0;
+            final boolean inDp = spec.endsWith(DP_MARKER);
+            if (inDp) {
+                spec = spec.substring(0, spec.length() - DP_MARKER.length());
+            }
+
+            if (spec.contains(BOTTOM_MARKER)) {
+                String[] splits = spec.split(BOTTOM_MARKER, 2);
+                spec = splits[0].trim();
+                bottomSpec = splits[1].trim();
+            }
+
+            final Matrix m = new Matrix();
+            final Region r = Region.obtain();
+            if (!spec.isEmpty()) {
+                try {
+                    p = PathParser.createPathFromPathData(spec);
+                } catch (Throwable e) {
+                    Log.wtf(TAG, "Could not inflate cutout: ", e);
+                }
+
+                if (p != null) {
+                    if (inDp) {
+                        m.postScale(density, density);
+                    }
+                    m.postTranslate(offsetX, 0);
+                    p.transform(m);
+
+                    boundTop = new Rect();
+                    toRectAndAddToRegion(p, r, boundTop);
+                    safeInset.top = boundTop.bottom;
+                }
+            }
+
+            if (bottomSpec != null) {
+                int bottomInset = 0;
+                Path bottomPath = null;
+                try {
+                    bottomPath = PathParser.createPathFromPathData(bottomSpec);
+                } catch (Throwable e) {
+                    Log.wtf(TAG, "Could not inflate bottom cutout: ", e);
+                }
+
+                if (bottomPath != null) {
+                    // Keep top transform
+                    m.postTranslate(0, displayHeight);
+                    bottomPath.transform(m);
+                    p.addPath(bottomPath);
+                    boundBottom = new Rect();
+                    toRectAndAddToRegion(bottomPath, r, boundBottom);
+                    bottomInset = displayHeight - boundBottom.top;
+                }
+                safeInset.bottom = bottomInset;
+            }
         }
 
-        Rect safeInset = new Rect(0, topInset, 0, bottomInset);
-        final DisplayCutout cutout = new DisplayCutout(
-                safeInset, null /* boundLeft */, boundTop, null /* boundRight */, boundBottom,
-                false /* copyArguments */);
+        if (!waterfallInsets.equals(Insets.NONE)) {
+            safeInset.set(
+                    Math.max(waterfallInsets.left, safeInset.left),
+                    Math.max(waterfallInsets.top, safeInset.top),
+                    Math.max(waterfallInsets.right, safeInset.right),
+                    Math.max(waterfallInsets.bottom, safeInset.bottom));
+        }
 
+        final DisplayCutout cutout = new DisplayCutout(
+                safeInset, waterfallInsets, null /* boundLeft */, boundTop,
+                null /* boundRight */, boundBottom, false /* copyArguments */);
         final Pair<Path, DisplayCutout> result = new Pair<>(p, cutout);
         synchronized (CACHE_LOCK) {
             sCachedSpec = spec;
@@ -719,6 +793,7 @@ public final class DisplayCutout {
             sCachedDisplayHeight = displayHeight;
             sCachedDensity = density;
             sCachedCutout = result;
+            sCachedWaterfallInsets = waterfallInsets;
         }
         return result;
     }
@@ -728,6 +803,15 @@ public final class DisplayCutout {
         p.computeBounds(rectF, false /* unused */);
         rectF.round(inoutRect);
         inoutRegion.op(inoutRect, Op.UNION);
+    }
+
+
+    private static Insets loadWaterfallInset(Resources res) {
+        return Insets.of(
+                res.getDimensionPixelSize(R.dimen.waterfall_display_left_edge_size),
+                res.getDimensionPixelSize(R.dimen.waterfall_display_top_edge_size),
+                res.getDimensionPixelSize(R.dimen.waterfall_display_right_edge_size),
+                res.getDimensionPixelSize(R.dimen.waterfall_display_bottom_edge_size));
     }
 
     /**
@@ -773,6 +857,7 @@ public final class DisplayCutout {
                 out.writeInt(1);
                 out.writeTypedObject(cutout.mSafeInsets, flags);
                 out.writeTypedArray(cutout.mBounds.getRects(), flags);
+                out.writeTypedObject(cutout.mWaterfallInsets, flags);
             }
         }
 
@@ -815,8 +900,10 @@ public final class DisplayCutout {
             Rect safeInsets = in.readTypedObject(Rect.CREATOR);
             Rect[] bounds = new Rect[BOUNDS_POSITION_LENGTH];
             in.readTypedArray(bounds, Rect.CREATOR);
+            Insets waterfallInsets = in.readTypedObject(Insets.CREATOR);
 
-            return new DisplayCutout(safeInsets, bounds, false /* copyArguments */);
+            return new DisplayCutout(
+                    safeInsets, waterfallInsets, bounds, false /* copyArguments */);
         }
 
         public DisplayCutout get() {

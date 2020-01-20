@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"اپنے کیلنڈر تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏SMS پیغامات بھیجیں اور دیکھیں"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"اسٹوریج"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"آپ کے آلہ پر تصاویر، میڈیا اور فائلوں تک رسائی حاصل کر سکتی ہیں"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"مائکروفون"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"آڈیو ریکارڈ کریں"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"تھپتھپانا، سوائپ کرنا، چٹکی بھرنا اور دیگر اشارے انجام دے سکتی ہے"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"فنگر پرنٹ کے اشارے"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"آلہ کے فنگر پرنٹ سینسر پر کیے گئے اشاروں کو کیپچر کر سکتا ہے۔"</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"اسٹیٹس بار کو غیر فعال یا اس میں ترمیم کریں"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ایپ کو اسٹیٹس بار غیر فعال کرنے یا سسٹم آئیکنز شامل کرنے اور ہٹانے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"بطور اسٹیٹس بار کام لیں"</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"والیوم کو تجویز کردہ سطح سے زیادہ کریں؟\n\nزیادہ وقت تک اونچی آواز میں سننے سے آپ کی سماعت کو نقصان پہنچ سکتا ہے۔"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ایکسیسبیلٹی شارٹ کٹ استعمال کریں؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"شارٹ کٹ آن ہونے پر، 3 سیکنڈ تک دونوں والیوم بٹنز کو دبانے سے ایک ایکسیسبیلٹی خصوصیت شروع ہو جائے گی۔\n\n موجودہ ایکسیسبیلٹی خصوصیت:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n آپ خصوصیت کو ترتیبات &gt; ایکسیسبیلٹی میں جا کر تبدیل کر سکتے ہیں۔"</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"خالی"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"شارٹ کٹس میں ترمیم کریں"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"منسوخ کریں"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"شارٹ کٹ آف کریں"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"شارٹ کٹ استعمال کریں"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"رنگوں کی تقلیب"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"دفتری پروفائل آن کریں؟"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"آپ کی دفتری ایپس، اطلاعات، ڈیٹا اور دفتری پروفائل کی دیگر خصوصیات آن کر دی جائیں گی"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"آن کریں"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏یہ ایپ Android کے پرانے ورژن کے لئے بنائی گئی ہے اور ہو سکتا ہے صحیح طور پر کام نہ کرے۔ اپ ڈیٹس چیک کر کے آزمائیں یا ڈیولپر سے رابطہ کریں۔"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"اپ ڈیٹ چیک کریں"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"آپ کے پاس نئے پیغامات ہیں"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"معمول چارج سے پہلے بیٹری ختم ہو سکتی ہے"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"بیٹری لائف کو بڑھانے کے لیے بیٹری سیور کو فعال کر دیا گیا ہے"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"بیٹری سیور"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"بیٹری سیور اس وقت تک دوبارہ فعال نہیں ہوگی جب تک پھر سے بیٹری کم نہیں ہو جاتی ہے"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"بیٹری کافی سطح تک چارج ہو گئی ہے۔ بیٹری سیور اس وقت تک دوبارہ فعال نہیں ہوگی جب تک پھر سے بیٹری کم نہیں ہو جاتی ہے۔"</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"فون <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> چارج ہو گیا"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"ٹیبلیٹ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> چارج ہو گیا"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"آلہ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> چارج ہو گیا"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"بیٹری سیور آف ہے۔ خصوصیات پر اب پابندی نہیں ہے۔"</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"بیٹری سیور کو آف کر دیا گیا۔ خصوصیات پر اب پابندی نہیں ہے۔"</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"فولڈر"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"‏Android ایپلیکیشن"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"فائل"</string>

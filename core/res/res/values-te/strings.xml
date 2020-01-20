@@ -287,7 +287,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"మీ క్యాలెండర్‌ను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS సందేశాలను పంపడం మరియు వీక్షించడం"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"నిల్వ"</string>
+    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైల్‌లను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"మైక్రోఫోన్"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ఆడియోను రికార్డ్ చేయడానికి"</string>
@@ -313,6 +314,10 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"నొక్కగలరు, స్వైప్ చేయగలరు, స్క్రీన్‌పై రెండు వేళ్లను ఉంచి ఆ వేళ్లను దగ్గరకు లేదా దూరానికి లాగగలరు మరియు ఇతర సంజ్ఞలను చేయగలరు."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"వేలిముద్ర సంజ్ఞలు"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"పరికర వేలిముద్ర సెన్సార్‌లో ఉపయోగించిన సంజ్ఞలను క్యాప్చర్ చేయవచ్చు."</string>
+    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
+    <skip />
+    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"స్థితి బార్‌ను నిలిపివేయడం లేదా సవరించడం"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"స్థితి బార్‌ను నిలిపివేయడానికి లేదా సిస్టమ్ చిహ్నాలను జోడించడానికి మరియు తీసివేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"స్థితి పట్టీగా ఉండటం"</string>
@@ -1610,6 +1615,9 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"వాల్యూమ్‌ను సిఫార్సు చేయబడిన స్థాయి కంటే ఎక్కువగా పెంచాలా?\n\nసుదీర్ఘ వ్యవధుల పాటు అధిక వాల్యూమ్‌లో వినడం వలన మీ వినికిడి శక్తి దెబ్బ తినవచ్చు."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"యాక్సెస్ సామర్థ్యం షార్ట్‌కట్‌ను ఉపయోగించాలా?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"షార్ట్‌కట్ ఆన్‌లో ఉన్నప్పుడు, రెండు వాల్యూమ్ బటన్‌లను 3 సెకన్ల పాటు నొక్కితే యాక్సెస్ సామర్థ్య ఫీచర్ ప్రారంభం అవుతుంది.\n\n ప్రస్తుత యాక్సెస్ సామర్థ్య ఫీచర్:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n సెట్టింగ్‌లు &gt; యాక్సెస్ సామర్థ్యంలో మీరు ఫీచర్‌ను మార్చవచ్చు."</string>
+    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"ఖాళీ"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"షార్ట్‌కట్‌లను ఎడిట్ చేయి"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"రద్దు చేయి"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"సత్వరమార్గాన్ని ఆఫ్ చేయి"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"సత్వరమార్గాన్ని ఉపయోగించు"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"రంగుల మార్పిడి"</string>
@@ -1845,6 +1853,10 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"కార్యాలయ ప్రొఫైల్‌ని ఆన్ చేయాలా?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"మీ కార్యాలయ యాప్‌లు, నోటిఫికేషన్‌లు, డేటా మరియు ఇతర కార్యాలయ ప్రొఫైల్ ఫీచర్‌లు ఆన్ చేయబడతాయి"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ఆన్ చేయి"</string>
+    <!-- no translation found for app_blocked_title (7353262160455028160) -->
+    <skip />
+    <!-- no translation found for app_blocked_message (542972921087873023) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ఈ యాప్ పాత వెర్షన్ Android కోసం రూపొందించబడింది మరియు అది సరిగ్గా పని చేయకపోవచ్చు. అప్‌డేట్‌ల కోసం తనిఖీ చేయడానికి ప్రయత్నించండి లేదా డెవలపర్‌ని సంప్రదించండి."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"అప్‌డేట్ కోసం తనిఖీ చేయండి"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"మీకు కొత్త సందేశాలు ఉన్నాయి"</string>
@@ -1955,13 +1967,14 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"మామూలుగా ఛార్జ్ చేసేలోపు బ్యాటరీ ఖాళీ కావచ్చు"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి బ్యాటరీ సేవర్ యాక్టివేట్ చేయబడింది"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"బ్యాటరీ సేవర్"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"బ్యాటరీ మళ్లీ తగ్గిపోయే వరకు బ్యాటరీ సేవర్ తిరిగి యాక్టివేట్ చేయబడదు"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"బ్యాటరీ సరిపడే స్థాయికి ఛార్జ్ చేయబడింది. బ్యాటరీ మళ్లీ తగ్గిపోయే వరకు బ్యాటరీ సేవర్ తిరిగి యాక్టివేట్ చేయబడదు."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"ఫోన్ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ఛార్జ్ అయింది"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"టాబ్లెట్ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ఛార్జ్ అయింది"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"పరికరం <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ఛార్జ్ అయింది"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"బ్యాటరీ సేవర్ ఆఫ్‌లో ఉంది. ఫీచర్‌లు ఇప్పటి నుండి పరిమితం చేయబడవు."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"బ్యాటరీ సేవర్ ఆఫ్ చేయబడింది. ఫీచర్‌లు ఇప్పటి నుండి పరిమితం చేయబడవు."</string>
+    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
+    <skip />
     <string name="mime_type_folder" msgid="2203536499348787650">"ఫోల్డర్"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android అప్లికేషన్"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ఫైల్"</string>

@@ -14,9 +14,25 @@
  * limitations under the License.
  */
 
-package com.android.server.permission;
+package com.android.permission.persistence;
+
+import android.annotation.NonNull;
 
 /**
- * Persistence for runtime permissions.
+ * Utility class for IO.
  */
-public class RuntimePermissionPersistence {}
+public class IoUtils {
+
+    private IoUtils() {}
+
+    /**
+     * Close 'closeable' ignoring any exceptions.
+     */
+    public static void closeQuietly(@NonNull AutoCloseable closeable) {
+        try {
+            closeable.close();
+        } catch (Exception ignored) {
+            // Ignored.
+        }
+    }
+}

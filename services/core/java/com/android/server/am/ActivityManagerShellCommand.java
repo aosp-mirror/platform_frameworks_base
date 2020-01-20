@@ -91,7 +91,6 @@ import android.view.Display;
 import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.MemInfoReader;
-import com.android.internal.util.Preconditions;
 import com.android.server.compat.PlatformCompat;
 
 import java.io.BufferedReader;
@@ -217,6 +216,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSetWatchHeap(pw);
                 case "clear-watch-heap":
                     return runClearWatchHeap(pw);
+                case "clear-exit-info":
+                    return runClearExitInfo(pw);
                 case "bug-report":
                     return runBugReport(pw);
                 case "force-stop":
@@ -1019,6 +1020,30 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    int runClearExitInfo(PrintWriter pw) throws RemoteException {
+        mInternal.enforceCallingPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS,
+                "runClearExitInfo()");
+        String opt;
+        int userId = UserHandle.USER_CURRENT;
+        String packageName = null;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                packageName = opt;
+            }
+        }
+        if (userId == UserHandle.USER_CURRENT) {
+            UserInfo user = mInterface.getCurrentUser();
+            if (user == null) {
+                return -1;
+            }
+            userId = user.id;
+        }
+        mInternal.mProcessList.mAppExitInfoTracker.clearHistoryProcessExitInfo(packageName, userId);
+        return 0;
+    }
+
     int runBugReport(PrintWriter pw) throws RemoteException {
         String opt;
         boolean fullBugreport = true;
@@ -1145,7 +1170,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         static final int RESULT_ANR_DIALOG = 0;
         static final int RESULT_ANR_KILL = 1;
-        static final int RESULT_ANR_WAIT = 1;
+        static final int RESULT_ANR_WAIT = 2;
 
         int mResult;
 
@@ -3008,6 +3033,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    s[ervices] [COMP_SPEC ...]: service state");
             pw.println("    allowed-associations: current package association restrictions");
             pw.println("    as[sociations]: tracked app associations");
+            pw.println("    exit-info [PACKAGE_NAME]: historical process exit information");
             pw.println("    lmk: stats on low memory killer");
             pw.println("    lru: raw LRU process list");
             pw.println("    binder-proxies: stats on binder objects and IPCs");
@@ -3142,6 +3168,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      above <HEAP-LIMIT> then a heap dump is collected for the user to report.");
             pw.println("  clear-watch-heap");
             pw.println("      Clear the previously set-watch-heap.");
+            pw.println("  clear-exit-info [--user <USER_ID> | all | current] [package]");
+            pw.println("      Clear the process exit-info for given package");
             pw.println("  bug-report [--progress | --telephony]");
             pw.println("      Request bug report generation; will launch a notification");
             pw.println("        when done to select where it should be delivered. Options are:");
