@@ -938,8 +938,10 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
-     * Indicate whther the network is trusted or not. Networks are considered trusted
+     * Indicate whether the network is trusted or not. Networks are considered trusted
      * if the user explicitly allowed this network connection.
+     * This bit can be used by suggestion network, see
+     * {@link WifiNetworkSuggestion.Builder#setUnTrusted(boolean)}
      * @hide
      */
     public boolean trusted;

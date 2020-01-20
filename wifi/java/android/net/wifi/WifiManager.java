@@ -193,6 +193,14 @@ public class WifiManager {
      */
     public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_REMOVE_INVALID = 5;
 
+    /**
+     * Reason code if one or more of the network suggestions added is not allowed.
+     *
+     * This error may be caused by suggestion is using SIM-based encryption method, but calling app
+     * is not carrier privileged.
+     */
+    public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_NOT_ALLOWED = 6;
+
     /** @hide */
     @IntDef(prefix = { "STATUS_NETWORK_SUGGESTIONS_" }, value = {
             STATUS_NETWORK_SUGGESTIONS_SUCCESS,
@@ -201,6 +209,7 @@ public class WifiManager {
             STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_DUPLICATE,
             STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_EXCEEDS_MAX_PER_APP,
             STATUS_NETWORK_SUGGESTIONS_ERROR_REMOVE_INVALID,
+            STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_NOT_ALLOWED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NetworkSuggestionsStatusCode {}
