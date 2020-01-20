@@ -26,17 +26,20 @@ import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
+import android.media.RoutingSessionInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Provides routes for local playbacks such as phone speaker, wired headset, or Bluetooth speakers.
@@ -46,7 +49,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     static final String DEFAULT_ROUTE_ID = "DEFAULT_ROUTE";
-    static final String BLUETOOTH_ROUTE_ID = "BLUETOOTH_ROUTE";
+    static final String SYSTEM_SESSION_ID = "SYSTEM_SESSION";
 
     // TODO: Move these to a proper place
     public static final String TYPE_LIVE_AUDIO = "android.media.intent.route.TYPE_LIVE_AUDIO";
@@ -92,6 +95,14 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         mBtRouteProvider = BluetoothRouteProvider.getInstance(context, (routes) -> {
             mBluetoothRoutes = routes;
             publishRoutes();
+
+            boolean sessionInfoChanged;
+            synchronized (mLock) {
+                sessionInfoChanged = updateSessionInfosIfNeededLocked();
+            }
+            if (sessionInfoChanged) {
+                notifySessionInfoUpdated();
+            }
         });
         initializeRoutes();
     }
@@ -172,6 +183,9 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         }
         setProviderState(builder.build());
         mHandler.post(() -> notifyProviderState());
+
+        // Note: No lock needed when initializing.
+        updateSessionInfosIfNeededLocked();
     }
 
     void updateAudioRoutes(AudioRoutesInfo newRoutes) {
@@ -203,6 +217,35 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     /**
+     * Updates the mSessionInfo. Returns true if the session info is changed.
+     */
+    boolean updateSessionInfosIfNeededLocked() {
+        RoutingSessionInfo oldSessionInfo = mSessionInfos.isEmpty() ? null : mSessionInfos.get(0);
+
+        RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(
+                SYSTEM_SESSION_ID, "" /* clientPackageName */)
+                .setSystemSession(true);
+        String activeBtDeviceAddress = mBtRouteProvider.getActiveDeviceAddress();
+
+        RoutingSessionInfo newSessionInfo;
+        if (!TextUtils.isEmpty(activeBtDeviceAddress)) {
+            // Bluetooth route. Set the route ID with the device's address.
+            newSessionInfo = builder.addSelectedRoute(activeBtDeviceAddress).build();
+        } else {
+            // Default device
+            newSessionInfo = builder.addSelectedRoute(mDefaultRoute.getId()).build();
+        }
+
+        if (Objects.equals(oldSessionInfo, newSessionInfo)) {
+            return false;
+        } else {
+            mSessionInfos.clear();
+            mSessionInfos.add(newSessionInfo);
+            return true;
+        }
+    }
+
+    /**
      * The first route should be the currently selected system route.
      * For example, if there are two system routes (BT and device speaker),
      * BT will be the first route in the list.
@@ -214,5 +257,13 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             builder.addRoute(route);
         }
         setAndNotifyProviderState(builder.build());
+    }
+
+    void notifySessionInfoUpdated() {
+        RoutingSessionInfo sessionInfo;
+        synchronized (mLock) {
+            sessionInfo = mSessionInfos.get(0);
+        }
+        mCallback.onSessionUpdated(this, sessionInfo);
     }
 }

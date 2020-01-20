@@ -444,6 +444,12 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
+    public RoutingSessionInfo getSystemSessionInfo() {
+        return mService2.getSystemSessionInfo();
+    }
+
+    // Binder call
+    @Override
     public void registerClient2(IMediaRouter2Client client, String packageName) {
         final int uid = Binder.getCallingUid();
         if (!validatePackageName(uid, packageName)) {

@@ -76,6 +76,8 @@ public class MediaRouter2 {
     @GuardedBy("sRouterLock")
     final Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
 
+    final RoutingController mDefaultController;
+
     @GuardedBy("sRouterLock")
     private RouteDiscoveryPreference mDiscoveryPreference = RouteDiscoveryPreference.EMPTY;
 
@@ -116,19 +118,26 @@ public class MediaRouter2 {
         mHandler = new Handler(Looper.getMainLooper());
 
         List<MediaRoute2Info> currentSystemRoutes = null;
+        RoutingSessionInfo currentSystemSessionInfo = null;
         try {
             currentSystemRoutes = mMediaRouterService.getSystemRoutes();
+            currentSystemSessionInfo = mMediaRouterService.getSystemSessionInfo();
         } catch (RemoteException ex) {
-            Log.e(TAG, "Unable to get current currentSystemRoutes", ex);
+            Log.e(TAG, "Unable to get current system's routes / session info", ex);
         }
 
         if (currentSystemRoutes == null || currentSystemRoutes.isEmpty()) {
             throw new RuntimeException("Null or empty currentSystemRoutes. Something is wrong.");
         }
 
+        if (currentSystemSessionInfo == null) {
+            throw new RuntimeException("Null currentSystemSessionInfo. Something is wrong.");
+        }
+
         for (MediaRoute2Info route : currentSystemRoutes) {
             mRoutes.put(route.getId(), route);
         }
+        mDefaultController = new DefaultRoutingController(currentSystemSessionInfo);
     }
 
     /**
@@ -341,6 +350,22 @@ public class MediaRouter2 {
     }
 
     /**
+     * Gets a {@link RoutingController} which can control the routes provided by system.
+     * e.g. Phone speaker, wired headset, Bluetooth, etc.
+     * <p>
+     * Note: The default controller can't be released. Calling {@link RoutingController#release()}
+     * will be no-op.
+     * <p>
+     * This method will always return the same instance.
+     *
+     * @hide
+     */
+    @NonNull
+    public RoutingController getDefaultController() {
+        return mDefaultController;
+    }
+
+    /**
      * Sends a media control request to be performed asynchronously by the route's destination.
      *
      * @param route the route that will receive the control request
@@ -523,6 +548,15 @@ public class MediaRouter2 {
     void changeSessionInfoOnHandler(RoutingSessionInfo sessionInfo) {
         if (sessionInfo == null) {
             Log.w(TAG, "changeSessionInfoOnHandler: Ignoring null sessionInfo.");
+            return;
+        }
+
+        if (sessionInfo.isSystemSession()) {
+            // The session info is sent from SystemMediaRoute2Provider.
+            RoutingController defaultController = getDefaultController();
+            RoutingSessionInfo oldInfo = defaultController.getRoutingSessionInfo();
+            defaultController.setRoutingSessionInfo(sessionInfo);
+            notifySessionInfoChanged(defaultController, oldInfo, sessionInfo);
             return;
         }
 
@@ -766,7 +800,7 @@ public class MediaRouter2 {
      *
      * @hide
      */
-    public final class RoutingController {
+    public class RoutingController {
         private final Object mControllerLock = new Object();
 
         @GuardedBy("mControllerLock")
@@ -1074,7 +1108,6 @@ public class MediaRouter2 {
         // TODO: This method uses two locks (mLock outside, sLock inside).
         //       Check if there is any possiblity of deadlock.
         private List<MediaRoute2Info> getRoutesWithIdsLocked(List<String> routeIds) {
-
             List<MediaRoute2Info> routes = new ArrayList<>();
             synchronized (sRouterLock) {
                 // TODO: Maybe able to change using Collection.stream()?
@@ -1086,6 +1119,23 @@ public class MediaRouter2 {
                 }
             }
             return Collections.unmodifiableList(routes);
+        }
+    }
+
+    class DefaultRoutingController extends RoutingController {
+        DefaultRoutingController(@NonNull RoutingSessionInfo sessionInfo) {
+            super(sessionInfo);
+        }
+
+        @Override
+        public void release() {
+            // Do nothing. DefaultRoutingController will never be released
+        }
+
+        @Override
+        public boolean isReleased() {
+            // DefaultRoutingController will never be released
+            return false;
         }
     }
 
