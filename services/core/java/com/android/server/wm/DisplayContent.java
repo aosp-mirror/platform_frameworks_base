@@ -2099,6 +2099,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * the above app windows specify orientation, the orientation is computed from the child window
      * container, e.g. {@link AppWindowToken#getOrientation(int)}.
      */
+    @ScreenOrientation
     @Override
     int getOrientation() {
         final WindowManagerPolicy policy = mWmService.mPolicy;

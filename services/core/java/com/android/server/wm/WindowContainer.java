@@ -1068,8 +1068,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             if (wc.fillsParent() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
                 // Use the orientation if the container fills its parent or requested an explicit
                 // orientation that isn't SCREEN_ORIENTATION_UNSPECIFIED.
-                ProtoLog.v(WM_DEBUG_ORIENTATION, "%s is requesting orientation %d (%s)", toString(),
-                        orientation, ActivityInfo.screenOrientationToString(orientation));
+                ProtoLog.v(WM_DEBUG_ORIENTATION, "%s is requesting orientation %d (%s)",
+                        wc.toString(), orientation,
+                        ActivityInfo.screenOrientationToString(orientation));
                 return orientation;
             }
         }

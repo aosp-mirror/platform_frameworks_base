@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
@@ -362,6 +361,7 @@ class Task extends WindowContainer<WindowContainer> {
      * Display rotation as of the last time {@link #setBounds(Rect)} was called or this task was
      * moved to a new display.
      */
+    @Surface.Rotation
     private int mRotation;
 
     // For comparison with DisplayContent bounds.
