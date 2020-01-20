@@ -106,8 +106,8 @@ public class SystemUIDialog extends AlertDialog {
         if (Dependency.get(KeyguardStateController.class).isShowing()) {
             final Window window = dialog.getWindow();
             window.setType(LayoutParams.TYPE_STATUS_BAR_PANEL);
-            window.getAttributes().setFitWindowInsetsTypes(
-                    window.getAttributes().getFitWindowInsetsTypes() & ~Type.statusBars());
+            window.getAttributes().setFitInsetsTypes(
+                    window.getAttributes().getFitInsetsTypes() & ~Type.statusBars());
         } else {
             dialog.getWindow().setType(LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
         }
@@ -118,8 +118,8 @@ public class SystemUIDialog extends AlertDialog {
         window.setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
         window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
-        window.getAttributes().setFitWindowInsetsTypes(
-                window.getAttributes().getFitWindowInsetsTypes() & ~Type.statusBars());
+        window.getAttributes().setFitInsetsTypes(
+                window.getAttributes().getFitInsetsTypes() & ~Type.statusBars());
         return dialog;
     }
 

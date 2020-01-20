@@ -109,7 +109,7 @@ public class ViewRootImplTest {
         attrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        assertEquals(0, attrs.getFitWindowInsetsTypes() & Type.statusBars());
+        assertEquals(0, attrs.getFitInsetsTypes() & Type.statusBars());
     }
 
     @Test
@@ -120,7 +120,7 @@ public class ViewRootImplTest {
         attrs.flags = FLAG_LAYOUT_IN_SCREEN;
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        assertEquals(0, attrs.getFitWindowInsetsTypes() & Type.statusBars());
+        assertEquals(0, attrs.getFitInsetsTypes() & Type.statusBars());
     }
 
     @Test
@@ -131,7 +131,7 @@ public class ViewRootImplTest {
         attrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        assertEquals(0, attrs.getFitWindowInsetsTypes() & Type.systemBars());
+        assertEquals(0, attrs.getFitInsetsTypes() & Type.systemBars());
     }
 
     @Test
@@ -141,8 +141,8 @@ public class ViewRootImplTest {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_TOAST);
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        assertEquals(Type.systemBars(), attrs.getFitWindowInsetsTypes() & Type.systemBars());
-        assertEquals(true, attrs.getFitIgnoreVisibility());
+        assertEquals(Type.systemBars(), attrs.getFitInsetsTypes() & Type.systemBars());
+        assertEquals(true, attrs.isFitInsetsIgnoringVisibility());
     }
 
     @Test
@@ -152,8 +152,8 @@ public class ViewRootImplTest {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_SYSTEM_ALERT);
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        assertEquals(Type.systemBars(), attrs.getFitWindowInsetsTypes() & Type.systemBars());
-        assertEquals(true, attrs.getFitIgnoreVisibility());
+        assertEquals(Type.systemBars(), attrs.getFitInsetsTypes() & Type.systemBars());
+        assertEquals(true, attrs.isFitInsetsIgnoringVisibility());
     }
 
     @Test
@@ -165,14 +165,14 @@ public class ViewRootImplTest {
         final int sides = Side.TOP | Side.LEFT;
         final boolean fitMaxInsets = true;
         attrs.flags = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-        attrs.setFitWindowInsetsTypes(types);
-        attrs.setFitWindowInsetsSides(sides);
-        attrs.setFitIgnoreVisibility(fitMaxInsets);
+        attrs.setFitInsetsTypes(types);
+        attrs.setFitInsetsSides(sides);
+        attrs.setFitInsetsIgnoringVisibility(fitMaxInsets);
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        assertEquals(types, attrs.getFitWindowInsetsTypes());
-        assertEquals(sides, attrs.getFitWindowInsetsSides());
-        assertEquals(fitMaxInsets, attrs.getFitIgnoreVisibility());
+        assertEquals(types, attrs.getFitInsetsTypes());
+        assertEquals(sides, attrs.getFitInsetsSides());
+        assertEquals(fitMaxInsets, attrs.isFitInsetsIgnoringVisibility());
     }
 
     private static class ViewRootImplAccessor {

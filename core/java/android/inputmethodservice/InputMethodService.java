@@ -1240,13 +1240,14 @@ public class InputMethodService extends AbstractInputMethodService {
                 Context.LAYOUT_INFLATER_SERVICE);
         mWindow = new SoftInputWindow(this, "InputMethod", mTheme, null, null, mDispatcherState,
                 WindowManager.LayoutParams.TYPE_INPUT_METHOD, Gravity.BOTTOM, false);
-        mWindow.getWindow().getAttributes().setFitWindowInsetsTypes(WindowInsets.Type.statusBars());
+        mWindow.getWindow().getAttributes().setFitInsetsTypes(WindowInsets.Type.statusBars());
 
         // IME layout should always be inset by navigation bar, no matter it's current visibility.
         mWindow.getWindow().getDecorView().setOnApplyWindowInsetsListener(
                 (v, insets) -> v.onApplyWindowInsets(
                         new WindowInsets.Builder(insets).setInsets(
-                                navigationBars(), insets.getMaxInsets(navigationBars()))
+                                navigationBars(),
+                                insets.getInsetsIgnoringVisibility(navigationBars()))
                                 .build()));
 
         // For ColorView in DecorView to work, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS needs to be set

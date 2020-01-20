@@ -368,8 +368,8 @@ public class UserGridRecyclerView extends RecyclerView {
             window.setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
             window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
-            window.getAttributes().setFitWindowInsetsTypes(
-                    window.getAttributes().getFitWindowInsetsTypes() & ~statusBars());
+            window.getAttributes().setFitInsetsTypes(
+                    window.getAttributes().getFitInsetsTypes() & ~statusBars());
         }
 
         private void notifyUserSelected(UserRecord userRecord) {

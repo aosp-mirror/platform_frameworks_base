@@ -94,7 +94,7 @@ public class InsetsStateTest {
             WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), false, false,
                     DisplayCutout.NO_CUTOUT, null, null, SOFT_INPUT_ADJUST_RESIZE, 0, null);
             assertEquals(100, insets.getStableInsetBottom());
-            assertEquals(Insets.of(0, 0, 0, 100), insets.getMaxInsets(Type.systemBars()));
+            assertEquals(Insets.of(0, 0, 0, 100), insets.getInsetsIgnoringVisibility(Type.systemBars()));
             assertEquals(Insets.of(0, 0, 0, 200), insets.getSystemWindowInsets());
             assertEquals(Insets.of(0, 0, 0, 200), insets.getInsets(Type.all()));
             assertEquals(Insets.of(0, 0, 0, 100), insets.getInsets(Type.navigationBars()));

@@ -70,7 +70,7 @@ public class AssistDisclosure {
                             | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
                     PixelFormat.TRANSLUCENT);
             lp.setTitle("AssistDisclosure");
-            lp.setFitWindowInsetsTypes(0 /* types */);
+            lp.setFitInsetsTypes(0 /* types */);
 
             mWm.addView(mView, lp);
             mViewAdded = true;
