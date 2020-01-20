@@ -31,6 +31,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -653,6 +654,19 @@ public class TetheringManager {
          * @param error One of {@code TetheringManager#TETHER_ERROR_*}.
          */
         public void onError(@NonNull String ifName, int error) {}
+
+        /**
+         * Called when the list of tethered clients changes.
+         *
+         * <p>This callback provides best-effort information on connected clients based on state
+         * known to the system, however the list cannot be completely accurate (and should not be
+         * used for security purposes). For example, clients behind a bridge and using static IP
+         * assignments are not visible to the tethering device; or even when using DHCP, such
+         * clients may still be reported by this callback after disconnection as the system cannot
+         * determine if they are still connected.
+         * @param clients The new set of tethered clients; the collection is not ordered.
+         */
+        public void onClientsChanged(@NonNull Collection<TetheredClient> clients) {}
     }
 
     /**
