@@ -27,6 +27,7 @@ import static com.android.internal.app.AccessibilityButtonChooserActivity.WhiteL
 import static com.android.internal.app.AccessibilityButtonChooserActivity.WhiteListingFeatureElementIndex.ICON_ID;
 import static com.android.internal.app.AccessibilityButtonChooserActivity.WhiteListingFeatureElementIndex.LABEL_ID;
 import static com.android.internal.app.AccessibilityButtonChooserActivity.WhiteListingFeatureElementIndex.SETTINGS_KEY;
+import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.IntDef;
@@ -75,15 +76,10 @@ public class AccessibilityButtonChooserActivity extends Activity {
     private static final char SERVICES_SEPARATOR = ':';
     private static final TextUtils.SimpleStringSplitter sStringColonSplitter =
             new TextUtils.SimpleStringSplitter(SERVICES_SEPARATOR);
-    @UserShortcutType
-    private static final int ACCESSIBILITY_BUTTON_USER_TYPE = convertToUserType(
-            ACCESSIBILITY_BUTTON);
-    @UserShortcutType
-    private static final int ACCESSIBILITY_SHORTCUT_KEY_USER_TYPE = convertToUserType(
-            ACCESSIBILITY_SHORTCUT_KEY);
-
     @ShortcutType
     private int mShortcutType;
+    @UserShortcutType
+    private int mShortcutUserType;
     private final List<AccessibilityButtonTarget> mTargets = new ArrayList<>();
     private AlertDialog mAlertDialog;
     private TargetAdapter mTargetAdapter;
@@ -213,11 +209,12 @@ public class AccessibilityButtonChooserActivity extends Activity {
         }
 
         mShortcutType = getIntent().getIntExtra(AccessibilityManager.EXTRA_SHORTCUT_TYPE,
-                ACCESSIBILITY_BUTTON);
-        if ((mShortcutType != ACCESSIBILITY_BUTTON)
-                && (mShortcutType != ACCESSIBILITY_SHORTCUT_KEY)) {
-            throw new IllegalStateException("Unexpected shortcut type: " + mShortcutType);
-        }
+                /* unexpectedShortcutType */ -1);
+        final boolean existInShortcutType = (mShortcutType == ACCESSIBILITY_BUTTON)
+                || (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY);
+        checkArgument(existInShortcutType, "Unexpected shortcut type: " + mShortcutType);
+
+        mShortcutUserType = convertToUserType(mShortcutType);
 
         mTargets.addAll(getServiceTargets(this, mShortcutType));
 
@@ -343,13 +340,11 @@ public class AccessibilityButtonChooserActivity extends Activity {
         }
     }
 
-    private void disableService(ComponentName componentName) {
-        final String componentId = componentName.flattenToString();
-
+    private void disableService(String componentId) {
         if (isWhiteListingService(componentId)) {
-            setWhiteListingServiceEnabled(componentName.flattenToString(),
-                    /* settingsValueOff */ 0);
+            setWhiteListingServiceEnabled(componentId, /* settingsValueOff */ 0);
         } else {
+            final ComponentName componentName = ComponentName.unflattenFromString(componentId);
             setAccessibilityServiceState(this, componentName, /* enabled= */ false);
         }
     }
@@ -620,18 +615,17 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
     private void onTargetDeleted(AdapterView<?> parent, View view, int position, long id) {
         final AccessibilityButtonTarget target = mTargets.get(position);
-        final ComponentName targetComponentName =
-                ComponentName.unflattenFromString(target.getId());
+        final String componentId = target.getId();
 
         switch (target.getFragmentType()) {
             case AccessibilityServiceFragmentType.LEGACY:
-                onLegacyTargetDeleted(targetComponentName);
+                onLegacyTargetDeleted(position, componentId);
                 break;
             case AccessibilityServiceFragmentType.INVISIBLE:
-                onInvisibleTargetDeleted(targetComponentName);
+                onInvisibleTargetDeleted(position, componentId);
                 break;
             case AccessibilityServiceFragmentType.INTUITIVE:
-                onIntuitiveTargetDeleted(targetComponentName);
+                onIntuitiveTargetDeleted(position, componentId);
                 break;
             case AccessibilityServiceFragmentType.BOUNCE:
                 // Do nothing
@@ -640,44 +634,36 @@ public class AccessibilityButtonChooserActivity extends Activity {
                 throw new IllegalStateException("Unexpected fragment type");
         }
 
-        mTargets.remove(position);
-        mTargetAdapter.notifyDataSetChanged();
-
         if (mTargets.isEmpty()) {
             mAlertDialog.dismiss();
         }
     }
 
-    private void onLegacyTargetDeleted(ComponentName componentName) {
+    private void onLegacyTargetDeleted(int position, String componentId) {
         if (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
-            optOutValueFromSettings(this, ACCESSIBILITY_SHORTCUT_KEY_USER_TYPE, componentName);
+            optOutValueFromSettings(this, mShortcutUserType, componentId);
+
+            mTargets.remove(position);
+            mTargetAdapter.notifyDataSetChanged();
         }
     }
 
-    private void onInvisibleTargetDeleted(ComponentName componentName) {
-        if (mShortcutType == ACCESSIBILITY_BUTTON) {
-            optOutValueFromSettings(this, ACCESSIBILITY_BUTTON_USER_TYPE, componentName);
+    private void onInvisibleTargetDeleted(int position, String componentId) {
+        optOutValueFromSettings(this, mShortcutUserType, componentId);
 
-            if (!hasValueInSettings(this,
-                    ACCESSIBILITY_SHORTCUT_KEY_USER_TYPE, componentName)) {
-                disableService(componentName);
-            }
-        } else if (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
-            optOutValueFromSettings(this, ACCESSIBILITY_SHORTCUT_KEY_USER_TYPE, componentName);
-
-            if (!hasValueInSettings(this,
-                    ACCESSIBILITY_BUTTON_USER_TYPE, componentName)) {
-                disableService(componentName);
-            }
+        final int shortcutTypes = UserShortcutType.SOFTWARE | UserShortcutType.HARDWARE;
+        if (!hasValuesInSettings(this, shortcutTypes, componentId)) {
+            disableService(componentId);
         }
+
+        mTargets.remove(position);
+        mTargetAdapter.notifyDataSetChanged();
     }
 
-    private void onIntuitiveTargetDeleted(ComponentName componentName) {
-        if (mShortcutType == ACCESSIBILITY_BUTTON) {
-            optOutValueFromSettings(this, ACCESSIBILITY_BUTTON_USER_TYPE, componentName);
-        } else if (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
-            optOutValueFromSettings(this, ACCESSIBILITY_SHORTCUT_KEY_USER_TYPE, componentName);
-        }
+    private void onIntuitiveTargetDeleted(int position, String componentId) {
+        optOutValueFromSettings(this, mShortcutUserType, componentId);
+        mTargets.remove(position);
+        mTargetAdapter.notifyDataSetChanged();
     }
 
     private void onCancelButtonClicked() {
@@ -786,10 +772,10 @@ public class AccessibilityButtonChooserActivity extends Activity {
      *
      * @param context The current context.
      * @param shortcutType The preferred shortcut type user selected.
-     * @param componentName The component name that need to be opted out from Settings.
+     * @param componentId The component id that need to be opted out from Settings.
      */
     private void optOutValueFromSettings(
-            Context context, @UserShortcutType int shortcutType, ComponentName componentName) {
+            Context context, @UserShortcutType int shortcutType, String componentId) {
         final StringJoiner joiner = new StringJoiner(String.valueOf(SERVICES_SEPARATOR));
         final String targetsKey = convertToKey(shortcutType);
         final String targetsValue = Settings.Secure.getString(context.getContentResolver(),
@@ -801,26 +787,47 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
         sStringColonSplitter.setString(targetsValue);
         while (sStringColonSplitter.hasNext()) {
-            final String name = sStringColonSplitter.next();
-            if (TextUtils.isEmpty(name) || (componentName.flattenToString()).equals(name)) {
+            final String id = sStringColonSplitter.next();
+            if (TextUtils.isEmpty(id) || componentId.equals(id)) {
                 continue;
             }
-            joiner.add(name);
+            joiner.add(id);
         }
 
         Settings.Secure.putString(context.getContentResolver(), targetsKey, joiner.toString());
     }
 
     /**
+     * Returns if component name existed in one of {@code shortcutTypes} string in Settings.
+     *
+     * @param context The current context.
+     * @param shortcutTypes A combination of {@link UserShortcutType}.
+     * @param componentId The component name that need to be checked existed in Settings.
+     * @return {@code true} if componentName existed in Settings.
+     */
+    private boolean hasValuesInSettings(Context context, int shortcutTypes,
+            @NonNull String componentId) {
+        boolean exist = false;
+        if ((shortcutTypes & UserShortcutType.SOFTWARE) == UserShortcutType.SOFTWARE) {
+            exist = hasValueInSettings(context, UserShortcutType.SOFTWARE, componentId);
+        }
+        if (((shortcutTypes & UserShortcutType.HARDWARE) == UserShortcutType.HARDWARE)) {
+            exist |= hasValueInSettings(context, UserShortcutType.HARDWARE, componentId);
+        }
+        return exist;
+    }
+
+
+    /**
      * Returns if component name existed in Settings.
      *
      * @param context The current context.
      * @param shortcutType The preferred shortcut type user selected.
-     * @param componentName The component name that need to be checked existed in Settings.
+     * @param componentId The component id that need to be checked existed in Settings.
      * @return {@code true} if componentName existed in Settings.
      */
     private boolean hasValueInSettings(Context context, @UserShortcutType int shortcutType,
-            @NonNull ComponentName componentName) {
+            @NonNull String componentId) {
         final String targetKey = convertToKey(shortcutType);
         final String targetString = Settings.Secure.getString(context.getContentResolver(),
                 targetKey);
@@ -831,8 +838,8 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
         sStringColonSplitter.setString(targetString);
         while (sStringColonSplitter.hasNext()) {
-            final String name = sStringColonSplitter.next();
-            if ((componentName.flattenToString()).equals(name)) {
+            final String id = sStringColonSplitter.next();
+            if (componentId.equals(id)) {
                 return true;
             }
         }
