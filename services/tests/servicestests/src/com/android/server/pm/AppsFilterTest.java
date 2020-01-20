@@ -51,7 +51,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -511,6 +510,62 @@ public class AppsFilterTest {
                 overlaySetting, 0));
     }
 
+    @Test
+    public void testInitiatingApp_DoesntFilter() {
+        final AppsFilter appsFilter =
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+        appsFilter.onSystemReady();
+
+        PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
+                DUMMY_TARGET_UID);
+        PackageSetting calling = simulateAddPackage(appsFilter, pkg("com.some.other.package"),
+                DUMMY_CALLING_UID, withInstallSource(target.name, null, null, false));
+
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+    }
+
+    @Test
+    public void testUninstalledInitiatingApp_Filters() {
+        final AppsFilter appsFilter =
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+        appsFilter.onSystemReady();
+
+        PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
+                DUMMY_TARGET_UID);
+        PackageSetting calling = simulateAddPackage(appsFilter, pkg("com.some.other.package"),
+                DUMMY_CALLING_UID, withInstallSource(target.name, null, null, true));
+
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+    }
+
+    @Test
+    public void testOriginatingApp_Filters() {
+        final AppsFilter appsFilter =
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+        appsFilter.onSystemReady();
+
+        PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
+                DUMMY_TARGET_UID);
+        PackageSetting calling = simulateAddPackage(appsFilter, pkg("com.some.other.package"),
+                DUMMY_CALLING_UID, withInstallSource(null, target.name, null, false));
+
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+    }
+
+    @Test
+    public void testInstallingApp_DoesntFilter() {
+        final AppsFilter appsFilter =
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+        appsFilter.onSystemReady();
+
+        PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
+                DUMMY_TARGET_UID);
+        PackageSetting calling = simulateAddPackage(appsFilter, pkg("com.some.other.package"),
+                DUMMY_CALLING_UID, withInstallSource(null, null, target.name, false));
+
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+    }
+
     private interface WithSettingBuilder {
         PackageSettingBuilder withBuilder(PackageSettingBuilder builder);
     }
@@ -538,5 +593,13 @@ public class AppsFilterTest {
         return setting;
     }
 
+    private WithSettingBuilder withInstallSource(String initiatingPackageName,
+            String originatingPackageName, String installerPackageName,
+            boolean isInitiatingPackageUninstalled) {
+        final InstallSource installSource = InstallSource.create(initiatingPackageName,
+                originatingPackageName, installerPackageName,
+                /* isOrphaned= */ false, isInitiatingPackageUninstalled);
+        return setting -> setting.setInstallSource(installSource);
+    }
 }
 
