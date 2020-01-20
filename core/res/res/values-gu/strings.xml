@@ -246,7 +246,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"એરપ્લેન મોડ"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"એરપ્લેન મોડ ચાલુ છે."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"એરપ્લેન મોડ બંધ છે."</string>
-    <string name="global_action_settings" msgid="4671878836947494217">"સેટિંગ્સ"</string>
+    <string name="global_action_settings" msgid="4671878836947494217">"સેટિંગ"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"સહાય"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"વૉઇસ સહાય"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"લૉકડાઉન"</string>
@@ -1613,7 +1613,7 @@
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ઉપકરણ સાથે કનેક્ટ કરો"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ઉપકરણ પર સ્ક્રીન કાસ્ટ કરો"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"ઉપકરણો માટે શોધી રહ્યું છે…"</string>
-    <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"સેટિંગ્સ"</string>
+    <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"સેટિંગ"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ડિસ્કનેક્ટ કરો"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"સ્કેન કરી રહ્યું છે..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"કનેક્ટ કરી રહ્યું છે..."</string>

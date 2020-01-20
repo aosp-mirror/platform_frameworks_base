@@ -1515,7 +1515,7 @@
     <string name="sync_really_delete" msgid="5657871730315579051">"Избриши ги ставките"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Врати ги избришаните"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Не прави ништо засега"</string>
-    <string name="choose_account_label" msgid="5557833752759831548">"Избери сметка"</string>
+    <string name="choose_account_label" msgid="5557833752759831548">"Изберете сметка"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Додај сметка"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"Додај сметка"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Зголеми"</string>
