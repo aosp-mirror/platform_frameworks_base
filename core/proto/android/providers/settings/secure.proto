@@ -188,6 +188,7 @@ message SecureSettingsProto {
         optional SettingProto pulse_on_long_press = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto pulse_on_double_tap = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto pulse_on_tap = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto suppress = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Doze doze = 21;
 
