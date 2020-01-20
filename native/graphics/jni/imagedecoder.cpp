@@ -131,6 +131,10 @@ static ImageDecoder* toDecoder(AImageDecoder* d) {
     return reinterpret_cast<ImageDecoder*>(d);
 }
 
+static const ImageDecoder* toDecoder(const AImageDecoder* d) {
+    return reinterpret_cast<const ImageDecoder*>(d);
+}
+
 // Note: This differs from the version in android_bitmap.cpp in that this
 // version returns kGray_8_SkColorType for ANDROID_BITMAP_FORMAT_A_8. SkCodec
 // allows decoding single channel images to gray, which Android then treats
@@ -256,6 +260,18 @@ int AImageDecoder_setTargetSize(AImageDecoder* decoder, int width, int height) {
 
     return toDecoder(decoder)->setTargetSize(width, height)
             ? ANDROID_IMAGE_DECODER_SUCCESS : ANDROID_IMAGE_DECODER_INVALID_SCALE;
+}
+
+int AImageDecoder_computeSampledSize(const AImageDecoder* decoder, int sampleSize,
+                                     int* width, int* height) {
+    if (!decoder || !width || !height || sampleSize < 1) {
+        return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
+    }
+
+    SkISize size = toDecoder(decoder)->mCodec->getSampledDimensions(sampleSize);
+    *width = size.width();
+    *height = size.height();
+    return ANDROID_IMAGE_DECODER_SUCCESS;
 }
 
 int AImageDecoder_setCrop(AImageDecoder* decoder, ARect crop) {
