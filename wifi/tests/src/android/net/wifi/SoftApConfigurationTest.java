@@ -18,6 +18,8 @@ package android.net.wifi;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertNull;
+
 import android.net.MacAddress;
 import android.os.Parcel;
 
@@ -251,7 +253,7 @@ public class SoftApConfigurationTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testsetClientListExceptionWhenExistMacAddressInBothList() {
+    public void testSetClientListExceptionWhenExistMacAddressInBothList() {
         final MacAddress testMacAddress_1 = MacAddress.fromString("22:33:44:55:66:77");
         final MacAddress testMacAddress_2 = MacAddress.fromString("aa:bb:cc:dd:ee:ff");
         ArrayList<MacAddress> testAllowedClientList = new ArrayList<>();
@@ -261,5 +263,41 @@ public class SoftApConfigurationTest {
         testBlockedClientList.add(testMacAddress_1);
         SoftApConfiguration.Builder configBuilder = new SoftApConfiguration.Builder();
         configBuilder.setClientList(testBlockedClientList, testAllowedClientList);
+    }
+
+    @Test
+    public void testToWifiConfigurationWithUnsupportedParameter() {
+        SoftApConfiguration sae_config = new SoftApConfiguration.Builder()
+                .setPassphrase("secretsecret", SoftApConfiguration.SECURITY_TYPE_WPA3_SAE)
+                .build();
+
+        assertNull(sae_config.toWifiConfiguration());
+        SoftApConfiguration band_6g_config = new SoftApConfiguration.Builder()
+                .setBand(SoftApConfiguration.BAND_6GHZ)
+                .build();
+
+        assertNull(band_6g_config.toWifiConfiguration());
+        SoftApConfiguration sae_transition_config = new SoftApConfiguration.Builder()
+                .setPassphrase("secretsecret",
+                        SoftApConfiguration.SECURITY_TYPE_WPA3_SAE_TRANSITION)
+                .build();
+
+        assertNull(sae_transition_config.toWifiConfiguration());
+    }
+
+    @Test
+    public void testToWifiConfigurationWithSupportedParameter() {
+        SoftApConfiguration softApConfig = new SoftApConfiguration.Builder()
+                .setPassphrase("secretsecret",
+                        SoftApConfiguration.SECURITY_TYPE_WPA2_PSK)
+                .setChannel(149, SoftApConfiguration.BAND_5GHZ)
+                .setHiddenSsid(true)
+                .build();
+        WifiConfiguration wifiConfig = softApConfig.toWifiConfiguration();
+        assertThat(wifiConfig.getAuthType()).isEqualTo(WifiConfiguration.KeyMgmt.WPA2_PSK);
+        assertThat(wifiConfig.preSharedKey).isEqualTo("secretsecret");
+        assertThat(wifiConfig.apBand).isEqualTo(WifiConfiguration.AP_BAND_5GHZ);
+        assertThat(wifiConfig.apChannel).isEqualTo(149);
+        assertThat(wifiConfig.hiddenSSID).isEqualTo(true);
     }
 }

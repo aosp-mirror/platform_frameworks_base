@@ -24,6 +24,7 @@ import android.net.MacAddress;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
@@ -55,6 +56,8 @@ import java.util.Objects;
  *
  */
 public final class SoftApConfiguration implements Parcelable {
+
+    private static final String TAG = "SoftApConfiguration";
 
     @VisibleForTesting
     static final int PSK_MIN_LEN = 8;
@@ -469,6 +472,58 @@ public final class SoftApConfiguration implements Parcelable {
     @SystemApi
     public List<MacAddress> getAllowedClientList() {
         return mAllowedClientList;
+    }
+
+    /**
+     * Returns a {@link WifiConfiguration} representation of this {@link SoftApConfiguration}.
+     * Note that SoftApConfiguration may contain configuration which is cannot be represented
+     * by the legacy WifiConfiguration, in such cases a null will be returned.
+     *
+     * <li> SoftAp band in {@link WifiConfiguration.apBand} only supports
+     * 2GHz, 5GHz, 2GHz+5GHz bands, so conversion is limited to these bands. </li>
+     *
+     * <li> SoftAp security type in {@link WifiConfiguration.KeyMgmt} only supports
+     * NONE, WPA2_PSK, so conversion is limited to these security type.</li>
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public WifiConfiguration toWifiConfiguration() {
+        WifiConfiguration wifiConfig = new WifiConfiguration();
+        wifiConfig.SSID = mSsid;
+        if (mBssid != null) {
+            wifiConfig.BSSID = mBssid.toString();
+        }
+        wifiConfig.preSharedKey = mPassphrase;
+        wifiConfig.hiddenSSID = mHiddenSsid;
+        wifiConfig.apChannel = mChannel;
+        switch (mSecurityType) {
+            case SECURITY_TYPE_OPEN:
+                wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                break;
+            case SECURITY_TYPE_WPA2_PSK:
+                wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA2_PSK);
+                break;
+            default:
+                Log.e(TAG, "Convert fail, unsupported security type :" + mSecurityType);
+                return null;
+        }
+
+        switch (mBand) {
+            case BAND_2GHZ:
+                wifiConfig.apBand  = WifiConfiguration.AP_BAND_2GHZ;
+                break;
+            case BAND_5GHZ:
+                wifiConfig.apBand  = WifiConfiguration.AP_BAND_5GHZ;
+                break;
+            case BAND_ANY:
+                wifiConfig.apBand  = WifiConfiguration.AP_BAND_ANY;
+                break;
+            default:
+                Log.e(TAG, "Convert fail, unsupported band setting :" + mBand);
+                return null;
+        }
+        return wifiConfig;
     }
 
     /**
