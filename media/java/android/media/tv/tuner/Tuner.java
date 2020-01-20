@@ -269,8 +269,8 @@ public final class Tuner implements AutoCloseable  {
      * start a new tuning.
      *
      * <p>
-     * Tune is an async call, with {@link OnTuneEventListener#LOCKED LOCKED} and {@link
-     * OnTuneEventListener#NO_SIGNAL NO_SIGNAL} events sent to the {@link OnTuneEventListener}
+     * Tune is an async call, with {@link OnTuneEventListener#SIGNAL_LOCKED} and {@link
+     * OnTuneEventListener#SIGNAL_NO_SIGNAL} events sent to the {@link OnTuneEventListener}
      * specified in {@link #setOnTuneEventListener(Executor, OnTuneEventListener)}.
      *
      * @param settings Signal delivery information the frontend uses to
@@ -357,13 +357,9 @@ public final class Tuner implements AutoCloseable  {
      * @param lnb the LNB instance.
      *
      * @return result status of the operation.
-     *
-     * @hide
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
-    public int setLnb(@NonNull Lnb lnb) {
-        TunerUtils.checkTunerPermission(mContext);
+    private int setLnb(@NonNull Lnb lnb) {
         return nativeSetLnb(lnb.mId);
     }
 
@@ -373,8 +369,6 @@ public final class Tuner implements AutoCloseable  {
      * @param enable {@code true} to activate LNA module; {@code false} to deactivate LNA.
      *
      * @return result status of the operation.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
@@ -390,10 +384,9 @@ public final class Tuner implements AutoCloseable  {
      *
      * @param statusTypes an array of status types which the caller requests.
      * @return statuses which response the caller's requests.
-     * @hide
      */
     @Nullable
-    public FrontendStatus getFrontendStatus(int[] statusTypes) {
+    public FrontendStatus getFrontendStatus(@NonNull int[] statusTypes) {
         return nativeGetFrontendStatus(statusTypes);
     }
 
@@ -466,8 +459,6 @@ public final class Tuner implements AutoCloseable  {
      * Gets the frontend information.
      *
      * @return The frontend information. {@code null} if the operation failed.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Nullable
@@ -477,20 +468,6 @@ public final class Tuner implements AutoCloseable  {
             throw new IllegalStateException("frontend is not initialized");
         }
         return nativeGetFrontendInfo(mFrontend.mId);
-    }
-
-    /**
-     * Gets the frontend ID.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
-    public int getFrontendId() {
-        TunerUtils.checkTunerPermission(mContext);
-        if (mFrontend == null) {
-            throw new IllegalStateException("frontend is not initialized");
-        }
-        return mFrontend.mId;
     }
 
     /**
