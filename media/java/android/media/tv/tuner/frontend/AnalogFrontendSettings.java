@@ -37,7 +37,9 @@ public class AnalogFrontendSettings extends FrontendSettings {
     /** @hide */
     @IntDef(flag = true,
             prefix = "SIGNAL_TYPE_",
-            value = {SIGNAL_TYPE_UNDEFINED, SIGNAL_TYPE_PAL, SIGNAL_TYPE_SECAM, SIGNAL_TYPE_NTSC})
+            value = {SIGNAL_TYPE_UNDEFINED, SIGNAL_TYPE_AUTO, SIGNAL_TYPE_PAL, SIGNAL_TYPE_PAL_M,
+              SIGNAL_TYPE_PAL_N, SIGNAL_TYPE_PAL_60, SIGNAL_TYPE_NTSC, SIGNAL_TYPE_NTSC_443,
+              SIGNAL_TYPE_SECAM})
     @Retention(RetentionPolicy.SOURCE)
     public @interface SignalType {}
 
@@ -46,25 +48,44 @@ public class AnalogFrontendSettings extends FrontendSettings {
      */
     public static final int SIGNAL_TYPE_UNDEFINED = Constants.FrontendAnalogType.UNDEFINED;
     /**
+     * AUTO analog signal type.
+     */
+    public static final int SIGNAL_TYPE_AUTO = Constants.FrontendAnalogType.AUTO;
+    /**
      * PAL analog signal type.
      */
     public static final int SIGNAL_TYPE_PAL = Constants.FrontendAnalogType.PAL;
     /**
-     * SECM analog signal type.
+     * PAL M analog signal type.
      */
-    public static final int SIGNAL_TYPE_SECAM = Constants.FrontendAnalogType.SECAM;
+    public static final int SIGNAL_TYPE_PAL_M = Constants.FrontendAnalogType.PAL_M;
+    /**
+     * PAL N analog signal type.
+     */
+    public static final int SIGNAL_TYPE_PAL_N = Constants.FrontendAnalogType.PAL_N;
+    /**
+     * PAL 60 analog signal type.
+     */
+    public static final int SIGNAL_TYPE_PAL_60 = Constants.FrontendAnalogType.PAL_60;
     /**
      * NTSC analog signal type.
      */
     public static final int SIGNAL_TYPE_NTSC = Constants.FrontendAnalogType.NTSC;
-
+    /**
+     * NTSC 443 analog signal type.
+     */
+    public static final int SIGNAL_TYPE_NTSC_443 = Constants.FrontendAnalogType.NTSC_443;
+    /**
+     * SECM analog signal type.
+     */
+    public static final int SIGNAL_TYPE_SECAM = Constants.FrontendAnalogType.SECAM;
 
     /** @hide */
     @IntDef(flag = true,
             prefix = "SIF_",
-            value = {SIF_UNDEFINED, SIF_BG, SIF_BG_A2, SIF_BG_NICAM, SIF_I, SIF_DK,
-            SIF_DK1, SIF_DK2, SIF_DK3, SIF_DK_NICAM, SIF_L, SIF_M, SIF_M_BTSC, SIF_M_A2,
-            SIF_M_EIA_J, SIF_I_NICAM, SIF_L_NICAM, SIF_L_PRIME})
+            value = {SIF_UNDEFINED, SIF_AUTO, SIF_BG, SIF_BG_A2, SIF_BG_NICAM, SIF_I, SIF_DK,
+            SIF_DK1_A2, SIF_DK2_A2, SIF_DK3_A2, SIF_DK_NICAM, SIF_L, SIF_M, SIF_M_BTSC, SIF_M_A2,
+            SIF_M_EIAJ, SIF_I_NICAM, SIF_L_NICAM, SIF_L_PRIME})
     @Retention(RetentionPolicy.SOURCE)
     public @interface SifStandard {}
 
@@ -73,6 +94,10 @@ public class AnalogFrontendSettings extends FrontendSettings {
      */
     public static final int SIF_UNDEFINED = Constants.FrontendAnalogSifStandard.UNDEFINED;
     /**
+     * Audo Analog Standard Interchange Format (SIF).
+     */
+    public static final int SIF_AUTO = Constants.FrontendAnalogSifStandard.AUTO;
+     /**
      * BG Analog Standard Interchange Format (SIF).
      */
     public static final int SIF_BG = Constants.FrontendAnalogSifStandard.BG;
@@ -93,17 +118,17 @@ public class AnalogFrontendSettings extends FrontendSettings {
      */
     public static final int SIF_DK = Constants.FrontendAnalogSifStandard.DK;
     /**
-     * DK1 Analog Standard Interchange Format (SIF).
+     * DK1 A2 Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_DK1 = Constants.FrontendAnalogSifStandard.DK1;
+    public static final int SIF_DK1_A2 = Constants.FrontendAnalogSifStandard.DK1_A2;
     /**
-     * DK2 Analog Standard Interchange Format (SIF).
+     * DK2 A2 Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_DK2 = Constants.FrontendAnalogSifStandard.DK2;
+    public static final int SIF_DK2_A2 = Constants.FrontendAnalogSifStandard.DK2_A2;
     /**
-     * DK3 Analog Standard Interchange Format (SIF).
+     * DK3 A2 Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_DK3 = Constants.FrontendAnalogSifStandard.DK3;
+    public static final int SIF_DK3_A2 = Constants.FrontendAnalogSifStandard.DK3_A2;
     /**
      * DK-NICAM Analog Standard Interchange Format (SIF).
      */
@@ -125,9 +150,9 @@ public class AnalogFrontendSettings extends FrontendSettings {
      */
     public static final int SIF_M_A2 = Constants.FrontendAnalogSifStandard.M_A2;
     /**
-     * M-EIA-J Analog Standard Interchange Format (SIF).
+     * M-EIAJ Analog Standard Interchange Format (SIF).
      */
-    public static final int SIF_M_EIA_J = Constants.FrontendAnalogSifStandard.M_EIA_J;
+    public static final int SIF_M_EIAJ = Constants.FrontendAnalogSifStandard.M_EIAJ;
     /**
      * I-NICAM Analog Standard Interchange Format (SIF).
      */
