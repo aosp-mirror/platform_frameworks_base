@@ -28,6 +28,7 @@ import static android.os.Trace.TRACE_TAG_DATABASE;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.AppOpsManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.PackageManager;
@@ -2523,6 +2524,16 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     /** @hide */
     public static int getUserIdFromUri(Uri uri) {
         return getUserIdFromUri(uri, UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Returns the user associated with the given URI.
+     *
+     * @hide
+     */
+    @TestApi
+    public @NonNull static UserHandle getUserHandleFromUri(@NonNull Uri uri) {
+        return UserHandle.of(getUserIdFromUri(uri, Process.myUserHandle().getIdentifier()));
     }
 
     /**
