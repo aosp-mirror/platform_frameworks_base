@@ -829,12 +829,15 @@ public class WindowContainerTests extends WindowTestsBase {
         wc.getDisplayContent().mAppTransition.overridePendingAppTransitionRemote(adapter);
         spyOn(wc);
         doReturn(true).when(wc).okToAnimate();
+        final Runnable onAnimationFinishedCallback = mock(Runnable.class);
 
         // Make sure animating state is as expected after applied animation.
-        assertTrue(wc.applyAnimation(null, TRANSIT_TASK_OPEN, true, false));
+        assertTrue(wc.applyAnimation(null, TRANSIT_TASK_OPEN, true, false,
+                onAnimationFinishedCallback));
         assertEquals(wc.getTopMostActivity(), act);
         assertTrue(wc.isAnimating());
         assertTrue(act.isAnimating(PARENTS));
+        verify(onAnimationFinishedCallback, times(0)).run();
 
         // Make sure animation finish callback will be received and reset animating state after
         // animation finish.
@@ -843,6 +846,7 @@ public class WindowContainerTests extends WindowTestsBase {
         verify(wc).onAnimationFinished();
         assertFalse(wc.isAnimating());
         assertFalse(act.isAnimating(PARENTS));
+        verify(onAnimationFinishedCallback, times(1)).run();
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */

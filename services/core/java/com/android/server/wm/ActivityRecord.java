@@ -4089,11 +4089,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean applyAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
-            boolean isVoiceInteraction) {
+            boolean isVoiceInteraction, @Nullable Runnable animationFinishedCallback) {
         if (mUseTransferredAnimation) {
             return false;
         }
-        return super.applyAnimation(lp, transit, enter, isVoiceInteraction);
+        return super.applyAnimation(lp, transit, enter, isVoiceInteraction,
+                animationFinishedCallback);
     }
 
     /**
