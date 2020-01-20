@@ -1479,11 +1479,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     /**
-     * @return The token used to identify the windows input channel.
-     * @hide
+     * A token used for constructing {@link SurfaceControlViewHost}. This token should
+     * be passed from the host process to the client process.
+     *
+     * @return The token
      */
-    @TestApi
-    public @Nullable IBinder getInputToken() {
+    public @Nullable IBinder getHostToken() {
         final ViewRootImpl viewRoot = getViewRootImpl();
         if (viewRoot == null) {
             return null;
@@ -1545,9 +1546,13 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     /**
-     * @hide
+     * Display the view-hierarchy embedded within a {@link SurfaceControlViewHost.SurfacePackage}
+     * within this SurfaceView. If this SurfaceView is above it's host Surface (see
+     * {@link #setZOrderOnTop} then the embedded Surface hierarchy will be able to receive
+     * input.
+     *
+     * @param p The SurfacePackage to embed.
      */
-    @TestApi
     public void setChildSurfacePackage(@NonNull SurfaceControlViewHost.SurfacePackage p) {
         final SurfaceControl sc = p != null ? p.getSurfaceControl() : null;
         final SurfaceControl lastSc = mSurfacePackage != null ?

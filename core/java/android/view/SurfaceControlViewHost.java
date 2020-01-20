@@ -20,15 +20,21 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.graphics.PixelFormat;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
- * Utility class for adding a view hierarchy to a SurfaceControl.
- *
- * See WindowlessWmTest for example usage.
- * @hide
+ * Utility class for adding a View hierarchy to a {@link SurfaceControl}. The View hierarchy
+ * will render in to a root SurfaceControl, and receive input based on the SurfaceControl's
+ * placement on-screen. The primary usage of this class is to embed a View hierarchy from
+ * one process in to another. After the SurfaceControlViewHost has been set up in the embedded
+ * content provider, we can send the {@link SurfaceControlViewHost.SurfacePackage}
+ * to the host process. The host process can then attach the hierarchy to a SurfaceView within
+ * its own by calling
+ * {@link SurfaceView#setChildSurfacePackage}.
  */
-@TestApi
 public class SurfaceControlViewHost {
     private ViewRootImpl mViewRoot;
     private WindowlessWindowManager mWm;
@@ -36,20 +42,52 @@ public class SurfaceControlViewHost {
     private SurfaceControl mSurfaceControl;
 
     /**
-     * @hide
+     * Package encapsulating a Surface hierarchy which contains interactive view
+     * elements. It's expected to get this object from
+     * {@link SurfaceControlViewHost#getSurfacePackage} afterwards it can be embedded within
+     * a SurfaceView by calling {@link SurfaceView#setChildSurfacePackage}.
      */
-    @TestApi
-    public class SurfacePackage {
-        final SurfaceControl mSurfaceControl;
+    public static final class SurfacePackage implements Parcelable {
+        private final SurfaceControl mSurfaceControl;
         // TODO: Accessibility ID goes here
 
         SurfacePackage(SurfaceControl sc) {
             mSurfaceControl = sc;
         }
 
+        private SurfacePackage(Parcel in) {
+            mSurfaceControl = new SurfaceControl();
+            mSurfaceControl.readFromParcel(in);
+        }
+
+        /**
+         * Use {@link SurfaceView#setChildSurfacePackage} or manually fix
+         * accessibility (see SurfaceView implementation).
+         * @hide
+         */
         public @NonNull SurfaceControl getSurfaceControl() {
             return mSurfaceControl;
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel out, int flags) {
+            mSurfaceControl.writeToParcel(out, flags);
+        }
+
+        public static final @NonNull Creator<SurfacePackage> CREATOR
+             = new Creator<SurfacePackage>() {
+                     public SurfacePackage createFromParcel(Parcel in) {
+                         return new SurfacePackage(in);
+                     }
+                     public SurfacePackage[] newArray(int size) {
+                         return new SurfacePackage[size];
+                     }
+             };
     }
 
     /** @hide */
@@ -59,17 +97,36 @@ public class SurfaceControlViewHost {
         mViewRoot = new ViewRootImpl(c, d, mWm);
     }
 
-    public SurfaceControlViewHost(@NonNull Context c, @NonNull Display d,
-            @Nullable IBinder hostInputToken) {
+    /**
+     * Construct a new SurfaceControlViewHost. The root Surface will be
+     * allocated internally and is accessible via getSurfacePackage().
+     *
+     * The {@param hostToken} parameter, primarily used for ANR reporting,
+     * must be obtained from whomever will be hosting the embedded hierarchy.
+     * It's accessible from {@link SurfaceView#getHostToken}.
+     *
+     * @param context The Context object for your activity or application.
+     * @param display The Display the hierarchy will be placed on.
+     * @param hostToken The host token, as discussed above.
+     */
+    public SurfaceControlViewHost(@NonNull Context context, @NonNull Display display,
+            @Nullable IBinder hostToken) {
         mSurfaceControl = new SurfaceControl.Builder()
             .setContainerLayer()
             .setName("SurfaceControlViewHost")
             .build();
-        mWm = new WindowlessWindowManager(c.getResources().getConfiguration(), mSurfaceControl,
-                hostInputToken);
-        mViewRoot = new ViewRootImpl(c, d, mWm);
+        mWm = new WindowlessWindowManager(context.getResources().getConfiguration(),
+                mSurfaceControl, hostToken);
+        mViewRoot = new ViewRootImpl(context, display, mWm);
     }
 
+    /**
+     * Return a SurfacePackage for the root SurfaceControl of the embedded hierarchy.
+     * Rather than be directly reparented using {@link SurfaceControl.Transaction} this
+     * SurfacePackage should be passed to {@link SurfaceView#setChildSurfacePackage}
+     * which will not only reparent the Surface, but ensure the accessibility hierarchies
+     * are linked.
+     */
     public @Nullable SurfacePackage getSurfacePackage() {
         if (mSurfaceControl != null) {
             return new SurfacePackage(mSurfaceControl);
@@ -78,10 +135,32 @@ public class SurfaceControlViewHost {
         }
     }
 
-    public void addView(View view, WindowManager.LayoutParams attrs) {
+    /**
+     * @hide
+     */
+    public void addView(@NonNull View view, WindowManager.LayoutParams attrs) {
         mViewRoot.setView(view, attrs, null);
     }
 
+    /**
+     * Set the root view of the SurfaceControlViewHost. This view will render in to
+     * the SurfaceControl, and receive input based on the SurfaceControls positioning on
+     * screen. It will be laid as if it were in a window of the passed in width and height.
+     *
+     * @param view The View to add
+     * @param width The width to layout the View within, in pixels.
+     * @param height The height to layout the View within, in pixels.
+     */
+    public void addView(@NonNull View view, int width, int height) {
+        final WindowManager.LayoutParams lp =
+                new WindowManager.LayoutParams(width, height,
+                        WindowManager.LayoutParams.TYPE_APPLICATION, 0, PixelFormat.TRANSPARENT);
+        addView(view, lp);
+    }
+
+    /**
+     * @hide
+     */
     public void relayout(WindowManager.LayoutParams attrs) {
         mViewRoot.setLayoutParams(attrs, false);
         mViewRoot.setReportNextDraw();
@@ -90,8 +169,27 @@ public class SurfaceControlViewHost {
         });
     }
 
-    public void dispose() {
+    /**
+     * Modify the size of the root view.
+     *
+     * @param width Width in pixels
+     * @param height Height in pixels
+     */
+    public void relayout(int width, int height) {
+        final WindowManager.LayoutParams lp =
+                new WindowManager.LayoutParams(width, height,
+                        WindowManager.LayoutParams.TYPE_APPLICATION, 0, PixelFormat.TRANSPARENT);
+        relayout(width, height);
+    }
+
+    /**
+     * Trigger the tear down of the embedded view hierarchy and release the SurfaceControl.
+     * This will result in onDispatchedFromWindow being dispatched to the embedded view hierarchy
+     * and render the object unusable.
+     */
+    public void release() {
         mViewRoot.dispatchDetachedFromWindow();
+        mSurfaceControl.release();
     }
 
     /**

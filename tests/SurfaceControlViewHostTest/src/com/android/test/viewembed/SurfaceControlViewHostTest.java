@@ -52,7 +52,7 @@ public class SurfaceControlViewHostTest extends Activity implements SurfaceHolde
 
     void addEmbeddedView() {
         mVr = new SurfaceControlViewHost(this, this.getDisplay(),
-                mView.getInputToken());
+                mView.getHostToken());
 
         mView.setChildSurfacePackage(mVr.getSurfacePackage());
 
