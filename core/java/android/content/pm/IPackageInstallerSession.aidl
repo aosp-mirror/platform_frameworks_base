@@ -36,7 +36,7 @@ interface IPackageInstallerSession {
 
     void close();
     void commit(in IntentSender statusReceiver, boolean forTransferred);
-    void transfer(in String packageName, in IntentSender statusReceiver);
+    void transfer(in String packageName);
     void abandon();
 
     void addFile(String name, long lengthBytes, in byte[] metadata);
