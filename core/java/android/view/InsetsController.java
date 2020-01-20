@@ -246,6 +246,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private int mPendingTypesToShow;
 
     private int mLastLegacySoftInputMode;
+    private int mLastLegacySystemUiFlags;
     private boolean mStartingAnimation;
 
     private SyncRtSurfaceTransactionApplier mApplier;
@@ -274,7 +275,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             WindowInsets insets = state.calculateInsets(mFrame, mLastInsets.isRound(),
                     mLastInsets.shouldAlwaysConsumeSystemBars(), mLastInsets.getDisplayCutout(),
                     mLastLegacyContentInsets, mLastLegacyStableInsets, mLastLegacySoftInputMode,
-                    null /* typeSideMap */);
+                    mLastLegacySystemUiFlags, null /* typeSideMap */);
             mViewRoot.mView.dispatchWindowInsetsAnimationProgress(insets);
 
             for (int i = mTmpFinishedControls.size() - 1; i >= 0; i--) {
@@ -317,12 +318,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     @VisibleForTesting
     public WindowInsets calculateInsets(boolean isScreenRound,
             boolean alwaysConsumeSystemBars, DisplayCutout cutout, Rect legacyContentInsets,
-            Rect legacyStableInsets, int legacySoftInputMode) {
+            Rect legacyStableInsets, int legacySoftInputMode, int legacySystemUiFlags) {
         mLastLegacyContentInsets.set(legacyContentInsets);
         mLastLegacyStableInsets.set(legacyStableInsets);
         mLastLegacySoftInputMode = legacySoftInputMode;
+        mLastLegacySystemUiFlags = legacySystemUiFlags;
         mLastInsets = mState.calculateInsets(mFrame, isScreenRound, alwaysConsumeSystemBars, cutout,
-                legacyContentInsets, legacyStableInsets, legacySoftInputMode,
+                legacyContentInsets, legacyStableInsets, legacySoftInputMode, legacySystemUiFlags,
                 null /* typeSideMap */);
         return mLastInsets;
     }

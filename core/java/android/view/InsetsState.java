@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
@@ -143,7 +144,8 @@ public class InsetsState implements Parcelable {
     public WindowInsets calculateInsets(Rect frame, boolean isScreenRound,
             boolean alwaysConsumeSystemBars, DisplayCutout cutout,
             @Nullable Rect legacyContentInsets, @Nullable Rect legacyStableInsets,
-            int legacySoftInputMode, @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
+            int legacySoftInputMode, int legacySystemUiFlags,
+            @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
         Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
         boolean[] typeVisibilityMap = new boolean[SIZE];
@@ -186,7 +188,9 @@ public class InsetsState implements Parcelable {
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
                 alwaysConsumeSystemBars, cutout, softInputAdjustMode == SOFT_INPUT_ADJUST_RESIZE
                         ? systemBars() | ime()
-                        : systemBars());
+                        : systemBars(),
+                sNewInsetsMode == NEW_INSETS_MODE_FULL
+                        && (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0);
     }
 
     public Rect calculateVisibleInsets(Rect frame, Rect legacyVisibleInsets,

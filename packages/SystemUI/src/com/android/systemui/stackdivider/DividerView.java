@@ -332,6 +332,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             insets = state.calculateInsets(state.getDisplayFrame(), insets.isRound(),
                     insets.shouldAlwaysConsumeSystemBars(), insets.getDisplayCutout(),
                     null /* legacyContentInsets */, null /* legacyStableInsets */,
+                    0 /* legacySystemUiFlags */,
                     SOFT_INPUT_ADJUST_NOTHING, null /* typeSideMap */);
         }
         if (mStableInsets.left != insets.getStableInsetLeft()
