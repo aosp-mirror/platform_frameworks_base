@@ -4532,6 +4532,30 @@ public class ActivityManager {
     }
 
     /**
+     * Kill the given PIDs, but the killing will be delayed until the device is idle
+     * and the given process is imperceptible.
+     *
+     * <p>You must hold the permission
+     * {@link android.Manifest.permission#FORCE_STOP_PACKAGES} to be able to
+     * call this method.
+     * </p>
+     *
+     * @param pids The list of the pids to be killed
+     * @pram reason The reason of the kill
+     *
+     * @hide
+     */
+    @SystemApi @TestApi
+    @RequiresPermission(Manifest.permission.FORCE_STOP_PACKAGES)
+    public void killProcessesWhenImperceptible(@NonNull int[] pids, @NonNull String reason) {
+        try {
+            getService().killProcessesWhenImperceptible(pids, reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * The AppTask allows you to manage your own application's tasks.
      * See {@link android.app.ActivityManager#getAppTasks()}
      */

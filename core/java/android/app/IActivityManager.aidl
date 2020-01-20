@@ -631,4 +631,10 @@ interface IActivityManager {
      */
     ParceledListSlice<ApplicationExitInfo> getHistoricalProcessExitReasons(String packageName,
             int pid, int maxNum, int userId);
+
+    /*
+     * Kill the given PIDs, but the killing will be delayed until the device is idle
+     * and the given process is imperceptible.
+     */
+    void killProcessesWhenImperceptible(in int[] pids, String reason);
 }
