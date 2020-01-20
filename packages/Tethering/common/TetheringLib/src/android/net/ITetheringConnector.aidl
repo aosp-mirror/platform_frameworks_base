@@ -17,6 +17,7 @@ package android.net;
 
 import android.net.IIntResultListener;
 import android.net.ITetheringEventCallback;
+import android.net.TetheringRequestParcel;
 import android.os.ResultReceiver;
 
 /** @hide */
@@ -27,8 +28,8 @@ oneway interface ITetheringConnector {
 
     void setUsbTethering(boolean enable, String callerPkg, IIntResultListener receiver);
 
-    void startTethering(int type, in ResultReceiver receiver, boolean showProvisioningUi,
-            String callerPkg);
+    void startTethering(in TetheringRequestParcel request, String callerPkg,
+            IIntResultListener receiver);
 
     void stopTethering(int type, String callerPkg, IIntResultListener receiver);
 
