@@ -121,8 +121,13 @@ public class StatusBarWindowController {
         apply(mCurrentState);
     }
 
+    private void applyHeight() {
+        mLpChanged.height = mBarHeight;
+    }
+
     private void apply(State state) {
         applyForceStatusBarVisibleFlag(state);
+        applyHeight();
         if (mLp != null && mLp.copyFrom(mLpChanged) != 0) {
             mWindowManager.updateViewLayout(mStatusBarView, mLp);
         }
