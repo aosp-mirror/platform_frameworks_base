@@ -198,6 +198,7 @@ import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.IntArray;
+import android.util.RotationUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -1606,17 +1607,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (cutout == null || cutout == DisplayCutout.NO_CUTOUT) {
             return WmDisplayCutout.NO_CUTOUT;
         }
+        final Insets waterfallInsets =
+                RotationUtils.rotateInsets(cutout.getWaterfallInsets(), rotation);
         if (rotation == ROTATION_0) {
             return WmDisplayCutout.computeSafeInsets(
                     cutout, mInitialDisplayWidth, mInitialDisplayHeight);
         }
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
         final Rect[] newBounds = mRotationUtil.getRotatedBounds(
-                WmDisplayCutout.computeSafeInsets(
-                        cutout, mInitialDisplayWidth, mInitialDisplayHeight)
-                        .getDisplayCutout().getBoundingRectsAll(),
+                cutout.getBoundingRectsAll(),
                 rotation, mInitialDisplayWidth, mInitialDisplayHeight);
-        return WmDisplayCutout.computeSafeInsets(DisplayCutout.fromBounds(newBounds),
+        return WmDisplayCutout.computeSafeInsets(
+                DisplayCutout.fromBoundsAndWaterfall(newBounds, waterfallInsets),
                 rotated ? mInitialDisplayHeight : mInitialDisplayWidth,
                 rotated ? mInitialDisplayWidth : mInitialDisplayHeight);
     }
