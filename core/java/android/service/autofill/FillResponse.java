@@ -559,8 +559,8 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
-         * Sets targets with the resources IDs of the child view of
-         * {@link RemoteViews Presentation Template} which will cancel the session when clicked.
+         * Sets target resource IDs of the child view in {@link RemoteViews Presentation Template}
+         * which will cancel the session when clicked.
          * Those targets will be respectively applied to a child of the header, footer and
          * each {@link Dataset}.
          *
@@ -571,7 +571,7 @@ public final class FillResponse implements Parcelable {
          * @throws IllegalStateException if {@link #build()} was already called.
          */
         @NonNull
-        public Builder setCancelTargetIds(@Nullable int[] ids) {
+        public Builder setPresentationCancelIds(@Nullable int[] ids) {
             throwIfDestroyed();
             mCancelIds = ids;
             return this;
@@ -769,7 +769,7 @@ public final class FillResponse implements Parcelable {
             }
             builder.setFlags(parcel.readInt());
             final int[] cancelIds = parcel.createIntArray();
-            builder.setCancelTargetIds(cancelIds);
+            builder.setPresentationCancelIds(cancelIds);
 
             final FillResponse response = builder.build();
             response.setRequestId(parcel.readInt());
