@@ -2723,6 +2723,11 @@
     <!-- The amount to scale fullscreen snapshots for Overview and snapshot starting windows. -->
     <item name="config_fullTaskSnapshotScale" format="float" type="dimen">1.0</item>
 
+    <!-- The amount to scale reduced scale snapshots for Overview and snapshot starting windows.
+         Reduced scale snapshots are loaded before full screen snapshots to improve load times and
+         minimize the chance the user will see an empty task card. -->
+    <item name="config_reducedTaskSnapshotScale" format="float" type="dimen">0.5</item>
+
     <!-- Feature flag to store TaskSnapshot in 16 bit pixel format to save memory. -->
     <bool name="config_use16BitTaskSnapshotPixelFormat">false</bool>
 
