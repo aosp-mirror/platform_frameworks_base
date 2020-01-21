@@ -303,7 +303,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         // other task
         Task task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
-                .setStack(mDisplay.getHomeStack()).build();
+                .setStack(mDisplay.getRootHomeTask()).build();
         Task task2 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
                 .setStack(mStack).build();
@@ -792,7 +792,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testBackStackTasks_expectNoTrim() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
-        final ActivityStack homeStack = mDisplay.getHomeStack();
+        final ActivityStack homeStack = mDisplay.getRootHomeTask();
         final ActivityStack aboveHomeStack = mDisplay.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
@@ -812,7 +812,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         final ActivityStack behindHomeStack = mDisplay.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final ActivityStack homeStack = mDisplay.getHomeStack();
+        final ActivityStack homeStack = mDisplay.getRootHomeTask();
         final ActivityStack aboveHomeStack = mDisplay.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
@@ -832,7 +832,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testOtherDisplayTasks_expectNoTrim() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
-        final ActivityStack homeStack = mDisplay.getHomeStack();
+        final ActivityStack homeStack = mDisplay.getRootHomeTask();
         final DisplayContent otherDisplay = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
         final ActivityStack otherDisplayStack = otherDisplay.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);

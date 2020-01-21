@@ -1656,7 +1656,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Only resume home activity if isn't finishing.
         if (r != null && !r.finishing) {
             r.moveFocusableActivityToTop(myReason);
-            return resumeFocusedStacksTopActivities(r.getActivityStack(), prev, null);
+            return resumeFocusedStacksTopActivities(r.getRootTask(), prev, null);
         }
         return startHomeOnDisplay(mCurrentUser, myReason, displayId);
     }
@@ -1980,9 +1980,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     boolean switchUser(int userId, UserState uss) {
-        final int focusStackId = getTopDisplayFocusedStack().getStackId();
+        final int focusStackId = getTopDisplayFocusedStack().getRootTaskId();
         // We dismiss the docked stack whenever we switch users.
-        final ActivityStack dockedStack = getDefaultDisplay().getSplitScreenPrimaryStack();
+        final ActivityStack dockedStack = getDefaultDisplay().getRootSplitScreenPrimaryTask();
         if (dockedStack != null) {
             mStackSupervisor.moveTasksToFullscreenStackLocked(
                     dockedStack, dockedStack.isFocusedStackOnDisplay());
@@ -1994,7 +1994,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         mUserStackInFront.put(mCurrentUser, focusStackId);
         final int restoreStackId =
-                mUserStackInFront.get(userId, getDefaultDisplay().getHomeStack().mStackId);
+                mUserStackInFront.get(userId, getDefaultDisplay().getRootHomeTask().getRootTaskId());
         mCurrentUser = userId;
 
         mStackSupervisor.mStartingUsers.add(uss);
@@ -2012,7 +2012,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         ActivityStack stack = getStack(restoreStackId);
         if (stack == null) {
-            stack = getDefaultDisplay().getHomeStack();
+            stack = getDefaultDisplay().getRootHomeTask();
         }
         final boolean homeInFront = stack.isActivityTypeHome();
         if (stack.isOnHomeDisplay()) {
@@ -2034,8 +2034,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      */
     void updateUserStack(int userId, ActivityStack stack) {
         if (userId != mCurrentUser) {
-            mUserStackInFront.put(userId, stack != null ? stack.getStackId()
-                    : getDefaultDisplay().getHomeStack().mStackId);
+            mUserStackInFront.put(userId, stack != null ? stack.getRootTaskId()
+                    : getDefaultDisplay().getRootHomeTask().getRootTaskId());
         }
     }
 
@@ -2108,12 +2108,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             String reason) {
         mService.deferWindowLayout();
 
-        final DisplayContent display = r.getActivityStack().getDisplay();
+        final DisplayContent display = r.getRootTask().getDisplay();
 
         try {
             final Task task = r.getTask();
 
-            final ActivityStack pinnedStack = display.getPinnedStack();
+            final ActivityStack pinnedStack = display.getRootPinnedTask();
             // This will change the pinned stack's windowing mode to its original mode, ensuring
             // we only have one stack that is in pinned mode.
             if (pinnedStack != null) {
@@ -2124,13 +2124,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
             final ActivityStack stack;
             if (singleActivity) {
-                stack = r.getActivityStack();
+                stack = r.getRootTask();
             } else {
                 // In the case of multiple activities, we will create a new stack for it and then
                 // move the PIP activity into the stack.
                 // We will then perform a windowing mode change for both scenarios.
                 stack = display.createStack(
-                        r.getActivityStack().getRequestedOverrideWindowingMode(),
+                        r.getRootTask().getRequestedOverrideWindowingMode(),
                         r.getActivityType(), ON_TOP, r.info, r.intent);
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
@@ -2398,7 +2398,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         ActivityManager.StackInfo info = new ActivityManager.StackInfo();
         stack.getBounds(info.bounds);
         info.displayId = display.mDisplayId;
-        info.stackId = stack.mStackId;
+        info.stackId = stack.mTaskId;
         info.stackToken = stack.mRemoteToken;
         info.userId = stack.mCurrentUser;
         info.visible = stack.shouldBeVisible(null);
@@ -2853,7 +2853,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             stack = candidateTask.getStack();
         }
         if (stack == null && r != null) {
-            stack = r.getActivityStack();
+            stack = r.getRootTask();
         }
         if (stack != null) {
             display = stack.getDisplay();
@@ -2868,7 +2868,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     return stack;
                 }
                 if (windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY
-                        && display.getSplitScreenPrimaryStack() == stack
+                        && display.getRootSplitScreenPrimaryTask() == stack
                         && candidateTask == stack.getTopMostTask()) {
                     // This is a special case when we try to launch an activity that is currently on
                     // top of split-screen primary stack, but is targeting split-screen secondary.
@@ -3244,7 +3244,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (resumedActivity == null || !resumedActivity.idle) {
                 if (DEBUG_STATES) {
                     Slog.d(TAG_STATES, "allResumedActivitiesIdle: stack="
-                            + stack.mStackId + " " + resumedActivity + " not idle");
+                            + stack.getRootTaskId() + " " + resumedActivity + " not idle");
                 }
                 return false;
             }
@@ -3599,7 +3599,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // TODO(b/111541062): Update tests to look for resumed activities on all displays
         final ActivityStack focusedStack = getTopDisplayFocusedStack();
         if (focusedStack != null) {
-            proto.write(FOCUSED_STACK_ID, focusedStack.mStackId);
+            proto.write(FOCUSED_STACK_ID, focusedStack.getRootTaskId());
             final ActivityRecord focusedActivity = focusedStack.getDisplay().getResumedActivity();
             if (focusedActivity != null) {
                 focusedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);

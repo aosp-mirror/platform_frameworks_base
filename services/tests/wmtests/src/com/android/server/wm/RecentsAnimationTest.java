@@ -97,7 +97,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
                 .setStack(recentsStack)
                 .build();
         ActivityRecord topActivity = new ActivityBuilder(mService).setCreateTask(true).build();
-        topActivity.getActivityStack().moveToFront("testRecentsActivityVisiblility");
+        topActivity.getRootTask().moveToFront("testRecentsActivityVisiblility");
 
         doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
                 any() /* starting */, anyInt() /* configChanges */,
@@ -187,7 +187,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         recentActivity.app = null;
 
         // Start an activity on top.
-        new ActivityBuilder(mService).setCreateTask(true).build().getActivityStack().moveToFront(
+        new ActivityBuilder(mService).setCreateTask(true).build().getRootTask().moveToFront(
                 "testRestartRecentsActivity");
 
         doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
@@ -209,7 +209,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
     public void testSetLaunchTaskBehindOfTargetActivity() {
         DisplayContent display = mRootWindowContainer.getDefaultDisplay();
         display.mDisplayContent.mBoundsAnimationController = mock(BoundsAnimationController.class);
-        ActivityStack homeStack = display.getHomeStack();
+        ActivityStack homeStack = display.getRootHomeTask();
         // Assume the home activity support recents.
         ActivityRecord targetActivity = homeStack.getTopNonFinishingActivity();
         if (targetActivity == null) {
@@ -229,7 +229,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         new ActivityBuilder(mService)
                 .setCreateTask(true)
                 .build()
-                .getActivityStack()
+                .getRootTask()
                 .moveToFront("Activity start");
 
         // Start the recents animation.

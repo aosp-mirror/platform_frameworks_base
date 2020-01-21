@@ -3163,7 +3163,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // Notify whether the docked stack exists for the current user
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
             final ActivityStack stack =
-                    displayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+                    displayContent.getRootSplitScreenPrimaryTask();
             displayContent.mDividerControllerLocked.notifyDockedStackExistsChanged(
                     stack != null && stack.hasTaskForUser(newUserId));
 
@@ -6414,7 +6414,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public int getDockedStackSide() {
         synchronized (mGlobalLock) {
             final ActivityStack dockedStack = getDefaultDisplayContentLocked()
-                    .getSplitScreenPrimaryStackIgnoringVisibility();
+                    .getRootSplitScreenPrimaryTask();
             return dockedStack == null ? DOCKED_INVALID : dockedStack.getDockSide();
         }
     }

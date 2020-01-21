@@ -153,7 +153,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         assertThat((Object) task2.getStack()).isInstanceOf(ActivityStack.class);
         mStarter.updateBounds(task2, bounds);
 
-        verify(mService, times(1)).animateResizePinnedStack(eq(task2.getStack().mStackId),
+        verify(mService, times(1)).animateResizePinnedStack(eq(task2.getRootTaskId()),
                 eq(bounds), anyInt());
 
         // In the case of no animation, the stack and task bounds should be set immediately.
@@ -446,13 +446,13 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 new ActivityBuilder(mService).setCreateTask(true).build();
         final ActivityRecord splitSecondReusableActivity =
                 new ActivityBuilder(mService).setCreateTask(true).build();
-        splitPrimaryFocusActivity.getActivityStack()
+        splitPrimaryFocusActivity.getRootTask()
                 .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        splitSecondReusableActivity.getActivityStack()
+        splitSecondReusableActivity.getRootTask()
                 .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
 
         // Set focus back to primary.
-        splitPrimaryFocusActivity.getActivityStack().moveToFront("testSplitScreenDeliverToTop");
+        splitPrimaryFocusActivity.getRootTask().moveToFront("testSplitScreenDeliverToTop");
 
         // Start activity and delivered new intent.
         starter.getIntent().setComponent(splitSecondReusableActivity.mActivityComponent);
@@ -477,18 +477,18 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 new ActivityBuilder(mService).setCreateTask(true).build();
         final ActivityRecord splitPrimaryFocusActivity =
                 new ActivityBuilder(mService).setCreateTask(true).build();
-        splitPrimaryFocusActivity.getActivityStack()
+        splitPrimaryFocusActivity.getRootTask()
                 .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        splitSecondReusableActivity.getActivityStack()
+        splitSecondReusableActivity.getRootTask()
                 .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-        splitSecondTopActivity.getActivityStack()
+        splitSecondTopActivity.getRootTask()
                 .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
 
         // Make it on top of split-screen-secondary.
-        splitSecondTopActivity.getActivityStack().moveToFront("testSplitScreenTaskToFront");
+        splitSecondTopActivity.getRootTask().moveToFront("testSplitScreenTaskToFront");
 
         // Let primary stack has focus.
-        splitPrimaryFocusActivity.getActivityStack().moveToFront("testSplitScreenTaskToFront");
+        splitPrimaryFocusActivity.getRootTask().moveToFront("testSplitScreenTaskToFront");
 
         // Start activity and delivered new intent.
         starter.getIntent().setComponent(splitSecondReusableActivity.mActivityComponent);
@@ -732,13 +732,13 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mService)
                 .setCreateTask(true).build();
         new ActivityBuilder(mService)
-                .setStack(activity.getActivityStack())
+                .setStack(activity.getRootTask())
                 .setCreateTask(true).build();
 
         // Create a top finishing activity.
         final ActivityRecord finishingTopActivity = new ActivityBuilder(mService)
                 .setCreateTask(true).build();
-        finishingTopActivity.getActivityStack().moveToFront("finishingTopActivity");
+        finishingTopActivity.getRootTask().moveToFront("finishingTopActivity");
 
         assertEquals(finishingTopActivity, mRootWindowContainer.topRunningActivity());
         finishingTopActivity.finishing = true;
@@ -997,8 +997,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
         assertThat(outActivity[0].inSplitScreenWindowingMode()).isFalse();
 
         // Move activity to split-screen-primary stack and make sure it has the focus.
-        top.getActivityStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        top.getActivityStack().moveToFront("testWindowingModeOptionsLaunchAdjacent");
+        top.getRootTask().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        top.getRootTask().moveToFront("testWindowingModeOptionsLaunchAdjacent");
 
         // Activity must landed on split-screen-secondary when launch adjacent.
         starter.setActivityOptions(options.toBundle())

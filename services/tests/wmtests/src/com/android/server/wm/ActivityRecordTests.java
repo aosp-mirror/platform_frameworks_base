@@ -136,7 +136,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testStackCleanupOnTaskRemoval() {
         mStack.removeChild(mTask, null /*reason*/);
         // Stack should be gone on task removal.
-        assertNull(mService.mRootWindowContainer.getStack(mStack.mStackId));
+        assertNull(mService.mRootWindowContainer.getStack(mStack.mTaskId));
     }
 
     @Test
@@ -1010,7 +1010,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testDestroyIfPossible_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
-        final ActivityStack homeStack = mActivity.getDisplay().getHomeStack();
+        final ActivityStack homeStack = mActivity.getDisplay().getRootHomeTask();
         homeStack.forAllTasks((t) -> {
             homeStack.removeChild(t, "test");
         }, true /* traverseTopToBottom */, homeStack);
@@ -1036,7 +1036,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testCompleteFinishing_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
-        final ActivityStack homeStack = mActivity.getDisplay().getHomeStack();
+        final ActivityStack homeStack = mActivity.getDisplay().getRootHomeTask();
         homeStack.forAllTasks((t) -> {
             homeStack.removeChild(t, "test");
         }, true /* traverseTopToBottom */, homeStack);
@@ -1136,7 +1136,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testRemoveFromHistory() {
-        final ActivityStack stack = mActivity.getActivityStack();
+        final ActivityStack stack = mActivity.getRootTask();
         final Task task = mActivity.getTask();
 
         mActivity.removeFromHistory("test");

@@ -618,15 +618,15 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
         // Compare the z-order of ActivityStacks if both activities landed on same display.
         if (display == topDisplay
-                && mPreQTopResumedActivity.getActivityStack().compareTo(
-                        activity.getActivityStack()) <= 0) {
+                && mPreQTopResumedActivity.getRootTask().compareTo(
+                        activity.getRootTask()) <= 0) {
             canUpdate = true;
         }
 
         if (canUpdate) {
             // Make sure the previous top activity in the process no longer be resumed.
             if (mPreQTopResumedActivity != null && mPreQTopResumedActivity.isState(RESUMED)) {
-                final ActivityStack stack = mPreQTopResumedActivity.getActivityStack();
+                final ActivityStack stack = mPreQTopResumedActivity.getRootTask();
                 if (stack != null) {
                     stack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
                             activity);

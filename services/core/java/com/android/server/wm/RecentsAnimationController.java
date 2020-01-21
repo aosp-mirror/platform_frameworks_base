@@ -413,7 +413,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
         // Save the minimized home height
         final ActivityStack dockedStack =
-                mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+                mDisplayContent.getRootSplitScreenPrimaryTask();
         mDisplayContent.getDockedDividerController().getHomeStackBoundsInDockedMode(
                 mDisplayContent.getConfiguration(),
                 dockedStack == null ? DOCKED_INVALID : dockedStack.getDockSide(),

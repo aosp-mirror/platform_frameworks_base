@@ -85,7 +85,7 @@ public class TaskPositionerTests extends WindowTestsBase {
 
         mPositioner.register(mDisplayContent, win);
 
-        win.getStack().setWindowingMode(WINDOWING_MODE_FREEFORM);
+        win.getRootTask().setWindowingMode(WINDOWING_MODE_FREEFORM);
     }
 
     @After

@@ -824,7 +824,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         false /* markFrozenIfConfigChanged */, true /* deferResume */);
             }
 
-            if (r.getActivityStack().checkKeyguardVisibility(r, true /* shouldBeVisible */,
+            if (r.getRootTask().checkKeyguardVisibility(r, true /* shouldBeVisible */,
                     true /* isTop */) && r.allowMoveToFront()) {
                 // We only set the visibility to true if the activity is not being launched in
                 // background, and is allowed to be visible based on keyguard state. This avoids
@@ -1582,7 +1582,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         final ActivityStack stack =
-                mRootWindowContainer.getDefaultDisplay().getSplitScreenPrimaryStack();
+                mRootWindowContainer.getDefaultDisplay().getRootSplitScreenPrimaryTask();
         if (stack == null) {
             Slog.w(TAG, "resizeDockedStackLocked: docked stack not found");
             return;
@@ -1670,7 +1670,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     void resizePinnedStackLocked(Rect pinnedBounds, Rect tempPinnedTaskBounds) {
         // TODO(multi-display): The display containing the stack should be passed in.
         final ActivityStack stack =
-                mRootWindowContainer.getDefaultDisplay().getPinnedStack();
+                mRootWindowContainer.getDefaultDisplay().getRootPinnedTask();
         if (stack == null) {
             Slog.w(TAG, "resizePinnedStackLocked: pinned stack not found");
             return;
@@ -1891,13 +1891,13 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     // TODO: Look into changing users to this method to DisplayContent.resolveWindowingMode()
     ActivityStack getReparentTargetStack(Task task, ActivityStack stack, boolean toTop) {
         final ActivityStack prevStack = task.getStack();
-        final int stackId = stack.mStackId;
+        final int rootTaskId = stack.mTaskId;
         final boolean inMultiWindowMode = stack.inMultiWindowMode();
 
         // Check that we aren't reparenting to the same stack that the task is already in
-        if (prevStack != null && prevStack.mStackId == stackId) {
+        if (prevStack != null && prevStack.mTaskId == rootTaskId) {
             Slog.w(TAG, "Can not reparent to same stack, task=" + task
-                    + " already in stackId=" + stackId);
+                    + " already in stackId=" + rootTaskId);
             return prevStack;
         }
 
@@ -1912,7 +1912,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // multi-display.
         if (stack.getDisplayId() != DEFAULT_DISPLAY && !mService.mSupportsMultiDisplay) {
             throw new IllegalArgumentException("Device doesn't support multi-display, can not"
-                    + " reparent task=" + task + " to stackId=" + stackId);
+                    + " reparent task=" + task + " to stackId=" + rootTaskId);
         }
 
         // Ensure that we aren't trying to move into a freeform stack without freeform support
@@ -1993,7 +1993,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     void activitySleptLocked(ActivityRecord r) {
         mGoingToSleepActivities.remove(r);
-        final ActivityStack s = r.getActivityStack();
+        final ActivityStack s = r.getRootTask();
         if (s != null) {
             s.checkReadyForSleep();
         } else {
@@ -2029,7 +2029,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // A resumed activity cannot be stopping. remove from list
         mStoppingActivities.remove(r);
 
-        final ActivityStack stack = r.getActivityStack();
+        final ActivityStack stack = r.getRootTask();
         if (stack.getDisplay().allResumedActivitiesComplete()) {
             mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
             // Make sure activity & window visibility should be identical
@@ -2082,7 +2082,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + s.nowVisible
                     + " animating=" + animating + " finishing=" + s.finishing);
 
-            final ActivityStack stack = s.getActivityStack();
+            final ActivityStack stack = s.getRootTask();
             final boolean shouldSleepOrShutDown = stack != null
                     ? stack.shouldSleepOrShutDownActivities()
                     : mService.isSleepingOrShuttingDownLocked();
@@ -2395,7 +2395,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final boolean isSecondaryDisplayPreferred =
                 (preferredDisplayId != DEFAULT_DISPLAY && preferredDisplayId != INVALID_DISPLAY);
         final boolean inSplitScreenMode = actualStack != null
-                && actualStack.getDisplay().hasSplitScreenPrimaryStack();
+                && actualStack.getDisplay().hasSplitScreenPrimaryTask();
         if (((!inSplitScreenMode && preferredWindowingMode != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
                 && !isSecondaryDisplayPreferred) || !task.isActivityTypeStandardOrUndefined()) {
             return;
@@ -2444,7 +2444,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
 
             final ActivityStack dockedStack =
-                    task.getStack().getDisplay().getSplitScreenPrimaryStack();
+                    task.getStack().getDisplay().getRootSplitScreenPrimaryTask();
             if (dockedStack != null) {
                 // Display a warning toast that we tried to put an app that doesn't support
                 // split-screen in split-screen.
@@ -2473,7 +2473,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final ActivityRecord r = ActivityRecord.isInStackLocked(token);
         if (r != null) {
             r.finishRelaunching();
-            if (r.getActivityStack().shouldSleepOrShutDownActivities()) {
+            if (r.getRootTask().shouldSleepOrShutDownActivities()) {
                 r.setSleeping(true, true);
             }
         }
