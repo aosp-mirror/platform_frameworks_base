@@ -1075,8 +1075,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      */
     static boolean canLaunchInActivityView(Context context, NotificationEntry entry) {
         PendingIntent intent = entry.getBubbleMetadata() != null
-                ? entry.getBubbleMetadata().getIntent()
+                ? entry.getBubbleMetadata().getBubbleIntent()
                 : null;
+        if (entry.getBubbleMetadata() != null
+                && entry.getBubbleMetadata().getShortcutId() != null) {
+            return true;
+        }
         if (intent == null) {
             Log.w(TAG, "Unable to create bubble -- no intent: " + entry.getKey());
             return false;

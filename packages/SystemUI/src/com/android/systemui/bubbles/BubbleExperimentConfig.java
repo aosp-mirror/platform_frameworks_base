@@ -29,7 +29,6 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Color;
@@ -182,7 +181,7 @@ public class BubbleExperimentConfig {
             ShortcutInfo info = getShortcutInfo(context, entry.getSbn().getPackageName(),
                     entry.getSbn().getUser(), shortcutId);
             if (info != null) {
-                metadata = createForShortcut(context, entry);
+                metadata = createForShortcut(shortcutId);
             }
 
             // Replace existing metadata with shortcut, or we're bubbling for experiment
@@ -259,30 +258,17 @@ public class BubbleExperimentConfig {
         }
         if (intent != null) {
             return new Notification.BubbleMetadata.Builder()
+                    .createIntentBubble(intent, icon)
                     .setDesiredHeight(BUBBLE_HEIGHT)
-                    .setIcon(icon)
-                    .setIntent(intent)
                     .build();
         }
         return null;
     }
 
-    static Notification.BubbleMetadata createForShortcut(Context context, NotificationEntry entry) {
-        // ShortcutInfo does not return an icon, instead a Drawable, lets just use
-        // notification icon for BubbleMetadata.
-        Icon icon = entry.getSbn().getNotification().getSmallIcon();
-
-        // ShortcutInfo does not return the intent, lets make a fake but identifiable
-        // intent so we can still add bubbleMetadata
-        if (sDummyShortcutIntent == null) {
-            Intent i = new Intent(SHORTCUT_DUMMY_INTENT);
-            sDummyShortcutIntent = PendingIntent.getActivity(context, 0, i,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-        }
+    static Notification.BubbleMetadata createForShortcut(String shortcutId) {
         return new Notification.BubbleMetadata.Builder()
                 .setDesiredHeight(BUBBLE_HEIGHT)
-                .setIcon(icon)
-                .setIntent(sDummyShortcutIntent)
+                .createShortcutBubble(shortcutId)
                 .build();
     }
 
@@ -302,10 +288,6 @@ public class BubbleExperimentConfig {
         return shortcuts != null && shortcuts.size() > 0
                 ? shortcuts.get(0)
                 : null;
-    }
-
-    static boolean isShortcutIntent(PendingIntent intent) {
-        return intent != null && intent.equals(sDummyShortcutIntent);
     }
 
     static List<Person> getPeopleFromNotification(NotificationEntry entry) {

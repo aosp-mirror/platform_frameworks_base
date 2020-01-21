@@ -126,14 +126,21 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             StatusBarNotification sbn = b.getEntry().getSbn();
             String packageName = sbn.getPackageName();
 
-            // Shortcut info for this bubble
-            String shortcutId = sbn.getNotification().getShortcutId();
-            if (BubbleExperimentConfig.useShortcutInfoToBubble(c)
-                    && shortcutId != null) {
-                info.shortcutInfo = BubbleExperimentConfig.getShortcutInfo(c,
-                        packageName,
-                        sbn.getUser(), shortcutId);
+            // Real shortcut info for this bubble
+            String bubbleShortcutId =  b.getEntry().getBubbleMetadata().getShortcutId();
+            if (bubbleShortcutId != null) {
+                info.shortcutInfo = BubbleExperimentConfig.getShortcutInfo(c, packageName,
+                        sbn.getUser(), bubbleShortcutId);
+            } else {
+                // Check for experimental shortcut
+                String shortcutId = sbn.getNotification().getShortcutId();
+                if (BubbleExperimentConfig.useShortcutInfoToBubble(c) && shortcutId != null) {
+                    info.shortcutInfo = BubbleExperimentConfig.getShortcutInfo(c,
+                            packageName,
+                            sbn.getUser(), shortcutId);
+                }
             }
+
 
             // App name & app icon
             PackageManager pm = c.getPackageManager();
@@ -158,7 +165,8 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             }
 
             // Badged bubble image
-            Drawable bubbleDrawable = iconFactory.getBubbleDrawable(b, c);
+            Drawable bubbleDrawable = iconFactory.getBubbleDrawable(c, info.shortcutInfo,
+                    b.getEntry().getBubbleMetadata());
             BitmapInfo badgeBitmapInfo = iconFactory.getBadgeBitmap(badgedIcon);
             info.badgedBubbleImage = iconFactory.getBubbleBitmap(bubbleDrawable,
                     badgeBitmapInfo).icon;

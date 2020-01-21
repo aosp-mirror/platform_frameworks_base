@@ -346,14 +346,14 @@ class Bubble {
      * To populate the icon use {@link LauncherApps#getShortcutIconDrawable(ShortcutInfo, int)}.
      */
     boolean usingShortcutInfo() {
-        return BubbleExperimentConfig.isShortcutIntent(getBubbleIntent());
+        return mEntry.getBubbleMetadata().getShortcutId() != null;
     }
 
     @Nullable
     PendingIntent getBubbleIntent() {
         Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
         if (data != null) {
-            return data.getIntent();
+            return data.getBubbleIntent();
         }
         return null;
     }
