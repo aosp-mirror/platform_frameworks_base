@@ -16,6 +16,9 @@
 
 package com.android.server.media;
 
+import static android.media.MediaRoute2Info.FEATURE_LIVE_AUDIO;
+import static android.media.MediaRoute2Info.FEATURE_LIVE_VIDEO;
+
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
@@ -50,10 +53,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
     static final String DEFAULT_ROUTE_ID = "DEFAULT_ROUTE";
     static final String SYSTEM_SESSION_ID = "SYSTEM_SESSION";
-
-    // TODO: Move these to a proper place
-    public static final String TYPE_LIVE_AUDIO = "android.media.intent.route.TYPE_LIVE_AUDIO";
-    public static final String TYPE_LIVE_VIDEO = "android.media.intent.route.TYPE_LIVE_VIDEO";
 
     private final AudioManager mAudioManager;
     private final IAudioService mAudioService;
@@ -158,8 +157,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                         : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                 .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
                 .setVolume(mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
-                .addFeature(TYPE_LIVE_AUDIO)
-                .addFeature(TYPE_LIVE_VIDEO)
+                .addFeature(FEATURE_LIVE_AUDIO)
+                .addFeature(FEATURE_LIVE_VIDEO)
                 .build();
 
         AudioRoutesInfo newAudioRoutes = null;
@@ -209,8 +208,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                         : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                 .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
                 .setVolume(mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
-                .addFeature(TYPE_LIVE_AUDIO)
-                .addFeature(TYPE_LIVE_VIDEO)
+                .addFeature(FEATURE_LIVE_AUDIO)
+                .addFeature(FEATURE_LIVE_VIDEO)
                 .build();
 
         publishRoutes();
