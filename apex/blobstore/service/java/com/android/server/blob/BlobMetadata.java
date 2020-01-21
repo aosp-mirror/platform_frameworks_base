@@ -43,6 +43,7 @@ import android.system.Os;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
@@ -52,6 +53,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Objects;
@@ -82,6 +84,9 @@ class BlobMetadata {
     private final ArrayMap<String, ArraySet<RevocableFileDescriptor>> mRevocableFds =
             new ArrayMap<>();
 
+    // Do not access this directly, instead use getSessionFile().
+    private File mBlobFile;
+
     BlobMetadata(Context context, long blobId, BlobHandle blobHandle, int userId) {
         mContext = context;
         this.blobId = blobId;
@@ -98,6 +103,20 @@ class BlobMetadata {
     void addCommitters(ArraySet<Committer> committers) {
         synchronized (mMetadataLock) {
             mCommitters.addAll(committers);
+        }
+    }
+
+    void removeCommitter(@NonNull String packageName, int uid) {
+        synchronized (mMetadataLock) {
+            mCommitters.removeIf((committer) ->
+                    committer.uid == uid && committer.packageName.equals(packageName));
+        }
+    }
+
+    void removeInvalidCommitters(SparseArray<String> packages) {
+        synchronized (mMetadataLock) {
+            mCommitters.removeIf(committer ->
+                    !committer.packageName.equals(packages.get(committer.uid)));
         }
     }
 
@@ -125,7 +144,15 @@ class BlobMetadata {
 
     void removeLeasee(String packageName, int uid) {
         synchronized (mMetadataLock) {
-            mLeasees.remove(new Accessor(packageName, uid));
+            mLeasees.removeIf((leasee) ->
+                    leasee.uid == uid && leasee.packageName.equals(packageName));
+        }
+    }
+
+    void removeInvalidLeasees(SparseArray<String> packages) {
+        synchronized (mMetadataLock) {
+            mLeasees.removeIf(leasee ->
+                    !leasee.packageName.equals(packages.get(leasee.uid)));
         }
     }
 
@@ -160,11 +187,18 @@ class BlobMetadata {
         return false;
     }
 
+    File getBlobFile() {
+        if (mBlobFile == null) {
+            mBlobFile = BlobStoreConfig.getBlobFile(blobId);
+        }
+        return mBlobFile;
+    }
+
     ParcelFileDescriptor openForRead(String callingPackage) throws IOException {
         // TODO: Add limit on opened fds
         FileDescriptor fd;
         try {
-            fd = Os.open(BlobStoreConfig.getBlobFile(blobId).getPath(), O_RDONLY, 0);
+            fd = Os.open(getBlobFile().getPath(), O_RDONLY, 0);
         } catch (ErrnoException e) {
             throw e.rethrowAsIOException();
         }

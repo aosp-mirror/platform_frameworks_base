@@ -22,6 +22,10 @@ import static android.app.blob.XmlTags.TAG_BLOB;
 import static android.app.blob.XmlTags.TAG_BLOBS;
 import static android.app.blob.XmlTags.TAG_SESSION;
 import static android.app.blob.XmlTags.TAG_SESSIONS;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
+import static android.os.UserHandle.USER_NULL;
 
 import static com.android.server.blob.BlobStoreConfig.CURRENT_XML_VERSION;
 import static com.android.server.blob.BlobStoreConfig.TAG;
@@ -39,7 +43,11 @@ import android.annotation.Nullable;
 import android.app.blob.BlobHandle;
 import android.app.blob.IBlobStoreManager;
 import android.app.blob.IBlobStoreSession;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Handler;
@@ -49,6 +57,7 @@ import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.ExceptionUtils;
@@ -80,6 +89,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Service responsible for maintaining and facilitating access to data blobs published by apps.
@@ -122,14 +133,16 @@ public class BlobStoreManagerService extends SystemService {
         publishBinderService(Context.BLOB_STORE_SERVICE, new Stub());
 
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        registerReceivers();
     }
 
     @Override
     public void onBootPhase(int phase) {
         if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             synchronized (mBlobsLock) {
-                readBlobSessionsLocked();
-                readBlobsInfoLocked();
+                final SparseArray<SparseArray<String>> allPackages = getAllPackages();
+                readBlobSessionsLocked(allPackages);
+                readBlobsInfoLocked(allPackages);
             }
         }
     }
@@ -137,6 +150,15 @@ public class BlobStoreManagerService extends SystemService {
     @GuardedBy("mBlobsLock")
     private long generateNextSessionIdLocked() {
         return ++mCurrentMaxSessionId;
+    }
+
+    private void registerReceivers() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
+        intentFilter.addAction(Intent.ACTION_USER_REMOVED);
+        mContext.registerReceiverAsUser(new PackageChangedReceiver(), UserHandle.ALL,
+                intentFilter, null, mHandler);
     }
 
     @GuardedBy("mBlobsLock")
@@ -349,11 +371,10 @@ public class BlobStoreManagerService extends SystemService {
     }
 
     @GuardedBy("mBlobsLock")
-    private void readBlobSessionsLocked() {
+    private void readBlobSessionsLocked(SparseArray<SparseArray<String>> allPackages) {
         if (!BlobStoreConfig.getBlobStoreRootDir().exists()) {
             return;
         }
-
         final AtomicFile sessionsIndexFile = prepareSessionsIndexFile();
         if (sessionsIndexFile == null) {
             Slog.wtf(TAG, "Error creating sessions index file");
@@ -377,8 +398,17 @@ public class BlobStoreManagerService extends SystemService {
                     if (session == null) {
                         continue;
                     }
-                    getUserSessionsLocked(UserHandle.getUserId(session.ownerUid)).put(
-                            session.sessionId, session);
+                    final SparseArray<String> userPackages = allPackages.get(
+                            UserHandle.getUserId(session.ownerUid));
+                    if (userPackages != null
+                            && session.ownerPackageName.equals(
+                                    userPackages.get(session.ownerUid))) {
+                        getUserSessionsLocked(UserHandle.getUserId(session.ownerUid)).put(
+                                session.sessionId, session);
+                    } else {
+                        // Unknown package or the session data does not belong to this package.
+                        session.getSessionFile().delete();
+                    }
                     mCurrentMaxSessionId = Math.max(mCurrentMaxSessionId, session.sessionId);
                 }
             }
@@ -423,11 +453,10 @@ public class BlobStoreManagerService extends SystemService {
     }
 
     @GuardedBy("mBlobsLock")
-    private void readBlobsInfoLocked() {
+    private void readBlobsInfoLocked(SparseArray<SparseArray<String>> allPackages) {
         if (!BlobStoreConfig.getBlobStoreRootDir().exists()) {
             return;
         }
-
         final AtomicFile blobsIndexFile = prepareBlobsIndexFile();
         if (blobsIndexFile == null) {
             Slog.wtf(TAG, "Error creating blobs index file");
@@ -447,8 +476,15 @@ public class BlobStoreManagerService extends SystemService {
 
                 if (TAG_BLOB.equals(in.getName())) {
                     final BlobMetadata blobMetadata = BlobMetadata.createFromXml(mContext, in);
-                    getUserBlobsLocked(blobMetadata.userId).put(
-                            blobMetadata.blobHandle, blobMetadata);
+                    final SparseArray<String> userPackages = allPackages.get(blobMetadata.userId);
+                    if (userPackages == null) {
+                        blobMetadata.getBlobFile().delete();
+                    } else {
+                        getUserBlobsLocked(blobMetadata.userId).put(
+                                blobMetadata.blobHandle, blobMetadata);
+                        blobMetadata.removeInvalidCommitters(userPackages);
+                        blobMetadata.removeInvalidLeasees(userPackages);
+                    }
                     mCurrentMaxSessionId = Math.max(mCurrentMaxSessionId, blobMetadata.blobId);
                 }
             }
@@ -489,6 +525,33 @@ public class BlobStoreManagerService extends SystemService {
                 BlobStoreManagerService.this).recycleOnUse());
     }
 
+    private int getPackageUid(String packageName, int userId) {
+        final int uid = mPackageManagerInternal.getPackageUid(
+                packageName,
+                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE | MATCH_UNINSTALLED_PACKAGES,
+                userId);
+        return uid;
+    }
+
+    private SparseArray<SparseArray<String>> getAllPackages() {
+        final SparseArray<SparseArray<String>> allPackages = new SparseArray<>();
+        final int[] allUsers = LocalServices.getService(UserManagerInternal.class).getUserIds();
+        for (int userId : allUsers) {
+            final SparseArray<String> userPackages = new SparseArray<>();
+            allPackages.put(userId, userPackages);
+            final List<ApplicationInfo> applicationInfos = mPackageManagerInternal
+                    .getInstalledApplications(
+                            MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE
+                                    | MATCH_UNINSTALLED_PACKAGES,
+                            userId, Process.myUid());
+            for (int i = 0, count = applicationInfos.size(); i < count; ++i) {
+                final ApplicationInfo applicationInfo = applicationInfos.get(i);
+                userPackages.put(applicationInfo.uid, applicationInfo.packageName);
+            }
+        }
+        return allPackages;
+    }
+
     AtomicFile prepareSessionsIndexFile() {
         final File file = BlobStoreConfig.prepareSessionIndexFile();
         if (file == null) {
@@ -503,6 +566,91 @@ public class BlobStoreManagerService extends SystemService {
             return null;
         }
         return new AtomicFile(file, "blobs_index" /* commitLogTag */);
+    }
+
+    private void handlePackageRemoved(String packageName, int uid) {
+        synchronized (mBlobsLock) {
+            // Clean up any pending sessions
+            final LongSparseArray<BlobStoreSession> userSessions =
+                    getUserSessionsLocked(UserHandle.getUserId(uid));
+            final ArrayList<Integer> indicesToRemove = new ArrayList<>();
+            for (int i = 0, count = userSessions.size(); i < count; ++i) {
+                final BlobStoreSession session = userSessions.valueAt(i);
+                if (session.ownerUid == uid
+                        && session.ownerPackageName.equals(packageName)) {
+                    session.getSessionFile().delete();
+                    indicesToRemove.add(i);
+                }
+            }
+            for (int i = 0, count = indicesToRemove.size(); i < count; ++i) {
+                userSessions.removeAt(i);
+            }
+
+            // Remove the package from the committer and leasee list
+            final ArrayMap<BlobHandle, BlobMetadata> userBlobs =
+                    getUserBlobsLocked(UserHandle.getUserId(uid));
+            for (int i = 0, count = userBlobs.size(); i < count; ++i) {
+                final BlobMetadata blobMetadata = userBlobs.valueAt(i);
+                blobMetadata.removeCommitter(packageName, uid);
+                blobMetadata.removeLeasee(packageName, uid);
+            }
+            // TODO: clean-up blobs which doesn't have any active leases.
+        }
+    }
+
+    private void handleUserRemoved(int userId) {
+        synchronized (mBlobsLock) {
+            final LongSparseArray<BlobStoreSession> userSessions =
+                    mSessions.removeReturnOld(userId);
+            if (userSessions != null) {
+                for (int i = 0, count = userSessions.size(); i < count; ++i) {
+                    final BlobStoreSession session = userSessions.valueAt(i);
+                    session.getSessionFile().delete();
+                }
+            }
+
+            final ArrayMap<BlobHandle, BlobMetadata> userBlobs =
+                    mBlobsMap.removeReturnOld(userId);
+            if (userBlobs != null) {
+                for (int i = 0, count = userBlobs.size(); i < count; ++i) {
+                    final BlobMetadata blobMetadata = userBlobs.valueAt(i);
+                    blobMetadata.getBlobFile().delete();
+                }
+            }
+        }
+    }
+
+    private class PackageChangedReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case Intent.ACTION_PACKAGE_FULLY_REMOVED:
+                case Intent.ACTION_PACKAGE_DATA_CLEARED:
+                    final String packageName = intent.getData().getSchemeSpecificPart();
+                    if (packageName == null) {
+                        Slog.wtf(TAG, "Package name is missing in the intent: " + intent);
+                        return;
+                    }
+                    final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                    if (uid == -1) {
+                        Slog.wtf(TAG, "uid is missing in the intent: " + intent);
+                        return;
+                    }
+                    handlePackageRemoved(packageName, uid);
+                    break;
+                case Intent.ACTION_USER_REMOVED:
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                            USER_NULL);
+                    if (userId == USER_NULL) {
+                        Slog.wtf(TAG, "userId is missing in the intent: " + intent);
+                        return;
+                    }
+                    handleUserRemoved(userId);
+                    break;
+                default:
+                    Slog.wtf(TAG, "Received unknown intent: " + intent);
+            }
+        }
     }
 
     private class Stub extends IBlobStoreManager.Stub {
@@ -622,6 +770,8 @@ public class BlobStoreManagerService extends SystemService {
 
             final IndentingPrintWriter fout = new IndentingPrintWriter(writer, "    ");
             synchronized (mBlobsLock) {
+                fout.println("mCurrentMaxSessionId: " + mCurrentMaxSessionId);
+                fout.println();
                 for (int i = 0, userCount = mSessions.size(); i < userCount; ++i) {
                     final int userId = mSessions.keyAt(i);
                     final LongSparseArray<BlobStoreSession> userSessions = mSessions.valueAt(i);
