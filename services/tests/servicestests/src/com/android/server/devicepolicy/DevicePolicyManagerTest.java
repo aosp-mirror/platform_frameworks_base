@@ -3723,6 +3723,39 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(-1, dpm.getLastSecurityLogRetrievalTime());
     }
 
+    public void testSetLockdownAdminConfiguredNetworksWithDO() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        dpm.setLockdownAdminConfiguredNetworks(admin1, true);
+        verify(getServices().settings).settingsGlobalPutInt(
+                Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 1);
+
+        dpm.setLockdownAdminConfiguredNetworks(admin1, false);
+        verify(getServices().settings).settingsGlobalPutInt(
+                Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 0);
+    }
+
+    public void testSetLockdownAdminConfiguredNetworksWithPO() throws Exception {
+        setupProfileOwner();
+        assertExpectException(SecurityException.class, null,
+                () -> dpm.setLockdownAdminConfiguredNetworks(admin1, false));
+        verify(getServices().settings, never()).settingsGlobalPutInt(
+                Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 0);
+    }
+
+    public void testSetLockdownAdminConfiguredNetworksWithPOOfOrganizationOwnedDevice()
+            throws Exception {
+        setupProfileOwner();
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
+        dpm.setLockdownAdminConfiguredNetworks(admin1, true);
+        verify(getServices().settings).settingsGlobalPutInt(
+                Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 1);
+
+        dpm.setLockdownAdminConfiguredNetworks(admin1, false);
+        verify(getServices().settings).settingsGlobalPutInt(
+                Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 0);
+    }
+
     public void testSetSystemSettingFailWithNonWhitelistedSettings() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();

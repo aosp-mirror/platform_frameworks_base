@@ -11348,6 +11348,37 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public void setLockdownAdminConfiguredNetworks(ComponentName who, boolean lockdown) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(who);
+
+        mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.settingsGlobalPutInt(Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN,
+                        lockdown ? 1 : 0));
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.ALLOW_MODIFICATION_OF_ADMIN_CONFIGURED_NETWORKS)
+                .setAdmin(who)
+                .setBoolean(lockdown)
+                .write();
+    }
+
+    @Override
+    public boolean isLockdownAdminConfiguredNetworks(ComponentName who) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(who);
+
+        return mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.settingsGlobalGetInt(Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 0) > 0);
+    }
+
+    @Override
     public void setLocationEnabled(ComponentName who, boolean locationEnabled) {
         Objects.requireNonNull(who, "ComponentName is null");
         enforceDeviceOwner(who);

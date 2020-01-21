@@ -8605,6 +8605,55 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device owner or a profile owner of an organization-owned managed profile to
+     * control whether the user can change networks configured by the admin.
+     * <p>
+     * WiFi network configuration lockdown is controlled by a global settings
+     * {@link android.provider.Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN} and calling
+     * this API effectively modifies the global settings. Previously device owners can also
+     * control this directly via {@link #setGlobalSetting} but they are recommended to switch
+     * to this API.
+     *
+     * @param admin             admin Which {@link DeviceAdminReceiver} this request is associated
+     *                          with.
+     * @param lockdown Whether the admin configured networks should be unmodifiable by the
+     *                          user.
+     * @throws SecurityException if caller is not a device owner or a profile owner of an
+     *                           organization-owned managed profile.
+     */
+    public void setLockdownAdminConfiguredNetworks(@NonNull ComponentName admin, boolean lockdown) {
+        throwIfParentInstance("setLockdownAdminConfiguredNetworks");
+        if (mService != null) {
+            try {
+                mService.setLockdownAdminConfiguredNetworks(admin, lockdown);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by a device owner or a profile owner of an organization-owned managed profile to
+     * determine whether the user is prevented from modifying networks configured by the admin.
+     *
+     * @param admin             admin Which {@link DeviceAdminReceiver} this request is associated
+     *                          with.
+     * @throws SecurityException if caller is not a device owner or a profile owner of an
+     *                           organization-owned managed profile.
+     */
+    public boolean isLockdownAdminConfiguredNetworks(@NonNull ComponentName admin) {
+        throwIfParentInstance("setLockdownAdminConfiguredNetworks");
+        if (mService != null) {
+            try {
+                return mService.isLockdownAdminConfiguredNetworks(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Called by a device owner or a profile owner of an organization-owned managed
      * profile to set the system wall clock time. This only takes effect if called when
      * {@link android.provider.Settings.Global#AUTO_TIME} is 0, otherwise {@code false}
