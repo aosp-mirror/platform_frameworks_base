@@ -6,7 +6,7 @@ filegroup {
 }
 
 filegroup {
-    name: "services-stub-sources",
+    name: "services-all-sources",
     srcs: [
         ":services.core-sources",
         ":services.accessibility-sources",
@@ -111,7 +111,7 @@ filegroup {
 
 droidstubs {
     name: "services-stubs.sources",
-    srcs: [":services-stub-sources"],
+    srcs: [":services-all-sources"],
     installable: false,
     // TODO: remove the --hide options below
     args: " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES,process=android.annotation.SystemApi.Process.SYSTEM_SERVER\\)" +
