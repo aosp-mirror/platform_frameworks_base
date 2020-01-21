@@ -55,6 +55,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.GraphicBuffer;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
@@ -115,6 +116,7 @@ class TaskSnapshotSurface implements StartingSurface {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "SnapshotStartingWindow" : TAG_WM;
     private static final int MSG_REPORT_DRAW = 0;
     private static final String TITLE_FORMAT = "SnapshotStartingWindow for taskId=%s";
+    private static final Point sSurfaceSize = new Point(); //tmp var for unused relayout param
     private final Window mWindow;
     private final Surface mSurface;
     private SurfaceControl mSurfaceControl;
@@ -227,7 +229,8 @@ class TaskSnapshotSurface implements StartingSurface {
         try {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,
                     tmpFrame, tmpContentInsets, tmpRect, tmpStableInsets, tmpRect,
-                    tmpCutout, tmpMergedConfiguration, surfaceControl, mTmpInsetsState);
+                    tmpCutout, tmpMergedConfiguration, surfaceControl, mTmpInsetsState,
+                    sSurfaceSize);
         } catch (RemoteException e) {
             // Local call.
         }

@@ -436,6 +436,10 @@ public final class ViewRootImpl implements ViewParent,
     FallbackEventHandler mFallbackEventHandler;
     Choreographer mChoreographer;
 
+    // used in relayout to get SurfaceControl size
+    // for BLAST adapter surface setup
+    private final Point mSurfaceSize = new Point();
+
     final Rect mTempRect; // used in the transaction to not thrash the heap.
     final Rect mVisRect; // used to retrieve visible rect of focused view.
     private final Rect mTempBoundsRect = new Rect(); // used to set the size of the bounds surface.
@@ -7333,14 +7337,13 @@ public final class ViewRootImpl implements ViewParent,
                 insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
                 mTmpFrame, mPendingContentInsets, mPendingVisibleInsets,
                 mPendingStableInsets, mPendingBackDropFrame, mPendingDisplayCutout,
-                mPendingMergedConfiguration, mSurfaceControl, mTempInsets);
+                mPendingMergedConfiguration, mSurfaceControl, mTempInsets, mSurfaceSize);
         if (mSurfaceControl.isValid()) {
             if (!WindowManagerGlobal.USE_BLAST_ADAPTER) {
                 mSurface.copyFrom(mSurfaceControl);
             } else {
-                mSurface.transferFrom(getOrCreateBLASTSurface(
-                    (int) (mView.getMeasuredWidth() * appScale + 0.5f),
-                    (int) (mView.getMeasuredHeight() * appScale + 0.5f)));
+                mSurface.transferFrom(getOrCreateBLASTSurface(mSurfaceSize.x,
+                        mSurfaceSize.y));
             }
         } else {
             destroySurface();

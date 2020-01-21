@@ -18,6 +18,7 @@ package android.view;
 
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -159,7 +160,8 @@ public class WindowlessWindowManager implements IWindowSession {
             Rect outFrame, Rect outContentInsets, Rect outVisibleInsets,
             Rect outStableInsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
-            SurfaceControl outSurfaceControl, InsetsState outInsetsState) {
+            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
+            Point outSurfaceSize) {
         State state = null;
         synchronized (this) {
             state = mStateForWindow.get(window.asBinder());
