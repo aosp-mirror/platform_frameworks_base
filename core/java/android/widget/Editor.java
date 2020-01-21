@@ -387,7 +387,7 @@ public class Editor {
 
     // Specifies whether the cursor control feature set is enabled.
     // This can only be true if the text view is editable.
-    private final boolean mCursorControlEnabled;
+    private boolean mCursorControlEnabled;
 
     Editor(TextView textView) {
         mTextView = textView;
@@ -409,6 +409,16 @@ public class Editor {
             logCursor("Editor", "Cursor control is %s.",
                     mCursorControlEnabled ? "enabled" : "disabled");
         }
+    }
+
+    @VisibleForTesting
+    public void setCursorControlEnabled(boolean enabled) {
+        mCursorControlEnabled = enabled;
+    }
+
+    @VisibleForTesting
+    public boolean getCursorControlEnabled() {
+        return mCursorControlEnabled;
     }
 
     ParcelableParcel saveInstanceState() {
@@ -1204,7 +1214,7 @@ public class Editor {
         }
         // Long press in empty space moves cursor and starts the insertion action mode.
         if (!handled && !isPositionOnText(mTouchState.getLastDownX(), mTouchState.getLastDownY())
-                && mInsertionControllerEnabled) {
+                && !mTouchState.isOnHandle() && mInsertionControllerEnabled) {
             final int offset = mTextView.getOffsetForPosition(mTouchState.getLastDownX(),
                     mTouchState.getLastDownY());
             Selection.setSelection((Spannable) mTextView.getText(), offset);
@@ -5135,6 +5145,37 @@ public class Editor {
         private float mLastDownRawX, mLastDownRawY;
         private Runnable mHider;
 
+        // Members for fake-dismiss effect in touch through mode.
+        // It is to make InsertionHandleView can receive the MOVE/UP events after calling dismiss(),
+        // which could happen in case of long-press (making selection will dismiss the insertion
+        // handle).
+
+        // Whether the finger is down and hasn't been up yet.
+        private boolean mIsTouchDown = false;
+        // Whether the popup window is in the invisible state and will be dismissed when finger up.
+        private boolean mPendingDismissOnUp = false;
+        // The alpha value of the drawable.
+        private final int mDrawableOpacity = 255;
+
+        // Members for toggling the insertion menu in touch through mode.
+
+        // The coordinate for the touch down event, which is used for transforming the coordinates
+        // of the events to the text view.
+        private float mTouchDownX;
+        private float mTouchDownY;
+        // The cursor offset when touch down. This is to detect whether the cursor is moved when
+        // finger move/up.
+        private int mOffsetDown;
+        // Whether the cursor offset has been changed on the move/up events.
+        private boolean mOffsetChanged;
+        // Whether it is in insertion action mode when finger down.
+        private boolean mIsInActionMode;
+        // The timestamp for the last up event, which is used for double tap detection.
+        private long mLastUpTime;
+        // The text height of the font of the text view, which is used to calculate the Y coordinate
+        // of the touch through events.
+        private float mTextHeight;
+
         public InsertionHandleView(Drawable drawable) {
             super(drawable, drawable, com.android.internal.R.id.insertion_handle);
         }
@@ -5190,6 +5231,11 @@ public class Editor {
 
         @Override
         public boolean onTouchEvent(MotionEvent ev) {
+            if (mCursorControlEnabled && FLAG_ENABLE_CURSOR_DRAG) {
+                // Should only enable touch through when cursor drag is enabled.
+                // Otherwise the insertion handle view cannot be moved.
+                return touchThrough(ev);
+            }
             final boolean result = super.onTouchEvent(ev);
 
             switch (ev.getActionMasked()) {
@@ -5233,6 +5279,115 @@ public class Editor {
             }
 
             return result;
+        }
+
+        // Handles the touch events in touch through mode.
+        private boolean touchThrough(MotionEvent ev) {
+            final int actionType = ev.getActionMasked();
+            switch (actionType) {
+                case MotionEvent.ACTION_DOWN:
+                    mIsTouchDown = true;
+                    mOffsetChanged = false;
+                    mOffsetDown = mTextView.getSelectionStart();
+                    mTouchDownX = ev.getX();
+                    mTouchDownY = ev.getY();
+                    mIsInActionMode = mTextActionMode != null;
+                    if (ev.getEventTime() - mLastUpTime < ViewConfiguration.getDoubleTapTimeout()) {
+                        stopTextActionMode();  // Avoid crash when double tap and drag backwards.
+                    }
+                    final Paint.FontMetrics fontMetrics = mTextView.getPaint().getFontMetrics();
+                    mTextHeight = fontMetrics.descent - fontMetrics.ascent;
+                    mTouchState.setIsOnHandle(true);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    mLastUpTime = ev.getEventTime();
+                    break;
+            }
+            // Performs the touch through by forward the events to the text view.
+            boolean ret = mTextView.onTouchEvent(transformEventForTouchThrough(ev));
+
+            if (actionType == MotionEvent.ACTION_UP || actionType == MotionEvent.ACTION_CANCEL) {
+                mIsTouchDown = false;
+                if (mPendingDismissOnUp) {
+                    dismiss();
+                }
+                mTouchState.setIsOnHandle(false);
+            }
+
+            // Checks for cursor offset change.
+            if (!mOffsetChanged) {
+                int start = mTextView.getSelectionStart();
+                int end = mTextView.getSelectionEnd();
+                if (start != end || mOffsetDown != start) {
+                    mOffsetChanged = true;
+                }
+            }
+
+            // Toggling the insertion action mode on finger up.
+            if (!mOffsetChanged && actionType == MotionEvent.ACTION_UP) {
+                if (mIsInActionMode) {
+                    stopTextActionMode();
+                } else {
+                    startInsertionActionMode();
+                }
+            }
+            return ret;
+        }
+
+        private MotionEvent transformEventForTouchThrough(MotionEvent ev) {
+            // Transforms the touch events to screen coordinates.
+            // And also shift up to make the hit point is on the text.
+            // Note:
+            //  - The revised X should reflect the distance to the horizontal center of touch down.
+            //  - The revised Y should be at the top of the text.
+            Matrix m = new Matrix();
+            m.setTranslate(ev.getRawX() - ev.getX() + (getMeasuredWidth() >> 1) - mTouchDownX,
+                    ev.getRawY() - ev.getY() - mTouchDownY - mTextHeight);
+            ev.transform(m);
+            // Transforms the touch events to text view coordinates.
+            mTextView.toLocalMotionEvent(ev);
+            if (TextView.DEBUG_CURSOR) {
+                logCursor("InsertionHandleView#transformEventForTouchThrough",
+                        "Touch through: %d, (%f, %f)",
+                        ev.getAction(), ev.getX(), ev.getY());
+            }
+            return ev;
+        }
+
+        @Override
+        public boolean isShowing() {
+            if (mPendingDismissOnUp) {
+                return false;
+            }
+            return super.isShowing();
+        }
+
+        @Override
+        public void show() {
+            super.show();
+            mPendingDismissOnUp = false;
+            mDrawable.setAlpha(mDrawableOpacity);
+        }
+
+        @Override
+        public void dismiss() {
+            if (mIsTouchDown) {
+                if (TextView.DEBUG_CURSOR) {
+                    logCursor("InsertionHandleView#dismiss",
+                            "Suppressed the real dismiss, only become invisible");
+                }
+                mPendingDismissOnUp = true;
+                mDrawable.setAlpha(0);
+            } else {
+                super.dismiss();
+                mPendingDismissOnUp = false;
+            }
+        }
+
+        @Override
+        protected void updateDrawable(final boolean updateDrawableWhenDragging) {
+            super.updateDrawable(updateDrawableWhenDragging);
+            mDrawable.setAlpha(mDrawableOpacity);
         }
 
         @Override
@@ -6039,8 +6194,8 @@ public class Editor {
                                 eventX, eventY);
 
                         // Double tap detection
-                        if (mTouchState.isMultiTapInSameArea()
-                                && (isMouse || isPositionOnText(eventX, eventY))) {
+                        if (mTouchState.isMultiTapInSameArea() && (isMouse
+                                || mTouchState.isOnHandle() || isPositionOnText(eventX, eventY))) {
                             if (TextView.DEBUG_CURSOR) {
                                 logCursor("SelectionModifierCursorController: onTouchEvent",
                                         "ACTION_DOWN: select and start drag");
