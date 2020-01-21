@@ -1477,7 +1477,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Some system windows (e.g. "Power off" dialog) don't have a task, but we would still
         // associate them with some stack to enable dimming.
         final DisplayContent dc = getDisplayContent();
-        return mAttrs.type >= FIRST_SYSTEM_WINDOW && dc != null ? dc.getHomeStack() : null;
+        return mAttrs.type >= FIRST_SYSTEM_WINDOW && dc != null ? dc.getRootHomeTask() : null;
     }
 
     /**
@@ -2651,7 +2651,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             // also reset drag resizing state, because the owner can't do it
                             // anymore.
                             final ActivityStack stack =
-                                    dc.getSplitScreenPrimaryStack();
+                                    dc.getRootSplitScreenPrimaryTask();
                             if (stack != null) {
                                 stack.resetDockedStackToMiddle();
                             }

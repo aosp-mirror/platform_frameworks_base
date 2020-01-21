@@ -233,7 +233,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
 
         final ActivityStack pinnedStack = display.createStack(
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        assertEquals(pinnedStack, display.getPinnedStack());
+        assertEquals(pinnedStack, display.getRootPinnedTask());
         assertEquals(pinnedStack, display.getTopStack());
 
         final ActivityStack anotherAlwaysOnTopStack = display.createStack(

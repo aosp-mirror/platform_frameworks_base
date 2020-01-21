@@ -1010,7 +1010,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testDestroyIfPossible_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
-        final ActivityStack homeStack = mActivity.getDisplay().getHomeStack();
+        final ActivityStack homeStack = mActivity.getDisplay().getRootHomeTask();
         homeStack.forAllTasks((t) -> {
             homeStack.removeChild(t, "test");
         }, true /* traverseTopToBottom */, homeStack);
@@ -1036,7 +1036,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testCompleteFinishing_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
-        final ActivityStack homeStack = mActivity.getDisplay().getHomeStack();
+        final ActivityStack homeStack = mActivity.getDisplay().getRootHomeTask();
         homeStack.forAllTasks((t) -> {
             homeStack.removeChild(t, "test");
         }, true /* traverseTopToBottom */, homeStack);

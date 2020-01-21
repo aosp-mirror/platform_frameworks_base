@@ -131,7 +131,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
                 0f /*aspectRatio*/, "initialMove");
 
         final DisplayContent display = mFullscreenStack.getDisplay();
-        ActivityStack pinnedStack = display.getPinnedStack();
+        ActivityStack pinnedStack = display.getRootPinnedTask();
         // Ensure a task has moved over.
         ensureStackPlacement(pinnedStack, firstActivity);
         ensureStackPlacement(mFullscreenStack, secondActivity);
@@ -141,7 +141,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
                 0f /*aspectRatio*/, "secondMove");
 
         // Need to get stacks again as a new instance might have been created.
-        pinnedStack = display.getPinnedStack();
+        pinnedStack = display.getRootPinnedTask();
         mFullscreenStack = display.getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         // Ensure stacks have swapped tasks.
         ensureStackPlacement(pinnedStack, secondActivity);
@@ -417,7 +417,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     @Test
     public void testResumeFocusedStacksStartsHomeActivity_NoActivities() {
         mFullscreenStack.removeIfPossible();
-        mService.mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY).getHomeStack()
+        mService.mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY).getRootHomeTask()
                 .removeIfPossible();
         mService.mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY)
                 .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
@@ -440,7 +440,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     @Test
     public void testResumeFocusedStacksStartsHomeActivity_ActivityOnSecondaryScreen() {
         mFullscreenStack.removeIfPossible();
-        mService.mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY).getHomeStack()
+        mService.mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY).getRootHomeTask()
                 .removeIfPossible();
         mService.mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY)
                 .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);

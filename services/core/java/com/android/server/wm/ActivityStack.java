@@ -728,11 +728,11 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 setBounds(newBounds);
                 newBounds.set(newBounds);
             } else if (overrideWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
-                Rect dockedBounds = display.getSplitScreenPrimaryStack().getBounds();
+                Rect dockedBounds = display.getRootSplitScreenPrimaryTask().getBounds();
                 final boolean isMinimizedDock =
                         display.mDisplayContent.getDockedDividerController().isMinimizedDock();
                 if (isMinimizedDock) {
-                    Task topTask = display.getSplitScreenPrimaryStack().getTopMostTask();
+                    Task topTask = display.getRootSplitScreenPrimaryTask().getTopMostTask();
                     if (topTask != null) {
                         dockedBounds = topTask.getBounds();
                     }
@@ -826,7 +826,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         final int currentOverrideMode = getRequestedOverrideWindowingMode();
         final DisplayContent display = getDisplay();
         final Task topTask = getTopMostTask();
-        final ActivityStack splitScreenStack = display.getSplitScreenPrimaryStack();
+        final ActivityStack splitScreenStack = display.getRootSplitScreenPrimaryTask();
         int windowingMode = preferredWindowingMode;
         if (preferredWindowingMode == WINDOWING_MODE_UNDEFINED
                 && isTransientWindowingMode(currentMode)) {
@@ -847,7 +847,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             windowingMode = mRestoreOverrideWindowingMode;
         }
 
-        final boolean alreadyInSplitScreenMode = display.hasSplitScreenPrimaryStack();
+        final boolean alreadyInSplitScreenMode = display.hasSplitScreenPrimaryTask();
 
         // Don't send non-resizeable notifications if the windowing mode changed was a side effect
         // of us entering split-screen mode.
@@ -864,7 +864,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 // warning toast about it.
                 mAtmService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
-                final ActivityStack primarySplitStack = display.getSplitScreenPrimaryStack();
+                final ActivityStack primarySplitStack = display.getRootSplitScreenPrimaryTask();
                 primarySplitStack.setWindowingModeInSurfaceTransaction(WINDOWING_MODE_UNDEFINED,
                         false /* animate */, false /* showRecents */,
                         false /* enteringSplitScreenMode */, true /* deferEnsuringVisibility */,
@@ -1161,7 +1161,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             final ActivityStack topFullScreenStack =
                     display.getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);
             if (topFullScreenStack != null) {
-                final ActivityStack primarySplitScreenStack = display.getSplitScreenPrimaryStack();
+                final ActivityStack primarySplitScreenStack = display.getRootSplitScreenPrimaryTask();
                 if (display.getIndexOf(topFullScreenStack)
                         > display.getIndexOf(primarySplitScreenStack)) {
                     primarySplitScreenStack.moveToFront(reason + " splitScreenToTop");
@@ -1559,7 +1559,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         // focus). Also if there is an active pinned stack - we always want to notify it about
         // task stack changes, because its positioning may depend on it.
         if (mStackSupervisor.mAppVisibilitiesChangedSinceLastPause
-                || (getDisplay() != null && getDisplay().hasPinnedStack())) {
+                || (getDisplay() != null && getDisplay().hasPinnedTask())) {
             mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
             mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = false;
         }
@@ -4719,7 +4719,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             // activity early for the recents animation prior to the PiP animation starting, there
             // is no subsequent all-drawn signal. In this case, we can skip the pause when the home
             // stack is already visible and drawn.
-            final ActivityStack homeStack = mDisplayContent.getHomeStack();
+            final ActivityStack homeStack = mDisplayContent.getRootHomeTask();
             if (homeStack == null) {
                 return true;
             }

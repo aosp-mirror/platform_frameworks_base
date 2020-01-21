@@ -1365,7 +1365,7 @@ class ActivityStarter {
                     break;
                 case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
                     final ActivityStack homeStack =
-                            startedActivityStack.getDisplay().getHomeStack();
+                            startedActivityStack.getDisplay().getRootHomeTask();
                     if (homeStack != null && homeStack.shouldBeVisible(null /* starting */)) {
                         mService.mWindowManager.showRecentApps();
                     }

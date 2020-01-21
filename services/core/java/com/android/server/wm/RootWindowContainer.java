@@ -1982,7 +1982,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     boolean switchUser(int userId, UserState uss) {
         final int focusStackId = getTopDisplayFocusedStack().getRootTaskId();
         // We dismiss the docked stack whenever we switch users.
-        final ActivityStack dockedStack = getDefaultDisplay().getSplitScreenPrimaryStack();
+        final ActivityStack dockedStack = getDefaultDisplay().getRootSplitScreenPrimaryTask();
         if (dockedStack != null) {
             mStackSupervisor.moveTasksToFullscreenStackLocked(
                     dockedStack, dockedStack.isFocusedStackOnDisplay());
@@ -1994,7 +1994,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         mUserStackInFront.put(mCurrentUser, focusStackId);
         final int restoreStackId =
-                mUserStackInFront.get(userId, getDefaultDisplay().getHomeStack().getRootTaskId());
+                mUserStackInFront.get(userId, getDefaultDisplay().getRootHomeTask().getRootTaskId());
         mCurrentUser = userId;
 
         mStackSupervisor.mStartingUsers.add(uss);
@@ -2012,7 +2012,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         ActivityStack stack = getStack(restoreStackId);
         if (stack == null) {
-            stack = getDefaultDisplay().getHomeStack();
+            stack = getDefaultDisplay().getRootHomeTask();
         }
         final boolean homeInFront = stack.isActivityTypeHome();
         if (stack.isOnHomeDisplay()) {
@@ -2035,7 +2035,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void updateUserStack(int userId, ActivityStack stack) {
         if (userId != mCurrentUser) {
             mUserStackInFront.put(userId, stack != null ? stack.getRootTaskId()
-                    : getDefaultDisplay().getHomeStack().getRootTaskId());
+                    : getDefaultDisplay().getRootHomeTask().getRootTaskId());
         }
     }
 
@@ -2113,7 +2113,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         try {
             final Task task = r.getTask();
 
-            final ActivityStack pinnedStack = display.getPinnedStack();
+            final ActivityStack pinnedStack = display.getRootPinnedTask();
             // This will change the pinned stack's windowing mode to its original mode, ensuring
             // we only have one stack that is in pinned mode.
             if (pinnedStack != null) {
@@ -2868,7 +2868,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     return stack;
                 }
                 if (windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY
-                        && display.getSplitScreenPrimaryStack() == stack
+                        && display.getRootSplitScreenPrimaryTask() == stack
                         && candidateTask == stack.getTopMostTask()) {
                     // This is a special case when we try to launch an activity that is currently on
                     // top of split-screen primary stack, but is targeting split-screen secondary.

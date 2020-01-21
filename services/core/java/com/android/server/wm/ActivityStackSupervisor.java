@@ -1582,7 +1582,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         final ActivityStack stack =
-                mRootWindowContainer.getDefaultDisplay().getSplitScreenPrimaryStack();
+                mRootWindowContainer.getDefaultDisplay().getRootSplitScreenPrimaryTask();
         if (stack == null) {
             Slog.w(TAG, "resizeDockedStackLocked: docked stack not found");
             return;
@@ -1670,7 +1670,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     void resizePinnedStackLocked(Rect pinnedBounds, Rect tempPinnedTaskBounds) {
         // TODO(multi-display): The display containing the stack should be passed in.
         final ActivityStack stack =
-                mRootWindowContainer.getDefaultDisplay().getPinnedStack();
+                mRootWindowContainer.getDefaultDisplay().getRootPinnedTask();
         if (stack == null) {
             Slog.w(TAG, "resizePinnedStackLocked: pinned stack not found");
             return;
@@ -2395,7 +2395,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final boolean isSecondaryDisplayPreferred =
                 (preferredDisplayId != DEFAULT_DISPLAY && preferredDisplayId != INVALID_DISPLAY);
         final boolean inSplitScreenMode = actualStack != null
-                && actualStack.getDisplay().hasSplitScreenPrimaryStack();
+                && actualStack.getDisplay().hasSplitScreenPrimaryTask();
         if (((!inSplitScreenMode && preferredWindowingMode != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
                 && !isSecondaryDisplayPreferred) || !task.isActivityTypeStandardOrUndefined()) {
             return;
@@ -2444,7 +2444,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
 
             final ActivityStack dockedStack =
-                    task.getStack().getDisplay().getSplitScreenPrimaryStack();
+                    task.getStack().getDisplay().getRootSplitScreenPrimaryTask();
             if (dockedStack != null) {
                 // Display a warning toast that we tried to put an app that doesn't support
                 // split-screen in split-screen.

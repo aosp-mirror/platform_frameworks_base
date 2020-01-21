@@ -4080,7 +4080,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 final ActivityStack stack =
-                        mRootWindowContainer.getDefaultDisplay().getSplitScreenPrimaryStack();
+                        mRootWindowContainer.getDefaultDisplay().getRootSplitScreenPrimaryTask();
                 if (stack == null) {
                     Slog.w(TAG, "dismissSplitScreenMode: primary split-screen stack not found.");
                     return;
@@ -4121,7 +4121,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 final ActivityStack stack =
-                        mRootWindowContainer.getDefaultDisplay().getPinnedStack();
+                        mRootWindowContainer.getDefaultDisplay().getRootPinnedTask();
                 if (stack == null) {
                     Slog.w(TAG, "dismissPip: pinned stack not found.");
                     return;

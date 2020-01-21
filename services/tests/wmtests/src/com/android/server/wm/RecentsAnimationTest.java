@@ -209,7 +209,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
     public void testSetLaunchTaskBehindOfTargetActivity() {
         DisplayContent display = mRootWindowContainer.getDefaultDisplay();
         display.mDisplayContent.mBoundsAnimationController = mock(BoundsAnimationController.class);
-        ActivityStack homeStack = display.getHomeStack();
+        ActivityStack homeStack = display.getRootHomeTask();
         // Assume the home activity support recents.
         ActivityRecord targetActivity = homeStack.getTopNonFinishingActivity();
         if (targetActivity == null) {

@@ -2223,7 +2223,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         boolean isCurrentAppLocked =
                 mAtmService.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
         final DisplayContent display = getDisplay();
-        boolean hasPinnedStack = display != null && display.hasPinnedStack();
+        boolean hasPinnedStack = display != null && display.hasPinnedTask();
         // Don't return early if !isNotLocked, since we want to throw an exception if the activity
         // is in an incorrect state
         boolean isNotLockedOrOnKeyguard = !isKeyguardLocked && !isCurrentAppLocked;
@@ -2669,7 +2669,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // DisplayContent#topRunningActivity().
         final ActivityRecord next = display.topRunningActivity();
         final boolean isLastStackOverEmptyHome =
-                next == null && stack.isFocusedStackOnDisplay() && display.getHomeStack() != null;
+                next == null && stack.isFocusedStackOnDisplay() && display.getRootHomeTask() != null;
         if (isLastStackOverEmptyHome) {
             // Don't destroy activity immediately if this is the last activity on the display and
             // the display contains home stack. Although there is no next activity at the moment,
@@ -3824,7 +3824,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
                 // Notify the pinned stack upon all windows drawn. If there was an animation in
                 // progress then this signal will resume that animation.
-                final ActivityStack pinnedStack = mDisplayContent.getPinnedStack();
+                final ActivityStack pinnedStack = mDisplayContent.getRootPinnedTask();
                 if (pinnedStack != null) {
                     pinnedStack.onAllWindowsDrawn();
                 }
@@ -6712,7 +6712,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void savePinnedStackBounds() {
         // Leaving PiP to fullscreen, save the snap fraction based on the pre-animation bounds
         // for the next re-entry into PiP (assuming the activity is not hidden or destroyed)
-        final ActivityStack pinnedStack = mDisplayContent.getPinnedStack();
+        final ActivityStack pinnedStack = mDisplayContent.getRootPinnedTask();
         if (pinnedStack == null) return;
         final Rect stackBounds;
         if (pinnedStack.lastAnimatingBoundsWasToFullscreen()) {
