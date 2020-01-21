@@ -100,6 +100,8 @@ import java.util.stream.Collectors;
  * <tr><td>{@link #KEY_AAC_DRC_HEAVY_COMPRESSION}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies whether to use heavy compression.</td></tr>
  * <tr><td>{@link #KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the maximum number of channels the decoder outputs.</td></tr>
  * <tr><td>{@link #KEY_AAC_DRC_EFFECT_TYPE}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the MPEG-D DRC effect type to use.</td></tr>
+ * <tr><td>{@link #KEY_AAC_DRC_OUTPUT_LOUDNESS}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, returns the DRC output loudness.</td></tr>
+ * <tr><td>{@link #KEY_AAC_DRC_ALBUM_MODE}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the whether MPEG-D DRC Album Mode is active or not.</td></tr>
  * <tr><td>{@link #KEY_CHANNEL_MASK}</td><td>Integer</td><td>optional, a mask of audio channel assignments</td></tr>
  * <tr><td>{@link #KEY_ENCODER_DELAY}</td><td>Integer</td><td>optional, the number of frames to trim from the start of the decoded audio stream.</td></tr>
  * <tr><td>{@link #KEY_ENCODER_PADDING}</td><td>Integer</td><td>optional, the number of frames to trim from the end of the decoded audio stream.</td></tr>
@@ -734,6 +736,37 @@ public final class MediaFormat {
      * <p>This key is only used during decoding.
      */
     public static final String KEY_AAC_DRC_HEAVY_COMPRESSION = "aac-drc-heavy-compression";
+
+    /**
+     * A key to retrieve the output loudness of a decoded bitstream.
+     * <p>If loudness normalization is active, the value corresponds to the Target Reference Level
+     * (see {@link #KEY_AAC_DRC_TARGET_REFERENCE_LEVEL}).<br>
+     * If loudness normalization is not active, the value corresponds to the loudness metadata
+     * given in the bitstream.
+     * <p>The value is retrieved with getInteger() and is given as an integer value between 0 and
+     * 231. It is calculated as -4 * Output Loudness in LKFS. Therefore, it represents the range of
+     * 0 to -57.75 LKFS.
+     * <p>A value of -1 indicates that no loudness metadata is present in the bitstream.
+     * <p>Loudness metadata can originate from MPEG-4 DRC or MPEG-D DRC.
+     * <p>This key is only used during decoding.
+     */
+    public static final String KEY_AAC_DRC_OUTPUT_LOUDNESS = "aac-drc-output-loudness";
+
+    /**
+     * A key describing the album mode for MPEG-D DRC as defined in ISO/IEC 23003-4.
+     * <p>The associated value is an integer and can be set to following values:
+     * <table>
+     * <tr><th>Value</th><th>Album Mode</th></tr>
+     * <tr><th>0</th><th>disabled</th></tr>
+     * <tr><th>1</th><th>enabled</th></tr>
+     * </table>
+     * <p>Disabled album mode leads to application of gain sequences for fading in and out, if
+     * provided in the bitstream. Enabled album mode makes use of dedicated album loudness
+     * information, if provided in the bitstream.
+     * <p>The default value is 0 (album mode disabled).
+     * <p>This key is only used during decoding.
+     */
+    public static final String KEY_AAC_DRC_ALBUM_MODE = "aac-drc-album-mode";
 
     /**
      * A key describing the FLAC compression level to be used (FLAC audio format only).
