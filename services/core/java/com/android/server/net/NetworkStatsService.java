@@ -255,7 +255,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     private final Object mStatsLock = new Object();
-    private final Object mStatsProviderLock = new Object();
 
     /** Set of currently active ifaces. */
     @GuardedBy("mStatsLock")
@@ -1501,8 +1500,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         @Override
-        public void setStatsProviderLimit(@NonNull String iface, long quota) {
-            Slog.v(TAG, "setStatsProviderLimit(" + iface + "," + quota + ")");
+        public void setStatsProviderLimitAsync(@NonNull String iface, long quota) {
+            Slog.v(TAG, "setStatsProviderLimitAsync(" + iface + "," + quota + ")");
             invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.setLimit(iface, quota));
         }
     }
@@ -1783,9 +1782,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * {@code unregister()} of the returned callback.
      *
      * @param tag a human readable identifier of the custom network stats provider.
-     * @param provider the binder interface of
-     *                 {@link android.net.netstats.provider.AbstractNetworkStatsProvider} that
-     *                 needs to be registered to the system.
+     * @param provider the {@link INetworkStatsProvider} binder corresponding to the
+     *                 {@link android.net.netstats.provider.AbstractNetworkStatsProvider} to be
+     *                 registered.
      *
      * @return a binder interface of
      *         {@link android.net.netstats.provider.NetworkStatsProviderCallback}, which can be
@@ -1823,7 +1822,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private void invokeForAllStatsProviderCallbacks(
             @NonNull ThrowingConsumer<NetworkStatsProviderCallbackImpl, RemoteException> task) {
-        synchronized (mStatsProviderCbList) {
+        synchronized (mStatsLock) {
             final int length = mStatsProviderCbList.beginBroadcast();
             try {
                 for (int i = 0; i < length; i++) {
@@ -1844,13 +1843,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static class NetworkStatsProviderCallbackImpl extends INetworkStatsProviderCallback.Stub
             implements IBinder.DeathRecipient {
         @NonNull final String mTag;
-        @NonNull private final Object mProviderStatsLock = new Object();
+
         @NonNull final INetworkStatsProvider mProvider;
         @NonNull final INetworkManagementEventObserver mAlertObserver;
         @NonNull final RemoteCallbackList<NetworkStatsProviderCallbackImpl> mStatsProviderCbList;
 
+        @NonNull private final Object mProviderStatsLock = new Object();
+
         @GuardedBy("mProviderStatsLock")
-        // STATS_PER_IFACE and STATS_PER_UID
+        // Track STATS_PER_IFACE and STATS_PER_UID separately.
         private final NetworkStats mIfaceStats = new NetworkStats(0L, 0);
         @GuardedBy("mProviderStatsLock")
         private final NetworkStats mUidStats = new NetworkStats(0L, 0);
@@ -1881,7 +1882,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     default:
                         throw new IllegalArgumentException("Invalid type: " + how);
                 }
-                // Return a defensive copy instead of local reference.
+                // Callers might be able to mutate the returned object. Return a defensive copy
+                // instead of local reference.
                 return stats.clone();
             }
         }
