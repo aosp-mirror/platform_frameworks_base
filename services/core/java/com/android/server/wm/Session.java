@@ -238,16 +238,12 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void setInTouchMode(boolean mode) {
-        synchronized (mService.mGlobalLock) {
-            mService.mInTouchMode = mode;
-        }
+        mService.setInTouchMode(mode);
     }
 
     @Override
     public boolean getInTouchMode() {
-        synchronized (mService.mGlobalLock) {
-            return mService.mInTouchMode;
-        }
+        return mService.getInTouchMode();
     }
 
     @Override
