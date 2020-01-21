@@ -1063,22 +1063,16 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
 
   DropCapabilitiesBoundingSet(fail_fn);
 
-  bool use_native_bridge = !is_system_server &&
-                           instruction_set.has_value() &&
-                           android::NativeBridgeAvailable() &&
-                           android::NeedsNativeBridge(instruction_set.value().c_str());
+  bool need_pre_initialize_native_bridge =
+      !is_system_server &&
+      instruction_set.has_value() &&
+      android::NativeBridgeAvailable() &&
+      // Native bridge may be already initialized if this
+      // is an app forked from app-zygote.
+      !android::NativeBridgeInitialized() &&
+      android::NeedsNativeBridge(instruction_set.value().c_str());
 
-  if (use_native_bridge && !app_data_dir.has_value()) {
-    // The app_data_dir variable should never be empty if we need to use a
-    // native bridge.  In general, app_data_dir will never be empty for normal
-    // applications.  It can only happen in special cases (for isolated
-    // processes which are not associated with any app).  These are launched by
-    // the framework and should not be emulated anyway.
-    use_native_bridge = false;
-    ALOGW("Native bridge will not be used because managed_app_data_dir == nullptr.");
-  }
-
-  MountEmulatedStorage(uid, mount_external, use_native_bridge, fail_fn);
+  MountEmulatedStorage(uid, mount_external, need_pre_initialize_native_bridge, fail_fn);
 
   // If this zygote isn't root, it won't be able to create a process group,
   // since the directory is owned by root.
@@ -1094,11 +1088,12 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   SetGids(env, gids, fail_fn);
   SetRLimits(env, rlimits, fail_fn);
 
-  if (use_native_bridge) {
-    // Due to the logic behind use_native_bridge we know that both app_data_dir
-    // and instruction_set contain values.
-    android::PreInitializeNativeBridge(app_data_dir.value().c_str(),
-                                       instruction_set.value().c_str());
+  if (need_pre_initialize_native_bridge) {
+    // Due to the logic behind need_pre_initialize_native_bridge we know that
+    // instruction_set contains a value.
+    android::PreInitializeNativeBridge(
+        app_data_dir.has_value() ? app_data_dir.value().c_str() : nullptr,
+        instruction_set.value().c_str());
   }
 
   if (setresgid(gid, gid, gid) == -1) {
