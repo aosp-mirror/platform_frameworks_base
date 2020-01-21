@@ -169,6 +169,7 @@ import android.os.BestClock;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IDeviceIdleController;
 import android.os.INetworkManagementService;
@@ -876,7 +877,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             // Listen for subscriber changes
             mContext.getSystemService(SubscriptionManager.class).addOnSubscriptionsChangedListener(
-                    new OnSubscriptionsChangedListener(mHandler.getLooper()) {
+                    new HandlerExecutor(mHandler),
+                    new OnSubscriptionsChangedListener() {
                         @Override
                         public void onSubscriptionsChanged() {
                             updateNetworksInternal();
