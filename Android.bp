@@ -318,6 +318,7 @@ java_defaults {
             "rs/java",
             "sax/java",
             "telecomm/java",
+            "wifi/aidl-export",
         ],
     },
 

@@ -12,9 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+filegroup {
+    name: "framework-wifi-updatable-exported-aidl-sources",
+    srcs: ["aidl-export/**/*.aidl"],
+    path: "aidl-export",
+    visibility: ["//visibility:private"],
+}
 
 filegroup {
-    name: "framework-wifi-updatable-sources",
+    name: "framework-wifi-updatable-java-sources",
     srcs: [
         "java/**/*.java",
         "java/**/*.aidl",
@@ -23,6 +29,15 @@ filegroup {
         ":framework-wifi-non-updatable-sources"
     ],
     path: "java",
+    visibility: ["//visibility:private"],
+}
+
+filegroup {
+    name: "framework-wifi-updatable-sources",
+    srcs: [
+        ":framework-wifi-updatable-java-sources",
+        ":framework-wifi-updatable-exported-aidl-sources",
+    ],
 }
 
 filegroup {
