@@ -16,14 +16,14 @@
 
 package com.android.server.connectivity.tethering;
 
-import static android.net.TetheringManager.EXTRA_ADD_TETHER_TYPE;
-import static android.net.TetheringManager.EXTRA_PROVISION_CALLBACK;
-import static android.net.TetheringManager.EXTRA_RUN_PROVISION;
+import static android.net.TetheringConstants.EXTRA_ADD_TETHER_TYPE;
+import static android.net.TetheringConstants.EXTRA_PROVISION_CALLBACK;
+import static android.net.TetheringConstants.EXTRA_RUN_PROVISION;
 import static android.net.TetheringManager.TETHERING_BLUETOOTH;
 import static android.net.TetheringManager.TETHERING_INVALID;
 import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
-import static android.net.TetheringManager.TETHER_ERROR_ENTITLEMENT_UNKONWN;
+import static android.net.TetheringManager.TETHER_ERROR_ENTITLEMENT_UNKNOWN;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
 import static android.net.TetheringManager.TETHER_ERROR_PROVISION_FAILED;
 
@@ -577,7 +577,7 @@ public class EntitlementManager {
 
     private static String errorString(int value) {
         switch (value) {
-            case TETHER_ERROR_ENTITLEMENT_UNKONWN: return "TETHER_ERROR_ENTITLEMENT_UNKONWN";
+            case TETHER_ERROR_ENTITLEMENT_UNKNOWN: return "TETHER_ERROR_ENTITLEMENT_UNKONWN";
             case TETHER_ERROR_NO_ERROR: return "TETHER_ERROR_NO_ERROR";
             case TETHER_ERROR_PROVISION_FAILED: return "TETHER_ERROR_PROVISION_FAILED";
             default:
@@ -657,7 +657,7 @@ public class EntitlementManager {
         }
 
         final int cacheValue = mEntitlementCacheValue.get(
-                downstream, TETHER_ERROR_ENTITLEMENT_UNKONWN);
+                downstream, TETHER_ERROR_ENTITLEMENT_UNKNOWN);
         if (cacheValue == TETHER_ERROR_NO_ERROR || !showEntitlementUi) {
             receiver.send(cacheValue, null);
         } else {
