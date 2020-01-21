@@ -86,6 +86,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.RouteInfo;
 import android.net.TetherStatesParcel;
+import android.net.TetheringCallbackStartedParcel;
 import android.net.TetheringConfigurationParcel;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
@@ -1111,11 +1112,10 @@ public class TetheringTest {
         }
 
         @Override
-        public void onCallbackStarted(Network network, TetheringConfigurationParcel config,
-                TetherStatesParcel states) {
-            mActualUpstreams.add(network);
-            mTetheringConfigs.add(config);
-            mTetherStates.add(states);
+        public void onCallbackStarted(TetheringCallbackStartedParcel parcel) {
+            mActualUpstreams.add(parcel.upstreamNetwork);
+            mTetheringConfigs.add(parcel.config);
+            mTetherStates.add(parcel.states);
         }
 
         @Override

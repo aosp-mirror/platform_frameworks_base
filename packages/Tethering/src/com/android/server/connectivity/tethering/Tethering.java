@@ -74,6 +74,7 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.TetherStatesParcel;
+import android.net.TetheringCallbackStartedParcel;
 import android.net.TetheringConfigurationParcel;
 import android.net.ip.IpServer;
 import android.net.shared.NetdUtils;
@@ -938,6 +939,7 @@ public class Tethering {
                 mWrapper.showTetheredNotification(
                         R.drawable.stat_sys_tether_general, false);
                 mWrapper.untetherAll();
+                // TODO(b/148139325): send tetheringSupported on restriction change
             }
         }
     }
@@ -1829,9 +1831,13 @@ public class Tethering {
     void registerTetheringEventCallback(ITetheringEventCallback callback) {
         mHandler.post(() -> {
             mTetheringEventCallbacks.register(callback);
+            final TetheringCallbackStartedParcel parcel = new TetheringCallbackStartedParcel();
+            parcel.tetheringSupported = mDeps.isTetheringSupported();
+            parcel.upstreamNetwork = mTetherUpstream;
+            parcel.config = mConfig.toStableParcelable();
+            parcel.states = mTetherStatesParcel;
             try {
-                callback.onCallbackStarted(mTetherUpstream, mConfig.toStableParcelable(),
-                        mTetherStatesParcel);
+                callback.onCallbackStarted(parcel);
             } catch (RemoteException e) {
                 // Not really very much to do here.
             }
@@ -1866,6 +1872,7 @@ public class Tethering {
             for (int i = 0; i < length; i++) {
                 try {
                     mTetheringEventCallbacks.getBroadcastItem(i).onConfigurationChanged(config);
+                    // TODO(b/148139325): send tetheringSupported on configuration change
                 } catch (RemoteException e) {
                     // Not really very much to do here.
                 }
