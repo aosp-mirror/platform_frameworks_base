@@ -20,6 +20,8 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
@@ -34,6 +36,7 @@ import static android.view.Surface.ROTATION_90;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_FREE;
@@ -51,10 +54,13 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
 import android.app.TaskInfo;
+import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -857,6 +863,78 @@ public class TaskRecordTests extends ActivityTestsBase {
         spyOn(task);
         task.updateEffectiveIntent();
         verify(task).setIntent(eq(activity0));
+    }
+
+    @Test
+    public void testSaveLaunchingStateWhenConfigurationChanged() {
+        LaunchParamsPersister persister = mService.mStackSupervisor.mLaunchParamsPersister;
+        spyOn(persister);
+
+        final Task task = getTestTask();
+        task.hasBeenVisible = false;
+        task.getDisplayContent().setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
+        task.getStack().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+
+        task.hasBeenVisible = true;
+        task.onConfigurationChanged(task.getParent().getConfiguration());
+
+        verify(persister).saveTask(task, task.getDisplayContent());
+    }
+
+    @Test
+    public void testSaveLaunchingStateWhenClearingParent() {
+        LaunchParamsPersister persister = mService.mStackSupervisor.mLaunchParamsPersister;
+        spyOn(persister);
+
+        final Task task = getTestTask();
+        task.hasBeenVisible = false;
+        task.getDisplayContent().setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
+        task.getStack().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        final DisplayContent oldDisplay = task.getDisplayContent();
+
+        LaunchParamsController.LaunchParams params = new LaunchParamsController.LaunchParams();
+        params.mWindowingMode = WINDOWING_MODE_UNDEFINED;
+        persister.getLaunchParams(task, null, params);
+        assertEquals(WINDOWING_MODE_UNDEFINED, params.mWindowingMode);
+
+        task.hasBeenVisible = true;
+        task.removeImmediately();
+
+        verify(persister).saveTask(task, oldDisplay);
+
+        persister.getLaunchParams(task, null, params);
+        assertEquals(WINDOWING_MODE_FULLSCREEN, params.mWindowingMode);
+    }
+
+    @Test
+    public void testNotSaveLaunchingStateNonFreeformDisplay() {
+        LaunchParamsPersister persister = mService.mStackSupervisor.mLaunchParamsPersister;
+        spyOn(persister);
+
+        final Task task = getTestTask();
+        task.hasBeenVisible = false;
+        task.getStack().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+
+        task.hasBeenVisible = true;
+        task.onConfigurationChanged(task.getParent().getConfiguration());
+
+        verify(persister, never()).saveTask(same(task), any());
+    }
+
+    @Test
+    public void testNotSaveLaunchingStateWhenNotFullscreenOrFreeformWindow() {
+        LaunchParamsPersister persister = mService.mStackSupervisor.mLaunchParamsPersister;
+        spyOn(persister);
+
+        final Task task = getTestTask();
+        task.hasBeenVisible = false;
+        task.getDisplayContent().setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
+        task.getStack().setWindowingMode(WINDOWING_MODE_PINNED);
+
+        task.hasBeenVisible = true;
+        task.onConfigurationChanged(task.getParent().getConfiguration());
+
+        verify(persister, never()).saveTask(same(task), any());
     }
 
     private Task getTestTask() {
