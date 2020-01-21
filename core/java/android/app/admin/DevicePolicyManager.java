@@ -11468,6 +11468,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public void setProtectedPackages(@NonNull ComponentName admin, @NonNull List<String> packages) {
+        throwIfParentInstance("setProtectedPackages");
         if (mService != null) {
             try {
                 mService.setProtectedPackages(admin, packages);
@@ -11484,6 +11485,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public @NonNull List<String> getProtectedPackages(@NonNull ComponentName admin) {
+        throwIfParentInstance("getProtectedPackages");
         if (mService != null) {
             try {
                 return mService.getProtectedPackages(admin);
