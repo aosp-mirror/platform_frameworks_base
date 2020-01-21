@@ -2497,11 +2497,57 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerFaceSettings() {
-        // No op.
+        int tagId = StatsLog.FACE_SETTINGS;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullFaceSettings(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullRegisterFaceSettings() {
-        // No op.
+    private int pullFaceSettings(int atomTag, List<StatsEvent> pulledData) {
+        final long callingToken = Binder.clearCallingIdentity();
+        try {
+            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+            int numUsers = users.size();
+            for (int userNum = 0; userNum < numUsers; userNum++) {
+                int userId = users.get(userNum).getUserHandle().getIdentifier();
+
+                int unlockKeyguardEnabled = Settings.Secure.getIntForUser(
+                          mContext.getContentResolver(),
+                          Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED, 1, userId);
+                int unlockDismissesKeyguard = Settings.Secure.getIntForUser(
+                          mContext.getContentResolver(),
+                          Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD, 0, userId);
+                int unlockAttentionRequired = Settings.Secure.getIntForUser(
+                          mContext.getContentResolver(),
+                          Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED, 1, userId);
+                int unlockAppEnabled = Settings.Secure.getIntForUser(
+                          mContext.getContentResolver(),
+                          Settings.Secure.FACE_UNLOCK_APP_ENABLED, 1, userId);
+                int unlockAlwaysRequireConfirmation = Settings.Secure.getIntForUser(
+                          mContext.getContentResolver(),
+                          Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION, 0, userId);
+                int unlockDiversityRequired = Settings.Secure.getIntForUser(
+                          mContext.getContentResolver(),
+                          Settings.Secure.FACE_UNLOCK_DIVERSITY_REQUIRED, 1, userId);
+
+                StatsEvent e = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeBoolean(unlockKeyguardEnabled != 0)
+                        .writeBoolean(unlockDismissesKeyguard != 0)
+                        .writeBoolean(unlockAttentionRequired != 0)
+                        .writeBoolean(unlockAppEnabled != 0)
+                        .writeBoolean(unlockAlwaysRequireConfirmation != 0)
+                        .writeBoolean(unlockDiversityRequired != 0)
+                        .build();
+                pulledData.add(e);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerAppOps() {
