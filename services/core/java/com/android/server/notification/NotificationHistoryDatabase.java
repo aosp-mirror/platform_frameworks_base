@@ -62,7 +62,7 @@ public class NotificationHistoryDatabase {
 
     private static final String TAG = "NotiHistoryDatabase";
     private static final boolean DEBUG = NotificationManagerService.DBG;
-    private static final int HISTORY_RETENTION_DAYS = 2;
+    private static final int HISTORY_RETENTION_DAYS = 1;
     private static final int HISTORY_RETENTION_MS = 24 * 60 * 60 * 1000;
     private static final long WRITE_BUFFER_INTERVAL_MS = 1000 * 60 * 20;
 
