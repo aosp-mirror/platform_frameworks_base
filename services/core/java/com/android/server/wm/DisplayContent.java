@@ -218,6 +218,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
@@ -3689,7 +3690,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     w.mSeq++;
                     w.mSystemUiVisibility = newValue;
                 }
-                if (newValue != curValue || w.mAttrs.hasSystemUiListeners) {
+                if ((newValue != curValue || w.mAttrs.hasSystemUiListeners)
+                        && ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL) {
                     w.mClient.dispatchSystemUiVisibilityChanged(w.mSeq,
                             visibility, newValue, diff);
                 }

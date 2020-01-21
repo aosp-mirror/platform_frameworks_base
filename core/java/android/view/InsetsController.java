@@ -643,6 +643,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /**
+     * @see ViewRootImpl#updateCompatSysUiVisibility(int, boolean, boolean)
+     */
+    public void updateCompatSysUiVisibility(@InternalInsetsType int type, boolean visible,
+            boolean hasControl) {
+        mViewRoot.updateCompatSysUiVisibility(type, visible, hasControl);
+    }
+
+    /**
      * Called when current window gains focus.
      */
     public void onWindowFocusGained() {
