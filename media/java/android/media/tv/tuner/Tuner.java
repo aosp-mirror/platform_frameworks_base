@@ -311,10 +311,10 @@ public final class Tuner implements AutoCloseable  {
      * @throws SecurityException     if the caller does not have appropriate permissions.
      * @throws IllegalStateException if {@code scan} is called again before {@link #stopScan()} is
      *                               called.
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
-    public int scan(@NonNull FrontendSettings settings, @ScanCallback.ScanType int scanType,
+    @Result
+    public int scan(@NonNull FrontendSettings settings, @TunerConstants.ScanType int scanType,
             @NonNull @CallbackExecutor Executor executor, @NonNull ScanCallback scanCallback) {
         TunerUtils.checkTunerPermission(mContext);
         if (mScanCallback != null || mScanCallbackExecutor != null) {
@@ -337,7 +337,6 @@ public final class Tuner implements AutoCloseable  {
      * If the method completes successfully, the frontend stopped previous scanning.
      *
      * @throws SecurityException if the caller does not have appropriate permissions.
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result

@@ -16,40 +16,17 @@
 
 package android.media.tv.tuner.frontend;
 
-import android.annotation.IntDef;
-import android.hardware.tv.tuner.V1_0.Constants;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 
 /**
  * Scan callback.
  *
  * @hide
  */
+@SystemApi
 public interface ScanCallback {
-
-    /** @hide */
-    @IntDef(prefix = "SCAN_TYPE_", value = {SCAN_TYPE_UNDEFINED, SCAN_TYPE_AUTO, SCAN_TYPE_BLIND})
-    @Retention(RetentionPolicy.SOURCE)
-    @interface ScanType {}
-    /**
-     * Scan type undefined.
-     */
-    int SCAN_TYPE_UNDEFINED = Constants.FrontendScanType.SCAN_UNDEFINED;
-    /**
-     * Scan type auto.
-     *
-     * <p> Tuner will send {@link #onLocked}
-     */
-    int SCAN_TYPE_AUTO = Constants.FrontendScanType.SCAN_AUTO;
-    /**
-     * Blind scan.
-     *
-     * <p>Frequency range is not specified. The {@link android.media.tv.tuner.Tuner} will scan an
-     * implementation specific range.
-     */
-    int SCAN_TYPE_BLIND = Constants.FrontendScanType.SCAN_BLIND;
 
     /** Scan locked the signal. */
     void onLocked();
@@ -58,22 +35,22 @@ public interface ScanCallback {
     void onScanStopped();
 
     /** scan progress percent (0..100) */
-    void onProgress(int percent);
+    void onProgress(@IntRange(from = 0, to = 100) int percent);
 
     /** Signal frequencies in Hertz */
-    void onFrequenciesReport(int[] frequency);
+    void onFrequenciesReport(@NonNull int[] frequency);
 
     /** Symbols per second */
-    void onSymbolRates(int[] rate);
+    void onSymbolRates(@NonNull int[] rate);
 
     /** Locked Plp Ids for DVBT2 frontend. */
-    void onPlpIds(int[] plpIds);
+    void onPlpIds(@NonNull int[] plpIds);
 
     /** Locked group Ids for DVBT2 frontend. */
-    void onGroupIds(int[] groupIds);
+    void onGroupIds(@NonNull int[] groupIds);
 
     /** Stream Ids. */
-    void onInputStreamIds(int[] inputStreamIds);
+    void onInputStreamIds(@NonNull int[] inputStreamIds);
 
     /** Locked signal standard for DVBS. */
     void onDvbsStandard(@DvbsFrontendSettings.Standard int dvbsStandandard);
@@ -85,7 +62,7 @@ public interface ScanCallback {
     void onAnalogSifStandard(@AnalogFrontendSettings.SifStandard int sif);
 
     /** PLP status in a tuned frequency band for ATSC3 frontend. */
-    void onAtsc3PlpInfos(Atsc3PlpInfo[] atsc3PlpInfos);
+    void onAtsc3PlpInfos(@NonNull Atsc3PlpInfo[] atsc3PlpInfos);
 
     /** Frontend hierarchy. */
     void onHierarchy(@DvbtFrontendSettings.Hierarchy int hierarchy);
@@ -93,24 +70,4 @@ public interface ScanCallback {
     /** Frontend hierarchy. */
     void onSignalType(@AnalogFrontendSettings.SignalType int signalType);
 
-    /** PLP information for ATSC3. */
-    class Atsc3PlpInfo {
-        private final int mPlpId;
-        private final boolean mLlsFlag;
-
-        private Atsc3PlpInfo(int plpId, boolean llsFlag) {
-            mPlpId = plpId;
-            mLlsFlag = llsFlag;
-        }
-
-        /** Gets PLP IDs. */
-        public int getPlpId() {
-            return mPlpId;
-        }
-
-        /** Gets LLS flag. */
-        public boolean getLlsFlag() {
-            return mLlsFlag;
-        }
-    }
 }
