@@ -66,6 +66,10 @@ import java.util.List;
  * <p>
  * The easiest way to use this class is to call one of the static methods that constructs
  * everything you need and returns a new Toast object.
+ * <p>
+ * Note that
+ * <a href="{@docRoot}reference/com/google/android/material/snackbar/Snackbar">Snackbars</a> are
+ * preferred for brief messages while the app is in the foreground.
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
@@ -169,8 +173,16 @@ public class Toast {
 
     /**
      * Set the view to show.
+     *
      * @see #getView
+     * @deprecated Custom toast views are deprecated. Apps can create a standard text toast with the
+     *      {@link #makeText(Context, CharSequence, int)} method, or use a
+     *      <a href="{@docRoot}reference/com/google/android/material/snackbar/Snackbar">Snackbar</a>
+     *      when in the foreground. Starting from Android {@link Build.VERSION_CODES#R}, apps
+     *      targeting API level {@link Build.VERSION_CODES#R} or higher that are in the background
+     *      will not have custom toast views displayed.
      */
+    @Deprecated
     public void setView(View view) {
         mIsCustomToast = true;
         mNextView = view;
@@ -178,7 +190,14 @@ public class Toast {
 
     /**
      * Return the view.
+     *
      * @see #setView
+     * @deprecated Custom toast views are deprecated. Apps can create a standard text toast with the
+     *      {@link #makeText(Context, CharSequence, int)} method, or use a
+     *      <a href="{@docRoot}reference/com/google/android/material/snackbar/Snackbar">Snackbar</a>
+     *      when in the foreground. Starting from Android {@link Build.VERSION_CODES#R}, apps
+     *      targeting API level {@link Build.VERSION_CODES#R} or higher that are in the background
+     *      will not have custom toast views displayed.
      */
     public View getView() {
         mIsCustomToast = true;
