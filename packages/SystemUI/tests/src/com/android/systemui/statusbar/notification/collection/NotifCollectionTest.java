@@ -62,6 +62,7 @@ import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoa
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionLogger;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.util.Assert;
 
@@ -85,6 +86,7 @@ import java.util.Map;
 public class NotifCollectionTest extends SysuiTestCase {
 
     @Mock private IStatusBarService mStatusBarService;
+    @Mock private NotifCollectionLogger mLogger;
     @Mock private GroupCoalescer mGroupCoalescer;
     @Spy private RecordingCollectionListener mCollectionListener;
     @Mock private CollectionReadyForBuildListener mBuildListener;
@@ -111,9 +113,11 @@ public class NotifCollectionTest extends SysuiTestCase {
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(true);
         when(mFeatureFlags.isNewNotifPipelineEnabled()).thenReturn(true);
 
-        mCollection = new NotifCollection(mStatusBarService,
+        mCollection = new NotifCollection(
+                mStatusBarService,
                 mock(DumpController.class),
-                mFeatureFlags);
+                mFeatureFlags,
+                mLogger);
         mCollection.attach(mGroupCoalescer);
         mCollection.addCollectionListener(mCollectionListener);
         mCollection.setBuildListener(mBuildListener);

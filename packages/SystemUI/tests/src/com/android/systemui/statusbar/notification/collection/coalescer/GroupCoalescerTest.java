@@ -16,14 +16,14 @@
 
 package com.android.systemui.statusbar.notification.collection.coalescer;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+
+import static java.util.Objects.requireNonNull;
 
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -39,7 +39,6 @@ import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator.NotifEvent;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
-import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -63,7 +62,7 @@ public class GroupCoalescerTest extends SysuiTestCase {
 
     @Mock private NotificationListener mListenerService;
     @Mock private GroupCoalescer.BatchableNotificationHandler mListener;
-    @Mock private NotifLog mLog;
+    @Mock private GroupCoalescerLogger mLogger;
 
     @Captor private ArgumentCaptor<NotificationHandler> mListenerCaptor;
 
@@ -79,14 +78,14 @@ public class GroupCoalescerTest extends SysuiTestCase {
                 new GroupCoalescer(
                         mExecutor,
                         mClock,
-                        mLog,
+                        mLogger,
                         MIN_LINGER_DURATION,
                         MAX_LINGER_DURATION);
         mCoalescer.setNotificationHandler(mListener);
         mCoalescer.attach(mListenerService);
 
         verify(mListenerService).addNotificationHandler(mListenerCaptor.capture());
-        NotificationHandler serviceListener = checkNotNull(mListenerCaptor.getValue());
+        NotificationHandler serviceListener = requireNonNull(mListenerCaptor.getValue());
         mNoMan.addListener(serviceListener);
     }
 

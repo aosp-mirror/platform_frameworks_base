@@ -16,11 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection.coalescer;
 
-import static com.android.systemui.statusbar.notification.logging.NotifEvent.BATCH_MAX_TIMEOUT;
-import static com.android.systemui.statusbar.notification.logging.NotifEvent.COALESCED_EVENT;
-import static com.android.systemui.statusbar.notification.logging.NotifEvent.EARLY_BATCH_EMIT;
-import static com.android.systemui.statusbar.notification.logging.NotifEvent.EMIT_EVENT_BATCH;
-
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.MainThread;
@@ -35,7 +30,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
-import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 
@@ -71,7 +65,7 @@ import javax.inject.Inject;
 public class GroupCoalescer implements Dumpable {
     private final DelayableExecutor mMainExecutor;
     private final SystemClock mClock;
-    private final NotifLog mLog;
+    private final GroupCoalescerLogger mLogger;
     private final long mMinGroupLingerDuration;
     private final long mMaxGroupLingerDuration;
 
@@ -83,8 +77,9 @@ public class GroupCoalescer implements Dumpable {
     @Inject
     public GroupCoalescer(
             @Main DelayableExecutor mainExecutor,
-            SystemClock clock, NotifLog log) {
-        this(mainExecutor, clock, log, MIN_GROUP_LINGER_DURATION, MAX_GROUP_LINGER_DURATION);
+            SystemClock clock,
+            GroupCoalescerLogger logger) {
+        this(mainExecutor, clock, logger, MIN_GROUP_LINGER_DURATION, MAX_GROUP_LINGER_DURATION);
     }
 
     /**
@@ -98,12 +93,12 @@ public class GroupCoalescer implements Dumpable {
     GroupCoalescer(
             @Main DelayableExecutor mainExecutor,
             SystemClock clock,
-            NotifLog log,
+            GroupCoalescerLogger logger,
             long minGroupLingerDuration,
             long maxGroupLingerDuration) {
         mMainExecutor = mainExecutor;
         mClock = clock;
-        mLog = log;
+        mLogger = logger;
         mMinGroupLingerDuration = minGroupLingerDuration;
         mMaxGroupLingerDuration = maxGroupLingerDuration;
     }
@@ -129,7 +124,7 @@ public class GroupCoalescer implements Dumpable {
             final boolean shouldCoalesce = handleNotificationPosted(sbn, rankingMap);
 
             if (shouldCoalesce) {
-                mLog.log(COALESCED_EVENT, String.format("Coalesced notification %s", sbn.getKey()));
+                mLogger.logEventCoalesced(sbn.getKey());
                 mHandler.onNotificationRankingUpdate(rankingMap);
             } else {
                 mHandler.onNotificationPosted(sbn, rankingMap);
@@ -164,15 +159,11 @@ public class GroupCoalescer implements Dumpable {
         final CoalescedEvent event = mCoalescedEvents.get(sbn.getKey());
         final EventBatch batch = mBatches.get(sbn.getGroupKey());
         if (event != null) {
-            mLog.log(EARLY_BATCH_EMIT,
-                    String.format("Modification of %s triggered early emit of batched group %s",
-                            sbn.getKey(), requireNonNull(event.getBatch()).mGroupKey));
+            mLogger.logEarlyEmit(sbn.getKey(), requireNonNull(event.getBatch()).mGroupKey);
             emitBatch(requireNonNull(event.getBatch()));
         } else if (batch != null
                 && mClock.uptimeMillis() - batch.mCreatedTimestamp >= mMaxGroupLingerDuration) {
-            mLog.log(BATCH_MAX_TIMEOUT,
-                    String.format("Modification of %s triggered timeout emit of batched group %s",
-                            sbn.getKey(), batch.mGroupKey));
+            mLogger.logMaxBatchTimeout(sbn.getKey(), batch.mGroupKey);
             emitBatch(batch);
         }
     }
@@ -253,7 +244,7 @@ public class GroupCoalescer implements Dumpable {
         }
         events.sort(mEventComparator);
 
-        mLog.log(EMIT_EVENT_BATCH, "Emitting event batch for group " + batch.mGroupKey);
+        mLogger.logEmitBatch(batch.mGroupKey);
 
         mHandler.onNotificationBatchPosted(events);
     }
