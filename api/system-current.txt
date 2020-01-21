@@ -6877,17 +6877,17 @@ package android.net.wifi {
     method @Deprecated public void configureWifiChange(int, int, int, int, int, android.net.wifi.WifiScanner.BssidInfo[]);
     method @Deprecated public void configureWifiChange(android.net.wifi.WifiScanner.WifiChangeSettings);
     method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public java.util.List<java.lang.Integer> getAvailableChannels(int);
-    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean getScanResults();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean getScanResults();
     method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public java.util.List<android.net.wifi.ScanResult> getSingleScanResults();
     method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void registerScanListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiScanner.ScanListener);
     method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void setScanningEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener);
-    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener, android.os.WorkSource);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener, android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener, android.os.WorkSource);
     method @Deprecated public void startTrackingBssids(android.net.wifi.WifiScanner.BssidInfo[], int, android.net.wifi.WifiScanner.BssidListener);
     method @Deprecated public void startTrackingWifiChange(android.net.wifi.WifiScanner.WifiChangeListener);
-    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void stopBackgroundScan(android.net.wifi.WifiScanner.ScanListener);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void stopBackgroundScan(android.net.wifi.WifiScanner.ScanListener);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void stopScan(android.net.wifi.WifiScanner.ScanListener);
     method @Deprecated public void stopTrackingBssids(android.net.wifi.WifiScanner.BssidListener);
     method @Deprecated public void stopTrackingWifiChange(android.net.wifi.WifiScanner.WifiChangeListener);
@@ -6970,7 +6970,7 @@ package android.net.wifi {
 
   public static interface WifiScanner.ScanListener extends android.net.wifi.WifiScanner.ActionListener {
     method public void onFullResult(android.net.wifi.ScanResult);
-    method public void onPeriodChanged(int);
+    method @Deprecated public void onPeriodChanged(int);
     method public void onResults(android.net.wifi.WifiScanner.ScanData[]);
   }
 
@@ -6981,12 +6981,12 @@ package android.net.wifi {
     field @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public final java.util.List<android.net.wifi.WifiScanner.ScanSettings.HiddenNetwork> hiddenNetworks;
     field public boolean hideFromAppOps;
     field public boolean ignoreLocationSettings;
-    field public int maxPeriodInMs;
-    field public int maxScansToCache;
-    field public int numBssidsPerScan;
-    field public int periodInMs;
-    field public int reportEvents;
-    field public int stepCount;
+    field @Deprecated public int maxPeriodInMs;
+    field @Deprecated public int maxScansToCache;
+    field @Deprecated public int numBssidsPerScan;
+    field @Deprecated public int periodInMs;
+    field @Deprecated public int reportEvents;
+    field @Deprecated public int stepCount;
     field @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public int type;
   }
 
