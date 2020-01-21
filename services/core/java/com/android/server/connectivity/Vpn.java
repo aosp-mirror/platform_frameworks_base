@@ -848,7 +848,7 @@ public class Vpn {
     }
 
     public int getNetId() {
-        return mNetworkAgent != null ? mNetworkAgent.netId : NETID_UNSET;
+        return mNetworkAgent != null ? mNetworkAgent.network.netId : NETID_UNSET;
     }
 
     private LinkProperties makeLinkProperties() {

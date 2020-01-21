@@ -44,9 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @hide
  */
 public abstract class NetworkAgent extends Handler {
-    // Guaranteed to be valid (not NETID_UNSET), otherwise registerNetworkAgent() would have thrown
-    // an exception.
-    public final int netId;
+    public final Network network;
 
     private volatile AsyncChannel mAsyncChannel;
     private final String LOG_TAG;
@@ -245,7 +243,7 @@ public abstract class NetworkAgent extends Handler {
         if (VDBG) log("Registering NetworkAgent");
         ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
-        netId = cm.registerNetworkAgent(new Messenger(this), new NetworkInfo(ni),
+        network = cm.registerNetworkAgent(new Messenger(this), new NetworkInfo(ni),
                 new LinkProperties(lp), new NetworkCapabilities(nc), score, misc, providerId);
     }
 
