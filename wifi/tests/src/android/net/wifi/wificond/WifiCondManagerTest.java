@@ -1046,6 +1046,10 @@ public class WifiCondManagerTest {
         capaExpected.setWifiStandardSupport(ScanResult.WIFI_STANDARD_11N, true);
         capaExpected.setWifiStandardSupport(ScanResult.WIFI_STANDARD_11AC, true);
         capaExpected.setWifiStandardSupport(ScanResult.WIFI_STANDARD_11AX, false);
+        capaExpected.setChannelWidthSupported(ScanResult.CHANNEL_WIDTH_160MHZ, true);
+        capaExpected.setChannelWidthSupported(ScanResult.CHANNEL_WIDTH_80MHZ_PLUS_MHZ, false);
+        capaExpected.setMaxNumberTxSpatialStreams(2);
+        capaExpected.setMaxNumberRxSpatialStreams(1);
 
         when(mWificond.getDeviceWiphyCapabilities(TEST_INTERFACE_NAME))
                 .thenReturn(capaExpected);

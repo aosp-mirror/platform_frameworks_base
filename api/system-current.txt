@@ -7045,7 +7045,13 @@ package android.net.wifi.wificond {
   public final class DeviceWiphyCapabilities implements android.os.Parcelable {
     ctor public DeviceWiphyCapabilities();
     method public int describeContents();
+    method public int getMaxNumberRxSpatialStreams();
+    method public int getMaxNumberTxSpatialStreams();
+    method public boolean isChannelWidthSupported(int);
     method public boolean isWifiStandardSupported(int);
+    method public void setChannelWidthSupported(int, boolean);
+    method public void setMaxNumberRxSpatialStreams(int);
+    method public void setMaxNumberTxSpatialStreams(int);
     method public void setWifiStandardSupport(int, boolean);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.DeviceWiphyCapabilities> CREATOR;

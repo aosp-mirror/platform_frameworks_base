@@ -37,12 +37,21 @@ public final class DeviceWiphyCapabilities implements Parcelable {
     private boolean m80211nSupported;
     private boolean m80211acSupported;
     private boolean m80211axSupported;
+    private boolean mChannelWidth160MhzSupported;
+    private boolean mChannelWidth80p80MhzSupported;
+    private int mMaxNumberTxSpatialStreams;
+    private int mMaxNumberRxSpatialStreams;
+
 
     /** public constructor */
     public DeviceWiphyCapabilities() {
         m80211nSupported = false;
         m80211acSupported = false;
         m80211axSupported = false;
+        mChannelWidth160MhzSupported = false;
+        mChannelWidth80p80MhzSupported = false;
+        mMaxNumberTxSpatialStreams = 1;
+        mMaxNumberRxSpatialStreams = 1;
     }
 
     /**
@@ -91,6 +100,88 @@ public final class DeviceWiphyCapabilities implements Parcelable {
         }
     }
 
+    /**
+     * Get the support for channel bandwidth
+     *
+     * @param chWidth valid values from {@link ScanResult}'s {@code CHANNEL_WIDTH_}
+     *
+     * @return {@code true} if supported, {@code false} otherwise.
+     */
+    public boolean isChannelWidthSupported(int chWidth) {
+        switch (chWidth) {
+            case ScanResult.CHANNEL_WIDTH_20MHZ:
+                return true;
+            case ScanResult.CHANNEL_WIDTH_40MHZ:
+                return (m80211nSupported || m80211acSupported || m80211axSupported);
+            case ScanResult.CHANNEL_WIDTH_80MHZ:
+                return (m80211acSupported || m80211axSupported);
+            case ScanResult.CHANNEL_WIDTH_160MHZ:
+                return mChannelWidth160MhzSupported;
+            case ScanResult.CHANNEL_WIDTH_80MHZ_PLUS_MHZ:
+                return mChannelWidth80p80MhzSupported;
+            default:
+                Log.e(TAG, "isChannelWidthSupported called with invalid channel width: " + chWidth);
+        }
+        return false;
+    }
+
+    /**
+     * Set support for channel bandwidth
+     *
+     * @param chWidth valid values are {@link ScanResult#CHANNEL_WIDTH_160MHZ} and
+     *        {@link ScanResult#CHANNEL_WIDTH_80MHZ_PLUS_MHZ}
+     * @param support {@code true} if supported, {@code false} otherwise.
+     */
+    public void setChannelWidthSupported(int chWidth, boolean support) {
+        switch (chWidth) {
+            case ScanResult.CHANNEL_WIDTH_160MHZ:
+                mChannelWidth160MhzSupported = support;
+                break;
+            case ScanResult.CHANNEL_WIDTH_80MHZ_PLUS_MHZ:
+                mChannelWidth80p80MhzSupported = support;
+                break;
+            default:
+                Log.e(TAG, "setChannelWidthSupported called with Invalid channel width: "
+                        + chWidth);
+        }
+    }
+
+    /**
+     * Get maximum number of transmit spatial streams
+     *
+     * @return number of spatial streams
+     */
+    public int getMaxNumberTxSpatialStreams() {
+        return mMaxNumberTxSpatialStreams;
+    }
+
+    /**
+     * Set maximum number of transmit spatial streams
+     *
+     * @param streams number of spatial streams
+     */
+    public void setMaxNumberTxSpatialStreams(int streams) {
+        mMaxNumberTxSpatialStreams = streams;
+    }
+
+    /**
+     * Get maximum number of receive spatial streams
+     *
+     * @return number of streams
+     */
+    public int getMaxNumberRxSpatialStreams() {
+        return mMaxNumberRxSpatialStreams;
+    }
+
+    /**
+     * Set maximum number of receive spatial streams
+     *
+     * @param streams number of streams
+     */
+    public void setMaxNumberRxSpatialStreams(int streams) {
+        mMaxNumberRxSpatialStreams = streams;
+    }
+
     /** override comparator */
     @Override
     public boolean equals(Object rhs) {
@@ -102,13 +193,19 @@ public final class DeviceWiphyCapabilities implements Parcelable {
 
         return m80211nSupported == capa.m80211nSupported
                 && m80211acSupported == capa.m80211acSupported
-                && m80211axSupported == capa.m80211axSupported;
+                && m80211axSupported == capa.m80211axSupported
+                && mChannelWidth160MhzSupported == capa.mChannelWidth160MhzSupported
+                && mChannelWidth80p80MhzSupported == capa.mChannelWidth80p80MhzSupported
+                && mMaxNumberTxSpatialStreams == capa.mMaxNumberTxSpatialStreams
+                && mMaxNumberRxSpatialStreams == capa.mMaxNumberRxSpatialStreams;
     }
 
     /** override hash code */
     @Override
     public int hashCode() {
-        return Objects.hash(m80211nSupported, m80211acSupported, m80211axSupported);
+        return Objects.hash(m80211nSupported, m80211acSupported, m80211axSupported,
+                mChannelWidth160MhzSupported, mChannelWidth80p80MhzSupported,
+                mMaxNumberTxSpatialStreams, mMaxNumberRxSpatialStreams);
     }
 
     /** implement Parcelable interface */
@@ -126,6 +223,10 @@ public final class DeviceWiphyCapabilities implements Parcelable {
         out.writeBoolean(m80211nSupported);
         out.writeBoolean(m80211acSupported);
         out.writeBoolean(m80211axSupported);
+        out.writeBoolean(mChannelWidth160MhzSupported);
+        out.writeBoolean(mChannelWidth80p80MhzSupported);
+        out.writeInt(mMaxNumberTxSpatialStreams);
+        out.writeInt(mMaxNumberRxSpatialStreams);
     }
 
     @Override
@@ -134,6 +235,13 @@ public final class DeviceWiphyCapabilities implements Parcelable {
         sb.append("m80211nSupported:").append(m80211nSupported ? "Yes" : "No");
         sb.append("m80211acSupported:").append(m80211acSupported ? "Yes" : "No");
         sb.append("m80211axSupported:").append(m80211axSupported ? "Yes" : "No");
+        sb.append("mChannelWidth160MhzSupported: ")
+                .append(mChannelWidth160MhzSupported ? "Yes" : "No");
+        sb.append("mChannelWidth80p80MhzSupported: ")
+                .append(mChannelWidth80p80MhzSupported ? "Yes" : "No");
+        sb.append("mMaxNumberTxSpatialStreams: ").append(mMaxNumberTxSpatialStreams);
+        sb.append("mMaxNumberRxSpatialStreams: ").append(mMaxNumberRxSpatialStreams);
+
         return sb.toString();
     }
 
@@ -149,6 +257,10 @@ public final class DeviceWiphyCapabilities implements Parcelable {
             capabilities.m80211nSupported = in.readBoolean();
             capabilities.m80211acSupported = in.readBoolean();
             capabilities.m80211axSupported = in.readBoolean();
+            capabilities.mChannelWidth160MhzSupported = in.readBoolean();
+            capabilities.mChannelWidth80p80MhzSupported = in.readBoolean();
+            capabilities.mMaxNumberTxSpatialStreams = in.readInt();
+            capabilities.mMaxNumberRxSpatialStreams = in.readInt();
             return capabilities;
         }
 
