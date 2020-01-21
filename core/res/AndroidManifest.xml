@@ -2253,6 +2253,9 @@
     <eat-comment />
 
     <!-- @SystemApi @TestApi Allows an application to write to internal media storage
+         @deprecated This permission is no longer honored in the system and no longer adds
+         the media_rw gid as a supplementary gid to the holder. Use the
+         android.permission.MANAGE_EXTERNAL_STORAGE instead.
          @hide  -->
     <permission android:name="android.permission.WRITE_MEDIA_STORAGE"
         android:protectionLevel="signature|privileged" />
