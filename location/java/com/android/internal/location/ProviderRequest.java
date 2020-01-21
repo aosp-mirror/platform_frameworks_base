@@ -23,11 +23,10 @@ import android.os.Parcelable;
 import android.os.WorkSource;
 import android.util.TimeUtils;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /** @hide */
 public final class ProviderRequest implements Parcelable {
@@ -76,8 +75,8 @@ public final class ProviderRequest implements Parcelable {
         this.interval = interval;
         this.lowPowerMode = lowPowerMode;
         this.locationSettingsIgnored = locationSettingsIgnored;
-        this.locationRequests = Preconditions.checkNotNull(locationRequests);
-        this.workSource = Preconditions.checkNotNull(workSource);
+        this.locationRequests = Objects.requireNonNull(locationRequests);
+        this.workSource = Objects.requireNonNull(workSource);
     }
 
     public static final Parcelable.Creator<ProviderRequest> CREATOR =
@@ -155,40 +154,50 @@ public final class ProviderRequest implements Parcelable {
             return mInterval;
         }
 
-        public void setInterval(long interval) {
+        /** Sets the request interval. */
+        public Builder setInterval(long interval) {
             this.mInterval = interval;
+            return this;
         }
 
         public boolean isLowPowerMode() {
             return mLowPowerMode;
         }
 
-        public void setLowPowerMode(boolean lowPowerMode) {
+        /** Sets whether low power mode is enabled. */
+        public Builder setLowPowerMode(boolean lowPowerMode) {
             this.mLowPowerMode = lowPowerMode;
+            return this;
         }
 
         public boolean isLocationSettingsIgnored() {
             return mLocationSettingsIgnored;
         }
 
-        public void setLocationSettingsIgnored(boolean locationSettingsIgnored) {
+        /** Sets whether location settings should be ignored. */
+        public Builder setLocationSettingsIgnored(boolean locationSettingsIgnored) {
             this.mLocationSettingsIgnored = locationSettingsIgnored;
+            return this;
         }
 
         public List<LocationRequest> getLocationRequests() {
             return mLocationRequests;
         }
 
-        public void setLocationRequests(List<LocationRequest> locationRequests) {
-            this.mLocationRequests = Preconditions.checkNotNull(locationRequests);
+        /** Sets the {@link LocationRequest}s associated with this request. */
+        public Builder setLocationRequests(List<LocationRequest> locationRequests) {
+            this.mLocationRequests = Objects.requireNonNull(locationRequests);
+            return this;
         }
 
         public WorkSource getWorkSource() {
             return mWorkSource;
         }
 
-        public void setWorkSource(WorkSource workSource) {
-            mWorkSource = Preconditions.checkNotNull(workSource);
+        /** Sets the work source. */
+        public Builder setWorkSource(WorkSource workSource) {
+            mWorkSource = Objects.requireNonNull(workSource);
+            return this;
         }
 
         /**
