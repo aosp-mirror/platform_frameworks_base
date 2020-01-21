@@ -824,7 +824,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         false /* markFrozenIfConfigChanged */, true /* deferResume */);
             }
 
-            if (r.getActivityStack().checkKeyguardVisibility(r, true /* shouldBeVisible */,
+            if (r.getRootTask().checkKeyguardVisibility(r, true /* shouldBeVisible */,
                     true /* isTop */) && r.allowMoveToFront()) {
                 // We only set the visibility to true if the activity is not being launched in
                 // background, and is allowed to be visible based on keyguard state. This avoids
@@ -1891,13 +1891,13 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     // TODO: Look into changing users to this method to DisplayContent.resolveWindowingMode()
     ActivityStack getReparentTargetStack(Task task, ActivityStack stack, boolean toTop) {
         final ActivityStack prevStack = task.getStack();
-        final int stackId = stack.mStackId;
+        final int rootTaskId = stack.mTaskId;
         final boolean inMultiWindowMode = stack.inMultiWindowMode();
 
         // Check that we aren't reparenting to the same stack that the task is already in
-        if (prevStack != null && prevStack.mStackId == stackId) {
+        if (prevStack != null && prevStack.mTaskId == rootTaskId) {
             Slog.w(TAG, "Can not reparent to same stack, task=" + task
-                    + " already in stackId=" + stackId);
+                    + " already in stackId=" + rootTaskId);
             return prevStack;
         }
 
@@ -1912,7 +1912,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // multi-display.
         if (stack.getDisplayId() != DEFAULT_DISPLAY && !mService.mSupportsMultiDisplay) {
             throw new IllegalArgumentException("Device doesn't support multi-display, can not"
-                    + " reparent task=" + task + " to stackId=" + stackId);
+                    + " reparent task=" + task + " to stackId=" + rootTaskId);
         }
 
         // Ensure that we aren't trying to move into a freeform stack without freeform support
@@ -1993,7 +1993,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     void activitySleptLocked(ActivityRecord r) {
         mGoingToSleepActivities.remove(r);
-        final ActivityStack s = r.getActivityStack();
+        final ActivityStack s = r.getRootTask();
         if (s != null) {
             s.checkReadyForSleep();
         } else {
@@ -2029,7 +2029,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // A resumed activity cannot be stopping. remove from list
         mStoppingActivities.remove(r);
 
-        final ActivityStack stack = r.getActivityStack();
+        final ActivityStack stack = r.getRootTask();
         if (stack.getDisplay().allResumedActivitiesComplete()) {
             mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
             // Make sure activity & window visibility should be identical
@@ -2082,7 +2082,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + s.nowVisible
                     + " animating=" + animating + " finishing=" + s.finishing);
 
-            final ActivityStack stack = s.getActivityStack();
+            final ActivityStack stack = s.getRootTask();
             final boolean shouldSleepOrShutDown = stack != null
                     ? stack.shouldSleepOrShutDownActivities()
                     : mService.isSleepingOrShuttingDownLocked();
@@ -2473,7 +2473,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final ActivityRecord r = ActivityRecord.isInStackLocked(token);
         if (r != null) {
             r.finishRelaunching();
-            if (r.getActivityStack().shouldSleepOrShutDownActivities()) {
+            if (r.getRootTask().shouldSleepOrShutDownActivities()) {
                 r.setSleeping(true, true);
             }
         }

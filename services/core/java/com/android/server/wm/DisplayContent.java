@@ -2772,7 +2772,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         proto.write(SINGLE_TASK_INSTANCE, mSingleTaskInstance);
         final ActivityStack focusedStack = getFocusedStack();
         if (focusedStack != null) {
-            proto.write(FOCUSED_STACK_ID, focusedStack.mStackId);
+            proto.write(FOCUSED_STACK_ID, focusedStack.getRootTaskId());
             final ActivityRecord focusedActivity = focusedStack.getDisplay().getResumedActivity();
             if (focusedActivity != null) {
                 focusedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
@@ -5655,8 +5655,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (currentFocusedStack != prevFocusedStack) {
                 mLastFocusedStack = prevFocusedStack;
                 EventLogTags.writeWmFocusedStack(mRootWindowContainer.mCurrentUser, mDisplayId,
-                        currentFocusedStack == null ? -1 : currentFocusedStack.getStackId(),
-                        mLastFocusedStack == null ? -1 : mLastFocusedStack.getStackId(),
+                        currentFocusedStack == null ? -1 : currentFocusedStack.getRootTaskId(),
+                        mLastFocusedStack == null ? -1 : mLastFocusedStack.getRootTaskId(),
                         updateLastFocusedStackReason);
             }
         }
@@ -5664,10 +5664,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         onStackOrderChanged(stack);
     }
 
-    ActivityStack getStack(int stackId) {
+    ActivityStack getStack(int rootTaskId) {
         for (int i = getStackCount() - 1; i >= 0; --i) {
             final ActivityStack stack = getStackAt(i);
-            if (stack.mStackId == stackId) {
+            if (stack.getRootTaskId() == rootTaskId) {
                 return stack;
             }
         }
@@ -6704,7 +6704,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     public void dumpStacks(PrintWriter pw) {
         for (int i = getStackCount() - 1; i >= 0; --i) {
-            pw.print(getStackAt(i).mStackId);
+            pw.print(getStackAt(i).getRootTaskId());
             if (i > 0) {
                 pw.print(",");
             }

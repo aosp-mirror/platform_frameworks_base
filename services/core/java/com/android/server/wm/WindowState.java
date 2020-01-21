@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityTaskManager.INVALID_STACK_ID;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_NONE;
@@ -1055,7 +1055,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
 
-            final ActivityStack stack = getStack();
+            final ActivityStack stack = getRootTask();
             if (inPinnedWindowingMode() && stack != null
                     && stack.lastAnimatingBoundsWasToFullscreen()) {
                 // PIP edge case: When going from pinned to fullscreen, we apply a
@@ -1469,12 +1469,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord != null ? mActivityRecord.getTask() : null;
     }
 
-    ActivityStack getStack() {
-        Task task = getTask();
+    ActivityStack getRootTask() {
+        final Task task = getTask();
         if (task != null) {
-            if (task.getStack() != null) {
-                return task.getStack();
-            }
+            return (ActivityStack) task.getRootTask();
         }
         // Some system windows (e.g. "Power off" dialog) don't have a task, but we would still
         // associate them with some stack to enable dimming.
@@ -2229,7 +2227,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        final ActivityStack stack = getStack();
+        final ActivityStack stack = getRootTask();
         if (stack != null && stack.shouldIgnoreInput()) {
             // Ignore when the stack shouldn't receive input event.
             // (i.e. the minimized stack in split screen mode.)
@@ -2472,7 +2470,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (task != null) {
                 task.getDimBounds(mTmpRect);
             } else {
-                getStack().getDimBounds(mTmpRect);
+                getRootTask().getDimBounds(mTmpRect);
             }
         }
         if (inFreeformWindowingMode()) {
@@ -3563,12 +3561,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mTmpRect;
     }
 
-    private int getStackId() {
-        final ActivityStack stack = getStack();
+    private int getRootTaskId() {
+        final ActivityStack stack = getRootTask();
         if (stack == null) {
-            return INVALID_STACK_ID;
+            return INVALID_TASK_ID;
         }
-        return stack.mStackId;
+        return stack.mTaskId;
     }
 
     private void dispatchResized(Rect frame, Rect contentInsets,
@@ -3753,7 +3751,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(DISPLAY_ID, getDisplayId());
-        proto.write(STACK_ID, getStackId());
+        proto.write(STACK_ID, getRootTaskId());
         mAttrs.dumpDebug(proto, ATTRIBUTES);
         mGivenContentInsets.dumpDebug(proto, GIVEN_CONTENT_INSETS);
         mWindowFrames.dumpDebug(proto, WINDOW_FRAMES);
@@ -3795,10 +3793,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
-        final ActivityStack stack = getStack();
         pw.print(prefix + "mDisplayId=" + getDisplayId());
-        if (stack != null) {
-            pw.print(" stackId=" + stack.mStackId);
+        if (getRootTask() != null) {
+            pw.print(" rootTaskId=" + getRootTaskId());
         }
         pw.println(" mSession=" + mSession
                 + " mClient=" + mClient.asBinder());
@@ -5271,7 +5268,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             outPoint.offset(-parentBounds.left, -parentBounds.top);
         }
 
-        ActivityStack stack = getStack();
+        ActivityStack stack = getRootTask();
 
         // If we have stack outsets, that means the top-left
         // will be outset, and we need to inset ourselves

@@ -277,9 +277,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     int mCurrentUser;
 
-    /** Unique identifier */
-    final int mStackId;
-
     /** For comparison with DisplayContent bounds. */
     private Rect mTmpRect = new Rect();
     private Rect mTmpRect2 = new Rect();
@@ -633,7 +630,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 _realActivitySuspended, userSetupComplete, minWidth, minHeight, info, _voiceSession,
                 _voiceInteractor, stack);
 
-        mStackId = mTaskId;
         mDockedStackMinimizeThickness = mWmService.mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_minimize_thickness);
         EventLogTags.writeWmStackCreated(id);
@@ -1118,7 +1114,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             return null;
         }
         final Task task = r.getTask();
-        final ActivityStack stack = r.getActivityStack();
+        final ActivityStack stack = r.getRootTask();
         if (stack != null && task.mChildren.contains(r) && mChildren.contains(task)) {
             if (stack != this) Slog.w(TAG,
                     "Illegal state! task does not point to stack it is in.");
@@ -1347,7 +1343,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     private boolean containsActivityFromStack(List<ActivityRecord> rs) {
         for (ActivityRecord r : rs) {
-            if (r.getActivityStack() == this) {
+            if (r.getRootTask() == this) {
                 return true;
             }
         }
@@ -1873,7 +1869,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         final DisplayContent displayContent = getDisplay();
         if (displayContent == null) {
             throw new IllegalStateException("Stack is not attached to any display, stackId="
-                    + mStackId);
+                    + getRootTaskId());
         }
 
         final int flags = displayContent.mDisplay.getFlags();
@@ -2592,7 +2588,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             return false;
         }
         final ActivityStack targetStack = toFrontTask != null
-                ? toFrontTask.getStack() : toFrontActivity.getActivityStack();
+                ? toFrontTask.getStack() : toFrontActivity.getRootTask();
         if (targetStack != null && targetStack.isActivityTypeAssistant()) {
             // Ensure the task/activity being brought forward is not the assistant
             return false;
@@ -3073,7 +3069,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         }
 
         ActivityRecord topActivity = getDisplay().topRunningActivity();
-        ActivityStack topStack = topActivity.getActivityStack();
+        ActivityStack topStack = topActivity.getRootTask();
         if (topStack != null && topStack != this && topActivity.isState(RESUMED)) {
             // The new top activity is already resumed, so there's a good chance that nothing will
             // get resumed below. So, update visibility now in case the transition is closed
@@ -3102,7 +3098,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             return;
         }
 
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "stack.resize_" + mStackId);
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "stack.resize_" + getRootTaskId());
         mAtmService.deferWindowLayout();
         try {
             // Update override configurations of all tasks in the stack.
@@ -3219,7 +3215,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     boolean dump(FileDescriptor fd, PrintWriter pw, boolean dumpAll, boolean dumpClient,
             String dumpPackage, boolean needSep) {
-        pw.println("  Stack #" + mStackId
+        pw.println("  Stack #" + getRootTaskId()
                 + ": type=" + activityTypeToString(getActivityType())
                 + " mode=" + windowingModeToString(getWindowingMode()));
         pw.println("  isSleeping=" + shouldSleepActivities());
@@ -4484,7 +4480,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
-        pw.println(prefix + "mStackId=" + mStackId);
+        pw.println(prefix + "mStackId=" + getRootTaskId());
         pw.println(prefix + "mDeferRemoval=" + mDeferRemoval);
         pw.println(prefix + "mBounds=" + getRawBounds().toShortString());
         if (mMinimizeAmount != 0f) {
@@ -4513,14 +4509,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             }
         }
         mAnimatingActivityRegistry.dump(pw, "AnimatingApps:", prefix);
-    }
-
-    String getName() {
-        return toShortString();
-    }
-
-    public String toShortString() {
-        return "Stack=" + mStackId;
     }
 
     /**
@@ -4863,7 +4851,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             @WindowTraceLogLevel int logLevel) {
         final long token = proto.start(fieldId);
         dumpDebugInnerStackOnly(proto, STACK, logLevel);
-        proto.write(com.android.server.am.ActivityStackProto.ID, mStackId);
+        proto.write(com.android.server.am.ActivityStackProto.ID, getRootTaskId());
 
         forAllTasks((t) -> {
             t.dumpDebugInner(proto, com.android.server.am.ActivityStackProto.TASKS, logLevel);
@@ -4891,7 +4879,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
-        proto.write(StackProto.ID, mStackId);
+        proto.write(StackProto.ID, getRootTaskId());
         forAllTasks((t) -> {
             t.dumpDebugInnerTaskOnly(proto, StackProto.TASKS, logLevel);
         }, true /* traverseTopToBottom */, this);

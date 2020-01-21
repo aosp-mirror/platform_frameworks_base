@@ -31,7 +31,6 @@ import static android.app.ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_UNDEFINED;
-import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
@@ -1426,7 +1425,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return null;
             }
             ActivityRecord r = token.weakActivity.get();
-            if (r == null || r.getActivityStack() == null) {
+            if (r == null || r.getRootTask() == null) {
                 return null;
             }
             return r;
@@ -2055,19 +2054,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    /**
-     * @return Stack value from current task, null if there is no task.
-     */
-    ActivityStack getActivityStack() {
-        return task != null ? task.getStack() : null;
+    /** @return Root task of this activity, null if there is no task. */
+    ActivityStack getRootTask() {
+        return task != null ? (ActivityStack) task.getRootTask() : null;
     }
 
-    int getStackId() {
-        return getActivityStack() != null ? getActivityStack().mStackId : INVALID_STACK_ID;
+    int getRootTaskId() {
+        return task != null ? task.getRootTaskId() : INVALID_TASK_ID;
     }
 
     DisplayContent getDisplay() {
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         return stack != null ? stack.getDisplay() : null;
     }
 
@@ -2088,7 +2085,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mWmService.mWindowPlacerLocked.requestTraversal();
 
         if (changed && task != null && !occludesParent) {
-            getActivityStack().convertActivityToTranslucent(this);
+            getRootTask().convertActivityToTranslucent(this);
         }
         // Always ensure visibility if this activity doesn't occlude parent, so the
         // {@link #returningOptions} of the activity under this one can be applied in
@@ -2123,7 +2120,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean isInStackLocked() {
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         return stack != null && stack.isInStackLocked(this) != null;
     }
 
@@ -2325,7 +2322,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         if (stack == null) {
             Slog.w(TAG, "moveActivityStackToFront: invalid task or stack: activity="
                     + this + " task=" + task);
@@ -2456,7 +2453,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return FINISH_RESULT_CANCELLED;
         }
 
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         final boolean mayAdjustTop = (isState(RESUMED) || stack.mResumedActivity == null)
                 && stack.isFocusedStackOnDisplay();
         final boolean shouldAdjustGlobalFocus = mayAdjustTop
@@ -2497,7 +2494,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     final DisplayContent display = stack.getDisplay();
                     next = display.topRunningActivity();
                     if (next != null) {
-                        display.positionStackAtTop(next.getActivityStack(),
+                        display.positionStackAtTop(next.getRootTask(),
                                 false /* includingParents */, "finish-display-top");
                     }
                 }
@@ -2666,7 +2663,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mStackSupervisor.mStoppingActivities.remove(this);
         mStackSupervisor.mGoingToSleepActivities.remove(this);
 
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         final DisplayContent display = getDisplay();
         // TODO(b/137329632): Exclude current activity when looking for the next one with
         // DisplayContent#topRunningActivity().
@@ -2824,7 +2821,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean safelyDestroy(String reason) {
         if (isDestroyable()) {
             if (DEBUG_SWITCH) {
-                final ActivityStack stack = getActivityStack();
+                final ActivityStack stack = getRootTask();
                 Slog.v(TAG_SWITCH, "Safely destroying " + this + " in state " + getState()
                         + " resumed=" + stack.mResumedActivity
                         + " pausing=" + stack.mPausingActivity
@@ -3612,7 +3609,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     final boolean isSleeping() {
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         return stack != null ? stack.shouldSleepActivities() : mAtmService.isSleepingLocked();
     }
 
@@ -4449,7 +4446,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return visibleIgnoringKeyguard;
         }
 
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         if (stack == null) {
             return false;
         }
@@ -4471,7 +4468,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean shouldBeVisible() {
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         if (stack == null) {
             return false;
         }
@@ -4492,7 +4489,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If this activity is paused, tell it to now show its window.
         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                 "Making visible and scheduling visibility: " + this);
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         try {
             if (stack.mTranslucentActivityWaiting != null) {
                 updateOptionsLocked(returningOptions);
@@ -4578,7 +4575,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (DEBUG_VISIBILITY) {
                 Slog.v(TAG_VISIBILITY, "Resume visible activity, " + this);
             }
-            return getActivityStack().resumeTopActivityUncheckedLocked(activeActivity /* prev */,
+            return getRootTask().resumeTopActivityUncheckedLocked(activeActivity /* prev */,
                     null /* options */);
         } else if (shouldPauseActivity(activeActivity)) {
             if (DEBUG_VISIBILITY) {
@@ -4643,7 +4640,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private boolean shouldBeResumed(ActivityRecord activeActivity) {
         return shouldMakeActive(activeActivity) && isFocusable()
-                && getActivityStack().getVisibility(activeActivity) == STACK_VISIBILITY_VISIBLE
+                && getRootTask().getVisibility(activeActivity) == STACK_VISIBILITY_VISIBLE
                 && canResumeByCompat();
     }
 
@@ -4672,7 +4669,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // ActivityStack#ensureActivitiesVisible will bring the activity to a proper
         // active state.
         if (!isState(STARTED, RESUMED, PAUSED, STOPPED, STOPPING)
-                || getActivityStack().mTranslucentActivityWaiting != null) {
+                || getRootTask().mTranslucentActivityWaiting != null) {
             return false;
         }
 
@@ -4769,7 +4766,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mStackSupervisor.reportResumedActivityLocked(this);
 
         resumeKeyDispatchingLocked();
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         mStackSupervisor.mNoAnimActivities.clear();
 
         // Mark the point when the activity is resuming
@@ -4862,7 +4859,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void stopIfPossible() {
         if (DEBUG_SWITCH) Slog.d(TAG_SWITCH, "Stopping: " + this);
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         if (isNoHistory()) {
             if (!finishing) {
                 if (!stack.shouldSleepActivities()) {
@@ -4919,7 +4916,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void activityStopped(Bundle newIcicle, PersistableBundle newPersistentState,
             CharSequence description) {
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         final boolean isStopping = mState == STOPPING;
         if (!isStopping && mState != RESTARTING_PROCESS) {
             Slog.i(TAG, "Activity reported stop, but no longer stopping: " + this);
@@ -4969,7 +4966,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mStackSupervisor.mStoppingActivities.add(this);
         }
 
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         // If we already have a few activities waiting to stop, then give up on things going idle
         // and start clearing them out. Or if r is the last of activity of the last task the stack
         // will be empty and must be cleared immediately.
@@ -5005,7 +5002,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         if (stack == null) {
             return false;
         }
@@ -5021,7 +5018,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void finishLaunchTickingLocked() {
         launchTickTime = 0;
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         if (stack == null) {
             return;
         }
@@ -5491,13 +5488,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     static ActivityRecord isInStackLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        return (r != null) ? r.getActivityStack().isInStackLocked(r) : null;
+        return (r != null) ? r.getRootTask().isInStackLocked(r) : null;
     }
 
     static ActivityStack getStackLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.isInStackLocked(token);
         if (r != null) {
-            return r.getActivityStack();
+            return r.getRootTask();
         }
         return null;
     }
@@ -5507,7 +5504,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         {@link android.view.Display#INVALID_DISPLAY} if not attached.
      */
     int getDisplayId() {
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         if (stack == null) {
             return INVALID_DISPLAY;
         }
@@ -5519,7 +5516,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // This would be redundant.
             return false;
         }
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         if (isState(RESUMED) || stack == null || this == stack.mPausingActivity || !mHaveState
                 || !stopped) {
             // We're not ready for this kind of thing.
@@ -6755,7 +6752,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private void applyAspectRatio(Rect outBounds, Rect containingAppBounds,
             Rect containingBounds) {
         final float maxAspectRatio = info.maxAspectRatio;
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         final float minAspectRatio = info.minAspectRatio;
 
         if (task == null || stack == null || (inMultiWindowMode() && !shouldUseSizeCompatMode())
@@ -6861,7 +6858,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     boolean ensureActivityConfiguration(int globalChanges, boolean preserveWindow,
             boolean ignoreVisibility) {
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         if (stack.mConfigWillChange) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Skipping config check (will change): " + this);
@@ -7406,7 +7403,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!getTurnScreenOnFlag()) {
             return false;
         }
-        final ActivityStack stack = getActivityStack();
+        final ActivityStack stack = getRootTask();
         return stack != null &&
                 stack.checkKeyguardVisibility(this, true /* shouldBeVisible */, true /* isTop */);
     }

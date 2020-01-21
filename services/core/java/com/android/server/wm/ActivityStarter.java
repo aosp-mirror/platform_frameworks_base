@@ -937,7 +937,7 @@ class ActivityStarter {
         }
 
         final ActivityStack resultStack = resultRecord == null
-                ? null : resultRecord.getActivityStack();
+                ? null : resultRecord.getRootTask();
 
         if (err != START_SUCCESS) {
             if (resultRecord != null) {
@@ -1425,7 +1425,7 @@ class ActivityStarter {
      * @return the stack where the successful started activity resides.
      */
     private @Nullable ActivityStack handleStartResult(@NonNull ActivityRecord started, int result) {
-        final ActivityStack currentStack = started.getActivityStack();
+        final ActivityStack currentStack = started.getRootTask();
         ActivityStack startedActivityStack = currentStack != null ? currentStack : mTargetStack;
 
         if (ActivityManager.isStartResultSuccessful(result)) {
@@ -1446,7 +1446,7 @@ class ActivityStarter {
         // If we are not able to proceed, disassociate the activity from the task. Leaving an
         // activity in an incomplete state can lead to issues, such as performing operations
         // without a window container.
-        final ActivityStack stack = mStartActivity.getActivityStack();
+        final ActivityStack stack = mStartActivity.getRootTask();
         if (stack != null) {
             mStartActivity.finishIfPossible("startActivity", true /* oomAdj */);
         }
@@ -2231,7 +2231,7 @@ class ActivityStarter {
             return;
         }
         if (!mSourceRecord.finishing) {
-            mSourceStack = mSourceRecord.getActivityStack();
+            mSourceStack = mSourceRecord.getRootTask();
             return;
         }
 
@@ -2314,7 +2314,7 @@ class ActivityStarter {
      * @return {@link ActivityRecord} brought to front.
      */
     private void setTargetStackIfNeeded(ActivityRecord intentActivity) {
-        mTargetStack = intentActivity.getActivityStack();
+        mTargetStack = intentActivity.getRootTask();
         mTargetStack.mLastPausedActivity = null;
         // If the target task is not in the front, then we need to bring it to the front...
         // except...  well, with SINGLE_TASK_LAUNCH it's not entirely clear. We'd like to have
@@ -2371,7 +2371,7 @@ class ActivityStarter {
         }
         // Need to update mTargetStack because if task was moved out of it, the original stack may
         // be destroyed.
-        mTargetStack = intentActivity.getActivityStack();
+        mTargetStack = intentActivity.getRootTask();
         mSupervisor.handleNonResizableTaskIfNeeded(intentActivity.getTask(),
                 WINDOWING_MODE_UNDEFINED, DEFAULT_DISPLAY, mTargetStack);
     }
@@ -2422,10 +2422,11 @@ class ActivityStarter {
             return;
         }
 
-        final ActivityStack stack = task.getStack();
-        if (stack != null && stack.inPinnedWindowingMode()) {
-            mService.animateResizePinnedStack(stack.mStackId, bounds, -1);
+        final Task rootTask = task.getRootTask();
+        if (rootTask != null && rootTask.inPinnedWindowingMode()) {
+            mService.animateResizePinnedStack(rootTask.mTaskId, bounds, -1);
         } else {
+            // TODO: I don't believe it is possible to reach this else condition anymore...
             task.setBounds(bounds);
         }
     }

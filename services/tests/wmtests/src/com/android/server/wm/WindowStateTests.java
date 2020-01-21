@@ -278,7 +278,7 @@ public class WindowStateTests extends WindowTestsBase {
         spyOn(stack);
         doReturn(true).when(controller).isMinimizedDock();
         doReturn(true).when(controller).isHomeStackResizable();
-        doReturn(stack).when(appWindow).getStack();
+        doReturn(stack).when(appWindow).getRootTask();
 
         // Make sure canBeImeTarget is false due to shouldIgnoreInput is true;
         assertFalse(appWindow.canBeImeTarget());

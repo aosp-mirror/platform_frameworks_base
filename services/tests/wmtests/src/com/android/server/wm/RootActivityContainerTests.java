@@ -638,7 +638,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         final ActivityRecord resolverActivity = mRootWindowContainer.topRunningActivity();
 
         assertEquals(info, resolverActivity.info);
-        assertEquals(ACTIVITY_TYPE_STANDARD, resolverActivity.getActivityStack().getActivityType());
+        assertEquals(ACTIVITY_TYPE_STANDARD, resolverActivity.getRootTask().getActivityType());
     }
 
     /**

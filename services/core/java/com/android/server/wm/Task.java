@@ -526,7 +526,7 @@ class Task extends WindowContainer<WindowContainer> {
             ActivityStack stack) {
         super(atmService.mWindowManager);
 
-        EventLogTags.writeWmTaskCreated(_taskId, stack != null ? stack.mStackId : INVALID_STACK_ID);
+        EventLogTags.writeWmTaskCreated(_taskId, stack != null ? getRootTaskId() : INVALID_TASK_ID);
         mAtmService = atmService;
         mStackSupervisor = atmService.mStackSupervisor;
         mRootWindowContainer = mAtmService.mRootWindowContainer;
@@ -1080,7 +1080,7 @@ class Task extends WindowContainer<WindowContainer> {
         // the display, so we should probably consolidate it there instead.
 
         if (getParent() == null && mDisplayContent != null) {
-            EventLogTags.writeWmStackRemoved(getStackId());
+            EventLogTags.writeWmStackRemoved(getRootTaskId());
             mDisplayContent = null;
             mWmService.mWindowPlacerLocked.requestTraversal();
         }
@@ -2344,17 +2344,27 @@ class Task extends WindowContainer<WindowContainer> {
         return dc != null ? dc.mDisplayId : INVALID_DISPLAY;
     }
 
+    // TODO: Migrate callers to getRootTask()
     ActivityStack getStack() {
-        final WindowContainer parent = getParent();
-        return (ActivityStack) (parent instanceof ActivityStack ? parent : this);
+        return (ActivityStack) getRootTask();
     }
 
-    /**
-     * @return Id of current stack, {@link ActivityTaskManager#INVALID_STACK_ID} if no stack is set.
-     */
-    int getStackId() {
-        final ActivityStack stack = getStack();
-        return stack != null ? stack.mStackId : INVALID_STACK_ID;
+    /** @return Id of root task. */
+    int getRootTaskId() {
+        return getRootTask().mTaskId;
+    }
+
+    Task getRootTask() {
+        final WindowContainer parent = getParent();
+        if (parent == null) return this;
+
+        final Task parentTask = parent.asTask();
+        return parentTask == null ? this : parentTask.getRootTask();
+    }
+
+    // TODO(task-merge): Figure out what's the right thing to do for places that used it.
+    boolean isRootTask() {
+        return getRootTask() == this;
     }
 
     int getDescendantTaskCount() {
@@ -2736,7 +2746,7 @@ class Task extends WindowContainer<WindowContainer> {
             // No need to check if the mode is allowed if it's leaving dragResize
             if (dragResizing && !DragResizeMode.isModeAllowedForStack(getStack(), dragResizeMode)) {
                 throw new IllegalArgumentException("Drag resize mode not allow for stack stackId="
-                        + getStack().mStackId + " dragResizeMode=" + dragResizeMode);
+                        + getRootTaskId() + " dragResizeMode=" + dragResizeMode);
             }
             mDragResizing = dragResizing;
             mDragResizeMode = dragResizeMode;
@@ -3010,11 +3020,6 @@ class Task extends WindowContainer<WindowContainer> {
         return mTaskDescription;
     }
 
-    // TODO(task-merge): Figure out what's the right thing to do for places that used it.
-    boolean isRootTask() {
-        return getParent() == null || getParent().asTask() == null;
-    }
-
     @Override
     boolean fillsParent() {
         return matchParentBounds();
@@ -3167,7 +3172,7 @@ class Task extends WindowContainer<WindowContainer> {
     void fillTaskInfo(TaskInfo info) {
         getNumRunningActivities(mReuseActivitiesReport);
         info.userId = mUserId;
-        info.stackId = getStackId();
+        info.stackId = getRootTaskId();
         info.taskId = mTaskId;
         info.displayId = getDisplayId();
         info.isRunning = getTopNonFinishingActivity() != null;
@@ -3298,7 +3303,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (mRootProcess != null) {
             pw.print(prefix); pw.print("mRootProcess="); pw.println(mRootProcess);
         }
-        pw.print(prefix); pw.print("taskId=" + mTaskId); pw.println(" stackId=" + getStackId());
+        pw.print(prefix); pw.print("taskId=" + mTaskId); pw.println(" stackId=" + getRootTaskId());
         pw.print(prefix + "hasBeenVisible=" + hasBeenVisible);
         pw.print(" mResizeMode=" + ActivityInfo.resizeModeToString(mResizeMode));
         pw.print(" mSupportsPictureInPicture=" + mSupportsPictureInPicture);
@@ -3315,7 +3320,7 @@ class Task extends WindowContainer<WindowContainer> {
             sb.append(" U=");
             sb.append(mUserId);
             sb.append(" StackId=");
-            sb.append(getStackId());
+            sb.append(getRootTaskId());
             sb.append(" sz=");
             sb.append(getChildCount());
             sb.append('}');
@@ -3358,7 +3363,7 @@ class Task extends WindowContainer<WindowContainer> {
         forAllActivities((r) -> {
             r.dumpDebug(proto, ACTIVITIES);
         });
-        proto.write(STACK_ID, getStackId());
+        proto.write(STACK_ID, getRootTaskId());
         if (mLastNonFullscreenBounds != null) {
             mLastNonFullscreenBounds.dumpDebug(proto, LAST_NON_FULLSCREEN_BOUNDS);
         }
