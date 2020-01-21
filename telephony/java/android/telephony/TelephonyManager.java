@@ -45,7 +45,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkStats;
@@ -11103,8 +11102,8 @@ public class TelephonyManager {
      */
     public boolean isDataCapable() {
         if (mContext == null) return true;
-        return mContext.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_TELEPHONY_DATA);
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_mobile_data_capable);
     }
 
     /**
