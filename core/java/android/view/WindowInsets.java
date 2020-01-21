@@ -27,6 +27,7 @@ import static android.view.WindowInsets.Type.STATUS_BARS;
 import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.TAPPABLE_ELEMENT;
 import static android.view.WindowInsets.Type.all;
+import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.indexOf;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
@@ -46,6 +47,7 @@ import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethod;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -91,6 +93,7 @@ public final class WindowInsets {
     private final boolean mDisplayCutoutConsumed;
 
     private final int mCompatInsetTypes;
+    private final boolean mCompatIgnoreVisibility;
 
     /**
      * Since new insets may be added in the future that existing apps couldn't
@@ -117,7 +120,8 @@ public final class WindowInsets {
             boolean isRound, boolean alwaysConsumeSystemBars, DisplayCutout displayCutout) {
         this(createCompatTypeMap(systemWindowInsetsRect), createCompatTypeMap(stableInsetsRect),
                 createCompatVisibilityMap(createCompatTypeMap(systemWindowInsetsRect)),
-                isRound, alwaysConsumeSystemBars, displayCutout, systemBars());
+                isRound, alwaysConsumeSystemBars, displayCutout, systemBars(),
+                false /* compatIgnoreVisibility */);
     }
 
     /**
@@ -136,7 +140,8 @@ public final class WindowInsets {
             @Nullable Insets[] typeMaxInsetsMap,
             boolean[] typeVisibilityMap,
             boolean isRound,
-            boolean alwaysConsumeSystemBars, DisplayCutout displayCutout, int compatInsetTypes) {
+            boolean alwaysConsumeSystemBars, DisplayCutout displayCutout, int compatInsetTypes,
+            boolean compatIgnoreVisibility) {
         mSystemWindowInsetsConsumed = typeInsetsMap == null;
         mTypeInsetsMap = mSystemWindowInsetsConsumed
                 ? new Insets[SIZE]
@@ -151,6 +156,7 @@ public final class WindowInsets {
         mIsRound = isRound;
         mAlwaysConsumeSystemBars = alwaysConsumeSystemBars;
         mCompatInsetTypes = compatInsetTypes;
+        mCompatIgnoreVisibility = compatIgnoreVisibility;
 
         mDisplayCutoutConsumed = displayCutout == null;
         mDisplayCutout = (mDisplayCutoutConsumed || displayCutout.isEmpty())
@@ -167,7 +173,8 @@ public final class WindowInsets {
                 src.mStableInsetsConsumed ? null : src.mTypeMaxInsetsMap,
                 src.mTypeVisibilityMap, src.mIsRound,
                 src.mAlwaysConsumeSystemBars, displayCutoutCopyConstructorArgument(src),
-                src.mCompatInsetTypes);
+                src.mCompatInsetTypes,
+                src.mCompatIgnoreVisibility);
     }
 
     private static DisplayCutout displayCutoutCopyConstructorArgument(WindowInsets w) {
@@ -219,7 +226,7 @@ public final class WindowInsets {
     @UnsupportedAppUsage
     public WindowInsets(Rect systemWindowInsets) {
         this(createCompatTypeMap(systemWindowInsets), null, new boolean[SIZE], false, false, null,
-                systemBars());
+                systemBars(), false /* compatIgnoreVisibility */);
     }
 
     /**
@@ -239,7 +246,8 @@ public final class WindowInsets {
     /**
      * @hide
      */
-    static void assignCompatInsets(Insets[] typeInsetsMap, Rect insets) {
+    @VisibleForTesting
+    public static void assignCompatInsets(Insets[] typeInsetsMap, Rect insets) {
         typeInsetsMap[indexOf(STATUS_BARS)] = Insets.of(0, insets.top, 0, 0);
         typeInsetsMap[indexOf(NAVIGATION_BARS)] =
                 Insets.of(insets.left, 0, insets.right, insets.bottom);
@@ -288,7 +296,15 @@ public final class WindowInsets {
      */
     @NonNull
     public Insets getSystemWindowInsets() {
-        return getInsets(mTypeInsetsMap, mCompatInsetTypes);
+        Insets result = mCompatIgnoreVisibility
+                ? getMaxInsets(mCompatInsetTypes & ~ime())
+                : getInsets(mCompatInsetTypes);
+
+        // We can't query max insets for IME, so we need to add it manually after.
+        if ((mCompatInsetTypes & ime()) != 0 && mCompatIgnoreVisibility) {
+            result = Insets.max(result, getInsets(ime()));
+        }
+        return result;
     }
 
     /**
@@ -448,7 +464,7 @@ public final class WindowInsets {
                 mTypeVisibilityMap,
                 mIsRound, mAlwaysConsumeSystemBars,
                 null /* displayCutout */,
-                mCompatInsetTypes);
+                mCompatInsetTypes, mCompatIgnoreVisibility);
     }
 
 
@@ -491,11 +507,11 @@ public final class WindowInsets {
      */
     @NonNull
     public WindowInsets consumeSystemWindowInsets() {
-        return new WindowInsets(null, mStableInsetsConsumed ? null : mTypeMaxInsetsMap,
+        return new WindowInsets(null, null,
                 mTypeVisibilityMap,
                 mIsRound, mAlwaysConsumeSystemBars,
                 displayCutoutCopyConstructorArgument(this),
-                mCompatInsetTypes);
+                mCompatInsetTypes, mCompatIgnoreVisibility);
     }
 
     // TODO(b/119190588): replace @code with @link below
@@ -741,10 +757,7 @@ public final class WindowInsets {
      */
     @NonNull
     public WindowInsets consumeStableInsets() {
-        return new WindowInsets(mSystemWindowInsetsConsumed ? null : mTypeInsetsMap, null,
-                mTypeVisibilityMap, mIsRound, mAlwaysConsumeSystemBars,
-                displayCutoutCopyConstructorArgument(this),
-                mCompatInsetTypes);
+        return consumeSystemWindowInsets();
     }
 
     /**
@@ -829,7 +842,7 @@ public final class WindowInsets {
                         : mDisplayCutout == null
                                 ? DisplayCutout.NO_CUTOUT
                                 : mDisplayCutout.inset(left, top, right, bottom),
-                mCompatInsetTypes);
+                mCompatInsetTypes, mCompatIgnoreVisibility);
     }
 
     @Override
@@ -1147,7 +1160,7 @@ public final class WindowInsets {
             return new WindowInsets(mSystemInsetsConsumed ? null : mTypeInsetsMap,
                     mStableInsetsConsumed ? null : mTypeMaxInsetsMap, mTypeVisibilityMap,
                     mIsRound, mAlwaysConsumeSystemBars, mDisplayCutout,
-                    systemBars());
+                    systemBars(), false /* compatIgnoreVisibility */);
         }
     }
 

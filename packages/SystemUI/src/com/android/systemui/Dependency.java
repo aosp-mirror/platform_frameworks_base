@@ -89,6 +89,7 @@ import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -238,7 +239,8 @@ public class Dependency {
     @Inject Lazy<LeakReporter> mLeakReporter;
     @Inject Lazy<GarbageMonitor> mGarbageMonitor;
     @Inject Lazy<TunerService> mTunerService;
-    @Inject Lazy<StatusBarWindowController> mStatusBarWindowController;
+    @Inject Lazy<NotificationShadeWindowController> mNotificationShadeWindowController;
+    @Inject Lazy<StatusBarWindowController> mTempStatusBarWindowController;
     @Inject Lazy<DarkIconDispatcher> mDarkIconDispatcher;
     @Inject Lazy<ConfigurationController> mConfigurationController;
     @Inject Lazy<StatusBarIconController> mStatusBarIconController;
@@ -400,7 +402,10 @@ public class Dependency {
 
         mProviders.put(TunerService.class, mTunerService::get);
 
-        mProviders.put(StatusBarWindowController.class, mStatusBarWindowController::get);
+        mProviders.put(NotificationShadeWindowController.class,
+                mNotificationShadeWindowController::get);
+
+        mProviders.put(StatusBarWindowController.class, mTempStatusBarWindowController::get);
 
         mProviders.put(DarkIconDispatcher.class, mDarkIconDispatcher::get);
 

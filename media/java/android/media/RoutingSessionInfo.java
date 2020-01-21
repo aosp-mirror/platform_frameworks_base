@@ -59,6 +59,7 @@ public final class RoutingSessionInfo implements Parcelable {
     final List<String> mTransferrableRoutes;
     @Nullable
     final Bundle mControlHints;
+    final boolean mIsSystemSession;
 
     RoutingSessionInfo(@NonNull Builder builder) {
         Objects.requireNonNull(builder, "builder must not be null.");
@@ -78,6 +79,7 @@ public final class RoutingSessionInfo implements Parcelable {
                 convertToUniqueRouteIds(builder.mTransferrableRoutes));
 
         mControlHints = builder.mControlHints;
+        mIsSystemSession = builder.mIsSystemSession;
     }
 
     RoutingSessionInfo(@NonNull Parcel src) {
@@ -93,6 +95,7 @@ public final class RoutingSessionInfo implements Parcelable {
         mTransferrableRoutes = ensureList(src.createStringArrayList());
 
         mControlHints = src.readBundle();
+        mIsSystemSession = src.readBoolean();
     }
 
     private static String ensureString(String str) {
@@ -193,6 +196,15 @@ public final class RoutingSessionInfo implements Parcelable {
         return mControlHints;
     }
 
+    /**
+     * Gets whether this session is in system media route provider.
+     * @hide
+     */
+    @Nullable
+    public boolean isSystemSession() {
+        return mIsSystemSession;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -208,6 +220,7 @@ public final class RoutingSessionInfo implements Parcelable {
         dest.writeStringList(mDeselectableRoutes);
         dest.writeStringList(mTransferrableRoutes);
         dest.writeBundle(mControlHints);
+        dest.writeBoolean(mIsSystemSession);
     }
 
     @Override
@@ -278,6 +291,7 @@ public final class RoutingSessionInfo implements Parcelable {
      * Builder class for {@link RoutingSessionInfo}.
      */
     public static final class Builder {
+        // TODO: Reorder these (important ones first)
         final String mId;
         final String mClientPackageName;
         String mProviderId;
@@ -286,6 +300,7 @@ public final class RoutingSessionInfo implements Parcelable {
         final List<String> mDeselectableRoutes;
         final List<String> mTransferrableRoutes;
         Bundle mControlHints;
+        boolean mIsSystemSession;
 
         /**
          * Constructor for builder to create {@link RoutingSessionInfo}.
@@ -333,6 +348,7 @@ public final class RoutingSessionInfo implements Parcelable {
             mTransferrableRoutes = new ArrayList<>(sessionInfo.mTransferrableRoutes);
 
             mControlHints = sessionInfo.mControlHints;
+            mIsSystemSession = sessionInfo.mIsSystemSession;
         }
 
         /**
@@ -487,6 +503,16 @@ public final class RoutingSessionInfo implements Parcelable {
         @NonNull
         public Builder setControlHints(@Nullable Bundle controlHints) {
             mControlHints = controlHints;
+            return this;
+        }
+
+        /**
+         * Sets whether this session is in system media route provider.
+         * @hide
+         */
+        @NonNull
+        public Builder setSystemSession(boolean isSystemSession) {
+            mIsSystemSession = isSystemSession;
             return this;
         }
 

@@ -36,8 +36,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -57,7 +57,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock LockPatternUtils mLockPatternUtils;
     private @Mock KeyguardUpdateMonitor mUpdateMonitor;
     private @Mock StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private @Mock StatusBarWindowController mStatusBarWindowController;
+    private @Mock NotificationShadeWindowController mNotificationShadeWindowController;
     private @Mock BroadcastDispatcher mBroadcastDispatcher;
     private @Mock DismissCallbackRegistry mDismissCallbackRegistry;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
@@ -77,7 +77,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         TestableLooper.get(this).runWithLooper(() -> {
             mViewMediator = new KeyguardViewMediator(
                     mContext, mFalsingManager, mLockPatternUtils, mBroadcastDispatcher,
-                    mStatusBarWindowController, () -> mStatusBarKeyguardViewManager,
+                    mNotificationShadeWindowController, () -> mStatusBarKeyguardViewManager,
                     mDismissCallbackRegistry, mUiBgExecutor);
         });
     }
@@ -87,6 +87,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.start();
         mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
         verify(mUpdateMonitor).setKeyguardGoingAway(false);
-        verify(mStatusBarWindowController, never()).setKeyguardGoingAway(anyBoolean());
+        verify(mNotificationShadeWindowController, never()).setKeyguardGoingAway(anyBoolean());
     }
 }

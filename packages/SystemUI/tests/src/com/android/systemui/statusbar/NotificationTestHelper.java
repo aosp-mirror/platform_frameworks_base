@@ -55,7 +55,7 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.tests.R;
 
 import java.util.concurrent.CountDownLatch;
@@ -87,7 +87,7 @@ public class NotificationTestHelper {
         mContext = context;
         dependency.injectMockDependency(NotificationMediaManager.class);
         dependency.injectMockDependency(BubbleController.class);
-        dependency.injectMockDependency(StatusBarWindowController.class);
+        dependency.injectMockDependency(NotificationShadeWindowController.class);
         dependency.injectMockDependency(SmartReplyController.class);
         StatusBarStateController stateController = mock(StatusBarStateController.class);
         mGroupManager = new NotificationGroupManager(stateController);

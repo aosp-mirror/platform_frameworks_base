@@ -391,6 +391,9 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"O NFC está desativado"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"O NFC está ativado"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Gravação de ecrã"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
+    <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Parar"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Deslizar rapidamente para cima para mudar de aplicação"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arraste para a direita para mudar rapidamente de aplicação."</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Ativar/desativar Vista geral"</string>
@@ -471,6 +474,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Limpar tudo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gerir"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notificações silenciosas"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversas"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Limpar todas as notificações silenciosas"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificações colocadas em pausa pelo modo Não incomodar."</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Começar agora"</string>
@@ -557,7 +561,7 @@
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Para soltar este ecrã, toque sem soltar nos botões Anterior e Vista geral."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Para soltar este ecrã, toque sem soltar nos botões Anterior e Página inicial."</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Para soltar este ecrã, deslize rapidamente para cima sem soltar."</string>
-    <string name="screen_pinning_positive" msgid="3285785989665266984">"Compreendi"</string>
+    <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Não, obrigado"</string>
     <string name="screen_pinning_start" msgid="5695091877402422575">"Ecrã fixo"</string>
     <string name="screen_pinning_exit" msgid="5114993350662745840">"Ecrã solto"</string>
@@ -621,7 +625,7 @@
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversão para alguns, mas não para todos"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"O Sintonizador da interface do sistema disponibiliza-lhe formas adicionais ajustar e personalizar a interface do utilizador do Android. Estas funcionalidades experimentais podem ser alteradas, deixar de funcionar ou desaparecer em versões futuras. Prossiga com cuidado."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Estas funcionalidades experimentais podem ser alteradas, deixar de funcionar ou desaparecer em versões futuras. Prossiga com cuidado."</string>
-    <string name="got_it" msgid="477119182261892069">"Compreendi"</string>
+    <string name="got_it" msgid="477119182261892069">"OK"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"Parabéns! O Sintonizador da interface do sistema foi adicionado às Definições"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"Remover das Definições"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"Pretende remover o Sintonizador da interface do sistema das Definições e deixar de utilizar todas as respetivas funcionalidades?"</string>
@@ -689,6 +693,14 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"Personalizar"</string>
     <string name="notification_done" msgid="6215117625922713976">"Concluído"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Anular"</string>
+    <string name="demote" msgid="6225813324237153980">"Marcar esta notificação como não sendo uma conversa"</string>
+    <string name="notification_conversation_favorite" msgid="8252976467488182853">"Adicionar aos favoritos"</string>
+    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"Remover dos favoritos"</string>
+    <string name="notification_conversation_mute" msgid="477431709687199671">"Ignorar"</string>
+    <string name="notification_conversation_unmute" msgid="410885000669775294">"Ativar"</string>
+    <string name="notification_conversation_bubble" msgid="4598142032706190028">"Mostrar como balão"</string>
+    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"Desativar balões"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Adicionar ao ecrã principal"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> do <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"controlos de notificação"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"opções de suspensão de notificações"</string>
@@ -921,7 +933,7 @@
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Poupança de bateria agendada ativada"</string>
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"A Poupança de bateria é ativada automaticamente quando o nível de bateria está abaixo de <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Definições"</string>
-    <string name="auto_saver_okay_action" msgid="7815925750741935386">"Compreendi"</string>
+    <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Despejar pilha SysUI"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensores desativados"</string>
     <string name="device_services" msgid="1549944177856658705">"Serviços do dispositivo"</string>

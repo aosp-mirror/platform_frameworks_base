@@ -1156,19 +1156,19 @@ static std::string getAppDataDirName(std::string_view parent_path, std::string_v
       fail_fn(CREATE_ERROR("Unexpected error in getAppDataDirName: %s", strerror(errno)));
       return nullptr;
     }
-    // Directory doesn't exist, try to search the name from inode
-    DIR* dir = opendir(parent_path.data());
-    if (dir == nullptr) {
-      fail_fn(CREATE_ERROR("Failed to opendir %s", parent_path.data()));
-    }
-    struct dirent* ent;
-    while ((ent = readdir(dir))) {
-      if (ent->d_ino == ce_data_inode) {
-        closedir(dir);
-        return ent->d_name;
+    {
+      // Directory doesn't exist, try to search the name from inode
+      std::unique_ptr<DIR, decltype(&closedir)> dir(opendir(parent_path.data()), closedir);
+      if (dir == nullptr) {
+        fail_fn(CREATE_ERROR("Failed to opendir %s", parent_path.data()));
+      }
+      struct dirent* ent;
+      while ((ent = readdir(dir.get()))) {
+        if (ent->d_ino == ce_data_inode) {
+          return ent->d_name;
+        }
       }
     }
-    closedir(dir);
 
     // Fallback due to b/145989852, ce_data_inode stored in package manager may be corrupted
     // if ino_t is 32 bits.
@@ -1179,19 +1179,18 @@ static std::string getAppDataDirName(std::string_view parent_path, std::string_v
       fixed_ce_data_inode = ((ce_data_inode >> 32) & LOWER_HALF_WORD_MASK);
     }
     if (fixed_ce_data_inode != 0) {
-      dir = opendir(parent_path.data());
+      std::unique_ptr<DIR, decltype(&closedir)> dir(opendir(parent_path.data()), closedir);
       if (dir == nullptr) {
         fail_fn(CREATE_ERROR("Failed to opendir %s", parent_path.data()));
       }
-      while ((ent = readdir(dir))) {
+      struct dirent* ent;
+      while ((ent = readdir(dir.get()))) {
         if (ent->d_ino == fixed_ce_data_inode) {
           long long d_ino = ent->d_ino;
           ALOGW("Fallback success inode %lld -> %lld", ce_data_inode, d_ino);
-          closedir(dir);
           return ent->d_name;
         }
       }
-      closedir(dir);
     }
     // Fallback done
 

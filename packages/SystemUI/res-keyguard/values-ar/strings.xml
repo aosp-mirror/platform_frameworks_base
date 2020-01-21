@@ -48,7 +48,7 @@
     <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"‏تم إيقاف شريحة SIM بشكل دائم.\n اتصل بمقدم خدمة اللاسلكي للحصول على شريحة SIM أخرى."</string>
     <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"‏شريحة SIM مؤمّنة."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"‏شريحة SIM مؤمّنة برمز PUK."</string>
-    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"‏جارٍ إلغاء تأمين شريحة SIM…"</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"‏جارٍ فتح قفل شريحة SIM…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"منطقة رقم التعريف الشخصي"</string>
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"كلمة مرور الجهاز"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"‏منطقة رقم التعريف الشخصي لشريحة SIM"</string>
@@ -81,7 +81,7 @@
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"‏SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" غير مفعّلة الآن. أدخل رمز PUK للمتابعة. واتصل بمشغل شبكة الجوّال لمعرفة التفاصيل."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"أدخل رمز رقم التعريف الشخصي المطلوب"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"تأكيد رمز رقم التعريف الشخصي المطلوب"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"‏جارٍ إلغاء تأمين شريحة SIM…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"‏جارٍ فتح قفل شريحة SIM…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"اكتب رمز رقم التعريف الشخصي المكوّن من ٤ إلى ٨ أرقام."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"‏يجب أن يتضمن رمز PUK‏ ۸ أرقام أو أكثر."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"‏أعد إدخال رمز PUK الصحيح. وستؤدي المحاولات المتكررة إلى إيقاف شريحة SIM نهائيًا."</string>
@@ -113,6 +113,9 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"لا تتوفر خدمة."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"تبديل أسلوب الإدخال"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"وضع الطائرة"</string>
+    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"يجب إدخال رقم التعريف الشخصي للتحضير للتحديث."</string>
+    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"يجب رسم النقش للتحضير للتحديث."</string>
+    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"يجب إدخال كلمة المرور للتحضير للتحديث."</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"يجب رسم النقش بعد إعادة تشغيل الجهاز"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"يجب إدخال رقم التعريف الشخصي بعد إعادة تشغيل الجهاز"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"يجب إدخال كلمة المرور بعد إعادة تشغيل الجهاز"</string>
@@ -125,28 +128,28 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"اختار المشرف قفل الجهاز"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"تم حظر الجهاز يدويًا"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="1337428979661197957">
-      <item quantity="zero">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد النقش.</item>
-      <item quantity="two">لم يتم إلغاء تأمين الجهاز لمدة ساعتين (<xliff:g id="NUMBER_1">%d</xliff:g>). تأكيد النقش.</item>
-      <item quantity="few">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعات. تأكيد النقش.</item>
-      <item quantity="many">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد النقش.</item>
-      <item quantity="other">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد النقش.</item>
-      <item quantity="one">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_0">%d</xliff:g> ساعة. تأكيد النقش.</item>
+      <item quantity="zero">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد النقش.</item>
+      <item quantity="two">لم يتم فتح قفل الجهاز لمدة ساعتين (<xliff:g id="NUMBER_1">%d</xliff:g>). تأكيد النقش.</item>
+      <item quantity="few">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعات. تأكيد النقش.</item>
+      <item quantity="many">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد النقش.</item>
+      <item quantity="other">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد النقش.</item>
+      <item quantity="one">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_0">%d</xliff:g> ساعة. تأكيد النقش.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="6444519502336330270">
-      <item quantity="zero">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد رقم التعريف الشخصي.</item>
-      <item quantity="two">لم يتم إلغاء تأمين الجهاز لمدة ساعتين (<xliff:g id="NUMBER_1">%d</xliff:g>). تأكيد رقم التعريف الشخصي.</item>
-      <item quantity="few">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد رقم التعريف الشخصي.</item>
-      <item quantity="many">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد رقم التعريف الشخصي.</item>
-      <item quantity="other">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد رقم التعريف الشخصي.</item>
-      <item quantity="one">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_0">%d</xliff:g> ساعة. تأكيد رقم التعريف الشخصي.</item>
+      <item quantity="zero">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد رقم التعريف الشخصي.</item>
+      <item quantity="two">لم يتم فتح قفل الجهاز لمدة ساعتين (<xliff:g id="NUMBER_1">%d</xliff:g>). تأكيد رقم التعريف الشخصي.</item>
+      <item quantity="few">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد رقم التعريف الشخصي.</item>
+      <item quantity="many">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد رقم التعريف الشخصي.</item>
+      <item quantity="other">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد رقم التعريف الشخصي.</item>
+      <item quantity="one">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_0">%d</xliff:g> ساعة. تأكيد رقم التعريف الشخصي.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5343961527665116914">
-      <item quantity="zero">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد كلمة المرور.</item>
-      <item quantity="two">لم يتم إلغاء تأمين الجهاز لمدة ساعتين (<xliff:g id="NUMBER_1">%d</xliff:g>). تأكيد كلمة المرور.</item>
-      <item quantity="few">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعات. تأكيد كلمة المرور.</item>
-      <item quantity="many">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد كلمة المرور.</item>
-      <item quantity="other">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد كلمة المرور.</item>
-      <item quantity="one">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_0">%d</xliff:g> ساعة. تأكيد كلمة المرور.</item>
+      <item quantity="zero">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد كلمة المرور.</item>
+      <item quantity="two">لم يتم فتح قفل الجهاز لمدة ساعتين (<xliff:g id="NUMBER_1">%d</xliff:g>). تأكيد كلمة المرور.</item>
+      <item quantity="few">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعات. تأكيد كلمة المرور.</item>
+      <item quantity="many">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد كلمة المرور.</item>
+      <item quantity="other">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد كلمة المرور.</item>
+      <item quantity="one">لم يتم فتح قفل الجهاز لمدة <xliff:g id="NUMBER_0">%d</xliff:g> ساعة. تأكيد كلمة المرور.</item>
     </plurals>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"لم يتم التعرف عليها."</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"لم يتم التعرّف عليه."</string>

@@ -352,6 +352,7 @@ public class AppTransitionController {
      * Apply animation to the set of window containers.
      *
      * @param wcs The list of {@link WindowContainer}s to which an app transition animation applies.
+     * @param apps The list of {@link ActivityRecord}s being transitioning.
      * @param transit The current transition type.
      * @param visible {@code true} if the apps becomes visible, {@code false} if the apps becomes
      *                invisible.
@@ -359,12 +360,28 @@ public class AppTransitionController {
      * @param voiceInteraction {@code true} if one of the apps in this transition belongs to a voice
      *                         interaction session driving task.
      */
-    private void applyAnimations(ArraySet<WindowContainer> wcs, @TransitionType int transit,
-            boolean visible, LayoutParams animLp, boolean voiceInteraction) {
-        final int appsCount = wcs.size();
-        for (int i = 0; i < appsCount; i++) {
+    private void applyAnimations(ArraySet<WindowContainer> wcs, ArraySet<ActivityRecord> apps,
+            @TransitionType int transit, boolean visible, LayoutParams animLp,
+            boolean voiceInteraction) {
+        final int wcsCount = wcs.size();
+        for (int i = 0; i < wcsCount; i++) {
             final WindowContainer wc = wcs.valueAt(i);
-            wc.applyAnimation(animLp, transit, visible, voiceInteraction);
+            // If app transition animation target is promoted to higher level, SurfaceAnimator
+            // triggers WC#onAnimationFinished only on the promoted target. So we need to take care
+            // of triggering AR#onAnimationFinished on each ActivityRecord which is a part of the
+            // app transition.
+            final ArrayList<ActivityRecord> transitioningDecendants = new ArrayList<>();
+            for (int j = 0; j < apps.size(); ++j) {
+                final ActivityRecord app = apps.valueAt(j);
+                if (app.isDescendantOf(wc)) {
+                    transitioningDecendants.add(app);
+                }
+            }
+            wc.applyAnimation(animLp, transit, visible, voiceInteraction, () -> {
+                for (int j = 0; j < transitioningDecendants.size(); ++j) {
+                    transitioningDecendants.get(j).onAnimationFinished();
+                }
+            });
         }
     }
 
@@ -495,8 +512,10 @@ public class AppTransitionController {
                 openingApps, closingApps, true /* visible */);
         final ArraySet<WindowContainer> closingWcs = getAnimationTargets(
                 openingApps, closingApps, false /* visible */);
-        applyAnimations(openingWcs, transit, true /* visible */, animLp, voiceInteraction);
-        applyAnimations(closingWcs, transit, false /* visible */, animLp, voiceInteraction);
+        applyAnimations(openingWcs, openingApps, transit, true /* visible */, animLp,
+                voiceInteraction);
+        applyAnimations(closingWcs, closingApps, transit, false /* visible */, animLp,
+                voiceInteraction);
 
         final AccessibilityController accessibilityController =
                 mDisplayContent.mWmService.mAccessibilityController;
@@ -575,7 +594,8 @@ public class AppTransitionController {
             ActivityRecord activity = apps.valueAt(i);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Now changing app %s", activity);
             activity.cancelAnimationOnly();
-            activity.applyAnimation(null, transit, true, false);
+            activity.applyAnimation(null, transit, true, false,
+                    null /* animationFinishedCallback */);
             activity.updateReportedVisibilityLocked();
             mService.openSurfaceTransaction();
             try {

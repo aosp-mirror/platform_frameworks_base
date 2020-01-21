@@ -74,8 +74,8 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -126,7 +126,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     private ArgumentCaptor<NotificationRemoveInterceptor> mRemoveInterceptorCaptor;
 
     private TestableBubbleController mBubbleController;
-    private StatusBarWindowController mStatusBarWindowController;
+    private NotificationShadeWindowController mNotificationShadeWindowController;
     private NotificationEntryListener mEntryListener;
     private NotificationRemoveInterceptor mRemoveInterceptor;
 
@@ -170,11 +170,11 @@ public class BubbleControllerTest extends SysuiTestCase {
                 new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()));
 
         // Bubbles get added to status bar window view
-        mStatusBarWindowController = new StatusBarWindowController(mContext, mWindowManager,
-                mActivityManager, mDozeParameters, mStatusBarStateController,
+        mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,
+                mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardBypassController, mColorExtractor,
-                mSuperStatusBarViewFactory, mResources);
-        mStatusBarWindowController.attach();
+                mSuperStatusBarViewFactory);
+        mNotificationShadeWindowController.attach();
 
         // Need notifications for bubbles
         mNotificationTestHelper = new NotificationTestHelper(mContext, mDependency);
@@ -201,7 +201,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mock(NotificationInterruptionStateProvider.HeadsUpSuppressor.class));
         mBubbleData = new BubbleData(mContext);
         mBubbleController = new TestableBubbleController(mContext,
-                mStatusBarWindowController,
+                mNotificationShadeWindowController,
                 mStatusBarStateController,
                 mShadeController,
                 mBubbleData,
@@ -250,7 +250,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         mBubbleController.removeBubble(
                 mRow.getEntry().getKey(), BubbleController.DISMISS_USER_GESTURE);
-        assertFalse(mStatusBarWindowController.getBubblesShowing());
+        assertFalse(mNotificationShadeWindowController.getBubblesShowing());
         assertNull(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()));
         verify(mNotificationEntryManager, times(2)).updateNotifications(anyString());
         verify(mBubbleStateChangeListener).onHasBubblesChanged(false);
@@ -290,7 +290,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
 
         mBubbleController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
-        assertFalse(mStatusBarWindowController.getBubblesShowing());
+        assertFalse(mNotificationShadeWindowController.getBubblesShowing());
         verify(mNotificationEntryManager, times(3)).updateNotifications(any());
         assertNull(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()));
         assertNull(mBubbleData.getBubbleWithKey(mRow2.getEntry().getKey()));
@@ -308,14 +308,14 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
         assertFalse(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry().getKey()));
-        assertFalse(mStatusBarWindowController.getBubbleExpanded());
+        assertFalse(mNotificationShadeWindowController.getBubbleExpanded());
 
         // Expand the stack
         BubbleStackView stackView = mBubbleController.getStackView();
         mBubbleController.expandStack();
         assertTrue(mBubbleController.isStackExpanded());
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().getKey());
-        assertTrue(mStatusBarWindowController.getBubbleExpanded());
+        assertTrue(mNotificationShadeWindowController.getBubbleExpanded());
 
         // Make sure the notif is suppressed
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
@@ -325,7 +325,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mBubbleController.collapseStack();
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getEntry().getKey());
         assertFalse(mBubbleController.isStackExpanded());
-        assertFalse(mStatusBarWindowController.getBubbleExpanded());
+        assertFalse(mNotificationShadeWindowController.getBubbleExpanded());
     }
 
     @Test
@@ -711,7 +711,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     static class TestableBubbleController extends BubbleController {
         // Let's assume surfaces can be synchronized immediately.
         TestableBubbleController(Context context,
-                StatusBarWindowController statusBarWindowController,
+                NotificationShadeWindowController notificationShadeWindowController,
                 StatusBarStateController statusBarStateController,
                 ShadeController shadeController,
                 BubbleData data,
@@ -723,7 +723,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 NotificationEntryManager entryManager,
                 RemoteInputUriController remoteInputUriController) {
             super(context,
-                    statusBarWindowController, statusBarStateController, shadeController,
+                    notificationShadeWindowController, statusBarStateController, shadeController,
                     data, Runnable::run, configurationController, interruptionStateProvider,
                     zenModeController, lockscreenUserManager, groupManager, entryManager,
                     remoteInputUriController);

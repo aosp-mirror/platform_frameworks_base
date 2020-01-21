@@ -7598,6 +7598,12 @@ public final class Settings {
         public static final String DOZE_WAKE_DISPLAY_GESTURE = "doze_wake_display_gesture";
 
         /**
+         * Whether the device should suppress the current doze configuration and disable dozing.
+         * @hide
+         */
+        public static final String SUPPRESS_DOZE = "suppress_doze";
+
+        /**
          * Gesture that skips media.
          * @hide
          */

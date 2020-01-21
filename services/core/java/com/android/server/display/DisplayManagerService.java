@@ -2244,6 +2244,13 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
+        public boolean isMinimalPostProcessingRequested(int displayId) {
+            synchronized (mSyncRoot) {
+                return mLogicalDisplays.get(displayId).getRequestedMinimalPostProcessingLocked();
+            }
+        }
+
+        @Override // Binder call
         public void setTemporaryBrightness(int brightness) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,

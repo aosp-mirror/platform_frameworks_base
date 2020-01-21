@@ -391,6 +391,9 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"КБП"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"КБП е деактивирана"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"КБП е активирана"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Записване на екрана"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Старт"</string>
+    <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Стоп"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Прекарайте пръст нагоре, за да превключите между приложенията"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Плъзнете надясно за бързо превключване между приложенията"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Превключване на общия преглед"</string>
@@ -471,6 +474,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Изчистване на всички"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Управление"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Беззвучни известия"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"Разговори"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Изчистване на всички беззвучни известия"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Известията са поставени на пауза от режима „Не безпокойте“"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Стартиране сега"</string>
@@ -689,6 +693,14 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"Персонализиране"</string>
     <string name="notification_done" msgid="6215117625922713976">"Готово"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Отмяна"</string>
+    <string name="demote" msgid="6225813324237153980">"Отбелязване, че известието не е за разговор"</string>
+    <string name="notification_conversation_favorite" msgid="8252976467488182853">"Означаване като любим"</string>
+    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"Не е любим"</string>
+    <string name="notification_conversation_mute" msgid="477431709687199671">"Спиране"</string>
+    <string name="notification_conversation_unmute" msgid="410885000669775294">"Пускане"</string>
+    <string name="notification_conversation_bubble" msgid="4598142032706190028">"Показване като балонче"</string>
+    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"Изключване на балончетата"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Добавяне към началния екран"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> от <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"контроли за известията"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"опции за отлагане на известията"</string>

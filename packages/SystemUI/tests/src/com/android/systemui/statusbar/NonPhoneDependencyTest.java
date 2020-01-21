@@ -34,8 +34,8 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import org.junit.Before;
@@ -97,6 +97,6 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
         viewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
 
         TestableLooper.get(this).processAllMessages();
-        assertFalse(mDependency.hasInstantiatedDependency(StatusBarWindowController.class));
+        assertFalse(mDependency.hasInstantiatedDependency(NotificationShadeWindowController.class));
     }
 }

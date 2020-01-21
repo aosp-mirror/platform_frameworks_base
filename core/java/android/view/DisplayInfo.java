@@ -624,6 +624,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(Arrays.toString(supportedColorModes));
         sb.append(", hdrCapabilities ");
         sb.append(hdrCapabilities);
+        sb.append(", minimalPostProcessingSupported ");
+        sb.append(minimalPostProcessingSupported);
         sb.append(", rotation ");
         sb.append(rotation);
         sb.append(", density ");

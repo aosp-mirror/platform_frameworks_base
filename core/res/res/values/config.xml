@@ -4306,4 +4306,16 @@
 
     <!-- Retention policy: number of records to kept for the historical exit info per package. -->
     <integer name="config_app_exit_info_history_list_size">16</integer>
+
+    <!-- Packages that can't be killed even if it's requested to be killed on imperceptible -->
+    <string-array name="config_defaultImperceptibleKillingExemptionPkgs" translatable="false" />
+
+    <!-- Proc States that can't be killed even if it's requested to be killed on imperceptible -->
+    <integer-array name="config_defaultImperceptibleKillingExemptionProcStates">
+      <item>0</item> <!-- PROCESS_STATE_PERSISTENT -->
+      <item>1</item> <!-- PROCESS_STATE_PERSISTENT_UI -->
+      <item>2</item> <!-- PROCESS_STATE_TOP -->
+      <item>4</item> <!-- PROCESS_STATE_FOREGROUND_SERVICE -->
+      <item>12</item> <!-- PROCESS_STATE_TOP_SLEEPING -->
+    </integer-array>
 </resources>

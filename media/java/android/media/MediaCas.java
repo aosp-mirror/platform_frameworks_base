@@ -16,13 +16,15 @@
 
 package android.media;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.cas.V1_0.HidlCasPluginDescriptor;
 import android.hardware.cas.V1_0.ICas;
 import android.hardware.cas.V1_0.IMediaCasService;
-import android.hardware.cas.V1_1.ICasListener;
+import android.hardware.cas.V1_2.ICasListener;
 import android.media.MediaCasException.*;
+import android.media.tv.TvInputService.PriorityHintUseCaseType;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -34,6 +36,8 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.Singleton;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
 /**
@@ -100,28 +104,185 @@ public final class MediaCas implements AutoCloseable {
     private static final String TAG = "MediaCas";
     private ICas mICas;
     private android.hardware.cas.V1_1.ICas mICasV11;
+    private android.hardware.cas.V1_2.ICas mICasV12;
     private EventListener mListener;
     private HandlerThread mHandlerThread;
     private EventHandler mEventHandler;
+    private @PriorityHintUseCaseType int mPriorityHint;
+    private String mTvInputServiceSessionId;
+
+    /**
+     * Scrambling modes used to open cas sessions.
+     *
+     * @hide
+     */
+    @IntDef(prefix = "SCRAMBLING_MODE_",
+            value = {SCRAMBLING_MODE_RESERVED, SCRAMBLING_MODE_DVB_CSA1, SCRAMBLING_MODE_DVB_CSA2,
+            SCRAMBLING_MODE_DVB_CSA3_STANDARD,
+            SCRAMBLING_MODE_DVB_CSA3_MINIMAL, SCRAMBLING_MODE_DVB_CSA3_ENHANCE,
+            SCRAMBLING_MODE_DVB_CISSA_V1, SCRAMBLING_MODE_DVB_IDSA,
+            SCRAMBLING_MODE_MULTI2, SCRAMBLING_MODE_AES128, SCRAMBLING_MODE_AES_ECB,
+            SCRAMBLING_MODE_AES_SCTE52, SCRAMBLING_MODE_TDES_ECB, SCRAMBLING_MODE_TDES_SCTE52})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScramblingMode {}
+
+    /**
+     * DVB (Digital Video Broadcasting) reserved mode.
+     */
+    public static final int SCRAMBLING_MODE_RESERVED =
+            android.hardware.cas.V1_2.ScramblingMode.RESERVED;
+    /**
+     * DVB (Digital Video Broadcasting) Common Scrambling Algorithm (CSA) 1.
+     */
+    public static final int SCRAMBLING_MODE_DVB_CSA1 =
+            android.hardware.cas.V1_2.ScramblingMode.DVB_CSA1;
+    /**
+     * DVB CSA 2.
+     */
+    public static final int SCRAMBLING_MODE_DVB_CSA2 =
+            android.hardware.cas.V1_2.ScramblingMode.DVB_CSA2;
+    /**
+     * DVB CSA 3 in standard mode.
+     */
+    public static final int SCRAMBLING_MODE_DVB_CSA3_STANDARD =
+            android.hardware.cas.V1_2.ScramblingMode.DVB_CSA3_STANDARD;
+    /**
+     * DVB CSA 3 in minimally enhanced mode.
+     */
+    public static final int SCRAMBLING_MODE_DVB_CSA3_MINIMAL =
+            android.hardware.cas.V1_2.ScramblingMode.DVB_CSA3_MINIMAL;
+    /**
+     * DVB CSA 3 in fully enhanced mode.
+     */
+    public static final int SCRAMBLING_MODE_DVB_CSA3_ENHANCE =
+            android.hardware.cas.V1_2.ScramblingMode.DVB_CSA3_ENHANCE;
+    /**
+     * DVB Common IPTV Software-oriented Scrambling Algorithm (CISSA) Version 1.
+     */
+    public static final int SCRAMBLING_MODE_DVB_CISSA_V1 =
+            android.hardware.cas.V1_2.ScramblingMode.DVB_CISSA_V1;
+    /**
+     * ATIS-0800006 IIF Default Scrambling Algorithm (IDSA).
+     */
+    public static final int SCRAMBLING_MODE_DVB_IDSA =
+            android.hardware.cas.V1_2.ScramblingMode.DVB_IDSA;
+    /**
+     * A symmetric key algorithm.
+     */
+    public static final int SCRAMBLING_MODE_MULTI2 =
+            android.hardware.cas.V1_2.ScramblingMode.MULTI2;
+    /**
+     * Advanced Encryption System (AES) 128-bit Encryption mode.
+     */
+    public static final int SCRAMBLING_MODE_AES128 =
+            android.hardware.cas.V1_2.ScramblingMode.AES128;
+    /**
+     * Advanced Encryption System (AES) Electronic Code Book (ECB) mode.
+     */
+    public static final int SCRAMBLING_MODE_AES_ECB =
+            android.hardware.cas.V1_2.ScramblingMode.AES_ECB;
+    /**
+     * Advanced Encryption System (AES) Society of Cable Telecommunications Engineers (SCTE) 52
+     * mode.
+     */
+    public static final int SCRAMBLING_MODE_AES_SCTE52 =
+            android.hardware.cas.V1_2.ScramblingMode.AES_SCTE52;
+    /**
+     * Triple Data Encryption Algorithm (TDES) Electronic Code Book (ECB) mode.
+     */
+    public static final int SCRAMBLING_MODE_TDES_ECB =
+            android.hardware.cas.V1_2.ScramblingMode.TDES_ECB;
+    /**
+     * Triple Data Encryption Algorithm (TDES) Society of Cable Telecommunications Engineers (SCTE)
+     * 52 mode.
+     */
+    public static final int SCRAMBLING_MODE_TDES_SCTE52 =
+            android.hardware.cas.V1_2.ScramblingMode.TDES_SCTE52;
+
+    /**
+     * Usages used to open cas sessions.
+     *
+     * @hide
+     */
+    @IntDef(prefix = "SESSION_USAGE_",
+            value = {SESSION_USAGE_LIVE, SESSION_USAGE_PLAYBACK, SESSION_USAGE_RECORD,
+            SESSION_USAGE_TIMESHIFT})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SessionUsage {}
+    /**
+     * Cas session is used to descramble live streams.
+     */
+    public static final int SESSION_USAGE_LIVE = android.hardware.cas.V1_2.SessionIntent.LIVE;
+    /**
+     * Cas session is used to descramble recoreded streams.
+     */
+    public static final int SESSION_USAGE_PLAYBACK =
+            android.hardware.cas.V1_2.SessionIntent.PLAYBACK;
+    /**
+     * Cas session is used to descramble live streams and encrypt local recorded content
+     */
+    public static final int SESSION_USAGE_RECORD = android.hardware.cas.V1_2.SessionIntent.RECORD;
+    /**
+     * Cas session is used to descramble live streams , encrypt local recorded content and playback
+     * local encrypted content.
+     */
+    public static final int SESSION_USAGE_TIMESHIFT =
+            android.hardware.cas.V1_2.SessionIntent.TIMESHIFT;
+
+    /**
+     * Plugin status events sent from cas system.
+     *
+     * @hide
+     */
+    @IntDef(prefix = "PLUGIN_STATUS_",
+            value = {PLUGIN_STATUS_PHYSICAL_MODULE_CHANGED, PLUGIN_STATUS_SESSION_NUMBER_CHANGED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PluginStatus {}
+
+    /**
+     * The event to indicate that the status of CAS system is changed by the removal or insertion of
+     * physical CAS modules.
+     */
+    public static final int PLUGIN_STATUS_PHYSICAL_MODULE_CHANGED =
+            android.hardware.cas.V1_2.StatusEvent.PLUGIN_PHYSICAL_MODULE_CHANGED;
+    /**
+     * The event to indicate that the number of CAS system's session is changed.
+     */
+    public static final int PLUGIN_STATUS_SESSION_NUMBER_CHANGED =
+            android.hardware.cas.V1_2.StatusEvent.PLUGIN_SESSION_NUMBER_CHANGED;
 
     private static final Singleton<IMediaCasService> sService = new Singleton<IMediaCasService>() {
         @Override
         protected IMediaCasService create() {
             try {
-                Log.d(TAG, "Tried to get cas@1.1 service");
-                android.hardware.cas.V1_1.IMediaCasService serviceV11 =
-                        android.hardware.cas.V1_1.IMediaCasService.getService(true /*wait*/);
-                if (serviceV11 != null) {
-                    return serviceV11;
+                Log.d(TAG, "Trying to get cas@1.2 service");
+                android.hardware.cas.V1_2.IMediaCasService serviceV12 =
+                        android.hardware.cas.V1_2.IMediaCasService.getService(true /*wait*/);
+                if (serviceV12 != null) {
+                    return serviceV12;
                 }
-            } catch (Exception eV1_1) {
-                try {
-                    Log.d(TAG, "Tried to get cas@1.0 service");
-                    return IMediaCasService.getService(true /*wait*/);
-                } catch (Exception eV1_0) {
-                    Log.d(TAG, "Failed to get cas@1.0 service");
-                }
+            } catch (Exception eV1_2) {
+                Log.d(TAG, "Failed to get cas@1.2 service");
             }
+
+            try {
+                    Log.d(TAG, "Trying to get cas@1.1 service");
+                    android.hardware.cas.V1_1.IMediaCasService serviceV11 =
+                            android.hardware.cas.V1_1.IMediaCasService.getService(true /*wait*/);
+                    if (serviceV11 != null) {
+                        return serviceV11;
+                    }
+            } catch (Exception eV1_1) {
+                Log.d(TAG, "Failed to get cas@1.1 service");
+            }
+
+            try {
+                Log.d(TAG, "Trying to get cas@1.0 service");
+                return IMediaCasService.getService(true /*wait*/);
+            } catch (Exception eV1_0) {
+                Log.d(TAG, "Failed to get cas@1.0 service");
+            }
+
             return null;
         }
     };
@@ -139,6 +300,7 @@ public final class MediaCas implements AutoCloseable {
     private void cleanupAndRethrowIllegalState() {
         mICas = null;
         mICasV11 = null;
+        mICasV12 = null;
         throw new IllegalStateException();
     }
 
@@ -146,6 +308,8 @@ public final class MediaCas implements AutoCloseable {
 
         private static final int MSG_CAS_EVENT = 0;
         private static final int MSG_CAS_SESSION_EVENT = 1;
+        private static final int MSG_CAS_STATUS_EVENT = 2;
+        private static final int MSG_CAS_RESOURCE_LOST = 3;
         private static final String SESSION_KEY = "sessionId";
         private static final String DATA_KEY = "data";
 
@@ -164,6 +328,10 @@ public final class MediaCas implements AutoCloseable {
                 mListener.onSessionEvent(MediaCas.this,
                         createFromSessionId(sessionId), msg.arg1, msg.arg2,
                         bundle.getByteArray(DATA_KEY));
+            } else if (msg.what == MSG_CAS_STATUS_EVENT) {
+                mListener.onPluginStatusUpdate(MediaCas.this, msg.arg1, msg.arg2);
+            } else if (msg.what == MSG_CAS_RESOURCE_LOST) {
+                mListener.onResourceLost(MediaCas.this);
             }
         }
     }
@@ -188,6 +356,12 @@ public final class MediaCas implements AutoCloseable {
             bundle.putByteArray(EventHandler.DATA_KEY, toBytes(data));
             msg.setData(bundle);
             mEventHandler.sendMessage(msg);
+        }
+        @Override
+        public void onStatusUpdate(byte status, int arg)
+                throws RemoteException {
+            mEventHandler.sendMessage(mEventHandler.obtainMessage(
+                    EventHandler.MSG_CAS_STATUS_EVENT, status, arg));
         }
     };
     /**
@@ -257,7 +431,7 @@ public final class MediaCas implements AutoCloseable {
         final ArrayList<Byte> mSessionId;
 
         Session(@NonNull ArrayList<Byte> sessionId) {
-            mSessionId = sessionId;
+            mSessionId = new ArrayList<Byte>(sessionId);
         }
 
         /**
@@ -364,6 +538,19 @@ public final class MediaCas implements AutoCloseable {
         }
 
         /**
+         * Get Session Id.
+         *
+         * @return session Id of the session.
+         *
+         * @throws IllegalStateException if the MediaCas instance is not valid.
+         */
+        @NonNull
+        public byte[] getSessionId() {
+            validateInternalStates();
+            return toBytes(mSessionId);
+        }
+
+        /**
          * Close the session.
          *
          * @throws IllegalStateException if the MediaCas instance is not valid.
@@ -445,14 +632,23 @@ public final class MediaCas implements AutoCloseable {
     public MediaCas(int CA_system_id) throws UnsupportedCasException {
         try {
             IMediaCasService service = getService();
-            android.hardware.cas.V1_1.IMediaCasService serviceV11 =
+            android.hardware.cas.V1_2.IMediaCasService serviceV12 =
+                    android.hardware.cas.V1_2.IMediaCasService.castFrom(service);
+            if (serviceV12 == null) {
+                android.hardware.cas.V1_1.IMediaCasService serviceV11 =
                     android.hardware.cas.V1_1.IMediaCasService.castFrom(service);
-            if (serviceV11 == null) {
-                Log.d(TAG, "Used cas@1_0 interface to create plugin");
-                mICas = service.createPlugin(CA_system_id, mBinder);
+                if (serviceV11 == null) {
+                    Log.d(TAG, "Used cas@1_0 interface to create plugin");
+                    mICas = service.createPlugin(CA_system_id, mBinder);
+                } else {
+                    Log.d(TAG, "Used cas@1.1 interface to create plugin");
+                    mICas = mICasV11 = serviceV11.createPluginExt(CA_system_id, mBinder);
+                }
             } else {
-                Log.d(TAG, "Used cas@1.1 interface to create plugin");
-                mICas = mICasV11 = serviceV11.createPluginExt(CA_system_id, mBinder);
+                Log.d(TAG, "Used cas@1.2 interface to create plugin");
+                mICas = mICasV11 = mICasV12 =
+                    android.hardware.cas.V1_2.ICas
+                    .castFrom(serviceV12.createPluginExt(CA_system_id, mBinder));
             }
         } catch(Exception e) {
             Log.e(TAG, "Failed to create plugin: " + e);
@@ -463,6 +659,24 @@ public final class MediaCas implements AutoCloseable {
                         "Unsupported CA_system_id " + CA_system_id);
             }
         }
+    }
+
+    /**
+     * Instantiate a CA system of the specified system id.
+     *
+     * @param casSystemId The system id of the CA system.
+     * @param tvInputServiceSessionId The Id of the session opened in TV Input Service (TIS)
+     *        {@link android.media.tv.TvInputService#onCreateSession(String, String)}
+     * @param priorityHint priority hint from the use case type for new created CAS system.
+     *
+     * @throws UnsupportedCasException if the device does not support the
+     * specified CA system.
+     */
+    public MediaCas(int casSystemId, @Nullable String tvInputServiceSessionId,
+            @PriorityHintUseCaseType int priorityHint)  throws UnsupportedCasException {
+        this(casSystemId);
+        mPriorityHint = priorityHint;
+        mTvInputServiceSessionId = tvInputServiceSessionId;
     }
 
     IHwBinder getBinder() {
@@ -476,6 +690,7 @@ public final class MediaCas implements AutoCloseable {
      * to receives scheme-specific notifications from a MediaCas instance.
      */
     public interface EventListener {
+
         /**
          * Notify the listener of a scheme-specific event from the CA system.
          *
@@ -500,6 +715,27 @@ public final class MediaCas implements AutoCloseable {
         default void onSessionEvent(@NonNull MediaCas mediaCas, @NonNull Session session,
                 int event, int arg, @Nullable byte[] data) {
             Log.d(TAG, "Received MediaCas Session event");
+        }
+
+        /**
+         * Notify the listener that the cas plugin status is updated.
+         *
+         * @param mediaCas the MediaCas object to receive this event.
+         * @param status the plugin status which is updated.
+         * @param arg an integer whose meaning is specific to the status to be updated.
+         */
+        default void onPluginStatusUpdate(@NonNull MediaCas mediaCas, @PluginStatus int status,
+                int arg) {
+            Log.d(TAG, "Received MediaCas Plugin Status event");
+        }
+
+        /**
+         * Notify the listener that the session resources was lost.
+         *
+         * @param mediaCas the MediaCas object to receive this event.
+         */
+        default void onResourceLost(@NonNull MediaCas mediaCas) {
+            Log.d(TAG, "Received MediaCas Resource Reclaim event");
         }
     }
 
@@ -563,6 +799,20 @@ public final class MediaCas implements AutoCloseable {
             mSession = createFromSessionId(sessionId);
         }
     }
+
+    private class OpenSession_1_2_Callback implements
+            android.hardware.cas.V1_2.ICas.openSession_1_2Callback {
+
+        public Session mSession;
+        public int mStatus;
+
+        @Override
+        public void onValues(int status, ArrayList<Byte> sessionId) {
+            mStatus = status;
+            mSession = createFromSessionId(sessionId);
+        }
+    }
+
     /**
      * Open a session to descramble one or more streams scrambled by the
      * conditional access system.
@@ -579,6 +829,40 @@ public final class MediaCas implements AutoCloseable {
         try {
             OpenSessionCallback cb = new OpenSessionCallback();
             mICas.openSession(cb);
+            MediaCasException.throwExceptionIfNeeded(cb.mStatus);
+            return cb.mSession;
+        } catch (RemoteException e) {
+            cleanupAndRethrowIllegalState();
+        }
+        return null;
+    }
+
+    /**
+     * Open a session with usage and scrambling information, so that descrambler can be configured
+     * to descramble one or more streams scrambled by the conditional access system.
+     *
+     * @param sessionUsage used for the created session.
+     * @param scramblingMode used for the created session.
+     *
+     * @return session the newly opened session.
+     *
+     * @throws IllegalStateException if the MediaCas instance is not valid.
+     * @throws MediaCasException for CAS-specific errors.
+     * @throws MediaCasStateException for CAS-specific state exceptions.
+     */
+    @Nullable
+    public Session openSession(@SessionUsage int sessionUsage, @ScramblingMode int scramblingMode)
+            throws MediaCasException {
+        validateInternalStates();
+
+        if (mICasV12 == null) {
+            Log.d(TAG, "Open Session with scrambling mode is only supported by cas@1.2+ interface");
+            throw new UnsupportedCasException("Open Session with scrambling mode is not supported");
+        }
+
+        try {
+            OpenSession_1_2_Callback cb = new OpenSession_1_2_Callback();
+            mICasV12.openSession_1_2(sessionUsage, scramblingMode, cb);
             MediaCasException.throwExceptionIfNeeded(cb.mStatus);
             return cb.mSession;
         } catch (RemoteException e) {

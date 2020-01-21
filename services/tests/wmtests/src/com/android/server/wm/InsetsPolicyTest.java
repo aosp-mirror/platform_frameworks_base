@@ -22,12 +22,15 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -118,11 +121,11 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
     @Test
     public void testControlsForDispatch_keyguard() {
-        addWindow(TYPE_STATUS_BAR, "statusBar").mAttrs.privateFlags |= PRIVATE_FLAG_KEYGUARD;
+        addWindow(TYPE_NOTIFICATION_SHADE, "notificationShade");
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
+        mockKeyguardShowing();
 
         final InsetsSourceControl[] controls = addAppWindowAndGetControlsForDispatch();
-
         // The app must not control the top bar.
         assertNotNull(controls);
         assertEquals(1, controls.length);
@@ -130,9 +133,9 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
     // TODO: adjust this test if we pretend to the app that it's still able to control it.
     @Test
-    public void testControlsForDispatch_forceStatusBarVisibleTransparent() {
-        addWindow(TYPE_STATUS_BAR, "statusBar").mAttrs.privateFlags |=
-                PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
+    public void testControlsForDispatch_forceStatusBarVisible() {
+        addWindow(TYPE_STATUS_BAR, "topBar").mAttrs.privateFlags |=
+                PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
 
         final InsetsSourceControl[] controls = addAppWindowAndGetControlsForDispatch();
@@ -144,7 +147,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
     @Test
     public void testControlsForDispatch_statusBarForceShowNavigation() {
-        addWindow(TYPE_STATUS_BAR, "statusBar").mAttrs.privateFlags |=
+        addWindow(TYPE_NOTIFICATION_SHADE, "notificationShade").mAttrs.privateFlags |=
                 PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
 
@@ -256,5 +259,11 @@ public class InsetsPolicyTest extends WindowTestsBase {
     private InsetsSourceControl[] addWindowAndGetControlsForDispatch(WindowState win) {
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(win);
         return mDisplayContent.getInsetsStateController().getControlsForDispatch(win);
+    }
+
+    private void mockKeyguardShowing() {
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        spyOn(displayPolicy);
+        doReturn(true).when(displayPolicy).isKeyguardShowing();
     }
 }

@@ -60,15 +60,21 @@ public abstract class ImsFeature {
      * This feature supports emergency calling over MMTEL. If defined, the framework will try to
      * place an emergency call over IMS first. If it is not defined, the framework will only use
      * CSFB for emergency calling.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int FEATURE_EMERGENCY_MMTEL = 0;
     /**
      * This feature supports the MMTEL feature.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int FEATURE_MMTEL = 1;
     /**
      * This feature supports the RCS feature.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int FEATURE_RCS = 2;
     /**
      * Total number of features defined
@@ -116,18 +122,24 @@ public abstract class ImsFeature {
      * This {@link ImsFeature}'s state is unavailable and should not be communicated with. This will
      * remove all bindings back to the framework. Any attempt to communicate with the framework
      * during this time will result in an {@link IllegalStateException}.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int STATE_UNAVAILABLE = 0;
     /**
      * This {@link ImsFeature} state is initializing and should not be communicated with. This will
      * remove all bindings back to the framework. Any attempt to communicate with the framework
      * during this time will result in an {@link IllegalStateException}.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int STATE_INITIALIZING = 1;
     /**
      * This {@link ImsFeature} is ready for communication. Do not attempt to call framework methods
-     * until {@link #onFeatureReady()} is called.
+     * until {@see #onFeatureReady()} is called.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int STATE_READY = 2;
 
     /**
@@ -155,11 +167,15 @@ public abstract class ImsFeature {
 
     /**
      * The capability was unable to be changed.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int CAPABILITY_ERROR_GENERIC = -1;
     /**
      * The capability was able to be changed.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int CAPABILITY_SUCCESS = 0;
 
     /**
@@ -331,7 +347,9 @@ public abstract class ImsFeature {
      *
      * @see SubscriptionManager#getSubscriptionIds(int) for more information on getting the
      * subscription IDs associated with this slot.
+     * @hide
      */
+    @SystemApi @TestApi
     public final int getSlotIndex() {
         return mSlotId;
     }
@@ -339,7 +357,9 @@ public abstract class ImsFeature {
     /**
      * @return The current state of the ImsFeature, set previously by {@link #setFeatureState(int)}
      * or {@link #STATE_UNAVAILABLE} if it has not been updated  yet.
+     * @hide
      */
+    @SystemApi @TestApi
     public @ImsState int getFeatureState() {
         synchronized (mLock) {
             return mState;
@@ -351,7 +371,9 @@ public abstract class ImsFeature {
      * stop communication, depending on the state sent.
      * @param state The ImsFeature's state, defined as {@link #STATE_UNAVAILABLE},
      * {@link #STATE_INITIALIZING}, or {@link #STATE_READY}.
+     * @hide
      */
+    @SystemApi @TestApi
     public final void setFeatureState(@ImsState int state) {
         synchronized (mLock) {
             if (mState != state) {

@@ -47,7 +47,7 @@ import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.util.Utils;
 
 import java.util.Timer;
@@ -181,8 +181,9 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
             final int[] compactActions = mRow.getEntry().getSbn().getNotification().extras
                     .getIntArray(Notification.EXTRA_COMPACT_ACTIONS);
             int tintColor = getNotificationHeader().getOriginalIconColor();
-            StatusBarWindowController ctrl = Dependency.get(StatusBarWindowController.class);
-            QuickQSPanel panel = ctrl.getStatusBarView().findViewById(
+            NotificationShadeWindowController ctrl = Dependency.get(
+                    NotificationShadeWindowController.class);
+            QuickQSPanel panel = ctrl.getNotificationShadeView().findViewById(
                     com.android.systemui.R.id.quick_qs_panel);
             StatusBarNotification sbn = mRow.getEntry().getSbn();
             Notification notif = sbn.getNotification();
@@ -193,7 +194,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
                     mActions,
                     compactActions,
                     notif.contentIntent);
-            QSPanel bigPanel = ctrl.getStatusBarView().findViewById(
+            QSPanel bigPanel = ctrl.getNotificationShadeView().findViewById(
                     com.android.systemui.R.id.quick_settings_panel);
             bigPanel.addMediaSession(token,
                     notif.getSmallIcon(),

@@ -391,6 +391,9 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"La tecnología NFC está inhabilitada"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"La tecnología NFC está habilitada"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Grabar pantalla"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
+    <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Detener"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Desliza el dedo hacia arriba para cambiar de app"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arrastra a la derecha para cambiar aplicaciones rápidamente"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Ocultar o mostrar Recientes"</string>
@@ -471,6 +474,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Borrar todo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Administrar"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notificaciones silenciosas"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversaciones"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Borrar todas las notificaciones silenciosas"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificaciones pausadas por el modo \"No interrumpir\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Comenzar ahora"</string>
@@ -689,6 +693,14 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"Personalizar"</string>
     <string name="notification_done" msgid="6215117625922713976">"Listo"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Deshacer"</string>
+    <string name="demote" msgid="6225813324237153980">"Marcar que la notificación no es una conversación"</string>
+    <string name="notification_conversation_favorite" msgid="8252976467488182853">"Marcar como favorita"</string>
+    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"Borrar de las favoritas"</string>
+    <string name="notification_conversation_mute" msgid="477431709687199671">"Silenciar"</string>
+    <string name="notification_conversation_unmute" msgid="410885000669775294">"Dejar de silenciar"</string>
+    <string name="notification_conversation_bubble" msgid="4598142032706190028">"Mostrar como cuadro"</string>
+    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"Desactivar cuadros"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Agregar a la pantalla principal"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"controles de notificación"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"opciones para posponer notificaciones"</string>

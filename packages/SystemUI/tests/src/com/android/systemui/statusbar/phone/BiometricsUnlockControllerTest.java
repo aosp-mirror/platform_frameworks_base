@@ -67,7 +67,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Mock
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock
-    private StatusBarWindowController mStatusBarWindowController;
+    private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock
     private DozeScrimController mDozeScrimController;
     @Mock
@@ -104,9 +104,9 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         res.addOverride(com.android.internal.R.integer.config_wakeUpDelayDoze, 0);
         mBiometricUnlockController = new BiometricUnlockController(mContext, mDozeScrimController,
                 mKeyguardViewMediator, mScrimController, mStatusBar, mShadeController,
-                mStatusBarWindowController, mKeyguardStateController, mHandler, mUpdateMonitor,
-                res.getResources(), mKeyguardBypassController, mDozeParameters, mMetricsLogger,
-                mDumpController);
+                mNotificationShadeWindowController, mKeyguardStateController, mHandler,
+                mUpdateMonitor, res.getResources(), mKeyguardBypassController, mDozeParameters,
+                mMetricsLogger, mDumpController);
         mBiometricUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
     }
 

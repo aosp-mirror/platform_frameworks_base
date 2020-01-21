@@ -28,8 +28,8 @@ import com.android.systemui.navigationbar.car.CarNavigationBarController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.NavigationModeController;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -53,14 +53,14 @@ public class CarStatusBarKeyguardViewManager extends StatusBarKeyguardViewManage
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             NavigationModeController navigationModeController,
             DockManager dockManager,
-            StatusBarWindowController statusBarWindowController,
+            NotificationShadeWindowController notificationShadeWindowController,
             KeyguardStateController keyguardStateController,
             NotificationMediaManager notificationMediaManager,
             CarNavigationBarController carNavigationBarController,
             FullscreenUserSwitcher fullscreenUserSwitcher) {
         super(context, callback, lockPatternUtils, sysuiStatusBarStateController,
                 configurationController, keyguardUpdateMonitor, navigationModeController,
-                dockManager, statusBarWindowController, keyguardStateController,
+                dockManager, notificationShadeWindowController, keyguardStateController,
                 notificationMediaManager);
         mShouldHideNavBar = context.getResources()
                 .getBoolean(R.bool.config_hideNavWhenKeyguardBouncerShown);

@@ -112,6 +112,30 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    @NonNull
+    public RoutingSessionInfo getSystemSessionInfo() {
+        final int uid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            RoutingSessionInfo systemSessionInfo = null;
+            synchronized (mLock) {
+                UserRecord userRecord = getOrCreateUserRecordLocked(userId);
+                List<RoutingSessionInfo> sessionInfos =
+                        userRecord.mHandler.mSystemProvider.getSessionInfos();
+                if (sessionInfos != null && !sessionInfos.isEmpty()) {
+                    systemSessionInfo = sessionInfos.get(0);
+                } else {
+                    Slog.w(TAG, "System provider does not have any session info.");
+                }
+            }
+            return systemSessionInfo;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     public void registerClient(@NonNull IMediaRouter2Client client,
             @NonNull String packageName) {
         Objects.requireNonNull(client, "client must not be null");
@@ -1351,6 +1375,16 @@ class MediaRouter2ServiceImpl {
             List<IMediaRouter2Manager> managers = getManagers();
             notifySessionInfosChangedToManagers(managers);
 
+            // For system provider, notify all clients.
+            if (provider == mSystemProvider) {
+                MediaRouter2ServiceImpl service = mServiceRef.get();
+                if (service == null) {
+                    return;
+                }
+                notifySessionInfoChangedToClients(getClients(), sessionInfo);
+                return;
+            }
+
             Client2Record client2Record = mSessionToClientMap.get(
                     sessionInfo.getId());
             if (client2Record == null) {
@@ -1505,6 +1539,17 @@ class MediaRouter2ServiceImpl {
                     client.notifyRoutesChanged(routes);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to notify routes changed. Client probably died.", ex);
+                }
+            }
+        }
+
+        private void notifySessionInfoChangedToClients(List<IMediaRouter2Client> clients,
+                RoutingSessionInfo sessionInfo) {
+            for (IMediaRouter2Client client : clients) {
+                try {
+                    client.notifySessionInfoChanged(sessionInfo);
+                } catch (RemoteException ex) {
+                    Slog.w(TAG, "Failed to notify session info changed. Client probably died.", ex);
                 }
             }
         }

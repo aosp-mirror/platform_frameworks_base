@@ -19,8 +19,9 @@ package com.android.systemui.statusbar.phone.dagger;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
-import com.android.systemui.statusbar.phone.StatusBarWindowView;
-import com.android.systemui.statusbar.phone.StatusBarWindowViewController;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
+import com.android.systemui.statusbar.phone.StatusBarWindowController;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -41,7 +42,8 @@ public interface StatusBarComponent {
      */
     @Subcomponent.Builder
     interface Builder {
-        @BindsInstance Builder statusBarWindowView(StatusBarWindowView statusBarWindowView);
+        @BindsInstance Builder statusBarWindowView(
+                NotificationShadeWindowView notificationShadeWindowView);
         StatusBarComponent build();
     }
 
@@ -54,10 +56,16 @@ public interface StatusBarComponent {
     @interface StatusBarScope {}
 
     /**
+     * Creates a NotificationShadeWindowViewController.
+     */
+    @StatusBarScope
+    NotificationShadeWindowViewController getNotificationShadeWindowViewController();
+
+    /**
      * Creates a StatusBarWindowViewController.
      */
     @StatusBarScope
-    StatusBarWindowViewController getStatusBarWindowViewController();
+    StatusBarWindowController getStatusBarWindowController();
 
     /**
      * Creates a NotificationPanelViewController.

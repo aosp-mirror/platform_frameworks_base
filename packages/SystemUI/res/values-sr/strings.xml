@@ -393,6 +393,9 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC је онемогућен"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC је омогућен"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Снимак екрана"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Почните"</string>
+    <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Зауставите"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Превуците нагоре да бисте мењали апликације"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Превуците удесно да бисте брзо променили апликације"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Укључи/искључи преглед"</string>
@@ -474,6 +477,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Обриши све"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Управљајте"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Нечујна обавештења"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"Конверзације"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Обришите сва нечујна обавештења"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Обавештења су паузирана режимом Не узнемиравај"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Започни одмах"</string>
@@ -692,6 +696,14 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"Прилагоди"</string>
     <string name="notification_done" msgid="6215117625922713976">"Готово"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Опозови"</string>
+    <string name="demote" msgid="6225813324237153980">"Означи да ово обавештење није конверзација"</string>
+    <string name="notification_conversation_favorite" msgid="8252976467488182853">"Означи као омиљено"</string>
+    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"Уклони из омиљених"</string>
+    <string name="notification_conversation_mute" msgid="477431709687199671">"Искључи звук"</string>
+    <string name="notification_conversation_unmute" msgid="410885000669775294">"Укључи звук"</string>
+    <string name="notification_conversation_bubble" msgid="4598142032706190028">"Прикажи као облачић"</string>
+    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"Искључи облачиће"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Додај на почетни екран"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"контроле обавештења"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"опције за одлагање обавештења"</string>

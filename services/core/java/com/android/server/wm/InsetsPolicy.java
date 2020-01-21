@@ -22,8 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 
 import android.annotation.Nullable;
@@ -188,7 +187,7 @@ class InsetsPolicy {
         if (mShowingTransientTypes.indexOf(ITYPE_STATUS_BAR) != -1) {
             return mTransientControlTarget;
         }
-        if (areSystemBarsForciblyVisible() || isStatusBarForciblyVisible()) {
+        if (areSystemBarsForciblyVisible() || isKeyguardOrStatusBarForciblyVisible()) {
             return null;
         }
         return focusedWin;
@@ -204,29 +203,27 @@ class InsetsPolicy {
         return focusedWin;
     }
 
-    private boolean isStatusBarForciblyVisible() {
+    private boolean isKeyguardOrStatusBarForciblyVisible() {
+        if (mPolicy.isKeyguardShowing()) {
+            return true;
+        }
         final WindowState statusBar = mPolicy.getStatusBar();
-        if (statusBar == null) {
-            return false;
-        }
-        final int privateFlags = statusBar.mAttrs.privateFlags;
-
-        // TODO(b/118118435): Pretend to the app that it's still able to control it?
-        if ((privateFlags & PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT) != 0) {
-            return true;
-        }
-        if ((privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
-            return true;
+        if (statusBar != null) {
+            // TODO(b/118118435): Pretend to the app that it's still able to control it?
+            if ((statusBar.mAttrs.privateFlags & PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR) != 0) {
+                return true;
+            }
         }
         return false;
     }
 
     private boolean isNavBarForciblyVisible() {
-        final WindowState statusBar = mPolicy.getStatusBar();
-        if (statusBar == null) {
+        final WindowState notificationShade = mPolicy.getNotificationShade();
+        if (notificationShade == null) {
             return false;
         }
-        if ((statusBar.mAttrs.privateFlags & PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION) != 0) {
+        if ((notificationShade.mAttrs.privateFlags
+                & PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION) != 0) {
             return true;
         }
         return false;

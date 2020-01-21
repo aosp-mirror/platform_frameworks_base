@@ -111,6 +111,9 @@ interface IDisplayManager {
     // Gets the default brightness configuration if configured.
     BrightnessConfiguration getDefaultBrightnessConfiguration();
 
+    // Gets the last requested minimal post processing settings for display with displayId.
+    boolean isMinimalPostProcessingRequested(int displayId);
+
     // Temporarily sets the display brightness.
     void setTemporaryBrightness(int brightness);
 

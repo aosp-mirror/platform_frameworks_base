@@ -155,6 +155,7 @@ package android {
     field public static final String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
     field public static final String RADIO_SCAN_WITHOUT_LOCATION = "android.permission.RADIO_SCAN_WITHOUT_LOCATION";
     field public static final String READ_ACTIVE_EMERGENCY_SESSION = "android.permission.READ_ACTIVE_EMERGENCY_SESSION";
+    field public static final String READ_CARRIER_APP_INFO = "android.permission.READ_CARRIER_APP_INFO";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String READ_CONTENT_RATING_SYSTEMS = "android.permission.READ_CONTENT_RATING_SYSTEMS";
     field public static final String READ_DEVICE_CONFIG = "android.permission.READ_DEVICE_CONFIG";
@@ -327,6 +328,7 @@ package android.app {
     method @NonNull public java.util.Collection<java.util.Locale> getSupportedLocales();
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidImportance(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, "android.permission.CREATE_USERS"}) public boolean isProfileForeground(@NonNull android.os.UserHandle);
+    method @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) public void killProcessesWhenImperceptible(@NonNull int[], @NonNull String);
     method @RequiresPermission(android.Manifest.permission.KILL_UID) public void killUid(int, String);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
     method public void setDeviceLocales(@NonNull android.os.LocaleList);
@@ -1752,6 +1754,7 @@ package android.content {
     field public static final String SECURE_ELEMENT_SERVICE = "secure_element";
     field public static final String STATS_MANAGER = "stats";
     field public static final String STATUS_BAR_SERVICE = "statusbar";
+    field public static final String SYSTEM_CONFIG_SERVICE = "system_config";
     field public static final String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final String TELEPHONY_IMS_SERVICE = "telephony_ims";
     field public static final String TELEPHONY_REGISTRY_SERVICE = "telephony_registry";
@@ -4787,27 +4790,33 @@ package android.media.tv.tuner.frontend {
     method public int getSifStandard();
     method public int getSignalType();
     method public int getType();
-    field public static final int SIF_BG = 1; // 0x1
-    field public static final int SIF_BG_A2 = 2; // 0x2
-    field public static final int SIF_BG_NICAM = 4; // 0x4
-    field public static final int SIF_DK = 16; // 0x10
-    field public static final int SIF_DK1 = 32; // 0x20
-    field public static final int SIF_DK2 = 64; // 0x40
-    field public static final int SIF_DK3 = 128; // 0x80
-    field public static final int SIF_DK_NICAM = 256; // 0x100
-    field public static final int SIF_I = 8; // 0x8
-    field public static final int SIF_I_NICAM = 16384; // 0x4000
-    field public static final int SIF_L = 512; // 0x200
-    field public static final int SIF_L_NICAM = 32768; // 0x8000
-    field public static final int SIF_L_PRIME = 65536; // 0x10000
-    field public static final int SIF_M = 1024; // 0x400
-    field public static final int SIF_M_A2 = 4096; // 0x1000
-    field public static final int SIF_M_BTSC = 2048; // 0x800
-    field public static final int SIF_M_EIA_J = 8192; // 0x2000
+    field public static final int SIF_AUTO = 1; // 0x1
+    field public static final int SIF_BG = 2; // 0x2
+    field public static final int SIF_BG_A2 = 4; // 0x4
+    field public static final int SIF_BG_NICAM = 8; // 0x8
+    field public static final int SIF_DK = 32; // 0x20
+    field public static final int SIF_DK1_A2 = 64; // 0x40
+    field public static final int SIF_DK2_A2 = 128; // 0x80
+    field public static final int SIF_DK3_A2 = 256; // 0x100
+    field public static final int SIF_DK_NICAM = 512; // 0x200
+    field public static final int SIF_I = 16; // 0x10
+    field public static final int SIF_I_NICAM = 32768; // 0x8000
+    field public static final int SIF_L = 1024; // 0x400
+    field public static final int SIF_L_NICAM = 65536; // 0x10000
+    field public static final int SIF_L_PRIME = 131072; // 0x20000
+    field public static final int SIF_M = 2048; // 0x800
+    field public static final int SIF_M_A2 = 8192; // 0x2000
+    field public static final int SIF_M_BTSC = 4096; // 0x1000
+    field public static final int SIF_M_EIAJ = 16384; // 0x4000
     field public static final int SIF_UNDEFINED = 0; // 0x0
-    field public static final int SIGNAL_TYPE_NTSC = 4; // 0x4
-    field public static final int SIGNAL_TYPE_PAL = 1; // 0x1
-    field public static final int SIGNAL_TYPE_SECAM = 2; // 0x2
+    field public static final int SIGNAL_TYPE_AUTO = 1; // 0x1
+    field public static final int SIGNAL_TYPE_NTSC = 32; // 0x20
+    field public static final int SIGNAL_TYPE_NTSC_443 = 64; // 0x40
+    field public static final int SIGNAL_TYPE_PAL = 2; // 0x2
+    field public static final int SIGNAL_TYPE_PAL_60 = 16; // 0x10
+    field public static final int SIGNAL_TYPE_PAL_M = 4; // 0x4
+    field public static final int SIGNAL_TYPE_PAL_N = 8; // 0x8
+    field public static final int SIGNAL_TYPE_SECAM = 128; // 0x80
     field public static final int SIGNAL_TYPE_UNDEFINED = 0; // 0x0
   }
 
@@ -5078,6 +5087,7 @@ package android.net {
 
   public abstract class NetworkAgent {
     ctor public NetworkAgent(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, int, @NonNull android.net.NetworkAgentConfig, @Nullable android.net.NetworkProvider);
+    method @Nullable public android.net.Network getNetwork();
     method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
     method public void onAutomaticReconnectDisabled();
     method public void onBandwidthUpdateRequested();
@@ -5088,13 +5098,17 @@ package android.net {
     method public void onStartSocketKeepalive(int, int, @NonNull android.net.KeepalivePacketData);
     method public void onStopSocketKeepalive(int);
     method public void onValidationStatus(int, @Nullable String);
+    method @NonNull public android.net.Network register();
     method public void sendLinkProperties(@NonNull android.net.LinkProperties);
     method public void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
     method public void sendNetworkScore(int);
     method public void sendSocketKeepaliveEvent(int, int);
+    method public void setConnected();
+    method @Deprecated public void setLegacyExtraInfo(@Nullable String);
+    method @Deprecated public void setLegacySubtype(int, @NonNull String);
+    method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
     field public static final int VALIDATION_STATUS_VALID = 1; // 0x1
-    field @NonNull public final android.net.Network network;
     field public final int providerId;
   }
 
@@ -6124,6 +6138,7 @@ package android.net.wifi {
     method public int getMaxNumberOfClients();
     method public int getShutdownTimeoutMillis();
     method public boolean isClientControlByUserEnabled();
+    method @Nullable public android.net.wifi.WifiConfiguration toWifiConfiguration();
     field public static final int BAND_2GHZ = 1; // 0x1
     field public static final int BAND_5GHZ = 2; // 0x2
     field public static final int BAND_6GHZ = 4; // 0x4
@@ -6326,7 +6341,7 @@ package android.net.wifi {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public android.net.wifi.SoftApConfiguration getSoftApConfiguration();
     method public int getVerboseLoggingLevel();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public void getWifiActivityEnergyInfoAsync(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.OnWifiActivityEnergyInfoListener);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public android.net.wifi.WifiConfiguration getWifiApConfiguration();
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public android.net.wifi.WifiConfiguration getWifiApConfiguration();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public int getWifiApState();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.List<android.net.wifi.WifiConfiguration> getWifiConfigForMatchedNetworkSuggestionsSharedWithUser(@NonNull java.util.List<android.net.wifi.ScanResult>);
     method public boolean isApMacRandomizationSupported();
@@ -7478,6 +7493,11 @@ package android.os {
     field public static final int TUPLE_VALUE_TYPE = 7; // 0x7
   }
 
+  public class SystemConfigManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_CARRIER_APP_INFO) public java.util.Set<java.lang.String> getDisabledUntilUsedPreinstalledCarrierApps();
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_CARRIER_APP_INFO) public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
+  }
+
   public class SystemProperties {
     method @NonNull public static String get(@NonNull String);
     method @NonNull public static String get(@NonNull String, @Nullable String);
@@ -8401,6 +8421,7 @@ package android.provider {
   public static final class Telephony.SimInfo {
     field public static final String ACCESS_RULES = "access_rules";
     field public static final String ACCESS_RULES_FROM_CARRIER_CONFIGS = "access_rules_from_carrier_configs";
+    field public static final String ALLOWED_NETWORK_TYPES = "allowed_network_types";
     field public static final String CARD_ID = "card_id";
     field public static final String CARRIER_ID = "carrier_id";
     field public static final String CARRIER_NAME = "carrier_name";
@@ -10742,6 +10763,7 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void enableVideoCalling(boolean);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getAidForAppType(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getAllowedNetworkTypes();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.ImsiEncryptionInfo getCarrierInfoForImsiEncryption(int);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntent(android.content.Intent);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntentAndPhone(android.content.Intent, int);
@@ -10827,6 +10849,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean resetRadioConfig();
     method @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL) public void resetSettings();
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAllowedNetworkTypes(long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAlwaysAllowMmsData(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCarrierDataEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setCarrierRestrictionRules(@NonNull android.telephony.CarrierRestrictionRules);
@@ -11499,10 +11522,6 @@ package android.telephony.ims {
     ctor public ImsException(@Nullable String);
     ctor public ImsException(@Nullable String, int);
     ctor public ImsException(@Nullable String, int, @Nullable Throwable);
-    method public int getCode();
-    field public static final int CODE_ERROR_SERVICE_UNAVAILABLE = 1; // 0x1
-    field public static final int CODE_ERROR_UNSPECIFIED = 0; // 0x0
-    field public static final int CODE_ERROR_UNSUPPORTED_OPERATION = 2; // 0x2
   }
 
   public final class ImsExternalCallState implements android.os.Parcelable {
@@ -11528,23 +11547,13 @@ package android.telephony.ims {
   }
 
   public class ImsMmTelManager implements android.telephony.ims.RegistrationManager {
-    method @NonNull public static android.telephony.ims.ImsMmTelManager createForSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getFeatureState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getRegistrationState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getRegistrationTransportType(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getVoWiFiModeSetting();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getVoWiFiRoamingModeSetting();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAdvancedCallingSettingEnabled();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAvailable(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCapable(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void isSupported(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>) throws android.telephony.ims.ImsException;
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isTtyOverVolteEnabled();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isVoWiFiRoamingSettingEnabled();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isVoWiFiSettingEnabled();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isVtSettingEnabled();
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsMmTelManager.RegistrationCallback) throws android.telephony.ims.ImsException;
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RegistrationManager.RegistrationCallback) throws android.telephony.ims.ImsException;
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerMmTelCapabilityCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsMmTelManager.CapabilityCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setAdvancedCallingSettingEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setRttCapabilitySetting(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVoWiFiModeSetting(int);
@@ -11554,16 +11563,6 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVoWiFiSettingEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVtSettingEnabled(boolean);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.ImsMmTelManager.RegistrationCallback);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterMmTelCapabilityCallback(@NonNull android.telephony.ims.ImsMmTelManager.CapabilityCallback);
-    field public static final int WIFI_MODE_CELLULAR_PREFERRED = 1; // 0x1
-    field public static final int WIFI_MODE_WIFI_ONLY = 0; // 0x0
-    field public static final int WIFI_MODE_WIFI_PREFERRED = 2; // 0x2
-  }
-
-  public static class ImsMmTelManager.CapabilityCallback {
-    ctor public ImsMmTelManager.CapabilityCallback();
-    method public void onCapabilitiesStatusChanged(@NonNull android.telephony.ims.feature.MmTelFeature.MmTelCapabilities);
   }
 
   @Deprecated public static class ImsMmTelManager.RegistrationCallback extends android.telephony.ims.RegistrationManager.RegistrationCallback {
@@ -11903,24 +11902,6 @@ package android.telephony.ims {
     method @NonNull public android.telephony.ims.RcsContactUceCapability build();
   }
 
-  public interface RegistrationManager {
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getRegistrationState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getRegistrationTransportType(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RegistrationManager.RegistrationCallback) throws android.telephony.ims.ImsException;
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
-    field public static final int REGISTRATION_STATE_NOT_REGISTERED = 0; // 0x0
-    field public static final int REGISTRATION_STATE_REGISTERED = 2; // 0x2
-    field public static final int REGISTRATION_STATE_REGISTERING = 1; // 0x1
-  }
-
-  public static class RegistrationManager.RegistrationCallback {
-    ctor public RegistrationManager.RegistrationCallback();
-    method public void onRegistered(int);
-    method public void onRegistering(int);
-    method public void onTechnologyChangeFailed(int, @Nullable android.telephony.ims.ImsReasonInfo);
-    method public void onUnregistered(@Nullable android.telephony.ims.ImsReasonInfo);
-  }
-
 }
 
 package android.telephony.ims.feature {
@@ -11983,7 +11964,7 @@ package android.telephony.ims.feature {
     method public void onFeatureReady();
     method public void onFeatureRemoved();
     method public boolean queryCapabilityConfiguration(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int);
-    method public final android.telephony.ims.feature.MmTelFeature.MmTelCapabilities queryCapabilityStatus();
+    method @NonNull public final android.telephony.ims.feature.MmTelFeature.MmTelCapabilities queryCapabilityStatus();
     method public void setUiTtyMode(int, @Nullable android.os.Message);
     method @android.telephony.ims.feature.MmTelFeature.ProcessCallResult public int shouldProcessCall(@NonNull String[]);
     field public static final String EXTRA_IS_UNKNOWN_CALL = "android.telephony.ims.feature.extra.IS_UNKNOWN_CALL";
@@ -11999,10 +11980,6 @@ package android.telephony.ims.feature {
     method public final void addCapabilities(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);
     method public final boolean isCapable(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);
     method public final void removeCapabilities(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);
-    field public static final int CAPABILITY_TYPE_SMS = 8; // 0x8
-    field public static final int CAPABILITY_TYPE_UT = 4; // 0x4
-    field public static final int CAPABILITY_TYPE_VIDEO = 2; // 0x2
-    field public static final int CAPABILITY_TYPE_VOICE = 1; // 0x1
   }
 
   @IntDef(flag=true, value={android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE, android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO, android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT, android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface MmTelFeature.MmTelCapabilities.MmTelCapability {

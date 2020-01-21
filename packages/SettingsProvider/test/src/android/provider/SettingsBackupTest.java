@@ -726,7 +726,8 @@ public class SettingsBackupTest {
                  Settings.Secure.FACE_UNLOCK_RE_ENROLL,
                  Settings.Secure.TAP_GESTURE,
                  Settings.Secure.WINDOW_MAGNIFICATION,
-                 Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER);
+                 Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER,
+                 Settings.Secure.SUPPRESS_DOZE);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {

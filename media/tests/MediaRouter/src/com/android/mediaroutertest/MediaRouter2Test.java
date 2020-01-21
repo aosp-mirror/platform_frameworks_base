@@ -692,6 +692,14 @@ public class MediaRouter2Test {
         }
     }
 
+    // TODO: Consider adding tests with bluetooth connection/disconnection.
+    @Test
+    public void testGetDefaultController() {
+        final RoutingController defaultController = mRouter2.getDefaultController();
+        assertNotNull(defaultController);
+        assertFalse(defaultController.isReleased());
+    }
+
     // Helper for getting routes easily
     static Map<String, MediaRoute2Info> createRouteMap(List<MediaRoute2Info> routes) {
         Map<String, MediaRoute2Info> routeMap = new HashMap<>();

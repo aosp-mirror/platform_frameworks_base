@@ -58,11 +58,11 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
@@ -77,6 +77,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
@@ -289,6 +290,7 @@ public class DisplayPolicy {
 
     private final ArraySet<WindowState> mScreenDecorWindows = new ArraySet<>();
     private WindowState mStatusBar = null;
+    private WindowState mNotificationShade = null;
     private final int[] mStatusBarHeightForRotation = new int[4];
     private WindowState mNavigationBar = null;
     @NavigationBarPosition
@@ -368,8 +370,6 @@ public class DisplayPolicy {
     private WindowState mTopDockedOpaqueOrDimmingWindowState;
     private boolean mTopIsFullscreen;
     private boolean mForceStatusBar;
-    private boolean mForceStatusBarFromKeyguard;
-    private boolean mForceStatusBarTransparent;
     private int mNavBarOpacityMode = NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED;
     private boolean mForcingShowNavBar;
     private int mForcingShowNavBarLayer;
@@ -851,15 +851,13 @@ public class DisplayPolicy {
                 // letterboxed. Hence always let them extend under the cutout.
                 attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
                 break;
-            case TYPE_STATUS_BAR:
-
+            case TYPE_NOTIFICATION_SHADE:
                 // If the Keyguard is in a hidden state (occluded by another window), we force to
                 // remove the wallpaper and keyguard flag so that any change in-flight after setting
                 // the keyguard as occluded wouldn't set these flags again.
                 // See {@link #processKeyguardSetHiddenResultLw}.
                 if (mService.mPolicy.isKeyguardOccluded()) {
                     attrs.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-                    attrs.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
                 }
                 break;
 
@@ -891,11 +889,6 @@ public class DisplayPolicy {
                 attrs.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
                 break;
         }
-
-        if (attrs.type != TYPE_STATUS_BAR) {
-            // The status bar is the only window allowed to exhibit keyguard behavior.
-            attrs.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
-        }
     }
 
     /**
@@ -914,6 +907,7 @@ public class DisplayPolicy {
      * Currently enforces that two window types are singletons per display:
      * <ul>
      * <li>{@link WindowManager.LayoutParams#TYPE_STATUS_BAR}</li>
+     * <li>{@link WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE}</li>
      * <li>{@link WindowManager.LayoutParams#TYPE_NAVIGATION_BAR}</li>
      * </ul>
      *
@@ -936,6 +930,16 @@ public class DisplayPolicy {
                         "DisplayPolicy");
                 if (mStatusBar != null) {
                     if (mStatusBar.isAlive()) {
+                        return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
+                    }
+                }
+                break;
+            case TYPE_NOTIFICATION_SHADE:
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.STATUS_BAR_SERVICE,
+                        "DisplayPolicy");
+                if (mNotificationShade != null) {
+                    if (mNotificationShade.isAlive()) {
                         return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                     }
                 }
@@ -974,12 +978,15 @@ public class DisplayPolicy {
         }
 
         switch (attrs.type) {
-            case TYPE_STATUS_BAR:
-                mStatusBar = win;
-                mStatusBarController.setWindow(win);
+            case TYPE_NOTIFICATION_SHADE:
+                mNotificationShade = win;
                 if (mDisplayContent.isDefaultDisplay) {
                     mService.mPolicy.setKeyguardCandidateLw(win);
                 }
+                break;
+            case TYPE_STATUS_BAR:
+                mStatusBar = win;
+                mStatusBarController.setWindow(win);
                 final TriConsumer<DisplayFrames, WindowState, Rect> frameProvider =
                         (displayFrames, windowState, rect) -> {
                             rect.top = 0;
@@ -1036,14 +1043,16 @@ public class DisplayPolicy {
         if (mStatusBar == win) {
             mStatusBar = null;
             mStatusBarController.setWindow(null);
-            if (mDisplayContent.isDefaultDisplay) {
-                mService.mPolicy.setKeyguardCandidateLw(null);
-            }
             mDisplayContent.setInsetProvider(ITYPE_STATUS_BAR, null, null);
         } else if (mNavigationBar == win) {
             mNavigationBar = null;
             mNavigationBarController.setWindow(null);
             mDisplayContent.setInsetProvider(ITYPE_NAVIGATION_BAR, null, null);
+        } else if (mNotificationShade == win) {
+            mNotificationShade = null;
+            if (mDisplayContent.isDefaultDisplay) {
+                mService.mPolicy.setKeyguardCandidateLw(null);
+            }
         }
         if (mLastFocusedWindow == win) {
             mLastFocusedWindow = null;
@@ -1058,6 +1067,10 @@ public class DisplayPolicy {
 
     WindowState getStatusBar() {
         return mStatusBar;
+    }
+
+    WindowState getNotificationShade() {
+        return mNotificationShade;
     }
 
     WindowState getNavigationBar() {
@@ -1082,12 +1095,6 @@ public class DisplayPolicy {
         if (DEBUG_ANIM) Slog.i(TAG, "selectAnimation in " + win
                 + ": transit=" + transit);
         if (win == mStatusBar) {
-            final boolean isKeyguard = (win.getAttrs().privateFlags & PRIVATE_FLAG_KEYGUARD) != 0;
-            final boolean expanded = win.getAttrs().height == MATCH_PARENT
-                    && win.getAttrs().width == MATCH_PARENT;
-            if (isKeyguard || expanded) {
-                return ANIMATION_NONE;
-            }
             if (transit == TRANSIT_EXIT
                     || transit == TRANSIT_HIDE) {
                 return R.anim.dock_top_exit;
@@ -1425,10 +1432,10 @@ public class DisplayPolicy {
                 || (behavior & BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE) != 0;
         boolean navAllowedHidden = immersive || immersiveSticky;
         navTranslucent &= !immersiveSticky;  // transient trumps translucent
-        boolean isKeyguardShowing = isStatusBarKeyguard()
-                && !mService.mPolicy.isKeyguardOccluded();
-        boolean statusBarForcesShowingNavigation = !isKeyguardShowing && mStatusBar != null
-                && (mStatusBar.getAttrs().privateFlags
+        boolean isKeyguardShowing = isKeyguardShowing() && !isKeyguardOccluded();
+        boolean notificationShadeForcesShowingNavigation =
+                !isKeyguardShowing && mNotificationShade != null
+                && (mNotificationShade.getAttrs().privateFlags
                 & PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION) != 0;
 
         // When the navigation bar isn't visible, we put up a fake input window to catch all
@@ -1455,7 +1462,7 @@ public class DisplayPolicy {
         navVisible |= !canHideNavigationBar();
 
         boolean updateSysUiVisibility = layoutNavigationBar(displayFrames, uiMode, navVisible,
-                navTranslucent, navAllowedHidden, statusBarForcesShowingNavigation);
+                navTranslucent, navAllowedHidden, notificationShadeForcesShowingNavigation);
         if (DEBUG_LAYOUT) Slog.i(TAG, "mDock rect:" + displayFrames.mDock);
         updateSysUiVisibility |= layoutStatusBar(displayFrames, sysui, isKeyguardShowing);
         if (updateSysUiVisibility) {
@@ -2104,7 +2111,7 @@ public class DisplayPolicy {
                     df.set(displayFrames.mUnrestricted);
                     pf.set(displayFrames.mUnrestricted);
                 } else if ((sysUiFl & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
-                        && (type == TYPE_STATUS_BAR
+                        && (type == TYPE_NOTIFICATION_SHADE
                         || type == TYPE_TOAST
                         || type == TYPE_DOCK_DIVIDER
                         || type == TYPE_VOICE_INTERACTION_STARTING
@@ -2210,7 +2217,8 @@ public class DisplayPolicy {
 
         // Ensure that windows with a DEFAULT or NEVER display cutout mode are laid out in
         // the cutout safe zone.
-        if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES) {
+        if (cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+                || cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER) {
             final Rect displayCutoutSafeExceptMaybeBars = sTmpDisplayCutoutSafeExceptMaybeBarsRect;
             displayCutoutSafeExceptMaybeBars.set(displayFrames.mDisplayCutoutSafe);
             if (layoutInScreen && layoutInsetDecor && !requestedFullscreen
@@ -2355,8 +2363,6 @@ public class DisplayPolicy {
         mTopDockedOpaqueWindowState = null;
         mTopDockedOpaqueOrDimmingWindowState = null;
         mForceStatusBar = false;
-        mForceStatusBarFromKeyguard = false;
-        mForceStatusBarTransparent = false;
         mForcingShowNavBar = false;
         mForcingShowNavBarLayer = -1;
 
@@ -2383,14 +2389,6 @@ public class DisplayPolicy {
                 && attrs.type == TYPE_INPUT_METHOD) {
             mForcingShowNavBar = true;
             mForcingShowNavBarLayer = win.getSurfaceLayer();
-        }
-        if (attrs.type == TYPE_STATUS_BAR) {
-            if ((attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
-                mForceStatusBarFromKeyguard = true;
-            }
-            if ((attrs.privateFlags & PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT) != 0) {
-                mForceStatusBarTransparent = true;
-            }
         }
 
         boolean appWindow = attrs.type >= FIRST_APPLICATION_WINDOW
@@ -2513,32 +2511,25 @@ public class DisplayPolicy {
 
         if (mStatusBar != null) {
             if (DEBUG_LAYOUT) Slog.i(TAG, "force=" + mForceStatusBar
-                    + " forcefkg=" + mForceStatusBarFromKeyguard
                     + " top=" + mTopFullscreenOpaqueWindowState);
-            boolean shouldBeTransparent = mForceStatusBarTransparent
-                    && !mForceStatusBar
-                    && !mForceStatusBarFromKeyguard;
-            if (!shouldBeTransparent) {
-                mStatusBarController.setShowTransparent(false /* transparent */);
-            } else if (!mStatusBar.isVisibleLw()) {
-                mStatusBarController.setShowTransparent(true /* transparent */);
-            }
-
-            boolean statusBarForcesShowingNavigation =
-                    (mStatusBar.getAttrs().privateFlags
+            final boolean forceShowStatusBar = (mStatusBar.getAttrs().privateFlags
+                    & PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR) != 0;
+            final boolean notificationShadeForcesShowingNavigation =
+                    mNotificationShade != null
+                            && (mNotificationShade.getAttrs().privateFlags
                             & PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION) != 0;
+
             boolean topAppHidesStatusBar = topAppHidesStatusBar();
-            if (mForceStatusBar || mForceStatusBarFromKeyguard || mForceStatusBarTransparent
-                    || statusBarForcesShowingNavigation) {
+            if (mForceStatusBar || forceShowStatusBar) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Showing status bar: forced");
                 if (mStatusBarController.setBarShowingLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT;
                 }
                 // Maintain fullscreen layout until incoming animation is complete.
                 topIsFullscreen = mTopIsFullscreen && mStatusBar.isAnimatingLw();
-                // Transient status bar is not allowed if status bar is on lockscreen or status bar
-                // is expecting the navigation keys from the user.
-                if ((mForceStatusBarFromKeyguard || statusBarForcesShowingNavigation)
+                // Transient status bar is not allowed if notification shade is expecting the
+                // navigation keys from the user.
+                if (notificationShadeForcesShowingNavigation
                         && mStatusBarController.isTransientShowing()) {
                     mStatusBarController.updateVisibilityLw(false /*transientAllowed*/,
                             mLastSystemUiFlags, mLastSystemUiFlags);
@@ -3102,11 +3093,9 @@ public class DisplayPolicy {
         }
     }
 
-    private boolean isStatusBarKeyguard() {
-        return mStatusBar != null
-                && (mStatusBar.getAttrs().privateFlags & PRIVATE_FLAG_KEYGUARD) != 0;
+    boolean isKeyguardShowing() {
+        return mService.mPolicy.isKeyguardShowing();
     }
-
     private boolean isKeyguardOccluded() {
         // TODO (b/113840485): Handle per display keyguard.
         return mService.mPolicy.isKeyguardOccluded();
@@ -3139,7 +3128,7 @@ public class DisplayPolicy {
             // keys, we let it keep controlling the visibility.
             final boolean lastFocusCanReceiveKeys =
                     (mLastFocusedWindow != null && mLastFocusedWindow.canReceiveKeys());
-            winCandidate = isStatusBarKeyguard() ? mStatusBar
+            winCandidate = isKeyguardShowing() ? mNotificationShade
                     : lastFocusCanReceiveKeys ? mLastFocusedWindow
                             : mTopFullscreenOpaqueWindowState;
             if (winCandidate == null) {
@@ -3147,7 +3136,8 @@ public class DisplayPolicy {
             }
         }
         final WindowState win = winCandidate;
-        if ((win.getAttrs().privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 && isKeyguardOccluded()) {
+        if (win.getAttrs().type == TYPE_NOTIFICATION_SHADE && isKeyguardShowing()
+                && isKeyguardOccluded()) {
             // We are updating at a point where the keyguard has gotten
             // focus, but we were last in a state where the top window is
             // hiding it.  This is probably because the keyguard as been
@@ -3281,8 +3271,8 @@ public class DisplayPolicy {
 
     private int updateLightStatusBarAppearanceLw(@Appearance int appearance, WindowState opaque,
             WindowState opaqueOrDimming) {
-        final boolean onKeyguard = isStatusBarKeyguard() && !isKeyguardOccluded();
-        final WindowState statusColorWin = onKeyguard ? mStatusBar : opaqueOrDimming;
+        final boolean onKeyguard = isKeyguardShowing() && !isKeyguardOccluded();
+        final WindowState statusColorWin = onKeyguard ? mNotificationShade : opaqueOrDimming;
         if (statusColorWin != null && (statusColorWin == opaque || onKeyguard)) {
             // If the top fullscreen-or-dimming window is also the top fullscreen, respect
             // its light flag.
@@ -3370,11 +3360,11 @@ public class DisplayPolicy {
         // visibility changes.
         mForceShowSystemBars = dockedStackVisible || win.inFreeformWindowingMode() || resizing
                 || mForceShowSystemBarsFromExternal;
-        final boolean forceOpaqueStatusBar = mForceShowSystemBars && !mForceStatusBarFromKeyguard;
+        final boolean forceOpaqueStatusBar = mForceShowSystemBars && !isKeyguardShowing();
 
         // apply translucent bar vis flags
-        WindowState fullscreenTransWin = isStatusBarKeyguard() && !isKeyguardOccluded()
-                ? mStatusBar
+        WindowState fullscreenTransWin = isKeyguardShowing() && !isKeyguardOccluded()
+                ? mNotificationShade
                 : mTopFullscreenOpaqueWindowState;
         vis = mStatusBarController.applyTranslucentFlagLw(fullscreenTransWin, vis, oldVis);
         vis = mNavigationBarController.applyTranslucentFlagLw(fullscreenTransWin, vis, oldVis);
@@ -3394,8 +3384,8 @@ public class DisplayPolicy {
 
         // prevent status bar interaction from clearing certain flags
         int type = win.getAttrs().type;
-        boolean statusBarHasFocus = type == TYPE_STATUS_BAR;
-        if (statusBarHasFocus && !isStatusBarKeyguard()) {
+        boolean notificationShadeHasFocus = type == TYPE_NOTIFICATION_SHADE;
+        if (notificationShadeHasFocus && !isKeyguardShowing()) {
             int flags = View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_IMMERSIVE
@@ -3430,7 +3420,7 @@ public class DisplayPolicy {
                 (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
 
         final boolean transientStatusBarAllowed = mStatusBar != null
-                && (statusBarHasFocus || (!mForceShowSystemBars
+                && (notificationShadeHasFocus || (!mForceShowSystemBars
                 && (hideStatusBarWM || (hideStatusBarSysui && immersiveSticky))));
 
         final boolean transientNavBarAllowed = mNavigationBar != null
@@ -3441,7 +3431,7 @@ public class DisplayPolicy {
                 && now - mPendingPanicGestureUptime <= PANIC_GESTURE_EXPIRATION;
         final DisplayPolicy defaultDisplayPolicy =
                 mService.getDefaultDisplayContentLocked().getDisplayPolicy();
-        if (pendingPanic && hideNavBarSysui && !isStatusBarKeyguard()
+        if (pendingPanic && hideNavBarSysui && !isKeyguardShowing()
                 // TODO (b/111955725): Show keyguard presentation on all external displays
                 && defaultDisplayPolicy.isKeyguardDrawComplete()) {
             // The user performed the panic gesture recently, we're about to hide the bars,
@@ -3703,8 +3693,11 @@ public class DisplayPolicy {
         pw.print(" mDreamingSleepToken="); pw.println(mDreamingSleepToken);
         if (mStatusBar != null) {
             pw.print(prefix); pw.print("mStatusBar="); pw.print(mStatusBar);
-                    pw.print(" isStatusBarKeyguard="); pw.println(isStatusBarKeyguard());
         }
+        if (mNotificationShade != null) {
+            pw.print(prefix); pw.print("mExpandedPanel="); pw.print(mNotificationShade);
+        }
+        pw.print(" isKeyguardShowing="); pw.println(isKeyguardShowing());
         if (mNavigationBar != null) {
             pw.print(prefix); pw.print("mNavigationBar="); pw.println(mNavigationBar);
             pw.print(prefix); pw.print("mNavBarOpacityMode="); pw.println(mNavBarOpacityMode);
@@ -3733,7 +3726,6 @@ public class DisplayPolicy {
         }
         pw.print(prefix); pw.print("mTopIsFullscreen="); pw.println(mTopIsFullscreen);
         pw.print(prefix); pw.print("mForceStatusBar="); pw.print(mForceStatusBar);
-        pw.print(" mForceStatusBarFromKeyguard="); pw.println(mForceStatusBarFromKeyguard);
         pw.print(prefix); pw.print("mForceShowSystemBarsFromExternal=");
         pw.print(mForceShowSystemBarsFromExternal);
         pw.print(" mAllowLockscreenWhenOn="); pw.println(mAllowLockscreenWhenOn);

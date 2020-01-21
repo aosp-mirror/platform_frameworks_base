@@ -594,6 +594,19 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Gets the last requested minimal post processing setting for the display with displayId.
+     *
+     * @hide
+     */
+    public boolean isMinimalPostProcessingRequested(int displayId) {
+        try {
+            return mDm.isMinimalPostProcessingRequested(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Temporarily sets the brightness of the display.
      * <p>
      * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS} permission.
