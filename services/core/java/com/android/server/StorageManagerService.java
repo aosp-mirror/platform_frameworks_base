@@ -224,7 +224,7 @@ class StorageManagerService extends IStorageManager.Stub
      * disables FuseDaemon. If {@code 0}, uses the default value from the build system.
      */
     private static final String FUSE_ENABLED = "fuse_enabled";
-    private static final boolean DEFAULT_FUSE_ENABLED = false;
+    private static final boolean DEFAULT_FUSE_ENABLED = true;
 
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;
