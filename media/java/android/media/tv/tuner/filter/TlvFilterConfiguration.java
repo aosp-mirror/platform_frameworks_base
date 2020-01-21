@@ -18,19 +18,22 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.tuner.TunerUtils;
 
 /**
  * Filter configuration for a TLV filter.
+ *
  * @hide
  */
+@SystemApi
 public class TlvFilterConfiguration extends FilterConfiguration {
     private final int mPacketType;
     private final boolean mIsCompressedIpPacket;
     private final boolean mPassthrough;
 
-    public TlvFilterConfiguration(Settings settings, int packetType, boolean isCompressed,
+    private TlvFilterConfiguration(Settings settings, int packetType, boolean isCompressed,
             boolean passthrough) {
         super(settings);
         mPacketType = packetType;

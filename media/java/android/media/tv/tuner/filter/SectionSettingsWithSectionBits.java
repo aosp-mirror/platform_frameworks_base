@@ -18,13 +18,16 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.tuner.TunerUtils;
 
 /**
  * Bits Settings for Section Filters.
+ *
  * @hide
  */
+@SystemApi
 public class SectionSettingsWithSectionBits extends SectionSettings {
     private final byte[] mFilter;
     private final byte[] mMask;
@@ -41,6 +44,7 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
     /**
      * Gets the bytes configured for Section Filter
      */
+    @NonNull
     public byte[] getFilterBytes() {
         return mFilter;
     }
@@ -49,6 +53,7 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
      *
      * <p>The bits in the bytes are used for filtering.
      */
+    @NonNull
     public byte[] getMask() {
         return mMask;
     }
@@ -60,6 +65,7 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
      * <p>Do negative match at the bit position of the configured bytes when the bit at same
      * position of the mode is 1.
      */
+    @NonNull
     public byte[] getMode() {
         return mMode;
     }
@@ -93,7 +99,7 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
          * Sets filter bytes.
          */
         @NonNull
-        public Builder setFilter(byte[] filter) {
+        public Builder setFilter(@NonNull byte[] filter) {
             mFilter = filter;
             return this;
         }
@@ -101,7 +107,7 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
          * Sets bit mask.
          */
         @NonNull
-        public Builder setMask(byte[] mask) {
+        public Builder setMask(@NonNull byte[] mask) {
             mMask = mask;
             return this;
         }
@@ -109,7 +115,7 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
          * Sets mode.
          */
         @NonNull
-        public Builder setMode(byte[] mode) {
+        public Builder setMode(@NonNull byte[] mode) {
             mMode = mode;
             return this;
         }

@@ -33,8 +33,6 @@ public abstract class Settings {
 
     /**
      * Gets filter settings type.
-     *
-     * @hide
      */
     public int getType() {
         return mType;
@@ -45,7 +43,6 @@ public abstract class Settings {
      * Builder for {@link Settings}.
      *
      * @param <T> The subclass to be built.
-     * @hide
      */
     public abstract static class Builder<T extends Builder<T>> {
         /* package */ final int mMainType;
