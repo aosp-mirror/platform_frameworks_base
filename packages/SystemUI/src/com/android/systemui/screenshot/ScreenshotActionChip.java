@@ -17,9 +17,11 @@
 package com.android.systemui.screenshot;
 
 import android.annotation.ColorInt;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -30,6 +32,8 @@ import com.android.systemui.R;
  * View for a chip with an icon and text.
  */
 public class ScreenshotActionChip extends LinearLayout {
+
+    private static final String TAG = "ScreenshotActionChip";
 
     private ImageView mIcon;
     private TextView mText;
@@ -47,11 +51,11 @@ public class ScreenshotActionChip extends LinearLayout {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public ScreenshotActionChip(Context context, AttributeSet attrs, int defStyleAttr,
-            int defStyleRes) {
+    public ScreenshotActionChip(
+            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        mIconColor = context.getColor(R.color.global_screenshot_button_text);
+        mIconColor = context.getColor(R.color.global_screenshot_button_icon);
     }
 
     @Override
@@ -69,5 +73,16 @@ public class ScreenshotActionChip extends LinearLayout {
 
     void setText(CharSequence text) {
         mText.setText(text);
+    }
+
+    void setPendingIntent(PendingIntent intent, Runnable finisher) {
+        setOnClickListener(v -> {
+            try {
+                intent.send();
+                finisher.run();
+            } catch (PendingIntent.CanceledException e) {
+                Log.e(TAG, "Intent cancelled", e);
+            }
+        });
     }
 }

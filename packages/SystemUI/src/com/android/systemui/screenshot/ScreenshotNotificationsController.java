@@ -190,9 +190,13 @@ public class ScreenshotNotificationsController {
      */
     public void showScreenshotActionsNotification(
             Uri imageUri,
+            List<Notification.Action> smartActions,
             List<Notification.Action> actions) {
         for (Notification.Action action : actions) {
             mNotificationBuilder.addAction(action);
+        }
+        for (Notification.Action smartAction : smartActions) {
+            mNotificationBuilder.addAction(smartAction);
         }
 
         // Create the intent to show the screenshot in gallery
