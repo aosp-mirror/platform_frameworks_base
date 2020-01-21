@@ -24,6 +24,8 @@ import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -50,6 +52,11 @@ public final class CellIdentityLte extends CellIdentity {
     // cell bandwidth, in kHz
     private final int mBandwidth;
 
+    // a list of additional PLMN-IDs reported for this cell
+    private final List<String> mAdditionalPlmns;
+
+    private ClosedSubscriberGroupInfo mCsgInfo;
+
     /**
      * @hide
      */
@@ -61,6 +68,8 @@ public final class CellIdentityLte extends CellIdentity {
         mTac = CellInfo.UNAVAILABLE;
         mEarfcn = CellInfo.UNAVAILABLE;
         mBandwidth = CellInfo.UNAVAILABLE;
+        mAdditionalPlmns = Collections.emptyList();
+        mCsgInfo = null;
     }
 
     /**
@@ -76,7 +85,7 @@ public final class CellIdentityLte extends CellIdentity {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public CellIdentityLte(int mcc, int mnc, int ci, int pci, int tac) {
         this(ci, pci, tac, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, String.valueOf(mcc),
-                String.valueOf(mnc), null, null);
+                String.valueOf(mnc), null, null, Collections.emptyList(), null);
     }
 
     /**
@@ -90,34 +99,49 @@ public final class CellIdentityLte extends CellIdentity {
      * @param mncStr 2 or 3-digit Mobile Network Code in string format
      * @param alphal long alpha Operator Name String or Enhanced Operator Name String
      * @param alphas short alpha Operator Name String or Enhanced Operator Name String
+     * @param additionalPlmns a list of additional PLMN IDs broadcast by the cell
+     * @param csgInfo info about the closed subscriber group broadcast by the cell
      *
      * @hide
      */
     public CellIdentityLte(int ci, int pci, int tac, int earfcn, int bandwidth, String mccStr,
-            String mncStr, String alphal, String alphas) {
+            String mncStr, String alphal, String alphas, List<String> additionalPlmns,
+            ClosedSubscriberGroupInfo csgInfo) {
         super(TAG, CellInfo.TYPE_LTE, mccStr, mncStr, alphal, alphas);
         mCi = inRangeOrUnavailable(ci, 0, MAX_CI);
         mPci = inRangeOrUnavailable(pci, 0, MAX_PCI);
         mTac = inRangeOrUnavailable(tac, 0, MAX_TAC);
         mEarfcn = inRangeOrUnavailable(earfcn, 0, MAX_EARFCN);
         mBandwidth = inRangeOrUnavailable(bandwidth, 0, MAX_BANDWIDTH);
+        mAdditionalPlmns = additionalPlmns;
+        mCsgInfo = csgInfo;
     }
 
     /** @hide */
     public CellIdentityLte(android.hardware.radio.V1_0.CellIdentityLte cid) {
-        this(cid.ci, cid.pci, cid.tac, cid.earfcn, CellInfo.UNAVAILABLE, cid.mcc, cid.mnc, "", "");
+        this(cid.ci, cid.pci, cid.tac, cid.earfcn,
+                CellInfo.UNAVAILABLE, cid.mcc, cid.mnc, "", "", Collections.emptyList(), null);
     }
 
     /** @hide */
     public CellIdentityLte(android.hardware.radio.V1_2.CellIdentityLte cid) {
         this(cid.base.ci, cid.base.pci, cid.base.tac, cid.base.earfcn, cid.bandwidth,
                 cid.base.mcc, cid.base.mnc, cid.operatorNames.alphaLong,
-                cid.operatorNames.alphaShort);
+                cid.operatorNames.alphaShort, Collections.emptyList(), null);
+    }
+
+    /** @hide */
+    public CellIdentityLte(android.hardware.radio.V1_5.CellIdentityLte cid) {
+        this(cid.base.base.ci, cid.base.base.pci, cid.base.base.tac, cid.base.base.earfcn,
+                cid.base.bandwidth, cid.base.base.mcc, cid.base.base.mnc,
+                cid.base.operatorNames.alphaLong, cid.base.operatorNames.alphaShort,
+                cid.additionalPlmns, cid.optionalCsgInfo.csgInfo() != null
+                        ? new ClosedSubscriberGroupInfo(cid.optionalCsgInfo.csgInfo()) : null);
     }
 
     private CellIdentityLte(CellIdentityLte cid) {
         this(cid.mCi, cid.mPci, cid.mTac, cid.mEarfcn, cid.mBandwidth, cid.mMccStr,
-                cid.mMncStr, cid.mAlphaLong, cid.mAlphaShort);
+                cid.mMncStr, cid.mAlphaLong, cid.mAlphaShort, cid.mAdditionalPlmns, cid.mCsgInfo);
     }
 
     /** @hide */
@@ -125,7 +149,7 @@ public final class CellIdentityLte extends CellIdentity {
     public @NonNull CellIdentityLte sanitizeLocationInfo() {
         return new CellIdentityLte(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
-                mMccStr, mMncStr, mAlphaLong, mAlphaShort);
+                mMccStr, mMncStr, mAlphaLong, mAlphaShort, mAdditionalPlmns, null);
     }
 
     CellIdentityLte copy() {
@@ -223,6 +247,22 @@ public final class CellIdentityLte extends CellIdentity {
     }
 
     /**
+     * @return a list of additional PLMN IDs supported by this cell.
+     */
+    @NonNull
+    public List<String> getAdditionalPlmns() {
+        return mAdditionalPlmns;
+    }
+
+    /**
+     * @return closed subscriber group information about the cell if available, otherwise null.
+     */
+    @Nullable
+    public ClosedSubscriberGroupInfo getClosedSubscriberGroupInfo() {
+        return mCsgInfo;
+    }
+
+    /**
      * A hack to allow tunneling of LTE information via GsmCellLocation
      * so that older Network Location Providers can return some information
      * on LTE only networks, see bug 9228974.
@@ -247,7 +287,8 @@ public final class CellIdentityLte extends CellIdentity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mCi, mPci, mTac, super.hashCode());
+        return Objects.hash(mCi, mPci, mTac,
+                mAdditionalPlmns.hashCode(), mCsgInfo, super.hashCode());
     }
 
     @Override
@@ -268,6 +309,8 @@ public final class CellIdentityLte extends CellIdentity {
                 && mBandwidth == o.mBandwidth
                 && TextUtils.equals(mMccStr, o.mMccStr)
                 && TextUtils.equals(mMncStr, o.mMncStr)
+                && mAdditionalPlmns.equals(o.mAdditionalPlmns)
+                && Objects.equals(mCsgInfo, o.mCsgInfo)
                 && super.equals(other);
     }
 
@@ -283,6 +326,8 @@ public final class CellIdentityLte extends CellIdentity {
         .append(" mMnc=").append(mMncStr)
         .append(" mAlphaLong=").append(mAlphaLong)
         .append(" mAlphaShort=").append(mAlphaShort)
+        .append(" mAdditionalPlmns=").append(mAdditionalPlmns)
+        .append(" mCsgInfo=").append(mCsgInfo)
         .append("}").toString();
     }
 
@@ -296,6 +341,8 @@ public final class CellIdentityLte extends CellIdentity {
         dest.writeInt(mTac);
         dest.writeInt(mEarfcn);
         dest.writeInt(mBandwidth);
+        dest.writeList(mAdditionalPlmns);
+        dest.writeParcelable(mCsgInfo, flags);
     }
 
     /** Construct from Parcel, type has already been processed */
@@ -306,7 +353,8 @@ public final class CellIdentityLte extends CellIdentity {
         mTac = in.readInt();
         mEarfcn = in.readInt();
         mBandwidth = in.readInt();
-
+        mAdditionalPlmns = in.readArrayList(null);
+        mCsgInfo = in.readParcelable(null);
         if (DBG) log(toString());
     }
 
