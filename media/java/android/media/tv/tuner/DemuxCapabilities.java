@@ -58,11 +58,13 @@ public class DemuxCapabilities {
     private final long mSectionFilterLength;
     private final int mFilterCaps;
     private final int[] mLinkCaps;
+    private final boolean mSupportTimeFilter;
 
     // Used by JNI
     private DemuxCapabilities(int demuxCount, int recordCount, int playbackCount, int tsFilterCount,
             int sectionFilterCount, int audioFilterCount, int videoFilterCount, int pesFilterCount,
-            int pcrFilterCount, long sectionFilterLength, int filterCaps, int[] linkCaps) {
+            int pcrFilterCount, long sectionFilterLength, int filterCaps, int[] linkCaps,
+            boolean timeFilter) {
         mDemuxCount = demuxCount;
         mRecordCount = recordCount;
         mPlaybackCount = playbackCount;
@@ -75,6 +77,7 @@ public class DemuxCapabilities {
         mSectionFilterLength = sectionFilterLength;
         mFilterCaps = filterCaps;
         mLinkCaps = linkCaps;
+        mSupportTimeFilter = timeFilter;
     }
 
     /**
@@ -160,5 +163,11 @@ public class DemuxCapabilities {
     @Size(5)
     public int[] getLinkCapabilities() {
         return mLinkCaps;
+    }
+    /**
+     * Is {@link android.media.tv.tuner.filter.TimeFilter} supported.
+     */
+    public boolean isTimeFilterSupported() {
+        return mSupportTimeFilter;
     }
 }

@@ -4719,6 +4719,7 @@ package android.media.tv.tuner {
     method public long getSectionFilterLength();
     method public int getTsFilterCount();
     method public int getVideoFilterCount();
+    method public boolean isTimeFilterSupported();
   }
 
   public class Descrambler implements java.lang.AutoCloseable {
@@ -4764,7 +4765,7 @@ package android.media.tv.tuner {
   public class Tuner implements java.lang.AutoCloseable {
     ctor @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public Tuner(@NonNull android.content.Context, @NonNull String, int, @Nullable android.media.tv.tuner.Tuner.OnResourceLostListener);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void clearOnTuneEventListener();
-    method public void close();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void close();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int connectCiCam(int);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int disconnectCiCam();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int getAvSyncHwId(@NonNull android.media.tv.tuner.filter.Filter);
@@ -4782,10 +4783,11 @@ package android.media.tv.tuner {
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int scan(@NonNull android.media.tv.tuner.frontend.FrontendSettings, int, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.ScanCallback);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setLna(boolean);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void setOnTuneEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.OnTuneEventListener);
-    method public void shareFrontendFromTuner(@NonNull android.media.tv.tuner.Tuner);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void shareFrontendFromTuner(@NonNull android.media.tv.tuner.Tuner);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int stopScan();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int stopTune();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int tune(@NonNull android.media.tv.tuner.frontend.FrontendSettings);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void updateResourcePriority(int, int);
   }
 
   public static interface Tuner.OnResourceLostListener {
@@ -5104,7 +5106,16 @@ package android.media.tv.tuner.filter {
     method public int getVersion();
   }
 
-  public class SectionSettings extends android.media.tv.tuner.filter.Settings {
+  public abstract class SectionSettings extends android.media.tv.tuner.filter.Settings {
+    method public boolean isCrcEnabled();
+    method public boolean isRaw();
+    method public boolean isRepeat();
+  }
+
+  public abstract static class SectionSettings.Builder<T extends android.media.tv.tuner.filter.SectionSettings.Builder<T>> extends android.media.tv.tuner.filter.Settings.Builder<android.media.tv.tuner.filter.SectionSettings.Builder<T>> {
+    method @NonNull public T setCrcEnabled(boolean);
+    method @NonNull public T setRaw(boolean);
+    method @NonNull public T setRepeat(boolean);
   }
 
   public class SectionSettingsWithSectionBits extends android.media.tv.tuner.filter.SectionSettings {
@@ -5114,7 +5125,7 @@ package android.media.tv.tuner.filter {
     method @NonNull public byte[] getMode();
   }
 
-  public static class SectionSettingsWithSectionBits.Builder extends android.media.tv.tuner.filter.Settings.Builder<android.media.tv.tuner.filter.SectionSettingsWithSectionBits.Builder> {
+  public static class SectionSettingsWithSectionBits.Builder extends android.media.tv.tuner.filter.SectionSettings.Builder<android.media.tv.tuner.filter.SectionSettingsWithSectionBits.Builder> {
     method @NonNull public android.media.tv.tuner.filter.SectionSettingsWithSectionBits build();
     method @NonNull public android.media.tv.tuner.filter.SectionSettingsWithSectionBits.Builder setFilter(@NonNull byte[]);
     method @NonNull public android.media.tv.tuner.filter.SectionSettingsWithSectionBits.Builder setMask(@NonNull byte[]);
@@ -5127,7 +5138,7 @@ package android.media.tv.tuner.filter {
     method public int getVersion();
   }
 
-  public static class SectionSettingsWithTableInfo.Builder extends android.media.tv.tuner.filter.Settings.Builder<android.media.tv.tuner.filter.SectionSettingsWithTableInfo.Builder> {
+  public static class SectionSettingsWithTableInfo.Builder extends android.media.tv.tuner.filter.SectionSettings.Builder<android.media.tv.tuner.filter.SectionSettingsWithTableInfo.Builder> {
     method @NonNull public android.media.tv.tuner.filter.SectionSettingsWithTableInfo build();
     method @NonNull public android.media.tv.tuner.filter.SectionSettingsWithTableInfo.Builder setTableId(int);
     method @NonNull public android.media.tv.tuner.filter.SectionSettingsWithTableInfo.Builder setVersion(int);
@@ -5165,7 +5176,7 @@ package android.media.tv.tuner.filter {
 
   public static class TlvFilterConfiguration.Builder extends android.media.tv.tuner.filter.FilterConfiguration.Builder<android.media.tv.tuner.filter.TlvFilterConfiguration.Builder> {
     method @NonNull public android.media.tv.tuner.filter.TlvFilterConfiguration build();
-    method @NonNull public android.media.tv.tuner.filter.TlvFilterConfiguration.Builder setIsCompressedIpPacket(boolean);
+    method @NonNull public android.media.tv.tuner.filter.TlvFilterConfiguration.Builder setCompressedIpPacket(boolean);
     method @NonNull public android.media.tv.tuner.filter.TlvFilterConfiguration.Builder setPacketType(int);
     method @NonNull public android.media.tv.tuner.filter.TlvFilterConfiguration.Builder setPassthrough(boolean);
   }

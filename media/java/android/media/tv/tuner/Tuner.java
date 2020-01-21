@@ -105,16 +105,33 @@ public class Tuner implements AutoCloseable  {
      *
      * @param tuner the Tuner instance to share frontend resource with.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     public void shareFrontendFromTuner(@NonNull Tuner tuner) {
         // TODO: implementation.
     }
 
+    /**
+     * Updates client priority with an arbitrary value along with a nice value.
+     *
+     * <p>Tuner resource manager (TRM) uses the client priority value to decide whether it is able
+     * to reclaim insufficient resources from another client.
+     * <p>The nice value represents how much the client intends to give up the resource when an
+     * insufficient resource situation happens.
+     *
+     * @param priority the new priority.
+     * @param niceValue the nice value.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    public void updateResourcePriority(int priority, int niceValue) {
+        // TODO: implementation.
+    }
 
     private long mNativeContext; // used by native jMediaTuner
 
     /**
      * Releases the Tuner instance.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Override
     public void close() {
         // TODO: implementation.
