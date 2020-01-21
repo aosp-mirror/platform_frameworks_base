@@ -17,6 +17,8 @@ package android.app.appsearch;
 
 import com.android.internal.infra.AndroidFuture;
 
+parcelable AppSearchBatchResult;
+
 /** {@hide} */
 interface IAppSearchManager {
     /**
@@ -32,14 +34,17 @@ interface IAppSearchManager {
     void setSchema(in byte[] schemaBytes, boolean forceOverride, in AndroidFuture callback);
 
     /**
-     * Inserts a document into the index.
+     * Inserts documents into the index.
      *
-     * @param documentBytes serialized DocumentProto
-     * @param callback {@link AndroidFuture}&lt;{@link Void}&gt;. Will be completed with
-     *     {@code null} upon successful completion of the put call, or completed exceptionally if
-     *     put fails.
+     * @param documentsBytes {@link List}&lt;byte[]&gt; of serialized DocumentProtos.
+     * @param callback
+     *     {@link AndroidFuture}&lt;{@link AppSearchBatchResult}&lt;{@link String}, {@link Void}&gt;&gt;.
+     *     If the call fails to start, {@code callback} will be completed exceptionally. Otherwise,
+     *     {@code callback} will be completed with an
+     *     {@link AppSearchBatchResult}&lt;{@link String}, {@link Void}&gt;
+     *     where the keys are document URIs, and the values are {@code null}.
      */
-    void putDocument(in byte[] documentBytes, in AndroidFuture callback);
+    void putDocuments(in List documentsBytes, in AndroidFuture<AppSearchBatchResult> callback);
 
     /**
      * Searches a document based on a given query string.
