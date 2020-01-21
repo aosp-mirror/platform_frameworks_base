@@ -88,7 +88,6 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
@@ -109,14 +108,12 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorComponent;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.notification.people.PeopleHubSectionFooterViewAdapter;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -512,17 +509,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             NotificationRoundnessManager notificationRoundnessManager,
             DynamicPrivacyController dynamicPrivacyController,
-            ConfigurationController configurationController,
-            ActivityStarter activityStarter,
-            StatusBarStateController statusBarStateController,
+            SysuiStatusBarStateController statusBarStateController,
             HeadsUpManagerPhone headsUpManager,
             KeyguardBypassController keyguardBypassController,
             FalsingManager falsingManager,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGutsManager notificationGutsManager,
-            NotificationSectionsFeatureManager sectionsFeatureManager,
-            PeopleHubSectionFooterViewAdapter peopleHubViewAdapter,
-            ZenModeController zenController) {
+            ZenModeController zenController,
+            NotificationSectionsManager notificationSectionsManager) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
 
@@ -539,22 +533,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mFalsingManager = falsingManager;
         mZenController = zenController;
 
-        int[] buckets = sectionsFeatureManager.getNotificationBuckets();
-        mSectionsManager =
-                new NotificationSectionsManager(
-                        this,
-                        activityStarter,
-                        statusBarStateController,
-                        configurationController,
-                        peopleHubViewAdapter,
-                        buckets.length);
-        mSectionsManager.initialize(LayoutInflater.from(context));
+        mSectionsManager = notificationSectionsManager;
+        mSectionsManager.initialize(this, LayoutInflater.from(context));
         mSectionsManager.setOnClearGentleNotifsClickListener(v -> {
             // Leave the shade open if there will be other notifs left over to clear
             final boolean closeShade = !hasActiveClearableNotifications(ROWS_HIGH_PRIORITY);
             clearNotifications(ROWS_GENTLE, closeShade);
         });
-        mSections = mSectionsManager.createSectionsForBuckets(buckets);
+        mSections = mSectionsManager.createSectionsForBuckets();
 
         mAmbientState = new AmbientState(context, mSectionsManager, mHeadsUpManager);
         mBgColor = context.getColor(R.color.notification_shade_background_color);
@@ -617,7 +603,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         });
         dynamicPrivacyController.addListener(this);
         mDynamicPrivacyController = dynamicPrivacyController;
-        mStatusbarStateController = (SysuiStatusBarStateController) statusBarStateController;
+        mStatusbarStateController = statusBarStateController;
     }
 
     private void updateDismissRtlSetting(boolean dismissRtl) {

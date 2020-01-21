@@ -44,8 +44,12 @@ import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.people.PeopleHubSectionFooterViewAdapter;
+import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
+import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
@@ -58,7 +62,7 @@ import org.mockito.junit.MockitoRule;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class NotificationSectionsManagerTest extends SysuiTestCase {
 
     @Rule public final MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -68,30 +72,47 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
     @Mock private PeopleHubSectionFooterViewAdapter mPeopleHubAdapter;
+    @Mock private NotificationSectionsFeatureManager mSectionsFeatureManager;
+    @Mock private NotificationRowComponent mNotificationRowComponent;
+    @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
 
     private NotificationSectionsManager mSectionsManager;
 
     @Before
     public void setUp() {
+        when(mSectionsFeatureManager.getNumberOfBuckets()).thenReturn(2);
+        when(mNotificationRowComponent.getActivatableNotificationViewController()).thenReturn(
+                mActivatableNotificationViewController
+        );
         mSectionsManager =
                 new NotificationSectionsManager(
-                        mNssl,
                         mActivityStarterDelegate,
                         mStatusBarStateController,
                         mConfigurationController,
                         mPeopleHubAdapter,
-                        2);
+                        mSectionsFeatureManager,
+                        new NotificationRowComponent.Builder() {
+                    @Override
+                    public NotificationRowComponent.Builder activatableNotificationView(
+                            ActivatableNotificationView view) {
+                        return this;
+                    }
+
+                    @Override
+                    public NotificationRowComponent build() {
+                        return mNotificationRowComponent;
+                    }});
         // Required in order for the header inflation to work properly
         when(mNssl.generateLayoutParams(any(AttributeSet.class)))
                 .thenReturn(new ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-        mSectionsManager.initialize(LayoutInflater.from(mContext));
+        mSectionsManager.initialize(mNssl, LayoutInflater.from(mContext));
         when(mNssl.indexOfChild(any(View.class))).thenReturn(-1);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
     }
 
     @Test(expected =  IllegalStateException.class)
     public void testDuplicateInitializeThrows() {
-        mSectionsManager.initialize(LayoutInflater.from(mContext));
+        mSectionsManager.initialize(mNssl, LayoutInflater.from(mContext));
     }
 
     @Test

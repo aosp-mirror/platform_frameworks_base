@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
@@ -39,6 +40,7 @@ public class SuperStatusBarViewFactory {
 
     private final Context mContext;
     private final InjectionInflationController mInjectionInflationController;
+    private final NotificationRowComponent.Builder mNotificationRowComponentBuilder;
 
     private NotificationShadeWindowView mNotificationShadeWindowView;
     private StatusBarWindowView mStatusBarWindowView;
@@ -46,9 +48,11 @@ public class SuperStatusBarViewFactory {
 
     @Inject
     public SuperStatusBarViewFactory(Context context,
-            InjectionInflationController injectionInflationController) {
+            InjectionInflationController injectionInflationController,
+            NotificationRowComponent.Builder notificationRowComponentBuilder) {
         mContext = context;
         mInjectionInflationController = injectionInflationController;
+        mNotificationRowComponentBuilder = notificationRowComponentBuilder;
     }
 
     /**
@@ -114,6 +118,12 @@ public class SuperStatusBarViewFactory {
         mNotificationShelf = (NotificationShelf) mInjectionInflationController.injectable(
                 LayoutInflater.from(mContext)).inflate(R.layout.status_bar_notification_shelf,
                 container, /* attachToRoot= */ false);
+
+        NotificationRowComponent component = mNotificationRowComponentBuilder
+                .activatableNotificationView(mNotificationShelf)
+                .build();
+        component.getActivatableNotificationViewController().init();
+
         if (mNotificationShelf == null) {
             throw new IllegalStateException(
                     "R.layout.status_bar_notification_shelf could not be properly inflated");
