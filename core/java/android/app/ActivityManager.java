@@ -573,6 +573,8 @@ public class ActivityManager {
     @IntDef(flag = true, prefix = { "PROCESS_CAPABILITY_" }, value = {
             PROCESS_CAPABILITY_NONE,
             PROCESS_CAPABILITY_FOREGROUND_LOCATION,
+            PROCESS_CAPABILITY_FOREGROUND_CAMERA,
+            PROCESS_CAPABILITY_FOREGROUND_MICROPHONE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProcessCapability {}
@@ -585,9 +587,19 @@ public class ActivityManager {
     @TestApi
     public static final int PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1 << 0;
 
+    /** @hide Process can access camera while in foreground */
+    @TestApi
+    public static final int PROCESS_CAPABILITY_FOREGROUND_CAMERA = 1 << 1;
+
+    /** @hide Process can access microphone while in foreground */
+    @TestApi
+    public static final int PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 1 << 2;
+
     /** @hide all capabilities, the ORing of all flags in {@link ProcessCapability}*/
     @TestApi
-    public static final int PROCESS_CAPABILITY_ALL = PROCESS_CAPABILITY_FOREGROUND_LOCATION;
+    public static final int PROCESS_CAPABILITY_ALL = PROCESS_CAPABILITY_FOREGROUND_LOCATION
+            | PROCESS_CAPABILITY_FOREGROUND_CAMERA
+            | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 
     // NOTE: If PROCESS_STATEs are added, then new fields must be added
     // to frameworks/base/core/proto/android/app/enums.proto and the following method must
