@@ -74,6 +74,14 @@ filegroup {
 }
 
 filegroup {
+    name: "framework-identity-sources",
+    srcs: [
+        "identity/java/**/*.java",
+    ],
+    path: "identity/java",
+}
+
+filegroup {
     name: "framework-keystore-sources",
     srcs: [
         "keystore/java/**/*.java",
@@ -210,6 +218,7 @@ filegroup {
         ":framework-graphics-sources",
         ":framework-jobscheduler-sources", // jobscheduler is not a module for R
         ":framework-keystore-sources",
+        ":framework-identity-sources",
         ":framework-location-sources",
         ":framework-lowpan-sources",
         ":framework-mca-effect-sources",
@@ -232,6 +241,7 @@ filegroup {
         ":platform-compat-native-aidl",
 
         // AIDL sources from external directories
+        ":credstore_aidl",
         ":dumpstate_aidl",
         ":framework_native_aidl",
         ":gatekeeper_aidl",
@@ -295,6 +305,7 @@ java_defaults {
             "core/java",
             "drm/java",
             "graphics/java",
+            "identity/java",
             "keystore/java",
             "location/java",
             "lowpan/java",
