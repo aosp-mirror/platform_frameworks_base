@@ -225,6 +225,9 @@ public class PhoneStateListener {
 
     /**
      * Listen for changes to the SRVCC state of the active call.
+     *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
+     *
      * @see #onServiceStateChanged(ServiceState)
      * @hide
      */
@@ -253,6 +256,9 @@ public class PhoneStateListener {
 
     /**
      * Listen for changes to the sim voice activation state
+     *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
+     *
      * @see TelephonyManager#SIM_ACTIVATION_STATE_ACTIVATING
      * @see TelephonyManager#SIM_ACTIVATION_STATE_ACTIVATED
      * @see TelephonyManager#SIM_ACTIVATION_STATE_DEACTIVATED
@@ -266,6 +272,7 @@ public class PhoneStateListener {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public static final int LISTEN_VOICE_ACTIVATION_STATE                   = 0x00020000;
 
     /**
@@ -312,10 +319,13 @@ public class PhoneStateListener {
     /**
      *  Listen for changes to the radio power state.
      *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
+     *
      *  @see #onRadioPowerStateChanged
      *  @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public static final int LISTEN_RADIO_POWER_STATE_CHANGED               = 0x00800000;
 
     /**
@@ -904,7 +914,6 @@ public class PhoneStateListener {
      * Callback invoked when phone capability changes.
      * Note, this callback triggers regardless of registered subscription.
      *
-     * Requires the READ_PRIVILEGED_PHONE_STATE permission.
      * @param capability the new phone capability
      * @hide
      */
@@ -934,7 +943,7 @@ public class PhoneStateListener {
      * subId. Otherwise, this callback applies to
      * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
-     * Requires the READ_PRIVILEGED_PHONE_STATE permission.
+     * Requires the READ_PRECISE_PHONE_STATE permission.
      * @param callAttributes the call attributes
      * @hide
      */
