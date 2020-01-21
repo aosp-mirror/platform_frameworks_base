@@ -80,6 +80,7 @@ import com.android.internal.os.RoSystemProperties;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.MemInfoReader;
+import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlSerializer;
@@ -4685,6 +4686,37 @@ public class ActivityManager {
     public void appNotResponding(@NonNull final String reason) {
         try {
             getService().appNotResponding(reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register with {@link HomeVisibilityObserver} with ActivityManager.
+     * @hide
+     */
+    @SystemApi
+    public void registerHomeVisibilityObserver(@NonNull HomeVisibilityObserver observer) {
+        Preconditions.checkNotNull(observer);
+        try {
+            observer.init(mContext, this);
+            getService().registerProcessObserver(observer.mObserver);
+            // Notify upon first registration.
+            observer.onHomeVisibilityChanged(observer.mIsHomeActivityVisible);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister with {@link HomeVisibilityObserver} with ActivityManager.
+     * @hide
+     */
+    @SystemApi
+    public void unregisterHomeVisibilityObserver(@NonNull HomeVisibilityObserver observer) {
+        Preconditions.checkNotNull(observer);
+        try {
+            getService().unregisterProcessObserver(observer.mObserver);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
