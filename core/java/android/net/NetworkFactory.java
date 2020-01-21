@@ -115,13 +115,6 @@ public class NetworkFactory extends Handler {
      */
     private static final int CMD_SET_FILTER = BASE + 3;
 
-    /**
-     * Sent by NetworkFactory to ConnectivityService to indicate that a request is
-     * unfulfillable.
-     * @see #releaseRequestAsUnfulfillableByAnyFactory(NetworkRequest).
-     */
-    public static final int EVENT_UNFULFILLABLE_REQUEST = BASE + 4;
-
     private final Context mContext;
     private final ArrayList<Message> mPreConnectedQueue = new ArrayList<Message>();
     private final String LOG_TAG;
