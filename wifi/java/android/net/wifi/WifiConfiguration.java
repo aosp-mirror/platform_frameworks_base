@@ -1662,7 +1662,9 @@ public class WifiConfiguration implements Parcelable {
              */
             @NonNull
             public NetworkSelectionStatus build() {
-                return mNetworkSelectionStatus;
+                NetworkSelectionStatus status = new NetworkSelectionStatus();
+                status.copy(mNetworkSelectionStatus);
+                return status;
             }
         }
 
