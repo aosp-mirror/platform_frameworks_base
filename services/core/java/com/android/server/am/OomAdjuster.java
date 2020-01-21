@@ -65,6 +65,9 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 
 import android.app.ActivityManager;
 import android.app.usage.UsageEvents;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
 import android.os.Build;
@@ -100,7 +103,6 @@ import java.util.Arrays;
  */
 public final class OomAdjuster {
     private static final String TAG = "OomAdjuster";
-
     static final String OOM_ADJ_REASON_METHOD = "updateOomAdj";
     static final String OOM_ADJ_REASON_NONE = OOM_ADJ_REASON_METHOD + "_meh";
     static final String OOM_ADJ_REASON_ACTIVITY = OOM_ADJ_REASON_METHOD + "_activityChange";
@@ -115,6 +117,17 @@ public final class OomAdjuster {
     static final String OOM_ADJ_REASON_WHITELIST = OOM_ADJ_REASON_METHOD + "_whitelistChange";
     static final String OOM_ADJ_REASON_PROCESS_BEGIN = OOM_ADJ_REASON_METHOD + "_processBegin";
     static final String OOM_ADJ_REASON_PROCESS_END = OOM_ADJ_REASON_METHOD + "_processEnd";
+
+    /**
+     * Flag {@link Context#BIND_INCLUDE_CAPABILITIES} is used
+     * to pass while-in-use capabilities from client process to bound service. In targetSdkVersion
+     * R and above, if client is a TOP activity, when this flag is present, bound service gets all
+     * while-in-use capabilities; when this flag is not present, bound service gets no while-in-use
+     * capabilitiy from client.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion=android.os.Build.VERSION_CODES.Q)
+    static final long PROCESS_CAPABILITY_CHANGE_ID = 136274596L;
 
     /**
      * For some direct access we need to power manager.
@@ -1601,7 +1614,7 @@ public final class OomAdjuster {
                                 // Go at most to BOUND_TOP, unless requested to elevate
                                 // to client's state.
                                 clientProcState = PROCESS_STATE_BOUND_TOP;
-                                if (client.info.targetSdkVersion >= Build.VERSION_CODES.R) {
+                                if (Compatibility.isChangeEnabled(PROCESS_CAPABILITY_CHANGE_ID)) {
                                     if (cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES)) {
                                         // TOP process passes all capabilities to the service.
                                         capability = PROCESS_CAPABILITY_ALL;
