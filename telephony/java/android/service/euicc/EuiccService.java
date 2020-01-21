@@ -34,6 +34,8 @@ import android.telephony.euicc.EuiccInfo;
 import android.telephony.euicc.EuiccManager.OtaStatus;
 import android.util.Log;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -583,6 +585,13 @@ public abstract class EuiccService extends Service {
     public abstract int onRetainSubscriptionsForFactoryReset(int slotId);
 
     /**
+     * Dump to a provided printWriter.
+     */
+    public void dump(@NonNull PrintWriter printWriter) {
+        printWriter.println("The connected LPA does not implement EuiccService#dump()");
+    }
+
+    /**
      * Wrapper around IEuiccService that forwards calls to implementations of {@link EuiccService}.
      */
     private class IEuiccServiceWrapper extends IEuiccService.Stub {
@@ -828,6 +837,23 @@ public abstract class EuiccService extends Service {
                     int result = EuiccService.this.onRetainSubscriptionsForFactoryReset(slotId);
                     try {
                         callback.onComplete(result);
+                    } catch (RemoteException e) {
+                        // Can't communicate with the phone process; ignore.
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void dump(IEuiccServiceDumpResultCallback callback) throws RemoteException {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        final StringWriter sw = new StringWriter();
+                        final PrintWriter pw = new PrintWriter(sw);
+                        EuiccService.this.dump(pw);
+                        callback.onComplete(sw.toString());
                     } catch (RemoteException e) {
                         // Can't communicate with the phone process; ignore.
                     }
