@@ -22,6 +22,8 @@ import android.annotation.Nullable;
 import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -40,6 +42,9 @@ public final class CellIdentityNr extends CellIdentity {
     private final int mTac;
     private final long mNci;
 
+    // a list of additional PLMN-IDs reported for this cell
+    private final List<String> mAdditionalPlmns;
+
     /**
      *
      * @param pci Physical Cell Id in range [0, 1007].
@@ -50,29 +55,38 @@ public final class CellIdentityNr extends CellIdentity {
      * @param nci The 36-bit NR Cell Identity in range [0, 68719476735].
      * @param alphal long alpha Operator Name String or Enhanced Operator Name String.
      * @param alphas short alpha Operator Name String or Enhanced Operator Name String.
+     * @param additionalPlmns a list of additional PLMN IDs broadcast by the cell
      *
      * @hide
      */
     public CellIdentityNr(int pci, int tac, int nrArfcn, String mccStr, String mncStr,
-            long nci, String alphal, String alphas) {
+            long nci, String alphal, String alphas, List<String> additionalPlmns) {
         super(TAG, CellInfo.TYPE_NR, mccStr, mncStr, alphal, alphas);
         mPci = inRangeOrUnavailable(pci, 0, MAX_PCI);
         mTac = inRangeOrUnavailable(tac, 0, MAX_TAC);
         mNrArfcn = inRangeOrUnavailable(nrArfcn, 0, MAX_NRARFCN);
         mNci = inRangeOrUnavailable(nci, 0, MAX_NCI);
+        mAdditionalPlmns = additionalPlmns;
     }
 
     /** @hide */
     public CellIdentityNr(android.hardware.radio.V1_4.CellIdentityNr cid) {
         this(cid.pci, cid.tac, cid.nrarfcn, cid.mcc, cid.mnc, cid.nci, cid.operatorNames.alphaLong,
-                cid.operatorNames.alphaShort);
+                cid.operatorNames.alphaShort, Collections.emptyList());
+    }
+
+    /** @hide */
+    public CellIdentityNr(android.hardware.radio.V1_5.CellIdentityNr cid) {
+        this(cid.base.pci, cid.base.tac, cid.base.nrarfcn, cid.base.mcc, cid.base.mnc,
+                cid.base.nci, cid.base.operatorNames.alphaLong,
+                cid.base.operatorNames.alphaShort, cid.additionalPlmns);
     }
 
     /** @hide */
     @Override
     public @NonNull CellIdentityNr sanitizeLocationInfo() {
         return new CellIdentityNr(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
-                mMccStr, mMncStr, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort);
+                mMccStr, mMncStr, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort, mAdditionalPlmns);
     }
 
     /**
@@ -87,7 +101,8 @@ public final class CellIdentityNr extends CellIdentity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), mPci, mTac, mNrArfcn, mNci);
+        return Objects.hash(super.hashCode(), mPci, mTac,
+                mNrArfcn, mNci, mAdditionalPlmns.hashCode());
     }
 
     @Override
@@ -98,7 +113,7 @@ public final class CellIdentityNr extends CellIdentity {
 
         CellIdentityNr o = (CellIdentityNr) other;
         return super.equals(o) && mPci == o.mPci && mTac == o.mTac && mNrArfcn == o.mNrArfcn
-                && mNci == o.mNci;
+                && mNci == o.mNci && mAdditionalPlmns.equals(o.mAdditionalPlmns);
     }
 
     /**
@@ -158,6 +173,20 @@ public final class CellIdentityNr extends CellIdentity {
         return mMncStr;
     }
 
+    /** @hide */
+    @Override
+    public int getChannelNumber() {
+        return mNrArfcn;
+    }
+
+    /**
+     * @return a list of additional PLMN IDs supported by this cell.
+     */
+    @NonNull
+    public List<String> getAdditionalPlmns() {
+        return mAdditionalPlmns;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder(TAG + ":{")
@@ -169,6 +198,7 @@ public final class CellIdentityNr extends CellIdentity {
                 .append(" mNci = ").append(mNci)
                 .append(" mAlphaLong = ").append(mAlphaLong)
                 .append(" mAlphaShort = ").append(mAlphaShort)
+                .append(" mAdditionalPlmns = ").append(mAdditionalPlmns)
                 .append(" }")
                 .toString();
     }
@@ -180,6 +210,7 @@ public final class CellIdentityNr extends CellIdentity {
         dest.writeInt(mTac);
         dest.writeInt(mNrArfcn);
         dest.writeLong(mNci);
+        dest.writeList(mAdditionalPlmns);
     }
 
     /** Construct from Parcel, type has already been processed */
@@ -189,6 +220,7 @@ public final class CellIdentityNr extends CellIdentity {
         mTac = in.readInt();
         mNrArfcn = in.readInt();
         mNci = in.readLong();
+        mAdditionalPlmns = in.readArrayList(null);
     }
 
     /** Implement the Parcelable interface */
