@@ -46,7 +46,7 @@ import org.junit.runner.RunWith;
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class TaskStackContainersTests extends WindowTestsBase {
+public class TaskContainersTests extends WindowTestsBase {
 
     private ActivityStack mPinnedStack;
 

@@ -371,7 +371,7 @@ public class DockedStackDividerController {
         if (mWindow == null) {
             return;
         }
-        ActivityStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+        ActivityStack stack = mDisplayContent.getSplitScreenPrimaryStack();
 
         // If the stack is invisible, we policy force hide it in WindowAnimator.shouldForceHide
         final boolean visible = stack != null;
@@ -415,7 +415,7 @@ public class DockedStackDividerController {
     }
 
     void positionDockedStackedDivider(Rect frame) {
-        ActivityStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+        ActivityStack stack = mDisplayContent.getSplitScreenPrimaryStack();
         if (stack == null) {
             // Unfortunately we might end up with still having a divider, even though the underlying
             // stack was already removed. This is because we are on AM thread and the removal of the
@@ -524,7 +524,7 @@ public class DockedStackDividerController {
             // If a primary stack was just created, it will not have access to display content at
             // this point so pass it from here to get a valid dock side.
             final ActivityStack stack =
-                    mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+                    mDisplayContent.getSplitScreenPrimaryStack();
             mOriginalDockedSide = stack.getDockSideForDisplay(mDisplayContent);
             return;
         }
@@ -560,7 +560,7 @@ public class DockedStackDividerController {
         long animDuration = 0;
         if (animate) {
             final ActivityStack stack =
-                    mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+                    mDisplayContent.getSplitScreenPrimaryStack();
             final long transitionDuration = isAnimationMaximizing()
                     ? mDisplayContent.mAppTransition.getLastClipRevealTransitionDuration()
                     : DEFAULT_APP_TRANSITION_DURATION;
@@ -615,7 +615,7 @@ public class DockedStackDividerController {
         mDockedStackListeners.register(listener);
         notifyDockedDividerVisibilityChanged(wasVisible());
         notifyDockedStackExistsChanged(
-                mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility() != null);
+                mDisplayContent.getSplitScreenPrimaryStack() != null);
         notifyDockedStackMinimizedChanged(mMinimizedDock, false /* animate */,
                 isHomeStackResizable());
         notifyAdjustedForImeChanged(mAdjustedForIme, 0 /* animDuration */);
@@ -701,7 +701,7 @@ public class DockedStackDividerController {
     }
 
     void checkMinimizeChanged(boolean animate) {
-        if (mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility() == null) {
+        if (mDisplayContent.getSplitScreenPrimaryStack() == null) {
             return;
         }
         final ActivityStack homeStack = mDisplayContent.getHomeStack();
@@ -873,7 +873,7 @@ public class DockedStackDividerController {
     }
 
     private boolean setMinimizedDockedStack(boolean minimized) {
-        final ActivityStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+        final ActivityStack stack = mDisplayContent.getSplitScreenPrimaryStack();
         notifyDockedStackMinimizedChanged(minimized, false /* animate */, isHomeStackResizable());
         return stack != null && stack.setAdjustedForMinimizedDock(minimized ? 1f : 0f);
     }
@@ -923,7 +923,7 @@ public class DockedStackDividerController {
     }
 
     private boolean animateForMinimizedDockedStack(long now) {
-        final ActivityStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+        final ActivityStack stack = mDisplayContent.getSplitScreenPrimaryStack();
         if (!mAnimationStarted) {
             mAnimationStarted = true;
             mAnimationStartTime = now;
