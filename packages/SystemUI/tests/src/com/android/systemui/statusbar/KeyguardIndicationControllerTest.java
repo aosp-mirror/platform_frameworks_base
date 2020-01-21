@@ -280,6 +280,20 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void unlockMethodCache_listenerUpdatesPluggedIndication() {
+        createController();
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+        mController.setPowerPluggedIn(true);
+        mController.setVisible(true);
+        String powerIndication = mController.computePowerIndication();
+        String pluggedIndication = mContext.getString(R.string.keyguard_indication_trust_unlocked);
+        pluggedIndication = mContext.getString(
+                R.string.keyguard_indication_trust_unlocked_plugged_in,
+                pluggedIndication, powerIndication);
+        assertThat(mTextView.getText()).isEqualTo(pluggedIndication);
+    }
+
+    @Test
     public void unlockMethodCache_listener() {
         createController();
         verify(mUnlockMethodCache).addListener(eq(mController));
