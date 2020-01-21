@@ -296,6 +296,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_CALL
                     | PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_SMS;
 
+    static final int READ_PRIVILEGED_PHONE_STATE_PERMISSION_MASK =
+            PhoneStateListener.LISTEN_OEM_HOOK_RAW_EVENT
+                | PhoneStateListener.LISTEN_SRVCC_STATE_CHANGED
+                | PhoneStateListener.LISTEN_RADIO_POWER_STATE_CHANGED
+                | PhoneStateListener.LISTEN_VOICE_ACTIVATION_STATE;
+
     private static final int MSG_USER_SWITCHED = 1;
     private static final int MSG_UPDATE_DEFAULT_SUB = 2;
 
@@ -2448,27 +2454,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION, null);
         }
 
-        if ((events & PhoneStateListener.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH) != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH, null);
-        }
-
-        if ((events & PhoneStateListener.LISTEN_OEM_HOOK_RAW_EVENT) != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
-        }
-
-        if ((events & PhoneStateListener.LISTEN_SRVCC_STATE_CHANGED) != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
-        }
-
-        if ((events & PhoneStateListener.LISTEN_RADIO_POWER_STATE_CHANGED) != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
-        }
-
-        if ((events & PhoneStateListener.LISTEN_VOICE_ACTIVATION_STATE) != 0) {
+        if ((events & READ_PRIVILEGED_PHONE_STATE_PERMISSION_MASK) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
         }
