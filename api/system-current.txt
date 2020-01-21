@@ -2221,6 +2221,7 @@ package android.content.pm {
     field public static final String FEATURE_BROADCAST_RADIO = "android.hardware.broadcastradio";
     field public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
+    field public static final int FLAGS_PERMISSION_RESERVED_PERMISSIONCONTROLLER = -268435456; // 0xf0000000
     field public static final int FLAG_PERMISSION_APPLY_RESTRICTION = 16384; // 0x4000
     field public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT = 32; // 0x20
     field public static final int FLAG_PERMISSION_GRANTED_BY_ROLE = 32768; // 0x8000
