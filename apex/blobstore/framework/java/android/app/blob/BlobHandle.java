@@ -22,6 +22,9 @@ import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * An identifier to represent a blob.
  */
@@ -171,6 +174,27 @@ public final class BlobHandle implements Parcelable {
         dest.writeCharSequence(label);
         dest.writeLong(expiryTimeMillis);
         dest.writeString(tag);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof BlobHandle)) {
+            return false;
+        }
+        final BlobHandle other = (BlobHandle) obj;
+        return this.algorithm.equals(other.algorithm)
+                && Arrays.equals(this.digest, other.digest)
+                && this.label.equals(other.label)
+                && this.expiryTimeMillis == other.expiryTimeMillis
+                && this.tag.equals(tag);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(algorithm, Arrays.hashCode(digest), label, expiryTimeMillis, tag);
     }
 
     public static final @NonNull Creator<BlobHandle> CREATOR = new Creator<BlobHandle>() {

@@ -26,6 +26,10 @@ interface IBlobStoreSession {
     void allowSameSignatureAccess();
     void allowPublicAccess();
 
+    boolean isPackageAccessAllowed(in String packageName, in byte[] certificate);
+    boolean isSameSignatureAccessAllowed();
+    boolean isPublicAccessAllowed();
+
     long getSize();
     void close();
     void abandon();

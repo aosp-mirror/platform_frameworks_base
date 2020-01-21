@@ -45,6 +45,11 @@ import java.util.function.Consumer;
  */
 @SystemService(Context.BLOB_STORE_SERVICE)
 public class BlobStoreManager {
+    /** @hide */
+    public static final int COMMIT_RESULT_SUCCESS = 0;
+    /** @hide */
+    public static final int COMMIT_RESULT_ERROR = 1;
+
     private final Context mContext;
     private final IBlobStoreManager mService;
 
@@ -102,7 +107,28 @@ public class BlobStoreManager {
      */
     public @NonNull Session openSession(@IntRange(from = 1) long sessionId) throws IOException {
         try {
-            return new Session(mService.openSession(sessionId));
+            return new Session(mService.openSession(sessionId, mContext.getOpPackageName()));
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Delete an existing session and any data that was written to that session so far.
+     *
+     * @param sessionId a unique id obtained via {@link #createSession(BlobHandle)} that
+     *                  represents a particular session.
+     *
+     * @throws IOException when there is an I/O error while deleting the session.
+     * @throws SecurityException when the caller does not own the session, or
+     *                           the session does not exist or is invalid.
+     */
+    public void deleteSession(@IntRange(from = 1) long sessionId) throws IOException {
+        try {
+            mService.deleteSession(sessionId, mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             throw new RuntimeException(e);
@@ -141,6 +167,9 @@ public class BlobStoreManager {
      *
      * <p> Any active leases will be automatically released when the blob's expiry time
      * ({@link BlobHandle#getExpiryTimeMillis()}) is elapsed.
+     *
+     * <p> This lease information is persisted and calling this more than once will result in
+     * latest lease overriding any previous lease.
      *
      * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
      *                   acquire a lease for.
@@ -189,6 +218,9 @@ public class BlobStoreManager {
      *
      * <p> Any active leases will be automatically released when the blob's expiry time
      * ({@link BlobHandle#getExpiryTimeMillis()}) is elapsed.
+     *
+     * <p> This lease information is persisted and calling this more than once will result in
+     * latest lease overriding any previous lease.
      *
      * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
      *                   acquire a lease for.
@@ -279,7 +311,9 @@ public class BlobStoreManager {
         public @NonNull ParcelFileDescriptor openWrite(@BytesLong long offsetBytes,
                 @BytesLong long lengthBytes) throws IOException {
             try {
-                return mSession.openWrite(offsetBytes, lengthBytes);
+                final ParcelFileDescriptor pfd = mSession.openWrite(offsetBytes, lengthBytes);
+                pfd.seekTo(offsetBytes);
+                return pfd;
             } catch (ParcelableException e) {
                 e.maybeRethrow(IOException.class);
                 throw new RuntimeException(e);
@@ -376,6 +410,31 @@ public class BlobStoreManager {
         }
 
         /**
+         * Returns {@code true} if access has been allowed for a {@code packageName} using either
+         * {@link #allowPackageAccess(String, byte[])}.
+         * Otherwise, {@code false}.
+         *
+         * @param packageName the name of the package to check the access for.
+         * @param certificate the input bytes representing a certificate of type
+         *                    {@link android.content.pm.PackageManager#CERT_INPUT_SHA256}.
+         *
+         * @throws IOException when there is an I/O error while getting the access type.
+         * @throws IllegalStateException when the caller tries to get access type from a session
+         *                               which is closed or abandoned.
+         */
+        public boolean isPackageAccessAllowed(@NonNull String packageName,
+                @NonNull byte[] certificate) throws IOException {
+            try {
+                return mSession.isPackageAccessAllowed(packageName, certificate);
+            } catch (ParcelableException e) {
+                e.maybeRethrow(IOException.class);
+                throw new RuntimeException(e);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Allow packages which are signed with the same certificate as the caller to access this
          * blob data once it is committed using a {@link BlobHandle} representing the blob.
          *
@@ -390,6 +449,26 @@ public class BlobStoreManager {
         public void allowSameSignatureAccess() throws IOException {
             try {
                 mSession.allowSameSignatureAccess();
+            } catch (ParcelableException e) {
+                e.maybeRethrow(IOException.class);
+                throw new RuntimeException(e);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Returns {@code true} if access has been allowed for packages signed with the same
+         * certificate as the caller by using {@link #allowSameSignatureAccess()}.
+         * Otherwise, {@code false}.
+         *
+         * @throws IOException when there is an I/O error while getting the access type.
+         * @throws IllegalStateException when the caller tries to get access type from a session
+         *                               which is closed or abandoned.
+         */
+        public boolean isSameSignatureAccessAllowed() throws IOException {
+            try {
+                return mSession.isSameSignatureAccessAllowed();
             } catch (ParcelableException e) {
                 e.maybeRethrow(IOException.class);
                 throw new RuntimeException(e);
@@ -427,6 +506,25 @@ public class BlobStoreManager {
         }
 
         /**
+         * Returns {@code true} if public access has been allowed by using
+         * {@link #allowPublicAccess()}. Otherwise, {@code false}.
+         *
+         * @throws IOException when there is an I/O error while getting the access type.
+         * @throws IllegalStateException when the caller tries to get access type from a session
+         *                               which is closed or abandoned.
+         */
+        public boolean isPublicAccessAllowed() throws IOException {
+            try {
+                return mSession.isPublicAccessAllowed();
+            } catch (ParcelableException e) {
+                e.maybeRethrow(IOException.class);
+                throw new RuntimeException(e);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Commit the file that was written so far to this session to the blob store maintained by
          * the system.
          *
@@ -438,6 +536,10 @@ public class BlobStoreManager {
          * to this session does not match with the one used for
          * {@link BlobHandle#createWithSha256(byte[], CharSequence, long, String)}  BlobHandle}
          * associated with this session.
+         *
+         * <p> Committing the same data more than once will result in replacing the corresponding
+         * access mode (via calling one of {@link #allowPackageAccess(String, byte[])},
+         * {@link #allowSameSignatureAccess()}, etc) with the latest one.
          *
          * @param executor the executor on which result callback will be invoked.
          * @param resultCallback a callback to receive the commit result. when the result is
