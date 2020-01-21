@@ -196,15 +196,22 @@ public class StatsPullAtomService extends SystemService {
     private final Object mNetworkStatsLock = new Object();
     @GuardedBy("mNetworkStatsLock")
     private INetworkStatsService mNetworkStatsService;
+
     private final Object mThermalLock = new Object();
     @GuardedBy("mThermalLock")
     private IThermalService mThermalService;
+
     private final Object mStoragedLock = new Object();
     @GuardedBy("mStoragedLock")
     private IStoraged mStorageService;
+
     private final Object mNotificationStatsLock = new Object();
     @GuardedBy("mNotificationStatsLock")
     private INotificationManager mNotificationManagerService;
+
+    private final Object mProcessStatsLock = new Object();
+    @GuardedBy("mProcessStatsLock")
+    private IProcessStats mProcessStatsService;
 
     private final Context mContext;
     private StatsManager mStatsManager;
@@ -222,7 +229,7 @@ public class StatsPullAtomService extends SystemService {
         mTelephony = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         mStorageManager = (StorageManager) mContext.getSystemService(StorageManager.class);
 
-        // Used to initialize the CPU Frequency atom.
+        // Initialize state for CPU_TIME_PER_FREQ atom
         PowerProfile powerProfile = new PowerProfile(mContext);
         final int numClusters = powerProfile.getNumCpuClusters();
         mKernelCpuSpeedReaders = new KernelCpuSpeedReader[numClusters];
@@ -237,6 +244,9 @@ public class StatsPullAtomService extends SystemService {
         // Used for CPU_TIME_PER_THREAD_FREQ
         mKernelCpuThreadReader =
                 KernelCpuThreadReaderSettingsObserver.getSettingsModifiedReader(mContext);
+
+        // Used by PROC_STATS and PROC_STATS_PKG_PROC atoms
+        mBaseDir.mkdirs();
     }
 
     @Override
@@ -385,7 +395,7 @@ public class StatsPullAtomService extends SystemService {
         synchronized (mNotificationStatsLock) {
             if (mNotificationManagerService == null) {
                 mNotificationManagerService = INotificationManager.Stub.asInterface(
-                                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+                        ServiceManager.getService(Context.NOTIFICATION_SERVICE));
             }
             if (mNotificationManagerService != null) {
                 try {
@@ -401,6 +411,28 @@ public class StatsPullAtomService extends SystemService {
             }
         }
         return mNotificationManagerService;
+    }
+
+    private IProcessStats getIProcessStatsService() {
+        synchronized (mProcessStatsLock) {
+            if (mProcessStatsService == null) {
+                mProcessStatsService = IProcessStats.Stub.asInterface(
+                        ServiceManager.getService(ProcessStats.SERVICE_NAME));
+            }
+            if (mProcessStatsService != null) {
+                try {
+                    mProcessStatsService.asBinder().linkToDeath(() -> {
+                        synchronized (mProcessStatsLock) {
+                            mProcessStatsService = null;
+                        }
+                    }, /* flags */ 0);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "linkToDeath with ProcessStats failed", e);
+                    mProcessStatsService = null;
+                }
+            }
+        }
+        return mProcessStatsService;
     }
 
     private void registerWifiBytesTransfer() {
@@ -1868,21 +1900,87 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
-    private void registerProcStats() {
-        // No op.
-    }
+    private File mBaseDir = new File(SystemServiceManager.ensureSystemDir(), "stats_companion");
 
-    private void pullProcStats() {
-        // No op.
+    private void registerProcStats() {
+        int tagId = StatsLog.PROC_STATS;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullProcStats(ProcessStats.REPORT_ALL, atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
     private void registerProcStatsPkgProc() {
-        // No op.
+        int tagId = StatsLog.PROC_STATS_PKG_PROC;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                (atomTag, data) -> pullProcStats(ProcessStats.REPORT_PKG_PROC_STATS, atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullProcStatsPkgProc() {
-        // No op.
+    private int pullProcStats(int section, int atomTag, List<StatsEvent> pulledData) {
+        IProcessStats processStatsService = getIProcessStatsService();
+        if (processStatsService == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        synchronized (mProcessStatsLock) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                long lastHighWaterMark = readProcStatsHighWaterMark(section);
+                List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
+                long highWaterMark = processStatsService.getCommittedStats(
+                        lastHighWaterMark, section, true, statsFiles);
+                if (statsFiles.size() != 1) {
+                    return StatsManager.PULL_SKIP;
+                }
+                unpackStreamedData(atomTag, pulledData, statsFiles);
+                new File(mBaseDir.getAbsolutePath() + "/" + section + "_" + lastHighWaterMark)
+                        .delete();
+                new File(mBaseDir.getAbsolutePath() + "/" + section + "_" + highWaterMark)
+                        .createNewFile();
+            } catch (IOException e) {
+                Slog.e(TAG, "Getting procstats failed: ", e);
+                return StatsManager.PULL_SKIP;
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Getting procstats failed: ", e);
+                return StatsManager.PULL_SKIP;
+            } catch (SecurityException e) {
+                Slog.e(TAG, "Getting procstats failed: ", e);
+                return StatsManager.PULL_SKIP;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        return StatsManager.PULL_SUCCESS;
     }
+
+    // read high watermark for section
+    private long readProcStatsHighWaterMark(int section) {
+        try {
+            File[] files = mBaseDir.listFiles((d, name) -> {
+                return name.toLowerCase().startsWith(String.valueOf(section) + '_');
+            });
+            if (files == null || files.length == 0) {
+                return 0;
+            }
+            if (files.length > 1) {
+                Slog.e(TAG, "Only 1 file expected for high water mark. Found " + files.length);
+            }
+            return Long.valueOf(files[0].getName().split("_")[1]);
+        } catch (SecurityException e) {
+            Slog.e(TAG, "Failed to get procstats high watermark file.", e);
+        } catch (NumberFormatException e) {
+            Slog.e(TAG, "Failed to parse file name.", e);
+        }
+        return 0;
+    }
+
 
     private StoragedUidIoStatsReader mStoragedUidIoStatsReader =
             new StoragedUidIoStatsReader();
@@ -1953,7 +2051,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerProcessCpuTime() {
         int tagId = StatsLog.PROCESS_CPU_TIME;
-        // Min cool-down is 5 sec, inline with what ActivityManagerService uses.
+        // Min cool-down is 5 sec, in line with what ActivityManagerService uses.
         PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
                 .setCoolDownNs(5 * NS_PER_SEC)
                 .build();
@@ -2562,7 +2660,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private int pullAppOps(int atomTag, List<StatsEvent> pulledData) {
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
 
@@ -2678,7 +2776,7 @@ public class StatsPullAtomService extends SystemService {
         }
         final long callingToken = Binder.clearCallingIdentity();
         try {
-            // determine last pull tine. Copy file trick from pullProcessStats?
+            // determine last pull tine. Copy file trick from pullProcStats?
             long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
             long lastNotificationStatsNs = wallClockNanos -
                     TimeUnit.NANOSECONDS.convert(1, TimeUnit.DAYS);
