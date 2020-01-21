@@ -52,6 +52,7 @@ import java.util.stream.Collectors;
  * <tr><td>{@link #KEY_PIXEL_ASPECT_RATIO_WIDTH}</td><td>Integer</td><td>optional, the pixel aspect ratio width</td></tr>
  * <tr><td>{@link #KEY_PIXEL_ASPECT_RATIO_HEIGHT}</td><td>Integer</td><td>optional, the pixel aspect ratio height</td></tr>
  * <tr><td>{@link #KEY_BIT_RATE}</td><td>Integer</td><td><b>encoder-only</b>, desired bitrate in bits/second</td></tr>
+ * <tr><td>{@link #KEY_DURATION}</td><td>long</td><td>the duration of the content (in microseconds)</td></tr>
  * </table>
  *
  * Video formats have the following keys:
