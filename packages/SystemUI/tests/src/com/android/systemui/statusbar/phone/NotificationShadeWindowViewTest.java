@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
+import com.android.systemui.statusbar.StatusBarWindowBlurController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -79,6 +80,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private DockManager mDockManager;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private NotificationStackScrollLayout mNotificationStackScrollLayout;
+    @Mock private StatusBarWindowBlurController mStatusBarWindowBlurController;
 
     @Before
     public void setUp() {
@@ -112,6 +114,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 new CommandQueue(mContext),
                 mShadeController,
                 mDockManager,
+                mStatusBarWindowBlurController,
                 mView,
                 mNotificationPanelViewController);
         mController.setupExpandedStatusBar();

@@ -98,6 +98,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
+import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -157,6 +158,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final IActivityManager mIActivityManager;
     private final TelecomManager mTelecomManager;
     private final MetricsLogger mMetricsLogger;
+    private final BlurUtils mBlurUtils;
 
     private ArrayList<Action> mItems;
     private ActionsDialog mDialog;
@@ -177,6 +179,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final ScreenshotHelper mScreenshotHelper;
     private final ScreenRecordHelper mScreenRecordHelper;
     private final ActivityStarter mActivityStarter;
+    private final SysuiColorExtractor mSysuiColorExtractor;
+    private final IStatusBarService mStatusBarService;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private GlobalActionsPanelPlugin mPanelPlugin;
 
     /**
@@ -192,7 +197,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             ConfigurationController configurationController, ActivityStarter activityStarter,
             KeyguardStateController keyguardStateController, UserManager userManager,
             TrustManager trustManager, IActivityManager iActivityManager,
-            TelecomManager telecomManager, MetricsLogger metricsLogger) {
+            TelecomManager telecomManager, MetricsLogger metricsLogger,
+            BlurUtils blurUtils, SysuiColorExtractor colorExtractor,
+            IStatusBarService statusBarService,
+            NotificationShadeWindowController notificationShadeWindowController) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -208,6 +216,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mIActivityManager = iActivityManager;
         mTelecomManager = telecomManager;
         mMetricsLogger = metricsLogger;
+        mBlurUtils = blurUtils;
+        mSysuiColorExtractor = colorExtractor;
+        mStatusBarService = statusBarService;
+        mNotificationShadeWindowController = notificationShadeWindowController;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -443,8 +455,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                                 mKeyguardManager.isDeviceLocked())
                         : null;
 
-        ActionsDialog dialog = new ActionsDialog(
-                mContext, mAdapter, panelViewController, isControlsEnabled(mContext));
+        ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, panelViewController,
+                mBlurUtils, mSysuiColorExtractor, mStatusBarService,
+                mNotificationShadeWindowController, isControlsEnabled(mContext));
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
         dialog.setKeyguardShowing(mKeyguardShowing);
 
@@ -1529,18 +1542,21 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private ResetOrientationData mResetOrientationData;
         private boolean mHadTopUi;
         private final NotificationShadeWindowController mNotificationShadeWindowController;
-        private boolean mControlsEnabled;
+        private final BlurUtils mBlurUtils;
+        private final boolean mControlsEnabled;
 
         ActionsDialog(Context context, MyAdapter adapter,
-                GlobalActionsPanelPlugin.PanelViewController plugin,
+                GlobalActionsPanelPlugin.PanelViewController plugin, BlurUtils blurUtils,
+                SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
+                NotificationShadeWindowController notificationShadeWindowController,
                 boolean controlsEnabled) {
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
             mContext = context;
             mAdapter = adapter;
-            mColorExtractor = Dependency.get(SysuiColorExtractor.class);
-            mStatusBarService = Dependency.get(IStatusBarService.class);
-            mNotificationShadeWindowController =
-                    Dependency.get(NotificationShadeWindowController.class);
+            mBlurUtils = blurUtils;
+            mColorExtractor = sysuiColorExtractor;
+            mStatusBarService = statusBarService;
+            mNotificationShadeWindowController = notificationShadeWindowController;
             mControlsEnabled = controlsEnabled;
 
             // Window initialization
@@ -1735,9 +1751,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     .setDuration(300)
                     .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .setUpdateListener(animation -> {
-                        int alpha = (int) ((Float) animation.getAnimatedValue()
-                                * mScrimAlpha * 255);
+                        float animatedValue = animation.getAnimatedFraction();
+                        int alpha = (int) (animatedValue * mScrimAlpha * 255);
                         mBackgroundDrawable.setAlpha(alpha);
+                        mBlurUtils.applyBlur(mGlobalActionsLayout.getViewRootImpl(),
+                                mBlurUtils.radiusForRatio(animatedValue));
                     })
                     .start();
         }
@@ -1759,9 +1777,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     .withEndAction(this::completeDismiss)
                     .setInterpolator(new LogAccelerateInterpolator())
                     .setUpdateListener(animation -> {
-                        int alpha = (int) ((1f - (Float) animation.getAnimatedValue())
-                                * mScrimAlpha * 255);
+                        float animatedValue = 1f - animation.getAnimatedFraction();
+                        int alpha = (int) (animatedValue * mScrimAlpha * 255);
                         mBackgroundDrawable.setAlpha(alpha);
+                        mBlurUtils.applyBlur(mGlobalActionsLayout.getViewRootImpl(),
+                                mBlurUtils.radiusForRatio(animatedValue));
                     })
                     .start();
             dismissPanel();
