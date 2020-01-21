@@ -16,11 +16,14 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.SystemApi;
+
 /**
  * Filter event sent from {@link Filter} objects with download type.
  *
  * @hide
  */
+@SystemApi
 public class DownloadEvent extends FilterEvent {
     private final int mItemId;
     private final int mMpuSequenceNumber;

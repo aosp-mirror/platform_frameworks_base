@@ -70,7 +70,6 @@ public final class TunerConstants {
      */
     public static final int INDEX_TYPE_SC_HEVC = Constants.DemuxRecordScIndexType.SC_HEVC;
 
-
     /**
      * Indexes can be tagged by Start Code in PES (Packetized Elementary Stream)
      * according to ISO/IEC 13818-1.
@@ -83,22 +82,18 @@ public final class TunerConstants {
 
     /**
      * SC index for a new I-frame.
-     * @hide
      */
     public static final int SC_INDEX_I_FRAME = Constants.DemuxScIndex.I_FRAME;
     /**
      * SC index for a new P-frame.
-     * @hide
      */
     public static final int SC_INDEX_P_FRAME = Constants.DemuxScIndex.P_FRAME;
     /**
      * SC index for a new B-frame.
-     * @hide
      */
     public static final int SC_INDEX_B_FRAME = Constants.DemuxScIndex.B_FRAME;
     /**
      * SC index for a new sequence.
-     * @hide
      */
     public static final int SC_INDEX_SEQUENCE = Constants.DemuxScIndex.SEQUENCE;
 
@@ -118,47 +113,39 @@ public final class TunerConstants {
 
     /**
      * SC HEVC index SPS.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_SPS = Constants.DemuxScHevcIndex.SPS;
     /**
      * SC HEVC index AUD.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_AUD = Constants.DemuxScHevcIndex.AUD;
     /**
      * SC HEVC index SLICE_CE_BLA_W_LP.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_SLICE_CE_BLA_W_LP =
             Constants.DemuxScHevcIndex.SLICE_CE_BLA_W_LP;
     /**
      * SC HEVC index SLICE_BLA_W_RADL.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_SLICE_BLA_W_RADL =
             Constants.DemuxScHevcIndex.SLICE_BLA_W_RADL;
     /**
      * SC HEVC index SLICE_BLA_N_LP.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_SLICE_BLA_N_LP =
             Constants.DemuxScHevcIndex.SLICE_BLA_N_LP;
     /**
      * SC HEVC index SLICE_IDR_W_RADL.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_SLICE_IDR_W_RADL =
             Constants.DemuxScHevcIndex.SLICE_IDR_W_RADL;
     /**
      * SC HEVC index SLICE_IDR_N_LP.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_SLICE_IDR_N_LP =
             Constants.DemuxScHevcIndex.SLICE_IDR_N_LP;
     /**
      * SC HEVC index SLICE_TRAIL_CRA.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_SLICE_TRAIL_CRA =
             Constants.DemuxScHevcIndex.SLICE_TRAIL_CRA;

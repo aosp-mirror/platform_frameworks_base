@@ -16,43 +16,47 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.BytesLong;
+import android.annotation.SystemApi;
+
 
 /**
  * Filter event sent from {@link Filter} objects for TS record data.
  *
  * @hide
  */
+@SystemApi
 public class TsRecordEvent extends FilterEvent {
 
     private final int mPid;
     private final int mTsIndexMask;
     private final int mScIndexMask;
-    private final long mByteNumber;
+    private final long mDataLength;
 
     // This constructor is used by JNI code only
-    private TsRecordEvent(int pid, int tsIndexMask, int scIndexMask, long byteNumber) {
+    private TsRecordEvent(int pid, int tsIndexMask, int scIndexMask, long dataLength) {
         mPid = pid;
         mTsIndexMask = tsIndexMask;
         mScIndexMask = scIndexMask;
-        mByteNumber = byteNumber;
+        mDataLength = dataLength;
     }
 
     /**
      * Gets packet ID.
      */
-    public int getTpid() {
+    public int getPacketId() {
         return mPid;
     }
 
     /**
-     * Gets TS index mask.
+     * Gets TS (transport stream) index mask.
      */
     @RecordSettings.TsIndexMask
     public int getTsIndexMask() {
         return mTsIndexMask;
     }
     /**
-     * Gets SC index mask.
+     * Gets SC (Start Code) index mask.
      *
      * <p>The index type is SC or SC-HEVC, and is set when configuring the filter.
      */
@@ -62,9 +66,10 @@ public class TsRecordEvent extends FilterEvent {
     }
 
     /**
-     * Gets the byte number from beginning of the filter's output.
+     * Gets data size in bytes of filtered data.
      */
-    public long getByteNumber() {
-        return mByteNumber;
+    @BytesLong
+    public long getDataLength() {
+        return mDataLength;
     }
 }

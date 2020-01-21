@@ -16,19 +16,23 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.BytesLong;
+import android.annotation.SystemApi;
+
 /**
  * Filter event sent from {@link Filter} objects with MMTP type.
  *
  * @hide
  */
+@SystemApi
 public class MmtpRecordEvent extends FilterEvent {
     private final int mScHevcIndexMask;
-    private final long mByteNumber;
+    private final long mDataLength;
 
     // This constructor is used by JNI code only
-    private MmtpRecordEvent(int scHevcIndexMask, long byteNumber) {
+    private MmtpRecordEvent(int scHevcIndexMask, long dataLength) {
         mScHevcIndexMask = scHevcIndexMask;
-        mByteNumber = byteNumber;
+        mDataLength = dataLength;
     }
 
     /**
@@ -39,9 +43,10 @@ public class MmtpRecordEvent extends FilterEvent {
     }
 
     /**
-     * Gets the byte number from beginning of the filter's output.
+     * Gets data size in bytes of filtered data.
      */
-    public long getByteNumber() {
-        return mByteNumber;
+    @BytesLong
+    public long getDataLength() {
+        return mDataLength;
     }
 }
