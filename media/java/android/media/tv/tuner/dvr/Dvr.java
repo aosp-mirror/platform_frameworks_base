@@ -16,9 +16,9 @@
 
 package android.media.tv.tuner.dvr;
 
-import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerConstants.Result;
 import android.media.tv.tuner.filter.Filter;
@@ -33,40 +33,26 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-public class Dvr {
+@SystemApi
+public class Dvr implements AutoCloseable {
+
     /** @hide */
+    @IntDef(prefix = "TYPE_", value = {TYPE_RECORD, TYPE_PLAYBACK})
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "PLAYBACK_STATUS_",
-            value = {PLAYBACK_STATUS_EMPTY, PLAYBACK_STATUS_ALMOST_EMPTY,
-                    PLAYBACK_STATUS_ALMOST_FULL, PLAYBACK_STATUS_FULL})
-    @interface PlaybackStatus {}
+    public @interface Type {}
 
     /**
-     * The space of the playback is empty.
+     * DVR for recording.
      */
-    public static final int PLAYBACK_STATUS_EMPTY = Constants.PlaybackStatus.SPACE_EMPTY;
+    public static final int TYPE_RECORD = Constants.DvrType.RECORD;
     /**
-     * The space of the playback is almost empty.
-     *
-     * <p> the threshold is set in {@link DvrSettings}.
+     * DVR for playback of recorded programs.
      */
-    public static final int PLAYBACK_STATUS_ALMOST_EMPTY =
-            Constants.PlaybackStatus.SPACE_ALMOST_EMPTY;
-    /**
-     * The space of the playback is almost full.
-     *
-     * <p> the threshold is set in {@link DvrSettings}.
-     */
-    public static final int PLAYBACK_STATUS_ALMOST_FULL =
-            Constants.PlaybackStatus.SPACE_ALMOST_FULL;
-    /**
-     * The space of the playback is full.
-     */
-    public static final int PLAYBACK_STATUS_FULL = Constants.PlaybackStatus.SPACE_FULL;
+    public static final int TYPE_PLAYBACK = Constants.DvrType.PLAYBACK;
 
 
-    private long mNativeContext;
-    private DvrCallback mCallback;
+    final int mType;
+    long mNativeContext;
 
     private native int nativeAttachFilter(Filter filter);
     private native int nativeDetachFilter(Filter filter);
@@ -76,12 +62,10 @@ public class Dvr {
     private native int nativeFlushDvr();
     private native int nativeClose();
     private native void nativeSetFileDescriptor(int fd);
-    private native int nativeRead(long size);
-    private native int nativeRead(byte[] bytes, long offset, long size);
-    private native int nativeWrite(long size);
-    private native int nativeWrite(byte[] bytes, long offset, long size);
 
-    private Dvr() {}
+    protected Dvr(int type) {
+        mType = type;
+    }
 
     /**
      * Attaches a filter to DVR interface for recording.
@@ -154,12 +138,9 @@ public class Dvr {
 
     /**
      * Closes the DVR instance to release resources.
-     *
-     * @return result status of the operation.
      */
-    @Result
-    public int close() {
-        return nativeClose();
+    public void close() {
+        nativeClose();
     }
 
     /**
@@ -171,51 +152,8 @@ public class Dvr {
         nativeSetFileDescriptor(fd.getFd());
     }
 
-    /**
-     * Reads data from the file for DVR playback.
-     *
-     * @param size the maximum number of bytes to read.
-     * @return the number of bytes read.
-     */
-    public int read(@BytesLong long size) {
-        return nativeRead(size);
-    }
-
-    /**
-     * Reads data from the buffer for DVR playback and copies to the given byte array.
-     *
-     * @param bytes the byte array to store the data.
-     * @param offset the index of the first byte in {@code bytes} to copy to.
-     * @param size the maximum number of bytes to read.
-     * @return the number of bytes read.
-     */
-    public int read(@NonNull byte[] bytes, @BytesLong long offset, @BytesLong long size) {
-        if (size + offset > bytes.length) {
-            throw new ArrayIndexOutOfBoundsException(
-                    "Array length=" + bytes.length + ", offset=" + offset + ", size=" + size);
-        }
-        return nativeRead(bytes, offset, size);
-    }
-
-    /**
-     * Writes recording data to file.
-     *
-     * @param size the maximum number of bytes to write.
-     * @return the number of bytes written.
-     */
-    public int write(@BytesLong long size) {
-        return nativeWrite(size);
-    }
-
-    /**
-     * Writes recording data to buffer.
-     *
-     * @param bytes the byte array stores the data to be written to DVR.
-     * @param offset the index of the first byte in {@code bytes} to be written to DVR.
-     * @param size the maximum number of bytes to write.
-     * @return the number of bytes written.
-     */
-    public int write(@NonNull byte[] bytes, @BytesLong long offset, @BytesLong long size) {
-        return nativeWrite(bytes, offset, size);
+    @Type
+    int getType() {
+        return mType;
     }
 }

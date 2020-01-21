@@ -24,9 +24,10 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.tuner.TunerConstants.Result;
-import android.media.tv.tuner.dvr.Dvr;
-import android.media.tv.tuner.dvr.DvrCallback;
-import android.media.tv.tuner.dvr.DvrSettings;
+import android.media.tv.tuner.dvr.DvrPlayback;
+import android.media.tv.tuner.dvr.DvrRecorder;
+import android.media.tv.tuner.dvr.OnPlaybackStatusChangedListener;
+import android.media.tv.tuner.dvr.OnRecordStatusChangedListener;
 import android.media.tv.tuner.filter.Filter;
 import android.media.tv.tuner.filter.Filter.Subtype;
 import android.media.tv.tuner.filter.Filter.Type;
@@ -166,7 +167,8 @@ public final class Tuner implements AutoCloseable  {
 
     private native Descrambler nativeOpenDescrambler();
 
-    private native Dvr nativeOpenDvr(int type, long bufferSize);
+    private native DvrRecorder nativeOpenDvrRecorder(long bufferSize);
+    private native DvrPlayback nativeOpenDvrPlayback(long bufferSize);
 
     private static native DemuxCapabilities nativeGetDemuxCapabilities();
 
@@ -639,24 +641,44 @@ public final class Tuner implements AutoCloseable  {
     }
 
     /**
-     * Open a DVR (Digital Video Record) instance.
+     * Open a DVR (Digital Video Record) recorder instance.
      *
-     * @param type the DVR type to be opened.
      * @param bufferSize the buffer size of the output in bytes. It's used to hold output data of
      * the attached filters.
      * @param executor the executor on which callback will be invoked. The default event handler
      * executor is used if it's {@code null}.
-     * @param cb the callback to receive notifications from DVR.
-     * @return the opened DVR object. {@code null} if the operation failed.
-     *
-     * @hide
+     * @param l the listener to receive notifications from DVR recorder.
+     * @return the opened DVR recorder object. {@code null} if the operation failed.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Nullable
-    public Dvr openDvr(@DvrSettings.Type int type, @BytesLong long bufferSize,
-            @CallbackExecutor @Nullable Executor executor, DvrCallback cb) {
+    public DvrRecorder openDvrRecorder(
+            @BytesLong long bufferSize,
+            @CallbackExecutor @Nullable Executor executor,
+            @Nullable OnRecordStatusChangedListener l) {
         TunerUtils.checkTunerPermission(mContext);
-        Dvr dvr = nativeOpenDvr(type, bufferSize);
+        DvrRecorder dvr = nativeOpenDvrRecorder(bufferSize);
+        return dvr;
+    }
+
+    /**
+     * Open a DVR (Digital Video Record) playback instance.
+     *
+     * @param bufferSize the buffer size of the output in bytes. It's used to hold output data of
+     * the attached filters.
+     * @param executor the executor on which callback will be invoked. The default event handler
+     * executor is used if it's {@code null}.
+     * @param l the listener to receive notifications from DVR recorder.
+     * @return the opened DVR playback object. {@code null} if the operation failed.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @Nullable
+    public DvrPlayback openDvrPlayback(
+            @BytesLong long bufferSize,
+            @CallbackExecutor @Nullable Executor executor,
+            @Nullable OnPlaybackStatusChangedListener l) {
+        TunerUtils.checkTunerPermission(mContext);
+        DvrPlayback dvr = nativeOpenDvrPlayback(bufferSize);
         return dvr;
     }
 }

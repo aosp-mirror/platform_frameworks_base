@@ -4700,6 +4700,8 @@ package android.media.tv.tuner {
     ctor public Tuner(@NonNull android.content.Context);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void clearOnTuneEventListener();
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.Tuner.Descrambler openDescrambler();
+    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.dvr.DvrPlayback openDvrPlayback(long, @Nullable java.util.concurrent.Executor, @Nullable android.media.tv.tuner.dvr.OnPlaybackStatusChangedListener);
+    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.dvr.DvrRecorder openDvrRecorder(long, @Nullable java.util.concurrent.Executor, @Nullable android.media.tv.tuner.dvr.OnRecordStatusChangedListener);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.filter.Filter openFilter(int, int, long, @Nullable java.util.concurrent.Executor, @Nullable android.media.tv.tuner.filter.FilterCallback);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void setOnTuneEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.OnTuneEventListener);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int stopTune();
@@ -4723,6 +4725,34 @@ package android.media.tv.tuner {
 
 package android.media.tv.tuner.dvr {
 
+  public class Dvr implements java.lang.AutoCloseable {
+    ctor protected Dvr(int);
+    method public int attachFilter(@NonNull android.media.tv.tuner.filter.Filter);
+    method public void close();
+    method public int configure(@NonNull android.media.tv.tuner.dvr.DvrSettings);
+    method public int detachFilter(@NonNull android.media.tv.tuner.filter.Filter);
+    method public int flush();
+    method public void setFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
+    method public int start();
+    method public int stop();
+    field public static final int TYPE_PLAYBACK = 1; // 0x1
+    field public static final int TYPE_RECORD = 0; // 0x0
+  }
+
+  public class DvrPlayback extends android.media.tv.tuner.dvr.Dvr {
+    method public long read(long);
+    method public long read(@NonNull byte[], long, long);
+    field public static final int PLAYBACK_STATUS_ALMOST_EMPTY = 2; // 0x2
+    field public static final int PLAYBACK_STATUS_ALMOST_FULL = 4; // 0x4
+    field public static final int PLAYBACK_STATUS_EMPTY = 1; // 0x1
+    field public static final int PLAYBACK_STATUS_FULL = 8; // 0x8
+  }
+
+  public class DvrRecorder extends android.media.tv.tuner.dvr.Dvr {
+    method public long write(long);
+    method public long write(@NonNull byte[], long, long);
+  }
+
   public class DvrSettings {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.dvr.DvrSettings.Builder builder(@NonNull android.content.Context);
     method public int getDataFormat();
@@ -4730,13 +4760,10 @@ package android.media.tv.tuner.dvr {
     method public long getLowThreshold();
     method public long getPacketSize();
     method public int getStatusMask();
-    method public int getType();
     field public static final int DATA_FORMAT_ES = 2; // 0x2
     field public static final int DATA_FORMAT_PES = 1; // 0x1
     field public static final int DATA_FORMAT_SHV_TLV = 3; // 0x3
     field public static final int DATA_FORMAT_TS = 0; // 0x0
-    field public static final int TYPE_PLAYBACK = 1; // 0x1
-    field public static final int TYPE_RECORD = 0; // 0x0
   }
 
   public static final class DvrSettings.Builder {
@@ -4747,7 +4774,14 @@ package android.media.tv.tuner.dvr {
     method @NonNull public android.media.tv.tuner.dvr.DvrSettings.Builder setLowThreshold(long);
     method @NonNull public android.media.tv.tuner.dvr.DvrSettings.Builder setPacketSize(long);
     method @NonNull public android.media.tv.tuner.dvr.DvrSettings.Builder setStatusMask(int);
-    method @NonNull public android.media.tv.tuner.dvr.DvrSettings.Builder setType(int);
+  }
+
+  public interface OnPlaybackStatusChangedListener {
+    method public void onPlaybackStatusChanged(int);
+  }
+
+  public interface OnRecordStatusChangedListener {
+    method public void onRecordStatusChanged(int);
   }
 
 }
