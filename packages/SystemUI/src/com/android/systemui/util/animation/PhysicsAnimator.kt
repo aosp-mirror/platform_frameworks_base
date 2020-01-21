@@ -293,15 +293,19 @@ class PhysicsAnimator<T> private constructor (val target: T) {
             val velocityToReachDestination = distanceToDestination *
                     (flingConfig.friction * FLING_FRICTION_SCALAR_MULTIPLIER)
 
-            // Try to use the provided start velocity, but use the required velocity to reach the
-            // destination if the provided velocity is insufficient.
-            val sufficientVelocity =
-                    if (distanceToDestination < 0)
-                        min(velocityToReachDestination, startVelocity)
-                    else
-                        max(velocityToReachDestination, startVelocity)
+            // If there's distance to cover, and the provided velocity is moving in the correct
+            // direction, ensure that the velocity is high enough to reach the destination.
+            // Otherwise, just use startVelocity - this means that the fling is at or out of bounds.
+            // The fling will immediately end and a spring will bring the object back into bounds
+            // with this startVelocity.
+            flingConfigCopy.startVelocity = when {
+                distanceToDestination > 0f && startVelocity >= 0f ->
+                    max(velocityToReachDestination, startVelocity)
+                distanceToDestination < 0f && startVelocity <= 0f ->
+                    min(velocityToReachDestination, startVelocity)
+                else -> startVelocity
+            }
 
-            flingConfigCopy.startVelocity = sufficientVelocity
             springConfigCopy.finalPosition = toAtLeast
         } else {
             flingConfigCopy.startVelocity = startVelocity
@@ -367,8 +371,17 @@ class PhysicsAnimator<T> private constructor (val target: T) {
      * animation is explicitly canceled, use [addEndListener]. End listeners have an allEnded param,
      * which indicates that all relevant animations have ended.
      */
-    fun withEndActions(vararg endActions: EndAction): PhysicsAnimator<T> {
-        this.endActions.addAll(endActions)
+    fun withEndActions(vararg endActions: EndAction?): PhysicsAnimator<T> {
+        this.endActions.addAll(endActions.filterNotNull())
+        return this
+    }
+
+    /**
+     * Helper overload so that callers from Java can use Runnables or method references as end
+     * actions without having to explicitly return Unit.
+     */
+    fun withEndActions(vararg endActions: Runnable?): PhysicsAnimator<T> {
+        this.endActions.addAll(endActions.filterNotNull().map { it::run })
         return this
     }
 
@@ -416,8 +429,10 @@ class PhysicsAnimator<T> private constructor (val target: T) {
                         max = max(currentValue, this.max)
                     }
 
-                    // Apply the configuration and start the animation.
+                    // Apply the configuration and start the animation. Since flings can't be
+                    // redirected while in motion, cancel it first.
                     getFlingAnimation(animatedProperty)
+                            .also { it.cancel() }
                             .also { flingConfig.applyToAnimation(it) }
                             .start()
                 }
