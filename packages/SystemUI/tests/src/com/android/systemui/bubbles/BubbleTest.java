@@ -45,7 +45,6 @@ public class BubbleTest extends SysuiTestCase {
     private Notification mNotif;
 
     private NotificationEntry mEntry;
-    private Bubble mBubble;
     private Bundle mExtras;
 
     @Before
@@ -58,7 +57,6 @@ public class BubbleTest extends SysuiTestCase {
         mEntry = new NotificationEntryBuilder()
                 .setNotification(mNotif)
                 .build();
-        mBubble = new Bubble(mEntry);
     }
 
     @Test
@@ -66,7 +64,8 @@ public class BubbleTest extends SysuiTestCase {
         final String msg = "Hello there!";
         doReturn(Notification.Style.class).when(mNotif).getNotificationStyle();
         mExtras.putCharSequence(Notification.EXTRA_TEXT, msg);
-        assertEquals(msg, mBubble.getUpdateMessage(mContext));
+        assertEquals(msg, BubbleViewInfoTask.extractFlyoutMessage(mContext,
+                mEntry).message);
     }
 
     @Test
@@ -77,7 +76,8 @@ public class BubbleTest extends SysuiTestCase {
         mExtras.putCharSequence(Notification.EXTRA_BIG_TEXT, msg);
 
         // Should be big text, not the small text.
-        assertEquals(msg, mBubble.getUpdateMessage(mContext));
+        assertEquals(msg, BubbleViewInfoTask.extractFlyoutMessage(mContext,
+                mEntry).message);
     }
 
     @Test
@@ -85,7 +85,8 @@ public class BubbleTest extends SysuiTestCase {
         doReturn(Notification.MediaStyle.class).when(mNotif).getNotificationStyle();
 
         // Media notifs don't get update messages.
-        assertNull(mBubble.getUpdateMessage(mContext));
+        assertNull(BubbleViewInfoTask.extractFlyoutMessage(mContext,
+                mEntry).message);
     }
 
     @Test
@@ -100,7 +101,8 @@ public class BubbleTest extends SysuiTestCase {
                         "Really? I prefer them that way."});
 
         // Should be the last one only.
-        assertEquals("Really? I prefer them that way.", mBubble.getUpdateMessage(mContext));
+        assertEquals("Really? I prefer them that way.",
+                BubbleViewInfoTask.extractFlyoutMessage(mContext, mEntry).message);
     }
 
     @Test
@@ -115,6 +117,10 @@ public class BubbleTest extends SysuiTestCase {
                                 "Oh, hello!", 0, "Mady").toBundle()});
 
         // Should be the last one only.
-        assertEquals("Mady: Oh, hello!", mBubble.getUpdateMessage(mContext));
+        assertEquals("Oh, hello!",
+                BubbleViewInfoTask.extractFlyoutMessage(mContext, mEntry).message);
+        assertEquals("Mady",
+                BubbleViewInfoTask.extractFlyoutMessage(mContext,
+                        mEntry).senderName);
     }
 }

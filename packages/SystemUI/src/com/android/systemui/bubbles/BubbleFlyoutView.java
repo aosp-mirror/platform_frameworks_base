@@ -32,11 +32,13 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.ShapeDrawable;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -65,7 +67,9 @@ public class BubbleFlyoutView extends FrameLayout {
     private final float mCornerRadius;
 
     private final ViewGroup mFlyoutTextContainer;
-    private final TextView mFlyoutText;
+    private final ImageView mSenderAvatar;
+    private final TextView mSenderText;
+    private final TextView mMessageText;
 
     /** Values related to the 'new' dot which we use to figure out where to collapse the flyout. */
     private final float mNewDotRadius;
@@ -142,7 +146,9 @@ public class BubbleFlyoutView extends FrameLayout {
         LayoutInflater.from(context).inflate(R.layout.bubble_flyout, this, true);
 
         mFlyoutTextContainer = findViewById(R.id.bubble_flyout_text_container);
-        mFlyoutText = mFlyoutTextContainer.findViewById(R.id.bubble_flyout_text);
+        mSenderText = findViewById(R.id.bubble_flyout_name);
+        mSenderAvatar = findViewById(R.id.bubble_flyout_avatar);
+        mMessageText = mFlyoutTextContainer.findViewById(R.id.bubble_flyout_text);
 
         final Resources res = getResources();
         mFlyoutPadding = res.getDimensionPixelSize(R.dimen.bubble_flyout_padding_x);
@@ -204,9 +210,34 @@ public class BubbleFlyoutView extends FrameLayout {
 
     /** Configures the flyout, collapsed into to dot form. */
     void setupFlyoutStartingAsDot(
-            CharSequence updateMessage, PointF stackPos, float parentWidth,
-            boolean arrowPointingLeft, int dotColor, @Nullable Runnable onLayoutComplete,
-            @Nullable Runnable onHide, float[] dotCenter, boolean hideDot) {
+            Bubble.FlyoutMessage flyoutMessage,
+            PointF stackPos,
+            float parentWidth,
+            boolean arrowPointingLeft,
+            int dotColor,
+            @Nullable Runnable onLayoutComplete,
+            @Nullable Runnable onHide,
+            float[] dotCenter,
+            boolean hideDot) {
+
+        if (flyoutMessage.senderAvatar != null && flyoutMessage.isGroupChat) {
+            mSenderAvatar.setVisibility(VISIBLE);
+            mSenderAvatar.setImageDrawable(flyoutMessage.senderAvatar);
+        } else {
+            mSenderAvatar.setVisibility(GONE);
+            mSenderAvatar.setTranslationX(0);
+            mMessageText.setTranslationX(0);
+            mSenderText.setTranslationX(0);
+        }
+
+        // Name visibility
+        if (!TextUtils.isEmpty(flyoutMessage.senderName)) {
+            mSenderText.setText(flyoutMessage.senderName);
+            mSenderText.setVisibility(VISIBLE);
+        } else {
+            mSenderText.setVisibility(GONE);
+        }
+
         mArrowPointingLeft = arrowPointingLeft;
         mDotColor = dotColor;
         mOnHide = onHide;
@@ -217,15 +248,15 @@ public class BubbleFlyoutView extends FrameLayout {
         // Set the flyout TextView's max width in terms of percent, and then subtract out the
         // padding so that the entire flyout view will be the desired width (rather than the
         // TextView being the desired width + extra padding).
-        mFlyoutText.setMaxWidth(
+        mMessageText.setMaxWidth(
                 (int) (parentWidth * FLYOUT_MAX_WIDTH_PERCENT) - mFlyoutPadding * 2);
-        mFlyoutText.setText(updateMessage);
+        mMessageText.setText(flyoutMessage.message);
 
         // Wait for the TextView to lay out so we know its line count.
         post(() -> {
             float restingTranslationY;
             // Multi line flyouts get top-aligned to the bubble.
-            if (mFlyoutText.getLineCount() > 1) {
+            if (mMessageText.getLineCount() > 1) {
                 restingTranslationY = stackPos.y + mBubbleIconTopPadding;
             } else {
                 // Single line flyouts are vertically centered with respect to the bubble.
@@ -289,11 +320,20 @@ public class BubbleFlyoutView extends FrameLayout {
         mPercentStillFlyout = (1f - mPercentTransitionedToDot);
 
         // Move and fade out the text.
-        mFlyoutText.setTranslationX(
-                (mArrowPointingLeft ? -getWidth() : getWidth()) * mPercentTransitionedToDot);
-        mFlyoutText.setAlpha(clampPercentage(
+        final float translationX = mPercentTransitionedToDot
+                * (mArrowPointingLeft ? -getWidth() : getWidth());
+        final float alpha = clampPercentage(
                 (mPercentStillFlyout - (1f - BubbleStackView.FLYOUT_DRAG_PERCENT_DISMISS))
-                        / BubbleStackView.FLYOUT_DRAG_PERCENT_DISMISS));
+                        / BubbleStackView.FLYOUT_DRAG_PERCENT_DISMISS);
+
+        mMessageText.setTranslationX(translationX);
+        mMessageText.setAlpha(alpha);
+
+        mSenderText.setTranslationX(translationX);
+        mSenderText.setAlpha(alpha);
+
+        mSenderAvatar.setTranslationX(translationX);
+        mSenderAvatar.setAlpha(alpha);
 
         // Reduce the elevation towards that of the topmost bubble.
         setTranslationZ(
