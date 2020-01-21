@@ -236,6 +236,9 @@
     <!-- Permission needed to test mainline permission module rollback -->
     <uses-permission android:name="android.permission.UPGRADE_RUNTIME_PERMISSIONS" />
 
+    <!-- Permission required for CTS test - CtsLightsManagerTest -->
+    <uses-permission android:name="android.permission.CONTROL_DEVICE_LIGHTS" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

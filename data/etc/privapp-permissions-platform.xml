@@ -350,6 +350,8 @@ applications that come with the platform
         <!-- Permissions required to test ambient display. -->
         <permission name="android.permission.READ_DREAM_STATE" />
         <permission name="android.permission.WRITE_DREAM_STATE" />
+        <!-- Permission required to test lights control APIs. -->
+        <permission name="android.permission.CONTROL_DEVICE_LIGHTS" />
         <permission name="android.permission.REBOOT"/>
     </privapp-permissions>
 
