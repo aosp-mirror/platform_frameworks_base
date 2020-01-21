@@ -32,6 +32,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.provider.settings.validators.SettingsValidators;
+import android.provider.settings.validators.Validator;
 import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
 
@@ -43,6 +45,7 @@ import org.junit.runner.RunWith;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,12 +58,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 /** Tests for the SettingsHelperTest */
 @RunWith(AndroidJUnit4.class)
 public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
-
+    private static final Uri TEST_URI = Uri.EMPTY;
     private static final String TEST_DISPLAY_DENSITY_FORCED = "123";
+    private static final String OVERRIDDEN_TEST_SETTING = "overridden_setting";
+    private static final String PRESERVED_TEST_SETTING = "preserved_setting";
+    private static final Map<String, String> DEVICE_SPECIFIC_TEST_VALUES = new HashMap<>();
     private static final Map<String, String> TEST_VALUES = new HashMap<>();
+    private static final Map<String, Validator> TEST_VALUES_VALIDATORS = new HashMap<>();
 
     static {
-        TEST_VALUES.put(Settings.Secure.DISPLAY_DENSITY_FORCED, TEST_DISPLAY_DENSITY_FORCED);
+        DEVICE_SPECIFIC_TEST_VALUES.put(Settings.Secure.DISPLAY_DENSITY_FORCED,
+                TEST_DISPLAY_DENSITY_FORCED);
+
+        TEST_VALUES.put(OVERRIDDEN_TEST_SETTING, "123");
+        TEST_VALUES.put(PRESERVED_TEST_SETTING, "124");
+
+        TEST_VALUES_VALIDATORS.put(OVERRIDDEN_TEST_SETTING,
+                SettingsValidators.ANY_STRING_VALIDATOR);
+        TEST_VALUES_VALIDATORS.put(PRESERVED_TEST_SETTING, SettingsValidators.ANY_STRING_VALIDATOR);
     }
 
     private TestFriendlySettingsBackupAgent mAgentUnderTest;
@@ -83,14 +98,15 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
 
         byte[] settingsBackup = mAgentUnderTest.getDeviceSpecificConfiguration();
 
-        assertEquals("Not all values backed up.", TEST_VALUES.keySet(), helper.mReadEntries);
+        assertEquals("Not all values backed up.", DEVICE_SPECIFIC_TEST_VALUES.keySet(), helper.mReadEntries);
 
         mAgentUnderTest.restoreDeviceSpecificConfig(
                 settingsBackup,
                 R.array.restore_blocked_device_specific_settings,
+                Collections.emptySet(),
                 Collections.emptySet());
 
-        assertEquals("Not all values were restored.", TEST_VALUES, helper.mWrittenValues);
+        assertEquals("Not all values were restored.", DEVICE_SPECIFIC_TEST_VALUES, helper.mWrittenValues);
     }
 
     @Test
@@ -100,12 +116,13 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
 
         byte[] settingsBackup = mAgentUnderTest.getDeviceSpecificConfiguration();
 
-        assertEquals("Not all values backed up.", TEST_VALUES.keySet(), helper.mReadEntries);
-        mAgentUnderTest.setBlockedSettings(TEST_VALUES.keySet().toArray(new String[0]));
+        assertEquals("Not all values backed up.", DEVICE_SPECIFIC_TEST_VALUES.keySet(), helper.mReadEntries);
+        mAgentUnderTest.setBlockedSettings(DEVICE_SPECIFIC_TEST_VALUES.keySet().toArray(new String[0]));
 
         mAgentUnderTest.restoreDeviceSpecificConfig(
                 settingsBackup,
                 R.array.restore_blocked_device_specific_settings,
+                Collections.emptySet(),
                 Collections.emptySet());
 
         assertTrue("Not all values were blocked.", helper.mWrittenValues.isEmpty());
@@ -172,7 +189,48 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
                 mAgentUnderTest.restoreDeviceSpecificConfig(
                         data,
                         R.array.restore_blocked_device_specific_settings,
+                        Collections.emptySet(),
                         Collections.emptySet()));
+    }
+
+    @Test
+    public void testOnRestore_preservedSettingsAreNotRestored() {
+        SettingsBackupAgent.SettingsBackupWhitelist whitelist =
+                new SettingsBackupAgent.SettingsBackupWhitelist(
+                        new String[] { OVERRIDDEN_TEST_SETTING, PRESERVED_TEST_SETTING },
+                        TEST_VALUES_VALIDATORS);
+        mAgentUnderTest.setSettingsWhitelist(whitelist);
+        mAgentUnderTest.setBlockedSettings();
+        TestSettingsHelper settingsHelper = new TestSettingsHelper(mContext);
+        mAgentUnderTest.mSettingsHelper = settingsHelper;
+
+        byte[] backupData = generateBackupData(TEST_VALUES);
+        mAgentUnderTest.restoreSettings(backupData, /* pos */ 0, backupData.length, TEST_URI, new HashSet<>(),
+                Collections.emptySet(), /* blockedSettingsArrayId */ 0, Collections.emptySet(),
+                new HashSet<>(Collections.singletonList(SettingsBackupAgent.getQualifiedKeyForSetting(PRESERVED_TEST_SETTING, TEST_URI))));
+
+        assertTrue(settingsHelper.mWrittenValues.containsKey(OVERRIDDEN_TEST_SETTING));
+        assertFalse(settingsHelper.mWrittenValues.containsKey(PRESERVED_TEST_SETTING));
+    }
+
+    private byte[] generateBackupData(Map<String, String> keyValueData) {
+        int totalBytes = 0;
+        for (String key : keyValueData.keySet()) {
+            totalBytes += 2 * Integer.BYTES + key.getBytes().length
+                    + keyValueData.get(key).getBytes().length;
+        }
+
+        ByteBuffer buffer = ByteBuffer.allocate(totalBytes);
+        for (String key : keyValueData.keySet()) {
+            byte[] keyBytes = key.getBytes();
+            byte[] valueBytes = keyValueData.get(key).getBytes();
+            buffer.putInt(keyBytes.length);
+            buffer.put(keyBytes);
+            buffer.putInt(valueBytes.length);
+            buffer.put(valueBytes);
+        }
+
+        return buffer.array();
     }
 
     private byte[] generateUncorruptedHeader() throws IOException {
@@ -219,6 +277,7 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
     private static class TestFriendlySettingsBackupAgent extends SettingsBackupAgent {
         private Boolean mForcedDeviceInfoRestoreAcceptability = null;
         private String[] mBlockedSettings = null;
+        private SettingsBackupWhitelist mSettingsWhitelist = null;
 
         void setForcedDeviceInfoRestoreAcceptability(boolean value) {
             mForcedDeviceInfoRestoreAcceptability = value;
@@ -226,6 +285,10 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
 
         void setBlockedSettings(String... blockedSettings) {
             mBlockedSettings = blockedSettings;
+        }
+
+        void setSettingsWhitelist(SettingsBackupWhitelist settingsWhitelist) {
+            mSettingsWhitelist = settingsWhitelist;
         }
 
         @Override
@@ -240,6 +303,15 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
             return mForcedDeviceInfoRestoreAcceptability == null
                     ? super.isSourceAcceptable(data, pos)
                     : mForcedDeviceInfoRestoreAcceptability;
+        }
+
+        @Override
+        SettingsBackupWhitelist getBackupWhitelist(Uri contentUri) {
+            if (mSettingsWhitelist == null) {
+                return super.getBackupWhitelist(contentUri);
+            }
+
+            return mSettingsWhitelist;
         }
     }
 
@@ -257,7 +329,7 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
         @Override
         public String onBackupValue(String key, String value) {
             mReadEntries.add(key);
-            String readValue = TEST_VALUES.get(key);
+            String readValue = DEVICE_SPECIFIC_TEST_VALUES.get(key);
             assert readValue != null;
             return readValue;
         }

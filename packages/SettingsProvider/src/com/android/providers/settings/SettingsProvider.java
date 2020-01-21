@@ -180,10 +180,17 @@ public class SettingsProvider extends ContentProvider {
     private static final int MUTATION_OPERATION_UPDATE = 3;
     private static final int MUTATION_OPERATION_RESET = 4;
 
+    private static final String[] LEGACY_SQL_COLUMNS = new String[] {
+            Settings.NameValueTable._ID,
+            Settings.NameValueTable.NAME,
+            Settings.NameValueTable.VALUE,
+    };
+
     private static final String[] ALL_COLUMNS = new String[] {
             Settings.NameValueTable._ID,
             Settings.NameValueTable.NAME,
-            Settings.NameValueTable.VALUE
+            Settings.NameValueTable.VALUE,
+            Settings.NameValueTable.IS_PRESERVED_IN_RESTORE,
     };
 
     public static final int SETTINGS_TYPE_GLOBAL = SettingsState.SETTINGS_TYPE_GLOBAL;
@@ -2353,6 +2360,10 @@ public class SettingsProvider extends ContentProvider {
                 case Settings.NameValueTable.VALUE: {
                     values[i] = setting.getValue();
                 } break;
+
+                case Settings.NameValueTable.IS_PRESERVED_IN_RESTORE: {
+                    values[i] = String.valueOf(setting.isValuePreservedInRestore());
+                } break;
             }
         }
 
@@ -3097,7 +3108,7 @@ public class SettingsProvider extends ContentProvider {
             SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
             queryBuilder.setTables(table);
 
-            Cursor cursor = queryBuilder.query(database, ALL_COLUMNS,
+            Cursor cursor = queryBuilder.query(database, LEGACY_SQL_COLUMNS,
                     null, null, null, null, null);
 
             if (cursor == null) {

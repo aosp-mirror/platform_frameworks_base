@@ -2417,6 +2417,10 @@ public final class Settings {
     public static class NameValueTable implements BaseColumns {
         public static final String NAME = "name";
         public static final String VALUE = "value";
+        // A flag indicating whether the current value of a setting should be preserved during
+        // restore.
+        /** @hide */
+        public static final String IS_PRESERVED_IN_RESTORE = "is_preserved_in_restore";
 
         protected static boolean putString(ContentResolver resolver, Uri uri,
                 String name, String value) {
