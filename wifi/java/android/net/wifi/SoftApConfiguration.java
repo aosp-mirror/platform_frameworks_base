@@ -212,7 +212,6 @@ public final class SoftApConfiguration implements Parcelable {
      */
     public static final int SECURITY_TYPE_OPEN = 0;
 
-
     /**
      * The definition of security type WPA2-PSK.
      */
@@ -408,7 +407,11 @@ public final class SoftApConfiguration implements Parcelable {
     /**
      * Get security type params which depends on which security passphrase to set.
      *
-     * @return One of the security types from {@link SecurityType}.
+     * @return One of:
+     * {@link #SECURITY_TYPE_OPEN},
+     * {@link #SECURITY_TYPE_WPA2_PSK},
+     * {@link #SECURITY_TYPE_WPA3_SAE_TRANSITION},
+     * {@link #SECURITY_TYPE_WPA3_SAE}
      */
     public @SecurityType int getSecurityType() {
         return mSecurityType;
