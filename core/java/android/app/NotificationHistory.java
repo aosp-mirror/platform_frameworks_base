@@ -24,6 +24,8 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -311,11 +313,23 @@ public final class NotificationHistory implements Parcelable {
         mHistoryCount++;
     }
 
+    /**
+     * Used when populating a history from disk; adds an historical notification.
+     */
+    public void addNewNotificationToWrite(@NonNull HistoricalNotification notification) {
+        if (notification == null) {
+            return;
+        }
+        mNotificationsToWrite.add(0, notification);
+        mHistoryCount++;
+    }
+
     public void addNotificationsToWrite(@NonNull NotificationHistory notificationHistory) {
         for (HistoricalNotification hn : notificationHistory.getNotificationsToWrite()) {
-            // TODO: consider merging by date
             addNotificationToWrite(hn);
         }
+        Collections.sort(mNotificationsToWrite,
+                (o1, o2) -> -1 * Long.compare(o1.getPostedTimeMs(), o2.getPostedTimeMs()));
         poolStringsFromNotifications();
     }
 

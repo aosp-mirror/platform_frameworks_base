@@ -172,7 +172,7 @@ public class NotificationHistoryDatabase {
 
     public void addNotification(final HistoricalNotification notification) {
         synchronized (mLock) {
-            mBuffer.addNotificationToWrite(notification);
+            mBuffer.addNewNotificationToWrite(notification);
             // Each time we have new history to write to disk, schedule a write in [interval] ms
             if (mBuffer.getHistoryCount() == 1) {
                 mFileWriteHandler.postDelayed(mWriteBufferRunnable, WRITE_BUFFER_INTERVAL_MS);
