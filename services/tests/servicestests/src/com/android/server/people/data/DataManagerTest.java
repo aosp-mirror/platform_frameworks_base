@@ -218,7 +218,7 @@ public final class DataManagerTest {
         mDataManager.getShortcut(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID);
         verify(mShortcutServiceInternal).getShortcuts(anyInt(), anyString(), anyLong(),
                 eq(TEST_PKG_NAME), eq(Collections.singletonList(TEST_SHORTCUT_ID)),
-                eq(null), anyInt(), eq(USER_ID_PRIMARY), anyInt(), anyInt());
+                eq(null), eq(null), anyInt(), eq(USER_ID_PRIMARY), anyInt(), anyInt());
     }
 
     @Test

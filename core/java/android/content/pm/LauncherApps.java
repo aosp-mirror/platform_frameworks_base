@@ -34,6 +34,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.LocusId;
 import android.content.pm.PackageInstaller.SessionCallback;
 import android.content.pm.PackageInstaller.SessionCallbackDelegate;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -415,6 +416,9 @@ public class LauncherApps {
         List<String> mShortcutIds;
 
         @Nullable
+        List<LocusId> mLocusIds;
+
+        @Nullable
         ComponentName mActivity;
 
         @QueryFlags
@@ -447,6 +451,19 @@ public class LauncherApps {
          */
         public ShortcutQuery setShortcutIds(@Nullable List<String> shortcutIds) {
             mShortcutIds = shortcutIds;
+            return this;
+        }
+
+        /**
+         * If non-null, return only the specified shortcuts by locus ID.  When setting this field,
+         * a package name must also be set with {@link #setPackage}.
+         *
+         * @hide
+         */
+        @SystemApi
+        @NonNull
+        public ShortcutQuery setLocusIds(@Nullable List<LocusId> locusIds) {
+            mLocusIds = locusIds;
             return this;
         }
 
@@ -1022,8 +1039,8 @@ public class LauncherApps {
             // changed callback, but that only returns shortcuts with the "key" information, so
             // that won't return disabled message.
             return maybeUpdateDisabledMessage(mService.getShortcuts(mContext.getPackageName(),
-                    query.mChangedSince, query.mPackage, query.mShortcutIds, query.mActivity,
-                    query.mQueryFlags, user)
+                    query.mChangedSince, query.mPackage, query.mShortcutIds, query.mLocusIds,
+                    query.mActivity, query.mQueryFlags, user)
                     .getList());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1680,8 +1697,9 @@ public class LauncherApps {
             mShortcutChangeCallbacks.put(callbackId, state);
             try {
                 mService.registerShortcutChangeCallback(mContext.getPackageName(),
-                        query.mChangedSince, query.mPackage, query.mShortcutIds, query.mActivity,
-                        query.mQueryFlags, new ShortcutChangeCallbackProxy(state), callbackId);
+                        query.mChangedSince, query.mPackage, query.mShortcutIds, query.mLocusIds,
+                        query.mActivity, query.mQueryFlags, new ShortcutChangeCallbackProxy(state),
+                        callbackId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

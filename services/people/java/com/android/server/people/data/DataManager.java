@@ -270,8 +270,8 @@ public class DataManager {
                 | ShortcutQuery.FLAG_MATCH_PINNED | ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER;
         return mShortcutServiceInternal.getShortcuts(
                 mInjector.getCallingUserId(), /*callingPackage=*/ PLATFORM_PACKAGE_NAME,
-                /*changedSince=*/ 0, packageName, shortcutIds, /*componentName=*/ null, queryFlags,
-                userId, MY_PID, MY_UID);
+                /*changedSince=*/ 0, packageName, shortcutIds, /*locusIds=*/ null,
+                /*componentName=*/ null, queryFlags, userId, MY_PID, MY_UID);
     }
 
     @Nullable
