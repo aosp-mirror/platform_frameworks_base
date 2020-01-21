@@ -301,6 +301,7 @@ applications that come with the platform
         <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
         <permission name="android.permission.MANAGE_ACCESSIBILITY"/>
         <permission name="android.permission.MANAGE_DEVICE_ADMINS"/>
+        <permission name="android.permission.MANAGE_ROLLBACKS"/>
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
