@@ -115,7 +115,7 @@ public class TaskStackTests extends WindowTestsBase {
         // Remove stack and check if its child is also removed.
         stack.removeImmediately();
         assertNull(stack.getDisplayContent());
-        assertNull(task.getStack());
+        assertNull(task.getParent());
     }
 
     @Test
@@ -131,7 +131,7 @@ public class TaskStackTests extends WindowTestsBase {
         assertEquals(0, stack.getChildCount());
         assertNull(stack.getDisplayContent());
         assertNull(task.getDisplayContent());
-        assertNull(task.getStack());
+        assertNull(task.getParent());
     }
 
     @Test
@@ -140,6 +140,7 @@ public class TaskStackTests extends WindowTestsBase {
         final Task task = createTaskInStack(stack, 0 /* userId */);
 
         // Stack removal is deferred if one of its child is animating.
+        doReturn(true).when(stack).hasWindowsAlive();
         doReturn(true).when(task).isAnimating(TRANSITION | CHILDREN);
 
         stack.removeIfPossible();

@@ -152,6 +152,8 @@ public class TaskRecordTests extends ActivityTestsBase {
     @Test
     public void testReturnsToHomeStack() throws Exception {
         final Task task = createTask(1);
+        spyOn(task);
+        doReturn(true).when(task).hasChild();
         assertFalse(task.returnsToHomeStack());
         task.intent = null;
         assertFalse(task.returnsToHomeStack());
@@ -906,7 +908,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     }
 
     private Task createTask(int taskId) {
-        return new Task(mService, taskId, new Intent(), null, null, null,
+        return new ActivityStack(mService, taskId, new Intent(), null, null, null,
                 ActivityBuilder.getDefaultComponent(), null, false, false, false, 0, 10050, null,
                 0, false, null, 0, 0, 0, 0, 0, null, 0, false, false, false, 0,
                 0, null /*ActivityInfo*/, null /*_voiceSession*/, null /*_voiceInteractor*/,

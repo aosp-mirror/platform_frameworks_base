@@ -247,8 +247,7 @@ class ResetTargetTaskHelper {
             } else {
                 targetTask = mTargetStack.createTask(
                         atmService.mStackSupervisor.getNextTaskIdForUser(r.mUserId), r.info,
-                        null /* intent */, null /* voiceSession */, null /* voiceInteractor */,
-                        false /* toTop */);
+                        null /* intent */, false /* toTop */);
                 targetTask.affinityIntent = r.intent;
                 createdTasks.add(targetTask);
                 if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity "

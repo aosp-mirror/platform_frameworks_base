@@ -2699,8 +2699,7 @@ public class WindowManagerService extends IWindowManager.Stub
         displayContent.getDockedDividerController().checkMinimizeChanged(animate);
     }
 
-    boolean isValidPictureInPictureAspectRatio(int displayId, float aspectRatio) {
-        final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+    boolean isValidPictureInPictureAspectRatio(DisplayContent displayContent, float aspectRatio) {
         return displayContent.getPinnedStackController().isValidPictureInPictureAspectRatio(
                 aspectRatio);
     }

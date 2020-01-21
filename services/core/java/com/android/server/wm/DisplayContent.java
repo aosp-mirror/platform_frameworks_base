@@ -167,8 +167,10 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
+import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -4243,7 +4245,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         ArrayList<Task> getVisibleTasks() {
             final ArrayList<Task> visibleTasks = new ArrayList<>();
             forAllTasks(task -> {
-                if (task.isVisible()) {
+                if (!task.isRootTask() && task.isVisible()) {
                     visibleTasks.add(task);
                 }
             });
@@ -4262,36 +4264,48 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         private void addStackReferenceIfNeeded(ActivityStack stack) {
             if (stack.isActivityTypeHome()) {
                 if (mHomeStack != null) {
-                    throw new IllegalArgumentException("addStackReferenceIfNeeded: home stack="
-                            + mHomeStack + " already exist on display=" + this + " stack=" + stack);
-
+                    if (!stack.isDescendantOf(mHomeStack)) {
+                        throw new IllegalArgumentException("addStackReferenceIfNeeded: home stack="
+                                + mHomeStack + " already exist on display=" + this
+                                + " stack=" + stack);
+                    }
+                } else {
+                    mHomeStack = stack;
                 }
-                mHomeStack = stack;
             } else if (stack.isActivityTypeRecents()) {
                 if (mRecentsStack != null && mRecentsStack != stack) {
-                    throw new IllegalArgumentException(
-                        "addStackReferenceIfNeeded: recents stack=" + mRecentsStack
-                            + " already exist on display=" + this + " stack=" + stack);
+                    if (!stack.isDescendantOf(mRecentsStack)) {
+                        throw new IllegalArgumentException(
+                                "addStackReferenceIfNeeded: recents stack=" + mRecentsStack
+                                        + " already exist on display=" + this + " stack=" + stack);
+                    }
+                } else {
+                    mRecentsStack = stack;
                 }
-                mRecentsStack = stack;
             }
             final int windowingMode = stack.getWindowingMode();
             if (windowingMode == WINDOWING_MODE_PINNED) {
                 if (mPinnedStack != null) {
-                    throw new IllegalArgumentException("addStackReferenceIfNeeded: pinned stack="
-                            + mPinnedStack + " already exist on display=" + this
-                            + " stack=" + stack);
+                    if (!stack.isDescendantOf(mPinnedStack)) {
+                        throw new IllegalArgumentException(
+                                "addStackReferenceIfNeeded: pinned stack=" + mPinnedStack
+                                        + " already exist on display=" + this + " stack=" + stack);
+                    }
+                } else {
+                    mPinnedStack = stack;
                 }
-                mPinnedStack = stack;
             } else if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 if (mSplitScreenPrimaryStack != null) {
-                    throw new IllegalArgumentException("addStackReferenceIfNeeded:"
-                            + " split-screen-primary" + " stack=" + mSplitScreenPrimaryStack
-                            + " already exist on display=" + this + " stack=" + stack);
+                    if (!stack.isDescendantOf(mSplitScreenPrimaryStack)) {
+                        throw new IllegalArgumentException("addStackReferenceIfNeeded:"
+                                + " split-screen-primary" + " stack=" + mSplitScreenPrimaryStack
+                                + " already exist on display=" + this + " stack=" + stack);
+                    }
+                } else {
+                    mSplitScreenPrimaryStack = stack;
+                    mDisplayContent.onSplitScreenModeActivated();
+                    mDividerControllerLocked.notifyDockedStackExistsChanged(true);
                 }
-                mSplitScreenPrimaryStack = stack;
-                mDisplayContent.onSplitScreenModeActivated();
-                mDividerControllerLocked.notifyDockedStackExistsChanged(true);
             }
         }
 
@@ -5740,6 +5754,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mAtmService.mStackSupervisor.getNextTaskIdForUser();
     }
 
+    ActivityStack createStack(int windowingMode, int activityType, boolean onTop) {
+        return createStack(windowingMode, activityType, onTop, null /*info*/, null /*intent*/);
+    }
+
     /**
      * Creates a stack matching the input windowing mode and activity type on this display.
      * @param windowingMode The windowing mode the stack should be created in. If
@@ -5751,13 +5769,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @param onTop If true the stack will be created at the top of the display, else at the bottom.
      * @return The newly created stack.
      */
-    ActivityStack createStack(int windowingMode, int activityType, boolean onTop) {
+    ActivityStack createStack(int windowingMode, int activityType, boolean onTop, ActivityInfo info,
+            Intent intent) {
         if (mSingleTaskInstance && getStackCount() > 0) {
             // Create stack on default display instead since this display can only contain 1 stack.
             // TODO: Kinda a hack, but better that having the decision at each call point. Hoping
             // this goes away once ActivityView is no longer using virtual displays.
             return mRootWindowContainer.getDefaultDisplay().createStack(
-                    windowingMode, activityType, onTop);
+                    windowingMode, activityType, onTop, info, intent);
         }
 
         if (activityType == ACTIVITY_TYPE_UNDEFINED) {
@@ -5785,18 +5804,23 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         final int stackId = getNextStackId();
-        return createStackUnchecked(windowingMode, activityType, stackId, onTop);
+        return createStackUnchecked(windowingMode, activityType, stackId, onTop, info, intent);
     }
 
     @VisibleForTesting
     ActivityStack createStackUnchecked(int windowingMode, int activityType,
-            int stackId, boolean onTop) {
+            int stackId, boolean onTop, ActivityInfo info, Intent intent) {
         if (windowingMode == WINDOWING_MODE_PINNED && activityType != ACTIVITY_TYPE_STANDARD) {
             throw new IllegalArgumentException("Stack with windowing mode cannot with non standard "
                     + "activity type.");
         }
+        if (info == null) {
+            info = new ActivityInfo();
+            info.applicationInfo = new ApplicationInfo();
+        }
+
         final ActivityStack stack = new ActivityStack(this, stackId,
-                mRootWindowContainer.mStackSupervisor, activityType);
+                mRootWindowContainer.mStackSupervisor, activityType, info, intent);
         addStack(stack, onTop ? POSITION_TOP : POSITION_BOTTOM);
         stack.setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
                 false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,

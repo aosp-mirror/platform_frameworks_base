@@ -228,12 +228,6 @@ class WindowToken extends WindowContainer<WindowState> {
         return false;
     }
 
-    ActivityRecord asActivityRecord() {
-        // TODO: Not sure if this is the best way to handle this vs. using instanceof and casting.
-        // I am not an app window token!
-        return null;
-    }
-
     @Override
     void removeImmediately() {
         if (mDisplayContent != null) {

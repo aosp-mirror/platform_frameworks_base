@@ -32,7 +32,6 @@ import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.Process.SYSTEM_UID;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
@@ -1382,7 +1381,7 @@ class RecentTasks {
 
         // Ignore tasks from different displays
         // TODO (b/115289124): No Recents on non-default displays.
-        if (stack.getDisplayId() != DEFAULT_DISPLAY) {
+        if (!stack.isOnHomeDisplay()) {
             return false;
         }
 

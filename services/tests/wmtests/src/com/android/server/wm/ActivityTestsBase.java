@@ -375,7 +375,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             intent.setComponent(mComponent);
             intent.setFlags(mFlags);
 
-            final Task task = new Task(mSupervisor.mService, mTaskId, aInfo,
+            final Task task = new ActivityStack(mSupervisor.mService, mTaskId, aInfo,
                     intent /*intent*/, mVoiceSession, null /*_voiceInteractor*/,
                     null /*taskDescription*/, mStack);
             spyOn(task);
@@ -398,6 +398,8 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         private int mActivityType = ACTIVITY_TYPE_STANDARD;
         private boolean mOnTop = true;
         private boolean mCreateActivity = true;
+        private ActivityInfo mInfo;
+        private Intent mIntent;
 
         StackBuilder(RootWindowContainer root) {
             mRootWindowContainer = root;
@@ -434,12 +436,21 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        StackBuilder setActivityInfo(ActivityInfo info) {
+            mInfo = info;
+            return this;
+        }
+
+        StackBuilder setIntent(Intent intent) {
+            mIntent = intent;
+            return this;
+        }
+
         ActivityStack build() {
             final int stackId = mStackId >= 0 ? mStackId : mDisplay.getNextStackId();
-            final ActivityStack stack;
+            final ActivityStack stack = mDisplay.createStackUnchecked(mWindowingMode,
+                    mActivityType, stackId, mOnTop, mInfo, mIntent);
             final ActivityStackSupervisor supervisor = mRootWindowContainer.mStackSupervisor;
-
-            stack = mDisplay.createStackUnchecked(mWindowingMode, mActivityType, stackId, mOnTop);
 
             if (mCreateActivity) {
                 new ActivityBuilder(supervisor.mService)

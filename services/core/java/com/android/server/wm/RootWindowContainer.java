@@ -2131,23 +2131,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // We will then perform a windowing mode change for both scenarios.
                 stack = display.createStack(
                         r.getActivityStack().getRequestedOverrideWindowingMode(),
-                        r.getActivityType(), ON_TOP);
+                        r.getActivityType(), ON_TOP, r.info, r.intent);
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
 
-                // Currently, we don't support reparenting activities across tasks in two different
-                // stacks, so instead, just create a new task in the same stack, reparent the
-                // activity into that task, and then reparent the whole task to the new stack. This
-                // ensures that all the necessary work to migrate states in the old and new stacks
-                // is also done.
-                final Task newTask = task.getStack().createTask(
-                        mStackSupervisor.getNextTaskIdForUser(r.mUserId), r.info,
-                        r.intent, null, null, true);
+                Task newTask = stack.createTask(mStackSupervisor.getNextTaskIdForUser(r.mUserId),
+                        r.info, r.intent, true);
                 r.reparent(newTask, MAX_VALUE, "moveActivityToStack");
-
-                // Defer resume until below, and do not schedule PiP changes until we animate below
-                newTask.reparent(stack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, !ANIMATE,
-                        DEFER_RESUME, false /* schedulePictureInPictureModeChange */, reason);
             }
 
             stack.setWindowingMode(WINDOWING_MODE_PINNED);
@@ -2416,17 +2406,17 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         info.position = display != null ? display.getIndexOf(stack) : 0;
         info.configuration.setTo(stack.getConfiguration());
 
-        final int numTasks = stack.getChildCount();
+        final int numTasks = stack.getDescendantTaskCount();
         info.taskIds = new int[numTasks];
         info.taskNames = new String[numTasks];
         info.taskBounds = new Rect[numTasks];
         info.taskUserIds = new int[numTasks];
-        final int[] currenIndex = {0};
+        final int[] currentIndex = {0};
 
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 RootWindowContainer::processTaskForStackInfo, PooledLambda.__(Task.class), info,
-                currenIndex);
-        stack.forAllTasks(c, false);
+                currentIndex);
+        stack.forAllTasks(c, false /* traverseTopToBottom */, stack);
         c.recycle();
 
         final ActivityRecord top = stack.topRunningActivity();
@@ -2569,7 +2559,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     ActivityStack findStackBehind(ActivityStack stack) {
-        final DisplayContent display = getDisplayContent(stack.getDisplayId());
+        final DisplayContent display = stack.getDisplayContent();
         if (display != null) {
             for (int i = display.getStackCount() - 1; i >= 0; i--) {
                 if (display.getStackAt(i) == stack && i > 0) {

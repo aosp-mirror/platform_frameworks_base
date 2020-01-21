@@ -745,7 +745,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             synchronized (mAtmService.mGlobalLock) {
                 Slog.w(TAG, "Activity stop timeout for " + ActivityRecord.this);
                 if (isInHistory()) {
-                    activityStopped(null /*icicle*/, null /*persistentState*/, null /*description*/);
+                    activityStopped(
+                            null /*icicle*/, null /*persistentState*/, null /*description*/);
                 }
             }
         }
@@ -1286,17 +1287,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         updateColorTransform();
 
-        final ActivityStack oldStack = (oldTask != null) ? oldTask.getStack() : null;
-        final ActivityStack newStack = (newTask != null) ? newTask.getStack() : null;
-        // Inform old stack (if present) of activity removal and new stack (if set) of activity
-        // addition.
-        if (oldStack != newStack) {
-            if (oldStack !=  null) {
-                oldStack.onActivityRemovedFromStack(this);
-            }
-            if (newStack !=  null) {
-                newStack.onActivityAddedToStack(this);
-            }
+        if (oldTask != null) {
+            oldTask.cleanUpActivityReferences(this);
+        }
+        if (newTask != null && isState(RESUMED)) {
+            newTask.setResumedActivity(this, "onParentChanged");
         }
     }
 
@@ -2904,8 +2899,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Note: Call before {@link #removeFromHistory(String)}.
      */
     void cleanUp(boolean cleanServices, boolean setState) {
-        final ActivityStack stack = getActivityStack();
-        stack.onActivityRemovedFromStack(this);
+        task.cleanUpActivityReferences(this);
 
         deferRelaunchUntilPaused = false;
         frozenBeforeDestroy = false;
@@ -5833,7 +5827,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     boolean isWaitingForTransitionStart() {
         final DisplayContent dc = getDisplayContent();
-        return dc.mAppTransition.isTransitionSet()
+        return dc != null && dc.mAppTransition.isTransitionSet()
                 && (dc.mOpeningApps.contains(this)
                 || dc.mClosingApps.contains(this)
                 || dc.mChangingApps.contains(this));

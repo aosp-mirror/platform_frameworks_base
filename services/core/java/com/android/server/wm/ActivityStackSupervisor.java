@@ -419,7 +419,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
             final PooledConsumer c = PooledLambda.obtainConsumer(
                     MoveTaskToFullscreenHelper::processTask, this, PooledLambda.__(Task.class));
-            fromStack.forAllTasks(c, false);
+            fromStack.forAllTasks(c, false /* traverseTopToBottom */, fromStack);
             c.recycle();
             mToDisplay = null;
             mTopTask = null;
@@ -1724,7 +1724,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         } else {
             final PooledConsumer c = PooledLambda.obtainConsumer(
                     ActivityStackSupervisor::processRemoveTask, this, PooledLambda.__(Task.class));
-            stack.forAllTasks(c);
+            stack.forAllTasks(c, true /* traverseTopToBottom */, stack);
             c.recycle();
         }
     }
@@ -1849,14 +1849,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     boolean restoreRecentTaskLocked(Task task, ActivityOptions aOptions, boolean onTop) {
         final ActivityStack stack =
                 mRootWindowContainer.getLaunchStack(null, aOptions, task, onTop);
-        final ActivityStack currentStack = task.getStack();
+        final WindowContainer parent = task.getParent();
 
-        if (currentStack == stack) {
+        if (parent == stack) {
             // Nothing else to do since it is already restored in the right stack.
             return true;
         }
 
-        if (currentStack != null) {
+        if (parent != null) {
             // Task has already been restored once. Just re-parent it to the new stack.
             task.reparent(stack, POSITION_TOP, true /*moveParents*/, "restoreRecentTaskLocked");
             return true;
