@@ -37,6 +37,8 @@ import static android.os.storage.OnObbStateChangeListener.ERROR_NOT_MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.ERROR_PERMISSION_DENIED;
 import static android.os.storage.OnObbStateChangeListener.MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.UNMOUNTED;
+import static android.os.storage.StorageManager.PROP_FUSE;
+import static android.os.storage.StorageManager.PROP_SETTINGS_FUSE;
 
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
@@ -1617,7 +1619,10 @@ class StorageManagerService extends IStorageManager.Stub
         SystemProperties.set(StorageManager.PROP_ISOLATED_STORAGE_SNAPSHOT, Boolean.toString(
                 SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, true)));
 
-        mIsFuseEnabled = SystemProperties.getBoolean(StorageManager.PROP_FUSE, false);
+        // If there is no value in the property yet (first boot after data wipe), this value may be
+        // incorrect until #updateFusePropFromSettings where we set the correct value and reboot if
+        // different
+        mIsFuseEnabled = SystemProperties.getBoolean(PROP_FUSE, false);
         mContext = context;
         mResolver = mContext.getContentResolver();
         mCallbacks = new Callbacks(FgThread.get().getLooper());
@@ -1680,25 +1685,24 @@ class StorageManagerService extends IStorageManager.Stub
      *  and updates PROP_FUSE (reboots if changed).
      */
     private void updateFusePropFromSettings() {
-        String settingsFuseFlag = SystemProperties.get(StorageManager.PROP_SETTINGS_FUSE);
-        Slog.d(TAG, "The value of Settings Fuse Flag is "
-                + (settingsFuseFlag == null || settingsFuseFlag.isEmpty()
-                ? "null" : settingsFuseFlag));
-        // Set default value of PROP_SETTINGS_FUSE and PROP_FUSE if it
-        // is unset (neither true nor false, this happens only on the first boot
-        // after wiping data partition).
-        if (settingsFuseFlag == null || settingsFuseFlag.isEmpty()) {
-            SystemProperties.set(StorageManager.PROP_SETTINGS_FUSE, "false");
-            SystemProperties.set(StorageManager.PROP_FUSE, "false");
+        boolean defaultFuseFlag = false;
+        boolean settingsFuseFlag = SystemProperties.getBoolean(PROP_SETTINGS_FUSE, defaultFuseFlag);
+        Slog.d(TAG, "FUSE flags. Settings: " + settingsFuseFlag + ". Default: " + defaultFuseFlag);
+
+        if (TextUtils.isEmpty(SystemProperties.get(PROP_SETTINGS_FUSE))) {
+            // Set default value of PROP_SETTINGS_FUSE and PROP_FUSE if it
+            // is unset (neither true nor false).
+            // This happens only on the first boot after wiping data partition
+            SystemProperties.set(PROP_SETTINGS_FUSE, Boolean.toString(defaultFuseFlag));
+            SystemProperties.set(PROP_FUSE, Boolean.toString(defaultFuseFlag));
             return;
         }
 
-        if (!SystemProperties.get(StorageManager.PROP_FUSE).equals(settingsFuseFlag)) {
-            Slog.d(TAG, "Set persist.sys.fuse to " + settingsFuseFlag);
-            SystemProperties.set(StorageManager.PROP_FUSE, settingsFuseFlag);
+        if (mIsFuseEnabled != settingsFuseFlag) {
+            Slog.i(TAG, "Toggling persist.sys.fuse to " + settingsFuseFlag);
+            SystemProperties.set(PROP_FUSE, Boolean.toString(settingsFuseFlag));
             // Perform hard reboot to kick policy into place
-            mContext.getSystemService(PowerManager.class).reboot("Reboot device for FUSE system"
-                    + "property change to take effect");
+            mContext.getSystemService(PowerManager.class).reboot("fuse_prop");
         }
     }
 
