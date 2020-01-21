@@ -27,6 +27,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings.Global;
 import android.telephony.Annotation;
+import android.telephony.CdmaEriInformation;
 import android.telephony.CellSignalStrength;
 import android.telephony.CellSignalStrengthCdma;
 import android.telephony.NetworkRegistrationInfo;
@@ -41,7 +42,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.telephony.cdma.EriInfo;
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.net.SignalStrengthUtil;
@@ -415,10 +415,10 @@ public class MobileSignalController extends SignalController<
             return false;
         }
         if (isCdma() && mServiceState != null) {
-            final int iconMode = mServiceState.getCdmaEriIconMode();
-            return mServiceState.getCdmaEriIconIndex() != EriInfo.ROAMING_INDICATOR_OFF
-                    && (iconMode == EriInfo.ROAMING_ICON_MODE_NORMAL
-                    || iconMode == EriInfo.ROAMING_ICON_MODE_FLASH);
+            final int iconMode = mPhone.getCdmaEriInformation().getEriIconMode();
+            return mPhone.getCdmaEriInformation().getEriIconIndex() != CdmaEriInformation.ERI_OFF
+                    && (iconMode == CdmaEriInformation.ERI_ICON_MODE_NORMAL
+                    || iconMode == CdmaEriInformation.ERI_ICON_MODE_FLASH);
         } else {
             return mServiceState != null && mServiceState.getRoaming();
         }
