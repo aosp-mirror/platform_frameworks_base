@@ -67,11 +67,13 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     style="@style/TextAppearance.NotificationImportanceHeader"
+                    android:visibility="gone"
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="2dp"
                     android:text="@*android:string/notification_header_divider_symbol" />
                 <TextView
                     android:id="@+id/name"
+                    android:visibility="gone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
