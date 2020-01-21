@@ -28,7 +28,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.net.InvalidPacketException.ErrorCode;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -148,13 +147,18 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
     }
 
-    private class DefaultAnimationControlListener implements WindowInsetsAnimationControlListener {
+    /**
+     * The default implementation of listener, to be used by InsetsController and InsetsPolicy to
+     * animate insets.
+     */
+    public static class InternalAnimationControlListener
+            implements WindowInsetsAnimationControlListener {
 
         private WindowInsetsAnimationController mController;
         private ObjectAnimator mAnimator;
-        private boolean mShow;
+        protected boolean mShow;
 
-        DefaultAnimationControlListener(boolean show) {
+        InternalAnimationControlListener(boolean show) {
             mShow = show;
         }
 
@@ -178,9 +182,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     onAnimationFinish();
                 }
             });
-            mStartingAnimation = true;
+            setStartingAnimation(true);
             mAnimator.start();
-            mStartingAnimation = false;
+            setStartingAnimation(false);
         }
 
         @Override
@@ -191,16 +195,19 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
         }
 
-        private void onAnimationFinish() {
+        protected void setStartingAnimation(boolean startingAnimation) {
+        }
+
+        protected void onAnimationFinish() {
             mController.finish(mShow);
         }
 
-        private float getRawProgress() {
+        protected float getRawProgress() {
             float fraction = (float) mAnimator.getCurrentPlayTime() / mAnimator.getDuration();
             return mShow ? fraction : 1 - fraction;
         }
 
-        private long getDurationMs() {
+        protected long getDurationMs() {
             if (mAnimator != null) {
                 return mAnimator.getDuration();
             }
@@ -220,6 +227,17 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
         final InsetsAnimationControlImpl control;
         final @AnimationType int type;
+    }
+
+    private class DefaultAnimationControlListener extends InternalAnimationControlListener {
+        DefaultAnimationControlListener(boolean show) {
+            super(show);
+        }
+
+        @Override
+        protected void setStartingAnimation(boolean startingAnimation) {
+            mStartingAnimation = startingAnimation;
+        }
     }
 
     private final String TAG = "InsetsControllerImpl";
