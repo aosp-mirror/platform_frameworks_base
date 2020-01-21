@@ -59,7 +59,7 @@ import org.junit.runner.RunWith;
 import java.util.function.IntConsumer;
 
 /**
- * Tests the state transitions of {@link MagnificationGestureHandler}
+ * Tests the state transitions of {@link FullScreenMagnificationGestureHandler}
  *
  * Here's a dot graph describing the transitions being tested:
  * {@code
@@ -87,7 +87,7 @@ import java.util.function.IntConsumer;
  * }
  */
 @RunWith(AndroidJUnit4.class)
-public class MagnificationGestureHandlerTest {
+public class FullScreenMagnificationGestureHandlerTest {
 
     public static final int STATE_IDLE = 1;
     public static final int STATE_ZOOMED = 2;
@@ -113,7 +113,7 @@ public class MagnificationGestureHandlerTest {
     MagnificationController mMagnificationController;
 
     private OffsettableClock mClock;
-    private MagnificationGestureHandler mMgh;
+    private FullScreenMagnificationGestureHandler mMgh;
     private TestHandler mHandler;
 
     private long mLastDownTime = Integer.MIN_VALUE;
@@ -154,16 +154,17 @@ public class MagnificationGestureHandlerTest {
     }
 
     @NonNull
-    private MagnificationGestureHandler newInstance(boolean detectTripleTap,
+    private FullScreenMagnificationGestureHandler newInstance(boolean detectTripleTap,
             boolean detectShortcutTrigger) {
-        MagnificationGestureHandler h = new MagnificationGestureHandler(
+        FullScreenMagnificationGestureHandler h = new FullScreenMagnificationGestureHandler(
                 mContext, mMagnificationController,
                 detectTripleTap, detectShortcutTrigger, DISPLAY_0);
         mHandler = new TestHandler(h.mDetectingState, mClock) {
             @Override
             protected String messageToString(Message m) {
                 return DebugUtils.valueToString(
-                        MagnificationGestureHandler.DetectingState.class, "MESSAGE_", m.what);
+                        FullScreenMagnificationGestureHandler.DetectingState.class, "MESSAGE_",
+                        m.what);
             }
         };
         h.mDetectingState.mHandler = mHandler;
@@ -541,7 +542,8 @@ public class MagnificationGestureHandlerTest {
     }
 
     private static String stateToString(int state) {
-        return DebugUtils.valueToString(MagnificationGestureHandlerTest.class, "STATE_", state);
+        return DebugUtils.valueToString(FullScreenMagnificationGestureHandlerTest.class, "STATE_",
+                state);
     }
 
     private void tap() {
@@ -591,7 +593,7 @@ public class MagnificationGestureHandlerTest {
 
     private MotionEvent moveEvent(float x, float y) {
         return fromTouchscreen(
-        	    MotionEvent.obtain(mLastDownTime, mClock.now(), ACTION_MOVE, x, y, 0));
+                MotionEvent.obtain(mLastDownTime, mClock.now(), ACTION_MOVE, x, y, 0));
     }
 
     private MotionEvent downEvent() {
@@ -638,7 +640,7 @@ public class MagnificationGestureHandlerTest {
             /* action */ action,
             /* pointerCount */ 2,
             /* pointerProperties */ new MotionEvent.PointerProperties[] {
-                        defPointerProperties, pointerProperties },
+                    defPointerProperties, pointerProperties},
             /* pointerCoords */ new MotionEvent.PointerCoords[] { defPointerCoords, pointerCoords },
             /* metaState */ 0,
             /* buttonState */ 0,

@@ -31,6 +31,7 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.android.server.LocalServices;
 import com.android.server.accessibility.gestures.TouchExplorer;
+import com.android.server.accessibility.magnification.MagnificationGestureHandler;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.ArrayList;
@@ -402,7 +403,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                 final boolean triggerable = (mEnabledFeatures
                         & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0;
                 MagnificationGestureHandler magnificationGestureHandler =
-                        new MagnificationGestureHandler(displayContext,
+                        new FullScreenMagnificationGestureHandler(displayContext,
                                 mAms.getMagnificationController(),
                                 detectControlGestures, triggerable, displayId);
                 addFirstEventHandler(displayId, magnificationGestureHandler);
