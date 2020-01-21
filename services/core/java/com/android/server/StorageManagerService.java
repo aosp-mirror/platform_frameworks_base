@@ -1997,10 +1997,11 @@ class StorageManagerService extends IStorageManager.Stub
                         } catch (ExternalStorageServiceException e) {
                             Slog.e(TAG, "Failed to mount volume " + vol, e);
 
-                            Slog.i(TAG, "Scheduling reset in one minute");
+                            int nextResetSeconds = REMOTE_TIMEOUT_SECONDS * 2;
+                            Slog.i(TAG, "Scheduling reset in " + nextResetSeconds + "s");
                             mHandler.removeMessages(H_RESET);
                             mHandler.sendMessageDelayed(mHandler.obtainMessage(H_RESET),
-                                    TimeUnit.SECONDS.toMillis(REMOTE_TIMEOUT_SECONDS * 2));
+                                    TimeUnit.SECONDS.toMillis(nextResetSeconds));
                             return false;
                         } finally {
                             try {
