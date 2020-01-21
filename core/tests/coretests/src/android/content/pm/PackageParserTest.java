@@ -470,7 +470,7 @@ public class PackageParserTest {
         PackageParser.collectCertificates(p, false);
         PackageInfo pi = PackageParser.generatePackageInfo(p, apexInfo, flags);
 
-        assertEquals("com.google.android.tzdata", pi.applicationInfo.packageName);
+        assertEquals("com.google.android.tzdata2", pi.applicationInfo.packageName);
         assertTrue(pi.applicationInfo.enabled);
         assertEquals(28, pi.applicationInfo.targetSdkVersion);
         assertEquals(191000070, pi.applicationInfo.longVersionCode);
@@ -479,7 +479,7 @@ public class PackageParserTest {
         assertEquals("Bundle[{com.android.vending.derived.apk.id=1}]",
                 pi.applicationInfo.metaData.toString());
 
-        assertEquals("com.google.android.tzdata", pi.packageName);
+        assertEquals("com.google.android.tzdata2", pi.packageName);
         assertEquals(191000070, pi.getLongVersionCode());
         assertNotNull(pi.signingInfo);
         assertTrue(pi.signingInfo.getApkContentsSigners().length > 0);
