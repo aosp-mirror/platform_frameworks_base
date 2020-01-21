@@ -23,7 +23,9 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.pm.UserInfo;
 import android.os.Looper;
+import android.os.ServiceSpecificException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.UserManagerInternal;
 
 import androidx.test.InstrumentationRegistry;
@@ -31,11 +33,13 @@ import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
+import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.util.List;
 
@@ -241,6 +245,65 @@ public class UserManagerServiceCreateProfileTest {
         assertTrue("Cannot add a managed profile by removing another one",
                 mUserManagerService.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
                         true /* allow remove */));
+    }
+
+    @Test
+    public void testCreateProfileForUser_lowStorageException() {
+        DeviceStorageMonitorInternal dsmMock = Mockito.mock(DeviceStorageMonitorInternal.class);
+        Mockito.when(dsmMock.isMemoryLow()).thenReturn(true);
+        LocalServices.addService(DeviceStorageMonitorInternal.class, dsmMock);
+
+        try {
+            mUserManagerService.createProfileForUserWithThrow("user2", USER_TYPE_PROFILE_MANAGED, 0,
+                    UserHandle.USER_SYSTEM, null);
+        } catch (ServiceSpecificException e) {
+            assertEquals(UserManager.USER_OPERATION_ERROR_LOW_STORAGE,
+                    UserManager.UserOperationException.from(e).getUserOperationResult());
+        } finally {
+            LocalServices.removeServiceForTest(DeviceStorageMonitorInternal.class);
+        }
+    }
+
+    @Test
+    public void testCreateProfileForUser_unknownParentUser() {
+        DeviceStorageMonitorInternal dsmMock = Mockito.mock(DeviceStorageMonitorInternal.class);
+        Mockito.when(dsmMock.isMemoryLow()).thenReturn(false);
+        LocalServices.addService(DeviceStorageMonitorInternal.class, dsmMock);
+
+        try {
+            final int badParentUserId = 1234;
+            mUserManagerService.createProfileForUserWithThrow("profile", USER_TYPE_PROFILE_MANAGED,
+                    0, badParentUserId, null);
+        } catch (ServiceSpecificException e) {
+            assertEquals(UserManager.USER_OPERATION_ERROR_UNKNOWN,
+                    UserManager.UserOperationException.from(e).getUserOperationResult());
+        } finally {
+            LocalServices.removeServiceForTest(DeviceStorageMonitorInternal.class);
+        }
+    }
+
+    @Test
+    public void testCreateManagedProfileForUser_maxManagedUsersException() {
+        DeviceStorageMonitorInternal dsmMock = Mockito.mock(DeviceStorageMonitorInternal.class);
+        Mockito.when(dsmMock.isMemoryLow()).thenReturn(false);
+        LocalServices.addService(DeviceStorageMonitorInternal.class, dsmMock);
+
+        UserManagerService userManagerServiceSpy = Mockito.spy(mUserManagerService);
+        Mockito.doReturn(false).when(userManagerServiceSpy).canAddMoreManagedProfiles(
+                Mockito.anyInt(), Mockito.anyBoolean());
+
+        Mockito.doReturn(false).when(userManagerServiceSpy).canAddMoreProfilesToUser(
+                Mockito.anyString(), Mockito.anyInt(), Mockito.anyBoolean());
+
+        try {
+            userManagerServiceSpy.createProfileForUserWithThrow("profile",
+                    USER_TYPE_PROFILE_MANAGED, 0, UserHandle.USER_SYSTEM, null);
+        } catch (ServiceSpecificException e) {
+            assertEquals(UserManager.USER_OPERATION_ERROR_MAX_USERS,
+                    UserManager.UserOperationException.from(e).getUserOperationResult());
+        } finally {
+            LocalServices.removeServiceForTest(DeviceStorageMonitorInternal.class);
+        }
     }
 
     private void removeUsers() {

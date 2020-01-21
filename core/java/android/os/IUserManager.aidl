@@ -41,11 +41,11 @@ interface IUserManager {
      * END OF DO NOT MOVE
      */
 
-    UserInfo createUser(in String name, in String userType, int flags);
-    UserInfo preCreateUser(in String userType);
-    UserInfo createProfileForUser(in String name, in String userType, int flags, int userId,
+    UserInfo createUserWithThrow(in String name, in String userType, int flags);
+    UserInfo preCreateUserWithThrow(in String userType);
+    UserInfo createProfileForUserWithThrow(in String name, in String userType, int flags, int userId,
             in String[] disallowedPackages);
-    UserInfo createRestrictedProfile(String name, int parentUserHandle);
+    UserInfo createRestrictedProfileWithThrow(String name, int parentUserHandle);
     void setUserEnabled(int userId);
     void setUserAdmin(int userId);
     void evictCredentialEncryptionKey(int userId);
@@ -100,7 +100,7 @@ interface IUserManager {
     boolean isManagedProfile(int userId);
     boolean isDemoUser(int userId);
     boolean isPreCreated(int userId);
-    UserInfo createProfileForUserEvenWhenDisallowed(in String name, in String userType, int flags,
+    UserInfo createProfileForUserEvenWhenDisallowedWithThrow(in String name, in String userType, int flags,
             int userId, in String[] disallowedPackages);
     boolean isUserUnlockingOrUnlocked(int userId);
     int getUserIconBadgeResId(int userId);

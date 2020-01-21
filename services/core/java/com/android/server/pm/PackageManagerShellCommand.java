@@ -81,6 +81,7 @@ import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -2516,7 +2517,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         name = arg;
-        UserInfo info;
+        UserInfo info = null;
         IUserManager um = IUserManager.Stub.asInterface(
                 ServiceManager.getService(Context.USER_SERVICE));
         IAccountManager accm = IAccountManager.Stub.asInterface(
@@ -2524,17 +2525,22 @@ class PackageManagerShellCommand extends ShellCommand {
         if (userType == null) {
             userType = UserInfo.getDefaultUserType(flags);
         }
-        if (UserManager.isUserTypeRestricted(userType)) {
-            // In non-split user mode, userId can only be SYSTEM
-            int parentUserId = userId >= 0 ? userId : UserHandle.USER_SYSTEM;
-            info = um.createRestrictedProfile(name, parentUserId);
-            accm.addSharedAccountsFromParentUser(parentUserId, userId,
-                    (Process.myUid() == Process.ROOT_UID) ? "root" : "com.android.shell");
-        } else if (userId < 0) {
-            info = preCreateOnly ?
-                    um.preCreateUser(userType) : um.createUser(name, userType, flags);
-        } else {
-            info = um.createProfileForUser(name, userType, flags, userId, null);
+        try {
+            if (UserManager.isUserTypeRestricted(userType)) {
+                // In non-split user mode, userId can only be SYSTEM
+                int parentUserId = userId >= 0 ? userId : UserHandle.USER_SYSTEM;
+                info = um.createRestrictedProfileWithThrow(name, parentUserId);
+                accm.addSharedAccountsFromParentUser(parentUserId, userId,
+                        (Process.myUid() == Process.ROOT_UID) ? "root" : "com.android.shell");
+            } else if (userId < 0) {
+                info = preCreateOnly ?
+                        um.preCreateUserWithThrow(userType) :
+                        um.createUserWithThrow(name, userType, flags);
+            } else {
+                info = um.createProfileForUserWithThrow(name, userType, flags, userId, null);
+            }
+        } catch (ServiceSpecificException e) {
+            getErrPrintWriter().println("Error: " + e);
         }
 
         if (info != null) {

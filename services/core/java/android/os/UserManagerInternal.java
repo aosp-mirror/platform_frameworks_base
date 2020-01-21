@@ -162,7 +162,8 @@ public abstract class UserManagerInternal {
      * createAndManageUser is called by the device owner.
      */
     public abstract UserInfo createUserEvenWhenDisallowed(String name, String userType,
-            int flags, String[] disallowedPackages);
+            int flags, String[] disallowedPackages)
+            throws UserManager.CheckedUserOperationException;
 
     /**
      * Same as {@link UserManager#removeUser(int userId)}, but bypasses the check for
