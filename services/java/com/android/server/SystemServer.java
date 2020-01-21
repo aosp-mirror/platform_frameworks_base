@@ -1769,7 +1769,7 @@ public final class SystemServer {
             if (!isWatch && !disableNetworkTime) {
                 t.traceBegin("StartNetworkTimeUpdateService");
                 try {
-                    networkTimeUpdater = new NetworkTimeUpdateServiceImpl(context);
+                    networkTimeUpdater = new NetworkTimeUpdateService(context);
                     ServiceManager.addService("network_time_update_service", networkTimeUpdater);
                 } catch (Throwable e) {
                     reportWtf("starting NetworkTimeUpdate service", e);
