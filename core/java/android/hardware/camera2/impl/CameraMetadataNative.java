@@ -1703,6 +1703,15 @@ public class CameraMetadataNative implements Parcelable {
 
 
     /**
+     * Retrieves the pointer to the native CameraMetadata as a Java long.
+     *
+     * @hide
+     */
+    public long getMetadataPtr() {
+        return mMetadataPtr;
+    }
+
+    /**
      * Return a list containing keys of the given key class for all defined vendor tags.
      *
      * @hide
