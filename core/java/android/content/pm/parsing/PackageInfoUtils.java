@@ -345,6 +345,7 @@ public class PackageInfoUtils {
         ai.requestedVrComponent = a.requestedVrComponent;
         ai.rotationAnimation = a.rotationAnimation;
         ai.colorMode = a.colorMode;
+        ai.preferMinimalPostProcessing = a.preferMinimalPostProcessing;
         ai.windowLayout = a.windowLayout;
         ai.metaData = a.metaData;
         ai.applicationInfo = applicationInfo;

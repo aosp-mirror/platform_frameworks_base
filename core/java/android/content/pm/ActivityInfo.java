@@ -290,6 +290,15 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public int colorMode = COLOR_MODE_DEFAULT;
 
     /**
+     * Value for {@link #preferMinimalPostProcessing} indicating that by default
+     * minimal post processing is not preferred.
+     *
+     * @see android.R.attr#preferMinimalPostProcessing
+     * @hide
+     */
+    public static final boolean MINIMAL_POST_PROCESSING_DEFAULT = false;
+
+    /**
      * Indicates whether the activity wants the connected display to do minimal post processing on
      * the produced image or video frames. This will only be requested if this activity's main
      * window is visible on the screen.
@@ -315,7 +324,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @see android.view.WindowManager.LayoutParams#preferMinimalPostProcessing
      * @see android.view.Display#isMinimalPostProcessingSupported
      */
-    public boolean preferMinimalPostProcessing = false;
+    public boolean preferMinimalPostProcessing = MINIMAL_POST_PROCESSING_DEFAULT;
 
     /**
      * Bit in {@link #flags} indicating whether this activity is able to
