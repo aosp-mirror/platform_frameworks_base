@@ -21,8 +21,7 @@
 #include <SkMatrix.h>
 #include <android/hardware_buffer.h>
 #include <cutils/compiler.h>
-// TODO: Use public SurfaceTexture APIs once available and include public NDK header file instead.
-#include <gui/surfacetexture/surface_texture_platform.h>
+#include <android/surface_texture.h>
 
 #include <map>
 #include <memory>
@@ -37,7 +36,7 @@ namespace uirenderer {
 class AutoBackendTextureRelease;
 class RenderState;
 
-typedef std::unique_ptr<ASurfaceTexture> AutoTextureRelease;
+typedef std::unique_ptr<ASurfaceTexture, decltype(&ASurfaceTexture_release)> AutoTextureRelease;
 
 // Container to hold the properties a layer should be set to at the start
 // of a render pass

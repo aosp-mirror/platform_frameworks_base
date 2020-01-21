@@ -19,12 +19,9 @@
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 
+#include <android/surface_texture_jni.h>
 #include "core_jni_helpers.h"
-#include <android_runtime/android_graphics_SurfaceTexture.h>
 
-#include <gui/IGraphicBufferProducer.h>
-#include <gui/surfacetexture/surface_texture_platform.h>
-#include <gui/surfacetexture/SurfaceTexture.h>
 #include <hwui/Paint.h>
 #include <SkMatrix.h>
 #include <DeferredLayerUpdater.h>
@@ -61,10 +58,8 @@ static void TextureLayer_setTransform(JNIEnv* env, jobject clazz,
 static void TextureLayer_setSurfaceTexture(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr, jobject surface) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
-    auto consumer = SurfaceTexture_getSurfaceTexture(env, surface);
-    auto producer = SurfaceTexture_getProducer(env, surface);
-    layer->setSurfaceTexture(AutoTextureRelease(
-            ASurfaceTexture_create(consumer, producer)));
+    ASurfaceTexture* surfaceTexture = ASurfaceTexture_fromSurfaceTexture(env, surface);
+    layer->setSurfaceTexture(AutoTextureRelease(surfaceTexture, &ASurfaceTexture_release));
 }
 
 static void TextureLayer_updateSurfaceTexture(JNIEnv* env, jobject clazz,
