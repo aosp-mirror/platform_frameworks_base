@@ -1418,6 +1418,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE =
             "android.telephony.extra.DEFAULT_SUBSCRIPTION_SELECT_TYPE";
 
@@ -1437,6 +1438,7 @@ public class TelephonyManager {
      * to indicate there's no need to re-select any default subscription.
      * @hide
      */
+    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_NONE = 0;
 
     /**
@@ -1444,6 +1446,7 @@ public class TelephonyManager {
      * to indicate there's a need to select default data subscription.
      * @hide
      */
+    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_DATA = 1;
 
     /**
@@ -1451,6 +1454,7 @@ public class TelephonyManager {
      * to indicate there's a need to select default voice call subscription.
      * @hide
      */
+    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_VOICE = 2;
 
     /**
@@ -1458,6 +1462,7 @@ public class TelephonyManager {
      * to indicate there's a need to select default sms subscription.
      * @hide
      */
+    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_SMS = 3;
 
     /**
@@ -1467,6 +1472,7 @@ public class TelephonyManager {
      * which subscription should be the default subscription.
      * @hide
      */
+    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_ALL = 4;
 
     /**
@@ -1476,6 +1482,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_SIM_COMBINATION_WARNING_TYPE =
             "android.telephony.extra.SIM_COMBINATION_WARNING_TYPE";
 
@@ -1492,6 +1499,7 @@ public class TelephonyManager {
      * to indicate there's no SIM combination warning.
      * @hide
      */
+    @SystemApi
     public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_NONE = 0;
 
     /**
@@ -1499,6 +1507,7 @@ public class TelephonyManager {
      * to indicate two active SIMs are both CDMA hence there might be functional limitation.
      * @hide
      */
+    @SystemApi
     public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_DUAL_CDMA = 1;
 
     /**
@@ -1509,6 +1518,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_SIM_COMBINATION_NAMES =
             "android.telephony.extra.SIM_COMBINATION_NAMES";
 
