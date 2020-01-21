@@ -29,12 +29,12 @@ import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.StatusProto;
 import com.google.android.icing.protobuf.InvalidProtocolBufferException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  * This class provides access to the centralized AppSearch index maintained by the system.
@@ -158,26 +158,25 @@ public class AppSearchManager {
      * name of a schema type previously registered via the {@link #setSchema} method.
      *
      * @param documents {@link Document Documents} that need to be indexed.
-     * @param executor Executor on which to invoke the callback.
-     * @param callback Callback to receive errors. On success, it will be called with {@code null}.
-     *     On failure, it will be called with a {@link Throwable} describing the failure.
+     * @return An {@link AppSearchBatchResult} mapping the document URIs to {@link Void} if they
+     *     were successfully indexed, or a {@link Throwable} describing the failure if they could
+     *     not be indexed.
+     * @hide
      */
-    public void putDocuments(
-            @NonNull List<Document> documents,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<? super Throwable> callback) {
-        AndroidFuture<Void> future = new AndroidFuture<>();
+    public AppSearchBatchResult<String, Void> putDocuments(@NonNull List<Document> documents) {
+        // TODO(b/146386470): Transmit these documents as a RemoteStream instead of sending them in
+        // one big list.
+        List<byte[]> documentsBytes = new ArrayList<>(documents.size());
         for (Document document : documents) {
-            // TODO(b/146386470) batching Document protos
-            try {
-                mService.putDocument(document.getProto().toByteArray(), future);
-            } catch (RemoteException e) {
-                future.completeExceptionally(e);
-                break;
-            }
+            documentsBytes.add(document.getProto().toByteArray());
         }
-        // TODO(b/147614371) Fix error report for multiple documents.
-        future.whenCompleteAsync((noop, err) -> callback.accept(err), executor);
+        AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
+        try {
+            mService.putDocuments(documentsBytes, future);
+        } catch (RemoteException e) {
+            future.completeExceptionally(e);
+        }
+        return getFutureOrThrow(future);
     }
 
     /**
