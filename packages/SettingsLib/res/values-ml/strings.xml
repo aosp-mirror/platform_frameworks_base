@@ -230,6 +230,8 @@
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP പതിപ്പ്"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Bluetooth AVRCP പതിപ്പ് തിരഞ്ഞെടുക്കുക"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP പതിപ്പ്"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Bluetooth MAP പതിപ്പ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Bluetooth ഓഡിയോ കോഡെക്"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Bluetooth Audio Codec\nSelection ട്രിഗ്ഗര്‍ ചെയ്യുക"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Bluetooth ഓഡിയോ സാമ്പിൾ നിരക്ക്"</string>
@@ -276,7 +278,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT വഴി ഇൻസ്റ്റാൾ ചെയ്‌ത കേടാക്കുന്ന പ്രവർത്തനരീതിയുള്ള ആപ്പുകൾ പരിശോധിക്കുക."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"പേരില്ലാത്ത Bluetooth ഉപകരണങ്ങൾ (MAC വിലാസങ്ങൾ മാത്രം) പ്രദർശിപ്പിക്കും"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"അസ്വീകാര്യമായ തരത്തിൽ ഉയർന്ന വോളിയമോ ശബ്ദ നിയന്ത്രണത്തിന്റെ അഭാവമോ പോലെ, വിദൂര ഉപകരണങ്ങളുമായി ബന്ധപ്പെട്ട വോളിയം പ്രശ്നങ്ങൾ ഉണ്ടാകുന്ന സാഹചര്യത്തിൽ, Bluetooth അബ്‌സൊല്യൂട്ട് വോളിയം ഫീച്ചർ പ്രവർത്തനരഹിതമാക്കുന്നു."</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"Bluetooth Gabeldorche ഫീച്ചർ സ്‌റ്റാക്ക് പ്രവർത്തനക്ഷമമാക്കുന്നു."</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche ഫീച്ചർ സ്റ്റാക്ക് പ്രവർത്തനക്ഷമമാക്കുന്നു."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"പ്രാദേശിക ടെർമിനൽ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"പ്രാദേശിക ഷെൽ ആക്‌സസ് നൽകുന്ന ടെർമിനൽ അപ്ലിക്കേഷൻ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP പരിശോധന"</string>

@@ -230,6 +230,8 @@
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Povoliť Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Verzia rozhrania Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Zvoľte verziu rozhrania Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Verzia profilu Bluetooth MAP"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Výber verzie profilu Bluetooth MAP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Bluetooth Audio – kodek"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Spustiť zvukový kodek Bluetooth\nVýber"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Bluetooth Audio – vzorkovacia frekvencia"</string>
@@ -276,7 +278,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Kontrolovať škodlivosť aplikácií nainštalovaných pomocou nástroja ADB alebo ADT"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Zariadenia Bluetooth sa budú zobrazovať bez názvov (iba adresy MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Umožňuje zakázať funkciu absolútnej hlasitosti rozhrania Bluetooth v prípade problémov s hlasitosťou vo vzdialených zariadeniach, ako je napríklad neprijateľne vysoká hlasitosť alebo absencia ovládacích prvkov."</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"Umožňuje povoliť skupiny funkcií Bluetooth Gabeldorche."</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Umožňuje povoliť skupinu funkcií Bluetooth Gabeldorche."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Miestny terminál"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Povoliť terminálovú apl. na miestny prístup k prostrediu shell"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Kontrola HDCP"</string>

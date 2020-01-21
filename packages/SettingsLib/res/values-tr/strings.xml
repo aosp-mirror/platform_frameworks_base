@@ -230,6 +230,8 @@
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche\'yi etkileştir"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP Sürümü"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Bluetooth AVRCP Sürümünü seçin"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP Sürümü"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Bluetooth MAP Sürümünü seçin"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Bluetooth Ses Codec\'i"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Bluetooth Ses Codec\'i Tetikleme\nSeçimi"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Bluetooth Ses Örnek Hızı"</string>
@@ -276,7 +278,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT üzerinden yüklenen uygulamaları zararlı davranışlara karşı denetle."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Adsız Bluetooth cihazları (yalnızca MAC adresleri) gösterilecek"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Uzak cihazda sesin aşırı yüksek olması veya kontrol edilememesi gibi ses sorunları olması ihtimaline karşı Bluetooh mutlak ses özelliğini iptal eder."</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"Bluetooth Gabeldorche özellik grubunu etkinleştirir."</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche özellik yığınını etkinleştirir."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Yerel terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Yerel kabuk erişimi sunan terminal uygulamasını etkinleştir"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP denetimi"</string>
