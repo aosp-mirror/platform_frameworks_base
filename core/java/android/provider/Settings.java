@@ -7488,6 +7488,21 @@ public final class Settings {
         public static final String INCALL_POWER_BUTTON_BEHAVIOR = "incall_power_button_behavior";
 
         /**
+         * Whether the user allows minimal post processing or not.
+         *
+         * <p>Values:
+         * 0 - Not allowed. Any preferences set through the Window.setPreferMinimalPostProcessing
+         *     API will be ignored.
+         * 1 - Allowed. Any preferences set through the Window.setPreferMinimalPostProcessing API
+         *     will be respected and the appropriate signals will be sent to display.
+         *     (Default behaviour)
+         *
+         * @hide
+         */
+        public static final String MINIMAL_POST_PROCESSING_ALLOWED =
+                "minimal_post_processing_allowed";
+
+        /**
          * INCALL_POWER_BUTTON_BEHAVIOR value for "turn off screen".
          * @hide
          */

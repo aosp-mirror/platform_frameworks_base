@@ -39,6 +39,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.database.ContentObserver;
 import android.graphics.ColorSpace;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -60,6 +61,7 @@ import android.hardware.display.WifiDisplayStatus;
 import android.hardware.input.InputManagerInternal;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -77,6 +79,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.IntArray;
 import android.util.Pair;
@@ -304,6 +307,13 @@ public final class DisplayManagerService extends SystemService {
 
     private SensorManager mSensorManager;
 
+    // Whether minimal post processing is allowed by the user.
+    @GuardedBy("mSyncRoot")
+    private boolean mMinimalPostProcessingAllowed;
+
+    // Receives notifications about changes to Settings.
+    private SettingsObserver mSettingsObserver;
+
     public DisplayManagerService(Context context) {
         this(context, new Injector());
     }
@@ -403,6 +413,7 @@ public final class DisplayManagerService extends SystemService {
                 BrightnessConfiguration config =
                         mPersistentDataStore.getBrightnessConfiguration(userSerial);
                 mDisplayPowerController.setBrightnessConfiguration(config);
+                handleSettingsChange();
             }
             mDisplayPowerController.onSwitchUser(newUserId);
         }
@@ -428,6 +439,8 @@ public final class DisplayManagerService extends SystemService {
             // Just in case the top inset changed before the system was ready. At this point, any
             // relevant configuration should be in place.
             recordTopInsetLocked(mLogicalDisplays.get(Display.DEFAULT_DISPLAY));
+
+            updateSettingsLocked();
         }
 
         mDisplayModeDirector.setDesiredDisplayModeSpecsListener(
@@ -435,6 +448,8 @@ public final class DisplayManagerService extends SystemService {
         mDisplayModeDirector.start(mSensorManager);
 
         mHandler.sendEmptyMessage(MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS);
+
+        mSettingsObserver = new SettingsObserver();
     }
 
     @VisibleForTesting
@@ -567,6 +582,33 @@ public final class DisplayManagerService extends SystemService {
                 mTempDisplayStateWorkQueue.clear();
             }
         }
+    }
+
+    private class SettingsObserver extends ContentObserver {
+        SettingsObserver() {
+            super(mHandler);
+
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Secure.getUriFor(
+                        Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED), false, this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            handleSettingsChange();
+        }
+    }
+
+    private void handleSettingsChange() {
+        synchronized (mSyncRoot) {
+            updateSettingsLocked();
+            scheduleTraversalLocked(false);
+        }
+    }
+
+    private void updateSettingsLocked() {
+        mMinimalPostProcessingAllowed = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED, 1, UserHandle.USER_CURRENT) != 0;
     }
 
     private DisplayInfo getDisplayInfoInternal(int displayId, int callingUid) {
@@ -1192,7 +1234,7 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void setDisplayPropertiesInternal(int displayId, boolean hasContent,
-            float requestedRefreshRate, int requestedModeId, boolean requestedMinimalPostProcessing,
+            float requestedRefreshRate, int requestedModeId, boolean preferMinimalPostProcessing,
             boolean inTraversal) {
         synchronized (mSyncRoot) {
             LogicalDisplay display = mLogicalDisplays.get(displayId);
@@ -1220,14 +1262,13 @@ public final class DisplayManagerService extends SystemService {
             mDisplayModeDirector.getAppRequestObserver().setAppRequestedMode(
                     displayId, requestedModeId);
 
+            if (display.getDisplayInfoLocked().minimalPostProcessingSupported) {
+                boolean mppRequest = mMinimalPostProcessingAllowed && preferMinimalPostProcessing;
 
-            if (display.getDisplayInfoLocked().minimalPostProcessingSupported
-                    && (display.getRequestedMinimalPostProcessingLocked()
-                    != requestedMinimalPostProcessing)) {
-
-                display.setRequestedMinimalPostProcessingLocked(requestedMinimalPostProcessing);
-
-                shouldScheduleTraversal = true;
+                if (display.getRequestedMinimalPostProcessingLocked() != mppRequest) {
+                    display.setRequestedMinimalPostProcessingLocked(mppRequest);
+                    shouldScheduleTraversal = true;
+                }
             }
 
             if (shouldScheduleTraversal) {
