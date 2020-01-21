@@ -33,6 +33,8 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import javax.inject.Inject;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Quick Settings tile for: Night Mode / Dark Theme / Dark Mode.
@@ -43,7 +45,7 @@ import javax.inject.Inject;
 public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         ConfigurationController.ConfigurationListener,
         BatteryController.BatteryStateChangeCallback {
-
+    public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
     private final Icon mIcon = ResourceIcon.get(
             com.android.internal.R.drawable.ic_qs_ui_mode_night);
     private final UiModeManager mUiModeManager;
@@ -88,17 +90,28 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
     protected void handleUpdateState(BooleanState state, Object arg) {
         int uiMode = mUiModeManager.getNightMode();
         boolean powerSave = mBatteryController.isPowerSave();
-        boolean isAuto = uiMode == UiModeManager.MODE_NIGHT_AUTO;
         boolean nightMode = (mContext.getResources().getConfiguration().uiMode
                         & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
 
         if (powerSave) {
             state.secondaryLabel = mContext.getResources().getString(
                     R.string.quick_settings_dark_mode_secondary_label_battery_saver);
-        } else if (isAuto) {
+        } else if (uiMode == UiModeManager.MODE_NIGHT_AUTO) {
             state.secondaryLabel = mContext.getResources().getString(nightMode
                     ? R.string.quick_settings_dark_mode_secondary_label_until_sunrise
                     : R.string.quick_settings_dark_mode_secondary_label_on_at_sunset);
+        } else if (uiMode == UiModeManager.MODE_NIGHT_CUSTOM) {
+            final boolean use24HourFormat = android.text.format.DateFormat.is24HourFormat(mContext);
+            final LocalTime time;
+            if (nightMode) {
+                time = mUiModeManager.getCustomNightModeEnd();
+            } else {
+                time = mUiModeManager.getCustomNightModeStart();
+            }
+            state.secondaryLabel = mContext.getResources().getString(nightMode
+                    ? R.string.quick_settings_dark_mode_secondary_label_until
+                    : R.string.quick_settings_dark_mode_secondary_label_on_at,
+                    use24HourFormat ? time.toString() : formatter.format(time));
         } else {
             state.secondaryLabel = null;
         }
