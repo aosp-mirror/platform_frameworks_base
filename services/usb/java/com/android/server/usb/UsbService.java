@@ -56,6 +56,8 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.dump.DualDumpOutputStream;
+import com.android.server.FgThread;
+import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 
 import java.io.File;
@@ -64,6 +66,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * UsbService manages all USB related state, including both host and device support.
@@ -74,6 +77,9 @@ public class UsbService extends IUsbManager.Stub {
 
     public static class Lifecycle extends SystemService {
         private UsbService mUsbService;
+        private final CompletableFuture<Void> mOnStartFinished = new CompletableFuture<>();
+        private final CompletableFuture<Void> mOnActivityManagerPhaseFinished =
+                new CompletableFuture<>();
 
         public Lifecycle(Context context) {
             super(context);
@@ -81,32 +87,41 @@ public class UsbService extends IUsbManager.Stub {
 
         @Override
         public void onStart() {
-            mUsbService = new UsbService(getContext());
-            publishBinderService(Context.USB_SERVICE, mUsbService);
+            SystemServerInitThreadPool.submit(() -> {
+                mUsbService = new UsbService(getContext());
+                publishBinderService(Context.USB_SERVICE, mUsbService);
+                mOnStartFinished.complete(null);
+            }, "UsbService$Lifecycle#onStart");
         }
 
         @Override
         public void onBootPhase(int phase) {
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
-                mUsbService.systemReady();
+                SystemServerInitThreadPool.submit(() -> {
+                    mOnStartFinished.join();
+                    mUsbService.systemReady();
+                    mOnActivityManagerPhaseFinished.complete(null);
+                }, "UsbService$Lifecycle#onBootPhase");
             } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+                mOnActivityManagerPhaseFinished.join();
                 mUsbService.bootCompleted();
             }
         }
 
         @Override
-        public void onSwitchUser(int newUserId) {
-            mUsbService.onSwitchUser(newUserId);
+        public void onSwitchUser(TargetUser from, TargetUser to) {
+            FgThread.getHandler()
+                    .postAtFrontOfQueue(() -> mUsbService.onSwitchUser(to.getUserIdentifier()));
         }
 
         @Override
-        public void onStopUser(int userHandle) {
-            mUsbService.onStopUser(UserHandle.of(userHandle));
+        public void onStopUser(TargetUser userInfo) {
+            mUsbService.onStopUser(userInfo.getUserHandle());
         }
 
         @Override
-        public void onUnlockUser(int userHandle) {
-            mUsbService.onUnlockUser(userHandle);
+        public void onUnlockUser(TargetUser userInfo) {
+            mUsbService.onUnlockUser(userInfo.getUserIdentifier());
         }
     }
 
