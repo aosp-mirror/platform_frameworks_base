@@ -69,7 +69,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFI
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
@@ -308,8 +307,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // on the IME target. We mainly have this container grouping so we can keep track of all the IME
     // window containers together and move them in-sync if/when needed. We use a subclass of
     // WindowContainer which is omitted from screen magnification, as the IME is never magnified.
-    private final NonAppWindowContainers mImeWindowsContainers =
-            new NonAppWindowContainers("mImeWindowsContainers", mWmService);
+    // TODO(display-area): is "no magnification" in the comment still true?
+    private final ImeContainer mImeWindowsContainers = new ImeContainer(mWmService);
 
     private WindowState mTmpWindow;
     private WindowState mTmpWindow2;
@@ -2028,6 +2027,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mTaskStackContainers.getVisibleTasks();
     }
 
+    SurfaceControl getSplitScreenDividerAnchor() {
+        return mTaskStackContainers.getSplitScreenDividerAnchor();
+    }
+
     void onStackWindowingModeChanged(ActivityStack stack) {
         mTaskStackContainers.onStackWindowingModeChanged(stack);
     }
@@ -2114,7 +2117,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     boolean forAllImeWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
-        return mImeWindowsContainers.forAllWindows(callback, traverseTopToBottom);
+        return mImeWindowsContainers.forAllWindowForce(callback, traverseTopToBottom);
     }
 
     /**
@@ -2372,11 +2375,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         throw new UnsupportedOperationException("See DisplayChildWindowContainer");
     }
 
+    void positionDisplayAt(int position, boolean includingParents) {
+        getParent().positionChildAt(position, this, includingParents);
+    }
+
     @Override
     void positionChildAt(int position, DisplayChildWindowContainer child, boolean includingParents) {
         // Children of the display are statically ordered, so the real intention here is to perform
         // the operation on the display and not the static direct children.
-        getParent().positionChildAt(position, this, includingParents);
+        positionDisplayAt(position, includingParents);
     }
 
     void positionStackAt(int position, ActivityStack child, boolean includingParents) {
@@ -4354,8 +4361,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         @Override
         void positionChildAt(int position, ActivityStack child, boolean includingParents) {
-            if (child.getWindowConfiguration().isAlwaysOnTop()
-                    && position != POSITION_TOP && position != mChildren.size()) {
+            final boolean moveToTop = (position == POSITION_TOP || position == getChildCount());
+            final boolean moveToBottom = (position == POSITION_BOTTOM || position == 0);
+            if (child.getWindowConfiguration().isAlwaysOnTop() && !moveToTop) {
                 // This stack is always-on-top, override the default behavior.
                 Slog.w(TAG_WM, "Ignoring move of always-on-top stack=" + this + " to bottom");
 
@@ -4371,18 +4379,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 includingParents = false;
             }
             final int targetPosition = findPositionForStack(position, child, false /* adding */);
-            super.positionChildAt(targetPosition, child, includingParents);
+            super.positionChildAt(targetPosition, child, false /* includingParents */);
 
-            if (includingParents) {
-                // We still want to move the display of this stack container to top because even the
-                // target position is adjusted to non-top, the intention of the condition is to have
-                // higher z-order to gain focus (e.g. moving a task of a fullscreen stack to front
-                // in a non-top display which is using picture-in-picture mode).
-                final int topChildPosition = getChildCount() - 1;
-                if (targetPosition < topChildPosition && position >= topChildPosition) {
-                    getParent().positionChildAt(POSITION_TOP, this /* child */,
-                            true /* includingParents */);
-                }
+            if (includingParents && (moveToTop || moveToBottom)) {
+                // The DisplayContent children do not re-order, but we still want to move the
+                // display of this stack container because the intention of positioning is to have
+                // higher z-order to gain focus.
+                positionDisplayAt(moveToTop ? POSITION_TOP : POSITION_BOTTOM,
+                        true /* includingParents */);
             }
 
             setLayoutNeeded();
@@ -4702,38 +4706,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         @Override
-        SurfaceControl.Builder makeChildSurface(WindowContainer child) {
-            final SurfaceControl.Builder builder = super.makeChildSurface(child);
-            if (child instanceof WindowToken && ((WindowToken) child).mRoundedCornerOverlay) {
-                // To draw above the ColorFade layer during the screen off transition, the
-                // rounded corner overlays need to be at the root of the surface hierarchy.
-                // TODO: move the ColorLayer into the display overlay layer such that this is not
-                // necessary anymore.
-                builder.setParent(null);
-            }
-            return builder;
-        }
-
-        @Override
         void assignChildLayers(SurfaceControl.Transaction t) {
-            assignChildLayers(t, null /* imeContainer */);
-        }
-
-        void assignChildLayers(SurfaceControl.Transaction t, WindowContainer imeContainer) {
-            boolean needAssignIme = imeContainer != null
-                    && imeContainer.getSurfaceControl() != null;
+            boolean needAssignIme = mImeWindowsContainers.getSurfaceControl() != null;
             for (int j = 0; j < mChildren.size(); ++j) {
                 final WindowToken wt = mChildren.get(j);
 
-                // See {@link mSplitScreenDividerAnchor}
-                if (wt.windowType == TYPE_DOCK_DIVIDER) {
-                    wt.assignRelativeLayer(t, mTaskStackContainers.getSplitScreenDividerAnchor(), 1);
-                    continue;
-                }
-                if (wt.mRoundedCornerOverlay) {
-                    wt.assignLayer(t, WindowManagerPolicy.COLOR_FADE_LAYER + 1);
-                    continue;
-                }
                 wt.assignLayer(t, j);
                 wt.assignChildLayers(t);
 
@@ -4742,12 +4719,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
                 if (needAssignIme && layer >= mWmService.mPolicy.getWindowLayerFromTypeLw(
                         TYPE_INPUT_METHOD_DIALOG, true)) {
-                    imeContainer.assignRelativeLayer(t, wt.getSurfaceControl(), -1);
+                    mImeWindowsContainers.assignRelativeLayer(t, wt.getSurfaceControl(), -1);
                     needAssignIme = false;
                 }
-            }
-            if (needAssignIme) {
-                imeContainer.assignRelativeLayer(t, getSurfaceControl(), Integer.MAX_VALUE);
             }
         }
     }
@@ -4762,6 +4736,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         @Override
         void assignChildLayers(SurfaceControl.Transaction t) {
+            mImeWindowsContainers.setNeedsLayer();
             mBelowAppWindowsContainers.assignLayer(t, 0);
             mTaskStackContainers.assignLayer(t, 1);
             mAboveAppWindowsContainers.assignLayer(t, 2);
@@ -4797,15 +4772,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         // TODO: We need to use an extra level on the app surface to ensure
                         // this is always above SurfaceView but always below attached window.
                         1);
-                needAssignIme = false;
             }
 
             // Above we have assigned layers to our children, now we ask them to assign
             // layers to their children.
             mBelowAppWindowsContainers.assignChildLayers(t);
             mTaskStackContainers.assignChildLayers(t);
-            mAboveAppWindowsContainers.assignChildLayers(t,
-                    needAssignIme ? mImeWindowsContainers : null);
+            mAboveAppWindowsContainers.assignChildLayers(t);
+            mImeWindowsContainers.assignRelativeLayer(t, getSurfaceControl(), Integer.MAX_VALUE);
             mImeWindowsContainers.assignChildLayers(t);
         }
 
@@ -4819,47 +4793,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             addChild(mTaskStackContainers, null);
             addChild(mAboveAppWindowsContainers, null);
             addChild(mImeWindowsContainers, null);
-        }
-
-        /**
-         * In split-screen mode we process the IME containers above the docked divider
-         * rather than directly above their target.
-         */
-        private boolean skipTraverseChild(WindowContainer child) {
-            return child == mImeWindowsContainers && mInputMethodTarget != null
-                    && !hasSplitScreenPrimaryStack();
-        }
-
-        @Override
-        boolean forAllWindows(ToBooleanFunction<WindowState> callback,
-                boolean traverseTopToBottom) {
-            // Special handling so we can process IME windows with #forAllImeWindows above their IME
-            // target, or here in order if there isn't an IME target.
-            if (traverseTopToBottom) {
-                for (int i = mChildren.size() - 1; i >= 0; --i) {
-                    final WindowContainer child = mChildren.get(i);
-                    if (skipTraverseChild(child)) {
-                        continue;
-                    }
-
-                    if (child.forAllWindows(callback, traverseTopToBottom)) {
-                        return true;
-                    }
-                }
-            } else {
-                final int count = mChildren.size();
-                for (int i = 0; i < count; i++) {
-                    final WindowContainer child = mChildren.get(i);
-                    if (skipTraverseChild(child)) {
-                        continue;
-                    }
-
-                    if (child.forAllWindows(callback, traverseTopToBottom)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
 
         @Override
@@ -4975,6 +4908,68 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
+    /**
+     * Container for IME windows.
+     *
+     * This has some special behaviors:
+     * - layers assignment is ignored except if setNeedsLayer() has been called before (and no
+     *   layer has been assigned since), to facilitate assigning the layer from the IME target, or
+     *   fall back if there is no target.
+     * - the container doesn't always participate in window traversal, according to
+     *   {@link #skipImeWindowsDuringTraversal()}
+     */
+    private class ImeContainer extends NonAppWindowContainers {
+        boolean mNeedsLayer = false;
+
+        ImeContainer(WindowManagerService wms) {
+            super("ImeContainer", wms);
+        }
+
+        public void setNeedsLayer() {
+            mNeedsLayer = true;
+        }
+
+        @Override
+        boolean forAllWindows(ToBooleanFunction<WindowState> callback,
+                boolean traverseTopToBottom) {
+            final DisplayContent dc = mDisplayContent;
+            if (skipImeWindowsDuringTraversal(dc)) {
+                return false;
+            }
+            return super.forAllWindows(callback, traverseTopToBottom);
+        }
+
+        private boolean skipImeWindowsDuringTraversal(DisplayContent dc) {
+            // We skip IME windows so they're processed just above their target, except
+            // in split-screen mode where we process the IME containers above the docked divider.
+            return dc.mInputMethodTarget != null && !dc.hasSplitScreenPrimaryStack();
+        }
+
+        /** Like {@link #forAllWindows}, but ignores {@link #skipImeWindowsDuringTraversal} */
+        boolean forAllWindowForce(ToBooleanFunction<WindowState> callback,
+                boolean traverseTopToBottom) {
+            return super.forAllWindows(callback, traverseTopToBottom);
+        }
+
+        @Override
+        void assignLayer(Transaction t, int layer) {
+            if (!mNeedsLayer) {
+                return;
+            }
+            super.assignLayer(t, layer);
+            mNeedsLayer = false;
+        }
+
+        @Override
+        void assignRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
+            if (!mNeedsLayer) {
+                return;
+            }
+            super.assignRelativeLayer(t, relativeTo, layer);
+            mNeedsLayer = false;
+        }
+    }
+
     @Override
     SurfaceSession getSession() {
         return mSession;
@@ -5078,6 +5073,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * with {@link WindowState#assignLayer}
      */
     void assignRelativeLayerForImeTargetChild(SurfaceControl.Transaction t, WindowContainer child) {
+        mImeWindowsContainers.setNeedsLayer();
         child.assignRelativeLayer(t, mImeWindowsContainers.getSurfaceControl(), 1);
     }
 

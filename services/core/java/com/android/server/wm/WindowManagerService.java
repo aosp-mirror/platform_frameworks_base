@@ -2771,7 +2771,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
             if (displayContent != null && mRoot.getTopChild() != displayContent) {
-                mRoot.positionChildAt(WindowContainer.POSITION_TOP, displayContent,
+                displayContent.positionDisplayAt(WindowContainer.POSITION_TOP,
                         true /* includingParents */);
             }
         }
@@ -7698,7 +7698,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final DisplayContent displayContent = touchedWindow.getDisplayContent();
         if (!displayContent.isOnTop()) {
-            displayContent.getParent().positionChildAt(WindowContainer.POSITION_TOP, displayContent,
+            displayContent.positionDisplayAt(WindowContainer.POSITION_TOP,
                     true /* includingParents */);
         }
         handleTaskFocusChange(touchedWindow.getTask());
