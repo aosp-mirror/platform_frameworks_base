@@ -1633,7 +1633,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         requestedVrComponent = (aInfo.requestedVrComponent == null) ?
                 null : ComponentName.unflattenFromString(aInfo.requestedVrComponent);
 
-        lockTaskLaunchMode = getLockTaskLaunchMode(aInfo, options);
+        lockTaskLaunchMode = aInfo.lockTaskLaunchMode;
+        if (info.applicationInfo.isPrivilegedApp()
+                && (lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_ALWAYS
+                || lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_NEVER)) {
+            lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
+        }
 
         if (options != null) {
             pendingOptions = options;
@@ -1641,25 +1646,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (usageReport != null) {
                 appTimeTracker = new AppTimeTracker(usageReport);
             }
-            // Gets launch display id from options. It returns INVALID_DISPLAY if not set.
-            mHandoverLaunchDisplayId = options.getLaunchDisplayId();
-        }
-    }
-
-    static int getLockTaskLaunchMode(ActivityInfo aInfo, @Nullable ActivityOptions options) {
-        int lockTaskLaunchMode = aInfo.lockTaskLaunchMode;
-        if (aInfo.applicationInfo.isPrivilegedApp()
-                && (lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_ALWAYS
-                || lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_NEVER)) {
-            lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
-        }
-        if (options != null) {
-            final boolean useLockTask = options.getLockTaskMode();
+            final boolean useLockTask = pendingOptions.getLockTaskMode();
             if (useLockTask && lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_DEFAULT) {
                 lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
             }
+            // Gets launch display id from options. It returns INVALID_DISPLAY if not set.
+            mHandoverLaunchDisplayId = options.getLaunchDisplayId();
         }
-        return lockTaskLaunchMode;
     }
 
     @Override
