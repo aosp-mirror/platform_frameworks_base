@@ -18,19 +18,16 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:shareInterpolator="false">
-    <!-- Version for two-phase animation
+    android:shareInterpolator="false">
     <rotate android:fromDegrees="90" android:toDegrees="0"
-            android:pivotX="50%" android:pivotY="50%"
-            android:interpolator="@interpolator/decelerate_quint"
-            android:fillEnabled="true"
-            android:fillBefore="true" android:fillAfter="true"
-            android:duration="@android:integer/config_longAnimTime" />
-    -->
-    <rotate android:fromDegrees="90" android:toDegrees="0"
-            android:pivotX="50%" android:pivotY="50%"
-            android:interpolator="@interpolator/decelerate_quint"
-            android:fillEnabled="true"
-            android:fillBefore="true" android:fillAfter="true"
-            android:duration="@android:integer/config_mediumAnimTime" />
+        android:pivotX="50%" android:pivotY="50%"
+        android:fillEnabled="true"
+        android:fillBefore="true" android:fillAfter="true"
+        android:interpolator="@interpolator/fast_out_slow_in"
+        android:duration="@android:integer/config_screen_rotation_total_90" />
+    <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
+        android:fillEnabled="true"
+        android:interpolator="@interpolator/screen_rotation_alpha_in"
+        android:startOffset="@android:integer/config_screen_rotation_fade_in_delay"
+        android:duration="@android:integer/config_screen_rotation_fade_in" />
 </set>
