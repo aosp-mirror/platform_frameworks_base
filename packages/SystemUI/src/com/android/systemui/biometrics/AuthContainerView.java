@@ -19,11 +19,8 @@ package com.android.systemui.biometrics;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.Binder;
 import android.os.Bundle;
@@ -168,9 +165,8 @@ public class AuthContainerView extends LinearLayout
                     R.layout.auth_container_view, root, false /* attachToRoot */);
         }
 
-        AuthPanelController getPanelController(Context context, View panelView,
-                boolean isManagedProfile) {
-            return new AuthPanelController(context, panelView, isManagedProfile);
+        AuthPanelController getPanelController(Context context, View panelView) {
+            return new AuthPanelController(context, panelView);
         }
 
         ImageView getBackgroundView(FrameLayout parent) {
@@ -256,10 +252,8 @@ public class AuthContainerView extends LinearLayout
         final LayoutInflater factory = LayoutInflater.from(mContext);
         mFrameLayout = mInjector.inflateContainerView(factory, this);
 
-        final boolean isManagedProfile = Utils.isManagedProfile(mContext, mConfig.mUserId);
-
         mPanelView = mInjector.getPanelView(mFrameLayout);
-        mPanelController = mInjector.getPanelController(mContext, mPanelView, isManagedProfile);
+        mPanelController = mInjector.getPanelController(mContext, mPanelView);
 
         // Inflate biometric view only if necessary.
         if (Utils.isBiometricAllowed(mConfig.mBiometricPromptBundle)) {
@@ -280,16 +274,6 @@ public class AuthContainerView extends LinearLayout
 
         mBiometricScrollView = mInjector.getBiometricScrollView(mFrameLayout);
         mBackgroundView = mInjector.getBackgroundView(mFrameLayout);
-
-        if (isManagedProfile) {
-            final Drawable image = getResources().getDrawable(R.drawable.work_challenge_background,
-                    mContext.getTheme());
-            final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-            image.setColorFilter(dpm.getOrganizationColorForUser(mConfig.mUserId),
-                    PorterDuff.Mode.DARKEN);
-            mBackgroundView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            mBackgroundView.setImageDrawable(image);
-        }
 
         addView(mFrameLayout);
 
