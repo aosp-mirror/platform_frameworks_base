@@ -4052,8 +4052,8 @@ package android.media.tv {
   public final class DvbDeviceInfo implements android.os.Parcelable {
     ctor public DvbDeviceInfo(int, int);
     method public int describeContents();
-    method public int getAdapterId();
-    method public int getDeviceId();
+    method @IntRange(from=0) public int getAdapterId();
+    method @IntRange(from=0) public int getDeviceId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.DvbDeviceInfo> CREATOR;
   }

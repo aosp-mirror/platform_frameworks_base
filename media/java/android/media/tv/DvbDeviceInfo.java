@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
@@ -23,9 +24,13 @@ import android.os.Parcelable;
 import android.util.Log;
 
 /**
- * Simple container for information about DVB device.
- * Not for third-party developers.
+ * A digital video broadcasting (DVB) device.
  *
+ * <p> Simple wrapper around a <a href="https://www.linuxtv.org/docs/dvbapi/dvbapi.html">Linux DVB
+ * v3</a> device.
+ *
+ * @see TvInputManager#getDvbDeviceList()
+ * @see TvInputManager#openDvbDevice(DvbDeviceInfo, int)
  * @hide
  */
 @SystemApi
@@ -67,17 +72,19 @@ public final class DvbDeviceInfo implements Parcelable {
     }
 
     /**
-     * Returns the adapter ID of DVB device, in terms of enumerating the DVB device adapters
-     * installed in the system. The adapter ID counts from zero.
+     * Returns the adapter ID.
+     *
+     * <p>DVB Adapters contain one or more devices.
      */
+    @IntRange(from = 0)
     public int getAdapterId() {
         return mAdapterId;
     }
 
     /**
-     * Returns the device ID of DVB device, in terms of enumerating the DVB devices attached to
-     * the same device adapter. The device ID counts from zero.
+     * Returns the device ID.
      */
+    @IntRange(from = 0)
     public int getDeviceId() {
         return mDeviceId;
     }
