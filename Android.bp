@@ -53,6 +53,7 @@ filegroup {
         "core/java/android/view/DisplayAdjustments.java",
     ],
     path: "core/java",
+    visibility: ["//frameworks/base/test-mock"],
 }
 
 filegroup {
