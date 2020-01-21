@@ -885,6 +885,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             remove(r.binder);
                         }
                     }
+                    if ((events & PhoneStateListener.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH)
+                            != 0) {
+                        updateReportSignalStrengthDecision(r.subId);
+                    }
                     if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_INFO)) {
                         try {
                             if (DBG_LOC) log("listen: mCellInfo[" + phoneId + "] = "
@@ -1021,6 +1025,27 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    private void updateReportSignalStrengthDecision(int subscriptionId) {
+        synchronized (mRecords) {
+            TelephonyManager telephonyManager = (TelephonyManager) mContext
+                    .getSystemService(Context.TELEPHONY_SERVICE);
+            for (Record r : mRecords) {
+                // If any of the system clients wants to always listen to signal strength,
+                // we need to set it on.
+                if (r.matchPhoneStateListenerEvent(
+                        PhoneStateListener.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH)) {
+                    telephonyManager.createForSubscriptionId(subscriptionId)
+                            .setAlwaysReportSignalStrength(true);
+                    return;
+                }
+            }
+            // If none of the system clients wants to always listen to signal strength,
+            // we need to set it off.
+            telephonyManager.createForSubscriptionId(subscriptionId)
+                    .setAlwaysReportSignalStrength(false);
+        }
+    }
+
     private String getCallIncomingNumber(Record record, int phoneId) {
         // Only reveal the incoming number if the record has read call log permission.
         return record.canReadCallLog() ? mCallIncomingNumber[phoneId] : "";
@@ -1078,6 +1103,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
 
                     mRecords.remove(i);
+
+                    // Every time a client that is registrating to always receive the signal
+                    // strength is removed from registry records, we need to check if
+                    // the signal strength decision needs to update on its slot.
+                    if (r.matchPhoneStateListenerEvent(
+                            PhoneStateListener.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH)) {
+                        updateReportSignalStrengthDecision(r.subId);
+                    }
                     return;
                 }
             }
@@ -2492,6 +2525,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if ((events & READ_ACTIVE_EMERGENCY_SESSION_PERMISSION_MASK) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION, null);
+        }
+
+        if ((events & PhoneStateListener.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH) != 0) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH, null);
         }
 
         if ((events & PhoneStateListener.LISTEN_OEM_HOOK_RAW_EVENT) != 0) {
