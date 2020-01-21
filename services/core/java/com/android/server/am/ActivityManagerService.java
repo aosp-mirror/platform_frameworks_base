@@ -1763,7 +1763,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case KILL_APP_ZYGOTE_MSG: {
                     synchronized (ActivityManagerService.this) {
                         final AppZygote appZygote = (AppZygote) msg.obj;
-                        mProcessList.killAppZygoteIfNeededLocked(appZygote);
+                        mProcessList.killAppZygoteIfNeededLocked(appZygote, false /* force */);
                     }
                 } break;
             case CHECK_EXCESSIVE_POWER_USE_MSG: {
@@ -4617,6 +4617,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                     null, null, userId, true);
         }
         return didSomething;
+    }
+
+    @GuardedBy("this")
+    final void forceStopAppZygoteLocked(String packageName, int appId, int userId) {
+        if (packageName == null) {
+            return;
+        }
+        if (appId < 0) {
+            try {
+                appId = UserHandle.getAppId(AppGlobals.getPackageManager()
+                        .getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, 0));
+            } catch (RemoteException e) {
+            }
+        }
+
+        mProcessList.killAppZygotesLocked(packageName, appId, userId, true /* force */);
     }
 
     @GuardedBy("this")
@@ -15583,6 +15599,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                                                 intent.getIntExtra(Intent.EXTRA_UID, -1)),
                                                 false, true, true, false, fullUninstall, userId,
                                                 removed ? "pkg removed" : "pkg changed");
+                                    } else {
+                                        // Kill any app zygotes always, since they can't fork new
+                                        // processes with references to the old code
+                                        forceStopAppZygoteLocked(ssp, UserHandle.getAppId(
+                                                intent.getIntExtra(Intent.EXTRA_UID, -1)),
+                                                userId);
                                     }
                                     final int cmd = killProcess
                                             ? ApplicationThreadConstants.PACKAGE_REMOVED
