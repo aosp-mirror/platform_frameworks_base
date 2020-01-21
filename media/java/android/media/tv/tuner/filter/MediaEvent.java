@@ -19,6 +19,7 @@ package android.media.tv.tuner.filter;
 import android.annotation.BytesLong;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.media.MediaCodec.LinearBlock;
 
 /**
  * Filter event sent from {@link Filter} objects with media type.
@@ -32,7 +33,7 @@ public class MediaEvent extends FilterEvent{
     private final long mPts;
     private final long mDataLength;
     private final long mOffset;
-    private final Object mLinearBuffer;
+    private final LinearBlock mLinearBlock;
     private final boolean mIsSecureMemory;
     private final long mDataId;
     private final int mMpuSequenceNumber;
@@ -41,14 +42,14 @@ public class MediaEvent extends FilterEvent{
 
     // This constructor is used by JNI code only
     private MediaEvent(int streamId, boolean isPtsPresent, long pts, long dataLength, long offset,
-            Object buffer, boolean isSecureMemory, long dataId, int mpuSequenceNumber,
+            LinearBlock buffer, boolean isSecureMemory, long dataId, int mpuSequenceNumber,
             boolean isPrivateData, AudioDescriptor extraMetaData) {
         mStreamId = streamId;
         mIsPtsPresent = isPtsPresent;
         mPts = pts;
         mDataLength = dataLength;
         mOffset = offset;
-        mLinearBuffer = buffer;
+        mLinearBlock = buffer;
         mIsSecureMemory = isSecureMemory;
         mDataId = dataId;
         mMpuSequenceNumber = mpuSequenceNumber;
@@ -96,13 +97,11 @@ public class MediaEvent extends FilterEvent{
     }
 
     /**
-     * Gets a linear buffer associated to the memory where audio or video data stays.
-     * TODO: use LinearBuffer when it's ready.
-     *
-     * @hide
+     * Gets a linear block associated to the memory where audio or video data stays.
      */
-    public Object getLinearBuffer() {
-        return mLinearBuffer;
+    @Nullable
+    public LinearBlock getLinearBlock() {
+        return mLinearBlock;
     }
 
     /**
