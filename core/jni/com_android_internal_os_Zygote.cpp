@@ -1471,8 +1471,7 @@ static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
 
   // Create profile directory for this user.
   std::string actualCurUserProfile = StringPrintf("%s/%d", kCurProfileDirPath, user_id);
-  PrepareDir(actualCurUserProfile.c_str(), DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT,
-      fail_fn);
+  PrepareDir(actualCurUserProfile, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT, fail_fn);
 
   for (int i = 0; i < size; i += 3) {
     jstring package_str = (jstring) (env->GetObjectArrayElement(pkg_data_info_list, i));
