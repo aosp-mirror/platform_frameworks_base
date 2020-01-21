@@ -1958,7 +1958,7 @@ public class DisplayPolicy {
             }
         } else if (type == TYPE_WALLPAPER) {
             layoutWallpaper(displayFrames, pf, df, cf);
-        } else if (win == mStatusBar) {
+        } else if (win == mStatusBar || type == TYPE_NOTIFICATION_SHADE) {
             df.set(displayFrames.mUnrestricted);
             pf.set(displayFrames.mUnrestricted);
             cf.set(displayFrames.mStable);
