@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.provider.DeviceConfig;
 import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -56,11 +57,16 @@ import java.util.ArrayList;
 public final class WindowManagerGlobal {
     private static final String TAG = "WindowManager";
 
+    private static final String WM_USE_BLAST_ADAPTER_FLAG = "wm_use_blast_adapter";
+
     /**
      * This flag controls whether ViewRootImpl will utilize the Blast Adapter
      * to send buffer updates to SurfaceFlinger
      */
-    public static final boolean USE_BLAST_ADAPTER = false;
+    public static final boolean USE_BLAST_ADAPTER =
+            SystemProperties.getBoolean(String.join(".", "persist.device_config",
+                  DeviceConfig.NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT,
+                  WM_USE_BLAST_ADAPTER_FLAG), false);
 
     /**
      * The user is navigating with keys (not the touch screen), so

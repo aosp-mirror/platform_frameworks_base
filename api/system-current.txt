@@ -8472,6 +8472,7 @@ package android.provider {
     field public static final String NAMESPACE_SYSTEMUI = "systemui";
     field public static final String NAMESPACE_TELEPHONY = "telephony";
     field public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
+    field public static final String NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT = "window_manager_native_boot";
   }
 
   public static class DeviceConfig.BadConfigException extends java.lang.Exception {
