@@ -130,7 +130,7 @@
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"جارٍ البحث عن وجهك…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"رمز الوجه"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"زر تكبير/تصغير للتوافق."</string>
-    <string name="accessibility_compatibility_zoom_example" msgid="2617218726091234073">"استخدام التكبير/التصغير لتحويل شاشة صغيرة إلى شاشة أكبر"</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="2617218726091234073">"استخدام التكبير أو التصغير لتحويل شاشة صغيرة إلى شاشة أكبر"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"تم توصيل البلوتوث."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7195823280221275929">"تم فصل البلوتوث."</string>
     <string name="accessibility_no_battery" msgid="3789287732041910804">"ليست هناك بطارية."</string>
