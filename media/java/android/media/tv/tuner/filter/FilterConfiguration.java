@@ -19,7 +19,6 @@ package android.media.tv.tuner.filter;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,37 +30,6 @@ import java.lang.annotation.RetentionPolicy;
  */
 @SystemApi
 public abstract class FilterConfiguration {
-
-    /**
-     * TODO: moved to Filter. Remove it here.
-     * @hide
-     */
-    @IntDef(prefix = "FILTER_TYPE_", value =
-            {FILTER_TYPE_TS, FILTER_TYPE_MMTP, FILTER_TYPE_IP, FILTER_TYPE_TLV, FILTER_TYPE_ALP})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FilterType {}
-
-    /**
-     * TS filter type.
-     */
-    public static final int FILTER_TYPE_TS = Constants.DemuxFilterMainType.TS;
-    /**
-     * MMTP filter type.
-     */
-    public static final int FILTER_TYPE_MMTP = Constants.DemuxFilterMainType.MMTP;
-    /**
-     * IP filter type.
-     */
-    public static final int FILTER_TYPE_IP = Constants.DemuxFilterMainType.IP;
-    /**
-     * TLV filter type.
-     */
-    public static final int FILTER_TYPE_TLV = Constants.DemuxFilterMainType.TLV;
-    /**
-     * ALP filter type.
-     */
-    public static final int FILTER_TYPE_ALP = Constants.DemuxFilterMainType.ALP;
-
 
     /** @hide */
     @IntDef(prefix = "PACKET_TYPE_", value =
@@ -97,7 +65,7 @@ public abstract class FilterConfiguration {
      * Gets filter configuration type.
      * @hide
      */
-    @FilterType
+    @Filter.Type
     public abstract int getType();
 
     /** @hide */

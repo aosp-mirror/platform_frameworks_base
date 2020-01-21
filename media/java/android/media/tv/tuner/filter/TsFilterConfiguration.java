@@ -39,7 +39,7 @@ public class TsFilterConfiguration extends FilterConfiguration {
 
     @Override
     public int getType() {
-        return FilterConfiguration.FILTER_TYPE_TS;
+        return Filter.TYPE_TS;
     }
 
     /**

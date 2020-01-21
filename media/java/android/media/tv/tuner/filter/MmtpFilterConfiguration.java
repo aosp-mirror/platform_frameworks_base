@@ -35,7 +35,7 @@ public class MmtpFilterConfiguration extends FilterConfiguration {
 
     @Override
     public int getType() {
-        return FilterConfiguration.FILTER_TYPE_MMTP;
+        return Filter.TYPE_MMTP;
     }
 
     /**

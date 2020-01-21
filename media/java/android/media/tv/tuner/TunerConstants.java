@@ -47,37 +47,6 @@ public final class TunerConstants {
      */
     public static final int INVALID_STREAM_ID = Constants.Constant.INVALID_STREAM_ID;
 
-    /** @hide */
-    @IntDef(flag = true, prefix = "FILTER_STATUS_", value = {FILTER_STATUS_DATA_READY,
-            FILTER_STATUS_LOW_WATER, FILTER_STATUS_HIGH_WATER, FILTER_STATUS_OVERFLOW})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FilterStatus {}
-
-    /**
-     * The status of a filter that the data in the filter buffer is ready to be read.
-     */
-    public static final int FILTER_STATUS_DATA_READY = Constants.DemuxFilterStatus.DATA_READY;
-    /**
-     * The status of a filter that the amount of available data in the filter buffer is at low
-     * level.
-     *
-     * The value is set to 25 percent of the buffer size by default. It can be changed when
-     * configuring the filter.
-     */
-    public static final int FILTER_STATUS_LOW_WATER = Constants.DemuxFilterStatus.LOW_WATER;
-    /**
-     * The status of a filter that the amount of available data in the filter buffer is at high
-     * level.
-     * The value is set to 75 percent of the buffer size by default. It can be changed when
-     * configuring the filter.
-     */
-    public static final int FILTER_STATUS_HIGH_WATER = Constants.DemuxFilterStatus.HIGH_WATER;
-    /**
-     * The status of a filter that the filter buffer is full and newly filtered data is being
-     * discarded.
-     */
-    public static final int FILTER_STATUS_OVERFLOW = Constants.DemuxFilterStatus.OVERFLOW;
-
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

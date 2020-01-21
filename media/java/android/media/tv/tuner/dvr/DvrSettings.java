@@ -22,8 +22,8 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
-import android.media.tv.tuner.TunerConstants.FilterStatus;
 import android.media.tv.tuner.TunerUtils;
+import android.media.tv.tuner.filter.Filter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -124,7 +124,7 @@ public class DvrSettings {
          * Sets status mask.
          */
         @NonNull
-        public Builder setStatusMask(@FilterStatus int statusMask) {
+        public Builder setStatusMask(@Filter.Status int statusMask) {
             this.mStatusMask = statusMask;
             return this;
         }

@@ -20,8 +20,8 @@ import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.hardware.tv.tuner.V1_0.Constants;
-import android.media.tv.tuner.Tuner.Filter;
 import android.media.tv.tuner.TunerConstants.Result;
+import android.media.tv.tuner.filter.Filter;
 import android.os.ParcelFileDescriptor;
 
 import java.lang.annotation.Retention;

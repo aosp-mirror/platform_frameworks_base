@@ -18,7 +18,7 @@ package android.media.tv.tuner;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.media.tv.tuner.Tuner.Filter;
+import android.media.tv.tuner.filter.Filter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
