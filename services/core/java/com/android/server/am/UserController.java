@@ -54,6 +54,7 @@ import android.appwidget.AppWidgetManagerInternal;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
+import android.content.PermissionChecker;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -1756,7 +1757,7 @@ class UserController implements Handler.Callback {
                 // We require full access, sucks to be you.
                 allow = false;
             } else if (canInteractWithAcrossProfilesPermission(
-                    allowMode, isSameProfileGroup, callingPid, callingUid)) {
+                    allowMode, isSameProfileGroup, callingPid, callingUid, callerPackage)) {
                 allow = true;
             } else if (mInjector.checkComponentPermission(INTERACT_ACROSS_USERS, callingPid,
                     callingUid, -1, true) != PackageManager.PERMISSION_GRANTED) {
@@ -1821,16 +1822,21 @@ class UserController implements Handler.Callback {
     }
 
     private boolean canInteractWithAcrossProfilesPermission(
-            int allowMode, boolean isSameProfileGroup, int callingPid, int callingUid) {
+            int allowMode, boolean isSameProfileGroup, int callingPid, int callingUid,
+            String callingPackage) {
         if (allowMode != ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE) {
             return false;
         }
         if (!isSameProfileGroup) {
             return false;
         }
-        return mInjector.checkComponentPermission(
-                INTERACT_ACROSS_PROFILES, callingPid, callingUid, /*owningUid= */-1,
-                /*exported= */true) == PackageManager.PERMISSION_GRANTED;
+        return  PermissionChecker.PERMISSION_GRANTED
+                == PermissionChecker.checkPermissionForPreflight(
+                        mInjector.getContext(),
+                        INTERACT_ACROSS_PROFILES,
+                        callingPid,
+                        callingUid,
+                        callingPackage);
     }
 
     int unsafeConvertIncomingUser(@UserIdInt int userId) {

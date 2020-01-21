@@ -35,6 +35,7 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ICrossProfileApps;
 import android.content.pm.IPackageManager;
@@ -114,6 +115,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
         final int callerUserId = mInjector.getCallingUserId();
         final int callingUid = mInjector.getCallingUid();
+        final int callingPid = mInjector.getCallingPid();
 
         List<UserHandle> allowedTargetUsers = getTargetUserProfilesUnchecked(
                 callingPackage, callerUserId);
@@ -143,10 +145,13 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             // must have the required permission and the users must be in the same profile group
             // in order to launch any of its own activities.
             if (callerUserId != userId) {
-                final int permissionFlag = mInjector.checkComponentPermission(
-                        android.Manifest.permission.INTERACT_ACROSS_PROFILES, callingUid,
-                        -1, true);
-                if (permissionFlag != PackageManager.PERMISSION_GRANTED
+                final int permissionFlag =  PermissionChecker.checkPermissionForPreflight(
+                        mContext,
+                        android.Manifest.permission.INTERACT_ACROSS_PROFILES,
+                        callingPid,
+                        callingUid,
+                        callingPackage);
+                if (permissionFlag != PermissionChecker.PERMISSION_GRANTED
                         || !isSameProfileGroup(callerUserId, userId)) {
                     throw new SecurityException("Attempt to launch activity without required "
                             + android.Manifest.permission.INTERACT_ACROSS_PROFILES + " permission"
@@ -210,12 +215,15 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             return false;
         }
         final int callingUid = mInjector.getCallingUid();
+        final int callingPid = mInjector.getCallingPid();
         return isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS_FULL, callingUid)
                 || isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS, callingUid)
-                || isPermissionGranted(Manifest.permission.INTERACT_ACROSS_PROFILES, callingUid)
-                || AppOpsManager.MODE_ALLOWED == getAppOpsService().noteOperation(
-                OP_INTERACT_ACROSS_PROFILES, callingUid, callingPackage, /* featureId= */ null,
-                /*shouldCollectAsyncNotedOp= */false, /*message= */null);
+                || PermissionChecker.checkPermissionForPreflight(
+                        mContext,
+                        Manifest.permission.INTERACT_ACROSS_PROFILES,
+                        callingPid,
+                        callingUid,
+                        callingPackage) == PermissionChecker.PERMISSION_GRANTED;
     }
 
     private boolean isCrossProfilePackageWhitelisted(String packageName) {
@@ -436,6 +444,10 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             return Binder.getCallingUid();
         }
 
+        public int getCallingPid() {
+            return Binder.getCallingPid();
+        }
+
         public int getCallingUserId() {
             return UserHandle.getCallingUserId();
         }
@@ -503,6 +515,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     @VisibleForTesting
     public interface Injector {
         int getCallingUid();
+
+        int getCallingPid();
 
         int getCallingUserId();
 

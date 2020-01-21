@@ -5711,6 +5711,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testGetAllCrossProfilePackages_notSet_returnsEmpty() throws Exception {
         addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
+        mContext.packageName = admin1.getPackageName();
 
         setCrossProfileAppsList();
 
@@ -5720,6 +5721,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testGetAllCrossProfilePackages_notSet_dpmsReinitialized_returnsEmpty()
             throws Exception {
         addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
+        mContext.packageName = admin1.getPackageName();
 
         setCrossProfileAppsList();
         initializeDpms();
@@ -5730,6 +5732,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testGetAllCrossProfilePackages_whenSet_returnsCombinedSet() throws Exception {
         addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
         final Set<String> packages = Sets.newSet("TEST_PACKAGE", "TEST_COMMON_PACKAGE");
+        mContext.packageName = admin1.getPackageName();
 
         dpm.setCrossProfilePackages(admin1, packages);
         setCrossProfileAppsList("TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE");
@@ -5744,6 +5747,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             throws Exception {
         addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
         final Set<String> packages = Sets.newSet("TEST_PACKAGE", "TEST_COMMON_PACKAGE");
+        mContext.packageName = admin1.getPackageName();
 
         dpm.setCrossProfilePackages(admin1, packages);
         setCrossProfileAppsList("TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE");

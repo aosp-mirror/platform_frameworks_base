@@ -28,6 +28,7 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
+import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.NotificationManager;
@@ -120,6 +121,7 @@ public class MockSystemServices {
     public final TimeZoneDetector timeZoneDetector;
     public final KeyChain.KeyChainConnection keyChainConnection;
     public final PersistentDataBlockManagerInternal persistentDataBlockManagerInternal;
+    public final AppOpsManager appOpsManager;
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
     public final BuildMock buildMock = new BuildMock();
@@ -164,6 +166,7 @@ public class MockSystemServices {
         timeZoneDetector = mock(TimeZoneDetector.class);
         keyChainConnection = mock(KeyChain.KeyChainConnection.class, RETURNS_DEEP_STUBS);
         persistentDataBlockManagerInternal = mock(PersistentDataBlockManagerInternal.class);
+        appOpsManager = mock(AppOpsManager.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(realContext.getPackageManager());

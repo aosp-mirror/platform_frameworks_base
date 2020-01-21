@@ -27,6 +27,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -95,6 +96,7 @@ public class CrossProfileAppsServiceImplTest {
     public void initCrossProfileAppsServiceImpl() {
         mTestInjector = new TestInjector();
         mCrossProfileAppsServiceImpl = new CrossProfileAppsServiceImpl(mContext, mTestInjector);
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
     }
 
     @Before
@@ -365,6 +367,11 @@ public class CrossProfileAppsServiceImplTest {
 
     @Test
     public void startAnyActivityAsUser_profile_notExported() {
+        try {
+            when(mPackageManager.getPermissionInfo(anyString(), anyInt()))
+                    .thenReturn(new PermissionInfo());
+        } catch (PackageManager.NameNotFoundException ignored) {
+        }
         mActivityInfo.exported = false;
 
         assertThrows(
@@ -523,9 +530,14 @@ public class CrossProfileAppsServiceImplTest {
     private class TestInjector implements CrossProfileAppsServiceImpl.Injector {
         private int mCallingUid;
         private int mCallingUserId;
+        private int mCallingPid;
 
         public void setCallingUid(int uid) {
             mCallingUid = uid;
+        }
+
+        public void setCallingPid(int pid) {
+            mCallingPid = pid;
         }
 
         public void setCallingUserId(int userId) {
@@ -535,6 +547,11 @@ public class CrossProfileAppsServiceImplTest {
         @Override
         public int getCallingUid() {
             return mCallingUid;
+        }
+
+        @Override
+        public int getCallingPid() {
+            return mCallingPid;
         }
 
         @Override
