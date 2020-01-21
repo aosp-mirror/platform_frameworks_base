@@ -511,8 +511,7 @@ java_library {
         "framework-sdkextensions-stubs-systemapi",
         // TODO(b/146167933): Use framework-statsd-stubs instead.
         "framework-statsd",
-        // TODO(b/140299412): should be framework-wifi-stubs
-        "framework-wifi",
+        "framework-wifi-stubs",
         "ike-stubs",
         // TODO(b/147200698): should be the stub of framework-tethering
         "framework-tethering",
@@ -551,7 +550,8 @@ java_library {
         "compat-changeid-annotation-processor",
     ],
     static_libs: [
-        "exoplayer2-core"
+        "exoplayer2-core",
+        "android.hardware.wifi-V1.0-java-constants",
     ]
 }
 
@@ -1216,7 +1216,7 @@ java_library {
         "core/java/com/android/internal/util/Protocol.java",
         "core/java/com/android/internal/util/Preconditions.java",
         "telephony/java/android/telephony/Annotation.java",
-	":net-utils-framework-wifi-common-srcs",
+        ":net-utils-framework-wifi-common-srcs",
     ],
     libs: [
         "framework-annotations-lib",
@@ -1243,6 +1243,7 @@ filegroup {
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
     ],
+    visibility: ["//frameworks/opt/net/wifi/service"],
 }
 
 // TODO(b/145644363): move this to under StubLibraries.bp or ApiDocs.bp
