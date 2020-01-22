@@ -3686,6 +3686,7 @@ package android.hardware.usb {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public long getCurrentFunctions();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_USB) public java.util.List<android.hardware.usb.UsbPort> getPorts();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void grantPermission(android.hardware.usb.UsbDevice, String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void resetUsbGadget();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void setCurrentFunctions(long);
     field @RequiresPermission(android.Manifest.permission.MANAGE_USB) public static final String ACTION_USB_PORT_CHANGED = "android.hardware.usb.action.USB_PORT_CHANGED";
     field public static final String ACTION_USB_STATE = "android.hardware.usb.action.USB_STATE";
