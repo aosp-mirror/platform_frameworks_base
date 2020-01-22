@@ -69,8 +69,8 @@ public class PreparationCoordinator implements Coordinator {
     @Override
     public void attach(NotifPipeline pipeline) {
         pipeline.addCollectionListener(mNotifCollectionListener);
-        pipeline.addPreRenderFilter(mNotifInflationErrorFilter);
-        pipeline.addPreRenderFilter(mNotifInflatingFilter);
+        pipeline.addFinalizeFilter(mNotifInflationErrorFilter);
+        pipeline.addFinalizeFilter(mNotifInflatingFilter);
     }
 
     private final NotifCollectionListener mNotifCollectionListener = new NotifCollectionListener() {

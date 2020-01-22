@@ -79,7 +79,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
 
         ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
         mCoordinator.attach(mNotifPipeline);
-        verify(mNotifPipeline, times(2)).addPreRenderFilter(filterCaptor.capture());
+        verify(mNotifPipeline, times(2)).addFinalizeFilter(filterCaptor.capture());
         List<NotifFilter> filters = filterCaptor.getAllValues();
         mInflationErrorFilter = filters.get(0);
     }
