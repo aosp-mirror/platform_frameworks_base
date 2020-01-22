@@ -188,6 +188,10 @@ public class AudioTrack extends PlayerBase
 
     // Events:
     // to keep in sync with frameworks/av/include/media/AudioTrack.h
+    // Note: To avoid collisions with other event constants,
+    // do not define an event here that is the same value as
+    // AudioSystem.NATIVE_EVENT_ROUTING_CHANGE.
+
     /**
      * Event id denotes when playback head has reached a previously set marker.
      */
@@ -210,6 +214,14 @@ public class AudioTrack extends PlayerBase
      * back (after stop is called) for an offloaded track.
      */
     private static final int NATIVE_EVENT_STREAM_END = 7;
+    /**
+     * Event id denotes when the codec format changes.
+     *
+     * Note: Similar to a device routing change (AudioSystem.NATIVE_EVENT_ROUTING_CHANGE),
+     * this event comes from the AudioFlinger Thread / Output Stream management
+     * (not from buffer indications as above).
+     */
+    private static final int NATIVE_EVENT_CODEC_FORMAT_CHANGE = 100;
 
     private final static String TAG = "android.media.AudioTrack";
 
@@ -3409,6 +3421,67 @@ public class AudioTrack extends PlayerBase
         }
     }
 
+    //--------------------------------------------------------------------------
+    // Codec notifications
+    //--------------------
+
+    // OnCodecFormatChangedListener notifications uses an instance
+    // of ListenerList to manage its listeners.
+
+    private final Utils.ListenerList<AudioMetadata.ReadMap> mCodecFormatChangedListeners =
+            new Utils.ListenerList();
+
+    /**
+     * Interface definition for a listener for codec format changes.
+     */
+    public interface OnCodecFormatChangedListener {
+        /**
+         * Called when the compressed codec format changes.
+         *
+         * @param audioTrack is the {@code AudioTrack} instance associated with the codec.
+         * @param info is a {@link AudioMetadata.ReadMap} of values which contains decoded format
+         *     changes reported by the codec.  Not all hardware
+         *     codecs indicate codec format changes. Acceptable keys are taken from
+         *     {@code AudioMetadata.Format.KEY_*} range, with the associated value type.
+         */
+        void onCodecFormatChanged(
+                @NonNull AudioTrack audioTrack, @Nullable AudioMetadata.ReadMap info);
+    }
+
+    /**
+     * Adds an {@link OnCodecFormatChangedListener} to receive notifications of
+     * codec format change events on this {@code AudioTrack}.
+     *
+     * @param executor  Specifies the {@link Executor} object to control execution.
+     *
+     * @param listener The {@link OnCodecFormatChangedListener} interface to receive
+     *     notifications of codec events.
+     */
+    public void addOnCodecFormatChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnCodecFormatChangedListener listener) { // NPE checks done by ListenerList.
+        mCodecFormatChangedListeners.add(
+                listener, /* key for removal */
+                executor,
+                (int eventCode, AudioMetadata.ReadMap readMap) -> {
+                    // eventCode is unused by this implementation.
+                    listener.onCodecFormatChanged(this, readMap);
+                }
+        );
+    }
+
+    /**
+     * Removes an {@link OnCodecFormatChangedListener} which has been previously added
+     * to receive codec format change events.
+     *
+     * @param listener The previously added {@link OnCodecFormatChangedListener} interface
+     * to remove.
+     */
+    public void removeOnCodecFormatChangedListener(
+            @NonNull OnCodecFormatChangedListener listener) {
+        mCodecFormatChangedListeners.remove(listener);  // NPE checks done by ListenerList.
+    }
+
     //---------------------------------------------------------
     // Interface definitions
     //--------------------
@@ -3742,6 +3815,12 @@ public class AudioTrack extends PlayerBase
 
         if (what == AudioSystem.NATIVE_EVENT_ROUTING_CHANGE) {
             track.broadcastRoutingChange();
+            return;
+        }
+
+        if (what == NATIVE_EVENT_CODEC_FORMAT_CHANGE) {
+            track.mCodecFormatChangedListeners.notify(
+                    0 /* eventCode, unused */, (AudioMetadata.ReadMap) obj);
             return;
         }
 
