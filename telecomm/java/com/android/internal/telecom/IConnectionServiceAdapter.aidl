@@ -44,6 +44,12 @@ oneway interface IConnectionServiceAdapter {
             in ParcelableConnection connection,
             in Session.Info sessionInfo);
 
+    void handleCreateConferenceComplete(
+            String callId,
+            in ConnectionRequest request,
+            in ParcelableConference connection,
+            in Session.Info sessionInfo);
+
     void setActive(String callId, in Session.Info sessionInfo);
 
     void setRinging(String callId, in Session.Info sessionInfo);

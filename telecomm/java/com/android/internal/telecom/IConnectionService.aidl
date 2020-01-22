@@ -53,6 +53,20 @@ oneway interface IConnectionService {
     void createConnectionFailed(in PhoneAccountHandle connectionManagerPhoneAccount, String callId,
             in ConnectionRequest request, boolean isIncoming, in Session.Info sessionInfo);
 
+    void createConference(
+            in PhoneAccountHandle connectionManagerPhoneAccount,
+            String callId,
+            in ConnectionRequest request,
+            boolean isIncoming,
+            boolean isUnknown,
+            in Session.Info sessionInfo);
+
+    void createConferenceComplete(String callId, in Session.Info sessionInfo);
+
+    void createConferenceFailed(in PhoneAccountHandle connectionManagerPhoneAccount, String callId,
+            in ConnectionRequest request, boolean isIncoming, in Session.Info sessionInfo);
+
+
     void abort(String callId, in Session.Info sessionInfo);
 
     void answerVideo(String callId, int videoState, in Session.Info sessionInfo);
