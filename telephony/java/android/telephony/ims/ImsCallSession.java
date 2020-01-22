@@ -25,8 +25,6 @@ import android.util.Log;
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsVideoCallProvider;
 
-import java.util.Objects;
-
 /**
  * Provides the call initiation/termination, and media exchange between two IMS endpoints.
  * It directly communicates with IMS service which implements the IMS protocol behavior.
@@ -346,7 +344,7 @@ public class ImsCallSession {
         }
 
         /**
-         * Called when an {@link ImsCallSession} may handover from one radio technology to another.
+         * Called when an {@link ImsCallSession} may handover from one network type to another.
          * For example, the session may handover from WIFI to LTE if conditions are right.
          * <p>
          * If handover is attempted,
@@ -355,24 +353,24 @@ public class ImsCallSession {
          * called to indicate the success or failure of the handover.
          *
          * @param session IMS session object
-         * @param srcAccessTech original access technology
-         * @param targetAccessTech new access technology
+         * @param srcNetworkType original network type
+         * @param targetNetworkType new network type
          */
-        public void callSessionMayHandover(ImsCallSession session, int srcAccessTech,
-                int targetAccessTech) {
+        public void callSessionMayHandover(ImsCallSession session, int srcNetworkType,
+                int targetNetworkType) {
             // no-op
         }
 
         /**
-         * Called when session access technology changes
+         * Called when session network type changes
          *
          * @param session IMS session object
-         * @param srcAccessTech original access technology
-         * @param targetAccessTech new access technology
+         * @param srcNetworkType original network type
+         * @param targetNetworkType new network type
          * @param reasonInfo
          */
         public void callSessionHandover(ImsCallSession session,
-                                 int srcAccessTech, int targetAccessTech,
+                                 int srcNetworkType, int targetNetworkType,
                                  ImsReasonInfo reasonInfo) {
             // no-op
         }
@@ -381,12 +379,12 @@ public class ImsCallSession {
          * Called when session access technology change fails
          *
          * @param session IMS session object
-         * @param srcAccessTech original access technology
-         * @param targetAccessTech new access technology
+         * @param srcNetworkType original access technology
+         * @param targetNetworkType new access technology
          * @param reasonInfo handover failure reason
          */
         public void callSessionHandoverFailed(ImsCallSession session,
-                                       int srcAccessTech, int targetAccessTech,
+                                       int srcNetworkType, int targetNetworkType,
                                        ImsReasonInfo reasonInfo) {
             // no-op
         }
@@ -1303,20 +1301,19 @@ public class ImsCallSession {
         /**
          * Notifies of a case where a {@link ImsCallSession} may
          * potentially handover from one radio technology to another.
-         * @param srcAccessTech The source radio access technology; one of the access technology
-         *                      constants defined in {@link android.telephony.ServiceState}.  For
-         *                      example
-         *                      {@link android.telephony.ServiceState#RIL_RADIO_TECHNOLOGY_LTE}.
-         * @param targetAccessTech The target radio access technology; one of the access technology
-         *                      constants defined in {@link android.telephony.ServiceState}.  For
-         *                      example
-         *                      {@link android.telephony.ServiceState#RIL_RADIO_TECHNOLOGY_LTE}.
+         * @param srcNetworkType The source network type; one of the network type constants defined
+         *                       in {@link android.telephony.TelephonyManager}.  For example
+         *                      {@link android.telephony.TelephonyManager#NETWORK_TYPE_LTE}.
+         * @param targetNetworkType The target radio access technology; one of the network type
+         *                          constants defined in {@link android.telephony.TelephonyManager}.
+         *                          For example
+         *                          {@link android.telephony.TelephonyManager#NETWORK_TYPE_LTE}.
          */
         @Override
-        public void callSessionMayHandover(int srcAccessTech, int targetAccessTech) {
+        public void callSessionMayHandover(int srcNetworkType, int targetNetworkType) {
             if (mListener != null) {
-                mListener.callSessionMayHandover(ImsCallSession.this, srcAccessTech,
-                        targetAccessTech);
+                mListener.callSessionMayHandover(ImsCallSession.this, srcNetworkType,
+                        targetNetworkType);
             }
         }
 
@@ -1324,11 +1321,11 @@ public class ImsCallSession {
          * Notifies of handover information for this call
          */
         @Override
-        public void callSessionHandover(int srcAccessTech, int targetAccessTech,
+        public void callSessionHandover(int srcNetworkType, int targetNetworkType,
                 ImsReasonInfo reasonInfo) {
             if (mListener != null) {
-                mListener.callSessionHandover(ImsCallSession.this, srcAccessTech,
-                        targetAccessTech, reasonInfo);
+                mListener.callSessionHandover(ImsCallSession.this, srcNetworkType,
+                        targetNetworkType, reasonInfo);
             }
         }
 
@@ -1336,11 +1333,11 @@ public class ImsCallSession {
          * Notifies of handover failure info for this call
          */
         @Override
-        public void callSessionHandoverFailed(int srcAccessTech, int targetAccessTech,
+        public void callSessionHandoverFailed(int srcNetworkType, int targetNetworkType,
                 ImsReasonInfo reasonInfo) {
             if (mListener != null) {
-                mListener.callSessionHandoverFailed(ImsCallSession.this, srcAccessTech,
-                        targetAccessTech, reasonInfo);
+                mListener.callSessionHandoverFailed(ImsCallSession.this, srcNetworkType,
+                        targetNetworkType, reasonInfo);
             }
         }
 

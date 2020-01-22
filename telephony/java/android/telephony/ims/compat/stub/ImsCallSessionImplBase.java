@@ -20,6 +20,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.CallQuality;
+import android.telephony.ServiceState;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsConferenceState;
@@ -547,19 +548,25 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
         @Override
         public void callSessionHandover(IImsCallSession i, int srcAccessTech, int targetAccessTech,
                 ImsReasonInfo reasonInfo) throws RemoteException {
-            mNewListener.callSessionHandover(srcAccessTech, targetAccessTech, reasonInfo);
+            mNewListener.callSessionHandover(
+                    ServiceState.rilRadioTechnologyToNetworkType(srcAccessTech),
+                    ServiceState.rilRadioTechnologyToNetworkType(targetAccessTech), reasonInfo);
         }
 
         @Override
         public void callSessionHandoverFailed(IImsCallSession i, int srcAccessTech,
                 int targetAccessTech, ImsReasonInfo reasonInfo) throws RemoteException {
-            mNewListener.callSessionHandoverFailed(srcAccessTech, targetAccessTech, reasonInfo);
+            mNewListener.callSessionHandoverFailed(
+                    ServiceState.rilRadioTechnologyToNetworkType(srcAccessTech),
+                    ServiceState.rilRadioTechnologyToNetworkType(targetAccessTech), reasonInfo);
         }
 
         @Override
         public void callSessionMayHandover(IImsCallSession i, int srcAccessTech, int targetAccessTech)
                 throws RemoteException {
-            mNewListener.callSessionMayHandover(srcAccessTech, targetAccessTech);
+            mNewListener.callSessionMayHandover(
+                    ServiceState.rilRadioTechnologyToNetworkType(srcAccessTech),
+                    ServiceState.rilRadioTechnologyToNetworkType(targetAccessTech));
         }
 
         @Override
