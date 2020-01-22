@@ -92,7 +92,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     private static final String PACKAGE_NAME = "com.test.app";
     private static final int VERSION_CODE = 100;
-    private static final String INSTALLER = TEST_FRAMEWORK_PACKAGE;
+    private static final String INSTALLER = "com.long.random.test.installer.name";
     // These are obtained by running the test and checking logcat.
     private static final String APP_CERT =
             "301AA3CB081134501C45F1422ABC66C24224FD5DED5FDC8F17E697176FD866AA";
@@ -100,7 +100,7 @@ public class AppIntegrityManagerServiceImplTest {
             "301AA3CB081134501C45F1422ABC66C24224FD5DED5FDC8F17E697176FD866AA";
     // We use SHA256 for package names longer than 32 characters.
     private static final String INSTALLER_SHA256 =
-            "786933C28839603EB48C50B2A688DC6BE52C833627CB2731FF8466A2AE9F94CD";
+            "30F41A7CBF96EE736A54DD6DF759B50ED3CC126ABCEF694E167C324F5976C227";
 
     private static final String PLAY_STORE_PKG = "com.android.vending";
     private static final String ADB_INSTALLER = "adb";
@@ -140,7 +140,7 @@ public class AppIntegrityManagerServiceImplTest {
         // setup mocks to prevent NPE
         when(mMockContext.getPackageManager()).thenReturn(mSpyPackageManager);
         when(mMockContext.getResources()).thenReturn(mMockResources);
-        when(mMockResources.getStringArray(anyInt())).thenReturn(new String[] {});
+        when(mMockResources.getStringArray(anyInt())).thenReturn(new String[]{});
         when(mIntegrityFileManager.initialized()).thenReturn(true);
     }
 
@@ -267,6 +267,8 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void broadcastReceiverRegistration() throws Exception {
+        whitelistUsAsRuleProvider();
+        makeUsSystemApp();
         ArgumentCaptor<IntentFilter> intentFilterCaptor =
                 ArgumentCaptor.forClass(IntentFilter.class);
 
@@ -281,6 +283,8 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void handleBroadcast_correctArgs() throws Exception {
+        whitelistUsAsRuleProvider();
+        makeUsSystemApp();
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
         verify(mMockContext)
@@ -314,6 +318,8 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void handleBroadcast_allow() throws Exception {
+        whitelistUsAsRuleProvider();
+        makeUsSystemApp();
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
         verify(mMockContext)
@@ -331,6 +337,8 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void handleBroadcast_reject() throws Exception {
+        whitelistUsAsRuleProvider();
+        makeUsSystemApp();
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
         verify(mMockContext)
@@ -354,6 +362,8 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void handleBroadcast_notInitialized() throws Exception {
+        whitelistUsAsRuleProvider();
+        makeUsSystemApp();
         when(mIntegrityFileManager.initialized()).thenReturn(false);
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
@@ -371,10 +381,30 @@ public class AppIntegrityManagerServiceImplTest {
         verify(mSpyPackageManager, never()).getPackageArchiveInfo(any(), anyInt());
     }
 
+    @Test
+    public void verifierAsInstaller_skipIntegrityVerification() throws Exception {
+        whitelistUsAsRuleProvider();
+        makeUsSystemApp();
+        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mMockContext)
+                .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
+        Intent intent = makeVerificationIntent(TEST_FRAMEWORK_PACKAGE);
+        when(mRuleEvaluationEngine.evaluate(any(), any())).thenReturn(
+                IntegrityCheckResult.deny(/* rule= */ null));
+
+        broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
+        runJobInHandler();
+
+        verify(mPackageManagerInternal)
+                .setIntegrityVerificationResult(
+                        1, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
+    }
+
     private void whitelistUsAsRuleProvider() {
         Resources mockResources = mock(Resources.class);
         when(mockResources.getStringArray(R.array.config_integrityRuleProviderPackages))
-                .thenReturn(new String[] {TEST_FRAMEWORK_PACKAGE});
+                .thenReturn(new String[]{TEST_FRAMEWORK_PACKAGE});
         when(mMockContext.getResources()).thenReturn(mockResources);
     }
 
@@ -395,15 +425,28 @@ public class AppIntegrityManagerServiceImplTest {
     }
 
     private Intent makeVerificationIntent() throws Exception {
+        PackageInfo packageInfo =
+                mRealContext.getPackageManager().getPackageInfo(TEST_FRAMEWORK_PACKAGE,
+                        PackageManager.GET_SIGNATURES);
+        doReturn(packageInfo)
+                .when(mSpyPackageManager)
+                .getPackageInfo(eq(INSTALLER), anyInt());
+        doReturn(1)
+                .when(mSpyPackageManager)
+                .getPackageUid(eq(INSTALLER), anyInt());
+        return makeVerificationIntent(INSTALLER);
+    }
+
+    private Intent makeVerificationIntent(String installer) throws Exception {
         Intent intent = new Intent();
         intent.setDataAndType(Uri.fromFile(mTestApk), PACKAGE_MIME_TYPE);
         intent.setAction(Intent.ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION);
         intent.putExtra(EXTRA_VERIFICATION_ID, 1);
         intent.putExtra(Intent.EXTRA_PACKAGE_NAME, PACKAGE_NAME);
-        intent.putExtra(EXTRA_VERIFICATION_INSTALLER_PACKAGE, INSTALLER);
+        intent.putExtra(EXTRA_VERIFICATION_INSTALLER_PACKAGE, installer);
         intent.putExtra(
                 EXTRA_VERIFICATION_INSTALLER_UID,
-                mRealContext.getPackageManager().getPackageUid(INSTALLER, /* flags= */ 0));
+                mMockContext.getPackageManager().getPackageUid(installer, /* flags= */ 0));
         intent.putExtra(Intent.EXTRA_VERSION_CODE, VERSION_CODE);
         return intent;
     }
