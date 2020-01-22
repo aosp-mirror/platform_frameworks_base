@@ -108,7 +108,9 @@ SkColorType PixelFormatToColorType(android::PixelFormat format) {
     }
 }
 
-// FIXME: Share with the version in android_bitmap.cpp?
+namespace {
+static constexpr skcms_TransferFunction k2Dot6 = {2.6f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+
 // Skia's SkNamedGamut::kDCIP3 is based on a white point of D65. This gamut
 // matches the white point used by ColorSpace.Named.DCIP3.
 static constexpr skcms_Matrix3x3 kDCIP3 = {{
@@ -116,6 +118,87 @@ static constexpr skcms_Matrix3x3 kDCIP3 = {{
         {0.226676, 0.710327, 0.0629966},
         {0.000800549, 0.0432385, 0.78275},
 }};
+
+static bool nearlyEqual(float a, float b) {
+    // By trial and error, this is close enough to match for the ADataSpaces we
+    // compare for.
+    return ::fabs(a - b) < .002f;
+}
+
+static bool nearlyEqual(const skcms_TransferFunction& x, const skcms_TransferFunction& y) {
+    return nearlyEqual(x.g, y.g)
+        && nearlyEqual(x.a, y.a)
+        && nearlyEqual(x.b, y.b)
+        && nearlyEqual(x.c, y.c)
+        && nearlyEqual(x.d, y.d)
+        && nearlyEqual(x.e, y.e)
+        && nearlyEqual(x.f, y.f);
+}
+
+static bool nearlyEqual(const skcms_Matrix3x3& x, const skcms_Matrix3x3& y) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (!nearlyEqual(x.vals[i][j], y.vals[i][j])) return false;
+        }
+    }
+    return true;
+}
+
+} // anonymous namespace
+
+android_dataspace ColorSpaceToADataSpace(SkColorSpace* colorSpace, SkColorType colorType) {
+    if (!colorSpace) {
+        return HAL_DATASPACE_UNKNOWN;
+    }
+
+    if (colorSpace->isSRGB()) {
+        if (colorType == kRGBA_F16_SkColorType) {
+            return HAL_DATASPACE_V0_SCRGB;
+        }
+        return HAL_DATASPACE_V0_SRGB;
+    }
+
+    skcms_TransferFunction fn;
+    LOG_ALWAYS_FATAL_IF(!colorSpace->isNumericalTransferFn(&fn));
+
+    skcms_Matrix3x3 gamut;
+    LOG_ALWAYS_FATAL_IF(!colorSpace->toXYZD50(&gamut));
+
+    if (nearlyEqual(gamut, SkNamedGamut::kSRGB)) {
+        if (nearlyEqual(fn, SkNamedTransferFn::kLinear)) {
+            // Skia doesn't differentiate amongst the RANGES. In Java, we associate
+            // LINEAR_EXTENDED_SRGB with F16, and LINEAR_SRGB with other Configs.
+            // Make the same association here.
+            if (colorType == kRGBA_F16_SkColorType) {
+                return HAL_DATASPACE_V0_SCRGB_LINEAR;
+            }
+            return HAL_DATASPACE_V0_SRGB_LINEAR;
+        }
+
+        if (nearlyEqual(fn, SkNamedTransferFn::kRec2020)) {
+            return HAL_DATASPACE_V0_BT709;
+        }
+    }
+
+    if (nearlyEqual(fn, SkNamedTransferFn::kSRGB) && nearlyEqual(gamut, SkNamedGamut::kDCIP3)) {
+        return HAL_DATASPACE_DISPLAY_P3;
+    }
+
+    if (nearlyEqual(fn, SkNamedTransferFn::k2Dot2) && nearlyEqual(gamut, SkNamedGamut::kAdobeRGB)) {
+        return HAL_DATASPACE_ADOBE_RGB;
+    }
+
+    if (nearlyEqual(fn, SkNamedTransferFn::kRec2020) &&
+        nearlyEqual(gamut, SkNamedGamut::kRec2020)) {
+        return HAL_DATASPACE_BT2020;
+    }
+
+    if (nearlyEqual(fn, k2Dot6) && nearlyEqual(gamut, kDCIP3)) {
+        return HAL_DATASPACE_DCI_P3;
+    }
+
+    return HAL_DATASPACE_UNKNOWN;
+}
 
 sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
     if (dataspace == HAL_DATASPACE_UNKNOWN) {
@@ -126,7 +209,7 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
         // needs to use the locally-defined kDCIP3 gamut, rather than the one in
         // Skia (SkNamedGamut), which is used for other data spaces with
         // HAL_DATASPACE_STANDARD_DCI_P3 (e.g. HAL_DATASPACE_DISPLAY_P3).
-        return SkColorSpace::MakeRGB({2.6f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, kDCIP3);
+        return SkColorSpace::MakeRGB(k2Dot6, kDCIP3);
     }
 
     skcms_Matrix3x3 gamut;
@@ -165,7 +248,7 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
         case HAL_DATASPACE_TRANSFER_GAMMA2_2:
             return SkColorSpace::MakeRGB({2.2f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, gamut);
         case HAL_DATASPACE_TRANSFER_GAMMA2_6:
-            return SkColorSpace::MakeRGB({2.6f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, gamut);
+            return SkColorSpace::MakeRGB(k2Dot6, gamut);
         case HAL_DATASPACE_TRANSFER_GAMMA2_8:
             return SkColorSpace::MakeRGB({2.8f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, gamut);
         case HAL_DATASPACE_TRANSFER_ST2084:
