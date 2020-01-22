@@ -108,6 +108,21 @@ final class CoreSettingsObserver extends ContentObserver {
         sDeviceConfigEntries.add(new DeviceConfigEntry(
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_CURSOR_CONTROL,
                 WidgetFlags.KEY_ENABLE_CURSOR_CONTROL, boolean.class));
+        sDeviceConfigEntries.add(new DeviceConfigEntry(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.INSERTION_HANDLE_DELTA_HEIGHT,
+                WidgetFlags.KEY_INSERTION_HANDLE_DELTA_HEIGHT, int.class));
+        sDeviceConfigEntries.add(new DeviceConfigEntry(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.INSERTION_HANDLE_OPACITY,
+                WidgetFlags.KEY_INSERTION_HANDLE_OPACITY, int.class));
+        sDeviceConfigEntries.add(new DeviceConfigEntry(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_NEW_MAGNIFIER,
+                WidgetFlags.KEY_ENABLE_NEW_MAGNIFIER, boolean.class));
+        sDeviceConfigEntries.add(new DeviceConfigEntry(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.MAGNIFIER_ZOOM_FACTOR,
+                WidgetFlags.KEY_MAGNIFIER_ZOOM_FACTOR, float.class));
+        sDeviceConfigEntries.add(new DeviceConfigEntry(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.MAGNIFIER_ASPECT_RATIO,
+                WidgetFlags.KEY_MAGNIFIER_ASPECT_RATIO, float.class));
         // add other device configs here...
     }
 
