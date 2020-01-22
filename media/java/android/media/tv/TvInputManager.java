@@ -1735,8 +1735,14 @@ public final class TvInputManager {
     /**
      * Acquires {@link Hardware} object for the given device ID.
      *
-     * <p>A subsequent call to this method on the same {@code deviceId} will release the currently
-     * acquired Hardware.
+     * <p>A subsequent call to this method on the same {@code deviceId} could release the currently
+     * acquired Hardware if TunerResourceManager(TRM) detects higher priority from the current
+     * request.
+     *
+     * <p>If the client would like to provide information for the TRM to compare, use
+     * {@link #acquireTvInputHardware(int, TvInputInfo, HardwareCallback, String, int)} instead.
+     *
+     * <p>Otherwise default priority will be applied.
      *
      * @param deviceId The device ID to acquire Hardware for.
      * @param callback A callback to receive updates on Hardware.
@@ -1747,8 +1753,49 @@ public final class TvInputManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
-    public Hardware acquireTvInputHardware(int deviceId, TvInputInfo info,
-            final HardwareCallback callback) {
+    public Hardware acquireTvInputHardware(int deviceId, @NonNull TvInputInfo info,
+            @NonNull final HardwareCallback callback) {
+        Preconditions.checkNotNull(info);
+        Preconditions.checkNotNull(callback);
+        return acquireTvInputHardwareInternal(deviceId, info, callback, null,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_LIVE);
+    }
+
+    /**
+     * Acquires {@link Hardware} object for the given device ID.
+     *
+     * <p>A subsequent call to this method on the same {@code deviceId} could release the currently
+     * acquired Hardware if TunerResourceManager(TRM) detects higher priority from the current
+     * request.
+     *
+     * @param deviceId The device ID to acquire Hardware for.
+     * @param callback A callback to receive updates on Hardware.
+     * @param info The TV input which will use the acquired Hardware.
+     * @param tvInputSessionId a String returned to TIS when the session was created.
+     *        {@see TvInputService#onCreateSession(String, String)}. If null, the client will be
+     *        treated as a background app.
+     * @param priorityHint The use case of the client. {@see TvInputService#PriorityHintUseCaseType}
+     * @return Hardware on success, {@code null} otherwise. When the TRM decides to not grant
+     *         resource, null is returned and the {@link IllegalStateException} is thrown with
+     *         "No enough resources".
+     *
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
+    public Hardware acquireTvInputHardware(int deviceId, @NonNull TvInputInfo info,
+            @NonNull final HardwareCallback callback,
+            @Nullable String tvInputSessionId,
+            @TvInputService.PriorityHintUseCaseType int priorityHint) {
+        Preconditions.checkNotNull(info);
+        Preconditions.checkNotNull(callback);
+        return acquireTvInputHardwareInternal(deviceId, info, callback,
+                tvInputSessionId, priorityHint);
+    }
+
+    private Hardware acquireTvInputHardwareInternal(int deviceId, TvInputInfo info,
+             final HardwareCallback callback, String tvInputSessionId, int priorityHint) {
         try {
             return new Hardware(
                     mService.acquireTvInputHardware(deviceId, new ITvInputHardwareCallback.Stub() {
@@ -1761,7 +1808,7 @@ public final class TvInputManager {
                 public void onStreamConfigChanged(TvStreamConfig[] configs) {
                     callback.onStreamConfigChanged(configs);
                 }
-            }, info, mUserId));
+                    }, info, mUserId, tvInputSessionId, priorityHint));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

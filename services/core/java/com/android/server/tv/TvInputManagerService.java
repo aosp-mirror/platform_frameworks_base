@@ -1736,8 +1736,9 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public ITvInputHardware acquireTvInputHardware(int deviceId,
-                ITvInputHardwareCallback callback, TvInputInfo info, int userId)
-                throws RemoteException {
+                ITvInputHardwareCallback callback, TvInputInfo info, int userId,
+                String tvInputSessionId,
+                @TvInputService.PriorityHintUseCaseType int priorityHint) throws RemoteException {
             if (mContext.checkCallingPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
                     != PackageManager.PERMISSION_GRANTED) {
                 return null;
@@ -1749,7 +1750,8 @@ public final class TvInputManagerService extends SystemService {
                     userId, "acquireTvInputHardware");
             try {
                 return mTvInputHardwareManager.acquireHardware(
-                        deviceId, callback, info, callingUid, resolvedUserId);
+                        deviceId, callback, info, callingUid, resolvedUserId,
+                        tvInputSessionId, priorityHint);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
