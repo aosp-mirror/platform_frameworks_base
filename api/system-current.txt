@@ -4307,6 +4307,32 @@ package android.net {
     field public static final int APP_RETURN_WANTED_AS_IS = 2; // 0x2
   }
 
+  public final class CaptivePortalData implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getByteLimit();
+    method public long getExpiryTimeMillis();
+    method public long getRefreshTimeMillis();
+    method @Nullable public android.net.Uri getUserPortalUrl();
+    method @Nullable public android.net.Uri getVenueInfoUrl();
+    method public boolean isCaptive();
+    method public boolean isSessionExtendable();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.CaptivePortalData> CREATOR;
+  }
+
+  public static class CaptivePortalData.Builder {
+    ctor public CaptivePortalData.Builder();
+    ctor public CaptivePortalData.Builder(@Nullable android.net.CaptivePortalData);
+    method @NonNull public android.net.CaptivePortalData build();
+    method @NonNull public android.net.CaptivePortalData.Builder setBytesRemaining(long);
+    method @NonNull public android.net.CaptivePortalData.Builder setCaptive(boolean);
+    method @NonNull public android.net.CaptivePortalData.Builder setExpiryTime(long);
+    method @NonNull public android.net.CaptivePortalData.Builder setRefreshTime(long);
+    method @NonNull public android.net.CaptivePortalData.Builder setSessionExtendable(boolean);
+    method @NonNull public android.net.CaptivePortalData.Builder setUserPortalUrl(@Nullable android.net.Uri);
+    method @NonNull public android.net.CaptivePortalData.Builder setVenueInfoUrl(@Nullable android.net.Uri);
+  }
+
   public class ConnectivityManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD) public android.net.SocketKeepalive createNattKeepalive(@NonNull android.net.Network, @NonNull android.os.ParcelFileDescriptor, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD) public android.net.SocketKeepalive createSocketKeepalive(@NonNull android.net.Network, @NonNull java.net.Socket, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
@@ -4438,6 +4464,8 @@ package android.net {
     method @NonNull public java.util.List<java.lang.String> getAllInterfaceNames();
     method @NonNull public java.util.List<android.net.LinkAddress> getAllLinkAddresses();
     method @NonNull public java.util.List<android.net.RouteInfo> getAllRoutes();
+    method @Nullable public android.net.Uri getCaptivePortalApiUrl();
+    method @Nullable public android.net.CaptivePortalData getCaptivePortalData();
     method @NonNull public java.util.List<java.net.InetAddress> getPcscfServers();
     method @Nullable public String getTcpBufferSizes();
     method @NonNull public java.util.List<java.net.InetAddress> getValidatedPrivateDnsServers();
@@ -4451,9 +4479,12 @@ package android.net {
     method public boolean isIpv6Provisioned();
     method public boolean isProvisioned();
     method public boolean isReachable(@NonNull java.net.InetAddress);
+    method @NonNull public android.net.LinkProperties makeSensitiveFieldsParcelingCopy();
     method public boolean removeDnsServer(@NonNull java.net.InetAddress);
     method public boolean removeLinkAddress(@NonNull android.net.LinkAddress);
     method public boolean removeRoute(@NonNull android.net.RouteInfo);
+    method public void setCaptivePortalApiUrl(@Nullable android.net.Uri);
+    method public void setCaptivePortalData(@Nullable android.net.CaptivePortalData);
     method public void setPcscfServers(@NonNull java.util.Collection<java.net.InetAddress>);
     method public void setPrivateDnsServerName(@Nullable String);
     method public void setTcpBufferSizes(@Nullable String);
