@@ -235,7 +235,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
 
     private void buildNavBarWindows() {
         mTopNavigationBarWindow = mSuperStatusBarViewFactory
-                .getNotificationShadeWindowView()
+                .getStatusBarWindowView()
                 .findViewById(R.id.car_top_navigation_bar_container);
         mBottomNavigationBarWindow = mCarNavigationBarController.getBottomWindow();
         mLeftNavigationBarWindow = mCarNavigationBarController.getLeftWindow();

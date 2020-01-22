@@ -25,9 +25,22 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <FrameLayout
-        android:id="@+id/status_bar_container"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+    >
+        <FrameLayout
+            android:id="@+id/status_bar_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+        />
+
+        <FrameLayout
+            android:id="@+id/car_top_navigation_bar_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
 
 </com.android.systemui.statusbar.phone.StatusBarWindowView>
