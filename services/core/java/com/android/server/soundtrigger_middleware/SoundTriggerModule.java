@@ -174,7 +174,17 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
         for (Session session : mActiveSessions) {
             session.moduleDied();
         }
+        reset();
+    }
+
+    /**
+     * Resets the transient state of this object.
+     */
+    private void reset() {
         attachToHal();
+        // We conservatively assume that external capture is active until explicitly told otherwise.
+        mRecognitionAvailable = mProperties.concurrentCapture;
+        mNumLoadedModels = 0;
     }
 
     /**
