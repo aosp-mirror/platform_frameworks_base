@@ -41,6 +41,7 @@ import static android.os.Build.VERSION_CODES.O;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 
+import android.annotation.AnyThread;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -1081,6 +1082,7 @@ public class PackageParser {
      *
      * @see #parsePackage(File, int, boolean)
      */
+    @AnyThread
     public ParsedPackage parseParsedPackage(File packageFile, int flags, boolean useCaches)
             throws PackageParserException {
         ParsedPackage parsed = useCaches ? getCachedResult(packageFile, flags) : null;
