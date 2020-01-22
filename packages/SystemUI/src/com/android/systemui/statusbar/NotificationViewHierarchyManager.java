@@ -140,7 +140,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             boolean hideMedia = Utils.useQsMediaPlayer(mContext);
             if (ent.isRowDismissed() || ent.isRowRemoved()
                     || (ent.isMediaNotification() && hideMedia)
-                    || mBubbleController.isBubbleNotificationSuppressedFromShade(ent.getKey())) {
+                    || mBubbleController.isBubbleNotificationSuppressedFromShade(ent)) {
                 // we don't want to update removed notifications because they could
                 // temporarily become children if they were isolated before.
                 continue;

@@ -204,8 +204,8 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
         }
         int childCount = 0;
         boolean hasBubbles = false;
-        for (String key : group.children.keySet()) {
-            if (!getBubbleController().isBubbleNotificationSuppressedFromShade(key)) {
+        for (NotificationEntry entry : group.children.values()) {
+            if (!getBubbleController().isBubbleNotificationSuppressedFromShade(entry)) {
                 childCount++;
             } else {
                 hasBubbles = true;
