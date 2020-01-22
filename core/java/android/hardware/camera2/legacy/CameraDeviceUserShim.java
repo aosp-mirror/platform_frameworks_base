@@ -541,7 +541,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     @Override
-    public void endConfigure(int operatingMode, CameraMetadataNative sessionParams) {
+    public int[] endConfigure(int operatingMode, CameraMetadataNative sessionParams) {
         if (DEBUG) {
             Log.d(TAG, "endConfigure called.");
         }
@@ -576,6 +576,8 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
             mConfiguring = false;
         }
         mLegacyDevice.configureOutputs(surfaces);
+
+        return new int[0]; // Offline mode is not supported
     }
 
     @Override
@@ -791,8 +793,8 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
 
     @Override
     public ICameraOfflineSession switchToOffline(ICameraDeviceCallbacks cbs,
-            Surface[] offlineOutputs) {
-        throw new UnsupportedOperationException("Legacy device does not support switchToOffline");
+            int[] offlineOutputIds) {
+        throw new UnsupportedOperationException("Legacy device does not support offline mode");
     }
 
     @Override
