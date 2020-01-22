@@ -133,7 +133,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         Assert.assertTrue("onSimStateChanged not called",
                 mKeyguardUpdateMonitor.hasSimStateJustChanged());
 
-        intent.putExtra(TelephonyIntents.EXTRA_REBROADCAST_ON_UNLOCK, true);
+        intent.putExtra(Intent.EXTRA_REBROADCAST_ON_UNLOCK, true);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(), intent);
         mTestableLooper.processAllMessages();
         Assert.assertFalse("onSimStateChanged should have been skipped",
