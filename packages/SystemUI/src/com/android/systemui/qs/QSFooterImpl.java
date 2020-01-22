@@ -395,7 +395,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                 !(picture instanceof UserIconDrawable)) {
             picture = picture.getConstantState().newDrawable(mContext.getResources()).mutate();
             picture.setColorFilter(
-                    Utils.getColorAttrDefaultColor(mContext, android.R.attr.colorForeground),
+                    Utils.getColorAttrDefaultColor(mContext, android.R.attr.colorAccent),
                     Mode.SRC_IN);
         }
         mMultiUserAvatar.setImageDrawable(picture);
