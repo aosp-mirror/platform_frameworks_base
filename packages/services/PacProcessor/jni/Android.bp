@@ -39,8 +39,5 @@ cc_library_shared {
     ],
     sanitize: {
         cfi: true,
-        diag: {
-            cfi: true,
-        },
     },
 }
