@@ -32,8 +32,9 @@ public class SectionSettingsWithTableInfo extends SectionSettings {
     private final int mTableId;
     private final int mVersion;
 
-    private SectionSettingsWithTableInfo(int mainType, int tableId, int version) {
-        super(mainType);
+    private SectionSettingsWithTableInfo(int mainType, boolean isCheckCrc, boolean isRepeat,
+            boolean isRaw, int tableId, int version) {
+        super(mainType, isCheckCrc, isRepeat, isRaw);
         mTableId = tableId;
         mVersion = version;
     }
@@ -67,7 +68,7 @@ public class SectionSettingsWithTableInfo extends SectionSettings {
     /**
      * Builder for {@link SectionSettingsWithTableInfo}.
      */
-    public static class Builder extends Settings.Builder<Builder> {
+    public static class Builder extends SectionSettings.Builder<Builder> {
         private int mTableId;
         private int mVersion;
 
@@ -97,7 +98,8 @@ public class SectionSettingsWithTableInfo extends SectionSettings {
          */
         @NonNull
         public SectionSettingsWithTableInfo build() {
-            return new SectionSettingsWithTableInfo(mMainType, mTableId, mVersion);
+            return new SectionSettingsWithTableInfo(
+                    mMainType, mCrcEnabled, mIsRepeat, mIsRaw, mTableId, mVersion);
         }
 
         @Override

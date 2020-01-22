@@ -34,8 +34,9 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
     private final byte[] mMode;
 
 
-    private SectionSettingsWithSectionBits(int mainType, byte[] filter, byte[] mask, byte[] mode) {
-        super(mainType);
+    private SectionSettingsWithSectionBits(int mainType, boolean isCheckCrc, boolean isRepeat,
+            boolean isRaw, byte[] filter, byte[] mask, byte[] mode) {
+        super(mainType, isCheckCrc, isRepeat, isRaw);
         mFilter = filter;
         mMask = mask;
         mMode = mode;
@@ -86,7 +87,7 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
     /**
      * Builder for {@link SectionSettingsWithSectionBits}.
      */
-    public static class Builder extends Settings.Builder<Builder> {
+    public static class Builder extends SectionSettings.Builder<Builder> {
         private byte[] mFilter;
         private byte[] mMask;
         private byte[] mMode;
@@ -125,7 +126,8 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
          */
         @NonNull
         public SectionSettingsWithSectionBits build() {
-            return new SectionSettingsWithSectionBits(mMainType, mFilter, mMask, mMode);
+            return new SectionSettingsWithSectionBits(
+                    mMainType, mCrcEnabled, mIsRepeat, mIsRaw, mFilter, mMask, mMode);
         }
 
         @Override

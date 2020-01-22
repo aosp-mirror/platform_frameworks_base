@@ -124,6 +124,20 @@ public class MediaEvent extends FilterEvent{
     }
 
     /**
+     * Reserves the ID which is used by HAL to provide additional information for AV data.
+     *
+     * <p>The corresponding data is used and released by {@link android.media.AudioTrack}.
+     * <p>The data is also released when the {@link Filter} instance is closed.
+     *
+     * @return the reserved AV data ID.
+     * @hide
+     */
+    public long reserveAvDataId() {
+        // TODO: implement
+        return mDataId;
+    }
+
+    /**
      * Gets MPU sequence number of filtered data.
      */
     public int getMpuSequenceNumber() {

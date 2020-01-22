@@ -18,6 +18,7 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.BytesLong;
 import android.annotation.SystemApi;
+import android.media.tv.tuner.filter.RecordSettings.ScHevcIndex;
 
 /**
  * Filter event sent from {@link Filter} objects with MMTP type.
@@ -38,6 +39,7 @@ public class MmtpRecordEvent extends FilterEvent {
     /**
      * Gets indexes which can be tagged by NAL unit group in HEVC according to ISO/IEC 23008-2.
      */
+    @ScHevcIndex
     public int getScHevcIndexMask() {
         return mScHevcIndexMask;
     }
