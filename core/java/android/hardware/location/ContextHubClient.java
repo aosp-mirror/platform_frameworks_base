@@ -136,10 +136,7 @@ public class ContextHubClient implements Closeable {
      * @see NanoAppMessage
      * @see ContextHubTransaction.Result
      */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @ContextHubTransaction.Result
     public int sendMessageToNanoApp(@NonNull NanoAppMessage message) {
         Objects.requireNonNull(message, "NanoAppMessage cannot be null");
