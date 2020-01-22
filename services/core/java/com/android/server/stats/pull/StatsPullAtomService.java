@@ -2274,20 +2274,104 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
+    private final Object mDebugElapsedClockLock = new Object();
+    private long mDebugElapsedClockPreviousValue = 0;
+    private long mDebugElapsedClockPullCount = 0;
+
     private void registerDebugElapsedClock() {
-        // No op.
+        int tagId = StatsLog.DEBUG_ELAPSED_CLOCK;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {1, 2, 3, 4})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullDebugElapsedClock(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullDebugElapsedClock() {
-        // No op.
+    private int pullDebugElapsedClock(int atomTag, List<StatsEvent> pulledData) {
+        final long elapsedMillis = SystemClock.elapsedRealtime();
+
+        synchronized (mDebugElapsedClockLock) {
+            final long clockDiffMillis = mDebugElapsedClockPreviousValue == 0
+                    ? 0 : elapsedMillis - mDebugElapsedClockPreviousValue;
+
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeLong(mDebugElapsedClockPullCount)
+                    .writeLong(elapsedMillis)
+                    // Log it twice to be able to test multi-value aggregation from ValueMetric.
+                    .writeLong(elapsedMillis)
+                    .writeLong(clockDiffMillis)
+                    .writeInt(1 /* always set */)
+                    .build();
+            pulledData.add(e);
+
+            if (mDebugElapsedClockPullCount % 2 == 1) {
+                StatsEvent e2 = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeLong(mDebugElapsedClockPullCount)
+                        .writeLong(elapsedMillis)
+                        // Log it twice to be able to test multi-value aggregation from ValueMetric.
+                        .writeLong(elapsedMillis)
+                        .writeLong(clockDiffMillis)
+                        .writeInt(2 /* set on odd pulls */)
+                        .build();
+                pulledData.add(e2);
+            }
+
+            mDebugElapsedClockPullCount++;
+            mDebugElapsedClockPreviousValue = elapsedMillis;
+        }
+
+        return StatsManager.PULL_SUCCESS;
     }
+
+    private final Object mDebugFailingElapsedClockLock = new Object();
+    private long mDebugFailingElapsedClockPreviousValue = 0;
+    private long mDebugFailingElapsedClockPullCount = 0;
 
     private void registerDebugFailingElapsedClock() {
-        // No op.
+        int tagId = StatsLog.DEBUG_FAILING_ELAPSED_CLOCK;
+        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+                .setAdditiveFields(new int[] {1, 2, 3, 4})
+                .build();
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                metadata,
+                (atomTag, data) -> pullDebugFailingElapsedClock(atomTag, data),
+                BackgroundThread.getExecutor()
+        );
     }
 
-    private void pullDebugFailingElapsedClock() {
-        // No op.
+    private int pullDebugFailingElapsedClock(int atomTag, List<StatsEvent> pulledData) {
+        final long elapsedMillis = SystemClock.elapsedRealtime();
+
+        synchronized (mDebugFailingElapsedClockLock) {
+            // Fails every 5 buckets.
+            if (mDebugFailingElapsedClockPullCount++ % 5 == 0) {
+                mDebugFailingElapsedClockPreviousValue = elapsedMillis;
+                Slog.e(TAG, "Failing debug elapsed clock");
+                return StatsManager.PULL_SKIP;
+            }
+
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeLong(mDebugFailingElapsedClockPullCount)
+                    .writeLong(elapsedMillis)
+                    // Log it twice to be able to test multi-value aggregation from ValueMetric.
+                    .writeLong(elapsedMillis)
+                    .writeLong(mDebugFailingElapsedClockPreviousValue == 0
+                            ? 0 : elapsedMillis - mDebugFailingElapsedClockPreviousValue)
+                    .build();
+            pulledData.add(e);
+
+            mDebugFailingElapsedClockPreviousValue = elapsedMillis;
+        }
+
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerBuildInformation() {
