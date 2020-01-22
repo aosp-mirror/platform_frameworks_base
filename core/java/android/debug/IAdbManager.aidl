@@ -41,4 +41,15 @@ interface IAdbManager {
      * Clear all public keys installed for secure ADB debugging.
      */
     void clearDebuggingKeys();
+
+    /**
+     * Returns true if device supports secure Adb over Wi-Fi.
+     */
+    boolean isAdbWifiSupported();
+
+    /**
+     * Returns true if device supports secure Adb over Wi-Fi and device pairing by
+     * QR code.
+     */
+    boolean isAdbWifiQrSupported();
 }

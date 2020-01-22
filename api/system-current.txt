@@ -2440,6 +2440,15 @@ package android.content.rollback {
 
 }
 
+package android.debug {
+
+  public class AdbManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_DEBUGGING) public boolean isAdbWifiQrSupported();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_DEBUGGING) public boolean isAdbWifiSupported();
+  }
+
+}
+
 package android.hardware {
 
   public final class Sensor {
