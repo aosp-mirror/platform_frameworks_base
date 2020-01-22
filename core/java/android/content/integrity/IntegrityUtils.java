@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.server.integrity;
+package android.content.integrity;
 
 import static com.android.internal.util.Preconditions.checkArgument;
 
-/** Utils class for simple operations used in integrity module. */
+/**
+ * Utils class for simple operations used in integrity module.
+ *
+ * @hide
+ */
 public class IntegrityUtils {
 
     private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();

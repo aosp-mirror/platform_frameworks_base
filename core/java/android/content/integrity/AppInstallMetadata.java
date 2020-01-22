@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,6 @@
 package android.content.integrity;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.SystemApi;
-
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Objects;
 
@@ -34,8 +30,6 @@ import java.util.Objects;
  *
  * @hide
  */
-@SystemApi
-@VisibleForTesting
 public final class AppInstallMetadata {
     private final String mPackageName;
     // Raw string encoding for the SHA-256 hash of the certificate of the app.
@@ -43,7 +37,7 @@ public final class AppInstallMetadata {
     private final String mInstallerName;
     // Raw string encoding for the SHA-256 hash of the certificate of the installer.
     private final String mInstallerCertificate;
-    private final int mVersionCode;
+    private final long mVersionCode;
     private final boolean mIsPreInstalled;
 
     private AppInstallMetadata(Builder builder) {
@@ -65,18 +59,18 @@ public final class AppInstallMetadata {
         return mAppCertificate;
     }
 
-    @Nullable
+    @NonNull
     public String getInstallerName() {
         return mInstallerName;
     }
 
-    @Nullable
+    @NonNull
     public String getInstallerCertificate() {
         return mInstallerCertificate;
     }
 
-    /** @see AppInstallMetadata.Builder#setVersionCode(int) */
-    public int getVersionCode() {
+    /** @see AppInstallMetadata.Builder#setVersionCode(long) */
+    public long getVersionCode() {
         return mVersionCode;
     }
 
@@ -104,7 +98,7 @@ public final class AppInstallMetadata {
         private String mAppCertificate;
         private String mInstallerName;
         private String mInstallerCertificate;
-        private int mVersionCode;
+        private long mVersionCode;
         private boolean mIsPreInstalled;
 
         /**
@@ -163,7 +157,7 @@ public final class AppInstallMetadata {
          * @see AppInstallMetadata#getVersionCode()
          */
         @NonNull
-        public Builder setVersionCode(int versionCode) {
+        public Builder setVersionCode(long versionCode) {
             this.mVersionCode = versionCode;
             return this;
         }

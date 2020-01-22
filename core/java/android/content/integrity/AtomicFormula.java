@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,16 @@ import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 /**
@@ -38,29 +39,28 @@ import java.util.Objects;
  *
  * @hide
  */
-@SystemApi
 @VisibleForTesting
-public abstract class AtomicFormula implements Formula {
-
-    private static final String TAG = "AtomicFormula";
+public abstract class AtomicFormula extends IntegrityFormula {
 
     /** @hide */
     @IntDef(
             value = {
-                PACKAGE_NAME,
-                APP_CERTIFICATE,
-                INSTALLER_NAME,
-                INSTALLER_CERTIFICATE,
-                VERSION_CODE,
-                PRE_INSTALLED,
+                    PACKAGE_NAME,
+                    APP_CERTIFICATE,
+                    INSTALLER_NAME,
+                    INSTALLER_CERTIFICATE,
+                    VERSION_CODE,
+                    PRE_INSTALLED,
             })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface Key {}
+    public @interface Key {
+    }
 
     /** @hide */
-    @IntDef(value = {EQ, LT, LE, GT, GE})
+    @IntDef(value = {EQ, GT, GTE})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface Operator {}
+    public @interface Operator {
+    }
 
     /**
      * Package name of the app.
@@ -94,7 +94,7 @@ public abstract class AtomicFormula implements Formula {
     /**
      * Version code of the app.
      *
-     * <p>Can only be used in {@link IntAtomicFormula}.
+     * <p>Can only be used in {@link LongAtomicFormula}.
      */
     public static final int VERSION_CODE = 4;
 
@@ -106,10 +106,8 @@ public abstract class AtomicFormula implements Formula {
     public static final int PRE_INSTALLED = 5;
 
     public static final int EQ = 0;
-    public static final int LT = 1;
-    public static final int LE = 2;
-    public static final int GT = 3;
-    public static final int GE = 4;
+    public static final int GT = 1;
+    public static final int GTE = 2;
 
     private final @Key int mKey;
 
@@ -118,78 +116,99 @@ public abstract class AtomicFormula implements Formula {
         mKey = key;
     }
 
-    /** An {@link AtomicFormula} with an key and int value. */
-    public static final class IntAtomicFormula extends AtomicFormula implements Parcelable {
-        private final int mValue;
-        private final @Operator int mOperator;
+    /** An {@link AtomicFormula} with an key and long value. */
+    public static final class LongAtomicFormula extends AtomicFormula implements Parcelable {
+        private final Long mValue;
+        private final @Operator Integer mOperator;
 
         /**
-         * Constructs a new {@link IntAtomicFormula}.
+         * Constructs an empty {@link LongAtomicFormula}. This should only be used as a base.
+         *
+         * <p>This formula will always return false.
+         *
+         * @throws IllegalArgumentException if {@code key} cannot be used with long value
+         */
+        public LongAtomicFormula(@Key int key) {
+            super(key);
+            checkArgument(
+                    key == VERSION_CODE,
+                    String.format(
+                            "Key %s cannot be used with LongAtomicFormula", keyToString(key)));
+            mValue = null;
+            mOperator = null;
+        }
+
+        /**
+         * Constructs a new {@link LongAtomicFormula}.
          *
          * <p>This formula will hold if and only if the corresponding information of an install
          * specified by {@code key} is of the correct relationship to {@code value} as specified by
          * {@code operator}.
          *
-         * @throws IllegalArgumentException if {@code key} cannot be used with integer value
+         * @throws IllegalArgumentException if {@code key} cannot be used with long value
          */
-        public IntAtomicFormula(@Key int key, @Operator int operator, int value) {
+        public LongAtomicFormula(@Key int key, @Operator int operator, long value) {
             super(key);
             checkArgument(
                     key == VERSION_CODE,
-                    String.format("Key %s cannot be used with IntAtomicFormula", keyToString(key)));
-            checkArgument(isValidOperator(operator),
-                    String.format("Unknown operator: %d", operator));
+                    String.format(
+                            "Key %s cannot be used with LongAtomicFormula", keyToString(key)));
+            checkArgument(
+                    isValidOperator(operator), String.format("Unknown operator: %d", operator));
             mOperator = operator;
             mValue = value;
         }
 
-        IntAtomicFormula(Parcel in) {
+        LongAtomicFormula(Parcel in) {
             super(in.readInt());
-            mValue = in.readInt();
+            mValue = in.readLong();
             mOperator = in.readInt();
         }
 
         @NonNull
-        public static final Creator<IntAtomicFormula> CREATOR =
-                new Creator<IntAtomicFormula>() {
+        public static final Creator<LongAtomicFormula> CREATOR =
+                new Creator<LongAtomicFormula>() {
                     @Override
-                    public IntAtomicFormula createFromParcel(Parcel in) {
-                        return new IntAtomicFormula(in);
+                    public LongAtomicFormula createFromParcel(Parcel in) {
+                        return new LongAtomicFormula(in);
                     }
 
                     @Override
-                    public IntAtomicFormula[] newArray(int size) {
-                        return new IntAtomicFormula[size];
+                    public LongAtomicFormula[] newArray(int size) {
+                        return new LongAtomicFormula[size];
                     }
                 };
 
         @Override
-        public boolean isSatisfied(@NonNull AppInstallMetadata appInstallMetadata) {
-            int metadataValue = getMetadataValueByKey(appInstallMetadata);
+        public int getTag() {
+            return IntegrityFormula.LONG_ATOMIC_FORMULA_TAG;
+        }
+
+        @Override
+        public boolean matches(AppInstallMetadata appInstallMetadata) {
+            if (mValue == null || mOperator == null) {
+                return false;
+            }
+
+            long metadataValue = getLongMetadataValue(appInstallMetadata, getKey());
             switch (mOperator) {
                 case EQ:
                     return metadataValue == mValue;
-                case LE:
-                    return metadataValue <= mValue;
-                case LT:
-                    return metadataValue < mValue;
-                case GE:
-                    return metadataValue >= mValue;
                 case GT:
                     return metadataValue > mValue;
+                case GTE:
+                    return metadataValue >= mValue;
                 default:
-                    Slog.i(TAG, String.format("Unexpected operator %d", mOperator));
-                    return false;
+                    throw new IllegalArgumentException(
+                            String.format("Unexpected operator %d", mOperator));
             }
         }
 
         @Override
-        public int getTag() {
-            return Formula.INT_ATOMIC_FORMULA_TAG;
-        }
-
-        @Override
         public String toString() {
+            if (mValue == null || mOperator == null) {
+                return String.format("(%s)", keyToString(getKey()));
+            }
             return String.format(
                     "(%s %s %s)", keyToString(getKey()), operatorToString(mOperator), mValue);
         }
@@ -202,7 +221,7 @@ public abstract class AtomicFormula implements Formula {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            IntAtomicFormula that = (IntAtomicFormula) o;
+            LongAtomicFormula that = (LongAtomicFormula) o;
             return getKey() == that.getKey()
                     && mValue == that.mValue
                     && mOperator == that.mOperator;
@@ -220,35 +239,35 @@ public abstract class AtomicFormula implements Formula {
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
+            if (mValue == null || mOperator == null) {
+                throw new IllegalStateException("Cannot write an empty LongAtomicFormula.");
+            }
             dest.writeInt(getKey());
-            dest.writeInt(mValue);
+            dest.writeLong(mValue);
             dest.writeInt(mOperator);
         }
 
-        public int getValue() {
+        public Long getValue() {
             return mValue;
         }
 
-        public int getOperator() {
+        public Integer getOperator() {
             return mOperator;
-        }
-
-        private int getMetadataValueByKey(AppInstallMetadata appInstallMetadata) {
-            switch (getKey()) {
-                case VERSION_CODE:
-                    return appInstallMetadata.getVersionCode();
-                default:
-                    throw new IllegalStateException(
-                            "Unexpected key in IntAtomicFormula" + getKey());
-            }
         }
 
         private static boolean isValidOperator(int operator) {
             return operator == EQ
-                    || operator == LT
-                    || operator == LE
                     || operator == GT
-                    || operator == GE;
+                    || operator == GTE;
+        }
+
+        private static long getLongMetadataValue(AppInstallMetadata appInstallMetadata, int key) {
+            switch (key) {
+                case AtomicFormula.VERSION_CODE:
+                    return appInstallMetadata.getVersionCode();
+                default:
+                    throw new IllegalStateException("Unexpected key in IntAtomicFormula" + key);
+            }
         }
     }
 
@@ -256,7 +275,27 @@ public abstract class AtomicFormula implements Formula {
     public static final class StringAtomicFormula extends AtomicFormula implements Parcelable {
         private final String mValue;
         // Indicates whether the value is the actual value or the hashed value.
-        private final boolean mIsHashedValue;
+        private final Boolean mIsHashedValue;
+
+        /**
+         * Constructs an empty {@link StringAtomicFormula}. This should only be used as a base.
+         *
+         * <p>An empty formula will always match to false.
+         *
+         * @throws IllegalArgumentException if {@code key} cannot be used with string value
+         */
+        public StringAtomicFormula(@Key int key) {
+            super(key);
+            checkArgument(
+                    key == PACKAGE_NAME
+                            || key == APP_CERTIFICATE
+                            || key == INSTALLER_CERTIFICATE
+                            || key == INSTALLER_NAME,
+                    String.format(
+                            "Key %s cannot be used with StringAtomicFormula", keyToString(key)));
+            mValue = null;
+            mIsHashedValue = null;
+        }
 
         /**
          * Constructs a new {@link StringAtomicFormula}.
@@ -266,9 +305,8 @@ public abstract class AtomicFormula implements Formula {
          *
          * @throws IllegalArgumentException if {@code key} cannot be used with string value
          */
-        public StringAtomicFormula(@Key int key, @NonNull String value, boolean isHashedValue) {
+        public StringAtomicFormula(@Key int key, @NonNull String value, boolean isHashed) {
             super(key);
-            mIsHashedValue = isHashedValue;
             checkArgument(
                     key == PACKAGE_NAME
                             || key == APP_CERTIFICATE
@@ -277,6 +315,30 @@ public abstract class AtomicFormula implements Formula {
                     String.format(
                             "Key %s cannot be used with StringAtomicFormula", keyToString(key)));
             mValue = value;
+            mIsHashedValue = isHashed;
+        }
+
+        /**
+         * Constructs a new {@link StringAtomicFormula} together with handling the necessary
+         * hashing for the given key.
+         *
+         * <p> The value will be hashed with SHA256 and the hex digest will be computed; for
+         * all cases except when the key is PACKAGE_NAME or INSTALLER_NAME and the value
+         * is less than 33 characters.
+         *
+         * @throws IllegalArgumentException if {@code key} cannot be used with string value.
+         */
+        public StringAtomicFormula(@Key int key, @NonNull String value) {
+            super(key);
+            checkArgument(
+                    key == PACKAGE_NAME
+                            || key == APP_CERTIFICATE
+                            || key == INSTALLER_CERTIFICATE
+                            || key == INSTALLER_NAME,
+                    String.format(
+                            "Key %s cannot be used with StringAtomicFormula", keyToString(key)));
+            mValue = hashValue(key, value);
+            mIsHashedValue = !mValue.equals(value);
         }
 
         StringAtomicFormula(Parcel in) {
@@ -300,18 +362,23 @@ public abstract class AtomicFormula implements Formula {
                 };
 
         @Override
-        public boolean isSatisfied(@NonNull AppInstallMetadata appInstallMetadata) {
-            String metadataValue = getMetadataValueByKey(appInstallMetadata);
-            return metadataValue.equals(mValue);
+        public int getTag() {
+            return IntegrityFormula.STRING_ATOMIC_FORMULA_TAG;
         }
 
         @Override
-        public int getTag() {
-            return Formula.STRING_ATOMIC_FORMULA_TAG;
+        public boolean matches(AppInstallMetadata appInstallMetadata) {
+            if (mValue == null || mIsHashedValue == null) {
+                return false;
+            }
+            return getStringMetadataValue(appInstallMetadata, getKey()).equals(mValue);
         }
 
         @Override
         public String toString() {
+            if (mValue == null || mIsHashedValue == null) {
+                return String.format("(%s)", keyToString(getKey()));
+            }
             return String.format("(%s %s %s)", keyToString(getKey()), operatorToString(EQ), mValue);
         }
 
@@ -339,40 +406,80 @@ public abstract class AtomicFormula implements Formula {
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
+            if (mValue == null || mIsHashedValue == null) {
+                throw new IllegalStateException("Cannot write an empty StringAtomicFormula.");
+            }
             dest.writeInt(getKey());
             dest.writeStringNoHelper(mValue);
             dest.writeByte((byte) (mIsHashedValue ? 1 : 0));
         }
 
-        @NonNull
         public String getValue() {
             return mValue;
         }
 
-        public boolean getIsHashedValue() {
+        public Boolean getIsHashedValue() {
             return mIsHashedValue;
         }
 
-        private String getMetadataValueByKey(AppInstallMetadata appInstallMetadata) {
-            switch (getKey()) {
-                case PACKAGE_NAME:
+        private static String getStringMetadataValue(
+                AppInstallMetadata appInstallMetadata, int key) {
+            switch (key) {
+                case AtomicFormula.PACKAGE_NAME:
                     return appInstallMetadata.getPackageName();
-                case APP_CERTIFICATE:
+                case AtomicFormula.APP_CERTIFICATE:
                     return appInstallMetadata.getAppCertificate();
-                case INSTALLER_CERTIFICATE:
+                case AtomicFormula.INSTALLER_CERTIFICATE:
                     return appInstallMetadata.getInstallerCertificate();
-                case INSTALLER_NAME:
+                case AtomicFormula.INSTALLER_NAME:
                     return appInstallMetadata.getInstallerName();
                 default:
                     throw new IllegalStateException(
-                            "Unexpected key in StringAtomicFormula: " + getKey());
+                            "Unexpected key in StringAtomicFormula: " + key);
+            }
+        }
+
+        private static String hashValue(@Key int key, String value) {
+            // Hash the string value unless it is a PACKAGE_NAME or INSTALLER_NAME and the value is
+            // less than 33 characters.
+            if (value.length() <= 32) {
+                if (key == PACKAGE_NAME || key == INSTALLER_NAME) {
+                    return value;
+                }
+            }
+            return hash(value);
+        }
+
+        private static String hash(String value) {
+            try {
+                MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+                byte[] hashBytes = messageDigest.digest(value.getBytes(StandardCharsets.UTF_8));
+                return IntegrityUtils.getHexDigest(hashBytes);
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException("SHA-256 algorithm not found", e);
             }
         }
     }
 
     /** An {@link AtomicFormula} with a key and boolean value. */
     public static final class BooleanAtomicFormula extends AtomicFormula implements Parcelable {
-        private final boolean mValue;
+        private final Boolean mValue;
+
+        /**
+         * Constructs an empty {@link BooleanAtomicFormula}. This should only be used as a base.
+         *
+         * <p>An empty formula will always match to false.
+         *
+         * @throws IllegalArgumentException if {@code key} cannot be used with boolean value
+         */
+        public BooleanAtomicFormula(@Key int key) {
+            super(key);
+            checkArgument(
+                    key == PRE_INSTALLED,
+                    String.format(
+                            "Key %s cannot be used with BooleanAtomicFormula", keyToString(key)));
+            mValue = null;
+        }
 
         /**
          * Constructs a new {@link BooleanAtomicFormula}.
@@ -411,18 +518,23 @@ public abstract class AtomicFormula implements Formula {
                 };
 
         @Override
-        public boolean isSatisfied(@NonNull AppInstallMetadata appInstallMetadata) {
-            boolean metadataValue = getMetadataValueByKey(appInstallMetadata);
-            return metadataValue == mValue;
+        public int getTag() {
+            return IntegrityFormula.BOOLEAN_ATOMIC_FORMULA_TAG;
         }
 
         @Override
-        public int getTag() {
-            return Formula.BOOLEAN_ATOMIC_FORMULA_TAG;
+        public boolean matches(AppInstallMetadata appInstallMetadata) {
+            if (mValue == null) {
+                return false;
+            }
+            return getBooleanMetadataValue(appInstallMetadata, getKey()) == mValue;
         }
 
         @Override
         public String toString() {
+            if (mValue == null) {
+                return String.format("(%s)", keyToString(getKey()));
+            }
             return String.format("(%s %s %s)", keyToString(getKey()), operatorToString(EQ), mValue);
         }
 
@@ -450,21 +562,25 @@ public abstract class AtomicFormula implements Formula {
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
+            if (mValue == null) {
+                throw new IllegalStateException("Cannot write an empty BooleanAtomicFormula.");
+            }
             dest.writeInt(getKey());
             dest.writeByte((byte) (mValue ? 1 : 0));
         }
 
-        public boolean getValue() {
+        public Boolean getValue() {
             return mValue;
         }
 
-        private boolean getMetadataValueByKey(AppInstallMetadata appInstallMetadata) {
-            switch (getKey()) {
-                case PRE_INSTALLED:
+        private static boolean getBooleanMetadataValue(
+                AppInstallMetadata appInstallMetadata, int key) {
+            switch (key) {
+                case AtomicFormula.PRE_INSTALLED:
                     return appInstallMetadata.isPreInstalled();
                 default:
                     throw new IllegalStateException(
-                            "Unexpected key in BooleanAtomicFormula: " + getKey());
+                            "Unexpected key in BooleanAtomicFormula: " + key);
             }
         }
     }
@@ -496,14 +612,10 @@ public abstract class AtomicFormula implements Formula {
         switch (op) {
             case EQ:
                 return "EQ";
-            case LT:
-                return "LT";
-            case LE:
-                return "LE";
             case GT:
                 return "GT";
-            case GE:
-                return "GE";
+            case GTE:
+                return "GTE";
             default:
                 throw new IllegalArgumentException("Unknown operator " + op);
         }

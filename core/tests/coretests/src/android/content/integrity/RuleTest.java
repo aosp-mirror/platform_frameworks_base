@@ -35,11 +35,15 @@ public class RuleTest {
     private static final @Rule.Effect int DENY_EFFECT = Rule.DENY;
     private static final String PACKAGE_NAME = "com.test.app";
     private static final String APP_CERTIFICATE = "test_cert";
-    private static final Formula PACKAGE_NAME_ATOMIC_FORMULA =
-            new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME,
+    private static final IntegrityFormula PACKAGE_NAME_ATOMIC_FORMULA =
+            new AtomicFormula.StringAtomicFormula(
+                    AtomicFormula.PACKAGE_NAME,
+                    PACKAGE_NAME,
                     /* isHashedValue= */ false);
-    private static final Formula APP_CERTIFICATE_ATOMIC_FORMULA =
-            new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, APP_CERTIFICATE,
+    private static final IntegrityFormula APP_CERTIFICATE_ATOMIC_FORMULA =
+            new AtomicFormula.StringAtomicFormula(
+                    AtomicFormula.APP_CERTIFICATE,
+                    APP_CERTIFICATE,
                     /* isHashedValue= */ false);
 
     @Test

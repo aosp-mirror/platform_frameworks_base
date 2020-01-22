@@ -19,10 +19,11 @@ package com.android.server.integrity.engine;
 import static com.android.server.integrity.model.IntegrityCheckResult.Effect.ALLOW;
 import static com.android.server.integrity.model.IntegrityCheckResult.Effect.DENY;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.content.integrity.AppInstallMetadata;
 import android.content.integrity.AtomicFormula;
+import android.content.integrity.AtomicFormula.LongAtomicFormula;
 import android.content.integrity.AtomicFormula.StringAtomicFormula;
 import android.content.integrity.CompoundFormula;
 import android.content.integrity.Rule;
@@ -57,7 +58,7 @@ public class RuleEvaluatorTest {
 
         IntegrityCheckResult result = RuleEvaluator.evaluateRules(rules, APP_INSTALL_METADATA);
 
-        assertEquals(ALLOW, result.getEffect());
+        assertThat(result.getEffect()).isEqualTo(ALLOW);
     }
 
     @Test
@@ -73,7 +74,7 @@ public class RuleEvaluatorTest {
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule1), APP_INSTALL_METADATA);
 
-        assertEquals(ALLOW, result.getEffect());
+        assertThat(result.getEffect()).isEqualTo(ALLOW);
     }
 
     @Test
@@ -96,8 +97,8 @@ public class RuleEvaluatorTest {
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Arrays.asList(rule1, rule2), APP_INSTALL_METADATA);
 
-        assertEquals(DENY, result.getEffect());
-        assertEquals(rule1, result.getRule());
+        assertThat(result.getEffect()).isEqualTo(DENY);
+        assertThat(result.getRule()).isEqualTo(rule1);
     }
 
     @Test
@@ -126,8 +127,8 @@ public class RuleEvaluatorTest {
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Arrays.asList(rule1, rule2), APP_INSTALL_METADATA);
 
-        assertEquals(DENY, result.getEffect());
-        assertEquals(rule1, result.getRule());
+        assertThat(result.getEffect()).isEqualTo(DENY);
+        assertThat(result.getRule()).isEqualTo(rule1);
     }
 
     @Test
@@ -145,23 +146,23 @@ public class RuleEvaluatorTest {
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
-        assertEquals(DENY, result.getEffect());
-        assertEquals(rule, result.getRule());
+        assertThat(result.getEffect()).isEqualTo(DENY);
+        assertThat(result.getRule()).isEqualTo(rule);
     }
 
     @Test
     public void testEvaluateRules_ruleWithIntegerOperators_deny() {
         Rule rule =
                 new Rule(
-                        new AtomicFormula.IntAtomicFormula(
-                                AtomicFormula.VERSION_CODE, AtomicFormula.GT, 1),
+                        new LongAtomicFormula(AtomicFormula.VERSION_CODE,
+                                AtomicFormula.GT, 1),
                         Rule.DENY);
 
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
-        assertEquals(DENY, result.getEffect());
-        assertEquals(rule, result.getRule());
+        assertThat(result.getEffect()).isEqualTo(DENY);
+        assertThat(result.getRule()).isEqualTo(rule);
     }
 
     @Test
@@ -183,8 +184,8 @@ public class RuleEvaluatorTest {
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
-        assertEquals(DENY, result.getEffect());
-        assertEquals(rule, result.getRule());
+        assertThat(result.getEffect()).isEqualTo(DENY);
+        assertThat(result.getRule()).isEqualTo(rule);
     }
 
     @Test
@@ -206,7 +207,7 @@ public class RuleEvaluatorTest {
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
-        assertEquals(DENY, result.getEffect());
+        assertThat(result.getEffect()).isEqualTo(DENY);
     }
 
     @Test
@@ -230,7 +231,7 @@ public class RuleEvaluatorTest {
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
-        assertEquals(DENY, result.getEffect());
+        assertThat(result.getEffect()).isEqualTo(DENY);
     }
 
     @Test
@@ -259,7 +260,7 @@ public class RuleEvaluatorTest {
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Arrays.asList(rule1, rule2), APP_INSTALL_METADATA);
 
-        assertEquals(ALLOW, result.getEffect());
-        assertEquals(rule1, result.getRule());
+        assertThat(result.getEffect()).isEqualTo(ALLOW);
+        assertThat(result.getRule()).isEqualTo(rule1);
     }
 }

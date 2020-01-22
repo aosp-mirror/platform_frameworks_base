@@ -18,8 +18,8 @@ package com.android.server.integrity.utils;
 
 public class TestUtils {
 
-    public static String getBits(int component, int numOfBits) {
-        return String.format("%" + numOfBits + "s", Integer.toBinaryString(component))
+    public static String getBits(long component, int numOfBits) {
+        return String.format("%" + numOfBits + "s", Long.toBinaryString(component))
                 .replace(' ', '0');
     }
 

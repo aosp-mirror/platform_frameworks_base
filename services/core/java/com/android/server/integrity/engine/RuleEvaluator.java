@@ -22,7 +22,6 @@ import static android.content.integrity.Rule.FORCE_ALLOW;
 import android.annotation.NonNull;
 import android.content.integrity.AppInstallMetadata;
 import android.content.integrity.Rule;
-import android.util.Slog;
 
 import com.android.server.integrity.model.IntegrityCheckResult;
 
@@ -34,8 +33,6 @@ import java.util.List;
  * rules.
  */
 final class RuleEvaluator {
-
-    private static final String TAG = "RuleEvaluator";
 
     /**
      * Match the list of rules against an app install metadata.
@@ -53,7 +50,7 @@ final class RuleEvaluator {
             List<Rule> rules, AppInstallMetadata appInstallMetadata) {
         List<Rule> matchedRules = new ArrayList<>();
         for (Rule rule : rules) {
-            if (rule.getFormula().isSatisfied(appInstallMetadata)) {
+            if (rule.getFormula().matches(appInstallMetadata)) {
                 matchedRules.add(rule);
             }
         }
@@ -71,8 +68,7 @@ final class RuleEvaluator {
                 case FORCE_ALLOW:
                     return IntegrityCheckResult.allow(rule);
                 default:
-                    Slog.e(TAG, "Matched an unknown effect rule: " + rule);
-                    return IntegrityCheckResult.allow();
+                    throw new IllegalArgumentException("Matched an unknown effect rule: " + rule);
             }
         }
         return denied ? IntegrityCheckResult.deny(denyRule) : IntegrityCheckResult.allow();

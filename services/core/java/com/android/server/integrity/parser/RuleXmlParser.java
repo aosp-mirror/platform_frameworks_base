@@ -18,7 +18,7 @@ package com.android.server.integrity.parser;
 
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
-import android.content.integrity.Formula;
+import android.content.integrity.IntegrityFormula;
 import android.content.integrity.Rule;
 import android.util.Xml;
 
@@ -107,7 +107,7 @@ public final class RuleXmlParser implements RuleParser {
     }
 
     private static Rule parseRule(XmlPullParser parser) throws IOException, XmlPullParserException {
-        Formula formula = null;
+        IntegrityFormula formula = null;
         int effect = Integer.parseInt(extractAttributeValue(parser, EFFECT_ATTRIBUTE).orElse("-1"));
 
         int eventType;
@@ -139,11 +139,11 @@ public final class RuleXmlParser implements RuleParser {
         return new Rule(formula, effect);
     }
 
-    private static Formula parseCompoundFormula(XmlPullParser parser)
+    private static IntegrityFormula parseCompoundFormula(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         int connector =
                 Integer.parseInt(extractAttributeValue(parser, CONNECTOR_ATTRIBUTE).orElse("-1"));
-        List<Formula> formulas = new ArrayList<>();
+        List<IntegrityFormula> formulas = new ArrayList<>();
 
         int eventType;
         while ((eventType = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -175,7 +175,7 @@ public final class RuleXmlParser implements RuleParser {
         return new CompoundFormula(connector, formulas);
     }
 
-    private static Formula parseAtomicFormula(XmlPullParser parser)
+    private static IntegrityFormula parseAtomicFormula(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         int key = Integer.parseInt(extractAttributeValue(parser, KEY_ATTRIBUTE).orElse("-1"));
         int operator =
@@ -193,7 +193,7 @@ public final class RuleXmlParser implements RuleParser {
         return constructAtomicFormulaBasedOnKey(key, operator, value, isHashedValue);
     }
 
-    private static Formula constructAtomicFormulaBasedOnKey(
+    private static IntegrityFormula constructAtomicFormulaBasedOnKey(
             @AtomicFormula.Key int key,
             @AtomicFormula.Operator int operator,
             String value,
@@ -208,7 +208,7 @@ public final class RuleXmlParser implements RuleParser {
             case AtomicFormula.PRE_INSTALLED:
                 return new AtomicFormula.BooleanAtomicFormula(key, Boolean.parseBoolean(value));
             case AtomicFormula.VERSION_CODE:
-                return new AtomicFormula.IntAtomicFormula(key, operator, Integer.parseInt(value));
+                return new AtomicFormula.LongAtomicFormula(key, operator, Integer.parseInt(value));
             default:
                 throw new RuntimeException(String.format("Found unexpected key: %d", key));
         }

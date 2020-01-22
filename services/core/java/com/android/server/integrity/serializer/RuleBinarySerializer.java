@@ -36,11 +36,11 @@ import static com.android.server.integrity.serializer.RuleIndexingDetails.PACKAG
 
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
-import android.content.integrity.Formula;
+import android.content.integrity.IntegrityFormula;
+import android.content.integrity.IntegrityUtils;
 import android.content.integrity.Rule;
 
 import com.android.internal.util.Preconditions;
-import com.android.server.integrity.IntegrityUtils;
 import com.android.server.integrity.model.BitOutputStream;
 import com.android.server.integrity.model.ByteTrackedOutputStream;
 
@@ -192,7 +192,7 @@ public class RuleBinarySerializer implements RuleSerializer {
         bitOutputStream.setNext();
     }
 
-    private void serializeFormula(Formula formula, BitOutputStream bitOutputStream)
+    private void serializeFormula(IntegrityFormula formula, BitOutputStream bitOutputStream)
             throws IOException {
         if (formula instanceof AtomicFormula) {
             serializeAtomicFormula((AtomicFormula) formula, bitOutputStream);
@@ -212,7 +212,7 @@ public class RuleBinarySerializer implements RuleSerializer {
 
         bitOutputStream.setNext(SEPARATOR_BITS, COMPOUND_FORMULA_START);
         bitOutputStream.setNext(CONNECTOR_BITS, compoundFormula.getConnector());
-        for (Formula formula : compoundFormula.getFormulas()) {
+        for (IntegrityFormula formula : compoundFormula.getFormulas()) {
             serializeFormula(formula, bitOutputStream);
         }
         bitOutputStream.setNext(SEPARATOR_BITS, COMPOUND_FORMULA_END);
@@ -234,11 +234,14 @@ public class RuleBinarySerializer implements RuleSerializer {
                     stringAtomicFormula.getValue(),
                     stringAtomicFormula.getIsHashedValue(),
                     bitOutputStream);
-        } else if (atomicFormula.getTag() == AtomicFormula.INT_ATOMIC_FORMULA_TAG) {
-            AtomicFormula.IntAtomicFormula intAtomicFormula =
-                    (AtomicFormula.IntAtomicFormula) atomicFormula;
-            bitOutputStream.setNext(OPERATOR_BITS, intAtomicFormula.getOperator());
-            serializeIntValue(intAtomicFormula.getValue(), bitOutputStream);
+        } else if (atomicFormula.getTag() == AtomicFormula.LONG_ATOMIC_FORMULA_TAG) {
+            AtomicFormula.LongAtomicFormula longAtomicFormula =
+                    (AtomicFormula.LongAtomicFormula) atomicFormula;
+            bitOutputStream.setNext(OPERATOR_BITS, longAtomicFormula.getOperator());
+            // TODO(b/147880712): Temporary hack until we support long values in bitOutputStream
+            long value = longAtomicFormula.getValue();
+            serializeIntValue((int) (value >>> 32), bitOutputStream);
+            serializeIntValue((int) value, bitOutputStream);
         } else if (atomicFormula.getTag() == AtomicFormula.BOOLEAN_ATOMIC_FORMULA_TAG) {
             AtomicFormula.BooleanAtomicFormula booleanAtomicFormula =
                     (AtomicFormula.BooleanAtomicFormula) atomicFormula;

@@ -59,17 +59,17 @@ public final class Rule implements Parcelable {
      */
     public static final int FORCE_ALLOW = 1;
 
-    private final @NonNull Formula mFormula;
+    private final @NonNull IntegrityFormula mFormula;
     private final @Effect int mEffect;
 
-    public Rule(@NonNull Formula formula, @Effect int effect) {
+    public Rule(@NonNull IntegrityFormula formula, @Effect int effect) {
         checkArgument(isValidEffect(effect), String.format("Unknown effect: %d", effect));
         this.mFormula = Objects.requireNonNull(formula);
         this.mEffect = effect;
     }
 
     Rule(Parcel in) {
-        mFormula = Formula.readFromParcel(in);
+        mFormula = IntegrityFormula.readFromParcel(in);
         mEffect = in.readInt();
     }
 
@@ -94,12 +94,12 @@ public final class Rule implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        Formula.writeToParcel(mFormula, dest, flags);
+        IntegrityFormula.writeToParcel(mFormula, dest, flags);
         dest.writeInt(mEffect);
     }
 
     @NonNull
-    public Formula getFormula() {
+    public IntegrityFormula getFormula() {
         return mFormula;
     }
 
@@ -141,7 +141,6 @@ public final class Rule implements Parcelable {
     }
 
     private static boolean isValidEffect(int effect) {
-        return effect == DENY
-                || effect == FORCE_ALLOW;
+        return effect == DENY || effect == FORCE_ALLOW;
     }
 }

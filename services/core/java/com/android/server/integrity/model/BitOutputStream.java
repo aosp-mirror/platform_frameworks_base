@@ -61,7 +61,7 @@ public class BitOutputStream {
     /**
      * Set the next bit in the stream to value.
      *
-     * @param value The value to set the bit to.
+     * @param value The value to set the bit to
      */
     public void setNext(boolean value) throws IOException {
         int byteToWrite = mNextBitIndex / BYTE_BITS;
