@@ -855,8 +855,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 mDeathTimeMillis.add(now);
                 if (mDeathTimeMillis.size() >= DEATH_THRESHOLD) {
                     mDeathTimeMillis.clear();
-                    File[] configs = FileUtils.listFilesOrEmpty(new File(CONFIG_DIR));
-                    if (configs.length > 0) {
+                    File[] configs = new File(CONFIG_DIR).listFiles();
+                    if (configs != null && configs.length > 0) {
                         String fileName = configs[0].getName();
                         if (configs[0].delete()) {
                             mDeletedFiles.put(now, fileName);
