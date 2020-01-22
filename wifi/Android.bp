@@ -76,6 +76,8 @@ java_library {
     srcs: [
         ":framework-wifi-updatable-sources",
     ],
+    // java_api_finder must accompany `srcs`
+    plugins: ["java_api_finder"],
     installable: false,
     visibility: [
         "//frameworks/opt/net/wifi/service",
@@ -113,7 +115,6 @@ java_library {
         "com.android.wifi",
         "test_com.android.wifi",
     ],
-    plugins: ["java_api_finder"],
 }
 
 droidstubs {
