@@ -1089,7 +1089,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 // keep compatibility with apps that aren't direct boot aware.
                 // SysUI should just ignore this broadcast because it was already received
                 // and processed previously.
-                if (intent.getBooleanExtra(TelephonyIntents.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
+                if (intent.getBooleanExtra(Intent.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
                     // Guarantee mTelephonyCapable state after SysUI crash and restart
                     if (args.simState == TelephonyManager.SIM_STATE_ABSENT) {
                         mHandler.obtainMessage(MSG_TELEPHONY_CAPABLE, true).sendToTarget();
