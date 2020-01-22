@@ -193,7 +193,8 @@ static int read_memtrack_memory(struct memtrack_proc* p, int pid,
 {
     int err = memtrack_proc_get(p, pid);
     if (err != 0) {
-        ALOGW("failed to get memory consumption info: %d", err);
+        // The memtrack HAL may not be available, do not log to avoid flooding
+        // logcat.
         return err;
     }
 
