@@ -94,6 +94,7 @@ public class Notifier {
     private static final int MSG_USER_ACTIVITY = 1;
     private static final int MSG_BROADCAST = 2;
     private static final int MSG_WIRELESS_CHARGING_STARTED = 3;
+    private static final int MSG_BROADCAST_ENHANCED_PREDICTION = 4;
     private static final int MSG_PROFILE_TIMED_OUT = 5;
     private static final int MSG_WIRED_CHARGING_STARTED = 6;
 
@@ -701,6 +702,16 @@ public class Notifier {
         mPolicy.userActivity();
     }
 
+    void postEnhancedDischargePredictionBroadcast(long delayMs) {
+        mHandler.sendEmptyMessageDelayed(MSG_BROADCAST_ENHANCED_PREDICTION, delayMs);
+    }
+
+    private void sendEnhancedDischargePredictionBroadcast() {
+        Intent intent = new Intent(PowerManager.ACTION_ENHANCED_DISCHARGE_PREDICTION_CHANGED)
+                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+    }
+
     private void sendNextBroadcast() {
         final int powerState;
         synchronized (mLock) {
@@ -871,6 +882,10 @@ public class Notifier {
                     break;
                 case MSG_WIRELESS_CHARGING_STARTED:
                     showWirelessChargingStarted(msg.arg1, msg.arg2);
+                    break;
+                case MSG_BROADCAST_ENHANCED_PREDICTION:
+                    removeMessages(MSG_BROADCAST_ENHANCED_PREDICTION);
+                    sendEnhancedDischargePredictionBroadcast();
                     break;
                 case MSG_PROFILE_TIMED_OUT:
                     lockProfile(msg.arg1);
