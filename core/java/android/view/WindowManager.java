@@ -421,7 +421,9 @@ public interface WindowManager extends ViewManager {
      * </p>
      *
      * @return The display that this window manager is managing.
+     * @deprecated Use {@link Context#getDisplay()} instead.
      */
+    @Deprecated
     public Display getDefaultDisplay();
 
     /**

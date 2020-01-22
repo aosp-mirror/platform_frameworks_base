@@ -2,7 +2,6 @@
 package android.test.mock {
 
   public class MockContext extends android.content.Context {
-    method public android.view.Display getDisplay();
     method public int getDisplayId();
   }
 

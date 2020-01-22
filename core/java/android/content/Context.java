@@ -5720,6 +5720,63 @@ public abstract class Context {
     public abstract Context createDisplayContext(@NonNull Display display);
 
     /**
+     * Creates a Context for a non-activity window.
+     *
+     * <p>
+     * A window context is a context that can be used to add non-activity windows, such as
+     * {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY}. A window context
+     * must be created from a context that has an associated {@link Display}, such as
+     * {@link android.app.Activity Activity} or a context created with
+     * {@link #createDisplayContext(Display)}.
+     *
+     * <p>
+     * The window context is created with the appropriate {@link Configuration} for the area of the
+     * display that the windows created with it can occupy; it must be used when
+     * {@link android.view.LayoutInflater inflating} views, such that they can be inflated with
+     * proper {@link Resources}.
+     *
+     * Below is a sample code to <b>add an application overlay window on the primary display:<b/>
+     * <pre class="prettyprint">
+     * ...
+     * final DisplayManager dm = anyContext.getSystemService(DisplayManager.class);
+     * final Display primaryDisplay = dm.getDisplay(DEFAULT_DISPLAY);
+     * final Context windowContext = anyContext.createDisplayContext(primaryDisplay)
+     *         .createWindowContext(TYPE_APPLICATION_OVERLAY);
+     * final View overlayView = Inflater.from(windowContext).inflate(someLayoutXml, null);
+     *
+     * // WindowManager.LayoutParams initialization
+     * ...
+     * mParams.type = TYPE_APPLICATION_OVERLAY;
+     * ...
+     *
+     * mWindowContext.getSystemService(WindowManager.class).addView(overlayView, mParams);
+     * </pre>
+     *
+     * <p>
+     * This context's configuration and resources are adjusted to a display area where the windows
+     * with provided type will be added. <b>Note that all windows associated with the same context
+     * will have an affinity and can only be moved together between different displays or areas on a
+     * display.</b> If there is a need to add different window types, or non-associated windows,
+     * separate Contexts should be used.
+     * </p>
+     *
+     * @param type Window type in {@link WindowManager.LayoutParams}
+     * @return A {@link Context} that can be used to create windows.
+     * @throws UnsupportedOperationException if this is called on a non-UI context, such as
+     *         {@link android.app.Application Application} or {@link android.app.Service Service}.
+     *
+     * @see #getSystemService(String)
+     * @see #getSystemService(Class)
+     * @see #WINDOW_SERVICE
+     * @see #LAYOUT_INFLATER_SERVICE
+     * @see #WALLPAPER_SERVICE
+     * @throws IllegalArgumentException if token is invalid
+     */
+    public @NonNull Context createWindowContext(int type)  {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Return a new Context object for the current Context but for a different feature in the app.
      * Features can be used by complex apps to separate logical parts.
      *
@@ -5803,17 +5860,22 @@ public abstract class Context {
     public abstract DisplayAdjustments getDisplayAdjustments(int displayId);
 
     /**
+     * Get the display this context is associated with. Applications should use this method with
+     * {@link android.app.Activity} or a context associated with a {@link Display} via
+     * {@link #createDisplayContext(Display)} to get a display object associated with a Context, or
+     * {@link android.hardware.display.DisplayManager#getDisplay} to get a display object by id.
      * @return Returns the {@link Display} object this context is associated with.
-     * @hide
      */
-    @UnsupportedAppUsage
-    @TestApi
-    public abstract Display getDisplay();
+    @Nullable
+    public Display getDisplay() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
-     * Gets the display ID.
+     * Gets the ID of the display this context is associated with.
      *
      * @return display ID associated with this {@link Context}.
+     * @see #getDisplay()
      * @hide
      */
     @TestApi
