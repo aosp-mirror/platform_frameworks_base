@@ -2967,7 +2967,6 @@ public class CarrierConfigManager {
     /**
      * Controls hysteresis time in milli seconds for which OpportunisticNetworkService
      * will wait before switching data from opportunistic network to primary network.
-     * @hide
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG =
             "opportunistic_network_data_switch_exit_hysteresis_time_long";
@@ -2975,14 +2974,12 @@ public class CarrierConfigManager {
     /**
      * Controls whether to do ping test before switching data to opportunistic network.
      * This carrier config is used to disable this feature.
-     * @hide
      */
     public static final String KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL =
             "ping_test_before_data_switch_bool";
 
     /**
      * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
-     * @hide
      */
     public static final String KEY_5G_WATCHDOG_TIME_MS_LONG =
             "5g_watchdog_time_long";
@@ -2991,7 +2988,6 @@ public class CarrierConfigManager {
      * if primary is out of service. This control only affects system or 1st party app
      * initiated data switch, but will not override data switch initiated by privileged carrier apps
      * This carrier config is used to disable this feature.
-     * @hide
      */
     public static final String KEY_SWITCH_DATA_TO_PRIMARY_IF_PRIMARY_IS_OOS_BOOL =
             "switch_data_to_primary_if_primary_is_oos_bool";
@@ -3003,7 +2999,6 @@ public class CarrierConfigManager {
      * #KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT within
      * #KEY_OPPORTUNISTIC_NETWORK_PING_PONG_TIME_LONG of switching to opportunistic network,
      * it will be determined as ping pong situation by system app or 1st party app.
-     * @hide
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_PING_PONG_TIME_LONG =
             "opportunistic_network_ping_pong_time_long";
@@ -3017,7 +3012,6 @@ public class CarrierConfigManager {
      * #KEY_OPPORTUNISTIC_NETWORK_PING_PONG_TIME_LONG.
      * If ping pong situation continuous #KEY_OPPORTUNISTIC_NETWORK_BACKOFF_TIME_LONG
      * will be added to previously determined hysteresis time.
-     * @hide
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_BACKOFF_TIME_LONG =
             "opportunistic_network_backoff_time_long";
@@ -3029,7 +3023,6 @@ public class CarrierConfigManager {
      * continuous ping pong situation or not as described in
      * #KEY_OPPORTUNISTIC_NETWORK_PING_PONG_TIME_LONG and
      * #KEY_OPPORTUNISTIC_NETWORK_BACKOFF_TIME_LONG.
-     * @hide
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_MAX_BACKOFF_TIME_LONG =
             "opportunistic_network_max_backoff_time_long";
@@ -3076,7 +3069,6 @@ public class CarrierConfigManager {
      * validation result, this value defines customized value of how long we wait for validation
      * success before we fail and revoke the switch.
      * Time out is in milliseconds.
-     * @hide
      */
     public static final String KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG =
             "data_switch_validation_timeout_long";
