@@ -23,6 +23,7 @@ import android.os.Parcel;
 import android.telephony.AccessNetworkConstants.NgranBands.NgranBand;
 import android.telephony.gsm.GsmCellLocation;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -42,7 +43,7 @@ public final class CellIdentityNr extends CellIdentity {
     private final int mPci;
     private final int mTac;
     private final long mNci;
-    private final int mBand;
+    private final List<Integer> mBands;
 
     // a list of additional PLMN-IDs reported for this cell
     private final List<String> mAdditionalPlmns;
@@ -52,7 +53,7 @@ public final class CellIdentityNr extends CellIdentity {
      * @param pci Physical Cell Id in range [0, 1007].
      * @param tac 16-bit Tracking Area Code.
      * @param nrArfcn NR Absolute Radio Frequency Channel Number, in range [0, 3279165].
-     * @param band Band number defined in 3GPP TS 38.101-1 and TS 38.101-2.
+     * @param bands Bands used by the cell. Band number defined in 3GPP TS 38.101-1 and TS 38.101-2.
      * @param mccStr 3-digit Mobile Country Code in string format.
      * @param mncStr 2 or 3-digit Mobile Network Code in string format.
      * @param nci The 36-bit NR Cell Identity in range [0, 68719476735].
@@ -62,28 +63,28 @@ public final class CellIdentityNr extends CellIdentity {
      *
      * @hide
      */
-    public CellIdentityNr(int pci, int tac, int nrArfcn, @NgranBand int band, String mccStr,
-            String mncStr, long nci, String alphal, String alphas, List<String> additionalPlmns) {
+    public CellIdentityNr(int pci, int tac, int nrArfcn, @NgranBand List<Integer> bands,
+                          String mccStr, String mncStr, long nci, String alphal, String alphas,
+                          List<String> additionalPlmns) {
         super(TAG, CellInfo.TYPE_NR, mccStr, mncStr, alphal, alphas);
         mPci = inRangeOrUnavailable(pci, 0, MAX_PCI);
         mTac = inRangeOrUnavailable(tac, 0, MAX_TAC);
         mNrArfcn = inRangeOrUnavailable(nrArfcn, 0, MAX_NRARFCN);
-        mBand = inRangeOrUnavailable(band, AccessNetworkConstants.NgranBands.BAND_1,
-                AccessNetworkConstants.NgranBands.BAND_261);
+        mBands = new ArrayList<>(bands);
         mNci = inRangeOrUnavailable(nci, 0, MAX_NCI);
-        mAdditionalPlmns = additionalPlmns;
+        mAdditionalPlmns = new ArrayList<>(additionalPlmns);
     }
 
     /** @hide */
     public CellIdentityNr(android.hardware.radio.V1_4.CellIdentityNr cid) {
-        this(cid.pci, cid.tac, cid.nrarfcn, 0, cid.mcc, cid.mnc, cid.nci,
+        this(cid.pci, cid.tac, cid.nrarfcn, Collections.emptyList(), cid.mcc, cid.mnc, cid.nci,
                 cid.operatorNames.alphaLong, cid.operatorNames.alphaShort,
                 Collections.emptyList());
     }
 
     /** @hide */
     public CellIdentityNr(android.hardware.radio.V1_5.CellIdentityNr cid) {
-        this(cid.base.pci, cid.base.tac, cid.base.nrarfcn, cid.band, cid.base.mcc, cid.base.mnc,
+        this(cid.base.pci, cid.base.tac, cid.base.nrarfcn, cid.bands, cid.base.mcc, cid.base.mnc,
                 cid.base.nci, cid.base.operatorNames.alphaLong,
                 cid.base.operatorNames.alphaShort, cid.additionalPlmns);
     }
@@ -92,7 +93,7 @@ public final class CellIdentityNr extends CellIdentity {
     @Override
     public @NonNull CellIdentityNr sanitizeLocationInfo() {
         return new CellIdentityNr(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, mNrArfcn,
-                mBand, mMccStr, mMncStr, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort,
+                mBands, mMccStr, mMncStr, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort,
                 mAdditionalPlmns);
     }
 
@@ -109,7 +110,7 @@ public final class CellIdentityNr extends CellIdentity {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), mPci, mTac,
-                mNrArfcn, mBand, mNci, mAdditionalPlmns.hashCode());
+                mNrArfcn, mBands.hashCode(), mNci, mAdditionalPlmns.hashCode());
     }
 
     @Override
@@ -120,7 +121,7 @@ public final class CellIdentityNr extends CellIdentity {
 
         CellIdentityNr o = (CellIdentityNr) other;
         return super.equals(o) && mPci == o.mPci && mTac == o.mTac && mNrArfcn == o.mNrArfcn
-                && mBand == o.mBand && mNci == o.mNci
+                && mBands.equals(o.mBands) && mNci == o.mNci
                 && mAdditionalPlmns.equals(o.mAdditionalPlmns);
     }
 
@@ -148,16 +149,17 @@ public final class CellIdentityNr extends CellIdentity {
     }
 
     /**
-     * Get band of the cell
+     * Get bands of the cell
      *
      * Reference: TS 38.101-1 table 5.2-1
      * Reference: TS 38.101-2 table 5.2-1
      *
-     * @return band number or {@link CellInfo@UNAVAILABLE} if not available.
+     * @return List of band number or empty list if not available.
      */
     @NgranBand
-    public int getBand() {
-        return mBand;
+    @NonNull
+    public List<Integer> getBands() {
+        return Collections.unmodifiableList(mBands);
     }
 
     /**
@@ -205,7 +207,7 @@ public final class CellIdentityNr extends CellIdentity {
      */
     @NonNull
     public List<String> getAdditionalPlmns() {
-        return mAdditionalPlmns;
+        return Collections.unmodifiableList(mAdditionalPlmns);
     }
 
     @Override
@@ -214,7 +216,7 @@ public final class CellIdentityNr extends CellIdentity {
                 .append(" mPci = ").append(mPci)
                 .append(" mTac = ").append(mTac)
                 .append(" mNrArfcn = ").append(mNrArfcn)
-                .append(" mBand = ").append(mBand)
+                .append(" mBands = ").append(mBands)
                 .append(" mMcc = ").append(mMccStr)
                 .append(" mMnc = ").append(mMncStr)
                 .append(" mNci = ").append(mNci)
@@ -231,7 +233,7 @@ public final class CellIdentityNr extends CellIdentity {
         dest.writeInt(mPci);
         dest.writeInt(mTac);
         dest.writeInt(mNrArfcn);
-        dest.writeInt(mBand);
+        dest.writeList(mBands);
         dest.writeLong(mNci);
         dest.writeList(mAdditionalPlmns);
     }
@@ -242,7 +244,7 @@ public final class CellIdentityNr extends CellIdentity {
         mPci = in.readInt();
         mTac = in.readInt();
         mNrArfcn = in.readInt();
-        mBand = in.readInt();
+        mBands = in.readArrayList(null);
         mNci = in.readLong();
         mAdditionalPlmns = in.readArrayList(null);
     }
