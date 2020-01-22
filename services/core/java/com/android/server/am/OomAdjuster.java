@@ -125,7 +125,7 @@ public final class OomAdjuster {
     static final String OOM_ADJ_REASON_PROCESS_END = OOM_ADJ_REASON_METHOD + "_processEnd";
 
     /**
-     * Flag {@link Context#BIND_INCLUDE_CAPABILITIES} is used
+     * Flag {@link android.content.Context#BIND_INCLUDE_CAPABILITIES} is used
      * to pass while-in-use capabilities from client process to bound service. In targetSdkVersion
      * R and above, if client is a TOP activity, when this flag is present, bound service gets all
      * while-in-use capabilities; when this flag is not present, bound service gets no while-in-use
