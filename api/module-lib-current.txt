@@ -118,8 +118,30 @@ package android.timezone {
   }
 
   public final class TimeZoneFinder {
+    method @Nullable public String getIanaVersion();
     method @NonNull public static android.timezone.TimeZoneFinder getInstance();
     method @Nullable public android.timezone.CountryTimeZones lookupCountryTimeZones(@NonNull String);
+  }
+
+  public final class TzDataSetVersion {
+    method public static int currentFormatMajorVersion();
+    method public static int currentFormatMinorVersion();
+    method public int getFormatMajorVersion();
+    method public int getFormatMinorVersion();
+    method public int getRevision();
+    method @NonNull public String getRulesVersion();
+    method public static boolean isCompatibleWithThisDevice(android.timezone.TzDataSetVersion);
+    method @NonNull public static android.timezone.TzDataSetVersion read() throws java.io.IOException, android.timezone.TzDataSetVersion.TzDataSetException;
+  }
+
+  public static class TzDataSetVersion.TzDataSetException extends java.lang.Exception {
+    ctor public TzDataSetVersion.TzDataSetException(String);
+    ctor public TzDataSetVersion.TzDataSetException(String, Throwable);
+  }
+
+  public final class ZoneInfoDb {
+    method @NonNull public static android.timezone.ZoneInfoDb getInstance();
+    method @NonNull public String getVersion();
   }
 
 }
