@@ -94,6 +94,32 @@ public class CrossProfileApps {
     }
 
     /**
+     * Starts the specified activity of the caller package in the specified profile.
+     *
+     * <p>The caller must have the {@link android.Manifest.permission#INTERACT_ACROSS_PROFILES}
+     * permission and both the caller and target user profiles must be in the same profile group.
+     *
+     * @param intent The intent to launch. A component in the caller package must be specified.
+     * @param targetUser The {@link UserHandle} of the profile; must be one of the users returned by
+     *        {@link #getTargetUserProfiles()} if different to the calling user, otherwise a
+     *        {@link SecurityException} will be thrown.
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    public void startActivity(@NonNull Intent intent, @NonNull UserHandle targetUser) {
+        try {
+            mService.startActivityAsUserByIntent(
+                    mContext.getIApplicationThread(),
+                    mContext.getPackageName(),
+                    intent,
+                    targetUser.getIdentifier());
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Starts the specified activity of the caller package in the specified profile. Unlike
      * {@link #startMainActivity}, this can start any activity of the caller package, not just
      * the main activity.
