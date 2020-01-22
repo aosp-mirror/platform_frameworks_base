@@ -101,6 +101,14 @@ final class RemoteConnectionService {
         }
 
         @Override
+        public void handleCreateConferenceComplete(
+                String id,
+                ConnectionRequest request,
+                ParcelableConference parcel,
+                Session.Info info) {
+        }
+
+        @Override
         public void setActive(String callId, Session.Info sessionInfo) {
             if (mConnectionById.containsKey(callId)) {
                 findConnectionForAction(callId, "setActive")
