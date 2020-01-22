@@ -1606,12 +1606,13 @@ package android.bluetooth {
     field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED";
   }
 
-  public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
-    method protected void finalize();
+  public final class BluetoothPan implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public void close();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) protected void finalize();
     method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
-    method public boolean isTetheringOn();
-    method public void setBluetoothTethering(boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isTetheringOn();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public void setBluetoothTethering(boolean);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED";
     field public static final String EXTRA_LOCAL_ROLE = "android.bluetooth.pan.extra.LOCAL_ROLE";
