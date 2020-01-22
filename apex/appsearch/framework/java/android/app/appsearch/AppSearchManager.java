@@ -26,6 +26,7 @@ import com.android.internal.infra.AndroidFuture;
 
 import com.google.android.icing.proto.SchemaProto;
 import com.google.android.icing.proto.SearchResultProto;
+import com.google.android.icing.proto.SearchSpecProto;
 import com.google.android.icing.proto.StatusProto;
 import com.google.android.icing.protobuf.InvalidProtocolBufferException;
 
@@ -186,28 +187,28 @@ public class AppSearchManager {
      *<p>Currently we support following features in the raw query format:
      * <ul>
      *     <li>AND
-     *     AND joins (e.g. “match documents that have both the terms ‘dog’ and
+     *     <p>AND joins (e.g. “match documents that have both the terms ‘dog’ and
      *     ‘cat’”).
      *     Example: hello world matches documents that have both ‘hello’ and ‘world’
      *     <li>OR
-     *     OR joins (e.g. “match documents that have either the term ‘dog’ or
+     *     <p>OR joins (e.g. “match documents that have either the term ‘dog’ or
      *     ‘cat’”).
      *     Example: dog OR puppy
      *     <li>Exclusion
-     *     Exclude a term (e.g. “match documents that do
+     *     <p>Exclude a term (e.g. “match documents that do
      *     not have the term ‘dog’”).
      *     Example: -dog excludes the term ‘dog’
      *     <li>Grouping terms
-     *     Allow for conceptual grouping of subqueries to enable hierarchical structures (e.g.
+     *     <p>Allow for conceptual grouping of subqueries to enable hierarchical structures (e.g.
      *     “match documents that have either ‘dog’ or ‘puppy’, and either ‘cat’ or ‘kitten’”).
      *     Example: (dog puppy) (cat kitten) two one group containing two terms.
      *     <li>Property restricts
-     *      which properties of a document to specifically match terms in (e.g.
+     *     <p> Specifies which properties of a document to specifically match terms in (e.g.
      *     “match documents where the ‘subject’ property contains ‘important’”).
      *     Example: subject:important matches documents with the term ‘important’ in the
      *     ‘subject’ property
      *     <li>Schema type restricts
-     *     This is similar to property restricts, but allows for restricts on top-level document
+     *     <p>This is similar to property restricts, but allows for restricts on top-level document
      *     fields, such as schema_type. Clients should be able to limit their query to documents of
      *     a certain schema_type (e.g. “match documents that are of the ‘Email’ schema_type”).
      *     Example: { schema_type_filters: “Email”, “Video”,query: “dog” } will match documents
@@ -263,7 +264,11 @@ public class AppSearchManager {
         }, executor);
 
         try {
-            mService.query(queryExpression, searchSpec.getProto().toByteArray(), future);
+            SearchSpecProto searchSpecProto = searchSpec.getSearchSpecProto();
+            searchSpecProto = searchSpecProto.toBuilder().setQuery(queryExpression).build();
+            mService.query(searchSpecProto.toByteArray(),
+                    searchSpec.getResultSpecProto().toByteArray(),
+                    searchSpec.getScoringSpecProto().toByteArray(), future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }

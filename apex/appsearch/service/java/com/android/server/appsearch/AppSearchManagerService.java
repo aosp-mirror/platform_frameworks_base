@@ -106,10 +106,11 @@ public class AppSearchManagerService extends SystemService {
         // TODO(sidchhabra):Init FakeIcing properly.
         // TODO(sidchhabra): Do this in a threadpool.
         @Override
-        public void query(@NonNull String queryExpression, @NonNull byte[] searchSpec,
-                AndroidFuture callback) {
-            Preconditions.checkNotNull(queryExpression);
+        public void query(@NonNull byte[] searchSpec, @NonNull byte[] resultSpec,
+                @NonNull byte[] scoringSpec, AndroidFuture callback) {
             Preconditions.checkNotNull(searchSpec);
+            Preconditions.checkNotNull(resultSpec);
+            Preconditions.checkNotNull(scoringSpec);
             SearchSpecProto searchSpecProto = null;
             try {
                 searchSpecProto = SearchSpecProto.parseFrom(searchSpec);
@@ -117,7 +118,7 @@ public class AppSearchManagerService extends SystemService {
                 throw new RuntimeException(e);
             }
             SearchResultProto searchResults =
-                    mFakeIcing.query(queryExpression);
+                    mFakeIcing.query(searchSpecProto.getQuery());
             callback.complete(searchResults.toByteArray());
         }
     }

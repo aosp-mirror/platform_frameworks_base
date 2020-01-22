@@ -47,12 +47,14 @@ interface IAppSearchManager {
     void putDocuments(in List documentsBytes, in AndroidFuture<AppSearchBatchResult> callback);
 
     /**
-     * Searches a document based on a given query string.
+     * Searches a document based on a given specifications.
      *
-     * @param queryExpression Query String to search.
-     * @param searchSpec Serialized SearchSpecProto.
+     * @param searchSpecBytes Serialized SearchSpecProto.
+     * @param resultSpecBytes Serialized SearchResultsProto.
+     * @param scoringSpecBytes Serialized ScoringSpecProto.
      * @param callback {@link AndroidFuture}. Will be completed with a serialized
      *     {@link SearchResultsProto}, or completed exceptionally if query fails.
      */
-     void query(in String queryExpression, in byte[] searchSpecBytes, in AndroidFuture callback);
+    void query(in byte[] searchSpecBytes, in byte[] resultSpecBytes,
+            in byte[] scoringSpecBytes, in AndroidFuture callback);
 }
