@@ -1222,6 +1222,7 @@ public final class BluetoothAdapter {
             if (mService != null) {
                 return mService.factoryReset();
             }
+            Log.e(TAG, "factoryReset(): IBluetooth Service is null");
             SystemProperties.set("persist.bluetooth.factoryreset", "true");
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1239,7 +1240,7 @@ public final class BluetoothAdapter {
      */
     @UnsupportedAppUsage
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public @NonNull ParcelUuid[] getUuids() {
+    public @Nullable ParcelUuid[] getUuids() {
         if (getState() != STATE_ON) {
             return null;
         }
