@@ -52,6 +52,7 @@ public class RankingBuilder {
     private ArrayList<CharSequence> mSmartReplies = new ArrayList<>();
     private boolean mCanBubble = false;
     private boolean mIsVisuallyInterruptive = false;
+    private boolean mIsConversation = false;
 
     public RankingBuilder() {
     }
@@ -77,6 +78,7 @@ public class RankingBuilder {
         mSmartReplies = copyList(ranking.getSmartReplies());
         mCanBubble = ranking.canBubble();
         mIsVisuallyInterruptive = ranking.visuallyInterruptive();
+        mIsConversation = ranking.isConversation();
     }
 
     public Ranking build() {
@@ -101,7 +103,8 @@ public class RankingBuilder {
                 mSmartActions,
                 mSmartReplies,
                 mCanBubble,
-                mIsVisuallyInterruptive);
+                mIsVisuallyInterruptive,
+                mIsConversation);
         return ranking;
     }
 
@@ -178,6 +181,11 @@ public class RankingBuilder {
 
     public RankingBuilder setVisuallyInterruptive(boolean interruptive) {
         mIsVisuallyInterruptive = interruptive;
+        return this;
+    }
+
+    public RankingBuilder setIsConversation(boolean isConversation) {
+        mIsConversation = isConversation;
         return this;
     }
 

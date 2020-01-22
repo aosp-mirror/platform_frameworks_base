@@ -131,6 +131,13 @@ public final class Adjustment implements Parcelable {
     public static final String KEY_RANKING_SCORE = "key_ranking_score";
 
     /**
+     * Data type: boolean, when true it suggests this is NOT a conversation notification.
+     * @hide
+     */
+    @SystemApi
+    public static final String KEY_NOT_CONVERSATION = "key_not_conversation";
+
+    /**
      * Create a notification adjustment.
      *
      * @param pkg The package of the notification.
