@@ -63,7 +63,6 @@ public class Nat464XlatTest {
     static final int NETID = 42;
 
     @Mock ConnectivityService mConnectivity;
-    @Mock NetworkAgentConfig mAgentConfig;
     @Mock IDnsResolver mDnsResolver;
     @Mock INetd mNetd;
     @Mock INetworkManagementService mNms;
@@ -72,6 +71,7 @@ public class Nat464XlatTest {
 
     TestLooper mLooper;
     Handler mHandler;
+    NetworkAgentConfig mAgentConfig = new NetworkAgentConfig();
 
     Nat464Xlat makeNat464Xlat() {
         return new Nat464Xlat(mNai, mNetd, mDnsResolver, mNms) {
