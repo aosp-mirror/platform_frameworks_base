@@ -1610,9 +1610,11 @@ public final class ProcessList {
                     throw e.rethrowAsRuntimeException();
                 }
                 int numGids = 3;
-                if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+                if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE
+                        || app.info.packageName.equals("com.android.externalstorage")) {
                     numGids++;
                 }
+
                 /*
                  * Add shared application and profile GIDs so applications can share some
                  * resources like shared libraries and access user-wide resources
@@ -1626,8 +1628,14 @@ public final class ProcessList {
                 gids[0] = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
                 gids[1] = UserHandle.getCacheAppGid(UserHandle.getAppId(uid));
                 gids[2] = UserHandle.getUserGid(UserHandle.getUserId(uid));
+
                 if (numGids > 3) {
-                    gids[3] = Process.SDCARD_RW_GID;
+                    if (app.info.packageName.equals("com.android.externalstorage")) {
+                        // Allows access to 'unreliable' (USB OTG) volumes via SAF
+                        gids[3] = Process.MEDIA_RW_GID;
+                    } else if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+                        gids[3] = Process.SDCARD_RW_GID;
+                    }
                 }
 
                 // Replace any invalid GIDs
@@ -3945,4 +3953,3 @@ public final class ProcessList {
         }
     };
 }
-
