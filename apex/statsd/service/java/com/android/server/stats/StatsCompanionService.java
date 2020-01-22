@@ -342,30 +342,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             firstCpuOfCluster += powerProfile.getNumCoresInCpuCluster(i);
         }
 
-        // Enable push notifications of throttling from vendor thermal
-        // management subsystem via thermalservice.
-        IBinder b = ServiceManager.getService("thermalservice");
-
-        if (b != null) {
-            sThermalService = IThermalService.Stub.asInterface(b);
-            try {
-                sThermalService.registerThermalEventListener(
-                        new ThermalEventListener());
-                Slog.i(TAG, "register thermal listener successfully");
-            } catch (RemoteException e) {
-                // Should never happen.
-                Slog.e(TAG, "register thermal listener error");
-            }
-        } else {
-            Slog.e(TAG, "cannot find thermalservice, no throttling push notifications");
-        }
-
-        // Default NetworkRequest should cover all transport types.
-        final NetworkRequest request = new NetworkRequest.Builder().build();
-        final ConnectivityManager connectivityManager =
-                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        connectivityManager.registerNetworkCallback(request, new ConnectivityStatsCallback());
-
         HandlerThread handlerThread = new HandlerThread(TAG);
         handlerThread.start();
         mHandler = new CompanionHandler(handlerThread.getLooper());
@@ -907,30 +883,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 writer.println(
                         "  " + deletionMillis + ", " + mDeletedFiles.get(elapsedMillis));
             }
-        }
-    }
-
-    // Thermal event received from vendor thermal management subsystem
-    private static final class ThermalEventListener extends IThermalEventListener.Stub {
-        @Override
-        public void notifyThrottling(Temperature temp) {
-            StatsLog.write(StatsLog.THERMAL_THROTTLING_SEVERITY_STATE_CHANGED, temp.getType(),
-                    temp.getName(), (int) (temp.getValue() * 10), temp.getStatus());
-        }
-    }
-
-    private static final class ConnectivityStatsCallback extends
-            ConnectivityManager.NetworkCallback {
-        @Override
-        public void onAvailable(Network network) {
-            StatsLog.write(StatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
-                    StatsLog.CONNECTIVITY_STATE_CHANGED__STATE__CONNECTED);
-        }
-
-        @Override
-        public void onLost(Network network) {
-            StatsLog.write(StatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
-                    StatsLog.CONNECTIVITY_STATE_CHANGED__STATE__DISCONNECTED);
         }
     }
 }

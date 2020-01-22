@@ -229,6 +229,25 @@ public class StatsPullAtomService extends SystemService {
         mTelephony = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         mStorageManager = (StorageManager) mContext.getSystemService(StorageManager.class);
 
+        final ConnectivityManager connectivityManager =
+                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        // Default NetworkRequest should cover all transport types.
+        final NetworkRequest request = new NetworkRequest.Builder().build();
+        connectivityManager.registerNetworkCallback(request, new ConnectivityStatsCallback());
+
+        // Enable push notifications of throttling from vendor thermal
+        // management subsystem via thermalservice.
+        IThermalService thermalService = getIThermalService();
+        if (thermalService != null) {
+            try {
+                thermalService.registerThermalEventListener(
+                        new ThermalEventListener());
+                Slog.i(TAG, "register thermal listener successfully");
+            } catch (RemoteException e) {
+                Slog.i(TAG, "failed to register thermal listener");
+            }
+        }
+
         // Initialize state for CPU_TIME_PER_FREQ atom
         PowerProfile powerProfile = new PowerProfile(mContext);
         final int numClusters = powerProfile.getNumCpuClusters();
@@ -2895,5 +2914,30 @@ public class StatsPullAtomService extends SystemService {
                 (atomTag, data) -> pullDangerousPermissionState(atomTag, data),
                 BackgroundThread.getExecutor()
         );
+    }
+
+
+    // Thermal event received from vendor thermal management subsystem
+    private static final class ThermalEventListener extends IThermalEventListener.Stub {
+        @Override
+        public void notifyThrottling(Temperature temp) {
+            StatsLog.write(StatsLog.THERMAL_THROTTLING_SEVERITY_STATE_CHANGED, temp.getType(),
+                    temp.getName(), (int) (temp.getValue() * 10), temp.getStatus());
+        }
+    }
+
+    private static final class ConnectivityStatsCallback extends
+            ConnectivityManager.NetworkCallback {
+        @Override
+        public void onAvailable(Network network) {
+            StatsLog.write(StatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
+                    StatsLog.CONNECTIVITY_STATE_CHANGED__STATE__CONNECTED);
+        }
+
+        @Override
+        public void onLost(Network network) {
+            StatsLog.write(StatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
+                    StatsLog.CONNECTIVITY_STATE_CHANGED__STATE__DISCONNECTED);
+        }
     }
 }
