@@ -23,6 +23,8 @@
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
     <uses-permission android:name="android.permission.INSTALL_LOCATION_PROVIDER" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
 

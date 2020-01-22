@@ -63,6 +63,7 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.location.fused">
         <permission name="android.permission.INSTALL_LOCATION_PROVIDER"/>
+        <permission name="android.permission.UPDATE_DEVICE_STATS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.managedprovisioning">

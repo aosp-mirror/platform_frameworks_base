@@ -14,9 +14,33 @@
 
 android_app {
     name: "FusedLocation",
-    srcs: ["**/*.java"],
+    srcs: ["src/**/*.java"],
     libs: ["com.android.location.provider"],
     platform_apis: true,
     certificate: "platform",
     privileged: true,
+}
+
+android_test {
+    name: "FusedLocationTests",
+    manifest: "test/AndroidManifest.xml",
+    test_config: "test/AndroidTest.xml",
+    srcs: [
+        "test/src/**/*.java",
+        "src/**/*.java",  // include real sources because we're forced to test this directly
+    ],
+    libs: [
+        "android.test.base",
+        "android.test.runner",
+        "com.android.location.provider",
+    ],
+    static_libs: [
+        "androidx.test.core",
+        "androidx.test.rules",
+        "androidx.test.ext.junit",
+        "androidx.test.ext.truth",
+        "mockito-target-minus-junit4",
+        "truth-prebuilt",
+    ],
+    test_suites: ["device-tests"]
 }
