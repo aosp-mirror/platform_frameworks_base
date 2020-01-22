@@ -51,6 +51,11 @@ public interface WindowProcessListener {
      */
     boolean isRemoved();
 
+    /**
+     * Returns true if the process is in a cached state.
+     */
+    boolean isCached();
+
     /** Returns the total time (in milliseconds) spent executing in both user and system code. */
     long getCpuTime();
 

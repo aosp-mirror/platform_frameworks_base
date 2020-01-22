@@ -4866,7 +4866,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         updateProcessForegroundLocked(app, false, 0, false);
         app.hasShownUi = false;
         app.setDebugging(false);
-        app.cached = false;
+        app.setCached(false);
         app.killedByAm = false;
         app.killed = false;
 
@@ -12154,7 +12154,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         r.lastSwapPss*1024, new StringBuilder()));
                 proto.write(ProcessOomProto.Detail.LAST_CACHED_PSS, DebugUtils.sizeValueToString(
                         r.lastCachedPss*1024, new StringBuilder()));
-                proto.write(ProcessOomProto.Detail.CACHED, r.cached);
+                proto.write(ProcessOomProto.Detail.CACHED, r.isCached());
                 proto.write(ProcessOomProto.Detail.EMPTY, r.empty);
                 proto.write(ProcessOomProto.Detail.HAS_ABOVE_CLIENT, r.hasAboveClient);
 
@@ -12281,7 +12281,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println();
                 pw.print(prefix);
                 pw.print("    ");
-                pw.print("cached="); pw.print(r.cached);
+                pw.print("cached="); pw.print(r.isCached());
                 pw.print(" empty="); pw.print(r.empty);
                 pw.print(" hasAboveClient="); pw.println(r.hasAboveClient);
 

@@ -179,6 +179,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     // Last configuration that was reported to the process.
     private final Configuration mLastReportedConfiguration;
+    // Configuration that is waiting to be dispatched to the process.
+    private Configuration mPendingConfiguration;
     private final Configuration mNewOverrideConfig = new Configuration();
     // Registered display id as a listener to override config change
     private int mDisplayId;
@@ -1073,24 +1075,38 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
 
-        try {
-            if (mThread == null) {
-                if (Build.IS_DEBUGGABLE && mIsImeProcess) {
-                    // TODO (b/135719017): Temporary log for debugging IME service.
-                    Slog.w(TAG_CONFIGURATION, "Unable to send config for IME proc " + mName
-                            + ": no app thread");
-                }
-                return;
+        if (mListener.isCached()) {
+            // This process is in a cached state. We will delay delivering the config change to the
+            // process until the process is no longer cached.
+            if (mPendingConfiguration == null) {
+                mPendingConfiguration = new Configuration(config);
+            } else {
+                mPendingConfiguration.setTo(config);
             }
-            if (DEBUG_CONFIGURATION) {
-                Slog.v(TAG_CONFIGURATION, "Sending to proc " + mName
-                        + " new config " + config);
-            }
+            return;
+        }
+
+        dispatchConfigurationChange(config);
+    }
+
+    private void dispatchConfigurationChange(Configuration config) {
+        if (mThread == null) {
             if (Build.IS_DEBUGGABLE && mIsImeProcess) {
                 // TODO (b/135719017): Temporary log for debugging IME service.
-                Slog.v(TAG_CONFIGURATION, "Sending to IME proc " + mName
-                        + " new config " + config);
+                Slog.w(TAG_CONFIGURATION, "Unable to send config for IME proc " + mName
+                        + ": no app thread");
             }
+            return;
+        }
+        if (DEBUG_CONFIGURATION) {
+            Slog.v(TAG_CONFIGURATION, "Sending to proc " + mName + " new config " + config);
+        }
+        if (Build.IS_DEBUGGABLE && mIsImeProcess) {
+            // TODO (b/135719017): Temporary log for debugging IME service.
+            Slog.v(TAG_CONFIGURATION, "Sending to IME proc " + mName + " new config " + config);
+        }
+
+        try {
             config.seq = mAtm.increaseConfigurationSeqLocked();
             mAtm.getLifecycleManager().scheduleTransaction(mThread,
                     ConfigurationChangeItem.obtain(config));
@@ -1188,6 +1204,21 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return true;
         }
         return false;
+    }
+
+    /**
+     * Called to notify WindowProcessController of a change in the process's cached state.
+     *
+     * @param isCached whether or not the process is cached.
+     */
+    public void onProcCachedStateChanged(boolean isCached) {
+        synchronized (mAtm.mGlobalLock) {
+            if (!isCached && mPendingConfiguration != null) {
+                final Configuration config = mPendingConfiguration;
+                mPendingConfiguration = null;
+                dispatchConfigurationChange(config);
+            }
+        }
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)

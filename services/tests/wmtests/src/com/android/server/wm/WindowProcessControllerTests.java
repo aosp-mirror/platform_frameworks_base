@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static org.junit.Assert.assertEquals;
@@ -24,7 +26,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
+import android.app.IApplicationThread;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.platform.test.annotations.Presubmit;
@@ -53,6 +57,7 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
         mMockListener = mock(WindowProcessListener.class);
         mWpc = new WindowProcessController(
                 mService, mock(ApplicationInfo.class), null, 0, -1, null, mMockListener);
+        mWpc.setThread(mock(IApplicationThread.class));
     }
 
     @Test
@@ -132,23 +137,51 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
 
     @Test
     public void testConfigurationForSecondaryScreen() {
-        final WindowProcessController wpc = new WindowProcessController(
-                mService, mock(ApplicationInfo.class), null, 0, -1, null, null);
         // By default, the process should not listen to any display.
-        assertEquals(INVALID_DISPLAY, wpc.getDisplayId());
+        assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
 
         // Register to a new display as a listener.
         final DisplayContent display = new TestDisplayContent.Builder(mService, 2000, 1000)
                 .setDensityDpi(300).setPosition(DisplayContent.POSITION_TOP).build();
-        wpc.registerDisplayConfigurationListener(display);
+        mWpc.registerDisplayConfigurationListener(display);
 
-        assertEquals(display.mDisplayId, wpc.getDisplayId());
+        assertEquals(display.mDisplayId, mWpc.getDisplayId());
         final Configuration expectedConfig = mService.mRootWindowContainer.getConfiguration();
         expectedConfig.updateFrom(display.getConfiguration());
-        assertEquals(expectedConfig, wpc.getConfiguration());
+        assertEquals(expectedConfig, mWpc.getConfiguration());
+    }
+
+    @Test
+    public void testDelayingConfigurationChange() {
+        when(mMockListener.isCached()).thenReturn(false);
+
+        Configuration tmpConfig = new Configuration(mWpc.getConfiguration());
+        invertOrientation(tmpConfig);
+        mWpc.onConfigurationChanged(tmpConfig);
+
+        // The last reported config should be the current config as the process is not cached.
+        Configuration originalConfig = new Configuration(mWpc.getConfiguration());
+        assertEquals(mWpc.getLastReportedConfiguration(), originalConfig);
+
+        when(mMockListener.isCached()).thenReturn(true);
+        invertOrientation(tmpConfig);
+        mWpc.onConfigurationChanged(tmpConfig);
+
+        Configuration newConfig = new Configuration(mWpc.getConfiguration());
+
+        // Last reported config hasn't changed because the process is in a cached state.
+        assertEquals(mWpc.getLastReportedConfiguration(), originalConfig);
+
+        mWpc.onProcCachedStateChanged(false);
+        assertEquals(mWpc.getLastReportedConfiguration(), newConfig);
     }
 
     private TestDisplayContent createTestDisplayContentInContainer() {
         return new TestDisplayContent.Builder(mService, 1000, 1500).build();
+    }
+
+    private static void invertOrientation(Configuration config) {
+        config.orientation = config.orientation == ORIENTATION_PORTRAIT
+                ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
     }
 }

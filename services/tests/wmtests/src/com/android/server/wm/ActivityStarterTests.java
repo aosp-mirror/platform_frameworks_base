@@ -229,11 +229,12 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 service.mStackSupervisor, mock(ActivityStartInterceptor.class));
         prepareStarter(launchFlags);
         final IApplicationThread caller = mock(IApplicationThread.class);
+        final WindowProcessListener listener = mock(WindowProcessListener.class);
 
         final WindowProcessController wpc =
                 containsConditions(preconditions, PRECONDITION_NO_CALLER_APP)
                 ? null : new WindowProcessController(
-                        service, mock(ApplicationInfo.class), null, 0, -1, null, null);
+                        service, mock(ApplicationInfo.class), null, 0, -1, null, listener);
         doReturn(wpc).when(service).getProcessController(anyObject());
 
         final Intent intent = new Intent();
@@ -680,10 +681,11 @@ public class ActivityStarterTests extends ActivityTestsBase {
         doReturn(realCallingUidProcState).when(mService).getUidState(realCallingUid);
         // foreground activities
         final IApplicationThread caller = mock(IApplicationThread.class);
+        final WindowProcessListener listener = mock(WindowProcessListener.class);
         final ApplicationInfo ai = new ApplicationInfo();
         ai.uid = callingUid;
         final WindowProcessController callerApp =
-                new WindowProcessController(mService, ai, null, callingUid, -1, null, null);
+                new WindowProcessController(mService, ai, null, callingUid, -1, null, listener);
         callerApp.setHasForegroundActivities(hasForegroundActivities);
         doReturn(callerApp).when(mService).getProcessController(caller);
         // caller is recents

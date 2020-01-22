@@ -546,7 +546,7 @@ public class MockingOomAdjusterTests {
     public void testUpdateOomAdj_DoOne_NonCachedToCached() {
         ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
-        app.cached = false;
+        app.setCached(false);
         app.setCurRawAdj(SERVICE_ADJ);
         doReturn(null).when(sService).getTopAppLocked();
         sService.mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
@@ -1662,7 +1662,7 @@ public class MockingOomAdjusterTests {
         }
         app.lastProviderTime = lastProviderTime;
         app.lastTopTime = lastTopTime;
-        app.cached = cached;
+        app.setCached(cached);
         for (int i = 0; i < numOfExecutingServices; i++) {
             app.executingServices.add(mock(ServiceRecord.class));
         }

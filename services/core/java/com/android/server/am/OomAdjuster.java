@@ -261,7 +261,7 @@ public final class OomAdjuster {
             return updateOomAdjLocked(app, oomAdjReason);
         }
         final ProcessRecord TOP_APP = mService.getTopAppLocked();
-        final boolean wasCached = app.cached;
+        final boolean wasCached = app.isCached();
 
         mAdjSeq++;
 
@@ -274,7 +274,7 @@ public final class OomAdjuster {
         boolean success = updateOomAdjLocked(app, cachedAdj, TOP_APP, false,
                 SystemClock.uptimeMillis());
         if (oomAdjAll
-                && (wasCached != app.cached || app.getCurRawAdj() == ProcessList.UNKNOWN_ADJ)) {
+                && (wasCached != app.isCached() || app.getCurRawAdj() == ProcessList.UNKNOWN_ADJ)) {
             // Changed to/from cached state, so apps after it in the LRU
             // list may also be changed.
             updateOomAdjLocked(oomAdjReason);
@@ -350,7 +350,7 @@ public final class OomAdjuster {
         mAdjSeq++;
 
         // Firstly, try to see if the importance of itself gets changed
-        final boolean wasCached = app.cached;
+        final boolean wasCached = app.isCached();
         final int oldAdj = app.getCurRawAdj();
         final int cachedAdj = oldAdj >= ProcessList.CACHED_APP_MIN_ADJ
                 ? oldAdj : ProcessList.UNKNOWN_ADJ;
@@ -360,7 +360,7 @@ public final class OomAdjuster {
         app.resetCachedInfo();
         boolean success = updateOomAdjLocked(app, cachedAdj, topApp, false,
                 SystemClock.uptimeMillis());
-        if (!success || (wasCached == app.cached && oldAdj != ProcessList.INVALID_ADJ
+        if (!success || (wasCached == app.isCached() && oldAdj != ProcessList.INVALID_ADJ
                 && wasBackground == ActivityManager.isProcStateBackground(app.setProcState))) {
             // Okay, it's unchanged, it won't impact any service it binds to, we're done here.
             if (DEBUG_OOM_ADJ) {
@@ -978,7 +978,7 @@ public final class OomAdjuster {
             if (schedGroup < ProcessList.SCHED_GROUP_DEFAULT) {
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
             }
-            app.cached = false;
+            app.setCached(false);
             app.empty = false;
             foregroundActivities = true;
         }
@@ -1003,7 +1003,7 @@ public final class OomAdjuster {
             if (schedGroup < ProcessList.SCHED_GROUP_DEFAULT) {
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
             }
-            app.cached = false;
+            app.setCached(false);
             app.empty = false;
             foregroundActivities = true;
         }
@@ -1035,7 +1035,7 @@ public final class OomAdjuster {
                     }
                 }
             }
-            app.cached = false;
+            app.setCached(false);
             app.empty = false;
             foregroundActivities = true;
         }
@@ -1084,7 +1084,7 @@ public final class OomAdjuster {
         app.adjSource = null;
         app.adjTarget = null;
         app.empty = false;
-        app.cached = false;
+        app.setCached(false);
 
         final int appUid = app.info.uid;
         final int logUid = mService.mCurOomAdjUid;
@@ -1220,7 +1220,7 @@ public final class OomAdjuster {
             // value that the caller wants us to.
             adj = cachedAdj;
             procState = PROCESS_STATE_CACHED_EMPTY;
-            app.cached = true;
+            app.setCached(true);
             app.empty = true;
             app.adjType = "cch-empty";
             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
@@ -1255,7 +1255,7 @@ public final class OomAdjuster {
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
                 procState = PROCESS_STATE_FOREGROUND_SERVICE;
                 app.adjType = "fg-service";
-                app.cached = false;
+                app.setCached(false);
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to " + app.adjType + ": "
@@ -1265,7 +1265,7 @@ public final class OomAdjuster {
                 // The process is display an overlay UI.
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
                 procState = PROCESS_STATE_IMPORTANT_FOREGROUND;
-                app.cached = false;
+                app.setCached(false);
                 app.adjType = "has-overlay-ui";
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
@@ -1295,7 +1295,7 @@ public final class OomAdjuster {
                 // thus out of background check), so we yes the best background level we can.
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
                 procState = PROCESS_STATE_TRANSIENT_BACKGROUND;
-                app.cached = false;
+                app.setCached(false);
                 app.adjType = "force-imp";
                 app.adjSource = app.forcingToImportant;
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
@@ -1310,7 +1310,7 @@ public final class OomAdjuster {
                 // We don't want to kill the current heavy-weight process.
                 adj = ProcessList.HEAVY_WEIGHT_APP_ADJ;
                 schedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
-                app.cached = false;
+                app.setCached(false);
                 app.adjType = "heavy";
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to heavy: " + app);
@@ -1331,7 +1331,7 @@ public final class OomAdjuster {
                 // home app, so we don't want to let it go into the background.
                 adj = ProcessList.HOME_APP_ADJ;
                 schedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
-                app.cached = false;
+                app.setCached(false);
                 app.adjType = "home";
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to home: " + app);
@@ -1353,7 +1353,7 @@ public final class OomAdjuster {
                 // a good experience around switching between two apps.
                 adj = ProcessList.PREVIOUS_APP_ADJ;
                 schedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
-                app.cached = false;
+                app.setCached(false);
                 app.adjType = "previous";
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to prev: " + app);
@@ -1400,7 +1400,7 @@ public final class OomAdjuster {
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to backup: " + app);
                 }
-                app.cached = false;
+                app.setCached(false);
             }
             if (procState > ActivityManager.PROCESS_STATE_BACKUP) {
                 procState = ActivityManager.PROCESS_STATE_BACKUP;
@@ -1448,7 +1448,7 @@ public final class OomAdjuster {
                                 reportOomAdjMessageLocked(TAG_OOM_ADJ,
                                         "Raise adj to started service: " + app);
                             }
-                            app.cached = false;
+                            app.setCached(false);
                         }
                     }
                     // If we have let the service slide into the background
@@ -1538,7 +1538,7 @@ public final class OomAdjuster {
                                 if (adj > clientAdj) {
                                     adjType = "cch-bound-ui-services";
                                 }
-                                app.cached = false;
+                                app.setCached(false);
                                 clientAdj = adj;
                                 clientProcState = procState;
                             } else {
@@ -1601,8 +1601,8 @@ public final class OomAdjuster {
                                         newAdj = adj;
                                     }
                                 }
-                                if (!client.cached) {
-                                    app.cached = false;
+                                if (!client.isCached()) {
+                                    app.setCached(false);
                                 }
                                 if (adj >  newAdj) {
                                     adj = newAdj;
@@ -1726,7 +1726,7 @@ public final class OomAdjuster {
                                     schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
                                 }
                             }
-                            app.cached = false;
+                            app.setCached(false);
                             app.adjType = "service";
                             app.adjTypeCode = ActivityManager.RunningAppProcessInfo
                                     .REASON_SERVICE_IN_USE;
@@ -1791,7 +1791,7 @@ public final class OomAdjuster {
                         app.setCurRawAdj(adj);
                         adjType = "provider";
                     }
-                    app.cached &= client.cached;
+                    app.setCached(app.isCached() & client.isCached());
                 }
 
                 if (clientProcState <= PROCESS_STATE_FOREGROUND_SERVICE) {
@@ -1836,7 +1836,7 @@ public final class OomAdjuster {
                     adj = ProcessList.FOREGROUND_APP_ADJ;
                     app.setCurRawAdj(adj);
                     schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
-                    app.cached = false;
+                    app.setCached(false);
                     app.adjType = "ext-provider";
                     app.adjTarget = cpr.name;
                     if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
@@ -1860,7 +1860,7 @@ public final class OomAdjuster {
             if (adj > ProcessList.PREVIOUS_APP_ADJ) {
                 adj = ProcessList.PREVIOUS_APP_ADJ;
                 schedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
-                app.cached = false;
+                app.setCached(false);
                 app.adjType = "recent-provider";
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ,
