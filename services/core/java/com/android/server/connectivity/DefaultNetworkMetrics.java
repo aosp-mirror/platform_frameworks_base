@@ -82,12 +82,14 @@ public class DefaultNetworkMetrics {
     }
 
     /**
-     * Convert events in the ring buffer to protos and add to the given list
+     * Convert events in the ring buffer to a list of IpConnectivityEvent protos
      */
-    public synchronized void listEventsAsProto(List<IpConnectivityEvent> out) {
+    public synchronized List<IpConnectivityEvent> listEventsAsProto() {
+        List<IpConnectivityEvent> list = new ArrayList<>();
         for (DefaultNetworkEvent ev : mEventsLog.toArray()) {
-            out.add(IpConnectivityEventBuilder.toProto(ev));
+            list.add(IpConnectivityEventBuilder.toProto(ev));
         }
+        return list;
     }
 
     public synchronized void flushEvents(List<IpConnectivityEvent> out) {

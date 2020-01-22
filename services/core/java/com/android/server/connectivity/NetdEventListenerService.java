@@ -367,18 +367,20 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     }
 
     /**
-     * Convert events in the buffer to protos and add to the given list
+     * Convert events in the buffer to a list of IpConnectivityEvent protos
      */
-    public synchronized void listAsProtos(List<IpConnectivityEvent> out) {
+    public synchronized List<IpConnectivityEvent> listAsProtos() {
+        List<IpConnectivityEvent> list = new ArrayList<>();
         for (int i = 0; i < mNetworkMetrics.size(); i++) {
-            out.add(IpConnectivityEventBuilder.toProto(mNetworkMetrics.valueAt(i).connectMetrics));
+            list.add(IpConnectivityEventBuilder.toProto(mNetworkMetrics.valueAt(i).connectMetrics));
         }
         for (int i = 0; i < mNetworkMetrics.size(); i++) {
-            out.add(IpConnectivityEventBuilder.toProto(mNetworkMetrics.valueAt(i).dnsMetrics));
+            list.add(IpConnectivityEventBuilder.toProto(mNetworkMetrics.valueAt(i).dnsMetrics));
         }
         for (int i = 0; i < mWakeupStats.size(); i++) {
-            out.add(IpConnectivityEventBuilder.toProto(mWakeupStats.valueAt(i)));
+            list.add(IpConnectivityEventBuilder.toProto(mWakeupStats.valueAt(i)));
         }
+        return list;
     }
 
     private long getTransports(int netId) {
