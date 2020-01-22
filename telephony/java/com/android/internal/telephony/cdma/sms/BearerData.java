@@ -32,6 +32,7 @@ import com.android.internal.telephony.uicc.IccUtils;
 import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.BitwiseOutputStream;
 
+import java.io.ByteArrayOutputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -282,6 +283,33 @@ public final class BearerData {
             if (second < 0 || second > 59) return null;
             ts.second = second;
             return ts;
+        }
+
+        public static TimeStamp fromMillis(long timeInMillis) {
+            TimeStamp ts = new TimeStamp();
+            LocalDateTime localDateTime =
+                    Instant.ofEpochMilli(timeInMillis).atZone(ts.mZoneId).toLocalDateTime();
+            int year = localDateTime.getYear();
+            if (year < 1996 || year > 2095) return null;
+            ts.year = year;
+            ts.month = localDateTime.getMonthValue();
+            ts.monthDay = localDateTime.getDayOfMonth();
+            ts.hour = localDateTime.getHour();
+            ts.minute = localDateTime.getMinute();
+            ts.second = localDateTime.getSecond();
+            return ts;
+        }
+
+        public byte[] toByteArray() {
+            int year = this.year % 100; // 00 - 99
+            ByteArrayOutputStream outStream = new ByteArrayOutputStream(6);
+            outStream.write((((year / 10) & 0x0F) << 4) | ((year % 10) & 0x0F));
+            outStream.write((((month / 10) << 4) & 0xF0) | ((month % 10) & 0x0F));
+            outStream.write((((monthDay / 10) << 4) & 0xF0) | ((monthDay % 10) & 0x0F));
+            outStream.write((((hour / 10) << 4) & 0xF0) | ((hour % 10) & 0x0F));
+            outStream.write((((minute / 10) << 4) & 0xF0) | ((minute % 10) & 0x0F));
+            outStream.write((((second / 10) << 4) & 0xF0) | ((second % 10) & 0x0F));
+            return outStream.toByteArray();
         }
 
         public long toMillis() {
@@ -957,6 +985,12 @@ public final class BearerData {
         }
     }
 
+    private static void encodeMsgCenterTimeStamp(BearerData bData, BitwiseOutputStream outStream)
+            throws BitwiseOutputStream.AccessException {
+        outStream.write(8, 6);
+        outStream.writeByteArray(8 * 6, bData.msgCenterTimeStamp.toByteArray());
+    };
+
     /**
      * Create serialized representation for BearerData object.
      * (See 3GPP2 C.R1001-F, v1.0, section 4.5 for layout details)
@@ -1020,6 +1054,10 @@ public final class BearerData {
             if (bData.serviceCategoryProgramResults != null) {
                 outStream.write(8, SUBPARAM_SERVICE_CATEGORY_PROGRAM_RESULTS);
                 encodeScpResults(bData, outStream);
+            }
+            if (bData.msgCenterTimeStamp != null) {
+                outStream.write(8, SUBPARAM_MESSAGE_CENTER_TIME_STAMP);
+                encodeMsgCenterTimeStamp(bData, outStream);
             }
             return outStream.toByteArray();
         } catch (BitwiseOutputStream.AccessException ex) {
