@@ -331,7 +331,17 @@ public final class PhoneAccount implements Parcelable {
      */
     public static final int CAPABILITY_EMERGENCY_PREFERRED = 0x2000;
 
-    /* NEXT CAPABILITY: 0x4000 */
+    /**
+     * An adhoc conference call is established by providing a list of addresses to
+     * {@code TelecomManager#startConference(List<Uri>, int videoState)} where the
+     * {@link ConnectionService} is responsible for connecting all indicated participants
+     * to a conference simultaneously.
+     * This is in contrast to conferences formed by merging calls together (e.g. using
+     * {@link android.telecom.Call#mergeConference()}).
+     */
+    public static final int CAPABILITY_ADHOC_CONFERENCE_CALLING = 0x4000;
+
+    /* NEXT CAPABILITY: 0x8000 */
 
     /**
      * URI scheme for telephone number URIs.
@@ -1053,6 +1063,9 @@ public final class PhoneAccount implements Parcelable {
         }
         if (hasCapabilities(CAPABILITY_RTT)) {
             sb.append("Rtt");
+        }
+        if (hasCapabilities(CAPABILITY_ADHOC_CONFERENCE_CALLING)) {
+            sb.append("AdhocConf");
         }
         return sb.toString();
     }
