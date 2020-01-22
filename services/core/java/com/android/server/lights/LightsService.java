@@ -58,12 +58,23 @@ public class LightsService extends SystemService {
         }
 
         @Override
+        public void setBrightnessFloat(float brightness) {
+            if (!Float.isNaN(brightness)) {
+                setBrightness(brightness, 0, BRIGHTNESS_MODE_USER);
+            }
+        }
+
+        @Override
         public void setBrightness(int brightness) {
             setBrightness(brightness, BRIGHTNESS_MODE_USER);
         }
 
         @Override
         public void setBrightness(int brightness, int brightnessMode) {
+            setBrightness(Float.NaN, brightness, brightnessMode);
+        }
+
+        private void setBrightness(float brightnessFloat, int brightness, int brightnessMode) {
             synchronized (this) {
                 // LOW_PERSISTENCE cannot be manually set
                 if (brightnessMode == BRIGHTNESS_MODE_LOW_PERSISTENCE) {
@@ -84,7 +95,10 @@ public class LightsService extends SystemService {
                     if (DEBUG) {
                         Slog.d(TAG, "Using new setBrightness path!");
                     }
-                    if (brightness == 0) {
+
+                    if (!Float.isNaN(brightnessFloat)) {
+                        SurfaceControl.setDisplayBrightness(mDisplayToken, brightnessFloat);
+                    } else if (brightness == 0) {
                         SurfaceControl.setDisplayBrightness(mDisplayToken, -1.0f);
                     } else {
                         SurfaceControl.setDisplayBrightness(mDisplayToken,
