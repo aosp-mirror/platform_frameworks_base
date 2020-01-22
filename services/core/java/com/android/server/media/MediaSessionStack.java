@@ -187,7 +187,9 @@ class MediaSessionStack {
         for (int i = 0; i < audioPlaybackUids.size(); i++) {
             MediaSessionRecordImpl mediaButtonSession =
                     findMediaButtonSession(audioPlaybackUids.get(i));
-            if (mediaButtonSession != null) {
+            if (mediaButtonSession != null
+                    && (mediaButtonSession.getSessionPolicies()
+                            & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_SESSION) == 0) {
                 // Found the media button session.
                 mAudioPlayerStateMonitor.cleanUpAudioPlaybackUids(mediaButtonSession.getUid());
                 if (mMediaButtonSession != mediaButtonSession) {
@@ -278,7 +280,7 @@ class MediaSessionStack {
         // session.
         if (newMediaButtonSession != null) {
             int policies = newMediaButtonSession.getSessionPolicies();
-            if ((policies & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_SESSION) == 1) {
+            if ((policies & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_SESSION) != 0) {
                 return;
             }
         }

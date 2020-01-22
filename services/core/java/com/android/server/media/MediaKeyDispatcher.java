@@ -23,8 +23,15 @@ import android.view.KeyEvent;
 
 /**
  * Provides a way to customize behavior for media key events.
+ *
+ * Note: When instantiating this class, {@link MediaSessionService} will only use the constructor
+ * without any parameters.
  */
-public interface MediaKeyDispatcher {
+public abstract class MediaKeyDispatcher {
+    public MediaKeyDispatcher() {
+        // Constructor used for reflection
+    }
+
     /**
      * Implement this to customize the logic for which MediaSession should consume which key event.
      *
@@ -35,5 +42,7 @@ public interface MediaKeyDispatcher {
      */
     @Nullable
     MediaSession.Token getSessionForKeyEvent(@NonNull KeyEvent keyEvent,
-            boolean asSystemService);
+            boolean asSystemService) {
+        return null;
+    }
 }
