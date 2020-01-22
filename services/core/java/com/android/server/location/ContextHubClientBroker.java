@@ -16,8 +16,6 @@
 
 package com.android.server.location;
 
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-
 import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -111,11 +109,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private AtomicBoolean mIsPendingIntentCancelled = new AtomicBoolean(false);
 
     /*
-     * True if the application creating the client has the ACCESS_CONTEXT_HUB permission.
-     */
-    private final boolean mHasAccessContextHubPermission;
-
-    /*
      * Helper class to manage registered PendingIntent requests from the client.
      */
     private class PendingIntentRequest {
@@ -172,9 +165,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         mCallbackInterface = callback;
         mPendingIntentRequest = new PendingIntentRequest();
         mPackage = mContext.getPackageManager().getNameForUid(Binder.getCallingUid());
-
-        mHasAccessContextHubPermission = context.checkCallingPermission(
-            Manifest.permission.ACCESS_CONTEXT_HUB) == PERMISSION_GRANTED;
     }
 
     /* package */ ContextHubClientBroker(
@@ -188,9 +178,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         mHostEndPointId = hostEndPointId;
         mPendingIntentRequest = new PendingIntentRequest(pendingIntent, nanoAppId);
         mPackage = pendingIntent.getCreatorPackage();
-
-        mHasAccessContextHubPermission = context.checkCallingPermission(
-            Manifest.permission.ACCESS_CONTEXT_HUB) == PERMISSION_GRANTED;
     }
 
     /**
@@ -428,12 +415,10 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     private void doSendPendingIntent(PendingIntent pendingIntent, Intent intent) {
         try {
-            String requiredPermission = mHasAccessContextHubPermission
-                    ? Manifest.permission.ACCESS_CONTEXT_HUB
-                    : Manifest.permission.LOCATION_HARDWARE;
             pendingIntent.send(
                     mContext, 0 /* code */, intent, null /* onFinished */, null /* Handler */,
-                    requiredPermission, null /* options */);
+                    Manifest.permission.LOCATION_HARDWARE /* requiredPermission */,
+                    null /* options */);
         } catch (PendingIntent.CanceledException e) {
             mIsPendingIntentCancelled.set(true);
             // The PendingIntent is no longer valid
