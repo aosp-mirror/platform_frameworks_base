@@ -5613,19 +5613,25 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the CDMA ERI icon index to display
+     * Get the CDMA ERI (Enhanced Roaming Indicator) information
+     *
+     * Returns {@link android.telephony#CdmaEriInformation}
+     *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public int getCdmaEriIconIndex() {
-        return getCdmaEriIconIndex(getSubId());
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    @NonNull
+    public CdmaEriInformation getCdmaEriInformation() {
+        return new CdmaEriInformation(
+               getCdmaEriIconMode(getSubId()), getCdmaEriIconIndex(getSubId()));
     }
 
     /**
      * Returns the CDMA ERI icon index to display for a subscription
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @UnsupportedAppUsage
     public int getCdmaEriIconIndex(int subId) {
         try {
@@ -5643,25 +5649,13 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the CDMA ERI icon mode,
-     * 0 - ON
-     * 1 - FLASHING
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public int getCdmaEriIconMode() {
-        return getCdmaEriIconMode(getSubId());
-    }
-
-    /**
      * Returns the CDMA ERI icon mode for a subscription.
      * 0 - ON
      * 1 - FLASHING
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @UnsupportedAppUsage
     public int getCdmaEriIconMode(int subId) {
         try {
