@@ -435,7 +435,7 @@ public class WifiInfo implements Parcelable {
          */
         @NonNull
         public WifiInfo build() {
-            return mWifiInfo;
+            return new WifiInfo(mWifiInfo);
         }
     }
 

@@ -24,6 +24,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import android.net.MacAddress;
@@ -385,5 +386,44 @@ public class WifiConfigurationTest {
         assertTrue(config.allowedGroupManagementCiphers
                 .get(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256));
         assertTrue(config.requirePMF);
+    }
+
+    /**
+     * Test that the NetworkSelectionStatus Builder returns the same values that was set, and that
+     * calling build multiple times returns different instances.
+     */
+    @Test
+    public void testNetworkSelectionStatusBuilder() throws Exception {
+        NetworkSelectionStatus.Builder builder = new NetworkSelectionStatus.Builder()
+                .setNetworkSelectionDisableReason(
+                        NetworkSelectionStatus.DISABLED_ASSOCIATION_REJECTION)
+                .setNetworkSelectionStatus(
+                        NetworkSelectionStatus.NETWORK_SELECTION_PERMANENTLY_DISABLED);
+
+        NetworkSelectionStatus status1 = builder.build();
+
+        assertEquals(NetworkSelectionStatus.DISABLED_ASSOCIATION_REJECTION,
+                status1.getNetworkSelectionDisableReason());
+        assertEquals(NetworkSelectionStatus.NETWORK_SELECTION_PERMANENTLY_DISABLED,
+                status1.getNetworkSelectionStatus());
+
+        NetworkSelectionStatus status2 = builder
+                .setNetworkSelectionDisableReason(NetworkSelectionStatus.DISABLED_BY_WRONG_PASSWORD)
+                .build();
+
+        // different instances
+        assertNotSame(status1, status2);
+
+        // assert that status1 didn't change
+        assertEquals(NetworkSelectionStatus.DISABLED_ASSOCIATION_REJECTION,
+                status1.getNetworkSelectionDisableReason());
+        assertEquals(NetworkSelectionStatus.NETWORK_SELECTION_PERMANENTLY_DISABLED,
+                status1.getNetworkSelectionStatus());
+
+        // assert that status2 changed
+        assertEquals(NetworkSelectionStatus.DISABLED_BY_WRONG_PASSWORD,
+                status2.getNetworkSelectionDisableReason());
+        assertEquals(NetworkSelectionStatus.NETWORK_SELECTION_PERMANENTLY_DISABLED,
+                status2.getNetworkSelectionStatus());
     }
 }
