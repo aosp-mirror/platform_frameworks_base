@@ -16,7 +16,8 @@
 
 package android.util.proto;
 
-import android.annotation.TestApi;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.Log;
 
 import java.io.FileDescriptor;
@@ -28,19 +29,23 @@ import java.io.UnsupportedEncodingException;
 /**
  * Class to write to a protobuf stream.
  *
- * Each write method takes an ID code from the protoc generated classes
- * and the value to write.  To make a nested object, call #start
- * and then #end when you are done.
+ * <p>
+ * This API is not as convenient or type safe as the standard protobuf
+ * classes. If possible, the best recommended library is to use protobuf lite.
+ * However, in environements (such as the Android platform itself), a
+ * more memory efficient version is necessary.
  *
- * The ID codes have type information embedded into them, so if you call
- * the incorrect function you will get an IllegalArgumentException.
+ * <p>Each write method takes an ID code from the protoc generated classes
+ * and the value to write.  To make a nested object, call {@link #start(long)}
+ * and then {@link #end(long)} when you are done.
  *
- * To retrieve the encoded protobuf stream, call getBytes().
+ * <p>The ID codes have type information embedded into them, so if you call
+ * the incorrect function you will get an {@link IllegalArgumentException}.
  *
- * TODO: Add a constructor that takes an OutputStream and write to that
+ * <p>To retrieve the encoded protobuf stream, call {@link #getBytes()}.
+ *
  * stream as the top-level objects are finished.
  *
- * @hide
  */
 
 /* IMPLEMENTATION NOTES
@@ -99,7 +104,6 @@ import java.io.UnsupportedEncodingException;
  * correctly matched pairs of #start and #end calls, and issue
  * errors if they are not matched.
  */
-@TestApi
 public final class ProtoOutputStream extends ProtoStream {
     /**
      * @hide
@@ -124,7 +128,9 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * An ID given to objects and returned in the token from startObject
      * and stored in the buffer until endObject is called, where the two
-     * are checked.  Starts at -1 and becomes more negative, so the values
+     * are checked.
+     *
+     * <p>Starts at -1 and becomes more negative, so the values
      * aren't likely to alias with the size it will be overwritten with,
      * which tend to be small, and we will be more likely to catch when
      * the caller of endObject uses a stale token that they didn't intend
@@ -133,8 +139,9 @@ public final class ProtoOutputStream extends ProtoStream {
     private int mNextObjectId = -1;
 
     /**
-     * The object token we are expecting in endObject.  If another call to
-     * startObject happens, this is written to that location, which gives
+     * The object token we are expecting in endObject.
+     *
+     * <p>If another call to startObject happens, this is written to that location, which gives
      * us a stack, stored in the space for the as-yet unused size fields.
      */
     private long mExpectedObjectToken;
@@ -151,39 +158,45 @@ public final class ProtoOutputStream extends ProtoStream {
     private boolean mCompacted;
 
     /**
-     * Construct a ProtoOutputStream with the default chunk size.
+     * Construct a {@link ProtoOutputStream} with the default chunk size.
+     *
+     * <p>This is for an in-memory proto. The caller should use {@link #getBytes()} for the result.
      */
     public ProtoOutputStream() {
         this(0);
     }
 
     /**
-     * Construct a ProtoOutputStream with the given chunk size.
+     * Construct a {@link ProtoOutputStream with the given chunk size.
+     *
+     * <p>This is for an in-memory proto. The caller should use {@link #getBytes()} for the result.
      */
     public ProtoOutputStream(int chunkSize) {
         mBuffer = new EncodedBuffer(chunkSize);
     }
 
     /**
-     * Construct a ProtoOutputStream that sits on top of an OutputStream.
-     * @more
-     * The {@link #flush() flush()} method must be called when done writing
-     * to flush any remanining data, althought data *may* be written at intermediate
+     * Construct a {@link ProtoOutputStream} that sits on top of an {@link OutputStream}.
+     *
+     * <p>The {@link #flush()} method must be called when done writing
+     * to flush any remaining data, although data *may* be written at intermediate
      * points within the writing as well.
      */
-    public ProtoOutputStream(OutputStream stream) {
+    public ProtoOutputStream(@NonNull OutputStream stream) {
         this();
         mStream = stream;
     }
 
     /**
-     * Construct a ProtoOutputStream that sits on top of a FileDescriptor.
-     * @more
-     * The {@link #flush() flush()} method must be called when done writing
-     * to flush any remanining data, althought data *may* be written at intermediate
+     * Construct a {@link ProtoOutputStream} that sits on top of a {@link FileDescriptor}.
+     *
+     * <p>The {@link #flush()} method must be called when done writing
+     * to flush any remaining data, although data *may* be written at intermediate
      * points within the writing as well.
+     *
+     * @hide
      */
-    public ProtoOutputStream(FileDescriptor fd) {
+    public ProtoOutputStream(@NonNull FileDescriptor fd) {
         this(new FileOutputStream(fd));
     }
 
@@ -202,7 +215,7 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a value for the given fieldId.
      *
-     * Will automatically convert for the following field types, and
+     * <p>Will automatically convert for the following field types, and
      * throw an exception for others: double, float, int32, int64, uint32, uint64,
      * sint32, sint64, fixed32, fixed64, sfixed32, sfixed64, bool, enum.
      *
@@ -337,7 +350,7 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a value for the given fieldId.
      *
-     * Will automatically convert for the following field types, and
+     * <p>Will automatically convert for the following field types, and
      * throw an exception for others: double, float, int32, int64, uint32, uint64,
      * sint32, sint64, fixed32, fixed64, sfixed32, sfixed64, bool, enum.
      *
@@ -472,7 +485,7 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a value for the given fieldId.
      *
-     * Will automatically convert for the following field types, and
+     * <p>Will automatically convert for the following field types, and
      * throw an exception for others: double, float, int32, int64, uint32, uint64,
      * sint32, sint64, fixed32, fixed64, sfixed32, sfixed64, bool, enum.
      *
@@ -607,7 +620,7 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a value for the given fieldId.
      *
-     * Will automatically convert for the following field types, and
+     * <p>Will automatically convert for the following field types, and
      * throw an exception for others: double, float, int32, int64, uint32, uint64,
      * sint32, sint64, fixed32, fixed64, sfixed32, sfixed64, bool, enum.
      *
@@ -742,7 +755,7 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a boolean value for the given fieldId.
      *
-     * If the field is not a bool field, an exception will be thrown.
+     * <p>If the field is not a bool field, an {@link IllegalStateException} will be thrown.
      *
      * @param fieldId The field identifier constant from the generated class.
      * @param val The value.
@@ -771,12 +784,12 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a string value for the given fieldId.
      *
-     * If the field is not a string field, an exception will be thrown.
+     * <p>If the field is not a string field, an exception will be thrown.
      *
      * @param fieldId The field identifier constant from the generated class.
      * @param val The value.
      */
-    public void write(long fieldId, String val) {
+    public void write(long fieldId, @Nullable String val) {
         assertNotCompacted();
         final int id = (int)fieldId;
 
@@ -800,12 +813,12 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a byte[] value for the given fieldId.
      *
-     * If the field is not a bytes or object field, an exception will be thrown.
+     * <p>If the field is not a bytes or object field, an exception will be thrown.
      *
      * @param fieldId The field identifier constant from the generated class.
      * @param val The value.
      */
-    public void write(long fieldId, byte[] val) {
+    public void write(long fieldId, @Nullable byte[] val) {
         assertNotCompacted();
         final int id = (int)fieldId;
 
@@ -836,6 +849,9 @@ public final class ProtoOutputStream extends ProtoStream {
 
     /**
      * Start a sub object.
+     *
+     * @param fieldId The field identifier constant from the generated class.
+     * @return The token to call {@link #end(long)} with.
      */
     public long start(long fieldId) {
         assertNotCompacted();
@@ -855,6 +871,8 @@ public final class ProtoOutputStream extends ProtoStream {
 
     /**
      * End the object started by start() that returned token.
+     *
+     * @param token The token returned from {@link #start(long)}
      */
     public void end(long token) {
         endObjectImpl(token, getRepeatedFromToken(token));
@@ -870,7 +888,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "double" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, double)} instead.
+     * @hide
      */
     @Deprecated
     public void writeDouble(long fieldId, double val) {
@@ -890,7 +909,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto "double" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, double)} instead.
+     * @hide
      */
     @Deprecated
     public void writeRepeatedDouble(long fieldId, double val) {
@@ -908,10 +928,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a list of packed proto "double" type field values.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, double)} instead.
+     * @hide
      */
     @Deprecated
-    public void writePackedDouble(long fieldId, double[] val) {
+    public void writePackedDouble(long fieldId, @Nullable double[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_DOUBLE);
 
@@ -934,7 +955,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "float" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, float)} instead.
+     * @hide
      */
     @Deprecated
     public void writeFloat(long fieldId, float val) {
@@ -954,7 +976,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto "float" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, float)} instead.
+     * @hide
      */
     @Deprecated
     public void writeRepeatedFloat(long fieldId, float val) {
@@ -972,10 +995,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a list of packed proto "float" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, float)} instead.
+     * @hide
      */
     @Deprecated
-    public void writePackedFloat(long fieldId, float[] val) {
+    public void writePackedFloat(long fieldId, @Nullable float[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_FLOAT);
 
@@ -999,7 +1023,7 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Writes a java int as an usigned varint.
      *
-     * The unadorned int32 type in protobuf is unfortunate because it
+     * <p>The unadorned int32 type in protobuf is unfortunate because it
      * is stored in memory as a signed value, but encodes as unsigned
      * varints, which are formally always longs.  So here, we encode
      * negative values as 64 bits, which will get the sign-extension,
@@ -1017,11 +1041,12 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "int32" type field value.
      *
-     * Note that these are stored in memory as signed values and written as unsigned
+     * <p>Note that these are stored in memory as signed values and written as unsigned
      * varints, which if negative, are 10 bytes long. If you know the data is likely
      * to be negative, use "sint32".
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
     public void writeInt32(long fieldId, int val) {
@@ -1041,11 +1066,12 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto "int32" type field value.
      *
-     * Note that these are stored in memory as signed values and written as unsigned
+     * <p>Note that these are stored in memory as signed values and written as unsigned
      * varints, which if negative, are 10 bytes long. If you know the data is likely
      * to be negative, use "sint32".
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
     public void writeRepeatedInt32(long fieldId, int val) {
@@ -1063,14 +1089,15 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a list of packed proto "int32" type field value.
      *
-     * Note that these are stored in memory as signed values and written as unsigned
+     * <p>Note that these are stored in memory as signed values and written as unsigned
      * varints, which if negative, are 10 bytes long. If you know the data is likely
      * to be negative, use "sint32".
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
-    public void writePackedInt32(long fieldId, int[] val) {
+    public void writePackedInt32(long fieldId, @Nullable int[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_INT32);
 
@@ -1099,7 +1126,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "int64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
     public void writeInt64(long fieldId, long val) {
@@ -1119,7 +1147,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto "int64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
     public void writeRepeatedInt64(long fieldId, long val) {
@@ -1137,10 +1166,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a list of packed proto "int64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
-    public void writePackedInt64(long fieldId, long[] val) {
+    public void writePackedInt64(long fieldId, @Nullable long[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_INT64);
 
@@ -1168,7 +1198,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "uint32" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
     public void writeUInt32(long fieldId, int val) {
@@ -1188,7 +1219,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto "uint32" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
     public void writeRepeatedUInt32(long fieldId, int val) {
@@ -1206,10 +1238,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a list of packed proto "uint32" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
-    public void writePackedUInt32(long fieldId, int[] val) {
+    public void writePackedUInt32(long fieldId, @Nullable int[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_UINT32);
 
@@ -1237,7 +1270,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "uint64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
     public void writeUInt64(long fieldId, long val) {
@@ -1257,7 +1291,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "uint64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
     public void writeRepeatedUInt64(long fieldId, long val) {
@@ -1275,10 +1310,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "uint64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
-    public void writePackedUInt64(long fieldId, long[] val) {
+    public void writePackedUInt64(long fieldId, @Nullable long[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_UINT64);
 
@@ -1306,7 +1342,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "sint32" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
     public void writeSInt32(long fieldId, int val) {
@@ -1326,7 +1363,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto "sint32" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
     public void writeRepeatedSInt32(long fieldId, int val) {
@@ -1344,10 +1382,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a list of packed proto "sint32" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
-    public void writePackedSInt32(long fieldId, int[] val) {
+    public void writePackedSInt32(long fieldId, @Nullable int[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_SINT32);
 
@@ -1375,7 +1414,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "sint64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
     public void writeSInt64(long fieldId, long val) {
@@ -1395,7 +1435,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto "sint64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
     public void writeRepeatedSInt64(long fieldId, long val) {
@@ -1413,10 +1454,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a list of packed proto "sint64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
-    public void writePackedSInt64(long fieldId, long[] val) {
+    public void writePackedSInt64(long fieldId, @Nullable long[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_SINT64);
 
@@ -1443,7 +1485,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "fixed32" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
     public void writeFixed32(long fieldId, int val) {
@@ -1463,7 +1506,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto "fixed32" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
     public void writeRepeatedFixed32(long fieldId, int val) {
@@ -1481,10 +1525,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a list of packed proto "fixed32" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
-    public void writePackedFixed32(long fieldId, int[] val) {
+    public void writePackedFixed32(long fieldId, @Nullable int[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_FIXED32);
 
@@ -1507,7 +1552,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "fixed64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
     public void writeFixed64(long fieldId, long val) {
@@ -1527,7 +1573,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto "fixed64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
     public void writeRepeatedFixed64(long fieldId, long val) {
@@ -1545,10 +1592,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a list of packed proto "fixed64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
-    public void writePackedFixed64(long fieldId, long[] val) {
+    public void writePackedFixed64(long fieldId, @Nullable long[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_FIXED64);
 
@@ -1570,7 +1618,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "sfixed32" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
     public void writeSFixed32(long fieldId, int val) {
@@ -1590,7 +1639,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto "sfixed32" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
     public void writeRepeatedSFixed32(long fieldId, int val) {
@@ -1608,10 +1658,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a list of packed proto "sfixed32" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
-    public void writePackedSFixed32(long fieldId, int[] val) {
+    public void writePackedSFixed32(long fieldId, @Nullable int[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_SFIXED32);
 
@@ -1634,7 +1685,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "sfixed64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
     public void writeSFixed64(long fieldId, long val) {
@@ -1654,7 +1706,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto "sfixed64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
     public void writeRepeatedSFixed64(long fieldId, long val) {
@@ -1672,10 +1725,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a list of packed proto "sfixed64" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, long)} instead.
+     * @hide
      */
     @Deprecated
-    public void writePackedSFixed64(long fieldId, long[] val) {
+    public void writePackedSFixed64(long fieldId, @Nullable long[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_SFIXED64);
 
@@ -1698,7 +1752,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "bool" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, boolean)} instead.
+     * @hide
      */
     @Deprecated
     public void writeBool(long fieldId, boolean val) {
@@ -1719,7 +1774,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto "bool" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, boolean)} instead.
+     * @hide
      */
     @Deprecated
     public void writeRepeatedBool(long fieldId, boolean val) {
@@ -1737,10 +1793,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a list of packed proto "bool" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, boolean)} instead.
+     * @hide
      */
     @Deprecated
-    public void writePackedBool(long fieldId, boolean[] val) {
+    public void writePackedBool(long fieldId, @Nullable boolean[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_BOOL);
 
@@ -1767,10 +1824,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "string" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, String)} instead.
+     * @hide
      */
     @Deprecated
-    public void writeString(long fieldId, String val) {
+    public void writeString(long fieldId, @Nullable String val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_STRING);
 
@@ -1786,10 +1844,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto "string" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, String)} instead.
+     * @hide
      */
     @Deprecated
-    public void writeRepeatedString(long fieldId, String val) {
+    public void writeRepeatedString(long fieldId, @Nullable String val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_STRING);
 
@@ -1828,10 +1887,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto "bytes" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, byte[])} instead.
+     * @hide
      */
     @Deprecated
-    public void writeBytes(long fieldId, byte[] val) {
+    public void writeBytes(long fieldId, @Nullable byte[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_BYTES);
 
@@ -1848,10 +1908,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto "bytes" type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, byte[])} instead.
+     * @hide
      */
     @Deprecated
-    public void writeRepeatedBytes(long fieldId, byte[] val) {
+    public void writeRepeatedBytes(long fieldId, @Nullable byte[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_BYTES);
 
@@ -1874,7 +1935,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single proto enum type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
     public void writeEnum(long fieldId, int val) {
@@ -1894,7 +1956,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a single repeated proto enum type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
     public void writeRepeatedEnum(long fieldId, int val) {
@@ -1912,10 +1975,11 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write a list of packed proto enum type field value.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, int)} instead.
+     * @hide
      */
     @Deprecated
-    public void writePackedEnum(long fieldId, int[] val) {
+    public void writePackedEnum(long fieldId, @Nullable int[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_ENUM);
 
@@ -1940,7 +2004,8 @@ public final class ProtoOutputStream extends ProtoStream {
      * Returns a token which should be passed to endObject.  Calls to endObject must be
      * nested properly.
      *
-     * @deprecated Use #start() instead.
+     * @deprecated Use {@link #start(long)} instead.
+     * @hide
      */
     @Deprecated
     public long startObject(long fieldId) {
@@ -1953,7 +2018,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * End a child object. Pass in the token from the correspoinding startObject call.
      *
-     * @deprecated Use #end() instead.
+     * @deprecated Use {@link #end(long)} instead.
+     * @hide
      */
     @Deprecated
     public void endObject(long token) {
@@ -1968,7 +2034,8 @@ public final class ProtoOutputStream extends ProtoStream {
      * Returns a token which should be passed to endObject.  Calls to endObject must be
      * nested properly.
      *
-     * @deprecated Use #start() instead.
+     * @deprecated Use {@link #start(long)} instead.
+     * @hide
      */
     @Deprecated
     public long startRepeatedObject(long fieldId) {
@@ -1981,7 +2048,8 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * End a child object. Pass in the token from the correspoinding startRepeatedObject call.
      *
-     * @deprecated Use #end() instead.
+     * @deprecated Use {@link #end(long)} instead.
+     * @hide
      */
     @Deprecated
     public void endRepeatedObject(long token) {
@@ -2064,12 +2132,13 @@ public final class ProtoOutputStream extends ProtoStream {
     }
 
     /**
-     * Write an object that has already been flattend.
+     * Write an object that has already been flattened.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, byte[])} instead.
+     * @hide
      */
     @Deprecated
-    public void writeObject(long fieldId, byte[] value) {
+    public void writeObject(long fieldId, @Nullable byte[] value) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_MESSAGE);
 
@@ -2084,12 +2153,13 @@ public final class ProtoOutputStream extends ProtoStream {
     }
 
     /**
-     * Write an object that has already been flattend.
+     * Write an object that has already been flattened.
      *
-     * @deprecated Use #write instead.
+     * @deprecated Use {@link #write(long, byte[])} instead.
+     * @hide
      */
     @Deprecated
-    public void writeRepeatedObject(long fieldId, byte[] value) {
+    public void writeRepeatedObject(long fieldId, @Nullable byte[] value) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_MESSAGE);
 
@@ -2115,11 +2185,11 @@ public final class ProtoOutputStream extends ProtoStream {
     }
 
     /**
-     * Validates that the fieldId providied is of the type and count from expectedType.
+     * Validates that the fieldId provided is of the type and count from expectedType.
      *
-     * The type must match exactly to pass this check.
+     * <p>The type must match exactly to pass this check.
      *
-     * The count must match according to this truth table to pass the check:
+     * <p>The count must match according to this truth table to pass the check:
      *
      *                  expectedFlags
      *                  UNKNOWN     SINGLE      REPEATED    PACKED
@@ -2129,7 +2199,7 @@ public final class ProtoOutputStream extends ProtoStream {
      *    REPEATED      x           false       true        false
      *    PACKED        x           false       true        true
      *
-     * @throws IllegalArgumentException if it is not.
+     * @throws {@link IllegalArgumentException} if it is not.
      *
      * @return The raw ID of that field.
      */
@@ -2201,7 +2271,7 @@ public final class ProtoOutputStream extends ProtoStream {
     }
 
     /**
-     * Write a field tage to the stream.
+     * Write a field tag to the stream.
      */
     public void writeTag(int id, int wireType) {
         mBuffer.writeRawVarint32((id << FIELD_ID_SHIFT) | wireType);
@@ -2239,10 +2309,10 @@ public final class ProtoOutputStream extends ProtoStream {
      * Finish the encoding of the data, and return a byte[] with
      * the protobuf formatted data.
      *
-     * After this call, do not call any of the write* functions. The
+     * <p>After this call, do not call any of the write* functions. The
      * behavior is undefined.
      */
-    public byte[] getBytes() {
+    public @NonNull byte[] getBytes() {
         compactIfNecessary();
 
         return mBuffer.getBytes(mBuffer.getReadableSize());
@@ -2289,7 +2359,7 @@ public final class ProtoOutputStream extends ProtoStream {
     }
 
     /**
-     * First compaction pass.  Iterate through the data, and fill in the
+     * First compaction pass. Iterate through the data, and fill in the
      * nested object sizes so the next pass can compact them.
      */
     private int editEncodedSize(int rawSize) {
@@ -2416,10 +2486,10 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write remaining data to the output stream.  If there is no output stream,
      * this function does nothing. Any currently open objects (i.e. ones that
-     * have not had endObject called for them will not be written).  Whether this
+     * have not had {@link #end(long)} called for them will not be written).  Whether this
      * writes objects that are closed if there are remaining open objects is
      * undefined (current implementation does not write it, future ones will).
-     * For now, can either call getBytes() or flush(), but not both.
+     * For now, can either call {@link #getBytes()} or {@link #flush()}, but not both.
      */
     public void flush() {
         if (mStream == null) {
@@ -2457,7 +2527,7 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Dump debugging data about the buffers with the given log tag.
      */
-    public void dump(String tag) {
+    public void dump(@NonNull String tag) {
         Log.d(tag, mBuffer.getDebugString());
         mBuffer.dumpBuffers(tag);
     }
