@@ -94,6 +94,8 @@ interface IWifiManager
 
     void setMacRandomizationSettingPasspointEnabled(String fqdn, boolean enable);
 
+    void setMeteredOverridePasspoint(String fqdn, int meteredOverride);
+
     boolean startScan(String packageName, String featureId);
 
     List<android.net.wifi.ScanResult> getScanResults(String callingPackage, String callingFeatureId);

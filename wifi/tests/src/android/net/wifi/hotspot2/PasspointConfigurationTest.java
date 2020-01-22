@@ -16,6 +16,8 @@
 
 package android.net.wifi.hotspot2;
 
+import static android.net.wifi.WifiConfiguration.METERED_OVERRIDE_NONE;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -173,6 +175,7 @@ public class PasspointConfigurationTest {
         assertFalse(config.validateForR2());
         assertTrue(config.isAutoJoinEnabled());
         assertTrue(config.isMacRandomizationEnabled());
+        assertTrue(config.getMeteredOverride() == METERED_OVERRIDE_NONE);
     }
 
     /**
