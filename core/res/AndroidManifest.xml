@@ -1529,6 +1529,14 @@
         android:protectionLevel="signature|privileged" />
     <uses-permission android:name="android.permission.LOCATION_HARDWARE"/>
 
+    <!-- @SystemApi Allows an application to use the Context Hub.
+         <p>Not for use by third-party applications.
+         @hide
+    -->
+    <permission android:name="android.permission.ACCESS_CONTEXT_HUB"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.ACCESS_CONTEXT_HUB"/>
+
     <!-- @SystemApi Allows an application to create mock location providers for testing.
          <p>Protection level: signature
          @hide
