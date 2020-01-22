@@ -2186,4 +2186,15 @@ interface ITelephony {
     int setIccLockEnabled(int subId, boolean enabled, String password);
 
     int changeIccLockPassword(int subId, String oldPassword, String newPassword);
+
+    /**
+     * Request for receiving user activity notification
+     */
+    oneway void requestUserActivityNotification();
+
+    /**
+     * Called when userActivity is signalled in the power manager.
+     * This is safe to call from any thread, with any window manager locks held or not.
+     */
+    oneway void userActivity();
 }
