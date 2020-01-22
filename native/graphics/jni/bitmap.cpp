@@ -33,10 +33,14 @@ int AndroidBitmap_getInfo(JNIEnv* env, jobject jbitmap,
 
 int32_t AndroidBitmap_getDataSpace(JNIEnv* env, jobject jbitmap) {
     if (NULL == env || NULL == jbitmap) {
-        return ADATASPACE_UNKNOWN; // Or return a real error?
+        return ADATASPACE_UNKNOWN;
     }
 
     android::graphics::Bitmap bitmap(env, jbitmap);
+    if (!bitmap.isValid()) {
+        return ADATASPACE_UNKNOWN;
+    }
+
     return bitmap.getDataSpace();
 }
 
