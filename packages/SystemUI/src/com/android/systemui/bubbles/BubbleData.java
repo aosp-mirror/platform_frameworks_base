@@ -218,7 +218,7 @@ public class BubbleData {
         }
         mPendingBubbles.remove(bubble); // No longer pending once we're here
         Bubble prevBubble = getBubbleWithKey(bubble.getKey());
-        suppressFlyout |= !shouldShowFlyout(bubble.getEntry());
+        suppressFlyout |= !bubble.getEntry().getRanking().visuallyInterruptive();
 
         if (prevBubble == null) {
             // Create a new bubble
@@ -327,14 +327,6 @@ public class BubbleData {
             }
         }
         return bubbleChildren;
-    }
-
-    private boolean shouldShowFlyout(NotificationEntry notif) {
-        if (notif.getRanking().visuallyInterruptive()) {
-            return true;
-        }
-        return hasBubbleWithKey(notif.getKey())
-                && !getBubbleWithKey(notif.getKey()).showInShade();
     }
 
     private void doAdd(Bubble bubble) {
