@@ -1309,6 +1309,7 @@ java_library {
     libs: [
         "framework-minus-apex",
         "unsupportedappusage",
+        "ike-stubs",
     ],
     static_libs: [
         "libphonenumber-platform",
