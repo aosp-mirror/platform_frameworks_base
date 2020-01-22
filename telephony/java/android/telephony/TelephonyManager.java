@@ -194,11 +194,8 @@ public class TelephonyManager {
                     NETWORK_SELECTION_MODE_MANUAL})
     public @interface NetworkSelectionMode {}
 
-    /** @hide */
     public static final int NETWORK_SELECTION_MODE_UNKNOWN = 0;
-    /** @hide */
     public static final int NETWORK_SELECTION_MODE_AUTO = 1;
-    /** @hide */
     public static final int NETWORK_SELECTION_MODE_MANUAL = 2;
 
     /** The otaspMode passed to PhoneStateListener#onOtaspChanged */
@@ -7970,14 +7967,18 @@ public class TelephonyManager {
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
-
-     * @return the network selection mode.
+     *  <p>Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
+     * READ_PRECISE_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * @hide
+     * @return the network selection mode.
      */
-    @NetworkSelectionMode
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public int getNetworkSelectionMode() {
+    @SuppressAutoDoc // No support for carrier privileges (b/72967236).
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PRECISE_PHONE_STATE
+    })
+    public @NetworkSelectionMode int getNetworkSelectionMode() {
         int mode = NETWORK_SELECTION_MODE_UNKNOWN;
         try {
             ITelephony telephony = getITelephony();
