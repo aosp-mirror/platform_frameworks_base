@@ -5032,10 +5032,7 @@ public abstract class Context {
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.telephony.ims.ImsManager}.
-     * @hide
      */
-    @SystemApi
-    @TestApi
     public static final String TELEPHONY_IMS_SERVICE = "telephony_ims";
 
     /**
