@@ -14,6 +14,7 @@ cc_library_static {
 
     srcs: [
         ":graphicsstats_proto",
+        ":lib_alarmManagerService_native",
         "BroadcastRadio/JavaRef.cpp",
         "BroadcastRadio/NativeCallbackThread.cpp",
         "BroadcastRadio/BroadcastRadioService.cpp",
@@ -21,7 +22,6 @@ cc_library_static {
         "BroadcastRadio/TunerCallback.cpp",
         "BroadcastRadio/convert.cpp",
         "BroadcastRadio/regions.cpp",
-        "com_android_server_AlarmManagerService.cpp",
         "com_android_server_am_BatteryStatsService.cpp",
         "com_android_server_connectivity_Vpn.cpp",
         "com_android_server_ConsumerIrService.cpp",
@@ -180,5 +180,12 @@ filegroup {
     name: "lib_networkStatsFactory_native",
     srcs: [
         "com_android_server_net_NetworkStatsFactory.cpp",
+    ],
+}
+
+filegroup {
+    name: "lib_alarmManagerService_native",
+    srcs: [
+        "com_android_server_AlarmManagerService.cpp",
     ],
 }
