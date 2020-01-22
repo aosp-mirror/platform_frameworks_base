@@ -1,6 +1,8 @@
 cc_library_shared {
     name: "libmedia_jni",
 
+    defaults: ["libcodec2-internal-defaults"],
+
     srcs: [
         "android_media_ImageWriter.cpp",
         "android_media_ImageReader.cpp",
