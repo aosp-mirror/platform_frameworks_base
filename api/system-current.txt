@@ -6253,6 +6253,8 @@ package android.net {
 
   public final class RouteInfo implements android.os.Parcelable {
     ctor public RouteInfo(@Nullable android.net.IpPrefix, @Nullable java.net.InetAddress, @Nullable String, int);
+    ctor public RouteInfo(@Nullable android.net.IpPrefix, @Nullable java.net.InetAddress, @Nullable String, int, int);
+    method public int getMtu();
     method public int getType();
     field public static final int RTN_THROW = 9; // 0x9
     field public static final int RTN_UNICAST = 1; // 0x1
@@ -12146,7 +12148,9 @@ package android.telephony.data {
     method public int getId();
     method @NonNull public String getInterfaceName();
     method public int getLinkStatus();
-    method public int getMtu();
+    method @Deprecated public int getMtu();
+    method public int getMtuV4();
+    method public int getMtuV6();
     method @NonNull public java.util.List<java.net.InetAddress> getPcscfAddresses();
     method public int getProtocolType();
     method public int getSuggestedRetryTime();
@@ -12168,7 +12172,9 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.DataCallResponse.Builder setId(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setInterfaceName(@NonNull String);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setLinkStatus(int);
-    method @NonNull public android.telephony.data.DataCallResponse.Builder setMtu(int);
+    method @Deprecated @NonNull public android.telephony.data.DataCallResponse.Builder setMtu(int);
+    method @NonNull public android.telephony.data.DataCallResponse.Builder setMtuV4(int);
+    method @NonNull public android.telephony.data.DataCallResponse.Builder setMtuV6(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setPcscfAddresses(@NonNull java.util.List<java.net.InetAddress>);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setProtocolType(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setSuggestedRetryTime(int);
@@ -12179,7 +12185,9 @@ package android.telephony.data {
     method @NonNull public String getApn();
     method public int getAuthType();
     method public int getBearerBitmask();
-    method public int getMtu();
+    method @Deprecated public int getMtu();
+    method public int getMtuV4();
+    method public int getMtuV6();
     method @Nullable public String getPassword();
     method public int getProfileId();
     method public int getProtocolType();
@@ -12204,7 +12212,9 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.DataProfile.Builder setApn(@NonNull String);
     method @NonNull public android.telephony.data.DataProfile.Builder setAuthType(int);
     method @NonNull public android.telephony.data.DataProfile.Builder setBearerBitmask(int);
-    method @NonNull public android.telephony.data.DataProfile.Builder setMtu(int);
+    method @Deprecated @NonNull public android.telephony.data.DataProfile.Builder setMtu(int);
+    method @NonNull public android.telephony.data.DataProfile.Builder setMtuV4(int);
+    method @NonNull public android.telephony.data.DataProfile.Builder setMtuV6(int);
     method @NonNull public android.telephony.data.DataProfile.Builder setPassword(@NonNull String);
     method @NonNull public android.telephony.data.DataProfile.Builder setPersistent(boolean);
     method @NonNull public android.telephony.data.DataProfile.Builder setPreferred(boolean);
