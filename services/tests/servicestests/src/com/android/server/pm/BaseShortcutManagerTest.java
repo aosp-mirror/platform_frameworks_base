@@ -556,6 +556,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         void injectRestoreCallingIdentity(long token) {
             mInjectedCallingUid = (int) token;
         }
+
+        @Override
+        boolean injectHasAccessShortcutsPermission(int callingPid, int callingUid) {
+            return true;
+        }
     }
 
     protected class LauncherAppsTestable extends LauncherApps {
@@ -1609,6 +1614,22 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 .setShortLabel("title-" + id)
                 .setIntent(makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class))
                 .setLocusId(locusId);
+        final ShortcutInfo s = b.build();
+
+        s.setTimestamp(mInjectedCurrentTimeMillis); // HACK
+
+        return s;
+    }
+
+    /**
+     * Make a long lived shortcut with an ID.
+     */
+    protected ShortcutInfo makeLongLivedShortcut(String id) {
+        final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, id)
+                .setActivity(new ComponentName(mClientContext.getPackageName(), "main"))
+                .setShortLabel("title-" + id)
+                .setIntent(makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class))
+                .setLongLived(true);
         final ShortcutInfo s = b.build();
 
         s.setTimestamp(mInjectedCurrentTimeMillis); // HACK

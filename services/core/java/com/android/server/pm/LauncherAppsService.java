@@ -661,6 +661,23 @@ public class LauncherAppsService extends SystemService {
             }
         }
 
+        private void ensureStrictAccessShortcutsPermission(@NonNull String callingPackage) {
+            verifyCallingPackage(callingPackage);
+            if (!injectHasAccessShortcutsPermission(injectBinderCallingPid(),
+                    injectBinderCallingUid())) {
+                throw new SecurityException("Caller can't access shortcut information");
+            }
+        }
+
+        /**
+         * Returns true if the caller has the "ACCESS_SHORTCUTS" permission.
+         */
+        @VisibleForTesting
+        boolean injectHasAccessShortcutsPermission(int callingPid, int callingUid) {
+            return mContext.checkPermission(android.Manifest.permission.ACCESS_SHORTCUTS,
+                    callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
+        }
+
         @Override
         public ParceledListSlice getShortcuts(String callingPackage, long changedSince,
                 String packageName, List shortcutIds, List<LocusId> locusIds,
@@ -706,6 +723,30 @@ public class LauncherAppsService extends SystemService {
             }
 
             mShortcutServiceInternal.pinShortcuts(getCallingUserId(),
+                    callingPackage, packageName, ids, targetUser.getIdentifier());
+        }
+
+        @Override
+        public void cacheShortcuts(String callingPackage, String packageName, List<String> ids,
+                UserHandle targetUser) {
+            ensureStrictAccessShortcutsPermission(callingPackage);
+            if (!canAccessProfile(targetUser.getIdentifier(), "Cannot cache shortcuts")) {
+                return;
+            }
+
+            mShortcutServiceInternal.cacheShortcuts(getCallingUserId(),
+                    callingPackage, packageName, ids, targetUser.getIdentifier());
+        }
+
+        @Override
+        public void uncacheShortcuts(String callingPackage, String packageName, List<String> ids,
+                UserHandle targetUser) {
+            ensureStrictAccessShortcutsPermission(callingPackage);
+            if (!canAccessProfile(targetUser.getIdentifier(), "Cannot uncache shortcuts")) {
+                return;
+            }
+
+            mShortcutServiceInternal.uncacheShortcuts(getCallingUserId(),
                     callingPackage, packageName, ids, targetUser.getIdentifier());
         }
 
