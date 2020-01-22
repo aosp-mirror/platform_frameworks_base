@@ -3810,6 +3810,9 @@
   <java-symbol type="string" name="config_rawContactsLocalAccountName" />
   <java-symbol type="string" name="config_rawContactsLocalAccountType" />
 
+  <!-- For App Standby -->
+  <java-symbol type="string" name="as_app_forced_to_restricted_bucket" />
+
   <!-- Assistant handles -->
   <java-symbol type="dimen" name="assist_handle_shadow_radius" />
 

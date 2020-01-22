@@ -2391,6 +2391,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return UsageStatsManager.STANDBY_BUCKET_FREQUENT;
         } else if (lower.startsWith("ra")) {
             return UsageStatsManager.STANDBY_BUCKET_RARE;
+        } else if (lower.startsWith("re")) {
+            return UsageStatsManager.STANDBY_BUCKET_RESTRICTED;
         } else if (lower.startsWith("ne")) {
             return UsageStatsManager.STANDBY_BUCKET_NEVER;
         } else {
