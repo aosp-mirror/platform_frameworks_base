@@ -22,8 +22,10 @@ import android.annotation.SystemApi;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.util.Objects;
+
 /**
- * A class that can be used to find time zones.
+ * A class that can be used to find time zones using information like country and offset.
  *
  * @hide
  */
@@ -34,15 +36,8 @@ public final class TimeZoneFinder {
     @GuardedBy("sLock")
     private static TimeZoneFinder sInstance;
 
-    private final libcore.timezone.TimeZoneFinder mDelegate;
-
-    private TimeZoneFinder(libcore.timezone.TimeZoneFinder delegate) {
-        mDelegate = delegate;
-    }
-
     /**
-     * Obtains an instance for use when resolving telephony time zone information. This method never
-     * returns {@code null}.
+     * Obtains the singleton instance.
      */
     @NonNull
     public static TimeZoneFinder getInstance() {
@@ -52,6 +47,22 @@ public final class TimeZoneFinder {
             }
         }
         return sInstance;
+    }
+
+    @NonNull
+    private final libcore.timezone.TimeZoneFinder mDelegate;
+
+    private TimeZoneFinder(@NonNull libcore.timezone.TimeZoneFinder delegate) {
+        mDelegate = Objects.requireNonNull(delegate);
+    }
+
+    /**
+     * Returns the IANA rules version associated with the data. If there is no version information
+     * or there is a problem reading the file then {@code null} is returned.
+     */
+    @Nullable
+    public String getIanaVersion() {
+        return mDelegate.getIanaVersion();
     }
 
     /**
