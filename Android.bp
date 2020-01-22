@@ -583,7 +583,6 @@ java_library {
     host_supported: true,
     srcs: [
         "core/java/android/annotation/IntDef.java",
-        "core/java/android/annotation/UnsupportedAppUsage.java",
     ],
     static_libs: [
         "art.module.api.annotations",
@@ -664,7 +663,6 @@ filegroup {
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/SystemService.java",
         "core/java/android/annotation/TestApi.java",
-        "core/java/android/annotation/UnsupportedAppUsage.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
         "core/java/com/android/internal/annotations/VisibleForTesting.java",
         "core/java/com/android/internal/annotations/Immutable.java",
@@ -1073,7 +1071,6 @@ java_library {
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/TestApi.java",
-        "core/java/android/annotation/UnsupportedAppUsage.java",
         "core/java/android/os/HidlMemory.java",
         "core/java/android/os/HwBinder.java",
         "core/java/android/os/HwBlob.java",
