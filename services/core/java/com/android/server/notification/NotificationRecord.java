@@ -466,6 +466,7 @@ public final class NotificationRecord {
         pw.println(prefix + "deleteIntent=" + notification.deleteIntent);
         pw.println(prefix + "number=" + notification.number);
         pw.println(prefix + "groupAlertBehavior=" + notification.getGroupAlertBehavior());
+        pw.println(prefix + "when=" + notification.when);
 
         pw.print(prefix + "tickerText=");
         if (!TextUtils.isEmpty(notification.tickerText)) {
