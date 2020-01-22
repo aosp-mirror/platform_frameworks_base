@@ -310,7 +310,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     /**
-     * Remove all shortcuts that aren't pinned nor dynamic.
+     * Remove all shortcuts that aren't pinned, cached nor dynamic.
      */
     private void removeOrphans() {
         ArrayList<String> removeList = null; // Lazily initialize.
@@ -356,10 +356,10 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     /**
      * Remove a dynamic shortcut by ID.  It'll be removed from the dynamic set, but if the shortcut
-     * is pinned, it'll remain as a pinned shortcut, and is still enabled.
+     * is pinned or cached, it'll remain as a pinned or cached shortcut, and is still enabled.
      *
-     * @return true if it's actually removed because it wasn't pinned, or false if it's still
-     * pinned.
+     * @return true if it's removed, or false if it was not actually removed because it is either
+     * pinned or cached.
      */
     public boolean deleteDynamicWithId(@NonNull String shortcutId, boolean ignoreInvisible) {
         final ShortcutInfo removed = deleteOrDisableWithId(
@@ -381,6 +381,24 @@ class ShortcutPackage extends ShortcutPackageItem {
                 shortcutId, /* disable =*/ true, /* overrideImmutable=*/ false, ignoreInvisible,
                 disabledReason);
         return disabled == null;
+    }
+
+    /**
+     * Remove a long lived shortcut by ID. If the shortcut is pinned, it'll remain as a pinned
+     * shortcut, and is still enabled.
+     *
+     * @return true if it's actually removed because it wasn't pinned, or false if it's still
+     * pinned.
+     */
+    public boolean deleteLongLivedWithId(@NonNull String shortcutId, boolean ignoreInvisible) {
+        final ShortcutInfo shortcut = mShortcuts.get(shortcutId);
+        if (shortcut != null) {
+            shortcut.clearFlags(ShortcutInfo.FLAG_CACHED);
+        }
+        final ShortcutInfo removed = deleteOrDisableWithId(
+                shortcutId, /* disable =*/ false, /* overrideImmutable=*/ false, ignoreInvisible,
+                ShortcutInfo.DISABLED_REASON_NOT_DISABLED);
+        return removed == null;
     }
 
     /**
@@ -419,7 +437,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         if (!overrideImmutable) {
             ensureNotImmutable(oldShortcut, /*ignoreInvisible=*/ true);
         }
-        if (oldShortcut.isPinned()) {
+        if (oldShortcut.isPinned() || oldShortcut.isCached()) {
 
             oldShortcut.setRank(0);
             oldShortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_MANIFEST);
@@ -500,7 +518,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
         });
 
-        // Lastly, remove the ones that are no longer pinned nor dynamic.
+        // Lastly, remove the ones that are no longer pinned, cached nor dynamic.
         removeOrphans();
     }
 
@@ -1328,6 +1346,10 @@ class ShortcutPackage extends ShortcutPackageItem {
                     // Don't adjust ranks for manifest shortcuts.
                     continue;
                 }
+                if (si.isCached() && !si.isDynamic()) {
+                    // Don't adjust ranks for cached shortcuts that are not dynamic anymore.
+                    continue;
+                }
                 // At this point, it must be dynamic.
                 if (!si.isDynamic()) {
                     s.wtf("Non-dynamic shortcut found.");
@@ -1869,7 +1891,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         // Verify each shortcut's status.
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
-            if (!(si.isDeclaredInManifest() || si.isDynamic() || si.isPinned())) {
+            if (!(si.isDeclaredInManifest() || si.isDynamic() || si.isPinned() || si.isCached())) {
                 failed = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " is not manifest, dynamic or pinned.");

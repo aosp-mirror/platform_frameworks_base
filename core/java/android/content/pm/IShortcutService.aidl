@@ -78,4 +78,8 @@ interface IShortcutService {
     ParceledListSlice getShareTargets(String packageName, in IntentFilter filter, int userId);
 
     boolean hasShareTargets(String packageName, String packageToCheck, int userId);
+
+    void removeLongLivedShortcuts(String packageName, in List shortcutIds, int userId);
+
+    ParceledListSlice getShortcuts(String packageName, int matchFlags, int userId);
 }

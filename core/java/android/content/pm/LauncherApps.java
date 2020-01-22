@@ -324,6 +324,11 @@ public class LauncherApps {
          */
         public static final int FLAG_MATCH_MANIFEST = 1 << 3;
 
+        /**
+         * Include cached shortcuts in the result.
+         */
+        public static final int FLAG_MATCH_CACHED = 1 << 4;
+
         /** @hide kept for unit tests */
         @Deprecated
         public static final int FLAG_GET_MANIFEST = FLAG_MATCH_MANIFEST;
@@ -345,11 +350,11 @@ public class LauncherApps {
         public static final int FLAG_MATCH_PINNED_BY_ANY_LAUNCHER = 1 << 10;
 
         /**
-         * FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST
+         * FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST | FLAG_MATCH_CACHED
          * @hide
          */
         public static final int FLAG_MATCH_ALL_KINDS =
-                FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST;
+                FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST | FLAG_MATCH_CACHED;
 
         /**
          * FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST | FLAG_MATCH_ALL_PINNED
@@ -386,8 +391,8 @@ public class LauncherApps {
                 FLAG_MATCH_DYNAMIC,
                 FLAG_MATCH_PINNED,
                 FLAG_MATCH_MANIFEST,
+                FLAG_MATCH_CACHED,
                 FLAG_GET_KEY_FIELDS_ONLY,
-                FLAG_MATCH_MANIFEST,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface QueryFlags {}
@@ -454,6 +459,7 @@ public class LauncherApps {
          *     <li>{@link #FLAG_MATCH_DYNAMIC}
          *     <li>{@link #FLAG_MATCH_PINNED}
          *     <li>{@link #FLAG_MATCH_MANIFEST}
+         *     <li>{@link #FLAG_MATCH_CACHED}
          *     <li>{@link #FLAG_GET_KEY_FIELDS_ONLY}
          * </ul>
          */
