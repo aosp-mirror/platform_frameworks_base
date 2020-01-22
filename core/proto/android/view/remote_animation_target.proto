@@ -44,4 +44,6 @@ message RemoteAnimationTargetProto {
     optional .android.app.WindowConfigurationProto window_configuration = 10;
     optional .android.view.SurfaceControlProto start_leash = 11;
     optional .android.graphics.RectProto start_bounds = 12;
+    optional .android.graphics.RectProto local_bounds = 13;
+    optional .android.graphics.RectProto screen_space_bounds = 14;
 }
