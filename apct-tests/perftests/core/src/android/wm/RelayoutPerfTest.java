@@ -150,7 +150,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase {
                         mViewVisibility.getAsInt(), mFlags, mFrameNumber, mOutFrame,
                         mOutContentInsets, mOutVisibleInsets, mOutStableInsets,
                         mOutBackDropFrame, mOutDisplayCutout, mOutMergedConfiguration,
-                        mOutSurfaceControl, mOutInsetsState, new Point());
+                        mOutSurfaceControl, mOutInsetsState, new Point(), new SurfaceControl());
             }
         }
     }

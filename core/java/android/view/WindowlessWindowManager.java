@@ -161,7 +161,7 @@ public class WindowlessWindowManager implements IWindowSession {
             Rect outStableInsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            Point outSurfaceSize) {
+            Point outSurfaceSize, SurfaceControl outBLASTSurfaceControl) {
         State state = null;
         synchronized (this) {
             state = mStateForWindow.get(window.asBinder());
