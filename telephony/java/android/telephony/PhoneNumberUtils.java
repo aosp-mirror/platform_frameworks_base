@@ -28,7 +28,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.location.CountryDetector;
 import android.net.Uri;
 import android.os.PersistableBundle;
 import android.provider.Contacts;
@@ -2032,6 +2031,7 @@ public class PhoneNumberUtils {
     private static boolean isEmergencyNumberInternal(int subId, String number,
                                                      String defaultCountryIso,
                                                      boolean useExactMatch) {
+        // TODO: clean up all the callers that pass in a defaultCountryIso, since it's ignored now.
         try {
             if (useExactMatch) {
                 return TelephonyManager.getDefault().isEmergencyNumber(number);
@@ -2193,18 +2193,7 @@ public class PhoneNumberUtils {
     private static boolean isLocalEmergencyNumberInternal(int subId, String number,
                                                           Context context,
                                                           boolean useExactMatch) {
-        String countryIso;
-        CountryDetector detector = (CountryDetector) context.getSystemService(
-                Context.COUNTRY_DETECTOR);
-        if (detector != null && detector.detectCountry() != null) {
-            countryIso = detector.detectCountry().getCountryIso();
-        } else {
-            Locale locale = context.getResources().getConfiguration().locale;
-            countryIso = locale.getCountry();
-            Rlog.w(LOG_TAG, "No CountryDetector; falling back to countryIso based on locale: "
-                    + countryIso);
-        }
-        return isEmergencyNumberInternal(subId, number, countryIso, useExactMatch);
+        return isEmergencyNumberInternal(subId, number, null /* unused */, useExactMatch);
     }
 
     /**
