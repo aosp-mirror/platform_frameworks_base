@@ -123,7 +123,8 @@ public final class InlineSuggestionFactory {
         // TODO(b/146453195): fill in the autofill hint properly.
         final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
                 inlinePresentation.getInlinePresentationSpec(),
-                InlineSuggestionInfo.SOURCE_PLATFORM, new String[]{""});
+                InlineSuggestionInfo.SOURCE_PLATFORM, new String[]{""},
+                InlineSuggestionInfo.TYPE_SUGGESTION);
         final View.OnClickListener onClickListener = v -> {
             try {
                 client.autofill(sessionId, dataset.getFieldIds(), dataset.getFieldValues());
@@ -146,7 +147,8 @@ public final class InlineSuggestionFactory {
         // TODO(b/146453195): fill in the autofill hint properly.
         final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
                 inlinePresentation.getInlinePresentationSpec(),
-                InlineSuggestionInfo.SOURCE_AUTOFILL, new String[]{""});
+                InlineSuggestionInfo.SOURCE_AUTOFILL, new String[]{""},
+                InlineSuggestionInfo.TYPE_SUGGESTION);
         final View.OnClickListener onClickListener = v -> {
             client.fill(requestId, fieldIndex, dataset);
         };

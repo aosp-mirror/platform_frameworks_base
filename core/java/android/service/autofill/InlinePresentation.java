@@ -34,9 +34,21 @@ import com.android.internal.util.DataClass;
         genEqualsHashCode = true)
 public final class InlinePresentation implements Parcelable {
 
+
+    /**
+     * Represents the UI content and the action for the inline suggestion.
+     */
     private final @NonNull Slice mSlice;
 
+    /**
+     * Specifies the UI specification for the inline suggestion.
+     */
     private final @NonNull InlinePresentationSpec mInlinePresentationSpec;
+
+    /**
+     * Indicates whether the UI should be pinned, hence non-scrollable, in the host.
+     */
+    private final boolean mPinned;
 
 
 
@@ -53,28 +65,54 @@ public final class InlinePresentation implements Parcelable {
     //@formatter:off
 
 
+    /**
+     * Creates a new InlinePresentation.
+     *
+     * @param slice
+     *   Represents the UI content and the action for the inline suggestion.
+     * @param inlinePresentationSpec
+     *   Specifies the UI specification for the inline suggestion.
+     * @param pinned
+     *   Indicates whether the UI should be pinned, hence non-scrollable, in the host.
+     */
     @DataClass.Generated.Member
     public InlinePresentation(
             @NonNull Slice slice,
-            @NonNull InlinePresentationSpec inlinePresentationSpec) {
+            @NonNull InlinePresentationSpec inlinePresentationSpec,
+            boolean pinned) {
         this.mSlice = slice;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mSlice);
         this.mInlinePresentationSpec = inlinePresentationSpec;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mInlinePresentationSpec);
+        this.mPinned = pinned;
 
         // onConstructed(); // You can define this method to get a callback
     }
 
+    /**
+     * Represents the UI content and the action for the inline suggestion.
+     */
     @DataClass.Generated.Member
     public @NonNull Slice getSlice() {
         return mSlice;
     }
 
+    /**
+     * Specifies the UI specification for the inline suggestion.
+     */
     @DataClass.Generated.Member
     public @NonNull InlinePresentationSpec getInlinePresentationSpec() {
         return mInlinePresentationSpec;
+    }
+
+    /**
+     * Indicates whether the UI should be pinned, hence non-scrollable, in the host.
+     */
+    @DataClass.Generated.Member
+    public boolean isPinned() {
+        return mPinned;
     }
 
     @Override
@@ -85,7 +123,8 @@ public final class InlinePresentation implements Parcelable {
 
         return "InlinePresentation { " +
                 "slice = " + mSlice + ", " +
-                "inlinePresentationSpec = " + mInlinePresentationSpec +
+                "inlinePresentationSpec = " + mInlinePresentationSpec + ", " +
+                "pinned = " + mPinned +
         " }";
     }
 
@@ -103,7 +142,8 @@ public final class InlinePresentation implements Parcelable {
         //noinspection PointlessBooleanExpression
         return true
                 && java.util.Objects.equals(mSlice, that.mSlice)
-                && java.util.Objects.equals(mInlinePresentationSpec, that.mInlinePresentationSpec);
+                && java.util.Objects.equals(mInlinePresentationSpec, that.mInlinePresentationSpec)
+                && mPinned == that.mPinned;
     }
 
     @Override
@@ -115,6 +155,7 @@ public final class InlinePresentation implements Parcelable {
         int _hash = 1;
         _hash = 31 * _hash + java.util.Objects.hashCode(mSlice);
         _hash = 31 * _hash + java.util.Objects.hashCode(mInlinePresentationSpec);
+        _hash = 31 * _hash + Boolean.hashCode(mPinned);
         return _hash;
     }
 
@@ -124,6 +165,9 @@ public final class InlinePresentation implements Parcelable {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
+        byte flg = 0;
+        if (mPinned) flg |= 0x4;
+        dest.writeByte(flg);
         dest.writeTypedObject(mSlice, flags);
         dest.writeTypedObject(mInlinePresentationSpec, flags);
     }
@@ -139,6 +183,8 @@ public final class InlinePresentation implements Parcelable {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
+        byte flg = in.readByte();
+        boolean pinned = (flg & 0x4) != 0;
         Slice slice = (Slice) in.readTypedObject(Slice.CREATOR);
         InlinePresentationSpec inlinePresentationSpec = (InlinePresentationSpec) in.readTypedObject(InlinePresentationSpec.CREATOR);
 
@@ -148,6 +194,7 @@ public final class InlinePresentation implements Parcelable {
         this.mInlinePresentationSpec = inlinePresentationSpec;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mInlinePresentationSpec);
+        this.mPinned = pinned;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -167,10 +214,10 @@ public final class InlinePresentation implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1578081082387L,
+            time = 1579726472535L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/service/autofill/InlinePresentation.java",
-            inputSignatures = "private final @android.annotation.NonNull android.app.slice.Slice mSlice\nprivate final @android.annotation.NonNull android.view.inline.InlinePresentationSpec mInlinePresentationSpec\nclass InlinePresentation extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstDefs=true, genEqualsHashCode=true)")
+            inputSignatures = "private final @android.annotation.NonNull android.app.slice.Slice mSlice\nprivate final @android.annotation.NonNull android.view.inline.InlinePresentationSpec mInlinePresentationSpec\nprivate final  boolean mPinned\nclass InlinePresentation extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstDefs=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
 
