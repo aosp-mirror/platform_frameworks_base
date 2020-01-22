@@ -32,7 +32,7 @@ import dagger.Subcomponent;
 /**
  * Dagger subcomponent for Notification related views.
  */
-@Subcomponent(modules = {})
+@Subcomponent(modules = {NotificationRowModule.class})
 @NotificationRowComponent.NotificationRowScope
 public interface NotificationRowComponent {
     /**
