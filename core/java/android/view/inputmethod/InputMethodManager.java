@@ -1636,7 +1636,8 @@ public final class InputMethodManager {
             }
 
             try {
-                return mService.showSoftInput(mClient, flags, resultReceiver);
+                return mService.showSoftInput(
+                        mClient, view.getWindowToken(), flags, resultReceiver);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1658,7 +1659,8 @@ public final class InputMethodManager {
             Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be removed "
                     + "soon. If you are using android.support.v7.widget.SearchView, please update "
                     + "to version 26.0 or newer version.");
-            mService.showSoftInput(mClient, flags, resultReceiver);
+            mService.showSoftInput(
+                    mClient, mCurRootView.getView().getWindowToken(), flags, resultReceiver);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
@@ -368,18 +369,20 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#applyImeVisibility(boolean)}.
+     * Calls {@link IInputMethodPrivilegedOperations#applyImeVisibility(IBinder, boolean)}.
      *
+     * @param showInputToken dummy token that maps to window requesting
+     *        {@link android.view.inputmethod.InputMethodManager#showSoftInput(View, int)}
      * @param setVisible {@code true} to set IME visible, else hidden.
      */
     @AnyThread
-    public void applyImeVisibility(boolean setVisible) {
+    public void applyImeVisibility(IBinder showInputToken, boolean setVisible) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            ops.applyImeVisibility(setVisible);
+            ops.applyImeVisibility(showInputToken, setVisible);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
