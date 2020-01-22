@@ -27,6 +27,7 @@ import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.contentsuggestions.ISelectionsCallback;
 import android.app.contentsuggestions.SelectionsRequest;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -61,6 +62,10 @@ public class ContentSuggestionsManagerService extends
     private static final boolean VERBOSE = false; // TODO: make dynamic
 
     private static final int MAX_TEMP_SERVICE_DURATION_MS = 1_000 * 60 * 2; // 2 minutes
+    /**
+     * Key into the extras Bundle passed to {@link #provideContextImage(int, Bundle)}.
+     */
+    private static final String EXTRA_BITMAP = "android.contentsuggestions.extra.BITMAP";
 
     private ActivityTaskManagerInternal mActivityTaskManagerInternal;
 
@@ -110,6 +115,33 @@ public class ContentSuggestionsManagerService extends
     }
 
     private class ContentSuggestionsManagerStub extends IContentSuggestionsManager.Stub {
+        @Override
+        public void provideContextBitmap(
+                int userId,
+                @NonNull Bitmap bitmap,
+                @NonNull Bundle imageContextRequestExtras) {
+            if (bitmap == null) {
+                throw new IllegalArgumentException("Expected non-null bitmap");
+            }
+            if (imageContextRequestExtras == null) {
+                throw new IllegalArgumentException("Expected non-null imageContextRequestExtras");
+            }
+            enforceCaller(UserHandle.getCallingUserId(), "provideContextBitmap");
+
+            synchronized (mLock) {
+                final ContentSuggestionsPerUserService service = getServiceForUserLocked(userId);
+                if (service != null) {
+                    // TODO(b/147324195): Temporarily pass bitmap until we change the service API.
+                    imageContextRequestExtras.putParcelable(EXTRA_BITMAP, bitmap);
+                    service.provideContextImageLocked(/* taskId = */ -1, imageContextRequestExtras);
+                } else {
+                    if (VERBOSE) {
+                        Slog.v(TAG, "provideContextImageLocked: no service for " + userId);
+                    }
+                }
+            }
+        }
+
         @Override
         public void provideContextImage(
                 int userId,
