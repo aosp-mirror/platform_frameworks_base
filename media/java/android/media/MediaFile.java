@@ -200,6 +200,84 @@ public class MediaFile {
         return null;
     }
 
+    /**
+     * Check whether the mime type is document or not.
+     * @param mimeType the mime type to check
+     * @return true, if the mimeType is matched. Otherwise, false.
+     */
+    public static boolean isDocumentMimeType(@Nullable String mimeType) {
+        if (mimeType == null) {
+            return false;
+        }
+
+        final String normalizedMimeType = normalizeMimeType(mimeType);
+        if (normalizedMimeType.startsWith("text/")) {
+            return true;
+        }
+
+        switch (normalizedMimeType) {
+            case "application/epub+zip":
+            case "application/msword":
+            case "application/pdf":
+            case "application/rtf":
+            case "application/vnd.ms-excel":
+            case "application/vnd.ms-excel.addin.macroEnabled.12":
+            case "application/vnd.ms-excel.sheet.binary.macroEnabled.12":
+            case "application/vnd.ms-excel.sheet.macroEnabled.12":
+            case "application/vnd.ms-excel.template.macroEnabled.12":
+            case "application/vnd.ms-powerpoint":
+            case "application/vnd.ms-powerpoint.addin.macroEnabled.12":
+            case "application/vnd.ms-powerpoint.presentation.macroEnabled.12":
+            case "application/vnd.ms-powerpoint.slideshow.macroEnabled.12":
+            case "application/vnd.ms-powerpoint.template.macroEnabled.12":
+            case "application/vnd.ms-word.document.macroEnabled.12":
+            case "application/vnd.ms-word.template.macroEnabled.12":
+            case "application/vnd.oasis.opendocument.chart":
+            case "application/vnd.oasis.opendocument.database":
+            case "application/vnd.oasis.opendocument.formula":
+            case "application/vnd.oasis.opendocument.graphics":
+            case "application/vnd.oasis.opendocument.graphics-template":
+            case "application/vnd.oasis.opendocument.presentation":
+            case "application/vnd.oasis.opendocument.presentation-template":
+            case "application/vnd.oasis.opendocument.spreadsheet":
+            case "application/vnd.oasis.opendocument.spreadsheet-template":
+            case "application/vnd.oasis.opendocument.text":
+            case "application/vnd.oasis.opendocument.text-master":
+            case "application/vnd.oasis.opendocument.text-template":
+            case "application/vnd.oasis.opendocument.text-web":
+            case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+            case "application/vnd.openxmlformats-officedocument.presentationml.slideshow":
+            case "application/vnd.openxmlformats-officedocument.presentationml.template":
+            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+            case "application/vnd.openxmlformats-officedocument.spreadsheetml.template":
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.template":
+            case "application/vnd.stardivision.calc":
+            case "application/vnd.stardivision.chart":
+            case "application/vnd.stardivision.draw":
+            case "application/vnd.stardivision.impress":
+            case "application/vnd.stardivision.impress-packed":
+            case "application/vnd.stardivision.mail":
+            case "application/vnd.stardivision.math":
+            case "application/vnd.stardivision.writer":
+            case "application/vnd.stardivision.writer-global":
+            case "application/vnd.sun.xml.calc":
+            case "application/vnd.sun.xml.calc.template":
+            case "application/vnd.sun.xml.draw":
+            case "application/vnd.sun.xml.draw.template":
+            case "application/vnd.sun.xml.impress":
+            case "application/vnd.sun.xml.impress.template":
+            case "application/vnd.sun.xml.math":
+            case "application/vnd.sun.xml.writer":
+            case "application/vnd.sun.xml.writer.global":
+            case "application/vnd.sun.xml.writer.template":
+            case "application/x-mspublisher":
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public static boolean isExifMimeType(@Nullable String mimeType) {
         // For simplicity, assume that all image files might have EXIF data
         return isImageMimeType(mimeType);
