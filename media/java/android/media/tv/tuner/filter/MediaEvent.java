@@ -124,15 +124,16 @@ public class MediaEvent extends FilterEvent{
     }
 
     /**
-     * Reserves the ID which is used by HAL to provide additional information for AV data.
+     * Gets the audio handle.
      *
-     * <p>The corresponding data is used and released by {@link android.media.AudioTrack}.
-     * <p>The data is also released when the {@link Filter} instance is closed.
+     * <p>Client gets audio handle from {@link MediaEvent}, and queues it to
+     * {@link android.media.AudioTrack} in
+     * {@link android.media.AudioTrack#ENCAPSULATION_MODE_HANDLE} format.
      *
-     * @return the reserved AV data ID.
-     * @hide
+     * @return the audio handle.
+     * @see android.media.AudioTrack#ENCAPSULATION_MODE_HANDLE
      */
-    public long reserveAvDataId() {
+    public long getAudioHandle() {
         // TODO: implement
         return mDataId;
     }

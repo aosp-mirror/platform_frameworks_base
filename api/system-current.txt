@@ -5049,6 +5049,7 @@ package android.media.tv.tuner.filter {
   }
 
   public class MediaEvent extends android.media.tv.tuner.filter.FilterEvent {
+    method public long getAudioHandle();
     method public long getAvDataId();
     method public long getDataLength();
     method @Nullable public android.media.tv.tuner.filter.AudioDescriptor getExtraMetaData();
