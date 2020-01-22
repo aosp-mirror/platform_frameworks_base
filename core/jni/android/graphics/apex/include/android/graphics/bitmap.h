@@ -21,6 +21,8 @@
 #include <jni.h>
 #include <sys/cdefs.h>
 
+struct AHardwareBuffer;
+
 __BEGIN_DECLS
 
 /**
@@ -62,6 +64,18 @@ jobject ABitmapConfig_getConfigFromFormat(JNIEnv* env, AndroidBitmapFormat forma
 int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const void* pixels,
                      AndroidBitmapCompressFormat format, int32_t quality, void* userContext,
                      AndroidBitmap_compress_write_fn);
+/**
+ *  Retrieve the native object associated with a HARDWARE Bitmap.
+ *
+ *  Client must not modify it while a Bitmap is wrapping it.
+ *
+ *  @param bitmap Handle to an android.graphics.Bitmap.
+ *  @return on success, a pointer to the
+ *         AHardwareBuffer associated with bitmap. This acquires
+ *         a reference on the buffer, and the client must call
+ *         AHardwareBuffer_release when finished with it.
+ */
+AHardwareBuffer* ABitmap_getHardwareBuffer(ABitmap* bitmap);
 
 __END_DECLS
 
@@ -116,6 +130,7 @@ namespace graphics {
         ADataSpace getDataSpace() const { return ABitmap_getDataSpace(mBitmap); }
         void* getPixels() const { return ABitmap_getPixels(mBitmap); }
         void notifyPixelsChanged() const { ABitmap_notifyPixelsChanged(mBitmap); }
+        AHardwareBuffer* getHardwareBuffer() const { return ABitmap_getHardwareBuffer(mBitmap); }
 
     private:
         // takes ownership of the provided ABitmap

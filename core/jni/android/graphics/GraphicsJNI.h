@@ -62,7 +62,8 @@ public:
 
     static android::Canvas* getNativeCanvas(JNIEnv*, jobject canvas);
     static android::Bitmap* getNativeBitmap(JNIEnv*, jobject bitmap);
-    static SkImageInfo getBitmapInfo(JNIEnv*, jobject bitmap, uint32_t* outRowBytes);
+    static SkImageInfo getBitmapInfo(JNIEnv*, jobject bitmap, uint32_t* outRowBytes,
+                                     bool* isHardware);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
 
     /*
