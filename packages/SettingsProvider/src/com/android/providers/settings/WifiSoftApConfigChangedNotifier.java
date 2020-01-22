@@ -27,17 +27,17 @@ import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
 
 /**
- * Helper class for sending notifications when the user's Soft AP Band was changed upon restore.
+ * Helper class for sending notifications when the user's Soft AP config was changed upon restore.
  */
-public class WifiSoftApBandChangedNotifier {
-    private WifiSoftApBandChangedNotifier() {}
+public class WifiSoftApConfigChangedNotifier {
+    private WifiSoftApConfigChangedNotifier() {}
 
     /**
-     * Send a notification informing the user that their' Soft AP Band was changed upon restore.
+     * Send a notification informing the user that their' Soft AP Config was changed upon restore.
      * When the user taps on the notification, they are taken to the Wifi Tethering page in
      * Settings.
      */
-    public static void notifyUserOfApBandConversion(Context context) {
+    public static void notifyUserOfConfigConversion(Context context) {
         NotificationManager notificationManager =
                 context.getSystemService(NotificationManager.class);
 
