@@ -868,7 +868,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public CharSequence getBackgroundPermissionButtonLabel() {
+    public CharSequence getBackgroundPermissionOptionLabel() {
         try {
 
             String permissionController = getPermissionControllerPackageName();

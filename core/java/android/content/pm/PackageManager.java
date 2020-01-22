@@ -4410,14 +4410,17 @@ public abstract class PackageManager {
     public abstract boolean shouldShowRequestPermissionRationale(@NonNull String permName);
 
     /**
-     * Gets the string that is displayed on the button which corresponds to granting background
-     * location in settings. The intended use for this is to help apps instruct users how to
-     * grant a background permission by providing the string that users will see.
+     * Gets the localized label that corresponds to the option in settings for granting
+     * background access.
      *
-     * @return the string shown on the button for granting background location
+     * <p>The intended use is for apps to reference this label in its instruction for users to grant
+     * a background permission.
+     *
+     * @return the localized label that corresponds to the settings option for granting
+     * background access
      */
     @NonNull
-    public CharSequence getBackgroundPermissionButtonLabel() {
+    public CharSequence getBackgroundPermissionOptionLabel() {
         return "";
     }
 
