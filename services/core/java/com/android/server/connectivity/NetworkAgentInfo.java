@@ -451,15 +451,6 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 && !isLingering();
     }
 
-    /**
-     * Returns whether this network is currently suspended. A network is suspended if it is still
-     * connected but data temporarily fails to transfer. See {@link NetworkInfo.State#SUSPENDED}
-     * and {@link NetworkCapabilities#NET_CAPABILITY_NOT_SUSPENDED}.
-     */
-    public boolean isSuspended() {
-        return networkInfo.getState() == NetworkInfo.State.SUSPENDED;
-    }
-
     // Does this network satisfy request?
     public boolean satisfies(NetworkRequest request) {
         return created &&
