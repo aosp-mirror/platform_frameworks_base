@@ -37,7 +37,6 @@
 #include "PowerStatsPuller.h"
 #include "ResourceHealthManagerPuller.h"
 #include "StatsCallbackPuller.h"
-#include "StatsCompanionServicePuller.h"
 #include "SubsystemSleepStatePuller.h"
 #include "TrainInfoPuller.h"
 #include "statslog.h"

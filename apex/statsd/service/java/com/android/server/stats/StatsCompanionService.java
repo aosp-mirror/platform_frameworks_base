@@ -714,27 +714,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    /**
-     * Pulls various data.
-     */
-    @Override // Binder call
-    public StatsLogEventWrapper[] pullData(int tagId) {
-        StatsCompanion.enforceStatsCompanionPermission(mContext);
-        if (DEBUG) {
-            Slog.d(TAG, "Pulling " + tagId);
-        }
-        List<StatsLogEventWrapper> ret = new ArrayList<>();
-        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
-        long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
-        switch (tagId) {
-
-            default:
-                Slog.w(TAG, "No such tagId data as " + tagId);
-                return null;
-        }
-        return ret.toArray(new StatsLogEventWrapper[ret.size()]);
-    }
-
     @Override // Binder call
     public void statsdReady() {
         StatsCompanion.enforceStatsCompanionPermission(mContext);
