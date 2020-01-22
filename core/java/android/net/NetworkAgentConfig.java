@@ -16,6 +16,8 @@
 
 package android.net;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -26,7 +28,7 @@ import android.os.Parcelable;
  *
  * @hide
  */
-public class NetworkMisc implements Parcelable {
+public class NetworkAgentConfig implements Parcelable {
 
     /**
      * If the {@link Network} is a VPN, whether apps are allowed to bypass the
@@ -83,17 +85,17 @@ public class NetworkMisc implements Parcelable {
      */
     public boolean hasShownBroken;
 
-    public NetworkMisc() {
+    public NetworkAgentConfig() {
     }
 
-    public NetworkMisc(NetworkMisc nm) {
-        if (nm != null) {
-            allowBypass = nm.allowBypass;
-            explicitlySelected = nm.explicitlySelected;
-            acceptUnvalidated = nm.acceptUnvalidated;
-            subscriberId = nm.subscriberId;
-            provisioningNotificationDisabled = nm.provisioningNotificationDisabled;
-            skip464xlat = nm.skip464xlat;
+    public NetworkAgentConfig(@Nullable NetworkAgentConfig nac) {
+        if (nac != null) {
+            allowBypass = nac.allowBypass;
+            explicitlySelected = nac.explicitlySelected;
+            acceptUnvalidated = nac.acceptUnvalidated;
+            subscriberId = nac.subscriberId;
+            provisioningNotificationDisabled = nac.provisioningNotificationDisabled;
+            skip464xlat = nac.skip464xlat;
         }
     }
 
@@ -112,22 +114,23 @@ public class NetworkMisc implements Parcelable {
         out.writeInt(skip464xlat ? 1 : 0);
     }
 
-    public static final @android.annotation.NonNull Creator<NetworkMisc> CREATOR = new Creator<NetworkMisc>() {
+    public static final @NonNull Creator<NetworkAgentConfig> CREATOR =
+            new Creator<NetworkAgentConfig>() {
         @Override
-        public NetworkMisc createFromParcel(Parcel in) {
-            NetworkMisc networkMisc = new NetworkMisc();
-            networkMisc.allowBypass = in.readInt() != 0;
-            networkMisc.explicitlySelected = in.readInt() != 0;
-            networkMisc.acceptUnvalidated = in.readInt() != 0;
-            networkMisc.subscriberId = in.readString();
-            networkMisc.provisioningNotificationDisabled = in.readInt() != 0;
-            networkMisc.skip464xlat = in.readInt() != 0;
-            return networkMisc;
+        public NetworkAgentConfig createFromParcel(Parcel in) {
+            NetworkAgentConfig networkAgentConfig = new NetworkAgentConfig();
+            networkAgentConfig.allowBypass = in.readInt() != 0;
+            networkAgentConfig.explicitlySelected = in.readInt() != 0;
+            networkAgentConfig.acceptUnvalidated = in.readInt() != 0;
+            networkAgentConfig.subscriberId = in.readString();
+            networkAgentConfig.provisioningNotificationDisabled = in.readInt() != 0;
+            networkAgentConfig.skip464xlat = in.readInt() != 0;
+            return networkAgentConfig;
         }
 
         @Override
-        public NetworkMisc[] newArray(int size) {
-            return new NetworkMisc[size];
+        public NetworkAgentConfig[] newArray(int size) {
+            return new NetworkAgentConfig[size];
         }
     };
 }
