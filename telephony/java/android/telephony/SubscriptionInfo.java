@@ -16,8 +16,6 @@
 
 package android.telephony;
 
-import com.android.telephony.Rlog;
-
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -40,6 +38,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.android.internal.telephony.util.TelephonyUtils;
+import com.android.telephony.Rlog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -218,6 +217,20 @@ public class SubscriptionInfo implements Parcelable {
     private boolean mAreUiccApplicationsEnabled = true;
 
     /**
+     * Public copy constructor.
+     * @hide
+     */
+    public SubscriptionInfo(SubscriptionInfo info) {
+        this(info.mId, info.mIccId, info.mSimSlotIndex, info.mDisplayName, info.mCarrierName,
+                info.mNameSource, info.mIconTint, info.mNumber, info.mDataRoaming, info.mIconBitmap,
+                info.mMcc, info.mMnc, info.mCountryIso, info.mIsEmbedded, info.mNativeAccessRules,
+                info.mCardString, info.mCardId, info.mIsOpportunistic,
+                info.mGroupUUID == null ? null : info.mGroupUUID.toString(), info.mIsGroupDisabled,
+                info.mCarrierId, info.mProfileClass, info.mSubscriptionType, info.mGroupOwner,
+                info.mCarrierConfigAccessRules, info.mAreUiccApplicationsEnabled);
+    }
+
+    /**
      * @hide
      */
     public SubscriptionInfo(int id, String iccId, int simSlotIndex, CharSequence displayName,
@@ -292,10 +305,24 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * @return the ICC ID.
+     * Returns the ICC ID if the calling app has been granted the READ_PRIVILEGED_PHONE_STATE
+     * permission, has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}), or
+     * is a device owner or profile owner that has been granted the READ_PHONE_STATE permission.
+     * The profile owner is an app that owns a managed profile on the device; for more details see
+     * <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile
+     * owner access is deprecated and will be removed in a future release.
+     *
+     * @return the ICC ID, or an empty string if one of these requirements is not met
      */
     public String getIccId() {
         return this.mIccId;
+    }
+
+    /**
+     * @hide
+     */
+    public void clearIccId() {
+        this.mIccId = "";
     }
 
     /**
