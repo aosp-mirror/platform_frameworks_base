@@ -16,20 +16,23 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 
@@ -41,36 +44,53 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
+import com.android.systemui.util.Assert;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class ForegroundCoordinatorTest extends SysuiTestCase {
     private static final String TEST_PKG = "test_pkg";
     private static final int NOTIF_USER_ID = 0;
 
-    @Mock private Handler mMainHandler;
     @Mock private ForegroundServiceController mForegroundServiceController;
     @Mock private AppOpsController mAppOpsController;
     @Mock private NotifPipeline mNotifPipeline;
+
+    @Captor private ArgumentCaptor<AppOpsController.Callback> mAppOpsCaptor;
 
     private NotificationEntry mEntry;
     private Notification mNotification;
     private ForegroundCoordinator mForegroundCoordinator;
     private NotifFilter mForegroundFilter;
+    private AppOpsController.Callback mAppOpsCallback;
     private NotifLifetimeExtender mForegroundNotifLifetimeExtender;
+
+    private FakeSystemClock mClock = new FakeSystemClock();
+    private FakeExecutor mExecutor = new FakeExecutor(mClock);
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mForegroundCoordinator = new ForegroundCoordinator(
-                mForegroundServiceController, mAppOpsController, mMainHandler);
+        Assert.sMainLooper = TestableLooper.get(this).getLooper();
+
+        mForegroundCoordinator =
+                new ForegroundCoordinator(
+                        mForegroundServiceController,
+                        mAppOpsController,
+                        mExecutor);
 
         mNotification = new Notification();
         mEntry = new NotificationEntryBuilder()
@@ -86,9 +106,11 @@ public class ForegroundCoordinatorTest extends SysuiTestCase {
         verify(mNotifPipeline, times(1)).addPreGroupFilter(filterCaptor.capture());
         verify(mNotifPipeline, times(1)).addNotificationLifetimeExtender(
                 lifetimeExtenderCaptor.capture());
+        verify(mAppOpsController).addCallback(any(int[].class), mAppOpsCaptor.capture());
 
         mForegroundFilter = filterCaptor.getValue();
         mForegroundNotifLifetimeExtender = lifetimeExtenderCaptor.getValue();
+        mAppOpsCallback = mAppOpsCaptor.getValue();
     }
 
     @Test
@@ -182,5 +204,75 @@ public class ForegroundCoordinatorTest extends SysuiTestCase {
         // ForegroundCoordinator.MIN_FGS_TIME_MS
         assertFalse(mForegroundNotifLifetimeExtender
                 .shouldExtendLifetime(mEntry, NotificationListenerService.REASON_CLICK));
+    }
+
+    @Test
+    public void testAppOpsAreApplied() {
+        // GIVEN Three current notifications, two with the same key but from different users
+        NotificationEntry entry1 = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID))
+                .setPkg(TEST_PKG)
+                .setId(1)
+                .build();
+        NotificationEntry entry2 = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID))
+                .setPkg(TEST_PKG)
+                .setId(2)
+                .build();
+        NotificationEntry entry2Other = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID + 1))
+                .setPkg(TEST_PKG)
+                .setId(2)
+                .build();
+        when(mNotifPipeline.getActiveNotifs()).thenReturn(List.of(entry1, entry2, entry2Other));
+
+        // GIVEN that entry2 is currently associated with a foreground service
+        when(mForegroundServiceController.getStandardLayoutKey(0, TEST_PKG))
+                .thenReturn(entry2.getKey());
+
+        // WHEN a new app ops code comes in
+        mAppOpsCallback.onActiveStateChanged(47, NOTIF_USER_ID, TEST_PKG, true);
+        mExecutor.runAllReady();
+
+        // THEN entry2's app ops are updated, but no one else's are
+        assertEquals(
+                new ArraySet<>(),
+                entry1.mActiveAppOps);
+        assertEquals(
+                new ArraySet<>(List.of(47)),
+                entry2.mActiveAppOps);
+        assertEquals(
+                new ArraySet<>(),
+                entry2Other.mActiveAppOps);
+    }
+
+    @Test
+    public void testAppOpsAreRemoved() {
+        // GIVEN One notification which is associated with app ops
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID))
+                .setPkg(TEST_PKG)
+                .setId(2)
+                .build();
+        when(mNotifPipeline.getActiveNotifs()).thenReturn(List.of(entry));
+        when(mForegroundServiceController.getStandardLayoutKey(0, TEST_PKG))
+                .thenReturn(entry.getKey());
+
+        // GIVEN that the notification's app ops are already [47, 33]
+        mAppOpsCallback.onActiveStateChanged(47, NOTIF_USER_ID, TEST_PKG, true);
+        mAppOpsCallback.onActiveStateChanged(33, NOTIF_USER_ID, TEST_PKG, true);
+        mExecutor.runAllReady();
+        assertEquals(
+                new ArraySet<>(List.of(47, 33)),
+                entry.mActiveAppOps);
+
+        // WHEN one of the app ops is removed
+        mAppOpsCallback.onActiveStateChanged(47, NOTIF_USER_ID, TEST_PKG, false);
+        mExecutor.runAllReady();
+
+        // THEN the entry's active app ops are updated as well
+        assertEquals(
+                new ArraySet<>(List.of(33)),
+                entry.mActiveAppOps);
     }
 }
