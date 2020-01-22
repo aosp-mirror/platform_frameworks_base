@@ -1848,6 +1848,24 @@ public class WallpaperManager {
     }
 
     /**
+     * Set the current zoom out level of the wallpaper
+     * @param zoom from 0 to 1 (inclusive) where 1 means fully zoomed out, 0 means fully zoomed in
+     *
+     * @hide
+     */
+    public void setWallpaperZoomOut(float zoom) {
+        if (zoom < 0 || zoom > 1f) {
+            throw new IllegalArgumentException("zoom must be between 0 and one: " + zoom);
+        }
+        try {
+            sGlobals.mService.setWallpaperZoomOut(zoom, mContext.getOpPackageName(),
+                    mContext.getDisplayId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns whether wallpapers are supported for the calling user. If this function returns
      * {@code false}, any attempts to changing the wallpaper will have no effect,
      * and any attempt to obtain of the wallpaper will return {@code null}.
