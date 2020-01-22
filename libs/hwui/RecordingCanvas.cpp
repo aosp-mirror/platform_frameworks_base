@@ -130,6 +130,12 @@ struct SaveBehind final : Op {
     }
 };
 
+struct Concat44 final : Op {
+    static const auto kType = Type::Concat44;
+    Concat44(const SkScalar m[16]) { memcpy(colMajor, m, sizeof(colMajor)); }
+    SkScalar colMajor[16];
+    void draw(SkCanvas* c, const SkMatrix&) const { c->experimental_concat44(colMajor); }
+};
 struct Concat final : Op {
     static const auto kType = Type::Concat;
     Concat(const SkMatrix& matrix) : matrix(matrix) {}
@@ -143,6 +149,12 @@ struct SetMatrix final : Op {
     void draw(SkCanvas* c, const SkMatrix& original) const {
         c->setMatrix(SkMatrix::Concat(original, matrix));
     }
+};
+struct Scale final : Op {
+    static const auto kType = Type::Scale;
+    Scale(SkScalar sx, SkScalar sy) : sx(sx), sy(sy) {}
+    SkScalar sx, sy;
+    void draw(SkCanvas* c, const SkMatrix&) const { c->scale(sx, sy); }
 };
 struct Translate final : Op {
     static const auto kType = Type::Translate;
@@ -562,11 +574,17 @@ void DisplayListData::saveBehind(const SkRect* subset) {
     this->push<SaveBehind>(0, subset);
 }
 
+void DisplayListData::concat44(const SkScalar colMajor[16]) {
+    this->push<Concat44>(0, colMajor);
+}
 void DisplayListData::concat(const SkMatrix& matrix) {
     this->push<Concat>(0, matrix);
 }
 void DisplayListData::setMatrix(const SkMatrix& matrix) {
     this->push<SetMatrix>(0, matrix);
+}
+void DisplayListData::scale(SkScalar sx, SkScalar sy) {
+    this->push<Scale>(0, sx, sy);
 }
 void DisplayListData::translate(SkScalar dx, SkScalar dy) {
     this->push<Translate>(0, dx, dy);
@@ -823,11 +841,17 @@ bool RecordingCanvas::onDoSaveBehind(const SkRect* subset) {
     return false;
 }
 
+void RecordingCanvas::didConcat44(const SkScalar colMajor[16]) {
+    fDL->concat44(colMajor);
+}
 void RecordingCanvas::didConcat(const SkMatrix& matrix) {
     fDL->concat(matrix);
 }
 void RecordingCanvas::didSetMatrix(const SkMatrix& matrix) {
     fDL->setMatrix(matrix);
+}
+void RecordingCanvas::didScale(SkScalar sx, SkScalar sy) {
+    fDL->scale(sx, sy);
 }
 void RecordingCanvas::didTranslate(SkScalar dx, SkScalar dy) {
     fDL->translate(dx, dy);
