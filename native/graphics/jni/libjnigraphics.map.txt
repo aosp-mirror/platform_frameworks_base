@@ -6,6 +6,7 @@ LIBJNIGRAPHICS {
     AImageDecoder_delete; # introduced=30
     AImageDecoder_setAndroidBitmapFormat; # introduced=30
     AImageDecoder_setUnpremultipliedRequired; # introduced=30
+    AImageDecoder_setDataSpace; # introduced=30
     AImageDecoder_getHeaderInfo; # introduced=30
     AImageDecoder_getMinimumStride; # introduced=30
     AImageDecoder_decodeImage; # introduced=30
@@ -18,6 +19,7 @@ LIBJNIGRAPHICS {
     AImageDecoderHeaderInfo_getAlphaFlags; # introduced=30
     AImageDecoderHeaderInfo_isAnimated; # introduced=30
     AImageDecoderHeaderInfo_getAndroidBitmapFormat; # introduced=30
+    AImageDecoderHeaderInfo_getDataSpace; # introduced=30
     AndroidBitmap_getInfo;
     AndroidBitmap_getDataSpace;
     AndroidBitmap_lockPixels;
