@@ -35,6 +35,7 @@
     <xs:complexType name="nitsMap">
         <xs:sequence>
             <xs:element name="point" type="point" maxOccurs="unbounded" minOccurs="2"/>
+            <xs:element name="highBrightnessStart" minOccurs="0" type="nonNegativeDecimal"/>
         </xs:sequence>
     </xs:complexType>
 

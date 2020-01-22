@@ -20,6 +20,7 @@ import android.os.Environment;
 import android.util.Slog;
 
 import com.android.server.display.config.DisplayConfiguration;
+import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.Point;
 import com.android.server.display.config.XmlParser;
 
@@ -30,6 +31,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -40,12 +42,15 @@ import javax.xml.datatype.DatatypeConfigurationException;
 public class DisplayDeviceConfig {
     private static final String TAG = "DisplayDeviceConfig";
 
+    public static final float HIGH_BRIGHTNESS_MODE_UNSUPPORTED = Float.NaN;
+
     private static final String ETC_DIR = "etc";
     private static final String DISPLAY_CONFIG_DIR = "displayconfig";
     private static final String CONFIG_FILE_FORMAT = "display_%d.xml";
 
     private float[] mNits;
     private float[] mBrightness;
+    private BigDecimal mHighBrightnessModeStart;
 
     private DisplayDeviceConfig() {
     }
@@ -83,6 +88,18 @@ public class DisplayDeviceConfig {
         return mBrightness;
     }
 
+    /**
+     * Returns the point along the brightness value range {@link #getBrightness()} that
+     * high-brightness-mode begins. If high-brightness-mode is not supported, then
+     * Float.NaN is returned.
+     *
+     * @return The high brightness mode threshold, or Float.NaN if not supported.
+     */
+    public float getHighBrightnessModeStart() {
+        return mHighBrightnessModeStart != null
+                ? mHighBrightnessModeStart.floatValue() : HIGH_BRIGHTNESS_MODE_UNSUPPORTED;
+    }
+
     private void initFromFile(File configFile) {
         if (!configFile.exists()) {
             // Display configuration files aren't required to exist.
@@ -104,7 +121,8 @@ public class DisplayDeviceConfig {
     }
 
     private void loadBrightnessMap(DisplayConfiguration config) {
-        final List<Point> points = config.getScreenBrightnessMap().getPoint();
+        final NitsMap map = config.getScreenBrightnessMap();
+        final List<Point> points = map.getPoint();
         final int size = points.size();
 
         float[] nits = new float[size];
@@ -130,7 +148,9 @@ public class DisplayDeviceConfig {
             }
             ++i;
         }
+        final BigDecimal hbmStart = map.getHighBrightnessStart();
 
+        mHighBrightnessModeStart = hbmStart;
         mNits = nits;
         mBrightness = backlight;
     }
