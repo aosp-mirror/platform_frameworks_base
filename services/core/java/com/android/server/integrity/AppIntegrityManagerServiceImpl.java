@@ -67,7 +67,9 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /** Implementation of {@link AppIntegrityManagerService}. */
@@ -220,11 +222,10 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 return;
             }
 
-            String ruleProvider = getCallerPackageName();
             String installerPackageName = getInstallerPackageName(intent);
 
             // Skip integrity verification if the verifier is doing the install.
-            if (ruleProvider != null && ruleProvider.equals(installerPackageName)) {
+            if (isRuleProvider(installerPackageName)) {
                 Slog.i(TAG, "Verifier doing the install. Skipping integrity check.");
                 mPackageManagerInternal.setIntegrityVerificationResult(
                         verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
@@ -281,7 +282,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
      * Verify the UID and return the installer package name.
      *
      * @return the package name of the installer, or null if it cannot be determined or it is
-     *     installed via adb.
+     * installed via adb.
      */
     @Nullable
     private String getInstallerPackageName(Intent intent) {
@@ -538,9 +539,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     private String getCallerPackageName() {
-        final String[] allowedRuleProviders =
-                mContext.getResources()
-                        .getStringArray(R.array.config_integrityRuleProviderPackages);
+        final List<String> allowedRuleProviders = getAllowedRuleProviders();
         for (String packageName : allowedRuleProviders) {
             try {
                 // At least in tests, getPackageUid gives "NameNotFound" but getPackagesFromUid
@@ -569,5 +568,15 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
+    }
+
+    private List<String> getAllowedRuleProviders() {
+        return Arrays.asList(mContext.getResources().getStringArray(
+                R.array.config_integrityRuleProviderPackages));
+    }
+
+    private boolean isRuleProvider(String installerPackageName) {
+        return getAllowedRuleProviders().stream().anyMatch(
+                ruleProvider -> ruleProvider.equals(installerPackageName));
     }
 }
