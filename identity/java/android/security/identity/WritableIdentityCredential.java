@@ -31,6 +31,11 @@ import java.util.Collection;
  */
 public abstract class WritableIdentityCredential {
     /**
+     * @hide
+     */
+    protected WritableIdentityCredential() {}
+
+    /**
      * Generates and returns an X.509 certificate chain for the CredentialKey which identifies this
      * credential to the issuing authority. The certificate contains an
      * <a href="https://source.android.com/security/keystore/attestation">Android Keystore</a>
