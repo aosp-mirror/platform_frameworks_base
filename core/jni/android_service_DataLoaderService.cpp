@@ -35,24 +35,24 @@ static jboolean nativeCreateDataLoader(JNIEnv* env,
 static jboolean nativeStartDataLoader(JNIEnv* env,
                                       jobject thiz,
                                       jint storageId) {
-    return DataLoaderService_OnStart(storageId);
+    return DataLoaderService_OnStart(env, storageId);
 }
 
 static jboolean nativeStopDataLoader(JNIEnv* env,
                                      jobject thiz,
                                      jint storageId) {
-    return DataLoaderService_OnStop(storageId);
+    return DataLoaderService_OnStop(env, storageId);
 }
 
 static jboolean nativeDestroyDataLoader(JNIEnv* env,
                                         jobject thiz,
                                         jint storageId) {
-    return DataLoaderService_OnDestroy(storageId);
+    return DataLoaderService_OnDestroy(env, storageId);
 }
 
 
 static jboolean nativePrepareImage(JNIEnv* env, jobject thiz, jint storageId, jobject addedFiles, jobject removedFiles) {
-    return DataLoaderService_OnPrepareImage(storageId, addedFiles, removedFiles);
+    return DataLoaderService_OnPrepareImage(env, storageId, addedFiles, removedFiles);
 }
 
 static void nativeWriteData(JNIEnv* env,
