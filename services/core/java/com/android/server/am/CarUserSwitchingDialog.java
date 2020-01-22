@@ -32,8 +32,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -83,9 +83,13 @@ final class CarUserSwitchingDialog extends UserSwitchingDialog {
         }
 
         TextView msgView = view.findViewById(R.id.user_loading);
-        // TODO: use developer settings instead
-        if (Build.IS_DEBUGGABLE) {
-            // TODO: use specific string
+
+        // TODO(b/145132885): use constant from CarSettings
+        boolean showInfo = "true".equals(Settings.Global.getString(
+                getContext().getContentResolver(),
+                "android.car.ENABLE_USER_SWITCH_DEVELOPER_MESSAGE"));
+
+        if (showInfo) {
             msgView.setText(res.getString(R.string.car_loading_profile) + " user\n(from "
                     + mOldUser.id + " to " + mNewUser.id + ")");
         } else {
