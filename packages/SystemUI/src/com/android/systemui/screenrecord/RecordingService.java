@@ -34,6 +34,7 @@ import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -72,9 +73,6 @@ public class RecordingService extends Service {
 
     private static final String ACTION_START = "com.android.systemui.screenrecord.START";
     private static final String ACTION_STOP = "com.android.systemui.screenrecord.STOP";
-    private static final String ACTION_PAUSE = "com.android.systemui.screenrecord.PAUSE";
-    private static final String ACTION_RESUME = "com.android.systemui.screenrecord.RESUME";
-    private static final String ACTION_CANCEL = "com.android.systemui.screenrecord.CANCEL";
     private static final String ACTION_SHARE = "com.android.systemui.screenrecord.SHARE";
     private static final String ACTION_DELETE = "com.android.systemui.screenrecord.DELETE";
 
@@ -94,6 +92,7 @@ public class RecordingService extends Service {
 
     private boolean mUseAudio;
     private boolean mShowTaps;
+    private boolean mOriginalShowTaps;
     private File mTempFile;
 
     @Inject
@@ -145,36 +144,9 @@ public class RecordingService extends Service {
                 }
                 break;
 
-            case ACTION_CANCEL:
-                stopRecording();
-
-                // Delete temp file
-                if (!mTempFile.delete()) {
-                    Log.e(TAG, "Error canceling screen recording!");
-                    Toast.makeText(this, R.string.screenrecord_delete_error, Toast.LENGTH_LONG)
-                            .show();
-                } else {
-                    Toast.makeText(this, R.string.screenrecord_cancel_success, Toast.LENGTH_LONG)
-                            .show();
-                }
-
-                // Close quick shade
-                sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-                break;
-
             case ACTION_STOP:
                 stopRecording();
                 saveRecording(notificationManager);
-                break;
-
-            case ACTION_PAUSE:
-                mMediaRecorder.pause();
-                setNotificationActions(true, notificationManager);
-                break;
-
-            case ACTION_RESUME:
-                mMediaRecorder.resume();
-                setNotificationActions(false, notificationManager);
                 break;
 
             case ACTION_SHARE:
@@ -233,9 +205,14 @@ public class RecordingService extends Service {
      */
     private void startRecording() {
         try {
-            mTempFile = File.createTempFile("temp", ".mp4");
+            File cacheDir = getCacheDir();
+            cacheDir.mkdirs();
+            mTempFile = File.createTempFile("temp", ".mp4", cacheDir);
             Log.d(TAG, "Writing video output to: " + mTempFile.getAbsolutePath());
 
+            mOriginalShowTaps = 1 == Settings.System.getInt(
+                    getApplicationContext().getContentResolver(),
+                    Settings.System.SHOW_TOUCHES, 0);
             setTapsVisible(mShowTaps);
 
             // Set up media recorder
@@ -295,50 +272,33 @@ public class RecordingService extends Service {
         NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
                 getString(R.string.screenrecord_name),
-                NotificationManager.IMPORTANCE_LOW);
+                NotificationManager.IMPORTANCE_DEFAULT);
         channel.setDescription(getString(R.string.screenrecord_channel_description));
         channel.enableVibration(true);
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.createNotificationChannel(channel);
 
+        Bundle extras = new Bundle();
+        extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
+                getResources().getString(R.string.screenrecord_name));
+
         mRecordingNotificationBuilder = new Notification.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_android)
+                .setSmallIcon(R.drawable.ic_screenrecord)
                 .setContentTitle(getResources().getString(R.string.screenrecord_name))
+                .setContentText(getResources().getString(R.string.screenrecord_stop_text))
                 .setUsesChronometer(true)
-                .setOngoing(true);
-        setNotificationActions(false, notificationManager);
+                .setColorized(true)
+                .setColor(getResources().getColor(R.color.GM2_red_700))
+                .setOngoing(true)
+                .setContentIntent(
+                        PendingIntent.getService(
+                                this, REQUEST_CODE, getStopIntent(this),
+                                PendingIntent.FLAG_UPDATE_CURRENT))
+                .addExtras(extras);
+        notificationManager.notify(NOTIFICATION_ID, mRecordingNotificationBuilder.build());
         Notification notification = mRecordingNotificationBuilder.build();
         startForeground(NOTIFICATION_ID, notification);
-    }
-
-    private void setNotificationActions(boolean isPaused, NotificationManager notificationManager) {
-        String pauseString = getResources()
-                .getString(isPaused ? R.string.screenrecord_resume_label
-                        : R.string.screenrecord_pause_label);
-        Intent pauseIntent = isPaused ? getResumeIntent(this) : getPauseIntent(this);
-
-        mRecordingNotificationBuilder.setActions(
-                new Notification.Action.Builder(
-                        Icon.createWithResource(this, R.drawable.ic_android),
-                        getResources().getString(R.string.screenrecord_stop_label),
-                        PendingIntent
-                                .getService(this, REQUEST_CODE, getStopIntent(this),
-                                        PendingIntent.FLAG_UPDATE_CURRENT))
-                        .build(),
-                new Notification.Action.Builder(
-                        Icon.createWithResource(this, R.drawable.ic_android), pauseString,
-                        PendingIntent.getService(this, REQUEST_CODE, pauseIntent,
-                                PendingIntent.FLAG_UPDATE_CURRENT))
-                        .build(),
-                new Notification.Action.Builder(
-                        Icon.createWithResource(this, R.drawable.ic_android),
-                        getResources().getString(R.string.screenrecord_cancel_label),
-                        PendingIntent
-                                .getService(this, REQUEST_CODE, getCancelIntent(this),
-                                        PendingIntent.FLAG_UPDATE_CURRENT))
-                        .build());
-        notificationManager.notify(NOTIFICATION_ID, mRecordingNotificationBuilder.build());
     }
 
     private Notification createSaveNotification(Uri uri) {
@@ -347,7 +307,7 @@ public class RecordingService extends Service {
                 .setDataAndType(uri, "video/mp4");
 
         Notification.Action shareAction = new Notification.Action.Builder(
-                Icon.createWithResource(this, R.drawable.ic_android),
+                Icon.createWithResource(this, R.drawable.ic_screenrecord),
                 getResources().getString(R.string.screenrecord_share_label),
                 PendingIntent.getService(
                         this,
@@ -357,7 +317,7 @@ public class RecordingService extends Service {
                 .build();
 
         Notification.Action deleteAction = new Notification.Action.Builder(
-                Icon.createWithResource(this, R.drawable.ic_android),
+                Icon.createWithResource(this, R.drawable.ic_screenrecord),
                 getResources().getString(R.string.screenrecord_delete_label),
                 PendingIntent.getService(
                         this,
@@ -366,8 +326,12 @@ public class RecordingService extends Service {
                         PendingIntent.FLAG_UPDATE_CURRENT))
                 .build();
 
+        Bundle extras = new Bundle();
+        extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
+                getResources().getString(R.string.screenrecord_name));
+
         Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_android)
+                .setSmallIcon(R.drawable.ic_screenrecord)
                 .setContentTitle(getResources().getString(R.string.screenrecord_name))
                 .setContentText(getResources().getString(R.string.screenrecord_save_message))
                 .setContentIntent(PendingIntent.getActivity(
@@ -377,7 +341,8 @@ public class RecordingService extends Service {
                         Intent.FLAG_GRANT_READ_URI_PERMISSION))
                 .addAction(shareAction)
                 .addAction(deleteAction)
-                .setAutoCancel(true);
+                .setAutoCancel(true)
+                .addExtras(extras);
 
         // Add thumbnail if available
         Bitmap thumbnailBitmap = null;
@@ -400,7 +365,7 @@ public class RecordingService extends Service {
     }
 
     private void stopRecording() {
-        setTapsVisible(false);
+        setTapsVisible(mOriginalShowTaps);
         mMediaRecorder.stop();
         mMediaRecorder.release();
         mMediaRecorder = null;
@@ -457,18 +422,6 @@ public class RecordingService extends Service {
      */
     public static Intent getStopIntent(Context context) {
         return new Intent(context, RecordingService.class).setAction(ACTION_STOP);
-    }
-
-    private static Intent getPauseIntent(Context context) {
-        return new Intent(context, RecordingService.class).setAction(ACTION_PAUSE);
-    }
-
-    private static Intent getResumeIntent(Context context) {
-        return new Intent(context, RecordingService.class).setAction(ACTION_RESUME);
-    }
-
-    private static Intent getCancelIntent(Context context) {
-        return new Intent(context, RecordingService.class).setAction(ACTION_CANCEL);
     }
 
     private static Intent getShareIntent(Context context, String path) {

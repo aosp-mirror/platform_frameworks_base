@@ -226,6 +226,8 @@
     <string name="screenrecord_mic_label">Record voiceover</string>
     <!-- Label for the checkbox to enable showing location of touches during screen recording [CHAR LIMIT=NONE]-->
     <string name="screenrecord_taps_label">Show taps</string>
+    <!-- Label for notification that the user can tap to stop and save the screen recording [CHAR LIMIT=NONE] -->
+    <string name="screenrecord_stop_text">Tap to stop</string>
     <!-- Label for notification action to stop and save the screen recording [CHAR LIMIT=35] -->
     <string name="screenrecord_stop_label">Stop</string>
     <!-- Label for notification action to pause screen recording [CHAR LIMIT=35] -->
