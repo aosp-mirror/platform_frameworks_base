@@ -806,4 +806,173 @@ public class PowerManagerServiceTest {
         assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
                 DisplayPowerRequest.POLICY_BRIGHT);
     }
+
+    @Test
+    public void testIsAmbientDisplayAvailable_available() throws Exception {
+        createService();
+        when(mAmbientDisplayConfigurationMock.ambientDisplayAvailable()).thenReturn(true);
+
+        assertThat(mService.getBinderServiceInstance().isAmbientDisplayAvailable()).isTrue();
+    }
+
+    @Test
+    public void testIsAmbientDisplayAvailable_unavailable() throws Exception {
+        createService();
+        when(mAmbientDisplayConfigurationMock.ambientDisplayAvailable()).thenReturn(false);
+
+        assertThat(mService.getBinderServiceInstance().isAmbientDisplayAvailable()).isFalse();
+    }
+
+    @Test
+    public void testSuppressAmbientDisplay_suppressed() throws Exception {
+        createService();
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test", true);
+
+        assertThat(Settings.Secure.getInt(mContextSpy.getContentResolver(),
+            Settings.Secure.SUPPRESS_DOZE)).isEqualTo(1);
+    }
+
+    @Test
+    public void testSuppressAmbientDisplay_multipleCallers_suppressed() throws Exception {
+        createService();
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test1", true);
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test2", false);
+
+        assertThat(Settings.Secure.getInt(mContextSpy.getContentResolver(),
+            Settings.Secure.SUPPRESS_DOZE)).isEqualTo(1);
+    }
+
+    @Test
+    public void testSuppressAmbientDisplay_suppressTwice_suppressed() throws Exception {
+        createService();
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test", true);
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test", true);
+
+        assertThat(Settings.Secure.getInt(mContextSpy.getContentResolver(),
+            Settings.Secure.SUPPRESS_DOZE)).isEqualTo(1);
+    }
+
+    @Test
+    public void testSuppressAmbientDisplay_suppressTwiceThenUnsuppress_notSuppressed()
+            throws Exception {
+        createService();
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test", true);
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test", true);
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test", false);
+
+        assertThat(Settings.Secure.getInt(mContextSpy.getContentResolver(),
+            Settings.Secure.SUPPRESS_DOZE)).isEqualTo(0);
+    }
+
+    @Test
+    public void testSuppressAmbientDisplay_notSuppressed() throws Exception {
+        createService();
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test", false);
+
+        assertThat(Settings.Secure.getInt(mContextSpy.getContentResolver(),
+            Settings.Secure.SUPPRESS_DOZE)).isEqualTo(0);
+    }
+
+    @Test
+    public void testSuppressAmbientDisplay_unsuppressTwice_notSuppressed() throws Exception {
+        createService();
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test", false);
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test", false);
+
+        assertThat(Settings.Secure.getInt(mContextSpy.getContentResolver(),
+            Settings.Secure.SUPPRESS_DOZE)).isEqualTo(0);
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressed_default_notSuppressed() throws Exception {
+        createService();
+
+        assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressed()).isFalse();
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressed_suppressed() throws Exception {
+        createService();
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test", true);
+
+        assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressed()).isTrue();
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressed_notSuppressed() throws Exception {
+        createService();
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test", false);
+
+        assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressed()).isFalse();
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressed_multipleTokens_suppressed() throws Exception {
+        createService();
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test1", false);
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test2", true);
+
+        assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressed()).isTrue();
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressed_multipleTokens_notSuppressed() throws Exception {
+        createService();
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test1", false);
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test2", false);
+
+        assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressed()).isFalse();
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressedForToken_default_notSuppressed() throws Exception {
+        createService();
+
+        assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressedForToken("test"))
+            .isFalse();
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressedForToken_suppressed() throws Exception {
+        createService();
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test", true);
+
+        assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressedForToken("test"))
+            .isTrue();
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressedForToken_notSuppressed() throws Exception {
+        createService();
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test", false);
+
+        assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressedForToken("test"))
+            .isFalse();
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressedForToken_multipleTokens_suppressed()
+            throws Exception {
+        createService();
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test1", true);
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test2", true);
+
+        assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressedForToken("test1"))
+            .isTrue();
+        assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressedForToken("test2"))
+            .isTrue();
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressedForToken_multipleTokens_notSuppressed()
+            throws Exception {
+        createService();
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test1", true);
+        mService.getBinderServiceInstance().suppressAmbientDisplay("test2", false);
+
+        assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressedForToken("test1"))
+            .isTrue();
+        assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressedForToken("test2"))
+            .isFalse();
+    }
 }

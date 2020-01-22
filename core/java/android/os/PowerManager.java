@@ -1870,6 +1870,77 @@ public final class PowerManager {
     }
 
     /**
+     * Returns true if ambient display is available on the device.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE)
+    public boolean isAmbientDisplayAvailable() {
+        try {
+            return mService.isAmbientDisplayAvailable();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * If true, suppresses the current ambient display configuration and disables ambient display.
+     *
+     * <p>This method has no effect if {@link #isAmbientDisplayAvailable()} is false.
+     *
+     * @param token A persistable identifier for the ambient display suppression that is unique
+     *              within the calling application.
+     * @param suppress If set to {@code true}, ambient display will be suppressed. If set to
+     *                 {@code false}, ambient display will no longer be suppressed for the given
+     *                 token.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
+    public void suppressAmbientDisplay(@NonNull String token, boolean suppress) {
+        try {
+            mService.suppressAmbientDisplay(token, suppress);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns true if ambient display is suppressed by the calling app with the given
+     * {@code token}.
+     *
+     * <p>This method will return false if {@link #isAmbientDisplayAvailable()} is false.
+     *
+     * @param token The identifier of the ambient display suppression.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE)
+    public boolean isAmbientDisplaySuppressedForToken(@NonNull String token) {
+        try {
+            return mService.isAmbientDisplaySuppressedForToken(token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns true if ambient display is suppressed by <em>any</em> app with <em>any</em> token.
+     *
+     * <p>This method will return false if {@link #isAmbientDisplayAvailable()} is false.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE)
+    public boolean isAmbientDisplaySuppressed() {
+        try {
+            return mService.isAmbientDisplaySuppressed();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the reason the phone was last shutdown. Calling app must have the
      * {@link android.Manifest.permission#DEVICE_POWER} permission to request this information.
      * @return Reason for shutdown as an int, {@link #SHUTDOWN_REASON_UNKNOWN} if the file could
