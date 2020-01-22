@@ -188,6 +188,10 @@ public class PhoneStateListener {
      * Listen for {@link android.telephony.Annotation.PreciseCallStates} of ringing,
      * background and foreground calls.
      *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE}
+     * or the calling app has carrier privileges
+     * (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
      * @hide
      */
     @RequiresPermission((android.Manifest.permission.READ_PRECISE_PHONE_STATE))
@@ -197,13 +201,13 @@ public class PhoneStateListener {
     /**
      * Listen for {@link PreciseDataConnectionState} on the data connection (cellular).
      *
-     * <p>Requires permission {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE}
      * or the calling app has carrier privileges
      * (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
      * @see #onPreciseDataConnectionStateChanged
      */
-    @RequiresPermission((android.Manifest.permission.MODIFY_PHONE_STATE))
+    @RequiresPermission((android.Manifest.permission.READ_PRECISE_PHONE_STATE))
     public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE            = 0x00001000;
 
     /**
@@ -328,25 +332,35 @@ public class PhoneStateListener {
      * Listen for call disconnect causes which contains {@link DisconnectCause} and
      * {@link PreciseDisconnectCause}.
      *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE}
+     * or the calling app has carrier privileges
+     * (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
      */
     @RequiresPermission((android.Manifest.permission.READ_PRECISE_PHONE_STATE))
     public static final int LISTEN_CALL_DISCONNECT_CAUSES                  = 0x02000000;
 
     /**
      * Listen for changes to the call attributes of a currently active call.
-     * {@more}
-     * Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
-     * READ_PRECISE_PHONE_STATE}
+     *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE}
+     * or the calling app has carrier privileges
+     * (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
      * @see #onCallAttributesChanged
      * @hide
      */
     @SystemApi
+    @RequiresPermission((android.Manifest.permission.READ_PRECISE_PHONE_STATE))
     public static final int LISTEN_CALL_ATTRIBUTES_CHANGED                 = 0x04000000;
 
     /**
      * Listen for IMS call disconnect causes which contains
      * {@link android.telephony.ims.ImsReasonInfo}
+     *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE}
+     * or the calling app has carrier privileges
+     * (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
      * @see #onImsCallDisconnectCauseChanged(ImsReasonInfo)
      */
