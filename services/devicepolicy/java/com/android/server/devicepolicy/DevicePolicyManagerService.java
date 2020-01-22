@@ -527,11 +527,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     /**
      * For admin apps targeting R+, throw when the app sets password requirement
      * that is not taken into account at given quality. For example when quality is set
-     * to {@link DevicePolicyManager#PASSWORD_QUALITY_UNSPECIFIED}, it doesn't make sense to
-     * require certain password length. If the intent is to require a password of certain length
-     * having at least NUMERIC quality, the admin should first call
-     * {@link #setPasswordQuality(ComponentName, int, boolean)} and only then call
-     * {@link #setPasswordMinimumLength(ComponentName, int, boolean)}.
+     * to {@link android.app.admin.DevicePolicyManager#PASSWORD_QUALITY_UNSPECIFIED}, it doesn't
+     * make sense to require certain password length. If the intent is to require a password of
+     * certain length having at least NUMERIC quality, the admin should first call
+     * {@link android.app.admin.DevicePolicyManager#setPasswordQuality} and only then call
+     * {@link android.app.admin.DevicePolicyManager#setPasswordMinimumLength}.
      *
      * <p>Conversely when an admin app targeting R+ lowers password quality, those
      * requirements that stop making sense are reset to default values.
