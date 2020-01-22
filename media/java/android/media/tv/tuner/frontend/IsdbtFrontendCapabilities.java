@@ -16,23 +16,27 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.SystemApi;
+
 /**
  * ISDBT Capabilities.
+ *
  * @hide
  */
+@SystemApi
 public class IsdbtFrontendCapabilities extends FrontendCapabilities {
     private final int mModeCap;
     private final int mBandwidthCap;
     private final int mModulationCap;
-    private final int mCoderateCap;
+    private final int mCodeRateCap;
     private final int mGuardIntervalCap;
 
     private IsdbtFrontendCapabilities(int modeCap, int bandwidthCap, int modulationCap,
-            int coderateCap, int guardIntervalCap) {
+            int codeRateCap, int guardIntervalCap) {
         mModeCap = modeCap;
         mBandwidthCap = bandwidthCap;
         mModulationCap = modulationCap;
-        mCoderateCap = coderateCap;
+        mCodeRateCap = codeRateCap;
         mGuardIntervalCap = guardIntervalCap;
     }
 
@@ -60,9 +64,9 @@ public class IsdbtFrontendCapabilities extends FrontendCapabilities {
     /**
      * Gets code rate capability.
      */
-    @DvbtFrontendSettings.Coderate
+    @DvbtFrontendSettings.CodeRate
     public int getCodeRateCapability() {
-        return mCoderateCap;
+        return mCodeRateCap;
     }
     /**
      * Gets guard interval capability.

@@ -16,11 +16,14 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.SystemApi;
+
 /**
  * Capabilities for analog tuners.
  *
  * @hide
  */
+@SystemApi
 public class AnalogFrontendCapabilities extends FrontendCapabilities {
     @AnalogFrontendSettings.SignalType
     private final int mTypeCap;

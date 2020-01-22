@@ -18,19 +18,19 @@ package android.media.tv.tuner.frontend;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.Lnb;
-import android.media.tv.tuner.TunerConstants.FrontendInnerFec;
-import android.media.tv.tuner.TunerConstants.FrontendModulation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Frontend status
+ * Frontend status.
  *
  * @hide
  */
+@SystemApi
 public class FrontendStatus {
 
     /** @hide */
@@ -160,6 +160,52 @@ public class FrontendStatus {
             Constants.FrontendStatusType.ATSC3_PLP_INFO;
 
 
+    /** @hide */
+    @IntDef(value = {
+            DvbcFrontendSettings.MODULATION_UNDEFINED,
+            DvbcFrontendSettings.MODULATION_AUTO,
+            DvbcFrontendSettings.MODULATION_MOD_16QAM,
+            DvbcFrontendSettings.MODULATION_MOD_32QAM,
+            DvbcFrontendSettings.MODULATION_MOD_64QAM,
+            DvbcFrontendSettings.MODULATION_MOD_128QAM,
+            DvbcFrontendSettings.MODULATION_MOD_256QAM,
+            DvbsFrontendSettings.MODULATION_UNDEFINED,
+            DvbsFrontendSettings.MODULATION_AUTO,
+            DvbsFrontendSettings.MODULATION_MOD_QPSK,
+            DvbsFrontendSettings.MODULATION_MOD_8PSK,
+            DvbsFrontendSettings.MODULATION_MOD_16QAM,
+            DvbsFrontendSettings.MODULATION_MOD_16PSK,
+            DvbsFrontendSettings.MODULATION_MOD_32PSK,
+            DvbsFrontendSettings.MODULATION_MOD_ACM,
+            DvbsFrontendSettings.MODULATION_MOD_8APSK,
+            DvbsFrontendSettings.MODULATION_MOD_16APSK,
+            DvbsFrontendSettings.MODULATION_MOD_32APSK,
+            DvbsFrontendSettings.MODULATION_MOD_64APSK,
+            DvbsFrontendSettings.MODULATION_MOD_128APSK,
+            DvbsFrontendSettings.MODULATION_MOD_256APSK,
+            DvbsFrontendSettings.MODULATION_MOD_RESERVED,
+            IsdbsFrontendSettings.MODULATION_UNDEFINED,
+            IsdbsFrontendSettings.MODULATION_AUTO,
+            IsdbsFrontendSettings.MODULATION_MOD_BPSK,
+            IsdbsFrontendSettings.MODULATION_MOD_QPSK,
+            IsdbsFrontendSettings.MODULATION_MOD_TC8PSK,
+            Isdbs3FrontendSettings.MODULATION_UNDEFINED,
+            Isdbs3FrontendSettings.MODULATION_AUTO,
+            Isdbs3FrontendSettings.MODULATION_MOD_BPSK,
+            Isdbs3FrontendSettings.MODULATION_MOD_QPSK,
+            Isdbs3FrontendSettings.MODULATION_MOD_8PSK,
+            Isdbs3FrontendSettings.MODULATION_MOD_16APSK,
+            Isdbs3FrontendSettings.MODULATION_MOD_32APSK,
+            IsdbtFrontendSettings.MODULATION_UNDEFINED,
+            IsdbtFrontendSettings.MODULATION_AUTO,
+            IsdbtFrontendSettings.MODULATION_MOD_DQPSK,
+            IsdbtFrontendSettings.MODULATION_MOD_QPSK,
+            IsdbtFrontendSettings.MODULATION_MOD_16QAM,
+            IsdbtFrontendSettings.MODULATION_MOD_64QAM})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FrontendModulation {}
+
+
     private Boolean mIsDemodLocked;
     private Integer mSnr;
     private Integer mBer;
@@ -273,7 +319,7 @@ public class FrontendStatus {
      *  Gets Inner Forward Error Correction type as specified in ETSI EN 300 468 V1.15.1
      *  and ETSI EN 302 307-2 V1.1.1.
      */
-    @FrontendInnerFec
+    @FrontendSettings.InnerFec
     public long getFec() {
         if (mInnerFec == null) {
             throw new IllegalStateException();

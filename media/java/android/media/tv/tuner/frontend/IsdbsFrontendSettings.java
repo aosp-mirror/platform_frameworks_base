@@ -19,6 +19,7 @@ package android.media.tv.tuner.frontend;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerUtils;
@@ -28,8 +29,10 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Frontend settings for ISDBS.
+ *
  * @hide
  */
+@SystemApi
 public class IsdbsFrontendSettings extends FrontendSettings {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -81,11 +84,10 @@ public class IsdbsFrontendSettings extends FrontendSettings {
     /** @hide */
     @IntDef(flag = true,
             prefix = "CODERATE_",
-            value = {CODERATE_UNDEFINED, CODERATE_AUTO,
-            CODERATE_1_2, CODERATE_2_3, CODERATE_3_4,
-            CODERATE_5_6, CODERATE_7_8})
+            value = {CODERATE_UNDEFINED, CODERATE_AUTO, CODERATE_1_2, CODERATE_2_3, CODERATE_3_4,
+                    CODERATE_5_6, CODERATE_7_8})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface Coderate {}
+    public @interface CodeRate {}
 
     /**
      * Code rate undefined.
@@ -125,7 +127,7 @@ public class IsdbsFrontendSettings extends FrontendSettings {
     /**
      * Rolloff type undefined.
      */
-    public static final int ROLLOFF_UNDEFINED = Constants.FrontendIsdbs3Rolloff.UNDEFINED;
+    public static final int ROLLOFF_UNDEFINED = Constants.FrontendIsdbsRolloff.UNDEFINED;
     /**
      * 0,35 rolloff.
      */
@@ -135,17 +137,17 @@ public class IsdbsFrontendSettings extends FrontendSettings {
     private final int mStreamId;
     private final int mStreamIdType;
     private final int mModulation;
-    private final int mCoderate;
+    private final int mCodeRate;
     private final int mSymbolRate;
     private final int mRolloff;
 
     private IsdbsFrontendSettings(int frequency, int streamId, int streamIdType, int modulation,
-            int coderate, int symbolRate, int rolloff) {
+            int codeRate, int symbolRate, int rolloff) {
         super(frequency);
         mStreamId = streamId;
         mStreamIdType = streamIdType;
         mModulation = modulation;
-        mCoderate = coderate;
+        mCodeRate = codeRate;
         mSymbolRate = symbolRate;
         mRolloff = rolloff;
     }
@@ -173,9 +175,9 @@ public class IsdbsFrontendSettings extends FrontendSettings {
     /**
      * Gets Code rate.
      */
-    @Coderate
-    public int getCoderate() {
-        return mCoderate;
+    @CodeRate
+    public int getCodeRate() {
+        return mCodeRate;
     }
     /**
      * Gets Symbol Rate in symbols per second.
@@ -210,7 +212,7 @@ public class IsdbsFrontendSettings extends FrontendSettings {
         private int mStreamId;
         private int mStreamIdType;
         private int mModulation;
-        private int mCoderate;
+        private int mCodeRate;
         private int mSymbolRate;
         private int mRolloff;
 
@@ -245,8 +247,8 @@ public class IsdbsFrontendSettings extends FrontendSettings {
          * Sets Code rate.
          */
         @NonNull
-        public Builder setCoderate(@Coderate int coderate) {
-            mCoderate = coderate;
+        public Builder setCodeRate(@CodeRate int codeRate) {
+            mCodeRate = codeRate;
             return this;
         }
         /**
@@ -272,7 +274,7 @@ public class IsdbsFrontendSettings extends FrontendSettings {
         @NonNull
         public IsdbsFrontendSettings build() {
             return new IsdbsFrontendSettings(mFrequency, mStreamId, mStreamIdType, mModulation,
-                    mCoderate, mSymbolRate, mRolloff);
+                    mCodeRate, mSymbolRate, mRolloff);
         }
 
         @Override

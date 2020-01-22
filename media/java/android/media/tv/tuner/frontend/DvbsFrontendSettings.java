@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerUtils;
@@ -29,8 +30,10 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Frontend settings for DVBS.
+ *
  * @hide
  */
+@SystemApi
 public class DvbsFrontendSettings extends FrontendSettings {
     /** @hide */
     @IntDef(flag = true,
@@ -209,7 +212,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
 
 
     private final int mModulation;
-    private final DvbsCodeRate mCoderate;
+    private final DvbsCodeRate mCodeRate;
     private final int mSymbolRate;
     private final int mRolloff;
     private final int mPilot;
@@ -217,11 +220,11 @@ public class DvbsFrontendSettings extends FrontendSettings {
     private final int mStandard;
     private final int mVcmMode;
 
-    private DvbsFrontendSettings(int frequency, int modulation, DvbsCodeRate coderate,
+    private DvbsFrontendSettings(int frequency, int modulation, DvbsCodeRate codeRate,
             int symbolRate, int rolloff, int pilot, int inputStreamId, int standard, int vcm) {
         super(frequency);
         mModulation = modulation;
-        mCoderate = coderate;
+        mCodeRate = codeRate;
         mSymbolRate = symbolRate;
         mRolloff = rolloff;
         mPilot = pilot;
@@ -241,8 +244,8 @@ public class DvbsFrontendSettings extends FrontendSettings {
      * Gets Code rate.
      */
     @Nullable
-    public DvbsCodeRate getCoderate() {
-        return mCoderate;
+    public DvbsCodeRate getCodeRate() {
+        return mCodeRate;
     }
     /**
      * Gets Symbol Rate in symbols per second.
@@ -302,7 +305,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
      */
     public static class Builder extends FrontendSettings.Builder<Builder> {
         private int mModulation;
-        private DvbsCodeRate mCoderate;
+        private DvbsCodeRate mCodeRate;
         private int mSymbolRate;
         private int mRolloff;
         private int mPilot;
@@ -325,8 +328,8 @@ public class DvbsFrontendSettings extends FrontendSettings {
          * Sets Code rate.
          */
         @NonNull
-        public Builder setCoderate(@Nullable DvbsCodeRate coderate) {
-            mCoderate = coderate;
+        public Builder setCodeRate(@Nullable DvbsCodeRate codeRate) {
+            mCodeRate = codeRate;
             return this;
         }
         /**
@@ -383,7 +386,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
          */
         @NonNull
         public DvbsFrontendSettings build() {
-            return new DvbsFrontendSettings(mFrequency, mModulation, mCoderate, mSymbolRate,
+            return new DvbsFrontendSettings(mFrequency, mModulation, mCodeRate, mSymbolRate,
                     mRolloff, mPilot, mInputStreamId, mStandard, mVcmMode);
         }
 
