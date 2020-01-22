@@ -161,6 +161,11 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         Intent fillInIntent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         RemoteInput.addResultsToIntent(mRemoteInputs, fillInIntent,
                 results);
+
+        mEntry.remoteInputText = mEditText.getText();
+        mEntry.remoteInputUri = null;
+        mEntry.remoteInputMimeType = null;
+
         if (mEntry.editedSuggestionInfo == null) {
             RemoteInput.setResultsSource(fillInIntent, RemoteInput.SOURCE_FREE_FORM_INPUT);
         } else {
@@ -177,6 +182,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         Intent fillInIntent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         RemoteInput.addDataResultToIntent(mRemoteInput, fillInIntent, results);
 
+        mEntry.remoteInputText = mContext.getString(R.string.remote_input_image_insertion_text);
+        mEntry.remoteInputMimeType = contentType;
+        mEntry.remoteInputUri = data;
+
         return fillInIntent;
     }
 
@@ -184,7 +193,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setEnabled(false);
         mSendButton.setVisibility(INVISIBLE);
         mProgressBar.setVisibility(VISIBLE);
-        mEntry.remoteInputText = mEditText.getText();
         mEntry.lastRemoteInputSent = SystemClock.elapsedRealtime();
         mController.addSpinning(mEntry.getKey(), mToken);
         mController.removeRemoteInput(mEntry, mToken);

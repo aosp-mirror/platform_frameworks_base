@@ -1004,6 +1004,31 @@ public class Notification implements Parcelable
      */
     public static final String EXTRA_REMOTE_INPUT_HISTORY = "android.remoteInputHistory";
 
+
+    /**
+     * {@link #extras} key: this is a remote input history which can include media messages
+     * in addition to text, as supplied to
+     * {@link Builder#setRemoteInputHistory(RemoteInputHistoryItem[])} or
+     * {@link Builder#setRemoteInputHistory(CharSequence[])}.
+     *
+     * SystemUI can populate this through
+     * {@link Builder#setRemoteInputHistory(RemoteInputHistoryItem[])} with the most recent inputs
+     * that have been sent through a {@link RemoteInput} of this Notification. These items can
+     * represent either media content (specified by a URI and a MIME type) or a text message
+     * (described by a CharSequence).
+     *
+     * To maintain compatibility, this can also be set by apps with
+     * {@link Builder#setRemoteInputHistory(CharSequence[])}, which will create a
+     * {@link RemoteInputHistoryItem} for each of the provided text-only messages.
+     *
+     * The extra with this key is of type {@link RemoteInputHistoryItem[]} and contains the most
+     * recent entry at the 0 index, the second most recent at the 1 index, etc.
+     *
+     * @see Builder#setRemoteInputHistory(RemoteInputHistoryItem[])
+     * @hide
+     */
+    public static final String EXTRA_REMOTE_INPUT_HISTORY_ITEMS = "android.remoteInputHistoryItems";
+
     /**
      * {@link #extras} key: boolean as supplied to
      * {@link Builder#setShowRemoteInputSpinner(boolean)}.
@@ -3833,12 +3858,37 @@ public class Notification implements Parcelable
             if (text == null) {
                 mN.extras.putCharSequenceArray(EXTRA_REMOTE_INPUT_HISTORY, null);
             } else {
-                final int N = Math.min(MAX_REPLY_HISTORY, text.length);
-                CharSequence[] safe = new CharSequence[N];
-                for (int i = 0; i < N; i++) {
+                final int itemCount = Math.min(MAX_REPLY_HISTORY, text.length);
+                CharSequence[] safe = new CharSequence[itemCount];
+                RemoteInputHistoryItem[] items = new RemoteInputHistoryItem[itemCount];
+                for (int i = 0; i < itemCount; i++) {
                     safe[i] = safeCharSequence(text[i]);
+                    items[i] = new RemoteInputHistoryItem(text[i]);
                 }
                 mN.extras.putCharSequenceArray(EXTRA_REMOTE_INPUT_HISTORY, safe);
+
+                // Also add these messages as structured history items.
+                mN.extras.putParcelableArray(EXTRA_REMOTE_INPUT_HISTORY_ITEMS, items);
+            }
+            return this;
+        }
+
+        /**
+         * Set the remote input history, with support for embedding URIs and mime types for
+         * images and other media.
+         * @hide
+         */
+        @NonNull
+        public Builder setRemoteInputHistory(RemoteInputHistoryItem[] items) {
+            if (items == null) {
+                mN.extras.putParcelableArray(EXTRA_REMOTE_INPUT_HISTORY_ITEMS, null);
+            } else {
+                final int itemCount = Math.min(MAX_REPLY_HISTORY, items.length);
+                RemoteInputHistoryItem[] history = new RemoteInputHistoryItem[itemCount];
+                for (int i = 0; i < itemCount; i++) {
+                    history[i] = items[i];
+                }
+                mN.extras.putParcelableArray(EXTRA_REMOTE_INPUT_HISTORY_ITEMS, history);
             }
             return this;
         }
@@ -5246,16 +5296,17 @@ public class Notification implements Parcelable
                 big.setViewVisibility(R.id.actions_container, View.GONE);
             }
 
-            CharSequence[] replyText = mN.extras.getCharSequenceArray(EXTRA_REMOTE_INPUT_HISTORY);
-            if (validRemoteInput && replyText != null
-                    && replyText.length > 0 && !TextUtils.isEmpty(replyText[0])
+            RemoteInputHistoryItem[] replyText = (RemoteInputHistoryItem[])
+                    mN.extras.getParcelableArray(EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+            if (validRemoteInput && replyText != null && replyText.length > 0
+                    && !TextUtils.isEmpty(replyText[0].getText())
                     && p.maxRemoteInputHistory > 0) {
                 boolean showSpinner = mN.extras.getBoolean(EXTRA_SHOW_REMOTE_INPUT_SPINNER);
                 big.setViewVisibility(R.id.notification_material_reply_container, View.VISIBLE);
                 big.setViewVisibility(R.id.notification_material_reply_text_1_container,
                         View.VISIBLE);
                 big.setTextViewText(R.id.notification_material_reply_text_1,
-                        processTextSpans(replyText[0]));
+                        processTextSpans(replyText[0].getText()));
                 setTextViewColorSecondary(big, R.id.notification_material_reply_text_1, p);
                 big.setViewVisibility(R.id.notification_material_reply_progress,
                         showSpinner ? View.VISIBLE : View.GONE);
@@ -5264,19 +5315,19 @@ public class Notification implements Parcelable
                         ColorStateList.valueOf(
                                 isColorized(p) ? getPrimaryTextColor(p) : resolveContrastColor(p)));
 
-                if (replyText.length > 1 && !TextUtils.isEmpty(replyText[1])
+                if (replyText.length > 1 && !TextUtils.isEmpty(replyText[1].getText())
                         && p.maxRemoteInputHistory > 1) {
                     big.setViewVisibility(R.id.notification_material_reply_text_2, View.VISIBLE);
                     big.setTextViewText(R.id.notification_material_reply_text_2,
-                            processTextSpans(replyText[1]));
+                            processTextSpans(replyText[1].getText()));
                     setTextViewColorSecondary(big, R.id.notification_material_reply_text_2, p);
 
-                    if (replyText.length > 2 && !TextUtils.isEmpty(replyText[2])
+                    if (replyText.length > 2 && !TextUtils.isEmpty(replyText[2].getText())
                             && p.maxRemoteInputHistory > 2) {
                         big.setViewVisibility(
                                 R.id.notification_material_reply_text_3, View.VISIBLE);
                         big.setTextViewText(R.id.notification_material_reply_text_3,
-                                processTextSpans(replyText[2]));
+                                processTextSpans(replyText[2].getText()));
                         setTextViewColorSecondary(big, R.id.notification_material_reply_text_3, p);
                     }
                 }
@@ -7517,7 +7568,7 @@ public class Notification implements Parcelable
             @Nullable
             private final Person mSender;
             /** True if this message was generated from the extra
-             *  {@link Notification#EXTRA_REMOTE_INPUT_HISTORY}
+             *  {@link Notification#EXTRA_REMOTE_INPUT_HISTORY_ITEMS}
              */
             private final boolean mRemoteInputHistory;
 
@@ -7569,7 +7620,7 @@ public class Notification implements Parcelable
              * Should be <code>null</code> for messages by the current user, in which case
              * the platform will insert the user set in {@code MessagingStyle(Person)}.
              * @param remoteInputHistory True if the messages was generated from the extra
-             * {@link Notification#EXTRA_REMOTE_INPUT_HISTORY}.
+             * {@link Notification#EXTRA_REMOTE_INPUT_HISTORY_ITEMS}.
              * <p>
              * The person provided should contain an Icon, set with
              * {@link Person.Builder#setIcon(Icon)} and also have a name provided
@@ -7676,7 +7727,7 @@ public class Notification implements Parcelable
 
             /**
              * @return True if the message was generated from
-             * {@link Notification#EXTRA_REMOTE_INPUT_HISTORY}.
+             * {@link Notification#EXTRA_REMOTE_INPUT_HISTORY_ITEMS}.
              * @hide
              */
             public boolean isRemoteInputHistory() {
@@ -7906,8 +7957,8 @@ public class Notification implements Parcelable
             if (mBuilder.mActions.size() > 0) {
                 maxRows--;
             }
-            CharSequence[] remoteInputHistory = mBuilder.mN.extras.getCharSequenceArray(
-                    EXTRA_REMOTE_INPUT_HISTORY);
+            RemoteInputHistoryItem[] remoteInputHistory = (RemoteInputHistoryItem[])
+                    mBuilder.mN.extras.getParcelableArray(EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
             if (remoteInputHistory != null
                     && remoteInputHistory.length > NUMBER_OF_HISTORY_ALLOWED_UNTIL_REDUCTION) {
                 // Let's remove some messages to make room for the remote input history.

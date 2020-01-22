@@ -194,6 +194,10 @@
     <!-- Power menu item for taking a screenshot [CHAR LIMIT=20]-->
     <string name="global_action_screenshot">Screenshot</string>
 
+    <!-- text to show in place of RemoteInput images when they cannot be shown.
+         [CHAR LIMIT=50] -->
+    <string name="remote_input_image_insertion_text">Image inserted</string>
+
     <!-- Notification ticker displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=30] -->
     <string name="screenshot_saving_ticker">Saving screenshot\u2026</string>
     <!-- Notification title displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=50] -->

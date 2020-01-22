@@ -37,8 +37,10 @@ import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
 import android.app.NotificationManager.Policy;
 import android.app.Person;
+import android.app.RemoteInputHistoryItem;
 import android.content.Context;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -120,6 +122,8 @@ public final class NotificationEntry extends ListEntry {
     public int targetSdk;
     private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
     public CharSequence remoteInputText;
+    public String remoteInputMimeType;
+    public Uri remoteInputUri;
     private Notification.BubbleMetadata mBubbleMetadata;
 
     /**
@@ -595,8 +599,8 @@ public final class NotificationEntry extends ListEntry {
             return false;
         }
         Bundle extras = mSbn.getNotification().extras;
-        CharSequence[] replyTexts = extras.getCharSequenceArray(
-                Notification.EXTRA_REMOTE_INPUT_HISTORY);
+        RemoteInputHistoryItem[] replyTexts = (RemoteInputHistoryItem[]) extras.getParcelableArray(
+                Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
         if (!ArrayUtils.isEmpty(replyTexts)) {
             return true;
         }
