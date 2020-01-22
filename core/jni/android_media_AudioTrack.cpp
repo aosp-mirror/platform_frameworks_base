@@ -1355,6 +1355,71 @@ static void android_media_AudioTrack_set_delay_padding(JNIEnv *env,  jobject thi
     lpTrack->setParameters(param.toString());
 }
 
+static jint android_media_AudioTrack_setAudioDescriptionMixLeveldB(JNIEnv *env, jobject thiz,
+                                                                   jfloat level) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException", "AudioTrack not initialized");
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+
+    // TODO: replace in r-dev or r-tv-dev with code if HW is able to set audio mix level.
+    return (jint)AUDIO_JAVA_ERROR;
+}
+
+static jint android_media_AudioTrack_getAudioDescriptionMixLeveldB(JNIEnv *env, jobject thiz,
+                                                                   jfloatArray level) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == nullptr) {
+        ALOGE("%s: AudioTrack not initialized", __func__);
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+    jfloat *nativeLevel = (jfloat *)env->GetPrimitiveArrayCritical(level, NULL);
+    if (nativeLevel == nullptr) {
+        ALOGE("%s: Cannot retrieve level pointer", __func__);
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+
+    // TODO: replace in r-dev or r-tv-dev with code if HW is able to set audio mix level.
+    // By contract we can return -infinity if unsupported.
+    *nativeLevel = -std::numeric_limits<float>::infinity();
+    env->ReleasePrimitiveArrayCritical(level, nativeLevel, 0 /* mode */);
+    nativeLevel = nullptr;
+    return (jint)AUDIO_JAVA_SUCCESS;
+}
+
+static jint android_media_AudioTrack_setDualMonoMode(JNIEnv *env, jobject thiz, jint dualMonoMode) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException", "AudioTrack not initialized");
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+
+    // TODO: replace in r-dev or r-tv-dev with code if HW is able to set audio mix level.
+    return (jint)AUDIO_JAVA_ERROR;
+}
+
+static jint android_media_AudioTrack_getDualMonoMode(JNIEnv *env, jobject thiz,
+                                                     jintArray dualMonoMode) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == nullptr) {
+        ALOGE("%s: AudioTrack not initialized", __func__);
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+    jfloat *nativeDualMonoMode = (jfloat *)env->GetPrimitiveArrayCritical(dualMonoMode, NULL);
+    if (nativeDualMonoMode == nullptr) {
+        ALOGE("%s: Cannot retrieve dualMonoMode pointer", __func__);
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+
+    // TODO: replace in r-dev or r-tv-dev with code if HW is able to select dual mono mode.
+    // By contract we can return DUAL_MONO_MODE_OFF if unsupported.
+    *nativeDualMonoMode = 0; // DUAL_MONO_MODE_OFF for now.
+    env->ReleasePrimitiveArrayCritical(dualMonoMode, nativeDualMonoMode, 0 /* mode */);
+    nativeDualMonoMode = nullptr;
+    return (jint)AUDIO_JAVA_SUCCESS;
+}
+
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static const JNINativeMethod gMethods[] = {
@@ -1425,6 +1490,12 @@ static const JNINativeMethod gMethods[] = {
         {"native_setPresentation", "(II)I", (void *)android_media_AudioTrack_setPresentation},
         {"native_getPortId", "()I", (void *)android_media_AudioTrack_get_port_id},
         {"native_set_delay_padding", "(II)V", (void *)android_media_AudioTrack_set_delay_padding},
+        {"native_set_audio_description_mix_level_db", "(F)I",
+         (void *)android_media_AudioTrack_setAudioDescriptionMixLeveldB},
+        {"native_get_audio_description_mix_level_db", "([F)I",
+         (void *)android_media_AudioTrack_getAudioDescriptionMixLeveldB},
+        {"native_set_dual_mono_mode", "(I)I", (void *)android_media_AudioTrack_setDualMonoMode},
+        {"native_get_dual_mono_mode", "([I)I", (void *)android_media_AudioTrack_getDualMonoMode},
 };
 
 // field names found in android/media/AudioTrack.java
