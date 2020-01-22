@@ -11023,6 +11023,11 @@ package android.telephony.euicc {
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void getDefaultDownloadableSubscriptionList(android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void getDownloadableSubscriptionMetadata(android.telephony.euicc.DownloadableSubscription, android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public int getOtaStatus();
+    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public java.util.List<java.lang.String> getSupportedCountries();
+    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public java.util.List<java.lang.String> getUnsupportedCountries();
+    method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public boolean isSupportedCountry(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void setSupportedCountries(@NonNull java.util.List<java.lang.String>);
+    method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void setUnsupportedCountries(@NonNull java.util.List<java.lang.String>);
     field public static final String ACTION_DELETE_SUBSCRIPTION_PRIVILEGED = "android.telephony.euicc.action.DELETE_SUBSCRIPTION_PRIVILEGED";
     field @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public static final String ACTION_OTA_STATUS_CHANGED = "android.telephony.euicc.action.OTA_STATUS_CHANGED";
     field public static final String ACTION_PROVISION_EMBEDDED_SUBSCRIPTION = "android.telephony.euicc.action.PROVISION_EMBEDDED_SUBSCRIPTION";
