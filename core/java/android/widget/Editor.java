@@ -220,7 +220,9 @@ public class Editor {
 
     private final boolean mHapticTextHandleEnabled;
 
-    private final MagnifierMotionAnimator mMagnifierAnimator;
+    @Nullable
+    private MagnifierMotionAnimator mMagnifierAnimator;
+
     private final Runnable mUpdateMagnifierRunnable = new Runnable() {
         @Override
         public void run() {
@@ -397,12 +399,6 @@ public class Editor {
         mHapticTextHandleEnabled = mTextView.getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_enableHapticTextHandle);
 
-        if (FLAG_USE_MAGNIFIER) {
-            final Magnifier magnifier =
-                    Magnifier.createBuilderWithOldMagnifierDefaults(mTextView).build();
-            mMagnifierAnimator = new MagnifierMotionAnimator(magnifier);
-        }
-
         mCursorControlEnabled = AppGlobals.getIntCoreSetting(
                 WidgetFlags.KEY_ENABLE_CURSOR_CONTROL , 0) != 0;
         if (TextView.DEBUG_CURSOR) {
@@ -419,6 +415,63 @@ public class Editor {
     @VisibleForTesting
     public boolean getCursorControlEnabled() {
         return mCursorControlEnabled;
+    }
+
+    // Lazy creates the magnifier animator.
+    private MagnifierMotionAnimator getMagnifierAnimator() {
+        if (FLAG_USE_MAGNIFIER && mMagnifierAnimator == null) {
+            // Lazy creates the magnifier instance because it requires the text height which cannot
+            // be measured at the time of Editor instance being created.
+            final Magnifier.Builder builder = shouldUseNewMagnifier()
+                    ? createBuilderWithInlineMagnifierDefaults()
+                    : Magnifier.createBuilderWithOldMagnifierDefaults(mTextView);
+            mMagnifierAnimator = new MagnifierMotionAnimator(builder.build());
+        }
+        return mMagnifierAnimator;
+    }
+
+    private boolean shouldUseNewMagnifier() {
+        // TODO: use a separate flag to enable new magnifier.
+        return mCursorControlEnabled;
+    }
+
+    private Magnifier.Builder createBuilderWithInlineMagnifierDefaults() {
+        final Magnifier.Builder params = new Magnifier.Builder(mTextView);
+
+        // TODO: supports changing the height/width dynamically because the text height can be
+        // dynamically changed.
+        final Paint.FontMetrics fontMetrics = mTextView.getPaint().getFontMetrics();
+        final float sourceHeight = fontMetrics.descent - fontMetrics.ascent;
+        final float zoom = 1.5f;
+        final float widthHeightRatio = 5.5f;
+        // Slightly increase the height to avoid tooLargeTextForMagnifier() returns true.
+        int height = (int)(sourceHeight * zoom) + 2;
+        int width = (int)(widthHeightRatio * height);
+
+
+        params.setFishEyeStyle()
+                .setSize(width, height)
+                .setSourceSize(width, Math.round(sourceHeight))
+                .setElevation(0)
+                .setInitialZoom(zoom)
+                .setClippingEnabled(false);
+
+        final Context context = mTextView.getContext();
+        final TypedArray a = context.obtainStyledAttributes(
+                null, com.android.internal.R.styleable.Magnifier,
+                com.android.internal.R.attr.magnifierStyle, 0);
+        params.setDefaultSourceToMagnifierOffset(
+                a.getDimensionPixelSize(
+                        com.android.internal.R.styleable.Magnifier_magnifierHorizontalOffset, 0),
+                a.getDimensionPixelSize(
+                        com.android.internal.R.styleable.Magnifier_magnifierVerticalOffset, 0));
+        a.recycle();
+
+        return params.setSourceBounds(
+                Magnifier.SOURCE_BOUND_MAX_VISIBLE,
+                Magnifier.SOURCE_BOUND_MAX_IN_SURFACE,
+                Magnifier.SOURCE_BOUND_MAX_VISIBLE,
+                Magnifier.SOURCE_BOUND_MAX_IN_SURFACE);
     }
 
     ParcelableParcel saveInstanceState() {
@@ -5022,7 +5075,7 @@ public class Editor {
         }
 
         protected final void updateMagnifier(@NonNull final MotionEvent event) {
-            if (mMagnifierAnimator == null) {
+            if (getMagnifierAnimator() == null) {
                 return;
             }
 
@@ -5036,6 +5089,16 @@ public class Editor {
                 mTextView.invalidateCursorPath();
                 suspendBlink();
 
+                if (shouldUseNewMagnifier()) {
+                    // Calculates the line bounds as the content source bounds to the magnifier.
+                    Layout layout = mTextView.getLayout();
+                    int line = layout.getLineForOffset(getCurrentCursorOffset());
+                    int lineLeft = (int) layout.getLineLeft(line);
+                    lineLeft += mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
+                    int lineRight = (int) layout.getLineRight(line);
+                    lineRight -= mTextView.getTotalPaddingRight() + mTextView.getScrollX();
+                    mMagnifierAnimator.mMagnifier.setSourceHorizontalBounds(lineLeft, lineRight);
+                }
                 mMagnifierAnimator.show(showPosInView.x, showPosInView.y);
                 updateHandlesVisibility();
             } else {
