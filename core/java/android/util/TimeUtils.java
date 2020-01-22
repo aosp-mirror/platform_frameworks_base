@@ -88,7 +88,7 @@ public class TimeUtils {
      *
      * <p>The list returned may be different from other on-device sources like
      * {@link android.icu.util.TimeZone#getRegion(String)} as it can be curated to avoid
-     * contentious mappings.
+     * contentious or obsolete mappings.
      *
      * @param countryCode the ISO 3166-1 alpha-2 code for the country as can be obtained using
      *     {@link java.util.Locale#getCountry()}

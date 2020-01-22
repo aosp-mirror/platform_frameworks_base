@@ -23,7 +23,7 @@ import android.annotation.SystemApi;
 import java.util.Objects;
 
 /**
- * A class that can find telephony networks loaded via {@link TelephonyLookup}.
+ * A class that can find telephony network information loaded via {@link TelephonyLookup}.
  *
  * @hide
  */

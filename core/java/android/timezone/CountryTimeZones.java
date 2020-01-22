@@ -43,6 +43,7 @@ public final class CountryTimeZones {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final class TimeZoneMapping {
 
+        @NonNull
         private libcore.timezone.CountryTimeZones.TimeZoneMapping mDelegate;
 
         TimeZoneMapping(libcore.timezone.CountryTimeZones.TimeZoneMapping delegate) {
