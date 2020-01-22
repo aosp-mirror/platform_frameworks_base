@@ -11399,6 +11399,10 @@ public class DevicePolicyManager {
      *
      * <p>Previous calls are overridden by each subsequent call to this method.
      *
+     * <p>When previously-set cross-profile packages are missing from {@code packageNames}, the
+     * app-op for {@code INTERACT_ACROSS_PROFILES} will be reset for those packages. This will not
+     * occur for packages that are whitelisted by the OEM.
+     *
      * @param admin the {@link DeviceAdminReceiver} this request is associated with
      * @param packageNames the new cross-profile package names
      */

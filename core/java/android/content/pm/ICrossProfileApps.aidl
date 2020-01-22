@@ -35,4 +35,6 @@ interface ICrossProfileApps {
     boolean canInteractAcrossProfiles(in String callingPackage);
     boolean canRequestInteractAcrossProfiles(in String callingPackage);
     void setInteractAcrossProfilesAppOp(in String packageName, int newMode);
+    boolean canConfigureInteractAcrossProfiles(in String packageName);
+    void resetInteractAcrossProfilesAppOps(in List<String> packageNames);
 }

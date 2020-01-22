@@ -42,6 +42,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.CrossProfileApps;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -120,6 +121,7 @@ public class MockSystemServices {
     public final TimeDetector timeDetector;
     public final TimeZoneDetector timeZoneDetector;
     public final KeyChain.KeyChainConnection keyChainConnection;
+    public final CrossProfileApps crossProfileApps;
     public final PersistentDataBlockManagerInternal persistentDataBlockManagerInternal;
     public final AppOpsManager appOpsManager;
     /** Note this is a partial mock, not a real mock. */
@@ -165,6 +167,7 @@ public class MockSystemServices {
         timeDetector = mock(TimeDetector.class);
         timeZoneDetector = mock(TimeZoneDetector.class);
         keyChainConnection = mock(KeyChain.KeyChainConnection.class, RETURNS_DEEP_STUBS);
+        crossProfileApps = mock(CrossProfileApps.class);
         persistentDataBlockManagerInternal = mock(PersistentDataBlockManagerInternal.class);
         appOpsManager = mock(AppOpsManager.class);
 
