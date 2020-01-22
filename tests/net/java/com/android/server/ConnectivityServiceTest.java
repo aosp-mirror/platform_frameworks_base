@@ -21,6 +21,8 @@ import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_SUPL;
@@ -114,6 +116,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
@@ -129,6 +132,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.net.CaptivePortalData;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.ConnectivityManager.PacketKeepalive;
@@ -165,6 +169,7 @@ import android.net.ResolverParamsParcel;
 import android.net.RouteInfo;
 import android.net.SocketKeepalive;
 import android.net.UidRange;
+import android.net.Uri;
 import android.net.metrics.IpConnectivityLog;
 import android.net.shared.NetworkMonitorUtils;
 import android.net.shared.PrivateDnsConfig;
@@ -243,8 +248,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -347,6 +354,8 @@ public class ConnectivityServiceTest {
 
         @Spy private Resources mResources;
         private final LinkedBlockingQueue<Intent> mStartedActivities = new LinkedBlockingQueue<>();
+        // Map of permission name -> PermissionManager.Permission_{GRANTED|DENIED} constant
+        private final HashMap<String, Integer> mMockedPermissions = new HashMap<>();
 
         MockContext(Context base, ContentProvider settingsProvider) {
             super(base);
@@ -417,13 +426,39 @@ public class ConnectivityServiceTest {
         }
 
         @Override
+        public int checkPermission(String permission, int pid, int uid) {
+            final Integer granted = mMockedPermissions.get(permission);
+            if (granted == null) {
+                // All non-mocked permissions should be held by the test or unnecessary: check as
+                // normal to make sure the code does not rely on unexpected permissions.
+                return super.checkPermission(permission, pid, uid);
+            }
+            return granted;
+        }
+
+        @Override
         public void enforceCallingOrSelfPermission(String permission, String message) {
-            // The mainline permission can only be held if signed with the network stack certificate
-            // Skip testing for this permission.
-            if (NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK.equals(permission)) return;
-            // All other permissions should be held by the test or unnecessary: check as normal to
-            // make sure the code does not rely on unexpected permissions.
-            super.enforceCallingOrSelfPermission(permission, message);
+            final Integer granted = mMockedPermissions.get(permission);
+            if (granted == null) {
+                super.enforceCallingOrSelfPermission(permission, message);
+                return;
+            }
+
+            if (!granted.equals(PERMISSION_GRANTED)) {
+                throw new SecurityException("[Test] permission denied: " + permission);
+            }
+        }
+
+        /**
+         * Mock checks for the specified permission, and have them behave as per {@code granted}.
+         *
+         * <p>Passing null reverts to default behavior, which does a real permission check on the
+         * test package.
+         * @param granted One of {@link PackageManager#PERMISSION_GRANTED} or
+         *                {@link PackageManager#PERMISSION_DENIED}.
+         */
+        public void setPermission(String permission, Integer granted) {
+            mMockedPermissions.put(permission, granted);
         }
 
         @Override
@@ -1750,6 +1785,66 @@ public class ConnectivityServiceTest {
         assertNoCallbacks(genericNetworkCallback, wifiNetworkCallback, cellNetworkCallback);
     }
 
+    private void doNetworkCallbacksSanitizationTest(boolean sanitized) throws Exception {
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        final TestNetworkCallback defaultCallback = new TestNetworkCallback();
+        final NetworkRequest wifiRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_WIFI).build();
+        mCm.registerNetworkCallback(wifiRequest, callback);
+        mCm.registerDefaultNetworkCallback(defaultCallback);
+
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        defaultCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+
+        final LinkProperties newLp = new LinkProperties();
+        final Uri capportUrl = Uri.parse("https://capport.example.com/api");
+        final CaptivePortalData capportData = new CaptivePortalData.Builder()
+                .setCaptive(true).build();
+        newLp.setCaptivePortalApiUrl(capportUrl);
+        newLp.setCaptivePortalData(capportData);
+        mWiFiNetworkAgent.sendLinkProperties(newLp);
+
+        final Uri expectedCapportUrl = sanitized ? null : capportUrl;
+        final CaptivePortalData expectedCapportData = sanitized ? null : capportData;
+        callback.expectLinkPropertiesThat(mWiFiNetworkAgent, lp ->
+                Objects.equals(expectedCapportUrl, lp.getCaptivePortalApiUrl())
+                && Objects.equals(expectedCapportData, lp.getCaptivePortalData()));
+        defaultCallback.expectLinkPropertiesThat(mWiFiNetworkAgent, lp ->
+                Objects.equals(expectedCapportUrl, lp.getCaptivePortalApiUrl())
+                && Objects.equals(expectedCapportData, lp.getCaptivePortalData()));
+
+        final LinkProperties lp = mCm.getLinkProperties(mWiFiNetworkAgent.getNetwork());
+        assertEquals(expectedCapportUrl, lp.getCaptivePortalApiUrl());
+        assertEquals(expectedCapportData, lp.getCaptivePortalData());
+    }
+
+    @Test
+    public void networkCallbacksSanitizationTest_Sanitize() throws Exception {
+        mServiceContext.setPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+                PERMISSION_DENIED);
+        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS,
+                PERMISSION_DENIED);
+        doNetworkCallbacksSanitizationTest(true /* sanitized */);
+    }
+
+    @Test
+    public void networkCallbacksSanitizationTest_NoSanitize_NetworkStack() throws Exception {
+        mServiceContext.setPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+                PERMISSION_GRANTED);
+        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS, PERMISSION_DENIED);
+        doNetworkCallbacksSanitizationTest(false /* sanitized */);
+    }
+
+    @Test
+    public void networkCallbacksSanitizationTest_NoSanitize_Settings() throws Exception {
+        mServiceContext.setPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+                PERMISSION_DENIED);
+        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS, PERMISSION_GRANTED);
+        doNetworkCallbacksSanitizationTest(false /* sanitized */);
+    }
+
     @Test
     public void testMultipleLingering() throws Exception {
         // This test would be flaky with the default 120ms timer: that is short enough that
@@ -2628,6 +2723,8 @@ public class ConnectivityServiceTest {
         final String testKey = "testkey";
         final String testValue = "testvalue";
         testBundle.putString(testKey, testValue);
+        mServiceContext.setPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+                PERMISSION_GRANTED);
         mCm.startCaptivePortalApp(wifiNetwork, testBundle);
         final Intent signInIntent = mServiceContext.expectStartActivityIntent(TIMEOUT_MS);
         assertEquals(ACTION_CAPTIVE_PORTAL_SIGN_IN, signInIntent.getAction());
