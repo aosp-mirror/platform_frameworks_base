@@ -623,6 +623,7 @@ gensrcs {
         "&& $(location soong_zip) -jar -o $(out) -C $(genDir)/$(in) -D $(genDir)/$(in)",
 
     srcs: [
+        ":ipconnectivity-proto-src",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
     ],
@@ -737,6 +738,7 @@ java_library {
 java_library_host {
     name: "platformprotos",
     srcs: [
+        ":ipconnectivity-proto-src",
         "cmds/am/proto/instrumentation_data.proto",
         "cmds/statsd/src/**/*.proto",
         "core/proto/**/*.proto",
@@ -765,6 +767,7 @@ java_library {
     ],
     sdk_version: "9",
     srcs: [
+        ":ipconnectivity-proto-src",
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
     ],
@@ -779,6 +782,7 @@ java_library {
     },
 
     srcs: [
+        ":ipconnectivity-proto-src",
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
     ],
@@ -809,6 +813,7 @@ cc_defaults {
     ],
 
     srcs: [
+        ":ipconnectivity-proto-src",
         "core/proto/**/*.proto",
     ],
 }
