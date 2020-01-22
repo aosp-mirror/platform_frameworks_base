@@ -88,6 +88,8 @@ interface IWifiManager
 
     boolean disableNetwork(int netId, String packageName);
 
+    void allowAutojoinGlobal(boolean choice);
+
     void allowAutojoin(int netId, boolean choice);
 
     void allowAutojoinPasspoint(String fqdn, boolean enableAutoJoin);
@@ -178,8 +180,6 @@ interface IWifiManager
     void enableVerboseLogging(int verbose);
 
     int getVerboseLoggingLevel();
-
-    void enableWifiConnectivityManager(boolean enabled);
 
     void disableEphemeralNetwork(String SSID, String packageName);
 

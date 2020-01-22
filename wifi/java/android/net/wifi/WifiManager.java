@@ -4271,6 +4271,23 @@ public class WifiManager {
     }
 
     /**
+     * Allows the OEM to enable/disable auto-join globally.
+     *
+     * @param choice true to allow autojoin, false to disallow autojoin
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void allowAutojoinGlobal(boolean choice) {
+        try {
+            mService.allowAutojoinGlobal(choice);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
      * Sets the user choice for allowing auto-join to a network.
      * The updated choice will be made available through the updated config supplied by the
      * CONFIGURED_NETWORKS_CHANGED broadcast.
@@ -4894,18 +4911,6 @@ public class WifiManager {
      */
     public boolean getEnableAutoJoinWhenAssociated() {
         return false;
-    }
-
-    /**
-     * Enable/disable WifiConnectivityManager
-     * @hide
-     */
-    public void enableWifiConnectivityManager(boolean enabled) {
-        try {
-            mService.enableWifiConnectivityManager(enabled);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
     }
 
     /**
