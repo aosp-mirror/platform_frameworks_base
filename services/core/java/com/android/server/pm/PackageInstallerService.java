@@ -400,10 +400,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         } finally {
             IoUtils.closeQuietly(fis);
         }
-        // Re-sealing the sealed sessions.
+        // After all of the sessions were loaded, they are ready to be sealed and validated
         for (int i = 0; i < mSessions.size(); ++i) {
             PackageInstallerSession session = mSessions.valueAt(i);
-            session.sealIfNecessary();
+            session.sealAndValidateIfNecessary();
         }
     }
 
