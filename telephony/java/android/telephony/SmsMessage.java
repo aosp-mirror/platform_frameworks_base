@@ -278,41 +278,24 @@ public class SmsMessage {
     }
 
     /**
-     * Create an SmsMessage from an SMS EF record.
+     * Creates an SmsMessage from an SMS EF record.
      *
-     * @param index Index of SMS record. This should be index in ArrayList
-     *              returned by SmsManager.getAllMessagesFromSim + 1.
+     * @param index Index of SMS EF record.
      * @param data Record data.
      * @return An SmsMessage representing the record.
      *
      * @hide
      */
     public static SmsMessage createFromEfRecord(int index, byte[] data) {
-        SmsMessageBase wrappedMessage;
-
-        if (isCdmaVoice()) {
-            wrappedMessage = com.android.internal.telephony.cdma.SmsMessage.createFromEfRecord(
-                    index, data);
-        } else {
-            wrappedMessage = com.android.internal.telephony.gsm.SmsMessage.createFromEfRecord(
-                    index, data);
-        }
-
-        if (wrappedMessage != null) {
-            return new SmsMessage(wrappedMessage);
-        } else {
-            Rlog.e(LOG_TAG, "createFromEfRecord(): wrappedMessage is null");
-            return null;
-        }
+        return createFromEfRecord(index, data, SmsManager.getDefaultSmsSubscriptionId());
     }
 
     /**
-     * Create an SmsMessage from an SMS EF record.
+     * Creates an SmsMessage from an SMS EF record.
      *
-     * @param index Index of SMS record. This should be index in ArrayList
-     *              returned by SmsManager.getAllMessagesFromSim + 1.
+     * @param index Index of SMS EF record.
      * @param data Record data.
-     * @param subId Subscription Id of the SMS
+     * @param subId Subscription Id associated with the record.
      * @return An SmsMessage representing the record.
      *
      * @hide
