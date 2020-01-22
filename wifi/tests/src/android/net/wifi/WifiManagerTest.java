@@ -693,6 +693,18 @@ public class WifiManagerTest {
     }
 
     /**
+     * Verify an IllegalArgumentException is thrown if executor is null.
+     */
+    @Test
+    public void registerSoftApCallbackThrowsIllegalArgumentExceptionOnNullArgumentForExecutor() {
+        try {
+            mWifiManager.registerSoftApCallback(null, mSoftApCallback);
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    /**
      * Verify an IllegalArgumentException is thrown if callback is not provided.
      */
     @Test
@@ -702,16 +714,6 @@ public class WifiManagerTest {
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException expected) {
         }
-    }
-
-    /**
-     * Verify main looper is used when handler is not provided.
-     */
-    @Test
-    public void registerSoftApCallbackUsesMainLooperOnNullArgumentForHandler() {
-        when(mContext.getMainLooper()).thenReturn(mLooper.getLooper());
-        mWifiManager.registerSoftApCallback(null, mSoftApCallback);
-        verify(mContext).getMainExecutor();
     }
 
     /**
