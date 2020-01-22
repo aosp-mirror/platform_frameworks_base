@@ -1463,10 +1463,14 @@ package android.bluetooth {
   }
 
   public interface BluetoothProfile {
+    field public static final int A2DP_SINK = 11; // 0xb
+    field public static final int AVRCP_CONTROLLER = 12; // 0xc
     field public static final int CONNECTION_POLICY_ALLOWED = 100; // 0x64
     field public static final int CONNECTION_POLICY_FORBIDDEN = 0; // 0x0
     field public static final int CONNECTION_POLICY_UNKNOWN = -1; // 0xffffffff
+    field public static final int HEADSET_CLIENT = 16; // 0x10
     field public static final int PAN = 5; // 0x5
+    field public static final int PBAP_CLIENT = 17; // 0x11
     field @Deprecated public static final int PRIORITY_OFF = 0; // 0x0
     field @Deprecated public static final int PRIORITY_ON = 100; // 0x64
   }
