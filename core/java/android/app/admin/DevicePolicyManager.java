@@ -7028,21 +7028,28 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner to set the default SMS application.
+     * Must be called by a device owner or a profile owner of an organization-owned managed profile
+     * to set the default SMS application.
      * <p>
-     * The calling device admin must be a device owner. If it is not, a security exception will be
-     * thrown.
+     * This method can be called on the {@link DevicePolicyManager} instance, returned by
+     * {@link #getParentProfileInstance(ComponentName)}, where the caller must be the profile owner
+     * of an organization-owned managed profile and the package must be a pre-installed system
+     * package. If called on the parent instance, then the default SMS application is set on the
+     * personal profile.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin       Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The name of the package to set as the default SMS application.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException        if {@code admin} is not a device or profile owner or if
+     *                                  called on the parent profile and the {@code admin} is not a
+     *                                  profile owner of an organization-owned managed profile.
+     * @throws IllegalArgumentException if called on the parent profile and the package
+     *                                  provided is not a pre-installed system package.
      */
     public void setDefaultSmsApplication(@NonNull ComponentName admin,
             @NonNull String packageName) {
-        throwIfParentInstance("setDefaultSmsApplication");
         if (mService != null) {
             try {
-                mService.setDefaultSmsApplication(admin, packageName);
+                mService.setDefaultSmsApplication(admin, packageName, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

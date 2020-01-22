@@ -202,7 +202,7 @@ interface IDevicePolicyManager {
     void addPersistentPreferredActivity(in ComponentName admin, in IntentFilter filter, in ComponentName activity);
     void clearPackagePersistentPreferredActivities(in ComponentName admin, String packageName);
 
-    void setDefaultSmsApplication(in ComponentName admin, String packageName);
+    void setDefaultSmsApplication(in ComponentName admin, String packageName, boolean parent);
 
     void setApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName, in Bundle settings);
     Bundle getApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName);

@@ -2219,17 +2219,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         String packageName = "com.google.android.test";
 
-        PackageInfo packageInfo = new PackageInfo();
-        packageInfo.applicationInfo = new ApplicationInfo();
-        packageInfo.applicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
         when(getServices().userManager.getProfileParent(MANAGED_PROFILE_USER_ID))
                 .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
-        when(getServices().ipackageManager.getPackageInfo(packageName,
-                PackageManager.MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM)).thenReturn(
-                packageInfo);
-        when(getServices().ipackageManager.getPackageInfo(packageName,
-                PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.MATCH_SYSTEM_ONLY,
-                UserHandle.USER_SYSTEM)).thenReturn(packageInfo);
+        when(getServices().ipackageManager.getApplicationInfo(packageName,
+                PackageManager.MATCH_UNINSTALLED_PACKAGES, UserHandle.USER_SYSTEM)).thenReturn(
+                applicationInfo);
 
         parentDpm.setApplicationHidden(admin1, packageName, true);
         verify(getServices().ipackageManager).setApplicationHiddenSettingAsUser(packageName,
