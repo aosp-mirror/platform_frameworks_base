@@ -810,6 +810,7 @@ message ScheduledJobStateChanged {
         FREQUENT = 2;
         RARE = 3;
         NEVER = 4;
+        RESTRICTED = 5;
     }
     optional Bucket standby_bucket = 5 [default = UNKNOWN];
 

@@ -282,6 +282,10 @@ message ConstantsProto {
         // expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
         // WINDOW_SIZE_MS.
         optional int64 rare_window_size_ms = 6;
+        // The quota window size of the particular standby bucket. Apps in this standby bucket are
+        // expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
+        // WINDOW_SIZE_MS.
+        optional int64 restricted_window_size_ms = 20;
         // The maximum amount of time an app can have its jobs running within a 24 hour window.
         optional int64 max_execution_time_ms = 7;
         // The maximum number of jobs an app can run within this particular standby bucket's
@@ -296,6 +300,9 @@ message ConstantsProto {
         // The maximum number of jobs an app can run within this particular standby bucket's
         // window size.
         optional int32 max_job_count_rare = 11;
+        // The maximum number of jobs an app can run within this particular standby bucket's
+        // window size.
+        optional int32 max_job_count_restricted = 21;
         // The period of time used to rate limit recently run jobs.
         optional int32 rate_limiting_window_ms = 19;
         // The maximum number of jobs that should be allowed to run in the past
@@ -313,12 +320,17 @@ message ConstantsProto {
         // The maximum number of timing sessions an app can run within this particular standby
         // bucket's window size.
         optional int32 max_session_count_rare = 16;
+        // The maximum number of timing sessions an app can run within this particular standby
+        // bucket's window size.
+        optional int32 max_session_count_restricted = 22;
         // The maximum number of timing sessions that should be allowed to run in the past
         // rate_limiting_window_ms.
         optional int32 max_session_count_per_rate_limiting_window = 17;
         // Treat two distinct {@link TimingSession}s as the same if they start and end within this
         // amount of time of each other.
         optional int64 timing_session_coalescing_duration_ms = 18;
+
+        // Next tag: 23
     }
     optional QuotaController quota_controller = 24;
 
@@ -943,6 +955,9 @@ message JobStatusDumpProto {
     optional JobInfo job_info = 6;
 
     repeated ConstraintEnum required_constraints = 7;
+    // Dynamic constraints are additional constraints imposed by the system that MUST be met before
+    // the app can run if the app does not have quota.
+    repeated ConstraintEnum dynamic_constraints = 31;
     repeated ConstraintEnum satisfied_constraints = 8;
     repeated ConstraintEnum unsatisfied_constraints = 9;
     optional bool is_doze_whitelisted = 10;
@@ -956,6 +971,8 @@ message JobStatusDumpProto {
         // Battery Saver). This implicit constraint must be satisfied for the
         // job to run.
         optional bool is_not_restricted_in_bg = 2;
+        // True if dynamic constraints have been satisfied.
+        optional bool is_dynamic_satisfied = 3;
     }
     optional ImplicitConstraints implicit_constraints = 25;
 
@@ -998,6 +1015,7 @@ message JobStatusDumpProto {
         FREQUENT = 2;
         RARE = 3;
         NEVER = 4;
+        RESTRICTED = 5;
     }
     optional Bucket standby_bucket = 17;
     optional bool is_exempted_from_app_standby = 27;
@@ -1028,7 +1046,7 @@ message JobStatusDumpProto {
     // was no attempt.
     optional int64 time_since_first_force_batch_attempt_ms = 29;
 
-    // Next tag: 31
+    // Next tag: 32
 }
 
 // Dump from com.android.server.job.JobConcurrencyManager.

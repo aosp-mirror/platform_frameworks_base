@@ -16,7 +16,11 @@
 
 package com.android.server.job;
 
+import android.annotation.NonNull;
+
 import com.android.server.job.controllers.JobStatus;
+
+import java.util.List;
 
 /**
  * Interface through which a {@link com.android.server.job.controllers.StateController} informs
@@ -39,4 +43,10 @@ public interface StateChangedListener {
     public void onRunJobNow(JobStatus jobStatus);
 
     public void onDeviceIdleStateChanged(boolean deviceIdle);
+
+    /**
+     * Called when these jobs are added or removed from the
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED} bucket.
+     */
+    void onRestrictedBucketChanged(@NonNull List<JobStatus> jobs);
 }
