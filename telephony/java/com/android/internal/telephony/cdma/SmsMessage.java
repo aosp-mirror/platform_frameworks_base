@@ -201,26 +201,16 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * TODO(cleanup): why do getSubmitPdu methods take an scAddr input
-     * and do nothing with it?  GSM allows us to specify a SC (eg,
-     * when responding to an SMS that explicitly requests the response
-     * is sent to a specific SC), or pass null to use the default
-     * value.  Is there no similar notion in CDMA? Or do we just not
-     * have it hooked up?
-     */
-
-    /**
-     * Get an SMS-SUBMIT PDU for a destination address and a message
+     * Gets an SMS-SUBMIT PDU for a destination address and a message.
      *
-     * @param scAddr                Service Centre address.  Null means use default.
-     * @param destAddr              Address of the recipient.
-     * @param message               String representation of the message payload.
-     * @param statusReportRequested Indicates whether a report is requested for this message.
-     * @param smsHeader             Array containing the data for the User Data Header, preceded
-     *                              by the Element Identifiers.
-     * @return a <code>SubmitPdu</code> containing the encoded SC
-     *         address, if applicable, and the encoded message.
-     *         Returns null on encode error.
+     * @param scAddr Service Centre address. No use for this message.
+     * @param destAddr the address of the destination for the message.
+     * @param message string representation of the message payload.
+     * @param statusReportRequested indicates whether a report is requested for this message.
+     * @param smsHeader array containing the data for the User Data Header, preceded by the Element
+     *                  Identifiers.
+     * @return a <code>SubmitPdu</code> containing null SC address and the encoded message. Returns
+     *         null on encode error.
      * @hide
      */
     @UnsupportedAppUsage
@@ -230,18 +220,17 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * Get an SMS-SUBMIT PDU for a destination address and a message
+     * Gets an SMS-SUBMIT PDU for a destination address and a message.
      *
-     * @param scAddr                Service Centre address.  Null means use default.
-     * @param destAddr              Address of the recipient.
-     * @param message               String representation of the message payload.
-     * @param statusReportRequested Indicates whether a report is requested for this message.
-     * @param smsHeader             Array containing the data for the User Data Header, preceded
-     *                              by the Element Identifiers.
-     * @param priority              Priority level of the message
-     * @return a <code>SubmitPdu</code> containing the encoded SC
-     *         address, if applicable, and the encoded message.
-     *         Returns null on encode error.
+     * @param scAddr Service Centre address. No use for this message.
+     * @param destAddr the address of the destination for the message.
+     * @param message string representation of the message payload.
+     * @param statusReportRequested indicates whether a report is requested for this message.
+     * @param smsHeader array containing the data for the User Data Header, preceded by the Element
+     *                  Identifiers.
+     * @param priority priority level of the message.
+     * @return a <code>SubmitPdu</code> containing null SC address and the encoded message. Returns
+     *         null on encode error.
      * @hide
      */
     @UnsupportedAppUsage
@@ -264,16 +253,15 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * Get an SMS-SUBMIT PDU for a data message to a destination address and port.
+     * Gets an SMS-SUBMIT PDU for a data message to a destination address &amp; port.
      *
-     * @param scAddr Service Centre address. null == use default
-     * @param destAddr the address of the destination for the message
-     * @param destPort the port to deliver the message to at the
-     *        destination
-     * @param data the data for the message
-     * @return a <code>SubmitPdu</code> containing the encoded SC
-     *         address, if applicable, and the encoded message.
-     *         Returns null on encode error.
+     * @param scAddr Service Centre address. No use for this message.
+     * @param destAddr the address of the destination for the message.
+     * @param destPort the port to deliver the message to at the destination.
+     * @param data the data for the message.
+     * @param statusReportRequested indicates whether a report is requested for this message.
+     * @return a <code>SubmitPdu</code> containing null SC address and the encoded message. Returns
+     *         null on encode error.
      */
     @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String scAddr, String destAddr, int destPort,
@@ -304,14 +292,13 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * Get an SMS-SUBMIT PDU for a data message to a destination address &amp; port
+     * Gets an SMS-SUBMIT PDU for a data message to a destination address &amp; port.
      *
-     * @param destAddr the address of the destination for the message
-     * @param userData the data for the message
-     * @param statusReportRequested Indicates whether a report is requested for this message.
-     * @return a <code>SubmitPdu</code> containing the encoded SC
-     *         address, if applicable, and the encoded message.
-     *         Returns null on encode error.
+     * @param destAddr the address of the destination for the message.
+     * @param userData the data for the message.
+     * @param statusReportRequested indicates whether a report is requested for this message.
+     * @return a <code>SubmitPdu</code> containing null SC address and the encoded message. Returns
+     *         null on encode error.
      */
     @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String destAddr, UserData userData,
@@ -320,15 +307,14 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * Get an SMS-SUBMIT PDU for a data message to a destination address &amp; port
+     * Gets an SMS-SUBMIT PDU for a data message to a destination address &amp; port.
      *
-     * @param destAddr the address of the destination for the message
-     * @param userData the data for the message
-     * @param statusReportRequested Indicates whether a report is requested for this message.
-     * @param priority Priority level of the message
-     * @return a <code>SubmitPdu</code> containing the encoded SC
-     *         address, if applicable, and the encoded message.
-     *         Returns null on encode error.
+     * @param destAddr the address of the destination for the message.
+     * @param userData the data for the message.
+     * @param statusReportRequested indicates whether a report is requested for this message.
+     * @param priority Priority level of the message.
+     * @return a <code>SubmitPdu</code> containing null SC address and the encoded message. Returns
+     *         null on encode error.
      */
     @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String destAddr, UserData userData,
@@ -1053,6 +1039,72 @@ public class SmsMessage extends SmsMessageBase {
             return pdu;
         } catch(IOException ex) {
             Rlog.e(LOG_TAG, "creating SubmitPdu failed: " + ex);
+        }
+        return null;
+    }
+
+    /**
+     * Gets an SMS-DELIVER PDU for a originating address and a message.
+     *
+     * @param origAddr the address of the originating for the message.
+     * @param message string representation of the message payload.
+     * @param date the time stamp the message was received.
+     * @return a <code>SubmitPdu</code> containing null SC address and the encoded message. Returns
+     *         null on encode error.
+     * @hide
+     */
+    public static SubmitPdu getDeliverPdu(String origAddr, String message, long date) {
+        if (origAddr == null || message == null) {
+            return null;
+        }
+
+        CdmaSmsAddress addr = CdmaSmsAddress.parse(origAddr);
+        if (addr == null) return null;
+
+        BearerData bearerData = new BearerData();
+        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
+
+        bearerData.messageId = 0;
+
+        bearerData.deliveryAckReq = false;
+        bearerData.userAckReq = false;
+        bearerData.readAckReq = false;
+        bearerData.reportReq = false;
+
+        bearerData.userData = new UserData();
+        bearerData.userData.payloadStr = message;
+
+        bearerData.msgCenterTimeStamp = BearerData.TimeStamp.fromMillis(date);
+
+        byte[] encodedBearerData = BearerData.encode(bearerData);
+        if (encodedBearerData == null) return null;
+
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(100);
+            DataOutputStream dos = new DataOutputStream(baos);
+            dos.writeInt(SmsEnvelope.TELESERVICE_WMT);
+            dos.writeInt(0); // servicePresent
+            dos.writeInt(0); // serviceCategory
+            dos.write(addr.digitMode);
+            dos.write(addr.numberMode);
+            dos.write(addr.ton); // number_type
+            dos.write(addr.numberPlan);
+            dos.write(addr.numberOfDigits);
+            dos.write(addr.origBytes, 0, addr.origBytes.length); // digits
+            // Subaddress is not supported.
+            dos.write(0); // subaddressType
+            dos.write(0); // subaddr_odd
+            dos.write(0); // subaddr_nbr_of_digits
+            dos.write(encodedBearerData.length);
+            dos.write(encodedBearerData, 0, encodedBearerData.length);
+            dos.close();
+
+            SubmitPdu pdu = new SubmitPdu();
+            pdu.encodedMessage = baos.toByteArray();
+            pdu.encodedScAddress = null;
+            return pdu;
+        } catch (IOException ex) {
+            Rlog.e(LOG_TAG, "creating Deliver PDU failed: " + ex);
         }
         return null;
     }
