@@ -22,6 +22,7 @@ import android.os.SystemProperties
 import android.util.MathUtils
 import android.view.SurfaceControl
 import android.view.ViewRootImpl
+import androidx.annotation.VisibleForTesting
 import com.android.internal.util.IndentingPrintWriter
 import com.android.systemui.DumpController
 import com.android.systemui.Dumpable
@@ -33,7 +34,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class BlurUtils @Inject constructor(
+open class BlurUtils @Inject constructor(
     @Main private val resources: Resources,
     val dumpController: DumpController
 ) : Dumpable {
@@ -63,13 +64,19 @@ class BlurUtils @Inject constructor(
      * @param radius blur radius in pixels.
      */
     fun applyBlur(viewRootImpl: ViewRootImpl?, radius: Int) {
-        if (viewRootImpl == null || !supportsBlursOnWindows()) {
+        if (viewRootImpl == null || !viewRootImpl.surfaceControl.isValid ||
+                !supportsBlursOnWindows()) {
             return
         }
-        SurfaceControl.Transaction().use {
+        createTransaction().use {
             it.setBackgroundBlurRadius(viewRootImpl.surfaceControl, radius)
             it.apply()
         }
+    }
+
+    @VisibleForTesting
+    open fun createTransaction(): SurfaceControl.Transaction {
+        return SurfaceControl.Transaction()
     }
 
     /**
@@ -78,7 +85,7 @@ class BlurUtils @Inject constructor(
      * @see android.view.SurfaceControl.Transaction#setBackgroundBlurRadius(SurfaceControl, int)
      * @return {@code true} when supported.
      */
-    fun supportsBlursOnWindows(): Boolean {
+    open fun supportsBlursOnWindows(): Boolean {
         return blurSysProp && ActivityManager.isHighEndGfx()
     }
 
