@@ -2004,7 +2004,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 final ActivityStack stack = display.getStackAt(stackNdx);
                 stack.switchUser(userId);
                 Task task = stack.getTopMostTask();
-                if (task != null) {
+                if (task != null && task != stack) {
                     stack.positionChildAtTop(task);
                 }
             }
