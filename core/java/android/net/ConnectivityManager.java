@@ -3173,8 +3173,8 @@ public class ConnectivityManager {
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public Network registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
-            NetworkCapabilities nc, int score, NetworkMisc misc) {
-        return registerNetworkAgent(messenger, ni, lp, nc, score, misc, NetworkProvider.ID_NONE);
+            NetworkCapabilities nc, int score, NetworkAgentConfig config) {
+        return registerNetworkAgent(messenger, ni, lp, nc, score, config, NetworkProvider.ID_NONE);
     }
 
     /**
@@ -3184,9 +3184,10 @@ public class ConnectivityManager {
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public Network registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
-            NetworkCapabilities nc, int score, NetworkMisc misc, int providerId) {
+            NetworkCapabilities nc, int score, NetworkAgentConfig config, int providerId) {
+
         try {
-            return mService.registerNetworkAgent(messenger, ni, lp, nc, score, misc, providerId);
+            return mService.registerNetworkAgent(messenger, ni, lp, nc, score, config, providerId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

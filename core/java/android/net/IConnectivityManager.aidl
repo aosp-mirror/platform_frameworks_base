@@ -20,9 +20,9 @@ import android.app.PendingIntent;
 import android.net.ConnectionInfo;
 import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
-import android.net.NetworkMisc;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
@@ -153,7 +153,8 @@ interface IConnectivityManager
     void declareNetworkRequestUnfulfillable(in NetworkRequest request);
 
     Network registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
-            in NetworkCapabilities nc, int score, in NetworkMisc misc, in int factorySerialNumber);
+            in NetworkCapabilities nc, int score, in NetworkAgentConfig config,
+            in int factorySerialNumber);
 
     NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities,
             in Messenger messenger, int timeoutSec, in IBinder binder, int legacy);
