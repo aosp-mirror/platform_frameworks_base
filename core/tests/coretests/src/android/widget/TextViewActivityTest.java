@@ -27,9 +27,13 @@ import static android.widget.espresso.FloatingToolbarEspressoUtils.sleepForFloat
 import static android.widget.espresso.TextViewActions.Handle;
 import static android.widget.espresso.TextViewActions.clickOnTextAtIndex;
 import static android.widget.espresso.TextViewActions.doubleClickOnTextAtIndex;
+import static android.widget.espresso.TextViewActions.doubleTapAndDragHandle;
 import static android.widget.espresso.TextViewActions.doubleTapAndDragOnText;
+import static android.widget.espresso.TextViewActions.doubleTapHandle;
 import static android.widget.espresso.TextViewActions.dragHandle;
 import static android.widget.espresso.TextViewActions.longPressAndDragOnText;
+import static android.widget.espresso.TextViewActions.longPressAndDragHandle;
+import static android.widget.espresso.TextViewActions.longPressHandle;
 import static android.widget.espresso.TextViewActions.longPressOnTextAtIndex;
 import static android.widget.espresso.TextViewAssertions.doesNotHaveStyledText;
 import static android.widget.espresso.TextViewAssertions.hasInsertionPointerAtIndex;
@@ -508,6 +512,111 @@ public class TextViewActivityTest {
         onHandleView(com.android.internal.R.id.insertion_handle)
                 .perform(dragHandle(textView, Handle.INSERTION, text.indexOf('f')));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("f")));
+    }
+
+    @Test
+    public void testInsertionHandle_touchThrough() {
+        final TextView textView = mActivity.findViewById(R.id.textview);
+        boolean cursorControlEnabled = textView.getEditorForTesting().getCursorControlEnabled();
+        boolean cursorDragEnabled = Editor.FLAG_ENABLE_CURSOR_DRAG;
+        textView.getEditorForTesting().setCursorControlEnabled(true);
+        Editor.FLAG_ENABLE_CURSOR_DRAG = true;
+
+        testInsertionHandle();
+        testInsertionHandle_multiLine();
+
+        textView.getEditorForTesting().setCursorControlEnabled(cursorControlEnabled);
+        Editor.FLAG_ENABLE_CURSOR_DRAG = cursorDragEnabled;
+    }
+
+    @Test
+    public void testInsertionHandle_longPressToSelect() {
+        // This test only makes sense when Cursor Control flag is enabled.
+        final TextView textView = mActivity.findViewById(R.id.textview);
+        boolean cursorControlEnabled = textView.getEditorForTesting().getCursorControlEnabled();
+        boolean cursorDragEnabled = Editor.FLAG_ENABLE_CURSOR_DRAG;
+        textView.getEditorForTesting().setCursorControlEnabled(true);
+        Editor.FLAG_ENABLE_CURSOR_DRAG = true;
+
+        final String text = "hello the world";
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.length()));
+
+        onHandleView(com.android.internal.R.id.insertion_handle).perform(longPressHandle(textView));
+        onView(withId(R.id.textview)).check(hasSelection("world"));
+
+        textView.getEditorForTesting().setCursorControlEnabled(cursorControlEnabled);
+        Editor.FLAG_ENABLE_CURSOR_DRAG = cursorDragEnabled;
+    }
+
+    @Test
+    public void testInsertionHandle_longPressAndDragToSelect() {
+        // This test only makes sense when Cursor Control flag is enabled.
+        final TextView textView = mActivity.findViewById(R.id.textview);
+        boolean cursorControlEnabled = textView.getEditorForTesting().getCursorControlEnabled();
+        boolean cursorDragEnabled = Editor.FLAG_ENABLE_CURSOR_DRAG;
+        textView.getEditorForTesting().setCursorControlEnabled(true);
+        Editor.FLAG_ENABLE_CURSOR_DRAG = true;
+
+        final String text = "hello the world";
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.length()));
+
+        onHandleView(com.android.internal.R.id.insertion_handle)
+                .perform(longPressAndDragHandle(textView, Handle.INSERTION, text.indexOf('t')));
+        onView(withId(R.id.textview)).check(hasSelection("the world"));
+
+        textView.getEditorForTesting().setCursorControlEnabled(cursorControlEnabled);
+        Editor.FLAG_ENABLE_CURSOR_DRAG = cursorDragEnabled;
+    }
+
+    @Test
+    public void testInsertionHandle_doubleTapToSelect() {
+        // This test only makes sense when Cursor Control flag is enabled.
+        final TextView textView = mActivity.findViewById(R.id.textview);
+        boolean cursorControlEnabled = textView.getEditorForTesting().getCursorControlEnabled();
+        boolean cursorDragEnabled = Editor.FLAG_ENABLE_CURSOR_DRAG;
+        textView.getEditorForTesting().setCursorControlEnabled(true);
+        Editor.FLAG_ENABLE_CURSOR_DRAG = true;
+
+        final String text = "hello the world";
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.length()));
+
+        onHandleView(com.android.internal.R.id.insertion_handle).perform(doubleTapHandle(textView));
+        onView(withId(R.id.textview)).check(hasSelection("world"));
+
+        textView.getEditorForTesting().setCursorControlEnabled(cursorControlEnabled);
+        Editor.FLAG_ENABLE_CURSOR_DRAG = cursorDragEnabled;
+    }
+
+    @Test
+    public void testInsertionHandle_doubleTapAndDragToSelect() {
+        // This test only makes sense when Cursor Control flag is enabled.
+        final TextView textView = mActivity.findViewById(R.id.textview);
+        boolean cursorControlEnabled = textView.getEditorForTesting().getCursorControlEnabled();
+        boolean cursorDragEnabled = Editor.FLAG_ENABLE_CURSOR_DRAG;
+        textView.getEditorForTesting().setCursorControlEnabled(true);
+        Editor.FLAG_ENABLE_CURSOR_DRAG = true;
+
+        final String text = "hello the world";
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.length()));
+
+        onHandleView(com.android.internal.R.id.insertion_handle)
+                .perform(doubleTapAndDragHandle(textView, Handle.INSERTION, text.indexOf('t')));
+        onView(withId(R.id.textview)).check(hasSelection("the world"));
+
+        textView.getEditorForTesting().setCursorControlEnabled(cursorControlEnabled);
+        Editor.FLAG_ENABLE_CURSOR_DRAG = cursorDragEnabled;
     }
 
     @Test

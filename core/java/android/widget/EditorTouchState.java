@@ -42,6 +42,7 @@ public class EditorTouchState {
     private long mLastDownMillis;
     private float mLastUpX, mLastUpY;
     private long mLastUpMillis;
+    private boolean mIsOnHandle;
 
     @IntDef({MultiTapStatus.NONE, MultiTapStatus.FIRST_TAP, MultiTapStatus.DOUBLE_TAP,
             MultiTapStatus.TRIPLE_CLICK})
@@ -98,7 +99,15 @@ public class EditorTouchState {
     }
 
     public boolean isDragCloseToVertical() {
-        return mIsDragCloseToVertical;
+        return mIsDragCloseToVertical && !mIsOnHandle;
+    }
+
+    public void setIsOnHandle(boolean onHandle) {
+        mIsOnHandle = onHandle;
+    }
+
+    public boolean isOnHandle() {
+        return mIsOnHandle;
     }
 
     /**
