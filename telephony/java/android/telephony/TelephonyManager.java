@@ -45,7 +45,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkStats;
@@ -11042,6 +11041,27 @@ public class TelephonyManager {
     }
 
     /**
+     * Enable or disable signal strength changes from radio will always be reported in any
+     * condition (e.g. screen is off). This is only allowed for System caller.
+     *
+     * @param isEnabled {@code true} for enabling; {@code false} for disabling.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setAlwaysReportSignalStrength(boolean isEnabled) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setAlwaysReportSignalStrength(getSubId(), isEnabled);
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "setAlwaysReportSignalStrength RemoteException", ex);
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
      * Get the most recently available signal strength information.
      *
      * Get the most recent SignalStrength information reported by the modem. Due
@@ -11103,8 +11123,8 @@ public class TelephonyManager {
      */
     public boolean isDataCapable() {
         if (mContext == null) return true;
-        return mContext.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_TELEPHONY_DATA);
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_mobile_data_capable);
     }
 
     /**

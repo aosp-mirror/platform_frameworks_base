@@ -21,6 +21,7 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppGlobals;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.app.RemoteAction;
@@ -384,6 +385,10 @@ public class Editor {
 
     private final SuggestionHelper mSuggestionHelper = new SuggestionHelper();
 
+    // Specifies whether the cursor control feature set is enabled.
+    // This can only be true if the text view is editable.
+    private final boolean mCursorControlEnabled;
+
     Editor(TextView textView) {
         mTextView = textView;
         // Synchronize the filter list, which places the undo input filter at the end.
@@ -396,6 +401,13 @@ public class Editor {
             final Magnifier magnifier =
                     Magnifier.createBuilderWithOldMagnifierDefaults(mTextView).build();
             mMagnifierAnimator = new MagnifierMotionAnimator(magnifier);
+        }
+
+        mCursorControlEnabled = AppGlobals.getIntCoreSetting(
+                WidgetFlags.KEY_ENABLE_CURSOR_CONTROL , 0) != 0;
+        if (TextView.DEBUG_CURSOR) {
+            logCursor("Editor", "Cursor control is %s.",
+                    mCursorControlEnabled ? "enabled" : "disabled");
         }
     }
 

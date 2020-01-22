@@ -306,7 +306,7 @@ import java.util.Set;
  */
 public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityTaskManagerService" : TAG_ATM;
-    private static final String TAG_STACK = TAG + POSTFIX_STACK;
+    static final String TAG_STACK = TAG + POSTFIX_STACK;
     static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_IMMERSIVE = TAG + POSTFIX_IMMERSIVE;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
@@ -1612,7 +1612,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (mController != null) {
                 // Find the first activity that is not finishing.
                 final ActivityRecord next =
-                        r.getActivityStack().topRunningActivity(token, INVALID_TASK_ID);
+                        r.getRootTask().topRunningActivity(token, INVALID_TASK_ID);
                 if (next != null) {
                     // ask watcher if this is allowed
                     boolean resumeOK = true;
@@ -2037,7 +2037,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             ActivityRecord r = mRootWindowContainer.isInAnyStack(token);
             if (r != null) {
-                r.getActivityStack().notifyActivityDrawnLocked(r);
+                r.getRootTask().notifyActivityDrawnLocked(r);
             }
         }
     }
@@ -2057,8 +2057,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public int getDisplayId(IBinder activityToken) throws RemoteException {
         synchronized (mGlobalLock) {
             final ActivityStack stack = ActivityRecord.getStackLocked(activityToken);
-            if (stack != null && stack.getDisplayId() != INVALID_DISPLAY) {
-                return stack.getDisplayId();
+            if (stack != null) {
+                final int displayId = stack.getDisplayId();
+                return displayId != INVALID_DISPLAY ? displayId : DEFAULT_DISPLAY;
             }
             return DEFAULT_DISPLAY;
         }
@@ -2072,7 +2073,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 ActivityStack focusedStack = getTopDisplayFocusedStack();
                 if (focusedStack != null) {
-                    return mRootWindowContainer.getStackInfo(focusedStack.mStackId);
+                    return mRootWindowContainer.getStackInfo(focusedStack.mTaskId);
                 }
                 return null;
             }
@@ -2174,7 +2175,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final ActivityRecord srec = ActivityRecord.forTokenLocked(token);
             if (srec != null) {
-                return srec.getActivityStack().shouldUpRecreateTaskLocked(srec, destAffinity);
+                return srec.getRootTask().shouldUpRecreateTaskLocked(srec, destAffinity);
             }
         }
         return false;
@@ -2187,7 +2188,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
             if (r != null) {
-                return r.getActivityStack().navigateUpTo(
+                return r.getRootTask().navigateUpTo(
                         r, destIntent, resultCode, resultData);
             }
             return false;
@@ -2353,7 +2354,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (r == null) {
                 return;
             }
-            ActivityStack stack = r.getActivityStack();
+            ActivityStack stack = r.getRootTask();
             if (stack != null && stack.isSingleTaskInstance()) {
                 // Single-task stacks are used for activities which are presented in floating
                 // windows above full screen activities. Instead of directly finishing the
@@ -2581,7 +2582,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         r, resultWho, requestCode);
                 // TODO: This should probably only loop over the task since you need to be in the
                 // same task to return results.
-                r.getActivityStack().forAllActivities(c);
+                r.getRootTask().forAllActivities(c);
                 c.recycle();
 
                 updateOomAdj();
@@ -3214,10 +3215,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                                     + ainfo.applicationInfo.uid + ", calling uid=" + callingUid);
                 }
 
-                final ActivityStack stack = r.getActivityStack();
+                final ActivityStack stack = r.getRootTask();
                 final Task task = stack.createTask(
-                        mStackSupervisor.getNextTaskIdForUser(r.mUserId), ainfo, intent,
-                        null /* voiceSession */, null /* voiceInteractor */, !ON_TOP);
+                        mStackSupervisor.getNextTaskIdForUser(r.mUserId), ainfo, intent, !ON_TOP);
                 if (!mRecentTasks.addToBottom(task)) {
                     // The app has too many tasks already and we can't add any more
                     stack.removeChild(task, "addAppTask");
@@ -3551,7 +3551,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                                     + token);
                 }
 
-                final ActivityStack stack = r.getActivityStack();
+                final ActivityStack stack = r.getRootTask();
                 if (stack == null) {
                     throw new IllegalStateException("toggleFreeformWindowingMode: the activity "
                             + "doesn't have a stack");
@@ -4080,7 +4080,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 final ActivityStack stack =
-                        mRootWindowContainer.getDefaultDisplay().getSplitScreenPrimaryStack();
+                        mRootWindowContainer.getDefaultDisplay().getRootSplitScreenPrimaryTask();
                 if (stack == null) {
                     Slog.w(TAG, "dismissSplitScreenMode: primary split-screen stack not found.");
                     return;
@@ -4121,7 +4121,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 final ActivityStack stack =
-                        mRootWindowContainer.getDefaultDisplay().getPinnedStack();
+                        mRootWindowContainer.getDefaultDisplay().getRootPinnedTask();
                 if (stack == null) {
                     Slog.w(TAG, "dismissPip: pinned stack not found.");
                     return;
@@ -4235,14 +4235,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     private boolean isInPictureInPictureMode(ActivityRecord r) {
-        if (r == null || r.getActivityStack() == null || !r.inPinnedWindowingMode()
-                || r.getActivityStack().isInStackLocked(r) == null) {
+        if (r == null || r.getRootTask() == null || !r.inPinnedWindowingMode()
+                || r.getRootTask().isInStackLocked(r) == null) {
             return false;
         }
 
         // If we are animating to fullscreen then we have already dispatched the PIP mode
         // changed, so we should reflect that check here as well.
-        final ActivityStack taskStack = r.getActivityStack();
+        final ActivityStack taskStack = r.getRootTask();
         return !taskStack.isAnimatingBoundsToFullscreen();
     }
 
@@ -4281,7 +4281,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                                 r.pictureInPictureArgs.getSourceRectHint());
                         mRootWindowContainer.moveActivityToPinnedStack(
                                 r, sourceBounds, aspectRatio, "enterPictureInPictureMode");
-                        final ActivityStack stack = r.getActivityStack();
+                        final ActivityStack stack = r.getRootTask();
                         stack.setPictureInPictureAspectRatio(aspectRatio);
                         stack.setPictureInPictureActions(actions);
                         MetricsLoggerWrapper.logPictureInPictureEnter(mContext,
@@ -4326,7 +4326,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     // If the activity is already in picture-in-picture, update the pinned stack now
                     // if it is not already expanding to fullscreen. Otherwise, the arguments will
                     // be used the next time the activity enters PiP
-                    final ActivityStack stack = r.getActivityStack();
+                    final ActivityStack stack = r.getRootTask();
                     if (!stack.isAnimatingBoundsToFullscreen()) {
                         stack.setPictureInPictureAspectRatio(
                                 r.pictureInPictureArgs.getAspectRatio());
@@ -4385,7 +4385,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         if (params.hasSetAspectRatio()
                 && !mWindowManager.isValidPictureInPictureAspectRatio(
-                        r.getDisplayId(), params.getAspectRatio())) {
+                        r.getDisplay(), params.getAspectRatio())) {
             final float minAspectRatio = mContext.getResources().getFloat(
                     com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
             final float maxAspectRatio = mContext.getResources().getFloat(
@@ -4923,7 +4923,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             Slog.i(TAG, "Moving " + r.shortComponentName + " from display " + r.getDisplayId()
                     + " to main display for VR");
             mRootWindowContainer.moveStackToDisplay(
-                    r.getStackId(), DEFAULT_DISPLAY, true /* toTop */);
+                    r.getRootTaskId(), DEFAULT_DISPLAY, true /* toTop */);
         }
         mH.post(() -> {
             if (!mVrController.onVrModeChanged(r)) {
@@ -6752,7 +6752,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 int requestCode, int resultCode, Intent data) {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
-                if (r != null && r.getActivityStack() != null) {
+                if (r != null && r.getRootTask() != null) {
                     r.sendResult(callingUid, resultWho, requestCode, resultCode, data);
                 }
             }

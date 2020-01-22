@@ -295,17 +295,24 @@
     <!-- The padding on the global screenshot background image -->
     <dimen name="global_screenshot_legacy_bg_padding">20dp</dimen>
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
+    <dimen name="global_screenshot_x_scale">80dp</dimen>
+    <dimen name="screenshot_offset_y">48dp</dimen>
+    <dimen name="screenshot_offset_x">16dp</dimen>
+    <dimen name="screenshot_action_container_offset_y">32dp</dimen>
     <dimen name="screenshot_action_container_corner_radius">10dp</dimen>
-    <dimen name="screenshot_action_container_padding">10dp</dimen>
+    <dimen name="screenshot_action_container_padding_vertical">10dp</dimen>
+    <dimen name="screenshot_action_container_margin_horizontal">8dp</dimen>
+    <dimen name="screenshot_action_container_padding_left">100dp</dimen>
+    <dimen name="screenshot_action_container_padding_right">8dp</dimen>
     <!-- Radius of the chip background on global screenshot actions -->
     <dimen name="screenshot_button_corner_radius">20dp</dimen>
     <dimen name="screenshot_action_chip_margin_horizontal">4dp</dimen>
     <dimen name="screenshot_action_chip_padding_vertical">10dp</dimen>
     <dimen name="screenshot_action_chip_icon_size">20dp</dimen>
-    <dimen name="screenshot_action_chip_padding_start">4dp</dimen>
+    <dimen name="screenshot_action_chip_padding_start">8dp</dimen>
     <!-- Padding between icon and text -->
     <dimen name="screenshot_action_chip_padding_middle">8dp</dimen>
-    <dimen name="screenshot_action_chip_padding_end">12dp</dimen>
+    <dimen name="screenshot_action_chip_padding_end">16dp</dimen>
     <dimen name="screenshot_action_chip_text_size">14sp</dimen>
 
 
@@ -1079,6 +1086,10 @@
     <dimen name="logout_button_margin_bottom">12dp</dimen>
     <dimen name="logout_button_corner_radius">2dp</dimen>
 
+    <!--  Blur radius on status bar window and power menu  -->
+    <dimen name="min_window_blur_radius">1px</dimen>
+    <dimen name="max_window_blur_radius">100px</dimen>
+
     <!-- How much into a DisplayCutout's bounds we can go, on each side -->
     <dimen name="display_cutout_margin_consumption">0px</dimen>
     <!-- How much each bubble is elevated. -->
@@ -1086,13 +1097,15 @@
     <!-- How much the bubble flyout text container is elevated. -->
     <dimen name="bubble_flyout_elevation">4dp</dimen>
     <!-- How much padding is around the left and right sides of the flyout text. -->
-    <dimen name="bubble_flyout_padding_x">16dp</dimen>
+    <dimen name="bubble_flyout_padding_x">12dp</dimen>
     <!-- How much padding is around the top and bottom of the flyout text. -->
-    <dimen name="bubble_flyout_padding_y">8dp</dimen>
+    <dimen name="bubble_flyout_padding_y">10dp</dimen>
     <!-- Size of the triangle that points from the flyout to the bubble stack. -->
     <dimen name="bubble_flyout_pointer_size">6dp</dimen>
     <!-- How much space to leave between the flyout (tip of the arrow) and the bubble stack. -->
     <dimen name="bubble_flyout_space_from_bubble">8dp</dimen>
+    <!-- How much space to leave between the flyout text and the avatar displayed in the flyout. -->
+    <dimen name="bubble_flyout_avatar_message_space">6dp</dimen>
     <!-- Padding between status bar and bubbles when displayed in expanded state -->
     <dimen name="bubble_padding_top">16dp</dimen>
     <!-- Size of individual bubbles. -->

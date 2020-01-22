@@ -402,29 +402,29 @@ public class WifiConfiguration implements Parcelable {
         public static final String[] strings = { "current", "disabled", "enabled" };
     }
 
-    /**
-     * Security types we support.
-     */
-    /** @hide */
+    /** Security type for an open network. */
     public static final int SECURITY_TYPE_OPEN = 0;
-    /** @hide */
+    /** Security type for a WEP network. */
     public static final int SECURITY_TYPE_WEP = 1;
-    /** @hide */
+    /** Security type for a PSK network. */
     public static final int SECURITY_TYPE_PSK = 2;
-    /** @hide */
+    /** Security type for an EAP network. */
     public static final int SECURITY_TYPE_EAP = 3;
-    /** @hide */
+    /** Security type for an SAE network. */
     public static final int SECURITY_TYPE_SAE = 4;
-    /** @hide */
+    /** Security type for an EAP Suite B network. */
     public static final int SECURITY_TYPE_EAP_SUITE_B = 5;
-    /** @hide */
+    /** Security type for an OWE network. */
     public static final int SECURITY_TYPE_OWE = 6;
-    /** @hide */
+    /** Security type for a WAPI PSK network. */
     public static final int SECURITY_TYPE_WAPI_PSK = 7;
-    /** @hide */
+    /** Security type for a WAPI Certificate network. */
     public static final int SECURITY_TYPE_WAPI_CERT = 8;
 
-    /** @hide */
+    /**
+     * Security types we support.
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "SECURITY_TYPE_" }, value = {
             SECURITY_TYPE_OPEN,
@@ -440,10 +440,19 @@ public class WifiConfiguration implements Parcelable {
     public @interface SecurityType {}
 
     /**
-     * @hide
-     * Set security params (sets the various bitsets exposed in WifiConfiguration).
+     * Set the various security params to correspond to the provided security type.
+     * This is accomplished by setting the various BitSets exposed in WifiConfiguration.
      *
-     * @param securityType One of the security types from {@link SecurityType}.
+     * @param securityType One of the following security types:
+     * {@link #SECURITY_TYPE_OPEN},
+     * {@link #SECURITY_TYPE_WEP},
+     * {@link #SECURITY_TYPE_PSK},
+     * {@link #SECURITY_TYPE_EAP},
+     * {@link #SECURITY_TYPE_SAE},
+     * {@link #SECURITY_TYPE_EAP_SUITE_B},
+     * {@link #SECURITY_TYPE_OWE},
+     * {@link #SECURITY_TYPE_WAPI_PSK}, or
+     * {@link #SECURITY_TYPE_WAPI_CERT}
      */
     public void setSecurityParams(@SecurityType int securityType) {
         // Clear all the bitsets.

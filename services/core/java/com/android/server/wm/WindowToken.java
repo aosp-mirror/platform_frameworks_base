@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
@@ -38,7 +39,9 @@ import android.annotation.CallSuper;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
+import android.view.SurfaceControl;
 
+import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
@@ -228,12 +231,6 @@ class WindowToken extends WindowContainer<WindowState> {
         return false;
     }
 
-    ActivityRecord asActivityRecord() {
-        // TODO: Not sure if this is the best way to handle this vs. using instanceof and casting.
-        // I am not an app window token!
-        return null;
-    }
-
     @Override
     void removeImmediately() {
         if (mDisplayContent != null) {
@@ -254,6 +251,27 @@ class WindowToken extends WindowContainer<WindowState> {
         // it is ready.
 
         super.onDisplayChanged(dc);
+    }
+
+    @Override
+    void assignLayer(SurfaceControl.Transaction t, int layer) {
+        if (windowType == TYPE_DOCK_DIVIDER) {
+            // See {@link DisplayContent#mSplitScreenDividerAnchor}
+            super.assignRelativeLayer(t, mDisplayContent.getSplitScreenDividerAnchor(), 1);
+        } else if (mRoundedCornerOverlay) {
+            super.assignLayer(t, WindowManagerPolicy.COLOR_FADE_LAYER + 1);
+        } else {
+            super.assignLayer(t, layer);
+        }
+    }
+
+    @Override
+    SurfaceControl.Builder makeSurface() {
+        final SurfaceControl.Builder builder = super.makeSurface();
+        if (mRoundedCornerOverlay) {
+            builder.setParent(null);
+        }
+        return builder;
     }
 
     @CallSuper
@@ -314,5 +332,9 @@ class WindowToken extends WindowContainer<WindowState> {
         int navLayer = mWmService.mPolicy.getWindowLayerFromTypeLw(TYPE_NAVIGATION_BAR,
                 mOwnerCanManageAppTokens);
         return mOwnerCanManageAppTokens && (layer > navLayer);
+    }
+
+    int getWindowLayerFromType() {
+        return mWmService.mPolicy.getWindowLayerFromTypeLw(windowType, mOwnerCanManageAppTokens);
     }
 }

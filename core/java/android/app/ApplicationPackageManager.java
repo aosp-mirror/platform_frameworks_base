@@ -618,13 +618,70 @@ public class ApplicationPackageManager extends PackageManager {
         return hasSystemFeature(name, 0);
     }
 
-    @Override
-    public boolean hasSystemFeature(String name, int version) {
+    private boolean hasSystemFeatureUncached(String name, int version) {
         try {
             return mPM.hasSystemFeature(name, version);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    // Make this cache relatively large.  There are many system features and
+    // none are ever invalidated.  MPTS tests suggests that the cache should
+    // hold at least 150 entries.
+    private static final int SYS_FEATURE_CACHE_SIZE = 256;
+    private static final String CACHE_KEY_SYS_FEATURE_PROPERTY = "cache_key.has_system_feature";
+
+    private class SystemFeatureQuery {
+        public final String name;
+        public final int version;
+        public SystemFeatureQuery(String n, int v) {
+            name = n;
+            version = v;
+        }
+        @Override
+        public String toString() {
+            return String.format("SystemFeatureQuery(name=\"%s\", version=%d)",
+                    name, version);
+        }
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof SystemFeatureQuery) {
+                SystemFeatureQuery r = (SystemFeatureQuery) o;
+                return Objects.equals(name, r.name) &&  version == r.version;
+            } else {
+                return false;
+            }
+        }
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(name) + version;
+        }
+    }
+
+    private final PropertyInvalidatedCache<SystemFeatureQuery, Boolean> mSysFeatureCache =
+            new PropertyInvalidatedCache<SystemFeatureQuery, Boolean>(
+                SYS_FEATURE_CACHE_SIZE,
+                CACHE_KEY_SYS_FEATURE_PROPERTY) {
+                @Override
+                protected Boolean recompute(SystemFeatureQuery query) {
+                    return hasSystemFeatureUncached(query.name, query.version);
+                }
+            };
+
+    @Override
+    public boolean hasSystemFeature(String name, int version) {
+        return mSysFeatureCache.query(new SystemFeatureQuery(name, version)).booleanValue();
+    }
+
+    /** @hide */
+    public void disableSysFeatureCache() {
+        mSysFeatureCache.disableLocal();
+    }
+
+    /** @hide */
+    public static void invalidateSysFeatureCache() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_SYS_FEATURE_PROPERTY);
     }
 
     @Override

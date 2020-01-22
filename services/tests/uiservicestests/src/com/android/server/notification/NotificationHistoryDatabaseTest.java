@@ -186,6 +186,20 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testAddNotification_newestFirst() {
+        HistoricalNotification n = getHistoricalNotification(1);
+        HistoricalNotification n2 = getHistoricalNotification(2);
+
+        mDataBase.addNotification(n);
+
+        // second add should not trigger another write
+        mDataBase.addNotification(n2);
+
+        assertThat(mDataBase.mBuffer.getNotificationsToWrite().get(0)).isEqualTo(n2);
+        assertThat(mDataBase.mBuffer.getNotificationsToWrite().get(1)).isEqualTo(n);
+    }
+
+    @Test
     public void testReadNotificationHistory_readsAllFiles() throws Exception {
         for (long i = 10; i >= 5; i--) {
             AtomicFile af = mock(AtomicFile.class);

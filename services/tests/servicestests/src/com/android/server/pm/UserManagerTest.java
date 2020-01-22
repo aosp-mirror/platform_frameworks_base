@@ -39,6 +39,7 @@ import android.provider.Settings;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Slog;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -69,8 +70,10 @@ public final class UserManagerTest {
 
     // Packages which are used during tests.
     private static final String[] PACKAGES = new String[] {
-            "com.android.egg"
+            "com.android.egg",
+            "com.google.android.webview"
     };
+    private static final String TAG = UserManagerTest.class.getSimpleName();
 
     private final Context mContext = InstrumentationRegistry.getInstrumentation().getContext();
 
@@ -333,6 +336,9 @@ public final class UserManagerTest {
         assertThat(userInfo).isNotNull();
         final int userId = userInfo.id;
 
+        UserManager userManagerForUser = (UserManager) mContext.createPackageContextAsUser(
+                "android", 0, asHandle(userId)).getSystemService(Context.USER_SERVICE);
+
         assertThat(mUserManager.hasBadge(userId)).isEqualTo(userTypeDetails.hasBadge());
         assertThat(mUserManager.getUserIconBadgeResId(userId))
                 .isEqualTo(userTypeDetails.getIconBadge());
@@ -340,8 +346,10 @@ public final class UserManagerTest {
                 .isEqualTo(userTypeDetails.getBadgePlain());
         assertThat(mUserManager.getUserBadgeNoBackgroundResId(userId))
                 .isEqualTo(userTypeDetails.getBadgeNoBackground());
-        assertThat(mUserManager.isProfile(userId)).isEqualTo(userTypeDetails.isProfile());
         assertThat(mUserManager.isUserOfType(asHandle(userId), userTypeDetails.getName()))
+                .isTrue();
+        assertThat(userManagerForUser.isProfile()).isEqualTo(userTypeDetails.isProfile());
+        assertThat(userManagerForUser.isUserOfType(asHandle(userId), userTypeDetails.getName()))
                 .isTrue();
 
         final int badgeIndex = userInfo.profileBadge;
@@ -351,7 +359,7 @@ public final class UserManagerTest {
                 Resources.getSystem().getString(userTypeDetails.getBadgeLabel(badgeIndex), "Test"));
     }
 
-    // Make sure only one managed profile can be created
+    // Make sure only max managed profiles can be created
     @MediumTest
     @Test
     public void testAddManagedProfile() throws Exception {
@@ -384,6 +392,11 @@ public final class UserManagerTest {
                 UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
         // Verify that the packagesToVerify are installed by default.
         for (String pkg : PACKAGES) {
+            if (!mPackageManager.isPackageAvailable(pkg)) {
+                Slog.w(TAG, "Package is not available " + pkg);
+                continue;
+            }
+
             assertWithMessage("Package should be installed in managed profile: %s", pkg)
                     .that(isPackageInstalledForUser(pkg, userInfo1.id)).isTrue();
         }
@@ -393,6 +406,11 @@ public final class UserManagerTest {
                 UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId, PACKAGES);
         // Verify that the packagesToVerify are not installed by default.
         for (String pkg : PACKAGES) {
+            if (!mPackageManager.isPackageAvailable(pkg)) {
+                Slog.w(TAG, "Package is not available " + pkg);
+                continue;
+            }
+
             assertWithMessage(
                     "Package should not be installed in managed profile when disallowed: %s", pkg)
                             .that(isPackageInstalledForUser(pkg, userInfo2.id)).isFalse();
@@ -410,12 +428,22 @@ public final class UserManagerTest {
                 UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId, PACKAGES);
         // Verify that the packagesToVerify are not installed by default.
         for (String pkg : PACKAGES) {
+            if (!mPackageManager.isPackageAvailable(pkg)) {
+                Slog.w(TAG, "Package is not available " + pkg);
+                continue;
+            }
+
             assertWithMessage("Pkg should not be installed in managed profile when disallowed: %s",
                     pkg).that(isPackageInstalledForUser(pkg, userInfo.id)).isFalse();
         }
 
         // Verify that the disallowed packages during profile creation can be installed now.
         for (String pkg : PACKAGES) {
+            if (!mPackageManager.isPackageAvailable(pkg)) {
+                Slog.w(TAG, "Package is not available " + pkg);
+                continue;
+            }
+
             assertWithMessage("Package could not be installed: %s", pkg)
                     .that(mPackageManager.installExistingPackageAsUser(pkg, userInfo.id))
                     .isEqualTo(PackageManager.INSTALL_SUCCEEDED);
@@ -772,6 +800,78 @@ public final class UserManagerTest {
         }
 
         assertThat(found).isTrue();
+    }
+
+    @Test
+    public void testCreateProfile_withContextUserId() throws Exception {
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
+
+        UserInfo userProfile = createProfileForUser("Managed 1",
+                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+        assertThat(userProfile).isNotNull();
+
+        UserManager um = (UserManager) mContext.createPackageContextAsUser(
+                "android", 0, mUserManager.getPrimaryUser().getUserHandle())
+                .getSystemService(Context.USER_SERVICE);
+
+        List<UserHandle> profiles = um.getUserProfiles(false);
+        assertThat(profiles.size()).isEqualTo(2);
+        assertThat(profiles.get(0).equals(userProfile.getUserHandle())
+                || profiles.get(1).equals(userProfile.getUserHandle())).isTrue();
+    }
+
+    @Test
+    public void testSetUserName_withContextUserId() throws Exception {
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
+
+        UserInfo userInfo1 = createProfileForUser("Managed 1",
+                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+        assertThat(userInfo1).isNotNull();
+
+        UserManager um = (UserManager) mContext.createPackageContextAsUser(
+                "android", 0, userInfo1.getUserHandle())
+                .getSystemService(Context.USER_SERVICE);
+
+        final String newName = "Managed_user 1";
+        um.setUserName(newName);
+
+        UserInfo userInfo = mUserManager.getUserInfo(userInfo1.id);
+        assertThat(userInfo.name).isEqualTo(newName);
+
+        // get user name from getUserName using context.getUserId
+        assertThat(um.getUserName()).isEqualTo(newName);
+    }
+
+    @Test
+    public void testGetUserName_withContextUserId() throws Exception {
+        final String userName = "User 2";
+        UserInfo user2 = createUser(userName, 0);
+        assertThat(user2).isNotNull();
+
+        UserManager um = (UserManager) mContext.createPackageContextAsUser(
+                "android", 0, user2.getUserHandle())
+                .getSystemService(Context.USER_SERVICE);
+
+        assertThat(um.getUserName()).isEqualTo(userName);
+    }
+
+    @Test
+    public void testGetUserIcon_withContextUserId() throws Exception {
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
+
+        UserInfo userInfo1 = createProfileForUser("Managed 1",
+                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+        assertThat(userInfo1).isNotNull();
+
+        UserManager um = (UserManager) mContext.createPackageContextAsUser(
+                "android", 0, userInfo1.getUserHandle())
+                .getSystemService(Context.USER_SERVICE);
+
+        final String newName = "Managed_user 1";
+        um.setUserName(newName);
+
+        UserInfo userInfo = mUserManager.getUserInfo(userInfo1.id);
+        assertThat(userInfo.name).isEqualTo(newName);
     }
 
     private boolean isPackageInstalledForUser(String packageName, int userId) {

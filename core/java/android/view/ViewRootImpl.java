@@ -18,6 +18,8 @@ package android.view;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -25,15 +27,24 @@ import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+import static android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE;
 import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
 import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_TOUCH;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
@@ -105,6 +116,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
+import android.view.InsetsState.InternalInsetsType;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl.Transaction;
 import android.view.View.AttachInfo;
@@ -417,11 +429,16 @@ public final class ViewRootImpl implements ViewParent,
 
     @UnsupportedAppUsage
     final View.AttachInfo mAttachInfo;
+    final SystemUiVisibilityInfo mCompatibleVisibilityInfo;
     InputQueue.Callback mInputQueueCallback;
     InputQueue mInputQueue;
     @UnsupportedAppUsage
     FallbackEventHandler mFallbackEventHandler;
     Choreographer mChoreographer;
+
+    // used in relayout to get SurfaceControl size
+    // for BLAST adapter surface setup
+    private final Point mSurfaceSize = new Point();
 
     final Rect mTempRect; // used in the transaction to not thrash the heap.
     final Rect mVisRect; // used to retrieve visible rect of focused view.
@@ -674,6 +691,7 @@ public final class ViewRootImpl implements ViewParent,
         mAdded = false;
         mAttachInfo = new View.AttachInfo(mWindowSession, mWindow, display, this, mHandler, this,
                 context);
+        mCompatibleVisibilityInfo = new SystemUiVisibilityInfo();
         mAccessibilityManager = AccessibilityManager.getInstance(context);
         mAccessibilityManager.addAccessibilityStateChangeListener(
                 mAccessibilityInteractionConnectionManager, mHandler);
@@ -1862,6 +1880,9 @@ public final class ViewRootImpl implements ViewParent,
             mAttachInfo.mSystemUiVisibility &= ~mAttachInfo.mDisabledSystemUiVisibility;
             WindowManager.LayoutParams params = mWindowAttributes;
             mAttachInfo.mSystemUiVisibility |= getImpliedSystemUiVisibility(params);
+            mCompatibleVisibilityInfo.globalVisibility =
+                    (mCompatibleVisibilityInfo.globalVisibility & ~View.SYSTEM_UI_FLAG_LOW_PROFILE)
+                            | (mAttachInfo.mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
             if (mAttachInfo.mKeepScreenOn != oldScreenOn
                     || mAttachInfo.mSystemUiVisibility != params.subtreeSystemUiVisibility
                     || mAttachInfo.mHasSystemUiListeners != params.hasSystemUiListeners) {
@@ -1887,6 +1908,38 @@ public final class ViewRootImpl implements ViewParent,
         return vis;
     }
 
+    /**
+     * Update the compatible system UI visibility for dispatching it to the legacy app.
+     *
+     * @param type Indicates which type of the insets source we are handling.
+     * @param visible True if the insets source is visible.
+     * @param hasControl True if we can control the insets source.
+     */
+    void updateCompatSysUiVisibility(@InternalInsetsType int type, boolean visible,
+            boolean hasControl) {
+        if ((type != ITYPE_STATUS_BAR && type != ITYPE_NAVIGATION_BAR)
+                || ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL) {
+            return;
+        }
+        final SystemUiVisibilityInfo info = mCompatibleVisibilityInfo;
+        final int systemUiFlag = type == ITYPE_STATUS_BAR
+                ? View.SYSTEM_UI_FLAG_FULLSCREEN
+                : View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+        final boolean wasVisible = (info.globalVisibility & systemUiFlag) == 0;
+        if (visible) {
+            info.globalVisibility &= ~systemUiFlag;
+            if (!wasVisible && hasControl) {
+                // The local system UI visibility can only be cleared while we have the control.
+                info.localChanges |= systemUiFlag;
+            }
+        } else {
+            info.globalVisibility |= systemUiFlag;
+        }
+        if (mAttachInfo.mGlobalSystemUiVisibility != info.globalVisibility) {
+            scheduleTraversals();
+        }
+    }
+
     @VisibleForTesting
     public static void adjustLayoutParamsForCompatibility(WindowManager.LayoutParams inOutParams) {
         if (sNewInsetsMode != NEW_INSETS_MODE_FULL) {
@@ -1897,10 +1950,28 @@ public final class ViewRootImpl implements ViewParent,
         final int type = inOutParams.type;
         final int adjust = inOutParams.softInputMode & SOFT_INPUT_MASK_ADJUST;
 
-        if ((sysUiVis & SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0) {
-            inOutParams.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-        } else if ((sysUiVis & SYSTEM_UI_FLAG_IMMERSIVE) != 0) {
-            inOutParams.insetsFlags.behavior = BEHAVIOR_SHOW_BARS_BY_SWIPE;
+        if ((inOutParams.privateFlags & PRIVATE_FLAG_APPEARANCE_CONTROLLED) == 0) {
+            inOutParams.insetsFlags.appearance = 0;
+            if ((sysUiVis & SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
+                inOutParams.insetsFlags.appearance |= APPEARANCE_LOW_PROFILE_BARS;
+            }
+            if ((sysUiVis & SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) != 0) {
+                inOutParams.insetsFlags.appearance |= APPEARANCE_LIGHT_STATUS_BARS;
+            }
+            if ((sysUiVis & SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR) != 0) {
+                inOutParams.insetsFlags.appearance |= APPEARANCE_LIGHT_NAVIGATION_BARS;
+            }
+        }
+
+        if ((inOutParams.privateFlags & PRIVATE_FLAG_BEHAVIOR_CONTROLLED) == 0) {
+            if ((sysUiVis & SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0
+                    || (flags & FLAG_FULLSCREEN) != 0) {
+                inOutParams.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+            } else if ((sysUiVis & SYSTEM_UI_FLAG_IMMERSIVE) != 0) {
+                inOutParams.insetsFlags.behavior = BEHAVIOR_SHOW_BARS_BY_SWIPE;
+            } else {
+                inOutParams.insetsFlags.behavior = BEHAVIOR_SHOW_BARS_BY_TOUCH;
+            }
         }
 
         if ((inOutParams.privateFlags & PRIVATE_FLAG_FIT_INSETS_CONTROLLED) != 0) {
@@ -2305,6 +2376,11 @@ public final class ViewRootImpl implements ViewParent,
             mAttachInfo.mForceReportNewAttributes = false;
             params = lp;
         }
+        if (sNewInsetsMode == NEW_INSETS_MODE_FULL) {
+            adjustLayoutParamsForCompatibility(lp);
+            controlInsetsForCompatibility(lp);
+            handleDispatchSystemUiVisibilityChanged(mCompatibleVisibilityInfo);
+        }
 
         if (mFirst || mAttachInfo.mViewVisibilityChanged) {
             mAttachInfo.mViewVisibilityChanged = false;
@@ -2398,8 +2474,6 @@ public final class ViewRootImpl implements ViewParent,
                     && !PixelFormat.formatHasAlpha(params.format)) {
                 params.format = PixelFormat.TRANSLUCENT;
             }
-            adjustLayoutParamsForCompatibility(params);
-            controlInsetsForCompatibility(params);
         }
 
         if (mFirst || windowShouldResize || insetsChanged ||
@@ -7098,7 +7172,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void handleDispatchSystemUiVisibilityChanged(SystemUiVisibilityInfo args) {
-        if (mSeq != args.seq) {
+        if (mSeq != args.seq && sNewInsetsMode != NEW_INSETS_MODE_FULL) {
             // The sequence has changed, so we need to update our value and make
             // sure to do a traversal afterward so the window manager is given our
             // most recent data.
@@ -7109,6 +7183,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mView == null) return;
         if (args.localChanges != 0) {
             mView.updateLocalSystemUiVisibility(args.localValue, args.localChanges);
+            args.localChanges = 0;
         }
 
         int visibility = args.globalVisibility&View.SYSTEM_UI_CLEARABLE_FLAGS;
@@ -7262,14 +7337,13 @@ public final class ViewRootImpl implements ViewParent,
                 insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
                 mTmpFrame, mPendingContentInsets, mPendingVisibleInsets,
                 mPendingStableInsets, mPendingBackDropFrame, mPendingDisplayCutout,
-                mPendingMergedConfiguration, mSurfaceControl, mTempInsets);
+                mPendingMergedConfiguration, mSurfaceControl, mTempInsets, mSurfaceSize);
         if (mSurfaceControl.isValid()) {
             if (!WindowManagerGlobal.USE_BLAST_ADAPTER) {
                 mSurface.copyFrom(mSurfaceControl);
             } else {
-                mSurface.transferFrom(getOrCreateBLASTSurface(
-                    (int) (mView.getMeasuredWidth() * appScale + 0.5f),
-                    (int) (mView.getMeasuredHeight() * appScale + 0.5f)));
+                mSurface.transferFrom(getOrCreateBLASTSurface(mSurfaceSize.x,
+                        mSurfaceSize.y));
             }
         } else {
             destroySurface();

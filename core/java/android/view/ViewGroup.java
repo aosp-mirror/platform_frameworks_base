@@ -17,11 +17,14 @@
 package android.view;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+import static android.view.WindowInsetsAnimationCallback.DISPATCH_MODE_CONTINUE_ON_SUBTREE;
+import static android.view.WindowInsetsAnimationCallback.DISPATCH_MODE_STOP;
 
 import android.animation.LayoutTransition;
 import android.annotation.CallSuper;
 import android.annotation.IdRes;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -45,6 +48,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pools;
@@ -52,6 +56,7 @@ import android.util.Pools.SynchronizedPool;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.WindowInsetsAnimationCallback.AnimationBounds;
+import android.view.WindowInsetsAnimationCallback.DispatchMode;
 import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -605,6 +610,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * updated on the UI thread so shouldn't require explicit synchronization.
      */
     int mChildUnhandledKeyListeners = 0;
+
+    /**
+     * Current dispatch mode of animation events
+     *
+     * @see WindowInsetsAnimationCallback#getDispatchMode()
+     */
+    private @DispatchMode int mInsetsAnimationDispatchMode = DISPATCH_MODE_CONTINUE_ON_SUBTREE;
 
     /**
      * Empty ActionMode used as a sentinel in recursive entries to startActionModeForChild.
@@ -7170,6 +7182,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public WindowInsets dispatchApplyWindowInsets(WindowInsets insets) {
         insets = super.dispatchApplyWindowInsets(insets);
+        if (insets.isConsumed()) {
+            return insets;
+        }
         if (View.sBrokenInsetsDispatch) {
             return brokenDispatchApplyWindowInsets(insets);
         } else {
@@ -7178,13 +7193,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     private WindowInsets brokenDispatchApplyWindowInsets(WindowInsets insets) {
-        if (!insets.isConsumed()) {
-            final int count = getChildCount();
-            for (int i = 0; i < count; i++) {
-                insets = getChildAt(i).dispatchApplyWindowInsets(insets);
-                if (insets.isConsumed()) {
-                    break;
-                }
+        final int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            insets = getChildAt(i).dispatchApplyWindowInsets(insets);
+            if (insets.isConsumed()) {
+                break;
             }
         }
         return insets;
@@ -7199,9 +7212,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
+    public void setWindowInsetsAnimationCallback(@Nullable WindowInsetsAnimationCallback listener) {
+        super.setWindowInsetsAnimationCallback(listener);
+        mInsetsAnimationDispatchMode = listener != null
+                ? listener.getDispatchMode()
+                : DISPATCH_MODE_CONTINUE_ON_SUBTREE;
+    }
+
+    @Override
     public void dispatchWindowInsetsAnimationPrepare(
             @NonNull InsetsAnimation animation) {
         super.dispatchWindowInsetsAnimationPrepare(animation);
+        if (mInsetsAnimationDispatchMode == DISPATCH_MODE_STOP) {
+            return;
+        }
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             getChildAt(i).dispatchWindowInsetsAnimationPrepare(animation);
@@ -7212,7 +7236,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @NonNull
     public AnimationBounds dispatchWindowInsetsAnimationStart(
             @NonNull InsetsAnimation animation, @NonNull AnimationBounds bounds) {
-        super.dispatchWindowInsetsAnimationStart(animation, bounds);
+        bounds = super.dispatchWindowInsetsAnimationStart(animation, bounds);
+        if (mInsetsAnimationDispatchMode == DISPATCH_MODE_STOP) {
+            return bounds;
+        }
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             getChildAt(i).dispatchWindowInsetsAnimationStart(animation, bounds);
@@ -7224,6 +7251,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @NonNull
     public WindowInsets dispatchWindowInsetsAnimationProgress(@NonNull WindowInsets insets) {
         insets = super.dispatchWindowInsetsAnimationProgress(insets);
+        if (mInsetsAnimationDispatchMode == DISPATCH_MODE_STOP) {
+            return insets;
+        }
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             getChildAt(i).dispatchWindowInsetsAnimationProgress(insets);
@@ -7234,6 +7264,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public void dispatchWindowInsetsAnimationFinish(@NonNull InsetsAnimation animation) {
         super.dispatchWindowInsetsAnimationFinish(animation);
+        if (mInsetsAnimationDispatchMode == DISPATCH_MODE_STOP) {
+            return;
+        }
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             getChildAt(i).dispatchWindowInsetsAnimationFinish(animation);

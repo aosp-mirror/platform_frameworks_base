@@ -58,6 +58,7 @@ import android.app.IActivityManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
+import android.content.PermissionChecker;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PermissionGroupInfoFlags;
@@ -4070,8 +4071,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return;
         }
         final boolean isSameProfileGroup = isSameProfileGroup(callingUserId, userId);
-        if (isSameProfileGroup
-                && hasPermission(android.Manifest.permission.INTERACT_ACROSS_PROFILES)) {
+        if (isSameProfileGroup && PermissionChecker.checkPermissionForPreflight(
+                mContext,
+                android.Manifest.permission.INTERACT_ACROSS_PROFILES,
+                PermissionChecker.PID_UNKNOWN,
+                callingUid,
+                mPackageManagerInt.getPackage(callingUid).getPackageName())
+                == PermissionChecker.PERMISSION_GRANTED) {
             return;
         }
         String errorMessage = buildInvalidCrossUserOrProfilePermissionMessage(
@@ -4349,7 +4355,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public void enforceCrossUserOrProfilePermission(int callingUid, int userId,
                 boolean requireFullPermission, boolean checkShell, String message) {
-            PermissionManagerService.this.enforceCrossUserOrProfilePermission(callingUid,
+            PermissionManagerService.this.enforceCrossUserOrProfilePermission(
+                    callingUid,
                     userId,
                     requireFullPermission,
                     checkShell,

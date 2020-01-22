@@ -222,6 +222,19 @@ public class PackageInstaller {
     public static final String EXTRA_CALLBACK = "android.content.pm.extra.CALLBACK";
 
     /**
+     * Type of DataLoader for this session. Will be one of
+     * {@link #DATA_LOADER_TYPE_NONE}, {@link #DATA_LOADER_TYPE_STREAMING},
+     * {@link #DATA_LOADER_TYPE_INCREMENTAL}.
+     * <p>
+     * See the individual types documentation for details.
+     *
+     * @see Intent#getIntExtra(String, int)
+     * {@hide}
+     */
+    @SystemApi
+    public static final String EXTRA_DATA_LOADER_TYPE = "android.content.pm.extra.DATA_LOADER_TYPE";
+
+    /**
      * Streaming installation pending.
      * Caller should make sure DataLoader is able to prepare image and reinitiate the operation.
      *
@@ -324,6 +337,33 @@ public class PackageInstaller {
      * @see #EXTRA_STATUS_MESSAGE
      */
     public static final int STATUS_FAILURE_INCOMPATIBLE = 7;
+
+    /**
+     * Default value, non-streaming installation session.
+     *
+     * @see #EXTRA_DATA_LOADER_TYPE
+     * {@hide}
+     */
+    @SystemApi
+    public static final int DATA_LOADER_TYPE_NONE = DataLoaderType.NONE;
+
+    /**
+     * Streaming installation using data loader.
+     *
+     * @see #EXTRA_DATA_LOADER_TYPE
+     * {@hide}
+     */
+    @SystemApi
+    public static final int DATA_LOADER_TYPE_STREAMING = DataLoaderType.STREAMING;
+
+    /**
+     * Streaming installation using Incremental FileSystem.
+     *
+     * @see #EXTRA_DATA_LOADER_TYPE
+     * {@hide}
+     */
+    @SystemApi
+    public static final int DATA_LOADER_TYPE_INCREMENTAL = DataLoaderType.INCREMENTAL;
 
     private final IPackageInstaller mInstaller;
     private final int mUserId;

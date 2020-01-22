@@ -302,15 +302,30 @@ public final class ImsCallProfile implements Parcelable {
      *      updateImsCallRatFromExtras(Bundle)} to determine whether to set the
      * {@link android.telecom.TelecomManager#EXTRA_CALL_NETWORK_TYPE} extra value and
      * {@link android.telecom.Connection#PROPERTY_WIFI} property on a connection.
+     * @deprecated the constants associated with this extra are hidden, instead use
+     * {@link #EXTRA_CALL_NETWORK_TYPE}.
      */
+    @Deprecated
     public static final String EXTRA_CALL_RAT_TYPE = "CallRadioTech";
+
+    /**
+     * Extra key with an {@code int} value which can be set in {@link #setCallExtraInt(String, int)}
+     * to indicate the network type used for a call.
+     * <p>
+     * Valid values are defined by {@code TelephonyManager.NETWORK_TYPE_*} constants. An example may
+     * be {@link android.telephony.TelephonyManager#NETWORK_TYPE_LTE}.
+     */
+    public static final String EXTRA_CALL_NETWORK_TYPE =
+            "android.telephony.ims.extra.CALL_NETWORK_TYPE";
 
     /**
      * Similar to {@link #EXTRA_CALL_RAT_TYPE}, except with a lowercase 'c'.  Used to ensure
      * compatibility with modems that are non-compliant with the {@link #EXTRA_CALL_RAT_TYPE}
      * extra key.  Should be removed when the non-compliant modems are fixed.
      * @hide
+     * @deprecated Use {@link #EXTRA_CALL_NETWORK_TYPE} instead.
      */
+    @Deprecated
     public static final String EXTRA_CALL_RAT_TYPE_ALT = "callRadioTech";
 
     /** @hide */

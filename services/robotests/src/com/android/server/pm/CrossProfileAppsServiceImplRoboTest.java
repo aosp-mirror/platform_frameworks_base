@@ -79,6 +79,7 @@ import java.util.Set;
 @Config(shadows = {ShadowUserManager.class, ShadowApplicationPackageManager.class})
 public class CrossProfileAppsServiceImplRoboTest {
     private static final int CALLING_UID = 1111;
+    private static final int CALLING_PID = 1000;
     private static final String CROSS_PROFILE_APP_PACKAGE_NAME =
             "com.android.server.pm.crossprofileappsserviceimplrobotest.crossprofileapp";
     private static final int PERSONAL_PROFILE_USER_ID = 0;
@@ -380,6 +381,11 @@ public class CrossProfileAppsServiceImplRoboTest {
         @Override
         public int getCallingUid() {
             return CALLING_UID;
+        }
+
+        @Override
+        public int getCallingPid() {
+            return CALLING_PID;
         }
 
         @Override

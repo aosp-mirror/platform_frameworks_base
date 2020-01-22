@@ -131,6 +131,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -2339,6 +2340,85 @@ public class KeyValueBackupTaskTest  {
         assertThat(mBackupManagerService.getCurrentToken()).isEqualTo(0L);
     }
 
+    /** Do not inform transport of an empty backup if the app hasn't backed up before */
+    @Test
+    public void testRunTask_whenNoDataToBackupOnFirstBackup_doesNotTellTransportOfBackup()
+            throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        mBackupManagerService.setCurrentToken(0L);
+        when(transportMock.transport.getCurrentRestoreSet()).thenReturn(1234L);
+        setUpAgent(PACKAGE_1);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, true, PACKAGE_1);
+
+        runTask(task);
+
+        verify(transportMock.transport, never())
+                .performBackup(
+                        argThat(packageInfo(PACKAGE_1)), any(ParcelFileDescriptor.class), anyInt());
+    }
+
+    /** Let the transport know if there are no changes for a KV backed-up package. */
+    @Test
+    public void testRunTask_whenBackupHasCompletedAndThenNoDataChanges_transportGetsNotified()
+            throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        when(transportMock.transport.getCurrentRestoreSet()).thenReturn(1234L);
+        when(transportMock.transport.isAppEligibleForBackup(
+                        argThat(packageInfo(PACKAGE_1)), eq(false)))
+                .thenReturn(true);
+        when(transportMock.transport.isAppEligibleForBackup(
+                        argThat(packageInfo(PACKAGE_2)), eq(false)))
+                .thenReturn(true);
+        setUpAgentWithData(PACKAGE_1);
+        setUpAgentWithData(PACKAGE_2);
+
+        PackageInfo endSentinel = new PackageInfo();
+        endSentinel.packageName = KeyValueBackupTask.NO_DATA_END_SENTINEL;
+
+        // Perform First Backup run, which should backup both packages
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1, PACKAGE_2);
+        runTask(task);
+        InOrder order = Mockito.inOrder(transportMock.transport);
+        order.verify(transportMock.transport)
+                .performBackup(
+                        argThat(packageInfo(PACKAGE_1)),
+                        any(),
+                        eq(BackupTransport.FLAG_NON_INCREMENTAL));
+        order.verify(transportMock.transport).finishBackup();
+        order.verify(transportMock.transport)
+                .performBackup(
+                        argThat(packageInfo(PACKAGE_2)),
+                        any(),
+                        eq(BackupTransport.FLAG_NON_INCREMENTAL));
+        order.verify(transportMock.transport).finishBackup();
+
+        // Run again with new data for package 1, but nothing new for package 2
+        task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+        runTask(task);
+
+        // Now for the second run we performed one incremental backup (package 1) and
+        // made one "no change" call (package 2) before sending the end sentinel.
+        order.verify(transportMock.transport)
+                .performBackup(
+                        argThat(packageInfo(PACKAGE_1)),
+                        any(),
+                        eq(BackupTransport.FLAG_INCREMENTAL));
+        order.verify(transportMock.transport).finishBackup();
+        order.verify(transportMock.transport)
+                .performBackup(
+                        argThat(packageInfo(PACKAGE_2)),
+                        any(),
+                        eq(BackupTransport.FLAG_DATA_NOT_CHANGED));
+        order.verify(transportMock.transport).finishBackup();
+        order.verify(transportMock.transport)
+                .performBackup(
+                        argThat(packageInfo(endSentinel)),
+                        any(),
+                        eq(BackupTransport.FLAG_DATA_NOT_CHANGED));
+        order.verify(transportMock.transport).finishBackup();
+        order.verifyNoMoreInteractions();
+    }
+
     private void runTask(KeyValueBackupTask task) {
         // Pretend we are not on the main-thread to prevent RemoteCall from complaining
         mShadowMainLooper.setCurrentThread(false);
@@ -2574,6 +2654,20 @@ public class KeyValueBackupTaskTest  {
         // returns null. So we guard against that by checking for null.
         return packageInfo ->
                 packageInfo != null && packageData.packageName.equals(packageInfo.packageName);
+    }
+
+    /** Matches {@link PackageInfo} whose package name is {@code packageData.packageName}. */
+    private static ArgumentMatcher<PackageInfo> packageInfo(PackageInfo packageData) {
+        // We have to test for packageInfo nulity because of Mockito's own stubbing with argThat().
+        // E.g. if you do:
+        //
+        //   1. when(object.method(argThat(str -> str.equals("foo")))).thenReturn(0)
+        //   2. when(object.method(argThat(str -> str.equals("bar")))).thenReturn(2)
+        //
+        // The second line will throw NPE because it will call lambda 1 with null, since argThat()
+        // returns null. So we guard against that by checking for null.
+        return packageInfo ->
+                packageInfo != null && packageInfo.packageName.equals(packageInfo.packageName);
     }
 
     /** Matches {@link ApplicationInfo} whose package name is {@code packageData.packageName}. */

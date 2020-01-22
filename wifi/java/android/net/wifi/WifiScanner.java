@@ -291,28 +291,46 @@ public class WifiScanner {
         @NonNull
         @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
         public final List<HiddenNetwork> hiddenNetworks = new ArrayList<>();
-        /** period of background scan; in millisecond, 0 => single shot scan */
+        /**
+         * period of background scan; in millisecond, 0 => single shot scan
+         * @deprecated Background scan support is removed.
+         */
+        @Deprecated
         public int periodInMs;
-        /** must have a valid REPORT_EVENT value */
+        /**
+         * must have a valid REPORT_EVENT value
+         * @deprecated Background scan support is removed.
+         */
+        @Deprecated
         public int reportEvents;
-        /** defines number of bssids to cache from each scan */
+        /**
+         * defines number of bssids to cache from each scan
+         * @deprecated Background scan support is removed.
+         */
+        @Deprecated
         public int numBssidsPerScan;
         /**
          * defines number of scans to cache; use it with REPORT_EVENT_AFTER_BUFFER_FULL
          * to wake up at fixed interval
+         * @deprecated Background scan support is removed.
          */
+        @Deprecated
         public int maxScansToCache;
         /**
          * if maxPeriodInMs is non zero or different than period, then this bucket is
          * a truncated binary exponential backoff bucket and the scan period will grow
          * exponentially as per formula: actual_period(N) = period * (2 ^ (N/stepCount))
          * to maxPeriodInMs
+         * @deprecated Background scan support is removed.
          */
+        @Deprecated
         public int maxPeriodInMs;
         /**
          * for truncated binary exponential back off bucket, number of scans to perform
          * for a given period
+         * @deprecated Background scan support is removed.
          */
+        @Deprecated
         public int stepCount;
         /**
          * Flag to indicate if the scan settings are targeted for PNO scan.
@@ -788,7 +806,9 @@ public class WifiScanner {
         /**
          * Framework co-ordinates scans across multiple apps; so it may not give exactly the
          * same period requested. If period of a scan is changed; it is reported by this event.
+         * @deprecated Background scan support is removed.
          */
+        @Deprecated
         public void onPeriodChanged(int periodInMs);
         /**
          * reports results retrieved from background scan and single shot scans
@@ -891,7 +911,9 @@ public class WifiScanner {
      * @param listener specifies the object to report events to. This object is also treated as a
      *                 key for this scan, and must also be specified to cancel the scan. Multiple
      *                 scans should also not share this object.
+     * @deprecated Background scan support is removed.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void startBackgroundScan(ScanSettings settings, ScanListener listener,
             WorkSource workSource) {
@@ -911,7 +933,9 @@ public class WifiScanner {
      * stop an ongoing wifi scan
      * @param listener specifies which scan to cancel; must be same object as passed in {@link
      *  #startBackgroundScan}
+     * @deprecated Background scan support is removed.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void stopBackgroundScan(ScanListener listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
@@ -927,7 +951,9 @@ public class WifiScanner {
     /**
      * reports currently available scan results on appropriate listeners
      * @return true if all scan results were reported correctly
+     * @deprecated Background scan support is removed.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public boolean getScanResults() {
         validateChannel();

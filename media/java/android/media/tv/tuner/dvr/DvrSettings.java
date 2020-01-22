@@ -20,10 +20,11 @@ import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
-import android.media.tv.tuner.TunerConstants.FilterStatus;
 import android.media.tv.tuner.TunerUtils;
+import android.media.tv.tuner.filter.Filter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -33,6 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@SystemApi
 public class DvrSettings {
 
     /** @hide */
@@ -59,40 +61,64 @@ public class DvrSettings {
     public static final int DATA_FORMAT_SHV_TLV = Constants.DataFormat.SHV_TLV;
 
 
-    /** @hide */
-    @IntDef(prefix = "TYPE_", value = {TYPE_RECORD, TYPE_PLAYBACK})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Type {}
-
-    /**
-     * DVR for recording.
-     */
-    public static final int TYPE_RECORD = Constants.DvrType.RECORD;
-    /**
-     * DVR for playback of recorded programs.
-     */
-    public static final int TYPE_PLAYBACK = Constants.DvrType.PLAYBACK;
-
-
-
+    @Filter.Status
     private final int mStatusMask;
+    @BytesLong
     private final long mLowThreshold;
+    @BytesLong
     private final long mHighThreshold;
+    @BytesLong
     private final long mPacketSize;
-
     @DataFormat
     private final int mDataFormat;
-    @Type
-    private final int mType;
 
-    private DvrSettings(int statusMask, long lowThreshold, long highThreshold, long packetSize,
-            @DataFormat int dataFormat, @Type int type) {
+    private DvrSettings(@Filter.Status int statusMask, @BytesLong long lowThreshold,
+            @BytesLong long highThreshold, @BytesLong long packetSize, @DataFormat int dataFormat) {
         mStatusMask = statusMask;
         mLowThreshold = lowThreshold;
         mHighThreshold = highThreshold;
         mPacketSize = packetSize;
         mDataFormat = dataFormat;
-        mType = type;
+    }
+
+    /**
+     * Gets status mask.
+     */
+    @Filter.Status
+    public int getStatusMask() {
+        return mStatusMask;
+    }
+
+    /**
+     * Gets low threshold in bytes.
+     */
+    @BytesLong
+    public long getLowThreshold() {
+        return mLowThreshold;
+    }
+
+    /**
+     * Sets high threshold in bytes.
+     */
+    @BytesLong
+    public long getHighThreshold() {
+        return mHighThreshold;
+    }
+
+    /**
+     * Gets packet size in bytes.
+     */
+    @BytesLong
+    public long getPacketSize() {
+        return mPacketSize;
+    }
+
+    /**
+     * Gets data format.
+     */
+    @DataFormat
+    public int getDataFormat() {
+        return mDataFormat;
     }
 
     /**
@@ -102,7 +128,7 @@ public class DvrSettings {
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder builder(Context context) {
+    public static Builder builder(@NonNull Context context) {
         TunerUtils.checkTunerPermission(context);
         return new Builder();
     }
@@ -117,14 +143,12 @@ public class DvrSettings {
         private long mPacketSize;
         @DataFormat
         private int mDataFormat;
-        @Type
-        private int mType;
 
         /**
          * Sets status mask.
          */
         @NonNull
-        public Builder setStatusMask(@FilterStatus int statusMask) {
+        public Builder setStatusMask(@Filter.Status int statusMask) {
             this.mStatusMask = statusMask;
             return this;
         }
@@ -166,21 +190,12 @@ public class DvrSettings {
         }
 
         /**
-         * Sets settings type.
-         */
-        @NonNull
-        public Builder setType(@Type int type) {
-            this.mType = type;
-            return this;
-        }
-
-        /**
          * Builds a {@link DvrSettings} object.
          */
         @NonNull
         public DvrSettings build() {
             return new DvrSettings(
-                    mStatusMask, mLowThreshold, mHighThreshold, mPacketSize, mDataFormat, mType);
+                    mStatusMask, mLowThreshold, mHighThreshold, mPacketSize, mDataFormat);
         }
     }
 }

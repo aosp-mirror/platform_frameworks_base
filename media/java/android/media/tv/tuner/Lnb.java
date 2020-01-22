@@ -126,25 +126,21 @@ public class Lnb implements AutoCloseable {
 
     /**
      * Outgoing Diseqc message overflow.
-     * @hide
      */
     public static final int EVENT_TYPE_DISEQC_RX_OVERFLOW =
             Constants.LnbEventType.DISEQC_RX_OVERFLOW;
     /**
      * Outgoing Diseqc message isn't delivered on time.
-     * @hide
      */
     public static final int EVENT_TYPE_DISEQC_RX_TIMEOUT =
             Constants.LnbEventType.DISEQC_RX_TIMEOUT;
     /**
      * Incoming Diseqc message has parity error.
-     * @hide
      */
     public static final int EVENT_TYPE_DISEQC_RX_PARITY_ERROR =
             Constants.LnbEventType.DISEQC_RX_PARITY_ERROR;
     /**
      * LNB is overload.
-     * @hide
      */
     public static final int EVENT_TYPE_LNB_OVERLOAD = Constants.LnbEventType.LNB_OVERLOAD;
 
@@ -162,8 +158,7 @@ public class Lnb implements AutoCloseable {
         mId = id;
     }
 
-    /** @hide */
-    public void setCallback(@Nullable LnbCallback callback) {
+    void setCallback(@Nullable LnbCallback callback) {
         mCallback = callback;
         if (mCallback == null) {
             return;

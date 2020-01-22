@@ -17,13 +17,14 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
-import android.media.tv.tuner.Tuner.Filter;
+import android.annotation.SystemApi;
 
 /**
  * Filter event sent from {@link Filter} objects for Timed External Media Information (TEMI) data.
  *
  * @hide
  */
+@SystemApi
 public class TemiEvent extends FilterEvent {
     private final long mPts;
     private final byte mDescrTag;
@@ -45,14 +46,14 @@ public class TemiEvent extends FilterEvent {
     }
 
     /**
-     * Gets TEMI descriptor tag.
+     * Gets TEMI (Timed External Media Information) descriptor tag.
      */
     public byte getDescriptorTag() {
         return mDescrTag;
     }
 
     /**
-     * Gets TEMI descriptor.
+     * Gets TEMI (Timed External Media Information) descriptor.
      */
     @NonNull
     public byte[] getDescriptorData() {

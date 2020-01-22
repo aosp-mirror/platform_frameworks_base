@@ -3723,6 +3723,39 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(-1, dpm.getLastSecurityLogRetrievalTime());
     }
 
+    public void testSetLockdownAdminConfiguredNetworksWithDO() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        dpm.setLockdownAdminConfiguredNetworks(admin1, true);
+        verify(getServices().settings).settingsGlobalPutInt(
+                Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 1);
+
+        dpm.setLockdownAdminConfiguredNetworks(admin1, false);
+        verify(getServices().settings).settingsGlobalPutInt(
+                Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 0);
+    }
+
+    public void testSetLockdownAdminConfiguredNetworksWithPO() throws Exception {
+        setupProfileOwner();
+        assertExpectException(SecurityException.class, null,
+                () -> dpm.setLockdownAdminConfiguredNetworks(admin1, false));
+        verify(getServices().settings, never()).settingsGlobalPutInt(
+                Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 0);
+    }
+
+    public void testSetLockdownAdminConfiguredNetworksWithPOOfOrganizationOwnedDevice()
+            throws Exception {
+        setupProfileOwner();
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
+        dpm.setLockdownAdminConfiguredNetworks(admin1, true);
+        verify(getServices().settings).settingsGlobalPutInt(
+                Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 1);
+
+        dpm.setLockdownAdminConfiguredNetworks(admin1, false);
+        verify(getServices().settings).settingsGlobalPutInt(
+                Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 0);
+    }
+
     public void testSetSystemSettingFailWithNonWhitelistedSettings() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -5678,6 +5711,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testGetAllCrossProfilePackages_notSet_returnsEmpty() throws Exception {
         addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
+        mContext.packageName = admin1.getPackageName();
 
         setCrossProfileAppsList();
 
@@ -5687,6 +5721,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testGetAllCrossProfilePackages_notSet_dpmsReinitialized_returnsEmpty()
             throws Exception {
         addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
+        mContext.packageName = admin1.getPackageName();
 
         setCrossProfileAppsList();
         initializeDpms();
@@ -5697,6 +5732,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testGetAllCrossProfilePackages_whenSet_returnsCombinedSet() throws Exception {
         addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
         final Set<String> packages = Sets.newSet("TEST_PACKAGE", "TEST_COMMON_PACKAGE");
+        mContext.packageName = admin1.getPackageName();
 
         dpm.setCrossProfilePackages(admin1, packages);
         setCrossProfileAppsList("TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE");
@@ -5711,6 +5747,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             throws Exception {
         addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
         final Set<String> packages = Sets.newSet("TEST_PACKAGE", "TEST_COMMON_PACKAGE");
+        mContext.packageName = admin1.getPackageName();
 
         dpm.setCrossProfilePackages(admin1, packages);
         setCrossProfileAppsList("TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE");

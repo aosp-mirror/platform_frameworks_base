@@ -42,7 +42,6 @@ import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.StatsLog;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -52,6 +51,7 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.recents.TriangleShape;
+import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.AlphaOptimizedButton;
 
 /**
@@ -357,7 +357,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
             if (isNew) {
                 mBubbleIntent = mBubble.getBubbleIntent();
-                if (mBubbleIntent != null) {
+                if (mBubbleIntent != null || mBubble.getShortcutInfo() != null) {
                     setContentVisibility(false);
                     mActivityView.setVisibility(VISIBLE);
                 }
@@ -467,7 +467,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             mStackView.collapseStack(() -> {
                 mContext.startActivityAsUser(intent, mBubble.getEntry().getSbn().getUser());
                 logBubbleClickEvent(mBubble,
-                        StatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
+                        SysUiStatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
             });
         }
     }
@@ -543,7 +543,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     }
 
     private boolean usingActivityView() {
-        return mBubbleIntent != null && mActivityView != null;
+        return (mBubbleIntent != null || mBubble.getShortcutInfo() != null)
+                && mActivityView != null;
     }
 
     /**
@@ -564,7 +565,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
      */
     private void logBubbleClickEvent(Bubble bubble, int action) {
         StatusBarNotification notification = bubble.getEntry().getSbn();
-        StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
+        SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
                 notification.getPackageName(),
                 notification.getNotification().getChannelId(),
                 notification.getId(),

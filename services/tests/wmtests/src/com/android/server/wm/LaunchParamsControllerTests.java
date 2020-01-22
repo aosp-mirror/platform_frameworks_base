@@ -284,7 +284,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
         doNothing().when(mService).moveStackToDisplay(anyInt(), anyInt());
         mController.layoutTask(task, null /* windowLayout */);
-        verify(mService, times(1)).moveStackToDisplay(eq(task.getStackId()),
+        verify(mService, times(1)).moveStackToDisplay(eq(task.getRootTaskId()),
                 eq(params.mPreferredDisplayId));
     }
 
@@ -421,7 +421,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         }
 
         @Override
-        void saveTask(Task task) {
+        void saveTask(Task task, DisplayContent display) {
             final int userId = task.mUserId;
             final ComponentName realActivity = task.realActivity;
             mTmpParams.mPreferredDisplayId = task.getDisplayId();

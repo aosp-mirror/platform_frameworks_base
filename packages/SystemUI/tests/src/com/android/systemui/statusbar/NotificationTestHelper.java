@@ -383,9 +383,9 @@ public class NotificationTestHelper {
         PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0, target, 0);
 
         return new BubbleMetadata.Builder()
-                .setIntent(bubbleIntent)
+                .createIntentBubble(bubbleIntent,
+                        Icon.createWithResource(mContext, R.drawable.android))
                 .setDeleteIntent(deleteIntent)
-                .setIcon(Icon.createWithResource(mContext, R.drawable.android))
                 .setDesiredHeight(314)
                 .build();
     }

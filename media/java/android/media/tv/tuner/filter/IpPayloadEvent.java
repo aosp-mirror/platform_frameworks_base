@@ -16,13 +16,14 @@
 
 package android.media.tv.tuner.filter;
 
-import android.media.tv.tuner.Tuner.Filter;
+import android.annotation.SystemApi;
 
 /**
  * Filter event sent from {@link Filter} objects with IP payload type.
  *
  * @hide
  */
+@SystemApi
 public class IpPayloadEvent extends FilterEvent {
     private final int mDataLength;
 

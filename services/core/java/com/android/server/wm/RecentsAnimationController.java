@@ -374,7 +374,7 @@ public class RecentsAnimationController implements DeathRecipient {
             final PooledConsumer c = PooledLambda.obtainConsumer((t, outList) ->
 	            { if (!outList.contains(t)) outList.add(t); }, PooledLambda.__(Task.class),
                     visibleTasks);
-            targetStack.forAllTasks(c);
+            targetStack.forAllTasks(c, true /* traverseTopToBottom */, targetStack);
             c.recycle();
         }
 
@@ -413,7 +413,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
         // Save the minimized home height
         final ActivityStack dockedStack =
-                mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+                mDisplayContent.getRootSplitScreenPrimaryTask();
         mDisplayContent.getDockedDividerController().getHomeStackBoundsInDockedMode(
                 mDisplayContent.getConfiguration(),
                 dockedStack == null ? DOCKED_INVALID : dockedStack.getDockSide(),

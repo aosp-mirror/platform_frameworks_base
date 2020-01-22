@@ -18,7 +18,8 @@ package android.media.tv.tuner;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.media.tv.tuner.Tuner.Filter;
+import android.annotation.SystemApi;
+import android.media.tv.tuner.filter.Filter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,6 +33,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@SystemApi
 public class Descrambler implements AutoCloseable {
     /** @hide */
     @IntDef(prefix = "PID_TYPE_", value = {PID_TYPE_T, PID_TYPE_MMTP})
@@ -55,6 +57,7 @@ public class Descrambler implements AutoCloseable {
     private native int nativeSetKeyToken(byte[] keyToken);
     private native int nativeClose();
 
+    // Called by JNI code
     private Descrambler() {}
 
     /**

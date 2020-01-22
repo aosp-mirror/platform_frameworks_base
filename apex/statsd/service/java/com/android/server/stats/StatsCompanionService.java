@@ -714,98 +714,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    // read high watermark for section
-    private long readProcStatsHighWaterMark(int section) {
-        try {
-            File[] files = mBaseDir.listFiles((d, name) -> {
-                return name.toLowerCase().startsWith(String.valueOf(section) + '_');
-            });
-            if (files == null || files.length == 0) {
-                return 0;
-            }
-            if (files.length > 1) {
-                Log.e(TAG, "Only 1 file expected for high water mark. Found " + files.length);
-            }
-            return Long.valueOf(files[0].getName().split("_")[1]);
-        } catch (SecurityException e) {
-            Log.e(TAG, "Failed to get procstats high watermark file.", e);
-        } catch (NumberFormatException e) {
-            Log.e(TAG, "Failed to parse file name.", e);
-        }
-        return 0;
-    }
-
-    private IProcessStats mProcessStats =
-            IProcessStats.Stub.asInterface(ServiceManager.getService(ProcessStats.SERVICE_NAME));
-
-    private void pullProcessStats(int section, int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        synchronized (this) {
-            try {
-                long lastHighWaterMark = readProcStatsHighWaterMark(section);
-                List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
-                long highWaterMark = mProcessStats.getCommittedStats(
-                        lastHighWaterMark, section, true, statsFiles);
-                if (statsFiles.size() != 1) {
-                    return;
-                }
-                unpackStreamedData(tagId, elapsedNanos, wallClockNanos, pulledData, statsFiles);
-                new File(mBaseDir.getAbsolutePath() + "/" + section + "_"
-                        + lastHighWaterMark).delete();
-                new File(
-                        mBaseDir.getAbsolutePath() + "/" + section + "_"
-                                + highWaterMark).createNewFile();
-            } catch (IOException e) {
-                Log.e(TAG, "Getting procstats failed: ", e);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Getting procstats failed: ", e);
-            } catch (SecurityException e) {
-                Log.e(TAG, "Getting procstats failed: ", e);
-            }
-        }
-    }
-
-    static void unpackStreamedData(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData, List<ParcelFileDescriptor> statsFiles)
-            throws IOException {
-        InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(
-                statsFiles.get(0));
-        int[] len = new int[1];
-        byte[] stats = readFully(stream, len);
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
-                wallClockNanos);
-        e.writeStorage(Arrays.copyOf(stats, len[0]));
-        pulledData.add(e);
-    }
-
-    static byte[] readFully(InputStream stream, int[] outLen) throws IOException {
-        int pos = 0;
-        final int initialAvail = stream.available();
-        byte[] data = new byte[initialAvail > 0 ? (initialAvail + 1) : 16384];
-        while (true) {
-            int amt = stream.read(data, pos, data.length - pos);
-            if (DEBUG) {
-                Slog.i(TAG, "Read " + amt + " bytes at " + pos + " of avail " + data.length);
-            }
-            if (amt < 0) {
-                if (DEBUG) {
-                    Slog.i(TAG, "**** FINISHED READING: pos=" + pos + " len=" + data.length);
-                }
-                outLen[0] = pos;
-                return data;
-            }
-            pos += amt;
-            if (pos >= data.length) {
-                byte[] newData = new byte[pos + 16384];
-                if (DEBUG) {
-                    Slog.i(TAG, "Copying " + pos + " bytes to new array len " + newData.length);
-                }
-                System.arraycopy(data, 0, newData, 0, pos);
-                data = newData;
-            }
-        }
-    }
-
     private void pullDebugElapsedClock(int tagId,
             long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
         final long elapsedMillis = SystemClock.elapsedRealtime();
@@ -856,43 +764,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullFaceSettings(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        long callingToken = Binder.clearCallingIdentity();
-        try {
-            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
-            int numUsers = users.size();
-            for (int userNum = 0; userNum < numUsers; userNum++) {
-                int userId = users.get(userNum).getUserHandle().getIdentifier();
-
-                StatsLogEventWrapper e =
-                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED, 1,
-                        userId) != 0);
-                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD,
-                        0, userId) != 0);
-                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED, 1,
-                        userId) != 0);
-                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.FACE_UNLOCK_APP_ENABLED, 1,
-                        userId) != 0);
-                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION, 0,
-                        userId) != 0);
-                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.FACE_UNLOCK_DIVERSITY_REQUIRED, 1,
-                        userId) != 0);
-
-                pulledData.add(e);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(callingToken);
-        }
-    }
-
     /**
      * Pulls various data.
      */
@@ -907,17 +778,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
         switch (tagId) {
 
-            case StatsLog.PROC_STATS: {
-                pullProcessStats(ProcessStats.REPORT_ALL, tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.PROC_STATS_PKG_PROC: {
-                pullProcessStats(ProcessStats.REPORT_PKG_PROC_STATS, tagId, elapsedNanos,
-                        wallClockNanos, ret);
-                break;
-            }
-
             case StatsLog.DEBUG_ELAPSED_CLOCK: {
                 pullDebugElapsedClock(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
@@ -925,11 +785,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             case StatsLog.DEBUG_FAILING_ELAPSED_CLOCK: {
                 pullDebugFailingElapsedClock(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-
-            case StatsLog.FACE_SETTINGS: {
-                pullFaceSettings(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
 

@@ -2249,4 +2249,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void setSurfaceControl(SurfaceControl sc) {
         mSurfaceControl = sc;
     }
+
+    /** Cheap way of doing cast and instanceof. */
+    Task asTask() {
+        return null;
+    }
+
+    /** Cheap way of doing cast and instanceof. */
+    ActivityRecord asActivityRecord() {
+        return null;
+    }
 }

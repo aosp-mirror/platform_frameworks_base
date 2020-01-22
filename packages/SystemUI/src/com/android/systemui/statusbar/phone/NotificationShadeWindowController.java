@@ -256,7 +256,12 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
             mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {
             mLpChanged.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE;
-            mLpChanged.flags |= LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+            // Make sure to remove FLAG_ALT_FOCUSABLE_IM when keyguard needs input.
+            if (state.mKeyguardNeedsInput) {
+                mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+            } else {
+                mLpChanged.flags |= LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+            }
         } else {
             mLpChanged.flags |= LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;

@@ -20,10 +20,6 @@ import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STAT
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_FULL;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.ComponentName;
@@ -111,13 +107,6 @@ public class PipTouchHandler {
             }
         }
     };
-    private ValueAnimator.AnimatorUpdateListener mUpdateScrimListener =
-            new AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    updateDismissFraction();
-                }
-            };
 
     // Behaviour states
     private int mMenuState = MENU_STATE_NONE;
@@ -162,7 +151,7 @@ public class PipTouchHandler {
         @Override
         public void onPipMinimize() {
             setMinimizedStateInternal(true);
-            mMotionHelper.animateToClosestMinimizedState(mMovementBounds, null /* updateListener */);
+            mMotionHelper.animateToClosestMinimizedState(mMovementBounds, null /* updateAction */);
         }
 
         @Override
@@ -655,15 +644,6 @@ public class PipTouchHandler {
                 float lastY = mStartPosition.y + mDelta.y;
                 float left = lastX + lastDelta.x;
                 float top = lastY + lastDelta.y;
-                if (!touchState.allowDraggingOffscreen() || !ENABLE_MINIMIZE) {
-                    left = Math.max(mMovementBounds.left, Math.min(mMovementBounds.right, left));
-                }
-                if (mEnableDimissDragToEdge) {
-                    // Allow pip to move past bottom bounds
-                    top = Math.max(mMovementBounds.top, top);
-                } else {
-                    top = Math.max(mMovementBounds.top, Math.min(mMovementBounds.bottom, top));
-                }
 
                 // Add to the cumulative delta after bounding the position
                 mDelta.x += left - lastX;
@@ -720,8 +700,9 @@ public class PipTouchHandler {
                 if (mMotionHelper.shouldDismissPip() || isFlingToBot) {
                     MetricsLoggerWrapper.logPictureInPictureDismissByDrag(mContext,
                             PipUtils.getTopPinnedActivity(mContext, mActivityManager));
-                    mMotionHelper.animateDismiss(mMotionHelper.getBounds(), vel.x,
-                        vel.y, mUpdateScrimListener);
+                    mMotionHelper.animateDismiss(
+                            vel.x, vel.y,
+                            PipTouchHandler.this::updateDismissFraction /* updateAction */);
                     return true;
                 }
             }
@@ -739,8 +720,9 @@ public class PipTouchHandler {
                         // minimize offset adjusted
                         mMenuController.hideMenu();
                     } else {
-                        mMotionHelper.animateToClosestMinimizedState(mMovementBounds,
-                                mUpdateScrimListener);
+                        mMotionHelper.animateToClosestMinimizedState(
+                                mMovementBounds,
+                                PipTouchHandler.this::updateDismissFraction /* updateAction */);
                     }
                     return true;
                 }
@@ -750,7 +732,7 @@ public class PipTouchHandler {
                     setMinimizedStateInternal(false);
                 }
 
-                AnimatorListenerAdapter postAnimationCallback = null;
+                Runnable endAction = null;
                 if (mMenuState != MENU_STATE_NONE) {
                     // If the menu is still visible, and we aren't minimized, then just poke the
                     // menu so that it will timeout after the user stops touching it
@@ -759,26 +741,20 @@ public class PipTouchHandler {
                 } else {
                     // If the menu is not visible, then we can still be showing the activity for the
                     // dismiss overlay, so just finish it after the animation completes
-                    postAnimationCallback = new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            mMenuController.hideMenu();
-                        }
-                    };
+                    endAction = mMenuController::hideMenu;
                 }
 
                 if (isFling) {
-                    mMotionHelper.flingToSnapTarget(velocity, vel.x, vel.y, mMovementBounds,
-                            mUpdateScrimListener, postAnimationCallback,
-                            mStartPosition);
+                    mMotionHelper.flingToSnapTarget(
+                            vel.x, vel.y, mMovementBounds,
+                            PipTouchHandler.this::updateDismissFraction /* updateAction */,
+                            endAction /* endAction */);
                 } else {
-                    mMotionHelper.animateToClosestSnapTarget(mMovementBounds, mUpdateScrimListener,
-                            postAnimationCallback);
+                    mMotionHelper.animateToClosestSnapTarget(mMovementBounds);
                 }
             } else if (mIsMinimized) {
                 // This was a tap, so no longer minimized
-                mMotionHelper.animateToClosestSnapTarget(mMovementBounds, null /* updateListener */,
-                        null /* animatorListener */);
+                mMotionHelper.animateToClosestSnapTarget(mMovementBounds);
                 setMinimizedStateInternal(false);
             } else if (mTouchState.isDoubleTap()) {
                 // Expand to fullscreen if this is a double tap

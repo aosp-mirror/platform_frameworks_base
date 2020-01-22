@@ -42,6 +42,7 @@ import android.content.Intent;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.SparseArray;
+import android.view.View.OnApplyWindowInsetsListener;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.inputmethod.EditorInfo;
@@ -96,13 +97,20 @@ public final class WindowInsets {
     private final boolean mCompatIgnoreVisibility;
 
     /**
-     * Since new insets may be added in the future that existing apps couldn't
-     * know about, this fully empty constant shouldn't be made available to apps
-     * since it would allow them to inadvertently consume unknown insets by returning it.
-     * @hide
+     * A {@link WindowInsets} instance for which {@link #isConsumed()} returns {@code true}.
+     * <p>
+     * This can be used during insets dispatch in the view hierarchy by returning this value from
+     * {@link View#onApplyWindowInsets(WindowInsets)} or
+     * {@link OnApplyWindowInsetsListener#onApplyWindowInsets(View, WindowInsets)} to stop dispatch
+     * the insets to its children to avoid traversing the entire view hierarchy.
+     * <p>
+     * The application should return this instance once it has taken care of all insets on a certain
+     * level in the view hierarchy, and doesn't need to dispatch to its children anymore for better
+     * performance.
+     *
+     * @see #isConsumed()
      */
-    @UnsupportedAppUsage
-    public static final WindowInsets CONSUMED;
+    public static final @NonNull WindowInsets CONSUMED;
 
     static {
         CONSUMED = new WindowInsets((Rect) null, null, false, false, null);
@@ -456,7 +464,11 @@ public final class WindowInsets {
      * Returns a copy of this WindowInsets with the cutout fully consumed.
      *
      * @return A modified copy of this WindowInsets
+     * @deprecated Consuming of different parts individually of a {@link WindowInsets} instance is
+     * deprecated, since {@link WindowInsets} contains many different insets. Use {@link #CONSUMED}
+     * instead to stop dispatching insets.
      */
+    @Deprecated
     @NonNull
     public WindowInsets consumeDisplayCutout() {
         return new WindowInsets(mSystemWindowInsetsConsumed ? null : mTypeInsetsMap,
@@ -504,7 +516,11 @@ public final class WindowInsets {
      * Returns a copy of this WindowInsets with the system window insets fully consumed.
      *
      * @return A modified copy of this WindowInsets
+     * @deprecated Consuming of different parts individually of a {@link WindowInsets} instance is
+     * deprecated, since {@link WindowInsets} contains many different insets. Use {@link #CONSUMED}
+     * instead to stop dispatching insets.
      */
+    @Deprecated
     @NonNull
     public WindowInsets consumeSystemWindowInsets() {
         return new WindowInsets(null, null,
@@ -754,7 +770,11 @@ public final class WindowInsets {
      * Returns a copy of this WindowInsets with the stable insets fully consumed.
      *
      * @return A modified copy of this WindowInsets
+     * @deprecated Consuming of different parts individually of a {@link WindowInsets} instance is
+     * deprecated, since {@link WindowInsets} contains many different insets. Use {@link #CONSUMED}
+     * instead to stop dispatching insets.
      */
+    @Deprecated
     @NonNull
     public WindowInsets consumeStableInsets() {
         return consumeSystemWindowInsets();

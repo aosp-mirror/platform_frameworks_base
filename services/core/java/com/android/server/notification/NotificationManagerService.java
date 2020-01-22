@@ -51,6 +51,8 @@ import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.Context.BIND_NOT_PERCEPTIBLE;
+import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
+import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.MATCH_ALL;
@@ -147,10 +149,12 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.ShortcutInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -279,6 +283,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -399,6 +404,7 @@ public class NotificationManagerService extends SystemService {
     private RoleObserver mRoleObserver;
     private UserManager mUm;
     private IPlatformCompat mPlatformCompat;
+    private LauncherApps mLauncherAppsService;
 
     final IBinder mForegroundToken = new Binder();
     private WorkerHandler mHandler;
@@ -844,20 +850,22 @@ public class NotificationManagerService extends SystemService {
 
     private static final class ToastRecord
     {
-        final int pid;
-        final String pkg;
-        final ITransientNotification callback;
-        int duration;
-        int displayId;
-        Binder token;
+        public final int pid;
+        public final String pkg;
+        public final IBinder token;
+        public final ITransientNotification callback;
+        public int duration;
+        public int displayId;
+        public Binder windowToken;
 
-        ToastRecord(int pid, String pkg, ITransientNotification callback, int duration,
-                Binder token, int displayId) {
+        ToastRecord(int pid, String pkg, IBinder token, ITransientNotification callback,
+                int duration, Binder windowToken, int displayId) {
             this.pid = pid;
             this.pkg = pkg;
+            this.token = token;
             this.callback = callback;
             this.duration = duration;
-            this.token = token;
+            this.windowToken = windowToken;
             this.displayId = displayId;
         }
 
@@ -876,8 +884,10 @@ public class NotificationManagerService extends SystemService {
             return "ToastRecord{"
                 + Integer.toHexString(System.identityHashCode(this))
                 + " pkg=" + pkg
+                + " token=" + token
                 + " callback=" + callback
-                + " duration=" + duration;
+                + " duration=" + duration
+                + "}";
         }
     }
 
@@ -1195,12 +1205,7 @@ public class NotificationManagerService extends SystemService {
                     final StatusBarNotification n = r.sbn;
                     final int callingUid = n.getUid();
                     final String pkg = n.getPackageName();
-                    if (isBubble && isNotificationAppropriateToBubble(r, pkg, callingUid,
-                            null /* oldEntry */)) {
-                        r.getNotification().flags |= FLAG_BUBBLE;
-                    } else {
-                        r.getNotification().flags &= ~FLAG_BUBBLE;
-                    }
+                    applyFlagBubble(r, pkg, callingUid, null /* oldEntry */, isBubble);
                 }
             }
         }
@@ -1575,6 +1580,80 @@ public class NotificationManagerService extends SystemService {
         }
     };
 
+    // Key: packageName Value: <shortcutId, notifId>
+    private HashMap<String, HashMap<String, String>> mActiveShortcutBubbles = new HashMap<>();
+
+    private boolean mLauncherAppsCallbackRegistered;
+
+    // Bubbles can be created based on a shortcut, we need to listen for changes to
+    // that shortcut so that we may update the bubble appropriately.
+    private final LauncherApps.Callback mLauncherAppsCallback = new LauncherApps.Callback() {
+        @Override
+        public void onPackageRemoved(String packageName, UserHandle user) {
+        }
+
+        @Override
+        public void onPackageAdded(String packageName, UserHandle user) {
+        }
+
+        @Override
+        public void onPackageChanged(String packageName, UserHandle user) {
+        }
+
+        @Override
+        public void onPackagesAvailable(String[] packageNames, UserHandle user,
+                boolean replacing) {
+        }
+
+        @Override
+        public void onPackagesUnavailable(String[] packageNames, UserHandle user,
+                boolean replacing) {
+        }
+
+        @Override
+        public void onShortcutsChanged(@NonNull String packageName,
+                @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
+            HashMap<String, String> shortcutBubbles = mActiveShortcutBubbles.get(packageName);
+            boolean isAppForeground = packageName != null
+                    && mActivityManager.getPackageImportance(packageName) == IMPORTANCE_FOREGROUND;
+            ArrayList<String> bubbleKeysToRemove = new ArrayList<>();
+            if (shortcutBubbles != null) {
+                // If we can't find one of our bubbles in the shortcut list, that bubble needs
+                // to be removed.
+                for (String shortcutId : shortcutBubbles.keySet()) {
+                    boolean foundShortcut = false;
+                    for (int i = 0; i < shortcuts.size(); i++) {
+                        if (shortcuts.get(i).getId().equals(shortcutId)) {
+                            foundShortcut = true;
+                            break;
+                        }
+                    }
+                    if (!foundShortcut) {
+                        bubbleKeysToRemove.add(shortcutBubbles.get(shortcutId));
+                    }
+                }
+            }
+
+            // Do the removals
+            for (int i = 0; i < bubbleKeysToRemove.size(); i++) {
+                // update flag bubble
+                String bubbleKey = bubbleKeysToRemove.get(i);
+                synchronized (mNotificationLock) {
+                    NotificationRecord r = mNotificationsByKey.get(bubbleKey);
+                    if (r != null) {
+                        final StatusBarNotification n = r.sbn;
+                        final int callingUid = n.getUid();
+                        final String pkg = n.getPackageName();
+                        applyFlagBubble(r, pkg, callingUid, null /* oldEntry */, isAppForeground);
+                        mHandler.post(new EnqueueNotificationRunnable(user.getIdentifier(), r,
+                                false /* isAppForeground */));
+                    }
+                }
+            }
+        }
+    };
+
+
     private final class SettingsObserver extends ContentObserver {
         private final Uri NOTIFICATION_BADGING_URI
                 = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_BADGING);
@@ -1655,6 +1734,11 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     void setAudioManager(AudioManager audioMananger) {
         mAudioManager = audioMananger;
+    }
+
+    @VisibleForTesting
+    void setLauncherApps(LauncherApps launcherApps) {
+        mLauncherAppsService = launcherApps;
     }
 
     @VisibleForTesting
@@ -2151,6 +2235,8 @@ public class NotificationManagerService extends SystemService {
             mRoleObserver = new RoleObserver(getContext().getSystemService(RoleManager.class),
                     mPackageManager, getContext().getMainExecutor());
             mRoleObserver.init();
+            mLauncherAppsService =
+                    (LauncherApps) getContext().getSystemService(Context.LAUNCHER_APPS_SERVICE);
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             // This observer will force an update when observe is called, causing us to
             // bind to listener services.
@@ -2559,26 +2645,27 @@ public class NotificationManagerService extends SystemService {
         // ============================================================================
 
         @Override
-        public void enqueueTextToast(String pkg, ITransientNotification callback, int duration,
-                int displayId) {
-            enqueueToast(pkg, callback, duration, displayId, false);
+        public void enqueueTextToast(String pkg, IBinder token, ITransientNotification callback,
+                int duration, int displayId) {
+            enqueueToast(pkg, token, callback, duration, displayId, false);
         }
 
         @Override
-        public void enqueueToast(String pkg, ITransientNotification callback, int duration,
-                int displayId) {
-            enqueueToast(pkg, callback, duration, displayId, true);
+        public void enqueueToast(String pkg, IBinder token, ITransientNotification callback,
+                int duration, int displayId) {
+            enqueueToast(pkg, token, callback, duration, displayId, true);
         }
 
-        private void enqueueToast(String pkg, ITransientNotification callback, int duration,
-                int displayId, boolean isCustomToast) {
+        private void enqueueToast(String pkg, IBinder token, ITransientNotification callback,
+                int duration, int displayId, boolean isCustomToast) {
             if (DBG) {
                 Slog.i(TAG, "enqueueToast pkg=" + pkg + " callback=" + callback
                         + " duration=" + duration + " displayId=" + displayId);
             }
 
-            if (pkg == null || callback == null) {
-                Slog.e(TAG, "Not enqueuing toast. pkg=" + pkg + " callback=" + callback);
+            if (pkg == null || callback == null || token == null) {
+                Slog.e(TAG, "Not enqueuing toast. pkg=" + pkg + " callback=" + callback + " token="
+                        + token);
                 return ;
             }
 
@@ -2636,7 +2723,7 @@ public class NotificationManagerService extends SystemService {
                 long callingId = Binder.clearCallingIdentity();
                 try {
                     ToastRecord record;
-                    int index = indexOfToastLocked(pkg, callback);
+                    int index = indexOfToastLocked(pkg, token);
                     // If it's already in the queue, we update it in place, we don't
                     // move it to the end of the queue.
                     if (index >= 0) {
@@ -2661,10 +2748,10 @@ public class NotificationManagerService extends SystemService {
                             }
                         }
 
-                        Binder token = new Binder();
-                        mWindowManagerInternal.addWindowToken(token, TYPE_TOAST, displayId);
-                        record = new ToastRecord(callingPid, pkg, callback, duration, token,
-                                displayId);
+                        Binder windowToken = new Binder();
+                        mWindowManagerInternal.addWindowToken(windowToken, TYPE_TOAST, displayId);
+                        record = new ToastRecord(callingPid, pkg, token, callback, duration,
+                                windowToken, displayId);
                         mToastQueue.add(record);
                         index = mToastQueue.size() - 1;
                         keepProcessAliveIfNeededLocked(callingPid);
@@ -2683,23 +2770,23 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void cancelToast(String pkg, ITransientNotification callback) {
-            Slog.i(TAG, "cancelToast pkg=" + pkg + " callback=" + callback);
+        public void cancelToast(String pkg, IBinder token) {
+            Slog.i(TAG, "cancelToast pkg=" + pkg + " token=" + token);
 
-            if (pkg == null || callback == null) {
-                Slog.e(TAG, "Not cancelling notification. pkg=" + pkg + " callback=" + callback);
+            if (pkg == null || token == null) {
+                Slog.e(TAG, "Not cancelling notification. pkg=" + pkg + " token=" + token);
                 return ;
             }
 
             synchronized (mToastQueue) {
                 long callingId = Binder.clearCallingIdentity();
                 try {
-                    int index = indexOfToastLocked(pkg, callback);
+                    int index = indexOfToastLocked(pkg, token);
                     if (index >= 0) {
                         cancelToastLocked(index);
                     } else {
                         Slog.w(TAG, "Toast already cancelled. pkg=" + pkg
-                                + " callback=" + callback);
+                                + " token=" + token);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(callingId);
@@ -2708,17 +2795,17 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void finishToken(String pkg, ITransientNotification callback) {
+        public void finishToken(String pkg, IBinder token) {
             synchronized (mToastQueue) {
                 long callingId = Binder.clearCallingIdentity();
                 try {
-                    int index = indexOfToastLocked(pkg, callback);
+                    int index = indexOfToastLocked(pkg, token);
                     if (index >= 0) {
                         ToastRecord record = mToastQueue.get(index);
-                        finishTokenLocked(record.token, record.displayId);
+                        finishWindowTokenLocked(record.windowToken, record.displayId);
                     } else {
                         Slog.w(TAG, "Toast already killed. pkg=" + pkg
-                                + " callback=" + callback);
+                                + " token=" + token);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(callingId);
@@ -5439,23 +5526,70 @@ public class NotificationManagerService extends SystemService {
     }
 
     /**
-     * Updates the flags for this notification to reflect whether it is a bubble or not.
+     * Updates the flags for this notification to reflect whether it is a bubble or not. Some
+     * bubble specific flags only work if the app is foreground, this will strip those flags
+     * if the app wasn't foreground.
      */
-    private void flagNotificationForBubbles(NotificationRecord r, String pkg, int userId,
+    private void updateNotificationBubbleFlags(NotificationRecord r, String pkg, int userId,
             NotificationRecord oldRecord, boolean isAppForeground) {
         Notification notification = r.getNotification();
-        if (isNotificationAppropriateToBubble(r, pkg, userId, oldRecord)) {
-            notification.flags |= FLAG_BUBBLE;
-        } else {
-            notification.flags &= ~FLAG_BUBBLE;
-        }
+        applyFlagBubble(r, pkg, userId, oldRecord, true /* desiredFlag */);
+
+        // Remove any bubble specific flags that only work when foregrounded
         Notification.BubbleMetadata metadata = notification.getBubbleMetadata();
         if (!isAppForeground && metadata != null) {
-            // Remove any flags that only work when foregrounded
             int flags = metadata.getFlags();
             flags &= ~Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE;
             flags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
             metadata.setFlags(flags);
+        }
+    }
+
+    /**
+     * Handles actually applying or removing {@link Notification#FLAG_BUBBLE}. Performs necessary
+     * checks for the provided record to see if it can actually be a bubble.
+     * Tracks shortcut based bubbles so that we can find out if they've changed or been removed.
+     */
+    private void applyFlagBubble(NotificationRecord r, String pkg, int userId,
+            NotificationRecord oldRecord, boolean desiredFlag) {
+        boolean applyFlag = desiredFlag
+                && isNotificationAppropriateToBubble(r, pkg, userId, oldRecord);
+        final String shortcutId = r.getNotification().getBubbleMetadata() != null
+                ? r.getNotification().getBubbleMetadata().getShortcutId()
+                : null;
+        if (applyFlag) {
+            if (shortcutId != null) {
+                // Must track shortcut based bubbles in case the shortcut is removed
+                HashMap<String, String> packageBubbles = mActiveShortcutBubbles.get(
+                        r.sbn.getPackageName());
+                if (packageBubbles == null) {
+                    packageBubbles = new HashMap<>();
+                }
+                packageBubbles.put(shortcutId, r.getKey());
+                mActiveShortcutBubbles.put(r.sbn.getPackageName(), packageBubbles);
+                if (!mLauncherAppsCallbackRegistered) {
+                    mLauncherAppsService.registerCallback(mLauncherAppsCallback, mHandler);
+                    mLauncherAppsCallbackRegistered = true;
+                }
+            }
+            r.getNotification().flags |= FLAG_BUBBLE;
+        } else {
+            if (shortcutId != null) {
+                // No longer track shortcut
+                HashMap<String, String> packageBubbles = mActiveShortcutBubbles.get(
+                        r.sbn.getPackageName());
+                if (packageBubbles != null) {
+                    packageBubbles.remove(shortcutId);
+                }
+                if (packageBubbles != null && packageBubbles.isEmpty()) {
+                    mActiveShortcutBubbles.remove(r.sbn.getPackageName());
+                }
+                if (mLauncherAppsCallbackRegistered && mActiveShortcutBubbles.isEmpty()) {
+                    mLauncherAppsService.unregisterCallback(mLauncherAppsCallback);
+                    mLauncherAppsCallbackRegistered = false;
+                }
+            }
+            r.getNotification().flags &= ~FLAG_BUBBLE;
         }
     }
 
@@ -5533,10 +5667,6 @@ public class NotificationManagerService extends SystemService {
             // no log: no need to inform dev if they didn't attach bubble metadata
             return false;
         }
-        if (!canLaunchInActivityView(getContext(), metadata.getIntent(), pkg)) {
-            // no log: method has the failure log
-            return false;
-        }
         if (!mPreferencesHelper.bubblesEnabled()) {
             logBubbleError(r.getKey(), "bubbles disabled for user: " + userId);
             return false;
@@ -5551,7 +5681,20 @@ public class NotificationManagerService extends SystemService {
                     "bubbles for channel " + r.getChannel().getId() + " disabled");
             return false;
         }
-        return true;
+
+        String shortcutId = metadata.getShortcutId();
+        boolean shortcutValid = shortcutId != null
+                && hasValidShortcutInfo(shortcutId, pkg, r.getUser());
+        if (metadata.getBubbleIntent() == null && !shortcutValid) {
+            // Should have a shortcut if intent is null
+            logBubbleError(r.getKey(), "couldn't find shortcutId for bubble: " + shortcutId);
+            return false;
+        }
+        if (shortcutValid) {
+            return true;
+        }
+        // no log: canLaunch method has the failure log
+        return canLaunchInActivityView(getContext(), metadata.getBubbleIntent(), pkg);
     }
 
     private boolean hasValidRemoteInput(Notification n) {
@@ -5568,6 +5711,22 @@ public class NotificationManagerService extends SystemService {
             }
         }
         return false;
+    }
+
+    private boolean hasValidShortcutInfo(String shortcutId, String packageName, UserHandle user) {
+        LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery();
+        if (packageName != null) {
+            query.setPackage(packageName);
+        }
+        if (shortcutId != null) {
+            query.setShortcutIds(Arrays.asList(shortcutId));
+        }
+        query.setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED);
+        List<ShortcutInfo> shortcuts = mLauncherAppsService.getShortcuts(query, user);
+        ShortcutInfo shortcutInfo = shortcuts != null && shortcuts.size() > 0
+                ? shortcuts.get(0)
+                : null;
+        return shortcutInfo != null;
     }
 
     private void logBubbleError(String key, String failureMessage) {
@@ -6025,7 +6184,7 @@ public class NotificationManagerService extends SystemService {
                 final String tag = n.getTag();
 
                 // We need to fix the notification up a little for bubbles
-                flagNotificationForBubbles(r, pkg, callingUid, old, isAppForeground);
+                updateNotificationBubbleFlags(r, pkg, callingUid, old, isAppForeground);
 
                 // Handle grouped notifications and bail out early if we
                 // can to avoid extracting signals.
@@ -6757,7 +6916,7 @@ public class NotificationManagerService extends SystemService {
         while (record != null) {
             if (DBG) Slog.d(TAG, "Show pkg=" + record.pkg + " callback=" + record.callback);
             try {
-                record.callback.show(record.token);
+                record.callback.show(record.windowToken);
                 scheduleDurationReachedLocked(record);
                 return;
             } catch (RemoteException e) {
@@ -6792,7 +6951,7 @@ public class NotificationManagerService extends SystemService {
 
         ToastRecord lastToast = mToastQueue.remove(index);
 
-        mWindowManagerInternal.removeWindowToken(lastToast.token, false /* removeWindows */,
+        mWindowManagerInternal.removeWindowToken(lastToast.windowToken, false /* removeWindows */,
                 lastToast.displayId);
         // We passed 'false' for 'removeWindows' so that the client has time to stop
         // rendering (as hide above is a one-way message), otherwise we could crash
@@ -6810,7 +6969,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    void finishTokenLocked(IBinder t, int displayId) {
+    void finishWindowTokenLocked(IBinder t, int displayId) {
         mHandler.removeCallbacksAndMessages(t);
         // We pass 'true' for 'removeWindows' to let the WindowManager destroy any
         // remaining surfaces as either the client has called finishToken indicating
@@ -6835,9 +6994,9 @@ public class NotificationManagerService extends SystemService {
 
     private void handleDurationReached(ToastRecord record)
     {
-        if (DBG) Slog.d(TAG, "Timeout pkg=" + record.pkg + " callback=" + record.callback);
+        if (DBG) Slog.d(TAG, "Timeout pkg=" + record.pkg + " token=" + record.token);
         synchronized (mToastQueue) {
-            int index = indexOfToastLocked(record.pkg, record.callback);
+            int index = indexOfToastLocked(record.pkg, record.token);
             if (index >= 0) {
                 cancelToastLocked(index);
             }
@@ -6854,21 +7013,19 @@ public class NotificationManagerService extends SystemService {
 
     private void handleKillTokenTimeout(ToastRecord record)
     {
-        if (DBG) Slog.d(TAG, "Kill Token Timeout token=" + record.token);
+        if (DBG) Slog.d(TAG, "Kill Token Timeout token=" + record.windowToken);
         synchronized (mToastQueue) {
-            finishTokenLocked(record.token, record.displayId);
+            finishWindowTokenLocked(record.windowToken, record.displayId);
         }
     }
 
     @GuardedBy("mToastQueue")
-    int indexOfToastLocked(String pkg, ITransientNotification callback)
-    {
-        IBinder cbak = callback.asBinder();
+    int indexOfToastLocked(String pkg, IBinder token) {
         ArrayList<ToastRecord> list = mToastQueue;
         int len = list.size();
         for (int i=0; i<len; i++) {
             ToastRecord r = list.get(i);
-            if (r.pkg.equals(pkg) && r.callback.asBinder() == cbak) {
+            if (r.pkg.equals(pkg) && r.token == token) {
                 return i;
             }
         }

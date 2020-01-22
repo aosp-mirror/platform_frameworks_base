@@ -123,28 +123,27 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testStackCleanupOnClearingTask() {
         mActivity.onParentChanged(null /*newParent*/, mActivity.getTask());
-        verify(mStack, times(1)).onActivityRemovedFromStack(any());
+        verify(mStack, times(1)).cleanUpActivityReferences(any());
     }
 
     @Test
     public void testStackCleanupOnActivityRemoval() {
         mTask.removeChild(mActivity);
-        verify(mStack, times(1)).onActivityRemovedFromStack(any());
+        verify(mStack, times(1)).cleanUpActivityReferences(any());
     }
 
     @Test
     public void testStackCleanupOnTaskRemoval() {
         mStack.removeChild(mTask, null /*reason*/);
         // Stack should be gone on task removal.
-        assertNull(mService.mRootWindowContainer.getStack(mStack.mStackId));
+        assertNull(mService.mRootWindowContainer.getStack(mStack.mTaskId));
     }
 
     @Test
     public void testNoCleanupMovingActivityInSameStack() {
-        final Task newTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack)
-                .build();
+        final Task newTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
         mActivity.reparent(newTask, 0, null /*reason*/);
-        verify(mStack, times(0)).onActivityRemovedFromStack(any());
+        verify(mStack, times(0)).cleanUpActivityReferences(any());
     }
 
     @Test
@@ -490,7 +489,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
         try {
-            doReturn(false).when(stack).isStackTranslucent(any());
+            doReturn(false).when(stack).isTranslucent(any());
             assertFalse(mStack.shouldBeVisible(null /* starting */));
 
             mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
@@ -613,8 +612,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Sending 'null' for saved state can only happen due to timeout, so previously stored saved
         // states should not be overridden.
         mActivity.setState(STOPPING, "test");
-        mActivity.activityStopped(null /* savedState */, null /* persistentSavedState */,
-                "desc");
+        mActivity.activityStopped(null /* savedState */, null /* persistentSavedState */, "desc");
         assertTrue(mActivity.hasSavedState());
         assertEquals(savedState, mActivity.getSavedState());
         assertEquals(persistentSavedState, mActivity.getPersistentSavedState());
@@ -1012,8 +1010,10 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testDestroyIfPossible_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
-        final ActivityStack homeStack = mActivity.getDisplay().getHomeStack();
-        homeStack.forAllTasks((t) -> { homeStack.removeChild(t, "test"); });
+        final ActivityStack homeStack = mActivity.getDisplay().getRootHomeTask();
+        homeStack.forAllTasks((t) -> {
+            homeStack.removeChild(t, "test");
+        }, true /* traverseTopToBottom */, homeStack);
         mActivity.finishing = true;
         doReturn(false).when(mRootWindowContainer).resumeFocusedStacksTopActivities();
         spyOn(mStack);
@@ -1036,8 +1036,10 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testCompleteFinishing_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
-        final ActivityStack homeStack = mActivity.getDisplay().getHomeStack();
-        homeStack.forAllTasks((t) -> { homeStack.removeChild(t, "test"); });
+        final ActivityStack homeStack = mActivity.getDisplay().getRootHomeTask();
+        homeStack.forAllTasks((t) -> {
+            homeStack.removeChild(t, "test");
+        }, true /* traverseTopToBottom */, homeStack);
         mActivity.finishing = true;
         spyOn(mStack);
 
@@ -1134,7 +1136,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testRemoveFromHistory() {
-        final ActivityStack stack = mActivity.getActivityStack();
+        final ActivityStack stack = mActivity.getRootTask();
         final Task task = mActivity.getTask();
 
         mActivity.removeFromHistory("test");
@@ -1143,7 +1145,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertNull(mActivity.app);
         assertNull(mActivity.getTask());
         assertEquals(0, task.getChildCount());
-        assertNull(task.getStack());
+        assertEquals(task.getStack(), task);
         assertEquals(0, stack.getChildCount());
     }
 

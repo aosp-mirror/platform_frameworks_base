@@ -9102,11 +9102,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void enforceAcrossUsersPermissions() {
-        if (isCallerWithSystemUid() || mInjector.binderGetCallingUid() == Process.ROOT_UID) {
+        final int callingUid = mInjector.binderGetCallingUid();
+        final int callingPid = mInjector.binderGetCallingPid();
+        final String packageName = mContext.getPackageName();
+
+        if (isCallerWithSystemUid() || callingUid == Process.ROOT_UID) {
             return;
         }
-        if (mContext.checkCallingPermission(permission.INTERACT_ACROSS_PROFILES)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (PermissionChecker.checkPermissionForPreflight(
+                mContext, permission.INTERACT_ACROSS_PROFILES, callingPid, callingUid,
+                packageName) == PermissionChecker.PERMISSION_GRANTED) {
             return;
         }
         if (mContext.checkCallingPermission(permission.INTERACT_ACROSS_USERS)
@@ -10151,10 +10156,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             UserHandle.myUserId(), ACTION_PROVISION_MANAGED_USER).toArray(
                             new String[0]);
                 }
-                UserInfo userInfo = mUserManagerInternal.createUserEvenWhenDisallowed(name,
-                        userType, userInfoFlags, disallowedPackages);
-                if (userInfo != null) {
-                    user = userInfo.getUserHandle();
+                try {
+                    UserInfo userInfo = mUserManagerInternal.createUserEvenWhenDisallowed(name,
+                            userType, userInfoFlags, disallowedPackages);
+                    if (userInfo != null) {
+                        user = userInfo.getUserHandle();
+                    }
+                } catch (UserManager.CheckedUserOperationException e) {
+                    Log.e(LOG_TAG, "Couldn't createUserEvenWhenDisallowed", e);
                 }
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
@@ -11341,6 +11350,37 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.settingsSystemPutStringForUser(setting, value, callingUserId));
         }
+    }
+
+    @Override
+    public void setLockdownAdminConfiguredNetworks(ComponentName who, boolean lockdown) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(who);
+
+        mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.settingsGlobalPutInt(Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN,
+                        lockdown ? 1 : 0));
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.ALLOW_MODIFICATION_OF_ADMIN_CONFIGURED_NETWORKS)
+                .setAdmin(who)
+                .setBoolean(lockdown)
+                .write();
+    }
+
+    @Override
+    public boolean isLockdownAdminConfiguredNetworks(ComponentName who) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(who);
+
+        return mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.settingsGlobalGetInt(Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 0) > 0);
     }
 
     @Override

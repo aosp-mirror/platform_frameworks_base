@@ -19,6 +19,8 @@ package android.view;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.toPublicType;
 import static android.view.WindowInsets.Type.all;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -28,7 +30,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.net.InvalidPacketException.ErrorCode;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -148,13 +149,18 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
     }
 
-    private class DefaultAnimationControlListener implements WindowInsetsAnimationControlListener {
+    /**
+     * The default implementation of listener, to be used by InsetsController and InsetsPolicy to
+     * animate insets.
+     */
+    public static class InternalAnimationControlListener
+            implements WindowInsetsAnimationControlListener {
 
         private WindowInsetsAnimationController mController;
         private ObjectAnimator mAnimator;
-        private boolean mShow;
+        protected boolean mShow;
 
-        DefaultAnimationControlListener(boolean show) {
+        InternalAnimationControlListener(boolean show) {
             mShow = show;
         }
 
@@ -178,9 +184,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     onAnimationFinish();
                 }
             });
-            mStartingAnimation = true;
+            setStartingAnimation(true);
             mAnimator.start();
-            mStartingAnimation = false;
+            setStartingAnimation(false);
         }
 
         @Override
@@ -191,16 +197,19 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
         }
 
-        private void onAnimationFinish() {
+        protected void setStartingAnimation(boolean startingAnimation) {
+        }
+
+        protected void onAnimationFinish() {
             mController.finish(mShow);
         }
 
-        private float getRawProgress() {
+        protected float getRawProgress() {
             float fraction = (float) mAnimator.getCurrentPlayTime() / mAnimator.getDuration();
             return mShow ? fraction : 1 - fraction;
         }
 
-        private long getDurationMs() {
+        protected long getDurationMs() {
             if (mAnimator != null) {
                 return mAnimator.getDuration();
             }
@@ -220,6 +229,17 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
         final InsetsAnimationControlImpl control;
         final @AnimationType int type;
+    }
+
+    private class DefaultAnimationControlListener extends InternalAnimationControlListener {
+        DefaultAnimationControlListener(boolean show) {
+            super(show);
+        }
+
+        @Override
+        protected void setStartingAnimation(boolean startingAnimation) {
+            mStartingAnimation = startingAnimation;
+        }
     }
 
     private final String TAG = "InsetsControllerImpl";
@@ -625,6 +645,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /**
+     * @see ViewRootImpl#updateCompatSysUiVisibility(int, boolean, boolean)
+     */
+    public void updateCompatSysUiVisibility(@InternalInsetsType int type, boolean visible,
+            boolean hasControl) {
+        mViewRoot.updateCompatSysUiVisibility(type, visible, hasControl);
+    }
+
+    /**
      * Called when current window gains focus.
      */
     public void onWindowFocusGained() {
@@ -781,20 +809,41 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     @Override
-    public void setSystemBarsAppearance(@Appearance int appearance) {
-        if (mViewRoot.mWindowAttributes.insetsFlags.appearance != appearance) {
-            mViewRoot.mWindowAttributes.insetsFlags.appearance = appearance;
+    public void setSystemBarsAppearance(@Appearance int appearance, @Appearance int mask) {
+        mViewRoot.mWindowAttributes.privateFlags |= PRIVATE_FLAG_APPEARANCE_CONTROLLED;
+        final InsetsFlags insetsFlags = mViewRoot.mWindowAttributes.insetsFlags;
+        if (insetsFlags.appearance != appearance) {
+            insetsFlags.appearance = (insetsFlags.appearance & ~mask) | (appearance & mask);
             mViewRoot.mWindowAttributesChanged = true;
             mViewRoot.scheduleTraversals();
         }
     }
 
     @Override
+    public @Appearance int getSystemBarsAppearance() {
+        if ((mViewRoot.mWindowAttributes.privateFlags & PRIVATE_FLAG_APPEARANCE_CONTROLLED) == 0) {
+            // We only return the requested appearance, not the implied one.
+            return 0;
+        }
+        return mViewRoot.mWindowAttributes.insetsFlags.appearance;
+    }
+
+    @Override
     public void setSystemBarsBehavior(@Behavior int behavior) {
+        mViewRoot.mWindowAttributes.privateFlags |= PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
         if (mViewRoot.mWindowAttributes.insetsFlags.behavior != behavior) {
             mViewRoot.mWindowAttributes.insetsFlags.behavior = behavior;
             mViewRoot.mWindowAttributesChanged = true;
             mViewRoot.scheduleTraversals();
         }
+    }
+
+    @Override
+    public @Appearance int getSystemBarsBehavior() {
+        if ((mViewRoot.mWindowAttributes.privateFlags & PRIVATE_FLAG_BEHAVIOR_CONTROLLED) == 0) {
+            // We only return the requested behavior, not the implied one.
+            return 0;
+        }
+        return mViewRoot.mWindowAttributes.insetsFlags.behavior;
     }
 }

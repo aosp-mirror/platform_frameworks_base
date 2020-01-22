@@ -2039,7 +2039,8 @@ public class WindowManagerService extends IWindowManager.Stub
             long frameNumber, Rect outFrame, Rect outContentInsets,
             Rect outVisibleInsets, Rect outStableInsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper outCutout, MergedConfiguration mergedConfiguration,
-            SurfaceControl outSurfaceControl, InsetsState outInsetsState) {
+            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
+            Point outSurfaceSize) {
         int result = 0;
         boolean configChanged;
         final int pid = Binder.getCallingPid();
@@ -2361,6 +2362,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.sendNewConfiguration();
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             }
+            if (winAnimator.mSurfaceController != null) {
+                outSurfaceSize.set(winAnimator.mSurfaceController.getWidth(),
+                                         winAnimator.mSurfaceController.getHeight());
+            }
         }
 
         Binder.restoreCallingIdentity(origId);
@@ -2414,8 +2419,8 @@ public class WindowManagerService extends IWindowManager.Stub
         return focusMayChange;
     }
 
-    private int createSurfaceControl(SurfaceControl outSurfaceControl, int result, WindowState win,
-            WindowStateAnimator winAnimator) {
+    private int createSurfaceControl(SurfaceControl outSurfaceControl,
+            int result, WindowState win, WindowStateAnimator winAnimator) {
         if (!win.mHasSurface) {
             result |= RELAYOUT_RES_SURFACE_CHANGED;
         }
@@ -2694,8 +2699,7 @@ public class WindowManagerService extends IWindowManager.Stub
         displayContent.getDockedDividerController().checkMinimizeChanged(animate);
     }
 
-    boolean isValidPictureInPictureAspectRatio(int displayId, float aspectRatio) {
-        final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+    boolean isValidPictureInPictureAspectRatio(DisplayContent displayContent, float aspectRatio) {
         return displayContent.getPinnedStackController().isValidPictureInPictureAspectRatio(
                 aspectRatio);
     }
@@ -2767,7 +2771,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
             if (displayContent != null && mRoot.getTopChild() != displayContent) {
-                mRoot.positionChildAt(WindowContainer.POSITION_TOP, displayContent,
+                displayContent.positionDisplayAt(WindowContainer.POSITION_TOP,
                         true /* includingParents */);
             }
         }
@@ -3159,7 +3163,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // Notify whether the docked stack exists for the current user
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
             final ActivityStack stack =
-                    displayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+                    displayContent.getRootSplitScreenPrimaryTask();
             displayContent.mDividerControllerLocked.notifyDockedStackExistsChanged(
                     stack != null && stack.hasTaskForUser(newUserId));
 
@@ -5994,12 +5998,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" apps="); pw.print(mAppsFreezingScreen);
             final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
             pw.print("  mRotation="); pw.print(defaultDisplayContent.getRotation());
-            pw.print("  mLastWindowForcedOrientation=");
-                    pw.print(defaultDisplayContent.getLastWindowForcedOrientation());
-                    pw.print(" mLastOrientation=");
-                            pw.println(defaultDisplayContent.getLastOrientation());
-                    pw.print(" waitingForConfig=");
-                            pw.println(defaultDisplayContent.mWaitingForConfig);
+            pw.print("  mLastOrientation=");
+                    pw.println(defaultDisplayContent.getLastOrientation());
+            pw.print(" waitingForConfig=");
+                    pw.println(defaultDisplayContent.mWaitingForConfig);
 
             pw.print("  Animation settings: disabled="); pw.print(mAnimationsDisabled);
                     pw.print(" window="); pw.print(mWindowAnimationScaleSetting);
@@ -6412,7 +6414,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public int getDockedStackSide() {
         synchronized (mGlobalLock) {
             final ActivityStack dockedStack = getDefaultDisplayContentLocked()
-                    .getSplitScreenPrimaryStackIgnoringVisibility();
+                    .getRootSplitScreenPrimaryTask();
             return dockedStack == null ? DOCKED_INVALID : dockedStack.getDockSide();
         }
     }
@@ -7694,7 +7696,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final DisplayContent displayContent = touchedWindow.getDisplayContent();
         if (!displayContent.isOnTop()) {
-            displayContent.getParent().positionChildAt(WindowContainer.POSITION_TOP, displayContent,
+            displayContent.positionDisplayAt(WindowContainer.POSITION_TOP,
                     true /* includingParents */);
         }
         handleTaskFocusChange(touchedWindow.getTask());

@@ -75,8 +75,10 @@ package android.app {
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
     method @RequiresPermission("android.permission.MANAGE_USERS") public boolean switchUser(@NonNull android.os.UserHandle);
-    field public static final int PROCESS_CAPABILITY_ALL = 1; // 0x1
+    field public static final int PROCESS_CAPABILITY_ALL = 7; // 0x7
+    field public static final int PROCESS_CAPABILITY_FOREGROUND_CAMERA = 2; // 0x2
     field public static final int PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1; // 0x1
+    field public static final int PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 4; // 0x4
     field public static final int PROCESS_CAPABILITY_NONE = 0; // 0x0
   }
 
@@ -1891,7 +1893,7 @@ package android.os {
     method @Nullable public android.os.NativeHandle getHandle();
     method @NonNull public String getName();
     method public long getSize();
-    method @NonNull public android.os.NativeHandle releaseHandle();
+    method @Nullable public android.os.NativeHandle releaseHandle();
   }
 
   public abstract class HwBinder implements android.os.IHwBinder {
@@ -3425,7 +3427,8 @@ package android.telephony.ims {
     field public static final String EXTRA_ADDITIONAL_CALL_INFO = "AdditionalCallInfo";
     field public static final String EXTRA_ADDITIONAL_SIP_INVITE_FIELDS = "android.telephony.ims.extra.ADDITIONAL_SIP_INVITE_FIELDS";
     field public static final String EXTRA_CALL_DISCONNECT_CAUSE = "android.telephony.ims.extra.CALL_DISCONNECT_CAUSE";
-    field public static final String EXTRA_CALL_RAT_TYPE = "CallRadioTech";
+    field public static final String EXTRA_CALL_NETWORK_TYPE = "android.telephony.ims.extra.CALL_NETWORK_TYPE";
+    field @Deprecated public static final String EXTRA_CALL_RAT_TYPE = "CallRadioTech";
     field public static final String EXTRA_CHILD_NUMBER = "ChildNum";
     field public static final String EXTRA_CNA = "cna";
     field public static final String EXTRA_CNAP = "cnap";
@@ -3458,8 +3461,8 @@ package android.telephony.ims {
     method public void callSessionConferenceExtendReceived(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
     method public void callSessionConferenceExtended(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
     method public void callSessionConferenceStateUpdated(android.telephony.ims.ImsConferenceState);
-    method public void callSessionHandover(int, int, android.telephony.ims.ImsReasonInfo);
-    method public void callSessionHandoverFailed(int, int, android.telephony.ims.ImsReasonInfo);
+    method @Deprecated public void callSessionHandover(int, int, android.telephony.ims.ImsReasonInfo);
+    method @Deprecated public void callSessionHandoverFailed(int, int, android.telephony.ims.ImsReasonInfo);
     method public void callSessionHeld(android.telephony.ims.ImsCallProfile);
     method public void callSessionHoldFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionHoldReceived(android.telephony.ims.ImsCallProfile);
@@ -3467,7 +3470,7 @@ package android.telephony.ims {
     method public void callSessionInitiatedFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionInviteParticipantsRequestDelivered();
     method public void callSessionInviteParticipantsRequestFailed(android.telephony.ims.ImsReasonInfo);
-    method public void callSessionMayHandover(int, int);
+    method @Deprecated public void callSessionMayHandover(int, int);
     method public void callSessionMergeComplete(android.telephony.ims.stub.ImsCallSessionImplBase);
     method public void callSessionMergeFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionMergeStarted(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
@@ -3489,6 +3492,9 @@ package android.telephony.ims {
     method public void callSessionUpdateReceived(android.telephony.ims.ImsCallProfile);
     method public void callSessionUpdated(android.telephony.ims.ImsCallProfile);
     method public void callSessionUssdMessageReceived(int, String);
+    method public void onHandover(int, int, @Nullable android.telephony.ims.ImsReasonInfo);
+    method public void onHandoverFailed(int, int, @NonNull android.telephony.ims.ImsReasonInfo);
+    method public void onMayHandover(int, int);
   }
 
   public final class ImsConferenceState implements android.os.Parcelable {
@@ -4456,7 +4462,7 @@ package android.view {
     field public static final int ACCESSIBILITY_TITLE_CHANGED = 33554432; // 0x2000000
     field public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 64; // 0x40
     field public CharSequence accessibilityTitle;
-    field @android.view.ViewDebug.ExportedProperty(flagMapping={@android.view.ViewDebug.FlagToString(mask=0x1, equals=0x1, name="FAKE_HARDWARE_ACCELERATED"), @android.view.ViewDebug.FlagToString(mask=0x2, equals=0x2, name="FORCE_HARDWARE_ACCELERATED"), @android.view.ViewDebug.FlagToString(mask=0x4, equals=0x4, name="WANTS_OFFSET_NOTIFICATIONS"), @android.view.ViewDebug.FlagToString(mask=0x10, equals=0x10, name="SHOW_FOR_ALL_USERS"), @android.view.ViewDebug.FlagToString(mask=android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION, equals=android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION, name="NO_MOVE_ANIMATION"), @android.view.ViewDebug.FlagToString(mask=0x80, equals=0x80, name="COMPATIBLE_WINDOW"), @android.view.ViewDebug.FlagToString(mask=0x100, equals=0x100, name="SYSTEM_ERROR"), @android.view.ViewDebug.FlagToString(mask=0x800, equals=0x800, name="DISABLE_WALLPAPER_TOUCH_EVENTS"), @android.view.ViewDebug.FlagToString(mask=0x1000, equals=0x1000, name="FORCE_STATUS_BAR_VISIBLE"), @android.view.ViewDebug.FlagToString(mask=0x2000, equals=0x2000, name="PRESERVE_GEOMETRY"), @android.view.ViewDebug.FlagToString(mask=0x4000, equals=0x4000, name="FORCE_DECOR_VIEW_VISIBILITY"), @android.view.ViewDebug.FlagToString(mask=0x8000, equals=0x8000, name="WILL_NOT_REPLACE_ON_RELAUNCH"), @android.view.ViewDebug.FlagToString(mask=0x10000, equals=0x10000, name="LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME"), @android.view.ViewDebug.FlagToString(mask=0x20000, equals=0x20000, name="FORCE_DRAW_STATUS_BAR_BACKGROUND"), @android.view.ViewDebug.FlagToString(mask=0x40000, equals=0x40000, name="SUSTAINED_PERFORMANCE_MODE"), @android.view.ViewDebug.FlagToString(mask=0x80000, equals=0x80000, name="HIDE_NON_SYSTEM_OVERLAY_WINDOWS"), @android.view.ViewDebug.FlagToString(mask=0x100000, equals=0x100000, name="IS_ROUNDED_CORNERS_OVERLAY"), @android.view.ViewDebug.FlagToString(mask=0x400000, equals=0x400000, name="IS_SCREEN_DECOR"), @android.view.ViewDebug.FlagToString(mask=0x800000, equals=0x800000, name="STATUS_FORCE_SHOW_NAVIGATION"), @android.view.ViewDebug.FlagToString(mask=0x1000000, equals=0x1000000, name="COLOR_SPACE_AGNOSTIC"), @android.view.ViewDebug.FlagToString(mask=0x4000000, equals=0x4000000, name="FIT_INSETS_CONTROLLED"), @android.view.ViewDebug.FlagToString(mask=0x8000000, equals=0x8000000, name="ONLY_DRAW_BOTTOM_BAR_BACKGROUND")}) public int privateFlags;
+    field @android.view.ViewDebug.ExportedProperty(flagMapping={@android.view.ViewDebug.FlagToString(mask=0x1, equals=0x1, name="FAKE_HARDWARE_ACCELERATED"), @android.view.ViewDebug.FlagToString(mask=0x2, equals=0x2, name="FORCE_HARDWARE_ACCELERATED"), @android.view.ViewDebug.FlagToString(mask=0x4, equals=0x4, name="WANTS_OFFSET_NOTIFICATIONS"), @android.view.ViewDebug.FlagToString(mask=0x10, equals=0x10, name="SHOW_FOR_ALL_USERS"), @android.view.ViewDebug.FlagToString(mask=android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION, equals=android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION, name="NO_MOVE_ANIMATION"), @android.view.ViewDebug.FlagToString(mask=0x80, equals=0x80, name="COMPATIBLE_WINDOW"), @android.view.ViewDebug.FlagToString(mask=0x100, equals=0x100, name="SYSTEM_ERROR"), @android.view.ViewDebug.FlagToString(mask=0x800, equals=0x800, name="DISABLE_WALLPAPER_TOUCH_EVENTS"), @android.view.ViewDebug.FlagToString(mask=0x1000, equals=0x1000, name="FORCE_STATUS_BAR_VISIBLE"), @android.view.ViewDebug.FlagToString(mask=0x2000, equals=0x2000, name="PRESERVE_GEOMETRY"), @android.view.ViewDebug.FlagToString(mask=0x4000, equals=0x4000, name="FORCE_DECOR_VIEW_VISIBILITY"), @android.view.ViewDebug.FlagToString(mask=0x8000, equals=0x8000, name="WILL_NOT_REPLACE_ON_RELAUNCH"), @android.view.ViewDebug.FlagToString(mask=0x10000, equals=0x10000, name="LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME"), @android.view.ViewDebug.FlagToString(mask=0x20000, equals=0x20000, name="FORCE_DRAW_STATUS_BAR_BACKGROUND"), @android.view.ViewDebug.FlagToString(mask=0x40000, equals=0x40000, name="SUSTAINED_PERFORMANCE_MODE"), @android.view.ViewDebug.FlagToString(mask=0x80000, equals=0x80000, name="HIDE_NON_SYSTEM_OVERLAY_WINDOWS"), @android.view.ViewDebug.FlagToString(mask=0x100000, equals=0x100000, name="IS_ROUNDED_CORNERS_OVERLAY"), @android.view.ViewDebug.FlagToString(mask=0x400000, equals=0x400000, name="IS_SCREEN_DECOR"), @android.view.ViewDebug.FlagToString(mask=0x800000, equals=0x800000, name="STATUS_FORCE_SHOW_NAVIGATION"), @android.view.ViewDebug.FlagToString(mask=0x1000000, equals=0x1000000, name="COLOR_SPACE_AGNOSTIC"), @android.view.ViewDebug.FlagToString(mask=0x4000000, equals=0x4000000, name="APPEARANCE_CONTROLLED"), @android.view.ViewDebug.FlagToString(mask=0x8000000, equals=0x8000000, name="BEHAVIOR_CONTROLLED"), @android.view.ViewDebug.FlagToString(mask=0x10000000, equals=0x10000000, name="FIT_INSETS_CONTROLLED"), @android.view.ViewDebug.FlagToString(mask=0x20000000, equals=0x20000000, name="ONLY_DRAW_BOTTOM_BAR_BACKGROUND")}) public int privateFlags;
   }
 
 }

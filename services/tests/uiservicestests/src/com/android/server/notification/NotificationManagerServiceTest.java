@@ -100,8 +100,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.ShortcutInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -213,6 +215,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private UsageStatsManagerInternal mAppUsageStats;
     @Mock
     private AudioManager mAudioManager;
+    @Mock
+    private LauncherApps mLauncherApps;
     @Mock
     ActivityManager mActivityManager;
     @Mock
@@ -420,6 +424,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mService.setAudioManager(mAudioManager);
+        mService.setLauncherApps(mLauncherApps);
 
         // Tests call directly into the Binder.
         mBinderService = mService.getBinderService();
@@ -618,8 +623,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private Notification.BubbleMetadata.Builder getBubbleMetadataBuilder() {
         PendingIntent pi = PendingIntent.getActivity(mContext, 0, new Intent(), 0);
         return new Notification.BubbleMetadata.Builder()
-                .setIntent(pi)
-                .setIcon(Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon));
+                .createIntentBubble(pi,
+                        Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon));
     }
 
     private Notification.Builder getMessageStyleNotifBuilder(boolean addBubbleMetadata,
@@ -4397,7 +4402,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_FOREGROUND);
 
         // enqueue toast -> toast should still enqueue
-        ((INotificationManager)mService.mService).enqueueToast(testPackage,
+        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
                 new TestableToastCallback(), 2000, 0);
         assertEquals(1, mService.mToastQueue.size());
     }
@@ -4417,7 +4422,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPreferencesHelper.getImportance(testPackage, mUid)).thenReturn(IMPORTANCE_LOW);
 
         // enqueue toast -> no toasts enqueued
-        ((INotificationManager)mService.mService).enqueueToast(testPackage,
+        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
                 new TestableToastCallback(), 2000, 0);
         assertEquals(0, mService.mToastQueue.size());
     }
@@ -4440,7 +4445,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_GONE);
 
         // enqueue toast -> no toasts enqueued
-        ((INotificationManager)mService.mService).enqueueToast(testPackage,
+        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
                 new TestableToastCallback(), 2000, 0);
         assertEquals(0, mService.mToastQueue.size());
     }
@@ -4463,7 +4468,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_GONE);
 
         // enqueue toast -> system toast can still be enqueued
-        ((INotificationManager)mService.mService).enqueueToast(testPackage,
+        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
                 new TestableToastCallback(), 2000, 0);
         assertEquals(1, mService.mToastQueue.size());
     }
@@ -5686,6 +5691,58 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Our flags should have passed since we are foreground
         assertTrue(notif.getBubbleMetadata().getAutoExpandBubble());
         assertTrue(notif.getBubbleMetadata().isNotificationSuppressed());
+    }
+
+    @Test
+    public void testNotificationBubbles_flagRemoved_whenShortcutRemoved()
+            throws RemoteException {
+        // Bubbles are allowed!
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
+
+        ArgumentCaptor<LauncherApps.Callback> launcherAppsCallback =
+                ArgumentCaptor.forClass(LauncherApps.Callback.class);
+
+        // Messaging notification with shortcut info
+        Notification.BubbleMetadata metadata =
+                getBubbleMetadataBuilder().createShortcutBubble("someshortcutId").build();
+        Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
+                null /* groupKey */, false /* isSummary */);
+        nb.setBubbleMetadata(metadata);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "tag", mUid, 0, nb.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        // Pretend the shortcut exists
+        List<ShortcutInfo> shortcutInfos = new ArrayList<>();
+        shortcutInfos.add(mock(ShortcutInfo.class));
+        when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcutInfos);
+
+        // Test: Send the bubble notification
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.sbn.getTag(),
+                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+        waitForIdle();
+
+        // Verify:
+
+        // Make sure we register the callback for shortcut changes
+        verify(mLauncherApps, times(1)).registerCallback(launcherAppsCallback.capture(), any());
+
+        // yes allowed, yes messaging w/shortcut, yes bubble
+        Notification notif = mService.getNotificationRecord(nr.sbn.getKey()).getNotification();
+        assertTrue(notif.isBubbleNotification());
+
+        // Test: Remove the shortcut
+        launcherAppsCallback.getValue().onShortcutsChanged(PKG, Collections.emptyList(),
+                new UserHandle(mUid));
+
+        // Verify:
+
+        // Make sure callback is unregistered
+        verify(mLauncherApps, times(1)).unregisterCallback(launcherAppsCallback.getValue());
+
+        // We're no longer a bubble
+        Notification notif2 = mService.getNotificationRecord(nr.sbn.getKey()).getNotification();
+        assertFalse(notif2.isBubbleNotification());
     }
 
     @Test

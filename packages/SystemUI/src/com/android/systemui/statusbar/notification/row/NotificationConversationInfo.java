@@ -240,6 +240,10 @@ public class NotificationConversationInfo extends LinearLayout implements
         // a custom channel
         if (TextUtils.isEmpty(mNotificationChannel.getConversationId())) {
             try {
+                // TODO: remove
+                mNotificationChannel.setName(mContext.getString(
+                        R.string.notification_summary_message_format,
+                        getName(), mNotificationChannel.getName()));
                 mINotificationManager.createConversationNotificationChannelForPackage(
                         mPackageName, mAppUid, mSbn.getKey(), mNotificationChannel,
                         mConversationId);
@@ -347,7 +351,8 @@ public class NotificationConversationInfo extends LinearLayout implements
         channelName.setText(mNotificationChannel.getName());
 
         bindGroup();
-        bindName();
+        // TODO: bring back when channel name does not include name
+        // bindName();
         bindPackage();
         bindIcon();
 
@@ -383,15 +388,19 @@ public class NotificationConversationInfo extends LinearLayout implements
 
     private void bindName() {
         TextView name = findViewById(R.id.name);
+        name.setText(getName());
+    }
+
+    private String getName() {
         if (mShortcutInfo != null) {
-            name.setText(mShortcutInfo.getShortLabel());
+            return mShortcutInfo.getShortLabel().toString();
         } else {
             Bundle extras = mSbn.getNotification().extras;
             String nameString = extras.getString(Notification.EXTRA_CONVERSATION_TITLE);
             if (TextUtils.isEmpty(nameString)) {
                 nameString = extras.getString(Notification.EXTRA_TITLE);
             }
-            name.setText(nameString);
+            return nameString;
         }
     }
 

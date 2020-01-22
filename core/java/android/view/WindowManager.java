@@ -1857,18 +1857,32 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_USE_BLAST = 0x02000000;
 
         /**
+         * Flag to indicate that the window is controlling the appearance of system bars. So we
+         * don't need to adjust it by reading its system UI flags for compatibility.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_APPEARANCE_CONTROLLED = 0x04000000;
+
+        /**
+         * Flag to indicate that the window is controlling the behavior of system bars. So we don't
+         * need to adjust it by reading its window flags or system UI flags for compatibility.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_BEHAVIOR_CONTROLLED = 0x08000000;
+
+        /**
          * Flag to indicate that the window is controlling how it fits window insets on its own.
          * So we don't need to adjust its attributes for fitting window insets.
          * @hide
          */
-        public static final int PRIVATE_FLAG_FIT_INSETS_CONTROLLED = 0x04000000;
+        public static final int PRIVATE_FLAG_FIT_INSETS_CONTROLLED = 0x10000000;
 
         /**
          * Flag to indicate that the window only draws the bottom bar background so that we don't
          * extend it to system bar areas at other sides.
          * @hide
          */
-        public static final int PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND = 0x08000000;
+        public static final int PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND = 0x20000000;
 
         /**
          * An internal annotation for flags that can be specified to {@link #softInputMode}.
@@ -1969,6 +1983,14 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                         equals = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                         name = "COLOR_SPACE_AGNOSTIC"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
+                        equals = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
+                        name = "APPEARANCE_CONTROLLED"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_BEHAVIOR_CONTROLLED,
+                        equals = PRIVATE_FLAG_BEHAVIOR_CONTROLLED,
+                        name = "BEHAVIOR_CONTROLLED"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
                         equals = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,

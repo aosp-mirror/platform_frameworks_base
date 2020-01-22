@@ -28,7 +28,7 @@ import android.content.Intent;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2;
 import android.media.MediaRouter2.RouteCallback;
-import android.media.MediaRouter2.SessionCallback;
+import android.media.MediaRouter2.RoutingControllerCallback;
 import android.media.MediaRouter2Manager;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
@@ -110,7 +110,7 @@ public class MediaRouterManagerTest {
 
     private final List<MediaRouter2Manager.Callback> mManagerCallbacks = new ArrayList<>();
     private final List<RouteCallback> mRouteCallbacks = new ArrayList<>();
-    private final List<SessionCallback> mSessionCallbacks = new ArrayList<>();
+    private final List<RoutingControllerCallback> mControllerCallbacks = new ArrayList<>();
 
     public static final List<String> FEATURES_ALL = new ArrayList();
     public static final List<String> FEATURES_SPECIAL = new ArrayList();
@@ -213,9 +213,9 @@ public class MediaRouterManagerTest {
         addManagerCallback(new MediaRouter2Manager.Callback());
         //TODO: remove this when it's not necessary.
         addRouterCallback(new MediaRouter2.RouteCallback());
-        addSessionCallback(new SessionCallback() {
+        addSessionCallback(new RoutingControllerCallback() {
             @Override
-            public void onSessionCreated(MediaRouter2.RoutingController controller) {
+            public void onControllerCreated(MediaRouter2.RoutingController controller) {
                 if (createRouteMap(controller.getSelectedRoutes()).containsKey(ROUTE_ID1)) {
                     latch.countDown();
                 }
@@ -414,9 +414,9 @@ public class MediaRouterManagerTest {
         mRouter2.registerRouteCallback(mExecutor, routeCallback, RouteDiscoveryPreference.EMPTY);
     }
 
-    private void addSessionCallback(SessionCallback sessionCallback) {
-        mSessionCallbacks.add(sessionCallback);
-        mRouter2.registerSessionCallback(mExecutor, sessionCallback);
+    private void addSessionCallback(RoutingControllerCallback controllerCallback) {
+        mControllerCallbacks.add(controllerCallback);
+        mRouter2.registerControllerCallback(mExecutor, controllerCallback);
     }
 
     private void clearCallbacks() {
@@ -430,10 +430,10 @@ public class MediaRouterManagerTest {
         }
         mRouteCallbacks.clear();
 
-        for (SessionCallback sessionCallback : mSessionCallbacks) {
-            mRouter2.unregisterSessionCallback(sessionCallback);
+        for (RoutingControllerCallback controllerCallback : mControllerCallbacks) {
+            mRouter2.unregisterControllerCallback(controllerCallback);
         }
-        mSessionCallbacks.clear();
+        mControllerCallbacks.clear();
     }
 
     private void releaseAllSessions() {

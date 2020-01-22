@@ -18,6 +18,7 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.tuner.TunerUtils;
 
@@ -26,6 +27,7 @@ import android.media.tv.tuner.TunerUtils;
  *
  * @hide
  */
+@SystemApi
 public class AvSettings extends Settings {
     private final boolean mIsPassthrough;
 

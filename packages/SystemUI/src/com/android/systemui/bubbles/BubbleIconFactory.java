@@ -18,6 +18,7 @@ package com.android.systemui.bubbles;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.LauncherApps;
+import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
@@ -48,16 +49,19 @@ public class BubbleIconFactory extends BaseIconFactory {
     /**
      * Returns the drawable that the developer has provided to display in the bubble.
      */
-    Drawable getBubbleDrawable(Bubble b, Context context) {
-        if (b.getShortcutInfo() != null && b.usingShortcutInfo()) {
+    Drawable getBubbleDrawable(Context context, ShortcutInfo shortcutInfo,
+            Notification.BubbleMetadata metadata) {
+        if (shortcutInfo != null) {
             LauncherApps launcherApps =
                     (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
             int density = context.getResources().getConfiguration().densityDpi;
-            return launcherApps.getShortcutIconDrawable(b.getShortcutInfo(), density);
+            return launcherApps.getShortcutIconDrawable(shortcutInfo, density);
         } else {
-            Notification.BubbleMetadata metadata = b.getEntry().getBubbleMetadata();
-            Icon ic = metadata.getIcon();
-            return ic.loadDrawable(context);
+            Icon ic = metadata.getBubbleIcon();
+            if (ic != null) {
+                return ic.loadDrawable(context);
+            }
+            return null;
         }
     }
 

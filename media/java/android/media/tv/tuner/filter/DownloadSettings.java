@@ -18,13 +18,16 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.tuner.TunerUtils;
 
 /**
  * Filter Settings for a Download.
+ *
  * @hide
  */
+@SystemApi
 public class DownloadSettings extends Settings {
     private final int mDownloadId;
 

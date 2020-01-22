@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PermissionInfo;
 import android.os.Binder;
 import android.os.Process;
 
@@ -67,22 +68,30 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 public final class PermissionChecker {
-    /** Permission result: The permission is granted. */
+    /** The permission is granted. */
     public static final int PERMISSION_GRANTED =  PackageManager.PERMISSION_GRANTED;
 
-    /** Permission result: The permission is denied. */
-    public static final int PERMISSION_DENIED =  PackageManager.PERMISSION_DENIED;
+    /** Returned when:
+     * <ul>
+     * <li>For non app op permissions, returned when the permission is denied.</li>
+     * <li>For app op permissions, returned when the app op is denied or app op is
+     * {@link AppOpsManager#MODE_DEFAULT} and permission is denied.</li>
+     * </ul>
+     *
+     */
+    public static final int PERMISSION_HARD_DENIED =  PackageManager.PERMISSION_DENIED;
 
-    /** Permission result: The permission is denied because the app op is not allowed. */
-    public static final int PERMISSION_DENIED_APP_OP =  PackageManager.PERMISSION_DENIED  - 1;
+    /** Only for runtime permissions, its returned when the runtime permission
+     * is granted, but the corresponding app op is denied. */
+    public static final int PERMISSION_SOFT_DENIED =  PackageManager.PERMISSION_DENIED - 1;
 
     /** Constant when the PID for which we check permissions is unknown. */
     public static final int PID_UNKNOWN = -1;
 
     /** @hide */
     @IntDef({PERMISSION_GRANTED,
-            PERMISSION_DENIED,
-            PERMISSION_DENIED_APP_OP})
+            PERMISSION_SOFT_DENIED,
+            PERMISSION_HARD_DENIED})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionResult {}
 
@@ -116,7 +125,7 @@ public final class PermissionChecker {
      *     the first package for the calling UID will be used.
      * @param featureId Feature in the package
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
-     *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
      * @param message A message describing the reason the permission was checked
      *
      * @see #checkPermissionForPreflight(Context, String, int, int, String)
@@ -155,7 +164,7 @@ public final class PermissionChecker {
      * @param packageName The package name for which to check. If null the
      *     the first package for the calling UID will be used.
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
-     *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
      *
      * @see #checkPermissionForDataDelivery(Context, String, int, int, String, String)
      */
@@ -189,7 +198,7 @@ public final class PermissionChecker {
      * @param context Context for accessing resources.
      * @param permission The permission to check.
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
-     *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
      * @param message A message describing the reason the permission was checked
      *
      * @see #checkSelfPermissionForPreflight(Context, String)
@@ -225,7 +234,7 @@ public final class PermissionChecker {
      * @param context Context for accessing resources.
      * @param permission The permission to check.
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
-     *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
      *
      * @see #checkSelfPermissionForDataDelivery(Context, String, String)
      */
@@ -259,7 +268,7 @@ public final class PermissionChecker {
      *     the first package for the calling UID will be used.
      * @param featureId The feature inside of the app
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
-     *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
      * @param message A message describing the reason the permission was checked
      *
      * @see #checkCallingPermissionForPreflight(Context, String, String)
@@ -269,7 +278,7 @@ public final class PermissionChecker {
             @NonNull String permission, @Nullable String packageName,
             @Nullable String featureId, @Nullable String message) {
         if (Binder.getCallingPid() == Process.myPid()) {
-            return PERMISSION_DENIED;
+            return PERMISSION_HARD_DENIED;
         }
         return checkPermissionForDataDelivery(context, permission, Binder.getCallingPid(),
                 Binder.getCallingUid(), packageName, featureId, message);
@@ -299,7 +308,7 @@ public final class PermissionChecker {
      * @param packageName The package name making the IPC. If null the
      *     the first package for the calling UID will be used.
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
-     *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
      *
      * @see #checkCallingPermissionForDataDelivery(Context, String, String, String)
      */
@@ -307,7 +316,7 @@ public final class PermissionChecker {
     public static int checkCallingPermissionForPreflight(@NonNull Context context,
             @NonNull String permission, @Nullable String packageName) {
         if (Binder.getCallingPid() == Process.myPid()) {
-            return PERMISSION_DENIED;
+            return PERMISSION_HARD_DENIED;
         }
         return checkPermissionForPreflight(context, permission, Binder.getCallingPid(),
                 Binder.getCallingUid(), packageName);
@@ -333,7 +342,7 @@ public final class PermissionChecker {
      * @param context Context for accessing resources.
      * @param permission The permission to check.
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
-     *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
      * @param featureId feature Id of caller (if not self)
      * @param message A message describing the reason the permission was checked
      *
@@ -372,7 +381,7 @@ public final class PermissionChecker {
      * @param context Context for accessing resources.
      * @param permission The permission to check.
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
-     *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
      *
      * @see #checkCallingOrSelfPermissionForDataDelivery(Context, String, String, String)
      */
@@ -385,39 +394,85 @@ public final class PermissionChecker {
                 Binder.getCallingUid(), packageName);
     }
 
-    private static int checkPermissionCommon(@NonNull Context context, @NonNull String permission,
+    static int checkPermissionCommon(@NonNull Context context, @NonNull String permission,
             int pid, int uid, @Nullable String packageName, @Nullable String featureId,
             @Nullable String message, boolean forDataDelivery) {
-        if (context.checkPermission(permission, pid, uid) == PackageManager.PERMISSION_DENIED) {
-            return PERMISSION_DENIED;
-        }
-
-        AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
-        String op = appOpsManager.permissionToOp(permission);
-        if (op == null) {
-            return PERMISSION_GRANTED;
+        final PermissionInfo permissionInfo;
+        try {
+            // TODO(b/147869157): Cache platform defined app op and runtime permissions to avoid
+            // calling into the package manager every time.
+            permissionInfo = context.getPackageManager().getPermissionInfo(permission, 0);
+        } catch (PackageManager.NameNotFoundException ignored) {
+            return PERMISSION_HARD_DENIED;
         }
 
         if (packageName == null) {
             String[] packageNames = context.getPackageManager().getPackagesForUid(uid);
-            if (packageNames == null || packageNames.length <= 0) {
-                return PERMISSION_DENIED;
+            if (packageNames != null && packageNames.length > 0) {
+                packageName = packageNames[0];
             }
-            packageName = packageNames[0];
         }
 
-        if (forDataDelivery) {
-            if (appOpsManager.noteProxyOpNoThrow(op, packageName, uid, featureId, message)
-                    != AppOpsManager.MODE_ALLOWED) {
-                return PERMISSION_DENIED_APP_OP;
+        if (permissionInfo.isAppOp()) {
+            return checkAppOpPermission(context, permission, pid, uid, packageName, featureId,
+                    message, forDataDelivery);
+        }
+        if (permissionInfo.isRuntime()) {
+            return checkRuntimePermission(context, permission, pid, uid, packageName, featureId,
+                    message, forDataDelivery);
+        }
+        return context.checkPermission(permission, pid, uid);
+    }
+
+    private static int checkAppOpPermission(@NonNull Context context, @NonNull String permission,
+            int pid, int uid, @Nullable String packageName, @Nullable String featureId,
+            @Nullable String message, boolean forDataDelivery) {
+        final String op = AppOpsManager.permissionToOp(permission);
+        if (op == null || packageName == null) {
+            return PERMISSION_HARD_DENIED;
+        }
+
+        final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
+        final int opMode = (forDataDelivery)
+                ? appOpsManager.noteProxyOpNoThrow(op, packageName, uid, featureId, message)
+                : appOpsManager.unsafeCheckOpNoThrow(op, uid, packageName);
+
+        switch (opMode) {
+            case AppOpsManager.MODE_ALLOWED: {
+                return PERMISSION_GRANTED;
             }
+            case AppOpsManager.MODE_DEFAULT: {
+                return context.checkPermission(permission, pid, uid)
+                            == PackageManager.PERMISSION_GRANTED
+                        ? PERMISSION_GRANTED : PERMISSION_HARD_DENIED;
+            }
+            default: {
+                return PERMISSION_HARD_DENIED;
+            }
+        }
+    }
+
+    private static int checkRuntimePermission(@NonNull Context context, @NonNull String permission,
+            int pid, int uid, @Nullable String packageName, @Nullable String featureId,
+            @Nullable String message, boolean forDataDelivery) {
+        if (context.checkPermission(permission, pid, uid) == PackageManager.PERMISSION_DENIED) {
+            return PERMISSION_HARD_DENIED;
+        }
+
+        final String op = AppOpsManager.permissionToOp(permission);
+        if (op == null || packageName == null) {
+            return PERMISSION_GRANTED;
+        }
+
+        final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
+        final int opMode = (forDataDelivery)
+                ? appOpsManager.noteProxyOpNoThrow(op, packageName, uid, featureId, message)
+                : appOpsManager.unsafeCheckOpNoThrow(op, uid, packageName);
+
+        if (opMode == AppOpsManager.MODE_ALLOWED) {
+            return PERMISSION_GRANTED;
         } else {
-            final int mode = appOpsManager.unsafeCheckOpRawNoThrow(op, uid, packageName);
-            if (mode != AppOpsManager.MODE_ALLOWED && mode != AppOpsManager.MODE_FOREGROUND) {
-                return PERMISSION_DENIED_APP_OP;
-            }
+            return PERMISSION_SOFT_DENIED;
         }
-
-        return PERMISSION_GRANTED;
     }
 }

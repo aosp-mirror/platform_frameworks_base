@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -66,6 +67,10 @@ import java.util.List;
  * <p>
  * The easiest way to use this class is to call one of the static methods that constructs
  * everything you need and returns a new Toast object.
+ * <p>
+ * Note that
+ * <a href="{@docRoot}reference/com/google/android/material/snackbar/Snackbar">Snackbars</a> are
+ * preferred for brief messages while the app is in the foreground.
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
@@ -100,7 +105,8 @@ public class Toast {
      */
     public static final int LENGTH_LONG = 1;
 
-    final Context mContext;
+    private final Binder mToken;
+    private final Context mContext;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     final TN mTN;
     @UnsupportedAppUsage
@@ -126,7 +132,8 @@ public class Toast {
      */
     public Toast(@NonNull Context context, @Nullable Looper looper) {
         mContext = context;
-        mTN = new TN(context.getPackageName(), looper);
+        mToken = new Binder();
+        mTN = new TN(context.getPackageName(), mToken, looper);
         mTN.mY = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.toast_y_offset);
         mTN.mGravity = context.getResources().getInteger(
@@ -149,9 +156,9 @@ public class Toast {
 
         try {
             if (mIsCustomToast) {
-                service.enqueueToast(pkg, tn, mDuration, displayId);
+                service.enqueueToast(pkg, mToken, tn, mDuration, displayId);
             } else {
-                service.enqueueTextToast(pkg, tn, mDuration, displayId);
+                service.enqueueTextToast(pkg, mToken, tn, mDuration, displayId);
             }
         } catch (RemoteException e) {
             // Empty
@@ -169,8 +176,16 @@ public class Toast {
 
     /**
      * Set the view to show.
+     *
      * @see #getView
+     * @deprecated Custom toast views are deprecated. Apps can create a standard text toast with the
+     *      {@link #makeText(Context, CharSequence, int)} method, or use a
+     *      <a href="{@docRoot}reference/com/google/android/material/snackbar/Snackbar">Snackbar</a>
+     *      when in the foreground. Starting from Android {@link Build.VERSION_CODES#R}, apps
+     *      targeting API level {@link Build.VERSION_CODES#R} or higher that are in the background
+     *      will not have custom toast views displayed.
      */
+    @Deprecated
     public void setView(View view) {
         mIsCustomToast = true;
         mNextView = view;
@@ -178,7 +193,14 @@ public class Toast {
 
     /**
      * Return the view.
+     *
      * @see #setView
+     * @deprecated Custom toast views are deprecated. Apps can create a standard text toast with the
+     *      {@link #makeText(Context, CharSequence, int)} method, or use a
+     *      <a href="{@docRoot}reference/com/google/android/material/snackbar/Snackbar">Snackbar</a>
+     *      when in the foreground. Starting from Android {@link Build.VERSION_CODES#R}, apps
+     *      targeting API level {@link Build.VERSION_CODES#R} or higher that are in the background
+     *      will not have custom toast views displayed.
      */
     public View getView() {
         mIsCustomToast = true;
@@ -416,7 +438,8 @@ public class Toast {
 
         WindowManager mWM;
 
-        String mPackageName;
+        final String mPackageName;
+        final Binder mToken;
 
         @GuardedBy("mCallbacks")
         private final List<Callback> mCallbacks = new ArrayList<>();
@@ -424,7 +447,7 @@ public class Toast {
         static final long SHORT_DURATION_TIMEOUT = 4000;
         static final long LONG_DURATION_TIMEOUT = 7000;
 
-        TN(String packageName, @Nullable Looper looper) {
+        TN(String packageName, Binder token, @Nullable Looper looper) {
             // XXX This should be changed to use a Dialog, with a Theme.Toast
             // defined that sets up the layout params appropriately.
             final WindowManager.LayoutParams params = mParams;
@@ -440,6 +463,7 @@ public class Toast {
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 
             mPackageName = packageName;
+            mToken = token;
 
             if (looper == null) {
                 // Use Looper.myLooper() if looper is not specified.
@@ -471,7 +495,7 @@ public class Toast {
                             // handleShow()
                             mNextView = null;
                             try {
-                                getService().cancelToast(mPackageName, TN.this);
+                                getService().cancelToast(mPackageName, mToken);
                             } catch (RemoteException e) {
                             }
                             break;
@@ -601,7 +625,7 @@ public class Toast {
                 // Now that we've removed the view it's safe for the server to release
                 // the resources.
                 try {
-                    getService().finishToken(mPackageName, this);
+                    getService().finishToken(mPackageName, mToken);
                 } catch (RemoteException e) {
                 }
 

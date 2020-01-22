@@ -27,14 +27,14 @@
 #include "android_runtime/android_view_Surface.h"
 #include "android_runtime/android_graphics_SurfaceTexture.h"
 
-#include <gui/Surface.h>
-#include <gui/surfacetexture/SurfaceTexture.h>
 #include <gui/IGraphicBufferProducer.h>
 #include <gui/IProducerListener.h>
-#include <ui/GraphicBuffer.h>
-#include <system/window.h>
+#include <gui/Surface.h>
 #include <hardware/camera3.h>
+#include <surfacetexture/SurfaceTexture.h>
 #include <system/camera_metadata.h>
+#include <system/window.h>
+#include <ui/GraphicBuffer.h>
 
 #include <stdint.h>
 #include <inttypes.h>

@@ -16,6 +16,7 @@
 package com.android.server.appsearch;
 
 import android.annotation.NonNull;
+import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.IAppSearchManager;
 import android.content.Context;
 import android.os.Binder;
@@ -33,6 +34,8 @@ import com.google.android.icing.proto.SchemaProto;
 import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.SearchSpecProto;
 import com.google.android.icing.protobuf.InvalidProtocolBufferException;
+
+import java.util.List;
 
 /**
  * TODO(b/142567528): add comments when implement this class
@@ -72,17 +75,28 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void putDocument(byte[] documentBytes, AndroidFuture callback) {
-            Preconditions.checkNotNull(documentBytes);
+        public void putDocuments(
+                List documentsBytes, AndroidFuture<AppSearchBatchResult> callback) {
+            Preconditions.checkNotNull(documentsBytes);
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
             long callingIdentity = Binder.clearCallingIdentity();
             try {
-                DocumentProto document = DocumentProto.parseFrom(documentBytes);
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                impl.putDocument(callingUid, document);
-                callback.complete(null);
+                AppSearchBatchResult.Builder<String, Void> resultBuilder =
+                        AppSearchBatchResult.newBuilder();
+                for (int i = 0; i < documentsBytes.size(); i++) {
+                    byte[] documentBytes = (byte[]) documentsBytes.get(i);
+                    DocumentProto document = DocumentProto.parseFrom(documentBytes);
+                    try {
+                        impl.putDocument(callingUid, document);
+                        resultBuilder.setSuccess(document.getUri(), /*value=*/ null);
+                    } catch (Throwable t) {
+                        resultBuilder.setFailure(document.getUri(), t);
+                    }
+                }
+                callback.complete(resultBuilder.build());
             } catch (Throwable t) {
                 callback.completeExceptionally(t);
             } finally {

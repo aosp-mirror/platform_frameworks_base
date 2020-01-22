@@ -145,7 +145,7 @@ class BluetoothRouteProvider {
         BluetoothRouteInfo newBtRoute = new BluetoothRouteInfo();
         newBtRoute.btDevice = device;
         newBtRoute.route = new MediaRoute2Info.Builder(device.getAddress(), device.getName())
-                .addFeature(SystemMediaRoute2Provider.TYPE_LIVE_AUDIO)
+                .addFeature(MediaRoute2Info.FEATURE_LIVE_AUDIO)
                 .setConnectionState(MediaRoute2Info.CONNECTION_STATE_DISCONNECTED)
                 .setDescription(mContext.getResources().getText(
                         R.string.bluetooth_a2dp_audio_route_name).toString())

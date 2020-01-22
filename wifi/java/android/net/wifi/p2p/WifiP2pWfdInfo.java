@@ -61,6 +61,9 @@ public final class WifiP2pWfdInfo implements Parcelable {
      * {@link #mDeviceInfo} & {@link #DEVICE_TYPE} is one of {@link #DEVICE_TYPE_WFD_SOURCE},
      * {@link #DEVICE_TYPE_PRIMARY_SINK}, {@link #DEVICE_TYPE_SECONDARY_SINK} or
      * {@link #DEVICE_TYPE_SOURCE_OR_PRIMARY_SINK}.
+     *
+     * The bit definition is listed in 5.1.2 WFD Device Information Subelement in
+     * Wi-Fi Display Technical Specification.
      */
     private static final int DEVICE_TYPE                            = 1 << 1 | 1 << 0;
     private static final int COUPLED_SINK_SUPPORT_AT_SOURCE         = 1 << 2;
@@ -69,6 +72,8 @@ public final class WifiP2pWfdInfo implements Parcelable {
     private static final int SESSION_AVAILABLE_BIT2                 = 1 << 5;
     private static final int SESSION_AVAILABLE                      =
             SESSION_AVAILABLE_BIT2 | SESSION_AVAILABLE_BIT1;
+    /* The support of Content Protection using the HDCP system 2.0/2.1. */
+    private static final int CONTENT_PROTECTION_SUPPORT             = 1 << 8;
 
     private int mCtrlPort;
 
@@ -143,6 +148,26 @@ public final class WifiP2pWfdInfo implements Parcelable {
             mDeviceInfo &= ~SESSION_AVAILABLE_BIT2;
         } else {
             mDeviceInfo &= ~SESSION_AVAILABLE;
+        }
+    }
+
+    /**
+     * @return true if Content Protection using the HDCP system 2.0/2.1 is supported.
+     */
+    public boolean isContentProtectionSupported() {
+        return (mDeviceInfo & CONTENT_PROTECTION_SUPPORT) != 0;
+    }
+
+    /**
+     * Sets whether Content Protection using the HDCP system 2.0/2.1 is supported.
+     *
+     * @param enabled true to indicate that Content Protection is supported, false otherwise.
+     */
+    public void setContentProtectionSupported(boolean enabled) {
+        if (enabled) {
+            mDeviceInfo |= CONTENT_PROTECTION_SUPPORT;
+        } else {
+            mDeviceInfo &= ~CONTENT_PROTECTION_SUPPORT;
         }
     }
 

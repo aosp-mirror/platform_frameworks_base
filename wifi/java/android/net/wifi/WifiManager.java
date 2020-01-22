@@ -201,6 +201,13 @@ public class WifiManager {
      */
     public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_NOT_ALLOWED = 6;
 
+    /**
+     * Reason code if one or more of the network suggestions added is invalid.
+     *
+     * Please user {@link WifiNetworkSuggestion.Builder} to create network suggestions.
+     */
+    public static final int STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_INVALID = 7;
+
     /** @hide */
     @IntDef(prefix = { "STATUS_NETWORK_SUGGESTIONS_" }, value = {
             STATUS_NETWORK_SUGGESTIONS_SUCCESS,
@@ -210,6 +217,7 @@ public class WifiManager {
             STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_EXCEEDS_MAX_PER_APP,
             STATUS_NETWORK_SUGGESTIONS_ERROR_REMOVE_INVALID,
             STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_NOT_ALLOWED,
+            STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_INVALID,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NetworkSuggestionsStatusCode {}

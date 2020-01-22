@@ -195,8 +195,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 new Intent(mContext, BubblesTestActivity.class), 0);
         mBubbleSbn = new SbnBuilder(mSbn).setBubbleMetadata(
                 new Notification.BubbleMetadata.Builder()
-                        .setIntent(bubbleIntent)
-                        .setIcon(Icon.createWithResource(mContext, R.drawable.android)).build())
+                        .createIntentBubble(bubbleIntent,
+                                Icon.createWithResource(mContext, R.drawable.android)).build())
                 .build();
         mBubbleEntry = new NotificationEntryBuilder().setSbn(mBubbleSbn).build();
 
@@ -206,26 +206,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         when(mMockINotificationManager.getConversationNotificationChannel(anyString(), anyInt(),
                 anyString(), eq(TEST_CHANNEL), eq(false), eq(CONVERSATION_ID)))
                 .thenReturn(mConversationChannel);
-    }
-
-    @Test
-    public void testBindNotification_SetsTextShortcutName() {
-        mNotificationInfo.bindNotification(
-                mShortcutManager,
-                mLauncherApps,
-                mMockPackageManager,
-                mMockINotificationManager,
-                mVisualStabilityManager,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mEntry,
-                null,
-                null,
-                null,
-                true);
-        final TextView textView = mNotificationInfo.findViewById(R.id.name);
-        assertEquals(mShortcutInfo.getShortLabel(), textView.getText().toString());
-        assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
     }
 
     @Test
@@ -267,7 +247,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         assertTrue(textView.getText().toString().contains("App Name"));
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
     }
-
+/**
     @Test
     public void testBindNotification_SetsTextChannelName() {
         mNotificationInfo.bindNotification(
@@ -287,7 +267,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         assertTrue(textView.getText().toString().contains(mNotificationChannel.getName()));
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
     }
-
+*/
     @Test
     public void testBindNotification_SetsTextGroupName() throws Exception {
         NotificationChannelGroup group = new NotificationChannelGroup("id", "name");

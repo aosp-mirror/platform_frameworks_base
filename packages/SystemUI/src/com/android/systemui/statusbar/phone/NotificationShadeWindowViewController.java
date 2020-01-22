@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 
+import android.annotation.Nullable;
 import android.app.StatusBarManager;
 import android.graphics.RectF;
 import android.hardware.display.AmbientDisplayConfiguration;
@@ -44,6 +45,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
+import com.android.systemui.statusbar.StatusBarWindowBlurController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -79,6 +81,7 @@ public class NotificationShadeWindowViewController {
     private final CommandQueue mCommandQueue;
     private final NotificationShadeWindowView mView;
     private final ShadeController mShadeController;
+    private final StatusBarWindowBlurController mBlurController;
 
     private GestureDetector mGestureDetector;
     private View mBrightnessMirror;
@@ -120,6 +123,7 @@ public class NotificationShadeWindowViewController {
             CommandQueue commandQueue,
             ShadeController shadeController,
             DockManager dockManager,
+            @Nullable StatusBarWindowBlurController blurController,
             NotificationShadeWindowView statusBarWindowView,
             NotificationPanelViewController notificationPanelViewController) {
         mInjectionInflationController = injectionInflationController;
@@ -141,6 +145,7 @@ public class NotificationShadeWindowViewController {
         mShadeController = shadeController;
         mDockManager = dockManager;
         mNotificationPanelViewController = notificationPanelViewController;
+        mBlurController = blurController;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror);
@@ -383,6 +388,11 @@ public class NotificationShadeWindowViewController {
                 new DragDownHelper(
                         mView.getContext(), mView, expandHelperCallback,
                         dragDownCallback, mFalsingManager));
+
+        if (mBlurController != null) {
+            mBlurController.setRoot(mView);
+            mNotificationPanelViewController.addExpansionListener(mBlurController);
+        }
     }
 
     public NotificationShadeWindowView getView() {

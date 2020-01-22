@@ -16,38 +16,54 @@
 
 package com.android.server;
 
+import android.app.AlarmManager;
 import android.app.IUiModeManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import com.android.server.twilight.TwilightManager;
+import com.android.server.twilight.TwilightState;
 import com.android.server.wm.WindowManagerInternal;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 
 import static android.app.UiModeManager.MODE_NIGHT_AUTO;
+import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
 import static android.app.UiModeManager.MODE_NIGHT_NO;
 import static android.app.UiModeManager.MODE_NIGHT_YES;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -66,22 +82,51 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     TwilightManager mTwilightManager;
     @Mock
     PowerManager.WakeLock mWakeLock;
-    private Set<BroadcastReceiver> mScreenOffRecievers;
+    @Mock
+    AlarmManager mAlarmManager;
+    @Mock
+    PowerManager mPowerManager;
+    @Mock
+    TwilightState mTwilightState;
+
+    private BroadcastReceiver mScreenOffCallback;
+    private BroadcastReceiver mTimeChangedCallback;
+    private AlarmManager.OnAlarmListener mCustomListener;
 
     @Before
     public void setUp() {
-        mUiManagerService = new UiModeManagerService(mContext, mWindowManager, mWakeLock,
-                mTwilightManager, true);
-        mScreenOffRecievers = new HashSet<>();
+        initMocks(this);
+        mUiManagerService = new UiModeManagerService(mContext,
+                mWindowManager, mAlarmManager, mPowerManager,
+                mWakeLock, mTwilightManager, true);
         mService = mUiManagerService.getService();
         when(mContext.checkCallingOrSelfPermission(anyString()))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
         when(mContext.getResources()).thenReturn(mResources);
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
-        when(mContext.registerReceiver(any(), any())).then(inv -> {
-            mScreenOffRecievers.add(inv.getArgument(0));
+        when(mPowerManager.isInteractive()).thenReturn(true);
+        when(mTwilightManager.getLastTwilightState()).thenReturn(mTwilightState);
+        when(mTwilightState.isNight()).thenReturn(true);
+        when(mContext.registerReceiver(notNull(), notNull())).then(inv -> {
+            IntentFilter filter = inv.getArgument(1);
+            if (filter.hasAction(Intent.ACTION_TIMEZONE_CHANGED)) {
+                mTimeChangedCallback = inv.getArgument(0);
+            }
+            if (filter.hasAction(Intent.ACTION_SCREEN_OFF)) {
+                mScreenOffCallback = inv.getArgument(0);
+            }
             return null;
         });
+        doAnswer(inv -> {
+            mCustomListener = inv.getArgument(3);
+            return null;
+        }).when(mAlarmManager).setExact(anyInt(), anyLong(), anyString(),
+                any(AlarmManager.OnAlarmListener.class), any(Handler.class));
+
+        doAnswer(inv -> {
+            mCustomListener = () -> {};
+            return null;
+        }).when(mAlarmManager).cancel(eq(mCustomListener));
     }
 
     @Test
@@ -102,7 +147,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
             mService.setNightMode(MODE_NIGHT_NO);
         } catch (SecurityException e) { /*we should ignore this update config exception*/ }
         given(mContext.registerReceiver(any(), any())).willThrow(SecurityException.class);
-        verify(mContext).unregisterReceiver(any(BroadcastReceiver.class));
+        verify(mContext, atLeastOnce()).unregisterReceiver(any(BroadcastReceiver.class));
     }
 
     @Test
@@ -163,6 +208,132 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
             mService.setNightMode(MODE_NIGHT_NO);
         } catch (SecurityException e) { /* we should ignore this update config exception*/ }
         assertFalse(isNightModeActivated());
+    }
+
+    @Test
+    public void customTime_darkThemeOn() throws RemoteException {
+        LocalTime now = LocalTime.now();
+        mService.setNightMode(MODE_NIGHT_NO);
+        mService.setCustomNightModeStart(now.minusHours(1L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.plusHours(1L).toNanoOfDay() / 1000);
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        mScreenOffCallback.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
+        assertTrue(isNightModeActivated());
+    }
+
+    @Test
+    public void customTime_darkThemeOff() throws RemoteException {
+        LocalTime now = LocalTime.now();
+        mService.setNightMode(MODE_NIGHT_YES);
+        mService.setCustomNightModeStart(now.plusHours(1L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.minusHours(1L).toNanoOfDay() / 1000);
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        mScreenOffCallback.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
+        assertFalse(isNightModeActivated());
+    }
+
+    @Test
+    public void customTime_darkThemeOff_afterStartEnd() throws RemoteException {
+        LocalTime now = LocalTime.now();
+        mService.setNightMode(MODE_NIGHT_YES);
+        mService.setCustomNightModeStart(now.plusHours(1L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.plusHours(2L).toNanoOfDay() / 1000);
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        mScreenOffCallback.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
+        assertFalse(isNightModeActivated());
+    }
+
+    @Test
+    public void customTime_darkThemeOn_afterStartEnd() throws RemoteException {
+        LocalTime now = LocalTime.now();
+        mService.setNightMode(MODE_NIGHT_YES);
+        mService.setCustomNightModeStart(now.plusHours(1L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.plusHours(2L).toNanoOfDay() / 1000);
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        mScreenOffCallback.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
+        assertFalse(isNightModeActivated());
+    }
+
+
+
+    @Test
+    public void customTime_darkThemeOn_beforeStartEnd() throws RemoteException {
+        LocalTime now = LocalTime.now();
+        mService.setNightMode(MODE_NIGHT_YES);
+        mService.setCustomNightModeStart(now.minusHours(1L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.minusHours(2L).toNanoOfDay() / 1000);
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        mScreenOffCallback.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
+        assertTrue(isNightModeActivated());
+    }
+
+    @Test
+    public void customTime_darkThemeOff_beforeStartEnd() throws RemoteException {
+        LocalTime now = LocalTime.now();
+        mService.setNightMode(MODE_NIGHT_YES);
+        mService.setCustomNightModeStart(now.minusHours(2L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.minusHours(1L).toNanoOfDay() / 1000);
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        mScreenOffCallback.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
+        assertFalse(isNightModeActivated());
+    }
+
+    @Test
+    public void customTIme_customAlarmSetWhenScreenTimeChanges() throws RemoteException {
+        when(mPowerManager.isInteractive()).thenReturn(false);
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        verify(mAlarmManager, times(1))
+                .setExact(anyInt(), anyLong(), anyString(), any(), any());
+        mTimeChangedCallback.onReceive(mContext, new Intent(Intent.ACTION_TIME_CHANGED));
+        verify(mAlarmManager, atLeast(2))
+                .setExact(anyInt(), anyLong(), anyString(), any(), any());
+    }
+
+    @Test
+    public void customTime_alarmSetInTheFutureWhenOn() throws RemoteException {
+        LocalDateTime now = LocalDateTime.now();
+        when(mPowerManager.isInteractive()).thenReturn(false);
+        mService.setNightMode(MODE_NIGHT_YES);
+        mService.setCustomNightModeStart(now.toLocalTime().minusHours(1L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.toLocalTime().plusHours(1L).toNanoOfDay() / 1000);
+        LocalDateTime next = now.plusHours(1L);
+        final long millis = next.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        verify(mAlarmManager)
+                .setExact(anyInt(), eq(millis), anyString(), any(), any());
+    }
+
+    @Test
+    public void customTime_appliesImmediatelyWhenScreenOff() throws RemoteException {
+        when(mPowerManager.isInteractive()).thenReturn(false);
+        LocalTime now = LocalTime.now();
+        mService.setNightMode(MODE_NIGHT_NO);
+        mService.setCustomNightModeStart(now.minusHours(1L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.plusHours(1L).toNanoOfDay() / 1000);
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        assertTrue(isNightModeActivated());
+    }
+
+    @Test
+    public void customTime_appliesOnlyWhenScreenOff() throws RemoteException {
+        LocalTime now = LocalTime.now();
+        mService.setNightMode(MODE_NIGHT_NO);
+        mService.setCustomNightModeStart(now.minusHours(1L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.plusHours(1L).toNanoOfDay() / 1000);
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        assertFalse(isNightModeActivated());
+        mScreenOffCallback.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
+        assertTrue(isNightModeActivated());
+    }
+
+    @Test
+    public void nightAuto_appliesOnlyWhenScreenOff() throws RemoteException {
+        when(mTwilightState.isNight()).thenReturn(true);
+        mService.setNightMode(MODE_NIGHT_NO);
+        mService.setNightMode(MODE_NIGHT_AUTO);
+        assertFalse(isNightModeActivated());
+        mScreenOffCallback.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
+        assertTrue(isNightModeActivated());
     }
 
     private boolean isNightModeActivated() {

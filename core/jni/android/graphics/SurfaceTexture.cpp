@@ -23,10 +23,10 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include <gui/Surface.h>
-#include <gui/surfacetexture/SurfaceTexture.h>
 #include <gui/BufferQueue.h>
-#include <gui/surfacetexture/surface_texture_platform.h>
+#include <gui/Surface.h>
+#include <surfacetexture/SurfaceTexture.h>
+#include <surfacetexture/surface_texture_platform.h>
 
 #include "core_jni_helpers.h"
 

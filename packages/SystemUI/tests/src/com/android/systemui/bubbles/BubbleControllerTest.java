@@ -70,7 +70,9 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -151,6 +153,8 @@ public class BubbleControllerTest extends SysuiTestCase {
     private ShadeController mShadeController;
     @Mock
     private RemoteInputUriController mRemoteInputUriController;
+    @Mock
+    private NotificationRowComponent mNotificationRowComponent;
 
     private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private BubbleData mBubbleData;
@@ -167,7 +171,19 @@ public class BubbleControllerTest extends SysuiTestCase {
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
         mSuperStatusBarViewFactory = new SuperStatusBarViewFactory(mContext,
-                new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()));
+                new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()),
+                new NotificationRowComponent.Builder() {
+                    @Override
+                    public NotificationRowComponent.Builder activatableNotificationView(
+                            ActivatableNotificationView view) {
+                        return this;
+                    }
+
+                    @Override
+                    public NotificationRowComponent build() {
+                        return mNotificationRowComponent;
+                    }
+                });
 
         // Bubbles get added to status bar window view
         mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,

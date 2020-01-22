@@ -48,36 +48,26 @@ public final class TunerConstants {
     public static final int INVALID_STREAM_ID = Constants.Constant.INVALID_STREAM_ID;
 
     /** @hide */
-    @IntDef(flag = true, prefix = "FILTER_STATUS_", value = {FILTER_STATUS_DATA_READY,
-            FILTER_STATUS_LOW_WATER, FILTER_STATUS_HIGH_WATER, FILTER_STATUS_OVERFLOW})
+    @IntDef(prefix = "SCAN_TYPE_", value = {SCAN_TYPE_UNDEFINED, SCAN_TYPE_AUTO, SCAN_TYPE_BLIND})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface FilterStatus {}
-
+    public @interface ScanType {}
     /**
-     * The status of a filter that the data in the filter buffer is ready to be read.
+     * Scan type undefined.
      */
-    public static final int FILTER_STATUS_DATA_READY = Constants.DemuxFilterStatus.DATA_READY;
+    public static final int SCAN_TYPE_UNDEFINED = Constants.FrontendScanType.SCAN_UNDEFINED;
     /**
-     * The status of a filter that the amount of available data in the filter buffer is at low
-     * level.
+     * Scan type auto.
      *
-     * The value is set to 25 percent of the buffer size by default. It can be changed when
-     * configuring the filter.
+     * <p> Tuner will send {@link #onLocked}
      */
-    public static final int FILTER_STATUS_LOW_WATER = Constants.DemuxFilterStatus.LOW_WATER;
+    public static final int SCAN_TYPE_AUTO = Constants.FrontendScanType.SCAN_AUTO;
     /**
-     * The status of a filter that the amount of available data in the filter buffer is at high
-     * level.
-     * The value is set to 75 percent of the buffer size by default. It can be changed when
-     * configuring the filter.
+     * Blind scan.
+     *
+     * <p>Frequency range is not specified. The {@link android.media.tv.tuner.Tuner} will scan an
+     * implementation specific range.
      */
-    public static final int FILTER_STATUS_HIGH_WATER = Constants.DemuxFilterStatus.HIGH_WATER;
-    /**
-     * The status of a filter that the filter buffer is full and newly filtered data is being
-     * discarded.
-     */
-    public static final int FILTER_STATUS_OVERFLOW = Constants.DemuxFilterStatus.OVERFLOW;
-
+    public static final int SCAN_TYPE_BLIND = Constants.FrontendScanType.SCAN_BLIND;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -101,7 +91,6 @@ public final class TunerConstants {
      */
     public static final int INDEX_TYPE_SC_HEVC = Constants.DemuxRecordScIndexType.SC_HEVC;
 
-
     /**
      * Indexes can be tagged by Start Code in PES (Packetized Elementary Stream)
      * according to ISO/IEC 13818-1.
@@ -114,22 +103,18 @@ public final class TunerConstants {
 
     /**
      * SC index for a new I-frame.
-     * @hide
      */
     public static final int SC_INDEX_I_FRAME = Constants.DemuxScIndex.I_FRAME;
     /**
      * SC index for a new P-frame.
-     * @hide
      */
     public static final int SC_INDEX_P_FRAME = Constants.DemuxScIndex.P_FRAME;
     /**
      * SC index for a new B-frame.
-     * @hide
      */
     public static final int SC_INDEX_B_FRAME = Constants.DemuxScIndex.B_FRAME;
     /**
      * SC index for a new sequence.
-     * @hide
      */
     public static final int SC_INDEX_SEQUENCE = Constants.DemuxScIndex.SEQUENCE;
 
@@ -149,47 +134,39 @@ public final class TunerConstants {
 
     /**
      * SC HEVC index SPS.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_SPS = Constants.DemuxScHevcIndex.SPS;
     /**
      * SC HEVC index AUD.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_AUD = Constants.DemuxScHevcIndex.AUD;
     /**
      * SC HEVC index SLICE_CE_BLA_W_LP.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_SLICE_CE_BLA_W_LP =
             Constants.DemuxScHevcIndex.SLICE_CE_BLA_W_LP;
     /**
      * SC HEVC index SLICE_BLA_W_RADL.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_SLICE_BLA_W_RADL =
             Constants.DemuxScHevcIndex.SLICE_BLA_W_RADL;
     /**
      * SC HEVC index SLICE_BLA_N_LP.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_SLICE_BLA_N_LP =
             Constants.DemuxScHevcIndex.SLICE_BLA_N_LP;
     /**
      * SC HEVC index SLICE_IDR_W_RADL.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_SLICE_IDR_W_RADL =
             Constants.DemuxScHevcIndex.SLICE_IDR_W_RADL;
     /**
      * SC HEVC index SLICE_IDR_N_LP.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_SLICE_IDR_N_LP =
             Constants.DemuxScHevcIndex.SLICE_IDR_N_LP;
     /**
      * SC HEVC index SLICE_TRAIL_CRA.
-     * @hide
      */
     public static final int SC_HEVC_INDEX_SLICE_TRAIL_CRA =
             Constants.DemuxScHevcIndex.SLICE_TRAIL_CRA;

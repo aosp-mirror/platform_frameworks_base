@@ -19,13 +19,16 @@ package android.media.tv.tuner.filter;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.Size;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.tuner.TunerUtils;
 
 /**
  * Filter configuration for a IP filter.
+ *
  * @hide
  */
+@SystemApi
 public class IpFilterConfiguration extends FilterConfiguration {
     private final byte[] mSrcIpAddress;
     private final byte[] mDstIpAddress;
@@ -33,7 +36,7 @@ public class IpFilterConfiguration extends FilterConfiguration {
     private final int mDstPort;
     private final boolean mPassthrough;
 
-    public IpFilterConfiguration(Settings settings, byte[] srcAddr, byte[] dstAddr, int srcPort,
+    private IpFilterConfiguration(Settings settings, byte[] srcAddr, byte[] dstAddr, int srcPort,
             int dstPort, boolean passthrough) {
         super(settings);
         mSrcIpAddress = srcAddr;
@@ -45,13 +48,14 @@ public class IpFilterConfiguration extends FilterConfiguration {
 
     @Override
     public int getType() {
-        return FilterConfiguration.FILTER_TYPE_IP;
+        return Filter.TYPE_IP;
     }
 
     /**
      * Gets source IP address.
      */
     @Size(min = 4, max = 16)
+    @NonNull
     public byte[] getSrcIpAddress() {
         return mSrcIpAddress;
     }
@@ -59,6 +63,7 @@ public class IpFilterConfiguration extends FilterConfiguration {
      * Gets destination IP address.
      */
     @Size(min = 4, max = 16)
+    @NonNull
     public byte[] getDstIpAddress() {
         return mDstIpAddress;
     }
@@ -113,7 +118,7 @@ public class IpFilterConfiguration extends FilterConfiguration {
          * Sets source IP address.
          */
         @NonNull
-        public Builder setSrcIpAddress(byte[] srcIpAddress) {
+        public Builder setSrcIpAddress(@NonNull byte[] srcIpAddress) {
             mSrcIpAddress = srcIpAddress;
             return this;
         }
@@ -121,7 +126,7 @@ public class IpFilterConfiguration extends FilterConfiguration {
          * Sets destination IP address.
          */
         @NonNull
-        public Builder setDstIpAddress(byte[] dstIpAddress) {
+        public Builder setDstIpAddress(@NonNull byte[] dstIpAddress) {
             mDstIpAddress = dstIpAddress;
             return this;
         }

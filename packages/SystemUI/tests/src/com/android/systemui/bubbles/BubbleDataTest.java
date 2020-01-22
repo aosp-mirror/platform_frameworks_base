@@ -952,9 +952,8 @@ public class BubbleDataTest extends SysuiTestCase {
             long postTime) {
         // BubbleMetadata
         Notification.BubbleMetadata bubbleMetadata = new Notification.BubbleMetadata.Builder()
-                .setIntent(mExpandIntent)
+                .createIntentBubble(mExpandIntent, Icon.createWithResource("", 0))
                 .setDeleteIntent(mDeleteIntent)
-                .setIcon(Icon.createWithResource("", 0))
                 .build();
         // Notification -> BubbleMetadata
         Notification notification = mNotificationTestHelper.createNotification(false,

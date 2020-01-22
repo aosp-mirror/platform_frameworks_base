@@ -17,10 +17,13 @@
 package android.telephony.ims;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.RemoteException;
+import android.telephony.Annotation;
 import android.telephony.CallQuality;
+import android.telephony.ServiceState;
 import android.telephony.ims.aidl.IImsCallSessionListener;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
 
@@ -476,11 +479,27 @@ public class ImsCallSessionListener {
      * @param targetAccessTech The target radio access technology; one of the access technology
      * constants defined in {@link android.telephony.ServiceState}. For example
      * {@link android.telephony.ServiceState#RIL_RADIO_TECHNOLOGY_LTE}.
+     * @deprecated Uses hidden constants for radio access technology, use
+     * {@link #onMayHandover(int, int)} instead.
      */
-    public void callSessionMayHandover(int srcAccessTech, int targetAccessTech)
-    {
+    @Deprecated
+    public void callSessionMayHandover(int srcAccessTech, int targetAccessTech) {
+        // Use new API internally.
+        onMayHandover(ServiceState.rilRadioTechnologyToNetworkType(srcAccessTech),
+                ServiceState.rilRadioTechnologyToNetworkType(targetAccessTech));
+    }
+
+    /**
+     * Notify the framework that the associated {@link ImsCallSession} may handover from one network
+     * type to another.
+     *
+     * @param srcNetworkType The source network type.
+     * @param targetNetworkType The target network type.
+     */
+    public void onMayHandover(@Annotation.NetworkType int srcNetworkType,
+            @Annotation.NetworkType int targetNetworkType) {
         try {
-            mListener.callSessionMayHandover(srcAccessTech, targetAccessTech);
+            mListener.callSessionMayHandover(srcNetworkType, targetNetworkType);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -494,11 +513,29 @@ public class ImsCallSessionListener {
      * @param targetAccessTech new access technology, defined in
      * {@link android.telephony.ServiceState}.
      * @param reasonInfo The {@link ImsReasonInfo} associated with this handover.
+     * @deprecated Uses hidden radio access technology constants, use
+     * {@link #onHandover(int, int, ImsReasonInfo)} instead.
      */
+    @Deprecated
     public void callSessionHandover(int srcAccessTech, int targetAccessTech,
             ImsReasonInfo reasonInfo) {
+        // Use new API internally.
+        onHandover(ServiceState.rilRadioTechnologyToNetworkType(srcAccessTech),
+                ServiceState.rilRadioTechnologyToNetworkType(targetAccessTech), reasonInfo);
+    }
+
+    /**
+     * Notify the framework that the associated {@link ImsCallSession} has handed over from one
+     * network type to another.
+     *
+     * @param srcNetworkType original network type.
+     * @param targetNetworkType target network type after handover..
+     * @param reasonInfo An optional {@link ImsReasonInfo} associated with this handover.
+     */
+    public void onHandover(@Annotation.NetworkType int srcNetworkType,
+            @Annotation.NetworkType int targetNetworkType, @Nullable ImsReasonInfo reasonInfo) {
         try {
-            mListener.callSessionHandover(srcAccessTech, targetAccessTech, reasonInfo);
+            mListener.callSessionHandover(srcNetworkType, targetNetworkType, reasonInfo);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -510,11 +547,28 @@ public class ImsCallSessionListener {
      * @param srcAccessTech original access technology
      * @param targetAccessTech new access technology
      * @param reasonInfo An {@link ImsReasonInfo} detailing the reason for the failure.
+     * @deprecated Uses hidden radio access technology constants, use
+     * {@link #onHandoverFailed(int, int, ImsReasonInfo)} instead
      */
+    @Deprecated
     public void callSessionHandoverFailed(int srcAccessTech, int targetAccessTech,
             ImsReasonInfo reasonInfo) {
+        // Use new API internally.
+        onHandoverFailed(ServiceState.rilRadioTechnologyToNetworkType(srcAccessTech),
+                ServiceState.rilRadioTechnologyToNetworkType(targetAccessTech), reasonInfo);
+    }
+
+    /**
+     * The IMS call session's access technology change has failed..
+     *
+     * @param srcNetworkType original network type.
+     * @param targetNetworkType target network type that the handover failed for.
+     * @param reasonInfo An {@link ImsReasonInfo} detailing the reason for the failure.
+     */
+    public void onHandoverFailed(@Annotation.NetworkType int srcNetworkType,
+            @Annotation.NetworkType int targetNetworkType, @NonNull ImsReasonInfo reasonInfo) {
         try {
-            mListener.callSessionHandoverFailed(srcAccessTech, targetAccessTech, reasonInfo);
+            mListener.callSessionHandoverFailed(srcNetworkType, targetNetworkType, reasonInfo);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }

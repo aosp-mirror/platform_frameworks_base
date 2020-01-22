@@ -62,7 +62,7 @@ public class NotificationHistoryDatabase {
 
     private static final String TAG = "NotiHistoryDatabase";
     private static final boolean DEBUG = NotificationManagerService.DBG;
-    private static final int HISTORY_RETENTION_DAYS = 2;
+    private static final int HISTORY_RETENTION_DAYS = 1;
     private static final int HISTORY_RETENTION_MS = 24 * 60 * 60 * 1000;
     private static final long WRITE_BUFFER_INTERVAL_MS = 1000 * 60 * 20;
 
@@ -172,7 +172,7 @@ public class NotificationHistoryDatabase {
 
     public void addNotification(final HistoricalNotification notification) {
         synchronized (mLock) {
-            mBuffer.addNotificationToWrite(notification);
+            mBuffer.addNewNotificationToWrite(notification);
             // Each time we have new history to write to disk, schedule a write in [interval] ms
             if (mBuffer.getHistoryCount() == 1) {
                 mFileWriteHandler.postDelayed(mWriteBufferRunnable, WRITE_BUFFER_INTERVAL_MS);

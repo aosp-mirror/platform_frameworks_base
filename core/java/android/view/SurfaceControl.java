@@ -128,6 +128,8 @@ public final class SurfaceControl implements Parcelable {
             int l, int t, int r, int b);
     private static native void nativeSetCornerRadius(long transactionObj, long nativeObject,
             float cornerRadius);
+    private static native void nativeSetBackgroundBlurRadius(long transactionObj, long nativeObject,
+            int blurRadius);
     private static native void nativeSetLayerStack(long transactionObj, long nativeObject,
             int layerStack);
 
@@ -2501,6 +2503,20 @@ public final class SurfaceControl implements Parcelable {
             checkPreconditions(sc);
             nativeSetCornerRadius(mNativeObject, sc.mNativeObject, cornerRadius);
 
+            return this;
+        }
+
+        /**
+         * Sets the background blur radius of the {@link SurfaceControl}.
+         *
+         * @param sc SurfaceControl.
+         * @param radius Blur radius in pixels.
+         * @return itself.
+         * @hide
+         */
+        public Transaction setBackgroundBlurRadius(SurfaceControl sc, int radius) {
+            checkPreconditions(sc);
+            nativeSetBackgroundBlurRadius(mNativeObject, sc.mNativeObject, radius);
             return this;
         }
 

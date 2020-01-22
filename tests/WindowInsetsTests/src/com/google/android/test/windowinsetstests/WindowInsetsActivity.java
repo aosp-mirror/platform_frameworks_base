@@ -97,6 +97,11 @@ public class WindowInsetsActivity extends Activity {
         mRoot.setWindowInsetsAnimationCallback(new WindowInsetsAnimationCallback() {
 
             @Override
+            public int getDispatchMode() {
+                return DISPATCH_MODE_STOP;
+            }
+
+            @Override
             public void onPrepare(InsetsAnimation animation) {
                 if ((animation.getTypeMask() & Type.ime()) != 0) {
                     imeAnim = animation;

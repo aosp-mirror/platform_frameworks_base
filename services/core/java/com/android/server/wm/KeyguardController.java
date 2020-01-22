@@ -407,7 +407,7 @@ class KeyguardController {
             // stack since it will be complicated/risky to try to put the activity on top
             // of the lock screen in the right fullscreen configuration.
             final ActivityStack stack =
-                    mRootWindowContainer.getDefaultDisplay().getSplitScreenPrimaryStack();
+                    mRootWindowContainer.getDefaultDisplay().getRootSplitScreenPrimaryTask();
             if (stack == null) {
                 return;
             }

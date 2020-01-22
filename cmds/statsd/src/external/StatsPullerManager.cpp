@@ -86,14 +86,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
 
-        // ProcStats.
-        {{.atomTag = android::util::PROC_STATS},
-         {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS)}},
-
-        // ProcStatsPkgProc.
-        {{.atomTag = android::util::PROC_STATS_PKG_PROC},
-         {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS_PKG_PROC)}},
-
         // DebugElapsedClock.
         {{.atomTag = android::util::DEBUG_ELAPSED_CLOCK},
          {.additiveFields = {1, 2, 3, 4},
@@ -114,10 +106,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // GpuStatsAppInfo
         {{.atomTag = android::util::GPU_STATS_APP_INFO},
          {.puller = new GpuStatsPuller(android::util::GPU_STATS_APP_INFO)}},
-
-        // Face Settings
-        {{.atomTag = android::util::FACE_SETTINGS},
-         {.puller = new StatsCompanionServicePuller(android::util::FACE_SETTINGS)}},
 
         // VmsClientStats
         {{.atomTag = android::util::VMS_CLIENT_STATS},

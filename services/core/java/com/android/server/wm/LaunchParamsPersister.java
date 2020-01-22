@@ -197,6 +197,10 @@ class LaunchParamsPersister {
     }
 
     void saveTask(Task task) {
+        saveTask(task, task.getDisplayContent());
+    }
+
+    void saveTask(Task task, DisplayContent display) {
         final ComponentName name = task.realActivity;
         final int userId = task.mUserId;
         PersistableLaunchParams params;
@@ -211,7 +215,7 @@ class LaunchParamsPersister {
             params = new PersistableLaunchParams();
             map.put(name, params);
         }
-        final boolean changed = saveTaskToLaunchParam(task, params);
+        final boolean changed = saveTaskToLaunchParam(task, display, params);
 
         if (changed) {
             mPersisterQueue.updateLastOrAddItem(
@@ -220,17 +224,16 @@ class LaunchParamsPersister {
         }
     }
 
-    private boolean saveTaskToLaunchParam(Task task, PersistableLaunchParams params) {
-        final ActivityStack stack = task.getStack();
-        final DisplayContent display = stack.getDisplayContent();
+    private boolean saveTaskToLaunchParam(
+            Task task, DisplayContent display, PersistableLaunchParams params) {
         final DisplayInfo info = new DisplayInfo();
         display.mDisplay.getDisplayInfo(info);
 
         boolean changed = !Objects.equals(params.mDisplayUniqueId, info.uniqueId);
         params.mDisplayUniqueId = info.uniqueId;
 
-        changed |= params.mWindowingMode != stack.getWindowingMode();
-        params.mWindowingMode = stack.getWindowingMode();
+        changed |= params.mWindowingMode != task.getWindowingMode();
+        params.mWindowingMode = task.getWindowingMode();
 
         if (task.mLastNonFullscreenBounds != null) {
             changed |= !Objects.equals(params.mBounds, task.mLastNonFullscreenBounds);

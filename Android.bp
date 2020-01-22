@@ -53,6 +53,7 @@ filegroup {
         "core/java/android/view/DisplayAdjustments.java",
     ],
     path: "core/java",
+    visibility: ["//frameworks/base/test-mock"],
 }
 
 filegroup {
@@ -70,6 +71,14 @@ filegroup {
         "graphics/java/**/*.aidl",
     ],
     path: "graphics/java",
+}
+
+filegroup {
+    name: "framework-identity-sources",
+    srcs: [
+        "identity/java/**/*.java",
+    ],
+    path: "identity/java",
 }
 
 filegroup {
@@ -209,6 +218,7 @@ filegroup {
         ":framework-graphics-sources",
         ":framework-jobscheduler-sources", // jobscheduler is not a module for R
         ":framework-keystore-sources",
+        ":framework-identity-sources",
         ":framework-location-sources",
         ":framework-lowpan-sources",
         ":framework-mca-effect-sources",
@@ -231,6 +241,7 @@ filegroup {
         ":platform-compat-native-aidl",
 
         // AIDL sources from external directories
+        ":credstore_aidl",
         ":dumpstate_aidl",
         ":framework_native_aidl",
         ":gatekeeper_aidl",
@@ -294,6 +305,7 @@ java_defaults {
             "core/java",
             "drm/java",
             "graphics/java",
+            "identity/java",
             "keystore/java",
             "location/java",
             "lowpan/java",
@@ -306,6 +318,7 @@ java_defaults {
             "rs/java",
             "sax/java",
             "telecomm/java",
+            "wifi/aidl-export",
         ],
     },
 
@@ -473,7 +486,6 @@ java_library {
         "//frameworks/base/apex/permission/framework",
         "//frameworks/base/apex/statsd/service",
         "//frameworks/base/telephony",
-        "//frameworks/base/wifi",
         "//frameworks/opt/net/wifi/service",
     ],
 }
@@ -500,8 +512,7 @@ java_library {
         "framework-sdkextensions-stubs-systemapi",
         // TODO(b/146167933): Use framework-statsd-stubs instead.
         "framework-statsd",
-        // TODO(b/140299412): should be framework-wifi-stubs
-        "framework-wifi",
+        "framework-wifi-stubs",
         "ike-stubs",
         // TODO(b/147200698): should be the stub of framework-tethering
         "framework-tethering",
@@ -540,7 +551,8 @@ java_library {
         "compat-changeid-annotation-processor",
     ],
     static_libs: [
-        "exoplayer2-core"
+        "exoplayer2-core",
+        "android.hardware.wifi-V1.0-java-constants",
     ]
 }
 
@@ -1205,7 +1217,7 @@ java_library {
         "core/java/com/android/internal/util/Protocol.java",
         "core/java/com/android/internal/util/Preconditions.java",
         "telephony/java/android/telephony/Annotation.java",
-	":net-utils-framework-wifi-common-srcs",
+        ":net-utils-framework-wifi-common-srcs",
     ],
     libs: [
         "framework-annotations-lib",
@@ -1232,6 +1244,7 @@ filegroup {
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
     ],
+    visibility: ["//frameworks/opt/net/wifi/service"],
 }
 
 // TODO(b/145644363): move this to under StubLibraries.bp or ApiDocs.bp

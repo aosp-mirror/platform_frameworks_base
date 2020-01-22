@@ -17,9 +17,9 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,37 +32,6 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public abstract class FilterConfiguration {
 
-    /**
-     * TODO: moved to Filter. Remove it here.
-     * @hide
-     */
-    @IntDef(prefix = "FILTER_TYPE_", value =
-            {FILTER_TYPE_TS, FILTER_TYPE_MMTP, FILTER_TYPE_IP, FILTER_TYPE_TLV, FILTER_TYPE_ALP})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FilterType {}
-
-    /**
-     * TS filter type.
-     */
-    public static final int FILTER_TYPE_TS = Constants.DemuxFilterMainType.TS;
-    /**
-     * MMTP filter type.
-     */
-    public static final int FILTER_TYPE_MMTP = Constants.DemuxFilterMainType.MMTP;
-    /**
-     * IP filter type.
-     */
-    public static final int FILTER_TYPE_IP = Constants.DemuxFilterMainType.IP;
-    /**
-     * TLV filter type.
-     */
-    public static final int FILTER_TYPE_TLV = Constants.DemuxFilterMainType.TLV;
-    /**
-     * ALP filter type.
-     */
-    public static final int FILTER_TYPE_ALP = Constants.DemuxFilterMainType.ALP;
-
-
     /** @hide */
     @IntDef(prefix = "PACKET_TYPE_", value =
             {PACKET_TYPE_IPV4, PACKET_TYPE_COMPRESSED, PACKET_TYPE_SIGNALING})
@@ -71,17 +40,14 @@ public abstract class FilterConfiguration {
 
     /**
      * IP v4 packet type.
-     * @hide
      */
     public static final int PACKET_TYPE_IPV4 = 0;
     /**
      * Compressed packet type.
-     * @hide
      */
     public static final int PACKET_TYPE_COMPRESSED = 2;
     /**
      * Signaling packet type.
-     * @hide
      */
     public static final int PACKET_TYPE_SIGNALING = 4;
 
@@ -95,12 +61,13 @@ public abstract class FilterConfiguration {
 
     /**
      * Gets filter configuration type.
-     * @hide
      */
-    @FilterType
+    @Filter.Type
     public abstract int getType();
 
-    /** @hide */
+    /**
+     * Gets filter Settings.
+     */
     @Nullable
     public Settings getSettings() {
         return mSettings;
@@ -110,7 +77,6 @@ public abstract class FilterConfiguration {
      * Builder for {@link FilterConfiguration}.
      *
      * @param <T> The subclass to be built.
-     * @hide
      */
     public abstract static class Builder<T extends Builder<T>> {
         /* package */ Settings mSettings;
@@ -121,8 +87,8 @@ public abstract class FilterConfiguration {
         /**
          * Sets filter settings.
          */
-        @Nullable
-        public T setFrequency(Settings settings) {
+        @NonNull
+        public T setSettings(@Nullable Settings settings) {
             mSettings = settings;
             return self();
         }

@@ -87,17 +87,31 @@ public abstract class CameraMetadata<TKey> {
      */
      protected abstract <T> T getProtected(TKey key);
 
-     /**
-      * @hide
-      */
-     protected void setNativeInstance(CameraMetadataNative nativeInstance) {
+    /**
+     * @hide
+     */
+    protected void setNativeInstance(CameraMetadataNative nativeInstance) {
         mNativeInstance = nativeInstance;
-     }
+    }
 
-     /**
-      * @hide
-      */
-     protected abstract Class<TKey> getKeyClass();
+    /**
+     * Retrieves the native CameraMetadata* as a Java long.
+     * Returns 0 if mNativeInstance is null.
+     *
+     * @hide
+     */
+    public long getNativeMetadataPtr() {
+        if (mNativeInstance == null) {
+            return 0;
+        } else {
+            return mNativeInstance.getMetadataPtr();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    protected abstract Class<TKey> getKeyClass();
 
     /**
      * Returns a list of the keys contained in this map.

@@ -263,6 +263,9 @@ interface IDevicePolicyManager {
     void setSystemSetting(in ComponentName who, in String setting, in String value);
     void setSecureSetting(in ComponentName who, in String setting, in String value);
 
+    void setLockdownAdminConfiguredNetworks(in ComponentName who, boolean lockdown);
+    boolean isLockdownAdminConfiguredNetworks(in ComponentName who);
+
     void setLocationEnabled(in ComponentName who, boolean locationEnabled);
 
     boolean setTime(in ComponentName who, long millis);

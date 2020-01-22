@@ -67,6 +67,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SELinux;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
@@ -1538,12 +1539,14 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public void setUserIcon(@UserIdInt int userId, Bitmap bitmap) {
-        checkManageUsersPermission("update users");
-        if (hasUserRestriction(UserManager.DISALLOW_SET_USER_ICON, userId)) {
-            Slog.w(LOG_TAG, "Cannot set user icon. DISALLOW_SET_USER_ICON is enabled.");
-            return;
+        try {
+            checkManageUsersPermission("update users");
+            enforceUserRestriction(UserManager.DISALLOW_SET_USER_ICON, userId,
+                    "Cannot set user icon");
+            mLocalService.setUserIcon(userId, bitmap);
+        } catch (UserManager.CheckedUserOperationException e) {
+            throw e.toServiceSpecificException();
         }
-        mLocalService.setUserIcon(userId, bitmap);
     }
 
 
@@ -3037,34 +3040,53 @@ public class UserManagerService extends IUserManager.Stub {
 
     /**
      * Creates a profile user. Used for actual profiles, like
-     * {@link UserManager#USER_TYPE_PROFILE_MANAGED}, as well as for
-     * {@link UserManager#USER_TYPE_FULL_RESTRICTED}.
+     * {@link UserManager#USER_TYPE_PROFILE_MANAGED},
+     * as well as for {@link UserManager#USER_TYPE_FULL_RESTRICTED}.
      */
     @Override
-    public UserInfo createProfileForUser(String name, @NonNull String userType,
-            @UserInfoFlag int flags, @UserIdInt int userId, @Nullable String[] disallowedPackages) {
+    public UserInfo createProfileForUserWithThrow(String name, @NonNull String userType,
+            @UserInfoFlag int flags, @UserIdInt int userId, @Nullable String[] disallowedPackages)
+            throws ServiceSpecificException {
         checkManageOrCreateUsersPermission(flags);
-        return createUserInternal(name, userType, flags, userId, disallowedPackages);
+        try {
+            return createUserInternal(name, userType, flags, userId, disallowedPackages);
+        } catch (UserManager.CheckedUserOperationException e) {
+            throw e.toServiceSpecificException();
+        }
     }
 
-    /** @see #createProfileForUser */
+    /**
+     * @see #createProfileForUser
+     */
     @Override
-    public UserInfo createProfileForUserEvenWhenDisallowed(String name, @NonNull String userType,
-            @UserInfoFlag int flags, @UserIdInt int userId, @Nullable String[] disallowedPackages) {
+    public UserInfo createProfileForUserEvenWhenDisallowedWithThrow(String name,
+            @NonNull String userType,
+            @UserInfoFlag int flags, @UserIdInt int userId, @Nullable String[] disallowedPackages)
+            throws ServiceSpecificException {
         checkManageOrCreateUsersPermission(flags);
-        return createUserInternalUnchecked(name, userType, flags, userId,
-                /* preCreate= */ false, disallowedPackages);
+        try {
+            return createUserInternalUnchecked(name, userType, flags, userId,
+                    /* preCreate= */ false, disallowedPackages);
+        } catch (UserManager.CheckedUserOperationException e) {
+            throw e.toServiceSpecificException();
+        }
     }
 
     @Override
-    public UserInfo createUser(String name, @NonNull String userType, @UserInfoFlag int flags) {
+    public UserInfo createUserWithThrow(String name, @NonNull String userType,
+            @UserInfoFlag int flags)
+            throws ServiceSpecificException {
         checkManageOrCreateUsersPermission(flags);
-        return createUserInternal(name, userType, flags, UserHandle.USER_NULL,
-                /* disallowedPackages= */ null);
+        try {
+            return createUserInternal(name, userType, flags, UserHandle.USER_NULL,
+                    /* disallowedPackages= */ null);
+        } catch (UserManager.CheckedUserOperationException e) {
+            throw e.toServiceSpecificException();
+        }
     }
 
     @Override
-    public UserInfo preCreateUser(String userType) {
+    public UserInfo preCreateUserWithThrow(String userType) throws ServiceSpecificException {
         final UserTypeDetails userTypeDetails = mUserTypes.get(userType);
         final int flags = userTypeDetails != null ? userTypeDetails.getDefaultUserInfoFlags() : 0;
 
@@ -3074,28 +3096,32 @@ public class UserManagerService extends IUserManager.Stub {
                 "cannot pre-create user of type " + userType);
         Slog.i(LOG_TAG, "Pre-creating user of type " + userType);
 
-        return createUserInternalUnchecked(/* name= */ null, userType, flags,
-                /* parentId= */ UserHandle.USER_NULL, /* preCreate= */ true,
-                /* disallowedPackages= */ null);
+        try {
+            return createUserInternalUnchecked(/* name= */ null, userType, flags,
+                    /* parentId= */ UserHandle.USER_NULL, /* preCreate= */ true,
+                    /* disallowedPackages= */ null);
+        } catch (UserManager.CheckedUserOperationException e) {
+            throw e.toServiceSpecificException();
+        }
     }
 
     private UserInfo createUserInternal(@Nullable String name, @NonNull String userType,
             @UserInfoFlag int flags, @UserIdInt int parentId,
-            @Nullable String[] disallowedPackages) {
+            @Nullable String[] disallowedPackages)
+            throws UserManager.CheckedUserOperationException {
         String restriction = (UserManager.isUserTypeManagedProfile(userType))
                 ? UserManager.DISALLOW_ADD_MANAGED_PROFILE
                 : UserManager.DISALLOW_ADD_USER;
-        if (hasUserRestriction(restriction, UserHandle.getCallingUserId())) {
-            Slog.w(LOG_TAG, "Cannot add user. " + restriction + " is enabled.");
-            return null;
-        }
+        enforceUserRestriction(restriction, UserHandle.getCallingUserId(),
+                "Cannot add user");
         return createUserInternalUnchecked(name, userType, flags, parentId,
                 /* preCreate= */ false, disallowedPackages);
     }
 
     private UserInfo createUserInternalUnchecked(@Nullable String name,
             @NonNull String userType, @UserInfoFlag int flags, @UserIdInt int parentId,
-            boolean preCreate, @Nullable String[] disallowedPackages) {
+            boolean preCreate, @Nullable String[] disallowedPackages)
+            throws UserManager.CheckedUserOperationException {
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         t.traceBegin("createUser-" + flags);
         try {
@@ -3109,7 +3135,7 @@ public class UserManagerService extends IUserManager.Stub {
     private UserInfo createUserInternalUncheckedNoTracing(@Nullable String name,
             @NonNull String userType, @UserInfoFlag int flags, @UserIdInt int parentId,
             boolean preCreate, @Nullable String[] disallowedPackages,
-            @NonNull TimingsTraceAndSlog t) {
+            @NonNull TimingsTraceAndSlog t) throws UserManager.CheckedUserOperationException {
         final UserTypeDetails userTypeDetails = mUserTypes.get(userType);
         if (userTypeDetails == null) {
             Slog.e(LOG_TAG, "Cannot create user of invalid user type: " + userType);
@@ -3144,8 +3170,8 @@ public class UserManagerService extends IUserManager.Stub {
         DeviceStorageMonitorInternal dsm = LocalServices
                 .getService(DeviceStorageMonitorInternal.class);
         if (dsm.isMemoryLow()) {
-            Slog.w(LOG_TAG, "Cannot add user. Not enough space on disk.");
-            return null;
+            throwCheckedUserOperationException("Cannot add user. Not enough space on disk.",
+                    UserManager.USER_OPERATION_ERROR_LOW_STORAGE);
         }
 
         final boolean isProfile = userTypeDetails.isProfile();
@@ -3164,41 +3190,50 @@ public class UserManagerService extends IUserManager.Stub {
                     synchronized (mUsersLock) {
                         parent = getUserDataLU(parentId);
                     }
-                    if (parent == null) return null;
+                    if (parent == null) {
+                        throwCheckedUserOperationException(
+                                "Cannot find user data for parent user " + parentId,
+                                UserManager.USER_OPERATION_ERROR_UNKNOWN);
+                    }
                 }
                 if (!preCreate && !canAddMoreUsersOfType(userTypeDetails)) {
-                    Slog.e(LOG_TAG, "Cannot add more users of type " + userType
-                            + ". Maximum number of that type already exists.");
-                    return null;
+                    throwCheckedUserOperationException("Cannot add more users of type " + userType
+                                    + ". Maximum number of that type already exists.",
+                            UserManager.USER_OPERATION_ERROR_MAX_USERS);
                 }
                 // TODO(b/142482943): Perhaps let the following code apply to restricted users too.
                 if (isProfile && !canAddMoreProfilesToUser(userType, parentId, false)) {
-                    Slog.e(LOG_TAG, "Cannot add more profiles of type " + userType
-                            + " for user " + parentId);
-                    return null;
+                    throwCheckedUserOperationException(
+                            "Cannot add more profiles of type " + userType
+                                    + " for user " + parentId,
+                            UserManager.USER_OPERATION_ERROR_MAX_USERS);
                 }
                 if (!isGuest && !isProfile && !isDemo && isUserLimitReached()) {
                     // If we're not adding a guest/demo user or a profile and the 'user limit' has
                     // been reached, cannot add a user.
-                    Slog.e(LOG_TAG, "Cannot add user. Maximum user limit is reached.");
-                    return null;
+                    throwCheckedUserOperationException(
+                            "Cannot add user. Maximum user limit is reached.",
+                            UserManager.USER_OPERATION_ERROR_MAX_USERS);
                 }
                 // In legacy mode, restricted profile's parent can only be the owner user
                 if (isRestricted && !UserManager.isSplitSystemUser()
                         && (parentId != UserHandle.USER_SYSTEM)) {
-                    Slog.w(LOG_TAG, "Cannot add restricted profile - parent user must be owner");
-                    return null;
+                    throwCheckedUserOperationException(
+                            "Cannot add restricted profile - parent user must be owner",
+                            UserManager.USER_OPERATION_ERROR_UNKNOWN);
                 }
                 if (isRestricted && UserManager.isSplitSystemUser()) {
                     if (parent == null) {
-                        Slog.w(LOG_TAG, "Cannot add restricted profile - parent user must be "
-                                + "specified");
-                        return null;
+                        throwCheckedUserOperationException(
+                                "Cannot add restricted profile - parent user must be specified",
+                                UserManager.USER_OPERATION_ERROR_UNKNOWN);
                     }
                     if (!parent.info.canHaveProfile()) {
-                        Slog.w(LOG_TAG, "Cannot add restricted profile - profiles cannot be "
-                                + "created for the specified parent user id " + parentId);
-                        return null;
+                        throwCheckedUserOperationException(
+                                "Cannot add restricted profile - profiles cannot be created for "
+                                        + "the specified parent user id "
+                                        + parentId,
+                                UserManager.USER_OPERATION_ERROR_UNKNOWN);
                     }
                 }
 
@@ -3464,9 +3499,9 @@ public class UserManagerService extends IUserManager.Stub {
      * @hide
      */
     @Override
-    public UserInfo createRestrictedProfile(String name, int parentUserId) {
+    public UserInfo createRestrictedProfileWithThrow(String name, int parentUserId) {
         checkManageOrCreateUsersPermission("setupRestrictedProfile");
-        final UserInfo user = createProfileForUser(
+        final UserInfo user = createProfileForUserWithThrow(
                 name, UserManager.USER_TYPE_FULL_RESTRICTED, 0, parentUserId, null);
         if (user == null) {
             return null;
@@ -4715,7 +4750,8 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public UserInfo createUserEvenWhenDisallowed(String name, @NonNull String userType,
-                @UserInfoFlag int flags, String[] disallowedPackages) {
+                @UserInfoFlag int flags, String[] disallowedPackages)
+                throws UserManager.CheckedUserOperationException {
             return createUserInternalUnchecked(name, userType, flags,
                     UserHandle.USER_NULL, /* preCreated= */ false, disallowedPackages);
         }
@@ -4873,6 +4909,38 @@ public class UserManagerService extends IUserManager.Stub {
                 return allInfos;
             }
         }
+    }
+
+    /**
+     * Check if user has restrictions
+     * @param restriction restrictions to check
+     * @param userId id of the user
+     *
+     * @throws {@link android.os.UserManager.CheckedUserOperationException} if user has any of the
+     *      specified restrictions
+     */
+    private void enforceUserRestriction(String restriction, @UserIdInt int userId, String message)
+            throws UserManager.CheckedUserOperationException {
+        if (hasUserRestriction(restriction, userId)) {
+            String errorMessage = (message != null ? (message + ": ") : "")
+                    + restriction + " is enabled.";
+            Slog.w(LOG_TAG, errorMessage);
+            throw new UserManager.CheckedUserOperationException(errorMessage,
+                    UserManager.USER_OPERATION_ERROR_UNKNOWN);
+        }
+    }
+
+    /**
+     * Throws CheckedUserOperationException and shows error log
+     * @param message message for exception and logging
+     * @param userOperationResult result/error code
+     * @throws UserManager.CheckedUserOperationException
+     */
+    private void throwCheckedUserOperationException(@NonNull String message,
+            @UserManager.UserOperationResult int userOperationResult)
+            throws UserManager.CheckedUserOperationException {
+        Slog.e(LOG_TAG, message);
+        throw new UserManager.CheckedUserOperationException(message, userOperationResult);
     }
 
     /* Remove all the users except of the system one. */

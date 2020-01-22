@@ -184,6 +184,7 @@ public class GlobalScreenshotLegacy {
         data.image = mScreenBitmap;
         data.finisher = finisher;
         data.mActionsReadyListener = actionsReadyListener;
+        data.createDeleteAction = true;
         if (mSaveInBgTask != null) {
             mSaveInBgTask.cancel(false);
         }
@@ -264,12 +265,9 @@ public class GlobalScreenshotLegacy {
                 return false;
             }
         });
-        mScreenshotLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mScreenshotSelectorView.setVisibility(View.VISIBLE);
-                mScreenshotSelectorView.requestFocus();
-            }
+        mScreenshotLayout.post(() -> {
+            mScreenshotSelectorView.setVisibility(View.VISIBLE);
+            mScreenshotSelectorView.requestFocus();
         });
     }
 
@@ -326,8 +324,8 @@ public class GlobalScreenshotLegacy {
 
         mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
         ValueAnimator screenshotDropInAnim = createScreenshotDropInAnimation();
-        ValueAnimator screenshotFadeOutAnim = createScreenshotDropOutAnimation(w, h,
-                statusBarVisible, navBarVisible);
+        ValueAnimator screenshotFadeOutAnim =
+                createScreenshotDropOutAnimation(w, h, statusBarVisible, navBarVisible);
         mScreenshotAnimation = new AnimatorSet();
         mScreenshotAnimation.playSequentially(screenshotDropInAnim, screenshotFadeOutAnim);
         mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
@@ -336,13 +334,14 @@ public class GlobalScreenshotLegacy {
                 // Save the screenshot once we have a bit of time now
                 saveScreenshotInWorkerThread(finisher, new GlobalScreenshot.ActionsReadyListener() {
                     @Override
-                    void onActionsReady(Uri uri, List<Notification.Action> actions) {
+                    void onActionsReady(Uri uri, List<Notification.Action> smartActions,
+                            List<Notification.Action> actions) {
                         if (uri == null) {
                             mNotificationsController.notifyScreenshotError(
                                     R.string.screenshot_failed_to_capture_text);
                         } else {
-                            mNotificationsController.showScreenshotActionsNotification(
-                                    uri, actions);
+                            mNotificationsController
+                                    .showScreenshotActionsNotification(uri, smartActions, actions);
                         }
                     }
                 });

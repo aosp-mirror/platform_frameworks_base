@@ -138,7 +138,7 @@ class LaunchParamsController {
         try {
             if (mTmpParams.hasPreferredDisplay()
                     && mTmpParams.mPreferredDisplayId != task.getStack().getDisplay().mDisplayId) {
-                mService.moveStackToDisplay(task.getStackId(), mTmpParams.mPreferredDisplayId);
+                mService.moveStackToDisplay(task.getRootTaskId(), mTmpParams.mPreferredDisplayId);
             }
 
             if (mTmpParams.hasWindowingMode()

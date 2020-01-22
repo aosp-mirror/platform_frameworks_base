@@ -1,6 +1,7 @@
 #!/bin/sh
 
 NUM_ARGS=$#
+JAR_DESTINATION="$1/prebuilts/framework_intermediates/quickstep/libs/sysui_shared.jar"
 
 has_croot() {
   declare -F croot > /dev/null
@@ -25,7 +26,6 @@ main() {
     pushd .
     croot
     mma -j16 SystemUISharedLib
-    JAR_DESTINATION="$1/prebuilts/framework_intermediates/quickstep/libs/sysui_shared.jar"
     cp out/target/product/$TARGET_PRODUCT/obj/JAVA_LIBRARIES/SystemUISharedLib_intermediates/javalib.jar $JAR_DESTINATION
     popd
   fi

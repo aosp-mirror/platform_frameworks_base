@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
@@ -69,7 +70,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFI
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
@@ -167,8 +167,10 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
+import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -218,6 +220,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
@@ -292,7 +295,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /** The containers below are the only child containers {@link #mWindowContainers} can have. */
     // Contains all window containers that are related to apps (Activities)
-    private final TaskStackContainers mTaskStackContainers = new TaskStackContainers(mWmService);
+    private final TaskContainers mTaskContainers = new TaskContainers(mWmService);
     // Contains all non-app window containers that should be displayed above the app containers
     // (e.g. Status bar)
     private final AboveAppWindowContainers mAboveAppWindowsContainers =
@@ -305,8 +308,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // on the IME target. We mainly have this container grouping so we can keep track of all the IME
     // window containers together and move them in-sync if/when needed. We use a subclass of
     // WindowContainer which is omitted from screen magnification, as the IME is never magnified.
-    private final NonAppWindowContainers mImeWindowsContainers =
-            new NonAppWindowContainers("mImeWindowsContainers", mWmService);
+    // TODO(display-area): is "no magnification" in the comment still true?
+    private final ImeContainer mImeWindowsContainers = new ImeContainer(mWmService);
 
     private WindowState mTmpWindow;
     private WindowState mTmpWindow2;
@@ -397,14 +400,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /** @see #getCurrentOverrideConfigurationChanges */
     private int mCurrentOverrideConfigurationChanges;
-
-    /**
-     * Orientation forced by some window. If there is no visible window that specifies orientation
-     * it is set to {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED}.
-     *
-     * @see NonAppWindowContainers#getOrientation()
-     */
-    private int mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
     /**
      * Last orientation forced by the keyguard. It is applied when keyguard is shown and is not
@@ -1281,11 +1276,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mDisplayRotation.getLastOrientation();
     }
 
-    @ScreenOrientation
-    int getLastWindowForcedOrientation() {
-        return mLastWindowForcedOrientation;
-    }
-
     void registerRemoteAnimations(RemoteAnimationDefinition definition) {
         mAppTransitionController.registerRemoteAnimations(definition);
     }
@@ -1944,39 +1934,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return (mDisplay.getFlags() & FLAG_PRIVATE) != 0;
     }
 
-    ActivityStack getHomeStack() {
-        return mTaskStackContainers.getHomeStack();
+    ActivityStack getRootHomeTask() {
+        return mTaskContainers.getRootHomeTask();
     }
 
-    ActivityStack getRecentsStack() {
-        return mTaskStackContainers.getRecentsStack();
+    /** @return The primary split-screen task, and {@code null} otherwise. */
+    ActivityStack getRootSplitScreenPrimaryTask() {
+        return mTaskContainers.getRootSplitScreenPrimaryTask();
     }
 
-    /**
-     * @return The primary split-screen stack, and {@code null} otherwise.
-     */
-    ActivityStack getSplitScreenPrimaryStack() {
-        return mTaskStackContainers.getSplitScreenPrimaryStack();
+    boolean hasSplitScreenPrimaryTask() {
+        return getRootSplitScreenPrimaryTask() != null;
     }
 
-    boolean hasSplitScreenPrimaryStack() {
-        return getSplitScreenPrimaryStack() != null;
+    ActivityStack getRootPinnedTask() {
+        return mTaskContainers.getRootPinnedTask();
     }
 
-    /**
-     * Like {@link #getSplitScreenPrimaryStack}, but also returns the stack if it's currently
-     * not visible.
-     */
-    ActivityStack getSplitScreenPrimaryStackIgnoringVisibility() {
-        return mTaskStackContainers.getSplitScreenPrimaryStack();
-    }
-
-    ActivityStack getPinnedStack() {
-        return mTaskStackContainers.getPinnedStack();
-    }
-
-    boolean hasPinnedStack() {
-        return mTaskStackContainers.getPinnedStack() != null;
+    boolean hasPinnedTask() {
+        return mTaskContainers.getRootPinnedTask() != null;
     }
 
     /**
@@ -1992,41 +1968,45 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * activity type. Null is no compatible stack on the display.
      */
     ActivityStack getStack(int windowingMode, int activityType) {
-        return mTaskStackContainers.getStack(windowingMode, activityType);
+        return mTaskContainers.getStack(windowingMode, activityType);
     }
 
     protected int getStackCount() {
-        return mTaskStackContainers.mChildren.size();
+        return mTaskContainers.mChildren.size();
     }
 
     protected ActivityStack getStackAt(int index) {
-        return mTaskStackContainers.mChildren.get(index);
+        return mTaskContainers.mChildren.get(index);
     }
 
     int getIndexOf(ActivityStack stack) {
-        return mTaskStackContainers.getIndexOf(stack);
+        return mTaskContainers.getIndexOf(stack);
     }
 
     void removeStack(ActivityStack stack) {
-        mTaskStackContainers.removeChild(stack);
+        mTaskContainers.removeChild(stack);
     }
 
     @VisibleForTesting
     WindowList<ActivityStack> getStacks() {
-        return mTaskStackContainers.mChildren;
+        return mTaskContainers.mChildren;
     }
 
     @VisibleForTesting
     ActivityStack getTopStack() {
-        return mTaskStackContainers.getTopStack();
+        return mTaskContainers.getTopStack();
     }
 
     ArrayList<Task> getVisibleTasks() {
-        return mTaskStackContainers.getVisibleTasks();
+        return mTaskContainers.getVisibleTasks();
+    }
+
+    SurfaceControl getSplitScreenDividerAnchor() {
+        return mTaskContainers.getSplitScreenDividerAnchor();
     }
 
     void onStackWindowingModeChanged(ActivityStack stack) {
-        mTaskStackContainers.onStackWindowingModeChanged(stack);
+        mTaskContainers.onStackWindowingModeChanged(stack);
     }
 
     /**
@@ -2059,7 +2039,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         // If there was no pinned stack, we still need to notify the controller of the display info
         // update as a result of the config change.
-        if (mPinnedStackControllerLocked != null && !hasPinnedStack()) {
+        if (mPinnedStackControllerLocked != null && !hasPinnedTask()) {
             mPinnedStackControllerLocked.onDisplayInfoChanged(getDisplayInfo());
         }
     }
@@ -2111,7 +2091,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     boolean forAllImeWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
-        return mImeWindowsContainers.forAllWindows(callback, traverseTopToBottom);
+        return mImeWindowsContainers.forAllWindowForce(callback, traverseTopToBottom);
     }
 
     /**
@@ -2128,16 +2108,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         if (mWmService.mDisplayFrozen) {
-            if (mLastWindowForcedOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
-                ProtoLog.v(WM_DEBUG_ORIENTATION,
-                        "Display id=%d is frozen, return %d", mDisplayId,
-                        mLastWindowForcedOrientation);
-                // If the display is frozen, some activities may be in the middle of restarting, and
-                // thus have removed their old window. If the window has the flag to hide the lock
-                // screen, then the lock screen can re-appear and inflict its own orientation on us.
-                // Keep the orientation stable until this all settles down.
-                return mLastWindowForcedOrientation;
-            } else if (policy.isKeyguardLocked()) {
+            if (policy.isKeyguardLocked()) {
                 // Use the last orientation the while the display is frozen with the keyguard
                 // locked. This could be the keyguard forced orientation or from a SHOW_WHEN_LOCKED
                 // window. We don't want to check the show when locked window directly though as
@@ -2148,15 +2119,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         mDisplayId, getLastOrientation());
                 return getLastOrientation();
             }
-        } else {
-            final int orientation = mAboveAppWindowsContainers.getOrientation();
-            if (orientation != SCREEN_ORIENTATION_UNSET) {
-                return orientation;
-            }
+        }
+        final int orientation = mAboveAppWindowsContainers.getOrientation();
+        if (orientation != SCREEN_ORIENTATION_UNSET) {
+            return orientation;
         }
 
         // Top system windows are not requesting an orientation. Start searching from apps.
-        return mTaskStackContainers.getOrientation();
+        return mTaskContainers.getOrientation();
     }
 
     void updateDisplayInfo() {
@@ -2340,11 +2310,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     void setStackOnDisplay(ActivityStack stack, int position) {
         if (DEBUG_STACK) Slog.d(TAG_WM, "Set stack=" + stack + " on displayId=" + mDisplayId);
-        mTaskStackContainers.addChild(stack, position);
+        mTaskContainers.addChild(stack, position);
     }
 
     void moveStackToDisplay(ActivityStack stack, boolean onTop) {
-        stack.reparent(mTaskStackContainers, onTop ? POSITION_TOP: POSITION_BOTTOM);
+        stack.reparent(mTaskContainers, onTop ? POSITION_TOP: POSITION_BOTTOM);
     }
 
     @Override
@@ -2369,15 +2339,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         throw new UnsupportedOperationException("See DisplayChildWindowContainer");
     }
 
+    void positionDisplayAt(int position, boolean includingParents) {
+        getParent().positionChildAt(position, this, includingParents);
+    }
+
     @Override
     void positionChildAt(int position, DisplayChildWindowContainer child, boolean includingParents) {
         // Children of the display are statically ordered, so the real intention here is to perform
         // the operation on the display and not the static direct children.
-        getParent().positionChildAt(position, this, includingParents);
+        positionDisplayAt(position, includingParents);
     }
 
     void positionStackAt(int position, ActivityStack child, boolean includingParents) {
-        mTaskStackContainers.positionChildAt(position, child, includingParents);
+        mTaskContainers.positionChildAt(position, child, includingParents);
         layoutAndAssignWindowLayersIfNeeded();
     }
 
@@ -2408,7 +2382,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     Task findTaskForResizePoint(int x, int y) {
         final int delta = dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
-        return mTmpTaskForResizePointSearchResult.process(mTaskStackContainers, x, y, delta);
+        return mTmpTaskForResizePointSearchResult.process(mTaskContainers, x, y, delta);
     }
 
     void updateTouchExcludeRegion() {
@@ -2424,7 +2398,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             final PooledConsumer c = PooledLambda.obtainConsumer(
                     DisplayContent::processTaskForTouchExcludeRegion, this,
                     PooledLambda.__(Task.class), focusedTask, delta);
-            mTaskStackContainers.forAllTasks(c);
+            mTaskContainers.forAllTasks(c);
             c.recycle();
 
             // If we removed the focused task above, add it back and only leave its
@@ -2448,7 +2422,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         amendWindowTapExcludeRegion(mTouchExcludeRegion);
         // TODO(multi-display): Support docked stacks on secondary displays.
-        if (mDisplayId == DEFAULT_DISPLAY && getSplitScreenPrimaryStack() != null) {
+        if (mDisplayId == DEFAULT_DISPLAY && getRootSplitScreenPrimaryTask() != null) {
             mDividerControllerLocked.getTouchRegion(mTmpRect);
             mTmpRegion.set(mTmpRect);
             mTouchExcludeRegion.op(mTmpRegion, Op.UNION);
@@ -2594,8 +2568,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             float dividerAnimationTarget) {
         boolean updated = false;
 
-        for (int i = mTaskStackContainers.getChildCount() - 1; i >= 0; --i) {
-            final ActivityStack stack = mTaskStackContainers.getChildAt(i);
+        for (int i = mTaskContainers.getChildCount() - 1; i >= 0; --i) {
+            final ActivityStack stack = mTaskContainers.getChildAt(i);
             if (stack == null || !stack.isAdjustedForIme()) {
                 continue;
             }
@@ -2623,8 +2597,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     boolean clearImeAdjustAnimation() {
         boolean changed = false;
-        for (int i = mTaskStackContainers.getChildCount() - 1; i >= 0; --i) {
-            final ActivityStack stack = mTaskStackContainers.getChildAt(i);
+        for (int i = mTaskContainers.getChildCount() - 1; i >= 0; --i) {
+            final ActivityStack stack = mTaskContainers.getChildAt(i);
             if (stack != null && stack.isAdjustedForIme()) {
                 stack.resetAdjustedForIme(true /* adjustBoundsNow */);
                 changed  = true;
@@ -2634,8 +2608,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void beginImeAdjustAnimation() {
-        for (int i = mTaskStackContainers.getChildCount() - 1; i >= 0; --i) {
-            final ActivityStack stack = mTaskStackContainers.getChildAt(i);
+        for (int i = mTaskContainers.getChildCount() - 1; i >= 0; --i) {
+            final ActivityStack stack = mTaskContainers.getChildAt(i);
             if (stack.isVisible() && stack.isAdjustedForIme()) {
                 stack.beginImeAdjustAnimation();
             }
@@ -2646,7 +2620,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final WindowState imeWin = mInputMethodWindow;
         final boolean imeVisible = imeWin != null && imeWin.isVisibleLw() && imeWin.isDisplayedLw()
                 && !mDividerControllerLocked.isImeHideRequested();
-        final ActivityStack dockedStack = getSplitScreenPrimaryStack();
+        final ActivityStack dockedStack = getRootSplitScreenPrimaryTask();
         final boolean dockVisible = dockedStack != null;
         final Task topDockedTask = dockVisible ? dockedStack.getTask((t) -> true): null;
         final ActivityStack imeTargetStack = mWmService.getImeFocusStackLocked();
@@ -2672,8 +2646,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // - If IME is not visible, divider is not moved and is normal width.
 
         if (imeVisible && dockVisible && (imeOnTop || imeOnBottom) && !dockMinimized) {
-            for (int i = mTaskStackContainers.getChildCount() - 1; i >= 0; --i) {
-                final ActivityStack stack = mTaskStackContainers.getChildAt(i);
+            for (int i = mTaskContainers.getChildCount() - 1; i >= 0; --i) {
+                final ActivityStack stack = mTaskContainers.getChildAt(i);
                 final boolean isDockedOnBottom = stack.getDockSide() == DOCKED_BOTTOM;
                 if (stack.isVisible() && (imeOnBottom || isDockedOnBottom)
                         && stack.inSplitScreenWindowingMode()) {
@@ -2685,8 +2659,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mDividerControllerLocked.setAdjustedForIme(
                     imeOnBottom /*ime*/, true /*divider*/, true /*animate*/, imeWin, imeHeight);
         } else {
-            for (int i = mTaskStackContainers.getChildCount() - 1; i >= 0; --i) {
-                final ActivityStack stack = mTaskStackContainers.getChildAt(i);
+            for (int i = mTaskContainers.getChildCount() - 1; i >= 0; --i) {
+                final ActivityStack stack = mTaskContainers.getChildAt(i);
                 stack.resetAdjustedForIme(!dockVisible);
             }
             mDividerControllerLocked.setAdjustedForIme(
@@ -2696,8 +2670,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void prepareFreezingTaskBounds() {
-        for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityStack stack = mTaskStackContainers.getChildAt(stackNdx);
+        for (int stackNdx = mTaskContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = mTaskContainers.getChildAt(stackNdx);
             stack.prepareFreezingTaskBounds();
         }
     }
@@ -2773,7 +2747,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         proto.write(SINGLE_TASK_INSTANCE, mSingleTaskInstance);
         final ActivityStack focusedStack = getFocusedStack();
         if (focusedStack != null) {
-            proto.write(FOCUSED_STACK_ID, focusedStack.mStackId);
+            proto.write(FOCUSED_STACK_ID, focusedStack.getRootTaskId());
             final ActivityRecord focusedActivity = focusedStack.getDisplay().getResumedActivity();
             if (focusedActivity != null) {
                 focusedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
@@ -2799,8 +2773,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(ID, mDisplayId);
-        for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityStack stack = mTaskStackContainers.getChildAt(stackNdx);
+        for (int stackNdx = mTaskContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = mTaskContainers.getChildAt(stackNdx);
             stack.dumpDebugInnerStackOnly(proto, STACKS, logLevel);
         }
         mDividerControllerLocked.dumpDebug(proto, DOCKED_STACK_DIVIDER_CONTROLLER);
@@ -2926,8 +2900,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         pw.println();
         pw.println(prefix + "Application tokens in top down Z order:");
-        for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityStack stack = mTaskStackContainers.getChildAt(stackNdx);
+        for (int stackNdx = mTaskContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = mTaskContainers.getChildAt(stackNdx);
             stack.dump(pw, prefix + "  ", dumpAll);
         }
 
@@ -2957,19 +2931,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         pw.println();
 
         // Dump stack references
-        final ActivityStack homeStack = getHomeStack();
+        final ActivityStack homeStack = getRootHomeTask();
         if (homeStack != null) {
             pw.println(prefix + "homeStack=" + homeStack.getName());
         }
-        final ActivityStack pinnedStack = getPinnedStack();
+        final ActivityStack pinnedStack = getRootPinnedTask();
         if (pinnedStack != null) {
             pw.println(prefix + "pinnedStack=" + pinnedStack.getName());
         }
-        final ActivityStack splitScreenPrimaryStack = getSplitScreenPrimaryStack();
+        final ActivityStack splitScreenPrimaryStack = getRootSplitScreenPrimaryTask();
         if (splitScreenPrimaryStack != null) {
             pw.println(prefix + "splitScreenPrimaryStack=" + splitScreenPrimaryStack.getName());
         }
-        final ActivityStack recentsStack = getRecentsStack();
+        final ActivityStack recentsStack =
+                getStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_RECENTS);
         if (recentsStack != null) {
             pw.println(prefix + "recentsStack=" + recentsStack.getName());
         }
@@ -3689,7 +3664,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     w.mSeq++;
                     w.mSystemUiVisibility = newValue;
                 }
-                if (newValue != curValue || w.mAttrs.hasSystemUiListeners) {
+                if ((newValue != curValue || w.mAttrs.hasSystemUiListeners)
+                        && ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL) {
                     w.mClient.dispatchSystemUiVisibilityChanged(w.mSeq,
                             visibility, newValue, diff);
                 }
@@ -4006,7 +3982,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         // Initialize state of exiting applications.
-        mTaskStackContainers.setExitingTokensHasVisible(hasVisible);
+        mTaskContainers.setExitingTokensHasVisible(hasVisible);
     }
 
     void removeExistingTokensIfPossible() {
@@ -4018,7 +3994,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         // Time to remove any exiting applications?
-        mTaskStackContainers.removeExistingAppTokensIfPossible();
+        mTaskContainers.removeExistingAppTokensIfPossible();
     }
 
     @Override
@@ -4130,6 +4106,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         DisplayChildWindowContainer(WindowManagerService service) {
             super(service);
+            // TODO(display-area): move to ConfigurationContainer?
+            mOrientation = SCREEN_ORIENTATION_UNSET;
         }
 
         @Override
@@ -4147,7 +4125,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Window container class that contains all containers on this display relating to Apps.
      * I.e Activities.
      */
-    private final class TaskStackContainers extends DisplayChildWindowContainer<ActivityStack> {
+    private final class TaskContainers extends DisplayChildWindowContainer<ActivityStack> {
         /**
          * A control placed at the appropriate level for transitions to occur.
          */
@@ -4170,14 +4148,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
          */
         SurfaceControl mSplitScreenDividerAnchor = null;
 
-        // Cached reference to some special stacks we tend to get a lot so we don't need to loop
+        // Cached reference to some special tasks we tend to get a lot so we don't need to loop
         // through the list to find them.
-        private ActivityStack mHomeStack = null;
-        private ActivityStack mRecentsStack = null;
-        private ActivityStack mPinnedStack = null;
-        private ActivityStack mSplitScreenPrimaryStack = null;
+        private ActivityStack mRootHomeTask = null;
+        private ActivityStack mRootPinnedTask = null;
+        private ActivityStack mRootSplitScreenPrimaryTask = null;
 
-        TaskStackContainers(WindowManagerService service) {
+        TaskContainers(WindowManagerService service) {
             super(service);
         }
 
@@ -4187,15 +4164,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
          */
         ActivityStack getStack(int windowingMode, int activityType) {
             if (activityType == ACTIVITY_TYPE_HOME) {
-                return mHomeStack;
+                return mRootHomeTask;
             }
             if (windowingMode == WINDOWING_MODE_PINNED) {
-                return mPinnedStack;
+                return mRootPinnedTask;
             } else if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                return mSplitScreenPrimaryStack;
+                return mRootSplitScreenPrimaryTask;
             }
-            for (int i = mTaskStackContainers.getChildCount() - 1; i >= 0; --i) {
-                final ActivityStack stack = mTaskStackContainers.getChildAt(i);
+            for (int i = mTaskContainers.getChildCount() - 1; i >= 0; --i) {
+                final ActivityStack stack = mTaskContainers.getChildAt(i);
                 if (activityType == ACTIVITY_TYPE_UNDEFINED
                         && windowingMode == stack.getWindowingMode()) {
                     // Passing in undefined type means we want to match the topmost stack with the
@@ -4211,37 +4188,33 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         @VisibleForTesting
         ActivityStack getTopStack() {
-            return mTaskStackContainers.getChildCount() > 0
-                    ? mTaskStackContainers.getChildAt(mTaskStackContainers.getChildCount() - 1) : null;
+            return mTaskContainers.getChildCount() > 0
+                    ? mTaskContainers.getChildAt(mTaskContainers.getChildCount() - 1) : null;
         }
 
         int getIndexOf(ActivityStack stack) {
-            return mTaskStackContainers.mChildren.indexOf(stack);
+            return mTaskContainers.mChildren.indexOf(stack);
         }
 
-        ActivityStack getHomeStack() {
-            if (mHomeStack == null && mDisplayId == DEFAULT_DISPLAY) {
+        ActivityStack getRootHomeTask() {
+            if (mRootHomeTask == null && mDisplayId == DEFAULT_DISPLAY) {
                 Slog.e(TAG_WM, "getHomeStack: Returning null from this=" + this);
             }
-            return mHomeStack;
+            return mRootHomeTask;
         }
 
-        ActivityStack getRecentsStack() {
-            return mRecentsStack;
+        ActivityStack getRootPinnedTask() {
+            return mRootPinnedTask;
         }
 
-        ActivityStack getPinnedStack() {
-            return mPinnedStack;
-        }
-
-        ActivityStack getSplitScreenPrimaryStack() {
-            return mSplitScreenPrimaryStack;
+        ActivityStack getRootSplitScreenPrimaryTask() {
+            return mRootSplitScreenPrimaryTask;
         }
 
         ArrayList<Task> getVisibleTasks() {
             final ArrayList<Task> visibleTasks = new ArrayList<>();
             forAllTasks(task -> {
-                if (task.isVisible()) {
+                if (!task.isRootTask() && task.isVisible()) {
                     visibleTasks.add(task);
                 }
             });
@@ -4251,7 +4224,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         void onStackWindowingModeChanged(ActivityStack stack) {
             removeStackReferenceIfNeeded(stack);
             addStackReferenceIfNeeded(stack);
-            if (stack == mPinnedStack && getTopStack() != stack) {
+            if (stack == mRootPinnedTask && getTopStack() != stack) {
                 // Looks like this stack changed windowing mode to pinned. Move it to the top.
                 positionChildAt(POSITION_TOP, stack, false /* includingParents */);
             }
@@ -4259,49 +4232,49 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         private void addStackReferenceIfNeeded(ActivityStack stack) {
             if (stack.isActivityTypeHome()) {
-                if (mHomeStack != null) {
-                    throw new IllegalArgumentException("addStackReferenceIfNeeded: home stack="
-                            + mHomeStack + " already exist on display=" + this + " stack=" + stack);
-
+                if (mRootHomeTask != null) {
+                    if (!stack.isDescendantOf(mRootHomeTask)) {
+                        throw new IllegalArgumentException("addStackReferenceIfNeeded: home stack="
+                                + mRootHomeTask + " already exist on display=" + this
+                                + " stack=" + stack);
+                    }
+                } else {
+                    mRootHomeTask = stack;
                 }
-                mHomeStack = stack;
-            } else if (stack.isActivityTypeRecents()) {
-                if (mRecentsStack != null && mRecentsStack != stack) {
-                    throw new IllegalArgumentException(
-                        "addStackReferenceIfNeeded: recents stack=" + mRecentsStack
-                            + " already exist on display=" + this + " stack=" + stack);
-                }
-                mRecentsStack = stack;
             }
             final int windowingMode = stack.getWindowingMode();
             if (windowingMode == WINDOWING_MODE_PINNED) {
-                if (mPinnedStack != null) {
-                    throw new IllegalArgumentException("addStackReferenceIfNeeded: pinned stack="
-                            + mPinnedStack + " already exist on display=" + this
-                            + " stack=" + stack);
+                if (mRootPinnedTask != null) {
+                    if (!stack.isDescendantOf(mRootPinnedTask)) {
+                        throw new IllegalArgumentException(
+                                "addStackReferenceIfNeeded: pinned stack=" + mRootPinnedTask
+                                        + " already exist on display=" + this + " stack=" + stack);
+                    }
+                } else {
+                    mRootPinnedTask = stack;
                 }
-                mPinnedStack = stack;
             } else if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                if (mSplitScreenPrimaryStack != null) {
-                    throw new IllegalArgumentException("addStackReferenceIfNeeded:"
-                            + " split-screen-primary" + " stack=" + mSplitScreenPrimaryStack
-                            + " already exist on display=" + this + " stack=" + stack);
+                if (mRootSplitScreenPrimaryTask != null) {
+                    if (!stack.isDescendantOf(mRootSplitScreenPrimaryTask)) {
+                        throw new IllegalArgumentException("addStackReferenceIfNeeded:"
+                                + " split-screen-primary" + " stack=" + mRootSplitScreenPrimaryTask
+                                + " already exist on display=" + this + " stack=" + stack);
+                    }
+                } else {
+                    mRootSplitScreenPrimaryTask = stack;
+                    mDisplayContent.onSplitScreenModeActivated();
+                    mDividerControllerLocked.notifyDockedStackExistsChanged(true);
                 }
-                mSplitScreenPrimaryStack = stack;
-                mDisplayContent.onSplitScreenModeActivated();
-                mDividerControllerLocked.notifyDockedStackExistsChanged(true);
             }
         }
 
         void removeStackReferenceIfNeeded(ActivityStack stack) {
-            if (stack == mHomeStack) {
-                mHomeStack = null;
-            } else if (stack == mRecentsStack) {
-                mRecentsStack = null;
-            } else if (stack == mPinnedStack) {
-                mPinnedStack = null;
-            } else if (stack == mSplitScreenPrimaryStack) {
-                mSplitScreenPrimaryStack = null;
+            if (stack == mRootHomeTask) {
+                mRootHomeTask = null;
+            } else if (stack == mRootPinnedTask) {
+                mRootPinnedTask = null;
+            } else if (stack == mRootSplitScreenPrimaryTask) {
+                mRootSplitScreenPrimaryTask = null;
                 mDisplayContent.onSplitScreenModeDismissed();
                 // Re-set the split-screen create mode whenever the split-screen stack is removed.
                 mWmService.setDockedStackCreateStateLocked(
@@ -4338,8 +4311,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         @Override
         void positionChildAt(int position, ActivityStack child, boolean includingParents) {
-            if (child.getWindowConfiguration().isAlwaysOnTop()
-                    && position != POSITION_TOP && position != mChildren.size()) {
+            final boolean moveToTop = (position == POSITION_TOP || position == getChildCount());
+            final boolean moveToBottom = (position == POSITION_BOTTOM || position == 0);
+            if (child.getWindowConfiguration().isAlwaysOnTop() && !moveToTop) {
                 // This stack is always-on-top, override the default behavior.
                 Slog.w(TAG_WM, "Ignoring move of always-on-top stack=" + this + " to bottom");
 
@@ -4355,18 +4329,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 includingParents = false;
             }
             final int targetPosition = findPositionForStack(position, child, false /* adding */);
-            super.positionChildAt(targetPosition, child, includingParents);
+            super.positionChildAt(targetPosition, child, false /* includingParents */);
 
-            if (includingParents) {
-                // We still want to move the display of this stack container to top because even the
-                // target position is adjusted to non-top, the intention of the condition is to have
-                // higher z-order to gain focus (e.g. moving a task of a fullscreen stack to front
-                // in a non-top display which is using picture-in-picture mode).
-                final int topChildPosition = getChildCount() - 1;
-                if (targetPosition < topChildPosition && position >= topChildPosition) {
-                    getParent().positionChildAt(POSITION_TOP, this /* child */,
-                            true /* includingParents */);
-                }
+            if (includingParents && (moveToTop || moveToBottom)) {
+                // The DisplayContent children do not re-order, but we still want to move the
+                // display of this stack container because the intention of positioning is to have
+                // higher z-order to gain focus.
+                positionDisplayAt(moveToTop ? POSITION_TOP : POSITION_BOTTOM,
+                        true /* includingParents */);
             }
 
             setLayoutNeeded();
@@ -4406,9 +4376,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             int minPosition = POSITION_BOTTOM;
 
             if (stack.isAlwaysOnTop()) {
-                if (hasPinnedStack()) {
+                if (hasPinnedTask()) {
                     // Always-on-top stacks go below the pinned stack.
-                    maxPosition = getStacks().indexOf(mPinnedStack) - 1;
+                    maxPosition = getStacks().indexOf(mRootPinnedTask) - 1;
                 }
                 // Always-on-top stacks need to be above all other stacks.
                 minPosition = belowAlwaysOnTopPosition !=
@@ -4527,17 +4497,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         @Override
-        int getOrientation() {
+        int getOrientation(int candidate) {
             if (isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)) {
                 // Apps and their containers are not allowed to specify an orientation while the
                 // docked stack is visible...except for the home stack if the docked stack is
                 // minimized and it actually set something and the bounds is different from  the
                 // display.
-                if (mHomeStack != null && mHomeStack.isVisible()
+                if (mRootHomeTask != null && mRootHomeTask.isVisible()
                         && mDividerControllerLocked.isMinimizedDock()
                         && !(mDividerControllerLocked.isHomeStackResizable()
-                        && mHomeStack.matchParentBounds())) {
-                    final int orientation = mHomeStack.getOrientation();
+                        && mRootHomeTask.matchParentBounds())) {
+                    final int orientation = mRootHomeTask.getOrientation();
                     if (orientation != SCREEN_ORIENTATION_UNSET) {
                         return orientation;
                     }
@@ -4545,7 +4515,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 return SCREEN_ORIENTATION_UNSPECIFIED;
             }
 
-            final int orientation = super.getOrientation();
+            final int orientation = super.getOrientation(candidate);
             if (orientation != SCREEN_ORIENTATION_UNSET
                     && orientation != SCREEN_ORIENTATION_BEHIND) {
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
@@ -4686,38 +4656,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         @Override
-        SurfaceControl.Builder makeChildSurface(WindowContainer child) {
-            final SurfaceControl.Builder builder = super.makeChildSurface(child);
-            if (child instanceof WindowToken && ((WindowToken) child).mRoundedCornerOverlay) {
-                // To draw above the ColorFade layer during the screen off transition, the
-                // rounded corner overlays need to be at the root of the surface hierarchy.
-                // TODO: move the ColorLayer into the display overlay layer such that this is not
-                // necessary anymore.
-                builder.setParent(null);
-            }
-            return builder;
-        }
-
-        @Override
         void assignChildLayers(SurfaceControl.Transaction t) {
-            assignChildLayers(t, null /* imeContainer */);
-        }
-
-        void assignChildLayers(SurfaceControl.Transaction t, WindowContainer imeContainer) {
-            boolean needAssignIme = imeContainer != null
-                    && imeContainer.getSurfaceControl() != null;
+            boolean needAssignIme = mImeWindowsContainers.getSurfaceControl() != null;
             for (int j = 0; j < mChildren.size(); ++j) {
                 final WindowToken wt = mChildren.get(j);
 
-                // See {@link mSplitScreenDividerAnchor}
-                if (wt.windowType == TYPE_DOCK_DIVIDER) {
-                    wt.assignRelativeLayer(t, mTaskStackContainers.getSplitScreenDividerAnchor(), 1);
-                    continue;
-                }
-                if (wt.mRoundedCornerOverlay) {
-                    wt.assignLayer(t, WindowManagerPolicy.COLOR_FADE_LAYER + 1);
-                    continue;
-                }
                 wt.assignLayer(t, j);
                 wt.assignChildLayers(t);
 
@@ -4726,12 +4669,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
                 if (needAssignIme && layer >= mWmService.mPolicy.getWindowLayerFromTypeLw(
                         TYPE_INPUT_METHOD_DIALOG, true)) {
-                    imeContainer.assignRelativeLayer(t, wt.getSurfaceControl(), -1);
+                    mImeWindowsContainers.assignRelativeLayer(t, wt.getSurfaceControl(), -1);
                     needAssignIme = false;
                 }
-            }
-            if (needAssignIme) {
-                imeContainer.assignRelativeLayer(t, getSurfaceControl(), Integer.MAX_VALUE);
             }
         }
     }
@@ -4746,8 +4686,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         @Override
         void assignChildLayers(SurfaceControl.Transaction t) {
+            mImeWindowsContainers.setNeedsLayer();
             mBelowAppWindowsContainers.assignLayer(t, 0);
-            mTaskStackContainers.assignLayer(t, 1);
+            mTaskContainers.assignLayer(t, 1);
             mAboveAppWindowsContainers.assignLayer(t, 2);
 
             final WindowState imeTarget = mInputMethodTarget;
@@ -4781,15 +4722,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         // TODO: We need to use an extra level on the app surface to ensure
                         // this is always above SurfaceView but always below attached window.
                         1);
-                needAssignIme = false;
             }
 
             // Above we have assigned layers to our children, now we ask them to assign
             // layers to their children.
             mBelowAppWindowsContainers.assignChildLayers(t);
-            mTaskStackContainers.assignChildLayers(t);
-            mAboveAppWindowsContainers.assignChildLayers(t,
-                    needAssignIme ? mImeWindowsContainers : null);
+            mTaskContainers.assignChildLayers(t);
+            mAboveAppWindowsContainers.assignChildLayers(t);
+            mImeWindowsContainers.assignRelativeLayer(t, getSurfaceControl(), Integer.MAX_VALUE);
             mImeWindowsContainers.assignChildLayers(t);
         }
 
@@ -4800,50 +4740,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         void addChildren() {
             addChild(mBelowAppWindowsContainers, null);
-            addChild(mTaskStackContainers, null);
+            addChild(mTaskContainers, null);
             addChild(mAboveAppWindowsContainers, null);
             addChild(mImeWindowsContainers, null);
-        }
-
-        /**
-         * In split-screen mode we process the IME containers above the docked divider
-         * rather than directly above their target.
-         */
-        private boolean skipTraverseChild(WindowContainer child) {
-            return child == mImeWindowsContainers && mInputMethodTarget != null
-                    && !hasSplitScreenPrimaryStack();
-        }
-
-        @Override
-        boolean forAllWindows(ToBooleanFunction<WindowState> callback,
-                boolean traverseTopToBottom) {
-            // Special handling so we can process IME windows with #forAllImeWindows above their IME
-            // target, or here in order if there isn't an IME target.
-            if (traverseTopToBottom) {
-                for (int i = mChildren.size() - 1; i >= 0; --i) {
-                    final WindowContainer child = mChildren.get(i);
-                    if (skipTraverseChild(child)) {
-                        continue;
-                    }
-
-                    if (child.forAllWindows(callback, traverseTopToBottom)) {
-                        return true;
-                    }
-                }
-            } else {
-                final int count = mChildren.size();
-                for (int i = 0; i < count; i++) {
-                    final WindowContainer child = mChildren.get(i);
-                    if (skipTraverseChild(child)) {
-                        continue;
-                    }
-
-                    if (child.forAllWindows(callback, traverseTopToBottom)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
 
         @Override
@@ -4871,11 +4770,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         token2.mOwnerCanManageAppTokens) ? -1 : 1;
 
         private final Predicate<WindowState> mGetOrientingWindow = w -> {
-            if (!w.isVisibleLw() || !w.mLegacyPolicyVisibilityAfterAnim) {
-                return false;
+            final WindowManagerPolicy policy = mWmService.mPolicy;
+            if (policy.isKeyguardHostWindow(w.mAttrs)) {
+                if (mWmService.mKeyguardGoingAway) {
+                    return false;
+                }
+                // Consider unoccluding only when all unknown visibilities have been
+                // resolved, as otherwise we just may be starting another occluding activity.
+                final boolean isUnoccluding =
+                        mDisplayContent.mAppTransition.getAppTransition()
+                                == TRANSIT_KEYGUARD_UNOCCLUDE
+                                && mDisplayContent.mUnknownAppVisibilityController.allResolved();
+                // If keyguard is showing, or we're unoccluding, force the keyguard's orientation,
+                // even if SystemUI hasn't updated the attrs yet.
+                if (policy.isKeyguardShowingAndNotOccluded() || isUnoccluding) {
+                    return true;
+                }
             }
             final int req = w.mAttrs.screenOrientation;
-            if(req == SCREEN_ORIENTATION_UNSPECIFIED || req == SCREEN_ORIENTATION_BEHIND
+            if (req == SCREEN_ORIENTATION_UNSPECIFIED || req == SCREEN_ORIENTATION_BEHIND
                     || req == SCREEN_ORIENTATION_UNSET) {
                 return false;
             }
@@ -4902,39 +4815,27 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         @Override
-        int getOrientation() {
-            final WindowManagerPolicy policy = mWmService.mPolicy;
+        int getOrientation(int candidate) {
             // Find a window requesting orientation.
             final WindowState win = getWindow(mGetOrientingWindow);
 
             if (win != null) {
-                final int req = win.mAttrs.screenOrientation;
-                if (policy.isKeyguardHostWindow(win.mAttrs)) {
-                    mLastKeyguardForcedOrientation = req;
-                    if (mWmService.mKeyguardGoingAway) {
-                        // Keyguard can't affect the orientation if it is going away...
-                        mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
-                        return SCREEN_ORIENTATION_UNSET;
-                    }
-                }
+                int req = win.mAttrs.screenOrientation;
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
                         "%s forcing orientation to %d for display id=%d", win, req,
                         mDisplayId);
-                return (mLastWindowForcedOrientation = req);
+                if (mWmService.mPolicy.isKeyguardHostWindow(win.mAttrs)) {
+                    // SystemUI controls the Keyguard orientation asynchronously, and mAttrs may be
+                    // stale. We record / use the last known override.
+                    if (req != SCREEN_ORIENTATION_UNSET && req != SCREEN_ORIENTATION_UNSPECIFIED) {
+                        mDisplayContent.mLastKeyguardForcedOrientation = req;
+                    } else {
+                        req = mDisplayContent.mLastKeyguardForcedOrientation;
+                    }
+                }
+                return req;
             }
-
-            mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
-
-            // Only allow force setting the orientation when all unknown visibilities have been
-            // resolved, as otherwise we just may be starting another occluding activity.
-            final boolean isUnoccluding =
-                    mAppTransition.getAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE
-                            && mUnknownAppVisibilityController.allResolved();
-            if (policy.isKeyguardShowingAndNotOccluded() || isUnoccluding) {
-                return mLastKeyguardForcedOrientation;
-            }
-
-            return SCREEN_ORIENTATION_UNSET;
+            return candidate;
         }
 
         @Override
@@ -4956,6 +4857,74 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
                 scheduleAnimation();
             }
+        }
+    }
+
+    /**
+     * Container for IME windows.
+     *
+     * This has some special behaviors:
+     * - layers assignment is ignored except if setNeedsLayer() has been called before (and no
+     *   layer has been assigned since), to facilitate assigning the layer from the IME target, or
+     *   fall back if there is no target.
+     * - the container doesn't always participate in window traversal, according to
+     *   {@link #skipImeWindowsDuringTraversal()}
+     */
+    private class ImeContainer extends NonAppWindowContainers {
+        boolean mNeedsLayer = false;
+
+        ImeContainer(WindowManagerService wms) {
+            super("ImeContainer", wms);
+        }
+
+        public void setNeedsLayer() {
+            mNeedsLayer = true;
+        }
+
+        @Override
+        int getOrientation(int candidate) {
+            // IME does not participate in orientation.
+            return candidate;
+        }
+
+        @Override
+        boolean forAllWindows(ToBooleanFunction<WindowState> callback,
+                boolean traverseTopToBottom) {
+            final DisplayContent dc = mDisplayContent;
+            if (skipImeWindowsDuringTraversal(dc)) {
+                return false;
+            }
+            return super.forAllWindows(callback, traverseTopToBottom);
+        }
+
+        private boolean skipImeWindowsDuringTraversal(DisplayContent dc) {
+            // We skip IME windows so they're processed just above their target, except
+            // in split-screen mode where we process the IME containers above the docked divider.
+            return dc.mInputMethodTarget != null && !dc.hasSplitScreenPrimaryTask();
+        }
+
+        /** Like {@link #forAllWindows}, but ignores {@link #skipImeWindowsDuringTraversal} */
+        boolean forAllWindowForce(ToBooleanFunction<WindowState> callback,
+                boolean traverseTopToBottom) {
+            return super.forAllWindows(callback, traverseTopToBottom);
+        }
+
+        @Override
+        void assignLayer(Transaction t, int layer) {
+            if (!mNeedsLayer) {
+                return;
+            }
+            super.assignLayer(t, layer);
+            mNeedsLayer = false;
+        }
+
+        @Override
+        void assignRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
+            if (!mNeedsLayer) {
+                return;
+            }
+            super.assignRelativeLayer(t, relativeTo, layer);
+            mNeedsLayer = false;
         }
     }
 
@@ -5062,6 +5031,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * with {@link WindowState#assignLayer}
      */
     void assignRelativeLayerForImeTargetChild(SurfaceControl.Transaction t, WindowContainer child) {
+        mImeWindowsContainers.setNeedsLayer();
         child.assignRelativeLayer(t, mImeWindowsContainers.getSurfaceControl(), 1);
     }
 
@@ -5081,7 +5051,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void assignStackOrdering() {
-        mTaskStackContainers.assignStackOrdering(getPendingTransaction());
+        mTaskContainers.assignStackOrdering(getPendingTransaction());
     }
 
     /**
@@ -5670,8 +5640,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (currentFocusedStack != prevFocusedStack) {
                 mLastFocusedStack = prevFocusedStack;
                 EventLogTags.writeWmFocusedStack(mRootWindowContainer.mCurrentUser, mDisplayId,
-                        currentFocusedStack == null ? -1 : currentFocusedStack.getStackId(),
-                        mLastFocusedStack == null ? -1 : mLastFocusedStack.getStackId(),
+                        currentFocusedStack == null ? -1 : currentFocusedStack.getRootTaskId(),
+                        mLastFocusedStack == null ? -1 : mLastFocusedStack.getRootTaskId(),
                         updateLastFocusedStackReason);
             }
         }
@@ -5679,10 +5649,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         onStackOrderChanged(stack);
     }
 
-    ActivityStack getStack(int stackId) {
+    ActivityStack getStack(int rootTaskId) {
         for (int i = getStackCount() - 1; i >= 0; --i) {
             final ActivityStack stack = getStackAt(i);
-            if (stack.mStackId == stackId) {
+            if (stack.getRootTaskId() == rootTaskId) {
                 return stack;
             }
         }
@@ -5738,6 +5708,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mAtmService.mStackSupervisor.getNextTaskIdForUser();
     }
 
+    ActivityStack createStack(int windowingMode, int activityType, boolean onTop) {
+        return createStack(windowingMode, activityType, onTop, null /*info*/, null /*intent*/);
+    }
+
     /**
      * Creates a stack matching the input windowing mode and activity type on this display.
      * @param windowingMode The windowing mode the stack should be created in. If
@@ -5749,13 +5723,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @param onTop If true the stack will be created at the top of the display, else at the bottom.
      * @return The newly created stack.
      */
-    ActivityStack createStack(int windowingMode, int activityType, boolean onTop) {
+    ActivityStack createStack(int windowingMode, int activityType, boolean onTop, ActivityInfo info,
+            Intent intent) {
         if (mSingleTaskInstance && getStackCount() > 0) {
             // Create stack on default display instead since this display can only contain 1 stack.
             // TODO: Kinda a hack, but better that having the decision at each call point. Hoping
             // this goes away once ActivityView is no longer using virtual displays.
             return mRootWindowContainer.getDefaultDisplay().createStack(
-                    windowingMode, activityType, onTop);
+                    windowingMode, activityType, onTop, info, intent);
         }
 
         if (activityType == ACTIVITY_TYPE_UNDEFINED) {
@@ -5783,18 +5758,23 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         final int stackId = getNextStackId();
-        return createStackUnchecked(windowingMode, activityType, stackId, onTop);
+        return createStackUnchecked(windowingMode, activityType, stackId, onTop, info, intent);
     }
 
     @VisibleForTesting
     ActivityStack createStackUnchecked(int windowingMode, int activityType,
-            int stackId, boolean onTop) {
+            int stackId, boolean onTop, ActivityInfo info, Intent intent) {
         if (windowingMode == WINDOWING_MODE_PINNED && activityType != ACTIVITY_TYPE_STANDARD) {
             throw new IllegalArgumentException("Stack with windowing mode cannot with non standard "
                     + "activity type.");
         }
+        if (info == null) {
+            info = new ActivityInfo();
+            info.applicationInfo = new ApplicationInfo();
+        }
+
         final ActivityStack stack = new ActivityStack(this, stackId,
-                mRootWindowContainer.mStackSupervisor, activityType);
+                mRootWindowContainer.mStackSupervisor, activityType, info, intent);
         addStack(stack, onTop ? POSITION_TOP : POSITION_BOTTOM);
         stack.setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
                 false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,
@@ -6032,7 +6012,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         } finally {
             final ActivityStack topFullscreenStack =
                     getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);
-            final ActivityStack homeStack = getHomeStack();
+            final ActivityStack homeStack = getRootHomeTask();
             if (topFullscreenStack != null && homeStack != null && !isTopStack(homeStack)) {
                 // Whenever split-screen is dismissed we want the home stack directly behind the
                 // current top fullscreen stack so it shows up when the top stack is finished.
@@ -6050,7 +6030,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mAtmService.deferWindowLayout();
         try {
             // Adjust the windowing mode of any affected by split-screen to split-screen secondary.
-            final ActivityStack splitScreenPrimaryStack = getSplitScreenPrimaryStack();
+            final ActivityStack splitScreenPrimaryStack = getRootSplitScreenPrimaryTask();
             for (int i = getStackCount() - 1; i >= 0; --i) {
                 final ActivityStack otherStack = getStackAt(i);
                 if (otherStack == splitScreenPrimaryStack
@@ -6179,7 +6159,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        final boolean inSplitScreenMode = hasSplitScreenPrimaryStack();
+        final boolean inSplitScreenMode = hasSplitScreenPrimaryTask();
         if (!inSplitScreenMode
                 && windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY) {
             // Switch to the display's windowing mode if we are not in split-screen mode and we are
@@ -6425,7 +6405,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     // If default display is in split-window mode, set windowing mode of the stack
                     // to split-screen secondary. Otherwise, set the windowing mode to undefined by
                     // default to let stack inherited the windowing mode from the new display.
-                    final int windowingMode = toDisplay.hasSplitScreenPrimaryStack()
+                    final int windowingMode = toDisplay.hasSplitScreenPrimaryTask()
                             ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                             : WINDOWING_MODE_UNDEFINED;
                     stack.reparent(toDisplay, true /* onTop */);
@@ -6594,7 +6574,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void moveHomeStackToFront(String reason) {
-        final ActivityStack homeStack = getHomeStack();
+        final ActivityStack homeStack = getRootHomeTask();
         if (homeStack != null) {
             homeStack.moveToFront(reason);
         }
@@ -6620,7 +6600,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     @Nullable
     ActivityRecord getHomeActivityForUser(int userId) {
-        final ActivityStack homeStack = getHomeStack();
+        final ActivityStack homeStack = getRootHomeTask();
         if (homeStack == null) {
             return null;
         }
@@ -6709,7 +6689,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     public void dumpStacks(PrintWriter pw) {
         for (int i = getStackCount() - 1; i >= 0; --i) {
-            pw.print(getStackAt(i).mStackId);
+            pw.print(getStackAt(i).getRootTaskId());
             if (i > 0) {
                 pw.print(",");
             }

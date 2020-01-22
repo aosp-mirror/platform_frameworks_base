@@ -36,5 +36,6 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/screenshot_action_chip_padding_end"
         android:textSize="@dimen/screenshot_action_chip_text_size"
+        android:textStyle="bold"
         android:textColor="@color/global_screenshot_button_text"/>
 </com.android.systemui.screenshot.ScreenshotActionChip>

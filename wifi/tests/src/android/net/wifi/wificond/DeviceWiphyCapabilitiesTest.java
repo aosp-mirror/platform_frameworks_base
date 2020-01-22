@@ -45,6 +45,10 @@ public class DeviceWiphyCapabilitiesTest {
         capa.setWifiStandardSupport(ScanResult.WIFI_STANDARD_11N, true);
         capa.setWifiStandardSupport(ScanResult.WIFI_STANDARD_11AC, true);
         capa.setWifiStandardSupport(ScanResult.WIFI_STANDARD_11AX, false);
+        capa.setChannelWidthSupported(ScanResult.CHANNEL_WIDTH_160MHZ, true);
+        capa.setChannelWidthSupported(ScanResult.CHANNEL_WIDTH_80MHZ_PLUS_MHZ, false);
+        capa.setMaxNumberTxSpatialStreams(2);
+        capa.setMaxNumberRxSpatialStreams(1);
 
         Parcel parcel = Parcel.obtain();
         capa.writeToParcel(parcel, 0);
@@ -55,5 +59,30 @@ public class DeviceWiphyCapabilitiesTest {
 
         assertEquals(capa, capaDeserialized);
         assertEquals(capa.hashCode(), capaDeserialized.hashCode());
+    }
+
+    /**
+     * Test mapping wifi standard support into channel width support
+     */
+    @Test
+    public void testMappingWifiStandardIntoChannelWidthSupport() {
+        DeviceWiphyCapabilities capa = new DeviceWiphyCapabilities();
+
+        capa.setWifiStandardSupport(ScanResult.WIFI_STANDARD_11N, false);
+        capa.setWifiStandardSupport(ScanResult.WIFI_STANDARD_11AC, false);
+        capa.setWifiStandardSupport(ScanResult.WIFI_STANDARD_11AX, false);
+        assertEquals(true, capa.isChannelWidthSupported(ScanResult.CHANNEL_WIDTH_20MHZ));
+        assertEquals(false, capa.isChannelWidthSupported(ScanResult.CHANNEL_WIDTH_40MHZ));
+        assertEquals(false, capa.isChannelWidthSupported(ScanResult.CHANNEL_WIDTH_80MHZ));
+
+        capa.setWifiStandardSupport(ScanResult.WIFI_STANDARD_11N, true);
+        assertEquals(true, capa.isChannelWidthSupported(ScanResult.CHANNEL_WIDTH_20MHZ));
+        assertEquals(true, capa.isChannelWidthSupported(ScanResult.CHANNEL_WIDTH_40MHZ));
+        assertEquals(false, capa.isChannelWidthSupported(ScanResult.CHANNEL_WIDTH_80MHZ));
+
+        capa.setWifiStandardSupport(ScanResult.WIFI_STANDARD_11AC, true);
+        assertEquals(true, capa.isChannelWidthSupported(ScanResult.CHANNEL_WIDTH_20MHZ));
+        assertEquals(true, capa.isChannelWidthSupported(ScanResult.CHANNEL_WIDTH_40MHZ));
+        assertEquals(true, capa.isChannelWidthSupported(ScanResult.CHANNEL_WIDTH_80MHZ));
     }
 }

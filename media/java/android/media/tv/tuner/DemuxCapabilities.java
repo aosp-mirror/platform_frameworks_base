@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.SystemApi;
+import android.media.tv.tuner.filter.Filter;
 import android.media.tv.tuner.filter.FilterConfiguration;
 
 import java.lang.annotation.Retention;
@@ -36,11 +37,11 @@ public class DemuxCapabilities {
 
     /** @hide */
     @IntDef(flag = true, value = {
-            FilterConfiguration.FILTER_TYPE_TS,
-            FilterConfiguration.FILTER_TYPE_MMTP,
-            FilterConfiguration.FILTER_TYPE_IP,
-            FilterConfiguration.FILTER_TYPE_TLV,
-            FilterConfiguration.FILTER_TYPE_ALP
+            Filter.TYPE_TS,
+            Filter.TYPE_MMTP,
+            Filter.TYPE_IP,
+            Filter.TYPE_TLV,
+            Filter.TYPE_ALP
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FilterCapabilities {}
