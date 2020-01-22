@@ -30,6 +30,7 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.CloseGuard;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -50,10 +51,11 @@ import java.util.List;
  * @hide
  */
 @SystemApi
-public final class BluetoothPan implements BluetoothProfile {
+public final class BluetoothPan implements BluetoothProfile, AutoCloseable {
     private static final String TAG = "BluetoothPan";
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
+    private CloseGuard mCloseGuard;
 
     /**
      * Intent used to broadcast the change in connection state of the Pan
@@ -166,10 +168,15 @@ public final class BluetoothPan implements BluetoothProfile {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mContext = context;
         mProfileConnector.connect(context, listener);
+        mCloseGuard = new CloseGuard();
+        mCloseGuard.open("close");
     }
 
-    @UnsupportedAppUsage
-    /*package*/ void close() {
+    /**
+     * Closes the connection to the service and unregisters callbacks
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    public void close() {
         if (VDBG) log("close()");
         mProfileConnector.disconnect();
     }
@@ -178,8 +185,11 @@ public final class BluetoothPan implements BluetoothProfile {
         return mProfileConnector.getService();
     }
 
-
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     protected void finalize() {
+        if (mCloseGuard != null) {
+            mCloseGuard.warnIfOpen();
+        }
         close();
     }
 
@@ -316,6 +326,7 @@ public final class BluetoothPan implements BluetoothProfile {
      * @hide
      */
     @Override
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
         final IBluetoothPan service = getService();
@@ -335,6 +346,7 @@ public final class BluetoothPan implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public int getConnectionState(@Nullable BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
         final IBluetoothPan service = getService();
@@ -355,6 +367,7 @@ public final class BluetoothPan implements BluetoothProfile {
      *
      * @param value is whether to enable or disable bluetooth tethering
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public void setBluetoothTethering(boolean value) {
         String pkgName = mContext.getOpPackageName();
         if (DBG) log("setBluetoothTethering(" + value + "), calling package:" + pkgName);
@@ -373,6 +386,7 @@ public final class BluetoothPan implements BluetoothProfile {
      *
      * @return true if tethering is on, false if not or some error occurred
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean isTetheringOn() {
         if (VDBG) log("isTetheringOn()");
         final IBluetoothPan service = getService();
