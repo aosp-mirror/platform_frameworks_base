@@ -340,7 +340,8 @@ public final class BluetoothMap implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    public boolean setConnectionPolicy(@Nullable BluetoothDevice device, int connectionPolicy) {
+    public boolean setConnectionPolicy(@Nullable BluetoothDevice device,
+            @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
         final IBluetoothMap service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
@@ -388,7 +389,7 @@ public final class BluetoothMap implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public int getConnectionPolicy(@Nullable BluetoothDevice device) {
+    public @ConnectionPolicy int getConnectionPolicy(@Nullable BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
         final IBluetoothMap service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
