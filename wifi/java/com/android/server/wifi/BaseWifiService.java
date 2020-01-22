@@ -617,4 +617,12 @@ public class BaseWifiService extends IWifiManager.Stub {
     public void clearWifiConnectedNetworkScorer() {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public Map<WifiNetworkSuggestion, List<ScanResult>> getMatchingScanResults(
+            List<WifiNetworkSuggestion> networkSuggestions,
+            List<ScanResult> scanResults,
+            String callingPackage, String callingFeatureId) {
+        throw new UnsupportedOperationException();
+    }
 }

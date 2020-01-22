@@ -260,4 +260,9 @@ interface IWifiManager
     boolean setWifiConnectedNetworkScorer(in IBinder binder, in IWifiConnectedNetworkScorer scorer);
 
     void clearWifiConnectedNetworkScorer();
+
+    /**
+     * Return the Map of {@link WifiNetworkSuggestion} and the list of <ScanResult>
+     */
+    Map getMatchingScanResults(in List<WifiNetworkSuggestion> networkSuggestions, in List<ScanResult> scanResults, String callingPackage, String callingFeatureId);
 }
