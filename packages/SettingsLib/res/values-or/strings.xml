@@ -230,6 +230,8 @@
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"ଗାବେଲ୍‌ଡୋର୍ସ ସକ୍ରିୟ କରନ୍ତୁ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ବ୍ଲୁଟୂଥ୍‌ AVRCP ଭର୍ସନ୍"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ବ୍ଲୁଟୂଥ୍‍‌ AVRCP ଭର୍ସନ୍‌"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"ବ୍ଲୁଟୁଥ୍ MAP ସଂସ୍କରଣ"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"ବ୍ଲୁଟୁଥ୍ MAP ସଂସ୍କରଣ ଚୟନ କରନ୍ତୁ"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ବ୍ଲୁଟୁଥ୍‌ ଅଡିଓ କୋଡେକ୍‌"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ବ୍ଲୁଟୂଥ୍‍ ଅଡିଓ କୋଡେକ୍\nସିଲେକ୍ସନ୍‌କୁ ଗତିଶୀଳ କରନ୍ତୁ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"ବ୍ଲୁଟୂଥ୍‌ ଅଡିଓ ସାମ୍ପଲ୍‌ ରେଟ୍‌"</string>
@@ -276,7 +278,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT ମାଧ୍ୟମରେ ଇନଷ୍ଟଲ ହୋଇଥିବା ଆପ୍‌ଗୁଡ଼ିକ କ୍ଷତିକାରକ କି ନୁହେଁ ଯାଞ୍ଚ କରନ୍ତୁ।"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"(କେବଳ MAC ଠିକଣା ଥାଇ) ନାମ ବିନା ବ୍ଲୁଟୂଥ ଡିଭାଇସଗୁଡ଼ିକ ପ୍ରଦର୍ଶିତ ହେବ"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ରିମୋଟ୍‌ ଡିଭାଇସ୍‌ଗୁଡ଼ିକରେ ଯଦି ଅସ୍ୱୀକାର୍ଯ୍ୟ ଭାବେ ଉଚ୍ଚ ଭଲ୍ୟୁମ୍ କିମ୍ବା ନିୟନ୍ତ୍ରଣର ଅଭାବ ପରି ଭଲ୍ୟୁମ୍ ସମସ୍ୟା ଥାଏ, ବ୍ଲୁଟୂଥ୍‌ ପୂର୍ଣ୍ଣ ଭଲ୍ୟୁମ୍ ଫିଚର୍ ଅକ୍ଷମ କରିଥାଏ।"</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"ବ୍ଲୁଟୁଥ୍ ଗାବେଲ୍‌ଡୋର୍ସ ଫିଚର୍ ଷ୍ଟକ୍ ସକ୍ଷମ କରେ।"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ବ୍ଲୁଟୁଥ୍ ଗାବେଲଡୋର୍ସ ଫିଚର୍ ଷ୍ଟକ୍ ସକ୍ଷମ କରେ।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ସ୍ଥାନୀୟ ଟର୍ମିନାଲ୍‌"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"ସ୍ଥାନୀୟ ଶେଲ୍‌କୁ ଆକ‌ସେସ୍‌ ଦେଉଥିବା ଟର୍ମିନଲ୍‌ ଆପ୍‌କୁ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ଯାଞ୍ଚ କରୁଛି"</string>

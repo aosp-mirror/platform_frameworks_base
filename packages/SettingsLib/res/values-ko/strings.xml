@@ -230,6 +230,8 @@
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche 사용 설정"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"블루투스 AVRCP 버전"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"블루투스 AVRCP 버전 선택"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"블루투스 MAP 버전"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"블루투스 MAP 버전 선택"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"블루투스 오디오 코덱"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"블루투스 오디오 코덱 실행\n선택"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"블루투스 오디오 샘플링 비율"</string>
@@ -276,7 +278,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT를 통해 설치된 앱에 유해한 동작이 있는지 확인"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"이름이 없이 MAC 주소만 있는 블루투스 기기 표시"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"참기 어려울 정도로 볼륨이 크거나 제어가 되지 않는 등 원격 기기에서 볼륨 문제가 발생할 경우 블루투스 절대 볼륨 기능을 사용 중지"</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"블루투스 Gabeldorche 기능 스택을 사용 설정합니다."</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"블루투스 Gabeldorsche 기능 스택을 사용 설정합니다."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"로컬 터미널"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"로컬 셸 액세스를 제공하는 터미널 앱 사용"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP 확인"</string>

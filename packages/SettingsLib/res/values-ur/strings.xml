@@ -230,6 +230,8 @@
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"‏Gabeldorsche فعال کریں"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"‏بلوٹوتھ AVRCP ورژن"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"‏بلوٹوتھ AVRCP ورژن منتخب کریں"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"‏بلوٹوتھ MAP ورژن"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"‏بلوٹوتھ MAP ورژن منتخب کریں"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"بلوٹوتھ آڈیو کوڈیک"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"بلوٹوتھ آڈیو کوڈیک کو ٹریگر کریں\nانتخاب"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"بلوٹوتھ آڈیو کے نمونے کی شرح"</string>
@@ -276,7 +278,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"‏نقصان دہ رویے کے مدنظر ADB/ADT کی معرفت انسٹال شدہ ایپس کی جانچ کریں۔"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"‏بغیر نام والے بلوٹوتھ آلات (صرف MAC پتے) ڈسپلے کئے جائیں گے"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ریموٹ آلات کے ساتھ والیوم کے مسائل مثلاً نا قابل قبول حد تک بلند والیوم یا کنٹرول نہ ہونے کی صورت میں بلو ٹوتھ مطلق والیوم والی خصوصیت کو غیر فعال کریں۔"</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"‏بلوٹوتھ Gabeldorche خصوصیت کے انبار کو فعال کرتا ہے۔"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"‏بلوٹوتھ Gabeldorsche خصوصیت کے انبار کو فعال کرتا ہے۔"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"مقامی ٹرمینل"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"مقامی شیل رسائی پیش کرنے والی ٹرمینل ایپ فعال کریں"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"‏HDCP چیکنگ"</string>

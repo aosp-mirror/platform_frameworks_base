@@ -230,6 +230,8 @@
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Zapnout funkci Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Verze profilu Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Vyberte verzi profilu Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Verze MAP pro Bluetooth"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Vyberte verzi MAP pro Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Bluetooth Audio – kodek"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Spustit zvukový kodek Bluetooth\nVýběr"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Bluetooth Audio – vzorkovací frekvence"</string>
@@ -276,7 +278,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Kontrolovat škodlivost aplikací nainstalovaných pomocí nástroje ADB/ADT"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Zařízení Bluetooth se budou zobrazovat bez názvů (pouze adresy MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Zakáže funkci absolutní hlasitosti Bluetooth. Zabrání tak problémům s hlasitostí vzdálených zařízení (jako je příliš vysoká hlasitost nebo nemožnost ovládání)."</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"Zapnout sadu funkcí Bluetooth Gabeldorche."</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Zapne sadu funkcí Bluetooth Gabeldorche."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Místní terminál"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktivovat terminálovou aplikaci pro místní přístup k prostředí shell"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Kontrola HDCP"</string>
