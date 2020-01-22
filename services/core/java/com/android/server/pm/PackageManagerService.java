@@ -13494,6 +13494,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // Okay!
             targetPackageSetting.setInstallerPackageName(installerPackageName);
             mSettings.addInstallerPackageNames(targetPackageSetting.installSource);
+            mAppsFilter.addPackage(targetPackageSetting, mSettings.mPackages);
             scheduleWriteSettingsLocked();
         }
     }
