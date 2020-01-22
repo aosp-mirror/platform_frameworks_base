@@ -26,12 +26,10 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.IDisplayWindowListener;
-import android.view.IDisplayWindowRotationCallback;
-import android.view.IDisplayWindowRotationController;
 import android.view.IWindowManager;
-import android.view.WindowContainerTransaction;
 
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.wm.DisplayChangeController.OnDisplayChangingListener;
 
 import java.util.ArrayList;
 
@@ -45,42 +43,16 @@ import javax.inject.Singleton;
  * rotation.
  */
 @Singleton
-public class DisplayWindowController {
-    private static final String TAG = "DisplayWindowController";
+public class DisplayController {
+    private static final String TAG = "DisplayController";
 
     private final Handler mHandler;
     private final Context mContext;
     private final IWindowManager mWmService;
-
-    private final ArrayList<OnDisplayWindowRotationController> mRotationControllers =
-            new ArrayList<>();
-    private final ArrayList<OnDisplayWindowRotationController> mTmpControllers = new ArrayList<>();
+    private final DisplayChangeController mChangeController;
 
     private final SparseArray<DisplayRecord> mDisplays = new SparseArray<>();
-    private final ArrayList<DisplayWindowListener> mDisplayChangedListeners = new ArrayList<>();
-
-    private final IDisplayWindowRotationController mDisplayRotationController =
-            new IDisplayWindowRotationController.Stub() {
-                @Override
-                public void onRotateDisplay(int displayId, final int fromRotation,
-                        final int toRotation, IDisplayWindowRotationCallback callback) {
-                    mHandler.post(() -> {
-                        WindowContainerTransaction t = new WindowContainerTransaction();
-                        synchronized (mRotationControllers) {
-                            mTmpControllers.clear();
-                            // Make a local copy in case the handlers add/remove themselves.
-                            mTmpControllers.addAll(mRotationControllers);
-                        }
-                        for (OnDisplayWindowRotationController c : mTmpControllers) {
-                            c.onRotateDisplay(displayId, fromRotation, toRotation, t);
-                        }
-                        try {
-                            callback.continueRotateDisplay(toRotation, t);
-                        } catch (RemoteException e) {
-                        }
-                    });
-                }
-            };
+    private final ArrayList<OnDisplaysChangedListener> mDisplayChangedListeners = new ArrayList<>();
 
     /**
      * Get's a display by id from DisplayManager.
@@ -160,14 +132,14 @@ public class DisplayWindowController {
             };
 
     @Inject
-    public DisplayWindowController(Context context, @Main Handler mainHandler,
+    public DisplayController(Context context, @Main Handler mainHandler,
             IWindowManager wmService) {
         mHandler = mainHandler;
         mContext = context;
         mWmService = wmService;
+        mChangeController = new DisplayChangeController(mHandler, mWmService);
         try {
             mWmService.registerDisplayWindowListener(mDisplayContainerListener);
-            mWmService.setDisplayWindowRotationController(mDisplayRotationController);
         } catch (RemoteException e) {
             throw new RuntimeException("Unable to register hierarchy listener");
         }
@@ -193,7 +165,7 @@ public class DisplayWindowController {
      * Add a display window-container listener. It will get notified whenever a display's
      * configuration changes or when displays are added/removed from the WM hierarchy.
      */
-    public void addDisplayWindowListener(DisplayWindowListener listener) {
+    public void addDisplayWindowListener(OnDisplaysChangedListener listener) {
         synchronized (mDisplays) {
             if (mDisplayChangedListeners.contains(listener)) {
                 return;
@@ -208,7 +180,7 @@ public class DisplayWindowController {
     /**
      * Remove a display window-container listener.
      */
-    public void removeDisplayWindowListener(DisplayWindowListener listener) {
+    public void removeDisplayWindowListener(OnDisplaysChangedListener listener) {
         synchronized (mDisplays) {
             mDisplayChangedListeners.remove(listener);
         }
@@ -217,19 +189,15 @@ public class DisplayWindowController {
     /**
      * Adds a display rotation controller.
      */
-    public void addRotationController(OnDisplayWindowRotationController controller) {
-        synchronized (mRotationControllers) {
-            mRotationControllers.add(controller);
-        }
+    public void addDisplayChangingController(OnDisplayChangingListener controller) {
+        mChangeController.addRotationListener(controller);
     }
 
     /**
      * Removes a display rotation controller.
      */
-    public void removeRotationController(OnDisplayWindowRotationController controller) {
-        synchronized (mRotationControllers) {
-            mRotationControllers.remove(controller);
-        }
+    public void removeDisplayChangingController(OnDisplayChangingListener controller) {
+        mChangeController.removeRotationListener(controller);
     }
 
     private static class DisplayRecord {
@@ -244,36 +212,20 @@ public class DisplayWindowController {
      *
      * @see IDisplayWindowListener
      */
-    public interface DisplayWindowListener {
+    public interface OnDisplaysChangedListener {
         /**
          * Called when a display has been added to the WM hierarchy.
          */
-        void onDisplayAdded(int displayId);
+        default void onDisplayAdded(int displayId) {}
 
         /**
          * Called when a display's window-container configuration changes.
          */
-        void onDisplayConfigurationChanged(int displayId, Configuration newConfig);
+        default void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {}
 
         /**
          * Called when a display is removed.
          */
-        void onDisplayRemoved(int displayId);
-    }
-
-    /**
-     * Give a controller a chance to queue up configuration changes to execute as part of a
-     * display rotation. The contents of {@link #onRotateDisplay} must run synchronously.
-     */
-    public interface OnDisplayWindowRotationController {
-        /**
-         * Called before the display is rotated. Contents of this method must run synchronously.
-         * @param displayId Id of display that is rotating.
-         * @param fromRotation starting rotation of the display.
-         * @param toRotation target rotation of the display (after rotating).
-         * @param t A task transaction to populate.
-         */
-        void onRotateDisplay(int displayId, int fromRotation, int toRotation,
-                WindowContainerTransaction t);
+        default void onDisplayRemoved(int displayId) {}
     }
 }

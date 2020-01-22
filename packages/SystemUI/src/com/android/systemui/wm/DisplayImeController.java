@@ -45,7 +45,7 @@ import javax.inject.Singleton;
  * Manages IME control at the display-level. This occurs when IME comes up in multi-window mode.
  */
 @Singleton
-public class DisplayImeController implements DisplayWindowController.DisplayWindowListener {
+public class DisplayImeController implements DisplayController.OnDisplaysChangedListener {
     private static final String TAG = "DisplayImeController";
 
     static final int ANIMATION_DURATION_SHOW_MS = 275;
@@ -63,7 +63,7 @@ public class DisplayImeController implements DisplayWindowController.DisplayWind
     final ArrayList<ImePositionProcessor> mPositionProcessors = new ArrayList<>();
 
     @Inject
-    DisplayImeController(SystemWindows syswin, DisplayWindowController displayController,
+    public DisplayImeController(SystemWindows syswin, DisplayController displayController,
             @Main Handler mainHandler) {
         mHandler = mainHandler;
         mSystemWindows = syswin;
@@ -315,19 +315,20 @@ public class DisplayImeController implements DisplayWindowController.DisplayWind
         /**
          * Called when the IME position is starting to animate.
          */
-        void onImeStartPositioning(int displayId, int imeTop, int finalImeTop, boolean showing,
-                SurfaceControl.Transaction t);
+        default void onImeStartPositioning(int displayId, int imeTop, int finalImeTop,
+                boolean showing, SurfaceControl.Transaction t) {}
 
         /**
          * Called when the ime position changed. This is expected to be a synchronous call on the
          * animation thread. Operations can be added to the transaction to be applied in sync.
          */
-        void onImePositionChanged(int displayId, int imeTop, SurfaceControl.Transaction t);
+        default void onImePositionChanged(int displayId, int imeTop,
+                SurfaceControl.Transaction t) {}
 
         /**
          * Called when the IME position is done animating.
          */
-        void onImeEndPositioning(int displayId, int imeTop, boolean showing,
-                SurfaceControl.Transaction t);
+        default void onImeEndPositioning(int displayId, int imeTop, boolean showing,
+                SurfaceControl.Transaction t) {}
     }
 }
