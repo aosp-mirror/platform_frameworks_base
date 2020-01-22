@@ -4660,6 +4660,9 @@ public class DevicePolicyManager {
             | DevicePolicyManager.KEYGUARD_DISABLE_BIOMETRICS;
 
     /**
+     * @deprecated This method does not actually modify the storage encryption of the device.
+     * It has never affected the encryption status of a device.
+     *
      * Called by an application that is administering the device to request that the storage system
      * be encrypted. Does nothing if the caller is on a secondary user or a managed profile.
      * <p>
@@ -4693,6 +4696,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not an active administrator or does not use
      *             {@link DeviceAdminInfo#USES_ENCRYPTED_STORAGE}
      */
+    @Deprecated
     public int setStorageEncryption(@NonNull ComponentName admin, boolean encrypt) {
         throwIfParentInstance("setStorageEncryption");
         if (mService != null) {
@@ -4706,6 +4710,10 @@ public class DevicePolicyManager {
     }
 
     /**
+     * @deprecated This method only returns the value set by {@link #setStorageEncryption}.
+     * It does not actually reflect the storage encryption status.
+     * Use {@link #getStorageEncryptionStatus} for that.
+     *
      * Called by an application that is administering the device to
      * determine the requested setting for secure storage.
      *
@@ -4714,6 +4722,7 @@ public class DevicePolicyManager {
      * administrators.
      * @return true if the admin(s) are requesting encryption, false if not.
      */
+    @Deprecated
     public boolean getStorageEncryption(@Nullable ComponentName admin) {
         throwIfParentInstance("getStorageEncryption");
         if (mService != null) {
