@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
  * ApexManager class handles communications with the apex service to perform operation and queries,
  * as well as providing caching to avoid unnecessary calls to the service.
  */
-abstract class ApexManager {
+public abstract class ApexManager {
 
     private static final String TAG = "ApexManager";
 
@@ -263,6 +263,13 @@ abstract class ApexManager {
      * @param apexPackageName Package name of the apk container of apex
      */
     abstract List<String> getApksInApex(String apexPackageName);
+
+    /**
+     * Returns the apex module name for the given package name, if the package is an APEX. Otherwise
+     * returns {@code null}.
+     */
+    @Nullable
+    public abstract String getApexModuleNameForPackageName(String apexPackageName);
 
     /**
      * Dumps various state information to the provided {@link PrintWriter} object.
@@ -646,6 +653,15 @@ abstract class ApexManager {
             }
         }
 
+        @Override
+        @Nullable
+        public String getApexModuleNameForPackageName(String apexPackageName) {
+            populatePackageNameToApexModuleNameIfNeeded();
+            synchronized (mLock) {
+                return mPackageNameToApexModuleName.get(apexPackageName);
+            }
+        }
+
         /**
          * Dump information about the packages contained in a particular cache
          * @param packagesCache the cache to print information about.
@@ -840,6 +856,12 @@ abstract class ApexManager {
         @Override
         List<String> getApksInApex(String apexPackageName) {
             return Collections.emptyList();
+        }
+
+        @Override
+        @Nullable
+        public String getApexModuleNameForPackageName(String apexPackageName) {
+            return null;
         }
 
         @Override
