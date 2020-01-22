@@ -49,4 +49,15 @@ public interface UiEventLogger {
      * @param packageName the package name of the relevant app, if known (null otherwise).
      */
     void log(@NonNull UiEventEnum event, int uid, @Nullable String packageName);
+
+    /**
+     * Log an event with package information and an instance ID.
+     * Does nothing if event.getId() <= 0.
+     * @param event an enum implementing UiEventEnum interface.
+     * @param uid the uid of the relevant app, if known (0 otherwise).
+     * @param packageName the package name of the relevant app, if known (null otherwise).
+     * @param instance An identifier obtained from an InstanceIdSequence.
+     */
+    void logWithInstanceId(@NonNull UiEventEnum event, int uid, @Nullable String packageName,
+            @NonNull InstanceId instance);
 }

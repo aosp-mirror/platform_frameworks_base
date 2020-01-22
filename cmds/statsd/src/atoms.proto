@@ -3303,6 +3303,9 @@ message UiEventReported {
     // For example, the package posting a notification, or the destination package of a share.
     optional int32 uid = 2 [(is_uid) = true];
     optional string package_name = 3;
+    // An identifier used to disambiguate which logs refer to a particular instance of some
+    // UI element. Useful when there might be multiple instances simultaneously active.
+    optional int32 instance_id = 4;
 }
 
 /**
