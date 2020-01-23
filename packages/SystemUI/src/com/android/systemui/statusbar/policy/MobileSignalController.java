@@ -41,7 +41,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.net.SignalStrengthUtil;
@@ -430,12 +429,12 @@ public class MobileSignalController extends SignalController<
 
     public void handleBroadcast(Intent intent) {
         String action = intent.getAction();
-        if (action.equals(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION)) {
-            updateNetworkName(intent.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_SPN, false),
-                    intent.getStringExtra(TelephonyIntents.EXTRA_SPN),
-                    intent.getStringExtra(TelephonyIntents.EXTRA_DATA_SPN),
-                    intent.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_PLMN, false),
-                    intent.getStringExtra(TelephonyIntents.EXTRA_PLMN));
+        if (action.equals(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED)) {
+            updateNetworkName(intent.getBooleanExtra(TelephonyManager.EXTRA_SHOW_SPN, false),
+                    intent.getStringExtra(TelephonyManager.EXTRA_SPN),
+                    intent.getStringExtra(TelephonyManager.EXTRA_DATA_SPN),
+                    intent.getBooleanExtra(TelephonyManager.EXTRA_SHOW_PLMN, false),
+                    intent.getStringExtra(TelephonyManager.EXTRA_PLMN));
             notifyListenersIfNecessary();
         } else if (action.equals(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)) {
             updateDataSim();

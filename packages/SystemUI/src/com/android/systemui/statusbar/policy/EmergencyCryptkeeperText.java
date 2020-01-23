@@ -29,7 +29,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
@@ -137,9 +136,9 @@ public class EmergencyCryptkeeperText extends TextView {
                 displayText = getContext().getText(
                         com.android.internal.R.string.emergency_calls_only);
                 Intent i = getContext().registerReceiver(null,
-                        new IntentFilter(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION));
+                        new IntentFilter(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED));
                 if (i != null) {
-                    displayText = i.getStringExtra(TelephonyIntents.EXTRA_PLMN);
+                    displayText = i.getStringExtra(TelephonyManager.EXTRA_PLMN);
                 }
             }
         }
