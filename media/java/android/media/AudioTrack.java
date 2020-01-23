@@ -256,6 +256,38 @@ public class AudioTrack extends PlayerBase
      */
     public static final int ENCAPSULATION_MODE_HANDLE = 2;
 
+    /* Enumeration of metadata types permitted for use by
+     * encapsulation mode audio streams.
+     */
+    /** @hide */
+    @IntDef(prefix = { "ENCAPSULATION_METADATA_TYPE_" }, value = {
+        ENCAPSULATION_METADATA_TYPE_NONE, /* reserved */
+        ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER,
+        ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EncapsulationMetadataType {}
+
+    /**
+     * Reserved do not use.
+     * @hide
+     */
+    public static final int ENCAPSULATION_METADATA_TYPE_NONE = 0; // reserved
+
+    /**
+     * Encapsulation metadata type for framework tuner information.
+     *
+     * TODO(b/147778408) Link: Fill in Tuner API info.
+     */
+    public static final int ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER = 1;
+
+    /**
+     * Encapsulation metadata type for DVB AD descriptor.
+     *
+     * This metadata is formatted per ETSI TS 101 154 Table E.1: AD_descriptor.
+     */
+    public static final int ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR = 2;
+
     /* Dual Mono handling is used when a stereo audio stream
      * contains separate audio content on the left and right channels.
      * Such information about the content of the stream may be found, for example, in
