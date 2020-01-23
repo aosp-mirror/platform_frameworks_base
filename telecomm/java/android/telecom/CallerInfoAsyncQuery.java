@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.app.ActivityManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -34,8 +35,6 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.util.ArrayList;
 import java.util.List;

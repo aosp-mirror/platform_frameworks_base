@@ -17,7 +17,7 @@
 
 package com.google.android.mms.pdu;
 
-import dalvik.annotation.compat.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.io.ByteArrayOutputStream;
 
