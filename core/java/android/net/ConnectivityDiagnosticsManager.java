@@ -218,7 +218,7 @@ public class ConnectivityDiagnosticsManager {
 
         /** Implement the Parcelable interface */
         public static final @NonNull Creator<ConnectivityReport> CREATOR =
-                new Creator<>() {
+                new Creator<ConnectivityReport>() {
                     public ConnectivityReport createFromParcel(Parcel in) {
                         return new ConnectivityReport(
                                 in.readParcelable(null),
