@@ -372,6 +372,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     // TODO(b/146080380): merge file list with Callback installation.
     private IncrementalFileStorages mIncrementalFileStorages;
 
+    private static final String[] EMPTY_STRING_ARRAY = new String[]{};
+
     private static final FileFilter sAddedFilter = new FileFilter() {
         @Override
         public boolean accept(File file) {
@@ -713,7 +715,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private String[] getNamesLocked() {
         if (!isDataLoaderInstallation()) {
-            return stageDir.list();
+            String[] result = stageDir.list();
+            if (result == null) {
+                result = EMPTY_STRING_ARRAY;
+            }
+            return result;
         }
         return mFiles.stream().map(fileInfo -> fileInfo.name).toArray(String[]::new);
     }
@@ -1339,7 +1345,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
                 prepareDataLoader();
 
-                if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+                if (isApexInstallation()) {
                     validateApexInstallLocked();
                 } else {
                     validateApkInstallLocked(pkgInfo);
@@ -1370,15 +1376,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     /**
-     * If session should be sealed, then it's sealed to prevent further modification
-     * and then it's validated.
+     * If session should be sealed, then it's sealed to prevent further modification.
+     * If the session can't be sealed then it's destroyed.
      *
-     * If the session was sealed but something went wrong then it's destroyed.
+     * Additionally for staged APEX sessions read+validate the package and populate req'd fields.
      *
      * <p> This is meant to be called after all of the sessions are loaded and added to
      * PackageInstallerService
      */
-    void sealAndValidateIfNecessary() {
+    void onAfterSessionRead() {
         synchronized (mLock) {
             if (!mShouldBeSealed || isStagedAndInTerminalState()) {
                 return;
@@ -1387,9 +1393,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         List<PackageInstallerSession> childSessions = getChildSessions();
         synchronized (mLock) {
             try {
-                sealAndValidateLocked(childSessions);
-            } catch (StreamingException e) {
-                Slog.e(TAG, "Streaming failed", e);
+                sealLocked(childSessions);
+
+                if (isApexInstallation()) {
+                    // APEX installations rely on certain fields to be populated after reboot.
+                    // E.g. mPackageName.
+                    validateApexInstallLocked();
+                }
             } catch (PackageManagerException e) {
                 Slog.e(TAG, "Package not valid", e);
             }
@@ -1465,7 +1475,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
-        if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+        if (isApexInstallation()) {
             destroyInternal();
             dispatchSessionFinished(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
                     "APEX packages can only be installed using staged sessions.", null);
@@ -1549,7 +1559,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         final IPackageInstallObserver2 localObserver;
-        if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+        if (isApexInstallation()) {
             localObserver = null;
         } else {
             if (!params.isMultiPackage) {
@@ -1681,6 +1691,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return SystemProperties.getBoolean(PROPERTY_NAME_INHERIT_NATIVE, true) &&
                 params.mode == SessionParams.MODE_INHERIT_EXISTING &&
                 (params.installFlags & PackageManager.DONT_KILL_APP) != 0;
+    }
+
+    /**
+     * Returns true if the session is installing an APEX package.
+     */
+    private boolean isApexInstallation() {
+        return (params.installFlags & PackageManager.INSTALL_APEX) != 0;
     }
 
     /**
