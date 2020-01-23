@@ -209,7 +209,13 @@ public class Path {
      * points, and cache the result.
      *
      * @return True if the path is convex.
+     *
+     * @deprecated This method is not reliable. The way convexity is computed may change from
+     * release to release, and convexity could change based on a matrix as well. This method was
+     * useful when non-convex Paths were unable to be used in certain contexts, but that is no
+     * longer the case.
      */
+    @Deprecated
     public boolean isConvex() {
         return nIsConvex(mNativePath);
     }
