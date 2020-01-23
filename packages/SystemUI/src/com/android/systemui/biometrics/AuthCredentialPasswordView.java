@@ -72,10 +72,10 @@ public class AuthCredentialPasswordView extends AuthCredentialView
         }
 
         // Wait a bit to focus the field so the focusable flag on the window is already set then.
-        post(() -> {
+        postDelayed(() -> {
             mPasswordField.requestFocus();
             mImm.showSoftInput(mPasswordField, InputMethodManager.SHOW_IMPLICIT);
-        });
+        }, 100);
     }
 
     @Override
