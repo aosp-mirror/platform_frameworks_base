@@ -1,0 +1,18 @@
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android">
+  <TextView
+      android:id="@+id/controls_title"
+      android:text="@string/quick_controls_title"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:singleLine="true"
+      android:gravity="center"
+      android:textSize="25dp"
+      android:paddingTop="40dp"
+      android:paddingBottom="40dp"
+      android:layout_marginLeft="10dp"
+      android:layout_marginRight="10dp"
+      android:textColor="?android:attr/textColorPrimary"
+      android:fontFamily="@*android:string/config_headlineFontFamily"
+      android:background="@drawable/control_no_favorites_background"/>
+</merge>
