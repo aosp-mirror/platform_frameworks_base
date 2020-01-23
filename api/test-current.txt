@@ -1187,6 +1187,9 @@ package android.location {
     method public void resetElapsedRealtimeUncertaintyNanos();
     method public void resetFullBiasNanos();
     method public void resetLeapSecond();
+    method public void resetReferenceCarrierFrequencyHzForIsb();
+    method public void resetReferenceCodeTypeForIsb();
+    method public void resetReferenceConstellationTypeForIsb();
     method public void resetTimeUncertaintyNanos();
     method public void set(android.location.GnssClock);
     method public void setBiasNanos(double);
@@ -1198,6 +1201,9 @@ package android.location {
     method public void setFullBiasNanos(long);
     method public void setHardwareClockDiscontinuityCount(int);
     method public void setLeapSecond(int);
+    method public void setReferenceCarrierFrequencyHzForIsb(@FloatRange(from=0.0) double);
+    method public void setReferenceCodeTypeForIsb(@NonNull String);
+    method public void setReferenceConstellationTypeForIsb(int);
     method public void setTimeNanos(long);
     method public void setTimeUncertaintyNanos(@FloatRange(from=0.0f) double);
   }
@@ -1212,6 +1218,10 @@ package android.location {
     method @Deprecated public void resetCarrierPhase();
     method @Deprecated public void resetCarrierPhaseUncertainty();
     method public void resetCodeType();
+    method public void resetReceiverInterSignalBiasNanos();
+    method public void resetReceiverInterSignalBiasUncertaintyNanos();
+    method public void resetSatelliteInterSignalBiasNanos();
+    method public void resetSatelliteInterSignalBiasUncertaintyNanos();
     method public void resetSnrInDb();
     method public void set(android.location.GnssMeasurement);
     method public void setAccumulatedDeltaRangeMeters(double);
@@ -1231,6 +1241,10 @@ package android.location {
     method public void setPseudorangeRateUncertaintyMetersPerSecond(double);
     method public void setReceivedSvTimeNanos(long);
     method public void setReceivedSvTimeUncertaintyNanos(long);
+    method public void setReceiverInterSignalBiasNanos(double);
+    method public void setReceiverInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
+    method public void setSatelliteInterSignalBiasNanos(double);
+    method public void setSatelliteInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
     method public void setSnrInDb(double);
     method public void setState(int);
     method public void setSvid(int);
