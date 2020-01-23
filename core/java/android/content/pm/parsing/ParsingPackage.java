@@ -31,6 +31,7 @@ import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
 import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
 import android.content.pm.parsing.ComponentParseUtils.ParsedService;
 import android.os.Bundle;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
@@ -98,6 +99,8 @@ public interface ParsingPackage extends AndroidPackage {
     ParsingPackage addQueriesIntent(Intent intent);
 
     ParsingPackage addQueriesPackage(String packageName);
+
+    ParsingPackage setProcesses(ArrayMap<String, ComponentParseUtils.ParsedProcess> processes);
 
     ParsingPackage asSplit(
             String[] splitNames,

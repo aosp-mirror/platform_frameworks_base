@@ -33,6 +33,7 @@ import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ComponentParseUtils;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
@@ -687,6 +688,27 @@ public abstract class PackageManagerInternal {
     @NonNull
     public abstract String[] getSharedUserPackagesForPackage(@NonNull String packageName,
             int userId);
+
+    /**
+     * Return the processes that have been declared for a uid.
+     *
+     * @param uid The uid to query.
+     *
+     * @return Returns null if there are no declared processes for the uid; otherwise,
+     * returns the set of processes it declared.
+     */
+    public abstract ArrayMap<String, ProcessInfo> getProcessesForUid(int uid);
+
+    /**
+     * Return the gids associated with a particular permission.
+     *
+     * @param permissionName The name of the permission to query.
+     * @param userId The user id the gids will be associated with.
+     *
+     * @return Returns null if there are no gids associated with the permission, otherwise an
+     * array if the gid ints.
+     */
+    public abstract int[] getPermissionGids(String permissionName, int userId);
 
     /**
      * Return if device is currently in a "core" boot environment, typically

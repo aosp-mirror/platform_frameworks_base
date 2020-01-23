@@ -35,6 +35,7 @@ import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ProcessInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.CompatibilityInfo;
@@ -84,6 +85,7 @@ class ProcessRecord implements WindowProcessListener {
 
     private final ActivityManagerService mService; // where we came from
     final ApplicationInfo info; // all about the first app in the process
+    final ProcessInfo processInfo; // if non-null, process-specific manifest info
     final boolean isolated;     // true if this is a special isolated process
     final boolean appZygote;    // true if this is forked from the app zygote
     final int uid;              // uid of process; may be different from 'info' if isolated
@@ -603,6 +605,13 @@ class ProcessRecord implements WindowProcessListener {
             int _uid) {
         mService = _service;
         info = _info;
+        if (_service.mPackageManagerInt != null) {
+            ArrayMap<String, ProcessInfo> processes =
+                    _service.mPackageManagerInt.getProcessesForUid(_uid);
+            processInfo = processes != null ? processes.get(_processName) : null;
+        } else {
+            processInfo = null;
+        }
         isolated = _info.uid != _uid;
         appZygote = (UserHandle.getAppId(_uid) >= Process.FIRST_APP_ZYGOTE_ISOLATED_UID
                 && UserHandle.getAppId(_uid) <= Process.LAST_APP_ZYGOTE_ISOLATED_UID);

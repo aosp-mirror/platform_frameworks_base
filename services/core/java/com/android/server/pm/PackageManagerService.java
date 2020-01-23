@@ -185,6 +185,7 @@ import android.content.pm.PackageUserState;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
+import android.content.pm.ProcessInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SELinuxUtil;
@@ -3158,6 +3159,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // Adjust seInfo to ensure apps which share a sharedUserId are placed in the same
                 // SELinux domain.
                 setting.fixSeInfoLocked();
+                setting.updateProcesses();
             }
 
             // Now that we know all the packages we are keeping,
@@ -23487,6 +23489,20 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public ArrayMap<String, ProcessInfo> getProcessesForUid(int uid) {
+            synchronized (mLock) {
+                return getProcessesForUidLocked(uid);
+            }
+        }
+
+        @Override
+        public int[] getPermissionGids(String permissionName, int userId) {
+            synchronized (mLock) {
+                return getPermissionGidsLocked(permissionName, userId);
+            }
+        }
+
+        @Override
         public boolean isOnlyCoreApps() {
             return PackageManagerService.this.isOnlyCoreApps();
         }
@@ -23739,6 +23755,30 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         res = ArrayUtils.trimToSize(res, i);
         return res != null ? res : EmptyArray.STRING;
+    }
+
+    @GuardedBy("mLock")
+    public ArrayMap<String, ProcessInfo> getProcessesForUidLocked(int uid) {
+        final int appId = UserHandle.getAppId(uid);
+        final SettingBase obj = mSettings.getSettingLPr(appId);
+        if (obj instanceof SharedUserSetting) {
+            final SharedUserSetting sus = (SharedUserSetting) obj;
+            return PackageInfoUtils.generateProcessInfo(sus.processes, 0);
+        } else if (obj instanceof PackageSetting) {
+            final PackageSetting ps = (PackageSetting) obj;
+            return PackageInfoUtils.generateProcessInfo(ps.pkg.getProcesses(), 0);
+        }
+        return null;
+    }
+
+    @GuardedBy("mLock")
+    public int[] getPermissionGidsLocked(String permissionName, int userId) {
+        BasePermission perm
+                = mPermissionManager.getPermissionSettings().getPermission(permissionName);
+        if (perm != null) {
+            return perm.computeGids(userId);
+        }
+        return null;
     }
 
     @Override
