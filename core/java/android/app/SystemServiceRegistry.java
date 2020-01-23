@@ -148,6 +148,7 @@ import android.os.RecoverySystem;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.StatsFrameworkInitializer;
 import android.os.SystemConfigManager;
 import android.os.SystemUpdateManager;
 import android.os.SystemVibrator;
@@ -586,13 +587,6 @@ public final class SystemServiceRegistry {
                     public SensorPrivacyManager createService(ContextImpl ctx) {
                         return SensorPrivacyManager.getInstance(ctx);
                     }});
-
-        registerService(Context.STATS_MANAGER, StatsManager.class,
-                new CachedServiceFetcher<StatsManager>() {
-            @Override
-            public StatsManager createService(ContextImpl ctx) {
-                return new StatsManager(ctx.getOuterContext());
-            }});
 
         registerService(Context.STATUS_BAR_SERVICE, StatusBarManager.class,
                 new CachedServiceFetcher<StatusBarManager>() {
@@ -1306,6 +1300,7 @@ public final class SystemServiceRegistry {
             TelephonyFrameworkInitializer.registerServiceWrappers();
             AppSearchManagerFrameworkInitializer.initialize();
             WifiFrameworkInitializer.registerServiceWrappers();
+            StatsFrameworkInitializer.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...

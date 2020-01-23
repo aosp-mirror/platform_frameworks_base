@@ -30,7 +30,7 @@ import android.os.IPullAtomResultReceiver;
 import android.os.IStatsManagerService;
 import android.os.IStatsd;
 import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.StatsFrameworkInitializer;
 import android.util.AndroidException;
 import android.util.Slog;
 import android.util.StatsEvent;
@@ -702,7 +702,10 @@ public final class StatsManager {
             return mStatsManagerService;
         }
         mStatsManagerService = IStatsManagerService.Stub.asInterface(
-                ServiceManager.getService(Context.STATS_MANAGER_SERVICE));
+                StatsFrameworkInitializer
+                .getStatsServiceManager()
+                .getStatsManagerServiceRegisterer()
+                .get());
         return mStatsManagerService;
     }
 
