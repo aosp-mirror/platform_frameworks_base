@@ -311,6 +311,12 @@ public class CameraBinderTest extends AndroidTestCase {
                     cameraId, status));
         }
         @Override
+        public void onPhysicalCameraStatusChanged(int status, String cameraId,
+                String physicalCameraId) throws RemoteException {
+            Log.v(TAG, String.format("Camera %s : %s has status changed to 0x%x",
+                    cameraId, physicalCameraId, status));
+        }
+        @Override
         public void onCameraAccessPrioritiesChanged() {
             Log.v(TAG, "Camera access permission change");
         }
