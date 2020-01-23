@@ -597,6 +597,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.isStagedSessionReady = mStagedSessionReady;
             info.isStagedSessionFailed = mStagedSessionFailed;
             info.setStagedSessionErrorCode(mStagedSessionErrorCode, mStagedSessionErrorMessage);
+            info.createdMillis = createdMillis;
             info.updatedMillis = updatedMillis;
         }
         return info;
