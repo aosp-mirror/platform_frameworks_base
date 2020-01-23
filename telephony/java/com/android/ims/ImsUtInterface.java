@@ -166,6 +166,12 @@ public interface ImsUtInterface {
             String[] barrList, int serviceClass);
 
     /**
+     * Modifies the configuration of the call barring for specified service class with password.
+     */
+    public void updateCallBarring(int cbType, int action, Message result,
+            String[] barrList, int serviceClass, String password);
+
+    /**
      * Modifies the configuration of the call forward.
      */
     public void updateCallForward(int action, int condition, String number,
