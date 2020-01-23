@@ -27,7 +27,7 @@ import dagger.Module;
  * Module for NotificationRowComponent.
  */
 @Module
-public interface NotificationRowModule {
+public interface ActivatableNotificationViewModule {
     /** ExpandableView is provided as an instance of ActivatableNotificationView. */
     @Binds
     ExpandableView bindExpandableView(ActivatableNotificationView view);

@@ -194,9 +194,8 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     @Test
     public void testClickSound() throws Exception {
         assertTrue("Should play sounds by default.", mGroupRow.isSoundEffectsEnabled());
-        StatusBarStateController mock = mock(StatusBarStateController.class);
+        StatusBarStateController mock = mNotificationTestHelper.getStatusBarStateController();
         when(mock.isDozing()).thenReturn(true);
-        mGroupRow.setStatusBarStateController(mock);
         mGroupRow.setSecureStateProvider(()-> false);
         assertFalse("Shouldn't play sounds when dark and trusted.",
                 mGroupRow.isSoundEffectsEnabled());
