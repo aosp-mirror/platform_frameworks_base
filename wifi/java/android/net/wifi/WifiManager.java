@@ -1793,18 +1793,6 @@ public class WifiManager {
     }
 
     /**
-     * Same as {@link #registerNetworkRequestMatchCallback(Executor, NetworkRequestMatchCallback)},
-     * except that the callback will be executed on the application's main thread.
-     * @param callback Callback for network match events to register.
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void registerNetworkRequestMatchCallback(@NonNull NetworkRequestMatchCallback callback) {
-        registerNetworkRequestMatchCallback(mContext.getMainExecutor(), callback);
-    }
-
-    /**
      * Registers a callback for NetworkRequest matches. See {@link NetworkRequestMatchCallback}.
      * Caller can unregister a previously registered callback using
      * {@link #unregisterNetworkRequestMatchCallback(NetworkRequestMatchCallback)}
@@ -3719,18 +3707,6 @@ public class WifiManager {
     }
 
     /**
-     * Same as {@link #registerSoftApCallback(Executor, SoftApCallback)},
-     * except that the callback will be executed on the application's main thread.
-     * @param callback Callback for soft AP events
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void registerSoftApCallback(@NonNull SoftApCallback callback) {
-        registerSoftApCallback(mContext.getMainExecutor(), callback);
-    }
-
-    /**
      * Registers a callback for Soft AP. See {@link SoftApCallback}. Caller will receive the current
      * soft AP state and number of connected devices immediately after a successful call to this API
      * via callback. Note that receiving an immediate WIFI_AP_STATE_FAILED value for soft AP state
@@ -5149,18 +5125,6 @@ public class WifiManager {
                 mCallback.onStateChanged(state);
             });
         }
-    }
-
-    /**
-     * Same as {@link #registerTrafficStateCallback(Executor, TrafficStateCallback)},
-     * except that the callback will be executed on the application's main thread.
-     * @param callback Callback for traffic state events
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void registerTrafficStateCallback(@NonNull TrafficStateCallback callback) {
-        registerTrafficStateCallback(mContext.getMainExecutor(), callback);
     }
 
     /**
