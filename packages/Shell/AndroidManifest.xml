@@ -239,6 +239,10 @@
     <!-- Allows setting brightness from the shell -->
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS"/>
 
+    <!-- Permissions required to test ambient display. -->
+    <uses-permission android:name="android.permission.READ_DREAM_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_DREAM_STATE"/>
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
