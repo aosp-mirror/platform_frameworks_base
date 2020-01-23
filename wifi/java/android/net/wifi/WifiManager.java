@@ -3195,27 +3195,27 @@ public class WifiManager {
      * soft AP state and number of connected devices immediately after a successful call to this API
      * via callback. Note that receiving an immediate WIFI_AP_STATE_FAILED value for soft AP state
      * indicates that the latest attempt to start soft AP has failed. Caller can unregister a
-     * previously registered callback using {@link unregisterSoftApCallback}
+     * previously registered callback using {@link #unregisterSoftApCallback}
      * <p>
      * Applications should have the
      * {@link android.Manifest.permission#NETWORK_SETTINGS NETWORK_SETTINGS} permission. Callers
      * without the permission will trigger a {@link java.lang.SecurityException}.
      * <p>
      *
-     * @param executor The executor to execute the callbacks of the {@code executor}
-     *                 object. If null, then the application's main executor will be used.
+     * @param executor The Executor on whose thread to execute the callbacks of the {@code callback}
+     *                 object.
      * @param callback Callback for soft AP events
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void registerSoftApCallback(@Nullable @CallbackExecutor Executor executor,
+    public void registerSoftApCallback(@NonNull @CallbackExecutor Executor executor,
                                        @NonNull SoftApCallback callback) {
+        if (executor == null) throw new IllegalArgumentException("executor cannot be null");
         if (callback == null) throw new IllegalArgumentException("callback cannot be null");
         Log.v(TAG, "registerSoftApCallback: callback=" + callback + ", executor=" + executor);
 
-        executor = (executor == null) ? mContext.getMainExecutor() : executor;
         Binder binder = new Binder();
         try {
             mService.registerSoftApCallback(binder, new SoftApCallbackProxy(executor, callback),
