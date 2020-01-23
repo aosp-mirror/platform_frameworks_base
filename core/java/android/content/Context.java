@@ -3881,6 +3881,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.net.ConnectivityDiagnosticsManager} for performing network connectivity diagnostics
+     * as well as receiving network connectivity information from the system.
+     *
+     * @see #getSystemService(String)
+     * @see android.net.ConnectivityDiagnosticsManager
+     */
+    public static final String CONNECTIVITY_DIAGNOSTICS_SERVICE = "connectivity_diagnostics";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.net.TestNetworkManager} for building TUNs and limited-use Networks
      *
      * @see #getSystemService(String)
