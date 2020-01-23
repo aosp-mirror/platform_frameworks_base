@@ -356,10 +356,14 @@ public class AudioEffect {
     public static final String EFFECT_AUXILIARY = "Auxiliary";
     /**
      * Effect connection mode is pre processing.
-     * The audio pre processing effects are attached to an audio input (AudioRecord).
-     * @hide
+     * The audio pre processing effects are attached to an audio input stream or device
      */
     public static final String EFFECT_PRE_PROCESSING = "Pre Processing";
+    /**
+     * Effect connection mode is post processing.
+     * The audio post processing effects are attached to an audio output stream or device
+     */
+    public static final String EFFECT_POST_PROCESSING = "Post Processing";
 
     // --------------------------------------------------------------------------
     // Member variables
