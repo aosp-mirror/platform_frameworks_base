@@ -73,13 +73,14 @@ public class NetworkKey implements Parcelable {
     /**
      * Constructs a new NetworkKey for the given wifi {@link ScanResult}.
      *
-     * @return  A new {@link NetworkKey} instance or <code>null</code> if the given
-     *          {@link ScanResult} instance is malformed.
+     * @return A new {@link NetworkKey} instance or <code>null</code> if the given
+     *         {@link ScanResult} instance is malformed.
+     * @throws IllegalArgumentException
      */
     @Nullable
-    public static NetworkKey createFromScanResult(@Nullable ScanResult result) {
+    public static NetworkKey createFromScanResult(@NonNull ScanResult result) {
         if (result == null) {
-            return null;
+            throw new IllegalArgumentException("ScanResult cannot be null");
         }
         final String ssid = result.SSID;
         if (TextUtils.isEmpty(ssid) || ssid.equals(WifiManager.UNKNOWN_SSID)) {
