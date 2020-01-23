@@ -60,10 +60,6 @@
         <group gid="log" />
     </permission>
 
-    <permission name="android.permission.WRITE_MEDIA_STORAGE" >
-        <group gid="media_rw" />
-    </permission>
-
     <permission name="android.permission.ACCESS_MTP" >
         <group gid="mtp" />
     </permission>
