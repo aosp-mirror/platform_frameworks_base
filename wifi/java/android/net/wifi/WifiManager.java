@@ -22,6 +22,7 @@ import static android.Manifest.permission.READ_WIFI_CREDENTIAL;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -2353,7 +2354,7 @@ public class WifiManager {
         return (getSupportedFeatures() & feature) == feature;
     }
 
-   /**
+    /**
      * @return true if this adapter supports Passpoint
      * @hide
      */
@@ -2905,6 +2906,7 @@ public class WifiManager {
      * [0, {@link #getMaxSignalLevel()}], where 0 is the lowest (worst signal) RSSI
      * rating and {@link #getMaxSignalLevel()} is the highest (best signal) RSSI rating.
      */
+    @IntRange(from = 0)
     public int calculateSignalLevel(int rssi) {
         try {
             return mService.calculateSignalLevel(rssi);
@@ -2917,6 +2919,7 @@ public class WifiManager {
      * Get the system default maximum signal level.
      * This is the maximum RSSI level returned by {@link #calculateSignalLevel(int)}.
      */
+    @IntRange(from = 0)
     public int getMaxSignalLevel() {
         return calculateSignalLevel(Integer.MAX_VALUE);
     }
