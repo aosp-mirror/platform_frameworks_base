@@ -5336,4 +5336,6 @@
   <java-symbol type="string" name="satellite_notification_open_message" />
   <java-symbol type="string" name="satellite_notification_how_it_works" />
   <java-symbol type="drawable" name="ic_satellite_alt_24px" />
+
+  <java-symbol type="bool" name="config_watchlistUseFileHashesCache" />
 </resources>
