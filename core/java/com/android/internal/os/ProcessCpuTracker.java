@@ -753,6 +753,8 @@ public class ProcessCpuTracker {
         proto.write(CpuUsageProto.Load.LOAD15, mLoad15);
         proto.end(currentLoadToken);
 
+        buildWorkingProcs();
+
         proto.write(CpuUsageProto.NOW, now);
         proto.write(CpuUsageProto.LAST_SAMPLE_TIME, mLastSampleTime);
         proto.write(CpuUsageProto.CURRENT_SAMPLE_TIME, mCurrentSampleTime);
