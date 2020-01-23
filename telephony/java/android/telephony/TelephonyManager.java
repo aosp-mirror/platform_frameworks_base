@@ -2781,7 +2781,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public boolean isNetworkRoaming(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
-        return getTelephonyProperty(subId, TelephonyProperties.operator_is_roaming(), false);
+        return getTelephonyProperty(phoneId, TelephonyProperties.operator_is_roaming(), false);
     }
 
     /**
