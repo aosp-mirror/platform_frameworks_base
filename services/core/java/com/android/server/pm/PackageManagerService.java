@@ -17699,7 +17699,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /*
-     * This method deletes the package from internal data structures. If the DONT_DELETE_DATA
+     * This method deletes the package from internal data structures. If the DELETE_KEEP_DATA
      * flag is not set, the data directory is removed as well.
      * make sure this flag is set for partially installed apps. If not its meaningless to
      * delete a partially installed application.

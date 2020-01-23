@@ -230,7 +230,7 @@ interface IPackageManager {
      * @param versionedPackage The package to delete.
      * @param observer a callback to use to notify when the package deletion in finished.
      * @param userId the id of the user for whom to delete the package
-     * @param flags - possible values: {@link #DONT_DELETE_DATA}
+     * @param flags - possible values: {@link #DELETE_KEEP_DATA}
      */
     void deletePackageVersioned(in VersionedPackage versionedPackage,
             IPackageDeleteObserver2 observer, int userId, int flags);
