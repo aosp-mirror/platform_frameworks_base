@@ -17,5 +17,6 @@
 <permissions>
     <privapp-permissions package="com.android.documentsui">
         <permission name="android.permission.CHANGE_OVERLAY_PACKAGES"/>
+        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
     </privapp-permissions>
 </permissions>
