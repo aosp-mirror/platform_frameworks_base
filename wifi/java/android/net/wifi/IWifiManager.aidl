@@ -36,6 +36,7 @@ import android.net.wifi.ISuggestionConnectionStatusListener;
 import android.net.wifi.ITrafficStateCallback;
 import android.net.wifi.ITxPacketCountListener;
 import android.net.wifi.IWifiConnectedNetworkScorer;
+import android.net.wifi.ScanResult;
 import android.net.wifi.SoftApConfiguration;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -60,9 +61,9 @@ interface IWifiManager
 
     ParceledListSlice getPrivilegedConfiguredNetworks(String packageName, String featureId);
 
-    Map getAllMatchingFqdnsForScanResults(in List<android.net.wifi.ScanResult> scanResult);
+    Map getAllMatchingFqdnsForScanResults(in List<ScanResult> scanResult);
 
-    Map getMatchingOsuProviders(in List<android.net.wifi.ScanResult> scanResult);
+    Map getMatchingOsuProviders(in List<ScanResult> scanResult);
 
     Map getMatchingPasspointConfigsForOsuProviders(in List<OsuProvider> osuProviders);
 
@@ -96,7 +97,7 @@ interface IWifiManager
 
     boolean startScan(String packageName, String featureId);
 
-    List<android.net.wifi.ScanResult> getScanResults(String callingPackage, String callingFeatureId);
+    List<ScanResult> getScanResults(String callingPackage, String callingFeatureId);
 
     boolean disconnect(String packageName);
 
@@ -253,7 +254,7 @@ interface IWifiManager
 
     int calculateSignalLevel(int rssi);
 
-    List<WifiConfiguration> getWifiConfigForMatchedNetworkSuggestionsSharedWithUser(in List<android.net.wifi.ScanResult> scanResults);
+    List<WifiConfiguration> getWifiConfigForMatchedNetworkSuggestionsSharedWithUser(in List<ScanResult> scanResults);
 
     boolean setWifiConnectedNetworkScorer(in IBinder binder, in IWifiConnectedNetworkScorer scorer);
 
