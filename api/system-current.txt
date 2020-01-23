@@ -7507,12 +7507,12 @@ package android.net.wifi {
     method @NonNull public String getCaPath();
     method @NonNull public String getClientCertificateAlias();
     method public int getOcsp();
-    method @Nullable public String getWapiCertSuite();
+    method @NonNull public String getWapiCertSuite();
     method public void setCaCertificateAliases(@Nullable String[]);
-    method public void setCaPath(@Nullable String);
-    method public void setClientCertificateAlias(@Nullable String);
+    method public void setCaPath(@NonNull String);
+    method public void setClientCertificateAlias(@NonNull String);
     method public void setOcsp(int);
-    method public void setWapiCertSuite(@Nullable String);
+    method public void setWapiCertSuite(@NonNull String);
     field public static final int OCSP_NONE = 0; // 0x0
     field public static final int OCSP_REQUEST_CERT_STATUS = 1; // 0x1
     field public static final int OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS = 3; // 0x3
