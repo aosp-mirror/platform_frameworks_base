@@ -445,6 +445,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     // A collection of user restrictions that are deprecated and should simply be ignored.
     private static final Set<String> DEPRECATED_USER_RESTRICTIONS;
     private static final String AB_DEVICE_KEY = "ro.build.ab_update";
+    // Permissions related to location which must not be granted automatically
+    private static  final Set<String> LOCATION_PERMISSIONS;
 
     static {
         SECURE_SETTINGS_WHITELIST = new ArraySet<>();
@@ -489,6 +491,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         DEPRECATED_USER_RESTRICTIONS = Sets.newHashSet(
                 UserManager.DISALLOW_ADD_MANAGED_PROFILE,
                 UserManager.DISALLOW_REMOVE_MANAGED_PROFILE);
+
+        LOCATION_PERMISSIONS = Sets.newHashSet(
+                permission.ACCESS_FINE_LOCATION,
+                permission.ACCESS_BACKGROUND_LOCATION,
+                permission.ACCESS_COARSE_LOCATION);
     }
 
     /**
@@ -12390,6 +12397,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             true);
                 }
 
+                // Prevent granting location-related permissions without user consent.
+                if (LOCATION_PERMISSIONS.contains(permission)
+                        && grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
+                        && !isUnattendedManagedKioskUnchecked()) {
+                    callback.sendResult(null);
+                    return;
+                }
+
                 if (grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
                         || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
                         || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT) {
@@ -14981,21 +14996,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private boolean isUnattendedManagedKioskUnchecked() {
+        try {
+            return isManagedKioskInternal()
+                    && getPowerManagerInternal().wasDeviceIdleFor(UNATTENDED_MANAGED_KIOSK_MS);
+        } catch (RemoteException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     @Override
     public boolean isUnattendedManagedKiosk() {
         if (!mHasFeature) {
             return false;
         }
         enforceManageUsers();
-        long id = mInjector.binderClearCallingIdentity();
-        try {
-            return isManagedKioskInternal()
-                    && getPowerManagerInternal().wasDeviceIdleFor(UNATTENDED_MANAGED_KIOSK_MS);
-        } catch (RemoteException e) {
-            throw new IllegalStateException(e);
-        } finally {
-            mInjector.binderRestoreCallingIdentity(id);
-        }
+        return mInjector.binderWithCleanCallingIdentity(() -> isUnattendedManagedKioskUnchecked());
     }
 
     /**
