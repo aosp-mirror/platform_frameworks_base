@@ -2724,6 +2724,7 @@ class Task extends WindowContainer<WindowContainer> {
             boolean[] foundTop = { false };
             final PooledConsumer c = PooledLambda.obtainConsumer(Task::getMaxVisibleBounds,
                     PooledLambda.__(ActivityRecord.class), out, foundTop);
+            forAllActivities(c);
             c.recycle();
             if (foundTop[0]) {
                 return;
