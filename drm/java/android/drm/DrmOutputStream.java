@@ -40,7 +40,9 @@ import java.net.UnknownServiceException;
  * writing to disk, similar to a {@link FilterOutputStream}.
  *
  * @hide
+ * @deprecated Please use {@link android.media.MediaDrm}
  */
+@Deprecated
 public class DrmOutputStream extends OutputStream {
     private static final String TAG = "DrmOutputStream";
 

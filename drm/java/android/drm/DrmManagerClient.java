@@ -47,7 +47,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * The main programming interface for the DRM framework. An application must instantiate this class
  * to access DRM agents through the DRM framework.
  *
+ * @deprecated Please use {@link android.media.MediaDrm}
  */
+@Deprecated
 public class DrmManagerClient implements AutoCloseable {
     /**
      * Indicates that a request was successful or that no error occurred.

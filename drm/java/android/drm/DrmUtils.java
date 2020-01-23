@@ -33,7 +33,9 @@ import java.util.Iterator;
  * constraints, the constraints will show up in the
  * {@link DrmStore.ConstraintsColumns#EXTENDED_METADATA} key. You can use
  * {@link DrmUtils.ExtendedMetadataParser} to iterate over those values.
+ * @deprecated Please use {@link android.media.MediaDrm}
  */
+@Deprecated
 public class DrmUtils {
     /* Should be used when we need to read from local file */
     /* package */ static byte[] readBytes(String path) throws IOException {

@@ -22,7 +22,9 @@ import java.util.HashMap;
  * An entity class that is passed to the
  * {@link DrmManagerClient.OnErrorListener#onError onError()} callback.
  *
+ * @deprecated Please use {@link android.media.MediaDrm}
  */
+@Deprecated
 public class DrmErrorEvent extends DrmEvent {
 
     // Please add newly defined type constants to the end of the list,
