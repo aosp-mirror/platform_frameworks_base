@@ -144,14 +144,18 @@ public final class ConnectivityController extends RestrictingController implemen
     public void startTrackingRestrictedJobLocked(JobStatus jobStatus) {
         // Don't need to start tracking the job. If the job needed network, it would already be
         // tracked.
-        updateConstraintsSatisfied(jobStatus);
+        if (jobStatus.hasConnectivityConstraint()) {
+            updateConstraintsSatisfied(jobStatus);
+        }
     }
 
     @Override
     public void stopTrackingRestrictedJobLocked(JobStatus jobStatus) {
         // Shouldn't stop tracking the job here. If the job was tracked, it still needs network,
         // even after being unrestricted.
-        updateConstraintsSatisfied(jobStatus);
+        if (jobStatus.hasConnectivityConstraint()) {
+            updateConstraintsSatisfied(jobStatus);
+        }
     }
 
     /**
