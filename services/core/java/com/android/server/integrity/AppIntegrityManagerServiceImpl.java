@@ -49,6 +49,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -161,6 +162,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                         success = false;
                     }
 
+                    StatsLog.write(StatsLog.INTEGRITY_RULES_PUSHED, success, ruleProvider, version);
+
                     Intent intent = new Intent();
                     intent.putExtra(EXTRA_STATUS, success ? STATUS_SUCCESS : STATUS_FAILURE);
                     try {
@@ -258,6 +261,15 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                             + result.getEffect()
                             + " due to "
                             + result.getRule());
+            StatsLog.write(
+                    StatsLog.INTEGRITY_CHECK_RESULT_REPORTED,
+                    packageName,
+                    appCert,
+                    appInstallMetadata.getVersionCode(),
+                    installerPackageName,
+                    getLoggingResponse(result),
+                    isCausedByAppCertRule(result),
+                    isCausedByInstallerRule(result));
             mPackageManagerInternal.setIntegrityVerificationResult(
                     verificationId,
                     result.getEffect() == IntegrityCheckResult.Effect.ALLOW
@@ -568,6 +580,26 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
+    }
+
+    private static int getLoggingResponse(IntegrityCheckResult result) {
+        if (result.getEffect() == IntegrityCheckResult.Effect.DENY) {
+            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__REJECTED;
+        } else if (result.getRule() != null) {
+            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__FORCE_ALLOWED;
+        } else {
+            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__ALLOWED;
+        }
+    }
+
+    private static boolean isCausedByAppCertRule(IntegrityCheckResult result) {
+        // TODO(b/147095027): implement this.
+        return true;
+    }
+
+    private static boolean isCausedByInstallerRule(IntegrityCheckResult result) {
+        // TODO(b/147095027): implement this.
+        return true;
     }
 
     private List<String> getAllowedRuleProviders() {
