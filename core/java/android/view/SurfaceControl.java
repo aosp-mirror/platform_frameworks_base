@@ -211,6 +211,9 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetGlobalShadowSettings(@Size(4) float[] ambientColor,
             @Size(4) float[] spotColor, float lightPosY, float lightPosZ, float lightRadius);
 
+    private static native void nativeSetFrameRate(
+            long transactionObj, long nativeObject, float frameRate);
+
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
     /**
@@ -2783,6 +2786,33 @@ public final class SurfaceControl implements Parcelable {
         public Transaction setShadowRadius(SurfaceControl sc, float shadowRadius) {
             checkPreconditions(sc);
             nativeSetShadowRadius(mNativeObject, sc.mNativeObject, shadowRadius);
+            return this;
+        }
+
+        /**
+         * Sets the intended frame rate for the surface {@link SurfaceControl}.
+         *
+         * On devices that are capable of running the display at different refresh rates, the system
+         * may choose a display refresh rate to better match this surface's frame rate. Usage of
+         * this API won't directly affect the application's frame production pipeline. However,
+         * because the system may change the display refresh rate, calls to this function may result
+         * in changes to Choreographer callback timings, and changes to the time interval at which
+         * the system releases buffers back to the application.
+         *
+         * @param sc The SurfaceControl to specify the frame rate of.
+         * @param frameRate The intended frame rate for this surface. 0 is a special value that
+         *                  indicates the app will accept the system's choice for the display frame
+         *                  rate, which is the default behavior if this function isn't called. The
+         *                  frameRate param does *not* need to be a valid refresh rate for this
+         *                  device's display - e.g., it's fine to pass 30fps to a device that can
+         *                  only run the display at 60fps.
+         * @return This transaction object.
+         */
+        @NonNull
+        public Transaction setFrameRate(
+                @NonNull SurfaceControl sc, @FloatRange(from = 0.0) float frameRate) {
+            checkPreconditions(sc);
+            nativeSetFrameRate(mNativeObject, sc.mNativeObject, frameRate);
             return this;
         }
 
