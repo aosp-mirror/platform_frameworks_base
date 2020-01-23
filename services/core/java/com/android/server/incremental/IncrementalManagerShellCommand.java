@@ -16,6 +16,10 @@
 
 package com.android.server.incremental;
 
+import static android.content.pm.InstallationFile.FILE_TYPE_OBB;
+import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
+import static android.content.pm.PackageInstaller.LOCATION_MEDIA_OBB;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -171,7 +175,9 @@ public final class IncrementalManagerShellCommand extends ShellCommand {
             session = packageInstaller.openSession(sessionId);
             for (int i = 0; i < numFiles; i++) {
                 InstallationFile file = installationFiles.get(i);
-                session.addFile(file.getName(), file.getSize(), file.getMetadata());
+                final int location = file.getFileType() == FILE_TYPE_OBB ? LOCATION_MEDIA_OBB
+                        : LOCATION_DATA_APP;
+                session.addFile(location, file.getName(), file.getSize(), file.getMetadata(), null);
             }
             session.commit(localReceiver.getIntentSender());
             final Intent result = localReceiver.getResult();
