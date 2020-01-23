@@ -1628,29 +1628,21 @@
          config_timeZoneRulesUpdateTrackingEnabled are true.] -->
     <integer name="config_timeZoneRulesCheckRetryCount">5</integer>
 
-    <!-- Whether to enable network location overlay which allows network
-         location provider to be replaced by an app at run-time. When disabled,
-         only the config_networkLocationProviderPackageName package will be
-         searched for network location provider, otherwise packages whose
-         signature matches the signatures of config_locationProviderPackageNames
-         will be searched, and the service with the highest version number will
-         be picked. Anyone who wants to disable the overlay mechanism can set it
-         to false.
-         -->
+    <!-- Whether to enable network location overlay which allows network location provider to be
+         replaced by an app at run-time. When disabled, only the
+         config_networkLocationProviderPackageName package will be searched for network location
+         provider, otherwise any system package is eligible. Anyone who wants to disable the overlay
+         mechanism can set it to false. -->
     <bool name="config_enableNetworkLocationOverlay" translatable="false">true</bool>
     <!-- Package name providing network location support. Used only when
          config_enableNetworkLocationOverlay is false. -->
     <string name="config_networkLocationProviderPackageName" translatable="false">@null</string>
 
-    <!-- Whether to enable fused location provider overlay which allows fused
-         location provider to be replaced by an app at run-time. When disabled,
-         only the config_fusedLocationProviderPackageName package will be
-         searched for fused location provider, otherwise packages whose
-         signature matches the signatures of config_locationProviderPackageNames
-         will be searched, and the service with the highest version number will
-         be picked. Anyone who wants to disable the overlay mechanism can set it
-         to false.
-         -->
+    <!-- Whether to enable fused location provider overlay which allows fused location provider to
+         be replaced by an app at run-time. When disabled, only the
+         config_fusedLocationProviderPackageName package will be searched for fused location
+         provider, otherwise any system package is eligible. Anyone who wants to disable the overlay
+         mechanism can set it to false. -->
     <bool name="config_enableFusedLocationOverlay" translatable="false">true</bool>
     <!-- Package name providing fused location support. Used only when
          config_enableFusedLocationOverlay is false. -->
@@ -1669,25 +1661,10 @@
      -->
     <string name="config_defaultNetworkRecommendationProviderPackage" translatable="false"></string>
 
-    <!-- Whether to enable Hardware FLP overlay which allows Hardware FLP to be
-         replaced by an app at run-time. When disabled, only the
-         config_hardwareFlpPackageName package will be searched for Hardware Flp,
-         otherwise packages whose signature matches the signatures of
-         config_locationProviderPackageNames will be searched, and the service
-         with the highest version number will be picked. Anyone who wants to
-         disable the overlay mechanism can set it to false.
-         -->
-    <bool name="config_enableHardwareFlpOverlay" translatable="false">true</bool>
-    <!-- Package name providing Hardware Flp. Used only when
-         config_enableHardwareFlpOverlay is false. -->
-    <string name="config_hardwareFlpPackageName" translatable="false">com.android.location.fused</string>
-
     <!-- Whether to enable geocoder overlay which allows geocoder to be replaced
          by an app at run-time. When disabled, only the
          config_geocoderProviderPackageName package will be searched for
-         geocoder, otherwise packages whose signature matches the signatures of
-         config_locationProviderPackageNames will be searched, and the service
-         with the highest version number will be picked. Anyone who wants to
+         geocoder, otherwise any system package is eligible. Anyone who wants to
          disable the overlay mechanism can set it to false.
          -->
     <bool name="config_enableGeocoderOverlay" translatable="false">true</bool>
@@ -1698,9 +1675,7 @@
     <!-- Whether to enable geofence overlay which allows geofence to be replaced
          by an app at run-time. When disabled, only the
          config_geofenceProviderPackageName package will be searched for
-         geofence implementation, otherwise packages whose signature matches the
-         signatures of config_locationProviderPackageNames will be searched, and
-         the service with the highest version number will be picked. Anyone who
+         geofence implementation, otherwise any system package is eligible. Anyone who
          wants to disable the overlay mechanism can set it to false.
          -->
     <bool name="config_enableGeofenceOverlay" translatable="false">true</bool>
@@ -1711,9 +1686,7 @@
     <!-- Whether to enable Hardware Activity-Recognition overlay which allows Hardware
          Activity-Recognition to be replaced by an app at run-time. When disabled, only the
          config_activityRecognitionHardwarePackageName package will be searched for
-         its implementation, otherwise packages whose signature matches the
-         signatures of config_locationProviderPackageNames will be searched, and
-         the service with the highest version number will be picked. Anyone who
+         its implementation, otherwise any system package is eligible. Anyone who
          wants to disable the overlay mechanism can set it to false.
          -->
     <bool name="config_enableActivityRecognitionHardwareOverlay" translatable="false">true</bool>
@@ -1721,19 +1694,8 @@
          config_enableActivityRecognitionHardwareOverlay is false. -->
     <string name="config_activityRecognitionHardwarePackageName" translatable="false">@null</string>
 
-    <!-- Package name(s) containing location provider support.
-         These packages can contain services implementing location providers,
-         such as the Geocode Provider, Network Location Provider, and
-         Fused Location Provider. They will each be searched for
-         service components implementing these providers.
-         It is strongly recommended that the packages explicitly named
-         below are on the system image, so that they will not map to
-         a 3rd party application.
-         The location framework also has support for installation
-         of new location providers at run-time. The new package does not
-         have to be explicitly listed here, however it must have a signature
-         that matches the signature of at least one package on this list.
-         -->
+    <!-- Package name(s) containing location provider support. These packages will be auto-granted
+         several permissions by the system, and should be system packages. -->
     <string-array name="config_locationProviderPackageNames" translatable="false">
         <!-- The standard AOSP fused location provider -->
         <item>com.android.location.fused</item>
