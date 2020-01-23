@@ -12211,7 +12211,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     LocalDate.now());
         }
         synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER);
             if (policy == null) {
                 mOwners.clearSystemUpdatePolicy();
             } else {
@@ -12220,9 +12221,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             mOwners.writeDeviceOwner();
         }
-        mContext.sendBroadcastAsUser(
+        mInjector.binderWithCleanCallingIdentity(() -> mContext.sendBroadcastAsUser(
                 new Intent(DevicePolicyManager.ACTION_SYSTEM_UPDATE_POLICY_CHANGED),
-                UserHandle.SYSTEM);
+                UserHandle.SYSTEM));
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_SYSTEM_UPDATE_POLICY)
                 .setAdmin(who)
@@ -14884,7 +14885,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .setAdmin(admin)
                 .setBoolean(isDeviceAB())
                 .write();
-        enforceDeviceOwner(admin);
+        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(admin);
         mInjector.binderWithCleanCallingIdentity(() -> {
             UpdateInstaller updateInstaller;
             if (isDeviceAB()) {
