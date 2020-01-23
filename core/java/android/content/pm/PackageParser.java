@@ -953,6 +953,10 @@ public class PackageParser {
             throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
                     "No packages found in split");
         }
+        // Apk directory is directly nested under the current directory
+        if (files.length == 1 && files[0].isDirectory()) {
+            return parseClusterPackageLite(files[0], flags);
+        }
 
         String packageName = null;
         int versionCode = 0;
@@ -1325,12 +1329,9 @@ public class PackageParser {
                 }
             }
 
-            pkg.setCodePath(packageDir.getCanonicalPath());
+            pkg.setCodePath(lite.codePath);
             pkg.setUse32bitAbi(lite.use32bitAbi);
             return pkg;
-        } catch (IOException e) {
-            throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
-                    "Failed to get path: " + lite.baseCodePath, e);
         } finally {
             IoUtils.closeQuietly(assetLoader);
         }

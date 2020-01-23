@@ -205,11 +205,8 @@ public class ApkParseUtils {
                 }
             }
 
-            return parsingPackage.setCodePath(packageDir.getCanonicalPath())
+            return parsingPackage.setCodePath(lite.codePath)
                     .setUse32BitAbi(lite.use32bitAbi);
-        } catch (IOException e) {
-            throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
-                    "Failed to get path: " + lite.baseCodePath, e);
         } finally {
             IoUtils.closeQuietly(assetLoader);
         }
