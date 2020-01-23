@@ -18,6 +18,7 @@ package com.android.permission.persistence;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ApexContext;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -47,6 +48,8 @@ import java.util.Map;
 public class RuntimePermissionsPersistenceImpl implements RuntimePermissionsPersistence {
 
     private static final String LOG_TAG = RuntimePermissionsPersistenceImpl.class.getSimpleName();
+
+    private static final String APEX_MODULE_NAME = "com.android.permission";
 
     private static final String RUNTIME_PERMISSIONS_FILE_NAME = "runtime-permissions.xml";
 
@@ -253,9 +256,8 @@ public class RuntimePermissionsPersistenceImpl implements RuntimePermissionsPers
 
     @NonNull
     private static File getFile(@NonNull UserHandle user) {
-        // TODO: Use an API for this.
-        File dataDirectory = new File("/data/misc_de/" + user.getIdentifier()
-                + "/apexdata/com.android.permission");
+        ApexContext apexContext = ApexContext.getApexContext(APEX_MODULE_NAME);
+        File dataDirectory = apexContext.getDeviceProtectedDataDirForUser(user);
         return new File(dataDirectory, RUNTIME_PERMISSIONS_FILE_NAME);
     }
 }

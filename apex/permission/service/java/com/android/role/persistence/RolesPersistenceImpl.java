@@ -18,6 +18,7 @@ package com.android.role.persistence;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ApexContext;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -49,6 +50,8 @@ import java.util.Set;
 public class RolesPersistenceImpl implements RolesPersistence {
 
     private static final String LOG_TAG = RolesPersistenceImpl.class.getSimpleName();
+
+    private static final String APEX_MODULE_NAME = "com.android.permission";
 
     private static final String ROLES_FILE_NAME = "roles.xml";
 
@@ -209,9 +212,8 @@ public class RolesPersistenceImpl implements RolesPersistence {
 
     @NonNull
     private static File getFile(@NonNull UserHandle user) {
-        // TODO: Use an API for this.
-        File dataDirectory = new File("/data/misc_de/" + user.getIdentifier()
-                + "/apexdata/com.android.permission");
+        ApexContext apexContext = ApexContext.getApexContext(APEX_MODULE_NAME);
+        File dataDirectory = apexContext.getDeviceProtectedDataDirForUser(user);
         return new File(dataDirectory, ROLES_FILE_NAME);
     }
 }
