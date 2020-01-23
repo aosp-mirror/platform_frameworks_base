@@ -146,6 +146,8 @@ public final class MediaSession {
      * the system but will not be published until {@link #setActive(boolean)
      * setActive(true)} is called. You must call {@link #release()} when
      * finished with the session.
+     * <p>
+     * Note that {@link RuntimeException} will be thrown if an app creates too many sessions.
      *
      * @param context The context to use to create the session.
      * @param tag A short name for debugging purposes.
@@ -163,6 +165,8 @@ public final class MediaSession {
      * The {@code sessionInfo} can include additional unchanging information about this session.
      * For example, it can include the version of the application, or the list of the custom
      * commands that this session supports.
+     * <p>
+     * Note that {@link RuntimeException} will be thrown if an app creates too many sessions.
      *
      * @param context The context to use to create the session.
      * @param tag A short name for debugging purposes.
