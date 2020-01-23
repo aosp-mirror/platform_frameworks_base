@@ -36,6 +36,7 @@ import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
 import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
 import "frameworks/base/core/proto/android/server/fingerprint.proto";
 import "frameworks/base/core/proto/android/server/jobscheduler.proto";
+import "frameworks/base/core/proto/android/server/location/context_hub.proto";
 import "frameworks/base/core/proto/android/server/powermanagerservice.proto";
 import "frameworks/base/core/proto/android/server/rolemanagerservice.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
@@ -484,6 +485,11 @@ message IncidentProto {
     optional .clearcut.connectivity.IpConnectivityLog ip_connectivity_metrics = 3049 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "connmetrics --proto"
+    ];
+
+    optional com.android.server.location.ContextHubServiceProto context_hub = 3051 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "contexthub --proto"
     ];
 
     // Reserved for OEMs.
