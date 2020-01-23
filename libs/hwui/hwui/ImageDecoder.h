@@ -66,6 +66,7 @@ private:
     ImageDecoder& operator=(const ImageDecoder&) = delete;
 
     SkAlphaType getOutAlphaType() const;
+    sk_sp<SkColorSpace> getOutputColorSpace() const;
 };
 
 } // namespace android

@@ -156,6 +156,7 @@ import android.content.IntentFilter;
 import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.CrossProfileApps;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -302,6 +303,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -310,6 +312,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the device policy APIs.
@@ -369,6 +372,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final String TAG_TRANSFER_OWNERSHIP_BUNDLE = "transfer-ownership-bundle";
 
     private static final String TAG_PROTECTED_PACKAGES = "protected-packages";
+
+    private static final String TAG_SECONDARY_LOCK_SCREEN = "secondary-lock-screen";
 
     private static final int REQUEST_EXPIRE_PASSWORD = 5571;
 
@@ -522,11 +527,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     /**
      * For admin apps targeting R+, throw when the app sets password requirement
      * that is not taken into account at given quality. For example when quality is set
-     * to {@link DevicePolicyManager#PASSWORD_QUALITY_UNSPECIFIED}, it doesn't make sense to
-     * require certain password length. If the intent is to require a password of certain length
-     * having at least NUMERIC quality, the admin should first call
-     * {@link #setPasswordQuality(ComponentName, int, boolean)} and only then call
-     * {@link #setPasswordMinimumLength(ComponentName, int, boolean)}.
+     * to {@link android.app.admin.DevicePolicyManager#PASSWORD_QUALITY_UNSPECIFIED}, it doesn't
+     * make sense to require certain password length. If the intent is to require a password of
+     * certain length having at least NUMERIC quality, the admin should first call
+     * {@link android.app.admin.DevicePolicyManager#setPasswordQuality} and only then call
+     * {@link android.app.admin.DevicePolicyManager#setPasswordMinimumLength}.
      *
      * <p>Conversely when an admin app targeting R+ lowers password quality, those
      * requirements that stop making sense are reset to default values.
@@ -770,6 +775,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         long mLastNetworkLogsRetrievalTime = -1;
 
         boolean mCurrentInputMethodSet = false;
+
+        boolean mSecondaryLockscreenEnabled = false;
 
         // TODO(b/35385311): Keep track of metadata in TrustedCertificateStore instead.
         Set<String> mOwnerInstalledCaCerts = new ArraySet<>();
@@ -3322,6 +3329,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 out.endTag(null, TAG_LOCK_TASK_FEATURES);
             }
 
+            if (policy.mSecondaryLockscreenEnabled) {
+                out.startTag(null, TAG_SECONDARY_LOCK_SCREEN);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(true));
+                out.endTag(null, TAG_SECONDARY_LOCK_SCREEN);
+            }
+
             if (policy.mStatusBarDisabled) {
                 out.startTag(null, TAG_STATUS_BAR);
                 out.attribute(null, ATTR_DISABLED, Boolean.toString(policy.mStatusBarDisabled));
@@ -3570,6 +3583,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     policy.mLockTaskPackages.add(parser.getAttributeValue(null, "name"));
                 } else if (TAG_LOCK_TASK_FEATURES.equals(tag)) {
                     policy.mLockTaskFeatures = Integer.parseInt(
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_SECONDARY_LOCK_SCREEN.equals(tag)) {
+                    policy.mSecondaryLockscreenEnabled = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_STATUS_BAR.equals(tag)) {
                     policy.mStatusBarDisabled = Boolean.parseBoolean(
@@ -8601,6 +8617,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // Clear delegations.
         policy.mDelegationMap.clear();
         policy.mStatusBarDisabled = false;
+        policy.mSecondaryLockscreenEnabled = false;
         policy.mUserProvisioningState = DevicePolicyManager.STATE_USER_UNMANAGED;
         policy.mAffiliationIds.clear();
         policy.mLockTaskPackages.clear();
@@ -11150,6 +11167,33 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             ActiveAdmin admin = getProfileOwnerAdminLocked(userId);
             return (admin != null) ? admin.disableBluetoothContactSharing : false;
+        }
+    }
+
+    @Override
+    public void setSecondaryLockscreenEnabled(ComponentName who, boolean enabled) {
+        enforceCanSetSecondaryLockscreenEnabled(who);
+        synchronized (getLockObject()) {
+            final int userId = mInjector.userHandleGetCallingUserId();
+            DevicePolicyData policy = getUserData(userId);
+            policy.mSecondaryLockscreenEnabled = enabled;
+            saveSettingsLocked(userId);
+        }
+    }
+
+    @Override
+    public boolean isSecondaryLockscreenEnabled(int userId) {
+        synchronized (getLockObject()) {
+            return getUserData(userId).mSecondaryLockscreenEnabled;
+        }
+    }
+
+    private void enforceCanSetSecondaryLockscreenEnabled(ComponentName who) {
+        enforceProfileOrDeviceOwner(who);
+        final int userId = mInjector.userHandleGetCallingUserId();
+        if (isManagedProfile(userId)) {
+            throw new SecurityException(
+                    "User " + userId + " is not allowed to call setSecondaryLockscreenEnabled");
         }
     }
 
@@ -14846,12 +14890,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Objects.requireNonNull(who, "ComponentName is null");
         Objects.requireNonNull(packageNames, "Package names is null");
+        final List<String> previousCrossProfilePackages;
         synchronized (getLockObject()) {
             final ActiveAdmin admin =
                     getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            previousCrossProfilePackages = admin.mCrossProfilePackages;
             admin.mCrossProfilePackages = packageNames;
             saveSettingsLocked(mInjector.userHandleGetCallingUserId());
         }
+        final CrossProfileApps crossProfileApps = mContext.getSystemService(CrossProfileApps.class);
+        mInjector.binderWithCleanCallingIdentity(
+                () -> crossProfileApps.resetInteractAcrossProfilesAppOps(
+                        previousCrossProfilePackages, new HashSet<>(packageNames)));
     }
 
     @Override

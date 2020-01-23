@@ -9,6 +9,10 @@ package android.app {
 
 package android.provider {
 
+  public final class DocumentsContract {
+    method @NonNull public static android.net.Uri buildDocumentUriAsUser(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
+  }
+
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field public static final String COMMON_CRITERIA_MODE = "common_criteria_mode";
   }

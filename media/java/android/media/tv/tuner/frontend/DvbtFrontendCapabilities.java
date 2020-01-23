@@ -16,27 +16,31 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.SystemApi;
+
 /**
  * DVBT Capabilities.
+ *
  * @hide
  */
+@SystemApi
 public class DvbtFrontendCapabilities extends FrontendCapabilities {
     private final int mTransmissionModeCap;
     private final int mBandwidthCap;
     private final int mConstellationCap;
-    private final int mCoderateCap;
+    private final int mCodeRateCap;
     private final int mHierarchyCap;
     private final int mGuardIntervalCap;
     private final boolean mIsT2Supported;
     private final boolean mIsMisoSupported;
 
     private DvbtFrontendCapabilities(int transmissionModeCap, int bandwidthCap,
-            int constellationCap, int coderateCap, int hierarchyCap, int guardIntervalCap,
+            int constellationCap, int codeRateCap, int hierarchyCap, int guardIntervalCap,
             boolean isT2Supported, boolean isMisoSupported) {
         mTransmissionModeCap = transmissionModeCap;
         mBandwidthCap = bandwidthCap;
         mConstellationCap = constellationCap;
-        mCoderateCap = coderateCap;
+        mCodeRateCap = codeRateCap;
         mHierarchyCap = hierarchyCap;
         mGuardIntervalCap = guardIntervalCap;
         mIsT2Supported = isT2Supported;
@@ -67,9 +71,9 @@ public class DvbtFrontendCapabilities extends FrontendCapabilities {
     /**
      * Gets code rate capability.
      */
-    @DvbtFrontendSettings.Coderate
+    @DvbtFrontendSettings.CodeRate
     public int getCodeRateCapability() {
-        return mCoderateCap;
+        return mCodeRateCap;
     }
     /**
      * Gets hierarchy capability.

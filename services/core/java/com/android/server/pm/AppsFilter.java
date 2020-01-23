@@ -213,6 +213,25 @@ public class AppsFilter {
         return false;
     }
 
+    private static boolean canQueryViaPackage(AndroidPackage querying,
+            AndroidPackage potentialTarget) {
+        return querying.getQueriesPackages() != null
+                && querying.getQueriesPackages().contains(potentialTarget.getPackageName());
+    }
+
+    private static boolean canQueryAsInstaller(PackageSetting querying,
+            AndroidPackage potentialTarget) {
+        final InstallSource installSource = querying.installSource;
+        if (potentialTarget.getPackageName().equals(installSource.installerPackageName)) {
+            return true;
+        }
+        if (!installSource.isInitiatingPackageUninstalled
+                && potentialTarget.getPackageName().equals(installSource.initiatingPackageName)) {
+            return true;
+        }
+        return false;
+    }
+
     private static boolean matches(Intent intent, AndroidPackage potentialTarget) {
         for (int p = ArrayUtils.size(potentialTarget.getProviders()) - 1; p >= 0; p--) {
             ParsedProvider provider = potentialTarget.getProviders().get(p);
@@ -331,8 +350,8 @@ public class AppsFilter {
                     if (canQueryViaIntent(existingPkg, newPkg)) {
                         mQueriesViaIntent.add(existingSetting.appId, newPkgSetting.appId);
                     }
-                    if (existingPkg.getQueriesPackages() != null
-                            && existingPkg.getQueriesPackages().contains(newPkg.getPackageName())) {
+                    if (canQueryViaPackage(existingPkg, newPkg)
+                            || canQueryAsInstaller(existingSetting, newPkg)) {
                         mQueriesViaPackage.add(existingSetting.appId, newPkgSetting.appId);
                     }
                 }
@@ -341,8 +360,8 @@ public class AppsFilter {
                     if (canQueryViaIntent(newPkg, existingPkg)) {
                         mQueriesViaIntent.add(newPkgSetting.appId, existingSetting.appId);
                     }
-                    if (newPkg.getQueriesPackages() != null
-                            && newPkg.getQueriesPackages().contains(existingPkg.getPackageName())) {
+                    if (canQueryViaPackage(newPkg, existingPkg)
+                            || canQueryAsInstaller(newPkgSetting, existingPkg)) {
                         mQueriesViaPackage.add(newPkgSetting.appId, existingSetting.appId);
                     }
                 }
@@ -535,7 +554,6 @@ public class AppsFilter {
             try {
                 Trace.beginSection("mQueriesViaPackage");
                 if (mQueriesViaPackage.contains(callingAppId, targetAppId)) {
-                    // the calling package has explicitly declared the target package; allow
                     if (DEBUG_LOGGING) {
                         log(callingSetting, targetPkgSetting, "queries package");
                     }

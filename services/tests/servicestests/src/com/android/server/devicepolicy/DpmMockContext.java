@@ -221,6 +221,8 @@ public class DpmMockContext extends MockContext {
                 return mMockSystemServices.telephonyManager;
             case Context.APP_OPS_SERVICE:
                 return mMockSystemServices.appOpsManager;
+            case Context.CROSS_PROFILE_APPS_SERVICE:
+                return mMockSystemServices.crossProfileApps;
         }
         throw new UnsupportedOperationException();
     }

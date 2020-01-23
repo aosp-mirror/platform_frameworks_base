@@ -1701,8 +1701,15 @@ class StorageManagerService extends IStorageManager.Stub
         if (mIsFuseEnabled != settingsFuseFlag) {
             Slog.i(TAG, "Toggling persist.sys.fuse to " + settingsFuseFlag);
             SystemProperties.set(PROP_FUSE, Boolean.toString(settingsFuseFlag));
-            // Perform hard reboot to kick policy into place
-            mContext.getSystemService(PowerManager.class).reboot("fuse_prop");
+
+            PowerManager powerManager = mContext.getSystemService(PowerManager.class);
+            if (powerManager.isRebootingUserspaceSupported()) {
+                // Perform userspace reboot to kick policy into place
+                powerManager.reboot(PowerManager.REBOOT_USERSPACE);
+            } else {
+                // Perform hard reboot to kick policy into place
+                powerManager.reboot("fuse_prop");
+            }
         }
     }
 

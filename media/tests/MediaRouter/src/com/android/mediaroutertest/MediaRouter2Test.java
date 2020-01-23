@@ -36,6 +36,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertThrows;
 
@@ -691,6 +692,14 @@ public class MediaRouter2Test {
         final RoutingController systemController = mRouter2.getSystemController();
         assertNotNull(systemController);
         assertFalse(systemController.isReleased());
+    }
+
+    @Test
+    public void testControllers() {
+        List<RoutingController> controllers = mRouter2.getControllers();
+        assertNotNull(controllers);
+        assertFalse(controllers.isEmpty());
+        assertSame(mRouter2.getSystemController(), controllers.get(0));
     }
 
     // Helper for getting routes easily

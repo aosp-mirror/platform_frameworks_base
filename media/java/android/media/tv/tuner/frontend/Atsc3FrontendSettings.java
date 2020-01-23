@@ -19,6 +19,7 @@ package android.media.tv.tuner.frontend;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerUtils;
@@ -28,8 +29,10 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Frontend settings for ATSC-3.
+ *
  * @hide
  */
+@SystemApi
 public class Atsc3FrontendSettings extends FrontendSettings {
 
     /** @hide */
@@ -273,9 +276,9 @@ public class Atsc3FrontendSettings extends FrontendSettings {
     public static final int DEMOD_OUTPUT_FORMAT_BASEBAND_PACKET =
             Constants.FrontendAtsc3DemodOutputFormat.BASEBAND_PACKET;
 
-    public final int mBandwidth;
-    public final int mDemodOutputFormat;
-    public final Atsc3PlpSettings[] mPlpSettings;
+    private final int mBandwidth;
+    private final int mDemodOutputFormat;
+    private final Atsc3PlpSettings[] mPlpSettings;
 
     private Atsc3FrontendSettings(int frequency, int bandwidth, int demodOutputFormat,
             Atsc3PlpSettings[] plpSettings) {
@@ -302,6 +305,7 @@ public class Atsc3FrontendSettings extends FrontendSettings {
     /**
      * Gets PLP Settings.
      */
+    @NonNull
     public Atsc3PlpSettings[] getPlpSettings() {
         return mPlpSettings;
     }
@@ -349,7 +353,7 @@ public class Atsc3FrontendSettings extends FrontendSettings {
          * Sets PLP Settings.
          */
         @NonNull
-        public Builder setPlpSettings(Atsc3PlpSettings[] plpSettings) {
+        public Builder setPlpSettings(@NonNull Atsc3PlpSettings[] plpSettings) {
             mPlpSettings = plpSettings;
             return this;
         }

@@ -80,6 +80,14 @@ interface IPowerManager
 
     // controls whether PowerManager should doze after the screen turns off or not
     void setDozeAfterScreenOff(boolean on);
+    // returns whether ambient display is available on the device.
+    boolean isAmbientDisplayAvailable();
+    // suppresses the current ambient display configuration and disables ambient display.
+    void suppressAmbientDisplay(String token, boolean suppress);
+    // returns whether ambient display is suppressed by the calling app with the given token.
+    boolean isAmbientDisplaySuppressedForToken(String token);
+    // returns whether ambient display is suppressed by any app with any token.
+    boolean isAmbientDisplaySuppressed();
 
     // Forces the system to suspend even if there are held wakelocks.
     boolean forceSuspend();

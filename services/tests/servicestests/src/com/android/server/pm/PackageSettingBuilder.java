@@ -41,6 +41,7 @@ public class PackageSettingBuilder {
     private SparseArray<PackageUserState> mUserStates = new SparseArray<>();
     private AndroidPackage mPkg;
     private int mAppId;
+    private InstallSource mInstallSource;
 
     public PackageSettingBuilder setPackage(AndroidPackage pkg) {
         this.mPkg = pkg;
@@ -137,6 +138,11 @@ public class PackageSettingBuilder {
         return this;
     }
 
+    public PackageSettingBuilder setInstallSource(InstallSource installSource) {
+        mInstallSource = installSource;
+        return this;
+    }
+
     public PackageSetting build() {
         final PackageSetting packageSetting = new PackageSetting(mName, mRealName,
                 new File(mCodePath), new File(mResourcePath),
@@ -146,6 +152,9 @@ public class PackageSettingBuilder {
         packageSetting.pkg = mPkg;
         packageSetting.appId = mAppId;
         packageSetting.volumeUuid = this.mVolumeUuid;
+        if (mInstallSource != null) {
+            packageSetting.installSource = mInstallSource;
+        }
         for (int i = 0; i < mUserStates.size(); i++) {
             packageSetting.setUserState(mUserStates.keyAt(i), mUserStates.valueAt(i));
         }

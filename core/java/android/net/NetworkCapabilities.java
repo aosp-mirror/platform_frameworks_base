@@ -1283,6 +1283,7 @@ public final class NetworkCapabilities implements Parcelable {
      * Gets the SSID of this network, or null if none or unknown.
      * @hide
      */
+    @SystemApi
     public @Nullable String getSSID() {
         return mSSID;
     }

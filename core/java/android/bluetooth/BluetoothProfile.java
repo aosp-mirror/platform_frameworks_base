@@ -146,7 +146,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     int A2DP_SINK = 11;
 
     /**
@@ -154,7 +154,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     int AVRCP_CONTROLLER = 12;
 
     /**
@@ -169,6 +169,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
+    @SystemApi
     int HEADSET_CLIENT = 16;
 
     /**
@@ -176,6 +177,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
+    @SystemApi
     int PBAP_CLIENT = 17;
 
     /**

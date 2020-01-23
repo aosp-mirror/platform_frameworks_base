@@ -126,6 +126,9 @@ interface IUsbManager
     /* Gets the current screen unlocked functions. */
     long getScreenUnlockedFunctions();
 
+    /* Resets the USB gadget. */
+    void resetUsbGadget();
+
     /* Get the functionfs control handle for the given function. Usb
      * descriptors will already be written, and the handle will be
      * ready to use.

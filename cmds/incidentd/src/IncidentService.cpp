@@ -350,11 +350,11 @@ Status IncidentService::reportIncidentToDumpstate(unique_fd stream,
 Status IncidentService::registerSection(const int id, const String16& name16,
         const sp<IIncidentDumpCallback>& callback) {
     const char* name = String8(name16).c_str();
-    ALOGI("Register section %d: %s", id, name);
+    const uid_t callingUid = IPCThreadState::self()->getCallingUid();
+    ALOGI("Uid %d registers section %d '%s'", callingUid, id, name);
     if (callback == nullptr) {
         return Status::fromExceptionCode(Status::EX_NULL_POINTER);
     }
-    const uid_t callingUid = IPCThreadState::self()->getCallingUid();
     for (int i = 0; i < mRegisteredSections.size(); i++) {
         if (mRegisteredSections.at(i)->id == id) {
             if (mRegisteredSections.at(i)->uid != callingUid) {
@@ -370,8 +370,9 @@ Status IncidentService::registerSection(const int id, const String16& name16,
 }
 
 Status IncidentService::unregisterSection(const int id) {
-    ALOGI("Unregister section %d", id);
     uid_t callingUid = IPCThreadState::self()->getCallingUid();
+    ALOGI("Uid %d unregisters section %d", callingUid, id);
+
     for (auto it = mRegisteredSections.begin(); it != mRegisteredSections.end(); it++) {
         if ((*it)->id == id) {
             if ((*it)->uid != callingUid) {

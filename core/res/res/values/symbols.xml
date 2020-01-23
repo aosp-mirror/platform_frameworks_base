@@ -3723,6 +3723,9 @@
   <java-symbol type="string" name="mime_type_presentation" />
   <java-symbol type="string" name="mime_type_presentation_ext" />
 
+  <!-- For Bluetooth service -->
+  <java-symbol type="string" name="bluetooth_airplane_mode_toast" />
+
   <!-- For high refresh rate displays -->
   <java-symbol type="integer" name="config_defaultPeakRefreshRate" />
   <java-symbol type="integer" name="config_defaultRefreshRateInZone" />
@@ -3806,6 +3809,9 @@
   <!-- For contacts provider. -->
   <java-symbol type="string" name="config_rawContactsLocalAccountName" />
   <java-symbol type="string" name="config_rawContactsLocalAccountType" />
+
+  <!-- For App Standby -->
+  <java-symbol type="string" name="as_app_forced_to_restricted_bucket" />
 
   <!-- Assistant handles -->
   <java-symbol type="dimen" name="assist_handle_shadow_radius" />

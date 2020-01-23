@@ -1658,7 +1658,7 @@ public final class SmsManager {
     }
 
     /**
-     * Copy a raw SMS PDU to the ICC.
+     * Copies a raw SMS PDU to the ICC.
      * ICC (Integrated Circuit Card) is the card of the device.
      * For example, this can be the SIM or USIM for GSM.
      *
@@ -1672,21 +1672,26 @@ public final class SmsManager {
      * operation is performed on the correct subscription.
      * </p>
      *
-     * @param smsc the SMSC for this message, or NULL for the default SMSC
-     * @param pdu the raw PDU to store
-     * @param status message status (STATUS_ON_ICC_READ, STATUS_ON_ICC_UNREAD,
-     *               STATUS_ON_ICC_SENT, STATUS_ON_ICC_UNSENT)
-     * @return true for success
+     * @param smsc the SMSC for this messag or null for the default SMSC.
+     * @param pdu the raw PDU to store.
+     * @param status message status. One of these status:
+     *               <code>STATUS_ON_ICC_READ</code>
+     *               <code>STATUS_ON_ICC_UNREAD</code>
+     *               <code>STATUS_ON_ICC_SENT</code>
+     *               <code>STATUS_ON_ICC_UNSENT</code>
+     * @return true for success. Otherwise false.
      *
-     * @throws IllegalArgumentException if pdu is NULL
-     * {@hide}
+     * @throws IllegalArgumentException if pdu is null.
+     * @hide
      */
-    @UnsupportedAppUsage
-    public boolean copyMessageToIcc(byte[] smsc, byte[] pdu,int status) {
+    @SystemApi
+    @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
+    public boolean copyMessageToIcc(
+            @Nullable byte[] smsc, @NonNull byte[] pdu, @StatusOnIcc int status) {
         boolean success = false;
 
-        if (null == pdu) {
-            throw new IllegalArgumentException("pdu is NULL");
+        if (pdu == null) {
+            throw new IllegalArgumentException("pdu is null");
         }
         try {
             ISms iSms = getISmsService();
@@ -1703,7 +1708,7 @@ public final class SmsManager {
     }
 
     /**
-     * Delete the specified message from the ICC.
+     * Deletes the specified message from the ICC.
      * ICC (Integrated Circuit Card) is the card of the device.
      * For example, this can be the SIM or USIM for GSM.
      *
@@ -1787,7 +1792,7 @@ public final class SmsManager {
     }
 
     /**
-     * Retrieves all messages currently stored on ICC.
+     * Retrieves all messages currently stored on the ICC.
      * ICC (Integrated Circuit Card) is the card of the device.
      * For example, this can be the SIM or USIM for GSM.
      *
@@ -1953,8 +1958,7 @@ public final class SmsManager {
     }
 
     /**
-     * Create a list of <code>SmsMessage</code>s from a list of RawSmsData
-     * records returned by <code>getAllMessagesFromIcc()</code>
+     * Creates a list of <code>SmsMessage</code>s from a list of SmsRawData records.
      *
      * <p class="note"><strong>Note:</strong> This method is intended for internal use by carrier
      * applications or the Telephony framework and will never trigger an SMS disambiguation
@@ -1966,8 +1970,7 @@ public final class SmsManager {
      * operation is performed on the correct subscription.
      * </p>
      *
-     * @param records SMS EF records, returned by
-     *   <code>getAllMessagesFromIcc</code>
+     * @param records SMS EF records.
      * @return <code>ArrayList</code> of <code>SmsMessage</code> objects.
      */
     private ArrayList<SmsMessage> createMessageListFromRawRecords(List<SmsRawData> records) {
@@ -1978,7 +1981,7 @@ public final class SmsManager {
                 SmsRawData data = records.get(i);
                 // List contains all records, including "free" records (null)
                 if (data != null) {
-                    SmsMessage sms = SmsMessage.createFromEfRecord(i+1, data.getBytes(),
+                    SmsMessage sms = SmsMessage.createFromEfRecord(i + 1, data.getBytes(),
                             getSubscriptionId());
                     if (sms != null) {
                         messages.add(sms);
@@ -2121,6 +2124,17 @@ public final class SmsManager {
         }
         return ret;
     }
+
+    /** @hide */
+    @IntDef(prefix = { "STATUS_ON_ICC_" }, value = {
+            STATUS_ON_ICC_FREE,
+            STATUS_ON_ICC_READ,
+            STATUS_ON_ICC_UNREAD,
+            STATUS_ON_ICC_SENT,
+            STATUS_ON_ICC_UNSENT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StatusOnIcc {}
 
     // see SmsMessage.getStatusOnIcc
 

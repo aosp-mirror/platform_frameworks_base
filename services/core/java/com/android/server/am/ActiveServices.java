@@ -31,6 +31,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE_E
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
@@ -2068,9 +2069,9 @@ public final class ActiveServices {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "retrieveServiceLocked: " + service
                 + " type=" + resolvedType + " callingUid=" + callingUid);
 
-        userId = mAm.mUserController.handleIncomingUser(callingPid, callingUid, userId, false,
-                ActivityManagerInternal.ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE, "service",
-                callingPackage);
+        userId = mAm.mUserController.handleIncomingUser(callingPid, callingUid, userId,
+                /* allowAll= */false, getAllowMode(service, callingPackage),
+                /* name= */ "service", callingPackage);
 
         ServiceMap smap = getServiceMapLocked(userId);
         final ComponentName comp;
@@ -2258,6 +2259,17 @@ public final class ActiveServices {
             return new ServiceLookupResult(r, null);
         }
         return null;
+    }
+
+    private int getAllowMode(Intent service, @Nullable String callingPackage) {
+        if (callingPackage == null || service.getComponent() == null) {
+            return ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
+        }
+        if (callingPackage.equals(service.getComponent().getPackageName())) {
+            return ActivityManagerInternal.ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE;
+        } else {
+            return ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
+        }
     }
 
     private final void bumpServiceExecutingLocked(ServiceRecord r, boolean fg, String why) {

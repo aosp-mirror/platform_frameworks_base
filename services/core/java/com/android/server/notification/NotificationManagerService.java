@@ -378,8 +378,9 @@ public class NotificationManagerService extends SystemService {
 
     /**
      * Apps that post custom toasts in the background will have those blocked. Apps can
-     * still post toasts created with {@link Toast#makeText(Context, CharSequence, int)} and its
-     * variants while in the background.
+     * still post toasts created with
+     * {@link android.widget.Toast#makeText(Context, CharSequence, int)} and its variants while
+     * in the background.
      *
      * TODO(b/144152069): Add @EnabledAfter(Q) to target R+ after assessing impact on dogfood
      */
@@ -8255,7 +8256,8 @@ public class NotificationManagerService extends SystemService {
                     record.getSystemGeneratedSmartActions(),
                     record.getSmartReplies(),
                     record.canBubble(),
-                    record.isInterruptive()
+                    record.isInterruptive(),
+                    record.isConversation()
             );
             rankings.add(ranking);
         }

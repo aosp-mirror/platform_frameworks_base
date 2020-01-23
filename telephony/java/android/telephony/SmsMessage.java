@@ -278,41 +278,24 @@ public class SmsMessage {
     }
 
     /**
-     * Create an SmsMessage from an SMS EF record.
+     * Creates an SmsMessage from an SMS EF record.
      *
-     * @param index Index of SMS record. This should be index in ArrayList
-     *              returned by SmsManager.getAllMessagesFromSim + 1.
+     * @param index Index of SMS EF record.
      * @param data Record data.
      * @return An SmsMessage representing the record.
      *
      * @hide
      */
     public static SmsMessage createFromEfRecord(int index, byte[] data) {
-        SmsMessageBase wrappedMessage;
-
-        if (isCdmaVoice()) {
-            wrappedMessage = com.android.internal.telephony.cdma.SmsMessage.createFromEfRecord(
-                    index, data);
-        } else {
-            wrappedMessage = com.android.internal.telephony.gsm.SmsMessage.createFromEfRecord(
-                    index, data);
-        }
-
-        if (wrappedMessage != null) {
-            return new SmsMessage(wrappedMessage);
-        } else {
-            Rlog.e(LOG_TAG, "createFromEfRecord(): wrappedMessage is null");
-            return null;
-        }
+        return createFromEfRecord(index, data, SmsManager.getDefaultSmsSubscriptionId());
     }
 
     /**
-     * Create an SmsMessage from an SMS EF record.
+     * Creates an SmsMessage from an SMS EF record.
      *
-     * @param index Index of SMS record. This should be index in ArrayList
-     *              returned by SmsManager.getAllMessagesFromSim + 1.
+     * @param index Index of SMS EF record.
      * @param data Record data.
-     * @param subId Subscription Id of the SMS
+     * @param subId Subscription Id associated with the record.
      * @return An SmsMessage representing the record.
      *
      * @hide
@@ -602,13 +585,15 @@ public class SmsMessage {
      */
 
     /**
-     * Get an SMS-SUBMIT PDU for a destination address and a message.
+     * Gets an SMS-SUBMIT PDU for a destination address and a message.
      * This method will not attempt to use any GSM national language 7 bit encodings.
      *
-     * @param scAddress Service Centre address.  Null means use default.
-     * @return a <code>SubmitPdu</code> containing the encoded SC
-     *         address, if applicable, and the encoded message.
-     *         Returns null on encode error.
+     * @param scAddress Service Centre address. Null means use default.
+     * @param destinationAddress the address of the destination for the message.
+     * @param message string representation of the message payload.
+     * @param statusReportRequested indicates whether a report is requested for this message.
+     * @return a <code>SubmitPdu</code> containing the encoded SC address if applicable and the
+     *         encoded message. Returns null on encode error.
      */
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, String message, boolean statusReportRequested) {
@@ -621,17 +606,16 @@ public class SmsMessage {
     }
 
     /**
-     * Get an SMS-SUBMIT PDU for a destination address and a message.
+     * Gets an SMS-SUBMIT PDU for a destination address and a message.
      * This method will not attempt to use any GSM national language 7 bit encodings.
      *
-     * @param scAddress Service Centre address.  Null means use default.
+     * @param scAddress Service Centre address. Null means use default.
      * @param destinationAddress the address of the destination for the message.
-     * @param message String representation of the message payload.
-     * @param statusReportRequested Indicates whether a report is requested for this message.
-     * @param subId Subscription of the message
-     * @return a <code>SubmitPdu</code> containing the encoded SC
-     *         address, if applicable, and the encoded message.
-     *         Returns null on encode error.
+     * @param message string representation of the message payload.
+     * @param statusReportRequested indicates whether a report is requested for this message.
+     * @param subId subscription of the message.
+     * @return a <code>SubmitPdu</code> containing the encoded SC address if applicable and the
+     *         encoded message. Returns null on encode error.
      * @hide
      */
     public static SubmitPdu getSubmitPdu(String scAddress,
@@ -649,17 +633,16 @@ public class SmsMessage {
     }
 
     /**
-     * Get an SMS-SUBMIT PDU for a data message to a destination address &amp; port.
+     * Gets an SMS-SUBMIT PDU for a data message to a destination address &amp; port.
      * This method will not attempt to use any GSM national language 7 bit encodings.
      *
-     * @param scAddress Service Centre address. null == use default
-     * @param destinationAddress the address of the destination for the message
-     * @param destinationPort the port to deliver the message to at the
-     *        destination
-     * @param data the data for the message
-     * @return a <code>SubmitPdu</code> containing the encoded SC
-     *         address, if applicable, and the encoded message.
-     *         Returns null on encode error.
+     * @param scAddress Service Centre address. Null means use default.
+     * @param destinationAddress the address of the destination for the message.
+     * @param destinationPort the port to deliver the message to at the destination.
+     * @param data the data for the message.
+     * @param statusReportRequested indicates whether a report is requested for this message.
+     * @return a <code>SubmitPdu</code> containing the encoded SC address if applicable and the
+     *         encoded message. Returns null on encode error.
      */
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, short destinationPort, byte[] data,
@@ -675,6 +658,55 @@ public class SmsMessage {
         }
 
         return new SubmitPdu(spb);
+    }
+
+    // TODO: SubmitPdu class is used for SMS-DELIVER also now. Refactor for SubmitPdu and new
+    // DeliverPdu accordingly.
+
+    /**
+     * Gets an SMS PDU to store in the ICC.
+     *
+     * @param subId subscription of the message.
+     * @param status message status. One of these status:
+     *               <code>SmsManager.STATUS_ON_ICC_READ</code>
+     *               <code>SmsManager.STATUS_ON_ICC_UNREAD</code>
+     *               <code>SmsManager.STATUS_ON_ICC_SENT</code>
+     *               <code>SmsManager.STATUS_ON_ICC_UNSENT</code>
+     * @param scAddress Service Centre address. Null means use default.
+     * @param address destination or originating address.
+     * @param message string representation of the message payload.
+     * @param date the time stamp the message was received.
+     * @return a <code>SubmitPdu</code> containing the encoded SC address if applicable and the
+     *         encoded message. Returns null on encode error.
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public static SubmitPdu getSmsPdu(int subId, @SmsManager.StatusOnIcc int status,
+            @Nullable String scAddress, @NonNull String address, @NonNull String message,
+            long date) {
+        SubmitPduBase spb;
+        if (isCdmaVoice(subId)) { // 3GPP2 format
+            if (status == SmsManager.STATUS_ON_ICC_READ
+                    || status == SmsManager.STATUS_ON_ICC_UNREAD) { // Deliver PDU
+                spb = com.android.internal.telephony.cdma.SmsMessage.getDeliverPdu(address,
+                        message, date);
+            } else { // Submit PDU
+                spb = com.android.internal.telephony.cdma.SmsMessage.getSubmitPdu(scAddress,
+                        address, message, false /* statusReportRequested */, null /* smsHeader */);
+            }
+        } else { // 3GPP format
+            if (status == SmsManager.STATUS_ON_ICC_READ
+                    || status == SmsManager.STATUS_ON_ICC_UNREAD) { // Deliver PDU
+                spb = com.android.internal.telephony.gsm.SmsMessage.getDeliverPdu(scAddress,
+                        address, message, date);
+            } else { // Submit PDU
+                spb = com.android.internal.telephony.gsm.SmsMessage.getSubmitPdu(scAddress,
+                        address, message, false /* statusReportRequested */, null /* header */);
+            }
+        }
+
+        return spb != null ? new SubmitPdu(spb) : null;
     }
 
     /**

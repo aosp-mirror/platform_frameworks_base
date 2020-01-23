@@ -113,6 +113,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.function.Consumer;
@@ -334,6 +335,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private SparseBooleanArray mUserFingerprintAuthenticated = new SparseBooleanArray();
     private SparseBooleanArray mUserFaceAuthenticated = new SparseBooleanArray();
     private SparseBooleanArray mUserFaceUnlockRunning = new SparseBooleanArray();
+    private Map<Integer, Intent> mSecondaryLockscreenRequirement = new HashMap<Integer, Intent>();
 
     private static int sCurrentUser;
     private Runnable mUpdateBiometricListeningState = this::updateBiometricListeningState;
@@ -928,6 +930,45 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         return mUserTrustIsManaged.get(userId) && !isTrustDisabled(userId);
     }
 
+    private void updateSecondaryLockscreenRequirement(int userId) {
+        Intent oldIntent = mSecondaryLockscreenRequirement.get(userId);
+        boolean enabled = mDevicePolicyManager.isSecondaryLockscreenEnabled(userId);
+        boolean changed = false;
+
+        if (enabled && (oldIntent == null)) {
+            ResolveInfo resolveInfo =
+                    mContext.getPackageManager().resolveService(
+                            new Intent(
+                                    DevicePolicyManager.ACTION_BIND_SECONDARY_LOCKSCREEN_SERVICE),
+                            0);
+            if (resolveInfo != null) {
+                Intent newIntent = new Intent();
+                newIntent.setComponent(resolveInfo.serviceInfo.getComponentName());
+                mSecondaryLockscreenRequirement.put(userId, newIntent);
+                changed = true;
+            }
+        } else if (!enabled && (oldIntent != null)) {
+            mSecondaryLockscreenRequirement.put(userId, null);
+            changed = true;
+        }
+        if (changed) {
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+                if (cb != null) {
+                    cb.onSecondaryLockscreenRequirementChanged(userId);
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns an Intent by which to bind to a service that will provide additional security screen
+     * content that must be shown prior to dismissing the keyguard for this user.
+     */
+    public Intent getSecondaryLockscreenRequirement(int userId) {
+        return mSecondaryLockscreenRequirement.get(userId);
+    }
+
     /**
      * Cached version of {@link TrustManager#isTrustUsuallyManaged(int)}.
      */
@@ -1048,7 +1089,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 // keep compatibility with apps that aren't direct boot aware.
                 // SysUI should just ignore this broadcast because it was already received
                 // and processed previously.
-                if (intent.getBooleanExtra(TelephonyIntents.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
+                if (intent.getBooleanExtra(Intent.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
                     // Guarantee mTelephonyCapable state after SysUI crash and restart
                     if (args.simState == TelephonyManager.SIM_STATE_ABSENT) {
                         mHandler.obtainMessage(MSG_TELEPHONY_CAPABLE, true).sendToTarget();
@@ -1113,7 +1154,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         getSendingUserId()));
             } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
                     .equals(action)) {
-                mHandler.sendEmptyMessage(MSG_DPM_STATE_CHANGED);
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_DPM_STATE_CHANGED,
+                        getSendingUserId()));
             } else if (ACTION_USER_UNLOCKED.equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_UNLOCKED,
                         getSendingUserId(), 0));
@@ -1530,7 +1572,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         handleDeviceProvisioned();
                         break;
                     case MSG_DPM_STATE_CHANGED:
-                        handleDevicePolicyManagerStateChanged();
+                        handleDevicePolicyManagerStateChanged(msg.arg1);
                         break;
                     case MSG_USER_SWITCHING:
                         handleUserSwitching(msg.arg1, (IRemoteCallback) msg.obj);
@@ -1706,6 +1748,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mUserIsUnlocked.put(user, mUserManager.isUserUnlocked(user));
         mDevicePolicyManager = context.getSystemService(DevicePolicyManager.class);
         mLogoutEnabled = mDevicePolicyManager.isLogoutEnabled();
+        updateSecondaryLockscreenRequirement(user);
         List<UserInfo> allUsers = mUserManager.getUsers();
         for (UserInfo userInfo : allUsers) {
             mUserTrustIsUsuallyManaged.put(userInfo.id,
@@ -2046,9 +2089,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     /**
      * Handle {@link #MSG_DPM_STATE_CHANGED}
      */
-    private void handleDevicePolicyManagerStateChanged() {
+    private void handleDevicePolicyManagerStateChanged(int userId) {
         checkIsHandlerThread();
         updateFingerprintListeningState();
+        updateSecondaryLockscreenRequirement(userId);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {

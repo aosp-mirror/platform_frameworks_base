@@ -46,11 +46,13 @@ import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
@@ -450,6 +452,16 @@ public class InputMethodService extends AbstractInputMethodService {
     @Nullable
     private InlineSuggestionsRequestInfo mInlineSuggestionsRequestInfo = null;
 
+    /**
+     * An opaque {@link Binder} token of window requesting {@link InputMethodImpl#showSoftInput}
+     * The original app window token is passed from client app window.
+     * {@link com.android.server.inputmethod.InputMethodManagerService} creates a unique dummy
+     * token to identify this window.
+     * This dummy token is only valid for a single call to {@link InputMethodImpl#showSoftInput},
+     * after which it is set null until next call.
+     */
+    private IBinder mCurShowInputToken;
+
     private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
 
     final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer = info -> {
@@ -491,6 +503,9 @@ public class InputMethodService extends AbstractInputMethodService {
      * all of the standard behavior for an input method.
      */
     public class InputMethodImpl extends AbstractInputMethodImpl {
+
+        private boolean mSystemCallingShowSoftInput;
+
         /**
          * {@inheritDoc}
          * @hide
@@ -659,11 +674,33 @@ public class InputMethodService extends AbstractInputMethodService {
 
         /**
          * {@inheritDoc}
+         * @hide
+         */
+        @MainThread
+        @Override
+        public void showSoftInputWithToken(int flags, ResultReceiver resultReceiver,
+                IBinder showInputToken) {
+            mSystemCallingShowSoftInput = true;
+            mCurShowInputToken = showInputToken;
+            showSoftInput(flags, resultReceiver);
+            mCurShowInputToken = null;
+            mSystemCallingShowSoftInput = false;
+        }
+
+        /**
+         * {@inheritDoc}
          */
         @MainThread
         @Override
         public void showSoftInput(int flags, ResultReceiver resultReceiver) {
             if (DEBUG) Log.v(TAG, "showSoftInput()");
+            // TODO(b/148086656): Disallow IME developers from calling InputMethodImpl methods.
+            if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R
+                    && !mSystemCallingShowSoftInput) {
+                Log.e(TAG," IME shouldn't call showSoftInput on itself."
+                        + " Use requestShowSelf(int) itself");
+                return;
+            }
             final boolean wasVisible = mIsPreRendered
                     ? mDecorViewVisible && mWindowVisible : isInputViewShown();
             if (dispatchOnShowInputRequested(flags, false)) {
@@ -697,6 +734,15 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public void changeInputMethodSubtype(InputMethodSubtype subtype) {
             dispatchOnCurrentInputMethodSubtypeChanged(subtype);
+        }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @Override
+        public void setCurrentShowInputToken(IBinder showInputToken) {
+            mCurShowInputToken = showInputToken;
         }
     }
 
@@ -2181,7 +2227,7 @@ public class InputMethodService extends AbstractInputMethodService {
         if (!isVisibilityAppliedUsingInsetsConsumer()) {
             return;
         }
-        mPrivOps.applyImeVisibility(setVisible);
+        mPrivOps.applyImeVisibility(mCurShowInputToken, setVisible);
     }
 
     private boolean isVisibilityAppliedUsingInsetsConsumer() {

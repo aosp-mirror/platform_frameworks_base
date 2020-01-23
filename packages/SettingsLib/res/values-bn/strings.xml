@@ -230,6 +230,8 @@
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ফিচার চালু করুন"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ব্লুটুথ AVRCP ভার্সন"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ব্লুটুথ AVRCP ভার্সন বেছে নিন"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"ব্লুটুথ MAP ভার্সন"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"ব্লুটুথ MAP ভার্সন বেছে নিন"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ব্লুটুথ অডিও কোডেক"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ব্লুটুথ অডিও কোডেক ট্রিগার করুন\nএটি বেছে নেওয়া আছে"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"ব্লুটুথ অডিওর নমুনা হার"</string>
@@ -276,7 +278,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ক্ষতিকারক ক্রিয়াকলাপ করছে কিনা তার জন্য ADB/ADT মারফত ইনস্টল করা অ্যাপ্লিকেশানগুলি চেক করুন।"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখানো হবে (শুধুমাত্র MAC অ্যাড্রেস)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"অপ্রত্যাশিত উচ্চ ভলিউম বা নিয়ন্ত্রণের অভাবের মত দূরবর্তী ডিভাইসের ভলিউম সমস্যাগুলির ক্ষেত্রে, ব্লুটুথ চুড়ান্ত ভলিউম বৈশিষ্ট্য অক্ষম করে৷"</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"ব্লুটুথ Gabeldorche ফিচার স্ট্যাক চালু করা হয়েছে।"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ব্লুটুথ Gabeldorche ফিচার স্ট্যাক চালু করে।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"স্থানীয় টার্মিনাল"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"স্থানীয় শেল অ্যাক্সেসের প্রস্তাব করে এমন টার্মিনাল অ্যাপ্লিকেশন সক্ষম করুন"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP পরীক্ষণ"</string>

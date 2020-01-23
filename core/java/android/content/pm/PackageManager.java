@@ -50,6 +50,7 @@ import android.content.pm.dex.ArtManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -229,7 +230,7 @@ public abstract class PackageManager {
             MATCH_ALL,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ModuleInfoFlags {}
+    public @interface InstalledModulesFlags {}
 
     /** @hide */
     @IntDef(flag = true, prefix = { "GET_", "MATCH_" }, value = {
@@ -579,6 +580,22 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int ONLY_IF_NO_MATCH_FOUND = 0x00000004;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "MODULE_" }, value = {
+            MODULE_APEX_NAME,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ModuleInfoFlags {}
+
+    /**
+     * Flag for {@link #getModuleInfo}: allow ModuleInfo to be retrieved using the apex module
+     * name, rather than the package name.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MODULE_APEX_NAME = 0x00000001;
 
     /** @hide */
     @IntDef(prefix = { "PERMISSION_" }, value = {
@@ -1947,6 +1964,13 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CONSUMER_IR = "android.hardware.consumerir";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports a Context Hub.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CONTEXTHUB = "android.hardware.context_hub";
 
     /** {@hide} */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -3921,7 +3945,7 @@ public abstract class PackageManager {
      *         there are no installed modules, an empty list is returned.
      */
     @NonNull
-    public List<ModuleInfo> getInstalledModules(@ModuleInfoFlags int flags) {
+    public List<ModuleInfo> getInstalledModules(@InstalledModulesFlags int flags) {
         throw new UnsupportedOperationException(
                 "getInstalledModules not implemented in subclass");
     }
@@ -4386,14 +4410,17 @@ public abstract class PackageManager {
     public abstract boolean shouldShowRequestPermissionRationale(@NonNull String permName);
 
     /**
-     * Gets the string that is displayed on the button which corresponds to granting background
-     * location in settings. The intended use for this is to help apps instruct users how to
-     * grant a background permission by providing the string that users will see.
+     * Gets the localized label that corresponds to the option in settings for granting
+     * background access.
      *
-     * @return the string shown on the button for granting background location
+     * <p>The intended use is for apps to reference this label in its instruction for users to grant
+     * a background permission.
+     *
+     * @return the localized label that corresponds to the settings option for granting
+     * background access
      */
     @NonNull
-    public CharSequence getBackgroundPermissionButtonLabel() {
+    public CharSequence getBackgroundPermissionOptionLabel() {
         return "";
     }
 
@@ -7612,4 +7639,19 @@ public abstract class PackageManager {
             "sendDeviceCustomizationReadyBroadcast not implemented in subclass");
     }
 
+    /**
+     * Returns if the provided drawable represents the default activity icon provided by the system.
+     *
+     * PackageManager provides a default icon for any package/activity if the app itself does not
+     * define one or if the system encountered any error when loading the icon.
+     *
+     * @return true if the drawable represents the default activity icon, false otherwise
+     * @see #getDefaultActivityIcon()
+     */
+    public boolean isDefaultApplicationIcon(@NonNull Drawable drawable) {
+        int resId = drawable instanceof AdaptiveIconDrawable
+                ? ((AdaptiveIconDrawable) drawable).getSourceDrawableResId() : Resources.ID_NULL;
+        return resId == com.android.internal.R.drawable.sym_def_app_icon
+                || resId == com.android.internal.R.drawable.sym_app_on_sd_unavailable_icon;
+    }
 }

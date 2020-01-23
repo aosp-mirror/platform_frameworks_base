@@ -760,17 +760,12 @@ class MediaRouter2ServiceImpl {
             Slog.w(TAG, "selectClientRouteLocked: Ignoring unknown manager.");
             return;
         }
-        //TODO: we shouldn't ignore selecting request for unknown clients. (RCN?)
         Client2Record clientRecord = managerRecord.mUserRecord.mHandler
                 .findClientforSessionLocked(sessionId);
-        if (clientRecord == null) {
-            Slog.w(TAG, "selectClientRouteLocked: Ignoring unknown session.");
-            return;
-        }
 
-        clientRecord.mUserRecord.mHandler.sendMessage(
+        managerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::selectRouteOnHandler,
-                            clientRecord.mUserRecord.mHandler,
+                            managerRecord.mUserRecord.mHandler,
                             clientRecord, sessionId, route));
     }
 
@@ -783,17 +778,12 @@ class MediaRouter2ServiceImpl {
             Slog.w(TAG, "deselectClientRouteLocked: Ignoring unknown manager.");
             return;
         }
-        //TODO: we shouldn't ignore selecting request for unknown clients. (RCN?)
         Client2Record clientRecord = managerRecord.mUserRecord.mHandler
                 .findClientforSessionLocked(sessionId);
-        if (clientRecord == null) {
-            Slog.w(TAG, "deslectClientRouteLocked: Ignoring unknown session.");
-            return;
-        }
 
-        clientRecord.mUserRecord.mHandler.sendMessage(
+        managerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::deselectRouteOnHandler,
-                        clientRecord.mUserRecord.mHandler,
+                        managerRecord.mUserRecord.mHandler,
                         clientRecord, sessionId, route));
     }
 
@@ -806,17 +796,12 @@ class MediaRouter2ServiceImpl {
             Slog.w(TAG, "transferClientRouteLocked: Ignoring unknown manager.");
             return;
         }
-        //TODO: we shouldn't ignore selecting request for unknown clients. (RCN?)
         Client2Record clientRecord = managerRecord.mUserRecord.mHandler
                 .findClientforSessionLocked(sessionId);
-        if (clientRecord == null) {
-            Slog.w(TAG, "transferClientRouteLocked: Ignoring unknown session.");
-            return;
-        }
 
-        clientRecord.mUserRecord.mHandler.sendMessage(
+        managerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::transferToRouteOnHandler,
-                        clientRecord.mUserRecord.mHandler,
+                        managerRecord.mUserRecord.mHandler,
                         clientRecord, sessionId, route));
     }
 
@@ -1166,7 +1151,7 @@ class MediaRouter2ServiceImpl {
                     requestId, sessionHints);
         }
 
-        private void selectRouteOnHandler(@NonNull Client2Record clientRecord,
+        private void selectRouteOnHandler(@Nullable Client2Record clientRecord,
                 String uniqueSessionId, MediaRoute2Info route) {
             if (!checkArgumentsForSessionControl(clientRecord, uniqueSessionId, route,
                     "selecting")) {
@@ -1182,7 +1167,7 @@ class MediaRouter2ServiceImpl {
             provider.selectRoute(getOriginalId(uniqueSessionId), route.getOriginalId());
         }
 
-        private void deselectRouteOnHandler(@NonNull Client2Record clientRecord,
+        private void deselectRouteOnHandler(@Nullable Client2Record clientRecord,
                 String uniqueSessionId, MediaRoute2Info route) {
             if (!checkArgumentsForSessionControl(clientRecord, uniqueSessionId, route,
                     "deselecting")) {
@@ -1198,7 +1183,7 @@ class MediaRouter2ServiceImpl {
             provider.deselectRoute(getOriginalId(uniqueSessionId), route.getOriginalId());
         }
 
-        private void transferToRouteOnHandler(@NonNull Client2Record clientRecord,
+        private void transferToRouteOnHandler(Client2Record clientRecord,
                 String uniqueSessionId, MediaRoute2Info route) {
             if (!checkArgumentsForSessionControl(clientRecord, uniqueSessionId, route,
                     "transferring to")) {
@@ -1215,7 +1200,7 @@ class MediaRouter2ServiceImpl {
                     route.getOriginalId());
         }
 
-        private boolean checkArgumentsForSessionControl(@NonNull Client2Record clientRecord,
+        private boolean checkArgumentsForSessionControl(@Nullable Client2Record clientRecord,
                 String uniqueSessionId, MediaRoute2Info route, @NonNull String description) {
             if (route == null) {
                 Slog.w(TAG, "Ignoring " + description + " null route");
@@ -1233,6 +1218,17 @@ class MediaRouter2ServiceImpl {
             if (TextUtils.isEmpty(uniqueSessionId)) {
                 Slog.w(TAG, "Ignoring " + description + " route with empty unique session ID. "
                         + "route=" + route);
+                return false;
+            }
+
+            // Bypass checking client if it's the system session (clientRecord should be null)
+            if (TextUtils.equals(getProviderId(uniqueSessionId), mSystemProvider.getUniqueId())) {
+                return true;
+            }
+
+            //TODO: Handle RCN case.
+            if (clientRecord == null) {
+                Slog.w(TAG, "Ignoring " + description + " route from unknown client.");
                 return false;
             }
 

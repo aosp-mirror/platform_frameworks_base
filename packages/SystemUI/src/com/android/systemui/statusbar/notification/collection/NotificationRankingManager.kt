@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection
 
-import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.NotificationManager.IMPORTANCE_MIN
 import android.service.notification.NotificationListenerService.Ranking
@@ -192,9 +191,7 @@ open class NotificationRankingManager @Inject constructor(
     }
 
     private fun NotificationEntry.isPeopleNotification() =
-            sbn.isPeopleNotification(channel)
-    private fun StatusBarNotification.isPeopleNotification(channel: NotificationChannel) =
-            peopleNotificationIdentifier.isPeopleNotification(this, channel)
+            peopleNotificationIdentifier.isPeopleNotification(sbn, ranking)
 
     private fun NotificationEntry.isHighPriority() =
             highPriorityProvider.isHighPriority(this)

@@ -18,12 +18,14 @@
 
 #include <android/asset_manager.h>
 #include <android/bitmap.h>
+#include <android/data_space.h>
 #include <android/imagedecoder.h>
 #include <android/graphics/MimeType.h>
 #include <android/rect.h>
 #include <hwui/ImageDecoder.h>
 #include <log/log.h>
 #include <SkAndroidCodec.h>
+#include <utils/Color.h>
 
 #include <fcntl.h>
 #include <optional>
@@ -131,6 +133,10 @@ static ImageDecoder* toDecoder(AImageDecoder* d) {
     return reinterpret_cast<ImageDecoder*>(d);
 }
 
+static const ImageDecoder* toDecoder(const AImageDecoder* d) {
+    return reinterpret_cast<const ImageDecoder*>(d);
+}
+
 // Note: This differs from the version in android_bitmap.cpp in that this
 // version returns kGray_8_SkColorType for ANDROID_BITMAP_FORMAT_A_8. SkCodec
 // allows decoding single channel images to gray, which Android then treats
@@ -159,6 +165,18 @@ int AImageDecoder_setAndroidBitmapFormat(AImageDecoder* decoder, int32_t format)
     }
     return toDecoder(decoder)->setOutColorType(getColorType((AndroidBitmapFormat) format))
             ? ANDROID_IMAGE_DECODER_SUCCESS : ANDROID_IMAGE_DECODER_INVALID_CONVERSION;
+}
+
+int AImageDecoder_setDataSpace(AImageDecoder* decoder, int32_t dataspace) {
+    sk_sp<SkColorSpace> cs = uirenderer::DataSpaceToColorSpace((android_dataspace)dataspace);
+    // 0 is ADATASPACE_UNKNOWN. We need an explicit request for an ADataSpace.
+    if (!decoder || !dataspace || !cs) {
+        return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
+    }
+
+    ImageDecoder* imageDecoder = toDecoder(decoder);
+    imageDecoder->setOutColorSpace(std::move(cs));
+    return ANDROID_IMAGE_DECODER_SUCCESS;
 }
 
 const AImageDecoderHeaderInfo* AImageDecoder_getHeaderInfo(const AImageDecoder* decoder) {
@@ -195,6 +213,20 @@ bool AImageDecoderHeaderInfo_isAnimated(const AImageDecoderHeaderInfo* info) {
         return false;
     }
     return toDecoder(info)->mCodec->codec()->getFrameCount() > 1;
+}
+
+int32_t AImageDecoderHeaderInfo_getDataSpace(const AImageDecoderHeaderInfo* info) {
+    if (!info) {
+        return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
+    }
+
+    // Note: This recomputes the data space because it's possible the client has
+    // changed the output color space, so we cannot rely on it. Alternatively,
+    // we could store the ADataSpace in the ImageDecoder.
+    const ImageDecoder* imageDecoder = toDecoder(info);
+    SkColorType colorType = imageDecoder->mCodec->computeOutputColorType(kN32_SkColorType);
+    sk_sp<SkColorSpace> colorSpace = imageDecoder->mCodec->computeOutputColorSpace(colorType);
+    return uirenderer::ColorSpaceToADataSpace(colorSpace.get(), colorType);
 }
 
 // FIXME: Share with getFormat in android_bitmap.cpp?
@@ -256,6 +288,18 @@ int AImageDecoder_setTargetSize(AImageDecoder* decoder, int width, int height) {
 
     return toDecoder(decoder)->setTargetSize(width, height)
             ? ANDROID_IMAGE_DECODER_SUCCESS : ANDROID_IMAGE_DECODER_INVALID_SCALE;
+}
+
+int AImageDecoder_computeSampledSize(const AImageDecoder* decoder, int sampleSize,
+                                     int* width, int* height) {
+    if (!decoder || !width || !height || sampleSize < 1) {
+        return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
+    }
+
+    SkISize size = toDecoder(decoder)->mCodec->getSampledDimensions(sampleSize);
+    *width = size.width();
+    *height = size.height();
+    return ANDROID_IMAGE_DECODER_SUCCESS;
 }
 
 int AImageDecoder_setCrop(AImageDecoder* decoder, ARect crop) {

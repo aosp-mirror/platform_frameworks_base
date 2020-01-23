@@ -30,6 +30,7 @@ import android.os.Trace;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.Spline;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayCutout;
@@ -37,6 +38,7 @@ import android.view.DisplayEventReceiver;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.lights.Light;
@@ -187,8 +189,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private boolean mGameContentTypeRequested;
         private boolean mSidekickActive;
         private SidekickInternal mSidekickInternal;
-
         private SurfaceControl.PhysicalDisplayInfo[] mDisplayInfos;
+        private Spline mSystemBrightnessToNits;
+        private Spline mNitsToHalBrightness;
+        private boolean mHalBrightnessSupport;
 
         LocalDisplayDevice(IBinder displayToken, long physicalDisplayId,
                 SurfaceControl.PhysicalDisplayInfo[] physicalDisplayInfos, int activeDisplayInfo,
@@ -210,6 +214,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mHdrCapabilities = SurfaceControl.getHdrCapabilities(displayToken);
             mAllmSupported = SurfaceControl.getAutoLowLatencyModeSupport(displayToken);
             mGameContentTypeSupported = SurfaceControl.getGameContentTypeSupport(displayToken);
+            mHalBrightnessSupport = SurfaceControl.getDisplayBrightnessSupport(displayToken);
+
+            // Defer configuration file loading
+            BackgroundThread.getHandler().sendMessage(PooledLambda.obtainMessage(
+                    LocalDisplayDevice::loadDisplayConfigurationBrightnessMapping, this));
         }
 
         @Override
@@ -336,6 +345,41 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             // Schedule traversals so that we apply pending changes.
             sendTraversalRequestLocked();
             return true;
+        }
+
+        private void loadDisplayConfigurationBrightnessMapping() {
+            Spline nitsToHal = null;
+            Spline sysToNits = null;
+
+            // Load the mapping from nits to HAL brightness range (display-device-config.xml)
+            DisplayDeviceConfig config = DisplayDeviceConfig.create(mPhysicalDisplayId);
+            if (config == null) {
+                return;
+            }
+            final float[] halNits = config.getNits();
+            final float[] halBrightness = config.getBrightness();
+            if (halNits == null || halBrightness == null) {
+                return;
+            }
+            nitsToHal = Spline.createSpline(halNits, halBrightness);
+
+            // Load the mapping from system brightness range to nits (config.xml)
+            final Resources res = getOverlayContext().getResources();
+            final float[] sysNits = BrightnessMappingStrategy.getFloatArray(res.obtainTypedArray(
+                            com.android.internal.R.array.config_screenBrightnessNits));
+            final int[] sysBrightness = res.getIntArray(
+                    com.android.internal.R.array.config_screenBrightnessBacklight);
+            if (sysNits.length == 0 || sysBrightness.length != sysNits.length) {
+                return;
+            }
+            final float[] sysBrightnessFloat = new float[sysBrightness.length];
+            for (int i = 0; i < sysBrightness.length; i++) {
+                sysBrightnessFloat[i] = sysBrightness[i];
+            }
+            sysToNits = Spline.createSpline(sysBrightnessFloat, sysNits);
+
+            mNitsToHalBrightness = nitsToHal;
+            mSystemBrightnessToNits = sysToNits;
         }
 
         private boolean updateColorModesLocked(int[] colorModes,
@@ -628,12 +672,36 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         Trace.traceBegin(Trace.TRACE_TAG_POWER, "setDisplayBrightness("
                                 + "id=" + physicalDisplayId + ", brightness=" + brightness + ")");
                         try {
-                            mBacklight.setBrightness(brightness);
+                            if (mHalBrightnessSupport) {
+                                mBacklight.setBrightnessFloat(
+                                        displayBrightnessToHalBrightness(brightness));
+                            } else {
+                                mBacklight.setBrightness(brightness);
+                            }
                             Trace.traceCounter(Trace.TRACE_TAG_POWER,
                                     "ScreenBrightness", brightness);
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }
+                    }
+
+                    /**
+                     * Converts brightness range from the framework's brightness space to the
+                     * Hal brightness space if the HAL brightness space has been provided via
+                     * a display device configuration file.
+                     */
+                    private float displayBrightnessToHalBrightness(int brightness) {
+                        if (mSystemBrightnessToNits == null || mNitsToHalBrightness == null) {
+                            return PowerManager.BRIGHTNESS_INVALID_FLOAT;
+                        }
+
+                        if (brightness == 0) {
+                            return PowerManager.BRIGHTNESS_OFF_FLOAT;
+                        }
+
+                        final float nits = mSystemBrightnessToNits.interpolate(brightness);
+                        final float halBrightness = mNitsToHalBrightness.interpolate(nits);
+                        return halBrightness;
                     }
                 };
             }

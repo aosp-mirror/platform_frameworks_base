@@ -246,7 +246,7 @@ public class MediaRouterManagerTest {
             }
         });
 
-        assertEquals(0, mManager.getRoutingControllers(mPackageName).size());
+        assertEquals(1, mManager.getRoutingControllers(mPackageName).size());
 
         mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1));
         latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
@@ -254,14 +254,14 @@ public class MediaRouterManagerTest {
         List<MediaRouter2Manager.RoutingController> controllers =
                 mManager.getRoutingControllers(mPackageName);
 
-        assertEquals(1, controllers.size());
+        assertEquals(2, controllers.size());
 
-        MediaRouter2Manager.RoutingController routingController = controllers.get(0);
+        MediaRouter2Manager.RoutingController routingController = controllers.get(1);
         awaitOnRouteChangedManager(
                 () -> routingController.release(),
                 ROUTE_ID1,
                 route -> TextUtils.equals(route.getClientPackageName(), null));
-        assertEquals(0, mManager.getRoutingControllers(mPackageName).size());
+        assertEquals(1, mManager.getRoutingControllers(mPackageName).size());
     }
 
     /**
@@ -290,8 +290,8 @@ public class MediaRouterManagerTest {
         List<MediaRouter2Manager.RoutingController> controllers =
                 mManager.getRoutingControllers(mPackageName);
 
-        assertEquals(1, controllers.size());
-        MediaRouter2Manager.RoutingController routingController = controllers.get(0);
+        assertEquals(2, controllers.size());
+        MediaRouter2Manager.RoutingController routingController = controllers.get(1);
 
         awaitOnRouteChangedManager(
                 () -> mManager.selectRoute(mPackageName, routes.get(ROUTE_ID5_TO_TRANSFER_TO)),

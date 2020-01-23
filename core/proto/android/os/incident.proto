@@ -56,6 +56,7 @@ import "frameworks/base/core/proto/android/util/event_log_tags.proto";
 import "frameworks/base/core/proto/android/util/log.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/section.proto";
+import "frameworks/base/proto/src/ipconnectivity.proto";
 
 package android.os;
 
@@ -478,6 +479,11 @@ message IncidentProto {
     optional CpuUsageProto process_cpu_usage = 3047 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "cpuinfo --proto"
+    ];
+
+    optional .clearcut.connectivity.IpConnectivityLog ip_connectivity_metrics = 3049 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "connmetrics --proto"
     ];
 
     // Reserved for OEMs.

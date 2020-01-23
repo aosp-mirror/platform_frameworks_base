@@ -758,6 +758,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final WeakHashMap<IBinder, IBinder> mImeTargetWindowMap = new WeakHashMap<>();
 
     /**
+     * Map of generated token to windowToken that is requesting
+     * {@link InputMethodManager#showSoftInput(View, int)}.
+     * This map tracks origin of showSoftInput requests.
+     */
+    @GuardedBy("mMethodMap")
+    private final WeakHashMap<IBinder, IBinder> mShowRequestWindowMap = new WeakHashMap<>();
+
+    /**
      * A ring buffer to store the history of {@link StartInputInfo}.
      */
     private static final class StartInputHistory {
@@ -974,7 +982,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         hideCurrentInputLocked(0, null);
                         mShowRequested = showRequested;
                     } else if (mShowRequested) {
-                        showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
+                        showCurrentInputLocked(
+                                mCurFocusedWindow, InputMethodManager.SHOW_IMPLICIT, null);
                     }
                 } else {
                     boolean enabledChanged = false;
@@ -2075,7 +2084,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 startInputToken, session, mCurInputContext, mCurAttribute));
         if (mShowRequested) {
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
-            showCurrentInputLocked(getAppShowFlags(), null);
+            showCurrentInputLocked(mCurFocusedWindow, getAppShowFlags(), null);
         }
         return new InputBindResult(InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,
                 session.session, (session.channel != null ? session.channel.dup() : null),
@@ -2789,7 +2798,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public boolean showSoftInput(IInputMethodClient client, int flags,
+    public boolean showSoftInput(IInputMethodClient client, IBinder windowToken, int flags,
             ResultReceiver resultReceiver) {
         int uid = Binder.getCallingUid();
         synchronized (mMethodMap) {
@@ -2814,7 +2823,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }
                 if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
-                return showCurrentInputLocked(flags, resultReceiver);
+                return showCurrentInputLocked(windowToken, flags, resultReceiver);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2822,7 +2831,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("mMethodMap")
-    boolean showCurrentInputLocked(int flags, ResultReceiver resultReceiver) {
+    boolean showCurrentInputLocked(IBinder windowToken, int flags, ResultReceiver resultReceiver) {
         mShowRequested = true;
         if (mAccessibilityRequestingNoSoftKeyboard) {
             return false;
@@ -2842,9 +2851,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         boolean res = false;
         if (mCurMethod != null) {
             if (DEBUG) Slog.d(TAG, "showCurrentInputLocked: mCurToken=" + mCurToken);
-            executeOrSendMessage(mCurMethod, mCaller.obtainMessageIOO(
+            // create a dummy token for IMS so that IMS cannot inject windows into client app.
+            Binder showInputToken = new Binder();
+            mShowRequestWindowMap.put(showInputToken, windowToken);
+            executeOrSendMessage(mCurMethod, mCaller.obtainMessageIOOO(
                     MSG_SHOW_SOFT_INPUT, getImeShowFlags(), mCurMethod,
-                    resultReceiver));
+                    resultReceiver, showInputToken));
             mInputShown = true;
             if (mHaveConnection && !mVisibleBound) {
                 bindCurrentInputMethodServiceLocked(
@@ -3145,7 +3157,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 attribute, startInputFlags, startInputReason);
                         didStart = true;
                     }
-                    showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
+                    showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null);
                 }
                 break;
             case LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
@@ -3171,7 +3183,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                     attribute, startInputFlags, startInputReason);
                             didStart = true;
                         }
-                        showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
+                        showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null);
                     } else {
                         Slog.e(TAG, "SOFT_INPUT_STATE_VISIBLE is ignored because"
                                 + " there is no focused view that also returns true from"
@@ -3188,7 +3200,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 attribute, startInputFlags, startInputReason);
                         didStart = true;
                     }
-                    showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
+                    showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null);
                 } else {
                     Slog.e(TAG, "SOFT_INPUT_STATE_ALWAYS_VISIBLE is ignored because"
                             + " there is no focused view that also returns true from"
@@ -3627,7 +3639,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void applyImeVisibility(IBinder token, boolean setVisible) {
+    private void applyImeVisibility(IBinder token, IBinder windowToken, boolean setVisible) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -3644,7 +3656,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             } else {
                 // Send to window manager to show IME after IME layout finishes.
-                mWindowManagerInternal.showImePostLayout(mLastImeTargetWindow);
+                mWindowManagerInternal.showImePostLayout(mShowRequestWindowMap.get(windowToken));
             }
         }
     }
@@ -3695,7 +3707,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             long ident = Binder.clearCallingIdentity();
             try {
-                showCurrentInputLocked(flags, null);
+                showCurrentInputLocked(mLastImeTargetWindow, flags, null);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -3780,7 +3792,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 try {
                     if (DEBUG) Slog.v(TAG, "Calling " + args.arg1 + ".showSoftInput("
                             + msg.arg1 + ", " + args.arg2 + ")");
-                    ((IInputMethod)args.arg1).showSoftInput(msg.arg1, (ResultReceiver)args.arg2);
+                    ((IInputMethod) args.arg1).showSoftInput(
+                            (IBinder) args.arg3, msg.arg1, (ResultReceiver) args.arg2);
                 } catch (RemoteException e) {
                 }
                 args.recycle();
@@ -5346,8 +5359,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void applyImeVisibility(boolean setVisible) {
-            mImms.applyImeVisibility(mToken, setVisible);
+        public void applyImeVisibility(IBinder windowToken, boolean setVisible) {
+            mImms.applyImeVisibility(mToken, windowToken, setVisible);
         }
     }
 }

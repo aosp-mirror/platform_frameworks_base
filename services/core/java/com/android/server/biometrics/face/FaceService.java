@@ -118,14 +118,16 @@ public class FaceService extends BiometricServiceBase {
         private int mError;
         // Only valid if mError is ERROR_VENDOR
         private int mVendorError;
+        private int mUser;
 
         AuthenticationEvent(long startTime, long latency, boolean authenticated, int error,
-                int vendorError) {
+                int vendorError, int user) {
             mStartTime = startTime;
             mLatency = latency;
             mAuthenticated = authenticated;
             mError = error;
             mVendorError = vendorError;
+            mUser = user;
         }
 
         public String toString(Context context) {
@@ -134,6 +136,7 @@ public class FaceService extends BiometricServiceBase {
                     + "\tAuthenticated: " + mAuthenticated
                     + "\tError: " + mError
                     + "\tVendorCode: " + mVendorError
+                    + "\tUser: " + mUser
                     + "\t" + FaceManager.getErrorString(context, mError, mVendorError);
         }
     }
@@ -242,7 +245,8 @@ public class FaceService extends BiometricServiceBase {
                     System.currentTimeMillis() - getStartTimeMs() /* latency */,
                     authenticated,
                     0 /* error */,
-                    0 /* vendorError */));
+                    0 /* vendorError */,
+                    getTargetUserId()));
 
             // For face, the authentication lifecycle ends either when
             // 1) Authenticated == true
@@ -260,7 +264,8 @@ public class FaceService extends BiometricServiceBase {
                     System.currentTimeMillis() - getStartTimeMs() /* latency */,
                     false /* authenticated */,
                     error,
-                    vendorCode));
+                    vendorCode,
+                    getTargetUserId()));
 
             return super.onError(deviceId, error, vendorCode);
         }

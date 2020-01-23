@@ -34,8 +34,10 @@ import android.provider.Settings;
 import com.android.internal.R;
 import com.android.internal.util.UserIcons;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Class for handling cross profile operations. Apps can use this class to interact with its
@@ -88,6 +90,32 @@ public class CrossProfileApps {
                     component,
                     targetUser.getIdentifier(),
                     true);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Starts the specified activity of the caller package in the specified profile.
+     *
+     * <p>The caller must have the {@link android.Manifest.permission#INTERACT_ACROSS_PROFILES}
+     * permission and both the caller and target user profiles must be in the same profile group.
+     *
+     * @param intent The intent to launch. A component in the caller package must be specified.
+     * @param targetUser The {@link UserHandle} of the profile; must be one of the users returned by
+     *        {@link #getTargetUserProfiles()} if different to the calling user, otherwise a
+     *        {@link SecurityException} will be thrown.
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    public void startActivity(@NonNull Intent intent, @NonNull UserHandle targetUser) {
+        try {
+            mService.startActivityAsUserByIntent(
+                    mContext.getIApplicationThread(),
+                    mContext.getPackageName(),
+                    intent,
+                    targetUser.getIdentifier());
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -272,19 +300,24 @@ public class CrossProfileApps {
      * configurable by users in Settings. This configures it for the profile group of the calling
      * package.
      *
-     * <p>Before calling, check {@link #canRequestInteractAcrossProfiles()} and do not call if it is
-     * {@code false}. If presenting a user interface, do not allow the user to configure the app-op
-     * in that case.
+     * <p>Before calling, check {@link #canConfigureInteractAcrossProfiles(String)} and do not call
+     * if it is {@code false}. If presenting a user interface, do not allow the user to configure
+     * the app-op in that case.
      *
      * <p>The underlying app-op {@link android.app.AppOpsManager#OP_INTERACT_ACROSS_PROFILES} should
      * never be set directly. This method ensures that the app-op is kept in sync for the app across
      * each user in the profile group and that those apps are sent a broadcast when their ability to
      * interact across profiles changes.
      *
-     * <p>This method should be used whenever an app's ability to interact across profiles changes,
-     * as defined by the return value of {@link #canInteractAcrossProfiles()}. This includes user
-     * consent changes in Settings or during provisioning, plus changes to the admin or OEM consent
-     * whitelists that make the current app-op value invalid.
+     * <p>This method should be used directly whenever a user's action results in a change in an
+     * app's ability to interact across profiles, as defined by the return value of {@link
+     * #canInteractAcrossProfiles()}. This includes user consent changes in Settings or during
+     * provisioning.
+     *
+     * <p>If other changes could have affected the app's ability to interact across profiles, as
+     * defined by the return value of {@link #canInteractAcrossProfiles()}, such as changes to the
+     * admin or OEM consent whitelists, then {@link
+     * #resetInteractAcrossProfilesAppOpsIfInvalid(List)} should be used.
      *
      * @hide
      */
@@ -294,6 +327,58 @@ public class CrossProfileApps {
     public void setInteractAcrossProfilesAppOp(@NonNull String packageName, @Mode int newMode) {
         try {
             mService.setInteractAcrossProfilesAppOp(packageName, newMode);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether the given package can have its ability to interact across profiles configured
+     * by the user. This means that every other condition to interact across profiles has been set.
+     *
+     * <p>This differs from {@link #canRequestInteractAcrossProfiles()} since it will not return
+     * {@code false} simply when the target profile is disabled.
+     *
+     * @hide
+     */
+    public boolean canConfigureInteractAcrossProfiles(@NonNull String packageName) {
+        try {
+            return mService.canConfigureInteractAcrossProfiles(packageName);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * For each of the packages defined in {@code previousCrossProfilePackages} but not included in
+     * {@code newCrossProfilePackages}, resets the app-op for {@link android.Manifest.permission
+     * #INTERACT_ACROSS_PROFILES} back to its default value if it can no longer be configured by
+     * users in Settings, as defined by {@link #canConfigureInteractAcrossProfiles(String)}.
+     *
+     * <p>This method should be used whenever an app's ability to interact across profiles could
+     * have changed as a result of non-user actions, such as changes to admin or OEM consent
+     * whitelists.
+     *
+     * @hide
+     */
+    @RequiresPermission(
+            allOf={android.Manifest.permission.MANAGE_APP_OPS_MODES,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
+    public void resetInteractAcrossProfilesAppOps(
+            @NonNull Collection<String> previousCrossProfilePackages,
+            @NonNull Set<String> newCrossProfilePackages) {
+        if (previousCrossProfilePackages.isEmpty()) {
+            return;
+        }
+        final List<String> unsetCrossProfilePackages =
+                previousCrossProfilePackages.stream()
+                        .filter(packageName -> !newCrossProfilePackages.contains(packageName))
+                        .collect(Collectors.toList());
+        if (unsetCrossProfilePackages.isEmpty()) {
+            return;
+        }
+        try {
+            mService.resetInteractAcrossProfilesAppOps(unsetCrossProfilePackages);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

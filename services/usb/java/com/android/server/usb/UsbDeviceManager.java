@@ -161,6 +161,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
     private static final int MSG_GET_CURRENT_USB_FUNCTIONS = 16;
     private static final int MSG_FUNCTION_SWITCH_TIMEOUT = 17;
     private static final int MSG_GADGET_HAL_REGISTERED = 18;
+    private static final int MSG_RESET_USB_GADGET = 19;
 
     private static final int AUDIO_MODE_SOURCE = 1;
 
@@ -1846,6 +1847,23 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                         }
                     }
                     break;
+                case MSG_RESET_USB_GADGET:
+                    synchronized (mGadgetProxyLock) {
+                        if (mGadgetProxy == null) {
+                            Slog.e(TAG, "reset Usb Gadget mGadgetProxy is null");
+                            break;
+                        }
+
+                        try {
+                            android.hardware.usb.gadget.V1_1.IUsbGadget gadgetProxy =
+                                    android.hardware.usb.gadget.V1_1.IUsbGadget
+                                            .castFrom(mGadgetProxy);
+                            gadgetProxy.reset();
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "reset Usb Gadget failed", e);
+                        }
+                    }
+                    break;
                 default:
                     super.handleMessage(msg);
             }
@@ -2052,6 +2070,17 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     + UsbManager.usbFunctionsToString(functions) + ")");
         }
         mHandler.sendMessage(MSG_SET_SCREEN_UNLOCKED_FUNCTIONS, functions);
+    }
+
+    /**
+     * Resets the USB Gadget.
+     */
+    public void resetUsbGadget() {
+        if (DEBUG) {
+            Slog.d(TAG, "reset Usb Gadget");
+        }
+
+        mHandler.sendMessage(MSG_RESET_USB_GADGET, null);
     }
 
     private void onAdbEnabled(boolean enabled) {

@@ -259,11 +259,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         // atomic install which needs to query sessions, which requires lock on mSessions.
         boolean isDeviceUpgrading = mPm.isDeviceUpgrading();
         for (PackageInstallerSession session : stagedSessionsToRestore) {
-            if (isDeviceUpgrading && !session.isStagedAndInTerminalState()) {
+            if (!session.isStagedAndInTerminalState() && session.hasParentSessionId()
+                    && getSession(session.getParentSessionId()) == null) {
                 session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                        "Build fingerprint has changed");
+                        "An orphan staged session " + session.sessionId + " is found, "
+                                + "parent " + session.getParentSessionId() + " is missing");
             }
-            mStagingManager.restoreSession(session);
+            mStagingManager.restoreSession(session, isDeviceUpgrading);
         }
         // Broadcasts are not sent while we restore sessions on boot, since no processes would be
         // ready to listen to them. From now on, we greedily assume that broadcasts requests are
@@ -400,10 +402,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         } finally {
             IoUtils.closeQuietly(fis);
         }
-        // Re-sealing the sealed sessions.
+        // After all of the sessions were loaded, they are ready to be sealed and validated
         for (int i = 0; i < mSessions.size(); ++i) {
             PackageInstallerSession session = mSessions.valueAt(i);
-            session.sealIfNecessary();
+            session.sealAndValidateIfNecessary();
         }
     }
 

@@ -277,6 +277,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     DeviceIdleInternal mLocalDeviceIdleController;
     AppStateTracker mAppStateTracker;
     final UsageStatsManagerInternal mUsageStats;
+    private final AppStandbyInternal mAppStandbyInternal;
 
     /**
      * Set to true once we are allowed to run third party apps.
@@ -1062,7 +1063,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     packageName == null ? job.getService().getPackageName() : packageName;
             if (!mQuotaTracker.isWithinQuota(userId, pkg, QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG)) {
                 Slog.e(TAG, userId + "-" + pkg + " has called schedule() too many times");
-                // TODO(b/145551233): attempt to restrict app
+                mAppStandbyInternal.restrictApp(
+                        pkg, userId, UsageStatsManager.REASON_SUB_RESTRICT_BUGGY);
                 if (mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION
                         && mPlatformCompat.isChangeEnabledByPackageName(
                                 CRASH_ON_EXCEEDED_LIMIT, pkg, userId)) {
@@ -1430,8 +1432,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mConstants.API_QUOTA_SCHEDULE_COUNT,
                 mConstants.API_QUOTA_SCHEDULE_WINDOW_MS);
 
-        AppStandbyInternal appStandby = LocalServices.getService(AppStandbyInternal.class);
-        appStandby.addListener(mStandbyTracker);
+        mAppStandbyInternal = LocalServices.getService(AppStandbyInternal.class);
+        mAppStandbyInternal.addListener(mStandbyTracker);
 
         // The job store needs to call back
         publishLocalService(JobSchedulerInternal.class, new LocalService());

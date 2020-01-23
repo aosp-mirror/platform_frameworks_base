@@ -59,12 +59,12 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.ImeFocusController;
 import android.view.ImeInsetsSourceConsumer;
 import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventSender;
 import android.view.KeyEvent;
-import android.view.ImeFocusController;
 import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
@@ -562,14 +562,23 @@ public final class InputMethodManager {
         public boolean startInput(@StartInputReason int startInputReason, View focusedView,
                 @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
                 int windowFlags) {
+            final View servedView;
             synchronized (mH) {
                 mCurrentTextBoxAttribute = null;
                 mCompletions = null;
                 mServedConnecting = true;
-                if (getServedViewLocked() != null && !getServedViewLocked().onCheckIsTextEditor()) {
-                    // servedView has changed and it's not editable.
-                    maybeCallServedViewChangedLocked(null);
-                }
+                servedView = getServedViewLocked();
+            }
+            if (servedView != null && servedView.getHandler() != null) {
+                // Make sure View checks should be on the UI thread.
+                servedView.getHandler().post(() -> {
+                    if (!servedView.onCheckIsTextEditor()) {
+                        // servedView has changed and it's not editable.
+                        synchronized (mH) {
+                            maybeCallServedViewChangedLocked(null);
+                        }
+                    }
+                });
             }
             return startInputInner(startInputReason,
                     focusedView != null ? focusedView.getWindowToken() : null, startInputFlags,
@@ -607,21 +616,22 @@ public final class InputMethodManager {
                 mWindowFocusGainFuture.cancel(false /* mayInterruptIfRunning */);
             }
             mWindowFocusGainFuture = mStartInputWorker.submit(() -> {
-                synchronized (mH) {
-                    if (mCurRootView == null) {
+                final ImeFocusController controller = getFocusController();
+                if (controller == null) {
+                    return;
+                }
+                if (controller.checkFocus(forceNewFocus1, false)) {
+                    // We need to restart input on the current focus view.  This
+                    // should be done in conjunction with telling the system service
+                    // about the window gaining focus, to help make the transition
+                    // smooth.
+                    if (startInput(StartInputReason.WINDOW_FOCUS_GAIN,
+                            focusedView, startInputFlags, softInputMode, windowFlags)) {
                         return;
                     }
-                    if (mCurRootView.getImeFocusController().checkFocus(forceNewFocus1, false)) {
-                        // We need to restart input on the current focus view.  This
-                        // should be done in conjunction with telling the system service
-                        // about the window gaining focus, to help make the transition
-                        // smooth.
-                        if (startInput(StartInputReason.WINDOW_FOCUS_GAIN,
-                                focusedView, startInputFlags, softInputMode, windowFlags)) {
-                            return;
-                        }
-                    }
+                }
 
+                synchronized (mH) {
                     // For some reason we didn't do a startInput + windowFocusGain, so
                     // we'll just do a window focus gain and call it a day.
                     try {
@@ -713,6 +723,15 @@ public final class InputMethodManager {
     private void setNextServedViewLocked(View view) {
         if (mCurRootView != null) {
             mCurRootView.getImeFocusController().setNextServedView(view);
+        }
+    }
+
+    private ImeFocusController getFocusController() {
+        synchronized (mH) {
+            if (mCurRootView != null) {
+                return mCurRootView.getImeFocusController();
+            }
+            return null;
         }
     }
 
@@ -1617,7 +1636,8 @@ public final class InputMethodManager {
             }
 
             try {
-                return mService.showSoftInput(mClient, flags, resultReceiver);
+                return mService.showSoftInput(
+                        mClient, view.getWindowToken(), flags, resultReceiver);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1639,7 +1659,8 @@ public final class InputMethodManager {
             Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be removed "
                     + "soon. If you are using android.support.v7.widget.SearchView, please update "
                     + "to version 26.0 or newer version.");
-            mService.showSoftInput(mClient, flags, resultReceiver);
+            mService.showSoftInput(
+                    mClient, mCurRootView.getView().getWindowToken(), flags, resultReceiver);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1793,6 +1814,12 @@ public final class InputMethodManager {
         startInputInner(StartInputReason.APP_CALLED_RESTART_INPUT_API, null, 0, 0, 0);
     }
 
+    /**
+     * Called when {@link DelegateImpl#startInput}, {@link #restartInput(View)},
+     * {@link #MSG_BIND} or {@link #MSG_UNBIND}.
+     * Note that this method should *NOT* be called inside of {@code mH} lock to prevent start input
+     * background thread may blocked by other methods which already inside {@code mH} lock.
+     */
     boolean startInputInner(@StartInputReason int startInputReason,
             @Nullable IBinder windowGainingFocus, @StartInputFlags int startInputFlags,
             @SoftInputModeFlags int softInputMode, int windowFlags) {
@@ -1976,15 +2003,16 @@ public final class InputMethodManager {
     }
 
     /**
+     * Check the next served view from {@link ImeFocusController} if needs to start input.
+     * Note that this method should *NOT* be called inside of {@code mH} lock to prevent start input
+     * background thread may blocked by other methods which already inside {@code mH} lock.
      * @hide
      */
     @UnsupportedAppUsage
     public void checkFocus() {
-        synchronized (mH) {
-            if (mCurRootView != null) {
-                mCurRootView.getImeFocusController().checkFocus(false /* forceNewFocus */,
-                        true /* startInput */);
-            }
+        final ImeFocusController controller = getFocusController();
+        if (controller != null) {
+            controller.checkFocus(false /* forceNewFocus */, true /* startInput */);
         }
     }
 

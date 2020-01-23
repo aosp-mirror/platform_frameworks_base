@@ -230,6 +230,8 @@
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"បើក Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"កំណែប្ល៊ូធូស AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ជ្រើសរើសកំណែប្ល៊ូធូស AVRCP"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"កំណែ​ប៊្លូធូស MAP"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"ជ្រើសរើស​កំណែ​ប្ល៊ូធូស MAP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"កូឌិក​សំឡេង​ប៊្លូធូស"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ជំរុញ​ការជ្រើសរើស​កូឌិក​សំឡេង​\n​ប៊្លូធូស"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"អត្រា​គំរូ​សំឡេង​ប៊្លូធូស"</string>
@@ -276,7 +278,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ពិនិត្យ​កម្មវិធី​បាន​ដំឡើង​តាម​រយៈ ADB/ADT សម្រាប់​ឥរិយាបថ​ដែល​គ្រោះ​ថ្នាក់។"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"​ឧបករណ៍​ប្ល៊ូធូសគ្មានឈ្មោះ​ (អាសយដ្ឋាន MAC តែប៉ុណ្ណោះ) នឹង​បង្ហាញ"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"បិទមុខងារកម្រិតសំឡេងឮខ្លាំងពេលភ្ជាប់ប៊្លូធូសក្នុងករណីមានបញ្ហាជាមួយឧបករណ៍បញ្ជាពីចម្ងាយ ដូចជាកម្រិតសំឡេងឮខ្លាំងដែលមិនអាចទទួលយកបាន ឬខ្វះការគ្រប់គ្រង។"</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"បើក​ជង់​មុខងារ​ប៊្លូធូស Gabeldorche​។"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"បើកជង់​មុខងារ​ប៊្លូធូស Gabeldorsche។"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ស្ថានីយ​មូលដ្ឋាន"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"បើក​កម្មវិធី​ស្ថានីយ​ដែល​ផ្ដល់​ការ​ចូល​សែល​មូលដ្ឋាន"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"ពិនិត្យ HDCP"</string>

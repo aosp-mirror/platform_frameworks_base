@@ -230,6 +230,8 @@
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Ota Gabeldorsche käyttöön"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetoothin AVRCP-versio"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Valitse Bluetoothin AVRCP-versio"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetoothin MAP-versio"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Valitse Bluetoothin MAP-versio"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Bluetooth-äänen koodekki"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Käynnistä Bluetooth-äänipakkaus\nValinta"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Bluetooth-ääninäytteen siirtonopeus"</string>
@@ -276,7 +278,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Tarkista ADB:n/ADT:n kautta asennetut sovellukset haitallisen toiminnan varalta."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Näytetään Bluetooth-laitteet, joilla ei ole nimiä (vain MAC-osoitteet)."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Bluetoothin yleinen äänenvoimakkuuden säätö poistetaan käytöstä ongelmien välttämiseksi esimerkiksi silloin, kun laitteen äänenvoimakkuus on liian kova tai sitä ei voi säätää."</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"Bluetoothin Gabeldorche-ominaisuuspino tulee käyttöön."</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetoothin Gabeldorsche-ominaisuuspino otetaan käyttöön."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Paikallinen pääte"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Ota käyttöön päätesov. joka mahdollistaa paikall. liittymäkäytön"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-tarkistus"</string>

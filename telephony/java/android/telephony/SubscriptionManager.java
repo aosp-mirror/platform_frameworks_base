@@ -16,8 +16,8 @@
 
 package android.telephony;
 
-import static android.net.NetworkPolicyManager.OVERRIDE_CONGESTED;
-import static android.net.NetworkPolicyManager.OVERRIDE_UNMETERED;
+import static android.net.NetworkPolicyManager.SUBSCRIPTION_OVERRIDE_CONGESTED;
+import static android.net.NetworkPolicyManager.SUBSCRIPTION_OVERRIDE_UNMETERED;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
@@ -45,6 +45,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.INetworkPolicyManager;
 import android.net.NetworkCapabilities;
+import android.net.NetworkPolicyManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -957,6 +958,11 @@ public class SubscriptionManager {
         mContext = context;
     }
 
+    private NetworkPolicyManager getNetworkPolicyManager() {
+        return (NetworkPolicyManager) mContext
+                .getSystemService(Context.NETWORK_POLICY_SERVICE);
+    }
+
     /**
      * @deprecated developers should always obtain references directly from
      *             {@link Context#getSystemService(Class)}.
@@ -967,7 +973,7 @@ public class SubscriptionManager {
                 .getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
     }
 
-    private final INetworkPolicyManager getNetworkPolicy() {
+    private INetworkPolicyManager getINetworkPolicyManager() {
         if (mNetworkPolicy == null) {
             mNetworkPolicy = INetworkPolicyManager.Stub.asInterface(
                     TelephonyFrameworkInitializer
@@ -2587,14 +2593,10 @@ public class SubscriptionManager {
      *             outlined above.
      */
     public @NonNull List<SubscriptionPlan> getSubscriptionPlans(int subId) {
-        try {
-            SubscriptionPlan[] subscriptionPlans =
-                    getNetworkPolicy().getSubscriptionPlans(subId, mContext.getOpPackageName());
-            return subscriptionPlans == null
-                    ? Collections.emptyList() : Arrays.asList(subscriptionPlans);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        SubscriptionPlan[] subscriptionPlans =
+                getNetworkPolicyManager().getSubscriptionPlans(subId, mContext.getOpPackageName());
+        return subscriptionPlans == null
+                ? Collections.emptyList() : Arrays.asList(subscriptionPlans);
     }
 
     /**
@@ -2620,18 +2622,14 @@ public class SubscriptionManager {
      *             defined in {@link SubscriptionPlan}.
      */
     public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
-        try {
-            getNetworkPolicy().setSubscriptionPlans(subId,
-                    plans.toArray(new SubscriptionPlan[plans.size()]), mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        getNetworkPolicyManager().setSubscriptionPlans(subId,
+                plans.toArray(new SubscriptionPlan[plans.size()]), mContext.getOpPackageName());
     }
 
     /** @hide */
     private String getSubscriptionPlansOwner(int subId) {
         try {
-            return getNetworkPolicy().getSubscriptionPlansOwner(subId);
+            return getINetworkPolicyManager().getSubscriptionPlansOwner(subId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2662,13 +2660,10 @@ public class SubscriptionManager {
      */
     public void setSubscriptionOverrideUnmetered(int subId, boolean overrideUnmetered,
             @DurationMillisLong long timeoutMillis) {
-        try {
-            final int overrideValue = overrideUnmetered ? OVERRIDE_UNMETERED : 0;
-            getNetworkPolicy().setSubscriptionOverride(subId, OVERRIDE_UNMETERED, overrideValue,
-                    timeoutMillis, mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+
+        final int overrideValue = overrideUnmetered ? SUBSCRIPTION_OVERRIDE_UNMETERED : 0;
+        getNetworkPolicyManager().setSubscriptionOverride(subId, SUBSCRIPTION_OVERRIDE_UNMETERED,
+                overrideValue, timeoutMillis, mContext.getOpPackageName());
     }
 
     /**
@@ -2697,13 +2692,9 @@ public class SubscriptionManager {
      */
     public void setSubscriptionOverrideCongested(int subId, boolean overrideCongested,
             @DurationMillisLong long timeoutMillis) {
-        try {
-            final int overrideValue = overrideCongested ? OVERRIDE_CONGESTED : 0;
-            getNetworkPolicy().setSubscriptionOverride(subId, OVERRIDE_CONGESTED, overrideValue,
-                    timeoutMillis, mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        final int overrideValue = overrideCongested ? SUBSCRIPTION_OVERRIDE_CONGESTED : 0;
+        getNetworkPolicyManager().setSubscriptionOverride(subId, SUBSCRIPTION_OVERRIDE_CONGESTED,
+                overrideValue, timeoutMillis, mContext.getOpPackageName());
     }
 
     /**

@@ -50,11 +50,14 @@
 #include <pwd.h>
 #include <signal.h>
 #include <string.h>
+#include <sys/epoll.h>
 #include <sys/errno.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
+#include <sys/syscall.h>
 #include <sys/sysinfo.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 #define GUARD_THREAD_PRIORITY 0
@@ -1271,39 +1274,78 @@ void android_os_Process_removeAllProcessGroups(JNIEnv* env, jobject clazz)
     return removeAllProcessGroups();
 }
 
+static void throwErrnoException(JNIEnv* env, const char* functionName, int error) {
+    ScopedLocalRef<jstring> detailMessage(env, env->NewStringUTF(functionName));
+    if (detailMessage.get() == NULL) {
+        // Not really much we can do here. We're probably dead in the water,
+        // but let's try to stumble on...
+        env->ExceptionClear();
+    }
+    static jclass errnoExceptionClass =
+            MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/system/ErrnoException"));
+
+    static jmethodID errnoExceptionCtor =
+            GetMethodIDOrDie(env, errnoExceptionClass, "<init>", "(Ljava/lang/String;I)V");
+
+    jobject exception =
+            env->NewObject(errnoExceptionClass, errnoExceptionCtor, detailMessage.get(), error);
+    env->Throw(reinterpret_cast<jthrowable>(exception));
+}
+
+// Wrapper function to the syscall pidfd_open, which creates a file
+// descriptor that refers to the process whose PID is specified in pid.
+static inline int sys_pidfd_open(pid_t pid, unsigned int flags) {
+    return syscall(__NR_pidfd_open, pid, flags);
+}
+
+static jboolean android_os_Process_nativePidFdOpen(JNIEnv* env, jobject, jint pid, jint flags) {
+    int fd = sys_pidfd_open(pid, flags);
+    if (fd < 0) {
+        throwErrnoException(env, "nativePidFdOpen", errno);
+        return -1;
+    }
+    return fd;
+}
+
 static const JNINativeMethod methods[] = {
-    {"getUidForName",       "(Ljava/lang/String;)I", (void*)android_os_Process_getUidForName},
-    {"getGidForName",       "(Ljava/lang/String;)I", (void*)android_os_Process_getGidForName},
-    {"setThreadPriority",   "(II)V", (void*)android_os_Process_setThreadPriority},
-    {"setThreadScheduler",  "(III)V", (void*)android_os_Process_setThreadScheduler},
-    {"setCanSelfBackground", "(Z)V", (void*)android_os_Process_setCanSelfBackground},
-    {"setThreadPriority",   "(I)V", (void*)android_os_Process_setCallingThreadPriority},
-    {"getThreadPriority",   "(I)I", (void*)android_os_Process_getThreadPriority},
-    {"getThreadScheduler",   "(I)I", (void*)android_os_Process_getThreadScheduler},
-    {"setThreadGroup",      "(II)V", (void*)android_os_Process_setThreadGroup},
-    {"setThreadGroupAndCpuset", "(II)V", (void*)android_os_Process_setThreadGroupAndCpuset},
-    {"setProcessGroup",     "(II)V", (void*)android_os_Process_setProcessGroup},
-    {"getProcessGroup",     "(I)I", (void*)android_os_Process_getProcessGroup},
-    {"getExclusiveCores",   "()[I", (void*)android_os_Process_getExclusiveCores},
-    {"setSwappiness",   "(IZ)Z", (void*)android_os_Process_setSwappiness},
-    {"setArgV0",    "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
-    {"setUid", "(I)I", (void*)android_os_Process_setUid},
-    {"setGid", "(I)I", (void*)android_os_Process_setGid},
-    {"sendSignal", "(II)V", (void*)android_os_Process_sendSignal},
-    {"sendSignalQuiet", "(II)V", (void*)android_os_Process_sendSignalQuiet},
-    {"getFreeMemory", "()J", (void*)android_os_Process_getFreeMemory},
-    {"getTotalMemory", "()J", (void*)android_os_Process_getTotalMemory},
-    {"readProcLines", "(Ljava/lang/String;[Ljava/lang/String;[J)V", (void*)android_os_Process_readProcLines},
-    {"getPids", "(Ljava/lang/String;[I)[I", (void*)android_os_Process_getPids},
-    {"readProcFile", "(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z", (void*)android_os_Process_readProcFile},
-    {"parseProcLine", "([BII[I[Ljava/lang/String;[J[F)Z", (void*)android_os_Process_parseProcLine},
-    {"getElapsedCpuTime", "()J", (void*)android_os_Process_getElapsedCpuTime},
-    {"getPss", "(I)J", (void*)android_os_Process_getPss},
-    {"getRss", "(I)[J", (void*)android_os_Process_getRss},
-    {"getPidsForCommands", "([Ljava/lang/String;)[I", (void*)android_os_Process_getPidsForCommands},
-    //{"setApplicationObject", "(Landroid/os/IBinder;)V", (void*)android_os_Process_setApplicationObject},
-    {"killProcessGroup", "(II)I", (void*)android_os_Process_killProcessGroup},
-    {"removeAllProcessGroups", "()V", (void*)android_os_Process_removeAllProcessGroups},
+        {"getUidForName", "(Ljava/lang/String;)I", (void*)android_os_Process_getUidForName},
+        {"getGidForName", "(Ljava/lang/String;)I", (void*)android_os_Process_getGidForName},
+        {"setThreadPriority", "(II)V", (void*)android_os_Process_setThreadPriority},
+        {"setThreadScheduler", "(III)V", (void*)android_os_Process_setThreadScheduler},
+        {"setCanSelfBackground", "(Z)V", (void*)android_os_Process_setCanSelfBackground},
+        {"setThreadPriority", "(I)V", (void*)android_os_Process_setCallingThreadPriority},
+        {"getThreadPriority", "(I)I", (void*)android_os_Process_getThreadPriority},
+        {"getThreadScheduler", "(I)I", (void*)android_os_Process_getThreadScheduler},
+        {"setThreadGroup", "(II)V", (void*)android_os_Process_setThreadGroup},
+        {"setThreadGroupAndCpuset", "(II)V", (void*)android_os_Process_setThreadGroupAndCpuset},
+        {"setProcessGroup", "(II)V", (void*)android_os_Process_setProcessGroup},
+        {"getProcessGroup", "(I)I", (void*)android_os_Process_getProcessGroup},
+        {"getExclusiveCores", "()[I", (void*)android_os_Process_getExclusiveCores},
+        {"setSwappiness", "(IZ)Z", (void*)android_os_Process_setSwappiness},
+        {"setArgV0", "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
+        {"setUid", "(I)I", (void*)android_os_Process_setUid},
+        {"setGid", "(I)I", (void*)android_os_Process_setGid},
+        {"sendSignal", "(II)V", (void*)android_os_Process_sendSignal},
+        {"sendSignalQuiet", "(II)V", (void*)android_os_Process_sendSignalQuiet},
+        {"getFreeMemory", "()J", (void*)android_os_Process_getFreeMemory},
+        {"getTotalMemory", "()J", (void*)android_os_Process_getTotalMemory},
+        {"readProcLines", "(Ljava/lang/String;[Ljava/lang/String;[J)V",
+         (void*)android_os_Process_readProcLines},
+        {"getPids", "(Ljava/lang/String;[I)[I", (void*)android_os_Process_getPids},
+        {"readProcFile", "(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z",
+         (void*)android_os_Process_readProcFile},
+        {"parseProcLine", "([BII[I[Ljava/lang/String;[J[F)Z",
+         (void*)android_os_Process_parseProcLine},
+        {"getElapsedCpuTime", "()J", (void*)android_os_Process_getElapsedCpuTime},
+        {"getPss", "(I)J", (void*)android_os_Process_getPss},
+        {"getRss", "(I)[J", (void*)android_os_Process_getRss},
+        {"getPidsForCommands", "([Ljava/lang/String;)[I",
+         (void*)android_os_Process_getPidsForCommands},
+        //{"setApplicationObject", "(Landroid/os/IBinder;)V",
+        //(void*)android_os_Process_setApplicationObject},
+        {"killProcessGroup", "(II)I", (void*)android_os_Process_killProcessGroup},
+        {"removeAllProcessGroups", "()V", (void*)android_os_Process_removeAllProcessGroups},
+        {"nativePidFdOpen", "(II)I", (void*)android_os_Process_nativePidFdOpen},
 };
 
 int register_android_os_Process(JNIEnv* env)

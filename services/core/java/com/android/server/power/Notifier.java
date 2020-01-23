@@ -46,6 +46,7 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.StatsLog;
@@ -671,6 +672,8 @@ public class Notifier {
             }
             mUserActivityPending = false;
         }
+        TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+        tm.notifyUserActivity();
         mPolicy.userActivity();
     }
 

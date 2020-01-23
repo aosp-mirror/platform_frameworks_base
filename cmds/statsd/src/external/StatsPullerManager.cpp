@@ -37,7 +37,6 @@
 #include "PowerStatsPuller.h"
 #include "ResourceHealthManagerPuller.h"
 #include "StatsCallbackPuller.h"
-#include "StatsCompanionServicePuller.h"
 #include "SubsystemSleepStatePuller.h"
 #include "TrainInfoPuller.h"
 #include "statslog.h"
@@ -85,16 +84,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // battery_cycle_count
         {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
-
-        // DebugElapsedClock.
-        {{.atomTag = android::util::DEBUG_ELAPSED_CLOCK},
-         {.additiveFields = {1, 2, 3, 4},
-          .puller = new StatsCompanionServicePuller(android::util::DEBUG_ELAPSED_CLOCK)}},
-
-        // DebugFailingElapsedClock.
-        {{.atomTag = android::util::DEBUG_FAILING_ELAPSED_CLOCK},
-         {.additiveFields = {1, 2, 3, 4},
-          .puller = new StatsCompanionServicePuller(android::util::DEBUG_FAILING_ELAPSED_CLOCK)}},
 
         // TrainInfo.
         {{.atomTag = android::util::TRAIN_INFO}, {.puller = new TrainInfoPuller()}},

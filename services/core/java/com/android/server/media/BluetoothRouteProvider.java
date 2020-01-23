@@ -29,12 +29,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaRoute2Info;
 import android.text.TextUtils;
-import android.util.Log;
+import android.util.Slog;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +60,6 @@ class BluetoothRouteProvider {
     private final BroadcastReceiver mBroadcastReceiver = new BluetoothBroadcastReceiver();
     private final BluetoothProfileListener mProfileListener = new BluetoothProfileListener();
 
-    // TODO: The mActiveDevice should be set when BluetoothRouteProvider is created.
     private BluetoothDevice mActiveDevice = null;
 
     static synchronized BluetoothRouteProvider getInstance(@NonNull Context context,
@@ -102,6 +102,43 @@ class BluetoothRouteProvider {
                 deviceStateChangedReceiver);
 
         mContext.registerReceiver(mBroadcastReceiver, mIntentFilter, null, null);
+    }
+
+    /**
+     * Clears the active device for all known profiles.
+     */
+    public void clearActiveDevices() {
+        BluetoothA2dp a2dpProfile = mA2dpProfile;
+        BluetoothHearingAid hearingAidProfile = mHearingAidProfile;
+        if (a2dpProfile != null) {
+            a2dpProfile.setActiveDevice(null);
+        }
+        if (hearingAidProfile != null) {
+            hearingAidProfile.setActiveDevice(null);
+        }
+    }
+
+    /**
+     * Sets the active device.
+     * @param deviceId the id of the Bluetooth device
+     */
+    public void setActiveDevice(@NonNull String deviceId) {
+        BluetoothRouteInfo btRouteInfo = mBluetoothRoutes.get(deviceId);
+        if (btRouteInfo == null) {
+            Slog.w(TAG, "setActiveDevice: unknown device id=" + deviceId);
+            return;
+        }
+        BluetoothA2dp a2dpProfile = mA2dpProfile;
+        BluetoothHearingAid hearingAidProfile = mHearingAidProfile;
+
+        if (a2dpProfile != null
+                && btRouteInfo.connectedProfiles.get(BluetoothProfile.A2DP, false)) {
+            a2dpProfile.setActiveDevice(btRouteInfo.btDevice);
+        }
+        if (hearingAidProfile != null
+                && btRouteInfo.connectedProfiles.get(BluetoothProfile.HEARING_AID, false)) {
+            hearingAidProfile.setActiveDevice(btRouteInfo.btDevice);
+        }
     }
 
     private void addEventReceiver(String action, BluetoothEventReceiver eventReceiver) {
@@ -157,12 +194,12 @@ class BluetoothRouteProvider {
     private void setRouteConnectionStateForDevice(BluetoothDevice device,
             @MediaRoute2Info.ConnectionState int state) {
         if (device == null) {
-            Log.w(TAG, "setRouteConnectionStateForDevice: device shouldn't be null");
+            Slog.w(TAG, "setRouteConnectionStateForDevice: device shouldn't be null");
             return;
         }
         BluetoothRouteInfo btRoute = mBluetoothRoutes.get(device.getAddress());
         if (btRoute == null) {
-            Log.w(TAG, "setRouteConnectionStateForDevice: route shouldn't be null");
+            Slog.w(TAG, "setRouteConnectionStateForDevice: route shouldn't be null");
             return;
         }
         if (btRoute.route.getConnectionState() != state) {
@@ -184,24 +221,36 @@ class BluetoothRouteProvider {
     // These callbacks run on the main thread.
     private final class BluetoothProfileListener implements BluetoothProfile.ServiceListener {
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            List<BluetoothDevice> activeDevices;
             switch (profile) {
                 case BluetoothProfile.A2DP:
                     mA2dpProfile = (BluetoothA2dp) proxy;
+                    // It may contain null.
+                    activeDevices = Collections.singletonList(mA2dpProfile.getActiveDevice());
                     break;
                 case BluetoothProfile.HEARING_AID:
                     mHearingAidProfile = (BluetoothHearingAid) proxy;
+                    activeDevices = mHearingAidProfile.getActiveDevices();
                     break;
                 default:
                     return;
             }
+            //TODO: Check a pair of HAP devices whether there exist two or more active devices.
             for (BluetoothDevice device : proxy.getConnectedDevices()) {
                 BluetoothRouteInfo btRoute = mBluetoothRoutes.get(device.getAddress());
                 if (btRoute == null) {
                     btRoute = createBluetoothRoute(device);
                     mBluetoothRoutes.put(device.getAddress(), btRoute);
                 }
+                if (activeDevices.contains(device)) {
+                    mActiveDevice = device;
+                    setRouteConnectionStateForDevice(device,
+                            MediaRoute2Info.CONNECTION_STATE_CONNECTED);
+                }
+
                 btRoute.connectedProfiles.put(profile, true);
             }
+            notifyBluetoothRoutesUpdated();
         }
 
         public void onServiceDisconnected(int profile) {

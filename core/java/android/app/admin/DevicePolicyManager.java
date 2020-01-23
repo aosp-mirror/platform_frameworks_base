@@ -2384,6 +2384,13 @@ public class DevicePolicyManager {
     public static final int MAX_PASSWORD_LENGTH = 16;
 
     /**
+     * Service Action: Service implemented by a device owner or profile owner to provide a
+     * secondary lockscreen.
+     */
+    public static final String ACTION_BIND_SECONDARY_LOCKSCREEN_SERVICE =
+            "android.app.action.BIND_SECONDARY_LOCKSCREEN_SERVICE";
+
+    /**
      * Return true if the given administrator component is currently active (enabled) in the system.
      *
      * @param admin The administrator component to check for.
@@ -4203,7 +4210,18 @@ public class DevicePolicyManager {
      * device by first calling {@link #resetPassword} to set the password and then lock the device.
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance returned by
-     * {@link #getParentProfileInstance(ComponentName)} in order to lock the parent profile.
+     * {@link #getParentProfileInstance(ComponentName)} in order to lock the parent profile as
+     * well as the managed profile.
+     * <p>
+     * NOTE: In order to lock the parent profile and evict the encryption key of the managed
+     * profile, {@link #lockNow()} must be called twice: First, {@link #lockNow()} should be called
+     * on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)}, then {@link #lockNow(int)} should be
+     * called on the {@link DevicePolicyManager} instance associated with the managed profile,
+     * with the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag.
+     * Calling the method twice in this order ensures that all users are locked and does not
+     * stop the device admin on the managed profile from issuing a second call to lock its own
+     * profile.
      *
      * @param flags May be 0 or {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}.
      * @throws SecurityException if the calling application does not own an active administrator
@@ -4653,6 +4671,9 @@ public class DevicePolicyManager {
             | DevicePolicyManager.KEYGUARD_DISABLE_BIOMETRICS;
 
     /**
+     * @deprecated This method does not actually modify the storage encryption of the device.
+     * It has never affected the encryption status of a device.
+     *
      * Called by an application that is administering the device to request that the storage system
      * be encrypted. Does nothing if the caller is on a secondary user or a managed profile.
      * <p>
@@ -4686,6 +4707,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not an active administrator or does not use
      *             {@link DeviceAdminInfo#USES_ENCRYPTED_STORAGE}
      */
+    @Deprecated
     public int setStorageEncryption(@NonNull ComponentName admin, boolean encrypt) {
         throwIfParentInstance("setStorageEncryption");
         if (mService != null) {
@@ -4699,6 +4721,10 @@ public class DevicePolicyManager {
     }
 
     /**
+     * @deprecated This method only returns the value set by {@link #setStorageEncryption}.
+     * It does not actually reflect the storage encryption status.
+     * Use {@link #getStorageEncryptionStatus} for that.
+     *
      * Called by an application that is administering the device to
      * determine the requested setting for secure storage.
      *
@@ -4707,6 +4733,7 @@ public class DevicePolicyManager {
      * administrators.
      * @return true if the admin(s) are requesting encryption, false if not.
      */
+    @Deprecated
     public boolean getStorageEncryption(@Nullable ComponentName admin) {
         throwIfParentInstance("getStorageEncryption");
         if (mService != null) {
@@ -8393,6 +8420,52 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by device owner or profile owner to set whether a secondary lockscreen needs to be
+     * shown.
+     *
+     * <p>The secondary lockscreen will by displayed after the primary keyguard security screen
+     * requirements are met. To provide the lockscreen content the DO/PO will need to provide a
+     * service handling the {@link #ACTION_BIND_SECONDARY_LOCKSCREEN_SERVICE} intent action,
+     * extending the {@link DevicePolicyKeyguardService} class.
+     *
+     * <p>Relevant interactions on the secondary lockscreen should be communicated back to the
+     * keyguard via {@link IKeyguardCallback}, such as when the screen is ready to be dismissed.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param enabled Whether or not the lockscreen needs to be shown.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @see #isSecondaryLockscreenEnabled
+     **/
+    public void setSecondaryLockscreenEnabled(@NonNull ComponentName admin, boolean enabled) {
+        throwIfParentInstance("setSecondaryLockscreenEnabled");
+        if (mService != null) {
+            try {
+                mService.setSecondaryLockscreenEnabled(admin, enabled);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns whether the secondary lock screen needs to be shown.
+     * @see #setSecondaryLockscreenEnabled
+     * @hide
+     */
+    @SystemApi
+    public boolean isSecondaryLockscreenEnabled(int userId) {
+        throwIfParentInstance("isSecondaryLockscreenEnabled");
+        if (mService != null) {
+            try {
+                return mService.isSecondaryLockscreenEnabled(userId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Sets which packages may enter lock task mode.
      * <p>
      * Any packages that share uid with an allowed package will also be allowed to activate lock
@@ -11336,6 +11409,10 @@ public class DevicePolicyManager {
      * <p>Assumes that the caller is a profile owner and is the given {@code admin}.
      *
      * <p>Previous calls are overridden by each subsequent call to this method.
+     *
+     * <p>When previously-set cross-profile packages are missing from {@code packageNames}, the
+     * app-op for {@code INTERACT_ACROSS_PROFILES} will be reset for those packages. This will not
+     * occur for packages that are whitelisted by the OEM.
      *
      * @param admin the {@link DeviceAdminReceiver} this request is associated with
      * @param packageNames the new cross-profile package names

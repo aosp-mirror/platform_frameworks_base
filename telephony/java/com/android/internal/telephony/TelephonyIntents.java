@@ -180,8 +180,6 @@ public class TelephonyIntents {
     public static final String ACTION_SIM_STATE_CHANGED
             = Intent.ACTION_SIM_STATE_CHANGED;
 
-    public static final String EXTRA_REBROADCAST_ON_UNLOCK= "rebroadcastOnUnlock";
-
     /**
      * <p>Broadcast Action: It indicates the Emergency callback mode blocks datacall/sms
      * <p class="note">.

@@ -54,5 +54,5 @@ public interface PacProcessor {
      *         For example: "PROXY xxx.xxx.xxx.xxx:xx; SOCKS yyy.yyy.yyy:yy".
      */
     @Nullable
-    String makeProxyRequest(@NonNull String url);
+    String findProxyForUrl(@NonNull String url);
 }

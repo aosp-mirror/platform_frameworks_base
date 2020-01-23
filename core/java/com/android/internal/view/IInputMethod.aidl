@@ -54,7 +54,7 @@ oneway interface IInputMethod {
 
     void revokeSession(IInputMethodSession session);
 
-    void showSoftInput(int flags, in ResultReceiver resultReceiver);
+    void showSoftInput(in IBinder showInputToken, int flags, in ResultReceiver resultReceiver);
 
     void hideSoftInput(int flags, in ResultReceiver resultReceiver);
 

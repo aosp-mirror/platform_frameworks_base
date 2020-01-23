@@ -220,7 +220,17 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 return;
             }
 
+            String ruleProvider = getCallerPackageName();
             String installerPackageName = getInstallerPackageName(intent);
+
+            // Skip integrity verification if the verifier is doing the install.
+            if (ruleProvider != null && ruleProvider.equals(installerPackageName)) {
+                Slog.i(TAG, "Verifier doing the install. Skipping integrity check.");
+                mPackageManagerInternal.setIntegrityVerificationResult(
+                        verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
+                return;
+            }
+
             String appCert = getCertificateFingerprint(packageInfo);
 
             AppInstallMetadata.Builder builder = new AppInstallMetadata.Builder();
@@ -518,6 +528,16 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     private String getCallerPackageNameOrThrow() {
+        String callerPackageName = getCallerPackageName();
+        if (callerPackageName == null) {
+            throw new SecurityException(
+                    "Only system packages specified in config_integrityRuleProviderPackages are"
+                            + " allowed to call this method.");
+        }
+        return callerPackageName;
+    }
+
+    private String getCallerPackageName() {
         final String[] allowedRuleProviders =
                 mContext.getResources()
                         .getStringArray(R.array.config_integrityRuleProviderPackages);
@@ -537,9 +557,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 Slog.i(TAG, "Rule provider package " + packageName + " not installed.");
             }
         }
-        throw new SecurityException(
-                "Only system packages specified in config_integrityRuleProviderPackages are"
-                        + " allowed to call this method.");
+        return null;
     }
 
     private boolean isSystemApp(String packageName) {

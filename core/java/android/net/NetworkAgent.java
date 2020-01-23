@@ -304,10 +304,7 @@ public abstract class NetworkAgent {
     private static NetworkInfo getLegacyNetworkInfo(final NetworkAgentConfig config) {
         // The subtype can be changed with (TODO) setLegacySubtype, but it starts
         // with the type and an empty description.
-        final NetworkInfo ni = new NetworkInfo(config.legacyType, config.legacyType,
-                config.legacyTypeName, "");
-        ni.setIsAvailable(true);
-        return ni;
+        return new NetworkInfo(config.legacyType, config.legacyType, config.legacyTypeName, "");
     }
 
     /**

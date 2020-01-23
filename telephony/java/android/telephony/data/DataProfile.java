@@ -96,7 +96,9 @@ public final class DataProfile implements Parcelable {
     @NetworkTypeBitMask
     private final int mBearerBitmask;
 
-    private final int mMtu;
+    private final int mMtuV4;
+
+    private final int mMtuV6;
 
     private final boolean mPersistent;
 
@@ -104,12 +106,11 @@ public final class DataProfile implements Parcelable {
 
     /** @hide */
     private DataProfile(int profileId, String apn, @ProtocolType int protocolType, int authType,
-                        String userName, String password, int type, int maxConnectionsTime,
-                        int maxConnections, int waitTime, boolean enabled,
-                        @ApnType int supportedApnTypesBitmask,
-                        @ProtocolType int roamingProtocolType,
-                        @NetworkTypeBitMask int bearerBitmask, int mtu, boolean persistent,
-                        boolean preferred) {
+            String userName, String password, int type, int maxConnectionsTime,
+            int maxConnections, int waitTime, boolean enabled,
+            @ApnType int supportedApnTypesBitmask, @ProtocolType int roamingProtocolType,
+            @NetworkTypeBitMask int bearerBitmask, int mtuV4, int mtuV6, boolean persistent,
+            boolean preferred) {
         this.mProfileId = profileId;
         this.mApn = apn;
         this.mProtocolType = protocolType;
@@ -128,7 +129,8 @@ public final class DataProfile implements Parcelable {
         this.mSupportedApnTypesBitmask = supportedApnTypesBitmask;
         this.mRoamingProtocolType = roamingProtocolType;
         this.mBearerBitmask = bearerBitmask;
-        this.mMtu = mtu;
+        this.mMtuV4 = mtuV4;
+        this.mMtuV6 = mtuV6;
         this.mPersistent = persistent;
         this.mPreferred = preferred;
     }
@@ -148,7 +150,8 @@ public final class DataProfile implements Parcelable {
         mSupportedApnTypesBitmask = source.readInt();
         mRoamingProtocolType = source.readInt();
         mBearerBitmask = source.readInt();
-        mMtu = source.readInt();
+        mMtuV4 = source.readInt();
+        mMtuV6 = source.readInt();
         mPersistent = source.readBoolean();
         mPreferred = source.readBoolean();
     }
@@ -237,8 +240,21 @@ public final class DataProfile implements Parcelable {
 
     /**
      * @return The maximum transmission unit (MTU) size in bytes.
+     * @deprecated use {@link #getMtuV4} or {@link #getMtuV6} instead.
      */
-    public int getMtu() { return mMtu; }
+    @Deprecated
+    public int getMtu() { return mMtuV4; }
+
+    /**
+     * This replaces the deprecated method getMtu.
+     * @return The maximum transmission unit (MTU) size in bytes, for IPv4.
+     */
+    public int getMtuV4() { return mMtuV4; }
+
+    /**
+     * @return The maximum transmission unit (MTU) size in bytes, for IPv6.
+     */
+    public int getMtuV6() { return mMtuV6; }
 
     /**
      * @return {@code true} if modem must persist this data profile.
@@ -265,8 +281,8 @@ public final class DataProfile implements Parcelable {
                          (mApn + "/" + mUserName + "/" + mPassword)) + "/" + mType + "/"
                 + mMaxConnectionsTime + "/" + mMaxConnections + "/"
                 + mWaitTime + "/" + mEnabled + "/" + mSupportedApnTypesBitmask + "/"
-                + mRoamingProtocolType + "/" + mBearerBitmask + "/" + mMtu + "/" + mPersistent + "/"
-                + mPreferred;
+                + mRoamingProtocolType + "/" + mBearerBitmask + "/" + mMtuV4 + "/" + mMtuV6 + "/"
+                + mPersistent + "/" + mPreferred;
     }
 
     @Override
@@ -285,7 +301,8 @@ public final class DataProfile implements Parcelable {
         dest.writeInt(mSupportedApnTypesBitmask);
         dest.writeInt(mRoamingProtocolType);
         dest.writeInt(mBearerBitmask);
-        dest.writeInt(mMtu);
+        dest.writeInt(mMtuV4);
+        dest.writeInt(mMtuV6);
         dest.writeBoolean(mPersistent);
         dest.writeBoolean(mPreferred);
     }
@@ -319,7 +336,8 @@ public final class DataProfile implements Parcelable {
                 && mSupportedApnTypesBitmask == that.mSupportedApnTypesBitmask
                 && mRoamingProtocolType == that.mRoamingProtocolType
                 && mBearerBitmask == that.mBearerBitmask
-                && mMtu == that.mMtu
+                && mMtuV4 == that.mMtuV4
+                && mMtuV6 == that.mMtuV6
                 && mPersistent == that.mPersistent
                 && mPreferred == that.mPreferred
                 && Objects.equals(mApn, that.mApn)
@@ -331,8 +349,8 @@ public final class DataProfile implements Parcelable {
     public int hashCode() {
         return Objects.hash(mProfileId, mApn, mProtocolType, mAuthType, mUserName, mPassword, mType,
                 mMaxConnectionsTime, mMaxConnections, mWaitTime, mEnabled,
-                mSupportedApnTypesBitmask, mRoamingProtocolType, mBearerBitmask, mMtu, mPersistent,
-                mPreferred);
+                mSupportedApnTypesBitmask, mRoamingProtocolType, mBearerBitmask, mMtuV4, mMtuV6,
+                mPersistent, mPreferred);
     }
 
     /**
@@ -384,7 +402,9 @@ public final class DataProfile implements Parcelable {
         @NetworkTypeBitMask
         private int mBearerBitmask;
 
-        private int mMtu;
+        private int mMtuV4;
+
+        private int mMtuV6;
 
         private boolean mPersistent;
 
@@ -567,9 +587,33 @@ public final class DataProfile implements Parcelable {
          *
          * @param mtu The maximum transmission unit (MTU) size in bytes.
          * @return The same instance of the builder.
+         * @deprecated use {@link #setMtuV4} or {@link #setMtuV6} instead.
          */
         public @NonNull Builder setMtu(int mtu) {
-            mMtu = mtu;
+            mMtuV4 = mMtuV6 = mtu;
+            return this;
+        }
+
+        /**
+         * Set the maximum transmission unit (MTU) size in bytes, for IPv4.
+         * This replaces the deprecated method setMtu.
+         *
+         * @param mtu The maximum transmission unit (MTU) size in bytes.
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setMtuV4(int mtu) {
+            mMtuV4 = mtu;
+            return this;
+        }
+
+        /**
+         * Set the maximum transmission unit (MTU) size in bytes, for IPv6.
+         *
+         * @param mtu The maximum transmission unit (MTU) size in bytes.
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setMtuV6(int mtu) {
+            mMtuV6 = mtu;
             return this;
         }
 
@@ -606,7 +650,7 @@ public final class DataProfile implements Parcelable {
         public @NonNull DataProfile build() {
             return new DataProfile(mProfileId, mApn, mProtocolType, mAuthType, mUserName, mPassword,
                     mType, mMaxConnectionsTime, mMaxConnections, mWaitTime, mEnabled,
-                    mSupportedApnTypesBitmask, mRoamingProtocolType, mBearerBitmask, mMtu,
+                    mSupportedApnTypesBitmask, mRoamingProtocolType, mBearerBitmask, mMtuV4, mMtuV6,
                     mPersistent, mPreferred);
         }
     }

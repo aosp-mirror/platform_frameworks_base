@@ -189,12 +189,14 @@ public final class AppExitInfoTracker {
     }
 
     void onSystemReady() {
-        // Read the sysprop set by lmkd and set this to persist so app could read it.
-        SystemProperties.set("persist.sys.lmk.reportkills",
-                Boolean.toString(SystemProperties.getBoolean("sys.lmk.reportkills", false)));
         registerForUserRemoval();
         registerForPackageRemoval();
-        IoThread.getHandler().post(this::loadExistingProcessExitInfo);
+        IoThread.getHandler().post(() -> {
+            // Read the sysprop set by lmkd and set this to persist so app could read it.
+            SystemProperties.set("persist.sys.lmk.reportkills",
+                    Boolean.toString(SystemProperties.getBoolean("sys.lmk.reportkills", false)));
+            loadExistingProcessExitInfo();
+        });
     }
 
     @GuardedBy("mService")

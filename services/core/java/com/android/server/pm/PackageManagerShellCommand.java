@@ -1227,7 +1227,7 @@ class PackageManagerShellCommand extends ShellCommand {
             }
             abandonSession = false;
 
-            if (!params.sessionParams.isStaged || !params.waitForStagedSessionReady) {
+            if (!params.sessionParams.isStaged || !params.mWaitForStagedSessionReady) {
                 pw.println("Success");
                 return 0;
             }
@@ -1265,7 +1265,7 @@ class PackageManagerShellCommand extends ShellCommand {
                         + si.getStagedSessionErrorMessage() + "]");
                 return 1;
             }
-            pw.println("Success");
+            pw.println("Success. Reboot device to apply staged session");
             return 0;
         } finally {
             if (abandonSession) {
@@ -2615,7 +2615,7 @@ class PackageManagerShellCommand extends ShellCommand {
         SessionParams sessionParams;
         String installerPackageName;
         int userId = UserHandle.USER_ALL;
-        boolean waitForStagedSessionReady = false;
+        boolean mWaitForStagedSessionReady = true;
         long timeoutMs = DEFAULT_WAIT_MS;
     }
 
@@ -2743,12 +2743,15 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
                     break;
                 case "--wait":
-                    params.waitForStagedSessionReady = true;
+                    params.mWaitForStagedSessionReady = true;
                     try {
                         params.timeoutMs = Long.parseLong(peekNextArg());
                         getNextArg();
                     } catch (NumberFormatException ignore) {
                     }
+                    break;
+                case "--no-wait":
+                    params.mWaitForStagedSessionReady = false;
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);

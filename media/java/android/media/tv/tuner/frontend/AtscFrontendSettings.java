@@ -19,6 +19,7 @@ package android.media.tv.tuner.frontend;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerUtils;
@@ -28,8 +29,10 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Frontend settings for ATSC.
+ *
  * @hide
  */
+@SystemApi
 public class AtscFrontendSettings extends FrontendSettings {
 
     /** @hide */

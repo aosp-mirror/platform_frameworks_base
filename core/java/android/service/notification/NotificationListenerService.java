@@ -1539,6 +1539,7 @@ public abstract class NotificationListenerService extends Service {
         private ArrayList<CharSequence> mSmartReplies;
         private boolean mCanBubble;
         private boolean mVisuallyInterruptive;
+        private boolean mIsConversation;
 
         private static final int PARCEL_VERSION = 2;
 
@@ -1571,6 +1572,7 @@ public abstract class NotificationListenerService extends Service {
             out.writeCharSequenceList(mSmartReplies);
             out.writeBoolean(mCanBubble);
             out.writeBoolean(mVisuallyInterruptive);
+            out.writeBoolean(mIsConversation);
         }
 
         /** @hide */
@@ -1604,6 +1606,7 @@ public abstract class NotificationListenerService extends Service {
             mSmartReplies = in.readCharSequenceList();
             mCanBubble = in.readBoolean();
             mVisuallyInterruptive = in.readBoolean();
+            mIsConversation = in.readBoolean();
         }
 
 
@@ -1801,6 +1804,14 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
+         * Returns whether this notification is a conversation notification.
+         * @hide
+         */
+        public boolean isConversation() {
+            return mIsConversation;
+        }
+
+        /**
          * @hide
          */
         @VisibleForTesting
@@ -1812,7 +1823,7 @@ public abstract class NotificationListenerService extends Service {
                 int userSentiment, boolean hidden, long lastAudiblyAlertedMs,
                 boolean noisy, ArrayList<Notification.Action> smartActions,
                 ArrayList<CharSequence> smartReplies, boolean canBubble,
-                boolean visuallyInterruptive) {
+                boolean visuallyInterruptive, boolean isConversation) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1834,6 +1845,7 @@ public abstract class NotificationListenerService extends Service {
             mSmartReplies = smartReplies;
             mCanBubble = canBubble;
             mVisuallyInterruptive = visuallyInterruptive;
+            mIsConversation = isConversation;
         }
 
         /**
@@ -1859,7 +1871,8 @@ public abstract class NotificationListenerService extends Service {
                     other.mSmartActions,
                     other.mSmartReplies,
                     other.mCanBubble,
-                    other.mVisuallyInterruptive);
+                    other.mVisuallyInterruptive,
+                    other.mIsConversation);
         }
 
         /**
@@ -1912,7 +1925,8 @@ public abstract class NotificationListenerService extends Service {
                         == (other.mSmartActions == null ? 0 : other.mSmartActions.size()))
                     && Objects.equals(mSmartReplies, other.mSmartReplies)
                     && Objects.equals(mCanBubble, other.mCanBubble)
-                    && Objects.equals(mVisuallyInterruptive, other.mVisuallyInterruptive);
+                    && Objects.equals(mVisuallyInterruptive, other.mVisuallyInterruptive)
+                    && Objects.equals(mIsConversation, other.mIsConversation);
         }
     }
 

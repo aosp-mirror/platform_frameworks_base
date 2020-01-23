@@ -16,9 +16,6 @@
 
 package android.os;
 
-import android.os.IPullAtomCallback;
-import android.os.StatsLogEventWrapper;
-
 /**
   * Binder interface to communicate with the Java-based statistics service helper.
   * {@hide}
@@ -61,9 +58,6 @@ interface IStatsCompanionService {
 
     /** Cancel any alarm for the purpose of subscriber triggering. */
     oneway void cancelAlarmForSubscriberTriggering();
-
-    /** Pull the specified data. Results will be sent to statsd when complete. */
-    StatsLogEventWrapper[] pullData(int pullCode);
 
     /** Tells StatsCompaionService to grab the uid map snapshot and send it to statsd. */
     oneway void triggerUidSnapshot();

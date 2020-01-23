@@ -18,6 +18,7 @@ package android.net.wifi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
@@ -25,6 +26,8 @@ import android.os.Parcel;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * Unit tests for {@link android.net.wifi.WifiInfo}.
@@ -41,6 +44,11 @@ public class WifiInfoTest {
     private static final int TEST_WIFI_STANDARD = ScanResult.WIFI_STANDARD_11AC;
     private static final int TEST_MAX_SUPPORTED_TX_LINK_SPEED_MBPS = 866;
     private static final int TEST_MAX_SUPPORTED_RX_LINK_SPEED_MBPS = 1200;
+    private static final String TEST_SSID = "Test123";
+    private static final String TEST_BSSID = "12:12:12:12:12:12";
+    private static final int TEST_RSSI = -60;
+    private static final int TEST_NETWORK_ID = 5;
+    private static final int TEST_NETWORK_ID2 = 6;
 
     /**
      *  Verify parcel write/read with WifiInfo.
@@ -100,5 +108,44 @@ public class WifiInfoTest {
         assertEquals(WifiManager.UNKNOWN_SSID, wifiInfo.getSSID());
         assertEquals(null, wifiInfo.getBSSID());
         assertEquals(-1, wifiInfo.getNetworkId());
+    }
+
+    /**
+     * Test that the WifiInfo Builder returns the same values that was set, and that
+     * calling build multiple times returns different instances.
+     */
+    @Test
+    public void testWifiInfoBuilder() throws Exception {
+        WifiInfo.Builder builder = new WifiInfo.Builder()
+                .setSsid(TEST_SSID.getBytes(StandardCharsets.UTF_8))
+                .setBssid(TEST_BSSID)
+                .setRssi(TEST_RSSI)
+                .setNetworkId(TEST_NETWORK_ID);
+
+        WifiInfo info1 = builder.build();
+
+        assertEquals("\"" + TEST_SSID + "\"", info1.getSSID());
+        assertEquals(TEST_BSSID, info1.getBSSID());
+        assertEquals(TEST_RSSI, info1.getRssi());
+        assertEquals(TEST_NETWORK_ID, info1.getNetworkId());
+
+        WifiInfo info2 = builder
+                .setNetworkId(TEST_NETWORK_ID2)
+                .build();
+
+        // different instances
+        assertNotSame(info1, info2);
+
+        // assert that info1 didn't change
+        assertEquals("\"" + TEST_SSID + "\"", info1.getSSID());
+        assertEquals(TEST_BSSID, info1.getBSSID());
+        assertEquals(TEST_RSSI, info1.getRssi());
+        assertEquals(TEST_NETWORK_ID, info1.getNetworkId());
+
+        // assert that info2 changed
+        assertEquals("\"" + TEST_SSID + "\"", info2.getSSID());
+        assertEquals(TEST_BSSID, info2.getBSSID());
+        assertEquals(TEST_RSSI, info2.getRssi());
+        assertEquals(TEST_NETWORK_ID2, info2.getNetworkId());
     }
 }

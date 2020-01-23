@@ -16,10 +16,13 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.SystemApi;
+
 /**
  * Frontend capabilities.
  *
  * @hide
  */
+@SystemApi
 public abstract class FrontendCapabilities {
 }

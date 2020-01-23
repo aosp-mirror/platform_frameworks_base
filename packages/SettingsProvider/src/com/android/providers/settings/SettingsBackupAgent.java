@@ -968,18 +968,14 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     }
 
     private void restoreSoftApConfiguration(byte[] data) {
-        SoftApConfiguration config = mWifiManager.restoreSoftApBackupData(data);
-        if (config != null) {
-            int originalApBand = config.getBand();
+        SoftApConfiguration configInCloud = mWifiManager.restoreSoftApBackupData(data);
+        if (configInCloud != null) {
             if (DEBUG) Log.d(TAG, "Successfully unMarshaled SoftApConfiguration ");
-
-            // Depending on device hardware, we may need to notify the user of a setting change for
-            // the apBand preference
-            boolean dualMode = mWifiManager.isDualModeSupported();
-            int storedApBand = mWifiManager.getSoftApConfiguration().getBand();
-            if (dualMode && storedApBand != originalApBand) {
+            // Depending on device hardware, we may need to notify the user of a setting change
+            SoftApConfiguration storedConfig = mWifiManager.getSoftApConfiguration();
+            if (!storedConfig.equals(configInCloud)) {
                 Log.d(TAG, "restored ap configuration requires a conversion, notify the user");
-                WifiSoftApBandChangedNotifier.notifyUserOfApBandConversion(this);
+                WifiSoftApConfigChangedNotifier.notifyUserOfConfigConversion(this);
             }
         }
     }

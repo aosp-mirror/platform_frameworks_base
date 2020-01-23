@@ -230,6 +230,8 @@
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"啟用 Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"藍牙 AVRCP 版本"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"選取藍牙 AVRCP 版本"</string>
+    <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"藍牙 MAP 版本"</string>
+    <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"選取 Bluetooth MAP 版本"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"藍牙音訊轉碼器"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"觸發藍牙音訊轉碼器\n選項"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"藍牙音訊取樣率"</string>
@@ -276,7 +278,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"檢查透過 ADB/ADT 安裝的應用程式是否具有有害行為。"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"系統會顯示沒有名稱 (僅具有 MAC 位址) 的藍牙裝置"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"只要停用藍牙絕對音量功能，即可避免在連線到遠端裝置時，發生音量過大或無法控制音量等問題。"</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"啟用藍牙 Gabeldorsche 功能堆疊。"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"啟用藍牙 Gabeldorsche 功能堆疊。"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"本機終端機"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"啟用可提供本機命令介面存取權的終端機應用程式"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP 檢查"</string>

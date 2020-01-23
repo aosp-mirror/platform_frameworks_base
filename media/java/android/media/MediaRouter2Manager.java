@@ -178,8 +178,9 @@ public class MediaRouter2Manager {
 
     /**
      * Gets routing controllers of an application with the given package name.
-     * If the application isn't running or it doesn't use {@link MediaRouter2}, an empty list
-     * will be returned.
+     * The first element of the returned list is the system routing controller.
+     *
+     * @see MediaRouter2#getSystemController()
      */
     @NonNull
     public List<RoutingController> getRoutingControllers(@NonNull String packageName) {
@@ -188,7 +189,8 @@ public class MediaRouter2Manager {
         List<RoutingController> controllers = new ArrayList<>();
 
         for (RoutingSessionInfo sessionInfo : getActiveSessions()) {
-            if (TextUtils.equals(sessionInfo.getClientPackageName(), packageName)) {
+            if (sessionInfo.isSystemSession()
+                    || TextUtils.equals(sessionInfo.getClientPackageName(), packageName)) {
                 controllers.add(new RoutingController(sessionInfo));
             }
         }
@@ -196,8 +198,11 @@ public class MediaRouter2Manager {
     }
 
     /**
-     * Gets the list of all active routing sessions. It doesn't include default routing sessions
-     * of applications.
+     * Gets the list of all active routing sessions.
+     * The first element of the list is the system routing session containing
+     * phone speakers, wired headset, Bluetooth devices.
+     * The system routing session is shared by apps such that controlling it will affect
+     * all apps.
      */
     @NonNull
     public List<RoutingSessionInfo> getActiveSessions() {

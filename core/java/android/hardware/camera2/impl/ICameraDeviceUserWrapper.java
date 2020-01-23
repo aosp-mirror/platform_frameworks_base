@@ -110,10 +110,10 @@ public class ICameraDeviceUserWrapper {
         }
     }
 
-    public void endConfigure(int operatingMode, CameraMetadataNative sessionParams)
+    public int[] endConfigure(int operatingMode, CameraMetadataNative sessionParams)
            throws CameraAccessException {
         try {
-            mRemoteDevice.endConfigure(operatingMode, (sessionParams == null) ?
+            return mRemoteDevice.endConfigure(operatingMode, (sessionParams == null) ?
                     new CameraMetadataNative() : sessionParams);
         } catch (Throwable t) {
             CameraManager.throwAsPublicException(t);
@@ -251,10 +251,9 @@ public class ICameraDeviceUserWrapper {
     }
 
     public ICameraOfflineSession switchToOffline(ICameraDeviceCallbacks cbs,
-            Surface[] offlineOutputs)
-            throws CameraAccessException {
+            int[] offlineOutputIds) throws CameraAccessException {
         try {
-            return mRemoteDevice.switchToOffline(cbs, offlineOutputs);
+            return mRemoteDevice.switchToOffline(cbs, offlineOutputIds);
         } catch (Throwable t) {
             CameraManager.throwAsPublicException(t);
             throw new UnsupportedOperationException("Unexpected exception", t);

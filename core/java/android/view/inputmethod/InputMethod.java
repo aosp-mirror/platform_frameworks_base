@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Log;
+import android.view.View;
 import android.view.autofill.AutofillId;
 
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
@@ -298,7 +299,30 @@ public interface InputMethod {
      * until deliberated dismissed by the user in its UI.
      */
     public static final int SHOW_FORCED = 0x00002;
-    
+
+    /**
+     * Request that any soft input part of the input method be shown to the user.
+     *
+     * @param flags Provides additional information about the show request.
+     * Currently may be 0 or have the bit {@link #SHOW_EXPLICIT} set.
+     * @param resultReceiver The client requesting the show may wish to
+     * be told the impact of their request, which should be supplied here.
+     * The result code should be
+     * {@link InputMethodManager#RESULT_UNCHANGED_SHOWN InputMethodManager.RESULT_UNCHANGED_SHOWN},
+     * {@link InputMethodManager#RESULT_UNCHANGED_HIDDEN InputMethodManager.RESULT_UNCHANGED_HIDDEN},
+     * {@link InputMethodManager#RESULT_SHOWN InputMethodManager.RESULT_SHOWN}, or
+     * {@link InputMethodManager#RESULT_HIDDEN InputMethodManager.RESULT_HIDDEN}.
+     * @param showInputToken an opaque {@link android.os.Binder} token to identify which API call
+     *        of {@link InputMethodManager#showSoftInput(View, int)} is associated with
+     *        this callback.
+     * @hide
+     */
+    @MainThread
+    default public void showSoftInputWithToken(int flags, ResultReceiver resultReceiver,
+            IBinder showInputToken) {
+        showSoftInput(flags, resultReceiver);
+    }
+
     /**
      * Request that any soft input part of the input method be shown to the user.
      * 
@@ -314,7 +338,7 @@ public interface InputMethod {
      */
     @MainThread
     public void showSoftInput(int flags, ResultReceiver resultReceiver);
-    
+
     /**
      * Request that any soft input part of the input method be hidden from the user.
      * @param flags Provides additional information about the show request.
@@ -336,4 +360,12 @@ public interface InputMethod {
      */
     @MainThread
     public void changeInputMethodSubtype(InputMethodSubtype subtype);
+
+    /**
+     * Update token of the client window requesting {@link #showSoftInput(int, ResultReceiver)}
+     * @param showInputToken dummy app window token for window requesting
+     *        {@link InputMethodManager#showSoftInput(View, int)}
+     * @hide
+     */
+    public void setCurrentShowInputToken(IBinder showInputToken);
 }

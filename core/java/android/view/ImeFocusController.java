@@ -38,6 +38,7 @@ public final class ImeFocusController {
     private boolean mHasImeFocus = false;
     private View mServedView;
     private View mNextServedView;
+    private InputMethodManagerDelegate mDelegate;
 
     @UiThread
     ImeFocusController(@NonNull ViewRootImpl viewRootImpl) {
@@ -45,7 +46,11 @@ public final class ImeFocusController {
     }
 
     private InputMethodManagerDelegate getImmDelegate() {
-        return mViewRootImpl.mContext.getSystemService(InputMethodManager.class).getDelegate();
+        if (mDelegate == null) {
+            mDelegate = mViewRootImpl.mContext.getSystemService(
+                    InputMethodManager.class).getDelegate();
+        }
+        return mDelegate;
     }
 
     @UiThread

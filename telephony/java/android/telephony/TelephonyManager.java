@@ -50,7 +50,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkStats;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -94,6 +93,7 @@ import android.util.Pair;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.CellNetworkScanResult;
+import com.android.internal.telephony.IBooleanConsumer;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.IOns;
 import com.android.internal.telephony.IPhoneSubInfo;
@@ -160,8 +160,8 @@ public class TelephonyManager {
      * into the ResultReceiver Bundle.
      * @hide
      */
-    public static final String MODEM_ACTIVITY_RESULT_KEY =
-            BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY;
+    @SystemApi
+    public static final String MODEM_ACTIVITY_RESULT_KEY = "controller_activity";
 
     /**
      * The process name of the Phone app as well as many other apps that use this process name, such
@@ -193,11 +193,8 @@ public class TelephonyManager {
                     NETWORK_SELECTION_MODE_MANUAL})
     public @interface NetworkSelectionMode {}
 
-    /** @hide */
     public static final int NETWORK_SELECTION_MODE_UNKNOWN = 0;
-    /** @hide */
     public static final int NETWORK_SELECTION_MODE_AUTO = 1;
-    /** @hide */
     public static final int NETWORK_SELECTION_MODE_MANUAL = 2;
 
     /** The otaspMode passed to PhoneStateListener#onOtaspChanged */
@@ -1364,6 +1361,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE =
             "android.telephony.extra.DEFAULT_SUBSCRIPTION_SELECT_TYPE";
 
@@ -1383,6 +1381,7 @@ public class TelephonyManager {
      * to indicate there's no need to re-select any default subscription.
      * @hide
      */
+    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_NONE = 0;
 
     /**
@@ -1390,6 +1389,7 @@ public class TelephonyManager {
      * to indicate there's a need to select default data subscription.
      * @hide
      */
+    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_DATA = 1;
 
     /**
@@ -1397,6 +1397,7 @@ public class TelephonyManager {
      * to indicate there's a need to select default voice call subscription.
      * @hide
      */
+    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_VOICE = 2;
 
     /**
@@ -1404,6 +1405,7 @@ public class TelephonyManager {
      * to indicate there's a need to select default sms subscription.
      * @hide
      */
+    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_SMS = 3;
 
     /**
@@ -1413,6 +1415,7 @@ public class TelephonyManager {
      * which subscription should be the default subscription.
      * @hide
      */
+    @SystemApi
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_ALL = 4;
 
     /**
@@ -1422,6 +1425,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_SIM_COMBINATION_WARNING_TYPE =
             "android.telephony.extra.SIM_COMBINATION_WARNING_TYPE";
 
@@ -1438,6 +1442,7 @@ public class TelephonyManager {
      * to indicate there's no SIM combination warning.
      * @hide
      */
+    @SystemApi
     public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_NONE = 0;
 
     /**
@@ -1445,6 +1450,7 @@ public class TelephonyManager {
      * to indicate two active SIMs are both CDMA hence there might be functional limitation.
      * @hide
      */
+    @SystemApi
     public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_DUAL_CDMA = 1;
 
     /**
@@ -1455,6 +1461,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_SIM_COMBINATION_NAMES =
             "android.telephony.extra.SIM_COMBINATION_NAMES";
 
@@ -1774,6 +1781,24 @@ public class TelephonyManager {
     // Device Info
     //
     //
+
+    /**
+     * Returns the {@link PhoneCapability} for the device or null if it is not available.
+     * <p>
+     * Requires Permission: READ_PHONE_STATE or that the calling app has
+     * carrier privileges (see {@link #hasCarrierPrivileges}).
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @Nullable
+    public PhoneCapability getPhoneCapability() {
+        try {
+            ITelephony telephony = getITelephony();
+            return telephony == null ? null :
+                    telephony.getPhoneCapability(getSubId(), getOpPackageName(), getFeatureId());
+        } catch (RemoteException ex) {
+            return null;
+        }
+    }
 
     /**
      * Returns the software version number for the device, for example,
@@ -5613,19 +5638,25 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the CDMA ERI icon index to display
+     * Get the CDMA ERI (Enhanced Roaming Indicator) information
+     *
+     * Returns {@link android.telephony#CdmaEriInformation}
+     *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public int getCdmaEriIconIndex() {
-        return getCdmaEriIconIndex(getSubId());
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    @NonNull
+    public CdmaEriInformation getCdmaEriInformation() {
+        return new CdmaEriInformation(
+               getCdmaEriIconMode(getSubId()), getCdmaEriIconIndex(getSubId()));
     }
 
     /**
      * Returns the CDMA ERI icon index to display for a subscription
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @UnsupportedAppUsage
     public int getCdmaEriIconIndex(int subId) {
         try {
@@ -5643,25 +5674,13 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the CDMA ERI icon mode,
-     * 0 - ON
-     * 1 - FLASHING
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public int getCdmaEriIconMode() {
-        return getCdmaEriIconMode(getSubId());
-    }
-
-    /**
      * Returns the CDMA ERI icon mode for a subscription.
      * 0 - ON
      * 1 - FLASHING
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @UnsupportedAppUsage
     public int getCdmaEriIconMode(int subId) {
         try {
@@ -7919,6 +7938,36 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
+     * @param operatorNumeric the PLMN ID of the network to select.
+     * @param ran the initial suggested radio access network type.
+     *         If registration fails, the RAN is not available after, the RAN is not within the
+     *         network types specified by {@link #setPreferredNetworkTypeBitmask}, or the value is
+     *         {@link AccessNetworkConstants.AccessNetworkType#UNKNOWN}, modem will select
+     *         the next best RAN for network registration.
+     * @param persistSelection whether the selection will persist until reboot.
+     *         If true, only allows attaching to the selected PLMN until reboot; otherwise,
+     *         attach to the chosen PLMN and resume normal network selection next time.
+     * @return {@code true} on success; {@code false} on any failure.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public boolean setNetworkSelectionModeManual(@NonNull String operatorNumeric,
+            @AccessNetworkConstants.RadioAccessNetworkType int ran, boolean persistSelection) {
+        return setNetworkSelectionModeManual(new OperatorInfo("" /* operatorAlphaLong */,
+                "" /* operatorAlphaShort */, operatorNumeric, ran), persistSelection);
+    }
+
+    /**
+     * Ask the radio to connect to the input network and change selection mode to manual.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * @param operatorInfo included the PLMN id, long name, short name of the operator to attach to.
      * @param persistSelection whether the selection will persist until reboot. If true, only allows
      * attaching to the selected PLMN until reboot; otherwise, attach to the chosen PLMN and resume
@@ -7947,14 +7996,18 @@ public class TelephonyManager {
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
-
-     * @return the network selection mode.
+     *  <p>Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
+     * READ_PRECISE_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * @hide
+     * @return the network selection mode.
      */
-    @NetworkSelectionMode
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public int getNetworkSelectionMode() {
+    @SuppressAutoDoc // No support for carrier privileges (b/72967236).
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PRECISE_PHONE_STATE
+    })
+    public @NetworkSelectionMode int getNetworkSelectionMode() {
         int mode = NETWORK_SELECTION_MODE_UNKNOWN;
         try {
             ITelephony telephony = getITelephony();
@@ -10182,7 +10235,8 @@ public class TelephonyManager {
      * Requests the modem activity info. The recipient will place the result
      * in `result`.
      * @param result The object on which the recipient will send the resulting
-     * {@link android.telephony.ModemActivityInfo} object.
+     * {@link android.telephony.ModemActivityInfo} object with key of
+     * {@link #MODEM_ACTIVITY_RESULT_KEY}.
      * @hide
      */
     @SystemApi
@@ -12521,6 +12575,51 @@ public class TelephonyManager {
     }
 
     /**
+     * Specify which bands modem's background scan must act on.
+     * If {@code specifiers} is non-empty, the scan will be restricted to the bands specified.
+     * Otherwise, it scans all bands.
+     *
+     * For example, CBRS is only on LTE band 48. By specifying this band,
+     * modem saves more power.
+     *
+     * @param specifiers which bands to scan.
+     * @param executor The executor to execute the callback on
+     * @param callback The callback that gets invoked when the radio responds to the request. Called
+     *                 with {@code true} if the request succeeded, {@code false} otherwise.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setSystemSelectionChannels(@NonNull List<RadioAccessSpecifier> specifiers,
+            @Nullable @CallbackExecutor Executor executor,
+            @Nullable Consumer<Boolean> callback) {
+        Objects.requireNonNull(specifiers, "Specifiers must not be null.");
+        if (callback != null) {
+            Objects.requireNonNull(executor, "Executor must not be null when"
+                    + " the callback is nonnull");
+        }
+
+        IBooleanConsumer aidlConsumer = callback == null ? null : new IBooleanConsumer.Stub() {
+            @Override
+            public void accept(boolean result) {
+                executor.execute(() -> callback.accept(result));
+            }
+        };
+
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.setSystemSelectionChannels(specifiers, getSubId(), aidlConsumer);
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+    }
+
+    /**
      * Verifies whether the input MCC/MNC and MVNO correspond to the current carrier.
      *
      * @param mccmnc the carrier's mccmnc that you want to match
@@ -12740,5 +12839,23 @@ public class TelephonyManager {
             Log.e(TAG, "changeIccLockPassword RemoteException", e);
         }
         return 0;
+    }
+
+    /**
+     * Called when userActivity is signalled in the power manager.
+     * This should only be called from system Uid.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void notifyUserActivity() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.userActivity();
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

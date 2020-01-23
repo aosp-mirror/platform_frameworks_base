@@ -195,7 +195,7 @@ public class AnalogFrontendSettings extends FrontendSettings {
     /**
      * Creates a builder for {@link AnalogFrontendSettings}.
      *
-     * @param the context of the caller.
+     * @param context the context of the caller.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
@@ -223,7 +223,7 @@ public class AnalogFrontendSettings extends FrontendSettings {
          * Sets analog signal type.
          */
         @NonNull
-        public Builder setASignalType(@SignalType int signalType) {
+        public Builder setSignalType(@SignalType int signalType) {
             mSignalType = signalType;
             return this;
         }

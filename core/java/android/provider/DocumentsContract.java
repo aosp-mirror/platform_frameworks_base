@@ -16,6 +16,8 @@
 
 package android.provider;
 
+import static android.annotation.SystemApi.Client.MODULE_APPS;
+
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkCollectionNotEmpty;
 
@@ -24,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentInterface;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -47,6 +50,7 @@ import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.Parcelable;
 import android.os.ParcelableException;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -943,6 +947,20 @@ public final class DocumentsContract {
      */
     public static Uri buildDocumentUri(String authority, String documentId) {
         return getBaseDocumentUriBuilder(authority).appendPath(documentId).build();
+    }
+
+    /**
+     * Builds URI as described in {@link #buildDocumentUri(String, String)}, but such that it will
+     * be associated with the given user.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_APPS)
+    @NonNull
+    public static Uri buildDocumentUriAsUser(
+            @NonNull String authority, @NonNull String documentId, @NonNull UserHandle user) {
+        return ContentProvider.maybeAddUserId(
+                buildDocumentUri(authority, documentId), user.getIdentifier());
     }
 
     /** {@hide} */

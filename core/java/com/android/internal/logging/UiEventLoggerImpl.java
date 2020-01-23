@@ -36,4 +36,14 @@ public class UiEventLoggerImpl implements UiEventLogger {
             StatsLog.write(StatsLog.UI_EVENT_REPORTED, eventID, uid, packageName);
         }
     }
+
+    @Override
+    public void logWithInstanceId(UiEventEnum event, int uid, String packageName,
+            InstanceId instance) {
+        final int eventID = event.getId();
+        if (eventID > 0) {
+            StatsLog.write(StatsLog.UI_EVENT_REPORTED, eventID, uid, packageName,
+                    instance.getId());
+        }
+    }
 }
