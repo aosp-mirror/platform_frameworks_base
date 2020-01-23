@@ -130,7 +130,7 @@ class ConversionUtil {
         aidlPhrase.id = apiPhrase.id;
         aidlPhrase.recognitionModes = api2aidlRecognitionModes(apiPhrase.recognitionModes);
         aidlPhrase.users = Arrays.copyOf(apiPhrase.users, apiPhrase.users.length);
-        aidlPhrase.locale = apiPhrase.locale;
+        aidlPhrase.locale = apiPhrase.locale.toLanguageTag();
         aidlPhrase.text = apiPhrase.text;
         return aidlPhrase;
     }

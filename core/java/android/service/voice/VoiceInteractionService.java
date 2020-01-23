@@ -16,14 +16,18 @@
 
 package android.service.voice;
 
+import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.app.Service;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
+import android.media.voice.KeyphraseModelManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -301,6 +305,23 @@ public class VoiceInteractionService extends Service {
                     mKeyphraseEnrollmentInfo, mInterface, mSystemService);
         }
         return mHotwordDetector;
+    }
+
+    /**
+     * Creates an {@link KeyphraseModelManager} to use for enrolling voice models outside of the
+     * pre-bundled system voice models.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES)
+    @NonNull
+    public final KeyphraseModelManager createKeyphraseModelManager() {
+        if (mSystemService == null) {
+            throw new IllegalStateException("Not available until onReady() is called");
+        }
+        synchronized (mLock) {
+            return new KeyphraseModelManager(mSystemService);
+        }
     }
 
     /**

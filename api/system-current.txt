@@ -3636,7 +3636,32 @@ package android.hardware.radio {
 package android.hardware.soundtrigger {
 
   public class SoundTrigger {
+    field public static final int RECOGNITION_MODE_GENERIC = 8; // 0x8
+    field public static final int RECOGNITION_MODE_USER_AUTHENTICATION = 4; // 0x4
+    field public static final int RECOGNITION_MODE_USER_IDENTIFICATION = 2; // 0x2
+    field public static final int RECOGNITION_MODE_VOICE_TRIGGER = 1; // 0x1
     field public static final int STATUS_OK = 0; // 0x0
+  }
+
+  public static final class SoundTrigger.Keyphrase implements android.os.Parcelable {
+    ctor public SoundTrigger.Keyphrase(int, int, @NonNull java.util.Locale, @NonNull String, @Nullable int[]);
+    method @NonNull public static android.hardware.soundtrigger.SoundTrigger.Keyphrase readFromParcel(@NonNull android.os.Parcel);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.Keyphrase> CREATOR;
+    field public final int id;
+    field @NonNull public final java.util.Locale locale;
+    field public final int recognitionModes;
+    field @NonNull public final String text;
+    field @NonNull public final int[] users;
+  }
+
+  public static final class SoundTrigger.KeyphraseSoundModel extends android.hardware.soundtrigger.SoundTrigger.SoundModel implements android.os.Parcelable {
+    ctor public SoundTrigger.KeyphraseSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], @Nullable android.hardware.soundtrigger.SoundTrigger.Keyphrase[], int);
+    ctor public SoundTrigger.KeyphraseSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], @Nullable android.hardware.soundtrigger.SoundTrigger.Keyphrase[]);
+    method @NonNull public static android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel readFromParcel(@NonNull android.os.Parcel);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel> CREATOR;
+    field @NonNull public final android.hardware.soundtrigger.SoundTrigger.Keyphrase[] keyphrases;
   }
 
   public static final class SoundTrigger.ModelParamRange implements android.os.Parcelable {
@@ -3675,6 +3700,16 @@ package android.hardware.soundtrigger {
     method public int getCaptureSession();
     method public byte[] getData();
     method public boolean isCaptureAvailable();
+  }
+
+  public static class SoundTrigger.SoundModel {
+    field public static final int TYPE_GENERIC_SOUND = 1; // 0x1
+    field public static final int TYPE_KEYPHRASE = 0; // 0x0
+    field @NonNull public final byte[] data;
+    field public final int type;
+    field @NonNull public final java.util.UUID uuid;
+    field @NonNull public final java.util.UUID vendorUuid;
+    field public final int version;
   }
 
 }
@@ -5877,6 +5912,16 @@ package android.media.tv.tuner.frontend {
     method public void onScanStopped();
     method public void onSignalType(int);
     method public void onSymbolRates(@NonNull int[]);
+  }
+
+}
+
+package android.media.voice {
+
+  public final class KeyphraseModelManager {
+    method @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public void deleteKeyphraseSoundModel(int, @NonNull java.util.Locale);
+    method @Nullable @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel getKeyphraseSoundModel(int, @NonNull java.util.Locale);
+    method @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public void updateKeyphraseSoundModel(@NonNull android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel);
   }
 
 }
@@ -10459,6 +10504,14 @@ package android.service.trust {
     field public static final int TOKEN_STATE_ACTIVE = 1; // 0x1
     field public static final int TOKEN_STATE_INACTIVE = 0; // 0x0
     field public static final String TRUST_AGENT_META_DATA = "android.service.trust.trustagent";
+  }
+
+}
+
+package android.service.voice {
+
+  public class VoiceInteractionService extends android.app.Service {
+    method @NonNull @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public final android.media.voice.KeyphraseModelManager createKeyphraseModelManager();
   }
 
 }
