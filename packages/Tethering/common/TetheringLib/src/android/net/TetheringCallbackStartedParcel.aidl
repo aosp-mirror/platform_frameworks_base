@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,15 @@ package android.net;
 
 import android.net.Network;
 import android.net.TetheringConfigurationParcel;
-import android.net.TetheringCallbackStartedParcel;
 import android.net.TetherStatesParcel;
 
 /**
- * Callback class for receiving tethering changed events.
+ * Initial information reported by tethering upon callback registration.
  * @hide
  */
-oneway interface ITetheringEventCallback
-{
-    /** Called immediately after the callbacks are registered */
-    void onCallbackStarted(in TetheringCallbackStartedParcel parcel);
-    void onCallbackStopped(int errorCode);
-    void onUpstreamChanged(in Network network);
-    void onConfigurationChanged(in TetheringConfigurationParcel config);
-    void onTetherStatesChanged(in TetherStatesParcel states);
+parcelable TetheringCallbackStartedParcel {
+    boolean tetheringSupported;
+    Network upstreamNetwork;
+    TetheringConfigurationParcel config;
+    TetherStatesParcel states;
 }

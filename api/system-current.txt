@@ -5966,27 +5966,27 @@ package android.net {
     method @NonNull @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD) public android.net.SocketKeepalive createNattKeepalive(@NonNull android.net.Network, @NonNull android.os.ParcelFileDescriptor, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD) public android.net.SocketKeepalive createSocketKeepalive(@NonNull android.net.Network, @NonNull java.net.Socket, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
     method @Deprecated @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public String getCaptivePortalServerUrl();
-    method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void getLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEntitlementResultListener);
-    method @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void getLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEntitlementResultListener);
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
     method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public int registerNetworkProvider(@NonNull android.net.NetworkProvider);
-    method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
     method @Deprecated public void requestNetwork(@NonNull android.net.NetworkRequest, @NonNull android.net.ConnectivityManager.NetworkCallback, int, int, @NonNull android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_AIRPLANE_MODE, android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void setAirplaneMode(boolean);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public boolean shouldAvoidBadWifi();
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(@NonNull android.net.Network, @NonNull android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback, android.os.Handler);
-    method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void stopTethering(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void stopTethering(int);
     method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void unregisterNetworkProvider(@NonNull android.net.NetworkProvider);
-    method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void unregisterTetheringEventCallback(@NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void unregisterTetheringEventCallback(@NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
     field public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC = "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
     field public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT = "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
     field public static final int TETHERING_BLUETOOTH = 2; // 0x2
     field public static final int TETHERING_USB = 1; // 0x1
     field public static final int TETHERING_WIFI = 0; // 0x0
-    field public static final int TETHER_ERROR_ENTITLEMENT_UNKONWN = 13; // 0xd
-    field public static final int TETHER_ERROR_NO_ERROR = 0; // 0x0
-    field public static final int TETHER_ERROR_PROVISION_FAILED = 11; // 0xb
+    field @Deprecated public static final int TETHER_ERROR_ENTITLEMENT_UNKONWN = 13; // 0xd
+    field @Deprecated public static final int TETHER_ERROR_NO_ERROR = 0; // 0x0
+    field @Deprecated public static final int TETHER_ERROR_PROVISION_FAILED = 11; // 0xb
     field public static final int TYPE_NONE = -1; // 0xffffffff
     field @Deprecated public static final int TYPE_WIFI_P2P = 13; // 0xd
   }
@@ -5997,13 +5997,13 @@ package android.net {
     method public void onTetheringStarted();
   }
 
-  public static interface ConnectivityManager.OnTetheringEntitlementResultListener {
-    method public void onTetheringEntitlementResult(int);
+  @Deprecated public static interface ConnectivityManager.OnTetheringEntitlementResultListener {
+    method @Deprecated public void onTetheringEntitlementResult(int);
   }
 
-  public abstract static class ConnectivityManager.OnTetheringEventCallback {
-    ctor public ConnectivityManager.OnTetheringEventCallback();
-    method public void onUpstreamChanged(@Nullable android.net.Network);
+  @Deprecated public abstract static class ConnectivityManager.OnTetheringEventCallback {
+    ctor @Deprecated public ConnectivityManager.OnTetheringEventCallback();
+    method @Deprecated public void onUpstreamChanged(@Nullable android.net.Network);
   }
 
   public class InvalidPacketException extends java.lang.Exception {
@@ -6402,6 +6402,61 @@ package android.net {
 
   public final class TelephonyNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
     method public boolean satisfiedBy(android.net.NetworkSpecifier);
+  }
+
+  public class TetheringManager {
+    method public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.TetheringEventCallback);
+    method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void requestLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.OnTetheringEntitlementResultListener);
+    method public void stopAllTethering();
+    method public void stopTethering(int);
+    method public void unregisterTetheringEventCallback(@NonNull android.net.TetheringManager.TetheringEventCallback);
+    field public static final String ACTION_TETHER_STATE_CHANGED = "android.net.conn.TETHER_STATE_CHANGED";
+    field public static final String EXTRA_ACTIVE_LOCAL_ONLY = "android.net.extra.ACTIVE_LOCAL_ONLY";
+    field public static final String EXTRA_ACTIVE_TETHER = "tetherArray";
+    field public static final String EXTRA_AVAILABLE_TETHER = "availableArray";
+    field public static final String EXTRA_ERRORED_TETHER = "erroredArray";
+    field public static final int TETHERING_BLUETOOTH = 2; // 0x2
+    field public static final int TETHERING_INVALID = -1; // 0xffffffff
+    field public static final int TETHERING_USB = 1; // 0x1
+    field public static final int TETHERING_WIFI = 0; // 0x0
+    field public static final int TETHERING_WIFI_P2P = 3; // 0x3
+    field public static final int TETHER_ERROR_DHCPSERVER_ERROR = 12; // 0xc
+    field public static final int TETHER_ERROR_DISABLE_NAT_ERROR = 9; // 0x9
+    field public static final int TETHER_ERROR_ENABLE_NAT_ERROR = 8; // 0x8
+    field public static final int TETHER_ERROR_ENTITLEMENT_UNKNOWN = 13; // 0xd
+    field public static final int TETHER_ERROR_IFACE_CFG_ERROR = 10; // 0xa
+    field public static final int TETHER_ERROR_MASTER_ERROR = 5; // 0x5
+    field public static final int TETHER_ERROR_NO_ACCESS_TETHERING_PERMISSION = 15; // 0xf
+    field public static final int TETHER_ERROR_NO_CHANGE_TETHERING_PERMISSION = 14; // 0xe
+    field public static final int TETHER_ERROR_NO_ERROR = 0; // 0x0
+    field public static final int TETHER_ERROR_PROVISION_FAILED = 11; // 0xb
+    field public static final int TETHER_ERROR_SERVICE_UNAVAIL = 2; // 0x2
+    field public static final int TETHER_ERROR_TETHER_IFACE_ERROR = 6; // 0x6
+    field public static final int TETHER_ERROR_UNAVAIL_IFACE = 4; // 0x4
+    field public static final int TETHER_ERROR_UNKNOWN_IFACE = 1; // 0x1
+    field public static final int TETHER_ERROR_UNSUPPORTED = 3; // 0x3
+    field public static final int TETHER_ERROR_UNTETHER_IFACE_ERROR = 7; // 0x7
+  }
+
+  public static interface TetheringManager.OnTetheringEntitlementResultListener {
+    method public void onTetheringEntitlementResult(int);
+  }
+
+  public abstract static class TetheringManager.TetheringEventCallback {
+    ctor public TetheringManager.TetheringEventCallback();
+    method public void onError(@NonNull String, int);
+    method @Deprecated public void onTetherableInterfaceRegexpsChanged(@NonNull android.net.TetheringManager.TetheringInterfaceRegexps);
+    method public void onTetherableInterfacesChanged(@NonNull java.util.List<java.lang.String>);
+    method public void onTetheredInterfacesChanged(@NonNull java.util.List<java.lang.String>);
+    method public void onTetheringSupported(boolean);
+    method public void onUpstreamChanged(@Nullable android.net.Network);
+  }
+
+  @Deprecated public static class TetheringManager.TetheringInterfaceRegexps {
+    ctor @Deprecated public TetheringManager.TetheringInterfaceRegexps(@NonNull String[], @NonNull String[], @NonNull String[]);
+    method @Deprecated @NonNull public java.util.List<java.lang.String> getTetherableBluetoothRegexs();
+    method @Deprecated @NonNull public java.util.List<java.lang.String> getTetherableUsbRegexs();
+    method @Deprecated @NonNull public java.util.List<java.lang.String> getTetherableWifiRegexs();
   }
 
   public class TrafficStats {
