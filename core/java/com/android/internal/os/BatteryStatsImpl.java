@@ -12644,7 +12644,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
     /*@hide */
     public WifiBatteryStats getWifiBatteryStats() {
-        WifiBatteryStats s = new WifiBatteryStats();
         final int which = STATS_SINCE_CHARGED;
         final long rawRealTime = SystemClock.elapsedRealtime() * 1000;
         final ControllerActivityCounter counter = getWifiControllerActivity();
@@ -12675,24 +12674,16 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
             timeSignalStrengthTimeMs[i] = getWifiSignalStrengthTime(i, rawRealTime, which) / 1000;
         }
-        s.setLoggingDurationMillis(computeBatteryRealtime(rawRealTime, which) / 1000);
-        s.setKernelActiveTimeMillis(getWifiActiveTime(rawRealTime, which) / 1000);
-        s.setNumPacketsTx(getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which));
-        s.setNumBytesTx(getNetworkActivityBytes(NETWORK_WIFI_TX_DATA, which));
-        s.setNumPacketsRx(getNetworkActivityPackets(NETWORK_WIFI_RX_DATA, which));
-        s.setNumBytesRx(getNetworkActivityBytes(NETWORK_WIFI_RX_DATA, which));
-        s.setSleepTimeMillis(sleepTimeMs);
-        s.setIdleTimeMillis(idleTimeMs);
-        s.setRxTimeMillis(rxTimeMs);
-        s.setTxTimeMillis(txTimeMs);
-        s.setScanTimeMillis(scanTimeMs);
-        s.setEnergyConsumedMaMillis(energyConsumedMaMs);
-        s.setNumAppScanRequest(numAppScanRequest);
-        s.setTimeInStateMillis(timeInStateMs);
-        s.setTimeInSupplicantStateMillis(timeInSupplStateMs);
-        s.setTimeInRxSignalStrengthLevelMillis(timeSignalStrengthTimeMs);
-        s.setMonitoredRailChargeConsumedMaMillis(monitoredRailChargeConsumedMaMs);
-        return s;
+        return new WifiBatteryStats(
+                computeBatteryRealtime(rawRealTime, which) / 1000,
+                getWifiActiveTime(rawRealTime, which) / 1000,
+                getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which),
+                getNetworkActivityBytes(NETWORK_WIFI_TX_DATA, which),
+                getNetworkActivityPackets(NETWORK_WIFI_RX_DATA, which),
+                getNetworkActivityBytes(NETWORK_WIFI_RX_DATA, which),
+                sleepTimeMs, scanTimeMs, idleTimeMs, rxTimeMs, txTimeMs, energyConsumedMaMs,
+                numAppScanRequest, timeInStateMs, timeSignalStrengthTimeMs, timeInSupplStateMs,
+                monitoredRailChargeConsumedMaMs);
     }
 
     /*@hide */

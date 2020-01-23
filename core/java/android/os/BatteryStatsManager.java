@@ -42,7 +42,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 @SystemApi
 @SystemService(Context.BATTERY_STATS_SERVICE)
-public class BatteryStatsManager {
+public final class BatteryStatsManager {
     /**
      * Wifi states.
      *
@@ -166,7 +166,7 @@ public class BatteryStatsManager {
      * @param newRssi The new RSSI value.
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteWifiRssiChanged(@IntRange(from = -127, to = 0) int newRssi) {
+    public void reportWifiRssiChanged(@IntRange(from = -127, to = 0) int newRssi) {
         try {
             mBatteryStats.noteWifiRssiChanged(newRssi);
         } catch (RemoteException e) {
@@ -178,7 +178,7 @@ public class BatteryStatsManager {
      * Indicates that wifi was toggled on.
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteWifiOn() {
+    public void reportWifiOn() {
         try {
             mBatteryStats.noteWifiOn();
         } catch (RemoteException e) {
@@ -190,7 +190,7 @@ public class BatteryStatsManager {
      * Indicates that wifi was toggled off.
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteWifiOff() {
+    public void reportWifiOff() {
         try {
             mBatteryStats.noteWifiOff();
         } catch (RemoteException e) {
@@ -205,7 +205,7 @@ public class BatteryStatsManager {
      * @param accessPoint SSID of the network if wifi is connected to STA, else null.
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteWifiState(@WifiState int newWifiState,
+    public void reportWifiState(@WifiState int newWifiState,
             @Nullable String accessPoint) {
         try {
             mBatteryStats.noteWifiState(newWifiState, accessPoint);
@@ -220,7 +220,7 @@ public class BatteryStatsManager {
      * @param ws Worksource (to be used for battery blaming).
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteWifiScanStartedFromSource(@NonNull WorkSource ws) {
+    public void reportWifiScanStartedFromSource(@NonNull WorkSource ws) {
         try {
             mBatteryStats.noteWifiScanStartedFromSource(ws);
         } catch (RemoteException e) {
@@ -234,7 +234,7 @@ public class BatteryStatsManager {
      * @param ws Worksource (to be used for battery blaming).
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteWifiScanStoppedFromSource(@NonNull WorkSource ws) {
+    public void reportWifiScanStoppedFromSource(@NonNull WorkSource ws) {
         try {
             mBatteryStats.noteWifiScanStoppedFromSource(ws);
         } catch (RemoteException e) {
@@ -249,7 +249,7 @@ public class BatteryStatsManager {
      * @param csph Channels scanned per hour.
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteWifiBatchedScanStartedFromSource(@NonNull WorkSource ws,
+    public void reportWifiBatchedScanStartedFromSource(@NonNull WorkSource ws,
             @IntRange(from = 0) int csph) {
         try {
             mBatteryStats.noteWifiBatchedScanStartedFromSource(ws, csph);
@@ -264,7 +264,7 @@ public class BatteryStatsManager {
      * @param ws Worksource (to be used for battery blaming).
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteWifiBatchedScanStoppedFromSource(@NonNull WorkSource ws) {
+    public void reportWifiBatchedScanStoppedFromSource(@NonNull WorkSource ws) {
         try {
             mBatteryStats.noteWifiBatchedScanStoppedFromSource(ws);
         } catch (RemoteException e) {
@@ -308,7 +308,7 @@ public class BatteryStatsManager {
      * @param ws Worksource (to be used for battery blaming).
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteFullWifiLockAcquiredFromSource(@NonNull WorkSource ws) {
+    public void reportFullWifiLockAcquiredFromSource(@NonNull WorkSource ws) {
         try {
             mBatteryStats.noteFullWifiLockAcquiredFromSource(ws);
         } catch (RemoteException e) {
@@ -322,7 +322,7 @@ public class BatteryStatsManager {
      * @param ws Worksource (to be used for battery blaming).
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteFullWifiLockReleasedFromSource(@NonNull WorkSource ws) {
+    public void reportFullWifiLockReleasedFromSource(@NonNull WorkSource ws) {
         try {
             mBatteryStats.noteFullWifiLockReleasedFromSource(ws);
         } catch (RemoteException e) {
@@ -338,7 +338,7 @@ public class BatteryStatsManager {
      *                   authentication failure.
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteWifiSupplicantStateChanged(@WifiSupplState int newSupplState,
+    public void reportWifiSupplicantStateChanged(@WifiSupplState int newSupplState,
             boolean failedAuth) {
         try {
             mBatteryStats.noteWifiSupplicantStateChanged(newSupplState, failedAuth);
@@ -353,7 +353,7 @@ public class BatteryStatsManager {
      * @param uid UID of the app that acquired the wifi lock (to be used for battery blaming).
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteWifiMulticastEnabled(int uid) {
+    public void reportWifiMulticastEnabled(int uid) {
         try {
             mBatteryStats.noteWifiMulticastEnabled(uid);
         } catch (RemoteException e) {
@@ -367,7 +367,7 @@ public class BatteryStatsManager {
      * @param uid UID of the app that released the wifi lock (to be used for battery blaming).
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteWifiMulticastDisabled(int uid) {
+    public void reportWifiMulticastDisabled(int uid) {
         try {
             mBatteryStats.noteWifiMulticastDisabled(uid);
         } catch (RemoteException e) {
