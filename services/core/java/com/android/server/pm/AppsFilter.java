@@ -302,8 +302,9 @@ public class AppsFilter {
      *                   initiating uid.
      */
     public void grantImplicitAccess(int callingUid, int targetUid) {
-        if (mImplicitlyQueryable.add(targetUid, callingUid) && DEBUG_LOGGING) {
-            Slog.wtf(TAG, "implicit access granted: " + callingUid + " -> " + targetUid);
+        if (targetUid != callingUid
+                && mImplicitlyQueryable.add(targetUid, callingUid) && DEBUG_LOGGING) {
+            Slog.wtf(TAG, "implicit access granted: " + targetUid + " -> " + callingUid);
         }
     }
 
