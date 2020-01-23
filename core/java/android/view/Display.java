@@ -423,10 +423,14 @@ public final class Display {
     /**
      * Internal method to create a display.
      * The display created with this method will have a static {@link DisplayAdjustments} applied.
-     * Applications should use {@link android.view.WindowManager#getDefaultDisplay()}
-     * or {@link android.hardware.display.DisplayManager#getDisplay}
-     * to get a display object.
+     * Applications should use {@link android.content.Context#getDisplay} with
+     * {@link android.app.Activity} or a context associated with a {@link Display} via
+     * {@link android.content.Context#createDisplayContext(Display)}
+     * to get a display object associated with a {@link android.app.Context}, or
+     * {@link android.hardware.display.DisplayManager#getDisplay} to get a display object by id.
      *
+     * @see android.content.Context#getDisplay()
+     * @see android.content.Context#createDisplayContext(Display)
      * @hide
      */
     public Display(DisplayManagerGlobal global, int displayId, /*@NotNull*/ DisplayInfo displayInfo,
