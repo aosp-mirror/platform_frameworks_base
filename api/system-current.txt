@@ -7092,6 +7092,14 @@ package android.provider {
 
 }
 
+package android.se.omapi {
+
+  public final class Reader {
+    method @RequiresPermission(android.Manifest.permission.SECURE_ELEMENT_PRIVILEGED) public boolean reset();
+  }
+
+}
+
 package android.security.keystore {
 
   public abstract class AttestationUtils {
