@@ -511,6 +511,10 @@ public class AppsFilter {
                 }
                 return true;
             }
+            if (targetPkg.isStaticSharedLibrary()) {
+                // not an app, this filtering takes place at a higher level
+                return false;
+            }
             final String targetName = targetPkg.getPackageName();
             Trace.beginSection("getAppId");
             final int callingAppId;
