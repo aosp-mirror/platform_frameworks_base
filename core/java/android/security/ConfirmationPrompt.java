@@ -212,20 +212,16 @@ public class ConfirmationPrompt {
 
     private int getUiOptionsAsFlags() {
         int uiOptionsAsFlags = 0;
-        try {
-            ContentResolver contentResolver = mContext.getContentResolver();
-            int inversionEnabled = Settings.Secure.getInt(contentResolver,
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
-            if (inversionEnabled == 1) {
-                uiOptionsAsFlags |= UI_OPTION_ACCESSIBILITY_INVERTED_FLAG;
-            }
-            float fontScale = Settings.System.getFloat(contentResolver,
-                    Settings.System.FONT_SCALE);
-            if (fontScale > 1.0) {
-                uiOptionsAsFlags |= UI_OPTION_ACCESSIBILITY_MAGNIFIED_FLAG;
-            }
-        } catch (SettingNotFoundException e) {
-            Log.w(TAG, "Unexpected SettingNotFoundException");
+        ContentResolver contentResolver = mContext.getContentResolver();
+        int inversionEnabled = Settings.Secure.getInt(contentResolver,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0);
+        if (inversionEnabled == 1) {
+            uiOptionsAsFlags |= UI_OPTION_ACCESSIBILITY_INVERTED_FLAG;
+        }
+        float fontScale = Settings.System.getFloat(contentResolver,
+                Settings.System.FONT_SCALE, (float) 1.0);
+        if (fontScale > 1.0) {
+            uiOptionsAsFlags |= UI_OPTION_ACCESSIBILITY_MAGNIFIED_FLAG;
         }
         return uiOptionsAsFlags;
     }
