@@ -17,7 +17,6 @@
 package android.telephony;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -60,7 +59,7 @@ public final class ModemActivityInfo implements Parcelable {
     private int mRxTimeMs;
 
     public ModemActivityInfo(long timestamp, int sleepTimeMs, int idleTimeMs,
-                        @Nullable int[] txTimeMs, int rxTimeMs) {
+                        @NonNull int[] txTimeMs, int rxTimeMs) {
         mTimestamp = timestamp;
         mSleepTimeMs = sleepTimeMs;
         mIdleTimeMs = idleTimeMs;
@@ -69,13 +68,10 @@ public final class ModemActivityInfo implements Parcelable {
     }
 
     /** helper API to populate tx power range for each bucket **/
-    private void populateTransmitPowerRange(@Nullable int[] transmitPowerMs) {
+    private void populateTransmitPowerRange(@NonNull int[] transmitPowerMs) {
         int i = 0;
-        if (transmitPowerMs != null) {
-            for ( ; i < Math.min(transmitPowerMs.length, TX_POWER_LEVELS); i++) {
-                mTransmitPowerInfo.add(i,
-                        new TransmitPower(TX_POWER_RANGES[i], transmitPowerMs[i]));
-            }
+        for ( ; i < Math.min(transmitPowerMs.length, TX_POWER_LEVELS); i++) {
+            mTransmitPowerInfo.add(i, new TransmitPower(TX_POWER_RANGES[i], transmitPowerMs[i]));
         }
         // Make sure that mTransmitPowerInfo is fully initialized.
         for ( ; i < TX_POWER_LEVELS; i++) {
@@ -98,7 +94,7 @@ public final class ModemActivityInfo implements Parcelable {
         return 0;
     }
 
-    public static final @NonNull Parcelable.Creator<ModemActivityInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ModemActivityInfo> CREATOR =
             new Parcelable.Creator<ModemActivityInfo>() {
         public ModemActivityInfo createFromParcel(Parcel in) {
             long timestamp = in.readLong();
@@ -153,7 +149,7 @@ public final class ModemActivityInfo implements Parcelable {
     }
 
     /** @hide */
-    public void setTransmitTimeMillis(@Nullable int[] txTimeMs) {
+    public void setTransmitTimeMillis(int[] txTimeMs) {
         populateTransmitPowerRange(txTimeMs);
     }
 
