@@ -62,6 +62,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
@@ -275,6 +276,9 @@ public class SettingsProvider extends ContentProvider {
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
+    private RemoteCallback mConfigMonitorCallback;
+
+    @GuardedBy("mLock")
     private SettingsRegistry mSettingsRegistry;
 
     @GuardedBy("mLock")
@@ -450,8 +454,17 @@ public class SettingsProvider extends ContentProvider {
 
             case Settings.CALL_METHOD_LIST_CONFIG: {
                 String prefix = getSettingPrefix(args);
-                return packageValuesForCallResult(getAllConfigFlags(prefix),
+                Bundle result = packageValuesForCallResult(getAllConfigFlags(prefix),
                         isTrackingGeneration(args));
+                reportDeviceConfigAccess(prefix);
+                return result;
+            }
+
+            case Settings.CALL_METHOD_REGISTER_MONITOR_CALLBACK_CONFIG: {
+                RemoteCallback callback = args.getParcelable(
+                        Settings.CALL_METHOD_MONITOR_CALLBACK_KEY);
+                setMonitorCallback(callback);
+                break;
             }
 
             case Settings.CALL_METHOD_LIST_GLOBAL: {
@@ -1052,8 +1065,9 @@ public class SettingsProvider extends ContentProvider {
         enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
 
         synchronized (mLock) {
-            return mSettingsRegistry.setSettingsLocked(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM,
-                    prefix, keyValues, resolveCallingPackage());
+            final int key = makeKey(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
+            return mSettingsRegistry.setConfigSettingsLocked(key, prefix, keyValues,
+                    resolveCallingPackage());
         }
     }
 
@@ -2155,6 +2169,59 @@ public class SettingsProvider extends ContentProvider {
         return result;
     }
 
+    private void setMonitorCallback(RemoteCallback callback) {
+        if (callback == null) {
+            return;
+        }
+        getContext().enforceCallingOrSelfPermission(
+                Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS,
+                "Permission denial: registering for config access requires: "
+                        + Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS);
+        synchronized (mLock) {
+            mConfigMonitorCallback = callback;
+        }
+    }
+
+    private void reportDeviceConfigAccess(@Nullable String prefix) {
+        if (prefix == null) {
+            return;
+        }
+        String callingPackage = getCallingPackage();
+        String namespace = prefix.replace("/", "");
+        if (DeviceConfig.getPublicNamespaces().contains(namespace)) {
+            return;
+        }
+        synchronized (mLock) {
+            if (mConfigMonitorCallback != null) {
+                Bundle callbackResult = new Bundle();
+                callbackResult.putString(Settings.EXTRA_MONITOR_CALLBACK_TYPE,
+                        Settings.EXTRA_ACCESS_CALLBACK);
+                callbackResult.putString(Settings.EXTRA_CALLING_PACKAGE, callingPackage);
+                callbackResult.putString(Settings.EXTRA_NAMESPACE, namespace);
+                mConfigMonitorCallback.sendResult(callbackResult);
+            }
+        }
+    }
+
+    private void reportDeviceConfigUpdate(@Nullable String prefix) {
+        if (prefix == null) {
+            return;
+        }
+        String namespace = prefix.replace("/", "");
+        if (DeviceConfig.getPublicNamespaces().contains(namespace)) {
+            return;
+        }
+        synchronized (mLock) {
+            if (mConfigMonitorCallback != null) {
+                Bundle callbackResult = new Bundle();
+                callbackResult.putString(Settings.EXTRA_MONITOR_CALLBACK_TYPE,
+                        Settings.EXTRA_NAMESPACE_UPDATED_CALLBACK);
+                callbackResult.putString(Settings.EXTRA_NAMESPACE, namespace);
+                mConfigMonitorCallback.sendResult(callbackResult);
+            }
+        }
+    }
+
     private static int getRequestingUserId(Bundle args) {
         final int callingUserId = UserHandle.getCallingUserId();
         return (args != null) ? args.getInt(Settings.CALL_METHOD_USER_KEY, callingUserId)
@@ -2715,22 +2782,20 @@ public class SettingsProvider extends ContentProvider {
         }
 
         /**
-         * Set Settings using consumed keyValues, returns true if the keyValues can be set, false
-         * otherwise.
+         * Set Config Settings using consumed keyValues, returns true if the keyValues can be set,
+         * false otherwise.
          */
-        public boolean setSettingsLocked(int type, int userId, String prefix,
+        public boolean setConfigSettingsLocked(int key, String prefix,
                 Map<String, String> keyValues, String packageName) {
-            final int key = makeKey(type, userId);
-
             SettingsState settingsState = peekSettingsStateLocked(key);
             if (settingsState != null) {
-                if (SETTINGS_TYPE_CONFIG == type && settingsState.isNewConfigBannedLocked(prefix,
-                        keyValues)) {
+                if (settingsState.isNewConfigBannedLocked(prefix, keyValues)) {
                     return false;
                 }
                 List<String> changedSettings =
                         settingsState.setSettingsLocked(prefix, keyValues, packageName);
                 if (!changedSettings.isEmpty()) {
+                    reportDeviceConfigUpdate(prefix);
                     notifyForConfigSettingsChangeLocked(key, prefix, changedSettings);
                 }
             }

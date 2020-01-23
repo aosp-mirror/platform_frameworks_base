@@ -30,11 +30,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.times;
 
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.VersionedPackage;
+import android.os.Bundle;
 import android.os.RecoverySystem;
+import android.os.RemoteCallback;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
@@ -44,18 +47,21 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
 import com.android.server.RescueParty.RescuePartyObserver;
 import com.android.server.am.SettingsToPropertiesMapper;
-import com.android.server.utils.FlagNamespaceUtils;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Test RescueParty.
@@ -69,16 +75,25 @@ public class RescuePartyTest {
 
     private static VersionedPackage sFailingPackage = new VersionedPackage("com.package.name", 1);
     private static final String PROP_DISABLE_RESCUE = "persist.sys.disable_rescue";
+    private static final String CALLING_PACKAGE1 = "com.package.name1";
+    private static final String CALLING_PACKAGE2 = "com.package.name2";
+    private static final String NAMESPACE1 = "namespace1";
+    private static final String NAMESPACE2 = "namespace2";
 
     private MockitoSession mSession;
+    private HashMap<String, String> mSystemSettingsMap;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private Context mMockContext;
-
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private PackageWatchdog mMockPackageWatchdog;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private ContentResolver mMockContentResolver;
 
-    private HashMap<String, String> mSystemSettingsMap;
+    @Captor
+    private ArgumentCaptor<RemoteCallback> mMonitorCallbackCaptor;
+    @Captor
+    private ArgumentCaptor<List<String>> mPackageListCaptor;
 
     @Before
     public void setUp() throws Exception {
@@ -90,14 +105,17 @@ public class RescuePartyTest {
                         .spyStatic(SystemProperties.class)
                         .spyStatic(Settings.Global.class)
                         .spyStatic(Settings.Secure.class)
+                        .spyStatic(Settings.Config.class)
                         .spyStatic(SettingsToPropertiesMapper.class)
                         .spyStatic(RecoverySystem.class)
                         .spyStatic(RescueParty.class)
+                        .spyStatic(PackageWatchdog.class)
                         .startMocking();
         mSystemSettingsMap = new HashMap<>();
 
         when(mMockContext.getContentResolver()).thenReturn(mMockContentResolver);
-
+        // Reset observer instance to get new mock context on every run
+        RescuePartyObserver.reset();
 
         // Mock SystemProperties setter and various getters
         doAnswer((Answer<Void>) invocationOnMock -> {
@@ -143,9 +161,11 @@ public class RescuePartyTest {
         doAnswer((Answer<Void>) invocationOnMock -> null)
                 .when(() -> DeviceConfig.resetToDefaults(anyInt(), anyString()));
 
+        // Mock PackageWatchdog
+        doAnswer((Answer<PackageWatchdog>) invocationOnMock -> mMockPackageWatchdog)
+                .when(() -> PackageWatchdog.getInstance(mMockContext));
 
         doReturn(CURRENT_NETWORK_TIME_MILLIS).when(() -> RescueParty.getElapsedRealtime());
-        FlagNamespaceUtils.resetKnownResetNamespacesFlagCounterForTest();
 
         SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL,
                 Integer.toString(RescueParty.LEVEL_NONE));
@@ -162,19 +182,19 @@ public class RescuePartyTest {
     public void testBootLoopDetectionWithExecutionForAllRescueLevels() {
         noteBoot();
 
-        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS);
+        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS, /*resetNamespaces=*/ null);
         assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
         noteBoot();
 
-        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_CHANGES);
+        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_CHANGES, /*resetNamespaces=*/ null);
         assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
         noteBoot();
 
-        verifySettingsResets(Settings.RESET_MODE_TRUSTED_DEFAULTS);
+        verifySettingsResets(Settings.RESET_MODE_TRUSTED_DEFAULTS, /*resetNamespaces=*/ null);
         assertEquals(RescueParty.LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
@@ -189,19 +209,19 @@ public class RescuePartyTest {
     public void testPersistentAppCrashDetectionWithExecutionForAllRescueLevels() {
         notePersistentAppCrash();
 
-        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS);
+        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS, /*resetNamespaces=*/ null);
         assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
         notePersistentAppCrash();
 
-        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_CHANGES);
+        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_CHANGES, /*resetNamespaces=*/ null);
         assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
         notePersistentAppCrash();
 
-        verifySettingsResets(Settings.RESET_MODE_TRUSTED_DEFAULTS);
+        verifySettingsResets(Settings.RESET_MODE_TRUSTED_DEFAULTS, /*resetNamespaces=*/ null);
         assertEquals(RescueParty.LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
@@ -210,6 +230,54 @@ public class RescuePartyTest {
         verify(() -> RecoverySystem.rebootPromptAndWipeUserData(mMockContext, RescueParty.TAG));
         assertEquals(LEVEL_FACTORY_RESET,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
+    }
+
+    @Test
+    public void testNonPersistentAppCrashDetectionWithScopedResets() {
+        RescueParty.onSettingsProviderPublished(mMockContext);
+        verify(() -> Settings.Config.registerMonitorCallback(eq(mMockContentResolver),
+                mMonitorCallbackCaptor.capture()));
+
+        // Record DeviceConfig accesses
+        RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
+        RemoteCallback monitorCallback = mMonitorCallbackCaptor.getValue();
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE1));
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE2));
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE2));
+        // Fake DeviceConfig value changes
+        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE1));
+        verify(mMockPackageWatchdog).startObservingHealth(observer,
+                Arrays.asList(CALLING_PACKAGE1), RescueParty.DEFAULT_OBSERVING_DURATION_MS);
+        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE2));
+        verify(mMockPackageWatchdog, times(2)).startObservingHealth(eq(observer),
+                mPackageListCaptor.capture(),
+                eq(RescueParty.DEFAULT_OBSERVING_DURATION_MS));
+        assertTrue(mPackageListCaptor.getValue().containsAll(
+                Arrays.asList(CALLING_PACKAGE1, CALLING_PACKAGE2)));
+        // Perform and verify scoped resets
+        final String[] expectedResetNamespaces = new String[]{NAMESPACE1, NAMESPACE2};
+        observer.execute(new VersionedPackage(
+                CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_CRASH);
+        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS, expectedResetNamespaces);
+        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS,
+                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
+
+        observer.execute(new VersionedPackage(
+                CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
+        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_CHANGES, expectedResetNamespaces);
+        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES,
+                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
+
+        observer.execute(new VersionedPackage(
+                CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
+        verifySettingsResets(Settings.RESET_MODE_TRUSTED_DEFAULTS, /*resetNamespaces=*/null);
+        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS,
+                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
+
+        observer.execute(new VersionedPackage(
+                CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_CRASH);
+        verify(() -> RecoverySystem.rebootPromptAndWipeUserData(mMockContext, RescueParty.TAG));
+        assertTrue(RescueParty.isAttemptingFactoryReset());
     }
 
     @Test
@@ -227,7 +295,7 @@ public class RescuePartyTest {
 
         RescueParty.onSettingsProviderPublished(mMockContext);
 
-        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS);
+        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS, /*resetNamespaces=*/ null);
         assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
     }
@@ -244,15 +312,6 @@ public class RescuePartyTest {
                 FAKE_NATIVE_NAMESPACE1));
         verify(() -> DeviceConfig.resetToDefaults(Settings.RESET_MODE_TRUSTED_DEFAULTS,
                 FAKE_NATIVE_NAMESPACE2));
-
-        ExtendedMockito.verify(
-                () -> DeviceConfig.setProperty(FlagNamespaceUtils.NAMESPACE_RESCUE_PARTY,
-                        FlagNamespaceUtils.RESET_PLATFORM_PACKAGE_FLAG + 0,
-                        FAKE_NATIVE_NAMESPACE1, /*makeDefault=*/true));
-        ExtendedMockito.verify(
-                () -> DeviceConfig.setProperty(FlagNamespaceUtils.NAMESPACE_RESCUE_PARTY,
-                        FlagNamespaceUtils.RESET_PLATFORM_PACKAGE_FLAG + 1,
-                        FAKE_NATIVE_NAMESPACE2, /*makeDefault=*/true));
     }
 
     @Test
@@ -326,11 +385,19 @@ public class RescuePartyTest {
                 RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS);
     }
 
-    private void verifySettingsResets(int resetMode) {
+    private void verifySettingsResets(int resetMode, String[] resetNamespaces) {
         verify(() -> Settings.Global.resetToDefaultsAsUser(mMockContentResolver, null,
                 resetMode, UserHandle.USER_SYSTEM));
         verify(() -> Settings.Secure.resetToDefaultsAsUser(eq(mMockContentResolver), isNull(),
                 eq(resetMode), anyInt()));
+        // Verify DeviceConfig resets
+        if (resetNamespaces == null) {
+            verify(() -> DeviceConfig.resetToDefaults(resetMode, /*namespace=*/ null));
+        } else {
+            for (String namespace : resetNamespaces) {
+                verify(() -> DeviceConfig.resetToDefaults(resetMode, namespace));
+            }
+        }
     }
 
     private void noteBoot() {
@@ -339,6 +406,22 @@ public class RescuePartyTest {
 
     private void notePersistentAppCrash() {
         RescuePartyObserver.getInstance(mMockContext).execute(new VersionedPackage(
-                "com.package.name", 1), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+                "com.package.name", 1), PackageWatchdog.FAILURE_REASON_APP_CRASH);
+    }
+
+    private Bundle getConfigAccessBundle(String callingPackage, String namespace) {
+        Bundle result = new Bundle();
+        result.putString(Settings.EXTRA_MONITOR_CALLBACK_TYPE, Settings.EXTRA_ACCESS_CALLBACK);
+        result.putString(Settings.EXTRA_CALLING_PACKAGE, callingPackage);
+        result.putString(Settings.EXTRA_NAMESPACE, namespace);
+        return result;
+    }
+
+    private Bundle getConfigNamespaceUpdateBundle(String updatedNamespace) {
+        Bundle result = new Bundle();
+        result.putString(Settings.EXTRA_MONITOR_CALLBACK_TYPE,
+                Settings.EXTRA_NAMESPACE_UPDATED_CALLBACK);
+        result.putString(Settings.EXTRA_NAMESPACE, updatedNamespace);
+        return result;
     }
 }

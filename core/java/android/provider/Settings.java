@@ -63,6 +63,7 @@ import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.PowerManager.AutoPowerSaveModeTriggers;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -2161,6 +2162,11 @@ public final class Settings {
     public static final String CALL_METHOD_PREFIX_KEY = "_prefix";
 
     /**
+     * @hide - RemoteCallback monitor callback argument extra to the fast-path call()-based requests
+     */
+    public static final String CALL_METHOD_MONITOR_CALLBACK_KEY = "_monitor_callback_key";
+
+    /**
      * @hide - String argument extra to the fast-path call()-based requests
      */
     public static final String CALL_METHOD_FLAGS_KEY = "_flags";
@@ -2217,6 +2223,26 @@ public final class Settings {
 
     /** @hide - Private call() method to reset to defaults the 'configuration' table */
     public static final String CALL_METHOD_LIST_CONFIG = "LIST_config";
+
+    /** @hide - Private call() method to register monitor callback for 'configuration' table */
+    public static final String CALL_METHOD_REGISTER_MONITOR_CALLBACK_CONFIG =
+            "REGISTER_MONITOR_CALLBACK_config";
+
+    /** @hide - String argument extra to the config monitor callback */
+    public static final String EXTRA_MONITOR_CALLBACK_TYPE = "monitor_callback_type";
+
+    /** @hide - String argument extra to the config monitor callback */
+    public static final String EXTRA_ACCESS_CALLBACK = "access_callback";
+
+    /** @hide - String argument extra to the config monitor callback */
+    public static final String EXTRA_NAMESPACE_UPDATED_CALLBACK =
+            "namespace_updated_callback";
+
+    /** @hide - String argument extra to the config monitor callback */
+    public static final String EXTRA_NAMESPACE = "namespace";
+
+    /** @hide - String argument extra to the config monitor callback */
+    public static final String EXTRA_CALLING_PACKAGE = "calling_package";
 
     /**
      * Activity Extra: Limit available options in launched activity based on the given authority.
@@ -14152,6 +14178,37 @@ public final class Settings {
                         sProviderHolder.mUri.getAuthority(), CALL_METHOD_RESET_CONFIG, null, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset to defaults for " + DeviceConfig.CONTENT_URI, e);
+            }
+        }
+
+        /**
+         * Register callback for monitoring Config table.
+         *
+         * @param resolver Handle to the content resolver.
+         * @param callback callback to register
+         *
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS)
+        public static void registerMonitorCallback(@NonNull ContentResolver resolver,
+                @NonNull RemoteCallback callback) {
+            registerMonitorCallbackAsUser(resolver, resolver.getUserId(), callback);
+        }
+
+        private static void registerMonitorCallbackAsUser(
+                @NonNull ContentResolver resolver, @UserIdInt int userHandle,
+                @NonNull RemoteCallback callback) {
+            try {
+                Bundle arg = new Bundle();
+                arg.putInt(CALL_METHOD_USER_KEY, userHandle);
+                arg.putParcelable(CALL_METHOD_MONITOR_CALLBACK_KEY, callback);
+                IContentProvider cp = sProviderHolder.getProvider(resolver);
+                cp.call(resolver.getPackageName(), resolver.getFeatureId(),
+                        sProviderHolder.mUri.getAuthority(),
+                        CALL_METHOD_REGISTER_MONITOR_CALLBACK_CONFIG, null, arg);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't register config monitor callback", e);
             }
         }
 
