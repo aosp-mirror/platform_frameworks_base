@@ -30,7 +30,23 @@ cc_test {
         "-g",
     ],
     shared_libs: ["libbase", "libutils"],
+    // For some reasons, cuttlefish (x86) uses x86_64 test suites for testing. Unfortunately, when
+    // the uploader does not pick up the executable from correct output location. The following
+    // workaround allows the test to:
+    //  * upload the 32-bit exectuable for both 32 and 64 bits devices to use
+    //  * refer to the same executable name in Java
+    //  * no need to force the Java test to be archiecture specific.
+    //
+    // See b/145573317 for details.
+    multilib: {
+        lib32: {
+            suffix: "",
+        },
+        lib64: {
+            suffix: "64",  // not really used
+        },
+    },
 
-    test_suites: ["general-tests"],
+    test_suites: ["general-tests", "pts"],
     gtest: false,
 }
