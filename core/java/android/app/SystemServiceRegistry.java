@@ -113,6 +113,7 @@ import android.net.NetworkScoreManager;
 import android.net.NetworkWatchlistManager;
 import android.net.TestNetworkManager;
 import android.net.TetheringManager;
+import android.net.VpnManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
 import android.net.nsd.INsdManager;
@@ -368,6 +369,15 @@ final class SystemServiceRegistry {
                 IBinder b = ServiceManager.getService(Context.IPSEC_SERVICE);
                 IIpSecService service = IIpSecService.Stub.asInterface(b);
                 return new IpSecManager(ctx, service);
+            }});
+
+        registerService(Context.VPN_MANAGEMENT_SERVICE, VpnManager.class,
+                new CachedServiceFetcher<VpnManager>() {
+            @Override
+            public VpnManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
+                IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
+                return new VpnManager(ctx, service);
             }});
 
         registerService(Context.CONNECTIVITY_DIAGNOSTICS_SERVICE,
