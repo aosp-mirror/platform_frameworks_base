@@ -369,7 +369,7 @@ public abstract class PackageManager {
      * Flag parameter to retrieve some information about all applications (even
      * uninstalled ones) which have data directories. This state could have
      * resulted if applications have been deleted with flag
-     * {@code DONT_DELETE_DATA} with a possibility of being replaced or
+     * {@code DELETE_KEEP_DATA} with a possibility of being replaced or
      * reinstalled in future.
      * <p>
      * Note: this flag may cause less information about currently installed
@@ -3517,7 +3517,7 @@ public abstract class PackageManager {
      *         information is retrieved from the list of uninstalled
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
-     *         deleted with {@code DONT_DELETE_DATA} flag set).
+     *         deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
      */
@@ -3543,7 +3543,7 @@ public abstract class PackageManager {
      *         information is retrieved from the list of uninstalled
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
-     *         deleted with {@code DONT_DELETE_DATA} flag set).
+     *         deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
      */
@@ -3564,7 +3564,7 @@ public abstract class PackageManager {
      *         information is retrieved from the list of uninstalled
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
-     *         deleted with {@code DONT_DELETE_DATA} flag set).
+     *         deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
      * @hide
@@ -3811,7 +3811,7 @@ public abstract class PackageManager {
      *         the application information is retrieved from the list of
      *         uninstalled applications (which includes installed applications
      *         as well as applications with data directory i.e. applications
-     *         which had been deleted with {@code DONT_DELETE_DATA} flag set).
+     *         which had been deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
      */
@@ -3838,7 +3838,7 @@ public abstract class PackageManager {
      *         the application information is retrieved from the list of
      *         uninstalled applications (which includes installed applications
      *         as well as applications with data directory i.e. applications
-     *         which had been deleted with {@code DONT_DELETE_DATA} flag set).
+     *         which had been deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
      * @hide
@@ -3961,7 +3961,7 @@ public abstract class PackageManager {
      *         information is retrieved from the list of uninstalled
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
-     *         deleted with {@code DONT_DELETE_DATA} flag set).
+     *         deleted with {@code DELETE_KEEP_DATA} flag set).
      */
     @NonNull
     public abstract List<PackageInfo> getInstalledPackages(@PackageInfoFlags int flags);
@@ -3979,7 +3979,7 @@ public abstract class PackageManager {
      *         information is retrieved from the list of uninstalled
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
-     *         deleted with {@code DONT_DELETE_DATA} flag set).
+     *         deleted with {@code DELETE_KEEP_DATA} flag set).
      */
     @NonNull
     public abstract List<PackageInfo> getPackagesHoldingPermissions(
@@ -3998,7 +3998,7 @@ public abstract class PackageManager {
      *         information is retrieved from the list of uninstalled
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
-     *         deleted with {@code DONT_DELETE_DATA} flag set).
+     *         deleted with {@code DELETE_KEEP_DATA} flag set).
      * @hide
      */
     @NonNull
@@ -4544,7 +4544,7 @@ public abstract class PackageManager {
     /**
      * Return a List of all application packages that are installed for the
      * current user. If flag GET_UNINSTALLED_PACKAGES has been set, a list of all
-     * applications including those deleted with {@code DONT_DELETE_DATA}
+     * applications including those deleted with {@code DELETE_KEEP_DATA}
      * (partially installed apps with data directory) will be returned.
      *
      * @param flags Additional option flags to modify the data returned.
@@ -4555,7 +4555,7 @@ public abstract class PackageManager {
      *         information is retrieved from the list of uninstalled
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
-     *         deleted with {@code DONT_DELETE_DATA} flag set).
+     *         deleted with {@code DELETE_KEEP_DATA} flag set).
      */
     @NonNull
     public abstract List<ApplicationInfo> getInstalledApplications(@ApplicationInfoFlags int flags);
@@ -4564,7 +4564,7 @@ public abstract class PackageManager {
      * Return a List of all application packages that are installed on the
      * device, for a specific user. If flag GET_UNINSTALLED_PACKAGES has been
      * set, a list of all applications including those deleted with
-     * {@code DONT_DELETE_DATA} (partially installed apps with data directory)
+     * {@code DELETE_KEEP_DATA} (partially installed apps with data directory)
      * will be returned.
      *
      * @param flags Additional option flags to modify the data returned.
@@ -4577,7 +4577,7 @@ public abstract class PackageManager {
      *         information is retrieved from the list of uninstalled
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
-     *         deleted with {@code DONT_DELETE_DATA} flag set).
+     *         deleted with {@code DELETE_KEEP_DATA} flag set).
      * @hide
      */
     @NonNull
