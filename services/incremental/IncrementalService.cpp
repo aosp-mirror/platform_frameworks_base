@@ -1013,7 +1013,7 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
         return false;
     }
     FileSystemControlParcel fsControlParcel;
-    fsControlParcel.incremental = std::make_unique<IncrementalFileSystemControlParcel>();
+    fsControlParcel.incremental = IncrementalFileSystemControlParcel();
     fsControlParcel.incremental->cmd.reset(base::unique_fd(::dup(ifs.control.cmd)));
     fsControlParcel.incremental->pendingReads.reset(
             base::unique_fd(::dup(ifs.control.pendingReads)));
