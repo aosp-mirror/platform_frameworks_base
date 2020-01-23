@@ -20,8 +20,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
+import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -1240,16 +1240,15 @@ public class InputMethodService extends AbstractInputMethodService {
                 Context.LAYOUT_INFLATER_SERVICE);
         mWindow = new SoftInputWindow(this, "InputMethod", mTheme, null, null, mDispatcherState,
                 WindowManager.LayoutParams.TYPE_INPUT_METHOD, Gravity.BOTTOM, false);
-        mWindow.getWindow().setFitWindowInsetsTypes(WindowInsets.Type.systemBars());
-        mWindow.getWindow().addPrivateFlags(PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND);
+        mWindow.getWindow().getAttributes().setFitWindowInsetsTypes(WindowInsets.Type.statusBars());
+
+        // IME layout should always be inset by navigation bar, no matter it's current visibility.
         mWindow.getWindow().getDecorView().setOnApplyWindowInsetsListener(
                 (v, insets) -> v.onApplyWindowInsets(
-                        new WindowInsets.Builder(insets).setSystemWindowInsets(
-                                android.graphics.Insets.of(
-                                        insets.getSystemWindowInsetLeft(),
-                                        insets.getSystemWindowInsetTop(),
-                                        insets.getSystemWindowInsetRight(),
-                                        insets.getStableInsetBottom())).build()));
+                        new WindowInsets.Builder(insets).setInsets(
+                                navigationBars(), insets.getMaxInsets(navigationBars()))
+                                .build()));
+
         // For ColorView in DecorView to work, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS needs to be set
         // by default (but IME developers can opt this out later if they want a new behavior).
         mWindow.getWindow().setFlags(

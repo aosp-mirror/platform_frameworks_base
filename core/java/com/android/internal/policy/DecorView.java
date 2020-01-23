@@ -68,6 +68,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Build.VERSION_CODES;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
@@ -282,6 +283,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private Insets mLastBackgroundInsets = Insets.NONE;
     private boolean mDrawLegacyNavigationBarBackground;
 
+    /**
+     * Whether the app targets an SDK that uses the new insets APIs.
+     */
+    private boolean mUseNewInsetsApi;
+
     DecorView(Context context, int featureId, PhoneWindow window,
             WindowManager.LayoutParams params) {
         super(context);
@@ -311,6 +317,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         initResizingPaints();
 
         mLegacyNavigationBarBackgroundPaint.setColor(Color.BLACK);
+        mUseNewInsetsApi = context.getApplicationInfo().targetSdkVersion >= VERSION_CODES.R;
     }
 
     void setBackgroundFallback(@Nullable Drawable fallbackDrawable) {
@@ -1174,20 +1181,24 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         // Note: We don't need to check for IN_SCREEN or INSET_DECOR because unlike the status bar,
         // these flags wouldn't make the window draw behind the navigation bar, unless
         // LAYOUT_HIDE_NAVIGATION was set.
+        //
+        // Note: Once the app targets R+, we no longer do this logic because we can't rely on
+        // SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION to indicate whether the app wants to handle it by
+        // themselves.
         boolean hideNavigation = (sysUiVisibility & SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
                 || !(state == null || state.getSource(ITYPE_NAVIGATION_BAR).isVisible());
         boolean forceConsumingNavBar = (mForceWindowDrawsBarBackgrounds
                         && (attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
                         && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
-                        && (attrs.getFitWindowInsetsTypes() & Type.navigationBars()) != 0
                         && !hideNavigation)
                 || (mLastShouldAlwaysConsumeSystemBars && hideNavigation);
 
         boolean consumingNavBar =
                 ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
                         && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
-                        && (attrs.getFitWindowInsetsTypes() & Type.navigationBars()) != 0
-                        && !hideNavigation)
+                        && !hideNavigation
+                        // TODO IME wrap_content windows need to have margin to work properly
+                        && (!mUseNewInsetsApi || isImeWindow))
                 || forceConsumingNavBar;
 
         // If we didn't request fullscreen layout, but we still got it because of the
@@ -1200,16 +1211,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         boolean consumingStatusBar = (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) == 0
                 && (attrs.flags & FLAG_LAYOUT_IN_SCREEN) == 0
                 && (attrs.flags & FLAG_LAYOUT_INSET_DECOR) == 0
-                && (attrs.getFitWindowInsetsTypes() & Type.statusBars()) != 0
                 && mForceWindowDrawsBarBackgrounds
                 && mLastTopInset != 0
                 || (mLastShouldAlwaysConsumeSystemBars && fullscreen);
 
-        int sides = attrs.getFitWindowInsetsSides();
-        int consumedTop = consumingStatusBar && (sides & Side.TOP) != 0 ? mLastTopInset : 0;
-        int consumedRight = consumingNavBar && (sides & Side.RIGHT) != 0 ? mLastRightInset : 0;
-        int consumedBottom = consumingNavBar && (sides & Side.BOTTOM) != 0 ? mLastBottomInset : 0;
-        int consumedLeft = consumingNavBar && (sides & Side.LEFT) != 0 ? mLastLeftInset : 0;
+        int consumedTop = consumingStatusBar ? mLastTopInset : 0;
+        int consumedRight = consumingNavBar ? mLastRightInset : 0;
+        int consumedBottom = consumingNavBar ? mLastBottomInset : 0;
+        int consumedLeft = consumingNavBar ? mLastLeftInset : 0;
 
         if (mContentRoot != null
                 && mContentRoot.getLayoutParams() instanceof MarginLayoutParams) {

@@ -55,6 +55,7 @@ import android.util.Pools;
 import android.util.Pools.SynchronizedPool;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.view.Window.OnContentApplyWindowInsetsListener;
 import android.view.WindowInsetsAnimationCallback.AnimationBounds;
 import android.view.WindowInsetsAnimationCallback.DispatchMode;
 import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
@@ -1524,6 +1525,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
             children[i].makeOptionalFitsSystemWindows();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void makeFrameworkOptionalFitsSystemWindows() {
+        super.makeFrameworkOptionalFitsSystemWindows();
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < count; i++) {
+            children[i].makeFrameworkOptionalFitsSystemWindows();
         }
     }
 

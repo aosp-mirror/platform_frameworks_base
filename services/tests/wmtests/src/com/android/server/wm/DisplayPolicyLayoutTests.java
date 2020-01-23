@@ -36,7 +36,6 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -216,7 +215,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
 
         mWindow.mAttrs.flags = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-        mWindow.mAttrs.privateFlags = PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND;
         mWindow.mAttrs.setFitWindowInsetsTypes(Type.systemBars());
         addWindow(mWindow);
 

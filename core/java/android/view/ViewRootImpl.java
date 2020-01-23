@@ -32,6 +32,8 @@ import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE;
 import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
 import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -78,6 +80,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.FrameInfo;
 import android.graphics.HardwareRenderer.FrameDrawingCallback;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -122,6 +125,7 @@ import android.view.SurfaceControl.Transaction;
 import android.view.View.AttachInfo;
 import android.view.View.FocusDirection;
 import android.view.View.MeasureSpec;
+import android.view.Window.OnContentApplyWindowInsetsListener;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
@@ -753,6 +757,11 @@ public final class ViewRootImpl implements ViewParent,
     /** Add activity config callback to be notified about override config changes. */
     public void setActivityConfigCallback(ActivityConfigCallback callback) {
         mActivityConfigCallback = callback;
+    }
+
+    public void setOnContentApplyWindowInsetsListener(OnContentApplyWindowInsetsListener listener) {
+        mAttachInfo.mContentOnApplyWindowInsetsListener = listener;
+        requestFitSystemWindows();
     }
 
     public void addWindowCallbacks(WindowCallbacks callback) {
