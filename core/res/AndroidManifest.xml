@@ -3793,6 +3793,24 @@
     <permission android:name="android.permission.CAPTURE_MEDIA_OUTPUT"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to capture the audio played by other apps
+        with the {@code USAGE_VOICE_COMMUNICATION} usage.
+
+        The application may opt out of capturing by setting an allow capture policy of
+        {@link android.media.AudioAttributes#ALLOW_CAPTURE_BY_NONE}.
+
+        There are strong restriction listed at
+        {@link android.media.AudioAttributes#ALLOW_CAPTURE_BY_SYSTEM}
+        on what an app can do with the captured audio.
+
+        See {@code CAPTURE_AUDIO_OUTPUT} and {@code CAPTURE_MEDIA_OUTPUT} for capturing
+        audio use cases other than voice communication playback.
+
+        <p>Not for use by third-party applications.</p>
+        @hide -->
+    <permission android:name="android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows an application to capture audio for hotword detection.
          <p>Not for use by third-party applications.</p>
          @hide -->
