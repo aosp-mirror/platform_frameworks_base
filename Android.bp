@@ -297,6 +297,8 @@ filegroup {
     ],
 }
 
+// AIDL files under these paths are mixture of public and private ones.
+// They shouldn't be exported across module boundaries.
 java_defaults {
     name: "framework-aidl-export-defaults",
     aidl: {
@@ -321,12 +323,6 @@ java_defaults {
             "wifi/aidl-export",
         ],
     },
-
-    required: [
-        // TODO: remove gps_debug and protolog.conf.json when the build system propagates "required" properly.
-        "gps_debug.conf",
-	"protolog.conf.json.gz",
-    ],
 }
 
 // Collection of classes that are generated from non-Java files that are not listed in
@@ -415,6 +411,12 @@ java_defaults {
     plugins: [
         "view-inspector-annotation-processor",
         "staledataclass-annotation-processor",
+    ],
+
+    required: [
+        // TODO: remove gps_debug and protolog.conf.json when the build system propagates "required" properly.
+        "gps_debug.conf",
+        "protolog.conf.json.gz",
     ],
 }
 
@@ -539,7 +541,6 @@ java_library {
 
 java_library {
     name: "framework-annotation-proc",
-    defaults: ["framework-aidl-export-defaults"],
     srcs: [":framework-all-sources"],
     libs: [
         "app-compat-annotations",
