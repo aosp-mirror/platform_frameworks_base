@@ -5107,7 +5107,7 @@ public class Editor {
                     int lineLeft = (int) layout.getLineLeft(line);
                     lineLeft += mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
                     int lineRight = (int) layout.getLineRight(line);
-                    lineRight -= mTextView.getTotalPaddingRight() + mTextView.getScrollX();
+                    lineRight += mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
                     mMagnifierAnimator.mMagnifier.setSourceHorizontalBounds(lineLeft, lineRight);
                 }
                 mMagnifierAnimator.show(showPosInView.x, showPosInView.y);
