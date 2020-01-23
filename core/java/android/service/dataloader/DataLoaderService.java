@@ -58,6 +58,7 @@ public abstract class DataLoaderService extends Service {
      * Managed DataLoader interface. Each instance corresponds to a single installation session.
      * @hide
      */
+    @SystemApi
     public interface DataLoader {
         /**
          * A virtual constructor.
@@ -78,8 +79,8 @@ public abstract class DataLoaderService extends Service {
          * @param removedFiles list of files removed in this installation session.
          * @return false if unable to create and populate all addedFiles.
          */
-        boolean onPrepareImage(Collection<InstallationFile> addedFiles,
-                Collection<String> removedFiles);
+        boolean onPrepareImage(@NonNull Collection<InstallationFile> addedFiles,
+                @NonNull Collection<String> removedFiles);
     }
 
     /**
@@ -88,6 +89,7 @@ public abstract class DataLoaderService extends Service {
      * @return An instance of a DataLoader.
      * @hide
      */
+    @SystemApi
     public @Nullable DataLoader onCreateDataLoader() {
         return null;
     }
@@ -188,6 +190,7 @@ public abstract class DataLoaderService extends Service {
      *
      * @hide
      */
+    @SystemApi
     public static final class FileSystemConnector {
         /**
          * Create a wrapper for a native instance.
@@ -211,8 +214,8 @@ public abstract class DataLoaderService extends Service {
          * @throws IOException if trouble opening the file for writing, such as lack of disk space
          *                     or unavailable media.
          */
-        public void writeData(String name, long offsetBytes, long lengthBytes,
-                ParcelFileDescriptor incomingFd) throws IOException {
+        public void writeData(@NonNull String name, long offsetBytes, long lengthBytes,
+                @NonNull ParcelFileDescriptor incomingFd) throws IOException {
             try {
                 nativeWriteData(mNativeInstance, name, offsetBytes, lengthBytes, incomingFd);
             } catch (RuntimeException e) {

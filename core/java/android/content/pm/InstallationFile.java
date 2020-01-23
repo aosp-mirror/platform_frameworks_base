@@ -19,6 +19,7 @@ package android.content.pm;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,12 +32,14 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@SystemApi
 public final class InstallationFile implements Parcelable {
     public static final int FILE_TYPE_UNKNOWN = -1;
     public static final int FILE_TYPE_APK = 0;
     public static final int FILE_TYPE_LIB = 1;
     public static final int FILE_TYPE_OBB = 2;
 
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FILE_TYPE_"}, value = {
             FILE_TYPE_APK,
