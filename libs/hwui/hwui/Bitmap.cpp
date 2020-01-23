@@ -471,36 +471,14 @@ BitmapPalette Bitmap::computePalette(const SkImageInfo& info, const void* addr, 
     return BitmapPalette::Unknown;
 }
 
-Bitmap::CompressResult Bitmap::compress(JavaCompressFormat format, int32_t quality,
-                                        SkWStream* stream) {
+bool Bitmap::compress(JavaCompressFormat format, int32_t quality, SkWStream* stream) {
     SkBitmap skbitmap;
     getSkBitmap(&skbitmap);
     return compress(skbitmap, format, quality, stream);
 }
 
-Bitmap::CompressResult Bitmap::compress(const SkBitmap& bitmap, JavaCompressFormat format,
-                                        int32_t quality, SkWStream* stream) {
-    SkBitmap skbitmap = bitmap;
-    if (skbitmap.colorType() == kRGBA_F16_SkColorType) {
-        // Convert to P3 before encoding. This matches
-        // SkAndroidCodec::computeOutputColorSpace for wide gamuts. Now that F16
-        // could already be P3, we still want to convert to 8888.
-        auto cs = SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
-        auto info = skbitmap.info().makeColorType(kRGBA_8888_SkColorType)
-                                   .makeColorSpace(std::move(cs));
-        SkBitmap p3;
-        if (!p3.tryAllocPixels(info)) {
-            return CompressResult::AllocationFailed;
-        }
-
-        SkPixmap pm;
-        SkAssertResult(p3.peekPixels(&pm));  // should always work if tryAllocPixels() did.
-        if (!skbitmap.readPixels(pm)) {
-            return CompressResult::Error;
-        }
-        skbitmap = p3;
-    }
-
+bool Bitmap::compress(const SkBitmap& bitmap, JavaCompressFormat format,
+                      int32_t quality, SkWStream* stream) {
     SkEncodedImageFormat fm;
     switch (format) {
         case JavaCompressFormat::Jpeg:
@@ -518,12 +496,10 @@ Bitmap::CompressResult Bitmap::compress(const SkBitmap& bitmap, JavaCompressForm
             options.fQuality = quality;
             options.fCompression = format == JavaCompressFormat::WebpLossy ?
                     SkWebpEncoder::Compression::kLossy : SkWebpEncoder::Compression::kLossless;
-            return SkWebpEncoder::Encode(stream, skbitmap.pixmap(), options)
-                    ? CompressResult::Success : CompressResult::Error;
+            return SkWebpEncoder::Encode(stream, bitmap.pixmap(), options);
         }
     }
 
-    return SkEncodeImage(stream, skbitmap, fm, quality)
-            ? CompressResult::Success : CompressResult::Error;
+    return SkEncodeImage(stream, bitmap, fm, quality);
 }
 }  // namespace android

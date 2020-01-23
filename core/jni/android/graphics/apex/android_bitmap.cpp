@@ -290,14 +290,8 @@ int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const 
     }
 
     CompressWriter stream(userContext, fn);
-    switch (Bitmap::compress(bitmap, format, quality, &stream)) {
-        case Bitmap::CompressResult::Success:
-            return ANDROID_BITMAP_RESULT_SUCCESS;
-        case Bitmap::CompressResult::AllocationFailed:
-            return ANDROID_BITMAP_RESULT_ALLOCATION_FAILED;
-        case Bitmap::CompressResult::Error:
-            return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
-    }
+    return Bitmap::compress(bitmap, format, quality, &stream) ? ANDROID_BITMAP_RESULT_SUCCESS
+                                                              : ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
 }
 
 AHardwareBuffer* ABitmap_getHardwareBuffer(ABitmap* bitmapHandle) {
