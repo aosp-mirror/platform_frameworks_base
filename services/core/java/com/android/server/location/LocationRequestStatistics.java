@@ -92,7 +92,7 @@ public class LocationRequestStatistics {
     /**
      * A key that holds both package and provider names.
      */
-    public static class PackageProviderKey {
+    public static class PackageProviderKey implements Comparable<PackageProviderKey> {
         /**
          * Name of package requesting location.
          */
@@ -105,6 +105,16 @@ public class LocationRequestStatistics {
         PackageProviderKey(String packageName, String providerName) {
             this.packageName = packageName;
             this.providerName = providerName;
+        }
+
+        @Override
+        public int compareTo(PackageProviderKey other) {
+            final int providerCompare = providerName.compareTo(other.providerName);
+            if (providerCompare != 0) {
+                return providerCompare;
+            } else {
+                return packageName.compareTo(other.packageName);
+            }
         }
 
         @Override
@@ -211,7 +221,7 @@ public class LocationRequestStatistics {
         void dump(IndentingPrintWriter ipw, long systemElapsedOffsetMillis) {
             StringBuilder s = new StringBuilder();
             long systemTimeMillis = systemElapsedOffsetMillis + mElapsedRealtimeMillis;
-            s.append("At ").append(TimeUtils.formatForLogging(systemTimeMillis)).append(": ")
+            s.append("At ").append(TimeUtils.logTimeOfDay(systemTimeMillis)).append(": ")
                     .append(mIntervalMillis == REQUEST_ENDED_INTERVAL ? "- " : "+ ")
                     .append(String.format("%7s", mProviderName)).append(" request from ")
                     .append(mPackageName);

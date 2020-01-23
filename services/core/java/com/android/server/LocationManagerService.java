@@ -118,6 +118,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -2886,10 +2887,12 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             ipw.println("Historical Records by Provider:");
             ipw.increaseIndent();
+            TreeMap<PackageProviderKey, PackageStatistics> sorted = new TreeMap<>();
+            sorted.putAll(mRequestStatistics.statistics);
             for (Map.Entry<PackageProviderKey, PackageStatistics> entry
-                    : mRequestStatistics.statistics.entrySet()) {
+                    : sorted.entrySet()) {
                 PackageProviderKey key = entry.getKey();
-                ipw.println(key.packageName + ": " + key.providerName + ": " + entry.getValue());
+                ipw.println(key.providerName + ": " + key.packageName + ": " + entry.getValue());
             }
             ipw.decreaseIndent();
 
