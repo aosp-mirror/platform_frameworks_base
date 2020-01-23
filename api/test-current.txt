@@ -10,6 +10,7 @@ package android {
     field public static final String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
     field public static final String CLEAR_APP_USER_DATA = "android.permission.CLEAR_APP_USER_DATA";
     field public static final String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
+    field public static final String CONTROL_DEVICE_LIGHTS = "android.permission.CONTROL_DEVICE_LIGHTS";
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final String MANAGE_CRATES = "android.permission.MANAGE_CRATES";
@@ -1126,6 +1127,49 @@ package android.hardware.display {
     method public android.graphics.Point getStableDisplaySize();
     method public boolean isMinimalPostProcessingRequested(int);
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS) public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
+  }
+
+}
+
+package android.hardware.lights {
+
+  public final class Light implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getId();
+    method public int getOrdinal();
+    method public int getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.Light> CREATOR;
+  }
+
+  public final class LightState implements android.os.Parcelable {
+    ctor public LightState(@ColorInt int);
+    method public int describeContents();
+    method @ColorInt public int getColor();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.LightState> CREATOR;
+  }
+
+  public final class LightsManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public android.hardware.lights.LightState getLightState(@NonNull android.hardware.lights.Light);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public java.util.List<android.hardware.lights.Light> getLights();
+    method @NonNull @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public android.hardware.lights.LightsManager.LightsSession openSession();
+    field public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
+  }
+
+  public final class LightsManager.LightsSession implements java.lang.AutoCloseable {
+    method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public void close();
+    method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public void setLights(@NonNull android.hardware.lights.LightsRequest);
+  }
+
+  public final class LightsRequest {
+  }
+
+  public static final class LightsRequest.Builder {
+    ctor public LightsRequest.Builder();
+    method @NonNull public android.hardware.lights.LightsRequest build();
+    method @NonNull public android.hardware.lights.LightsRequest.Builder clearLight(@NonNull android.hardware.lights.Light);
+    method @NonNull public android.hardware.lights.LightsRequest.Builder setLight(@NonNull android.hardware.lights.Light, @NonNull android.hardware.lights.LightState);
   }
 
 }
