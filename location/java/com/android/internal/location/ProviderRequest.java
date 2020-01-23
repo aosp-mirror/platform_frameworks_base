@@ -118,6 +118,7 @@ public final class ProviderRequest implements Parcelable {
         for (LocationRequest request : locationRequests) {
             request.writeToParcel(parcel, flags);
         }
+        parcel.writeParcelable(workSource, flags);
     }
 
     @Override
