@@ -26,7 +26,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.PagerAdapter;
 import com.android.internal.widget.ViewPager;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Skeletal {@link PagerAdapter} implementation of a work or personal profile page for
@@ -34,6 +36,7 @@ import java.util.Objects;
  */
 public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
+    private static final String TAG = "AbstractMultiProfilePagerAdapter";
     static final int PROFILE_PERSONAL = 0;
     static final int PROFILE_WORK = 1;
     @IntDef({PROFILE_PERSONAL, PROFILE_WORK})
@@ -41,10 +44,17 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
     private final Context mContext;
     private int mCurrentPage;
+    private OnProfileSelectedListener mOnProfileSelectedListener;
+    private Set<Integer> mLoadedPages;
 
     AbstractMultiProfilePagerAdapter(Context context, int currentPage) {
         mContext = Objects.requireNonNull(context);
         mCurrentPage = currentPage;
+        mLoadedPages = new HashSet<>();
+    }
+
+    void setOnProfileSelectedListener(OnProfileSelectedListener listener) {
+        mOnProfileSelectedListener = listener;
     }
 
     Context getContext() {
@@ -57,15 +67,22 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
      * page and rebuilds the list.
      */
     void setupViewPager(ViewPager viewPager) {
-        viewPager.setCurrentItem(mCurrentPage);
         viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
                 mCurrentPage = position;
-                getActiveListAdapter().rebuildList();
+                if (!mLoadedPages.contains(position)) {
+                    getActiveListAdapter().rebuildList();
+                    mLoadedPages.add(position);
+                }
+                if (mOnProfileSelectedListener != null) {
+                    mOnProfileSelectedListener.onProfileSelected(position);
+                }
             }
         });
         viewPager.setAdapter(this);
+        viewPager.setCurrentItem(mCurrentPage);
+        mLoadedPages.add(mCurrentPage);
     }
 
     @Override
@@ -90,7 +107,8 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         return mCurrentPage;
     }
 
-    UserHandle getCurrentUserHandle() {
+    @VisibleForTesting
+    public UserHandle getCurrentUserHandle() {
         return getActiveListAdapter().mResolverListController.getUserHandle();
     }
 
@@ -135,7 +153,8 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
      * <p>This method is meant to be implemented with an implementation-specific return type
      * depending on the adapter type.
      */
-    abstract Object getAdapterForIndex(int pageIndex);
+    @VisibleForTesting
+    public abstract Object getAdapterForIndex(int pageIndex);
 
     @VisibleForTesting
     public abstract ResolverListAdapter getActiveListAdapter();
@@ -152,12 +171,25 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
     abstract Object getCurrentRootAdapter();
 
-    abstract ViewGroup getCurrentAdapterView();
+    abstract ViewGroup getActiveAdapterView();
+
+    abstract @Nullable ViewGroup getInactiveAdapterView();
 
     protected class ProfileDescriptor {
         final ViewGroup rootView;
         ProfileDescriptor(ViewGroup rootView) {
             this.rootView = rootView;
         }
+    }
+
+    public interface OnProfileSelectedListener {
+        /**
+         * Callback for when the user changes the active tab from personal to work or vice versa.
+         * <p>This callback is only called when the intent resolver or share sheet shows
+         * the work and personal profiles.
+         * @param profileIndex {@link #PROFILE_PERSONAL} if the personal profile was selected or
+         * {@link #PROFILE_WORK} if the work profile was selected.
+         */
+        void onProfileSelected(int profileIndex);
     }
 }

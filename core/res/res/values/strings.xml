@@ -5325,4 +5325,8 @@
     <!-- Text to tell the user that a package has been forced by themselves in the RESTRICTED bucket. [CHAR LIMIT=NONE] -->
     <string name="as_app_forced_to_restricted_bucket">
         <xliff:g id="package_name" example="com.android.example">%1$s</xliff:g> has been put into the RESTRICTED bucket</string>
+
+    <!-- ResolverActivity - profile tabs -->
+    <string name="resolver_personal_tab">Personal</string>
+    <string name="resolver_work_tab">Work</string>
 </resources>

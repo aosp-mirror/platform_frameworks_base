@@ -246,11 +246,6 @@ public class ChooserListAdapter extends ResolverListAdapter {
     }
 
     @Override
-    public boolean shouldGetResolvedFilter() {
-        return true;
-    }
-
-    @Override
     public int getCount() {
         return getRankedTargetCount() + getAlphaTargetCount()
                 + getSelectableServiceTargetCount() + getCallerTargetCount();

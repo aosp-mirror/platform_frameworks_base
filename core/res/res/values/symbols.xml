@@ -249,6 +249,9 @@
   <java-symbol type="id" name="app_ops" />
   <java-symbol type="id" name="profile_pager" />
   <java-symbol type="id" name="content_preview_container" />
+  <java-symbol type="id" name="profile_tabhost" />
+  <java-symbol type="id" name="tabs" />
+  <java-symbol type="id" name="tabcontent" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -3836,4 +3839,12 @@
 
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionPkgs" />
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionProcStates" />
+
+  <!-- Intent resolver and share sheet -->
+  <java-symbol type="color" name="resolver_tabs_active_color" />
+  <java-symbol type="color" name="resolver_tabs_inactive_color" />
+  <java-symbol type="string" name="resolver_personal_tab" />
+  <java-symbol type="string" name="resolver_work_tab" />
+  <java-symbol type="id" name="stub" />
+
 </resources>

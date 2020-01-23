@@ -151,14 +151,46 @@
         android:background="?attr/colorBackgroundFloating"
         android:foreground="?attr/dividerVertical" />
 
-    <com.android.internal.app.WrapHeightViewPager
-        android:id="@+id/profile_pager"
+    <FrameLayout
+        android:id="@+id/stub"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:dividerHeight="1dp"
-        android:divider="?attr/dividerVertical"
-        android:footerDividersEnabled="false"
-        android:headerDividersEnabled="false"/>
+        android:background="?attr/colorBackgroundFloating"/>
+
+    <TabHost
+        android:id="@+id/profile_tabhost"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="?attr/colorBackgroundFloating">
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
+            </TabWidget>
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <com.android.internal.app.ResolverViewPager
+                    android:id="@+id/profile_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:dividerHeight="1dp"
+                    android:divider="?attr/dividerVertical"
+                    android:footerDividersEnabled="false"
+                    android:headerDividersEnabled="false"/>
+            </FrameLayout>
+        </LinearLayout>
+    </TabHost>
+
     <View
         android:layout_alwaysShow="true"
         android:layout_width="match_parent"
