@@ -271,7 +271,8 @@ public final class BluetoothPbapClient implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    public boolean setConnectionPolicy(BluetoothDevice device, int connectionPolicy) {
+    public boolean setConnectionPolicy(BluetoothDevice device,
+            @ConnectionPolicy int connectionPolicy) {
         if (DBG) {
             log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
         }
@@ -323,7 +324,7 @@ public final class BluetoothPbapClient implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public int getConnectionPolicy(BluetoothDevice device) {
+    public @ConnectionPolicy int getConnectionPolicy(BluetoothDevice device) {
         if (VDBG) {
             log("getConnectionPolicy(" + device + ")");
         }
