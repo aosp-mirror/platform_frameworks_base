@@ -47,6 +47,7 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -399,6 +400,12 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
      *                     the transport have no data.
      */
     private void informTransportOfUnchangedApps(Set<String> appsBackedUp) {
+        // If the feautre is not enabled then we just exit early.
+        if (!FeatureFlagUtils.isEnabled(mBackupManagerService.getContext(),
+                FeatureFlagUtils.BACKUP_NO_KV_DATA_CHANGE_CALLS)) {
+            return;
+        }
+
         String[] succeedingPackages = getSucceedingPackages();
         if (succeedingPackages == null) {
             // Nothing is succeeding, so end early.
