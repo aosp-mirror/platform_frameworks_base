@@ -19,6 +19,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -26,6 +27,7 @@ import android.annotation.SystemService;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
@@ -50,6 +52,7 @@ import java.util.concurrent.Executor;
  */
 @SystemApi
 @SystemService(Context.CONTEXTHUB_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_CONTEXTHUB)
 public final class ContextHubManager {
     private static final String TAG = "ContextHubManager";
 
