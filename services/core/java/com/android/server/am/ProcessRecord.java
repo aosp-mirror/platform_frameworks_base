@@ -163,6 +163,8 @@ class ProcessRecord implements WindowProcessListener {
     long lastCompactTime;       // The last time that this process was compacted
     int reqCompactAction;       // The most recent compaction action requested for this app.
     int lastCompactAction;      // The most recent compaction action performed for this app.
+    boolean frozen;             // True when the process is frozen.
+    long freezeUnfreezeTime;    // Last time the app was (un)frozen, 0 for never
     private int mCurSchedGroup; // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
     int trimMemoryLevel;        // Last selected memory trimming level
@@ -623,7 +625,7 @@ class ProcessRecord implements WindowProcessListener {
         curAdj = setAdj = verifiedAdj = ProcessList.INVALID_ADJ;
         mPersistent = false;
         removed = false;
-        lastStateTime = lastPssTime = nextPssTime = SystemClock.uptimeMillis();
+        freezeUnfreezeTime = lastStateTime = lastPssTime = nextPssTime = SystemClock.uptimeMillis();
         mWindowProcessController = new WindowProcessController(
                 mService.mActivityTaskManager, info, processName, uid, userId, this, this);
         pkgList.put(_info.packageName, new ProcessStats.ProcessStateHolder(_info.longVersionCode));
