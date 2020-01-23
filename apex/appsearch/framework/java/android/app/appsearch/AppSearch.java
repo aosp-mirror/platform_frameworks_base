@@ -101,6 +101,54 @@ public final class AppSearch {
             this(document.mProto, document.mPropertyBundle);
         }
 
+        /** @hide */
+        Document(@NonNull DocumentProto documentProto) {
+            this(documentProto, new Bundle());
+            for (int i = 0; i < documentProto.getPropertiesCount(); i++) {
+                PropertyProto property = documentProto.getProperties(i);
+                String name = property.getName();
+                if (property.getStringValuesCount() > 0) {
+                    String[] values = new String[property.getStringValuesCount()];
+                    for (int j = 0; j < values.length; j++) {
+                        values[j] = property.getStringValues(j);
+                    }
+                    mPropertyBundle.putStringArray(name, values);
+                } else if (property.getInt64ValuesCount() > 0) {
+                    long[] values = new long[property.getInt64ValuesCount()];
+                    for (int j = 0; j < values.length; j++) {
+                        values[j] = property.getInt64Values(j);
+                    }
+                    mPropertyBundle.putLongArray(property.getName(), values);
+                } else if (property.getDoubleValuesCount() > 0) {
+                    double[] values = new double[property.getDoubleValuesCount()];
+                    for (int j = 0; j < values.length; j++) {
+                        values[j] = property.getDoubleValues(j);
+                    }
+                    mPropertyBundle.putDoubleArray(property.getName(), values);
+                } else if (property.getBooleanValuesCount() > 0) {
+                    boolean[] values = new boolean[property.getBooleanValuesCount()];
+                    for (int j = 0; j < values.length; j++) {
+                        values[j] = property.getBooleanValues(j);
+                    }
+                    mPropertyBundle.putBooleanArray(property.getName(), values);
+                } else if (property.getBytesValuesCount() > 0) {
+                    byte[][] values = new byte[property.getBytesValuesCount()][];
+                    for (int j = 0; j < values.length; j++) {
+                        values[j] = property.getBytesValues(j).toByteArray();
+                    }
+                    mPropertyBundle.putObject(name, values);
+                } else if (property.getDocumentValuesCount() > 0) {
+                    Document[] values = new Document[property.getDocumentValuesCount()];
+                    for (int j = 0; j < values.length; j++) {
+                        values[j] = new Document(property.getDocumentValues(j));
+                    }
+                    mPropertyBundle.putObject(name, values);
+                } else {
+                    throw new IllegalStateException("Unknown type of value: " + name);
+                }
+            }
+        }
+
         /**
          * Creates a new {@link Document.Builder}.
          *
