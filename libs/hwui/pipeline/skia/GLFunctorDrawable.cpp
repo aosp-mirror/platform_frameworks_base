@@ -26,6 +26,7 @@
 #include "SkAndroidFrameworkUtils.h"
 #include "SkClipStack.h"
 #include "SkRect.h"
+#include "include/private/SkM44.h"
 
 namespace android {
 namespace uirenderer {
@@ -92,7 +93,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
 
     SkIRect surfaceBounds = canvas->internal_private_getTopLayerBounds();
     SkIRect clipBounds = canvas->getDeviceClipBounds();
-    SkMatrix44 mat4(canvas->getTotalMatrix());
+    SkM44 mat4(canvas->experimental_getLocalToDevice());
     SkRegion clipRegion;
     canvas->temporary_internal_getRgnClip(&clipRegion);
 
@@ -118,7 +119,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
 
         // update the matrix and clip that we pass to the WebView to match the coordinates of
         // the offscreen layer
-        mat4.preTranslate(-clipBounds.fLeft, -clipBounds.fTop, 0);
+        mat4.preTranslate(-clipBounds.fLeft, -clipBounds.fTop);
         clipBounds.offsetTo(0, 0);
         clipRegion.translate(-surfaceBounds.fLeft, -surfaceBounds.fTop);
 
@@ -126,7 +127,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         // we are drawing into a (clipped) offscreen layer so we must update the clip and matrix
         // from device coordinates to the layer's coordinates
         clipBounds.offset(-surfaceBounds.fLeft, -surfaceBounds.fTop);
-        mat4.preTranslate(-surfaceBounds.fLeft, -surfaceBounds.fTop, 0);
+        mat4.preTranslate(-surfaceBounds.fLeft, -surfaceBounds.fTop);
     }
 
     DrawGlInfo info;
@@ -137,7 +138,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     info.isLayer = fboID != 0;
     info.width = fboSize.width();
     info.height = fboSize.height();
-    mat4.asColMajorf(&info.transform[0]);
+    mat4.getColMajor(&info.transform[0]);
     info.color_space_ptr = canvas->imageInfo().colorSpace();
 
     // ensure that the framebuffer that the webview will render into is bound before we clear
