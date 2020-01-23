@@ -2015,8 +2015,8 @@ public class ActivityManager {
         /** The size of the snapshot before scaling */
         private final Point mTaskSize;
         private final Rect mContentInsets;
-        // Whether this snapshot is a down-sampled version of the full resolution, used mainly for
-        // low-ram devices
+        // Whether this snapshot is a down-sampled version of the high resolution snapshot, used
+        // mainly for loading snapshots quickly from disk when user is flinging fast
         private final boolean mIsLowResolution;
         // Whether or not the snapshot is a real snapshot or an app-theme generated snapshot due to
         // the task having a secure window or having previews disabled
@@ -2229,7 +2229,6 @@ public class ActivityManager {
             private int mRotation;
             private Point mTaskSize;
             private Rect mContentInsets;
-            private boolean mIsLowResolution;
             private boolean mIsRealSnapshot;
             private int mWindowingMode;
             private int mSystemUiVisibility;
@@ -2279,21 +2278,6 @@ public class ActivityManager {
                 return this;
             }
 
-            /**
-             * Returns {@code true} if this is meant to be a low-resolution
-             */
-            public boolean isLowResolution() {
-                return mIsLowResolution;
-            }
-
-            /**
-             * Set to {@code true} if this is a low-resolution snapshot stored in *_reduced.jpg.
-             */
-            public Builder setIsLowResolution(boolean isLowResolution) {
-                mIsLowResolution = isLowResolution;
-                return this;
-            }
-
             public Builder setIsRealSnapshot(boolean realSnapshot) {
                 mIsRealSnapshot = realSnapshot;
                 return this;
@@ -2333,7 +2317,10 @@ public class ActivityManager {
                         mRotation,
                         mTaskSize,
                         mContentInsets,
-                        mIsLowResolution,
+                        // When building a TaskSnapshot with the Builder class, isLowResolution
+                        // is always false. Low-res snapshots are only created when loading from
+                        // disk.
+                        false /* isLowResolution */,
                         mIsRealSnapshot,
                         mWindowingMode,
                         mSystemUiVisibility,

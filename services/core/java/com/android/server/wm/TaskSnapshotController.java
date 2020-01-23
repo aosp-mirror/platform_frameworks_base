@@ -18,14 +18,12 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
-import static com.android.server.wm.TaskSnapshotPersister.DISABLE_HIGH_RES_BITMAPS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -222,7 +220,7 @@ class TaskSnapshotController {
     @Nullable TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk,
             boolean isLowResolution) {
         return mCache.getSnapshot(taskId, userId, restoreFromDisk, isLowResolution
-                || DISABLE_HIGH_RES_BITMAPS);
+                && mPersister.enableLowResSnapshots());
     }
 
     /**
@@ -300,12 +298,9 @@ class TaskSnapshotController {
             return false;
         }
 
-        final boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
-
         builder.setIsRealSnapshot(true);
         builder.setId(System.currentTimeMillis());
         builder.setContentInsets(getInsets(mainWindow));
-        builder.setIsLowResolution(isLowRamDevice);
 
         final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
         final boolean isShowWallpaper = (mainWindow.getAttrs().flags & FLAG_SHOW_WALLPAPER) != 0;
@@ -334,10 +329,8 @@ class TaskSnapshotController {
     SurfaceControl.ScreenshotGraphicBuffer createTaskSnapshot(@NonNull Task task,
             TaskSnapshot.Builder builder) {
         Point taskSize = new Point();
-        float scale = builder.isLowResolution()
-                ? mPersister.getLowResScale() : mHighResTaskSnapshotScale;
-        final SurfaceControl.ScreenshotGraphicBuffer taskSnapshot = createTaskSnapshot(task, scale,
-                builder.getPixelFormat(), taskSize);
+        final SurfaceControl.ScreenshotGraphicBuffer taskSnapshot = createTaskSnapshot(task,
+                mHighResTaskSnapshotScale, builder.getPixelFormat(), taskSize);
         builder.setTaskSize(taskSize);
         return taskSnapshot;
     }
@@ -493,7 +486,7 @@ class TaskSnapshotController {
                 topChild.mActivityComponent, hwBitmap.createGraphicBufferHandle(),
                 hwBitmap.getColorSpace(), mainWindow.getConfiguration().orientation,
                 mainWindow.getWindowConfiguration().getRotation(), new Point(taskWidth, taskHeight),
-                getInsets(mainWindow), ActivityManager.isLowRamDeviceStatic() /* isLowResolution */,
+                getInsets(mainWindow), false /* isLowResolution */,
                 false /* isRealSnapshot */, task.getWindowingMode(),
                 getSystemUiVisibility(task), false);
     }

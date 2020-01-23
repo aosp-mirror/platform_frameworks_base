@@ -25,6 +25,7 @@ import static com.android.server.wm.TaskSnapshotController.SNAPSHOT_MODE_APP_THE
 import static com.android.server.wm.TaskSnapshotController.SNAPSHOT_MODE_REAL;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -149,7 +150,6 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             builder.setSystemUiVisibility(systemUiVisibility);
             builder.setWindowingMode(windowingMode);
             builder.setColorSpace(sRGB);
-            builder.setIsLowResolution(true);
             builder.setOrientation(orientation);
             builder.setContentInsets(contentInsets);
             builder.setIsTranslucent(true);
@@ -167,8 +167,9 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             assertEquals(systemUiVisibility, snapshot.getSystemUiVisibility());
             assertEquals(windowingMode, snapshot.getWindowingMode());
             assertEquals(sRGB, snapshot.getColorSpace());
-            assertTrue(snapshot.isLowResolution());
-            assertTrue(builder.isLowResolution());
+            // Snapshots created with the Builder class are always high-res. The only way to get a
+            // low-res snapshot is to load it from the disk in TaskSnapshotLoader.
+            assertFalse(snapshot.isLowResolution());
             assertEquals(orientation, snapshot.getOrientation());
             assertEquals(contentInsets, snapshot.getContentInsets());
             assertTrue(snapshot.isTranslucent());
