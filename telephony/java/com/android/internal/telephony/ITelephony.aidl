@@ -2197,4 +2197,13 @@ interface ITelephony {
      * This is safe to call from any thread, with any window manager locks held or not.
      */
     oneway void userActivity();
+
+    /**
+     * Get the user manual network selection.
+     * Return empty string if in automatic selection.
+     *
+     * @param subId the id of the subscription
+     * @return operatorinfo on success
+     */
+    String getManualNetworkSelectionPlmn(int subId);
 }
