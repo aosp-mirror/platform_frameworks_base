@@ -113,7 +113,7 @@ public class SystemUIPrimaryWindowController implements
                 PixelFormat.TRANSLUCENT);
         mLp.token = new Binder();
         mLp.gravity = Gravity.TOP;
-        mLp.setFitWindowInsetsTypes(/* types= */ 0);
+        mLp.setFitInsetsTypes(/* types= */ 0);
         mLp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         mLp.setTitle("SystemUIPrimaryWindow");
         mLp.packageName = mContext.getPackageName();

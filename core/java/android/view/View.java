@@ -22,7 +22,6 @@ import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LO
 import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
 import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.WindowInsetsAnimationCallback.DISPATCH_MODE_CONTINUE_ON_SUBTREE;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
@@ -116,9 +115,10 @@ import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.AccessibilityIterators.WordTextSegmentIterator;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Window.OnContentApplyWindowInsetsListener;
+import android.view.WindowInsets.Type;
 import android.view.WindowInsetsAnimationCallback.AnimationBounds;
 import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
-import android.view.WindowInsetsAnimationCallback.DispatchMode;
+import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -3523,7 +3523,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * requested the system UI (status bar) to be visible (the default).
      *
      * @see #setSystemUiVisibility(int)
+     * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
+     * instead.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_VISIBLE = 0;
 
     /**
@@ -3536,7 +3539,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>In low profile mode, the status bar and/or navigation icons may dim.
      *
      * @see #setSystemUiVisibility(int)
+     * @deprecated Low profile mode is deprecated. Hide the system bars instead if the application
+     * needs to be in a unobtrusive mode. Use {@link WindowInsetsController#hide(int)} with
+     * {@link Type#systemBars()}.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_LOW_PROFILE = 0x00000001;
 
     /**
@@ -3557,7 +3564,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * so that both elements reappear at the same time.
      *
      * @see #setSystemUiVisibility(int)
+     * @deprecated Use {@link WindowInsetsController#hide(int)} with {@link Type#navigationBars()}
+     * instead.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = 0x00000002;
 
     /**
@@ -3593,7 +3603,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * the book.
      *
      * @see #setSystemUiVisibility(int)
+     * @deprecated Use {@link WindowInsetsController#hide(int)} with {@link Type#statusBars()}
+     * instead.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_FULLSCREEN = 0x00000004;
 
     /**
@@ -3627,7 +3640,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * overlay mode with {@link Window#FEATURE_ACTION_BAR_OVERLAY
      * Window.FEATURE_ACTION_BAR_OVERLAY}, this flag will also impact the
      * insets it adds to those given to the application.
+     *
+     * @deprecated Use {@link WindowInsets#getInsetsIgnoringVisibility(int)} instead to retrieve
+     * insets that don't change when system bars change visibility state.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_LAYOUT_STABLE = 0x00000100;
 
     /**
@@ -3639,6 +3656,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * decorations when they are shown.  You can perform layout of your inner
      * UI elements to account for the navigation system UI through the
      * {@link #fitSystemWindows(Rect)} method.
+     *
+     * @deprecated For floating windows, use {@link LayoutParams#setFitInsetsTypes(int)} with
+     * {@link Type#navigationBars()}. For non-floating windows that fill the screen, call
+     * {@link Window#setOnContentApplyWindowInsets} with {@code null} or a listener that doesn't
+     * fit the navigation bar on the window content level.
      */
     public static final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = 0x00000200;
 
@@ -3663,7 +3685,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
      * @see WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
      * @see WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+     *
+     * @deprecated For floating windows, use {@link LayoutParams#setFitInsetsTypes(int)} with
+     * {@link Type#statusBars()} ()}. For non-floating windows that fill the screen, call
+     * {@link Window#setOnContentApplyWindowInsets} with {@code null} or a listener that doesn't
+     * fit the status bar on the window content level.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 0x00000400;
 
     /**
@@ -3673,7 +3701,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * user interaction.
      * <p>Since this flag is a modifier for {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, it only
      * has an effect when used in combination with that flag.</p>
+     *
+     * @deprecated Use {@link WindowInsetsController#BEHAVIOR_SHOW_BARS_BY_SWIPE} instead.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_IMMERSIVE = 0x00000800;
 
     /**
@@ -3691,7 +3722,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </p><p>Since this flag is a modifier for {@link #SYSTEM_UI_FLAG_FULLSCREEN} and
      * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, it only has an effect when used in combination
      * with one or both of those flags.</p>
+     *
+     * @deprecated Use {@link WindowInsetsController#BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE} instead.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_IMMERSIVE_STICKY = 0x00001000;
 
     /**
@@ -3705,7 +3739,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         FLAG_TRANSLUCENT_STATUS}.
      *
      * @see android.R.attr#windowLightStatusBar
+     * @deprecated Use {@link WindowInsetsController#APPEARANCE_LIGHT_STATUS_BARS} instead.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_LIGHT_STATUS_BAR = 0x00002000;
 
     /**
@@ -3731,7 +3767,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         FLAG_TRANSLUCENT_NAVIGATION}.
      *
      * @see android.R.attr#windowLightNavigationBar
+     * @deprecated Use {@link WindowInsetsController#APPEARANCE_LIGHT_NAVIGATION_BARS} instead.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR = 0x00000010;
 
     /**
@@ -3959,7 +3997,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Flags that can impact the layout in relation to system UI.
+     *
+     * @deprecated System UI layout flags are deprecated.
      */
+    @Deprecated
     public static final int SYSTEM_UI_LAYOUT_FLAGS =
             SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             | SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
@@ -25785,7 +25826,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #SYSTEM_UI_FLAG_LAYOUT_STABLE}, {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION},
      * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, {@link #SYSTEM_UI_FLAG_IMMERSIVE},
      * and {@link #SYSTEM_UI_FLAG_IMMERSIVE_STICKY}.
+     *
+     * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
+     * instead.
      */
+    @Deprecated
     public void setSystemUiVisibility(int visibility) {
         if (visibility != mSystemUiVisibility) {
             mSystemUiVisibility = visibility;
@@ -25802,7 +25847,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #SYSTEM_UI_FLAG_LAYOUT_STABLE}, {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION},
      * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, {@link #SYSTEM_UI_FLAG_IMMERSIVE},
      * and {@link #SYSTEM_UI_FLAG_IMMERSIVE_STICKY}.
+     *
+     * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
+     * instead.
      */
+    @Deprecated
     public int getSystemUiVisibility() {
         return mSystemUiVisibility;
     }
@@ -25812,7 +25861,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * the entire window.  This is the combination of the
      * {@link #setSystemUiVisibility(int)} values supplied by all of the
      * views in the window.
+     *
+     * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
+     * instead.
      */
+    @Deprecated
     public int getWindowSystemUiVisibility() {
         return mAttachInfo != null ? mAttachInfo.mSystemUiVisibility : 0;
     }
@@ -25824,14 +25877,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #setOnSystemUiVisibilityChangeListener(OnSystemUiVisibilityChangeListener)}
      * in that this is only telling you about the local request of the window,
      * not the actual values applied by the system.
+     *
+     * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
+     * instead.
      */
+    @Deprecated
     public void onWindowSystemUiVisibilityChanged(int visible) {
     }
 
     /**
      * Dispatch callbacks to {@link #onWindowSystemUiVisibilityChanged(int)} down
      * the view hierarchy.
+     *
+     * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
+     * instead.
      */
+    @Deprecated
     public void dispatchWindowSystemUiVisiblityChanged(int visible) {
         onWindowSystemUiVisibilityChanged(visible);
     }
@@ -25839,7 +25900,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Set a listener to receive callbacks when the visibility of the system bar changes.
      * @param l  The {@link OnSystemUiVisibilityChangeListener} to receive callbacks.
+     *
+     * @deprecated Use {@link WindowInsets#isVisible(int)} to find out about system bar visibilities
+     * by setting a {@link OnApplyWindowInsetsListener} on this view.
      */
+    @Deprecated
     public void setOnSystemUiVisibilityChangeListener(OnSystemUiVisibilityChangeListener l) {
         getListenerInfo().mOnSystemUiVisibilityChangeListener = l;
         if (mParent != null && mAttachInfo != null && !mAttachInfo.mRecomputeGlobalAttributes) {
@@ -25850,7 +25915,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Dispatch callbacks to {@link #setOnSystemUiVisibilityChangeListener} down
      * the view hierarchy.
+     *
+     * @deprecated Use {@link WindowInsets#isVisible(int)} to find out about system bar visibilities
+     * by setting a {@link OnApplyWindowInsetsListener} on this view.
      */
+    @Deprecated
     public void dispatchSystemUiVisibilityChanged(int visibility) {
         ListenerInfo li = mListenerInfo;
         if (li != null && li.mOnSystemUiVisibilityChangeListener != null) {
@@ -28291,7 +28360,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * state, not what the application is requesting.
      *
      * @see View#setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener)
+     *
+     * @deprecated Use {@link WindowInsets#isVisible(int)} to find out about system bar visibilities
+     * by setting a {@link OnApplyWindowInsetsListener} on this view.
      */
+    @Deprecated
     public interface OnSystemUiVisibilityChangeListener {
         /**
          * Called when the status bar changes visibility because of a call to

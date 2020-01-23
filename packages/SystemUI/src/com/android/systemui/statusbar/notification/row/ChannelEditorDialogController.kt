@@ -295,7 +295,7 @@ class ChannelEditorDialogController @Inject constructor(
                     format = PixelFormat.TRANSLUCENT
                     title = ChannelEditorDialogController::class.java.simpleName
                     gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-                    fitWindowInsetsTypes = attributes.fitWindowInsetsTypes and statusBars().inv()
+                    fitInsetsTypes = attributes.fitInsetsTypes and statusBars().inv()
                     width = MATCH_PARENT
                     height = WRAP_CONTENT
                 }

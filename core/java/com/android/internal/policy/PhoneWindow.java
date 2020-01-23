@@ -2381,8 +2381,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             setFlags(0, flagsToUpdate);
         } else {
             setFlags(FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR, flagsToUpdate);
-            getAttributes().setFitWindowInsetsSides(0);
-            getAttributes().setFitWindowInsetsTypes(0);
+            getAttributes().setFitInsetsSides(0);
+            getAttributes().setFitInsetsTypes(0);
         }
 
         if (a.getBoolean(R.styleable.Window_windowNoTitle, false)) {

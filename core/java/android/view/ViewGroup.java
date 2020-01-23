@@ -1885,6 +1885,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
+    @Deprecated
     public void dispatchWindowSystemUiVisiblityChanged(int visible) {
         super.dispatchWindowSystemUiVisiblityChanged(visible);
 
@@ -1897,6 +1898,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
+    @Deprecated
     public void dispatchSystemUiVisibilityChanged(int visible) {
         super.dispatchSystemUiVisibilityChanged(visible);
 

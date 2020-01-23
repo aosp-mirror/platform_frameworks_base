@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.WindowInsets.Type.systemBars;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.LayoutRes;
@@ -81,7 +83,7 @@ public class NotificationShadeWindowView extends FrameLayout {
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets windowInsets) {
-        final Insets insets = windowInsets.getMaxInsets(WindowInsets.Type.systemBars());
+        final Insets insets = windowInsets.getInsetsIgnoringVisibility(systemBars());
         if (getFitsSystemWindows()) {
             boolean paddingChanged = insets.top != getPaddingTop()
                     || insets.bottom != getPaddingBottom();

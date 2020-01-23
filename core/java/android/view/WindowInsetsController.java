@@ -82,7 +82,6 @@ public interface WindowInsetsController {
      * shown on any user interaction on the corresponding display if navigation bars are hidden by
      * {@link #hide(int)} or
      * {@link WindowInsetsAnimationController#setInsetsAndAlpha(Insets, float, float)}.
-     * @hide
      */
     int BEHAVIOR_SHOW_BARS_BY_TOUCH = 0;
 
@@ -93,7 +92,6 @@ public interface WindowInsetsController {
      *
      * <p>When system bars are hidden in this mode, they can be revealed with system gestures, such
      * as swiping from the edge of the screen where the bar is hidden from.</p>
-     * @hide
      */
     int BEHAVIOR_SHOW_BARS_BY_SWIPE = 1;
 
@@ -106,7 +104,6 @@ public interface WindowInsetsController {
      * gestures, such as swiping from the edge of the screen where the bar is hidden from. These
      * transient system bars will overlay app’s content, may have some degree of transparency, and
      * will automatically hide after a short timeout.</p>
-     * @hide
      */
     int BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE = 2;
 
@@ -129,7 +126,6 @@ public interface WindowInsetsController {
      *
      * @param types A bitmask of {@link InsetsType} specifying what windows the app
      *              would like to make appear on screen.
-     * @hide
      */
     void show(@InsetsType int types);
 
@@ -142,7 +138,6 @@ public interface WindowInsetsController {
      *
      * @param types A bitmask of {@link InsetsType} specifying what windows the app
      *              would like to make disappear.
-     * @hide
      */
     void hide(@InsetsType int types);
 
@@ -166,7 +161,6 @@ public interface WindowInsetsController {
      * @see InsetsAnimation#getInterpolatedFraction()
      * @see InsetsAnimation#getInterpolator()
      * @see InsetsAnimation#getDurationMillis()
-     * @hide
      */
     void controlWindowInsetsAnimation(@InsetsType int types, long durationMillis,
             @Nullable Interpolator interpolator,

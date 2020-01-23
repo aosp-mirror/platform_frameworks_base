@@ -156,7 +156,7 @@ public class GlobalScreenshotLegacy {
                 PixelFormat.TRANSLUCENT);
         mWindowLayoutParams.setTitle("ScreenshotAnimation");
         mWindowLayoutParams.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        mWindowLayoutParams.setFitWindowInsetsTypes(0 /* types */);
+        mWindowLayoutParams.setFitInsetsTypes(0 /* types */);
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mDisplay = mWindowManager.getDefaultDisplay();
         mDisplayMetrics = new DisplayMetrics();

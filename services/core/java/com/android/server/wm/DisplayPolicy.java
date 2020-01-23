@@ -894,10 +894,10 @@ public class DisplayPolicy {
                 if (attrs.isFullscreen() && win.mActivityRecord != null
                         && win.mActivityRecord.fillsParent()
                         && (win.mAttrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0
-                        && attrs.getFitWindowInsetsTypes() != 0) {
+                        && attrs.getFitInsetsTypes() != 0) {
                     throw new RuntimeException("Illegal attributes: Main activity window that isn't"
                             + " translucent trying to fit insets: "
-                            + attrs.getFitWindowInsetsTypes()
+                            + attrs.getFitInsetsTypes()
                             + " attrs=" + attrs);
                 }
                 break;
@@ -1260,7 +1260,7 @@ public class DisplayPolicy {
 
         if (layoutInScreenAndInsetDecor && !screenDecor) {
             if ((sysUiVis & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
-                    || (attrs.getFitWindowInsetsTypes() & Type.navigationBars()) == 0) {
+                    || (attrs.getFitInsetsTypes() & Type.navigationBars()) == 0) {
                 outFrame.set(displayFrames.mUnrestricted);
             } else {
                 outFrame.set(displayFrames.mRestricted);
@@ -1876,15 +1876,15 @@ public class DisplayPolicy {
         sf.set(displayFrames.mStable);
 
         if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-            final @InsetsType int typesToFit = attrs.getFitWindowInsetsTypes();
-            final @InsetsSide int sidesToFit = attrs.getFitWindowInsetsSides();
+            final @InsetsType int typesToFit = attrs.getFitInsetsTypes();
+            final @InsetsSide int sidesToFit = attrs.getFitInsetsSides();
             final ArraySet<Integer> types = InsetsState.toInternalType(typesToFit);
             final Rect dfu = displayFrames.mUnrestricted;
             Insets insets = Insets.of(0, 0, 0, 0);
             for (int i = types.size() - 1; i >= 0; i--) {
                 insets = Insets.max(insets, mDisplayContent.getInsetsPolicy()
                         .getInsetsForDispatch(win).getSource(types.valueAt(i))
-                        .calculateInsets(dfu, attrs.getFitIgnoreVisibility()));
+                        .calculateInsets(dfu, attrs.isFitInsetsIgnoringVisibility()));
             }
             final int left = (sidesToFit & Side.LEFT) != 0 ? insets.left : 0;
             final int top = (sidesToFit & Side.TOP) != 0 ? insets.top : 0;

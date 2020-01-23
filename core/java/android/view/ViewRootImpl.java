@@ -32,8 +32,6 @@ import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE;
 import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
 import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
-import static android.view.WindowInsets.Type.ime;
-import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -80,7 +78,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.FrameInfo;
 import android.graphics.HardwareRenderer.FrameDrawingCallback;
-import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -1988,9 +1985,9 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
-        int types = inOutParams.getFitWindowInsetsTypes();
-        int sides = inOutParams.getFitWindowInsetsSides();
-        boolean ignoreVis = inOutParams.getFitIgnoreVisibility();
+        int types = inOutParams.getFitInsetsTypes();
+        int sides = inOutParams.getFitInsetsSides();
+        boolean ignoreVis = inOutParams.isFitInsetsIgnoringVisibility();
 
         if (((sysUiVis & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) != 0
                 || (flags & FLAG_LAYOUT_IN_SCREEN) != 0)
@@ -2007,9 +2004,9 @@ public final class ViewRootImpl implements ViewParent,
                 && adjust == SOFT_INPUT_ADJUST_RESIZE) {
             types |= Type.ime();
         }
-        inOutParams.setFitWindowInsetsTypes(types);
-        inOutParams.setFitWindowInsetsSides(sides);
-        inOutParams.setFitIgnoreVisibility(ignoreVis);
+        inOutParams.setFitInsetsTypes(types);
+        inOutParams.setFitInsetsSides(sides);
+        inOutParams.setFitInsetsIgnoringVisibility(ignoreVis);
 
         // The fitting of insets are not really controlled by the clients, so we remove the flag.
         inOutParams.privateFlags &= ~PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
