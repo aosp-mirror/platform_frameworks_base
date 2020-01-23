@@ -4602,22 +4602,6 @@ package android.view {
     method public abstract String asyncImpl() default "";
   }
 
-  public class SurfaceControlViewHost {
-    ctor public SurfaceControlViewHost(@NonNull android.content.Context, @NonNull android.view.Display, @Nullable android.os.IBinder);
-    method public void addView(android.view.View, android.view.WindowManager.LayoutParams);
-    method public void dispose();
-    method @Nullable public android.view.SurfaceControlViewHost.SurfacePackage getSurfacePackage();
-    method public void relayout(android.view.WindowManager.LayoutParams);
-  }
-
-  public class SurfaceControlViewHost.SurfacePackage {
-    method @NonNull public android.view.SurfaceControl getSurfaceControl();
-  }
-
-  public class SurfaceView extends android.view.View {
-    method @Nullable public android.os.IBinder getInputToken();
-  }
-
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
     method public android.view.View getTooltipView();
     method public boolean isAutofilled();

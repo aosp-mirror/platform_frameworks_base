@@ -37,7 +37,7 @@ public final class UniversalSmartspaceUtils {
         Intent intent = new Intent(ACTION_REQUEST_SMARTSPACE_VIEW);
 
         Bundle inputBundle = new Bundle();
-        inputBundle.putBinder(BUNDLE_KEY_INPUT_TOKEN, surfaceView.getInputToken());
+        inputBundle.putBinder(BUNDLE_KEY_INPUT_TOKEN, surfaceView.getHostToken());
         return intent
                 .putExtra(INTENT_KEY_SURFACE_CONTROL, surfaceView.getSurfaceControl())
                 .putExtra(INTENT_KEY_INPUT_BUNDLE, inputBundle)

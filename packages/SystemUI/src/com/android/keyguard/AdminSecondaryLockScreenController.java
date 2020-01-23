@@ -172,7 +172,7 @@ public class AdminSecondaryLockScreenController {
 
     private void onSurfaceReady() {
         try {
-            mClient.onSurfaceReady(mView.getInputToken(), mCallback);
+            mClient.onSurfaceReady(mView.getHostToken(), mCallback);
         } catch (RemoteException e) {
             Log.e(TAG, "Error in onSurfaceReady", e);
             dismiss(KeyguardUpdateMonitor.getCurrentUser());
