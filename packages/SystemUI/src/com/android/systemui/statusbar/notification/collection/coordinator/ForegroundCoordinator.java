@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import android.app.Notification;
-import android.os.Handler;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -30,6 +29,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
+import com.android.systemui.util.Assert;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +48,8 @@ import javax.inject.Singleton;
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceController
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceNotificationListener
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceLifetimeExtender
+ *
+ *  TODO: AppOps stuff should be spun off into its own coordinator
  */
 @Singleton
 public class ForegroundCoordinator implements Coordinator {
@@ -54,7 +57,7 @@ public class ForegroundCoordinator implements Coordinator {
 
     private final ForegroundServiceController mForegroundServiceController;
     private final AppOpsController mAppOpsController;
-    private final Handler mMainHandler;
+    private final DelayableExecutor mMainExecutor;
 
     private NotifPipeline mNotifPipeline;
 
@@ -62,10 +65,10 @@ public class ForegroundCoordinator implements Coordinator {
     public ForegroundCoordinator(
             ForegroundServiceController foregroundServiceController,
             AppOpsController appOpsController,
-            @Main Handler mainHandler) {
+            @Main DelayableExecutor mainExecutor) {
         mForegroundServiceController = foregroundServiceController;
         mAppOpsController = appOpsController;
-        mMainHandler = mainHandler;
+        mMainExecutor = mainExecutor;
     }
 
     @Override
@@ -78,11 +81,11 @@ public class ForegroundCoordinator implements Coordinator {
         // listen for new notifications to add appOps
         mNotifPipeline.addCollectionListener(mNotifCollectionListener);
 
-        // when appOps change, update any relevant notifications to update appOps for
-        mAppOpsController.addCallback(ForegroundServiceController.APP_OPS, this::onAppOpsChanged);
-
         // filter out foreground service notifications that aren't necessary anymore
         mNotifPipeline.addPreGroupFilter(mNotifFilter);
+
+        // when appOps change, update any relevant notifications to update appOps for
+        mAppOpsController.addCallback(ForegroundServiceController.APP_OPS, this::onAppOpsChanged);
     }
 
     /**
@@ -93,7 +96,8 @@ public class ForegroundCoordinator implements Coordinator {
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
             StatusBarNotification sbn = entry.getSbn();
             if (mForegroundServiceController.isDisclosureNotification(sbn)
-                    && !mForegroundServiceController.isDisclosureNeededForUser(sbn.getUserId())) {
+                    && !mForegroundServiceController.isDisclosureNeededForUser(
+                            sbn.getUser().getIdentifier())) {
                 return true;
             }
 
@@ -102,7 +106,7 @@ public class ForegroundCoordinator implements Coordinator {
                         Notification.EXTRA_FOREGROUND_APPS);
                 if (apps != null && apps.length >= 1) {
                     if (!mForegroundServiceController.isSystemAlertWarningNeeded(
-                            sbn.getUserId(), apps[0])) {
+                            sbn.getUser().getIdentifier(), apps[0])) {
                         return true;
                     }
                 }
@@ -119,7 +123,7 @@ public class ForegroundCoordinator implements Coordinator {
             new NotifLifetimeExtender() {
         private static final int MIN_FGS_TIME_MS = 5000;
         private OnEndLifetimeExtensionCallback mEndCallback;
-        private Map<String, Runnable> mEndRunnables = new HashMap<>();
+        private Map<NotificationEntry, Runnable> mEndRunnables = new HashMap<>();
 
         @Override
         public String getName() {
@@ -142,16 +146,18 @@ public class ForegroundCoordinator implements Coordinator {
             final boolean extendLife = currTime - entry.getSbn().getPostTime() < MIN_FGS_TIME_MS;
 
             if (extendLife) {
-                if (!mEndRunnables.containsKey(entry.getKey())) {
-                    final Runnable runnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            mEndCallback.onEndLifetimeExtension(mForegroundLifetimeExtender, entry);
-                        }
+                if (!mEndRunnables.containsKey(entry)) {
+                    final Runnable endExtensionRunnable = () -> {
+                        mEndRunnables.remove(entry);
+                        mEndCallback.onEndLifetimeExtension(
+                                mForegroundLifetimeExtender,
+                                entry);
                     };
-                    mEndRunnables.put(entry.getKey(), runnable);
-                    mMainHandler.postDelayed(runnable,
+
+                    final Runnable cancelRunnable = mMainExecutor.executeDelayed(
+                            endExtensionRunnable,
                             MIN_FGS_TIME_MS - (currTime - entry.getSbn().getPostTime()));
+                    mEndRunnables.put(entry, cancelRunnable);
                 }
             }
 
@@ -160,9 +166,9 @@ public class ForegroundCoordinator implements Coordinator {
 
         @Override
         public void cancelLifetimeExtension(NotificationEntry entry) {
-            if (mEndRunnables.containsKey(entry.getKey())) {
-                Runnable endRunnable = mEndRunnables.remove(entry.getKey());
-                mMainHandler.removeCallbacks(endRunnable);
+            Runnable cancelRunnable = mEndRunnables.remove(entry);
+            if (cancelRunnable != null) {
+                cancelRunnable.run();
             }
         }
     };
@@ -184,25 +190,32 @@ public class ForegroundCoordinator implements Coordinator {
         private void tagForeground(NotificationEntry entry) {
             final StatusBarNotification sbn = entry.getSbn();
             // note: requires that the ForegroundServiceController is updating their appOps first
-            ArraySet<Integer> activeOps = mForegroundServiceController.getAppOps(sbn.getUserId(),
-                    sbn.getPackageName());
+            ArraySet<Integer> activeOps =
+                    mForegroundServiceController.getAppOps(
+                            sbn.getUser().getIdentifier(),
+                            sbn.getPackageName());
             if (activeOps != null) {
-                synchronized (entry.mActiveAppOps) {
-                    entry.mActiveAppOps.clear();
-                    entry.mActiveAppOps.addAll(activeOps);
-                }
+                entry.mActiveAppOps.clear();
+                entry.mActiveAppOps.addAll(activeOps);
             }
         }
     };
 
+    private void onAppOpsChanged(int code, int uid, String packageName, boolean active) {
+        mMainExecutor.execute(() -> handleAppOpsChanged(code, uid, packageName, active));
+    }
+
     /**
      * Update the appOp for the posted notification associated with the current foreground service
+     *
      * @param code code for appOp to add/remove
      * @param uid of user the notification is sent to
      * @param packageName package that created the notification
      * @param active whether the appOpCode is active or not
      */
-    private void onAppOpsChanged(int code, int uid, String packageName, boolean active) {
+    private void handleAppOpsChanged(int code, int uid, String packageName, boolean active) {
+        Assert.isMainThread();
+
         int userId = UserHandle.getUserId(uid);
 
         // Update appOp if there's an associated posted notification:
@@ -214,15 +227,13 @@ public class ForegroundCoordinator implements Coordinator {
                     && uid == entry.getSbn().getUid()
                     && packageName.equals(entry.getSbn().getPackageName())) {
                 boolean changed;
-                synchronized (entry.mActiveAppOps) {
-                    if (active) {
-                        changed = entry.mActiveAppOps.add(code);
-                    } else {
-                        changed = entry.mActiveAppOps.remove(code);
-                    }
+                if (active) {
+                    changed = entry.mActiveAppOps.add(code);
+                } else {
+                    changed = entry.mActiveAppOps.remove(code);
                 }
                 if (changed) {
-                    mMainHandler.post(mNotifFilter::invalidateList);
+                    mNotifFilter.invalidateList();
                 }
             }
         }
