@@ -22,6 +22,7 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.graphics.Insets;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Property;
 import android.view.View;
 import android.view.WindowInsets;
@@ -67,8 +68,8 @@ public class WindowInsetsActivity extends Activity {
         }
     };
 
-    float showY;
-    float hideY;
+    float startY;
+    float endY;
     InsetsAnimation imeAnim;
 
     @Override
@@ -84,16 +85,6 @@ public class WindowInsetsActivity extends Activity {
                 v.getWindowInsetsController().hide(Type.ime());
             }
         });
-        mRoot.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-            if (imeAnim == null) {
-                return;
-            }
-            if (mRoot.getRootWindowInsets().isVisible(Type.ime())) {
-                showY = mButton.getTop();
-            } else {
-                hideY = mButton.getTop();
-            }
-        });
         mRoot.setWindowInsetsAnimationCallback(new WindowInsetsAnimationCallback() {
 
             @Override
@@ -106,22 +97,19 @@ public class WindowInsetsActivity extends Activity {
                 if ((animation.getTypeMask() & Type.ime()) != 0) {
                     imeAnim = animation;
                 }
-                if (mRoot.getRootWindowInsets().isVisible(Type.ime())) {
-                    showY = mButton.getTop();
-                } else {
-                    hideY = mButton.getTop();
-                }
+                startY = mButton.getTop();
             }
 
             @Override
             public WindowInsets onProgress(WindowInsets insets) {
-                mButton.setY(hideY + (showY - hideY) * imeAnim.getInterpolatedFraction());
+                mButton.setY(startY + (endY - startY) * imeAnim.getInterpolatedFraction());
                 return insets;
             }
 
             @Override
             public AnimationBounds onStart(InsetsAnimation animation,
                     AnimationBounds bounds) {
+                endY = mButton.getTop();
                 return bounds;
             }
 

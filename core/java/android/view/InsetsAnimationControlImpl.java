@@ -40,6 +40,7 @@ import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimationCallback.AnimationBounds;
 import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
 import android.view.WindowManager.LayoutParams;
+import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -84,8 +85,8 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     public InsetsAnimationControlImpl(SparseArray<InsetsSourceControl> controls, Rect frame,
             InsetsState state, WindowInsetsAnimationControlListener listener,
             @InsetsType int types,
-            InsetsAnimationControlCallbacks controller, long durationMs, boolean fade,
-            @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
+            InsetsAnimationControlCallbacks controller, long durationMs, Interpolator interpolator,
+            boolean fade, @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
         mControls = controls;
         mListener = listener;
         mTypes = types;
@@ -101,8 +102,8 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mFrame = new Rect(frame);
         buildTypeSourcesMap(mTypeSideMap, mSideSourceMap, mControls);
 
-        mAnimation = new WindowInsetsAnimationCallback.InsetsAnimation(mTypes,
-                InsetsController.INTERPOLATOR, durationMs);
+        mAnimation = new WindowInsetsAnimationCallback.InsetsAnimation(mTypes, interpolator,
+                durationMs);
         mAnimation.setAlpha(getCurrentAlpha());
         mController.startAnimation(this, listener, types, mAnimation,
                 new AnimationBounds(mHiddenInsets, mShownInsets), layoutInsetsDuringAnimation);
@@ -196,7 +197,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             state.getSource(control.getType()).setVisible(shown);
         }
         Insets insets = getInsetsFromState(state, mFrame, null /* typeSideMap */);
-        setInsetsAndAlpha(insets, 1f /* alpha */, shown ? 1f : 0f /* fraction */);
+        setInsetsAndAlpha(insets, 1f /* alpha */, 1f /* fraction */);
         mFinished = true;
         mShownOnFinish = shown;
     }

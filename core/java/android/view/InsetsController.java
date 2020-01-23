@@ -28,6 +28,7 @@ import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -145,7 +146,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             controller.setInsetsAndAlpha(
                     value, 1f /* alpha */, (((DefaultAnimationControlListener)
                             ((InsetsAnimationControlImpl) controller).getListener())
-                                    .getRawProgress()));
+                                    .getRawFraction()));
         }
     }
 
@@ -204,9 +205,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             mController.finish(mShow);
         }
 
-        protected float getRawProgress() {
-            float fraction = (float) mAnimator.getCurrentPlayTime() / mAnimator.getDuration();
-            return mShow ? fraction : 1 - fraction;
+        protected float getRawFraction() {
+            return (float) mAnimator.getCurrentPlayTime() / mAnimator.getDuration();
         }
 
         protected long getDurationMs() {
@@ -437,27 +437,29 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void controlWindowInsetsAnimation(@InsetsType int types, long durationMs,
-            WindowInsetsAnimationControlListener listener) {
-        controlWindowInsetsAnimation(types, listener, false /* fromIme */, durationMs,
+            @Nullable Interpolator interpolator,
+            @NonNull WindowInsetsAnimationControlListener listener) {
+        controlWindowInsetsAnimation(types, listener, false /* fromIme */, durationMs, interpolator,
                 ANIMATION_TYPE_USER);
     }
 
     private void controlWindowInsetsAnimation(@InsetsType int types,
             WindowInsetsAnimationControlListener listener, boolean fromIme, long durationMs,
-            @AnimationType int animationType) {
+            @Nullable Interpolator interpolator, @AnimationType int animationType) {
         // If the frame of our window doesn't span the entire display, the control API makes very
         // little sense, as we don't deal with negative insets. So just cancel immediately.
         if (!mState.getDisplayFrame().equals(mFrame)) {
             listener.onCancelled();
             return;
         }
-        controlAnimationUnchecked(types, listener, mFrame, fromIme, durationMs, false /* fade */,
-                animationType, getLayoutInsetsDuringAnimationMode(types));
+        controlAnimationUnchecked(types, listener, mFrame, fromIme, durationMs, interpolator,
+                false /* fade */, animationType, getLayoutInsetsDuringAnimationMode(types));
     }
 
     private void controlAnimationUnchecked(@InsetsType int types,
             WindowInsetsAnimationControlListener listener, Rect frame, boolean fromIme,
-            long durationMs, boolean fade, @AnimationType int animationType,
+            long durationMs, Interpolator interpolator, boolean fade,
+            @AnimationType int animationType,
             @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
         if (types == 0) {
             // nothing to animate.
@@ -488,7 +490,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
 
         final InsetsAnimationControlImpl controller = new InsetsAnimationControlImpl(controls,
-                frame, mState, listener, typesReady, this, durationMs, fade,
+                frame, mState, listener, typesReady, this, durationMs, interpolator, fade,
                 layoutInsetsDuringAnimation);
         mRunningAnimations.add(new RunningAnimation(controller, animationType));
     }
@@ -733,7 +735,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         // and hidden state insets are correct.
         controlAnimationUnchecked(
                 types, listener, mState.getDisplayFrame(), fromIme, listener.getDurationMs(),
-                true /* fade */, show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE,
+                INTERPOLATOR, true /* fade */, show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE,
                 show ? LAYOUT_INSETS_DURING_ANIMATION_SHOWN
                         : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN);
     }
