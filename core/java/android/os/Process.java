@@ -173,6 +173,12 @@ public class Process {
     public static final int OTA_UPDATE_UID = 1061;
 
     /**
+     * Defines the UID used for statsd
+     * @hide
+     */
+    public static final int STATSD_UID = 1066;
+
+    /**
      * Defines the UID used for incidentd.
      * @hide
      */

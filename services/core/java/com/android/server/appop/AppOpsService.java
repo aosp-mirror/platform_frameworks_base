@@ -50,12 +50,14 @@ import static android.app.AppOpsManager.resolveFirstUnrestrictedUidState;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
+import static android.os.Process.STATSD_UID;
 
 import android.Manifest;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -1759,6 +1761,15 @@ public class AppOpsService extends IAppOpsService.Stub {
         ensureHistoricalOpRequestIsValid(uid, packageName, featureId, opNames, filter,
                 beginTimeMillis, endTimeMillis, flags);
         Objects.requireNonNull(callback, "callback cannot be null");
+
+        ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
+        boolean isCallerInstrumented = ami.isUidCurrentlyInstrumented(Binder.getCallingUid());
+        boolean isCallerStatsCollector = Binder.getCallingUid() == STATSD_UID;
+
+        if (!isCallerStatsCollector && !isCallerInstrumented) {
+            mHandler.post(() -> callback.sendResult(new Bundle()));
+            return;
+        }
 
         mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), "getHistoricalOps");
@@ -4475,8 +4486,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         pw.println("    Limit output to data associated with the given feature id.");
         pw.println("  --watchers");
         pw.println("    Only output the watcher sections.");
-        pw.println("  --history");
-        pw.println("    Output the historical data.");
     }
 
     private void dumpStatesLocked(@NonNull PrintWriter pw, @Nullable String filterFeatureId,
@@ -4609,6 +4618,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         int dumpUid = Process.INVALID_UID;
         int dumpMode = -1;
         boolean dumpWatchers = false;
+        // TODO ntmyren: Remove the dumpHistory and dumpFilter
         boolean dumpHistory = false;
         @HistoricalOpsRequestFilter int dumpFilter = 0;
 
@@ -4671,8 +4681,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 } else if ("--watchers".equals(arg)) {
                     dumpWatchers = true;
-                } else if ("--history".equals(arg)) {
-                    dumpHistory = true;
                 } else if (arg.length() > 0 && arg.charAt(0) == '-'){
                     pw.println("Unknown option: " + arg);
                     return;
