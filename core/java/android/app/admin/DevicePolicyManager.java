@@ -8260,6 +8260,11 @@ public class DevicePolicyManager {
      * actual package file remain. This function can be called by a device owner, profile owner, or
      * by a delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
      * {@link #setDelegatedScopes}.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance, returned by
+     * {@link #getParentProfileInstance(ComponentName)}, where the caller must be the profile owner
+     * of an organization-owned managed profile and the package must be a system package. If called
+     * on the parent instance, then the package is hidden or unhidden in the personal profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if the caller is a package access delegate.
@@ -8267,17 +8272,20 @@ public class DevicePolicyManager {
      * @param hidden {@code true} if the package should be hidden, {@code false} if it should be
      *            unhidden.
      * @return boolean Whether the hidden setting of the package was successfully updated.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or if called on
+     *            the parent profile and the {@code admin} is not a profile owner of an
+     *            organization-owned managed profile.
+     * @throws IllegalArgumentException if called on the parent profile and the package provided
+     *            is not a system package.
      * @see #setDelegatedScopes
      * @see #DELEGATION_PACKAGE_ACCESS
      */
     public boolean setApplicationHidden(@NonNull ComponentName admin, String packageName,
             boolean hidden) {
-        throwIfParentInstance("setApplicationHidden");
         if (mService != null) {
             try {
                 return mService.setApplicationHidden(admin, mContext.getPackageName(), packageName,
-                        hidden);
+                        hidden, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8289,20 +8297,30 @@ public class DevicePolicyManager {
      * Determine if a package is hidden. This function can be called by a device owner, profile
      * owner, or by a delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
      * {@link #setDelegatedScopes}.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance, returned by
+     * {@link #getParentProfileInstance(ComponentName)}, where the caller must be the profile owner
+     * of an organization-owned managed profile and the package must be a system package. If called
+     * on the parent instance, this will determine whether the package is hidden or unhidden in the
+     * personal profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if the caller is a package access delegate.
      * @param packageName The name of the package to retrieve the hidden status of.
      * @return boolean {@code true} if the package is hidden, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or if called on
+     *            the parent profile and the {@code admin} is not a profile owner of an
+     *            organization-owned managed profile.
+     * @throws IllegalArgumentException if called on the parent profile and the package provided
+     *            is not a system package.
      * @see #setDelegatedScopes
      * @see #DELEGATION_PACKAGE_ACCESS
      */
     public boolean isApplicationHidden(@NonNull ComponentName admin, String packageName) {
-        throwIfParentInstance("isApplicationHidden");
         if (mService != null) {
             try {
-                return mService.isApplicationHidden(admin, mContext.getPackageName(), packageName);
+                return mService.isApplicationHidden(admin, mContext.getPackageName(), packageName,
+                        mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

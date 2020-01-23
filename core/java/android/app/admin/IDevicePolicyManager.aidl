@@ -233,8 +233,8 @@ interface IDevicePolicyManager {
     boolean isNotificationListenerServicePermitted(in String packageName, int userId);
 
     Intent createAdminSupportIntent(in String restriction);
-    boolean setApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName, boolean hidden);
-    boolean isApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName);
+    boolean setApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName, boolean hidden, boolean parent);
+    boolean isApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName, boolean parent);
 
     UserHandle createAndManageUser(in ComponentName who, in String name, in ComponentName profileOwner, in PersistableBundle adminExtras, in int flags);
     boolean removeUser(in ComponentName who, in UserHandle userHandle);
