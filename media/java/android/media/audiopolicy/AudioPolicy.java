@@ -51,6 +51,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @hide
@@ -404,7 +405,7 @@ public class AudioPolicy {
 
     /**
      * @hide
-     * Configures the audio framework so that all audio stream originating from the given UID
+     * Configures the audio framework so that all audio streams originating from the given UID
      * can only come from a set of audio devices.
      * For this routing to be operational, a number of {@link AudioMix} instances must have been
      * previously registered on this policy, and routed to a super-set of the given audio devices
@@ -471,6 +472,78 @@ public class AudioPolicy {
                 return (status == AudioManager.SUCCESS);
             } catch (RemoteException e) {
                 Log.e(TAG, "Dead object in removeUidDeviceAffinity", e);
+                return false;
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * Removes audio device affinity previously set by
+     * {@link #setUserIdDeviceAffinity(int, java.util.List)}.
+     * @param userId userId of the application affected.
+     * @return true if the change was successful, false otherwise.
+     */
+    @TestApi
+    @SystemApi
+    public boolean removeUserIdDeviceAffinity(int userId) {
+        synchronized (mLock) {
+            if (mStatus != POLICY_STATUS_REGISTERED) {
+                throw new IllegalStateException("Cannot use unregistered AudioPolicy");
+            }
+            final IAudioService service = getService();
+            try {
+                final int status = service.removeUserIdDeviceAffinity(this.cb(), userId);
+                return (status == AudioManager.SUCCESS);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Dead object in removeUserIdDeviceAffinity", e);
+                return false;
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * Configures the audio framework so that all audio streams originating from the given user
+     * can only come from a set of audio devices.
+     * For this routing to be operational, a number of {@link AudioMix} instances must have been
+     * previously registered on this policy, and routed to a super-set of the given audio devices
+     * with {@link AudioMix.Builder#setDevice(android.media.AudioDeviceInfo)}. Note that having
+     * multiple devices in the list doesn't imply the signals will be duplicated on the different
+     * audio devices, final routing will depend on the {@link AudioAttributes} of the sounds being
+     * played.
+     * @param userId Android user id to affect.
+     * @param devices list of devices to which the audio stream of the application may be routed.
+     * @return true if the change was successful, false otherwise.
+     */
+    @TestApi
+    @SystemApi
+    public boolean setUserIdDeviceAffinity(int userId, @NonNull List<AudioDeviceInfo> devices) {
+        Objects.requireNonNull(devices, "Illegal null list of audio devices");
+        synchronized (mLock) {
+            if (mStatus != POLICY_STATUS_REGISTERED) {
+                throw new IllegalStateException("Cannot use unregistered AudioPolicy");
+            }
+            final int[] deviceTypes = new int[devices.size()];
+            final String[] deviceAddresses = new String[devices.size()];
+            int i = 0;
+            for (AudioDeviceInfo device : devices) {
+                if (device == null) {
+                    throw new IllegalArgumentException(
+                            "Illegal null AudioDeviceInfo in setUserIdDeviceAffinity");
+                }
+                deviceTypes[i] =
+                        AudioDeviceInfo.convertDeviceTypeToInternalDevice(device.getType());
+                deviceAddresses[i] = device.getAddress();
+                i++;
+            }
+            final IAudioService service = getService();
+            try {
+                final int status = service.setUserIdDeviceAffinity(this.cb(),
+                        userId, deviceTypes, deviceAddresses);
+                return (status == AudioManager.SUCCESS);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Dead object in setUserIdDeviceAffinity", e);
                 return false;
             }
         }

@@ -1169,6 +1169,13 @@ public class AudioSystem
     /** see AudioPolicy.removeUidDeviceAffinities() */
     public static native int removeUidDeviceAffinities(int uid);
 
+    /** see AudioPolicy.setUserIdDeviceAffinities() */
+    public static native int setUserIdDeviceAffinities(int userId, @NonNull int[] types,
+            @NonNull String[] addresses);
+
+    /** see AudioPolicy.removeUserIdDeviceAffinities() */
+    public static native int removeUserIdDeviceAffinities(int userId);
+
     public static native int systemReady();
 
     public static native float getStreamVolumeDB(int stream, int index, int device);
