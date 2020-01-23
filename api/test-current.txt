@@ -4114,6 +4114,29 @@ package android.telephony.ims {
     method public void onProvisioningStringChanged(int, @NonNull String);
   }
 
+  public class RcsUceAdapter {
+    method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public boolean isUceSettingEnabled() throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUceSettingEnabled(boolean) throws android.telephony.ims.ImsException;
+    field public static final int ERROR_ALREADY_IN_QUEUE = 13; // 0xd
+    field public static final int ERROR_FORBIDDEN = 6; // 0x6
+    field public static final int ERROR_GENERIC_FAILURE = 1; // 0x1
+    field public static final int ERROR_INSUFFICIENT_MEMORY = 11; // 0xb
+    field public static final int ERROR_LOST_NETWORK = 12; // 0xc
+    field public static final int ERROR_NOT_AUTHORIZED = 5; // 0x5
+    field public static final int ERROR_NOT_AVAILABLE = 3; // 0x3
+    field public static final int ERROR_NOT_ENABLED = 2; // 0x2
+    field public static final int ERROR_NOT_FOUND = 7; // 0x7
+    field public static final int ERROR_NOT_REGISTERED = 4; // 0x4
+    field public static final int ERROR_REQUEST_TIMEOUT = 10; // 0xa
+    field public static final int ERROR_REQUEST_TOO_LARGE = 8; // 0x8
+    field public static final int PUBLISH_STATE_200_OK = 1; // 0x1
+    field public static final int PUBLISH_STATE_NOT_PUBLISHED = 2; // 0x2
+    field public static final int PUBLISH_STATE_OTHER_ERROR = 6; // 0x6
+    field public static final int PUBLISH_STATE_RCS_PROVISION_ERROR = 4; // 0x4
+    field public static final int PUBLISH_STATE_REQUEST_TIMEOUT = 5; // 0x5
+    field public static final int PUBLISH_STATE_VOLTE_PROVISION_ERROR = 3; // 0x3
+  }
+
 }
 
 package android.telephony.ims.feature {
