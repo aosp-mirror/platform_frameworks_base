@@ -59,6 +59,7 @@ package android {
     field public static final String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
     field public static final String CHANGE_DEVICE_IDLE_TEMP_WHITELIST = "android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST";
     field public static final String CLEAR_APP_USER_DATA = "android.permission.CLEAR_APP_USER_DATA";
+    field public static final String COMPANION_APPROVE_WIFI_CONNECTIONS = "android.permission.COMPANION_APPROVE_WIFI_CONNECTIONS";
     field public static final String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
     field public static final String CONFIGURE_WIFI_DISPLAY = "android.permission.CONFIGURE_WIFI_DISPLAY";
     field @Deprecated public static final String CONNECTIVITY_INTERNAL = "android.permission.CONNECTIVITY_INTERNAL";
@@ -1717,7 +1718,7 @@ package android.bluetooth.le {
 package android.companion {
 
   public final class CompanionDeviceManager {
-    method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean isDeviceAssociated(@NonNull String, @NonNull android.net.MacAddress, @NonNull android.os.UserHandle);
+    method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean isDeviceAssociatedForWifiConnection(@NonNull String, @NonNull android.net.MacAddress, @NonNull android.os.UserHandle);
   }
 
 }

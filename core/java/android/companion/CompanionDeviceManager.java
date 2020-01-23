@@ -269,7 +269,7 @@ public final class CompanionDeviceManager {
     @SystemApi
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
-    public boolean isDeviceAssociated(
+    public boolean isDeviceAssociatedForWifiConnection(
             @NonNull String packageName,
             @NonNull MacAddress macAddress,
             @NonNull UserHandle user) {
@@ -280,7 +280,7 @@ public final class CompanionDeviceManager {
         Objects.requireNonNull(macAddress, "mac address cannot be null");
         Objects.requireNonNull(user, "user cannot be null");
         try {
-            return mService.isDeviceAssociated(
+            return mService.isDeviceAssociatedForWifiConnection(
                     packageName, macAddress.toString(), user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
