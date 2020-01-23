@@ -208,13 +208,6 @@ const char* AImageDecoderHeaderInfo_getMimeType(const AImageDecoderHeaderInfo* i
     return getMimeType(toDecoder(info)->mCodec->getEncodedFormat());
 }
 
-bool AImageDecoderHeaderInfo_isAnimated(const AImageDecoderHeaderInfo* info) {
-    if (!info) {
-        return false;
-    }
-    return toDecoder(info)->mCodec->codec()->getFrameCount() > 1;
-}
-
 int32_t AImageDecoderHeaderInfo_getDataSpace(const AImageDecoderHeaderInfo* info) {
     if (!info) {
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
@@ -247,8 +240,7 @@ static AndroidBitmapFormat getFormat(SkColorType colorType) {
     }
 }
 
-AndroidBitmapFormat AImageDecoderHeaderInfo_getAndroidBitmapFormat(
-        const AImageDecoderHeaderInfo* info) {
+int32_t AImageDecoderHeaderInfo_getAndroidBitmapFormat(const AImageDecoderHeaderInfo* info) {
     if (!info) {
         return ANDROID_BITMAP_FORMAT_NONE;
     }
@@ -281,7 +273,7 @@ int AImageDecoder_setUnpremultipliedRequired(AImageDecoder* decoder, bool requir
             ? ANDROID_IMAGE_DECODER_SUCCESS : ANDROID_IMAGE_DECODER_INVALID_CONVERSION;
 }
 
-int AImageDecoder_setTargetSize(AImageDecoder* decoder, int width, int height) {
+int AImageDecoder_setTargetSize(AImageDecoder* decoder, int32_t width, int32_t height) {
     if (!decoder) {
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
@@ -291,7 +283,7 @@ int AImageDecoder_setTargetSize(AImageDecoder* decoder, int width, int height) {
 }
 
 int AImageDecoder_computeSampledSize(const AImageDecoder* decoder, int sampleSize,
-                                     int* width, int* height) {
+                                     int32_t* width, int32_t* height) {
     if (!decoder || !width || !height || sampleSize < 1) {
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
