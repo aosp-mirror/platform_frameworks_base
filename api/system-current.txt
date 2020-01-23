@@ -8983,23 +8983,15 @@ package android.os.connectivity {
   }
 
   public final class WifiActivityEnergyInfo implements android.os.Parcelable {
-    ctor public WifiActivityEnergyInfo(long, int, long, long, long, long);
+    ctor public WifiActivityEnergyInfo(long, int, @IntRange(from=0) long, @IntRange(from=0) long, @IntRange(from=0) long, @IntRange(from=0) long);
     method public int describeContents();
-    method public long getControllerEnergyUsedMicroJoules();
-    method public long getControllerIdleDurationMillis();
-    method public long getControllerRxDurationMillis();
-    method public long getControllerScanDurationMillis();
-    method public long getControllerTxDurationMillis();
+    method @IntRange(from=0) public long getControllerEnergyUsedMicroJoules();
+    method @IntRange(from=0) public long getControllerIdleDurationMillis();
+    method @IntRange(from=0) public long getControllerRxDurationMillis();
+    method @IntRange(from=0) public long getControllerScanDurationMillis();
+    method @IntRange(from=0) public long getControllerTxDurationMillis();
     method public int getStackState();
     method public long getTimeSinceBootMillis();
-    method public boolean isValid();
-    method public void setControllerEnergyUsedMicroJoules(long);
-    method public void setControllerIdleDurationMillis(long);
-    method public void setControllerRxDurationMillis(long);
-    method public void setControllerScanDurationMillis(long);
-    method public void setControllerTxDurationMillis(long);
-    method public void setStackState(int);
-    method public void setTimeSinceBootMillis(long);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.connectivity.WifiActivityEnergyInfo> CREATOR;
     field public static final int STACK_STATE_INVALID = 0; // 0x0
@@ -14244,3 +14236,4 @@ package android.webkit {
   }
 
 }
+
