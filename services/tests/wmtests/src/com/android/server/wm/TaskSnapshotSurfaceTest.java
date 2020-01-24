@@ -40,6 +40,7 @@ import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.view.Surface;
 import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
@@ -69,7 +70,8 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
         final TaskSnapshot snapshot = new TaskSnapshot(
                 System.currentTimeMillis(),
                 new ComponentName("", ""), buffer,
-                ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT, contentInsets, false,
+                ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
+                Surface.ROTATION_0, contentInsets, false,
                 1.0f, true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN,
                 0 /* systemUiVisibility */, false /* isTranslucent */);
         mSurface = new TaskSnapshotSurface(mWm, new Window(), new SurfaceControl(), snapshot, "Test",
