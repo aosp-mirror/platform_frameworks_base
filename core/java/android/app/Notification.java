@@ -3534,8 +3534,16 @@ public class Notification implements Parcelable
          * This field will be ignored by Launchers that don't support badging, don't show
          * notification content, or don't show {@link android.content.pm.ShortcutManager shortcuts}.
          *
+         * If this notification has {@link BubbleMetadata} attached that was created with
+         * {@link BubbleMetadata.Builder#createShortcutBubble(String)} a check will be performed
+         * to ensure the shortcutId supplied to bubble metadata matches the shortcutId set here,
+         * if one was set. If the shortcutId's were specified but do not match, an exception
+         * is thrown.
+         *
          * @param shortcutId the {@link ShortcutInfo#getId() id} of the shortcut this notification
          *                   supersedes
+         *
+         * @see BubbleMetadata.Builder#createShortcutBubble(String)
          */
         @NonNull
         public Builder setShortcutId(String shortcutId) {
@@ -5865,9 +5873,29 @@ public class Notification implements Parcelable
         /**
          * Combine all of the options that have been set and return a new {@link Notification}
          * object.
+         *
+         * If this notification has {@link BubbleMetadata} attached that was created with
+         * {@link BubbleMetadata.Builder#createShortcutBubble(String)} a check will be performed
+         * to ensure the shortcutId supplied to bubble metadata matches the shortcutId set on the
+         * notification builder, if one was set. If the shortcutId's were specified but do not
+         * match, an exception is thrown here.
+         *
+         * @see BubbleMetadata.Builder#createShortcutBubble(String)
+         * @see #setShortcutId(String)
          */
         @NonNull
         public Notification build() {
+            // Check shortcut id matches
+            if (mN.mShortcutId != null
+                    && mN.mBubbleMetadata != null
+                    && mN.mBubbleMetadata.getShortcutId() != null
+                    && !mN.mShortcutId.equals(mN.mBubbleMetadata.getShortcutId())) {
+                throw new IllegalArgumentException(
+                        "Notification and BubbleMetadata shortcut id's don't match,"
+                                + " notification: " + mN.mShortcutId
+                                + " vs bubble: " + mN.mBubbleMetadata.getShortcutId());
+            }
+
             // first, add any extras from the calling code
             if (mUserExtras != null) {
                 mN.extras = getAllExtras();
