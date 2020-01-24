@@ -3116,6 +3116,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
+        onWindowFocusChanged(oldFocus, newFocus);
+
         int focusChanged = getDisplayPolicy().focusChangedLw(oldFocus, newFocus);
 
         if (imWindowChanged && oldFocus != mInputMethodWindow) {
@@ -3156,6 +3158,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
         }
         return true;
+    }
+
+    private static void onWindowFocusChanged(WindowState oldFocus, WindowState newFocus) {
+        final Task focusedTask = newFocus != null ? newFocus.getTask() : null;
+        final Task unfocusedTask = oldFocus != null ? oldFocus.getTask() : null;
+        if (focusedTask == unfocusedTask) {
+            return;
+        }
+        if (focusedTask != null) {
+            focusedTask.onWindowFocusChanged(true /* hasFocus */);
+        }
+        if (unfocusedTask != null) {
+            unfocusedTask.onWindowFocusChanged(false /* hasFocus */);
+        }
     }
 
     /**

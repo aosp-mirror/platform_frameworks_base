@@ -9361,6 +9361,16 @@ public final class Settings {
         public static final String DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM =
                 "enable_sizecompat_freeform";
 
+        /**
+         * If true, shadows drawn around the window will be rendered by the system compositor. If
+         * false, shadows will be drawn by the client by setting an elevation on the root view and
+         * the contents will be inset by the surface insets.
+         * (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR =
+                "render_shadows_in_compositor";
+
        /**
         * Whether user has enabled development settings.
         */

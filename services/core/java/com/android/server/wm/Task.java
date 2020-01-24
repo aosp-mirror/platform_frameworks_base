@@ -16,13 +16,13 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -59,6 +59,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
 
+import static com.android.internal.policy.DecorView.DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP;
+import static com.android.internal.policy.DecorView.DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
 import static com.android.server.am.TaskRecordProto.ACTIVITIES;
 import static com.android.server.am.TaskRecordProto.ACTIVITY_TYPE;
 import static com.android.server.am.TaskRecordProto.FULLSCREEN;
@@ -99,6 +101,7 @@ import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 
 import static java.lang.Integer.MAX_VALUE;
@@ -210,6 +213,8 @@ class Task extends WindowContainer<WindowContainer> {
     static final int PERSIST_TASK_VERSION = 1;
 
     static final int INVALID_MIN_SIZE = -1;
+    private float mShadowRadius = 0;
+    private final Rect mLastSurfaceCrop = new Rect();
 
     /**
      * The modes to control how the stack is moved to the front when calling {@link Task#reparent}.
@@ -1869,6 +1874,7 @@ class Task extends WindowContainer<WindowContainer> {
         super.onConfigurationChanged(newParentConfig);
         if (wasInMultiWindowMode != inMultiWindowMode()) {
             mStackSupervisor.scheduleUpdateMultiWindowMode(this);
+            updateShadowsRadius(isFocused(), getPendingTransaction());
         }
 
         // If the configuration supports persistent bounds (eg. Freeform), keep track of the
@@ -2527,16 +2533,34 @@ class Task extends WindowContainer<WindowContainer> {
                 ? getStack().getDisplayContent() : null;
         if (displayContent != null) {
             rotation = displayContent.getDisplayInfo().rotation;
-        } else if (bounds == null) {
-            return super.setBounds(bounds);
         }
 
         final int boundsChange = super.setBounds(bounds);
-
         mRotation = rotation;
-
         updateSurfacePosition();
         return boundsChange;
+    }
+
+    private void updateSurfaceCrop() {
+        // Only update the crop if we are drawing shadows on the task.
+        if (mSurfaceControl == null || !mWmService.mRenderShadowsInCompositor) {
+            return;
+        }
+
+        if (inSplitScreenWindowingMode()) {
+            // inherit crop from parent
+            mTmpRect.setEmpty();
+        } else {
+            getBounds(mTmpRect);
+        }
+
+        mTmpRect.offsetTo(0, 0);
+        if (mLastSurfaceCrop.equals(mTmpRect)) {
+            return;
+        }
+
+        getPendingTransaction().setWindowCrop(mSurfaceControl, mTmpRect);
+        mLastSurfaceCrop.set(mTmpRect);
     }
 
     @Override
@@ -3126,6 +3150,9 @@ class Task extends WindowContainer<WindowContainer> {
         } else {
             mTmpDimBoundsRect.offsetTo(0, 0);
         }
+
+        updateSurfaceCrop();
+
         if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
             scheduleAnimation();
         }
@@ -3924,5 +3951,59 @@ class Task extends WindowContainer<WindowContainer> {
                     mAtmService.mTaskOrganizerController.getTaskOrganizer(windowingMode);
             setTaskOrganizer(org);
         }
+    }
+
+    /**
+     * @return true if the task is currently focused.
+     */
+    private boolean isFocused() {
+        if (mDisplayContent == null || mDisplayContent.mCurrentFocus == null) {
+            return false;
+        }
+        return mDisplayContent.mCurrentFocus.getTask() == this;
+    }
+
+    /**
+     * @return the desired shadow radius in pixels for the current task.
+     */
+    private float getShadowRadius(boolean taskIsFocused) {
+        if (mDisplayContent == null) {
+            return 0;
+        }
+
+        if (inPinnedWindowingMode()) {
+            return dipToPixel(PINNED_WINDOWING_MODE_ELEVATION_IN_DIP,
+                    mDisplayContent.getDisplayMetrics());
+        }
+        if (inFreeformWindowingMode()) {
+            final int elevation = taskIsFocused
+                    ? DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP : DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
+            return dipToPixel(elevation, mDisplayContent.getDisplayMetrics());
+        }
+
+        // For all other windowing modes, do not draw a shadow.
+        return 0;
+    }
+
+    /**
+     * Update the length of the shadow if needed based on windowing mode and task focus state.
+     */
+    private void updateShadowsRadius(boolean taskIsFocused,
+            SurfaceControl.Transaction pendingTransaction) {
+        if (!mWmService.mRenderShadowsInCompositor) return;
+
+        final float newShadowRadius = getShadowRadius(taskIsFocused);
+        if (mShadowRadius != newShadowRadius) {
+            mShadowRadius = newShadowRadius;
+            pendingTransaction.setShadowRadius(getSurfaceControl(), mShadowRadius);
+        }
+    }
+
+    /**
+     * Called on the task of a window which gained or lost focus.
+     * @param hasFocus
+     */
+    void onWindowFocusChanged(boolean hasFocus) {
+        updateShadowsRadius(hasFocus, getPendingTransaction());
     }
 }
