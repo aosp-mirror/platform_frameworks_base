@@ -19,6 +19,7 @@ package android.view;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -1269,6 +1270,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mSource;
     private int mDisplayId;
+    private @Nullable byte[] mHmac;
     @UnsupportedAppUsage
     private int mMetaState;
     @UnsupportedAppUsage
@@ -1546,6 +1548,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         mDeviceId = origEvent.mDeviceId;
         mSource = origEvent.mSource;
         mDisplayId = origEvent.mDisplayId;
+        mHmac = origEvent.mHmac == null ? null : origEvent.mHmac.clone();
         mScanCode = origEvent.mScanCode;
         mFlags = origEvent.mFlags;
         mCharacters = origEvent.mCharacters;
@@ -1573,6 +1576,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         mDeviceId = origEvent.mDeviceId;
         mSource = origEvent.mSource;
         mDisplayId = origEvent.mDisplayId;
+        mHmac = null; // Don't copy HMAC, it will be invalid because eventTime is changing
         mScanCode = origEvent.mScanCode;
         mFlags = origEvent.mFlags;
         mCharacters = origEvent.mCharacters;
@@ -1600,7 +1604,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public static KeyEvent obtain(long downTime, long eventTime, int action,
             int code, int repeat, int metaState,
-            int deviceId, int scancode, int flags, int source, int displayId, String characters) {
+            int deviceId, int scancode, int flags, int source, int displayId, @Nullable byte[] hmac,
+            String characters) {
         KeyEvent ev = obtain();
         ev.mDownTime = downTime;
         ev.mEventTime = eventTime;
@@ -1613,6 +1618,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         ev.mFlags = flags;
         ev.mSource = source;
         ev.mDisplayId = displayId;
+        ev.mHmac = hmac;
         ev.mCharacters = characters;
         return ev;
     }
@@ -1627,7 +1633,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
             int code, int repeat, int metaState,
             int deviceId, int scancode, int flags, int source, String characters) {
         return obtain(downTime, eventTime, action, code, repeat, metaState, deviceId, scancode,
-                flags, source, INVALID_DISPLAY, characters);
+                flags, source, INVALID_DISPLAY, null /* hmac */, characters);
     }
 
     /**
@@ -1650,6 +1656,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         ev.mFlags = other.mFlags;
         ev.mSource = other.mSource;
         ev.mDisplayId = other.mDisplayId;
+        ev.mHmac = other.mHmac == null ? null : other.mHmac.clone();
         ev.mCharacters = other.mCharacters;
         return ev;
     }
@@ -1738,6 +1745,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         mDeviceId = origEvent.mDeviceId;
         mSource = origEvent.mSource;
         mDisplayId = origEvent.mDisplayId;
+        mHmac = null; // Don't copy the hmac, it will be invalid since action is changing
         mScanCode = origEvent.mScanCode;
         mFlags = origEvent.mFlags;
         // Don't copy mCharacters, since one way or the other we'll lose it
@@ -3091,6 +3099,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         mDeviceId = in.readInt();
         mSource = in.readInt();
         mDisplayId = in.readInt();
+        mHmac = in.createByteArray();
         mAction = in.readInt();
         mKeyCode = in.readInt();
         mRepeatCount = in.readInt();
@@ -3109,6 +3118,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         out.writeInt(mDeviceId);
         out.writeInt(mSource);
         out.writeInt(mDisplayId);
+        out.writeByteArray(mHmac);
         out.writeInt(mAction);
         out.writeInt(mKeyCode);
         out.writeInt(mRepeatCount);
