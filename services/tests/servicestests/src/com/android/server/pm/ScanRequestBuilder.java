@@ -16,9 +16,10 @@
 
 package com.android.server.pm;
 
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ParsedPackage;
 import android.os.UserHandle;
+
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 class ScanRequestBuilder {
     private final ParsedPackage mPkg;

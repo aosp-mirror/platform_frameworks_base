@@ -57,7 +57,6 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
-import android.content.pm.parsing.AndroidPackage;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.CancellationSignal;
@@ -74,6 +73,7 @@ import android.util.Range;
 import com.android.internal.app.ChooserActivity;
 import com.android.internal.content.PackageMonitor;
 import com.android.server.LocalServices;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import org.junit.After;
 import org.junit.Before;

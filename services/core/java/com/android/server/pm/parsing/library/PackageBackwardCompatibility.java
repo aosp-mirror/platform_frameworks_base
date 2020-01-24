@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_T
 import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_RUNNER;
 import static com.android.server.pm.parsing.library.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
 
+import android.content.pm.PackageParser;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -28,7 +29,6 @@ import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * Modifies {@link ParsedPackage} in order to maintain backwards compatibility.
@@ -55,13 +55,7 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
         // android.test.mock.
         packageUpdaters.add(new AndroidTestRunnerSplitUpdater());
 
-        // Attempt to load and add the optional updater that will only be available when
-        // REMOVE_ATB_FROM_BCP=true. If that could not be found then add the default updater that
-        // will remove any references to org.apache.http.library from the package so that it does
-        // not try and load the library when it is on the bootclasspath.
-        boolean bootClassPathContainsATB = !addOptionalUpdater(packageUpdaters,
-                "android.content.pm.parsing.library.AndroidTestBaseUpdater",
-                RemoveUnnecessaryAndroidTestBaseLibrary::new);
+        boolean bootClassPathContainsATB = !addUpdaterForAndroidTestBase(packageUpdaters);
 
         PackageSharedLibraryUpdater[] updaterArray = packageUpdaters
                 .toArray(new PackageSharedLibraryUpdater[0]);
@@ -70,41 +64,31 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
     }
 
     /**
-     * Add an optional {@link PackageSharedLibraryUpdater} instance to the list, if it could not be
-     * found then add a default instance instead.
+     * Attempt to load and add the optional updater that will only be available when
+     * REMOVE_ATB_FROM_BCP=true. If that could not be found then add the default updater that
+     * will remove any references to org.apache.http.library from the package so that
+     * it does not try and load the library when it is on the bootclasspath.
      *
-     * @param packageUpdaters the list to update.
-     * @param className the name of the optional class.
-     * @param defaultUpdater the supplier of the default instance.
-     * @return true if the optional updater was added false otherwise.
+     * TODO:(b/135203078): Find a better way to do this.
      */
-    private static boolean addOptionalUpdater(List<PackageSharedLibraryUpdater> packageUpdaters,
-            String className, Supplier<PackageSharedLibraryUpdater> defaultUpdater) {
-        Class<? extends PackageSharedLibraryUpdater> clazz;
+    private static boolean addUpdaterForAndroidTestBase(
+            List<PackageSharedLibraryUpdater> packageUpdaters) {
+        boolean hasClass = false;
+        String className = "android.content.pm.AndroidTestBaseUpdater";
         try {
-            clazz = (PackageBackwardCompatibility.class.getClassLoader()
-                    .loadClass(className)
-                    .asSubclass(PackageSharedLibraryUpdater.class));
+            Class clazz = (PackageParser.class.getClassLoader().loadClass(className));
+            hasClass = clazz != null;
             Log.i(TAG, "Loaded " + className);
         } catch (ClassNotFoundException e) {
             Log.i(TAG, "Could not find " + className + ", ignoring");
-            clazz = null;
         }
 
-        boolean usedOptional = false;
-        PackageSharedLibraryUpdater updater;
-        if (clazz == null) {
-            updater = defaultUpdater.get();
+        if (hasClass) {
+            packageUpdaters.add(new AndroidTestBaseUpdater());
         } else {
-            try {
-                updater = clazz.getConstructor().newInstance();
-                usedOptional = true;
-            } catch (ReflectiveOperationException e) {
-                throw new IllegalStateException("Could not create instance of " + className, e);
-            }
+            packageUpdaters.add(new RemoveUnnecessaryAndroidTestBaseLibrary());
         }
-        packageUpdaters.add(updater);
-        return usedOptional;
+        return hasClass;
     }
 
     @VisibleForTesting

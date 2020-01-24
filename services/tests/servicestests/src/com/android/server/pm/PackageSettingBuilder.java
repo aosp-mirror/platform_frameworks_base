@@ -18,9 +18,10 @@ package com.android.server.pm;
 
 import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
-import android.content.pm.parsing.AndroidPackage;
 import android.util.ArraySet;
 import android.util.SparseArray;
+
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.File;
 import java.util.Map;

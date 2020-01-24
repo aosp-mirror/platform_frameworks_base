@@ -16,8 +16,8 @@
 
 package com.android.server.om
 
-import android.content.pm.parsing.AndroidPackage
 import android.net.Uri
+import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test

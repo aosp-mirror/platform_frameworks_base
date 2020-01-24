@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import android.content.pm.PackageParser;
+import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -38,6 +39,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Tests for {@link ParallelPackageParser}
  */
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ParallelPackageParserTest {
     private static final String TAG = ParallelPackageParserTest.class.getSimpleName();

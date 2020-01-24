@@ -93,6 +93,7 @@ android_test {
     },
 
     data: [":JobTestApp"],
+    resource_zips: [":FrameworksServicesTests_apks_as_resources"],
 }
 
 java_library {
@@ -114,4 +115,29 @@ filegroup {
     srcs: [
         "src/com/android/server/pm/SuspendPackagesTest.java",
     ],
+}
+
+// Rules to copy all the test apks to the intermediate raw resource directory
+java_genrule {
+    name: "FrameworksServicesTests_apks_as_resources",
+    srcs: [
+        ":FrameworksCoreTests_install_complete_package_info",
+        ":FrameworksServicesTests_install_intent_filters",
+        ":FrameworksServicesTests_install_split_base",
+        ":FrameworksServicesTests_install_split_feature_a",
+        ":FrameworksServicesTests_install_uses_sdk_0",
+        ":FrameworksServicesTests_install_uses_sdk_q0",
+        ":FrameworksServicesTests_install_uses_sdk_r",
+        ":FrameworksServicesTests_install_uses_sdk_r0",
+        ":FrameworksServicesTests_install_uses_sdk_r5",
+    ],
+    out: ["FrameworkServicesTests_apks_as_resources.res.zip"],
+    tools: ["soong_zip"],
+
+    cmd: "mkdir -p $(genDir)/res/raw && " +
+        "for i in $(in); do " +
+        "  x=$${i##*FrameworksCoreTests_}; cp $$i $(genDir)/res/raw/$${x%.apk};" +
+        "  x=$${i##*FrameworksServicesTests_}; cp $$i $(genDir)/res/raw/$${x%.apk};" +
+        "done && " +
+        "$(location soong_zip) -o $(out) -C $(genDir)/res -D $(genDir)/res",
 }

@@ -39,8 +39,6 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.PackageImpl;
 import android.os.Looper;
 import android.os.SystemProperties;
 import android.os.UserManager;
@@ -56,6 +54,9 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.PackageImpl;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import org.junit.After;
 import org.junit.Before;
@@ -252,14 +253,14 @@ public class UserSystemPackageInstallerTest {
         final Set<String> userWhitelist = new ArraySet<>();
         userWhitelist.add(packageName1);
 
-        final AndroidPackage pkg1 = PackageImpl.forParsing(packageName1)
-                .hideAsParsed().hideAsFinal();
-        final AndroidPackage pkg2 = PackageImpl.forParsing(packageName2)
-                .hideAsParsed().hideAsFinal();
-        final AndroidPackage pkg3 = PackageImpl.forParsing(packageName3)
-                .hideAsParsed().hideAsFinal();
-        final AndroidPackage pkg4 = PackageImpl.forParsing(packageName4)
-                .hideAsParsed().hideAsFinal();
+        final AndroidPackage pkg1 = ((ParsedPackage) PackageImpl.forTesting(packageName1)
+                .hideAsParsed()).hideAsFinal();
+        final AndroidPackage pkg2 = ((ParsedPackage) PackageImpl.forTesting(packageName2)
+                .hideAsParsed()).hideAsFinal();
+        final AndroidPackage pkg3 = ((ParsedPackage) PackageImpl.forTesting(packageName3)
+                .hideAsParsed()).hideAsFinal();
+        final AndroidPackage pkg4 = ((ParsedPackage) PackageImpl.forTesting(packageName4)
+                .hideAsParsed()).hideAsFinal();
 
         // No implicit whitelist, so only install pkg1.
         boolean implicit = false;

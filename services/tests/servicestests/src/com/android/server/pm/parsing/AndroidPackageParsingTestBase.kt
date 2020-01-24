@@ -27,14 +27,12 @@ import android.content.pm.PackageParser
 import android.content.pm.PackageUserState
 import android.content.pm.PermissionInfo
 import android.content.pm.ProviderInfo
-import android.content.pm.parsing.AndroidPackage
-import android.content.pm.parsing.PackageImpl
-import android.content.pm.parsing.PackageInfoUtils
 import android.os.Debug
 import android.os.Environment
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.pm.PackageManagerService
+import com.android.server.pm.parsing.pkg.AndroidPackage
 import org.junit.BeforeClass
 import org.mockito.Mockito
 import java.io.File
@@ -43,10 +41,7 @@ open class AndroidPackageParsingTestBase {
 
     companion object {
 
-        /**
-         * By default, don't parse all APKs on device, only the framework one.
-         * Toggle this manually if working on package parsing.
-         */
+        // TODO(chiuwinson): Enable in separate change to fail all presubmit builds and fix errors
         private const val VERIFY_ALL_APKS = false
 
         /** For auditing memory usage differences */
@@ -58,6 +53,11 @@ open class AndroidPackageParsingTestBase {
             setDisplayMetrics(context.resources.displayMetrics)
             setCallback { true }
         }
+
+        protected val packageParser2 = PackageParser2(null, false, context.resources.displayMetrics,
+                null, object : PackageParser2.Callback() {
+            override fun hasFeature(feature: String?) = true
+        })
 
         /**
          * It would be difficult to mock all possibilities, so just use the APKs on device.
@@ -98,7 +98,7 @@ open class AndroidPackageParsingTestBase {
             }
 
             this.newPackages = apks.map {
-                packageParser.parseParsedPackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
+                packageParser2.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
             }
 
             if (DUMP_HPROF_TO_EXTERNAL) {
