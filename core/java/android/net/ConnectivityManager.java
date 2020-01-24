@@ -2602,7 +2602,7 @@ public class ConnectivityManager {
      * Callback for use with {@link registerTetheringEventCallback} to find out tethering
      * upstream status.
      *
-     * @deprecated Use {@line TetheringManager#OnTetheringEventCallback} instead.
+     * @deprecated Use {@link TetheringManager#OnTetheringEventCallback} instead.
      * @hide
      */
     @SystemApi
@@ -2632,7 +2632,7 @@ public class ConnectivityManager {
      * @param executor the executor on which callback will be invoked.
      * @param callback the callback to be called when tethering has change events.
      *
-     * @deprecated Use {@line TetheringManager#registerTetheringEventCallback} instead.
+     * @deprecated Use {@link TetheringManager#registerTetheringEventCallback} instead.
      * @hide
      */
     @SystemApi
