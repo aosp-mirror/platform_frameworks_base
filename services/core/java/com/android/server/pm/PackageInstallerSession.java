@@ -81,7 +81,6 @@ import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.dex.DexMetadataHelper;
-import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -127,6 +126,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.security.VerityUtils;
 
 import libcore.io.IoUtils;

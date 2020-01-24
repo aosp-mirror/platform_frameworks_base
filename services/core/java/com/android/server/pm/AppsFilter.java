@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ComponentParseUtils;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
@@ -50,6 +49,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.FgThread;
 import com.android.server.om.OverlayReferenceMapper;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.PrintWriter;
 import java.util.List;

@@ -98,7 +98,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
-import android.content.pm.parsing.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import android.content.pm.parsing.ComponentParseUtils.ParsedFeature;
 import android.database.ContentObserver;
 import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;

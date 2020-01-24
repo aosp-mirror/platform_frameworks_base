@@ -37,7 +37,6 @@ import android.content.pm.PackageUserState;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedIntentInfo;
@@ -45,7 +44,6 @@ import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
 import android.content.pm.parsing.ComponentParseUtils.ParsedProviderIntentInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedService;
 import android.content.pm.parsing.ComponentParseUtils.ParsedServiceIntentInfo;
-import android.content.pm.parsing.PackageInfoUtils;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -58,6 +56,8 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.IntentResolver;
+import com.android.server.pm.parsing.PackageInfoUtils;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -671,7 +671,7 @@ public class ComponentResolver {
                         final String packageName =
                                 component != null ? component.getPackageName() : "?";
                         Slog.w(TAG, "Skipping provider name " + names[j]
-                                + " (in package " + pkg.getAppInfoPackageName() + ")"
+                                + " (in package " + pkg.getPackageName() + ")"
                                 + ": name already used by " + packageName);
                     }
                 }
@@ -1502,7 +1502,8 @@ public class ComponentResolver {
             }
             res.handleAllWebDataURI = info.handleAllWebDataURI();
             res.priority = info.getPriority();
-            res.preferredOrder = pkg.getPreferredOrder();
+            // TODO(b/135203078): This field was unwritten and does nothing
+//            res.preferredOrder = pkg.getPreferredOrder();
             //System.out.println("Result: " + res.activityInfo.className +
             //                   " = " + res.priority);
             res.match = match;
@@ -1790,7 +1791,8 @@ public class ComponentResolver {
                 res.filter = filter;
             }
             res.priority = filter.getPriority();
-            res.preferredOrder = pkg.getPreferredOrder();
+            // TODO(b/135203078): This field was unwritten and does nothing
+//            res.preferredOrder = pkg.getPreferredOrder();
             res.match = match;
             res.isDefault = filter.hasDefault;
             res.labelRes = filter.labelRes;
@@ -2038,7 +2040,8 @@ public class ComponentResolver {
                 res.filter = filter;
             }
             res.priority = filter.getPriority();
-            res.preferredOrder = pkg.getPreferredOrder();
+            // TODO(b/135203078): This field was unwritten and does nothing
+//            res.preferredOrder = pkg.getPreferredOrder();
             res.match = match;
             res.isDefault = filter.hasDefault;
             res.labelRes = filter.labelRes;

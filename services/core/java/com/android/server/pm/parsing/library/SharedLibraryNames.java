@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.content.pm.parsing.library;
+package com.android.server.pm.parsing.library;
 
 /**
  * A set of shared library names

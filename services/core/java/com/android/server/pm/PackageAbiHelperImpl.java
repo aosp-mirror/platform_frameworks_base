@@ -29,7 +29,6 @@ import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -40,6 +39,8 @@ import android.util.Slog;
 
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 
 import dalvik.system.VMRuntime;
 
@@ -134,7 +135,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
     public NativeLibraryPaths getNativeLibraryPaths(
             AndroidPackage pkg, File appLib32InstallDir) {
         return getNativeLibraryPaths(new Abis(pkg), appLib32InstallDir, pkg.getCodePath(),
-                pkg.getBaseCodePath(), pkg.isSystemApp(),
+                pkg.getBaseCodePath(), pkg.isSystem(),
                 pkg.isUpdatedSystemApp());
     }
 
@@ -300,7 +301,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
         // pass once we've determined ABI below.
         final NativeLibraryPaths initialLibraryPaths = getNativeLibraryPaths(new Abis(pkg),
                 PackageManagerService.sAppLib32InstallDir, pkg.getCodePath(),
-                pkg.getBaseCodePath(), pkg.isSystemApp(),
+                pkg.getBaseCodePath(), pkg.isSystem(),
                 pkg.isUpdatedSystemApp());
 
         // We shouldn't attempt to extract libs from system app when it was not updated.
@@ -317,7 +318,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
         NativeLibraryHelper.Handle handle = null;
         try {
-            handle = NativeLibraryHelper.Handle.create(pkg);
+            handle = AndroidPackageUtils.createNativeLibraryHandle(pkg);
             // TODO(multiArch): This can be null for apps that didn't go through the
             // usual installation process. We can calculate it again, like we
             // do during install time.
@@ -357,7 +358,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
                 }
 
                 // Shared library native code should be in the APK zip aligned
-                if (abi32 >= 0 && pkg.isLibrary() && extractLibs) {
+                if (abi32 >= 0 && AndroidPackageUtils.isLibrary(pkg) && extractLibs) {
                     throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                             "Shared library native lib extraction not supported");
                 }
@@ -384,7 +385,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
                 if (abi64 >= 0) {
                     // Shared library native libs should be in the APK zip aligned
-                    if (extractLibs && pkg.isLibrary()) {
+                    if (extractLibs && AndroidPackageUtils.isLibrary(pkg)) {
                         throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                                 "Shared library native lib extraction not supported");
                     }
@@ -437,7 +438,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
                 if (copyRet >= 0) {
                     // Shared libraries that have native libs must be multi-architecture
-                    if (pkg.isLibrary()) {
+                    if (AndroidPackageUtils.isLibrary(pkg)) {
                         throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                                 "Shared library with native libs must be multiarch");
                     }
@@ -462,8 +463,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
         return new Pair<>(abis,
                 getNativeLibraryPaths(abis, PackageManagerService.sAppLib32InstallDir,
                         pkg.getCodePath(), pkg.getBaseCodePath(),
-                        pkg.isSystemApp(),
-                        pkg.isUpdatedSystemApp()));
+                        pkg.isSystem(), pkg.isUpdatedSystemApp()));
     }
 
     /**

@@ -49,9 +49,9 @@ import android.content.pm.Signature;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
-import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ComponentParseUtils;
 import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
+import android.content.pm.parsing.ComponentParseUtils.ParsedMainComponent;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
 import android.net.Uri;
 import android.os.Binder;
@@ -96,6 +96,7 @@ import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.PermissionSettings;
 import com.android.server.pm.permission.PermissionsState;
@@ -4281,7 +4282,7 @@ public final class Settings {
         return userState.isMatch(componentInfo, flags);
     }
 
-    boolean isEnabledAndMatchLPr(AndroidPackage pkg, ParsedComponent component, int flags,
+    boolean isEnabledAndMatchLPr(AndroidPackage pkg, ParsedMainComponent component, int flags,
             int userId) {
         final PackageSetting ps = mPackages.get(component.getPackageName());
         if (ps == null) return false;

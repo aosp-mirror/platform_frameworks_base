@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.content.pm.parsing.library;
+package com.android.server.pm.parsing.library;
 
-import static android.content.pm.parsing.library.SharedLibraryNames.ANDROID_HIDL_BASE;
-import static android.content.pm.parsing.library.SharedLibraryNames.ANDROID_HIDL_MANAGER;
+import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_HIDL_BASE;
+import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_HIDL_MANAGER;
 
-import android.content.pm.parsing.ParsedPackage;
 import android.os.Build;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 /**
  * Updates a package to ensure that if it targets <= P that the android.hidl.base-V1.0-java
@@ -37,7 +37,7 @@ public class AndroidHidlUpdater extends PackageSharedLibraryUpdater {
         // This was the default <= P and is maintained for backwards compatibility.
         boolean isLegacy = parsedPackage.getTargetSdkVersion() <= Build.VERSION_CODES.P;
         // Only system apps use these libraries
-        boolean isSystem = parsedPackage.isSystemApp() || parsedPackage.isUpdatedSystemApp();
+        boolean isSystem = parsedPackage.isSystem() || parsedPackage.isUpdatedSystemApp();
 
         if (isLegacy && isSystem) {
             prefixRequiredLibrary(parsedPackage, ANDROID_HIDL_BASE);

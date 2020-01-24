@@ -71,10 +71,9 @@ import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
-import android.content.pm.parsing.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
-import android.content.pm.parsing.PackageInfoUtils;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.metrics.LogMaker;
 import android.os.Binder;
@@ -129,6 +128,7 @@ import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.SharedUserSetting;
 import com.android.server.pm.UserManagerService;
+import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultBrowserProvider;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultDialerProvider;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultHomeProvider;
@@ -2409,14 +2409,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     }
                 }
 
+                // TODO(b/140256621): The package instant app method has been removed
+                //  as part of work in b/135203078, so this has been commented out in the meantime
                 // Limit ephemeral apps to ephemeral allowed permissions.
-                if (pkg.isInstantApp() && !bp.isInstant()) {
-                    if (DEBUG_PERMISSIONS) {
-                        Log.i(TAG, "Denying non-ephemeral permission " + bp.getName()
-                                + " for package " + pkg.getPackageName());
-                    }
-                    continue;
-                }
+//                if (/*pkg.isInstantApp()*/ false && !bp.isInstant()) {
+//                    if (DEBUG_PERMISSIONS) {
+//                        Log.i(TAG, "Denying non-ephemeral permission " + bp.getName()
+//                                + " for package " + pkg.getPackageName());
+//                    }
+//                    continue;
+//                }
 
                 if (bp.isRuntimeOnly() && !appSupportsRuntimePermissions) {
                     if (DEBUG_PERMISSIONS) {
@@ -2934,7 +2936,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      */
     private @NonNull int[] checkIfLegacyStorageOpsNeedToBeUpdated(
             @NonNull AndroidPackage pkg, boolean replace, @NonNull int[] updatedUserIds) {
-        if (replace && pkg.hasRequestedLegacyExternalStorage() && (
+        if (replace && pkg.isRequestLegacyExternalStorage() && (
                 pkg.getRequestedPermissions().contains(READ_EXTERNAL_STORAGE)
                         || pkg.getRequestedPermissions().contains(WRITE_EXTERNAL_STORAGE))) {
             return UserManagerService.getInstance().getUserIds();
@@ -4234,7 +4236,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (pkg == null) {
             return StorageManager.UUID_PRIVATE_INTERNAL;
         }
-        if (pkg.isExternal()) {
+        if (pkg.isExternalStorage()) {
             if (TextUtils.isEmpty(pkg.getVolumeUuid())) {
                 return StorageManager.UUID_PRIMARY_PHYSICAL;
             } else {

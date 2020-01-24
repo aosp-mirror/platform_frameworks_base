@@ -18,19 +18,20 @@ package com.android.server.pm;
 
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ComponentParseUtils;
+import android.content.pm.parsing.ComponentParseUtils.ParsedProcess;
 import android.service.pm.PackageServiceDumpProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import libcore.util.EmptyArray;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Settings data for a particular shared user ID we know about.
@@ -53,7 +54,7 @@ public final class SharedUserSetting extends SettingBase {
     final PackageSignatures signatures = new PackageSignatures();
     Boolean signaturesChanged;
 
-    ArrayMap<String, ComponentParseUtils.ParsedProcess> processes;
+    ArrayMap<String, ParsedProcess> processes;
 
     SharedUserSetting(String _name, int _pkgFlags, int _pkgPrivateFlags) {
         super(_pkgFlags, _pkgPrivateFlags);
@@ -76,17 +77,17 @@ public final class SharedUserSetting extends SettingBase {
         proto.end(token);
     }
 
-    void addProcesses(ArrayMap<String, ComponentParseUtils.ParsedProcess> newProcs) {
+    void addProcesses(Map<String, ParsedProcess> newProcs) {
         if (newProcs != null) {
             final int numProcs = newProcs.size();
             if (processes == null) {
                 processes = new ArrayMap<>(numProcs);
             }
-            for (int i = 0; i < numProcs; i++) {
-                ComponentParseUtils.ParsedProcess newProc = newProcs.valueAt(i);
-                ComponentParseUtils.ParsedProcess proc = processes.get(newProc.name);
+            for (String key : newProcs.keySet()) {
+                ParsedProcess newProc = newProcs.get(key);
+                ParsedProcess proc = processes.get(newProc.name);
                 if (proc == null) {
-                    proc = new ComponentParseUtils.ParsedProcess(newProc);
+                    proc = new ParsedProcess(newProc);
                     processes.put(newProc.name, proc);
                 } else {
                     proc.addStateFrom(newProc);
@@ -221,8 +222,8 @@ public final class SharedUserSetting extends SettingBase {
             final int numProcs = sharedUser.processes.size();
             this.processes = new ArrayMap<>(numProcs);
             for (int i = 0; i < numProcs; i++) {
-                ComponentParseUtils.ParsedProcess proc =
-                        new ComponentParseUtils.ParsedProcess(sharedUser.processes.valueAt(i));
+                ParsedProcess proc =
+                        new ParsedProcess(sharedUser.processes.valueAt(i));
                 this.processes.put(proc.name, proc);
             }
         } else {

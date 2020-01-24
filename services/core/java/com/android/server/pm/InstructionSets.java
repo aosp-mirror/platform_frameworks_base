@@ -16,11 +16,12 @@
 
 package com.android.server.pm;
 
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArraySet;
+
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import dalvik.system.VMRuntime;
 

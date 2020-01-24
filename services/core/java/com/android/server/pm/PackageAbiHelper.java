@@ -17,11 +17,11 @@
 package com.android.server.pm;
 
 import android.annotation.Nullable;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ParsedPackage;
 import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.io.File;
 import java.util.Set;

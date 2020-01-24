@@ -16,7 +16,7 @@
 
 package com.android.server.pm.dex;
 
-import android.content.pm.parsing.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import android.os.Binder;
 import android.util.Log;
 

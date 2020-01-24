@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.content.pm.parsing.library;
+package com.android.server.pm.parsing.library;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.parsing.ParsedPackage;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.util.ArrayList;
 import java.util.List;

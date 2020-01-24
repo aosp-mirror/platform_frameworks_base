@@ -22,7 +22,6 @@ import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.IOtaDexopt;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -35,6 +34,8 @@ import android.util.Slog;
 import com.android.internal.logging.MetricsLogger;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexoptOptions;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -388,7 +389,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
 
             final String[] instructionSets = getAppDexInstructionSets(pkg.getPrimaryCpuAbi(),
                     pkg.getSecondaryCpuAbi());
-            final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
+            final List<String> paths =
+                    AndroidPackageUtils.getAllCodePathsExcludingResourceOnly(pkg);
             final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
             for (String dexCodeInstructionSet : dexCodeInstructionSets) {
                 for (String path : paths) {

@@ -44,7 +44,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -63,6 +62,8 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.DexoptUtils;
 import com.android.server.pm.dex.PackageDexUsage;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 
 import dalvik.system.DexFile;
 
@@ -160,11 +161,11 @@ public class PackageDexOptimizer {
                 targetInstructionSets : getAppDexInstructionSets(pkg.getPrimaryCpuAbi(),
                 pkg.getSecondaryCpuAbi());
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
-        final List<String> paths = pkg.getAllCodePaths();
+        final List<String> paths = AndroidPackageUtils.getAllCodePaths(pkg);
 
         int sharedGid = UserHandle.getSharedAppGid(pkg.getUid());
         if (sharedGid == -1) {
-            Slog.wtf(TAG, "Well this is awkward; package " + pkg.getAppInfoName() + " had UID "
+            Slog.wtf(TAG, "Well this is awkward; package " + pkg.getPackageName() + " had UID "
                     + pkg.getUid(), new Throwable());
             sharedGid = android.os.Process.NOBODY_UID;
         }
@@ -273,7 +274,7 @@ public class PackageDexOptimizer {
         String oatDir = getPackageOatDirIfSupported(pkg);
 
         Log.i(TAG, "Running dexopt (dexoptNeeded=" + dexoptNeeded + ") on: " + path
-                + " pkg=" + pkg.getAppInfoPackageName() + " isa=" + isa
+                + " pkg=" + pkg.getPackageName() + " isa=" + isa
                 + " dexoptFlags=" + printDexoptFlags(dexoptFlags)
                 + " targetFilter=" + compilerFilter + " oatDir=" + oatDir
                 + " classLoaderContext=" + classLoaderContext);
@@ -455,7 +456,7 @@ public class PackageDexOptimizer {
                 pkg.getSecondaryCpuAbi());
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
 
-        final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
+        final List<String> paths = AndroidPackageUtils.getAllCodePathsExcludingResourceOnly(pkg);
 
         for (String path : paths) {
             pw.println("path: " + path);
@@ -546,7 +547,7 @@ public class PackageDexOptimizer {
     private String getRealCompilerFilter(AndroidPackage pkg, String targetCompilerFilter,
             boolean isUsedByOtherApps) {
         // When an app or priv app is configured to run out of box, only verify it.
-        if (pkg.isEmbeddedDexUsed()
+        if (pkg.isUseEmbeddedDex()
                 || (pkg.isPrivileged()
                     && DexManager.isPackageSelectedToRunOob(pkg.getPackageName()))) {
             return "verify";
@@ -589,8 +590,8 @@ public class PackageDexOptimizer {
     }
     private int getDexFlags(AndroidPackage pkg, String compilerFilter,
             DexoptOptions options) {
-        return getDexFlags(pkg.getFlags(), pkg.getHiddenApiEnforcementPolicy(),
-                pkg.getSplitDependencies(), pkg.requestsIsolatedSplitLoading(), compilerFilter,
+        return getDexFlags(pkg.getFlags(), AndroidPackageUtils.getHiddenApiEnforcementPolicy(pkg),
+                pkg.getSplitDependencies(), pkg.isIsolatedSplitLoading(), compilerFilter,
                 options);
     }
 
@@ -700,7 +701,7 @@ public class PackageDexOptimizer {
      */
     @Nullable
     private String getPackageOatDirIfSupported(AndroidPackage pkg) {
-        if (!pkg.canHaveOatDir()) {
+        if (!AndroidPackageUtils.canHaveOatDir(pkg, pkg.isUpdatedSystemApp())) {
             return null;
         }
         File codePath = new File(pkg.getCodePath());

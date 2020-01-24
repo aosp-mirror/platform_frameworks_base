@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package android.content.pm.parsing.library;
+package com.android.server.pm.parsing.library;
 
-import static android.content.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_BASE;
-import static android.content.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_MOCK;
-import static android.content.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_RUNNER;
-import static android.content.pm.parsing.library.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
+import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_BASE;
+import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_MOCK;
+import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_RUNNER;
+import static com.android.server.pm.parsing.library.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
 
-import android.content.pm.parsing.ParsedPackage;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.util.ArrayList;
 import java.util.List;

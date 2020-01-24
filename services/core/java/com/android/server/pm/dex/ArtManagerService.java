@@ -31,7 +31,7 @@ import android.content.pm.dex.ArtManagerInternal;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.content.pm.dex.PackageOptimizationInfo;
-import android.content.pm.parsing.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -483,7 +483,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             final String packageName = pkg.getPackageName();
             final String apkPath = pkg.getBaseCodePath();
             final String outDexFile = pkg.getDataDir() + "/code_cache/compiled_view.dex";
-            if (pkg.isPrivileged() || pkg.isEmbeddedDexUsed()
+            if (pkg.isPrivileged() || pkg.isUseEmbeddedDex()
                     || pkg.isDefaultToDeviceProtectedStorage()) {
                 // Privileged apps prefer to load trusted code so they don't use compiled views.
                 // If the app is not privileged but prefers code integrity, also avoid compiling

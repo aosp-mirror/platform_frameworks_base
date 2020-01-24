@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.content.pm.parsing.library;
+package com.android.server.pm.parsing.library;
 
-import static android.content.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_BASE;
-import static android.content.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_RUNNER;
+import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_BASE;
+import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_RUNNER;
 
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ParsedPackage;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -30,6 +28,8 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.IPlatformCompat;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 /**
  * Updates a package to ensure that if it targets <= Q that the android.test.base library is

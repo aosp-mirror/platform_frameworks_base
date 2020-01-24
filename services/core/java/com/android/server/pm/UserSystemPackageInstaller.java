@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.AndroidPackage;
 import android.content.res.Resources;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -33,6 +32,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;

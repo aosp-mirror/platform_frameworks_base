@@ -20,10 +20,11 @@ import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 
 import android.content.pm.PackageManager;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.FileUtils;
 import android.util.AtomicFile;
 import android.util.Log;
+
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import libcore.io.IoUtils;
 

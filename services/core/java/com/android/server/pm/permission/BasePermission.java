@@ -32,9 +32,8 @@ import android.annotation.Nullable;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.content.pm.Signature;
-import android.content.pm.parsing.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
-import android.content.pm.parsing.PackageInfoUtils;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
@@ -43,6 +42,7 @@ import com.android.server.pm.DumpState;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.PackageSettingBase;
+import com.android.server.pm.parsing.PackageInfoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;

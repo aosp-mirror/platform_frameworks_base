@@ -186,6 +186,17 @@ public class CollectionUtils {
     }
 
     /**
+     * Returns the given map, or an immutable empty map if the provided map is null
+     *
+     * This can be used to guarantee null-safety without paying the price of extra allocations
+     *
+     * @see Collections#emptyMap
+     */
+    public static @NonNull <K, V> Map<K, V> emptyIfNull(@Nullable Map<K, V> cur) {
+        return cur == null ? Collections.emptyMap() : cur;
+    }
+
+    /**
      * Returns the size of the given collection, or 0 if null
      */
     public static int size(@Nullable Collection<?> cur) {
@@ -293,6 +304,18 @@ public class CollectionUtils {
             cur = new ArrayList<>();
         }
         cur.add(val);
+        return cur;
+    }
+
+    /**
+     * Similar to {@link List#add(int, Object)}, but with support for list values of {@code null}
+     * and {@link Collections#emptyList}
+     */
+    public static @NonNull <T> List<T> add(@Nullable List<T> cur, int index, T val) {
+        if (cur == null || cur == Collections.emptyList()) {
+            cur = new ArrayList<>();
+        }
+        cur.add(index, val);
         return cur;
     }
 

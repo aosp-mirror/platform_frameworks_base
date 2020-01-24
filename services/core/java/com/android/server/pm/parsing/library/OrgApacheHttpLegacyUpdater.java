@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.content.pm.parsing.library;
+package com.android.server.pm.parsing.library;
 
-import static android.content.pm.parsing.library.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
+import static com.android.server.pm.parsing.library.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
 
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ParsedPackage;
 import android.os.Build;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 /**
  * Updates a package to ensure that if it targets < P that the org.apache.http.legacy library is
