@@ -17,6 +17,7 @@ package com.android.server.blob;
 
 import static android.app.blob.BlobStoreManager.COMMIT_RESULT_ERROR;
 import static android.system.OsConstants.O_CREAT;
+import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_RDWR;
 import static android.system.OsConstants.SEEK_SET;
 
@@ -180,6 +181,40 @@ public class BlobStoreSession extends IBlobStoreSession.Stub {
             if (lengthBytes > 0) {
                 mContext.getSystemService(StorageManager.class).allocateBytes(fd, lengthBytes);
             }
+        } catch (ErrnoException e) {
+            e.rethrowAsIOException();
+        }
+        return createRevocableFdLocked(fd);
+    }
+
+    @Override
+    @NonNull
+    public ParcelFileDescriptor openRead() {
+        assertCallerIsOwner();
+        synchronized (mSessionLock) {
+            if (mState != STATE_OPENED) {
+                throw new IllegalStateException("Not allowed to read in state: "
+                        + stateToString(mState));
+            }
+
+            try {
+                return openReadLocked();
+            } catch (IOException e) {
+                throw ExceptionUtils.wrap(e);
+            }
+        }
+    }
+
+    @GuardedBy("mSessionLock")
+    @NonNull
+    private ParcelFileDescriptor openReadLocked() throws IOException {
+        FileDescriptor fd = null;
+        try {
+            final File sessionFile = getSessionFile();
+            if (sessionFile == null) {
+                throw new IllegalStateException("Couldn't get the file for this session");
+            }
+            fd = Os.open(sessionFile.getPath(), O_RDONLY, 0);
         } catch (ErrnoException e) {
             e.rethrowAsIOException();
         }
