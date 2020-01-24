@@ -8800,16 +8800,13 @@ package android.os {
     method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getEuiccCardControllerServiceRegisterer();
     method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getEuiccControllerService();
     method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getIccPhoneBookServiceRegisterer();
-    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getNetworkPolicyServiceRegisterer();
     method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getOpportunisticNetworkServiceRegisterer();
     method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getPackageManagerServiceRegisterer();
-    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getPermissionManagerServiceRegisterer();
     method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getPhoneSubServiceRegisterer();
     method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getSmsServiceRegisterer();
     method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getSubscriptionServiceRegisterer();
     method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyImsServiceRegisterer();
     method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyRcsMessageServiceRegisterer();
-    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyRegistryServiceRegisterer();
     method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyServiceRegisterer();
   }
 
@@ -12321,6 +12318,7 @@ package android.telephony {
   public class TelephonyRegistryManager {
     method public void addOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener, @NonNull java.util.concurrent.Executor);
     method public void addOnSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnSubscriptionsChangedListener, @NonNull java.util.concurrent.Executor);
+    method public void listenForSubscriber(int, @NonNull String, @NonNull String, @NonNull android.telephony.PhoneStateListener, int, boolean);
     method public void notifyActiveDataSubIdChanged(int);
     method public void notifyBarringInfoChanged(int, int, @NonNull android.telephony.BarringInfo);
     method public void notifyCallForwardingChanged(int, boolean);
@@ -12337,6 +12335,9 @@ package android.telephony {
     method public void notifyEmergencyNumberList(int, int);
     method public void notifyImsDisconnectCause(int, @NonNull android.telephony.ims.ImsReasonInfo);
     method public void notifyMessageWaitingChanged(int, int, boolean);
+    method public void notifyOpportunisticSubscriptionInfoChanged();
+    method public void notifyOutgoingEmergencyCall(int, int, @NonNull android.telephony.emergency.EmergencyNumber);
+    method public void notifyOutgoingEmergencySms(int, int, @NonNull android.telephony.emergency.EmergencyNumber);
     method public void notifyPhoneCapabilityChanged(@NonNull android.telephony.PhoneCapability);
     method public void notifyPreciseCallState(int, int, int, int, int);
     method public void notifyPreciseDataConnectionFailed(int, int, int, @Nullable String, int);
@@ -12345,6 +12346,7 @@ package android.telephony {
     method public void notifyServiceStateChanged(int, int, @NonNull android.telephony.ServiceState);
     method public void notifySignalStrengthChanged(int, int, @NonNull android.telephony.SignalStrength);
     method public void notifySrvccStateChanged(int, int);
+    method public void notifySubscriptionInfoChanged();
     method public void notifyUserMobileDataStateChanged(int, int, boolean);
     method public void notifyVoiceActivationStateChanged(int, int, int);
     method public void removeOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener);
