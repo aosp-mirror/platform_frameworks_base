@@ -1265,6 +1265,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
     private KeyEvent mNext;
 
+    private int mId;
     @UnsupportedAppUsage
     private int mDeviceId;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -1350,9 +1351,9 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
     private static native String nativeKeyCodeToString(int keyCode);
     private static native int nativeKeyCodeFromString(String keyCode);
+    private static native int nativeNextId();
 
-    private KeyEvent() {
-    }
+    private KeyEvent() {}
 
     /**
      * Create a new key event.
@@ -1362,6 +1363,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @param code The key code.
      */
     public KeyEvent(int action, int code) {
+        mId = nativeNextId();
         mAction = action;
         mKeyCode = code;
         mRepeatCount = 0;
@@ -1383,6 +1385,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public KeyEvent(long downTime, long eventTime, int action,
                     int code, int repeat) {
+        mId = nativeNextId();
         mDownTime = downTime;
         mEventTime = eventTime;
         mAction = action;
@@ -1407,6 +1410,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public KeyEvent(long downTime, long eventTime, int action,
                     int code, int repeat, int metaState) {
+        mId = nativeNextId();
         mDownTime = downTime;
         mEventTime = eventTime;
         mAction = action;
@@ -1435,6 +1439,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public KeyEvent(long downTime, long eventTime, int action,
                     int code, int repeat, int metaState,
                     int deviceId, int scancode) {
+        mId = nativeNextId();
         mDownTime = downTime;
         mEventTime = eventTime;
         mAction = action;
@@ -1465,6 +1470,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public KeyEvent(long downTime, long eventTime, int action,
                     int code, int repeat, int metaState,
                     int deviceId, int scancode, int flags) {
+        mId = nativeNextId();
         mDownTime = downTime;
         mEventTime = eventTime;
         mAction = action;
@@ -1497,6 +1503,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public KeyEvent(long downTime, long eventTime, int action,
                     int code, int repeat, int metaState,
                     int deviceId, int scancode, int flags, int source) {
+        mId = nativeNextId();
         mDownTime = downTime;
         mEventTime = eventTime;
         mAction = action;
@@ -1523,6 +1530,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @param flags The flags for this key event
      */
     public KeyEvent(long time, String characters, int deviceId, int flags) {
+        mId = nativeNextId();
         mDownTime = time;
         mEventTime = time;
         mCharacters = characters;
@@ -1539,6 +1547,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * Make an exact copy of an existing key event.
      */
     public KeyEvent(KeyEvent origEvent) {
+        mId = origEvent.mId;
         mDownTime = origEvent.mDownTime;
         mEventTime = origEvent.mEventTime;
         mAction = origEvent.mAction;
@@ -1567,6 +1576,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     @Deprecated
     public KeyEvent(KeyEvent origEvent, long eventTime, int newRepeat) {
+        mId = nativeNextId();  // Not an exact copy so assign a new ID.
         mDownTime = origEvent.mDownTime;
         mEventTime = eventTime;
         mAction = origEvent.mAction;
@@ -1598,15 +1608,16 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Obtains a (potentially recycled) key event.
+     * Obtains a (potentially recycled) key event. Used by native code to create a Java object.
      *
      * @hide
      */
-    public static KeyEvent obtain(long downTime, long eventTime, int action,
+    public static KeyEvent obtain(int id, long downTime, long eventTime, int action,
             int code, int repeat, int metaState,
             int deviceId, int scancode, int flags, int source, int displayId, @Nullable byte[] hmac,
             String characters) {
         KeyEvent ev = obtain();
+        ev.mId = id;
         ev.mDownTime = downTime;
         ev.mEventTime = eventTime;
         ev.mAction = action;
@@ -1628,12 +1639,24 @@ public class KeyEvent extends InputEvent implements Parcelable {
      *
      * @hide
      */
+    public static KeyEvent obtain(long downTime, long eventTime, int action,
+            int code, int repeat, int metaState,
+            int deviceId, int scanCode, int flags, int source, int displayId, String characters) {
+        return obtain(nativeNextId(), downTime, eventTime, action, code, repeat, metaState,
+                deviceId, scanCode, flags, source, displayId, null /* hmac */, characters);
+    }
+
+    /**
+     * Obtains a (potentially recycled) key event.
+     *
+     * @hide
+     */
     @UnsupportedAppUsage
     public static KeyEvent obtain(long downTime, long eventTime, int action,
             int code, int repeat, int metaState,
             int deviceId, int scancode, int flags, int source, String characters) {
         return obtain(downTime, eventTime, action, code, repeat, metaState, deviceId, scancode,
-                flags, source, INVALID_DISPLAY, null /* hmac */, characters);
+                flags, source, INVALID_DISPLAY, characters);
     }
 
     /**
@@ -1645,6 +1668,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public static KeyEvent obtain(KeyEvent other) {
         KeyEvent ev = obtain();
+        ev.mId = other.mId;
         ev.mDownTime = other.mDownTime;
         ev.mEventTime = other.mEventTime;
         ev.mAction = other.mAction;
@@ -1695,6 +1719,12 @@ public class KeyEvent extends InputEvent implements Parcelable {
         // Do nothing.
     }
 
+    /** @hide */
+    @Override
+    public int getId() {
+        return mId;
+    }
+
     /**
      * Create a new key event that is the same as the given one, but whose
      * event time and repeat count are replaced with the given value.
@@ -1723,6 +1753,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static KeyEvent changeTimeRepeat(KeyEvent event, long eventTime,
             int newRepeat, int newFlags) {
         KeyEvent ret = new KeyEvent(event);
+        ret.mId = nativeNextId();  // Not an exact copy so assign a new ID.
         ret.mEventTime = eventTime;
         ret.mRepeatCount = newRepeat;
         ret.mFlags = newFlags;
@@ -1736,6 +1767,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @param action The new action code of the event.
      */
     private KeyEvent(KeyEvent origEvent, int action) {
+        mId = nativeNextId();  // Not an exact copy so assign a new ID.
         mDownTime = origEvent.mDownTime;
         mEventTime = origEvent.mEventTime;
         mAction = action;
@@ -1772,6 +1804,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public static KeyEvent changeFlags(KeyEvent event, int flags) {
         event = new KeyEvent(event);
+        event.mId = nativeNextId();  // Not an exact copy so assign a new ID.
         event.mFlags = flags;
         return event;
     }
@@ -3096,6 +3129,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     private KeyEvent(Parcel in) {
+        mId = in.readInt();
         mDeviceId = in.readInt();
         mSource = in.readInt();
         mDisplayId = in.readInt();
@@ -3115,6 +3149,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(PARCEL_TOKEN_KEY_EVENT);
 
+        out.writeInt(mId);
         out.writeInt(mDeviceId);
         out.writeInt(mSource);
         out.writeInt(mDisplayId);
