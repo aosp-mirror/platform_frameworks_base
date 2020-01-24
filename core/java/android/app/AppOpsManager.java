@@ -27,6 +27,8 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.usage.UsageStatsManager;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -100,6 +102,18 @@ import java.util.function.Supplier;
  */
 @SystemService(Context.APP_OPS_SERVICE)
 public class AppOpsManager {
+    /**
+     * This is a subtle behavior change to {@link #startWatchingMode}.
+     *
+     * Before this change the system called back for the switched op. After the change the system
+     * will call back for the actually requested op or all switched ops if no op is specified.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    public static final long CALL_BACK_ON_CHANGED_LISTENER_WITH_SWITCHED_OP_CHANGE = 148180766L;
+
     /**
      * <p>App ops allows callers to:</p>
      *

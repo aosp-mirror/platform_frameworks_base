@@ -19,6 +19,7 @@ package com.android.server.appop;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+import static android.app.AppOpsManager.CALL_BACK_ON_CHANGED_LISTENER_WITH_SWITCHED_OP_CHANGE;
 import static android.app.AppOpsManager.FILTER_BY_FEATURE_ID;
 import static android.app.AppOpsManager.FILTER_BY_OP_NAMES;
 import static android.app.AppOpsManager.FILTER_BY_PACKAGE_NAME;
@@ -54,6 +55,8 @@ import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.os.Process.STATSD_UID;
 
+import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
+
 import static java.lang.Long.max;
 
 import android.Manifest;
@@ -73,6 +76,7 @@ import android.app.AppOpsManager.OpFlags;
 import android.app.AppOpsManagerInternal;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
 import android.app.AsyncNotedAppOp;
+import android.compat.Compatibility;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -132,7 +136,6 @@ import com.android.internal.app.IAppOpsNotedCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
@@ -294,8 +297,11 @@ public class AppOpsService extends IAppOpsService.Stub {
     @GuardedBy("this")
     private CheckOpsDelegate mCheckOpsDelegate;
 
-    @GuardedBy("this")
-    private SparseArray<List<Integer>> mSwitchOpToOps;
+    /**
+      * Reverse lookup for {@link AppOpsManager#opToSwitch(int)}. Initialized once and never
+      * changed
+      */
+    private final SparseArray<int[]> mSwitchedOps = new SparseArray<>();
 
     private ActivityManagerInternal mActivityManagerInternal;
 
@@ -1194,17 +1200,22 @@ public class AppOpsService extends IAppOpsService.Stub {
     final AudioRestrictionManager mAudioRestrictionManager = new AudioRestrictionManager();
 
     final class ModeCallback implements DeathRecipient {
+        /** If mWatchedOpCode==ALL_OPS notify for ops affected by the switch-op */
+        public static final int ALL_OPS = -2;
+
         final IAppOpsCallback mCallback;
         final int mWatchingUid;
         final int mFlags;
+        final int mWatchedOpCode;
         final int mCallingUid;
         final int mCallingPid;
 
-        ModeCallback(IAppOpsCallback callback, int watchingUid, int flags, int callingUid,
-                int callingPid) {
+        ModeCallback(IAppOpsCallback callback, int watchingUid, int flags, int watchedOp,
+                int callingUid, int callingPid) {
             mCallback = callback;
             mWatchingUid = watchingUid;
             mFlags = flags;
+            mWatchedOpCode = watchedOp;
             mCallingUid = callingUid;
             mCallingPid = callingPid;
             try {
@@ -1227,6 +1238,10 @@ public class AppOpsService extends IAppOpsService.Stub {
             UserHandle.formatUid(sb, mWatchingUid);
             sb.append(" flags=0x");
             sb.append(Integer.toHexString(mFlags));
+            if (mWatchedOpCode != OP_NONE) {
+                sb.append(" op=");
+                sb.append(opToName(mWatchedOpCode));
+            }
             sb.append(" from uid=");
             UserHandle.formatUid(sb, mCallingUid);
             sb.append(" pid=");
@@ -1346,6 +1361,12 @@ public class AppOpsService extends IAppOpsService.Stub {
         mHandler = handler;
         mConstants = new Constants(mHandler);
         readState();
+
+        for (int switchedCode = 0; switchedCode < _NUM_OP; switchedCode++) {
+            int switchCode = AppOpsManager.opToSwitch(switchedCode);
+            mSwitchedOps.put(switchCode,
+                    ArrayUtils.appendInt(mSwitchedOps.get(switchCode), switchedCode));
+        }
     }
 
     public void publish(Context context) {
@@ -2130,11 +2151,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         String packageName = packageNames[0];
 
-        List<Integer> ops = getSwitchOpToOps().get(switchCode);
-        int opsSize = CollectionUtils.size(ops);
-        for (int i = 0; i < opsSize; i++) {
-            int code = ops.get(i);
-
+        int[] ops = mSwitchedOps.get(switchCode);
+        for (int code : ops) {
             String permissionName = AppOpsManager.opToPermission(code);
             if (permissionName == null) {
                 continue;
@@ -2209,25 +2227,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
-        }
-    }
-
-    @NonNull
-    private SparseArray<List<Integer>> getSwitchOpToOps() {
-        synchronized (this) {
-            if (mSwitchOpToOps == null) {
-                mSwitchOpToOps = new SparseArray<>();
-                for (int op = 0; op < _NUM_OP; op++) {
-                    int switchOp = AppOpsManager.opToSwitch(op);
-                    List<Integer> ops = mSwitchOpToOps.get(switchOp);
-                    if (ops == null) {
-                        ops = new ArrayList<>();
-                        mSwitchOpToOps.put(switchOp, ops);
-                    }
-                    ops.add(op);
-                }
-            }
-            return mSwitchOpToOps;
         }
     }
 
@@ -2331,16 +2330,29 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (uid != UID_ANY && callback.mWatchingUid >= 0 && callback.mWatchingUid != uid) {
             return;
         }
-        // There are features watching for mode changes such as window manager
-        // and location manager which are in our process. The callbacks in these
-        // features may require permissions our remote caller does not have.
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            callback.mCallback.opChanged(code, uid, packageName);
-        } catch (RemoteException e) {
-            /* ignore */
-        } finally {
-            Binder.restoreCallingIdentity(identity);
+
+        // See CALL_BACK_ON_CHANGED_LISTENER_WITH_SWITCHED_OP_CHANGE
+        int[] switchedCodes;
+        if (callback.mWatchedOpCode == ALL_OPS) {
+            switchedCodes = mSwitchedOps.get(code);
+        } else if (callback.mWatchedOpCode == OP_NONE) {
+            switchedCodes = new int[]{code};
+        } else {
+            switchedCodes = new int[]{callback.mWatchedOpCode};
+        }
+
+        for (int switchedCode : switchedCodes) {
+            // There are features watching for mode changes such as window manager
+            // and location manager which are in our process. The callbacks in these
+            // features may require permissions our remote caller does not have.
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                callback.mCallback.opChanged(switchedCode, uid, packageName);
+            } catch (RemoteException e) {
+                /* ignore */
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -2535,17 +2547,32 @@ public class AppOpsService extends IAppOpsService.Stub {
             return;
         }
         synchronized (this) {
-            op = (op != AppOpsManager.OP_NONE) ? AppOpsManager.opToSwitch(op) : op;
+            int switchOp = (op != AppOpsManager.OP_NONE) ? AppOpsManager.opToSwitch(op) : op;
+
+            // See CALL_BACK_ON_CHANGED_LISTENER_WITH_SWITCHED_OP_CHANGE
+            int notifiedOps;
+            if (Compatibility.isChangeEnabled(
+                    CALL_BACK_ON_CHANGED_LISTENER_WITH_SWITCHED_OP_CHANGE)) {
+                if (op == OP_NONE) {
+                    notifiedOps = ALL_OPS;
+                } else {
+                    notifiedOps = op;
+                }
+            } else {
+                notifiedOps = switchOp;
+            }
+
             ModeCallback cb = mModeWatchers.get(callback.asBinder());
             if (cb == null) {
-                cb = new ModeCallback(callback, watchedUid, flags, callingUid, callingPid);
+                cb = new ModeCallback(callback, watchedUid, flags, notifiedOps, callingUid,
+                        callingPid);
                 mModeWatchers.put(callback.asBinder(), cb);
             }
-            if (op != AppOpsManager.OP_NONE) {
-                ArraySet<ModeCallback> cbs = mOpModeWatchers.get(op);
+            if (switchOp != AppOpsManager.OP_NONE) {
+                ArraySet<ModeCallback> cbs = mOpModeWatchers.get(switchOp);
                 if (cbs == null) {
                     cbs = new ArraySet<>();
-                    mOpModeWatchers.put(op, cbs);
+                    mOpModeWatchers.put(switchOp, cbs);
                 }
                 cbs.add(cb);
             }
