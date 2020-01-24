@@ -33,7 +33,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class KeyguardBypassController : Dumpable {
+open class KeyguardBypassController : Dumpable {
 
     private val mKeyguardStateController: KeyguardStateController
     private val statusBarStateController: StatusBarStateController

@@ -95,7 +95,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     @Mock
     private KeyguardStateController mKeyguardStateController;
 
-    private int mCurrentUserId;
+    private UserInfo mCurrentUser;
+    private UserInfo mSecondaryUser;
+    private UserInfo mWorkUser;
     private TestNotificationLockscreenUserManager mLockscreenUserManager;
 
     @Before
@@ -103,10 +105,14 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
 
-        mCurrentUserId = ActivityManager.getCurrentUser();
+        int currentUserId = ActivityManager.getCurrentUser();
+        mCurrentUser = new UserInfo(currentUserId, "", 0);
+        mSecondaryUser = new UserInfo(currentUserId + 1, "", 0);
+        mWorkUser = new UserInfo(currentUserId + 2, "" /* name */, null /* iconPath */, 0,
+                UserManager.USER_TYPE_PROFILE_MANAGED);
 
-        when(mUserManager.getProfiles(mCurrentUserId)).thenReturn(Lists.newArrayList(
-                new UserInfo(mCurrentUserId, "", 0), new UserInfo(mCurrentUserId + 1, "", 0)));
+        when(mUserManager.getProfiles(currentUserId)).thenReturn(Lists.newArrayList(
+                mCurrentUser, mSecondaryUser, mWorkUser));
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
                 Handler.createAsync(Looper.myLooper()));
 
@@ -141,15 +147,31 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1);
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
-        assertTrue(mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(mCurrentUserId));
+        assertTrue(mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(mCurrentUser.id));
     }
 
     @Test
     public void testLockScreenAllowPrivateNotificationsFalse() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0);
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0, mCurrentUser.id);
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
-        assertFalse(mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(mCurrentUserId));
+        assertFalse(mLockscreenUserManager.userAllowsNotificationsInPublic(mCurrentUser.id));
+    }
+
+    @Test
+    public void testLockScreenAllowsWorkPrivateNotificationsFalse() {
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0, mWorkUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+        assertFalse(mLockscreenUserManager.allowsManagedPrivateNotificationsInPublic());
+    }
+
+    @Test
+    public void testLockScreenAllowsWorkPrivateNotificationsTrue() {
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1, mWorkUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+        assertTrue(mLockscreenUserManager.allowsManagedPrivateNotificationsInPublic());
     }
 
     @Test
@@ -163,16 +185,16 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     public void testActionUserSwitchedCallsOnUserSwitched() {
         Intent intent = new Intent()
                 .setAction(ACTION_USER_SWITCHED)
-                .putExtra(Intent.EXTRA_USER_HANDLE, mCurrentUserId + 1);
+                .putExtra(Intent.EXTRA_USER_HANDLE, mSecondaryUser.id);
         mLockscreenUserManager.getBaseBroadcastReceiverForTest().onReceive(mContext, intent);
-        verify(mPresenter, times(1)).onUserSwitched(mCurrentUserId + 1);
+        verify(mPresenter, times(1)).onUserSwitched(mSecondaryUser.id);
     }
 
     @Test
     public void testIsLockscreenPublicMode() {
-        assertFalse(mLockscreenUserManager.isLockscreenPublicMode(mCurrentUserId));
-        mLockscreenUserManager.setLockscreenPublicMode(true, mCurrentUserId);
-        assertTrue(mLockscreenUserManager.isLockscreenPublicMode(mCurrentUserId));
+        assertFalse(mLockscreenUserManager.isLockscreenPublicMode(mCurrentUser.id));
+        mLockscreenUserManager.setLockscreenPublicMode(true, mCurrentUser.id);
+        assertTrue(mLockscreenUserManager.isLockscreenPublicMode(mCurrentUser.id));
     }
 
     @Test
