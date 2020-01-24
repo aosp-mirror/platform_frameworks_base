@@ -154,16 +154,10 @@ public:
     WebpLossless = 4,
   };
 
-  enum class CompressResult {
-    Success,
-    AllocationFailed,
-    Error,
-  };
+  bool compress(JavaCompressFormat format, int32_t quality, SkWStream* stream);
 
-  CompressResult compress(JavaCompressFormat format, int32_t quality, SkWStream* stream);
-
-  static CompressResult compress(const SkBitmap& bitmap, JavaCompressFormat format,
-                                 int32_t quality, SkWStream* stream);
+  static bool compress(const SkBitmap& bitmap, JavaCompressFormat format,
+                       int32_t quality, SkWStream* stream);
 private:
     static sk_sp<Bitmap> allocateAshmemBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);
     static sk_sp<Bitmap> allocateHeapBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);
