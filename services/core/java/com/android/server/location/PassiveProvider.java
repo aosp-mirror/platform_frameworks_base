@@ -56,7 +56,7 @@ public class PassiveProvider extends AbstractLocationProvider {
         mReportLocation = false;
 
         setProperties(PROPERTIES);
-        setEnabled(true);
+        setAllowed(true);
     }
 
     @Override

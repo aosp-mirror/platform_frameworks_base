@@ -180,6 +180,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.LocationManager;
+import android.location.LocationManagerInternal;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
@@ -2094,6 +2095,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         LocationManager getLocationManager() {
             return mContext.getSystemService(LocationManager.class);
+        }
+
+        LocationManagerInternal getLocationManagerInternal() {
+            return LocalServices.getService(LocationManagerInternal.class);
         }
 
         IWindowManager getIWindowManager() {
@@ -11550,6 +11555,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         locationEnabled ? Settings.Secure.LOCATION_MODE_ON
                                 : Settings.Secure.LOCATION_MODE_OFF))
                 .write();
+    }
+
+    @Override
+    public void requestSetLocationProviderAllowed(ComponentName who, String provider,
+            boolean providerAllowed) {
+        Objects.requireNonNull(who, "ComponentName is null");
+        enforceDeviceOwner(who);
+
+        mInjector.binderWithCleanCallingIdentity(
+                () -> mInjector.getLocationManagerInternal().requestSetProviderAllowed(provider,
+                        providerAllowed));
     }
 
     @Override
