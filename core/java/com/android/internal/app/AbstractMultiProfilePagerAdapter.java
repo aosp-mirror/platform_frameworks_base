@@ -156,14 +156,32 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     @VisibleForTesting
     public abstract Object getAdapterForIndex(int pageIndex);
 
+    /**
+     * Returns the {@link ResolverListAdapter} instance of the profile that represents
+     * <code>userHandle</code>. If there is no such adapter for the specified
+     * <code>userHandle</code>, returns {@code null}.
+     * <p>For example, if there is a work profile on the device with user id 10, calling this method
+     * with <code>UserHandle.of(10)</code> returns the work profile {@link ResolverListAdapter}.
+     */
+    @Nullable
+    abstract ResolverListAdapter getListAdapterForUserHandle(UserHandle userHandle);
+
+    /**
+     * Returns the {@link ResolverListAdapter} instance of the profile that is currently visible
+     * to the user.
+     * <p>For example, if the user is viewing the work tab in the share sheet, this method returns
+     * the work profile {@link ResolverListAdapter}.
+     * @see #getInactiveListAdapter()
+     */
     @VisibleForTesting
     public abstract ResolverListAdapter getActiveListAdapter();
 
     /**
      * If this is a device with a work profile, returns the {@link ResolverListAdapter} instance
-     * of the profile that is not the active one. Otherwise returns {@code null}. For example,
-     * if the share sheet is launched in the work profile, this method returns the personal
-     * profile {@link ResolverListAdapter}.
+     * of the profile that is <b><i>not</i></b> currently visible to the user. Otherwise returns
+     * {@code null}.
+     * <p>For example, if the user is viewing the work tab in the share sheet, this method returns
+     * the personal profile {@link ResolverListAdapter}.
      * @see #getActiveListAdapter()
      */
     @VisibleForTesting

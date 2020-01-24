@@ -543,6 +543,9 @@ public class ResolverActivity extends Activity implements
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
+        if (mMultiProfilePagerAdapter.getInactiveListAdapter() != null) {
+            mMultiProfilePagerAdapter.getInactiveListAdapter().handlePackagesChanged();
+        }
 
         if (mSystemWindowInsets != null) {
             mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,

@@ -407,6 +407,7 @@ public class ResolverListAdapter extends BaseAdapter {
     // We assume that at this point we've already filtered out the only intent for a different
     // targetUserId which we're going to use.
     private void addResolveInfo(DisplayResolveInfo dri) {
+        // TODO(arangelov): Is that UserHandle.USER_CURRENT check okay?
         if (dri != null && dri.getResolveInfo() != null
                 && dri.getResolveInfo().targetUserId == UserHandle.USER_CURRENT) {
             // Checks if this info is already listed in display.
@@ -575,7 +576,7 @@ public class ResolverListAdapter extends BaseAdapter {
 
     Drawable loadIconForResolveInfo(ResolveInfo ri) {
         // Load icons based on the current process. If in work profile icons should be badged.
-        return makePresentationGetter(ri).getIcon(mResolverListController.getUserHandle());
+        return makePresentationGetter(ri).getIcon(getUserHandle());
     }
 
     void loadFilteredItemIconTaskAsync(@NonNull ImageView iconView) {
@@ -583,6 +584,10 @@ public class ResolverListAdapter extends BaseAdapter {
         if (iconView != null && iconInfo != null) {
             new LoadIconTask(iconInfo, iconView).execute();
         }
+    }
+
+    UserHandle getUserHandle() {
+        return mResolverListController.getUserHandle();
     }
 
     /**

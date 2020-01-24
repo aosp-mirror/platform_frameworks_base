@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.os.UserHandle;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -85,6 +86,18 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     @VisibleForTesting
     public ResolverListAdapter getAdapterForIndex(int pageIndex) {
         return mItems[pageIndex].resolverListAdapter;
+    }
+
+    @Override
+    @Nullable
+    ResolverListAdapter getListAdapterForUserHandle(UserHandle userHandle) {
+        if (getActiveListAdapter().getUserHandle() == userHandle) {
+            return getActiveListAdapter();
+        } else if (getInactiveListAdapter() != null
+                && getInactiveListAdapter().getUserHandle() == userHandle) {
+            return getInactiveListAdapter();
+        }
+        return null;
     }
 
     @Override

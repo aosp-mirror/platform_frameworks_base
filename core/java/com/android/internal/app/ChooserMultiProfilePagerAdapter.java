@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.os.UserHandle;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -81,6 +82,18 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     @VisibleForTesting
     public ChooserActivity.ChooserGridAdapter getAdapterForIndex(int pageIndex) {
         return mItems[pageIndex].chooserGridAdapter;
+    }
+
+    @Override
+    @Nullable
+    ChooserListAdapter getListAdapterForUserHandle(UserHandle userHandle) {
+        if (getActiveListAdapter().getUserHandle() == userHandle) {
+            return getActiveListAdapter();
+        } else if (getInactiveListAdapter() != null
+                && getInactiveListAdapter().getUserHandle() == userHandle) {
+            return getInactiveListAdapter();
+        }
+        return null;
     }
 
     @Override

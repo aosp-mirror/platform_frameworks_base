@@ -92,7 +92,9 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -976,6 +978,8 @@ public class ChooserActivityTest {
                 .launchActivity(Intent.createChooser(sendIntent, null));
 
         // Insert the direct share target
+        Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos = new HashMap<>();
+        directShareToShortcutInfos.put(serviceTargets.get(0), null);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(
                 () -> activity.getAdapter().addServiceResults(
                         activity.createTestDisplayResolveInfo(sendIntent,
@@ -985,7 +989,8 @@ public class ChooserActivityTest {
                                 sendIntent,
                                 /* resolveInfoPresentationGetter */ null),
                         serviceTargets,
-                        TARGET_TYPE_CHOOSER_TARGET)
+                        TARGET_TYPE_CHOOSER_TARGET,
+                        directShareToShortcutInfos)
         );
 
         // Thread.sleep shouldn't be a thing in an integration test but it's
@@ -1044,6 +1049,8 @@ public class ChooserActivityTest {
                 .launchActivity(Intent.createChooser(sendIntent, null));
 
         // Insert the direct share target
+        Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos = new HashMap<>();
+        directShareToShortcutInfos.put(serviceTargets.get(0), null);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(
                 () -> activity.getAdapter().addServiceResults(
                         activity.createTestDisplayResolveInfo(sendIntent,
@@ -1053,7 +1060,8 @@ public class ChooserActivityTest {
                                 sendIntent,
                                 /* resolveInfoPresentationGetter */ null),
                         serviceTargets,
-                        TARGET_TYPE_CHOOSER_TARGET)
+                        TARGET_TYPE_CHOOSER_TARGET,
+                        directShareToShortcutInfos)
         );
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
@@ -1128,6 +1136,8 @@ public class ChooserActivityTest {
         final ChooserWrapperActivity activity = mActivityRule
                 .launchActivity(Intent.createChooser(sendIntent, null));
         // Insert the direct share target
+        Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos = new HashMap<>();
+        directShareToShortcutInfos.put(serviceTargets.get(0), null);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(
                 () -> activity.getAdapter().addServiceResults(
                         activity.createTestDisplayResolveInfo(sendIntent,
@@ -1137,7 +1147,8 @@ public class ChooserActivityTest {
                                 sendIntent,
                                 /* resolveInfoPresentationGetter */ null),
                         serviceTargets,
-                        TARGET_TYPE_CHOOSER_TARGET)
+                        TARGET_TYPE_CHOOSER_TARGET,
+                        directShareToShortcutInfos)
         );
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured

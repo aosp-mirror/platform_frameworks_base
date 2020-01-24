@@ -16,6 +16,7 @@
 
 package com.android.internal.app.chooser;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -70,7 +71,8 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
 
     public SelectableTargetInfo(Context context, DisplayResolveInfo sourceInfo,
             ChooserTarget chooserTarget,
-            float modifiedScore, SelectableTargetInfoCommunicator selectableTargetInfoComunicator) {
+            float modifiedScore, SelectableTargetInfoCommunicator selectableTargetInfoComunicator,
+            @Nullable ShortcutInfo shortcutInfo) {
         mContext = context;
         mSourceInfo = sourceInfo;
         mChooserTarget = chooserTarget;
@@ -91,7 +93,7 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
             }
         }
         // TODO(b/121287224): do this in the background thread, and only for selected targets
-        mDisplayIcon = getChooserTargetIconDrawable(chooserTarget);
+        mDisplayIcon = getChooserTargetIconDrawable(chooserTarget, shortcutInfo);
 
         if (sourceInfo != null) {
             mBackupResolveInfo = null;
@@ -134,34 +136,18 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
         return mIsSuspended;
     }
 
-    /**
-     * Since ShortcutInfos are returned by ShortcutManager, we can cache the shortcuts and skip
-     * the call to LauncherApps#getShortcuts(ShortcutQuery).
-     */
-    // TODO(121287224): Refactor code to apply the suggestion above
-    private Drawable getChooserTargetIconDrawable(ChooserTarget target) {
+    private Drawable getChooserTargetIconDrawable(ChooserTarget target,
+            @Nullable ShortcutInfo shortcutInfo) {
         Drawable directShareIcon = null;
 
         // First get the target drawable and associated activity info
         final Icon icon = target.getIcon();
         if (icon != null) {
             directShareIcon = icon.loadDrawable(mContext);
-        } else if (ChooserFlags.USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS) {
-            Bundle extras = target.getIntentExtras();
-            if (extras != null && extras.containsKey(Intent.EXTRA_SHORTCUT_ID)) {
-                CharSequence shortcutId = extras.getCharSequence(Intent.EXTRA_SHORTCUT_ID);
-                LauncherApps launcherApps = (LauncherApps) mContext.getSystemService(
-                        Context.LAUNCHER_APPS_SERVICE);
-                final LauncherApps.ShortcutQuery q = new LauncherApps.ShortcutQuery();
-                q.setPackage(target.getComponentName().getPackageName());
-                q.setShortcutIds(Arrays.asList(shortcutId.toString()));
-                q.setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC);
-                final List<ShortcutInfo> shortcuts =
-                        launcherApps.getShortcuts(q, mContext.getUser());
-                if (shortcuts != null && shortcuts.size() > 0) {
-                    directShareIcon = launcherApps.getShortcutIconDrawable(shortcuts.get(0), 0);
-                }
-            }
+        } else if (ChooserFlags.USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS && shortcutInfo != null) {
+            LauncherApps launcherApps = (LauncherApps) mContext.getSystemService(
+                    Context.LAUNCHER_APPS_SERVICE);
+            directShareIcon = launcherApps.getShortcutIconDrawable(shortcutInfo, 0);
         }
 
         if (directShareIcon == null) return null;
