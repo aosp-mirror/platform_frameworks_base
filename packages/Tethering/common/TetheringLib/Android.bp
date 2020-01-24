@@ -70,6 +70,7 @@ filegroup {
         "src/android/net/ITetheringConnector.aidl",
         "src/android/net/TetheringCallbackStartedParcel.aidl",
         "src/android/net/TetheringConfigurationParcel.aidl",
+        "src/android/net/TetheringRequestParcel.aidl",
         "src/android/net/TetherStatesParcel.aidl",
     ],
     path: "src"
