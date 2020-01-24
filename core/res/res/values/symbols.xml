@@ -249,6 +249,9 @@
   <java-symbol type="id" name="app_ops" />
   <java-symbol type="id" name="profile_pager" />
   <java-symbol type="id" name="content_preview_container" />
+  <java-symbol type="id" name="profile_tabhost" />
+  <java-symbol type="id" name="tabs" />
+  <java-symbol type="id" name="tabcontent" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -357,6 +360,7 @@
   <java-symbol type="bool" name="config_enableNewAutoSelectNetworkUI"/>
   <java-symbol type="bool" name="config_disableUsbPermissionDialogs"/>
   <java-symbol type="dimen" name="config_fullTaskSnapshotScale" />
+  <java-symbol type="dimen" name="config_reducedTaskSnapshotScale" />
   <java-symbol type="bool" name="config_use16BitTaskSnapshotPixelFormat" />
   <java-symbol type="bool" name="config_hasRecents" />
   <java-symbol type="string" name="config_recentsComponentName" />
@@ -1209,6 +1213,8 @@
   <java-symbol type="string" name="device_ownership_relinquished" />
   <java-symbol type="string" name="network_logging_notification_title" />
   <java-symbol type="string" name="network_logging_notification_text" />
+  <java-symbol type="string" name="personal_apps_suspended_notification_title" />
+  <java-symbol type="string" name="personal_apps_suspended_notification_text" />
   <java-symbol type="string" name="factory_reset_warning" />
   <java-symbol type="string" name="factory_reset_message" />
   <java-symbol type="string" name="lockscreen_transport_play_description" />
@@ -1869,7 +1875,6 @@
   <java-symbol type="bool" name="config_dozeAfterScreenOffByDefault" />
   <java-symbol type="bool" name="config_enableActivityRecognitionHardwareOverlay" />
   <java-symbol type="bool" name="config_enableFusedLocationOverlay" />
-  <java-symbol type="bool" name="config_enableHardwareFlpOverlay" />
   <java-symbol type="bool" name="config_enableGeocoderOverlay" />
   <java-symbol type="bool" name="config_enableGeofenceOverlay" />
   <java-symbol type="bool" name="config_enableNetworkLocationOverlay" />
@@ -2019,7 +2024,6 @@
   <java-symbol type="string" name="config_datause_iface" />
   <java-symbol type="string" name="config_activityRecognitionHardwarePackageName" />
   <java-symbol type="string" name="config_fusedLocationProviderPackageName" />
-  <java-symbol type="string" name="config_hardwareFlpPackageName" />
   <java-symbol type="string" name="config_geocoderProviderPackageName" />
   <java-symbol type="string" name="config_geofenceProviderPackageName" />
   <java-symbol type="string" name="config_networkLocationProviderPackageName" />
@@ -3822,6 +3826,9 @@
   <java-symbol type="dimen" name="waterfall_display_right_edge_size" />
   <java-symbol type="dimen" name="waterfall_display_bottom_edge_size" />
 
+  <!-- For device policy -->
+  <java-symbol type="array" name="config_packagesExemptFromSuspension" />
+
   <!-- Accessibility take screenshot -->
   <java-symbol type="string" name="capability_desc_canTakeScreenshot" />
   <java-symbol type="string" name="capability_title_canTakeScreenshot" />
@@ -3833,4 +3840,12 @@
 
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionPkgs" />
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionProcStates" />
+
+  <!-- Intent resolver and share sheet -->
+  <java-symbol type="color" name="resolver_tabs_active_color" />
+  <java-symbol type="color" name="resolver_tabs_inactive_color" />
+  <java-symbol type="string" name="resolver_personal_tab" />
+  <java-symbol type="string" name="resolver_work_tab" />
+  <java-symbol type="id" name="stub" />
+
 </resources>

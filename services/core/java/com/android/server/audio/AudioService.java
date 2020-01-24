@@ -21,6 +21,7 @@ import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static android.media.AudioManager.STREAM_SYSTEM;
+import static android.media.audiopolicy.AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.provider.Settings.Secure.VOLUME_HUSH_MUTE;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
@@ -89,6 +90,7 @@ import android.media.PlayerBase;
 import android.media.VolumePolicy;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioMixingRule.AudioMixMatchCriterion;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.AudioProductStrategy;
@@ -6774,6 +6776,7 @@ public class AudioService extends IAudioService.Stub
 
         boolean requireValidProjection = false;
         boolean requireCaptureAudioOrMediaOutputPerm = false;
+        boolean requireVoiceComunicationOutputPerm = false;
         boolean requireModifyRouting = false;
 
         if (hasFocusAccess || isVolumeController) {
@@ -6783,8 +6786,15 @@ public class AudioService extends IAudioService.Stub
             requireModifyRouting |= true;
         }
         for (AudioMix mix : policyConfig.getMixes()) {
-            // If mix is requesting a privileged capture
-            if (mix.getRule().allowPrivilegedPlaybackCapture()) {
+            // If mix is trying to capture USAGE_VOICE_COMMUNICATION using playback capture
+            if (isVoiceCommunicationPlaybackCaptureMix(mix)) {
+                // then it must have CAPTURE_USAGE_VOICE_COMMUNICATION_OUTPUT permission
+                requireVoiceComunicationOutputPerm |= true;
+            }
+            // If mix is requesting privileged capture and is capturing at
+            // least one usage which is not USAGE_VOICE_COMMUNICATION.
+            if (mix.getRule().allowPrivilegedPlaybackCapture()
+                    && isNonVoiceCommunicationCaptureMix(mix)) {
                 // then it must have CAPTURE_MEDIA_OUTPUT or CAPTURE_AUDIO_OUTPUT permission
                 requireCaptureAudioOrMediaOutputPerm |= true;
                 // and its format must be low quality enough
@@ -6812,6 +6822,14 @@ public class AudioService extends IAudioService.Stub
             return false;
         }
 
+        if (requireVoiceComunicationOutputPerm
+                && !callerHasPermission(
+                        android.Manifest.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT)) {
+            Log.e(TAG, "Privileged audio capture for voice communication requires "
+                      + "CAPTURE_VOICE_COMMUNICATION_OUTPUT system permission");
+            return false;
+        }
+
         if (requireValidProjection && !canProjectAudio(projection)) {
             return false;
         }
@@ -6823,6 +6841,41 @@ public class AudioService extends IAudioService.Stub
         }
 
         return true;
+    }
+
+    /**
+    * Checks whether a given AudioMix is used for playback capture
+    * (has the ROUTE_FLAG_LOOP_BACK_RENDER flag) and has a matching
+    * criterion for USAGE_VOICE_COMMUNICATION.
+    */
+    private boolean isVoiceCommunicationPlaybackCaptureMix(AudioMix mix) {
+        if (mix.getRouteFlags() != mix.ROUTE_FLAG_LOOP_BACK_RENDER) {
+            return false;
+        }
+
+        for (AudioMixMatchCriterion criterion : mix.getRule().getCriteria()) {
+            if (criterion.getRule() == RULE_MATCH_ATTRIBUTE_USAGE
+                    && criterion.getAudioAttributes().getUsage()
+                    == AudioAttributes.USAGE_VOICE_COMMUNICATION) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+    * Checks whether a given AudioMix has a matching
+    * criterion for a usage which is not USAGE_VOICE_COMMUNICATION.
+    */
+    private boolean isNonVoiceCommunicationCaptureMix(AudioMix mix) {
+        for (AudioMixMatchCriterion criterion : mix.getRule().getCriteria()) {
+            if (criterion.getRule() == RULE_MATCH_ATTRIBUTE_USAGE
+                    && criterion.getAudioAttributes().getUsage()
+                    != AudioAttributes.USAGE_VOICE_COMMUNICATION) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean callerHasPermission(String permission) {
@@ -6988,6 +7041,26 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /** see AudioPolicy.setUserIdDeviceAffinity() */
+    public int setUserIdDeviceAffinity(IAudioPolicyCallback pcb, int userId,
+            @NonNull int[] deviceTypes, @NonNull String[] deviceAddresses) {
+        if (DEBUG_AP) {
+            Log.d(TAG, "setUserIdDeviceAffinity for " + pcb.asBinder() + " user:" + userId);
+        }
+
+        synchronized (mAudioPolicies) {
+            final AudioPolicyProxy app =
+                    checkUpdateForPolicy(pcb, "Cannot change device affinity in audio policy");
+            if (app == null) {
+                return AudioManager.ERROR;
+            }
+            if (!app.hasMixRoutedToDevices(deviceTypes, deviceAddresses)) {
+                return AudioManager.ERROR;
+            }
+            return app.setUserIdDeviceAffinities(userId, deviceTypes, deviceAddresses);
+        }
+    }
+
     /** see AudioPolicy.removeUidDeviceAffinity() */
     public int removeUidDeviceAffinity(IAudioPolicyCallback pcb, int uid) {
         if (DEBUG_AP) {
@@ -7000,6 +7073,22 @@ public class AudioService extends IAudioService.Stub
                 return AudioManager.ERROR;
             }
             return app.removeUidDeviceAffinities(uid);
+        }
+    }
+
+    /** see AudioPolicy.removeUserIdDeviceAffinity() */
+    public int removeUserIdDeviceAffinity(IAudioPolicyCallback pcb, int userId) {
+        if (DEBUG_AP) {
+            Log.d(TAG, "removeUserIdDeviceAffinity for " + pcb.asBinder()
+                    + " userId:" + userId);
+        }
+        synchronized (mAudioPolicies) {
+            final AudioPolicyProxy app =
+                    checkUpdateForPolicy(pcb, "Cannot remove device affinity in audio policy");
+            if (app == null) {
+                return AudioManager.ERROR;
+            }
+            return app.removeUserIdDeviceAffinities(userId);
         }
     }
 
@@ -7238,6 +7327,9 @@ public class AudioService extends IAudioService.Stub
         final HashMap<Integer, AudioDeviceArray> mUidDeviceAffinities =
                 new HashMap<Integer, AudioDeviceArray>();
 
+        final HashMap<Integer, AudioDeviceArray> mUserIdDeviceAffinities =
+                new HashMap<>();
+
         final IMediaProjection mProjection;
         private final class UnregisterOnStopCallback extends IMediaProjectionCallback.Stub {
             public void onStop() {
@@ -7426,6 +7518,45 @@ public class AudioService extends IAudioService.Stub
                 }
             }
             Log.e(TAG, "AudioSystem. removeUidDeviceAffinities failed");
+            return AudioManager.ERROR;
+        }
+
+        int setUserIdDeviceAffinities(int userId,
+                @NonNull int[] types, @NonNull String[] addresses) {
+            final Integer UserId = new Integer(userId);
+            int res;
+            if (mUserIdDeviceAffinities.remove(UserId) != null) {
+                final long identity = Binder.clearCallingIdentity();
+                res = AudioSystem.removeUserIdDeviceAffinities(UserId);
+                Binder.restoreCallingIdentity(identity);
+                if (res != AudioSystem.SUCCESS) {
+                    Log.e(TAG, "AudioSystem. removeUserIdDeviceAffinities("
+                            + UserId + ") failed, "
+                            + " cannot call AudioSystem.setUserIdDeviceAffinities");
+                    return AudioManager.ERROR;
+                }
+            }
+            final long identity = Binder.clearCallingIdentity();
+            res = AudioSystem.setUserIdDeviceAffinities(userId, types, addresses);
+            Binder.restoreCallingIdentity(identity);
+            if (res == AudioSystem.SUCCESS) {
+                mUserIdDeviceAffinities.put(UserId, new AudioDeviceArray(types, addresses));
+                return AudioManager.SUCCESS;
+            }
+            Log.e(TAG, "AudioSystem.setUserIdDeviceAffinities(" + userId + ") failed");
+            return AudioManager.ERROR;
+        }
+
+        int removeUserIdDeviceAffinities(int userId) {
+            if (mUserIdDeviceAffinities.remove(new Integer(userId)) != null) {
+                final long identity = Binder.clearCallingIdentity();
+                final int res = AudioSystem.removeUserIdDeviceAffinities(userId);
+                Binder.restoreCallingIdentity(identity);
+                if (res == AudioSystem.SUCCESS) {
+                    return AudioManager.SUCCESS;
+                }
+            }
+            Log.e(TAG, "AudioSystem.removeUserIdDeviceAffinities failed");
             return AudioManager.ERROR;
         }
 

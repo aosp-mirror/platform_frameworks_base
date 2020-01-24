@@ -157,6 +157,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             PackageManager pm = c.getPackageManager();
             ApplicationInfo appInfo;
             Drawable badgedIcon;
+            Drawable appIcon;
             try {
                 appInfo = pm.getApplicationInfo(
                         packageName,
@@ -167,7 +168,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 if (appInfo != null) {
                     info.appName = String.valueOf(pm.getApplicationLabel(appInfo));
                 }
-                Drawable appIcon = pm.getApplicationIcon(packageName);
+                appIcon = pm.getApplicationIcon(packageName);
                 badgedIcon = pm.getUserBadgedIcon(appIcon, sbn.getUser());
             } catch (PackageManager.NameNotFoundException exception) {
                 // If we can't find package... don't think we should show the bubble.
@@ -178,6 +179,11 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             // Badged bubble image
             Drawable bubbleDrawable = iconFactory.getBubbleDrawable(c, info.shortcutInfo,
                     b.getEntry().getBubbleMetadata());
+            if (bubbleDrawable == null) {
+                // Default to app icon
+                bubbleDrawable = appIcon;
+            }
+
             BitmapInfo badgeBitmapInfo = iconFactory.getBadgeBitmap(badgedIcon);
             info.badgedBubbleImage = iconFactory.getBubbleBitmap(bubbleDrawable,
                     badgeBitmapInfo).icon;

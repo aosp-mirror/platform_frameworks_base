@@ -214,6 +214,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PathPermission;
 import android.content.pm.PermissionInfo;
+import android.content.pm.ProcessInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SELinuxUtil;
@@ -751,66 +752,22 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
+     * These are the currently running processes for which we have a ProcessInfo.
+     * Note: needs to be static since the permission checking call chain is static.  This
+     * all probably should be refactored into a separate permission checking object.
+     */
+    @GuardedBy("sActiveProcessInfoSelfLocked")
+    static final SparseArray<ProcessInfo> sActiveProcessInfoSelfLocked = new SparseArray<>();
+
+    /**
      * All of the processes we currently have running organized by pid.
      * The keys are the pid running the application.
      *
      * <p>NOTE: This object is protected by its own lock, NOT the global activity manager lock!
      */
     final PidMap mPidsSelfLocked = new PidMap();
-    final class PidMap {
+    static final class PidMap {
         private final SparseArray<ProcessRecord> mPidMap = new SparseArray<>();
-
-        /**
-         * Puts the process record in the map.
-         * <p>NOTE: Callers should avoid acquiring the mPidsSelfLocked lock before calling this
-         * method.
-         */
-        void put(ProcessRecord app) {
-            synchronized (this) {
-                mPidMap.put(app.pid, app);
-            }
-            mAtmInternal.onProcessMapped(app.pid, app.getWindowProcessController());
-        }
-
-        /**
-         * Removes the process record from the map.
-         * <p>NOTE: Callers should avoid acquiring the mPidsSelfLocked lock before calling this
-         * method.
-         */
-        void remove(ProcessRecord app) {
-            boolean removed = false;
-            synchronized (this) {
-                final ProcessRecord existingApp = mPidMap.get(app.pid);
-                if (existingApp != null && existingApp.startSeq == app.startSeq) {
-                    mPidMap.remove(app.pid);
-                    removed = true;
-                }
-            }
-            if (removed) {
-                mAtmInternal.onProcessUnMapped(app.pid);
-            }
-        }
-
-        /**
-         * Removes the process record from the map if it has a thread.
-         * <p>NOTE: Callers should avoid acquiring the mPidsSelfLocked lock before calling this
-         * method.
-         */
-        boolean removeIfNoThread(ProcessRecord app) {
-            boolean removed = false;
-            synchronized (this) {
-                final ProcessRecord existingApp = get(app.pid);
-                if (existingApp != null && existingApp.startSeq == app.startSeq
-                        && app.thread == null) {
-                    mPidMap.remove(app.pid);
-                    removed = true;
-                }
-            }
-            if (removed) {
-                mAtmInternal.onProcessUnMapped(app.pid);
-            }
-            return removed;
-        }
 
         ProcessRecord get(int pid) {
             return mPidMap.get(pid);
@@ -831,6 +788,82 @@ public class ActivityManagerService extends IActivityManager.Stub
         int indexOfKey(int key) {
             return mPidMap.indexOfKey(key);
         }
+
+        void doAddInternal(ProcessRecord app) {
+            mPidMap.put(app.pid, app);
+        }
+
+        boolean doRemoveInternal(ProcessRecord app) {
+            final ProcessRecord existingApp = mPidMap.get(app.pid);
+            if (existingApp != null && existingApp.startSeq == app.startSeq) {
+                mPidMap.remove(app.pid);
+                return true;
+            }
+            return false;
+        }
+
+        boolean doRemoveIfNoThreadInternal(ProcessRecord app) {
+            if (app == null || app.thread != null) {
+                return false;
+            }
+            return doRemoveInternal(app);
+        }
+    }
+
+    /**
+     * Puts the process record in the map.
+     * <p>NOTE: Callers should avoid acquiring the mPidsSelfLocked lock before calling this
+     * method.
+     */
+    void addPidLocked(ProcessRecord app) {
+        synchronized (mPidsSelfLocked) {
+            mPidsSelfLocked.doAddInternal(app);
+        }
+        synchronized (sActiveProcessInfoSelfLocked) {
+            if (app.processInfo != null) {
+                sActiveProcessInfoSelfLocked.put(app.pid, app.processInfo);
+            } else {
+                sActiveProcessInfoSelfLocked.remove(app.pid);
+            }
+        }
+        mAtmInternal.onProcessMapped(app.pid, app.getWindowProcessController());
+    }
+
+    /**
+     * Removes the process record from the map.
+     * <p>NOTE: Callers should avoid acquiring the mPidsSelfLocked lock before calling this
+     * method.
+     */
+    void removePidLocked(ProcessRecord app) {
+        final boolean removed;
+        synchronized (mPidsSelfLocked) {
+            removed = mPidsSelfLocked.doRemoveInternal(app);
+        }
+        if (removed) {
+            synchronized (sActiveProcessInfoSelfLocked) {
+                sActiveProcessInfoSelfLocked.remove(app.pid);
+            }
+            mAtmInternal.onProcessUnMapped(app.pid);
+        }
+    }
+
+    /**
+     * Removes the process record from the map if it doesn't have a thread.
+     * <p>NOTE: Callers should avoid acquiring the mPidsSelfLocked lock before calling this
+     * method.
+     */
+    boolean removePidIfNoThread(ProcessRecord app) {
+        final boolean removed;
+        synchronized (mPidsSelfLocked) {
+            removed = mPidsSelfLocked.doRemoveIfNoThreadInternal(app);
+        }
+        if (removed) {
+            synchronized (sActiveProcessInfoSelfLocked) {
+                sActiveProcessInfoSelfLocked.remove(app.pid);
+            }
+            mAtmInternal.onProcessUnMapped(app.pid);
+        }
+        return removed;
     }
 
     /**
@@ -2061,7 +2094,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.getWindowProcessController().setPid(MY_PID);
                 app.maxAdj = ProcessList.SYSTEM_ADJ;
                 app.makeActive(mSystemThread.getApplicationThread(), mProcessStats);
-                mPidsSelfLocked.put(app);
+                addPidLocked(app);
                 mProcessList.updateLruProcessLocked(app, false, null);
                 updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
             }
@@ -4723,7 +4756,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     private final void processStartTimedOutLocked(ProcessRecord app) {
         final int pid = app.pid;
-        boolean gone = mPidsSelfLocked.removeIfNoThread(app);
+        boolean gone = removePidIfNoThread(app);
 
         if (gone) {
             Slog.w(TAG, "Process " + app + " failed to attach");
@@ -4796,7 +4829,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // If there is already an app occupying that pid that hasn't been cleaned up
                 cleanUpApplicationRecordLocked(app, false, false, -1,
                             true /*replacingPid*/);
-                mPidsSelfLocked.remove(app);
+                removePidLocked(app);
                 app = null;
             }
         } else {
@@ -5895,6 +5928,21 @@ public class ActivityManagerService extends IActivityManager.Stub
             int owningUid, boolean exported) {
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
+        }
+        // If there is an explicit permission being checked, and this is coming from a process
+        // that has been denied access to that permission, then just deny.  Ultimately this may
+        // not be quite right -- it means that even if the caller would have access for another
+        // reason (such as being the owner of the component it is trying to access), it would still
+        // fail.  This also means the system and root uids would be able to deny themselves
+        // access to permissions, which...  well okay. ¯\_(ツ)_/¯
+        if (permission != null) {
+            synchronized (sActiveProcessInfoSelfLocked) {
+                ProcessInfo procInfo = sActiveProcessInfoSelfLocked.get(pid);
+                if (procInfo != null && procInfo.deniedPermissions != null
+                        && procInfo.deniedPermissions.contains(permission)) {
+                    return PackageManager.PERMISSION_DENIED;
+                }
+            }
         }
         return ActivityManager.checkComponentPermission(permission, uid,
                 owningUid, exported);
@@ -14367,7 +14415,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return true;
         } else if (app.pid > 0 && app.pid != MY_PID) {
             // Goodbye!
-            mPidsSelfLocked.remove(app);
+            removePidLocked(app);
             mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
             if (app.isolated) {

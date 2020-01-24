@@ -59,24 +59,6 @@
         sysui:ignoreRightInset="true"
     />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/status_bar_height"
-        android:orientation="vertical"
-    >
-        <FrameLayout
-            android:id="@+id/status_bar_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-        />
-
-        <FrameLayout
-            android:id="@+id/car_top_navigation_bar_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-
     <include layout="@layout/brightness_mirror"/>
 
     <ViewStub android:id="@+id/fullscreen_user_switcher_stub"

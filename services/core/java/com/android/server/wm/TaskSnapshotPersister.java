@@ -52,7 +52,6 @@ class TaskSnapshotPersister {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskSnapshotPersister" : TAG_WM;
     private static final String SNAPSHOTS_DIRNAME = "snapshots";
     private static final String REDUCED_POSTFIX = "_reduced";
-    private static final float REDUCED_SCALE = .5f;
     private static final float LOW_RAM_REDUCED_SCALE = .8f;
     static final boolean DISABLE_FULL_SIZED_BITMAPS = ActivityManager.isLowRamDeviceStatic();
     private static final long DELAY_MS = 100;
@@ -84,8 +83,13 @@ class TaskSnapshotPersister {
 
     TaskSnapshotPersister(WindowManagerService service, DirectoryResolver resolver) {
         mDirectoryResolver = resolver;
-        mReducedScale = ActivityManager.isLowRamDeviceStatic()
-                ? LOW_RAM_REDUCED_SCALE : REDUCED_SCALE;
+
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            mReducedScale = LOW_RAM_REDUCED_SCALE;
+        } else {
+            mReducedScale = service.mContext.getResources().getFloat(
+                    com.android.internal.R.dimen.config_reducedTaskSnapshotScale);
+        }
         mUse16BitFormat = service.mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_use16BitTaskSnapshotPixelFormat);
     }

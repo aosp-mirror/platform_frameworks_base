@@ -20,6 +20,7 @@ import android.Manifest.permission;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.role.RoleManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -40,15 +41,12 @@ import android.os.UserHandle;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.PackageChangeReceiver;
-import android.util.Log;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -205,7 +203,7 @@ public final class SmsApplication {
                 < android.os.Process.FIRST_APPLICATION_UID) {
             return contextUserId;
         } else {
-            return UserHandle.getUserId(callingUid);
+            return UserHandle.getUserHandleForUid(callingUid).getIdentifier();
         }
     }
 
@@ -811,10 +809,10 @@ public final class SmsApplication {
                 // This should never happen in prod -- unit tests will put the receiver into a
                 // unusual state where the pending result is null, which produces a NPE when calling
                 // getSendingUserId. Just pretend like it's the system user for testing.
-                userId = UserHandle.USER_SYSTEM;
+                userId = UserHandle.SYSTEM.getIdentifier();
             }
             Context userContext = mContext;
-            if (userId != UserHandle.USER_SYSTEM) {
+            if (userId != UserHandle.SYSTEM.getIdentifier()) {
                 try {
                     userContext = mContext.createPackageContextAsUser(mContext.getPackageName(), 0,
                         UserHandle.of(userId));

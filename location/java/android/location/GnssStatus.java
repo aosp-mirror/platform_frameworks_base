@@ -189,6 +189,7 @@ public final class GnssStatus {
      * <li>QZSS: 193-200</li>
      * <li>Galileo: 1-36</li>
      * <li>Beidou: 1-37</li>
+     * <li>IRNSS: 1-14</li>
      * </ul>
      *
      * @param satelliteIndex An index from zero to {@link #getSatelliteCount()} - 1

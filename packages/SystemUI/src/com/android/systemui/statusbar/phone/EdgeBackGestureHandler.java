@@ -304,7 +304,7 @@ public class EdgeBackGestureHandler implements DisplayListener,
         layoutParams.setTitle(TAG + mContext.getDisplayId());
         layoutParams.accessibilityTitle = mContext.getString(R.string.nav_bar_edge_panel);
         layoutParams.windowAnimations = 0;
-        layoutParams.setFitWindowInsetsTypes(0 /* types */);
+        layoutParams.setFitInsetsTypes(0 /* types */);
         return layoutParams;
     }
 

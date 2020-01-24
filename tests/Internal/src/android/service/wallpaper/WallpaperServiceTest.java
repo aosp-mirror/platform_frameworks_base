@@ -58,4 +58,31 @@ public class WallpaperServiceTest {
                 ambientModeChangedCount[0], 2);
     }
 
+    @Test
+    public void testDeliversZoomChanged() {
+        int[] zoomChangedCount = {0};
+        WallpaperService service = new WallpaperService() {
+            @Override
+            public Engine onCreateEngine() {
+                return new Engine() {
+                    @Override
+                    public void onZoomChanged(float zoom) {
+                        super.onZoomChanged(zoom);
+                        zoomChangedCount[0]++;
+                    }
+                };
+            }
+        };
+        WallpaperService.Engine engine = service.onCreateEngine();
+        engine.setCreated(true);
+
+        engine.setZoom(.5f);
+        assertEquals("engine scale was not updated", .5f, engine.getZoom(), .001f);
+        assertEquals("onZoomChanged should have been called", 1, zoomChangedCount[0]);
+
+        engine.setZoom(0);
+        assertEquals("engine scale was not updated", 0, engine.getZoom(), .001f);
+        assertEquals("onAmbientModeChanged should have been called", 2, zoomChangedCount[0]);
+    }
+
 }

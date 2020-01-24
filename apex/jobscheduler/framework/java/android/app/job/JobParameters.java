@@ -48,6 +48,13 @@ public class JobParameters implements Parcelable {
     public static final int REASON_DEVICE_IDLE = JobProtoEnums.STOP_REASON_DEVICE_IDLE; // 4.
     /** @hide */
     public static final int REASON_DEVICE_THERMAL = JobProtoEnums.STOP_REASON_DEVICE_THERMAL; // 5.
+    /**
+     * The job is in the {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED}
+     * bucket.
+     *
+     * @hide
+     */
+    public static final int REASON_RESTRAINED = JobProtoEnums.STOP_REASON_RESTRAINED; // 6.
 
     /**
      * All the stop reason codes. This should be regarded as an immutable array at runtime.
@@ -65,6 +72,7 @@ public class JobParameters implements Parcelable {
             REASON_TIMEOUT,
             REASON_DEVICE_IDLE,
             REASON_DEVICE_THERMAL,
+            REASON_RESTRAINED,
     };
 
     /**
@@ -80,6 +88,7 @@ public class JobParameters implements Parcelable {
             case REASON_TIMEOUT: return "timeout";
             case REASON_DEVICE_IDLE: return "device_idle";
             case REASON_DEVICE_THERMAL: return "thermal";
+            case REASON_RESTRAINED: return "restrained";
             default: return "unknown:" + reason;
         }
     }

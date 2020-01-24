@@ -545,3 +545,18 @@ void ASurfaceTransaction_setColor(ASurfaceTransaction* aSurfaceTransaction,
 
     transaction->setBackgroundColor(surfaceControl, color, alpha, static_cast<ui::Dataspace>(dataspace));
 }
+
+void ASurfaceTransaction_setFrameRate(ASurfaceTransaction* aSurfaceTransaction,
+                                      ASurfaceControl* aSurfaceControl, float frameRate) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    if (frameRate < 0) {
+        ALOGE("Failed to set frame ate - invalid frame rate");
+        return;
+    }
+
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+    transaction->setFrameRate(surfaceControl, frameRate);
+}

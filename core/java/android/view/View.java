@@ -22,7 +22,10 @@ import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LO
 import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
 import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.WindowInsetsAnimationCallback.DISPATCH_MODE_CONTINUE_ON_SUBTREE;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.systemBars;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 
 import static java.lang.Math.max;
@@ -97,6 +100,7 @@ import android.util.FloatProperty;
 import android.util.LayoutDirection;
 import android.util.Log;
 import android.util.LongSparseLongArray;
+import android.util.Pair;
 import android.util.Pools.SynchronizedPool;
 import android.util.Property;
 import android.util.SparseArray;
@@ -110,9 +114,11 @@ import android.view.AccessibilityIterators.ParagraphTextSegmentIterator;
 import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.AccessibilityIterators.WordTextSegmentIterator;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Window.OnContentApplyWindowInsetsListener;
+import android.view.WindowInsets.Type;
 import android.view.WindowInsetsAnimationCallback.AnimationBounds;
 import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
-import android.view.WindowInsetsAnimationCallback.DispatchMode;
+import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -140,6 +146,7 @@ import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 
 import com.android.internal.R;
+import com.android.internal.policy.DecorView;
 import com.android.internal.view.TooltipPopup;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.ScrollBarUtils;
@@ -1510,6 +1517,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Set for framework elements that use FITS_SYSTEM_WINDOWS, to indicate
      * that they are optional and should be skipped if the window has
      * requested system UI flags that ignore those insets for layout.
+     * <p>
+     * This is only used for support library as of Android R. The framework now uses
+     * {@link #PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS} such that it can skip the legacy
+     * insets path that loses insets information.
      */
     static final int OPTIONAL_FITS_SYSTEM_WINDOWS = 0x00000800;
 
@@ -2258,7 +2269,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * be extended in the future to hold our own class with more than just
      * a Rect. :)
      */
-    static final ThreadLocal<Rect> sThreadLocal = new ThreadLocal<Rect>();
+    static final ThreadLocal<Rect> sThreadLocal = ThreadLocal.withInitial(Rect::new);
 
     /**
      * Map used to store views' tags.
@@ -3420,6 +3431,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                          1       PFLAG4_CONTENT_CAPTURE_IMPORTANCE_IS_CACHED
      *                         1        PFLAG4_CONTENT_CAPTURE_IMPORTANCE_CACHED_VALUE
      *                         11       PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK
+     *                        1         PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS
      * |-------|-------|-------|-------|
      */
 
@@ -3456,6 +3468,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final int PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK =
             PFLAG4_CONTENT_CAPTURE_IMPORTANCE_IS_CACHED
             | PFLAG4_CONTENT_CAPTURE_IMPORTANCE_CACHED_VALUE;
+
+    /**
+     * @see #OPTIONAL_FITS_SYSTEM_WINDOWS
+     */
+    static final int PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS = 0x000000100;
 
     /* End of masks for mPrivateFlags4 */
 
@@ -3506,7 +3523,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * requested the system UI (status bar) to be visible (the default).
      *
      * @see #setSystemUiVisibility(int)
+     * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
+     * instead.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_VISIBLE = 0;
 
     /**
@@ -3519,7 +3539,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>In low profile mode, the status bar and/or navigation icons may dim.
      *
      * @see #setSystemUiVisibility(int)
+     * @deprecated Low profile mode is deprecated. Hide the system bars instead if the application
+     * needs to be in a unobtrusive mode. Use {@link WindowInsetsController#hide(int)} with
+     * {@link Type#systemBars()}.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_LOW_PROFILE = 0x00000001;
 
     /**
@@ -3540,7 +3564,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * so that both elements reappear at the same time.
      *
      * @see #setSystemUiVisibility(int)
+     * @deprecated Use {@link WindowInsetsController#hide(int)} with {@link Type#navigationBars()}
+     * instead.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = 0x00000002;
 
     /**
@@ -3576,7 +3603,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * the book.
      *
      * @see #setSystemUiVisibility(int)
+     * @deprecated Use {@link WindowInsetsController#hide(int)} with {@link Type#statusBars()}
+     * instead.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_FULLSCREEN = 0x00000004;
 
     /**
@@ -3610,7 +3640,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * overlay mode with {@link Window#FEATURE_ACTION_BAR_OVERLAY
      * Window.FEATURE_ACTION_BAR_OVERLAY}, this flag will also impact the
      * insets it adds to those given to the application.
+     *
+     * @deprecated Use {@link WindowInsets#getInsetsIgnoringVisibility(int)} instead to retrieve
+     * insets that don't change when system bars change visibility state.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_LAYOUT_STABLE = 0x00000100;
 
     /**
@@ -3622,6 +3656,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * decorations when they are shown.  You can perform layout of your inner
      * UI elements to account for the navigation system UI through the
      * {@link #fitSystemWindows(Rect)} method.
+     *
+     * @deprecated For floating windows, use {@link LayoutParams#setFitInsetsTypes(int)} with
+     * {@link Type#navigationBars()}. For non-floating windows that fill the screen, call
+     * {@link Window#setOnContentApplyWindowInsets} with {@code null} or a listener that doesn't
+     * fit the navigation bar on the window content level.
      */
     public static final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = 0x00000200;
 
@@ -3646,7 +3685,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
      * @see WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
      * @see WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+     *
+     * @deprecated For floating windows, use {@link LayoutParams#setFitInsetsTypes(int)} with
+     * {@link Type#statusBars()} ()}. For non-floating windows that fill the screen, call
+     * {@link Window#setOnContentApplyWindowInsets} with {@code null} or a listener that doesn't
+     * fit the status bar on the window content level.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 0x00000400;
 
     /**
@@ -3656,7 +3701,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * user interaction.
      * <p>Since this flag is a modifier for {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, it only
      * has an effect when used in combination with that flag.</p>
+     *
+     * @deprecated Use {@link WindowInsetsController#BEHAVIOR_SHOW_BARS_BY_SWIPE} instead.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_IMMERSIVE = 0x00000800;
 
     /**
@@ -3674,7 +3722,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </p><p>Since this flag is a modifier for {@link #SYSTEM_UI_FLAG_FULLSCREEN} and
      * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, it only has an effect when used in combination
      * with one or both of those flags.</p>
+     *
+     * @deprecated Use {@link WindowInsetsController#BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE} instead.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_IMMERSIVE_STICKY = 0x00001000;
 
     /**
@@ -3688,7 +3739,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         FLAG_TRANSLUCENT_STATUS}.
      *
      * @see android.R.attr#windowLightStatusBar
+     * @deprecated Use {@link WindowInsetsController#APPEARANCE_LIGHT_STATUS_BARS} instead.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_LIGHT_STATUS_BAR = 0x00002000;
 
     /**
@@ -3714,7 +3767,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         FLAG_TRANSLUCENT_NAVIGATION}.
      *
      * @see android.R.attr#windowLightNavigationBar
+     * @deprecated Use {@link WindowInsetsController#APPEARANCE_LIGHT_NAVIGATION_BARS} instead.
      */
+    @Deprecated
     public static final int SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR = 0x00000010;
 
     /**
@@ -3942,7 +3997,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Flags that can impact the layout in relation to system UI.
+     *
+     * @deprecated System UI layout flags are deprecated.
      */
+    @Deprecated
     public static final int SYSTEM_UI_LAYOUT_FLAGS =
             SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             | SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
@@ -11020,21 +11078,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private boolean fitSystemWindowsInt(Rect insets) {
         if ((mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS) {
-            mUserPaddingStart = UNDEFINED_PADDING;
-            mUserPaddingEnd = UNDEFINED_PADDING;
             Rect localInsets = sThreadLocal.get();
-            if (localInsets == null) {
-                localInsets = new Rect();
-                sThreadLocal.set(localInsets);
-            }
             boolean res = computeFitSystemWindows(insets, localInsets);
-            mUserPaddingLeftInitial = localInsets.left;
-            mUserPaddingRightInitial = localInsets.right;
-            internalSetPadding(localInsets.left, localInsets.top,
-                    localInsets.right, localInsets.bottom);
+            applyInsets(localInsets);
             return res;
         }
         return false;
+    }
+
+    private void applyInsets(Rect insets) {
+        mUserPaddingStart = UNDEFINED_PADDING;
+        mUserPaddingEnd = UNDEFINED_PADDING;
+        mUserPaddingLeftInitial = insets.left;
+        mUserPaddingRightInitial = insets.right;
+        internalSetPadding(insets.left, insets.top, insets.right, insets.bottom);
     }
 
     /**
@@ -11063,6 +11120,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The supplied insets with any applied insets consumed
      */
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        if ((mPrivateFlags4 & PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS) != 0
+                && (mViewFlags & FITS_SYSTEM_WINDOWS) != 0) {
+            return onApplyFrameworkOptionalFitSystemWindows(insets);
+        }
         if ((mPrivateFlags3 & PFLAG3_FITTING_SYSTEM_WINDOWS) == 0) {
             // We weren't called from within a direct call to fitSystemWindows,
             // call into it as a fallback in case we're in a class that overrides it
@@ -11077,6 +11138,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
         return insets;
+    }
+
+    private WindowInsets onApplyFrameworkOptionalFitSystemWindows(WindowInsets insets) {
+        Rect localInsets = sThreadLocal.get();
+        WindowInsets result = computeSystemWindowInsets(insets, localInsets);
+        applyInsets(localInsets);
+        return result;
     }
 
     /**
@@ -11369,16 +11437,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return Insets that should be passed along to views under this one
      */
     public WindowInsets computeSystemWindowInsets(WindowInsets in, Rect outLocalInsets) {
-        if ((mViewFlags & OPTIONAL_FITS_SYSTEM_WINDOWS) == 0
-                || mAttachInfo == null
-                || ((mAttachInfo.mSystemUiVisibility & SYSTEM_UI_LAYOUT_FLAGS) == 0)) {
+        boolean isOptionalFitSystemWindows = (mViewFlags & OPTIONAL_FITS_SYSTEM_WINDOWS) != 0
+                || (mPrivateFlags4 & PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS) != 0;
+        if (isOptionalFitSystemWindows && mAttachInfo != null) {
+            OnContentApplyWindowInsetsListener listener =
+                    mAttachInfo.mContentOnApplyWindowInsetsListener;
+            if (listener == null) {
+                // The application wants to take care of fitting system window for
+                // the content.
+                outLocalInsets.setEmpty();
+                return in;
+            }
+            Pair<Insets, WindowInsets> result = listener.onContentApplyWindowInsets(in);
+            outLocalInsets.set(result.first.toRect());
+            return result.second;
+        } else {
             outLocalInsets.set(in.getSystemWindowInsetsAsRect());
             return in.consumeSystemWindowInsets().inset(outLocalInsets);
-        } else {
-            // The application wants to take care of fitting system window for
-            // the content.
-            outLocalInsets.setEmpty();
-            return in;
         }
     }
 
@@ -11449,12 +11524,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * For use by PhoneWindow to make its own system window fitting optional.
+     * @see #OPTIONAL_FITS_SYSTEM_WINDOWS
      * @hide
      */
     @UnsupportedAppUsage
     public void makeOptionalFitsSystemWindows() {
         setFlags(OPTIONAL_FITS_SYSTEM_WINDOWS, OPTIONAL_FITS_SYSTEM_WINDOWS);
+    }
+
+    /**
+     * @see #PFLAG4_OPTIONAL_FITS_SYSTEM_WINDOWS
+     * @hide
+     */
+    public void makeFrameworkOptionalFitsSystemWindows() {
+        mPrivateFlags4 |= PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS;
     }
 
     /**
@@ -25743,7 +25826,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #SYSTEM_UI_FLAG_LAYOUT_STABLE}, {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION},
      * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, {@link #SYSTEM_UI_FLAG_IMMERSIVE},
      * and {@link #SYSTEM_UI_FLAG_IMMERSIVE_STICKY}.
+     *
+     * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
+     * instead.
      */
+    @Deprecated
     public void setSystemUiVisibility(int visibility) {
         if (visibility != mSystemUiVisibility) {
             mSystemUiVisibility = visibility;
@@ -25760,7 +25847,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #SYSTEM_UI_FLAG_LAYOUT_STABLE}, {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION},
      * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, {@link #SYSTEM_UI_FLAG_IMMERSIVE},
      * and {@link #SYSTEM_UI_FLAG_IMMERSIVE_STICKY}.
+     *
+     * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
+     * instead.
      */
+    @Deprecated
     public int getSystemUiVisibility() {
         return mSystemUiVisibility;
     }
@@ -25770,7 +25861,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * the entire window.  This is the combination of the
      * {@link #setSystemUiVisibility(int)} values supplied by all of the
      * views in the window.
+     *
+     * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
+     * instead.
      */
+    @Deprecated
     public int getWindowSystemUiVisibility() {
         return mAttachInfo != null ? mAttachInfo.mSystemUiVisibility : 0;
     }
@@ -25782,14 +25877,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #setOnSystemUiVisibilityChangeListener(OnSystemUiVisibilityChangeListener)}
      * in that this is only telling you about the local request of the window,
      * not the actual values applied by the system.
+     *
+     * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
+     * instead.
      */
+    @Deprecated
     public void onWindowSystemUiVisibilityChanged(int visible) {
     }
 
     /**
      * Dispatch callbacks to {@link #onWindowSystemUiVisibilityChanged(int)} down
      * the view hierarchy.
+     *
+     * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
+     * instead.
      */
+    @Deprecated
     public void dispatchWindowSystemUiVisiblityChanged(int visible) {
         onWindowSystemUiVisibilityChanged(visible);
     }
@@ -25797,7 +25900,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Set a listener to receive callbacks when the visibility of the system bar changes.
      * @param l  The {@link OnSystemUiVisibilityChangeListener} to receive callbacks.
+     *
+     * @deprecated Use {@link WindowInsets#isVisible(int)} to find out about system bar visibilities
+     * by setting a {@link OnApplyWindowInsetsListener} on this view.
      */
+    @Deprecated
     public void setOnSystemUiVisibilityChangeListener(OnSystemUiVisibilityChangeListener l) {
         getListenerInfo().mOnSystemUiVisibilityChangeListener = l;
         if (mParent != null && mAttachInfo != null && !mAttachInfo.mRecomputeGlobalAttributes) {
@@ -25808,7 +25915,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Dispatch callbacks to {@link #setOnSystemUiVisibilityChangeListener} down
      * the view hierarchy.
+     *
+     * @deprecated Use {@link WindowInsets#isVisible(int)} to find out about system bar visibilities
+     * by setting a {@link OnApplyWindowInsetsListener} on this view.
      */
+    @Deprecated
     public void dispatchSystemUiVisibilityChanged(int visibility) {
         ListenerInfo li = mListenerInfo;
         if (li != null && li.mOnSystemUiVisibilityChangeListener != null) {
@@ -28249,7 +28360,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * state, not what the application is requesting.
      *
      * @see View#setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener)
+     *
+     * @deprecated Use {@link WindowInsets#isVisible(int)} to find out about system bar visibilities
+     * by setting a {@link OnApplyWindowInsetsListener} on this view.
      */
+    @Deprecated
     public interface OnSystemUiVisibilityChangeListener {
         /**
          * Called when the status bar changes visibility because of a call to
@@ -28415,6 +28530,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * window.
      */
     final static class AttachInfo {
+
         interface Callbacks {
             void playSoundEffect(int effectId);
             boolean performHapticFeedback(int effectId, boolean always);
@@ -28852,6 +28968,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Cached reference to the {@link ContentCaptureManager}.
          */
         ContentCaptureManager mContentCaptureManager;
+
+        /**
+         * Listener used to fit content on window level.
+         */
+        OnContentApplyWindowInsetsListener mContentOnApplyWindowInsetsListener;
 
         /**
          * Creates a new set of attachment information with the specified

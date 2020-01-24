@@ -32,6 +32,7 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
+import android.view.DisplayCutout;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
@@ -111,6 +112,20 @@ interface IWindowManager
 
     // These can only be called when holding the MANAGE_APP_TOKENS permission.
     void setEventDispatching(boolean enabled);
+
+    /** @return {@code true} if this binder is a registered window token. */
+    boolean isWindowToken(in IBinder binder);
+    /**
+     * Adds window token for a given type.
+     *
+     * @param token Token to be registered.
+     * @param type Window type to be used with this token.
+     * @param displayId The ID of the display where this token should be added.
+     * @param packageName The name of package to request to add window token.
+     * @return {@link WindowManagerGlobal#ADD_OKAY} if the addition was successful, an error code
+     *         otherwise.
+     */
+    int addWindowContextToken(IBinder token, int type, int displayId, String packageName);
     void addWindowToken(IBinder token, int type, int displayId);
     void removeWindowToken(IBinder token, int displayId);
     void prepareAppTransition(int transit, boolean alwaysKeepCurrent);
@@ -725,4 +740,12 @@ interface IWindowManager
      * Called when a remote process modifies insets on a display window container.
      */
     void modifyDisplayWindowInsets(int displayId, in InsetsState state);
+
+    /**
+     * Called to get the expected window insets.
+     * TODO(window-context): Remove when new insets flag is available.
+     */
+    void getWindowInsets(in WindowManager.LayoutParams attrs, int displayId,
+            out Rect outContentInsets, out Rect outStableInsets,
+            out DisplayCutout.ParcelableWrapper displayCutout);
 }

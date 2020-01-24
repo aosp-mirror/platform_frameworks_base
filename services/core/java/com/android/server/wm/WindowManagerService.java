@@ -71,6 +71,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
+import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
@@ -1367,51 +1368,9 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean addToastWindowRequiresToken = false;
 
             if (token == null) {
-                if (rootType >= FIRST_APPLICATION_WINDOW && rootType <= LAST_APPLICATION_WINDOW) {
-                    ProtoLog.w(WM_ERROR, "Attempted to add application window with unknown token "
-                            + "%s.  Aborting.", attrs.token);
+                if (!unprivilegedAppCanCreateTokenWith(parentWindow, callingUid, type,
+                        rootType, attrs.token, attrs.packageName)) {
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
-                }
-                if (rootType == TYPE_INPUT_METHOD) {
-                    ProtoLog.w(WM_ERROR, "Attempted to add input method window with unknown token "
-                            + "%s.  Aborting.", attrs.token);
-                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
-                }
-                if (rootType == TYPE_VOICE_INTERACTION) {
-                    ProtoLog.w(WM_ERROR,
-                            "Attempted to add voice interaction window with unknown token "
-                                    + "%s.  Aborting.", attrs.token);
-                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
-                }
-                if (rootType == TYPE_WALLPAPER) {
-                    ProtoLog.w(WM_ERROR, "Attempted to add wallpaper window with unknown token "
-                            + "%s.  Aborting.", attrs.token);
-                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
-                }
-                if (rootType == TYPE_DREAM) {
-                    ProtoLog.w(WM_ERROR, "Attempted to add Dream window with unknown token "
-                            + "%s.  Aborting.", attrs.token);
-                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
-                }
-                if (rootType == TYPE_QS_DIALOG) {
-                    ProtoLog.w(WM_ERROR, "Attempted to add QS dialog window with unknown token "
-                            + "%s.  Aborting.", attrs.token);
-                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
-                }
-                if (rootType == TYPE_ACCESSIBILITY_OVERLAY) {
-                    ProtoLog.w(WM_ERROR,
-                            "Attempted to add Accessibility overlay window with unknown token "
-                                    + "%s.  Aborting.", attrs.token);
-                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
-                }
-                if (type == TYPE_TOAST) {
-                    // Apps targeting SDK above N MR1 cannot arbitrary add toast windows.
-                    if (doesAddToastWindowRequireToken(attrs.packageName, callingUid,
-                            parentWindow)) {
-                        ProtoLog.w(WM_ERROR, "Attempted to add a toast window with unknown token "
-                                + "%s.  Aborting.", attrs.token);
-                        return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
-                    }
                 }
                 final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
                 final boolean isRoundedCornerOverlay =
@@ -1695,6 +1654,56 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
 
         return res;
+    }
+
+    private boolean unprivilegedAppCanCreateTokenWith(WindowState parentWindow,
+            int callingUid, int type, int rootType, IBinder tokenForLog, String packageName) {
+        if (rootType >= FIRST_APPLICATION_WINDOW && rootType <= LAST_APPLICATION_WINDOW) {
+            ProtoLog.w(WM_ERROR, "Attempted to add application window with unknown token "
+                    + "%s.  Aborting.", tokenForLog);
+            return false;
+        }
+        if (rootType == TYPE_INPUT_METHOD) {
+            ProtoLog.w(WM_ERROR, "Attempted to add input method window with unknown token "
+                    + "%s.  Aborting.", tokenForLog);
+            return false;
+        }
+        if (rootType == TYPE_VOICE_INTERACTION) {
+            ProtoLog.w(WM_ERROR,
+                    "Attempted to add voice interaction window with unknown token "
+                            + "%s.  Aborting.", tokenForLog);
+            return false;
+        }
+        if (rootType == TYPE_WALLPAPER) {
+            ProtoLog.w(WM_ERROR, "Attempted to add wallpaper window with unknown token "
+                    + "%s.  Aborting.", tokenForLog);
+            return false;
+        }
+        if (rootType == TYPE_DREAM) {
+            ProtoLog.w(WM_ERROR, "Attempted to add Dream window with unknown token "
+                    + "%s.  Aborting.", tokenForLog);
+            return false;
+        }
+        if (rootType == TYPE_QS_DIALOG) {
+            ProtoLog.w(WM_ERROR, "Attempted to add QS dialog window with unknown token "
+                    + "%s.  Aborting.", tokenForLog);
+            return false;
+        }
+        if (rootType == TYPE_ACCESSIBILITY_OVERLAY) {
+            ProtoLog.w(WM_ERROR,
+                    "Attempted to add Accessibility overlay window with unknown token "
+                            + "%s.  Aborting.", tokenForLog);
+            return false;
+        }
+        if (type == TYPE_TOAST) {
+            // Apps targeting SDK above N MR1 cannot arbitrary add toast windows.
+            if (doesAddToastWindowRequireToken(packageName, callingUid, parentWindow)) {
+                ProtoLog.w(WM_ERROR, "Attempted to add a toast window with unknown token "
+                        + "%s.  Aborting.", tokenForLog);
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -2501,16 +2510,36 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void addWindowToken(IBinder binder, int type, int displayId) {
-        if (!checkCallingPermission(MANAGE_APP_TOKENS, "addWindowToken()")) {
-            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
+        addWindowContextToken(binder, type, displayId, null);
+    }
+
+    @Override
+    public int addWindowContextToken(IBinder binder, int type, int displayId, String packageName) {
+        final boolean callerCanManageAppTokens =
+                checkCallingPermission(MANAGE_APP_TOKENS, "addWindowToken()");
+        if (!callerCanManageAppTokens) {
+            // TODO(window-context): refactor checkAddPermission to not take attrs.
+            LayoutParams attrs = new LayoutParams(type);
+            attrs.packageName = packageName;
+            final int res = mPolicy.checkAddPermission(attrs, new int[1]);
+            if (res != ADD_OKAY) {
+                return res;
+            }
         }
 
         synchronized (mGlobalLock) {
+            if (!callerCanManageAppTokens) {
+                if (!unprivilegedAppCanCreateTokenWith(null, Binder.getCallingUid(), type, type,
+                        null, packageName) || packageName == null) {
+                    throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
+                }
+            }
+
             final DisplayContent dc = getDisplayContentOrCreate(displayId, null /* token */);
             if (dc == null) {
                 ProtoLog.w(WM_ERROR, "addWindowToken: Attempted to add token: %s"
                         + " for non-exiting displayId=%d", binder, displayId);
-                return;
+                return WindowManagerGlobal.ADD_INVALID_DISPLAY;
             }
 
             WindowToken token = dc.getWindowToken(binder);
@@ -2518,14 +2547,27 @@ public class WindowManagerService extends IWindowManager.Stub
                 ProtoLog.w(WM_ERROR, "addWindowToken: Attempted to add binder token: %s"
                         + " for already created window token: %s"
                         + " displayId=%d", binder, token, displayId);
-                return;
+                return WindowManagerGlobal.ADD_DUPLICATE_ADD;
             }
+            // TODO(window-container): Clean up dead tokens
             if (type == TYPE_WALLPAPER) {
-                new WallpaperWindowToken(this, binder, true, dc,
-                        true /* ownerCanManageAppTokens */);
+                new WallpaperWindowToken(this, binder, true, dc, callerCanManageAppTokens);
             } else {
-                new WindowToken(this, binder, type, true, dc, true /* ownerCanManageAppTokens */);
+                new WindowToken(this, binder, type, true, dc, callerCanManageAppTokens);
             }
+        }
+        return WindowManagerGlobal.ADD_OKAY;
+    }
+
+    @Override
+    public boolean isWindowToken(IBinder binder) {
+        synchronized (mGlobalLock) {
+            final WindowToken windowToken = mRoot.getWindowToken(binder);
+            if (windowToken == null) {
+                return false;
+            }
+            // We don't allow activity tokens in WindowContext. TODO(window-context): rename method
+            return windowToken.asActivityRecord() == null;
         }
     }
 
@@ -7884,5 +7926,34 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         return mDisplayWindowSettings.shouldShowImeLocked(displayContent)
                 || mForceDesktopModeOnExternalDisplays;
+    }
+
+    @Override
+    public void getWindowInsets(WindowManager.LayoutParams attrs,
+            int displayId, Rect outContentInsets, Rect outStableInsets,
+            DisplayCutout.ParcelableWrapper displayCutout) {
+        synchronized (mGlobalLock) {
+            final DisplayContent dc = mRoot.getDisplayContent(displayId);
+            final WindowToken windowToken = dc.getWindowToken(attrs.token);
+            final ActivityRecord activity;
+            if (windowToken != null && windowToken.asActivityRecord() != null) {
+                activity = windowToken.asActivityRecord();
+            } else {
+                activity = null;
+            }
+            final Rect taskBounds = new Rect();
+            final boolean floatingStack;
+            if (activity != null && activity.getTask() != null) {
+                final Task task = activity.getTask();
+                task.getBounds(taskBounds);
+                floatingStack = task.isFloating();
+            } else {
+                floatingStack = false;
+            }
+            final DisplayFrames displayFrames = dc.mDisplayFrames;
+            final DisplayPolicy policy = dc.getDisplayPolicy();
+            policy.getLayoutHintLw(attrs, taskBounds, displayFrames, floatingStack,
+                    new Rect(), outContentInsets, outStableInsets, displayCutout);
+        }
     }
 }

@@ -63,7 +63,6 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
@@ -362,7 +361,6 @@ public class DisplayPolicy {
     private static final Rect sTmpRect = new Rect();
     private static final Rect sTmpNavFrame = new Rect();
     private static final Rect sTmpLastParentFrame = new Rect();
-    private static final int[] sTmpTypesAndSides = new int[2];
 
     private WindowState mTopFullscreenOpaqueWindowState;
     private WindowState mTopFullscreenOpaqueOrDimmingWindowState;
@@ -888,6 +886,21 @@ public class DisplayPolicy {
                 // Toasts can't be clickable
                 attrs.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
                 break;
+
+            case TYPE_BASE_APPLICATION:
+
+                // A non-translucent main app window isn't allowed to fit insets, as it would create
+                // a hole on the display!
+                if (attrs.isFullscreen() && win.mActivityRecord != null
+                        && win.mActivityRecord.fillsParent()
+                        && (win.mAttrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0
+                        && attrs.getFitInsetsTypes() != 0) {
+                    throw new RuntimeException("Illegal attributes: Main activity window that isn't"
+                            + " translucent trying to fit insets: "
+                            + attrs.getFitInsetsTypes()
+                            + " attrs=" + attrs);
+                }
+                break;
         }
     }
 
@@ -1247,7 +1260,7 @@ public class DisplayPolicy {
 
         if (layoutInScreenAndInsetDecor && !screenDecor) {
             if ((sysUiVis & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
-                    || (attrs.getFitWindowInsetsTypes() & Type.navigationBars()) == 0) {
+                    || (attrs.getFitInsetsTypes() & Type.navigationBars()) == 0) {
                 outFrame.set(displayFrames.mUnrestricted);
             } else {
                 outFrame.set(displayFrames.mRestricted);
@@ -1297,21 +1310,6 @@ public class DisplayPolicy {
             outStableInsets.setEmpty();
             outDisplayCutout.set(DisplayCutout.NO_CUTOUT);
             return mForceShowSystemBars;
-        }
-    }
-
-    private static void getImpliedTypesAndSidesToFit(LayoutParams attrs, int[] typesAndSides) {
-        typesAndSides[0] = attrs.getFitWindowInsetsTypes();
-        typesAndSides[1] = attrs.getFitWindowInsetsSides();
-        final boolean forceDrawsBarBackgrounds =
-                (attrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0
-                        && attrs.height == MATCH_PARENT && attrs.width == MATCH_PARENT;
-        if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0 || forceDrawsBarBackgrounds) {
-            if ((attrs.privateFlags & PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND) != 0) {
-                typesAndSides[1] &= ~Side.BOTTOM;
-            } else {
-                typesAndSides[0] &= ~Type.systemBars();
-            }
         }
     }
 
@@ -1878,16 +1876,15 @@ public class DisplayPolicy {
         sf.set(displayFrames.mStable);
 
         if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-            getImpliedTypesAndSidesToFit(attrs, sTmpTypesAndSides);
-            final @InsetsType int typesToFit = sTmpTypesAndSides[0];
-            final @InsetsSide int sidesToFit = sTmpTypesAndSides[1];
+            final @InsetsType int typesToFit = attrs.getFitInsetsTypes();
+            final @InsetsSide int sidesToFit = attrs.getFitInsetsSides();
             final ArraySet<Integer> types = InsetsState.toInternalType(typesToFit);
             final Rect dfu = displayFrames.mUnrestricted;
             Insets insets = Insets.of(0, 0, 0, 0);
             for (int i = types.size() - 1; i >= 0; i--) {
                 insets = Insets.max(insets, mDisplayContent.getInsetsPolicy()
                         .getInsetsForDispatch(win).getSource(types.valueAt(i))
-                        .calculateInsets(dfu, attrs.getFitIgnoreVisibility()));
+                        .calculateInsets(dfu, attrs.isFitInsetsIgnoringVisibility()));
             }
             final int left = (sidesToFit & Side.LEFT) != 0 ? insets.left : 0;
             final int top = (sidesToFit & Side.TOP) != 0 ? insets.top : 0;

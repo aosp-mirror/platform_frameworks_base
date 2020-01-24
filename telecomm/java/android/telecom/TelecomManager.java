@@ -1810,6 +1810,45 @@ public class TelecomManager {
     }
 
     /**
+     * Registers a new incoming conference. A {@link ConnectionService} should invoke this method
+     * when it has an incoming conference. For managed {@link ConnectionService}s, the specified
+     * {@link PhoneAccountHandle} must have been registered with {@link #registerPhoneAccount} and
+     * the user must have enabled the corresponding {@link PhoneAccount}.  This can be checked using
+     * {@link #getPhoneAccount}. Self-managed {@link ConnectionService}s must have
+     * {@link android.Manifest.permission#MANAGE_OWN_CALLS} to add a new incoming call.
+     * <p>
+     * The incoming conference you are adding is assumed to have a video state of
+     * {@link VideoProfile#STATE_AUDIO_ONLY}, unless the extra value
+     * {@link #EXTRA_INCOMING_VIDEO_STATE} is specified.
+     * <p>
+     * Once invoked, this method will cause the system to bind to the {@link ConnectionService}
+     * associated with the {@link PhoneAccountHandle} and request additional information about the
+     * call (See {@link ConnectionService#onCreateIncomingConference}) before starting the incoming
+     * call UI.
+     * <p>
+     * For a managed {@link ConnectionService}, a {@link SecurityException} will be thrown if either
+     * the {@link PhoneAccountHandle} does not correspond to a registered {@link PhoneAccount} or
+     * the associated {@link PhoneAccount} is not currently enabled by the user.
+     *
+     * @param phoneAccount A {@link PhoneAccountHandle} registered with
+     *            {@link #registerPhoneAccount}.
+     * @param extras A bundle that will be passed through to
+     *            {@link ConnectionService#onCreateIncomingConference}.
+     */
+
+    public void addNewIncomingConference(@NonNull PhoneAccountHandle phoneAccount,
+            @NonNull Bundle extras) {
+        try {
+            if (isServiceConnected()) {
+                getTelecomService().addNewIncomingConference(
+                        phoneAccount, extras == null ? new Bundle() : extras);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException adding a new incoming conference: " + phoneAccount, e);
+        }
+    }
+
+    /**
      * Registers a new unknown call with Telecom. This can only be called by the system Telephony
      * service. This is invoked when Telephony detects a new unknown connection that was neither
      * a new incoming call, nor an user-initiated outgoing call.
@@ -2008,6 +2047,42 @@ public class TelecomManager {
             try {
                 service.placeCall(address, extras == null ? new Bundle() : extras,
                         mContext.getOpPackageName(), mContext.getFeatureId());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling ITelecomService#placeCall", e);
+            }
+        }
+    }
+
+
+    /**
+     * Place a new conference call with the provided participants using the system telecom service
+     * This method doesn't support placing of emergency calls.
+     *
+     * An adhoc conference call is established by providing a list of addresses to
+     * {@code TelecomManager#startConference(List<Uri>, int videoState)} where the
+     * {@link ConnectionService} is responsible for connecting all indicated participants
+     * to a conference simultaneously.
+     * This is in contrast to conferences formed by merging calls together (e.g. using
+     * {@link android.telecom.Call#mergeConference()}).
+     *
+     * The following keys are supported in the supplied extras.
+     * <ul>
+     *   <li>{@link #EXTRA_PHONE_ACCOUNT_HANDLE}</li>
+     *   <li>{@link #EXTRA_START_CALL_WITH_SPEAKERPHONE}</li>
+     *   <li>{@link #EXTRA_START_CALL_WITH_VIDEO_STATE}</li>
+     * </ul>
+     *
+     * @param participants List of participants to start conference with
+     * @param extras Bundle of extras to use with the call
+     */
+    @RequiresPermission(android.Manifest.permission.CALL_PHONE)
+    public void startConference(@NonNull List<Uri> participants,
+            @NonNull Bundle extras) {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                service.startConference(participants, extras,
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#placeCall", e);
             }

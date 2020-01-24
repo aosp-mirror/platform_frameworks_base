@@ -66,12 +66,20 @@ public class WifiP2pConfig implements Parcelable {
     /** @hide */
     public String passphrase = "";
 
-    /** Get the required band for the group owner. */
+    /**
+     * Get the required band for the group owner.
+     * The result will be one of the following:
+     * {@link #GROUP_OWNER_BAND_AUTO},
+     * {@link #GROUP_OWNER_BAND_2GHZ},
+     * {@link #GROUP_OWNER_BAND_5GHZ}
+     */
+    @GroupOperatingBandType
     public int getGroupOwnerBand() {
         return groupOwnerBand;
     }
 
     /** @hide */
+    @GroupOperatingBandType
     public int groupOwnerBand = GROUP_OWNER_BAND_AUTO;
 
     /** @hide */

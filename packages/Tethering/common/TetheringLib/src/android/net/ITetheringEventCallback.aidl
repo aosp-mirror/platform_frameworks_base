@@ -18,6 +18,7 @@ package android.net;
 
 import android.net.Network;
 import android.net.TetheringConfigurationParcel;
+import android.net.TetheringCallbackStartedParcel;
 import android.net.TetherStatesParcel;
 
 /**
@@ -26,8 +27,8 @@ import android.net.TetherStatesParcel;
  */
 oneway interface ITetheringEventCallback
 {
-    void onCallbackStarted(in Network network, in TetheringConfigurationParcel config,
-            in TetherStatesParcel states);
+    /** Called immediately after the callbacks are registered */
+    void onCallbackStarted(in TetheringCallbackStartedParcel parcel);
     void onCallbackStopped(int errorCode);
     void onUpstreamChanged(in Network network);
     void onConfigurationChanged(in TetheringConfigurationParcel config);

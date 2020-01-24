@@ -39,7 +39,6 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -337,15 +336,15 @@ public class CarrierTextController {
                 CharSequence text =
                         getContext().getText(com.android.internal.R.string.emergency_calls_only);
                 Intent i = getContext().registerReceiver(null,
-                        new IntentFilter(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION));
+                        new IntentFilter(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED));
                 if (i != null) {
                     String spn = "";
                     String plmn = "";
-                    if (i.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_SPN, false)) {
-                        spn = i.getStringExtra(TelephonyIntents.EXTRA_SPN);
+                    if (i.getBooleanExtra(TelephonyManager.EXTRA_SHOW_SPN, false)) {
+                        spn = i.getStringExtra(TelephonyManager.EXTRA_SPN);
                     }
-                    if (i.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_PLMN, false)) {
-                        plmn = i.getStringExtra(TelephonyIntents.EXTRA_PLMN);
+                    if (i.getBooleanExtra(TelephonyManager.EXTRA_SHOW_PLMN, false)) {
+                        plmn = i.getStringExtra(TelephonyManager.EXTRA_PLMN);
                     }
                     if (DEBUG) Log.d(TAG, "Getting plmn/spn sticky brdcst " + plmn + "/" + spn);
                     if (Objects.equals(plmn, spn)) {

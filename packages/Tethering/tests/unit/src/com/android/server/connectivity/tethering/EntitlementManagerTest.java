@@ -19,7 +19,7 @@ package com.android.server.connectivity.tethering;
 import static android.net.TetheringManager.TETHERING_BLUETOOTH;
 import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
-import static android.net.TetheringManager.TETHER_ERROR_ENTITLEMENT_UNKONWN;
+import static android.net.TetheringManager.TETHER_ERROR_ENTITLEMENT_UNKNOWN;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
 import static android.net.TetheringManager.TETHER_ERROR_PROVISION_FAILED;
 import static android.provider.DeviceConfig.NAMESPACE_CONNECTIVITY;
@@ -110,7 +110,7 @@ public final class EntitlementManagerTest {
     }
 
     public class WrappedEntitlementManager extends EntitlementManager {
-        public int fakeEntitlementResult = TETHER_ERROR_ENTITLEMENT_UNKONWN;
+        public int fakeEntitlementResult = TETHER_ERROR_ENTITLEMENT_UNKNOWN;
         public int uiProvisionCount = 0;
         public int silentProvisionCount = 0;
 
@@ -120,7 +120,7 @@ public final class EntitlementManagerTest {
         }
 
         public void reset() {
-            fakeEntitlementResult = TETHER_ERROR_ENTITLEMENT_UNKONWN;
+            fakeEntitlementResult = TETHER_ERROR_ENTITLEMENT_UNKNOWN;
             uiProvisionCount = 0;
             silentProvisionCount = 0;
         }
@@ -274,7 +274,7 @@ public final class EntitlementManagerTest {
         receiver = new ResultReceiver(null) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
-                assertEquals(TETHER_ERROR_ENTITLEMENT_UNKONWN, resultCode);
+                assertEquals(TETHER_ERROR_ENTITLEMENT_UNKNOWN, resultCode);
                 mCallbacklatch.countDown();
             }
         };
@@ -343,7 +343,7 @@ public final class EntitlementManagerTest {
         receiver = new ResultReceiver(null) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
-                assertEquals(TETHER_ERROR_ENTITLEMENT_UNKONWN, resultCode);
+                assertEquals(TETHER_ERROR_ENTITLEMENT_UNKNOWN, resultCode);
                 mCallbacklatch.countDown();
             }
         };

@@ -89,6 +89,7 @@ import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.input.InputManager;
 import android.hardware.iris.IIrisService;
 import android.hardware.iris.IrisManager;
+import android.hardware.lights.LightsManager;
 import android.hardware.location.ContextHubManager;
 import android.hardware.radio.RadioManager;
 import android.hardware.usb.IUsbManager;
@@ -106,6 +107,7 @@ import android.media.session.MediaSessionManager;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
+import android.net.ConnectivityDiagnosticsManager;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityThread;
 import android.net.EthernetManager;
@@ -374,6 +376,18 @@ public final class SystemServiceRegistry {
                 IBinder b = ServiceManager.getService(Context.IPSEC_SERVICE);
                 IIpSecService service = IIpSecService.Stub.asInterface(b);
                 return new IpSecManager(ctx, service);
+            }});
+
+        registerService(Context.CONNECTIVITY_DIAGNOSTICS_SERVICE,
+                ConnectivityDiagnosticsManager.class,
+                new CachedServiceFetcher<ConnectivityDiagnosticsManager>() {
+            @Override
+            public ConnectivityDiagnosticsManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                // ConnectivityDiagnosticsManager is backed by ConnectivityService
+                IBinder b = ServiceManager.getServiceOrThrow(Context.CONNECTIVITY_SERVICE);
+                IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
+                return new ConnectivityDiagnosticsManager(ctx, service);
             }});
 
         registerService(
@@ -1262,6 +1276,13 @@ public final class SystemServiceRegistry {
                                 Context.DATA_LOADER_MANAGER_SERVICE);
                         return new DataLoaderManager(IDataLoaderManager.Stub.asInterface(b));
                     }});
+        registerService(Context.LIGHTS_SERVICE, LightsManager.class,
+            new CachedServiceFetcher<LightsManager>() {
+                @Override
+                public LightsManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                    return new LightsManager(ctx);
+                }});
         //TODO(b/136132412): refactor this: 1) merge IIncrementalManager.aidl and
         //IIncrementalManagerNative.aidl, 2) implement the binder interface in
         //IncrementalManagerService.java, 3) use JNI to call native functions

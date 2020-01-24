@@ -20,6 +20,7 @@ import static android.content.DialogInterface.BUTTON_NEGATIVE;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.os.UserManager.DISALLOW_ADD_USER;
 import static android.os.UserManager.SWITCHABILITY_STATUS_OK;
+import static android.view.WindowInsets.Type.statusBars;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
@@ -367,8 +368,8 @@ public class UserGridRecyclerView extends RecyclerView {
             window.setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
             window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
-            window.setFitWindowInsetsTypes(
-                    window.getFitWindowInsetsTypes() & ~WindowInsets.Type.statusBars());
+            window.getAttributes().setFitInsetsTypes(
+                    window.getAttributes().getFitInsetsTypes() & ~statusBars());
         }
 
         private void notifyUserSelected(UserRecord userRecord) {

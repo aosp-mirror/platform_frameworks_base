@@ -425,6 +425,12 @@
     <!-- A toast message displayed when printing is attempted but disabled by policy. -->
     <string name="printing_disabled_by">Printing disabled by <xliff:g id="owner_app">%s</xliff:g>.</string>
 
+    <!-- Content title for a notification that personal apps are suspended [CHAR LIMIT=NONE] -->
+    <string name="personal_apps_suspended_notification_title">Personal apps have been suspended by an admin</string>
+
+    <!-- Message for a notification about personal apps suspension when work profile is off. [CHAR LIMIT=NONE] -->
+    <string name="personal_apps_suspended_notification_text">Tap here to check policy compliance.</string>
+
     <!-- Display name for any time a piece of data refers to the owner of the phone. For example, this could be used in place of the phone's phone number. -->
     <string name="me">Me</string>
 
@@ -5319,4 +5325,8 @@
     <!-- Text to tell the user that a package has been forced by themselves in the RESTRICTED bucket. [CHAR LIMIT=NONE] -->
     <string name="as_app_forced_to_restricted_bucket">
         <xliff:g id="package_name" example="com.android.example">%1$s</xliff:g> has been put into the RESTRICTED bucket</string>
+
+    <!-- ResolverActivity - profile tabs -->
+    <string name="resolver_personal_tab">Personal</string>
+    <string name="resolver_work_tab">Work</string>
 </resources>

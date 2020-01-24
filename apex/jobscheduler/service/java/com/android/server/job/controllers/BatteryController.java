@@ -43,7 +43,7 @@ import java.util.function.Predicate;
  * be charging when it's been plugged in for more than two minutes, and the system has broadcast
  * ACTION_BATTERY_OK.
  */
-public final class BatteryController extends StateController {
+public final class BatteryController extends RestrictingController {
     private static final String TAG = "JobScheduler.Battery";
     private static final boolean DEBUG = JobSchedulerService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
@@ -73,9 +73,21 @@ public final class BatteryController extends StateController {
     }
 
     @Override
+    public void startTrackingRestrictedJobLocked(JobStatus jobStatus) {
+        maybeStartTrackingJobLocked(jobStatus, null);
+    }
+
+    @Override
     public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob, boolean forUpdate) {
         if (taskStatus.clearTrackingController(JobStatus.TRACKING_BATTERY)) {
             mTrackedTasks.remove(taskStatus);
+        }
+    }
+
+    @Override
+    public void stopTrackingRestrictedJobLocked(JobStatus jobStatus) {
+        if (!jobStatus.hasPowerConstraint()) {
+            maybeStopTrackingJobLocked(jobStatus, null, false);
         }
     }
 

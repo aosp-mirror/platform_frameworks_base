@@ -323,6 +323,28 @@ public class BlobStoreManager {
         }
 
         /**
+         * Opens a file descriptor to read the blob content already written into this session.
+         *
+         * @return a {@link ParcelFileDescriptor} for reading from the blob file.
+         *
+         * @throws IOException when there is an I/O error while opening the file to read.
+         * @throws SecurityException when the caller is not the owner of the session.
+         * @throws IllegalStateException when the caller tries to read the file after it is
+         *                               abandoned (using {@link #abandon()})
+         *                               or closed (using {@link #close()}).
+         */
+        public @NonNull ParcelFileDescriptor openRead() throws IOException {
+            try {
+                return mSession.openRead();
+            } catch (ParcelableException e) {
+                e.maybeRethrow(IOException.class);
+                throw new RuntimeException(e);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Gets the size of the blob file that was written to the session so far.
          *
          * @return the size of the blob file so far.

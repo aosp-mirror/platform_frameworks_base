@@ -16,6 +16,7 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.media.tv.tuner.TunerUtils;
 
@@ -25,9 +26,81 @@ import android.media.tv.tuner.TunerUtils;
  * @hide
  */
 @SystemApi
-public class SectionSettings extends Settings {
+public abstract class SectionSettings extends Settings {
+    final boolean mCrcEnabled;
+    final boolean mIsRepeat;
+    final boolean mIsRaw;
 
-    SectionSettings(int mainType) {
+    SectionSettings(int mainType, boolean crcEnabled, boolean isRepeat, boolean isRaw) {
         super(TunerUtils.getFilterSubtype(mainType, Filter.SUBTYPE_SECTION));
+        mCrcEnabled = crcEnabled;
+        mIsRepeat = isRepeat;
+        mIsRaw = isRaw;
+    }
+
+    /**
+     * Returns whether the filter enables CRC (Cyclic redundancy check) and discards data which
+     * doesn't pass the check.
+     */
+    public boolean isCrcEnabled() {
+        return mCrcEnabled;
+    }
+    /**
+     * Returns whether the filter repeats the data with the same version.
+     */
+    public boolean isRepeat() {
+        return mIsRepeat;
+    }
+    /**
+     * Returns whether the filter sends {@link FilterCallback#onFilterStatusChanged} instead of
+     * {@link FilterCallback#onFilterEvent}.
+     */
+    public boolean isRaw() {
+        return mIsRaw;
+    }
+
+    /**
+     * Builder for {@link SectionSettings}.
+     *
+     * @param <T> The subclass to be built.
+     */
+    public abstract static class Builder<T extends Builder<T>>
+            extends Settings.Builder<Builder<T>> {
+        boolean mCrcEnabled;
+        boolean mIsRepeat;
+        boolean mIsRaw;
+
+        Builder(int mainType) {
+            super(mainType);
+        }
+
+        /**
+         * Sets whether the filter enables CRC (Cyclic redundancy check) and discards data which
+         * doesn't pass the check.
+         */
+        @NonNull
+        public T setCrcEnabled(boolean crcEnabled) {
+            mCrcEnabled = crcEnabled;
+            return self();
+        }
+        /**
+         * Sets whether the filter repeats the data with the same version.
+         */
+        @NonNull
+        public T setRepeat(boolean isRepeat) {
+            mIsRepeat = isRepeat;
+            return self();
+        }
+        /**
+         * Sets whether the filter send onFilterStatus instead of
+         * {@link FilterCallback#onFilterEvent}.
+         */
+        @NonNull
+        public T setRaw(boolean isRaw) {
+            mIsRaw = isRaw;
+            return self();
+        }
+
+        /* package */ abstract T self();
     }
 }

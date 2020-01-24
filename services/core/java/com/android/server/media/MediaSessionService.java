@@ -103,6 +103,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private static final int WAKELOCK_TIMEOUT = 5000;
     private static final int MEDIA_KEY_LISTENER_TIMEOUT = 1000;
+    private static final int SESSION_CREATION_LIMIT_PER_UID = 100;
 
     private final Context mContext;
     private final SessionManagerImpl mSessionManagerImpl;
@@ -428,6 +429,18 @@ public class MediaSessionService extends SystemService implements Monitor {
             Log.d(TAG, "Destroying " + session);
         }
         FullUserRecord user = getFullUserRecordLocked(session.getUserId());
+
+        if (user != null) {
+            final int uid = session.getUid();
+            final int sessionCount = user.mUidToSessionCount.get(uid, 0);
+            if (sessionCount <= 0) {
+                Log.w(TAG, "destroySessionLocked: sessionCount should be positive. "
+                        + "sessionCount=" + sessionCount);
+            } else {
+                user.mUidToSessionCount.put(uid, sessionCount - 1);
+            }
+        }
+
         if (mGlobalPrioritySession == session) {
             mGlobalPrioritySession = null;
             if (session.isActive() && user != null) {
@@ -490,6 +503,20 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
+    private boolean hasMediaControlPermission(int pid, int uid) {
+        // Check if it's system server or has MEDIA_CONTENT_CONTROL.
+        // Note that system server doesn't have MEDIA_CONTENT_CONTROL, so we need extra
+        // check here.
+        if (uid == Process.SYSTEM_UID || mContext.checkPermission(
+                android.Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else if (DEBUG) {
+            Log.d(TAG, "uid(" + uid + ") hasn't granted MEDIA_CONTENT_CONTROL");
+        }
+        return false;
+    }
+
     /**
      * This checks if the component is an enabled notification listener for the
      * specified user. Enabled components may only operate on behalf of the user
@@ -543,6 +570,14 @@ public class MediaSessionService extends SystemService implements Monitor {
             } catch (RemoteException e) {
                 throw new RuntimeException("Media Session owner died prematurely.", e);
             }
+
+            final int sessionCount = user.mUidToSessionCount.get(callerUid, 0);
+            if (sessionCount >= SESSION_CREATION_LIMIT_PER_UID
+                    && !hasMediaControlPermission(callerPid, callerUid)) {
+                throw new RuntimeException("Created too many sessions. count="
+                        + sessionCount + ")");
+            }
+            user.mUidToSessionCount.put(callerUid, sessionCount + 1);
 
             user.mPriorityStack.addSession(session);
             mHandler.postSessionsChanged(session);
@@ -723,6 +758,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 mOnMediaKeyEventDispatchedListeners = new HashMap<>();
         private final HashMap<IBinder, OnMediaKeyEventSessionChangedListenerRecord>
                 mOnMediaKeyEventSessionChangedListeners = new HashMap<>();
+        private final SparseIntArray mUidToSessionCount = new SparseIntArray();
 
         private PendingIntent mLastMediaButtonReceiver;
         private ComponentName mRestoredMediaButtonReceiver;
@@ -1952,20 +1988,6 @@ public class MediaSessionService extends SystemService implements Monitor {
             // enabled for the user they're calling from.
             enforceMediaPermissions(componentName, pid, uid, resolvedUserId);
             return resolvedUserId;
-        }
-
-        private boolean hasMediaControlPermission(int pid, int uid) {
-            // Check if it's system server or has MEDIA_CONTENT_CONTROL.
-            // Note that system server doesn't have MEDIA_CONTENT_CONTROL, so we need extra
-            // check here.
-            if (uid == Process.SYSTEM_UID || mContext.checkPermission(
-                    android.Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid)
-                    == PackageManager.PERMISSION_GRANTED) {
-                return true;
-            } else if (DEBUG) {
-                Log.d(TAG, "uid(" + uid + ") hasn't granted MEDIA_CONTENT_CONTROL");
-            }
-            return false;
         }
 
         private boolean hasEnabledNotificationListener(int resolvedUserId, String packageName)

@@ -2260,6 +2260,55 @@
         <attr name="name" />
     </declare-styleable>
 
+    <!-- The <code>processes</code> tag specifies the processes the application will run code in
+         and optionally characteristics of those processes.  This tag is optional; if not
+         specified, components will simply run in the processes they specify.  If supplied,
+         they can only specify processes that are enumerated here, and if they don't this
+         will be treated as a corrupt apk and result in an install failure.
+
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestApplication application} tag. -->
+    <declare-styleable name="AndroidManifestProcesses" parent="AndroidManifestApplication">
+    </declare-styleable>
+
+    <!-- The <code>process</code> tag enumerates one of the available processes under its
+         containing <code>processes</code> tag.
+
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestProcesses processes} tag. -->
+    <declare-styleable name="AndroidManifestProcess" parent="AndroidManifestProcesses">
+        <!-- Required name of the process that is allowed -->
+        <attr name="process" />
+    </declare-styleable>
+
+    <!-- The <code>deny-permission</code> tag specifies that a permission is to be denied
+         for a particular process (if specified under the
+         {@link #AndroidManifestProcess process} tag) or by default for all
+         processes {if specified under the
+         @link #AndroidManifestProcesses processes} tag).
+
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestProcesses processes} and
+         {@link #AndroidManifestProcess process} tags. -->
+    <declare-styleable name="AndroidManifestDenyPermission"
+            parent="AndroidManifestProcesses">
+        <!-- Required name of the permission that is to be denied -->
+        <attr name="name" />
+    </declare-styleable>
+
+    <!-- The <code>allow-permission</code> tag specifies that a permission is to be allowed
+         for a particular process, when it was previously denied for all processes through
+         {@link #AndroidManifestDenyPermission deny-permission}
+
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestProcesses processes} and
+         {@link #AndroidManifestProcess process} tags. -->
+    <declare-styleable name="AndroidManifestAllowPermission"
+            parent="AndroidManifestProcesses">
+        <!-- Required name of the permission that is to be allowed. -->
+        <attr name="name" />
+    </declare-styleable>
+
     <!-- The <code>provider</code> tag declares a
          {@link android.content.ContentProvider} class that is available
          as part of the package's application components, supplying structured

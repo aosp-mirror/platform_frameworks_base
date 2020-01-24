@@ -106,7 +106,7 @@ public class TlvFilterConfiguration extends FilterConfiguration {
          * Sets whether the data is compressed IP packet.
          */
         @NonNull
-        public Builder setIsCompressedIpPacket(boolean isCompressedIpPacket) {
+        public Builder setCompressedIpPacket(boolean isCompressedIpPacket) {
             mIsCompressedIpPacket = isCompressedIpPacket;
             return this;
         }

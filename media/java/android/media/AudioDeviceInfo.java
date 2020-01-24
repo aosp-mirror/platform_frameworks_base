@@ -422,6 +422,40 @@ public final class AudioDeviceInfo {
         return AudioFormat.filterPublicFormats(mPort.formats());
     }
 
+    /**
+     * Returns an array of supported encapsulation modes for the device.
+     *
+     * The array can include any of
+     * {@link AudioTrack#ENCAPSULATION_MODE_ELEMENTARY_STREAM},
+     * {@link AudioTrack#ENCAPSULATION_MODE_HANDLE}.
+     *
+     * @return An array of supported encapsulation modes for the device.  This
+     *     may be an empty array if no encapsulation modes are supported.
+     */
+    public @NonNull int[] getEncapsulationModes() {
+        // Implement a getter in r-dev or r-tv-dev as needed.
+        return new int[0];  // be careful of returning a copy of any internal data.
+    }
+
+    /**
+     * Returns an array of supported encapsulation metadata types for the device.
+     *
+     * The metadata type returned should be allowed for all encapsulation modes supported
+     * by the device.  Some metadata types may apply only to certain
+     * compressed stream formats, the returned list is the union of subsets.
+     *
+     * The array can include any of
+     * {@link AudioTrack#ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER},
+     * {@link AudioTrack#ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR}.
+     *
+     * @return An array of supported encapsulation metadata types for the device.  This
+     *     may be an empty array if no metadata types are supported.
+     */
+    public @NonNull int[] getEncapsulationMetadataTypes() {
+        // Implement a getter in r-dev or r-tv-dev as needed.
+        return new int[0];  // be careful of returning a copy of any internal data.
+    }
+
    /**
      * @return The device type identifier of the audio device (i.e. TYPE_BUILTIN_SPEAKER).
      */

@@ -119,14 +119,6 @@ public class TelephonyServiceManager {
     }
 
     /**
-     * Returns {@link ServiceRegisterer} for the telephony registry service.
-     */
-    @NonNull
-    public ServiceRegisterer getTelephonyRegistryServiceRegisterer() {
-        return new ServiceRegisterer("telephony.registry");
-    }
-
-    /**
      * Returns {@link ServiceRegisterer} for the telephony IMS service.
      */
     @NonNull
@@ -148,14 +140,6 @@ public class TelephonyServiceManager {
     @NonNull
     public ServiceRegisterer getSubscriptionServiceRegisterer() {
         return new ServiceRegisterer("isub");
-    }
-
-    /**
-     * Returns {@link ServiceRegisterer} for the network policy service.
-     */
-    @NonNull
-    public ServiceRegisterer getNetworkPolicyServiceRegisterer() {
-        return new ServiceRegisterer(Context.NETWORK_POLICY_SERVICE);
     }
 
     /**
@@ -198,6 +182,9 @@ public class TelephonyServiceManager {
         return new ServiceRegisterer("econtroller");
     }
 
+    /**
+     * Returns {@link ServiceRegisterer} for the eUICC card controller service.
+     */
     @NonNull
     public ServiceRegisterer getEuiccCardControllerServiceRegisterer() {
         return new ServiceRegisterer("euicc_card_controller");
@@ -209,14 +196,6 @@ public class TelephonyServiceManager {
     @NonNull
     public ServiceRegisterer getPackageManagerServiceRegisterer() {
         return new ServiceRegisterer("package");
-    }
-
-    /**
-     * Returns {@link ServiceRegisterer} for the permission manager service.
-     */
-    @NonNull
-    public ServiceRegisterer getPermissionManagerServiceRegisterer() {
-        return new ServiceRegisterer("permissionmgr");
     }
 
     /**

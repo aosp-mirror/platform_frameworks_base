@@ -43,6 +43,7 @@ import android.hardware.location.NanoAppState;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.DumpUtils;
 
@@ -782,6 +783,13 @@ public class ContextHubService extends IContextHubService.Stub {
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
+        for (String arg : args) {
+            if ("--proto".equals(arg)) {
+                dump(new ProtoOutputStream(fd));
+                return;
+            }
+        }
+
         pw.println("Dumping ContextHub Service");
 
         pw.println("");
@@ -800,6 +808,20 @@ public class ContextHubService extends IContextHubService.Stub {
         pw.println(mClientManager);
 
         // dump eventLog
+    }
+
+    private void dump(ProtoOutputStream proto) {
+        mContextHubIdToInfoMap.values().forEach(hubInfo -> {
+            long token = proto.start(ContextHubServiceProto.CONTEXT_HUB_INFO);
+            hubInfo.dump(proto);
+            proto.end(token);
+        });
+
+        long token = proto.start(ContextHubServiceProto.CLIENT_MANAGER);
+        mClientManager.dump(proto);
+        proto.end(token);
+
+        proto.flush();
     }
 
     private void checkPermissions() {

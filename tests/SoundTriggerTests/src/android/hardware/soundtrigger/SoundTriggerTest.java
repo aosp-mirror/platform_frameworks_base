@@ -30,6 +30,7 @@ import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Random;
 import java.util.UUID;
 
@@ -38,7 +39,8 @@ public class SoundTriggerTest extends InstrumentationTestCase {
 
     @SmallTest
     public void testKeyphraseParcelUnparcel_noUsers() throws Exception {
-        Keyphrase keyphrase = new Keyphrase(1, 0, "en-US", "hello", null);
+        Keyphrase keyphrase = new Keyphrase(1, 0,
+                Locale.forLanguageTag("en-US"), "hello", null);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -57,7 +59,8 @@ public class SoundTriggerTest extends InstrumentationTestCase {
 
     @SmallTest
     public void testKeyphraseParcelUnparcel_zeroUsers() throws Exception {
-        Keyphrase keyphrase = new Keyphrase(1, 0, "en-US", "hello", new int[0]);
+        Keyphrase keyphrase = new Keyphrase(1, 0,
+                Locale.forLanguageTag("en-US"), "hello", new int[0]);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -76,7 +79,8 @@ public class SoundTriggerTest extends InstrumentationTestCase {
 
     @SmallTest
     public void testKeyphraseParcelUnparcel_pos() throws Exception {
-        Keyphrase keyphrase = new Keyphrase(1, 0, "en-US", "hello", new int[] {1, 2, 3, 4, 5});
+        Keyphrase keyphrase = new Keyphrase(1, 0,
+                Locale.forLanguageTag("en-US"), "hello", new int[] {1, 2, 3, 4, 5});
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -96,8 +100,10 @@ public class SoundTriggerTest extends InstrumentationTestCase {
     @SmallTest
     public void testKeyphraseSoundModelParcelUnparcel_noData() throws Exception {
         Keyphrase[] keyphrases = new Keyphrase[2];
-        keyphrases[0] = new Keyphrase(1, 0, "en-US", "hello", new int[] {0});
-        keyphrases[1] = new Keyphrase(2, 0, "fr-FR", "there", new int[] {1, 2});
+        keyphrases[0] = new Keyphrase(1, 0, Locale.forLanguageTag("en-US"),
+                "hello", new int[] {0});
+        keyphrases[1] = new Keyphrase(2, 0, Locale.forLanguageTag("fr-FR"),
+                "there", new int[] {1, 2});
         KeyphraseSoundModel ksm = new KeyphraseSoundModel(UUID.randomUUID(), UUID.randomUUID(),
                 null, keyphrases);
 
@@ -119,8 +125,10 @@ public class SoundTriggerTest extends InstrumentationTestCase {
     @SmallTest
     public void testKeyphraseSoundModelParcelUnparcel_zeroData() throws Exception {
         Keyphrase[] keyphrases = new Keyphrase[2];
-        keyphrases[0] = new Keyphrase(1, 0, "en-US", "hello", new int[] {0});
-        keyphrases[1] = new Keyphrase(2, 0, "fr-FR", "there", new int[] {1, 2});
+        keyphrases[0] = new Keyphrase(1, 0, Locale.forLanguageTag("en-US"),
+                "hello", new int[] {0});
+        keyphrases[1] = new Keyphrase(2, 0, Locale.forLanguageTag("fr-FR"),
+                "there", new int[] {1, 2});
         KeyphraseSoundModel ksm = new KeyphraseSoundModel(UUID.randomUUID(), UUID.randomUUID(),
                 new byte[0], keyphrases);
 
@@ -186,8 +194,10 @@ public class SoundTriggerTest extends InstrumentationTestCase {
     @LargeTest
     public void testKeyphraseSoundModelParcelUnparcel_largeData() throws Exception {
         Keyphrase[] keyphrases = new Keyphrase[2];
-        keyphrases[0] = new Keyphrase(1, 0, "en-US", "hello", new int[] {0});
-        keyphrases[1] = new Keyphrase(2, 0, "fr-FR", "there", new int[] {1, 2});
+        keyphrases[0] = new Keyphrase(1, 0, Locale.forLanguageTag("en-US"),
+                "hello", new int[] {0});
+        keyphrases[1] = new Keyphrase(2, 0, Locale.forLanguageTag("fr-FR"),
+                "there", new int[] {1, 2});
         byte[] data = new byte[200 * 1024];
         mRandom.nextBytes(data);
         KeyphraseSoundModel ksm = new KeyphraseSoundModel(UUID.randomUUID(), UUID.randomUUID(),

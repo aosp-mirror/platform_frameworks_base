@@ -193,7 +193,8 @@ public class ResolverListAdapter extends BaseAdapter {
                     mBaseResolveList);
         } else {
             currentResolveList = mUnfilteredResolveList =
-                    mResolverListController.getResolversForIntent(shouldGetResolvedFilter(),
+                    mResolverListController.getResolversForIntent(
+                            /* shouldGetResolvedFilter= */ true,
                             mResolverListCommunicator.shouldGetActivityMetadata(),
                             mIntents);
             if (currentResolveList == null) {
@@ -361,10 +362,6 @@ public class ResolverListAdapter extends BaseAdapter {
             };
             mContext.getMainThreadHandler().post(mPostListReadyRunnable);
         }
-    }
-
-    public boolean shouldGetResolvedFilter() {
-        return mFilterLastUsed;
     }
 
     private void addResolveInfoWithAlternates(ResolvedComponentInfo rci) {

@@ -856,11 +856,11 @@ public class WifiEnterpriseConfig implements Parcelable {
      * like /etc/ssl/certs. If configured, these certificates are added to the
      * list of trusted CAs. ca_cert may also be included in that case, but it is
      * not required.
-     * @param path The path for CA certificate files, or null/empty string to clear.
+     * @param path The path for CA certificate files, or empty string to clear.
      * @hide
      */
     @SystemApi
-    public void setCaPath(@Nullable String path) {
+    public void setCaPath(@NonNull String path) {
         setFieldValue(CA_PATH_KEY, path);
     }
 
@@ -881,11 +881,11 @@ public class WifiEnterpriseConfig implements Parcelable {
      * <p> See the {@link android.security.KeyChain} for details on installing or choosing
      * a certificate
      * </p>
-     * @param alias identifies the certificate, or null/empty string to clear.
+     * @param alias identifies the certificate, or empty string to clear.
      * @hide
      */
     @SystemApi
-    public void setClientCertificateAlias(@Nullable String alias) {
+    public void setClientCertificateAlias(@NonNull String alias) {
         setFieldValue(CLIENT_CERT_KEY, alias, CLIENT_CERT_PREFIX);
         setFieldValue(PRIVATE_KEY_ID_KEY, alias, USER_PRIVATE_KEY);
         // Also, set engine parameters
@@ -1360,11 +1360,11 @@ public class WifiEnterpriseConfig implements Parcelable {
      * If this field is not specified, WAPI-CERT uses ASU ID from WAI packet
      * as the certificate suite name automatically.
      *
-     * @param wapiCertSuite The name for WAPI certificate suite, or null/empty string to clear.
+     * @param wapiCertSuite The name for WAPI certificate suite, or empty string to clear.
      * @hide
      */
     @SystemApi
-    public void setWapiCertSuite(@Nullable String wapiCertSuite) {
+    public void setWapiCertSuite(@NonNull String wapiCertSuite) {
         setFieldValue(WAPI_CERT_SUITE_KEY, wapiCertSuite);
     }
 
@@ -1373,7 +1373,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return the certificate suite name
      * @hide
      */
-    @Nullable
+    @NonNull
     @SystemApi
     public String getWapiCertSuite() {
         return getFieldValue(WAPI_CERT_SUITE_KEY);

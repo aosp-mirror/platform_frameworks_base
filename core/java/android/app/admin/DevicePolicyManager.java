@@ -2391,6 +2391,28 @@ public class DevicePolicyManager {
             "android.app.action.BIND_SECONDARY_LOCKSCREEN_SERVICE";
 
     /**
+     * Return value for {@link #getPersonalAppsSuspendedReasons} when personal apps are not
+     * suspended.
+     */
+    public static final int PERSONAL_APPS_NOT_SUSPENDED = 0;
+
+    /**
+     * Flag for {@link #getPersonalAppsSuspendedReasons} return value. Set when personal
+     * apps are suspended by an admin explicitly via {@link #setPersonalAppsSuspended}.
+     */
+    public static final int PERSONAL_APPS_SUSPENDED_EXPLICITLY = 1 << 0;
+
+    /**
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "PERSONAL_APPS_" }, value = {
+            PERSONAL_APPS_NOT_SUSPENDED,
+            PERSONAL_APPS_SUSPENDED_EXPLICITLY
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PersonalAppSuspensionReason {}
+
+    /**
      * Return true if the given administrator component is currently active (enabled) in the system.
      *
      * @param admin The administrator component to check for.
@@ -4575,6 +4597,18 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_START_ENCRYPTION
             = "android.app.action.START_ENCRYPTION";
+
+    /**
+     * Activity action: launch the DPC to check policy compliance. This intent is launched when
+     * the user taps on the notification about personal apps suspension. When handling this intent
+     * the DPC must check if personal apps should still be suspended and either unsuspend them or
+     * instruct the user on how to resolve the noncompliance causing the suspension.
+     *
+     * @see #setPersonalAppsSuspended
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CHECK_POLICY_COMPLIANCE =
+            "android.app.action.CHECK_POLICY_COMPLIANCE";
 
     /**
      * Broadcast action: notify managed provisioning that new managed user is created.
@@ -8226,6 +8260,11 @@ public class DevicePolicyManager {
      * actual package file remain. This function can be called by a device owner, profile owner, or
      * by a delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
      * {@link #setDelegatedScopes}.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance, returned by
+     * {@link #getParentProfileInstance(ComponentName)}, where the caller must be the profile owner
+     * of an organization-owned managed profile and the package must be a system package. If called
+     * on the parent instance, then the package is hidden or unhidden in the personal profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if the caller is a package access delegate.
@@ -8233,17 +8272,20 @@ public class DevicePolicyManager {
      * @param hidden {@code true} if the package should be hidden, {@code false} if it should be
      *            unhidden.
      * @return boolean Whether the hidden setting of the package was successfully updated.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or if called on
+     *            the parent profile and the {@code admin} is not a profile owner of an
+     *            organization-owned managed profile.
+     * @throws IllegalArgumentException if called on the parent profile and the package provided
+     *            is not a system package.
      * @see #setDelegatedScopes
      * @see #DELEGATION_PACKAGE_ACCESS
      */
     public boolean setApplicationHidden(@NonNull ComponentName admin, String packageName,
             boolean hidden) {
-        throwIfParentInstance("setApplicationHidden");
         if (mService != null) {
             try {
                 return mService.setApplicationHidden(admin, mContext.getPackageName(), packageName,
-                        hidden);
+                        hidden, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8255,20 +8297,30 @@ public class DevicePolicyManager {
      * Determine if a package is hidden. This function can be called by a device owner, profile
      * owner, or by a delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
      * {@link #setDelegatedScopes}.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance, returned by
+     * {@link #getParentProfileInstance(ComponentName)}, where the caller must be the profile owner
+     * of an organization-owned managed profile and the package must be a system package. If called
+     * on the parent instance, this will determine whether the package is hidden or unhidden in the
+     * personal profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if the caller is a package access delegate.
      * @param packageName The name of the package to retrieve the hidden status of.
      * @return boolean {@code true} if the package is hidden, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or if called on
+     *            the parent profile and the {@code admin} is not a profile owner of an
+     *            organization-owned managed profile.
+     * @throws IllegalArgumentException if called on the parent profile and the package provided
+     *            is not a system package.
      * @see #setDelegatedScopes
      * @see #DELEGATION_PACKAGE_ACCESS
      */
     public boolean isApplicationHidden(@NonNull ComponentName admin, String packageName) {
-        throwIfParentInstance("isApplicationHidden");
         if (mService != null) {
             try {
-                return mService.isApplicationHidden(admin, mContext.getPackageName(), packageName);
+                return mService.isApplicationHidden(admin, mContext.getPackageName(), packageName,
+                        mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -9057,7 +9109,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owners to set a local system update policy. When a new policy is set,
+     * Called by device owners or profile owners of an organization-owned managed profile to to set
+     * a local system update policy. When a new policy is set,
      * {@link #ACTION_SYSTEM_UPDATE_POLICY_CHANGED} is broadcasted.
      * <p>
      * If the supplied system update policy has freeze periods set but the freeze periods do not
@@ -9075,7 +9128,8 @@ public class DevicePolicyManager {
      *            components in the device owner package can set system update policies and the most
      *            recent policy takes effect.
      * @param policy the new policy, or {@code null} to clear the current policy.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not a device owner or a profile owner of an
+     *      organization-owned managed profile.
      * @throws IllegalArgumentException if the policy type or maintenance window is not valid.
      * @throws SystemUpdatePolicy.ValidationFailedException if the policy's freeze period does not
      *             meet the requirement.
@@ -9333,6 +9387,16 @@ public class DevicePolicyManager {
      * application built with a {@code targetSdkVersion} &lt;
      * {@link android.os.Build.VERSION_CODES#M} the app-op matching the permission is set to
      * {@link android.app.AppOpsManager#MODE_IGNORED}, but the permission stays granted.
+     *
+     * NOTE: Starting from Android R, location-related permissions cannot be granted by the
+     * admin: Calling this method with {@link #PERMISSION_GRANT_STATE_GRANTED} for any of the
+     * following permissions will return false:
+     *
+     * <ul>
+     * <li>{@code ACCESS_FINE_LOCATION}</li>
+     * <li>{@code ACCESS_BACKGROUND_LOCATION}</li>
+     * <li>{@code ACCESS_COARSE_LOCATION}</li>
+     * </ul>
      *
      * @param admin Which profile or device owner this request is associated with.
      * @param packageName The application to grant or revoke a permission to.
@@ -11150,7 +11214,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to install a system update from the given file. The device will be
+     * Called by device owner or profile owner of an organization-owned managed profile to install
+     * a system update from the given file. The device will be
      * rebooted in order to finish installing the update. Note that if the device is rebooted, this
      * doesn't necessarily mean that the update has been applied successfully. The caller should
      * additionally check the system version with {@link android.os.Build#FINGERPRINT} or {@link
@@ -11664,5 +11729,49 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Called by profile owner of an organization-owned managed profile to check whether
+     * personal apps are suspended.
+     *
+     * @return a bitmask of reasons for personal apps suspension or
+     *     {@link #PERSONAL_APPS_NOT_SUSPENDED} if apps are not suspended.
+     * @see #setPersonalAppsSuspended
+     */
+    public @PersonalAppSuspensionReason int getPersonalAppsSuspendedReasons(
+            @NonNull ComponentName admin) {
+        throwIfParentInstance("getPersonalAppsSuspendedReasons");
+        if (mService != null) {
+            try {
+                return mService.getPersonalAppsSuspendedReasons(admin);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Called by a profile owner of an organization-owned managed profile to suspend personal
+     * apps on the device. When personal apps are suspended the device can only be used for calls.
+     *
+     * <p>When personal apps are suspended, an ongoing notification about that is shown to the user.
+     * When the user taps the notification, system invokes {@link #ACTION_CHECK_POLICY_COMPLIANCE}
+     * in the profile owner package. Profile owner implementation that uses personal apps suspension
+     * must handle this intent.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with
+     * @param suspended Whether personal apps should be suspended.
+     */
+    public void setPersonalAppsSuspended(@NonNull ComponentName admin, boolean suspended) {
+        throwIfParentInstance("setPersonalAppsSuspended");
+        if (mService != null) {
+            try {
+                mService.setPersonalAppsSuspended(admin, suspended);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
     }
 }

@@ -215,6 +215,9 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     @Nullable
     private ArrayList<String> queriesPackages;
 
+    @Nullable
+    private ArrayMap<String, ComponentParseUtils.ParsedProcess> processes;
+
     private String[] splitClassLoaderNames;
     private String[] splitCodePaths;
     private SparseArray<int[]> splitDependencies;
@@ -525,6 +528,12 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     @Override
     public List<String> getUsesStaticLibraries() {
         return usesStaticLibraries;
+    }
+
+    @Nullable
+    @Override
+    public ArrayMap<String, ComponentParseUtils.ParsedProcess> getProcesses() {
+        return processes;
     }
 
     @Override
@@ -944,6 +953,12 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     public PackageImpl addQueriesPackage(String packageName) {
         this.queriesPackages = ArrayUtils.add(this.queriesPackages,
                 TextUtils.safeIntern(packageName));
+        return this;
+    }
+
+    @Override
+    public PackageImpl setProcesses(ArrayMap<String, ComponentParseUtils.ParsedProcess> processes) {
+        this.processes = processes;
         return this;
     }
 
@@ -3010,6 +3025,11 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         dest.writeStringList(this.usesOptionalLibraries);
         dest.writeStringList(this.usesStaticLibraries);
         dest.writeLongArray(this.usesStaticLibrariesVersions);
+        final int numProcesses = this.processes != null ? this.processes.size() : 0;
+        dest.writeInt(numProcesses);
+        for (int i = 0; i < numProcesses; i++) {
+            this.processes.valueAt(i).writeToParcel(dest, 0);
+        }
 
         if (this.usesStaticLibrariesCertDigests == null) {
             dest.writeInt(-1);
@@ -3161,6 +3181,16 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         this.usesStaticLibraries = in.createStringArrayList();
         internStringArrayList(usesStaticLibraries);
         this.usesStaticLibrariesVersions = in.createLongArray();
+        final int numProcesses = in.readInt();
+        if (numProcesses > 0) {
+            this.processes = new ArrayMap<>(numProcesses);
+            for (int i = 0; i < numProcesses; i++) {
+                ComponentParseUtils.ParsedProcess proc = new ComponentParseUtils.ParsedProcess(in);
+                this.processes.put(proc.name, proc);
+            }
+        } else {
+            this.processes = null;
+        }
 
         int digestsSize = in.readInt();
         if (digestsSize >= 0) {

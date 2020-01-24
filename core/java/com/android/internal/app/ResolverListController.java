@@ -133,7 +133,8 @@ public class ResolverListController {
         return resolvedComponents;
     }
 
-    UserHandle getUserHandle() {
+    @VisibleForTesting
+    public UserHandle getUserHandle() {
         return mUserHandle;
     }
 

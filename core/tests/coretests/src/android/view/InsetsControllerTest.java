@@ -44,6 +44,7 @@ import android.platform.test.annotations.Presubmit;
 import android.view.WindowInsets.Type;
 import android.view.WindowManager.BadTokenException;
 import android.view.WindowManager.LayoutParams;
+import android.view.animation.LinearInterpolator;
 import android.view.test.InsetsModeSession;
 import android.widget.TextView;
 
@@ -148,7 +149,7 @@ public class InsetsControllerTest {
             WindowInsetsAnimationControlListener mockListener =
                     mock(WindowInsetsAnimationControlListener.class);
             mController.controlWindowInsetsAnimation(statusBars(), 10 /* durationMs */,
-                    mockListener);
+                    new LinearInterpolator(), mockListener);
 
             // Ready gets deferred until next predraw
             mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
@@ -164,7 +165,8 @@ public class InsetsControllerTest {
         mController.getState().setDisplayFrame(new Rect(0, 0, 200, 200));
         WindowInsetsAnimationControlListener controlListener =
                 mock(WindowInsetsAnimationControlListener.class);
-        mController.controlWindowInsetsAnimation(0, 0 /* durationMs */, controlListener);
+        mController.controlWindowInsetsAnimation(0, 0 /* durationMs */, new LinearInterpolator(),
+                controlListener);
         verify(controlListener).onCancelled();
         verify(controlListener, never()).onReady(any(), anyInt());
     }
@@ -375,7 +377,7 @@ public class InsetsControllerTest {
             WindowInsetsAnimationControlListener mockListener =
                     mock(WindowInsetsAnimationControlListener.class);
             mController.controlWindowInsetsAnimation(statusBars(), 0 /* durationMs */,
-                    mockListener);
+                    new LinearInterpolator(), mockListener);
 
             ArgumentCaptor<WindowInsetsAnimationController> controllerCaptor =
                     ArgumentCaptor.forClass(WindowInsetsAnimationController.class);

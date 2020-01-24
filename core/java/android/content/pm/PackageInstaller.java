@@ -365,6 +365,41 @@ public class PackageInstaller {
     @SystemApi
     public static final int DATA_LOADER_TYPE_INCREMENTAL = DataLoaderType.INCREMENTAL;
 
+    /**
+     * Target location for the file in installation session is /data/app/<packageName>-<id>.
+     * This is the intended location for APKs.
+     * Requires permission to install packages.
+     * {@hide}
+     */
+    @SystemApi
+    public static final int LOCATION_DATA_APP = 0;
+
+    /**
+     * Target location for the file in installation session is
+     * /data/media/<userid>/Android/obb/<packageName>. This is the intended location for OBBs.
+     * {@hide}
+     */
+    @SystemApi
+    public static final int LOCATION_MEDIA_OBB = 1;
+
+    /**
+     * Target location for the file in installation session is
+     * /data/media/<userid>/Android/data/<packageName>.
+     * This is the intended location for application data.
+     * Can only be used by an app itself running under specific user.
+     * {@hide}
+     */
+    @SystemApi
+    public static final int LOCATION_MEDIA_DATA = 2;
+
+    /** @hide */
+    @IntDef(prefix = { "LOCATION_" }, value = {
+            LOCATION_DATA_APP,
+            LOCATION_MEDIA_OBB,
+            LOCATION_MEDIA_DATA})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FileLocation{}
+
     private final IPackageInstaller mInstaller;
     private final int mUserId;
     private final String mInstallerPackageName;
@@ -1071,10 +1106,33 @@ public class PackageInstaller {
             }
         }
 
+        /**
+         * @return data loader params or null if the session is not using one.
+         *
+         * WARNING: This is a system API to aid internal development.
+         * Use at your own risk. It will change or be removed without warning.
+         * {@hide}
+         */
+        @SystemApi
+        public @Nullable DataLoaderParams getDataLoaderParams() {
+            try {
+                DataLoaderParamsParcel data = mSession.getDataLoaderParams();
+                if (data == null) {
+                    return null;
+                }
+                return new DataLoaderParams(data);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
 
         /**
          * Adds a file to session. On commit this file will be pulled from dataLoader.
          *
+         * @param location target location for the file. Possible values:
+         *            {@link #LOCATION_DATA_APP},
+         *            {@link #LOCATION_MEDIA_OBB},
+         *            {@link #LOCATION_MEDIA_DATA}.
          * @param name arbitrary, unique name of your choosing to identify the
          *            APK being written. You can open a file again for
          *            additional writes (such as after a reboot) by using the
@@ -1084,6 +1142,8 @@ public class PackageInstaller {
          *            The system may clear various caches as needed to allocate
          *            this space.
          * @param metadata additional info use by dataLoader to pull data for the file.
+         * @param signature additional file signature, e.g.
+         *                  <a href="https://source.android.com/security/apksigning/v4.html">APK Signature Scheme v4</a>
          * @throws SecurityException if called after the session has been
          *             sealed or abandoned
          * @throws IllegalStateException if called for non-callback session
@@ -1093,9 +1153,10 @@ public class PackageInstaller {
          * {@hide}
          */
         @SystemApi
-        public void addFile(@NonNull String name, long lengthBytes, @NonNull byte[] metadata) {
+        public void addFile(@FileLocation int location, @NonNull String name, long lengthBytes,
+                @NonNull byte[] metadata, @Nullable byte[] signature) {
             try {
-                mSession.addFile(name, lengthBytes, metadata);
+                mSession.addFile(location, name, lengthBytes, metadata, signature);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1104,15 +1165,20 @@ public class PackageInstaller {
         /**
          * Removes a file.
          *
+         * @param location target location for the file. Possible values:
+         *            {@link #LOCATION_DATA_APP},
+         *            {@link #LOCATION_MEDIA_OBB},
+         *            {@link #LOCATION_MEDIA_DATA}.
          * @param name name of a file, e.g. split.
          * @throws SecurityException if called after the session has been
          *             sealed or abandoned
          * @throws IllegalStateException if called for non-callback session
          * {@hide}
          */
-        public void removeFile(@NonNull String name) {
+        @SystemApi
+        public void removeFile(@FileLocation int location, @NonNull String name) {
             try {
-                mSession.removeFile(name);
+                mSession.removeFile(location, name);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -2029,6 +2095,9 @@ public class PackageInstaller {
         public boolean isCommitted;
 
         /** {@hide} */
+        public long createdMillis;
+
+        /** {@hide} */
         public long updatedMillis;
 
         /** {@hide} */
@@ -2078,6 +2147,7 @@ public class PackageInstaller {
             mStagedSessionErrorMessage = source.readString();
             isCommitted = source.readBoolean();
             rollbackDataPolicy = source.readInt();
+            createdMillis = source.readLong();
         }
 
         /**
@@ -2520,6 +2590,13 @@ public class PackageInstaller {
         }
 
         /**
+         * The timestamp of the initial creation of the session.
+         */
+        public long getCreatedMillis() {
+            return createdMillis;
+        }
+
+        /**
          * The timestamp of the last update that occurred to the session, including changing of
          * states in case of staged sessions.
          */
@@ -2568,6 +2645,7 @@ public class PackageInstaller {
             dest.writeString(mStagedSessionErrorMessage);
             dest.writeBoolean(isCommitted);
             dest.writeInt(rollbackDataPolicy);
+            dest.writeLong(createdMillis);
         }
 
         public static final Parcelable.Creator<SessionInfo>

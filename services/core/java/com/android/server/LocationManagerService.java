@@ -18,6 +18,8 @@ package com.android.server;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.GPS_PROVIDER;
@@ -35,14 +37,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.ResolveInfo;
-import android.content.pm.Signature;
-import android.content.res.Resources;
-import android.hardware.location.ActivityRecognitionHardware;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
@@ -52,6 +47,7 @@ import android.location.IBatchedLocationCallback;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
 import android.location.IGnssStatusListener;
+import android.location.IGpsGeofenceHardware;
 import android.location.ILocationListener;
 import android.location.ILocationManager;
 import android.location.Location;
@@ -91,11 +87,11 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.location.AbstractLocationProvider;
 import com.android.server.location.AbstractLocationProvider.State;
-import com.android.server.location.ActivityRecognitionProxy;
 import com.android.server.location.CallerIdentity;
 import com.android.server.location.GeocoderProxy;
 import com.android.server.location.GeofenceManager;
 import com.android.server.location.GeofenceProxy;
+import com.android.server.location.HardwareActivityRecognitionProxy;
 import com.android.server.location.LocationFudger;
 import com.android.server.location.LocationProviderProxy;
 import com.android.server.location.LocationRequestStatistics;
@@ -114,7 +110,6 @@ import java.io.FileDescriptor;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -123,6 +118,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -543,77 +539,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @GuardedBy("mLock")
-    private void ensureFallbackFusedProviderPresentLocked(String[] pkgs) {
-        PackageManager pm = mContext.getPackageManager();
-        String systemPackageName = mContext.getPackageName();
-        ArrayList<HashSet<Signature>> sigSets = ServiceWatcher.getSignatureSets(mContext, pkgs);
-
-        List<ResolveInfo> rInfos = pm.queryIntentServicesAsUser(
-                new Intent(FUSED_LOCATION_SERVICE_ACTION),
-                PackageManager.GET_META_DATA, mUserInfoStore.getCurrentUserId());
-        for (ResolveInfo rInfo : rInfos) {
-            String packageName = rInfo.serviceInfo.packageName;
-
-            // Check that the signature is in the list of supported sigs. If it's not in
-            // this list the standard provider binding logic won't bind to it.
-            try {
-                PackageInfo pInfo;
-                pInfo = pm.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
-                if (!ServiceWatcher.isSignatureMatch(pInfo.signatures, sigSets)) {
-                    Log.w(TAG, packageName + " resolves service " + FUSED_LOCATION_SERVICE_ACTION +
-                            ", but has wrong signature, ignoring");
-                    continue;
-                }
-            } catch (NameNotFoundException e) {
-                Log.e(TAG, "missing package: " + packageName);
-                continue;
-            }
-
-            // Get the version info
-            if (rInfo.serviceInfo.metaData == null) {
-                Log.w(TAG, "Found fused provider without metadata: " + packageName);
-                continue;
-            }
-
-            int version = rInfo.serviceInfo.metaData.getInt(
-                    ServiceWatcher.EXTRA_SERVICE_VERSION, -1);
-            if (version == 0) {
-                // This should be the fallback fused location provider.
-
-                // Make sure it's in the system partition.
-                if ((rInfo.serviceInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
-                    if (D) Log.d(TAG, "Fallback candidate not in /system: " + packageName);
-                    continue;
-                }
-
-                // Check that the fallback is signed the same as the OS
-                // as a proxy for coreApp="true"
-                if (pm.checkSignatures(systemPackageName, packageName)
-                        != PackageManager.SIGNATURE_MATCH) {
-                    if (D) {
-                        Log.d(TAG, "Fallback candidate not signed the same as system: "
-                                + packageName);
-                    }
-                    continue;
-                }
-
-                // Found a valid fallback.
-                if (D) Log.d(TAG, "Found fallback provider: " + packageName);
-                return;
-            } else {
-                if (D) Log.d(TAG, "Fallback candidate not version 0: " + packageName);
-            }
-        }
-
-        throw new IllegalStateException("Unable to find a fused location provider that is in the "
-                + "system partition with version 0 and signed with the platform certificate. "
-                + "Such a package is needed to provide a default fused location provider in the "
-                + "event that no other fused location provider has been installed or is currently "
-                + "available. For example, coreOnly boot mode when decrypting the data "
-                + "partition. The fallback must also be marked coreApp=\"true\" in the manifest");
-    }
-
-    @GuardedBy("mLock")
     private void initializeProvidersLocked() {
         if (GnssManagerService.isGnssSupported()) {
             mGnssManagerService = new GnssManagerService(this, mContext, mLocationUsageLogger);
@@ -622,33 +547,11 @@ public class LocationManagerService extends ILocationManager.Stub {
             gnssManager.setRealProvider(mGnssManagerService.getGnssLocationProvider());
         }
 
-        /*
-        Load package name(s) containing location provider support.
-        These packages can contain services implementing location providers:
-        Geocoder Provider, Network Location Provider, and
-        Fused Location Provider. They will each be searched for
-        service components implementing these providers.
-        The location framework also has support for installation
-        of new location providers at run-time. The new package does not
-        have to be explicitly listed here, however it must have a signature
-        that matches the signature of at least one package on this list.
-        */
-        Resources resources = mContext.getResources();
-        String[] pkgs = resources.getStringArray(
-                com.android.internal.R.array.config_locationProviderPackageNames);
-        if (D) {
-            Log.d(TAG, "certificates for location providers pulled from: " +
-                    Arrays.toString(pkgs));
-        }
-
-        ensureFallbackFusedProviderPresentLocked(pkgs);
-
-        LocationProviderProxy networkProvider = LocationProviderProxy.createAndBind(
+        LocationProviderProxy networkProvider = LocationProviderProxy.createAndRegister(
                 mContext,
                 NETWORK_LOCATION_SERVICE_ACTION,
                 com.android.internal.R.bool.config_enableNetworkLocationOverlay,
-                com.android.internal.R.string.config_networkLocationProviderPackageName,
-                com.android.internal.R.array.config_locationProviderPackageNames);
+                com.android.internal.R.string.config_networkLocationProviderPackageName);
         if (networkProvider != null) {
             LocationProviderManager networkManager = new LocationProviderManager(NETWORK_PROVIDER);
             mProviderManagers.add(networkManager);
@@ -657,13 +560,18 @@ public class LocationManagerService extends ILocationManager.Stub {
             Slog.w(TAG, "no network location provider found");
         }
 
+        // ensure that a fused provider exists which will work in direct boot
+        Preconditions.checkState(!mContext.getPackageManager().queryIntentServicesAsUser(
+                new Intent(FUSED_LOCATION_SERVICE_ACTION),
+                MATCH_DIRECT_BOOT_AWARE | MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM).isEmpty(),
+                "Unable to find a direct boot aware fused location provider");
+
         // bind to fused provider
-        LocationProviderProxy fusedProvider = LocationProviderProxy.createAndBind(
+        LocationProviderProxy fusedProvider = LocationProviderProxy.createAndRegister(
                 mContext,
                 FUSED_LOCATION_SERVICE_ACTION,
                 com.android.internal.R.bool.config_enableFusedLocationOverlay,
-                com.android.internal.R.string.config_fusedLocationProviderPackageName,
-                com.android.internal.R.array.config_locationProviderPackageNames);
+                com.android.internal.R.string.config_fusedLocationProviderPackageName);
         if (fusedProvider != null) {
             LocationProviderManager fusedManager = new LocationProviderManager(FUSED_PROVIDER);
             mProviderManagers.add(fusedManager);
@@ -674,47 +582,30 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         // bind to geocoder provider
-        mGeocodeProvider = GeocoderProxy.createAndBind(mContext,
-                com.android.internal.R.bool.config_enableGeocoderOverlay,
-                com.android.internal.R.string.config_geocoderProviderPackageName,
-                com.android.internal.R.array.config_locationProviderPackageNames);
+        mGeocodeProvider = GeocoderProxy.createAndRegister(mContext);
         if (mGeocodeProvider == null) {
             Slog.e(TAG, "no geocoder provider found");
         }
 
+        // bind to geofence proxy
         if (mGnssManagerService != null) {
-            // bind to geofence provider
-            GeofenceProxy provider = GeofenceProxy.createAndBind(
-                    mContext, com.android.internal.R.bool.config_enableGeofenceOverlay,
-                    com.android.internal.R.string.config_geofenceProviderPackageName,
-                    com.android.internal.R.array.config_locationProviderPackageNames,
-                    mGnssManagerService.getGpsGeofenceProxy(),
-                    null);
-            if (provider == null) {
-                Slog.d(TAG, "Unable to bind FLP Geofence proxy.");
+            IGpsGeofenceHardware gpsGeofenceHardware = mGnssManagerService.getGpsGeofenceProxy();
+            if (gpsGeofenceHardware != null) {
+                GeofenceProxy provider = GeofenceProxy.createAndBind(mContext, gpsGeofenceHardware);
+                if (provider == null) {
+                    Slog.d(TAG, "unable to bind to GeofenceProxy");
+                }
             }
         }
 
         // bind to hardware activity recognition
-        boolean activityRecognitionHardwareIsSupported = ActivityRecognitionHardware.isSupported();
-        ActivityRecognitionHardware activityRecognitionHardware = null;
-        if (activityRecognitionHardwareIsSupported) {
-            activityRecognitionHardware = ActivityRecognitionHardware.getInstance(mContext);
-        } else {
-            Slog.d(TAG, "Hardware Activity-Recognition not supported.");
-        }
-        ActivityRecognitionProxy proxy = ActivityRecognitionProxy.createAndBind(
-                mContext,
-                activityRecognitionHardwareIsSupported,
-                activityRecognitionHardware,
-                com.android.internal.R.bool.config_enableActivityRecognitionHardwareOverlay,
-                com.android.internal.R.string.config_activityRecognitionHardwarePackageName,
-                com.android.internal.R.array.config_locationProviderPackageNames);
-        if (proxy == null) {
-            Slog.d(TAG, "Unable to bind ActivityRecognitionProxy.");
+        HardwareActivityRecognitionProxy hardwareActivityRecognitionProxy =
+                HardwareActivityRecognitionProxy.createAndRegister(mContext);
+        if (hardwareActivityRecognitionProxy == null) {
+            Log.e(TAG, "unable to bind ActivityRecognitionProxy");
         }
 
-        String[] testProviderStrings = resources.getStringArray(
+        String[] testProviderStrings = mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_testLocationProviders);
         for (String testProviderString : testProviderStrings) {
             String[] fragments = testProviderString.split(",");
@@ -2996,10 +2887,12 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             ipw.println("Historical Records by Provider:");
             ipw.increaseIndent();
+            TreeMap<PackageProviderKey, PackageStatistics> sorted = new TreeMap<>();
+            sorted.putAll(mRequestStatistics.statistics);
             for (Map.Entry<PackageProviderKey, PackageStatistics> entry
-                    : mRequestStatistics.statistics.entrySet()) {
+                    : sorted.entrySet()) {
                 PackageProviderKey key = entry.getKey();
-                ipw.println(key.packageName + ": " + key.providerName + ": " + entry.getValue());
+                ipw.println(key.providerName + ": " + key.packageName + ": " + entry.getValue());
             }
             ipw.decreaseIndent();
 

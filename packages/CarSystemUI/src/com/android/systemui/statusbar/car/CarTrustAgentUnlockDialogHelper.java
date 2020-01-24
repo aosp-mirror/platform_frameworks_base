@@ -249,7 +249,7 @@ class CarTrustAgentUnlockDialogHelper extends BroadcastReceiver{
                         | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
                 PixelFormat.TRANSLUCENT
         );
-        attrs.setFitWindowInsetsTypes(0 /* types */);
+        attrs.setFitInsetsTypes(0 /* types */);
         return attrs;
     }
 

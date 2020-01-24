@@ -75,4 +75,20 @@ public class AppGlobals {
             return defaultValue;
         }
     }
+
+    /**
+     * Gets the value of a float core setting.
+     *
+     * @param key The setting key.
+     * @param defaultValue The setting default value.
+     * @return The core settings.
+     */
+    public static float getFloatCoreSetting(String key, float defaultValue) {
+        ActivityThread currentActivityThread = ActivityThread.currentActivityThread();
+        if (currentActivityThread != null) {
+            return currentActivityThread.getFloatCoreSetting(key, defaultValue);
+        } else {
+            return defaultValue;
+        }
+    }
 }

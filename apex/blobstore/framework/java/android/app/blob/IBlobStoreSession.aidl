@@ -21,6 +21,7 @@ import android.os.ParcelFileDescriptor;
 /** {@hide} */
 interface IBlobStoreSession {
     ParcelFileDescriptor openWrite(long offsetBytes, long lengthBytes);
+    ParcelFileDescriptor openRead();
 
     void allowPackageAccess(in String packageName, in byte[] certificate);
     void allowSameSignatureAccess();

@@ -17,12 +17,17 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.graphics.Insets;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Size;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -62,6 +67,10 @@ public final class WindowManagerImpl implements WindowManager {
 
     private IBinder mDefaultToken;
 
+    private boolean mIsViewAdded;
+    private View mLastView;
+    private WindowManager.LayoutParams mLastParams;
+
     public WindowManagerImpl(Context context) {
         this(context, null);
     }
@@ -93,6 +102,9 @@ public final class WindowManagerImpl implements WindowManager {
     public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
         applyDefaultToken(params);
         mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);
+        mIsViewAdded = true;
+        mLastView = view;
+        mLastParams = (WindowManager.LayoutParams) params;
     }
 
     @Override
@@ -200,5 +212,72 @@ public final class WindowManagerImpl implements WindowManager {
         } catch (RemoteException e) {
         }
         return false;
+    }
+
+    @Override
+    public WindowMetrics getCurrentWindowMetrics() {
+        final Context context = mParentWindow != null ? mParentWindow.getContext() : mContext;
+        final Rect bound = getCurrentBounds(context);
+
+        return new WindowMetrics(toSize(bound), computeWindowInsets());
+    }
+
+    private static Rect getCurrentBounds(Context context) {
+        synchronized (ResourcesManager.getInstance()) {
+            return context.getResources().getConfiguration().windowConfiguration.getBounds();
+        }
+    }
+
+    @Override
+    public WindowMetrics getMaximumWindowMetrics() {
+        return new WindowMetrics(toSize(getMaximumBounds()), computeWindowInsets());
+    }
+
+    private Size toSize(Rect frame) {
+        return new Size(frame.width(), frame.height());
+    }
+
+    private Rect getMaximumBounds() {
+        // TODO(b/128338354): Current maximum bound is display size, but it should be displayArea
+        //  bound after displayArea feature is finished.
+        final Display display = mContext.getDisplay();
+        final Point displaySize = new Point();
+        display.getRealSize(displaySize);
+        return new Rect(0, 0, displaySize.x, displaySize.y);
+    }
+
+    private WindowInsets computeWindowInsets() {
+        // TODO(window-context): This can only be properly implemented
+        //  once we flip the new insets mode flag.
+        if (mParentWindow != null) {
+            if (mParentWindow.getDecorView().isAttachedToWindow()) {
+                return mParentWindow.getDecorView().getViewRootImpl()
+                        .getWindowInsets(true /* forceConstruct */);
+            }
+            return getWindowInsetsFromServer(mParentWindow.getAttributes());
+        }
+        if (mIsViewAdded) {
+            return mLastView.getViewRootImpl().getWindowInsets(true /* forceConstruct */);
+        } else {
+            return getWindowInsetsFromServer(new WindowManager.LayoutParams());
+        }
+
+    }
+
+    private WindowInsets getWindowInsetsFromServer(WindowManager.LayoutParams attrs) {
+        try {
+            final Rect systemWindowInsets = new Rect();
+            final Rect stableInsets = new Rect();
+            final DisplayCutout.ParcelableWrapper displayCutout =
+                    new DisplayCutout.ParcelableWrapper();
+            WindowManagerGlobal.getWindowManagerService().getWindowInsets(attrs,
+                    mContext.getDisplayId(), systemWindowInsets, stableInsets, displayCutout);
+            return new WindowInsets.Builder()
+                    .setSystemWindowInsets(Insets.of(systemWindowInsets))
+                    .setStableInsets(Insets.of(stableInsets))
+                    .setDisplayCutout(displayCutout.get()).build();
+        } catch (RemoteException e) {
+        }
+        return null;
     }
 }

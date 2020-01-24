@@ -9,7 +9,9 @@ package com.android.server.display.config {
 
   public class NitsMap {
     ctor public NitsMap();
+    method public java.math.BigDecimal getHighBrightnessStart();
     method public java.util.List<com.android.server.display.config.Point> getPoint();
+    method public void setHighBrightnessStart(java.math.BigDecimal);
   }
 
   public class Point {

@@ -45,12 +45,25 @@ public final class ImeFocusController {
         mViewRootImpl = viewRootImpl;
     }
 
+    @NonNull
     private InputMethodManagerDelegate getImmDelegate() {
-        if (mDelegate == null) {
-            mDelegate = mViewRootImpl.mContext.getSystemService(
-                    InputMethodManager.class).getDelegate();
+        InputMethodManagerDelegate delegate = mDelegate;
+        if (delegate != null) {
+            return delegate;
         }
-        return mDelegate;
+        delegate = mViewRootImpl.mContext.getSystemService(InputMethodManager.class).getDelegate();
+        mDelegate = delegate;
+        return delegate;
+    }
+
+    /** Called when the view root is moved to a different display. */
+    @UiThread
+    void onMovedToDisplay() {
+        // InputMethodManager managed its instances for different displays. So if the associated
+        // display is changed, the delegate also needs to be refreshed (by getImmDelegate).
+        // See the comment in {@link android.app.SystemServiceRegistry} for InputMethodManager
+        // and {@link android.view.inputmethod.InputMethodManager#forContext}.
+        mDelegate = null;
     }
 
     @UiThread
@@ -103,7 +116,8 @@ public final class ImeFocusController {
         }
 
         boolean forceFocus = false;
-        if (getImmDelegate().isRestartOnNextWindowFocus(true /* reset */)) {
+        final InputMethodManagerDelegate immDelegate = getImmDelegate();
+        if (immDelegate.isRestartOnNextWindowFocus(true /* reset */)) {
             if (DEBUG) Log.v(TAG, "Restarting due to isRestartOnNextWindowFocus as true");
             forceFocus = true;
         }
@@ -111,12 +125,13 @@ public final class ImeFocusController {
         final View viewForWindowFocus = focusedView != null ? focusedView : mViewRootImpl.mView;
         onViewFocusChanged(viewForWindowFocus, true);
 
-        getImmDelegate().startInputAsyncOnWindowFocusGain(viewForWindowFocus,
+        immDelegate.startInputAsyncOnWindowFocusGain(viewForWindowFocus,
                 windowAttribute.softInputMode, windowAttribute.flags, forceFocus);
     }
 
     public boolean checkFocus(boolean forceNewFocus, boolean startInput) {
-        if (!getImmDelegate().isCurrentRootView(mViewRootImpl)
+        final InputMethodManagerDelegate immDelegate = getImmDelegate();
+        if (!immDelegate.isCurrentRootView(mViewRootImpl)
                 || (mServedView == mNextServedView && !forceNewFocus)) {
             return false;
         }
@@ -128,15 +143,16 @@ public final class ImeFocusController {
 
         // Close the connection when no next served view coming.
         if (mNextServedView == null) {
-            getImmDelegate().finishInput();
-            getImmDelegate().closeCurrentIme();
+            immDelegate.finishInput();
+            immDelegate.closeCurrentIme();
             return false;
         }
         mServedView = mNextServedView;
-        getImmDelegate().finishComposingText();
+        immDelegate.finishComposingText();
 
         if (startInput) {
-            getImmDelegate().startInput(StartInputReason.CHECK_FOCUS, null, 0, 0, 0);
+            immDelegate.startInput(StartInputReason.CHECK_FOCUS, null /* focusedView */,
+                    0 /* startInputFlags */, 0 /* softInputMode */, 0 /* windowFlags */);
         }
         return true;
     }
@@ -169,13 +185,14 @@ public final class ImeFocusController {
 
     @UiThread
     void onWindowDismissed() {
-        if (!getImmDelegate().isCurrentRootView(mViewRootImpl)) {
+        final InputMethodManagerDelegate immDelegate = getImmDelegate();
+        if (!immDelegate.isCurrentRootView(mViewRootImpl)) {
             return;
         }
         if (mServedView != null) {
-            getImmDelegate().finishInput();
+            immDelegate.finishInput();
         }
-        getImmDelegate().setCurrentRootView(null);
+        immDelegate.setCurrentRootView(null);
         mHasImeFocus = false;
     }
 

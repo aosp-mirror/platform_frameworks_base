@@ -19,9 +19,24 @@ package com.android.server.lights;
 import android.hardware.light.V2_0.Brightness;
 import android.hardware.light.V2_0.Flash;
 
-public abstract class Light {
+/**
+ * Allow control over a logical light of a given type. The mapping of logical lights to physical
+ * lights is HAL implementation-dependent.
+ */
+public abstract class LogicalLight {
+    /**
+     * Keep the light steady on or off.
+     */
     public static final int LIGHT_FLASH_NONE = Flash.NONE;
+
+    /**
+     * Flash the light at specified rate.
+     */
     public static final int LIGHT_FLASH_TIMED = Flash.TIMED;
+
+    /**
+     * Flash the light using hardware assist.
+     */
     public static final int LIGHT_FLASH_HARDWARE = Flash.HARDWARE;
 
     /**
@@ -55,10 +70,33 @@ public abstract class Light {
      */
     public abstract void setBrightnessFloat(float brightness);
 
+    /**
+     * Set the color of a light.
+     */
     public abstract void setColor(int color);
+
+    /**
+     * Set the color of a light and control flashing.
+     */
     public abstract void setFlashing(int color, int mode, int onMS, int offMS);
+
+    /**
+     * Pulses the light.
+     */
     public abstract void pulse();
+
+    /**
+     * Pulses the light with a specified color for a specified duration.
+     */
     public abstract void pulse(int color, int onMS);
+
+    /**
+     * Turns off the light.
+     */
     public abstract void turnOff();
+
+    /**
+     * Set the VR mode of a display.
+     */
     public abstract void setVrMode(boolean enabled);
 }

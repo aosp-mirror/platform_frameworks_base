@@ -63,7 +63,7 @@ jobject ABitmapConfig_getConfigFromFormat(JNIEnv* env, AndroidBitmapFormat forma
 // NDK access
 int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const void* pixels,
                      AndroidBitmapCompressFormat format, int32_t quality, void* userContext,
-                     AndroidBitmap_compress_write_fn);
+                     AndroidBitmap_CompressWriteFunc);
 /**
  *  Retrieve the native object associated with a HARDWARE Bitmap.
  *

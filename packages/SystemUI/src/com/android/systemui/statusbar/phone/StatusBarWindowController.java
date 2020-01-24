@@ -107,6 +107,7 @@ public class StatusBarWindowController {
                 PixelFormat.TRANSLUCENT);
         mLp.token = new Binder();
         mLp.gravity = Gravity.TOP;
+        mLp.setFitInsetsTypes(0 /* types */);
         mLp.setTitle("StatusBar");
         mLp.packageName = mContext.getPackageName();
         mLp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;

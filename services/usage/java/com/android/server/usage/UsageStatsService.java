@@ -369,7 +369,7 @@ public class UsageStatsService extends SystemService implements
     /**
      * Fetches a map (package_name:install_time) of installed packages for the given user. This
      * map contains all installed packages, including those packages which have been uninstalled
-     * with the DONT_DELETE_DATA flag.
+     * with the DELETE_KEEP_DATA flag.
      * This is a helper method which should only be called when the given user's usage stats service
      * is initialized; it performs a heavy query to package manager so do not call it otherwise.
      * <br/>

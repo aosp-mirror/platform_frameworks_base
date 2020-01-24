@@ -99,7 +99,6 @@ import com.android.internal.telephony.IOns;
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ISetOpportunisticDataCallback;
 import com.android.internal.telephony.ITelephony;
-import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
 import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
@@ -1242,6 +1241,80 @@ public class TelephonyManager {
      * subscription which has changed; or in general whenever a subscription ID needs specified.
      */
     public static final String EXTRA_SUBSCRIPTION_ID = "android.telephony.extra.SUBSCRIPTION_ID";
+
+    /**
+     * Broadcast Action: The Service Provider string(s) have been updated. Activities or
+     * services that use these strings should update their display.
+     *
+     * <p>The intent will have the following extra values:
+     * <dl>
+     *   <dt>{@link #EXTRA_SHOW_PLMN}</dt>
+     *   <dd>Boolean that indicates whether the PLMN should be shown.</dd>
+     *   <dt>{@link #EXTRA_PLMN}</dt>
+     *   <dd>The operator name of the registered network, as a string.</dd>
+     *   <dt>{@link #EXTRA_SHOW_SPN}</dt>
+     *   <dd>Boolean that indicates whether the SPN should be shown.</dd>
+     *   <dt>{@link #EXTRA_SPN}</dt>
+     *   <dd>The service provider name, as a string.</dd>
+     *   <dt>{@link #EXTRA_DATA_SPN}</dt>
+     *   <dd>The service provider name for data service, as a string.</dd>
+     * </dl>
+     *
+     * Note that {@link #EXTRA_SHOW_PLMN} may indicate that {@link #EXTRA_PLMN} should be displayed,
+     * even though the value for {@link #EXTRA_PLMN} is null. This can happen, for example, if the
+     * phone has not registered to a network yet. In this case the receiver may substitute an
+     * appropriate placeholder string (eg, "No service").
+     *
+     * It is recommended to display {@link #EXTRA_PLMN} before / above {@link #EXTRA_SPN} if
+     * both are displayed.
+     *
+     * <p>Note: this is a protected intent that can only be sent by the system.
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SERVICE_PROVIDERS_UPDATED =
+            "android.telephony.action.SERVICE_PROVIDERS_UPDATED";
+
+    /**
+     * String intent extra to be used with {@link ACTION_SERVICE_PROVIDERS_UPDATED} to indicate
+     * whether the PLMN should be shown.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_SHOW_PLMN = "android.telephony.extra.SHOW_PLMN";
+
+    /**
+     * String intent extra to be used with {@link ACTION_SERVICE_PROVIDERS_UPDATED} to indicate
+     * the operator name of the registered network.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PLMN = "android.telephony.extra.PLMN";
+
+    /**
+     * String intent extra to be used with {@link ACTION_SERVICE_PROVIDERS_UPDATED} to indicate
+     * whether the PLMN should be shown.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_SHOW_SPN = "android.telephony.extra.SHOW_SPN";
+
+    /**
+     * String intent extra to be used with {@link ACTION_SERVICE_PROVIDERS_UPDATED} to indicate
+     * the service provider name.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_SPN = "android.telephony.extra.SPN";
+
+    /**
+     * String intent extra to be used with {@link ACTION_SERVICE_PROVIDERS_UPDATED} to indicate
+     * the service provider name for data service.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_DATA_SPN = "android.telephony.extra.DATA_SPN";
 
     /**
      * Broadcast intent action indicating that when data stall recovery is attempted by Telephony,
@@ -2707,7 +2780,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public boolean isNetworkRoaming(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
-        return getTelephonyProperty(subId, TelephonyProperties.operator_is_roaming(), false);
+        return getTelephonyProperty(phoneId, TelephonyProperties.operator_is_roaming(), false);
     }
 
     /**
@@ -5550,14 +5623,6 @@ public class TelephonyManager {
                 .getTelephonyServiceManager().getTelephonyServiceRegisterer().get());
     }
 
-    private ITelephonyRegistry getTelephonyRegistry() {
-        return ITelephonyRegistry.Stub.asInterface(
-                TelephonyFrameworkInitializer
-                        .getTelephonyServiceManager()
-                        .getTelephonyRegistryServiceRegisterer()
-                        .get());
-    }
-
     private IOns getIOns() {
         return IOns.Stub.asInterface(
                 TelephonyFrameworkInitializer
@@ -5611,29 +5676,27 @@ public class TelephonyManager {
      */
     public void listen(PhoneStateListener listener, int events) {
         if (mContext == null) return;
-        try {
-            boolean notifyNow = (getITelephony() != null);
-            ITelephonyRegistry registry = getTelephonyRegistry();
-            if (registry != null) {
-                // subId from PhoneStateListener is deprecated Q on forward, use the subId from
-                // TelephonyManager instance. keep using subId from PhoneStateListener for pre-Q.
-                int subId = mSubId;
-                if (Compatibility.isChangeEnabled(LISTEN_CODE_CHANGE)) {
-                    // since mSubId in PhoneStateListener is deprecated from Q on forward, this is
-                    // the only place to set mSubId and its for "informational" only.
-                    //  TODO: remove this once we completely get rid of mSubId in PhoneStateListener
-                    listener.mSubId = (events == PhoneStateListener.LISTEN_NONE)
-                            ? SubscriptionManager.INVALID_SUBSCRIPTION_ID : subId;
-                } else if (listener.mSubId != null) {
-                    subId = listener.mSubId;
-                }
-                registry.listenForSubscriber(subId, getOpPackageName(), getFeatureId(),
-                        listener.callback, events, notifyNow);
-            } else {
-                Rlog.w(TAG, "telephony registry not ready.");
+        boolean notifyNow = (getITelephony() != null);
+        TelephonyRegistryManager telephonyRegistry =
+                (TelephonyRegistryManager)
+                        mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
+        if (telephonyRegistry != null) {
+            // subId from PhoneStateListener is deprecated Q on forward, use the subId from
+            // TelephonyManager instance. keep using subId from PhoneStateListener for pre-Q.
+            int subId = mSubId;
+            if (Compatibility.isChangeEnabled(LISTEN_CODE_CHANGE)) {
+                // since mSubId in PhoneStateListener is deprecated from Q on forward, this is
+                // the only place to set mSubId and its for "informational" only.
+                //  TODO: remove this once we completely get rid of mSubId in PhoneStateListener
+                listener.mSubId = (events == PhoneStateListener.LISTEN_NONE)
+                        ? SubscriptionManager.INVALID_SUBSCRIPTION_ID : subId;
+            } else if (listener.mSubId != null) {
+                subId = listener.mSubId;
             }
-        } catch (RemoteException ex) {
-            // system process dead
+            telephonyRegistry.listenForSubscriber(subId, getOpPackageName(), getFeatureId(),
+                    listener, events, notifyNow);
+        } else {
+            Rlog.w(TAG, "telephony registry not ready.");
         }
     }
 
@@ -8018,6 +8081,30 @@ public class TelephonyManager {
             Rlog.e(TAG, "getNetworkSelectionMode RemoteException", ex);
         }
         return mode;
+    }
+
+    /**
+     * Get the PLMN chosen for Manual Network Selection if active.
+     * Return empty string if in automatic selection.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
+     * READ_PRECISE_PHONE_STATE} or that the calling app has carrier privileges
+     * (see {@link #hasCarrierPrivileges})
+     *
+     * @return manually selected network info on success or empty string on failure
+     */
+    @SuppressAutoDoc // No support carrier privileges (b/72967236).
+    @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE)
+    public @NonNull String getManualNetworkSelectionPlmn() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null && isManualNetworkSelectionAllowed()) {
+                return telephony.getManualNetworkSelectionPlmn(getSubId());
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getManualNetworkSelectionPlmn RemoteException", ex);
+        }
+        return "";
     }
 
     /**
@@ -11073,15 +11160,18 @@ public class TelephonyManager {
     /**
      * Checks if manual network selection is allowed.
      *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
+     * READ_PRECISE_PHONE_STATE} or that the calling app has carrier privileges
+     * (see {@link #hasCarrierPrivileges})
+     *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
      * @return {@code true} if manual network selection is allowed, otherwise return {@code false}.
-     *
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SuppressAutoDoc // No support carrier privileges (b/72967236).
+    @RequiresPermission(anyOf = {android.Manifest.permission.READ_PRECISE_PHONE_STATE,
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE})
     public boolean isManualNetworkSelectionAllowed() {
         try {
             ITelephony telephony = getITelephony();

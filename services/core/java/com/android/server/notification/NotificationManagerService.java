@@ -251,8 +251,8 @@ import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
-import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
+import com.android.server.lights.LogicalLight;
 import com.android.server.notification.ManagedServices.ManagedServiceInfo;
 import com.android.server.notification.ManagedServices.UserProfiles;
 import com.android.server.pm.PackageManagerService;
@@ -413,8 +413,8 @@ public class NotificationManagerService extends SystemService {
     private final HandlerThread mRankingThread = new HandlerThread("ranker",
             Process.THREAD_PRIORITY_BACKGROUND);
 
-    private Light mNotificationLight;
-    Light mAttentionLight;
+    private LogicalLight mNotificationLight;
+    LogicalLight mAttentionLight;
 
     private long[] mFallbackVibrationPattern;
     private boolean mUseAttentionLight;
@@ -1753,7 +1753,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    void setLights(Light light) {
+    void setLights(LogicalLight light) {
         mNotificationLight = light;
         mAttentionLight = light;
         mNotificationPulseEnabled = true;
@@ -7875,7 +7875,7 @@ public class NotificationManagerService extends SystemService {
             NotificationRecord.Light light = ledNotification.getLight();
             if (light != null && mNotificationPulseEnabled) {
                 // pulse repeatedly
-                mNotificationLight.setFlashing(light.color, Light.LIGHT_FLASH_TIMED,
+                mNotificationLight.setFlashing(light.color, LogicalLight.LIGHT_FLASH_TIMED,
                         light.onMs, light.offMs);
             }
         }

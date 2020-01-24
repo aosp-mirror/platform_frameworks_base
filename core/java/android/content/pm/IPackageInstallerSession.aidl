@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.content.pm.DataLoaderParamsParcel;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.IntentSender;
 import android.os.ParcelFileDescriptor;
@@ -39,8 +40,9 @@ interface IPackageInstallerSession {
     void transfer(in String packageName);
     void abandon();
 
-    void addFile(String name, long lengthBytes, in byte[] metadata);
-    void removeFile(String name);
+    DataLoaderParamsParcel getDataLoaderParams();
+    void addFile(int location, String name, long lengthBytes, in byte[] metadata, in byte[] signature);
+    void removeFile(int location, String name);
 
     boolean isMultiPackage();
     int[] getChildSessionIds();

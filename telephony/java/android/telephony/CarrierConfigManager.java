@@ -1080,6 +1080,14 @@ public class CarrierConfigManager {
     public static final String KEY_IGNORE_RTT_MODE_SETTING_BOOL =
             "ignore_rtt_mode_setting_bool";
 
+
+    /**
+     * Determines whether adhoc conference calls are supported by a carrier.  When {@code true},
+     * adhoc conference calling is supported, {@code false otherwise}.
+     */
+    public static final String KEY_SUPPORT_ADHOC_CONFERENCE_CALLS_BOOL =
+            "support_adhoc_conference_calls_bool";
+
     /**
      * Determines whether conference calls are supported by a carrier.  When {@code true},
      * conference calling is supported, {@code false otherwise}.
@@ -1444,6 +1452,50 @@ public class CarrierConfigManager {
      */
     public static final String KEY_APN_SETTINGS_DEFAULT_APN_TYPES_STRING_ARRAY =
             "apn_settings_default_apn_types_string_array";
+
+    /**
+     * Configs used for APN setup.
+     */
+    public static final class Apn {
+        /** Prefix of all Apn.KEY_* constants. */
+        public static final String KEY_PREFIX = "apn.";
+
+        /** IPv4 internet protocol */
+        public static final String PROTOCOL_IPV4 = "IP";
+        /** IPv6 internet protocol */
+        public static final String PROTOCOL_IPV6 = "IPV6";
+        /** IPv4 or IPv6 internet protocol */
+        public static final String PROTOCOL_IPV4V6 = "IPV4V6";
+
+        /**
+         * Default value of APN protocol field if not specified by user when adding/modifying
+         * an APN.
+         *
+         * Available options are: {@link #PROTOCOL_IPV4}, {@link #PROTOCOL_IPV6},
+         * {@link #PROTOCOL_IPV4V6}
+         */
+        public static final String KEY_SETTINGS_DEFAULT_PROTOCOL_STRING =
+                KEY_PREFIX + "settings_default_protocol_string";
+
+        /**
+         * Default value of APN roaming protocol field if not specified by user when
+         * adding/modifying an APN.
+         *
+         * Available options are: {@link #PROTOCOL_IPV4}, {@link #PROTOCOL_IPV6},
+         * {@link #PROTOCOL_IPV4V6}
+         */
+        public static final String KEY_SETTINGS_DEFAULT_ROAMING_PROTOCOL_STRING =
+                KEY_PREFIX + "settings_default_roaming_protocol_string";
+
+        private Apn() {}
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            defaults.putString(KEY_SETTINGS_DEFAULT_PROTOCOL_STRING, "");
+            defaults.putString(KEY_SETTINGS_DEFAULT_ROAMING_PROTOCOL_STRING, "");
+            return defaults;
+        }
+    }
 
     /**
      * Boolean indicating if intent for emergency call state changes should be broadcast
@@ -2967,7 +3019,6 @@ public class CarrierConfigManager {
     /**
      * Controls hysteresis time in milli seconds for which OpportunisticNetworkService
      * will wait before switching data from opportunistic network to primary network.
-     * @hide
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG =
             "opportunistic_network_data_switch_exit_hysteresis_time_long";
@@ -2975,14 +3026,12 @@ public class CarrierConfigManager {
     /**
      * Controls whether to do ping test before switching data to opportunistic network.
      * This carrier config is used to disable this feature.
-     * @hide
      */
     public static final String KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL =
             "ping_test_before_data_switch_bool";
 
     /**
      * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
-     * @hide
      */
     public static final String KEY_5G_WATCHDOG_TIME_MS_LONG =
             "5g_watchdog_time_long";
@@ -2991,7 +3040,6 @@ public class CarrierConfigManager {
      * if primary is out of service. This control only affects system or 1st party app
      * initiated data switch, but will not override data switch initiated by privileged carrier apps
      * This carrier config is used to disable this feature.
-     * @hide
      */
     public static final String KEY_SWITCH_DATA_TO_PRIMARY_IF_PRIMARY_IS_OOS_BOOL =
             "switch_data_to_primary_if_primary_is_oos_bool";
@@ -3003,7 +3051,6 @@ public class CarrierConfigManager {
      * #KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT within
      * #KEY_OPPORTUNISTIC_NETWORK_PING_PONG_TIME_LONG of switching to opportunistic network,
      * it will be determined as ping pong situation by system app or 1st party app.
-     * @hide
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_PING_PONG_TIME_LONG =
             "opportunistic_network_ping_pong_time_long";
@@ -3017,7 +3064,6 @@ public class CarrierConfigManager {
      * #KEY_OPPORTUNISTIC_NETWORK_PING_PONG_TIME_LONG.
      * If ping pong situation continuous #KEY_OPPORTUNISTIC_NETWORK_BACKOFF_TIME_LONG
      * will be added to previously determined hysteresis time.
-     * @hide
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_BACKOFF_TIME_LONG =
             "opportunistic_network_backoff_time_long";
@@ -3029,7 +3075,6 @@ public class CarrierConfigManager {
      * continuous ping pong situation or not as described in
      * #KEY_OPPORTUNISTIC_NETWORK_PING_PONG_TIME_LONG and
      * #KEY_OPPORTUNISTIC_NETWORK_BACKOFF_TIME_LONG.
-     * @hide
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_MAX_BACKOFF_TIME_LONG =
             "opportunistic_network_max_backoff_time_long";
@@ -3076,7 +3121,6 @@ public class CarrierConfigManager {
      * validation result, this value defines customized value of how long we wait for validation
      * success before we fail and revoke the switch.
      * Time out is in milliseconds.
-     * @hide
      */
     public static final String KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG =
             "data_switch_validation_timeout_long";
@@ -3418,6 +3462,14 @@ public class CarrierConfigManager {
      */
     public static final String KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL =
             "prevent_clir_activation_and_deactivation_code_bool";
+
+    /**
+     * Flag specifying whether to show forwarded number on call-in-progress screen.
+     * When true, forwarded number is shown.
+     * When false, forwarded number is not shown.
+     */
+    public static final String KEY_SHOW_FORWARDED_NUMBER_BOOL =
+            "show_forwarded_number_bool";
 
     /**
      * Configs used for epdg tunnel bring up.
@@ -3903,6 +3955,8 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_READ_ONLY_APN_TYPES_STRING_ARRAY, new String[] {"dun"});
         sDefaults.putStringArray(KEY_READ_ONLY_APN_FIELDS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_APN_SETTINGS_DEFAULT_APN_TYPES_STRING_ARRAY, null);
+        sDefaults.putAll(Apn.getDefaults());
+
         sDefaults.putBoolean(KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
         sDefaults.putStringArray(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS, new String[]{
@@ -3948,6 +4002,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CALL_FORWARDING_MAP_NON_NUMBER_TO_VOICEMAIL_BOOL, false);
         sDefaults.putBoolean(KEY_IGNORE_RTT_MODE_SETTING_BOOL, false);
         sDefaults.putInt(KEY_CDMA_3WAYCALL_FLASH_DELAY_INT , 0);
+        sDefaults.putBoolean(KEY_SUPPORT_ADHOC_CONFERENCE_CALLS_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_MANAGE_IMS_CONFERENCE_CALL_BOOL, true);
@@ -4273,6 +4328,7 @@ public class CarrierConfigManager {
         // Default wifi configurations.
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_FORWARDED_NUMBER_BOOL, false);
         sDefaults.putAll(Iwlan.getDefaults());
     }
 

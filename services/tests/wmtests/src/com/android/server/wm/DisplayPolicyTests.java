@@ -28,6 +28,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -233,6 +234,16 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertNotEquals(0, toast.getAttrs().flags & FLAG_SHOW_WHEN_LOCKED);
     }
 
+    @Test(expected = RuntimeException.class)
+    public void testMainAppWindowDisallowFitSystemWindowTypes() {
+        final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
+        final WindowState activity = createBaseApplicationWindow();
+        activity.mAttrs.privateFlags |= PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
+
+        policy.adjustWindowParamsLw(activity, activity.mAttrs, 0 /* callingPid */,
+                0 /* callingUid */);
+    }
+
     private WindowState createToastWindow() {
         final WindowState win = createWindow(null, TYPE_TOAST, "Toast");
         final WindowManager.LayoutParams attrs = win.mAttrs;
@@ -249,6 +260,17 @@ public class DisplayPolicyTests extends WindowTestsBase {
         attrs.width = MATCH_PARENT;
         attrs.height = MATCH_PARENT;
         attrs.flags = FLAG_SHOW_WHEN_LOCKED | FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
+        attrs.format = PixelFormat.OPAQUE;
+        win.mHasSurface = true;
+        return win;
+    }
+
+    private WindowState createBaseApplicationWindow() {
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "Application");
+        final WindowManager.LayoutParams attrs = win.mAttrs;
+        attrs.width = MATCH_PARENT;
+        attrs.height = MATCH_PARENT;
+        attrs.flags = FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
         attrs.format = PixelFormat.OPAQUE;
         win.mHasSurface = true;
         return win;

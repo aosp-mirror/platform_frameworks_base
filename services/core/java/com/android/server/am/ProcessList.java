@@ -1564,7 +1564,7 @@ public final class ProcessList {
         long startTime = SystemClock.uptimeMillis();
         if (app.pid > 0 && app.pid != ActivityManagerService.MY_PID) {
             checkSlow(startTime, "startProcess: removing from pids map");
-            mService.mPidsSelfLocked.remove(app);
+            mService.removePidLocked(app);
             mService.mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             checkSlow(startTime, "startProcess: done removing from pids map");
             app.setPid(0);
@@ -1609,10 +1609,28 @@ public final class ProcessList {
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }
+
+                // Remove any gids needed if the process has been denied permissions.
+                // NOTE: eventually we should probably have the package manager pre-compute
+                // this for us?
+                if (app.processInfo != null && app.processInfo.deniedPermissions != null) {
+                    for (int i = app.processInfo.deniedPermissions.size() - 1; i >= 0; i--) {
+                        int[] denyGids = mService.mPackageManagerInt.getPermissionGids(
+                                app.processInfo.deniedPermissions.valueAt(i), app.userId);
+                        if (denyGids != null) {
+                            for (int gid : denyGids) {
+                                permGids = ArrayUtils.removeInt(permGids, gid);
+                            }
+                        }
+                    }
+                }
+
                 int numGids = 3;
-                if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+                if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE
+                        || app.info.packageName.equals("com.android.externalstorage")) {
                     numGids++;
                 }
+
                 /*
                  * Add shared application and profile GIDs so applications can share some
                  * resources like shared libraries and access user-wide resources
@@ -1626,8 +1644,14 @@ public final class ProcessList {
                 gids[0] = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
                 gids[1] = UserHandle.getCacheAppGid(UserHandle.getAppId(uid));
                 gids[2] = UserHandle.getUserGid(UserHandle.getUserId(uid));
+
                 if (numGids > 3) {
-                    gids[3] = Process.SDCARD_RW_GID;
+                    if (app.info.packageName.equals("com.android.externalstorage")) {
+                        // Allows access to 'unreliable' (USB OTG) volumes via SAF
+                        gids[3] = Process.MEDIA_RW_GID;
+                    } else if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+                        gids[3] = Process.SDCARD_RW_GID;
+                    }
                 }
 
                 // Replace any invalid GIDs
@@ -2311,7 +2335,7 @@ public final class ProcessList {
             mService.cleanUpApplicationRecordLocked(oldApp, false, false, -1,
                     true /*replacingPid*/);
         }
-        mService.mPidsSelfLocked.put(app);
+        mService.addPidLocked(app);
         synchronized (mService.mPidsSelfLocked) {
             if (!procAttached) {
                 Message msg = mService.mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
@@ -2492,7 +2516,7 @@ public final class ProcessList {
                 .pendingStart)) {
             int pid = app.pid;
             if (pid > 0) {
-                mService.mPidsSelfLocked.remove(app);
+                mService.removePidLocked(app);
                 mService.mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
                 mService.mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
                 if (app.isolated) {
@@ -3945,4 +3969,3 @@ public final class ProcessList {
         }
     };
 }
-

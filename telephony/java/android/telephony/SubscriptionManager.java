@@ -54,6 +54,7 @@ import android.os.Looper;
 import android.os.ParcelUuid;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Telephony.SimInfo;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsMmTelManager;
@@ -677,6 +678,13 @@ public class SubscriptionManager {
     public static final String WFC_IMS_ROAMING_ENABLED = SimInfo.WFC_IMS_ROAMING_ENABLED;
 
     /**
+     * Determines if the user has enabled IMS RCS User Capability Exchange (UCE) for this
+     * subscription.
+     * @hide
+     */
+    public static final String IMS_RCS_UCE_ENABLED = SimInfo.IMS_RCS_UCE_ENABLED;
+
+    /**
      * TelephonyProvider column name for whether a subscription is opportunistic, that is,
      * whether the network it connects to is limited in functionality or coverage.
      * For example, CBRS.
@@ -976,10 +984,7 @@ public class SubscriptionManager {
     private INetworkPolicyManager getINetworkPolicyManager() {
         if (mNetworkPolicy == null) {
             mNetworkPolicy = INetworkPolicyManager.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getNetworkPolicyServiceRegisterer()
-                            .get());
+                    ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
         }
         return mNetworkPolicy;
     }

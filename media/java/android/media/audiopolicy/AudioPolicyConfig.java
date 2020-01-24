@@ -197,6 +197,14 @@ public class AudioPolicyConfig implements Parcelable {
                         textDump += "  exclude UID ";
                         textDump += criterion.mIntProp;
                         break;
+                    case AudioMixingRule.RULE_MATCH_USERID:
+                        textDump += "  match userId ";
+                        textDump += criterion.mIntProp;
+                        break;
+                    case AudioMixingRule.RULE_EXCLUDE_USERID:
+                        textDump += "  exclude userId ";
+                        textDump += criterion.mIntProp;
+                        break;
                     default:
                         textDump += "invalid rule!";
                 }

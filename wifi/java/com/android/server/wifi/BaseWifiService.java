@@ -178,6 +178,11 @@ public class BaseWifiService extends IWifiManager.Stub {
     }
 
     @Override
+    public void allowAutojoinGlobal(boolean choice) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void allowAutojoin(int netId, boolean choice) {
         throw new UnsupportedOperationException();
     }
@@ -404,7 +409,8 @@ public class BaseWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    /** @deprecated use {@link #allowAutojoinGlobal(boolean)} instead */
+    @Deprecated
     public void enableWifiConnectivityManager(boolean enabled) {
         throw new UnsupportedOperationException();
     }
@@ -615,6 +621,14 @@ public class BaseWifiService extends IWifiManager.Stub {
 
     @Override
     public void clearWifiConnectedNetworkScorer() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<WifiNetworkSuggestion, List<ScanResult>> getMatchingScanResults(
+            List<WifiNetworkSuggestion> networkSuggestions,
+            List<ScanResult> scanResults,
+            String callingPackage, String callingFeatureId) {
         throw new UnsupportedOperationException();
     }
 }

@@ -21,6 +21,7 @@ import android.annotation.SystemApi;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.proto.ProtoOutputStream;
 
 import java.util.Arrays;
 
@@ -268,6 +269,30 @@ public class ContextHubInfo implements Parcelable {
         retVal += ", MaxPacketLength : " + mMaxPacketLengthBytes + " Bytes";
 
         return retVal;
+    }
+
+    /**
+     * Dump the internal state as a ContextHubInfoProto to the given ProtoOutputStream.
+     *
+     * If the output belongs to a sub message, the caller is responsible for wrapping this function
+     * between {@link ProtoOutputStream#start(long)} and {@link ProtoOutputStream#end(long)}.
+     *
+     * @hide
+     */
+    public void dump(ProtoOutputStream proto) {
+        proto.write(ContextHubInfoProto.ID, mId);
+        proto.write(ContextHubInfoProto.NAME, mName);
+        proto.write(ContextHubInfoProto.VENDOR, mVendor);
+        proto.write(ContextHubInfoProto.TOOLCHAIN, mToolchain);
+        proto.write(ContextHubInfoProto.PLATFORM_VERSION, mPlatformVersion);
+        proto.write(ContextHubInfoProto.STATIC_SW_VERSION, getStaticSwVersion());
+        proto.write(ContextHubInfoProto.TOOLCHAIN_VERSION, mToolchainVersion);
+        proto.write(ContextHubInfoProto.CHRE_PLATFORM_ID, mChrePlatformId);
+        proto.write(ContextHubInfoProto.PEAK_MIPS, mPeakMips);
+        proto.write(ContextHubInfoProto.STOPPED_POWER_DRAW_MW, mStoppedPowerDrawMw);
+        proto.write(ContextHubInfoProto.SLEEP_POWER_DRAW_MW, mSleepPowerDrawMw);
+        proto.write(ContextHubInfoProto.PEAK_POWER_DRAW_MW, mPeakPowerDrawMw);
+        proto.write(ContextHubInfoProto.MAX_PACKET_LENGTH_BYTES, mMaxPacketLengthBytes);
     }
 
     @Override

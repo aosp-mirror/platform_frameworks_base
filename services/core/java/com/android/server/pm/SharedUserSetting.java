@@ -19,7 +19,9 @@ package com.android.server.pm;
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.parsing.ComponentParseUtils;
 import android.service.pm.PackageServiceDumpProto;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
@@ -51,6 +53,8 @@ public final class SharedUserSetting extends SettingBase {
     final PackageSignatures signatures = new PackageSignatures();
     Boolean signaturesChanged;
 
+    ArrayMap<String, ComponentParseUtils.ParsedProcess> processes;
+
     SharedUserSetting(String _name, int _pkgFlags, int _pkgPrivateFlags) {
         super(_pkgFlags, _pkgPrivateFlags);
         uidFlags =  _pkgFlags;
@@ -72,6 +76,25 @@ public final class SharedUserSetting extends SettingBase {
         proto.end(token);
     }
 
+    void addProcesses(ArrayMap<String, ComponentParseUtils.ParsedProcess> newProcs) {
+        if (newProcs != null) {
+            final int numProcs = newProcs.size();
+            if (processes == null) {
+                processes = new ArrayMap<>(numProcs);
+            }
+            for (int i = 0; i < numProcs; i++) {
+                ComponentParseUtils.ParsedProcess newProc = newProcs.valueAt(i);
+                ComponentParseUtils.ParsedProcess proc = processes.get(newProc.name);
+                if (proc == null) {
+                    proc = new ComponentParseUtils.ParsedProcess(newProc);
+                    processes.put(newProc.name, proc);
+                } else {
+                    proc.addStateFrom(newProc);
+                }
+            }
+        }
+    }
+
     boolean removePackage(PackageSetting packageSetting) {
         if (!packages.remove(packageSetting)) {
             return false;
@@ -91,6 +114,8 @@ public final class SharedUserSetting extends SettingBase {
             }
             setPrivateFlags(aggregatedPrivateFlags);
         }
+        // recalculate processes.
+        updateProcesses();
         return true;
     }
 
@@ -103,6 +128,9 @@ public final class SharedUserSetting extends SettingBase {
         if (packages.add(packageSetting)) {
             setFlags(this.pkgFlags | packageSetting.pkgFlags);
             setPrivateFlags(this.pkgPrivateFlags | packageSetting.pkgPrivateFlags);
+        }
+        if (packageSetting.pkg != null) {
+            addProcesses(packageSetting.pkg.getProcesses());
         }
     }
 
@@ -148,6 +176,16 @@ public final class SharedUserSetting extends SettingBase {
         }
     }
 
+    /**
+     * Update tracked data about processes based on all known packages in the shared user ID.
+     */
+    public void updateProcesses() {
+        processes = null;
+        for (int i = packages.size() - 1; i >= 0; i--) {
+            addProcesses(packages.valueAt(i).pkg.getProcesses());
+        }
+    }
+
     /** Returns userIds which doesn't have any packages with this sharedUserId */
     public int[] getNotInstalledUserIds() {
         int[] excludedUserIds = null;
@@ -176,6 +214,17 @@ public final class SharedUserSetting extends SettingBase {
         this.packages.clear();
         this.packages.addAll(sharedUser.packages);
         this.signaturesChanged = sharedUser.signaturesChanged;
+        if (sharedUser.processes != null) {
+            final int numProcs = sharedUser.processes.size();
+            this.processes = new ArrayMap<>(numProcs);
+            for (int i = 0; i < numProcs; i++) {
+                ComponentParseUtils.ParsedProcess proc =
+                        new ComponentParseUtils.ParsedProcess(sharedUser.processes.valueAt(i));
+                this.processes.put(proc.name, proc);
+            }
+        } else {
+            this.processes = null;
+        }
         return this;
     }
 }

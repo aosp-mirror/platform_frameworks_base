@@ -22,6 +22,7 @@ import static android.Manifest.permission.READ_WIFI_CREDENTIAL;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -2353,7 +2354,7 @@ public class WifiManager {
         return (getSupportedFeatures() & feature) == feature;
     }
 
-   /**
+    /**
      * @return true if this adapter supports Passpoint
      * @hide
      */
@@ -2685,6 +2686,34 @@ public class WifiManager {
     }
 
     /**
+     * Return the filtered ScanResults which may be authenticated by the suggested network
+     * configurations.
+     * @param networkSuggestions The list of {@link WifiNetworkSuggestion}
+     * @param scanResults The scan results to be filtered, this is optional, if it is null or
+     * empty, wifi system would use the recent scan results in the system.
+     * @return The map of {@link WifiNetworkSuggestion} and the list of {@link ScanResult} which
+     * may be authenticated by the corresponding network configuration.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {ACCESS_FINE_LOCATION, ACCESS_WIFI_STATE})
+    @NonNull
+    public Map<WifiNetworkSuggestion, List<ScanResult>> getMatchingScanResults(
+            @NonNull List<WifiNetworkSuggestion> networkSuggestions,
+            @Nullable List<ScanResult> scanResults) {
+        if (networkSuggestions == null) {
+            throw new IllegalArgumentException("networkSuggestions must not be null.");
+        }
+        try {
+            return mService.getMatchingScanResults(
+                    networkSuggestions, scanResults,
+                    mContext.getOpPackageName(), mContext.getFeatureId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Check if scanning is always available.
      *
      * If this return {@code true}, apps can issue {@link #startScan} and fetch scan results
@@ -2877,6 +2906,7 @@ public class WifiManager {
      * [0, {@link #getMaxSignalLevel()}], where 0 is the lowest (worst signal) RSSI
      * rating and {@link #getMaxSignalLevel()} is the highest (best signal) RSSI rating.
      */
+    @IntRange(from = 0)
     public int calculateSignalLevel(int rssi) {
         try {
             return mService.calculateSignalLevel(rssi);
@@ -2889,6 +2919,7 @@ public class WifiManager {
      * Get the system default maximum signal level.
      * This is the maximum RSSI level returned by {@link #calculateSignalLevel(int)}.
      */
+    @IntRange(from = 0)
     public int getMaxSignalLevel() {
         return calculateSignalLevel(Integer.MAX_VALUE);
     }
@@ -4271,6 +4302,23 @@ public class WifiManager {
     }
 
     /**
+     * Allows the OEM to enable/disable auto-join globally.
+     *
+     * @param choice true to allow autojoin, false to disallow autojoin
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void allowAutojoinGlobal(boolean choice) {
+        try {
+            mService.allowAutojoinGlobal(choice);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
      * Sets the user choice for allowing auto-join to a network.
      * The updated choice will be made available through the updated config supplied by the
      * CONFIGURED_NETWORKS_CHANGED broadcast.
@@ -4894,18 +4942,6 @@ public class WifiManager {
      */
     public boolean getEnableAutoJoinWhenAssociated() {
         return false;
-    }
-
-    /**
-     * Enable/disable WifiConnectivityManager
-     * @hide
-     */
-    public void enableWifiConnectivityManager(boolean enabled) {
-        try {
-            mService.enableWifiConnectivityManager(enabled);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
     }
 
     /**

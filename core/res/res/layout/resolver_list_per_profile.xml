@@ -25,7 +25,7 @@
     android:nestedScrollingEnabled="true"
     android:scrollbarStyle="outsideOverlay"
     android:scrollIndicators="top|bottom"
-    android:divider="?attr/dividerVertical"
+    android:divider="@null"
     android:footerDividersEnabled="false"
     android:headerDividersEnabled="false"
-    android:dividerHeight="1dp" />
+    android:dividerHeight="0dp" />

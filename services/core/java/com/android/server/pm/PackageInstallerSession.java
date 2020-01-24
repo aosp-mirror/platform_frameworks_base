@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.content.pm.DataLoaderType.INCREMENTAL;
 import static android.content.pm.DataLoaderType.STREAMING;
+import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ABORTED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_SIGNATURE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
@@ -60,6 +61,7 @@ import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.DataLoaderManager;
 import android.content.pm.DataLoaderParams;
+import android.content.pm.DataLoaderParamsParcel;
 import android.content.pm.FileSystemControlParcel;
 import android.content.pm.IDataLoader;
 import android.content.pm.IDataLoaderStatusListener;
@@ -203,8 +205,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_DATALOADER_PACKAGE_NAME = "dataLoaderPackageName";
     private static final String ATTR_DATALOADER_CLASS_NAME = "dataLoaderClassName";
     private static final String ATTR_DATALOADER_ARGUMENTS = "dataLoaderArguments";
+    private static final String ATTR_LOCATION = "location";
     private static final String ATTR_LENGTH_BYTES = "lengthBytes";
     private static final String ATTR_METADATA = "metadata";
+    private static final String ATTR_SIGNATURE = "signature";
 
     private static final String PROPERTY_NAME_INHERIT_NATIVE = "pi.inherit_native_on_dont_kill";
     private static final int[] EMPTY_CHILD_SESSION_ARRAY = {};
@@ -303,22 +307,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private int mParentSessionId;
 
     static class FileInfo {
+        public final int location;
         public final String name;
         public final Long lengthBytes;
         public final byte[] metadata;
+        public final byte[] signature;
 
-        public static FileInfo added(String name, Long lengthBytes, byte[] metadata) {
-            return new FileInfo(name, lengthBytes, metadata);
+        public static FileInfo added(int location, String name, Long lengthBytes, byte[] metadata,
+                byte[] signature) {
+            return new FileInfo(location, name, lengthBytes, metadata, signature);
         }
 
-        public static FileInfo removed(String name) {
-            return new FileInfo(name, -1L, null);
+        public static FileInfo removed(int location, String name) {
+            return new FileInfo(location, name, -1L, null, null);
         }
 
-        FileInfo(String name, Long lengthBytes, byte[] metadata) {
+        FileInfo(int location, String name, Long lengthBytes, byte[] metadata, byte[] signature) {
+            this.location = location;
             this.name = name;
             this.lengthBytes = lengthBytes;
             this.metadata = metadata;
+            this.signature = signature;
         }
     }
 
@@ -597,6 +606,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.isStagedSessionReady = mStagedSessionReady;
             info.isStagedSessionFailed = mStagedSessionFailed;
             info.setStagedSessionErrorCode(mStagedSessionErrorCode, mStagedSessionErrorMessage);
+            info.createdMillis = createdMillis;
             info.updatedMillis = updatedMillis;
         }
         return info;
@@ -2325,10 +2335,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @Override
-    public void addFile(String name, long lengthBytes, byte[] metadata) {
+    public DataLoaderParamsParcel getDataLoaderParams() {
+        return params.dataLoaderParams != null ? params.dataLoaderParams.getData() : null;
+    }
+
+    @Override
+    public void addFile(int location, String name, long lengthBytes, byte[] metadata,
+            byte[] signature) {
         if (!isDataLoaderInstallation()) {
             throw new IllegalStateException(
                     "Cannot add files to non-data loader installation session.");
+        }
+        if (!isIncrementalInstallation()) {
+            if (location != LOCATION_DATA_APP) {
+                throw new IllegalArgumentException(
+                        "Non-incremental installation only supports /data/app placement: " + name);
+            }
         }
         // Use installer provided name for now; we always rename later
         if (!FileUtils.isValidExtFilename(name)) {
@@ -2338,12 +2360,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotSealedLocked("addFile");
-            mFiles.add(FileInfo.added(name, lengthBytes, metadata));
+            mFiles.add(FileInfo.added(location, name, lengthBytes, metadata, signature));
         }
     }
 
     @Override
-    public void removeFile(String name) {
+    public void removeFile(int location, String name) {
         if (!isDataLoaderInstallation()) {
             throw new IllegalStateException(
                     "Cannot add files to non-data loader installation session.");
@@ -2356,7 +2378,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotSealedLocked("removeFile");
 
-            mFiles.add(FileInfo.removed(getRemoveMarkerName(name)));
+            mFiles.add(FileInfo.removed(location, getRemoveMarkerName(name)));
         }
     }
 
@@ -2891,9 +2913,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             for (FileInfo fileInfo : mFiles) {
                 out.startTag(null, TAG_SESSION_FILE);
+                writeIntAttribute(out, ATTR_LOCATION, fileInfo.location);
                 writeStringAttribute(out, ATTR_NAME, fileInfo.name);
                 writeLongAttribute(out, ATTR_LENGTH_BYTES, fileInfo.lengthBytes);
                 writeByteArrayAttribute(out, ATTR_METADATA, fileInfo.metadata);
+                writeByteArrayAttribute(out, ATTR_SIGNATURE, fileInfo.signature);
                 out.endTag(null, TAG_SESSION_FILE);
             }
         }
@@ -3024,9 +3048,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 childSessionIds.add(readIntAttribute(in, ATTR_SESSION_ID, SessionInfo.INVALID_ID));
             }
             if (TAG_SESSION_FILE.equals(in.getName())) {
-                files.add(new FileInfo(readStringAttribute(in, ATTR_NAME),
+                files.add(new FileInfo(
+                        readIntAttribute(in, ATTR_LOCATION, 0),
+                        readStringAttribute(in, ATTR_NAME),
                         readLongAttribute(in, ATTR_LENGTH_BYTES, -1),
-                        readByteArrayAttribute(in, ATTR_METADATA)));
+                        readByteArrayAttribute(in, ATTR_METADATA),
+                        readByteArrayAttribute(in, ATTR_SIGNATURE)));
             }
         }
 

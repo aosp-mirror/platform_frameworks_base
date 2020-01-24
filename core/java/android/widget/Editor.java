@@ -391,6 +391,9 @@ public class Editor {
     // This can only be true if the text view is editable.
     private boolean mCursorControlEnabled;
 
+    // Specifies whether the new magnifier (with fish-eye effect) is enabled.
+    private final boolean mNewMagnifierEnabled;
+
     Editor(TextView textView) {
         mTextView = textView;
         // Synchronize the filter list, which places the undo input filter at the end.
@@ -401,9 +404,13 @@ public class Editor {
 
         mCursorControlEnabled = AppGlobals.getIntCoreSetting(
                 WidgetFlags.KEY_ENABLE_CURSOR_CONTROL , 0) != 0;
+        mNewMagnifierEnabled = AppGlobals.getIntCoreSetting(
+                WidgetFlags.KEY_ENABLE_NEW_MAGNIFIER, 0) != 0;
         if (TextView.DEBUG_CURSOR) {
             logCursor("Editor", "Cursor control is %s.",
                     mCursorControlEnabled ? "enabled" : "disabled");
+            logCursor("Editor", "New magnifier is %s.",
+                    mNewMagnifierEnabled ? "enabled" : "disabled");
         }
     }
 
@@ -422,7 +429,7 @@ public class Editor {
         if (FLAG_USE_MAGNIFIER && mMagnifierAnimator == null) {
             // Lazy creates the magnifier instance because it requires the text height which cannot
             // be measured at the time of Editor instance being created.
-            final Magnifier.Builder builder = shouldUseNewMagnifier()
+            final Magnifier.Builder builder = mNewMagnifierEnabled
                     ? createBuilderWithInlineMagnifierDefaults()
                     : Magnifier.createBuilderWithOldMagnifierDefaults(mTextView);
             mMagnifierAnimator = new MagnifierMotionAnimator(builder.build());
@@ -430,24 +437,28 @@ public class Editor {
         return mMagnifierAnimator;
     }
 
-    private boolean shouldUseNewMagnifier() {
-        // TODO: use a separate flag to enable new magnifier.
-        return mCursorControlEnabled;
-    }
-
     private Magnifier.Builder createBuilderWithInlineMagnifierDefaults() {
         final Magnifier.Builder params = new Magnifier.Builder(mTextView);
 
         // TODO: supports changing the height/width dynamically because the text height can be
         // dynamically changed.
+        float zoom = AppGlobals.getFloatCoreSetting(
+                WidgetFlags.KEY_MAGNIFIER_ZOOM_FACTOR, 1.5f);
+        float aspectRatio = AppGlobals.getFloatCoreSetting(
+                WidgetFlags.KEY_MAGNIFIER_ASPECT_RATIO, 5.5f);
+        // Avoid invalid/unsupported values.
+        if (zoom < 1.2f || zoom > 1.8f) {
+            zoom = 1.5f;
+        }
+        if (aspectRatio < 3 || aspectRatio > 8) {
+            aspectRatio = 5.5f;
+        }
+
         final Paint.FontMetrics fontMetrics = mTextView.getPaint().getFontMetrics();
         final float sourceHeight = fontMetrics.descent - fontMetrics.ascent;
-        final float zoom = 1.5f;
-        final float widthHeightRatio = 5.5f;
         // Slightly increase the height to avoid tooLargeTextForMagnifier() returns true.
         int height = (int)(sourceHeight * zoom) + 2;
-        int width = (int)(widthHeightRatio * height);
-
+        int width = (int)(aspectRatio * height);
 
         params.setFishEyeStyle()
                 .setSize(width, height)
@@ -4680,11 +4691,11 @@ public class Editor {
             }
         };
 
-        private int getPreferredWidth() {
+        protected final int getPreferredWidth() {
             return Math.max(mDrawable.getIntrinsicWidth(), mMinSize);
         }
 
-        private int getPreferredHeight() {
+        protected final int getPreferredHeight() {
             return Math.max(mDrawable.getIntrinsicHeight(), mMinSize);
         }
 
@@ -5089,7 +5100,7 @@ public class Editor {
                 mTextView.invalidateCursorPath();
                 suspendBlink();
 
-                if (shouldUseNewMagnifier()) {
+                if (mNewMagnifierEnabled) {
                     // Calculates the line bounds as the content source bounds to the magnifier.
                     Layout layout = mTextView.getLayout();
                     int line = layout.getLineForOffset(getCurrentCursorOffset());
@@ -5218,7 +5229,7 @@ public class Editor {
         // Whether the popup window is in the invisible state and will be dismissed when finger up.
         private boolean mPendingDismissOnUp = false;
         // The alpha value of the drawable.
-        private final int mDrawableOpacity = 255;
+        private final int mDrawableOpacity;
 
         // Members for toggling the insertion menu in touch through mode.
 
@@ -5239,8 +5250,29 @@ public class Editor {
         // of the touch through events.
         private float mTextHeight;
 
-        public InsertionHandleView(Drawable drawable) {
+        // The delta height applied to the insertion handle view.
+        private final int mDeltaHeight;
+
+        InsertionHandleView(Drawable drawable) {
             super(drawable, drawable, com.android.internal.R.id.insertion_handle);
+
+            int deltaHeight = 0;
+            int opacity = 255;
+            if (mCursorControlEnabled) {
+                deltaHeight = AppGlobals.getIntCoreSetting(
+                        WidgetFlags.KEY_INSERTION_HANDLE_DELTA_HEIGHT, 25);
+                opacity = AppGlobals.getIntCoreSetting(
+                        WidgetFlags.KEY_INSERTION_HANDLE_OPACITY, 50);
+                // Avoid invalid/unsupported values.
+                if (deltaHeight < -25 || deltaHeight > 50) {
+                    deltaHeight = 25;
+                }
+                if (opacity < 10 || opacity > 100) {
+                    opacity = 50;
+                }
+            }
+            mDeltaHeight = deltaHeight;
+            mDrawableOpacity = opacity;
         }
 
         private void hideAfterDelay() {
@@ -5290,6 +5322,17 @@ public class Editor {
                 return clampHorizontalPosition(mDrawableForCursor, horizontal) + mTempRect.left;
             }
             return super.getCursorHorizontalPosition(layout, offset);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            if (mCursorControlEnabled) {
+                final int height = Math.max(
+                        getPreferredHeight() + mDeltaHeight, mDrawable.getIntrinsicHeight());
+                setMeasuredDimension(getPreferredWidth(), height);
+                return;
+            }
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
 
         @Override

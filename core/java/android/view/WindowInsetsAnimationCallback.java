@@ -88,7 +88,7 @@ public interface WindowInsetsAnimationCallback {
      * <ul>
      *     <li>Application calls {@link WindowInsetsController#hideInputMethod()},
      *     {@link WindowInsetsController#showInputMethod()},
-     *     {@link WindowInsetsController#controlInputMethodAnimation(long, WindowInsetsAnimationControlListener)}</li>
+     *     {@link WindowInsetsController#controlInputMethodAnimation}</li>
      *     <li>onPrepare is called on the view hierarchy listeners</li>
      *     <li>{@link View#onApplyWindowInsets} will be called with the end state of the
      *     animation</li>
@@ -182,14 +182,26 @@ public interface WindowInsetsAnimationCallback {
         private final @InsetsType int mTypeMask;
         private float mFraction;
         @Nullable private final Interpolator mInterpolator;
-        private long mDurationMs;
+        private final long mDurationMillis;
         private float mAlpha;
 
+        /**
+         * Creates a new {@link InsetsAnimation} object.
+         * <p>
+         * This should only be used for testing, as usually the system creates this object for the
+         * application to listen to with {@link WindowInsetsAnimationCallback}.
+         * </p>
+         * @param typeMask The bitmask of {@link WindowInsets.Type}s that are animating.
+         * @param interpolator The interpolator of the animation.
+         * @param durationMillis The duration of the animation in
+         *                   {@link java.util.concurrent.TimeUnit#MILLISECONDS}.
+         */
         public InsetsAnimation(
-                @InsetsType int typeMask, @Nullable Interpolator interpolator, long durationMs) {
+                @InsetsType int typeMask, @Nullable Interpolator interpolator,
+                long durationMillis) {
             mTypeMask = typeMask;
             mInterpolator = interpolator;
-            mDurationMs = durationMs;
+            mDurationMillis = durationMillis;
         }
 
         /**
@@ -201,14 +213,18 @@ public interface WindowInsetsAnimationCallback {
 
         /**
          * Returns the raw fractional progress of this animation between
-         * {@link AnimationBounds#getLowerBound()} and {@link AnimationBounds#getUpperBound()}. Note
+         * start state of the animation and the end state of the animation. Note
          * that this progress is the global progress of the animation, whereas
          * {@link WindowInsetsAnimationCallback#onProgress} will only dispatch the insets that may
          * be inset with {@link WindowInsets#inset} by parents of views in the hierarchy.
          * Progress per insets animation is global for the entire animation. One animation animates
          * all things together (in, out, ...). If they don't animate together, we'd have
          * multiple animations.
-         *
+         * <p>
+         * Note: In case the application is controlling the animation, the valued returned here will
+         * be the same as the application passed into
+         * {@link WindowInsetsAnimationController#setInsetsAndAlpha(Insets, float, float)}.
+         * </p>
          * @return The current progress of this animation.
          */
         @FloatRange(from = 0f, to = 1f)
@@ -218,16 +234,27 @@ public interface WindowInsetsAnimationCallback {
 
         /**
          * Returns the interpolated fractional progress of this animation between
-         * {@link AnimationBounds#getLowerBound()} and {@link AnimationBounds#getUpperBound()}. Note
+         * start state of the animation and the end state of the animation. Note
          * that this progress is the global progress of the animation, whereas
          * {@link WindowInsetsAnimationCallback#onProgress} will only dispatch the insets that may
          * be inset with {@link WindowInsets#inset} by parents of views in the hierarchy.
          * Progress per insets animation is global for the entire animation. One animation animates
          * all things together (in, out, ...). If they don't animate together, we'd have
          * multiple animations.
+         * <p>
+         * Note: In case the application is controlling the animation, the valued returned here will
+         * be the same as the application passed into
+         * {@link WindowInsetsAnimationController#setInsetsAndAlpha(Insets, float, float)},
+         * interpolated with the interpolator passed into
+         * {@link WindowInsetsController#controlInputMethodAnimation}.
+         * </p>
+         * <p>
+         * Note: For system-initiated animations, this will always return a valid value between 0
+         * and 1.
+         * </p>
          * @see #getFraction() for raw fraction.
          * @return The current interpolated progress of this animation. -1 if interpolator isn't
-         * specified.
+         *         specified.
          */
         public float getInterpolatedFraction() {
             if (mInterpolator != null) {
@@ -236,52 +263,66 @@ public interface WindowInsetsAnimationCallback {
             return -1;
         }
 
+        /**
+         * Retrieves the interpolator used for this animation, or {@code null} if this animation
+         * doesn't follow an interpolation curved. For system-initiated animations, this will never
+         * return {@code null}.
+         *
+         * @return The interpolator used for this animation.
+         */
         @Nullable
         public Interpolator getInterpolator() {
             return mInterpolator;
         }
 
         /**
-         * @return duration of animation in {@link java.util.concurrent.TimeUnit#MILLISECONDS}.
+         * @return duration of animation in {@link java.util.concurrent.TimeUnit#MILLISECONDS}, or
+         *         -1 if the animation doesn't have a fixed duration.
          */
         public long getDurationMillis() {
-            return mDurationMs;
+            return mDurationMillis;
         }
 
         /**
          * Set fraction of the progress if {@link WindowInsets.Type.InsetsType} animation is
-         * controlled by the app {@see #getCurrentFraction}.
-         * <p>Note: If app didn't create {@link InsetsAnimation}, it shouldn't set progress either.
-         * Progress would be set by system with the system-default animation.
+         * controlled by the app.
+         * <p>
+         * Note: This should only be used for testing, as the system fills in the fraction for the
+         * application or the fraction that was passed into
+         * {@link WindowInsetsAnimationController#setInsetsAndAlpha(Insets, float, float)} is being
+         * used.
          * </p>
          * @param fraction fractional progress between 0 and 1 where 0 represents hidden and
          *                zero progress and 1 represent fully shown final state.
+         * @see #getFraction()
          */
         public void setFraction(@FloatRange(from = 0f, to = 1f) float fraction) {
             mFraction = fraction;
         }
 
         /**
-         * Set duration of the animation if {@link WindowInsets.Type.InsetsType} animation is
-         * controlled by the app.
-         * <p>Note: If app didn't create {@link InsetsAnimation}, it shouldn't set duration either.
-         * Duration would be set by system with the system-default animation.
-         * </p>
-         * @param durationMs in {@link java.util.concurrent.TimeUnit#MILLISECONDS}
-         */
-        public void setDuration(long durationMs) {
-            mDurationMs = durationMs;
-        }
-
-        /**
-         * @return alpha of {@link WindowInsets.Type.InsetsType}.
+         * Retrieves the translucency of the windows that are animating.
+         *
+         * @return Alpha of windows that cause insets of type {@link WindowInsets.Type.InsetsType}.
          */
         @FloatRange(from = 0f, to = 1f)
         public float getAlpha() {
             return mAlpha;
         }
 
-        void setAlpha(@FloatRange(from = 0f, to = 1f) float alpha) {
+        /**
+         * Sets the translucency of the windows that are animating.
+         * <p>
+         * Note: This should only be used for testing, as the system fills in the alpha for the
+         * application or the alpha that was passed into
+         * {@link WindowInsetsAnimationController#setInsetsAndAlpha(Insets, float, float)} is being
+         * used.
+         * </p>
+         * @param alpha Alpha of windows that cause insets of type
+         *              {@link WindowInsets.Type.InsetsType}.
+         * @see #getAlpha()
+         */
+        public void setAlpha(@FloatRange(from = 0f, to = 1f) float alpha) {
             mAlpha = alpha;
         }
     }

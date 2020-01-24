@@ -82,8 +82,10 @@ private:
     void saveBehind(const SkRect*);
     void restore();
 
+    void concat44(const SkScalar colMajor[16]);
     void concat(const SkMatrix&);
     void setMatrix(const SkMatrix&);
+    void scale(SkScalar, SkScalar);
     void translate(SkScalar, SkScalar);
     void translateZ(SkScalar);
 
@@ -153,8 +155,10 @@ public:
 
     void onFlush() override;
 
+    void didConcat44(const SkScalar[16]) override;
     void didConcat(const SkMatrix&) override;
     void didSetMatrix(const SkMatrix&) override;
+    void didScale(SkScalar, SkScalar) override;
     void didTranslate(SkScalar, SkScalar) override;
 
     void onClipRect(const SkRect&, SkClipOp, ClipEdgeStyle) override;

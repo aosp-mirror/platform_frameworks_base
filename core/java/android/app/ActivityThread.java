@@ -7326,6 +7326,15 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    float getFloatCoreSetting(String key, float defaultValue) {
+        synchronized (mResourcesManager) {
+            if (mCoreSettings != null) {
+                return mCoreSettings.getFloat(key, defaultValue);
+            }
+            return defaultValue;
+        }
+    }
+
     private static class AndroidOs extends ForwardingOs {
         /**
          * Install selective syscall interception. For example, this is used to

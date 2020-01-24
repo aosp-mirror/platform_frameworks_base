@@ -17,8 +17,11 @@
 package com.android.internal.policy;
 
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
+import static android.view.View.SYSTEM_UI_LAYOUT_FLAGS;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
@@ -30,6 +33,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -43,6 +48,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -66,6 +72,7 @@ import android.transition.TransitionSet;
 import android.util.AndroidRuntimeException;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
@@ -306,6 +313,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     /** @see ViewRootImpl#mActivityConfigCallback */
     private ActivityConfigCallback mActivityConfigCallback;
+
+    private OnContentApplyWindowInsetsListener mPendingOnContentApplyWindowInsetsListener;
 
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
@@ -2092,6 +2101,34 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /** Notify when decor view is attached to window and {@link ViewRootImpl} is available. */
     void onViewRootImplSet(ViewRootImpl viewRoot) {
         viewRoot.setActivityConfigCallback(mActivityConfigCallback);
+        if (mPendingOnContentApplyWindowInsetsListener != null) {
+            viewRoot.setOnContentApplyWindowInsetsListener(
+                    mPendingOnContentApplyWindowInsetsListener);
+            mPendingOnContentApplyWindowInsetsListener = null;
+        } else {
+            viewRoot.setOnContentApplyWindowInsetsListener(
+                    createDefaultContentWindowInsetsListener());
+        }
+    }
+
+    private OnContentApplyWindowInsetsListener createDefaultContentWindowInsetsListener() {
+        return insets -> {
+            if ((getDecorView().getWindowSystemUiVisibility() & SYSTEM_UI_LAYOUT_FLAGS) != 0) {
+                return new Pair<>(Insets.NONE, insets);
+            }
+
+            boolean includeIme = (getAttributes().softInputMode & SOFT_INPUT_MASK_ADJUST)
+                    == SOFT_INPUT_ADJUST_RESIZE;
+            Insets insetsToApply;
+            if (ViewRootImpl.sNewInsetsMode == 0) {
+                insetsToApply = insets.getSystemWindowInsets();
+            } else {
+                insetsToApply = insets.getInsets(systemBars() | (includeIme ? ime() : 0));
+            }
+            insets = insets.inset(insetsToApply);
+            return new Pair<>(insetsToApply,
+                    insets.inset(insetsToApply).consumeSystemWindowInsets());
+        };
     }
 
     static private final String FOCUSED_ID_TAG = "android:focusedViewId";
@@ -2344,6 +2381,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             setFlags(0, flagsToUpdate);
         } else {
             setFlags(FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR, flagsToUpdate);
+            getAttributes().setFitInsetsSides(0);
+            getAttributes().setFitInsetsTypes(0);
         }
 
         if (a.getBoolean(R.styleable.Window_windowNoTitle, false)) {
@@ -2656,7 +2695,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mContentParent = generateLayout(mDecor);
 
             // Set up decor part of UI to ignore fitsSystemWindows if appropriate.
-            mDecor.makeOptionalFitsSystemWindows();
+            mDecor.makeFrameworkOptionalFitsSystemWindows();
 
             final DecorContentParent decorContentParent = (DecorContentParent) mDecor.findViewById(
                     R.id.decor_content_parent);
@@ -3852,5 +3891,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @NonNull
     public List<Rect> getSystemGestureExclusionRects() {
         return getViewRootImpl().getRootSystemGestureExclusionRects();
+    }
+
+    @Override
+    public void setOnContentApplyWindowInsetsListener(OnContentApplyWindowInsetsListener listener) {
+        ViewRootImpl impl = getViewRootImpl();
+        if (impl != null) {
+            impl.setOnContentApplyWindowInsetsListener(listener);
+        } else {
+            mPendingOnContentApplyWindowInsetsListener = listener;
+        }
+    }
+
+    @Override
+    public void resetOnContentApplyWindowInsetsListener() {
+        setOnContentApplyWindowInsetsListener(createDefaultContentWindowInsetsListener());
     }
 }

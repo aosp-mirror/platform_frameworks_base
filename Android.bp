@@ -297,6 +297,8 @@ filegroup {
     ],
 }
 
+// AIDL files under these paths are mixture of public and private ones.
+// They shouldn't be exported across module boundaries.
 java_defaults {
     name: "framework-aidl-export-defaults",
     aidl: {
@@ -321,12 +323,6 @@ java_defaults {
             "wifi/aidl-export",
         ],
     },
-
-    required: [
-        // TODO: remove gps_debug and protolog.conf.json when the build system propagates "required" properly.
-        "gps_debug.conf",
-	"protolog.conf.json.gz",
-    ],
 }
 
 // Collection of classes that are generated from non-Java files that are not listed in
@@ -344,6 +340,7 @@ java_library {
         "android.hardware.cas-V1.2-java",
         "android.hardware.contexthub-V1.0-java",
         "android.hardware.gnss-V1.0-java",
+        "android.hardware.gnss-V2.1-java",
         "android.hardware.health-V1.0-java-constants",
         "android.hardware.radio-V1.0-java",
         "android.hardware.radio-V1.1-java",
@@ -415,6 +412,12 @@ java_defaults {
     plugins: [
         "view-inspector-annotation-processor",
         "staledataclass-annotation-processor",
+    ],
+
+    required: [
+        // TODO: remove gps_debug and protolog.conf.json when the build system propagates "required" properly.
+        "gps_debug.conf",
+        "protolog.conf.json.gz",
     ],
 }
 
@@ -539,7 +542,6 @@ java_library {
 
 java_library {
     name: "framework-annotation-proc",
-    defaults: ["framework-aidl-export-defaults"],
     srcs: [":framework-all-sources"],
     libs: [
         "app-compat-annotations",
@@ -713,7 +715,10 @@ filegroup {
     name: "framework-tethering-annotations",
     srcs: [
         "core/java/android/annotation/NonNull.java",
+        "core/java/android/annotation/Nullable.java",
+        "core/java/android/annotation/RequiresPermission.java",
         "core/java/android/annotation/SystemApi.java",
+        "core/java/android/annotation/TestApi.java",
     ],
 }
 // Build ext.jar

@@ -33,10 +33,14 @@ int AndroidBitmap_getInfo(JNIEnv* env, jobject jbitmap,
 
 int32_t AndroidBitmap_getDataSpace(JNIEnv* env, jobject jbitmap) {
     if (NULL == env || NULL == jbitmap) {
-        return ADATASPACE_UNKNOWN; // Or return a real error?
+        return ADATASPACE_UNKNOWN;
     }
 
     android::graphics::Bitmap bitmap(env, jbitmap);
+    if (!bitmap.isValid()) {
+        return ADATASPACE_UNKNOWN;
+    }
+
     return bitmap.getDataSpace();
 }
 
@@ -96,7 +100,7 @@ int AndroidBitmap_compress(const AndroidBitmapInfo* info,
                            const void* pixels,
                            int32_t format, int32_t quality,
                            void* userContext,
-                           AndroidBitmap_compress_write_fn fn) {
+                           AndroidBitmap_CompressWriteFunc fn) {
     if (NULL == info || NULL == pixels || NULL == fn) {
         return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
     }

@@ -294,6 +294,14 @@ public final class MediaFormat {
     public static final String KEY_BIT_RATE = "bitrate";
 
     /**
+     * A key describing the hardware AV sync id.
+     * The associated value is an integer
+     *
+     * @see android.media.tv.tuner.Tuner#getAvSyncHwId
+     */
+    public static final String KEY_HARDWARE_AV_SYNC_ID = "hw-av-sync-id";
+
+    /**
      * A key describing the max bitrate in bits/sec.
      * This is usually over a one-second sliding window (e.g. over any window of one second).
      * The associated value is an integer

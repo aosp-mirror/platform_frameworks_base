@@ -361,13 +361,18 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
 
         @Override
-        public boolean isDeviceAssociated(String packageName, String macAddress, int userId) {
+        public boolean isDeviceAssociatedForWifiConnection(String packageName, String macAddress,
+                int userId) {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.MANAGE_COMPANION_DEVICES, "isDeviceAssociated");
 
+            boolean bypassMacPermission = getContext().getPackageManager().checkPermission(
+                    android.Manifest.permission.COMPANION_APPROVE_WIFI_CONNECTIONS, packageName)
+                    == PackageManager.PERMISSION_GRANTED;
+
             return CollectionUtils.any(
                     readAllAssociations(userId, packageName),
-                    a -> Objects.equals(a.deviceAddress, macAddress));
+                    a -> bypassMacPermission || Objects.equals(a.deviceAddress, macAddress));
         }
 
         private void checkCanCallNotificationApi(String callingPackage) throws RemoteException {

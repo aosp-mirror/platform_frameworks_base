@@ -244,9 +244,9 @@ final public class IpConnectivityMetrics extends SystemService {
     private List<IpConnectivityEvent> listEventsAsProtos() {
         final List<IpConnectivityEvent> events = IpConnectivityEventBuilder.toProto(getEvents());
         if (mNetdListener != null) {
-            mNetdListener.listAsProtos(events);
+            events.addAll(mNetdListener.listAsProtos());
         }
-        mDefaultNetworkMetrics.listEventsAsProto(events);
+        events.addAll(mDefaultNetworkMetrics.listEventsAsProto());
         return events;
     }
 

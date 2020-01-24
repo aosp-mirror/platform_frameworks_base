@@ -175,7 +175,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
                 PixelFormat.TRANSLUCENT);
         mLp.token = new Binder();
         mLp.gravity = Gravity.TOP;
-        mLp.setFitWindowInsetsTypes(0 /* types */);
+        mLp.setFitInsetsTypes(0 /* types */);
         mLp.softInputMode = LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         mLp.setTitle("NotificationShade");
         mLp.packageName = mContext.getPackageName();

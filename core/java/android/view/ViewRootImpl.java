@@ -122,6 +122,7 @@ import android.view.SurfaceControl.Transaction;
 import android.view.View.AttachInfo;
 import android.view.View.FocusDirection;
 import android.view.View.MeasureSpec;
+import android.view.Window.OnContentApplyWindowInsetsListener;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
@@ -753,6 +754,11 @@ public final class ViewRootImpl implements ViewParent,
     /** Add activity config callback to be notified about override config changes. */
     public void setActivityConfigCallback(ActivityConfigCallback callback) {
         mActivityConfigCallback = callback;
+    }
+
+    public void setOnContentApplyWindowInsetsListener(OnContentApplyWindowInsetsListener listener) {
+        mAttachInfo.mContentOnApplyWindowInsetsListener = listener;
+        requestFitSystemWindows();
     }
 
     public void addWindowCallbacks(WindowCallbacks callback) {
@@ -1442,6 +1448,7 @@ public final class ViewRootImpl implements ViewParent,
         // Get new instance of display based on current display adjustments. It may be updated later
         // if moving between the displays also involved a configuration change.
         updateInternalDisplay(displayId, mView.getResources());
+        mImeFocusController.onMovedToDisplay();
         mAttachInfo.mDisplayState = mDisplay.getState();
         // Internal state updated, now notify the view hierarchy.
         mView.dispatchMovedToDisplay(mDisplay, config);
@@ -1978,9 +1985,9 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
-        int types = inOutParams.getFitWindowInsetsTypes();
-        int sides = inOutParams.getFitWindowInsetsSides();
-        boolean ignoreVis = inOutParams.getFitIgnoreVisibility();
+        int types = inOutParams.getFitInsetsTypes();
+        int sides = inOutParams.getFitInsetsSides();
+        boolean ignoreVis = inOutParams.isFitInsetsIgnoringVisibility();
 
         if (((sysUiVis & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) != 0
                 || (flags & FLAG_LAYOUT_IN_SCREEN) != 0)
@@ -1997,9 +2004,9 @@ public final class ViewRootImpl implements ViewParent,
                 && adjust == SOFT_INPUT_ADJUST_RESIZE) {
             types |= Type.ime();
         }
-        inOutParams.setFitWindowInsetsTypes(types);
-        inOutParams.setFitWindowInsetsSides(sides);
-        inOutParams.setFitIgnoreVisibility(ignoreVis);
+        inOutParams.setFitInsetsTypes(types);
+        inOutParams.setFitInsetsSides(sides);
+        inOutParams.setFitInsetsIgnoringVisibility(ignoreVis);
 
         // The fitting of insets are not really controlled by the clients, so we remove the flag.
         inOutParams.privateFlags &= ~PRIVATE_FLAG_FIT_INSETS_CONTROLLED;

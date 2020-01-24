@@ -101,6 +101,7 @@ import com.android.server.job.controllers.DeviceIdleJobsController;
 import com.android.server.job.controllers.IdleController;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.QuotaController;
+import com.android.server.job.controllers.RestrictingController;
 import com.android.server.job.controllers.StateController;
 import com.android.server.job.controllers.StorageController;
 import com.android.server.job.controllers.TimeController;
@@ -241,6 +242,11 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     /** List of controllers that will notify this service of updates to jobs. */
     final List<StateController> mControllers;
+    /**
+     * List of controllers that will apply to all jobs in the RESTRICTED bucket. This is a subset of
+     * {@link #mControllers}.
+     */
+    private final List<RestrictingController> mRestrictiveControllers;
     /** Need direct access to this for testing. */
     private final BatteryController mBatteryController;
     /** Need direct access to this for testing. */
@@ -313,6 +319,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     public static final int FREQUENT_INDEX = 2;
     public static final int RARE_INDEX = 3;
     public static final int NEVER_INDEX = 4;
+    // Putting RESTRICTED_INDEX after NEVER_INDEX to make it easier for proto dumping
+    // (ScheduledJobStateChanged and JobStatusDumpProto).
+    public static final int RESTRICTED_INDEX = 5;
 
     // -- Pre-allocated temporaries only for use in assignJobsToContextsLocked --
 
@@ -1367,6 +1376,40 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    @Override
+    public void onRestrictedBucketChanged(List<JobStatus> jobs) {
+        final int len = jobs.size();
+        if (len == 0) {
+            Slog.wtf(TAG, "onRestrictedBucketChanged called with no jobs");
+            return;
+        }
+        synchronized (mLock) {
+            for (int i = 0; i < len; ++i) {
+                JobStatus js = jobs.get(i);
+                for (int j = mRestrictiveControllers.size() - 1; j >= 0; --j) {
+                    // Effective standby bucket can change after this in some situations so use
+                    // the real bucket so that the job is tracked by the controllers.
+                    if (js.getStandbyBucket() == RESTRICTED_INDEX) {
+                        js.addDynamicConstraint(JobStatus.CONSTRAINT_BATTERY_NOT_LOW);
+                        js.addDynamicConstraint(JobStatus.CONSTRAINT_CHARGING);
+                        js.addDynamicConstraint(JobStatus.CONSTRAINT_CONNECTIVITY);
+                        js.addDynamicConstraint(JobStatus.CONSTRAINT_IDLE);
+
+                        mRestrictiveControllers.get(j).startTrackingRestrictedJobLocked(js);
+                    } else {
+                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_BATTERY_NOT_LOW);
+                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_CHARGING);
+                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_CONNECTIVITY);
+                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_IDLE);
+
+                        mRestrictiveControllers.get(j).stopTrackingRestrictedJobLocked(js);
+                    }
+                }
+            }
+        }
+        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
+    }
+
     void reportActiveLocked() {
         // active is true if pending queue contains jobs OR some job is running.
         boolean active = mPendingJobs.size() > 0;
@@ -1443,9 +1486,11 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         // Create the controllers.
         mControllers = new ArrayList<StateController>();
-        mControllers.add(new ConnectivityController(this));
+        final ConnectivityController connectivityController = new ConnectivityController(this);
+        mControllers.add(connectivityController);
         mControllers.add(new TimeController(this));
-        mControllers.add(new IdleController(this));
+        final IdleController idleController = new IdleController(this);
+        mControllers.add(idleController);
         mBatteryController = new BatteryController(this);
         mControllers.add(mBatteryController);
         mStorageController = new StorageController(this);
@@ -1456,6 +1501,11 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(mDeviceIdleJobsController);
         mQuotaController = new QuotaController(this);
         mControllers.add(mQuotaController);
+
+        mRestrictiveControllers = new ArrayList<>();
+        mRestrictiveControllers.add(mBatteryController);
+        mRestrictiveControllers.add(connectivityController);
+        mRestrictiveControllers.add(idleController);
 
         // Create restrictions
         mJobRestrictions = new ArrayList<>();
@@ -2127,11 +2177,13 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                 } catch (RemoteException e) {
                 }
-                if (mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT > 1
+                // Restricted jobs must always be batched
+                if (job.getEffectiveStandbyBucket() == RESTRICTED_INDEX
+                        || (mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT > 1
                         && job.getEffectiveStandbyBucket() != ACTIVE_INDEX
                         && (job.getFirstForceBatchedTimeElapsed() == 0
                         || sElapsedRealtimeClock.millis() - job.getFirstForceBatchedTimeElapsed()
-                                < mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS)) {
+                                < mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS))) {
                     // Force batching non-ACTIVE jobs. Don't include them in the other counts.
                     forceBatchedCount++;
                     if (job.getFirstForceBatchedTimeElapsed() == 0) {
@@ -2538,11 +2590,19 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     public static int standbyBucketToBucketIndex(int bucket) {
         // Normalize AppStandby constants to indices into our bookkeeping
-        if (bucket == UsageStatsManager.STANDBY_BUCKET_NEVER) return NEVER_INDEX;
-        else if (bucket > UsageStatsManager.STANDBY_BUCKET_FREQUENT) return RARE_INDEX;
-        else if (bucket > UsageStatsManager.STANDBY_BUCKET_WORKING_SET) return FREQUENT_INDEX;
-        else if (bucket > UsageStatsManager.STANDBY_BUCKET_ACTIVE) return WORKING_INDEX;
-        else return ACTIVE_INDEX;
+        if (bucket == UsageStatsManager.STANDBY_BUCKET_NEVER) {
+            return NEVER_INDEX;
+        } else if (bucket > UsageStatsManager.STANDBY_BUCKET_RARE) {
+            return RESTRICTED_INDEX;
+        } else if (bucket > UsageStatsManager.STANDBY_BUCKET_FREQUENT) {
+            return RARE_INDEX;
+        } else if (bucket > UsageStatsManager.STANDBY_BUCKET_WORKING_SET) {
+            return FREQUENT_INDEX;
+        } else if (bucket > UsageStatsManager.STANDBY_BUCKET_ACTIVE) {
+            return WORKING_INDEX;
+        } else {
+            return ACTIVE_INDEX;
+        }
     }
 
     // Static to support external callers
