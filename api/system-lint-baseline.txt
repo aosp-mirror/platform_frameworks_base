@@ -1,4 +1,14 @@
 // Baseline format: 1.0
+// Tethering broadcast action / extras cannot change name for backwards compatibility
+ActionValue: android.net.TetheringManager#ACTION_TETHER_STATE_CHANGED:
+    Inconsistent action value; expected `android.net.action.TETHER_STATE_CHANGED`, was `android.net.conn.TETHER_STATE_CHANGED`
+ActionValue: android.net.TetheringManager#EXTRA_ACTIVE_TETHER:
+    Inconsistent extra value; expected `android.net.extra.ACTIVE_TETHER`, was `tetherArray`
+ActionValue: android.net.TetheringManager#EXTRA_AVAILABLE_TETHER:
+    Inconsistent extra value; expected `android.net.extra.AVAILABLE_TETHER`, was `availableArray`
+ActionValue: android.net.TetheringManager#EXTRA_ERRORED_TETHER:
+    Inconsistent extra value; expected `android.net.extra.ERRORED_TETHER`, was `erroredArray`
+
 ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
     
 
